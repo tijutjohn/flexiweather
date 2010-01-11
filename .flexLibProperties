@@ -1,7 +1,65 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <flexLibProperties version="1">
   <includeClasses>
+    <classEntry path="com.iblsoft.flexiweather.ogc.BBox"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.CRSWithBBox"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.GMLUtils"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.IBehaviouralObject"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.ISynchronisedObject"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.InteractiveLayerWFS"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.InteractiveLayerWMS"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.LayerConfiguration"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.LayerConfigurationManager"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.OGCLayerConfiguration"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.OGCServiceConfiguration"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.OGCServiceConfigurationManager"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.Version"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.WFSFeatureBase"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.WMSDimension"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.WMSLayer"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.WMSLayerBase"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.WMSLayerConfiguration"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.WMSLayerGroup"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.WMSLayerGroupTreeDataDescriptor"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.WMSServiceConfiguration"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.IEditableItem"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.IEditableItemManager"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.IHighlightableItem"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.IHighlightableItemManager"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.IInteractiveLayerProvider"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.IMouseEditableItem"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.ISelectableItem"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.ISelectableItemManager"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.InteractiveLayerWFSEditable"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.MoveablePoint"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableCurve"/>
+    <classEntry path="com.iblsoft.flexiweather.proj.Coord"/>
+    <classEntry path="com.iblsoft.flexiweather.proj.Projection"/>
     <classEntry path="com.iblsoft.flexiweather.utils.ArrayUtils"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.BitmapFilterUtils"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.CubicBezier"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.DateTimeValidator"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.Duration"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.GraphicsCurveRenderer"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.ICurveRenderer"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.ISO8601Parser"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.ScreenUtils"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.Serializable"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.SharedObjectStorage"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.Storage"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.UniURLLoader"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.BackgroundJob"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.BackgroundJobManager"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayer"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerClickAction"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerClickActionEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerComposer"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerCoordinate"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerPan"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerRoute"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerZoom"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveWidget"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
