@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <flexLibProperties version="1">
-  <includeClasses/>
+  <includeClasses>
+    <classEntry path="com.iblsoft.flexiweather.utils.ArrayUtils"/>
+  </includeClasses>
   <includeResources/>
   <namespaceManifests/>
 </flexLibProperties>
