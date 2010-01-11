@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="400" height="244"
-		implements="com.iblsoft.ria.plugins.ILayerBehaviour"
+		implements="com.iblsoft.flexiweather.plugins.ILayerBehaviour"
 		title="Layer Behaviour" showCloseButton="true"
 		creationComplete="onCreated()" close="onCancelClicked()">
 	<mx:Script>
 		<![CDATA[
 			import mx.managers.PopUpManager;
-			import com.iblsoft.ria.plugins.IPlugin;
+			import com.iblsoft.flexiweather.plugins.IPlugin;
 			
 			protected var ms_behaviourId: String;
 			protected var ms_initalValue: String;
@@ -23,7 +23,7 @@
 					parent: DisplayObject,
 					saveCallback: Function, cancelCallback: Function = null): void
 			{
-				var dlg: SimpleLayerBahaviourEditDialog = new SimpleLayerBahaviourEditDialog();
+				var dlg: SimpleLayerBehaviourEditDialog = new SimpleLayerBehaviourEditDialog();
 				dlg.ms_behaviourId = s_behaviourId;
 				dlg.ms_initalValue = s_value;
 				dlg.m_saveCallback = saveCallback;

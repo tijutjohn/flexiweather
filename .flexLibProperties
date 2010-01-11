@@ -47,7 +47,6 @@
     <classEntry path="com.iblsoft.flexiweather.plugins.ILayerSelectionListener"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.IPlugin"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.PluginAbility"/>
-    <classEntry path="com.iblsoft.flexiweather.plugins.SimpleLayerBahaviourEditDialog"/>
     <classEntry path="com.iblsoft.flexiweather.proj.Coord"/>
     <classEntry path="com.iblsoft.flexiweather.proj.Projection"/>
     <classEntry path="com.iblsoft.flexiweather.utils.ArrayUtils"/>
@@ -74,6 +73,7 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerRoute"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerZoom"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveWidget"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.SimpleLayerBehaviourEditDialog"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
