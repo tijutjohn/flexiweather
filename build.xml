@@ -6,7 +6,7 @@
 	<target name="main">
 		<compc output="bin/FlexiWeather.swc">
 			<source-path path-element="${basedir}/src"/>
-			<include-sources dir="src" includes="**/*.as **/*.mxm" />
+			<include-sources dir="src" includes="**/*.as **/*.mxml" />
 		</compc>
 	</target>
 </project>
