@@ -16,7 +16,7 @@ package com.iblsoft.flexiweather.widgets
 		protected var m_wheelZoomTimer: Timer = new Timer(500, 1); 
 		protected var mb_finalChangeOccuredAfterWheelZoom: Boolean = true; 
 		
-		public function InteractiveLayerZoom(container: InteractiveWidget)
+		public function InteractiveLayerZoom(container: InteractiveWidget = null)
 		{
 			super(container);
 			m_wheelZoomTimer.stop();
@@ -144,6 +144,7 @@ package com.iblsoft.flexiweather.widgets
 		}
 		
 		// getters & setters
+		[Bindable]
 		public function get requireCtrlKey(): Boolean
 		{ return mb_requireCtrlKey; }
 

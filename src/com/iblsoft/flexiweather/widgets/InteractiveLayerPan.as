@@ -10,7 +10,7 @@ package com.iblsoft.flexiweather.widgets
 		internal var _p: Point;
 		internal var mb_requireShiftKey: Boolean = true;
 		
-		public function InteractiveLayerPan(container: InteractiveWidget)
+		public function InteractiveLayerPan(container: InteractiveWidget = null)
 		{
 			super(container);
 		}
@@ -64,6 +64,7 @@ package com.iblsoft.flexiweather.widgets
         }
 
 		// getters & setters
+		[Bindable]
 		public function get requireShiftKey(): Boolean
 		{ return mb_requireShiftKey; }
 

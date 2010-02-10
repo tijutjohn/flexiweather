@@ -4,22 +4,23 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
 	
+	import flash.display.DisplayObject;
 	import flash.display.GradientType;
+	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	
-	import mx.collections.ArrayCollection;
 	import mx.core.Container;
 	import mx.events.ResizeEvent;
 
 	public class InteractiveWidget extends Container
 	{
-        internal var _layers: ArrayCollection = new ArrayCollection();
-        internal var ms_crs: String = "EPSG:4326";
-        internal var m_viewBBox: BBox = new BBox(-180, -90, 180, 90);
-        internal var m_extentBBox: BBox = new BBox(-180, -90, 180, 90);
+        private var ms_crs: String = "EPSG:4326";
+        private var m_viewBBox: BBox = new BBox(-180, -90, 180, 90);
+        private var m_extentBBox: BBox = new BBox(-180, -90, 180, 90);
+        private var mb_orderingLayers: Boolean = false;
 
 		public function InteractiveWidget() {
 			super();
@@ -37,40 +38,68 @@ package com.iblsoft.flexiweather.widgets
 			addEventListener(MouseEvent.ROLL_OUT, onMouseRollOut);
 			addEventListener(ResizeEvent.RESIZE, onResized);
 		}
+		
+		public override function addChild(child: DisplayObject): DisplayObject
+		{
+			InteractiveLayer(child).container = this;
+			child.x = x;
+			child.y = y;
+			child.width = width;
+			child.height = height;
+			var o: DisplayObject = super.addChild(child);
+			orderLayers();
+			return o;
+		}
+		
+		public override function addChildAt(child: DisplayObject, index: int): DisplayObject
+		{
+			var o: DisplayObject = super.addChildAt(child, index);
+			orderLayers();
+			return o;
+		}
 
 		public function addLayer(l: InteractiveLayer): void
 		{
-			_layers.addItem(l);
-			l.x = x;
-			l.y = y;
-			l.width = width;
-			l.height = height;
 			addChild(l);
+			orderLayers();
 		}
 
 		public function removeLayer(l: InteractiveLayer): void
 		{
-			var i : int = _layers.getItemIndex(l);
-			if(i >= 0) {
-				_layers.removeItemAt(i);
+			if(contains(l))
 				removeChild(l);
-			}
 		}
 		
 		public function removeAllLayers(): void
 		{
-			_layers.removeAll();
 			removeAllChildren();
 		}
-
-        /*
-        public function set value1(value: Number) : void {
-            this._value1 = value;
-            invalidateProperties();
-            invalidateSize();
-            invalidateDisplayList();
-        }
-        */
+		
+		public function orderLayers(): void
+		{
+			if(mb_orderingLayers)
+				return;
+			mb_orderingLayers = true;
+			try {
+				// stable-sort interactive layers in ma_layers according to their zOrder property
+				for(var i: int = 0; i < numChildren; ++i) {
+					var ilI: InteractiveLayer = InteractiveLayer(getChildAt(i)); 
+					for(var j: int = i + 1; j < numChildren; ++j) {
+						var ilJ: InteractiveLayer = InteractiveLayer(getChildAt(j));
+						if(ilJ.zOrder < ilI.zOrder) {
+							// swap Ith and Jth layer, we know that J > I
+							removeChildAt(j);
+							removeChildAt(i);
+							addChildAt(ilJ, i);
+							addChildAt(ilI, j);
+						}
+					}
+				}
+			}
+			finally {
+				mb_orderingLayers = false;
+			}
+		}
 
         override protected function updateDisplayList(
             	unscaledWidth: Number, unscaledHeight: Number): void
@@ -102,8 +131,8 @@ package com.iblsoft.flexiweather.widgets
 
         protected function onAreaChanged(b_finalChange: Boolean): void
         {
-            for(var i: int = 0; i < _layers.length; ++i) {
-            	var l: InteractiveLayer = InteractiveLayer(_layers[i]);
+            for(var i: int = 0; i < numChildren; ++i) {
+            	var l: InteractiveLayer = InteractiveLayer(getChildAt(i));
             	if(l.onAreaChanged(b_finalChange))
             		break;
             	if(!l.isDynamicPartInvalid())
@@ -137,8 +166,8 @@ package com.iblsoft.flexiweather.widgets
 
         protected function onMouseDown(event: MouseEvent): void
         {
-            for(var i: int = _layers.length - 1; i >= 0; --i) {
-            	var l: InteractiveLayer = InteractiveLayer(_layers[i]);
+            for(var i: int = numChildren - 1; i >= 0; --i) {
+            	var l: InteractiveLayer = InteractiveLayer(getChildAt(i));
             	if(!l.enabled)
             		continue;
             	if(l.onMouseDown(event))
@@ -148,8 +177,8 @@ package com.iblsoft.flexiweather.widgets
 
         protected function onMouseUp(event: MouseEvent): void
         {
-            for(var i: int = _layers.length - 1; i >= 0; --i) {
-            	var l: InteractiveLayer = InteractiveLayer(_layers[i]);
+            for(var i: int = numChildren - 1; i >= 0; --i) {
+            	var l: InteractiveLayer = InteractiveLayer(getChildAt(i));
             	if(!l.enabled)
             		continue;
             	if(l.onMouseUp(event))
@@ -159,8 +188,8 @@ package com.iblsoft.flexiweather.widgets
 
         protected function onMouseMove(event: MouseEvent): void
         {
-            for(var i: int = _layers.length - 1; i >= 0; --i) {
-            	var l: InteractiveLayer = InteractiveLayer(_layers[i]);
+            for(var i: int = numChildren - 1; i >= 0; --i) {
+            	var l: InteractiveLayer = InteractiveLayer(getChildAt(i));
             	if(!l.enabled)
             		continue;
             	if(l.onMouseMove(event))
@@ -170,8 +199,8 @@ package com.iblsoft.flexiweather.widgets
 
         protected function onMouseWheel(event: MouseEvent): void
         {
-            for(var i: int = _layers.length - 1; i >= 0; --i) {
-            	var l: InteractiveLayer = InteractiveLayer(_layers[i]);
+            for(var i: int = numChildren - 1; i >= 0; --i) {
+            	var l: InteractiveLayer = InteractiveLayer(getChildAt(i));
             	if(!l.enabled)
             		continue;
             	if(l.onMouseWheel(event))
@@ -181,8 +210,8 @@ package com.iblsoft.flexiweather.widgets
         
         protected function onMouseClick(event: MouseEvent): void
         {
-            for(var i: int = _layers.length - 1; i >= 0; --i) {
-            	var l: InteractiveLayer = InteractiveLayer(_layers[i]);
+            for(var i: int = numChildren - 1; i >= 0; --i) {
+            	var l: InteractiveLayer = InteractiveLayer(getChildAt(i));
             	if(!l.enabled)
             		continue;
             	if(l.onMouseClick(event))
@@ -192,8 +221,8 @@ package com.iblsoft.flexiweather.widgets
 
         protected function onMouseDoubleClick(event: MouseEvent): void
         {
-            for(var i: int = _layers.length - 1; i >= 0; --i) {
-            	var l: InteractiveLayer = InteractiveLayer(_layers[i]);
+            for(var i: int = numChildren - 1; i >= 0; --i) {
+            	var l: InteractiveLayer = InteractiveLayer(getChildAt(i));
             	if(!l.enabled)
             		continue;
             	if(l.onMouseDoubleClick(event))
@@ -203,8 +232,8 @@ package com.iblsoft.flexiweather.widgets
 
         protected function onMouseRollOver(event: MouseEvent): void
         {
-            for(var i: int = _layers.length - 1; i >= 0; --i) {
-            	var l: InteractiveLayer = InteractiveLayer(_layers[i]);
+            for(var i: int = numChildren - 1; i >= 0; --i) {
+            	var l: InteractiveLayer = InteractiveLayer(getChildAt(i));
             	if(!l.enabled)
             		continue;
             	if(l.onMouseRollOver(event))
@@ -214,8 +243,8 @@ package com.iblsoft.flexiweather.widgets
 
         protected function onMouseRollOut(event: MouseEvent): void
         {
-            for(var i: int = _layers.length - 1; i >= 0; --i) {
-            	var l: InteractiveLayer = InteractiveLayer(_layers[i]);
+            for(var i: int = numChildren - 1; i >= 0; --i) {
+            	var l: InteractiveLayer = InteractiveLayer(getChildAt(i));
             	if(!l.enabled)
             		continue;
             	if(l.onMouseRollOut(event))
@@ -226,8 +255,8 @@ package com.iblsoft.flexiweather.widgets
         protected function onResized(Event: ResizeEvent): void
         {
         	setViewBBox(m_viewBBox, true); // set the view bbox to update the aspects 
-            for(var i: int = 0; i < _layers.length; ++i) {
-            	var l: InteractiveLayer = InteractiveLayer(_layers[i]);
+            for(var i: int = 0; i < numChildren; ++i) {
+            	var l: InteractiveLayer = InteractiveLayer(getChildAt(i));
             	l.width = width;
             	l.height = height;
             	l.onContainerSizeChanged();
@@ -244,8 +273,11 @@ package com.iblsoft.flexiweather.widgets
 
         public function setCRS(s_crs: String, b_finalChange: Boolean = true): void
         {
-        	ms_crs = s_crs;
-        	signalAreaChanged(b_finalChange);
+        	if(ms_crs != s_crs) {
+	        	ms_crs = s_crs;
+	        	signalAreaChanged(b_finalChange);
+	        	dispatchEvent(new Event("crsChanged"));
+        	}
         }
         
         public function setViewBBoxRaw(xmin: Number, ymin: Number, xmax: Number, ymax: Number, b_finalChange: Boolean): void
@@ -328,5 +360,15 @@ package com.iblsoft.flexiweather.widgets
 
         public function getViewBBox(): BBox
         { return m_viewBBox; }
+        
+        // getters & setters
+
+		[Bindable(event = "crsChanged")]
+        public function get crs(): String
+        { return getCRS(); }
+
+		[Bindable(event = "crsChanged")]
+        public function set srs(s_crs: String): void
+        { return setCRS(s_crs, true); }
 	}
 }

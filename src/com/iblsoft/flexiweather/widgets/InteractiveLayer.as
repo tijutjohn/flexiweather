@@ -7,14 +7,14 @@ package com.iblsoft.flexiweather.widgets
 	import flash.events.MouseEvent;
 	
 	import mx.core.UIComponent;
-	import mx.events.FlexEvent;
 	
 	public class InteractiveLayer extends UIComponent
 	{
 		public var container: InteractiveWidget;
-		internal var mb_dynamicPartInvalid: Boolean = false;
-		internal var mb_visible: Boolean = true;
-		internal var mb_enabled: Boolean = true;
+		private var mb_dynamicPartInvalid: Boolean = false;
+		private var mb_visible: Boolean = true;
+		private var mb_enabled: Boolean = true;
+		private var mi_zOrder: int = 0;
 		
 		public function InteractiveLayer(container: InteractiveWidget)
 		{
@@ -101,5 +101,15 @@ package com.iblsoft.flexiweather.widgets
 
 		public function renderPreview(graphics: Graphics, f_width: Number, f_height: Number): void
 		{}
+		
+		public function get zOrder(): int
+		{ return mi_zOrder; }
+
+		public function set zOrder(i_zOrder: int): void 
+		{
+			mi_zOrder = i_zOrder;
+			if(container != null)
+				container.orderLayers();
+		}
 	}
 }
