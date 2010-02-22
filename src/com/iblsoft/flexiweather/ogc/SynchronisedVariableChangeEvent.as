@@ -5,14 +5,17 @@ package com.iblsoft.flexiweather.ogc
 	public class SynchronisedVariableChangeEvent extends Event
 	{
 		public static const SYNCHRONISED_VARIABLE_CHANGED: String = "synchronisedVariableChanged";
+		public static const SYNCHRONISED_VARIABLE_DOMAIN_CHANGED: String = "synchronisedVariableDomainChanged";
 		//[Event(name = SYNCHRONISED_VARIABLE_CHANGED, type = "com.iblsoft.flexiweather.ogc.SynchronisedVariableChangeEvent")]
 
 		protected var ms_variableId: String;
 		
-		public function SynchronisedVariableChangeEvent(s_variableId: String 
+		public function SynchronisedVariableChangeEvent(
+				s_type: String,
+				s_variableId: String 
 				/*type:String, bubbles:Boolean=false, cancelable:Boolean=false*/)
 		{
-			super(SYNCHRONISED_VARIABLE_CHANGED, bubbles, cancelable);
+			super(s_type, bubbles, cancelable);
 			ms_variableId = s_variableId;
 		}
 		

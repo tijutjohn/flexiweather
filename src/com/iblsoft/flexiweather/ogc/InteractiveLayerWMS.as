@@ -346,7 +346,8 @@ package com.iblsoft.flexiweather.ogc
         		delete md_dimensionValues[s_dimName];
         	// if "run" changed, then even time axis changes
         	if(m_cfg.ms_dimensionRunName != null && s_dimName == m_cfg.ms_dimensionRunName) {
-				dispatchEvent(new SynchronisedVariableChangeEvent("frame"));
+				dispatchEvent(new SynchronisedVariableChangeEvent(
+						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, "frame"));
         	}
         }
 
@@ -522,6 +523,8 @@ package com.iblsoft.flexiweather.ogc
 					var frame: Date = value as Date;
 					// TODO: interpolation vs. find nearest value?
 					setWMSDimensionValue(m_cfg.dimensionTimeName, ISO8601Parser.dateToString(frame));
+					dispatchEvent(new SynchronisedVariableChangeEvent(
+							SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, "frame"));
 					return true;
 				}
 				else if(m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null) {
@@ -540,6 +543,8 @@ package com.iblsoft.flexiweather.ogc
 					}
 					if(ofNearest != null) {
 						setWMSDimensionValue(m_cfg.dimensionForecastName, ofNearest.value);
+						dispatchEvent(new SynchronisedVariableChangeEvent(
+								SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, "frame"));
 						return true;
 					}
 				}
@@ -575,7 +580,8 @@ package com.iblsoft.flexiweather.ogc
 		
 		protected function onCapabilitiesUpdated(event: DataEvent): void
 		{
-			dispatchEvent(new SynchronisedVariableChangeEvent("frame"));
+			dispatchEvent(new SynchronisedVariableChangeEvent(
+					SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, "frame"));
 		}
 
 		protected function onFeatureInfoLoaded(event: UniURLLoaderEvent): void
