@@ -82,15 +82,20 @@ package com.iblsoft.flexiweather.widgets
 		{
 			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
 		}
+
+		protected function onSynchronisedVariableDomainChanged(event: SynchronisedVariableChangeEvent): void
+		{
+			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
+		}
 		
 		// data global variables synchronisation
-		public function moveFrame(i_offset: int): Boolean
+		public function enumTimeAxis(l_syncLayers: Array = null): Array
 		{
+			if(l_syncLayers == null)
+				l_syncLayers = [];
 			var l_timeAxis: Array = null;
-			var l_syncLayers: Array = [];
-			var so: ISynchronisedObject;
 			for each(var l: InteractiveLayer in m_layers) {
-            	so = l as ISynchronisedObject;
+				var so: ISynchronisedObject = l as ISynchronisedObject;
             	if(so == null)
             		continue;
             	if(so.getSynchronisedVariables().indexOf("frame") < 0)
@@ -103,13 +108,21 @@ package com.iblsoft.flexiweather.widgets
             		l_timeAxis = l_frames;
             	else
             		ArrayUtils.unionArrays(l_timeAxis, l_frames);
-			}			
+			}
+			return l_timeAxis; 			
+		}
+
+		public function moveFrame(i_offset: int): Boolean
+		{
+			var l_syncLayers: Array = [];
+			var l_timeAxis: Array = enumTimeAxis(l_syncLayers);
           	if(l_timeAxis == null) // no time axis
           		return false;
 
 			var i: int;
+			var so: ISynchronisedObject;
 
-			/*trace("Overall timeaxis:");
+			/*trace("InteractiveLayerComposer.moveFrame(): Overall timeaxis:");
        		for(i = 0; i < l_timeAxis.length; ++i) {
        			trace("  " + ISO8601Parser.dateToString(l_timeAxis[i]));
        		}*/
@@ -177,6 +190,8 @@ package com.iblsoft.flexiweather.widgets
 			if(so != null) {
 				l.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED,
 						onSynchronisedVariableChanged);
+				l.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED,
+						onSynchronisedVariableDomainChanged);
 			}
 		}
 		
@@ -189,6 +204,8 @@ package com.iblsoft.flexiweather.widgets
 			if(so != null) {
 				l.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED,
 						onSynchronisedVariableChanged);
+				l.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED,
+						onSynchronisedVariableDomainChanged);
 			}
 		}
 		
