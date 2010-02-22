@@ -61,9 +61,9 @@ package com.iblsoft.flexiweather.ogc
 			onFeatureRemoved(feature);
 		}
 		
-        override public function refresh(): void
+        override public function refresh(b_force: Boolean): void
         {
-        	super.refresh();
+        	super.refresh(b_force);
         	updateData();
         }
 

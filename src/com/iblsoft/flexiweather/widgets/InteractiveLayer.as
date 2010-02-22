@@ -78,7 +78,7 @@ package com.iblsoft.flexiweather.widgets
         { return false; }
         
         // data refreshing
-        public function refresh(): void
+        public function refresh(b_force: Boolean): void
         {}
         
         // feature info

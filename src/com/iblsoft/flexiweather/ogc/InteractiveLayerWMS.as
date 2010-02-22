@@ -61,10 +61,10 @@ package com.iblsoft.flexiweather.ogc
 			}
 			m_cfg = cfg;
 			m_cfg.addEventListener(WMSLayerConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
-			updateData();
+			updateData(true);
 		}
 		
-		public function updateData(): void
+		public function updateData(b_forceUpdate: Boolean): void
 		{
 			if(m_job != null)
 				m_job.cancel();
@@ -78,7 +78,9 @@ package com.iblsoft.flexiweather.ogc
 					getWMSStyleListString());
 			updateDimensionsInURLRequest(m_request);
 			updateCustomParametersInURLRequest(m_request);
-			var img: Bitmap = m_cache.getImage(ms_requestedCRS, m_requestedBBox, m_request);
+			var img: Bitmap = null;
+			if(!b_forceUpdate)
+				img = m_cache.getImage(ms_requestedCRS, m_requestedBBox, m_request);
 			if(img == null) {
 				m_job = BackgroundJobManager.getInstance().startJob("Rendering " + m_cfg.ma_layerNames.join("+"));
 				m_loader.load(m_request);
@@ -148,7 +150,7 @@ package com.iblsoft.flexiweather.ogc
 			super.onAreaChanged(b_finalChange);
 			if(b_finalChange) {
 				m_cache.invalidate(ms_imageCRS, m_imageBBox);
-				updateData();
+				updateData(false);
 			}
 			else
 				invalidateDynamicPart();
@@ -157,13 +159,13 @@ package com.iblsoft.flexiweather.ogc
 		override public function onContainerSizeChanged(): void
 		{
 			super.onContainerSizeChanged();
-			updateData();
+			updateData(false);
 		}
 		
-        override public function refresh(): void
+        override public function refresh(b_force: Boolean): void
         {
-        	super.refresh();
-        	updateData();
+        	super.refresh(b_force);
+        	updateData(b_force);
         }
 
 		override public function hasPreview(): Boolean

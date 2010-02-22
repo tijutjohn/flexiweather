@@ -169,7 +169,7 @@ package com.iblsoft.flexiweather.ogc
 		public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer
 		{
 			var l: InteractiveLayerWMS = new InteractiveLayerWMS(iw, this);
-			l.updateData();
+			l.updateData(true);
 			return l;
 		}
 

@@ -139,7 +139,7 @@ package com.iblsoft.flexiweather.widgets
           	var newFrame: Date = l_timeAxis[i_currentIndex];
           	for each(so in l_syncLayers) {
           		if(so.synchroniseWith("frame", newFrame))
-          			InteractiveLayer(so).refresh();
+          			InteractiveLayer(so).refresh(false);
           	}
           	return true;
 		}
@@ -153,17 +153,17 @@ package com.iblsoft.flexiweather.widgets
             	if(so.getSynchronisedVariableValue("frame") == null)
             		continue;
           		if(so.synchroniseWith("frame", newFrame))
-          			l.refresh();
+          			l.refresh(false);
           	}
           	return true;
 		}
 		
         // data refreshing
-        override public function refresh(): void
+        override public function refresh(b_force: Boolean): void
         {
-        	super.refresh();
+        	super.refresh(b_force);
 			for each(var l: InteractiveLayer in m_layers) {
-            	l.refresh();
+            	l.refresh(b_force);
 			}			
         }
 
