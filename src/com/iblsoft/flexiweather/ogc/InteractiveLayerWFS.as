@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.utils.UniURLLoader;
+	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
@@ -9,8 +10,6 @@ package com.iblsoft.flexiweather.ogc
 	import flash.net.URLVariables;
 	
 	import mx.collections.ArrayCollection;
-	import mx.rpc.events.FaultEvent;
-	import mx.rpc.events.ResultEvent;
 
 	public class InteractiveLayerWFS extends InteractiveLayer
 	{
@@ -96,7 +95,7 @@ package com.iblsoft.flexiweather.ogc
 		}
 		
 		// event handlers
-		public function onDataLoaded(event: ResultEvent): void
+		public function onDataLoaded(event: UniURLLoaderEvent): void
 		{
 			var xml: XML = event.result as XML;
 			if(xml == null)
@@ -128,7 +127,7 @@ package com.iblsoft.flexiweather.ogc
 			invalidateDynamicPart();
 		}
 		
-		public function onDataLoadFailed(event: FaultEvent): void
+		public function onDataLoadFailed(event: UniURLLoaderEvent): void
 		{
 		}
 
