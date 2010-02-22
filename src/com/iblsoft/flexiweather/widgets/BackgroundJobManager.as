@@ -102,5 +102,8 @@ package com.iblsoft.flexiweather.widgets
 				m_progressBar.visible = false;
 			}
 		}
+		
+		public function hasJobs(): Boolean
+		{ return m_jobs.length > 0; }
 	}
 }
