@@ -13,6 +13,8 @@ package com.iblsoft.flexiweather.utils {
 		 * UTC DateTime has a format of YYYY-MM-DDThh:mm:ss.SSS without time zone offset
 		 */
 		public function parseDateTime(s: String): Date {
+			if(s == null)
+				return null;
 			var ss: Array = s.split("T", 2); // separate the date and time components
 			if (ss.length == 0)
 				throw new Error("bad date format: " + s);
@@ -60,6 +62,8 @@ package com.iblsoft.flexiweather.utils {
 		}
 		
 		public function parseTime(str: String): Date {
+			if(str == null)
+				return null;
 			if(str == null)
 				throw new Error("invalid format, must be hh:mm:ss.SSS");
 				
