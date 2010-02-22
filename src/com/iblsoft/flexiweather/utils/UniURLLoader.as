@@ -10,8 +10,6 @@ package com.iblsoft.flexiweather.utils
 	import flash.utils.ByteArray;
 	
 	import mx.rpc.Fault;
-	import mx.rpc.events.FaultEvent;
-	import mx.rpc.events.ResultEvent;
 	
 	public class UniURLLoader extends EventDispatcher
 	{
@@ -21,8 +19,8 @@ package com.iblsoft.flexiweather.utils
 		public static const DATA_LOADED: String = "dataLoaded";
 		public static const DATA_LOAD_FAILED: String = "dataLoadFailed";
 
-		[Event(name = DATA_LOADED, type = "mx.rpc.events.ResultEvent")]
-		[Event(name = DATA_LOAD_FAILED, type = "mx.rpc.events.FaultEvent")]
+		[Event(name = DATA_LOADED, type = "com.iblsoft.flexiweather.utils.UniURLLoaderEvent")]
+		[Event(name = DATA_LOAD_FAILED, type = "com.iblsoft.flexiweather.utils.UniURLLoaderEvent")]
 		
 		public static const ERROR_BAD_IMAGE: String = "errorBadImage";
 		public static const ERROR_IO: String = "errorIO";
@@ -47,15 +45,18 @@ package com.iblsoft.flexiweather.utils
 		
 		protected function dispatchResult(o: Object): void
 		{
-			var e: ResultEvent = new ResultEvent(DATA_LOADED, false, true, o);
+			var e: UniURLLoaderEvent = new UniURLLoaderEvent(DATA_LOADED, o, null, false, true);
 			dispatchEvent(e);  
 		}
 
 		protected function dispatchFault(
 				faultCode: String, faultString: String, faultDetail: String = null): void
 		{
-			dispatchEvent(new FaultEvent(DATA_LOAD_FAILED, false, true,
-					new Fault(faultCode, faultString, faultDetail)));  
+			dispatchEvent(new UniURLLoaderEvent(
+					DATA_LOAD_FAILED,
+					new Fault(faultCode, faultString, faultDetail),
+					null,
+					false, true));  
 		}
 
 		protected function onDataComplete(event: Event): void
@@ -63,9 +64,9 @@ package com.iblsoft.flexiweather.utils
 			var rawData: ByteArray = event.target.data as ByteArray;
 
 			var b0: int = rawData.length > 0 ? rawData.readUnsignedByte() : -1;
-			var b1: int = rawData.length > 0 ? rawData.readUnsignedByte() : -1;
-			var b2: int = rawData.length > 0 ? rawData.readUnsignedByte() : -1;
-			var b3: int = rawData.length > 0 ? rawData.readUnsignedByte() : -1;
+			var b1: int = rawData.length > 1 ? rawData.readUnsignedByte() : -1;
+			var b2: int = rawData.length > 2 ? rawData.readUnsignedByte() : -1;
+			var b3: int = rawData.length > 3 ? rawData.readUnsignedByte() : -1;
 			
 			rawData.position = 0;
 			// 0x89 P N G
