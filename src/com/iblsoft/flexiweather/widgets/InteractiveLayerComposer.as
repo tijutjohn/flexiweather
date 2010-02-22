@@ -1,9 +1,10 @@
 package com.iblsoft.flexiweather.widgets
 {
 	import com.iblsoft.flexiweather.ogc.ISynchronisedObject;
+	import com.iblsoft.flexiweather.ogc.SynchronisedVariableChangeEvent;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
-	import com.iblsoft.flexiweather.utils.ISO8601Parser;
 	
+	import flash.events.DataEvent;
 	import flash.events.Event;
 	
 	import mx.collections.ArrayCollection;
@@ -15,6 +16,9 @@ package com.iblsoft.flexiweather.widgets
 	{
         internal var m_layers: ArrayCollection = new ArrayCollection();
 
+		public static const TIME_AXIS_UPDATED: String = "timeAxisUpdated";
+		[Event(name = TIME_AXIS_UPDATED, type = "flash.events.DataEvent")]
+
 		public function InteractiveLayerComposer(container: InteractiveWidget)
 		{
 			super(container);
@@ -24,18 +28,18 @@ package com.iblsoft.flexiweather.widgets
 		public function addLayer(l: InteractiveLayer): void
 		{
 			m_layers.addItemAt(l, 0);
-			//addChild(l);
 			bindSubLayer(l);
+			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
 		}
 
 		public function removeLayer(l: InteractiveLayer): void
 		{
 			var i : int = m_layers.getItemIndex(l);
 			if(i >= 0) {
-				//removeChild(l);
 				unbindSubLayer(l);
 				m_layers.removeItemAt(i);
 			}
+			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
 		}
 
 		public function getLayerCount(): uint
@@ -72,6 +76,11 @@ package com.iblsoft.flexiweather.widgets
 		{
 			invalidateDynamicPart();
 			m_layers.itemUpdated(event.target);
+		}
+		
+		protected function onSynchronisedVariableChanged(event: SynchronisedVariableChangeEvent): void
+		{
+			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
 		}
 		
 		// data global variables synchronisation
@@ -134,6 +143,20 @@ package com.iblsoft.flexiweather.widgets
           	}
           	return true;
 		}
+
+		public function setFrame(newFrame: Date, b_nearrest: Boolean = true): Boolean
+		{
+			for each(var l: InteractiveLayer in m_layers) {
+            	var so: ISynchronisedObject = l as ISynchronisedObject;
+            	if(so == null)
+            		continue;
+            	if(so.getSynchronisedVariableValue("frame") == null)
+            		continue;
+          		if(so.synchroniseWith("frame", newFrame))
+          			l.refresh();
+          	}
+          	return true;
+		}
 		
         // data refreshing
         override public function refresh(): void
@@ -150,6 +173,11 @@ package com.iblsoft.flexiweather.widgets
 			l.addEventListener(FlexEvent.UPDATE_COMPLETE, onSignalSubLayerChange);
 			l.addEventListener(FlexEvent.SHOW, onSignalSubLayerChange);
 			l.addEventListener(FlexEvent.HIDE, onSignalSubLayerChange);
+			var so: ISynchronisedObject = l as ISynchronisedObject;
+			if(so != null) {
+				l.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED,
+						onSynchronisedVariableChanged);
+			}
 		}
 		
 		protected function unbindSubLayer(l: InteractiveLayer): void
@@ -157,6 +185,11 @@ package com.iblsoft.flexiweather.widgets
 			l.removeEventListener(FlexEvent.UPDATE_COMPLETE, onSignalSubLayerChange);
 			l.removeEventListener(FlexEvent.SHOW, onSignalSubLayerChange);
 			l.removeEventListener(FlexEvent.HIDE, onSignalSubLayerChange);
+			var so: ISynchronisedObject = l as ISynchronisedObject;
+			if(so != null) {
+				l.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED,
+						onSynchronisedVariableChanged);
+			}
 		}
 		
 		protected function onLayerCollectionChanged(event: CollectionEvent): void

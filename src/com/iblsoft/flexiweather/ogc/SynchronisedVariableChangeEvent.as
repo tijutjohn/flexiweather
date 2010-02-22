@@ -1,0 +1,22 @@
+package com.iblsoft.flexiweather.ogc
+{
+	import flash.events.Event;
+
+	public class SynchronisedVariableChangeEvent extends Event
+	{
+		public static const SYNCHRONISED_VARIABLE_CHANGED: String = "synchronisedVariableChanged";
+		//[Event(name = SYNCHRONISED_VARIABLE_CHANGED, type = "com.iblsoft.flexiweather.ogc.SynchronisedVariableChangeEvent")]
+
+		protected var ms_variableId: String;
+		
+		public function SynchronisedVariableChangeEvent(s_variableId: String 
+				/*type:String, bubbles:Boolean=false, cancelable:Boolean=false*/)
+		{
+			super(SYNCHRONISED_VARIABLE_CHANGED, bubbles, cancelable);
+			ms_variableId = s_variableId;
+		}
+		
+		public function get variableId(): String
+		{ return ms_variableId; }
+	}
+}

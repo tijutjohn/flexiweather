@@ -5,6 +5,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.utils.Duration;
 	import com.iblsoft.flexiweather.utils.ISO8601Parser;
 	import com.iblsoft.flexiweather.utils.UniURLLoader;
+	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.widgets.BackgroundJob;
 	import com.iblsoft.flexiweather.widgets.BackgroundJobManager;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
@@ -12,54 +13,85 @@ package com.iblsoft.flexiweather.ogc
 	
 	import flash.display.Bitmap;
 	import flash.display.Graphics;
+	import flash.events.DataEvent;
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.net.URLRequest;
 	import flash.utils.Dictionary;
 	
-	import mx.rpc.events.FaultEvent;
-	import mx.rpc.events.ResultEvent;
-
 	public class InteractiveLayerWMS extends InteractiveLayer
 			implements ISynchronisedObject
 	{
-		internal var m_loader: UniURLLoader = new UniURLLoader();
-		internal var m_featureInfoLoader: UniURLLoader = new UniURLLoader();
-		internal var m_image: Bitmap = null;
-		internal var mb_imageOK: Boolean = true;
-		internal var m_job: BackgroundJob;
+		protected var m_loader: UniURLLoader = new UniURLLoader();
+		protected var m_featureInfoLoader: UniURLLoader = new UniURLLoader();
+		protected var m_image: Bitmap = null;
+		protected var mb_imageOK: Boolean = true;
+		protected var m_job: BackgroundJob;
 
-		internal var ms_requestedCRS: String = null;
-		internal var m_requestedBBox: BBox = null;
+		protected var ms_requestedCRS: String = null;
+		protected var m_requestedBBox: BBox = null;
+		protected var m_request: URLRequest = null;
 
-		internal var ms_imageCRS: String = null;
-		internal var m_imageBBox: BBox = null;
+		protected var ms_imageCRS: String = null;
+		protected var m_imageBBox: BBox = null;
 		
-		internal var m_cfg: WMSLayerConfiguration;
-		internal var md_dimensionValues: Dictionary = new Dictionary(); 
-		internal var md_customParameters: Dictionary = new Dictionary(); 
-		internal var ma_subLayerStyleNames: Array = []; 
+		protected var m_cfg: WMSLayerConfiguration;
+		protected var md_dimensionValues: Dictionary = new Dictionary(); 
+		protected var md_customParameters: Dictionary = new Dictionary(); 
+		protected var ma_subLayerStyleNames: Array = [];
 		
+		protected var m_cache: WMSCache = new WMSCache();
+
 		public function InteractiveLayerWMS(container: InteractiveWidget, cfg: WMSLayerConfiguration)
 		{
 			super(container);
-			m_cfg = cfg;
 			m_loader.addEventListener(UniURLLoader.DATA_LOADED, onDataLoaded);
 			m_loader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onDataLoadFailed);
 			
 			m_featureInfoLoader.addEventListener(UniURLLoader.DATA_LOADED, onFeatureInfoLoaded);
 			m_featureInfoLoader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onFeatureInfoLoadFailed);
+			
+			setConfiguration(cfg);
 		}
 		
 		public function setConfiguration(cfg: WMSLayerConfiguration): void
 		{
+			if(m_cfg != null) {
+				m_cfg.removeEventListener(WMSLayerConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
+			}
 			m_cfg = cfg;
+			m_cfg.addEventListener(WMSLayerConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
 			updateData();
 		}
 		
 		public function updateData(): void
 		{
 			if(m_job != null)
+				m_job.cancel();
+			m_job = null;
+			
+			ms_requestedCRS = container.getCRS();
+			m_requestedBBox = container.getViewBBox();
+			m_request = m_cfg.toGetMapRequest(
+					ms_requestedCRS, m_requestedBBox.toBBOXString(),
+					int(container.width), int(container.height),
+					getWMSStyleListString());
+			updateDimensionsInURLRequest(m_request);
+			updateCustomParametersInURLRequest(m_request);
+			var img: Bitmap = m_cache.getImage(ms_requestedCRS, m_requestedBBox, m_request);
+			if(img == null) {
+				m_job = BackgroundJobManager.getInstance().startJob("Rendering " + m_cfg.ma_layerNames.join("+"));
+				m_loader.load(m_request);
+				invalidateDynamicPart();
+			}
+			else {
+				m_image = img;
+				mb_imageOK = true;
+				ms_imageCRS = ms_requestedCRS;
+				m_imageBBox = m_requestedBBox;
+				invalidateDynamicPart();
+			}
+			/*if(m_job != null)
 				m_job.cancel();
 			m_job = BackgroundJobManager.getInstance().startJob("Rendering " + m_cfg.ma_layerNames.join("+"));
 			
@@ -71,8 +103,9 @@ package com.iblsoft.flexiweather.ogc
 					getWMSStyleListString());
 			updateDimensionsInURLRequest(url);
 			updateCustomParametersInURLRequest(url);
+			m_request = url;
 			m_loader.load(url);
-			invalidateDynamicPart();
+			invalidateDynamicPart();*/
 		}
 
 		public override function draw(graphics: Graphics): void
@@ -113,8 +146,10 @@ package com.iblsoft.flexiweather.ogc
 		override public function onAreaChanged(b_finalChange: Boolean): void
 		{
 			super.onAreaChanged(b_finalChange);
-			if(b_finalChange)
+			if(b_finalChange) {
+				m_cache.invalidate(ms_imageCRS, m_imageBBox);
 				updateData();
+			}
 			else
 				invalidateDynamicPart();
 		}
@@ -307,6 +342,10 @@ package com.iblsoft.flexiweather.ogc
         		md_dimensionValues[s_dimName] = s_value;
         	else
         		delete md_dimensionValues[s_dimName];
+        	// if "run" changed, then even time axis changes
+        	if(m_cfg.ms_dimensionRunName != null && s_dimName == m_cfg.ms_dimensionRunName) {
+				dispatchEvent(new SynchronisedVariableChangeEvent("frame"));
+        	}
         }
 
         public function getWMSDimensionValue(s_dimName: String,
@@ -486,7 +525,7 @@ package com.iblsoft.flexiweather.ogc
 				else if(m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null) {
 					var run: Date = ISO8601Parser.stringToDate(
 							getWMSDimensionValue(m_cfg.dimensionRunName, true));
-					var forecast: Duration = new Duration((value as Date).time - run.time);
+					var forecast: Duration = new Duration(((value as Date).time - run.time) / 1000.0);
 					var l_forecasts: Array = getWMSDimensionsValues(m_cfg.dimensionForecastName);
 					// TODO: interpolation vs. find nearest value?
 					var ofNearest: Object = null;
@@ -505,9 +544,9 @@ package com.iblsoft.flexiweather.ogc
 			}
 			return false;
 		}
-
+		
 		// Event handlers
-		protected function onDataLoaded(event: ResultEvent): void
+		protected function onDataLoaded(event: UniURLLoaderEvent): void
 		{
 			var result: * = event.result;
 			if(result is Bitmap) {
@@ -515,30 +554,37 @@ package com.iblsoft.flexiweather.ogc
 				mb_imageOK = true;
 				ms_imageCRS = ms_requestedCRS;
 				m_imageBBox = m_requestedBBox;
+				m_cache.addImage(m_image, ms_requestedCRS, m_requestedBBox, m_request);
 				onJobFinished();
 			}
 			else
 				onDataLoadFailed(null);
 		}
 
-		protected function onDataLoadFailed(event: FaultEvent): void
+		protected function onDataLoadFailed(event: UniURLLoaderEvent): void
 		{
 			m_image = null;
+			m_cache.addImage(null, ms_requestedCRS, m_requestedBBox, m_request);
 			mb_imageOK = false;
 			ms_imageCRS = null;
 			m_imageBBox = null;
 			onJobFinished();
 		}
 		
-		protected function onFeatureInfoLoaded(event: ResultEvent): void
+		protected function onCapabilitiesUpdated(event: DataEvent): void
+		{
+			dispatchEvent(new SynchronisedVariableChangeEvent("frame"));
+		}
+
+		protected function onFeatureInfoLoaded(event: UniURLLoaderEvent): void
 		{
 			m_featureInfoCallBack.call(null, String(event.result));
 			m_featureInfoCallBack = null;
 		}
 		
-		protected function onFeatureInfoLoadFailed(event: FaultEvent): void
+		protected function onFeatureInfoLoadFailed(event: UniURLLoaderEvent): void
 		{
-			m_featureInfoCallBack.call(null, event.message);
+			m_featureInfoCallBack.call(null, event.result.toString());
 			m_featureInfoCallBack = null;
 		}
 		
@@ -559,5 +605,78 @@ package com.iblsoft.flexiweather.ogc
 
 		public function get dataLoader(): UniURLLoader
 		{ return m_loader; } 
+	}
+}
+
+import com.iblsoft.flexiweather.ogc.BBox;
+import flash.utils.Dictionary;
+import flash.net.URLRequest;
+import flash.display.Bitmap;
+
+class WMSCacheKey
+{
+	internal var ms_key: String;
+	internal var ms_crs: String;
+	internal var m_bbox: BBox;
+
+	public function WMSCacheKey(s_crs: String, bbox: BBox, url: URLRequest)
+	{
+		ms_crs = s_crs;
+		m_bbox = bbox;
+		ms_key = s_crs + "|" + bbox.toBBOXString();
+		var a: Array = []
+		if(url != null) {
+			for(var s: String in url.data) {
+				a.push(s);
+			}
+			a.sort();
+			for each(s in a) {
+				ms_key += "|" + s + "=" + url.data[s]; 
+			}
+		} 
+	}
+	
+	public function toString(): String
+	{ return ms_key; }
+}
+
+class WMSCache
+{
+	protected var md_cache: Dictionary = new Dictionary();
+	
+	public function getImage(s_crs: String, bbox: BBox, url: URLRequest): Bitmap
+	{
+		var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url);
+		var s_key: String = ck.toString(); 
+		if(s_key in md_cache) {
+			md_cache[s_key].lastUsed = new Date();
+			return md_cache[s_key].image;
+		}
+		return null;
+	}
+
+	public function addImage(img: Bitmap, s_crs: String, bbox: BBox, url: URLRequest): void
+	{
+		var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url);
+		var s_key: String = ck.toString(); 
+		md_cache[s_key] = {
+			cacheKey: ck,
+			lastUsed: new Date(),
+			image: img
+		};
+	}
+	
+	public function invalidate(s_crs: String, bbox: BBox): void
+	{
+		var a: Array = [];
+		for(var s_key: String in md_cache) {
+			var ck: WMSCacheKey = md_cache[s_key].cacheKey; 
+			if(ck.ms_crs == s_crs && ck.m_bbox.equals(bbox))
+				a.push(s_key);
+		}
+		for each(s_key in a) {
+			trace("WMSCache.invalidate(): removing image with key: " + md_cache[s_key].toString());
+			delete md_cache[s_key];
+		}
 	}
 }

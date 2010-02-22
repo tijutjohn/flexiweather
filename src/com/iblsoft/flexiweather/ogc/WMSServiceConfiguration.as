@@ -1,14 +1,12 @@
 package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.utils.UniURLLoader;
+	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.widgets.BackgroundJob;
 	import com.iblsoft.flexiweather.widgets.BackgroundJobManager;
 	
 	import flash.events.DataEvent;
 	import flash.net.URLRequest;
-	
-	import mx.rpc.events.FaultEvent;
-	import mx.rpc.events.ResultEvent;
 	
 	public class WMSServiceConfiguration extends OGCServiceConfiguration
 	{
@@ -63,7 +61,7 @@ package com.iblsoft.flexiweather.ogc
 		public function get layers(): WMSLayerGroup
 		{ return m_layers; }
 		
-		protected function onCapabilitiesLoaded(event: ResultEvent): void
+		protected function onCapabilitiesLoaded(event: UniURLLoaderEvent): void
 		{
 			m_capabilitiesLoadJob.finish();
 			m_capabilitiesLoadJob = null;
@@ -85,7 +83,7 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 
-		protected function onCapabilitiesLoadFailed(event: FaultEvent): void
+		protected function onCapabilitiesLoadFailed(event: UniURLLoaderEvent): void
 		{
 			m_capabilitiesLoadJob.finish();
 			m_capabilitiesLoadJob = null;

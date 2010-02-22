@@ -5,6 +5,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
+	import flash.events.DataEvent;
 	import flash.events.Event;
 	import flash.net.URLRequest;
 	
@@ -25,6 +26,9 @@ package com.iblsoft.flexiweather.ogc
 
 		// runtime variables
 		public var ma_layerConfigurations: Array;
+
+		public static const CAPABILITIES_UPDATED: String = "capabilitiesUpdated";
+		[Event(name = CAPABILITIES_UPDATED, type = "flash.events.DataEvent")]
 
 		public function WMSLayerConfiguration(service: WMSServiceConfiguration = null, a_layerNames: Array = null)
 		{
@@ -148,7 +152,7 @@ package com.iblsoft.flexiweather.ogc
 			}
 			if(b_changed) {
 				ma_layerConfigurations = a_layers.toArray();
-				dispatchEvent(new Event(""));
+				dispatchEvent(new DataEvent(CAPABILITIES_UPDATED));
 			}
 		}
 
