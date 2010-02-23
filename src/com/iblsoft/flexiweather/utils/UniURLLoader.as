@@ -9,6 +9,7 @@ package com.iblsoft.flexiweather.utils
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
 	
+	import mx.logging.Log;
 	import mx.rpc.Fault;
 	
 	public class UniURLLoader extends EventDispatcher
@@ -62,6 +63,7 @@ package com.iblsoft.flexiweather.utils
 		protected function onDataComplete(event: Event): void
 		{
 			var rawData: ByteArray = event.target.data as ByteArray;
+			//Log.getLogger("UniURLLoader").info("Received " + rawData.length + "B");
 
 			var b0: int = rawData.length > 0 ? rawData.readUnsignedByte() : -1;
 			var b1: int = rawData.length > 1 ? rawData.readUnsignedByte() : -1;
@@ -91,6 +93,7 @@ package com.iblsoft.flexiweather.utils
 
 		protected function onDataIOError(event: IOErrorEvent): void
 		{
+			Log.getLogger("UniURLLoader").info("I/O error: " + event.text);
 			dispatchFault(ERROR_IO, event.text);
 		}
 
