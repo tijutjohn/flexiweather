@@ -90,10 +90,12 @@ package com.iblsoft.flexiweather.utils {
 		{
 			return s.match(m_regExpDurationLike) != null;
 		}
+
 		public function parseDuration(s: String): Duration
 		{
 			if(s == null)
-				throw new Error("invalid format, must be in ISO8601 duration form PddDThhHmmMssS");
+				return null;
+			//throw new Error("invalid format, must be in ISO8601 duration form PddDThhHmmMssS");
 			
 			var result: Object = m_regExpDuration.exec(s);
 			if(result == null)
