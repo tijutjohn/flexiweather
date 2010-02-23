@@ -553,30 +553,17 @@ package com.iblsoft.flexiweather.ogc
 				onJobFinished();
 				return;
 			}
-			var logger: ILogger = Log.getLogger("WMS");
-			var s_errorPrefix: String = "Error accessing layers '" + m_cfg.ma_layerNames.join(",") + "': "
-			if(result is XML) {
-				var s_message: String;
-				var s_code: String = "Unknown service exception";
-				if(result.ServiceException[0]) {
-					s_message = result.ServiceException[0];
-					if(result.ServiceException[0].@code)
-						s_code = result.ServiceException[0].@code;
-				} else
-					s_message = String(result);
-				s_message = s_message.replace(/\n/, " ");
-				logger.error(s_errorPrefix + s_code + ": " + s_message);
-			}
-			else {
-				s_message = String(result);
-				s_message = s_message.replace(/\n/, " ");
-				logger.error(s_errorPrefix + "Unexpected response type: " + String(result));
-			}
+			ExceptionUtils.logError(Log.getLogger("WMS"), result,
+					"Error accessing layers '" + m_cfg.ma_layerNames.join(","))
 			onDataLoadFailed(null);
 		}
 
 		protected function onDataLoadFailed(event: UniURLLoaderEvent): void
 		{
+			if(event != null) {
+				ExceptionUtils.logError(Log.getLogger("WMS"), event,
+						"Error accessing layers '" + m_cfg.ma_layerNames.join(","))
+			}
 			m_image = null;
 			m_cache.addImage(null, ms_requestedCRS, m_requestedBBox, m_request);
 			mb_imageOK = false;
