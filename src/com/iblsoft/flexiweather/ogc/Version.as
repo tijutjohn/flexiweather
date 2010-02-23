@@ -40,6 +40,11 @@ package com.iblsoft.flexiweather.ogc
 			return false;
 		}
 
+		public function isLessThanVersion(other: Version): Boolean
+		{
+			return isLessThan(other._v1, other._v2, other._v3);
+		}
+
 		public function toString(): String
 		{
 			return _v1 + "." + _v2 + "." + _v3;
