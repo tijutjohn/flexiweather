@@ -50,6 +50,7 @@
     <classEntry path="com.iblsoft.flexiweather.plugins.PluginAbility"/>
     <classEntry path="com.iblsoft.flexiweather.proj.Coord"/>
     <classEntry path="com.iblsoft.flexiweather.proj.Projection"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.ArrayLogTarget"/>
     <classEntry path="com.iblsoft.flexiweather.utils.ArrayUtils"/>
     <classEntry path="com.iblsoft.flexiweather.utils.BitmapFilterUtils"/>
     <classEntry path="com.iblsoft.flexiweather.utils.CubicBezier"/>
