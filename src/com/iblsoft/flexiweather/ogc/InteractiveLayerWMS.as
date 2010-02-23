@@ -19,6 +19,9 @@ package com.iblsoft.flexiweather.ogc
 	import flash.net.URLRequest;
 	import flash.utils.Dictionary;
 	
+	import mx.logging.ILogger;
+	import mx.logging.Log;
+	
 	public class InteractiveLayerWMS extends InteractiveLayer
 			implements ISynchronisedObject
 	{
@@ -93,21 +96,6 @@ package com.iblsoft.flexiweather.ogc
 				m_imageBBox = m_requestedBBox;
 				invalidateDynamicPart();
 			}
-			/*if(m_job != null)
-				m_job.cancel();
-			m_job = BackgroundJobManager.getInstance().startJob("Rendering " + m_cfg.ma_layerNames.join("+"));
-			
-			ms_requestedCRS = container.getCRS();
-			m_requestedBBox = container.getViewBBox();
-			var url: URLRequest = m_cfg.toGetMapRequest(
-					ms_requestedCRS, container.getViewBBox().toBBOXString(),
-					int(container.width), int(container.height),
-					getWMSStyleListString());
-			updateDimensionsInURLRequest(url);
-			updateCustomParametersInURLRequest(url);
-			m_request = url;
-			m_loader.load(url);
-			invalidateDynamicPart();*/
 		}
 
 		public override function draw(graphics: Graphics): void
@@ -563,9 +551,28 @@ package com.iblsoft.flexiweather.ogc
 				m_imageBBox = m_requestedBBox;
 				m_cache.addImage(m_image, ms_requestedCRS, m_requestedBBox, m_request);
 				onJobFinished();
+				return;
 			}
-			else
-				onDataLoadFailed(null);
+			var logger: ILogger = Log.getLogger("WMS");
+			var s_errorPrefix: String = "Error accessing layers '" + m_cfg.ma_layerNames.join(",") + "': "
+			if(result is XML) {
+				var s_message: String;
+				var s_code: String = "Unknown service exception";
+				if(result.ServiceException[0]) {
+					s_message = result.ServiceException[0];
+					if(result.ServiceException[0].@code)
+						s_code = result.ServiceException[0].@code;
+				} else
+					s_message = String(result);
+				s_message = s_message.replace(/\n/, " ");
+				logger.error(s_errorPrefix + s_code + ": " + s_message);
+			}
+			else {
+				s_message = String(result);
+				s_message = s_message.replace(/\n/, " ");
+				logger.error(s_errorPrefix + "Unexpected response type: " + String(result));
+			}
+			onDataLoadFailed(null);
 		}
 
 		protected function onDataLoadFailed(event: UniURLLoaderEvent): void
