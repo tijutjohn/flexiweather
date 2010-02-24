@@ -17,9 +17,9 @@ package com.iblsoft.flexiweather.ogc
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.net.URLRequest;
+	import flash.net.URLVariables;
 	import flash.utils.Dictionary;
 	
-	import mx.logging.ILogger;
 	import mx.logging.Log;
 	
 	public class InteractiveLayerWMS extends InteractiveLayer
@@ -419,7 +419,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			for(var s_dimName: String in md_dimensionValues) {
 				if(url.data == null)
-					url.data = new Object();
+					url.data = new URLVariables();
 				url.data[m_cfg.dimensionToParameterName(s_dimName)] = md_dimensionValues[s_dimName];
 			}
 		}
@@ -431,7 +431,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			for(var s_parameter: String in md_customParameters) {
 				if(url.data == null)
-					url.data = new Object();
+					url.data = new URLVariables();
 				url.data[s_parameter] = md_customParameters[s_parameter];
 			}
 		 }
