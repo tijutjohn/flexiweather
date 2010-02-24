@@ -23,6 +23,16 @@ package com.iblsoft.flexiweather.widgets
 		public function InteractiveLayerRoute(container: InteractiveWidget)
 		{
 			super(container);
+			setStyle("routeColor", 0x000000);
+			setStyle("routeAlpha", 1.0);
+			setStyle("routeFillColor", 0x00FF00);
+			setStyle("routeFillAlpha", 1.0);
+			setStyle("pointColor", 0x000000);
+			setStyle("pointAlpha", 1.0);
+			setStyle("pointFillColor", 0x00FF00);
+			setStyle("pointFillAlpha", 1.0);
+			setStyle("pointHighlightFillColor", 0xFFFFFF);
+			setStyle("pointHighlightFillAlpha", 1.0);
 			ma_coords.addEventListener(CollectionEvent.COLLECTION_CHANGE, onCoordsCollectionChanged);
 		}
 		
@@ -108,17 +118,27 @@ package com.iblsoft.flexiweather.widgets
 			super.draw(graphics);
 			var ptPrev: Point;
 			var pt: Point;
+			var i_routeColor: uint = uint(getStyle("routeColor"));
+			var f_routeAlpha: uint = Number(getStyle("routeAlpha"));
+			var i_routeFillColor: uint = uint(getStyle("routeFillColor"));
+			var f_routeFillAlpha: uint = Number(getStyle("routeFillAlpha"));
+			var i_pointColor: uint = uint(getStyle("pointColor"));
+			var f_pointAlpha: uint = Number(getStyle("pointAlpha"));
+			var i_pointFillColor: uint = uint(getStyle("pointFillColor"));
+			var f_pointFillAlpha: uint = Number(getStyle("pointFillAlpha"));
+			var i_pointHighlightFillColor: uint = uint(getStyle("pointHighlightFillColor"));
+			var f_pointHighlightFillAlpha: uint = Number(getStyle("pointHighlightFillAlpha"));
 			for each(var c: Coord in ma_coords) {			
 				pt = container.coordToPoint(c);
 				if(ptPrev != null) {
 					// draw glow
-					graphics.beginFill(0);
-					graphics.lineStyle(6, 0x000000, 1, false, LineScaleMode.NORMAL, null, JointStyle.MITER);
+					graphics.beginFill(i_routeColor, f_routeAlpha);
+					graphics.lineStyle(6, i_routeColor, f_routeAlpha, false, LineScaleMode.NORMAL, null, JointStyle.MITER);
 					graphics.moveTo(ptPrev.x, ptPrev.y);
 					graphics.lineTo(pt.x, pt.y);
 					graphics.endFill();
 
-					graphics.beginFill(0x000000, 1);
+					graphics.beginFill(i_routeFillColor, f_routeFillAlpha);
 					var ptDiff: Point = pt.subtract(ptPrev);
 					ptDiff.normalize(15);
 					var ptDiff2: Point = new Point(ptDiff.x, ptDiff.y);
@@ -131,13 +151,13 @@ package com.iblsoft.flexiweather.widgets
 					graphics.lineTo(pt.x - ptDiff2.x, pt.y - ptDiff2.y);
 					graphics.endFill();
 
-					graphics.beginFill(0);
-					graphics.lineStyle(4, 0x00FF00, 1, false, LineScaleMode.NORMAL, null, JointStyle.MITER);
+					graphics.beginFill(i_routeFillColor, f_routeFillAlpha);
+					graphics.lineStyle(4, i_routeFillColor, f_routeFillAlpha, false, LineScaleMode.NORMAL, null, JointStyle.MITER);
 					graphics.moveTo(ptPrev.x, ptPrev.y);
 					graphics.lineTo(pt.x, pt.y);
 					graphics.endFill();
 
-					graphics.beginFill(0x00FF00, 1);
+					graphics.beginFill(i_routeFillColor, f_routeFillAlpha);
 					graphics.moveTo(pt.x - ptDiff2.x, pt.y - ptDiff2.y);
 					graphics.lineTo(pt.x + ptPerp.x - ptDiff.x, pt.y + ptPerp.y - ptDiff.y);
 					graphics.lineTo(pt.x - ptPerp.x - ptDiff.x, pt.y - ptPerp.y - ptDiff.y);
@@ -148,8 +168,10 @@ package com.iblsoft.flexiweather.widgets
 			}
 			for each(c in ma_coords) {			
 				pt = container.coordToPoint(c);
-				graphics.beginFill(m_highlightedCoord != c ? 0x00FF00 : 0xFFFFFF, 1);
-				graphics.lineStyle(1, 0x000000, 1);
+				graphics.beginFill(
+						m_highlightedCoord != c ? i_pointFillColor : i_pointHighlightFillColor,
+						f_pointFillAlpha);
+				graphics.lineStyle(1, i_pointColor, f_pointAlpha);
 				graphics.drawCircle(pt.x, pt.y, 6);
 				graphics.endFill();
 			}
