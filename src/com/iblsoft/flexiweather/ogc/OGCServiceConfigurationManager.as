@@ -76,18 +76,25 @@ package com.iblsoft.flexiweather.ogc
 				m_timer.stop();
 		}
 		
-		protected function onTimer(event: TimerEvent): void
+		public function update(b_force: Boolean = true): void
 		{
 			var i_currentFlashStamp: int = getTimer();
 			for each(var osc: OGCServiceConfiguration in ma_services) {
-				if(osc.updatePeriod == 0
-						&& osc.mi_lastUpdateFlashStamp != -1000000)
-					continue;
-				if(osc.mi_lastUpdateFlashStamp + osc.updatePeriod < i_currentFlashStamp) {
-					osc.update();
-					osc.mi_lastUpdateFlashStamp = i_currentFlashStamp;
+				if(!b_force) {
+					if(osc.updatePeriod == 0
+							&& osc.mi_lastUpdateFlashStamp != -1000000)
+						continue;
+					if(osc.mi_lastUpdateFlashStamp + osc.updatePeriod >= i_currentFlashStamp)
+						continue;
 				}
+				osc.update();
+				osc.mi_lastUpdateFlashStamp = i_currentFlashStamp;
 			}
+		}
+		
+		protected function onTimer(event: TimerEvent): void
+		{
+			update(false);
 		}
 		
 		public function get services(): ArrayCollection
