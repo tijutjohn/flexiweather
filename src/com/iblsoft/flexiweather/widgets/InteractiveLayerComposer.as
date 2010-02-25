@@ -29,7 +29,6 @@ package com.iblsoft.flexiweather.widgets
 		{
 			m_layers.addItemAt(l, 0);
 			bindSubLayer(l);
-			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
 		}
 
 		public function removeLayer(l: InteractiveLayer): void
@@ -39,7 +38,13 @@ package com.iblsoft.flexiweather.widgets
 				unbindSubLayer(l);
 				m_layers.removeItemAt(i);
 			}
-			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
+		}
+		
+		public function removeAllLayers(): void
+		{
+			for each(var l: InteractiveLayer in m_layers)
+				unbindSubLayer(l);
+			m_layers.removeAll();
 		}
 
 		public function getLayerCount(): uint
@@ -77,7 +82,7 @@ package com.iblsoft.flexiweather.widgets
 			invalidateDynamicPart();
 			m_layers.itemUpdated(event.target);
 		}
-		
+
 		protected function onSynchronisedVariableChanged(event: SynchronisedVariableChangeEvent): void
 		{
 			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
@@ -224,6 +229,7 @@ package com.iblsoft.flexiweather.widgets
 				addChildAt(l, 0);
 				//bindSubLayer(l);
 			}
+			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
 		}
         
         public function getLayers(): ArrayCollection
