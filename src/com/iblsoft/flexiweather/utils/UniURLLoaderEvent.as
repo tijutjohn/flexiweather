@@ -17,6 +17,11 @@ package com.iblsoft.flexiweather.utils
 			m_request = request;
 		}
 		
+		public override function clone(): Event
+		{
+			return new UniURLLoaderEvent(type, m_result, m_request, bubbles, cancelable);
+		}
+		
 		public function get result(): Object
 		{ return m_result; }
 
