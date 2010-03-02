@@ -23,6 +23,7 @@ package com.iblsoft.flexiweather.ogc
 		public var ms_dimensionRunName: String = null;
 		public var ms_dimensionForecastName: String = null;
 		public var ms_dimensionVerticalLevelName: String = null;
+		public var ms_previewURL: String = null;
 
 		// runtime variables
 		public var ma_layerConfigurations: Array;
@@ -61,6 +62,8 @@ package com.iblsoft.flexiweather.ogc
 					"dimension-forecast-name", ms_dimensionForecastName, null);
 			ms_dimensionVerticalLevelName = storage.serializeString(
 					"dimension-level-name", ms_dimensionVerticalLevelName, null);
+
+			ms_previewURL = storage.serializeString("preview-url", ms_previewURL, "<internal>");
 		}
 		
 		public function toGetMapRequest(
@@ -209,5 +212,11 @@ package com.iblsoft.flexiweather.ogc
 
 		public function get dimensionVerticalLevelName(): String
 		{ return ms_dimensionVerticalLevelName; }
+		
+		public function set previewURL(s: String): void
+		{ ms_previewURL = s; }
+
+		public function get previewURL(): String
+		{ return ms_previewURL; }
 	}
 }
