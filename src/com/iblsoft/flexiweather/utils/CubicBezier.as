@@ -4,6 +4,46 @@ package com.iblsoft.flexiweather.utils
 	
 	public class CubicBezier
 	{
+		public static function subdivideBezier(g: ICurveRenderer,
+				p0_x: Number, p0_y: Number, p1_x: Number, p1_y: Number,
+				s0_x: Number, s0_y: Number, s1_x: Number, s1_y: Number,
+				h: Number, prec: Number): void 
+		{
+			var pavg_x: Number = 0.5*(p0_x + p1_x);
+			var pavg_y: Number = 0.5*(p0_y + p1_y);
+			var smid_x: Number = 0.5*(s0_x + s1_x);
+			var smid_y: Number = 0.5*(s0_y + s1_y);
+			var factor: Number = 0.5*h*h;
+			var ofs_x: Number = factor*smid_x;
+			var ofs_y: Number = factor*smid_y;
+			if(ofs_x*ofs_x + ofs_y*ofs_y <= prec)
+				return;
+		
+			var pmid_x: Number = pavg_x - ofs_x;
+			var pmid_y: Number = pavg_y - ofs_y;
+			subdivideBezier(g, p0_x, p0_y, pmid_x, pmid_y, s0_x, s0_y, smid_x, smid_y, 0.5*h, prec);
+			g.lineTo(pmid_x, pmid_y);
+			/*
+			g.lineTo(pmid_x + 4, pmid_y + 4);
+			g.lineTo(pmid_x, pmid_y);
+			g.lineTo(pmid_x - 4, pmid_y);
+			g.lineTo(pmid_x, pmid_y);
+			*/
+			subdivideBezier(g, pmid_x, pmid_y, p1_x, p1_y, smid_x, smid_y, s1_x, s1_y, 0.5*h, prec);
+		}
+		public static function expandBezier(g: ICurveRenderer,
+				V0: Point, V1: Point, V2: Point, V3: Point, prec: Number): void
+		{
+			var sd0_x: Number = 6.0*(V2.x - (V1.x + V1.x) + V0.x);
+			var sd0_y: Number = 6.0*(V2.y - (V1.y + V1.y) + V0.y);
+			var sd1_x: Number = 6.0*(V3.x - (V2.x + V2.x) + V1.x);
+			var sd1_y: Number = 6.0*(V3.y - (V2.y + V2.y) + V1.y);
+			
+			g.moveTo(V0.x, V0.y);
+			subdivideBezier(g, V0.x, V0.y, V3.x, V3.y, sd0_x, sd0_y, sd1_x, sd1_y, 0.5, prec);
+			g.lineTo(V3.x, V3.y);
+		}
+		
 		/* pubic static function drawCurve
 		 * 	Draws a single cubic Bézier curve
 		 * 	@param: 
@@ -21,14 +61,7 @@ package com.iblsoft.flexiweather.utils
 		{
 			var bezier: BezierSegment = new BezierSegment(p1, p2, p3, p4);	// BezierSegment using the four points
 			g.start(p1.x, p1.y);
-			g.moveTo(p1.x, p1.y);
-
-			// Construct the curve out of 100 segments(adjust number for less/more detail)
-			for(var i: uint = 1; i <= 100; ++i) {
-				var t: Number = i / 100.0;
-				var val: Point = bezier.getValue(t);	// x, y on the curve for a given t
-				g.lineTo(val.x, val.y);
-			}
+			expandBezier(g, p1, p2, p3, p4, 2.5);
 			g.finish(p4.x, p4.y);
 		}
 		
