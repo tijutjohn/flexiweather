@@ -1,6 +1,5 @@
 package com.iblsoft.flexiweather.utils
 {	
-	import flash.display.Graphics;
 	import flash.geom.Point;
 	
 	public class CubicBezier
@@ -25,7 +24,8 @@ package com.iblsoft.flexiweather.utils
 			g.moveTo(p1.x, p1.y);
 
 			// Construct the curve out of 100 segments(adjust number for less/more detail)
-			for(var t: Number = .01; t < 1.01; t += .01) {
+			for(var i: uint = 1; i <= 100; ++i) {
+				var t: Number = i / 100.0;
 				var val: Point = bezier.getValue(t);	// x, y on the curve for a given t
 				g.lineTo(val.x, val.y);
 			}
@@ -237,13 +237,7 @@ package com.iblsoft.flexiweather.utils
 							g.lineTo(p[i+1].x, p[i+1].y);
 						}
 						else {
-							// BezierSegment instance using the current point, its second control point, the next point's first control point, and the next point
-							var bezier: BezierSegment = new BezierSegment(p[i], controlPts[i][1], controlPts[i+1][0], p[i+1]);
-							// Construct the curve out of 100 segments(adjust number for less/more detail)
-							for(var t: Number = .01 ; t < 1.01; t += .01) {
-								var val: Point = bezier.getValue(t);	// x, y on the curve for a given t
-								g.lineTo(val.x, val.y);
-							}
+							drawCurve(g, p[i], controlPts[i][1], controlPts[i+1][0], p[i+1]);
 						}
 					}
 					// If this isn't a closed line
