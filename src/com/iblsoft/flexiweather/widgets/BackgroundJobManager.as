@@ -11,7 +11,8 @@ package com.iblsoft.flexiweather.widgets
 	{
 		internal static var sm_instance: BackgroundJobManager;
 
-		internal var m_progressBar: ProgressBar = new ProgressBar();
+//		internal var m_progressBar: ProgressBar = new ProgressBar();
+		public var m_progressBar: JobPreloader;
 		internal var m_jobs: ArrayCollection = new ArrayCollection();
 		
 		internal var mi_maxJobs: int = 0;
@@ -34,19 +35,22 @@ package com.iblsoft.flexiweather.widgets
 		public function setupIndicator(parent: UIComponent): void
 		{
 			//m_progressBar.labelPlacement = ProgressBarLabelPlacement.CENTER;
-			parent.addEventListener(ResizeEvent.RESIZE, onParentResize);
-			parent.addChild(m_progressBar);
-			onParentResize(null);
+//			parent.addEventListener(ResizeEvent.RESIZE, onParentResize);
+//			parent.addChild(m_progressBar);
+//			onParentResize(null);
 		}
 		
 		public function onParentResize(event: ResizeEvent): void
 		{
-			m_progressBar.width = 200;
-			m_progressBar.height = m_progressBar.parent.height - 5;
-			m_progressBar.setStyle("trackHeight", 23);
-			m_progressBar.labelPlacement = ProgressBarLabelPlacement.CENTER;
-			m_progressBar.x = m_progressBar.parent.width - m_progressBar.width - 5;
-			m_progressBar.y = (m_progressBar.parent.height - m_progressBar.height) / 2;
+			if (m_progressBar)
+			{
+//				m_progressBar.width = 200;
+//				m_progressBar.height = m_progressBar.parent.height - 5;
+//				m_progressBar.setStyle("trackHeight", 23);
+//				m_progressBar.labelPlacement = ProgressBarLabelPlacement.CENTER;
+//				m_progressBar.x = m_progressBar.parent.width - m_progressBar.width - 5;
+//				m_progressBar.y = (m_progressBar.parent.height - m_progressBar.height) / 2;
+			}
 		}
 		
 		public function startJob(s_label: String): BackgroundJob
@@ -76,21 +80,23 @@ package com.iblsoft.flexiweather.widgets
 		protected function updateUI(): void
 		{
 			if(m_jobs.length > 0) {
-//				if(m_jobs.length > 1)
-					m_progressBar.label = mi_doneJobs + "/" + mi_maxJobs + " jobs done";
-//				else
-//					m_progressBar.label = m_jobs.getItemAt(0).getLabel();
-				if(mi_maxJobs > 1) {
-					m_progressBar.indeterminate = false;
-					m_progressBar.minimum = 0;
-					m_progressBar.maximum = mi_maxJobs;
-					m_progressBar.mode = ProgressBarMode.MANUAL;
-					m_progressBar.setProgress(mi_doneJobs, mi_maxJobs);
-				}
-				else {
-					m_progressBar.mode = ProgressBarMode.EVENT;
-					m_progressBar.indeterminate = true;
-				}
+				
+				if (m_progressBar)
+					m_progressBar.updateUI(mi_doneJobs, mi_maxJobs);
+				
+//				m_progressBar.label = mi_doneJobs + "/" + mi_maxJobs + " jobs done";
+//				
+//				if(mi_maxJobs > 1) {
+//					m_progressBar.indeterminate = false;
+//					m_progressBar.minimum = 0;
+//					m_progressBar.maximum = mi_maxJobs;
+//					m_progressBar.mode = ProgressBarMode.MANUAL;
+//					m_progressBar.setProgress(mi_doneJobs, mi_maxJobs);
+//				}
+//				else {
+//					m_progressBar.mode = ProgressBarMode.EVENT;
+//					m_progressBar.indeterminate = true;
+//				}
 				var s: String = "Pending jobs:";
 				for each(var job: BackgroundJob in m_jobs) {
 					s += "\n  " + job.ms_label;

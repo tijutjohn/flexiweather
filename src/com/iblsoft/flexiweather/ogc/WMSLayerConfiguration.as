@@ -24,6 +24,9 @@ package com.iblsoft.flexiweather.ogc
 		public var ms_dimensionForecastName: String = null;
 		public var ms_dimensionVerticalLevelName: String = null;
 		public var ms_previewURL: String = null;
+		
+		public var ms_layerType: String = null;
+		public var m_interactiveLayer: InteractiveLayerWMS;
 
 		// runtime variables
 		public var ma_layerConfigurations: Array;
@@ -218,5 +221,17 @@ package com.iblsoft.flexiweather.ogc
 
 		public function get previewURL(): String
 		{ return ms_previewURL; }
+		
+		public function set layerType(s: String): void
+		{ ms_layerType = s; }
+
+		public function get layerType(): String
+		{ return ms_layerType; }
+		
+		public function set interactiveLayer(s: InteractiveLayerWMS): void
+		{ m_interactiveLayer = s; }
+
+		public function get interactiveLayer(): InteractiveLayerWMS
+		{ return m_interactiveLayer; }
 	}
 }

@@ -14,6 +14,7 @@ package com.iblsoft.flexiweather.widgets
 	
 	import mx.core.Container;
 	import mx.events.ResizeEvent;
+	import mx.events.FlexEvent;
 
 	public class InteractiveWidget extends Container
 	{
@@ -24,6 +25,14 @@ package com.iblsoft.flexiweather.widgets
 
 		public function InteractiveWidget() {
 			super();
+			
+			addEventListener(FlexEvent.CREATION_COMPLETE, onCreationComplete);
+		}
+		
+		private function onCreationComplete(e:FlexEvent):void
+		{
+			removeEventListener(FlexEvent.CREATION_COMPLETE, onCreationComplete);
+
 			mouseEnabled = true;
 			mouseFocusEnabled = true;
 			doubleClickEnabled = true;
@@ -58,9 +67,13 @@ package com.iblsoft.flexiweather.widgets
 			return o;
 		}
 
-		public function addLayer(l: InteractiveLayer): void
+		public function addLayer(l: InteractiveLayer, index: int = -1): void
 		{
-			addChild(l);
+			trace("InteractiveWidget addLayer pos: " + index);
+			if (index >= 0)
+				addChildAt(l, index);
+			else
+				addChild(l);
 			orderLayers();
 		}
 
