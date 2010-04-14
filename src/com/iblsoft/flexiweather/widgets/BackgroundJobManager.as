@@ -11,8 +11,10 @@ package com.iblsoft.flexiweather.widgets
 	{
 		internal static var sm_instance: BackgroundJobManager;
 
-//		internal var m_progressBar: ProgressBar = new ProgressBar();
+		internal var m_default_progressBar: ProgressBar
+		
 		public var m_progressBar: JobPreloader;
+		
 		internal var m_jobs: ArrayCollection = new ArrayCollection();
 		
 		internal var mi_maxJobs: int = 0;
@@ -34,22 +36,28 @@ package com.iblsoft.flexiweather.widgets
 		
 		public function setupIndicator(parent: UIComponent): void
 		{
-			//m_progressBar.labelPlacement = ProgressBarLabelPlacement.CENTER;
-//			parent.addEventListener(ResizeEvent.RESIZE, onParentResize);
-//			parent.addChild(m_progressBar);
-//			onParentResize(null);
+			if (m_default_progressBar)
+				m_default_progressBar.labelPlacement = ProgressBarLabelPlacement.CENTER;
+			parent.addEventListener(ResizeEvent.RESIZE, onParentResize);
+			parent.addChild(m_default_progressBar);
+			onParentResize(null);
+		}
+		
+		public function createDefaultPreloader():void
+		{
+			m_default_progressBar = new ProgressBar();
 		}
 		
 		public function onParentResize(event: ResizeEvent): void
 		{
-			if (m_progressBar)
+			if (m_default_progressBar)
 			{
-//				m_progressBar.width = 200;
-//				m_progressBar.height = m_progressBar.parent.height - 5;
-//				m_progressBar.setStyle("trackHeight", 23);
-//				m_progressBar.labelPlacement = ProgressBarLabelPlacement.CENTER;
-//				m_progressBar.x = m_progressBar.parent.width - m_progressBar.width - 5;
-//				m_progressBar.y = (m_progressBar.parent.height - m_progressBar.height) / 2;
+				m_default_progressBar.width = 200;
+				m_default_progressBar.height = m_default_progressBar.parent.height - 5;
+				m_default_progressBar.setStyle("trackHeight", 23);
+				m_default_progressBar.labelPlacement = ProgressBarLabelPlacement.CENTER;
+				m_default_progressBar.x = m_default_progressBar.parent.width - m_default_progressBar.width - 5;
+				m_default_progressBar.y = (m_default_progressBar.parent.height - m_default_progressBar.height) / 2;
 			}
 		}
 		
@@ -81,31 +89,44 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if(m_jobs.length > 0) {
 				
-				if (m_progressBar)
-					m_progressBar.updateUI(mi_doneJobs, mi_maxJobs);
-				
-//				m_progressBar.label = mi_doneJobs + "/" + mi_maxJobs + " jobs done";
-//				
-//				if(mi_maxJobs > 1) {
-//					m_progressBar.indeterminate = false;
-//					m_progressBar.minimum = 0;
-//					m_progressBar.maximum = mi_maxJobs;
-//					m_progressBar.mode = ProgressBarMode.MANUAL;
-//					m_progressBar.setProgress(mi_doneJobs, mi_maxJobs);
-//				}
-//				else {
-//					m_progressBar.mode = ProgressBarMode.EVENT;
-//					m_progressBar.indeterminate = true;
-//				}
 				var s: String = "Pending jobs:";
 				for each(var job: BackgroundJob in m_jobs) {
 					s += "\n  " + job.ms_label;
 				}
-				m_progressBar.toolTip = s;
-				m_progressBar.visible = true;
+				
+				if (m_progressBar)
+				{
+					m_progressBar.updateUI(mi_doneJobs, mi_maxJobs);
+					m_progressBar.visible = true;
+					m_progressBar.toolTip = s;
+				}
+				
+				if (m_default_progressBar)
+				{
+					m_default_progressBar.label = mi_doneJobs + "/" + mi_maxJobs + " jobs done";
+					
+					if(mi_maxJobs > 1) {
+						m_default_progressBar.indeterminate = false;
+						m_default_progressBar.minimum = 0;
+						m_default_progressBar.maximum = mi_maxJobs;
+						m_default_progressBar.mode = ProgressBarMode.MANUAL;
+						m_default_progressBar.setProgress(mi_doneJobs, mi_maxJobs);
+					}
+					else {
+						m_default_progressBar.mode = ProgressBarMode.EVENT;
+						m_default_progressBar.indeterminate = true;
+					}
+					m_default_progressBar.toolTip = s;
+					m_default_progressBar.visible = true;
+				}
+				
+				
 			}
 			else {
-				m_progressBar.visible = false;
+				if (m_progressBar)
+					m_progressBar.visible = false;
+				if (m_default_progressBar)
+					m_default_progressBar.visible = false;
 			}
 		}
 		
