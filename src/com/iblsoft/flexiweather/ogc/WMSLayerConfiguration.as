@@ -24,10 +24,11 @@ package com.iblsoft.flexiweather.ogc
 		public var ms_dimensionForecastName: String = null;
 		public var ms_dimensionVerticalLevelName: String = null;
 		public var ms_previewURL: String = null;
+		public var mi_autoRefreshPeriod: uint = 0;
 		
 		public var ms_layerType: String = null;
 		public var m_interactiveLayer: InteractiveLayerWMS;
-
+		
 		// runtime variables
 		public var ma_layerConfigurations: Array;
 
@@ -67,6 +68,9 @@ package com.iblsoft.flexiweather.ogc
 					"dimension-level-name", ms_dimensionVerticalLevelName, null);
 
 			ms_previewURL = storage.serializeString("preview-url", ms_previewURL, "<internal>");
+
+			mi_autoRefreshPeriod = storage.serializeInt(
+					"auto-refresh-period", mi_autoRefreshPeriod, 0);
 		}
 		
 		public function toGetMapRequest(

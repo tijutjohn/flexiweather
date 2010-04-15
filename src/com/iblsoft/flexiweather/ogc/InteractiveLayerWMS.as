@@ -14,11 +14,13 @@ package com.iblsoft.flexiweather.ogc
 	import flash.display.Bitmap;
 	import flash.display.Graphics;
 	import flash.events.DataEvent;
+	import flash.events.TimerEvent;
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.net.URLRequest;
 	import flash.net.URLVariables;
 	import flash.utils.Dictionary;
+	import flash.utils.Timer;
 	
 	import mx.logging.Log;
 	
@@ -44,6 +46,8 @@ package com.iblsoft.flexiweather.ogc
 		protected var ma_subLayerStyleNames: Array = [];
 		
 		protected var m_cache: WMSCache = new WMSCache();
+		
+		protected var m_timer: Timer = new Timer(10000);
 
 		public function InteractiveLayerWMS(container: InteractiveWidget, cfg: WMSLayerConfiguration)
 		{
@@ -55,6 +59,9 @@ package com.iblsoft.flexiweather.ogc
 			m_featureInfoLoader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onFeatureInfoLoadFailed);
 			
 			setConfiguration(cfg);
+			//filters = [ new GlowFilter(0xffffe0, 0.8, 2, 2, 2) ];
+			m_timer.addEventListener(TimerEvent.TIMER_COMPLETE, onAutoRefreshTimerComplete)
+			m_timer.repeatCount = 1
 		}
 		
 		public function setConfiguration(cfg: WMSLayerConfiguration): void
@@ -63,6 +70,9 @@ package com.iblsoft.flexiweather.ogc
 				m_cfg.removeEventListener(WMSLayerConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
 			}
 			m_cfg = cfg;
+
+			m_timer.stop();
+			m_timer.delay = m_cfg.mi_autoRefreshPeriod * 1000.0;
 			m_cfg.addEventListener(WMSLayerConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
 			updateData(true);
 		}
@@ -82,14 +92,19 @@ package com.iblsoft.flexiweather.ogc
 			updateDimensionsInURLRequest(m_request);
 			updateCustomParametersInURLRequest(m_request);
 			var img: Bitmap = null;
+
 			if(!b_forceUpdate)
 				img = m_cache.getImage(ms_requestedCRS, m_requestedBBox, m_request);
 			if(img == null) {
+				m_timer.reset();
+				m_timer.stop();
 				m_job = BackgroundJobManager.getInstance().startJob("Rendering " + m_cfg.ma_layerNames.join("+"));
 				m_loader.load(m_request);
 				invalidateDynamicPart();
 			}
 			else {
+				if(m_timer.delay > 0)
+					m_timer.start();
 				m_image = img;
 				mb_imageOK = true;
 				ms_imageCRS = ms_requestedCRS;
@@ -543,6 +558,10 @@ package com.iblsoft.flexiweather.ogc
 		// Event handlers
 		protected function onDataLoaded(event: UniURLLoaderEvent): void
 		{
+			if(m_timer.delay > 0) {
+				m_timer.reset();
+				m_timer.start();
+			}
 			var result: * = event.result;
 			if(result is Bitmap) {
 				m_image = result;
@@ -560,6 +579,10 @@ package com.iblsoft.flexiweather.ogc
 
 		protected function onDataLoadFailed(event: UniURLLoaderEvent): void
 		{
+			if(m_timer.delay > 0) {
+				m_timer.reset();
+				m_timer.start();
+			}
 			if(event != null) {
 				ExceptionUtils.logError(Log.getLogger("WMS"), event,
 						"Error accessing layers '" + m_cfg.ma_layerNames.join(","))
@@ -597,6 +620,11 @@ package com.iblsoft.flexiweather.ogc
 				m_job = null;
 			}
 			invalidateDynamicPart();
+		}
+		
+		protected function onAutoRefreshTimerComplete(event: TimerEvent): void
+		{
+			updateData(true);
 		}
 		
 		override public function get name(): String
