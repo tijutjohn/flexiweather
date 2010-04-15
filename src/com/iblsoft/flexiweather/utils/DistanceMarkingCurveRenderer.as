@@ -28,8 +28,9 @@ package com.iblsoft.flexiweather.utils
 	
 			var f_nextMarkDistance: Number = mf_nextMarkDistance;
 			
-			while((f_distanceStart < f_nextMarkDistance && f_nextMarkDistance <= f_distanceFinal)
-					|| f_nextMarkDistance == 0.0)
+			while(f_distanceStart < f_nextMarkDistance
+					&& f_nextMarkDistance <= f_distanceFinal
+					&& mf_currentDistance < f_distanceFinal)
 			{
 				var f_ratio: Number = (f_nextMarkDistance - f_distanceStart) / f_len;
 				mf_currentDistance = f_distanceStart + f_ratio * f_len;
