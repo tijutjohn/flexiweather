@@ -5,9 +5,10 @@ package com.iblsoft.flexiweather.ogc
 	
 	public class GMLUtils
 	{
-		public static function parseGML3Coordinates2D(xml: XML, gml: Namespace): Array
+		public static function parseGML3Coordinates2D(xml: XML): Array
 		{
 			var l: Array = [];
+			// "http://www.opengis.net/gml"
 			for each(var node: XML in xml.children()) {
 				if(node.localName() == "posList") {
 					return parseGML3PosList2D(node);
@@ -53,7 +54,7 @@ package com.iblsoft.flexiweather.ogc
 			return a_coords;
 		}
 		
-		public static function encodeGML3Coordinates2D(l_coords: Array, gml: Namespace): XML
+		public static function encodeGML3Coordinates2D(l_coords: Array): XML
 		{
 			var s_sameCRS: String = null;
 			var c: Coord;
@@ -72,7 +73,7 @@ package com.iblsoft.flexiweather.ogc
 			if(s_sameCRS == null) {
 				for each(c in l_coords) {
 					s = c.x + " " + c.y;
-					x.appendChild(<gml:pos xmlns:gml={gml.uri} srsName={c.crs}>{s}</gml:pos>);
+					x.appendChild(<gml:pos xmlns:gml="http://www.opengis.net/gml" srsName={c.crs}>{s}</gml:pos>);
 				}
 				return x;
 			}
@@ -83,7 +84,7 @@ package com.iblsoft.flexiweather.ogc
 						s += " ";
 					s += c.x + " " + c.y;
 				}
-				x = <gml:posList xmlns:gml={gml.uri} srsName={s_sameCRS}>{s}</gml:posList>;
+				x = <gml:posList xmlns:gml="http://www.opengis.net/gml" srsName={s_sameCRS}>{s}</gml:posList>;
 			}
 			return x;
 		}
