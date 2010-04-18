@@ -19,12 +19,16 @@ package com.iblsoft.flexiweather.ogc
 		private var md_queryParametersGET: Array = new Array();
 		
 		protected var ms_serviceURL: String = null;
+		protected var m_version: Version;
 
-		public function InteractiveLayerWFS(container: InteractiveWidget)
+		public function InteractiveLayerWFS(
+				container: InteractiveWidget,
+				version: Version)
 		{
 			super(container);
 			m_loader.addEventListener(UniURLLoader.DATA_LOADED, onDataLoaded);
 			m_loader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onDataLoadFailed);
+			m_version = version;
 		}
 
 		public function updateData(): void
@@ -35,13 +39,16 @@ package com.iblsoft.flexiweather.ogc
 			if(url.data == null)
 				url.data = new URLVariables();
 			url.data['SERVICE'] = 'WFS';
-			url.data['VERSION'] = new Version(1, 0, 0).toString();
+			url.data['VERSION'] = m_version.toString();
 			url.data['REQUEST'] = 'GetFeature';
 			for(var s_param: String in md_queryParametersGET) {
 				var s_value: String = md_queryParametersGET[s_param];
 				url.data[s_param] = s_value;
 			}
-			url.data['TypeName'] = ma_queryFeatures.toArray().join(",");
+			if(!m_version.isLessThan(1, 1, 0)) {
+				url.data['SRSNAME'] = container.getCRS();
+			}
+			url.data['TYPENAME'] = ma_queryFeatures.toArray().join(",");
 			m_loader.load(url);
 		}
 		

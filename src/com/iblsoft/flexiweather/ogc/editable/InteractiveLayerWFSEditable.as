@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.ogc.editable
 {
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWFS;
+	import com.iblsoft.flexiweather.ogc.Version;
 	import com.iblsoft.flexiweather.ogc.WFSFeatureBase;
 	import com.iblsoft.flexiweather.utils.ScreenUtils;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
@@ -28,9 +29,11 @@ package com.iblsoft.flexiweather.ogc.editable
 		 
 		[Event(name = SELECTION_CHANGE, type = "mx.events.PropertyChangeEvent")]
 
-		public function InteractiveLayerWFSEditable(container:InteractiveWidget)
+		public function InteractiveLayerWFSEditable(
+				container: InteractiveWidget,
+				version: Version)
 		{
-			super(container);
+			super(container, version);
 		}
 
 		// IEditableItemManager implementation

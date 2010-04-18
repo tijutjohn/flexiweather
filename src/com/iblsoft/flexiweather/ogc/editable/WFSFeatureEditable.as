@@ -161,12 +161,9 @@ package com.iblsoft.flexiweather.ogc.editable
 	
 		public function get selected(): Boolean
 		{ return mb_selected; }
-		
 
 		public function set modified(b: Boolean): void
-		{
-			mb_modified = b;
-		}
+		{ mb_modified = b; }
 	
 		public function get modified(): Boolean
 		{ return mb_modified; }
