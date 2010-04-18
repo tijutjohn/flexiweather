@@ -95,6 +95,24 @@ package com.iblsoft.flexiweather.ogc.editable
 			return false;
 		}
 
+		// helper methods for GML serialisation
+		public function addInsertGMLProperty(xmlInsert: XML, s_property: String, value: Object): void
+		{
+			var p: XML = <{s_property}/>;
+			p.appendChild(value);
+			xmlInsert.appendChild(p);
+		}
+
+		public function addUpdateGMLProperty(xmlUpdate: XML, s_property: String, value: Object): void
+		{
+			var p: XML = <wfs:Property xmlns:wfs="http://www.opengis.net/wfs"/>;
+			p.appendChild(<wfs:Name xmlns:wfs="http://www.opengis.net/wfs">{s_property}</wfs:Name>);
+			var v: XML = <wfs:Value xmlns:wfs="http://www.opengis.net/wfs"/>;
+			v.appendChild(value);
+			p.appendChild(v);
+			xmlUpdate.appendChild(p);
+		}
+
 		// getters & setters 
 		public override function set selected(b: Boolean): void
 		{
