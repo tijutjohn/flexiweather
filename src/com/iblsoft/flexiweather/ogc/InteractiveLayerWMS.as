@@ -72,7 +72,8 @@ package com.iblsoft.flexiweather.ogc
 			m_cfg = cfg;
 
 			m_timer.stop();
-			m_timer.delay = m_cfg.mi_autoRefreshPeriod * 1000.0;
+			if(m_cfg.mi_autoRefreshPeriod > 0)
+				m_timer.delay = m_cfg.mi_autoRefreshPeriod * 1000.0;
 			m_cfg.addEventListener(WMSLayerConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
 			updateData(true);
 		}
@@ -97,14 +98,15 @@ package com.iblsoft.flexiweather.ogc
 				img = m_cache.getImage(ms_requestedCRS, m_requestedBBox, m_request);
 			if(img == null) {
 				m_timer.reset();
-				m_timer.stop();
 				m_job = BackgroundJobManager.getInstance().startJob("Rendering " + m_cfg.ma_layerNames.join("+"));
 				m_loader.load(m_request);
 				invalidateDynamicPart();
 			}
 			else {
-				if(m_timer.delay > 0)
+				if(m_cfg.mi_autoRefreshPeriod > 0) {
+					m_timer.delay = m_cfg.mi_autoRefreshPeriod * 1000.0;
 					m_timer.start();
+				}
 				m_image = img;
 				mb_imageOK = true;
 				ms_imageCRS = ms_requestedCRS;
@@ -558,8 +560,9 @@ package com.iblsoft.flexiweather.ogc
 		// Event handlers
 		protected function onDataLoaded(event: UniURLLoaderEvent): void
 		{
-			if(m_timer.delay > 0) {
+			if(m_cfg.mi_autoRefreshPeriod > 0) {
 				m_timer.reset();
+				m_timer.delay = m_cfg.mi_autoRefreshPeriod * 1000.0;
 				m_timer.start();
 			}
 			var result: * = event.result;
@@ -579,8 +582,9 @@ package com.iblsoft.flexiweather.ogc
 
 		protected function onDataLoadFailed(event: UniURLLoaderEvent): void
 		{
-			if(m_timer.delay > 0) {
+			if(m_cfg.mi_autoRefreshPeriod > 0) {
 				m_timer.reset();
+				m_timer.delay = m_cfg.mi_autoRefreshPeriod * 1000.0;
 				m_timer.start();
 			}
 			if(event != null) {
