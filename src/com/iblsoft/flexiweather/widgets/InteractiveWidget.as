@@ -26,13 +26,6 @@ package com.iblsoft.flexiweather.widgets
 		public function InteractiveWidget() {
 			super();
 			
-			addEventListener(FlexEvent.CREATION_COMPLETE, onCreationComplete);
-		}
-		
-		private function onCreationComplete(e:FlexEvent):void
-		{
-			removeEventListener(FlexEvent.CREATION_COMPLETE, onCreationComplete);
-
 			mouseEnabled = true;
 			mouseFocusEnabled = true;
 			doubleClickEnabled = true;
@@ -69,7 +62,7 @@ package com.iblsoft.flexiweather.widgets
 
 		public function addLayer(l: InteractiveLayer, index: int = -1): void
 		{
-			trace("InteractiveWidget addLayer pos: " + index);
+			//trace("InteractiveWidget.addLayer(): pos: " + index);
 			if (index >= 0)
 				addChildAt(l, index);
 			else
