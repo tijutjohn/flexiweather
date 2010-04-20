@@ -14,6 +14,12 @@ package com.iblsoft.flexiweather.proj
 			crs = s_crs;
 		}
 		
+		override public function clone(): Point
+		{ return cloneCoord(); }
+
+		public function cloneCoord(): Coord
+		{ return new Coord(crs, x, y); }
+		
 		public function toNiceString(): String
 		{
 			if(Projection.equalCRSs(crs, "CRS:84")) {

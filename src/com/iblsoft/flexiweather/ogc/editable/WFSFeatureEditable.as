@@ -67,6 +67,11 @@ package com.iblsoft.flexiweather.ogc.editable
 
 		public function fromGML(gml: XML): void
 		{}
+		
+		public function clone(): WFSFeatureEditable
+		{
+			throw new Error("WFSFeatureEditable.clone() not implemented for '" + ms_typeName + "'");
+		}
 
 		// helper methods for GML serialisation
 
