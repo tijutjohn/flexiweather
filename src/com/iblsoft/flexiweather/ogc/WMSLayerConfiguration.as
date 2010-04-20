@@ -27,7 +27,6 @@ package com.iblsoft.flexiweather.ogc
 		public var mi_autoRefreshPeriod: uint = 0;
 		
 		public var ms_layerType: String = null;
-		public var m_interactiveLayer: InteractiveLayerWMS;
 		
 		// runtime variables
 		public var ma_layerConfigurations: Array;
@@ -232,10 +231,5 @@ package com.iblsoft.flexiweather.ogc
 		public function get layerType(): String
 		{ return ms_layerType; }
 		
-		public function set interactiveLayer(s: InteractiveLayerWMS): void
-		{ m_interactiveLayer = s; }
-
-		public function get interactiveLayer(): InteractiveLayerWMS
-		{ return m_interactiveLayer; }
 	}
 }
