@@ -2,9 +2,6 @@ package com.iblsoft.flexiweather.ogc.editable
 {
 	import flash.display.Sprite;
 	import flash.geom.Point;
-	import flash.text.TextField;
-	
-	import mx.controls.Label;
 	
 	public class MoveablePoint extends Sprite
 			implements IMouseEditableItem, IHighlightableItem
@@ -85,6 +82,12 @@ package com.iblsoft.flexiweather.ogc.editable
 		public function onMouseDoubleClick(pt: Point): Boolean
 		{
 			m_feature.deselect();
+			if(m_feature is IClosableCurve) {
+				if(mi_pointIndex == 0) {
+					var closableCurve: IClosableCurve = IClosableCurve(m_feature);
+					closableCurve.closeCurve();
+				}
+			}
 			return true;
 		}
 	
