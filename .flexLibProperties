@@ -24,6 +24,7 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.WMSLayerGroup"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.WMSLayerGroupTreeDataDescriptor"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.WMSServiceConfiguration"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.IClosableCurve"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.IEditableItem"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.IEditableItemManager"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.IHighlightableItem"/>
@@ -79,6 +80,7 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerRoute"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerZoom"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveWidget"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.JobPreloader"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.SimpleLayerBehaviourEditDialog"/>
   </includeClasses>
   <includeResources/>
