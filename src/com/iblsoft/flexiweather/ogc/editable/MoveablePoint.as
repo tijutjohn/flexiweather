@@ -85,7 +85,8 @@ package com.iblsoft.flexiweather.ogc.editable
 			if(m_feature is IClosableCurve) {
 				if(mi_pointIndex == 0) {
 					var closableCurve: IClosableCurve = IClosableCurve(m_feature);
-					closableCurve.closeCurve();
+					if(!closableCurve.isCurveClosed())
+						closableCurve.closeCurve();
 				}
 			}
 			return true;
@@ -106,6 +107,22 @@ package com.iblsoft.flexiweather.ogc.editable
 			m_editableItemManager.releaseMouseMoveCapture(this);
 			m_editableItemManager.releaseMouseClickCapture(this);
 			mb_dragging = false;
+			if(mi_pointIndex == 0 || mi_pointIndex == (m_feature.getPoints().length - 1)) {
+				// if finished moving of first of last point...
+				if(m_feature is IClosableCurve && m_feature.getPoints().length >= 2) {
+					// ... of a closable curve with more than 2 points ...
+					var closableCurve: IClosableCurve = IClosableCurve(m_feature);
+					if(!closableCurve.isCurveClosed()) {
+						// ... which is not closed yet
+						var ptFirst: Point = m_feature.getPoint(0);
+						var ptLast: Point = m_feature.getPoint(m_feature.getPoints().length - 1);
+						var f_dist: Number = (ptFirst.subtract(ptLast)).length;
+						if(f_dist < 5) {
+							closableCurve.closeCurve();
+						}
+					}
+				}
+			}
 			return true;
 		}
 		
