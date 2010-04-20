@@ -84,13 +84,16 @@ package com.iblsoft.flexiweather.utils
 		*/	
 		public static function curveThroughPoints(
 				g: ICurveRenderer, 
-				points: Array /* of Points */, 
+				points: Array /* of Points */,
+				b_closed: Boolean = false,
 				z: Number = .5, 
 				angleFactor: Number = .75, 
 				moveTo: Boolean = true): void
 		{
 			try {
 				var p: Array = points.slice();	// Local copy of points array
+				if(b_closed)
+					p.push(p[0]);
 				var duplicates: Array = new Array();	// Array to hold indices of duplicate points
 				// Check to make sure array contains only Points
 				for(var i: uint = 0; i<p.length; i++) {
@@ -133,7 +136,7 @@ package com.iblsoft.flexiweather.utils
 					var firstPt: uint = 1;
 					var lastPt: uint = p.length - 1;
 					// Check if this is a closed line(the first and last points are the same)
-					if(p[0].x == p[p.length - 1].x && p[0].y == p[p.length - 1].y) {
+					if(b_closed) {
 						// Include first and last points in curve calculations
 						firstPt = 0;
 						lastPt = p.length;
