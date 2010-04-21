@@ -35,10 +35,20 @@ package com.iblsoft.flexiweather.utils
 					if (i_number < 10)
 						return "0" + String(i_number);
 					return String(i_number);
+				}
+				function fourDigitsStr(i_number:int):String
+				{
+					if (i_number < 10)
+						return "000" + String(i_number);
+					else if (i_number < 100)
+						return "00" + String(i_number);
+					else if (i_number < 1000)
+						return "0" + String(i_number);
+					return String(i_number);
 				}				
 				switch (s_directive.charAt(1))
 				{
-					case "Y": return String(dt.fullYear);
+					case "Y": return fourDigitsStr(dt.fullYear);
 					case "m": return twoDigitsStr(dt.month + 1); // months start from 0 
 					case "d": return twoDigitsStr(dt.date);
 					case "H": return twoDigitsStr(dt.hours);
