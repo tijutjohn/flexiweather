@@ -56,6 +56,9 @@ package com.iblsoft.flexiweather.ogc.editable
 				eim.removeEditableItem(mp);
 				m_editableSprite.removeChild(mp);
 			}
+			while(m_points.length < ml_movablePoints.length) {
+				ml_movablePoints.pop();
+			}
 			m_editableSprite.visible = mb_selected;
 		}
 		
@@ -110,6 +113,13 @@ package com.iblsoft.flexiweather.ogc.editable
 			modified = true;
 		}
 		
+		public function removePoint(i_pointIndex: uint): void
+		{
+			m_points.removeItemAt(i_pointIndex);
+			m_coordinates.removeItemAt(i_pointIndex);
+			update(m_master);
+		}
+
 		public function deselect(): void
 		{
 			if(selected)

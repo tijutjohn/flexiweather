@@ -119,6 +119,7 @@ package com.iblsoft.flexiweather.ogc.editable
 						var f_dist: Number = (ptFirst.subtract(ptLast)).length;
 						if(f_dist < 5) {
 							closableCurve.closeCurve();
+							m_feature.removePoint(m_feature.getPoints().length - 1);
 						}
 					}
 				}
