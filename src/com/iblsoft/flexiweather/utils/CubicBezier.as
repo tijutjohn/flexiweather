@@ -61,7 +61,7 @@ package com.iblsoft.flexiweather.utils
 		{
 			var bezier: BezierSegment = new BezierSegment(p1, p2, p3, p4);	// BezierSegment using the four points
 			g.start(p1.x, p1.y);
-			expandBezier(g, p1, p2, p3, p4, 2.5);
+			expandBezier(g, p1, p2, p3, p4, 0.5);
 			g.finish(p4.x, p4.y);
 		}
 		
