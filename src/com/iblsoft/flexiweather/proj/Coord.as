@@ -14,6 +14,9 @@ package com.iblsoft.flexiweather.proj
 			crs = s_crs;
 		}
 		
+		public function equalsCoord(c: Coord): Boolean
+		{ return crs === c.crs && equals(c); }
+
 		override public function clone(): Point
 		{ return cloneCoord(); }
 
