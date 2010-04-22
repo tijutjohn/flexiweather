@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.ogc.editable
 {
 	import com.iblsoft.flexiweather.ogc.GMLUtils;
+	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	
 	import flash.geom.Point;
 	
@@ -26,7 +27,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			super.toUpdateGML(xmlUpdate);
 			var line: XML = <gml:LineString xmlns:gml="http://www.opengis.net/gml"></gml:LineString>;
-			line.appendChild(GMLUtils.encodeGML3Coordinates2D(coordinates));
+			line.appendChild(GMLUtils.encodeGML3Coordinates2D(getEffectiveCoordinates()));
 			addUpdateGMLProperty(xmlUpdate, null, "curve", line);
 		}
 
@@ -37,7 +38,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			var nsGML: Namespace = new Namespace("http://www.opengis.net/gml");
 			var xmlCurve: XML = gml.ns::curve[0];
 			var xmlCoordinates: XML = xmlCurve.nsGML::LineString[0];
-			coordinates = GMLUtils.parseGML3Coordinates2D(xmlCoordinates);
+			setEffectiveCoordinates(GMLUtils.parseGML3Coordinates2D(xmlCoordinates));
 		}
 
 		// IMouseEditableItem implementation
@@ -123,6 +124,16 @@ package com.iblsoft.flexiweather.ogc.editable
 			return false;
 		}
 
+		protected function getEffectiveCoordinates(): Array
+		{
+			return coordinates;
+		}
+
+		protected function setEffectiveCoordinates(l_coordinates: Array): void
+		{
+			coordinates = l_coordinates;
+		}
+		
 		// getters & setters 
 		public override function set selected(b: Boolean): void
 		{
