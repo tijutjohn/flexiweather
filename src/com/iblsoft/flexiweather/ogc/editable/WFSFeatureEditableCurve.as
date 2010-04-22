@@ -1,5 +1,7 @@
 package com.iblsoft.flexiweather.ogc.editable
 {
+	import com.iblsoft.flexiweather.ogc.GMLUtils;
+	
 	import flash.geom.Point;
 	
 	import mx.collections.ArrayCollection;
@@ -10,6 +12,32 @@ package com.iblsoft.flexiweather.ogc.editable
 		public function WFSFeatureEditableCurve(s_namespace: String, s_typeName: String, s_featureId:String)
 		{
 			super(s_namespace, s_typeName, s_featureId);
+		}
+
+		override public function toInsertGML(xmlInsert: XML): void
+		{
+			super.toInsertGML(xmlInsert);
+			var line: XML = <gml:LineString xmlns:gml="http://www.opengis.net/gml"></gml:LineString>;
+			line.appendChild(GMLUtils.encodeGML3Coordinates2D(coordinates));
+			addInsertGMLProperty(xmlInsert, null, "curve", line);
+		}
+
+		override public function toUpdateGML(xmlUpdate: XML): void
+		{
+			super.toUpdateGML(xmlUpdate);
+			var line: XML = <gml:LineString xmlns:gml="http://www.opengis.net/gml"></gml:LineString>;
+			line.appendChild(GMLUtils.encodeGML3Coordinates2D(coordinates));
+			addUpdateGMLProperty(xmlUpdate, null, "curve", line);
+		}
+
+		override public function fromGML(gml: XML): void
+		{
+			super.fromGML(gml);
+			var ns: Namespace = new Namespace(ms_namespace);
+			var nsGML: Namespace = new Namespace("http://www.opengis.net/gml");
+			var xmlCurve: XML = gml.ns::curve[0];
+			var xmlCoordinates: XML = xmlCurve.nsGML::LineString[0];
+			coordinates = GMLUtils.parseGML3Coordinates2D(xmlCoordinates);
 		}
 
 		// IMouseEditableItem implementation
