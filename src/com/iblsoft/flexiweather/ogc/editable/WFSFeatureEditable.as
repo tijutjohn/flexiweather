@@ -62,6 +62,24 @@ package com.iblsoft.flexiweather.ogc.editable
 			m_editableSprite.visible = mb_selected;
 		}
 		
+		public function renderFallbackGraphics(i_preferredColor: uint = 0x5A90B1): void {
+			graphics.clear();
+			graphics.lineStyle(1, i_preferredColor);
+			if(m_points.length == 1) {
+				graphics.beginFill(i_preferredColor);
+				graphics.drawRoundRect(m_points[0].x - 4, m_points[0].y - 4, 9, 9, 6, 6);
+				graphics.endFill();
+			}
+			else {
+				for(var i: uint = 0; i < m_points.length; ++i) {
+					if(i == 0)
+						graphics.moveTo(m_points[i].x, m_points[i].y);
+					else
+						graphics.lineTo(m_points[i].x, m_points[i].y);
+				}
+			} 
+		}
+		
 		public function toInsertGML(xmlInsert: XML): void
 		{}
 
@@ -73,22 +91,35 @@ package com.iblsoft.flexiweather.ogc.editable
 		
 		public function clone(): WFSFeatureEditable
 		{
-			throw new Error("WFSFeatureEditable.clone() not implemented for '" + ms_typeName + "'");
+			var o: Object = this;
+			var c: Class = o.constructor;
+			var f: WFSFeatureEditable = new c(
+					this.ms_namespace, this.ms_typeName, null);
+			var xml: XML = <Feature/>; 
+			this.toInsertGML(xml);
+			f.fromGML(xml);
+			return f;
 		}
 
 		// helper methods for GML serialisation
 
-		public function addInsertGMLProperty(xmlInsert: XML, s_property: String, value: Object): void
+		public function addInsertGMLProperty(xmlInsert: XML,
+				s_namespace: String, s_property: String, value: Object): void
 		{
-			var p: XML = <{s_property}/>;
+			if(s_namespace == null)
+				s_namespace = ms_namespace;
+			var p: XML = <{s_property} xmlns={s_namespace}/>;
 			p.appendChild(value);
 			xmlInsert.appendChild(p);
 		}
 
-		public function addUpdateGMLProperty(xmlUpdate: XML, s_property: String, value: Object): void
+		public function addUpdateGMLProperty(xmlUpdate: XML,
+				s_namespace: String, s_property: String, value: Object): void
 		{
+			if(s_namespace == null)
+				s_namespace = ms_namespace;
 			var p: XML = <wfs:Property xmlns:wfs="http://www.opengis.net/wfs"/>;
-			p.appendChild(<wfs:Name xmlns:wfs="http://www.opengis.net/wfs">{s_property}</wfs:Name>);
+			p.appendChild(<wfs:Name xmlns:wfs="http://www.opengis.net/wfs" xmlns:ns={s_namespace}>ns:{s_property}</wfs:Name>);
 			var v: XML = <wfs:Value xmlns:wfs="http://www.opengis.net/wfs"/>;
 			v.appendChild(value);
 			p.appendChild(v);
