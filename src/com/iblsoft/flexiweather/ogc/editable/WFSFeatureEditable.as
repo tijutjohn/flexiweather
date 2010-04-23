@@ -169,7 +169,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			}
 			return ptClicked;
 		}
-
+		
 		// IEditableItem implementation
 		public function onRegisteredAsEditableItem(eim: IEditableItemManager): void
 		{

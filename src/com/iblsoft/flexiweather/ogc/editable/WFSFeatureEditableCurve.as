@@ -1,7 +1,10 @@
 package com.iblsoft.flexiweather.ogc.editable
 {
 	import com.iblsoft.flexiweather.ogc.GMLUtils;
-	import com.iblsoft.flexiweather.utils.ArrayUtils;
+	import com.iblsoft.flexiweather.proj.Coord;
+	import com.iblsoft.flexiweather.utils.CubicBezier;
+	import com.iblsoft.flexiweather.utils.CurveLineSegment;
+	import com.iblsoft.flexiweather.utils.CurveLineSegmentRenderer;
 	
 	import flash.geom.Point;
 	
@@ -39,6 +42,44 @@ package com.iblsoft.flexiweather.ogc.editable
 			var xmlCurve: XML = gml.ns::curve[0];
 			var xmlCoordinates: XML = xmlCurve.nsGML::LineString[0];
 			setEffectiveCoordinates(GMLUtils.parseGML3Coordinates2D(xmlCoordinates));
+		}
+
+		/** Returns curve approximation using line segments in "coordinates" space */
+		public function getLineSegmentApproximation(): Array
+		{
+			// assume we use smooth curve be default
+			return createSmoothLineSegmentApproximation();
+		}
+
+		public function createStraightLineSegmentApproximation(): Array
+		{
+			var l: Array = [];
+			var cPrev: Coord = null;
+			var i_segment: uint = 0;
+			for each(var c: Coord in coordinates) {
+				if(cPrev != null) {
+					l.push(new CurveLineSegment(i_segment,
+						cPrev.x, cPrev.y, c.x, c.y));
+				}
+				++i_segment;
+				cPrev = c;
+			} 
+			var b_closed: Boolean = (this is IClosableCurve) && IClosableCurve(this).isCurveClosed();
+			if(b_closed && cPrev != null) {
+				l.push(new CurveLineSegment(i_segment,
+					cPrev.x, cPrev.y, coordinates[0].x, coordinates[0].y));
+			}
+			var segmentRenderer: CurveLineSegmentRenderer = new CurveLineSegmentRenderer();
+			CubicBezier.curveThroughPoints(segmentRenderer, coordinates);			
+			return l;
+		}
+
+		public function createSmoothLineSegmentApproximation(): Array
+		{
+			var segmentRenderer: CurveLineSegmentRenderer = new CurveLineSegmentRenderer();
+			var b_closed: Boolean = (this is IClosableCurve) && IClosableCurve(this).isCurveClosed();
+			CubicBezier.curveThroughPoints(segmentRenderer, coordinates, b_closed);			
+			return segmentRenderer.segments;
 		}
 
 		// IMouseEditableItem implementation
@@ -124,6 +165,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			return false;
 		}
 
+		// getters & setters 
 		protected function getEffectiveCoordinates(): Array
 		{
 			return coordinates;
@@ -134,7 +176,6 @@ package com.iblsoft.flexiweather.ogc.editable
 			coordinates = l_coordinates;
 		}
 		
-		// getters & setters 
 		public override function set selected(b: Boolean): void
 		{
 			if(super.selected != b) {

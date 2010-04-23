@@ -12,7 +12,6 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.OGCLayerConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.utils.Duration"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.IAction"/>
-    <classEntry path="com.iblsoft.flexiweather.utils.NumberUtils"/>
     <classEntry path="com.iblsoft.flexiweather.utils.BitmapFilterUtils"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.ISynchronisedObject"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerZoom"/>
@@ -20,6 +19,7 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerRoute"/>
     <classEntry path="com.iblsoft.flexiweather.utils.DateUtils"/>
     <classEntry path="com.iblsoft.flexiweather.proj.Coord"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.CurveLineSegment"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableCurve"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerClickActionEvent"/>
     <classEntry path="com.iblsoft.flexiweather.utils.UniURLLoader"/>
@@ -56,6 +56,8 @@
     <classEntry path="com.iblsoft.flexiweather.utils.SharedObjectStorage"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.IEditableItem"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.CRSWithBBox"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.NumberUtils"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.CurveLineSegmentRenderer"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.IActionManager"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerPan"/>
     <classEntry path="com.iblsoft.flexiweather.utils.Storage"/>
