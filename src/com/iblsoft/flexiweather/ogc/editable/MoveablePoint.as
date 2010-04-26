@@ -82,7 +82,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		public function onMouseDoubleClick(pt: Point): Boolean
 		{
 			m_feature.deselect();
-			if(m_feature is IClosableCurve) {
+			if(m_feature is IClosableCurve && m_feature.coordinates.length > 2) {
 				if(mi_pointIndex == 0) {
 					var closableCurve: IClosableCurve = IClosableCurve(m_feature);
 					if(!closableCurve.isCurveClosed())
@@ -106,7 +106,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				return false;
 			m_editableItemManager.releaseMouseMoveCapture(this);
 			m_editableItemManager.releaseMouseClickCapture(this);
-			mb_dragging = false;
+				mb_dragging = false;
 			if(mi_pointIndex == 0 || mi_pointIndex == (m_feature.getPoints().length - 1)) {
 				// if finished moving of first of last point...
 				if(m_feature is IClosableCurve && m_feature.getPoints().length >= 2) {

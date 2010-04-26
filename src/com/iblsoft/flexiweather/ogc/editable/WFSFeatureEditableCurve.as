@@ -2,6 +2,7 @@ package com.iblsoft.flexiweather.ogc.editable
 {
 	import com.iblsoft.flexiweather.ogc.GMLUtils;
 	import com.iblsoft.flexiweather.proj.Coord;
+	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.utils.CubicBezier;
 	import com.iblsoft.flexiweather.utils.CurveLineSegment;
 	import com.iblsoft.flexiweather.utils.CurveLineSegmentRenderer;
@@ -43,7 +44,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			var xmlCoordinates: XML = xmlCurve.nsGML::LineString[0];
 			setEffectiveCoordinates(GMLUtils.parseGML3Coordinates2D(xmlCoordinates));
 		}
-
+		
 		/** Returns curve approximation using line segments in "coordinates" space */
 		public function getLineSegmentApproximation(): Array
 		{
