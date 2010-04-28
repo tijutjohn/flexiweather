@@ -486,7 +486,10 @@ package com.iblsoft.flexiweather.ogc
 							getWMSDimensionValue(m_cfg.dimensionRunName, true));
 					var forecast: Duration = ISO8601Parser.stringToDuration(
 							getWMSDimensionValue(m_cfg.dimensionForecastName, true));
-					return new Date(run.time + forecast.milisecondsTotal);
+					if (run != null && forecast != null)
+						return new Date(run.time + forecast.milisecondsTotal);
+						
+					return null;
 				}
 			}
 			return null;
