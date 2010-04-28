@@ -72,7 +72,9 @@ package com.iblsoft.flexiweather.widgets
 
 		public function removeLayer(l: InteractiveLayer): void
 		{
-			if(contains(l))
+			trace(l + " parent: " + parent);
+//			if(contains(l))
+			if(l.parent == this)
 				removeChild(l);
 		}
 		
