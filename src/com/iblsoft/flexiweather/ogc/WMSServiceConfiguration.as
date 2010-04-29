@@ -63,6 +63,11 @@ package com.iblsoft.flexiweather.ogc
 		
 		protected function onCapabilitiesLoaded(event: UniURLLoaderEvent): void
 		{
+			if (!m_capabilitiesLoadJob)
+			{
+				trace("ERROR m_capabilitiesLoadJob IS null")
+				return;
+			}
 			m_capabilitiesLoadJob.finish();
 			m_capabilitiesLoadJob = null;
 			if(event.result is XML) {
