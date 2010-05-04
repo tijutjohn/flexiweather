@@ -264,5 +264,13 @@ package com.iblsoft.flexiweather.utils
 			    "presentInFormat":presentInFormat, "nextGroupStart":i_nextGroupStart, "nextGroupEnd":i_nextGroupEnd,
 			    "previousGroupStart":i_previousGroupStart, "previousGroupEnd":i_previousGroupEnd};
 		}
+		
+		public static function convertToLocalTime(date: Date): Date
+		{
+			var newDate: Date = new Date();
+			newDate.setTime(date.time + date.timezoneOffset * 60 * 1000);
+			
+			return newDate;
+		}
 	}
 }
