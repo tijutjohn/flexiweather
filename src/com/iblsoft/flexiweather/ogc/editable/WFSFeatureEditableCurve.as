@@ -40,9 +40,13 @@ package com.iblsoft.flexiweather.ogc.editable
 			super.fromGML(gml);
 			var ns: Namespace = new Namespace(ms_namespace);
 			var nsGML: Namespace = new Namespace("http://www.opengis.net/gml");
-			var xmlCurve: XML = gml.ns::curve[0];
-			var xmlCoordinates: XML = xmlCurve.nsGML::LineString[0];
-			setEffectiveCoordinates(GMLUtils.parseGML3Coordinates2D(xmlCoordinates));
+			if (gml.ns::curve[0] != null) {
+				var xmlCurve: XML = gml.ns::curve[0];
+				var xmlCoordinates: XML = xmlCurve.nsGML::LineString[0];
+				setEffectiveCoordinates(GMLUtils.parseGML3Coordinates2D(xmlCoordinates));
+			} else {
+				trace("Curve is null ...");
+			}
 		}
 		
 		/** Returns curve approximation using line segments in "coordinates" space */

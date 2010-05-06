@@ -17,7 +17,7 @@ package com.iblsoft.flexiweather.ogc
 					var s_coords: String = String(node); 
 					var a_bits: Array = s_coords.split(/\s/);
 					var s_srs: String = node.@srsName;
-					if(s_srs == null)
+					if(s_srs == null || s_srs == "")
 						s_srs = Projection.CRS_GEOGRAPHIC;
 					l.push(new Coord(s_srs, Number(a_bits[0]), Number(a_bits[1])));
 				}
@@ -46,7 +46,7 @@ package com.iblsoft.flexiweather.ogc
 			var s_coords: String = String(xmlPosList);
 			var a_bits: Array = s_coords.split(/\s/);
 			var s_srs: String = xmlPosList.@srsName;
-			if(s_srs == null)
+			if(s_srs == null || s_srs == "")
 				s_srs = Projection.CRS_GEOGRAPHIC;
 			for(var i: uint = 0; i + 1 < a_bits.length; i += 2) {
 				a_coords.push(new Coord(s_srs, Number(a_bits[i]), Number(a_bits[i + 1]))); 
