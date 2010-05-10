@@ -16,9 +16,19 @@ package com.iblsoft.flexiweather.widgets
 		private var mb_enabled: Boolean = true;
 		private var mi_zOrder: int = 0;
 		
+		public static var ID: int = 0;
+		
 		public function InteractiveLayer(container: InteractiveWidget)
 		{
 			super();
+			
+			//FIX for diplaying Layers in List. If there are multiple isntances of same Layer types
+			//there were problem with pairing layer uid and itemRenderer. This is fix/workaround to have alway
+			//unique UID set
+			
+			InteractiveLayer.ID++;
+			uid = 'interactiveLayer'+InteractiveLayer.ID;
+			
 			this.container = container;
 		}
 		
