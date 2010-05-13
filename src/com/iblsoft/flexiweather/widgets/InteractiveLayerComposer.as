@@ -216,23 +216,36 @@ package com.iblsoft.flexiweather.widgets
 		
 		protected function onLayerCollectionChanged(event: CollectionEvent): void
 		{
-			if(event.kind == CollectionEventKind.UPDATE)
-				return;
-			var l: InteractiveLayer;
-			while(numChildren > 0) {
-				l = getChildAt(0) as InteractiveLayer;
-				//unbindSubLayer(l);
-				removeChildAt(0);
-			}
-			// add layers as children in reversed order
-			for each(l in m_layers) {
-				addChildAt(l, 0);
-				//bindSubLayer(l);
+			trace("onLayerCollectionChanged kind: " + event.kind);
+			
+			switch (event.kind)
+			{
+				case CollectionEventKind.UPDATE:
+					return;
+					break;
+					
+				case CollectionEventKind.ADD:
+				case CollectionEventKind.REMOVE:
+				
+				
+					var l: InteractiveLayer;
+					while(numChildren > 0) {
+						l = getChildAt(0) as InteractiveLayer;
+						//unbindSubLayer(l);
+						removeChildAt(0);
+					}
+					// add layers as children in reversed order
+					for each(l in m_layers) {
+						addChildAt(l, 0);
+						//bindSubLayer(l);
+					}
+					break;
 			}
 			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
 		}
         
-        public function getLayers(): ArrayCollection
+        [Bindable]
+        public function get layers(): ArrayCollection
         { return m_layers; }
 	}
 }

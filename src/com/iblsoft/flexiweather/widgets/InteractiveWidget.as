@@ -15,6 +15,7 @@ package com.iblsoft.flexiweather.widgets
 	import mx.core.Container;
 	import mx.events.ResizeEvent;
 	import mx.events.FlexEvent;
+	import mx.events.ChildExistenceChangedEvent;
 
 	public class InteractiveWidget extends Container
 	{
@@ -39,6 +40,19 @@ package com.iblsoft.flexiweather.widgets
 			addEventListener(MouseEvent.ROLL_OVER, onMouseRollOver);
 			addEventListener(MouseEvent.ROLL_OUT, onMouseRollOut);
 			addEventListener(ResizeEvent.RESIZE, onResized);
+			
+			addEventListener(ChildExistenceChangedEvent.CHILD_ADD, onChildAdd);
+			addEventListener(ChildExistenceChangedEvent.CHILD_REMOVE, onChildRemove);
+		}
+		
+		private function onChildAdd(e: ChildExistenceChangedEvent): void
+		{
+			trace("InteractiveWidget onChildAdd: " + numChildren);
+		}
+		private function onChildRemove(e: ChildExistenceChangedEvent): void
+		{
+			trace("InteractiveWidget onChildRemove: " + numChildren);
+			
 		}
 		
 		public override function addChild(child: DisplayObject): DisplayObject
@@ -62,12 +76,14 @@ package com.iblsoft.flexiweather.widgets
 
 		public function addLayer(l: InteractiveLayer, index: int = -1): void
 		{
-			//trace("InteractiveWidget.addLayer(): pos: " + index);
+			trace("1 InteractiveWidget.addLayer(): pos: " + index + " length: " + numChildren);
 			if (index >= 0)
 				addChildAt(l, index);
 			else
 				addChild(l);
+			trace("2 InteractiveWidget.addLayer(): pos: " + index + " length: " + numChildren);
 			orderLayers();
+			trace("3 InteractiveWidget.addLayer(): pos: " + index + " length: " + numChildren);
 		}
 
 		public function removeLayer(l: InteractiveLayer): void

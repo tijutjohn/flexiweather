@@ -10,6 +10,8 @@ package com.iblsoft.flexiweather.ogc
 	
 	public class WMSServiceConfiguration extends OGCServiceConfiguration
 	{
+		public var id: String;
+		
 		internal var m_capabilitiesLoader: UniURLLoader = new UniURLLoader();
 		internal var m_capabilities: XML = null;
 		internal var m_capabilitiesLoadJob: BackgroundJob = null;

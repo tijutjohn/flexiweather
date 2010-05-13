@@ -4,29 +4,33 @@ package com.iblsoft.flexiweather.utils
 	
 	public class DateUtils 
 	{	
-		public static function dayOfTheWeek(dt:Date):String
+		public static function dayOfTheWeek(dt:Date, b_useUTC: Boolean = true):String
 		{
-			return (DateBase.dayNamesLong[dt.getDay()]);
+//			return (DateBase.dayNamesLong[dt.getDay()]);
+			return (DateBase.dayNamesLong[b_useUTC ? dt.dayUTC : dt.day]);
 		}
 		
-		public static function dayOfTheWeekAbbr(dt:Date):String
+		public static function dayOfTheWeekAbbr(dt:Date, b_useUTC: Boolean = true):String
 		{
-			return (DateBase.dayNamesShort[dt.getDay()]);
+//			return (DateBase.dayNamesShort[dt.getDay()]);
+			return (DateBase.dayNamesShort[b_useUTC ? dt.dayUTC : dt.day]);
 		}
 		
-		public static function monthName(dt:Date):String
+		public static function monthName(dt:Date, b_useUTC: Boolean = true):String
 		{
-			return (DateBase.monthNamesLong[dt.getMonth()]);
+//			return (DateBase.monthNamesLong[dt.getMonth()]);
+			return (DateBase.monthNamesLong[b_useUTC ? dt.monthUTC : dt.month]);
 		}
 		
-		public static function monthNameAbbr(dt:Date):String
+		public static function monthNameAbbr(dt:Date, b_useUTC: Boolean = true):String
 		{
-			return (DateBase.monthNamesShort[dt.getMonth()]);
+//			return (DateBase.monthNamesShort[dt.getMonth()]);
+			return (DateBase.monthNamesShort[b_useUTC ? dt.monthUTC : dt.month]);
 		}
 		
 		// Just the following directives are currently supported:
 		// %Y, %m, %d, %H, %M, %S, %a, %A, %b, %B, %%
-		public static function strftime(dt:Date, s_format:String):String
+		public static function strftime(dt:Date, s_format:String, b_useUTC: Boolean = true):String
 		{
 			function convertDirective(s_directive:String, i_index:int, s_str:String):String
 			{
@@ -48,16 +52,16 @@ package com.iblsoft.flexiweather.utils
 				}				
 				switch (s_directive.charAt(1))
 				{
-					case "Y": return fourDigitsStr(dt.fullYear);
-					case "m": return twoDigitsStr(dt.month + 1); // months start from 0 
-					case "d": return twoDigitsStr(dt.date);
-					case "H": return twoDigitsStr(dt.hours);
-					case "M": return twoDigitsStr(dt.minutes);
-					case "S": return twoDigitsStr(dt.seconds);
-					case "a": return dayOfTheWeekAbbr(dt);
-					case "A": return dayOfTheWeek(dt);
-					case "b": return monthNameAbbr(dt);
-					case "B": return monthName(dt);
+					case "Y": return fourDigitsStr(b_useUTC ? dt.fullYearUTC : dt.fullYear);
+					case "m": return twoDigitsStr(b_useUTC ? dt.monthUTC + 1 : dt.month + 1); // months start from 0 
+					case "d": return twoDigitsStr(b_useUTC ? dt.dateUTC : dt.date);
+					case "H": return twoDigitsStr(b_useUTC ? dt.hoursUTC : dt.hours);
+					case "M": return twoDigitsStr(b_useUTC ? dt.minutesUTC : dt.minutes);
+					case "S": return twoDigitsStr(b_useUTC ? dt.secondsUTC : dt.seconds);
+					case "a": return dayOfTheWeekAbbr(dt, b_useUTC);
+					case "A": return dayOfTheWeek(dt, b_useUTC);
+					case "b": return monthNameAbbr(dt, b_useUTC);
+					case "B": return monthName(dt, b_useUTC);
 					case "%": return "%";
 					default: return s_directive;
 				}				
