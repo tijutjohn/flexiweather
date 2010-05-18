@@ -70,18 +70,20 @@ package com.iblsoft.flexiweather.utils
 			return s_format.replace(directivePattern, convertDirective);
 		}
 		
-		public static function strptime(s_datetime:String, s_format:String):Date
+		public static function strptime(s_datetime:String, s_format:String,
+			b_useUTC: Boolean = true):Date
 		{
-			return parseStrTime(s_datetime, s_format)["date"];
+			return parseStrTime(s_datetime, s_format, 0, "", b_useUTC)["date"];
 		}
 		
-		public static function whichTimeGroup(s_datetime:String, s_format:String, i_position:int):String
+		public static function whichTimeGroup(s_datetime:String, s_format:String, i_position:int, b_useUTC: Boolean = true):String
 		{
-			return parseStrTime(s_datetime, s_format, i_position)["inGroup"];
+			return parseStrTime(s_datetime, s_format, i_position, "", b_useUTC)["inGroup"];
 		}
 		
 		// Just the following directives are currently supported: %Y, %m, %d, %H, %M, %S, %b, %B
-		public static function parseStrTime(s_datetime:String, s_format:String, i_position:int = 0, s_selectionForGroup:String = ""):Object
+		public static function parseStrTime(s_datetime:String, s_format:String,
+			i_position:int = 0, s_selectionForGroup:String = "", b_useUTC: Boolean = true):Object
 		{
 			var year:int = 2000;
 			var month:int = 1;
@@ -100,7 +102,17 @@ package com.iblsoft.flexiweather.utils
 			var i_previousGroupStart:int = -1;
 			var i_previousGroupEnd:int = -1;
 			var s_inGroup:String = "unknown";
-			var presentInFormat:Object = {"fullYear":false, "month":false, "date":false, "hours":false, "minutes":false, "seconds":false};
+			var presentInFormat:Object;
+			if (b_useUTC)
+			{
+				presentInFormat = {"fullYearUTC":false, "monthUTC":false, "dateUTC":false, "hoursUTC":false,
+					"minutesUTC":false, "secondsUTC":false};
+			}
+			else
+			{
+				presentInFormat = {"fullYear":false, "month":false, "date":false, "hours":false, "minutes":false, "seconds":false};
+			}
+			
 			var b_inputValid:Boolean = true;
 						
 			function parseDirective(s_directive:String, i_curPosFormat:int, s_str:String):String
@@ -215,40 +227,45 @@ package com.iblsoft.flexiweather.utils
 				i_curPosInput += i_curPosFormat - i_previousPosFormatEnd + i_width;
 				if (s_format.substring(i_previousPosFormatEnd, i_curPosFormat) != s_datetime.substring(i_previousPosInputEnd, i_curPosInput))
 				    b_inputValid = false;
-
+				
+				var s_postfix: String = "";
+				if (b_useUTC)
+				{
+					s_postfix = "UTC";
+				}
 				switch (s_directive.charAt(1))
 				{
 					case "Y":
 						i_width = 4;
-						year = handleTimeGroup("fullYear");
+						year = handleTimeGroup("fullYear" + s_postfix);
 						break;
 					case "m":
 						i_width = 2;
-						month = handleTimeGroup("month");
+						month = handleTimeGroup("month" + s_postfix);
 						break;
 					case "d":
 						i_width = 2;
-						day = handleTimeGroup("date");
+						day = handleTimeGroup("date" + s_postfix);
 						break;					
 					case "H":
 						i_width = 2;
-						hour = handleTimeGroup("hours");
+						hour = handleTimeGroup("hours" + s_postfix);
 						break;
 					case "M":
 						i_width = 2;
-						min = handleTimeGroup("minutes");
+						min = handleTimeGroup("minutes" + s_postfix);
 						break;
 					case "S":
 						i_width = 2;
-						sec = handleTimeGroup("seconds");
+						sec = handleTimeGroup("seconds" + s_postfix);
 						break;
 					case "b":
 						i_width = 3;
-						month = handleTimeGroup("month", DateBase.monthNamesShort);
+						month = handleTimeGroup("month" + s_postfix, DateBase.monthNamesShort);
 						break;
 					case "B":
 						i_width = 3;
-						month = handleTimeGroup("month", DateBase.monthNamesLong);
+						month = handleTimeGroup("month" + s_postfix, DateBase.monthNamesLong);
 						break;
 					default:
 						break;
@@ -261,7 +278,15 @@ package com.iblsoft.flexiweather.utils
 			// We use replace(...) just to parse the s_datetime string,
 			// but in fact we do not replace anything.
 			s_format.replace(directivePattern, parseDirective);
-			var dt:Date = new Date(year, month-1, day, hour, min, sec, ms);
+			var dt:Date;
+			if (b_useUTC)
+			{
+				dt = new Date(Date.UTC(year, month-1, day, hour, min, sec, ms));
+			}
+			else
+			{
+				 dt = new Date(year, month-1, day, hour, min, sec, ms);
+			}
 			if (!b_inputValid)
 				dt.setTime(NaN);
 			return {"date":dt, "groupStart":i_groupStart, "groupEnd":i_groupEnd, "inGroup":s_inGroup,
