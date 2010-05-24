@@ -45,6 +45,12 @@ package com.iblsoft.flexiweather.ogc
 		protected var md_customParameters: Dictionary = new Dictionary(); 
 		protected var ma_subLayerStyleNames: Array = [];
 		
+		protected var m_synchronisationRole: SynchronisationRole;
+		public function get synchronisationRole(): SynchronisationRole
+		{
+			return m_synchronisationRole;
+		}
+		
 		protected var m_cache: WMSCache = new WMSCache();
 		
 		protected var m_timer: Timer = new Timer(10000);
@@ -57,6 +63,8 @@ package com.iblsoft.flexiweather.ogc
 			
 			m_featureInfoLoader.addEventListener(UniURLLoader.DATA_LOADED, onFeatureInfoLoaded);
 			m_featureInfoLoader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onFeatureInfoLoadFailed);
+			
+			m_synchronisationRole = new SynchronisationRole();
 			
 			setConfiguration(cfg);
 			//filters = [ new GlowFilter(0xffffe0, 0.8, 2, 2, 2) ];
@@ -343,6 +351,20 @@ package com.iblsoft.flexiweather.ogc
         	return a_dimValues;
         }
 
+		/**
+		 * It returns date from RUN and FORECAST set for this layer 
+		 * @return 
+		 * 
+		 */		
+		public function getWMSCurrentDate(): Date
+		{
+			var run: String = getWMSDimensionValue('RUN');
+			var forecast: String = getWMSDimensionValue('FORECAST');
+			
+			trace('run: ' + run + ' forecast: ' + forecast);
+			
+			return new Date();
+		}
         public function setWMSDimensionValue(s_dimName: String, s_value: String): void
         {
         	if(s_value != null)
@@ -353,6 +375,11 @@ package com.iblsoft.flexiweather.ogc
         	if(m_cfg.ms_dimensionRunName != null && s_dimName == m_cfg.ms_dimensionRunName) {
 				dispatchEvent(new SynchronisedVariableChangeEvent(
 						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, "frame"));
+        	}
+        	//if "forecast" changed, we need to update timeline, so we need to dispatch event
+        	if(m_cfg.ms_dimensionForecastName != null && s_dimName == m_cfg.ms_dimensionForecastName) {
+				dispatchEvent(new SynchronisedVariableChangeEvent(
+						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, "frame"));
         	}
         }
 
@@ -470,6 +497,15 @@ package com.iblsoft.flexiweather.ogc
 			return a;
 		}
 
+		public function isPrimaryLayer(): Boolean
+		{
+			if (m_synchronisationRole)
+			{
+				return m_synchronisationRole.isPrimary;
+			}
+			return false;
+		}
+	
 		public function canSynchronisedVariableWith(s_variable: String, value: Object): Boolean
 		{
 			return false;
@@ -716,4 +752,6 @@ class WMSCache
 			delete md_cache[s_key];
 		}
 	}
+	
+	
 }

@@ -11,6 +11,9 @@ package com.iblsoft.flexiweather.widgets
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
 	import mx.events.FlexEvent;
+	import com.iblsoft.flexiweather.utils.DateUtils;
+	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
+	import mx.events.DynamicEvent;
 	
 	public class InteractiveLayerComposer extends InteractiveLayer
 	{
@@ -18,6 +21,15 @@ package com.iblsoft.flexiweather.widgets
 
 		public static const TIME_AXIS_UPDATED: String = "timeAxisUpdated";
 		[Event(name = TIME_AXIS_UPDATED, type = "flash.events.DataEvent")]
+		
+		public static const PRIMARY_LAYER_CHANGED: String = "primaryLayerChanged";
+		[Event(name = PRIMARY_LAYER_CHANGED, type = "flash.events.DataEvent")]
+
+		public static const TIME_VARIABLE_CHANGED: String = "timeVariableChanged";
+		[Event(name = TIME_VARIABLE_CHANGED, type = "mx.events.DynamicEvent")]
+		
+		public static const SYNCHRONISE_WITH: String = "synchroniseWith";
+		[Event(name = SYNCHRONISE_WITH, type = "mx.events.DynamicEvent")]
 
 		public function InteractiveLayerComposer(container: InteractiveWidget)
 		{
@@ -86,11 +98,25 @@ package com.iblsoft.flexiweather.widgets
 		protected function onSynchronisedVariableChanged(event: SynchronisedVariableChangeEvent): void
 		{
 			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
+			
+			var lWMS: InteractiveLayerWMS = event.target as InteractiveLayerWMS;
+			var le: DynamicEvent = new DynamicEvent(TIME_VARIABLE_CHANGED);
+			le.lWMS = lWMS;
+			dispatchEvent(le);
 		}
 
 		protected function onSynchronisedVariableDomainChanged(event: SynchronisedVariableChangeEvent): void
 		{
 			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
+		}
+		
+		/**
+		 * Layer composer need to dispatch event when new layer becomes primary 
+		 * 
+		 */		
+		public function primaryLayerHasChanged(): void
+		{
+			dispatchEvent(new DataEvent(PRIMARY_LAYER_CHANGED));
 		}
 		
 		// data global variables synchronisation
@@ -105,9 +131,14 @@ package com.iblsoft.flexiweather.widgets
             		continue;
             	if(so.getSynchronisedVariables().indexOf("frame") < 0)
             		continue;
+            		
+            	if (!so.isPrimaryLayer())
+            		continue;
+            		
             	var l_frames: Array = so.getSynchronisedVariableValuesList("frame");
             	if(l_frames == null)
             		continue;
+
             	l_syncLayers.push(so);
             	if(l_timeAxis == null)
             		l_timeAxis = l_frames;
@@ -116,7 +147,122 @@ package com.iblsoft.flexiweather.widgets
 			}
 			return l_timeAxis; 			
 		}
+		
+		public function getDimensionValues(dimName: String, b_intersection: Boolean = true): Array
+		{
+			
+			var l_syncLayers: Array = [];
+			var l_timeAxis: Array = enumTimeAxis(l_syncLayers);
+          	if(l_timeAxis == null) // no time axis
+          		return null;
+          		
+          	var i: int;
+			var so: ISynchronisedObject;
+			
+			var a_dimValues: Array;
+          	for each(so in l_syncLayers) 
+          	{
+				var values: Array = (so as InteractiveLayerWMS).getWMSDimensionsValues(dimName);
+          		
+          		if(a_dimValues == null)
+        				a_dimValues = values;
+        			else {
+        				if(b_intersection)
+        					a_dimValues = ArrayUtils.intersectedArrays(a_dimValues, values);
+        				else
+        					ArrayUtils.unionArrays(a_dimValues, values);
+        			}	
+          	}
 
+			return a_dimValues;
+				
+		}
+		
+		public function areFramesInsideTimePeriod(startDate: Date, endDate: Date): Boolean
+		{
+			var l_syncLayers: Array = [];
+			var l_timeAxis: Array = enumTimeAxis(l_syncLayers);
+          	if(l_timeAxis == null) // no time axis
+          		return false;
+          		
+          	var i: int;
+			var so: ISynchronisedObject;
+			
+          	for each(so in l_syncLayers) {
+          		var frame: Date = so.getSynchronisedVariableValue("frame") as Date;
+          		if(frame == null)
+          			continue;
+          			
+          		for(i = 0; i < l_timeAxis.length; ++i) 
+          		{
+          			var currDate: Date = l_timeAxis[i] as Date;
+          			if (startDate.time <= currDate.time && currDate.time <= endDate.time) 
+          			{
+          				return true;
+          			}
+          		}
+          	}
+          	
+          	return false;
+		}
+
+		/**
+		 * return first available frame 
+		 * @return 
+		 * 
+		 */		
+		public function getFirstFrame(): Date
+		{
+			var l_syncLayers: Array = [];
+			var l_timeAxis: Array = enumTimeAxis(l_syncLayers);
+          	if(l_timeAxis == null) // no time axis
+          		return null;
+          	
+          	return 	l_timeAxis[0] as Date;
+		}
+		
+		public function getLastFrame(): Date
+		{
+			var l_syncLayers: Array = [];
+			var l_timeAxis: Array = enumTimeAxis(l_syncLayers);
+          	if(l_timeAxis == null) // no time axis
+          		return null;
+          	
+          	return 	l_timeAxis[l_timeAxis.length - 1] as Date;
+		}
+		public function getNowFrame(): Date
+		{
+			var l_syncLayers: Array = [];
+			var l_timeAxis: Array = enumTimeAxis(l_syncLayers);
+          	if(l_timeAxis == null) // no time axis
+          		return null;
+          		
+          	var i: int;
+			var so: ISynchronisedObject;
+			
+			var now: Date = DateUtils.convertToUTCDate(new Date());
+			var nowDistance: Number = Number.MAX_VALUE;
+			var nowFrame: Date;
+			
+          	for each(so in l_syncLayers) {
+          		var frame: Date = so.getSynchronisedVariableValue("frame") as Date;
+          		if(frame == null)
+          			continue;
+          			
+          		for(i = 0; i < l_timeAxis.length; ++i) 
+          		{
+          			var currDate: Date = l_timeAxis[i] as Date;
+          			if (Math.abs(currDate.time - now.time) < nowDistance) 
+          			{
+          				nowDistance = Math.abs(currDate.time - now.time);
+          				nowFrame = currDate;
+          			}
+          		}
+          	}
+          	
+          	return nowFrame;
+		}
+		
 		public function moveFrame(i_offset: int): Boolean
 		{
 			var l_syncLayers: Array = [];
@@ -162,6 +308,38 @@ package com.iblsoft.flexiweather.widgets
           	return true;
 		}
 
+		/**
+		 * Return frames count 
+		 * @return 
+		 * 
+		 */		
+		public function get framesLength(): int
+		{
+			var l_syncLayers: Array = [];
+			
+			var l_timeAxis: Array = enumTimeAxis(l_syncLayers);
+          	if(l_timeAxis == null) // no time axis
+          		return 0;
+          		
+			return l_timeAxis.length;
+		}
+		
+		public function getFrame(index: int): Date
+		{
+			var l_syncLayers: Array = [];
+			
+			var l_timeAxis: Array = enumTimeAxis(l_syncLayers);
+          	if(l_timeAxis == null) // no time axis
+          		return null;
+          		
+			if (l_timeAxis.length > index)
+			{
+				return l_timeAxis[index] as Date;
+			}
+			
+			return null;	
+		}
+		
 		public function setFrame(newFrame: Date, b_nearrest: Boolean = true): Boolean
 		{
 			for each(var l: InteractiveLayer in m_layers) {
@@ -175,6 +353,7 @@ package com.iblsoft.flexiweather.widgets
           	}
           	return true;
 		}
+		
 		
         // data refreshing
         override public function refresh(b_force: Boolean): void

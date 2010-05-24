@@ -301,5 +301,40 @@ package com.iblsoft.flexiweather.utils
 			
 			return newDate;
 		}
+		
+		public static function convertToUTCDate(date: Date): Date
+		{
+			var newDate: Date = new Date();
+			newDate.setTime(date.time - date.timezoneOffset * 60 * 1000);
+			
+			return newDate;
+		}
+		
+		/**
+		 * Return time "distance" between 2 dates 
+		 * @param date1
+		 * @param date2
+		 * @return 
+		 * 
+		 */		
+		public static function getDatesDistance(date1: Date, date2: Date): Number
+		{
+			return Math.abs(date1.time - date2.time);
+		}
+		
+		public static function getMinimumDate(date: Date, maximumDate: Date): Date
+		{
+			if (date.time <= maximumDate.time)
+				return date;
+				
+			return maximumDate;
+		}
+		public static function getMaximumDate(date: Date, minimumDate: Date): Date
+		{
+			if (date.time >= minimumDate.time)
+				return date;
+				
+			return minimumDate;
+		}
 	}
 }

@@ -76,14 +76,11 @@ package com.iblsoft.flexiweather.widgets
 
 		public function addLayer(l: InteractiveLayer, index: int = -1): void
 		{
-			trace("1 InteractiveWidget.addLayer(): pos: " + index + " length: " + numChildren);
 			if (index >= 0)
 				addChildAt(l, index);
 			else
 				addChild(l);
-			trace("2 InteractiveWidget.addLayer(): pos: " + index + " length: " + numChildren);
 			orderLayers();
-			trace("3 InteractiveWidget.addLayer(): pos: " + index + " length: " + numChildren);
 		}
 
 		public function removeLayer(l: InteractiveLayer): void
@@ -119,6 +116,17 @@ package com.iblsoft.flexiweather.widgets
 						}
 					}
 				}
+				/*
+				trace("**********************************************")
+				trace("                 SORTING by ZORDER");
+				trace("**********************************************")
+				for(var i: int = 0; i < numChildren; ++i) 
+				{
+					var layer: InteractiveLayer = InteractiveLayer(getChildAt(i)); 
+					trace("LAYER ["+i+"] = " + layer.name); 
+				}
+				trace("**********************************************")
+				*/
 			}
 			finally {
 				mb_orderingLayers = false;
