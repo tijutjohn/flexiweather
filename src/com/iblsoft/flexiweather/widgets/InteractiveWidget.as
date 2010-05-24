@@ -47,11 +47,11 @@ package com.iblsoft.flexiweather.widgets
 		
 		private function onChildAdd(e: ChildExistenceChangedEvent): void
 		{
-			trace("InteractiveWidget onChildAdd: " + numChildren);
+//			trace("InteractiveWidget onChildAdd: " + numChildren);
 		}
 		private function onChildRemove(e: ChildExistenceChangedEvent): void
 		{
-			trace("InteractiveWidget onChildRemove: " + numChildren);
+//			trace("InteractiveWidget onChildRemove: " + numChildren);
 			
 		}
 		

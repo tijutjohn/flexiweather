@@ -83,7 +83,8 @@ package com.iblsoft.flexiweather.ogc
 			if(m_cfg.mi_autoRefreshPeriod > 0)
 				m_timer.delay = m_cfg.mi_autoRefreshPeriod * 1000.0;
 			m_cfg.addEventListener(WMSLayerConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
-			updateData(true);
+			
+//			updateData(true);
 		}
 		
 		public function updateData(b_forceUpdate: Boolean): void
