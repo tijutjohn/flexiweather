@@ -98,11 +98,6 @@ package com.iblsoft.flexiweather.widgets
 		protected function onSynchronisedVariableChanged(event: SynchronisedVariableChangeEvent): void
 		{
 			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
-			
-			var lWMS: InteractiveLayerWMS = event.target as InteractiveLayerWMS;
-			var le: DynamicEvent = new DynamicEvent(TIME_VARIABLE_CHANGED);
-			le.lWMS = lWMS;
-			dispatchEvent(le);
 		}
 
 		protected function onSynchronisedVariableDomainChanged(event: SynchronisedVariableChangeEvent): void

@@ -381,6 +381,11 @@ package com.iblsoft.flexiweather.ogc
 				dispatchEvent(new SynchronisedVariableChangeEvent(
 						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, "frame"));
         	}
+        	//if "time" changed, we need to update timeline, so we need to dispatch event
+        	if(m_cfg.ms_dimensionTimeName != null && s_dimName == m_cfg.ms_dimensionTimeName) {
+				dispatchEvent(new SynchronisedVariableChangeEvent(
+						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, "frame"));
+        	}
         }
 
         public function getWMSDimensionValue(s_dimName: String,
