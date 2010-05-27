@@ -48,8 +48,8 @@ package com.iblsoft.flexiweather.proj
 				f_laFrac *= 60;
 				var f_laSec: Number = Math.round(f_laFrac);
 				
-				return f_laDeg + f_laNS + f_laSec + "'" + f_laSec + '"' + " "
-						+ f_loDeg + f_loEW + f_loSec + "'" + f_loSec + '"'; 
+				return f_laDeg + f_laNS + f_laMin + "'" + f_laSec + '"' + " "
+						+ f_loDeg + f_loEW + f_loMin + "'" + f_loSec + '"'; 
 			}
 			var nf: NumberFormatter = new NumberFormatter();
 			nf.precision = 2;
