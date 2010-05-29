@@ -418,7 +418,7 @@ package com.iblsoft.flexiweather.widgets
 			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
 		}
         
-        [Bindable]
+        //[Bindable]
         public function get layers(): ArrayCollection
         { return m_layers; }
 	}

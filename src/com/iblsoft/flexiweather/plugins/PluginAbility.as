@@ -6,6 +6,7 @@ package com.iblsoft.flexiweather.plugins
 	{
 		public static const ACTION: String = "action";
 		public static const DOCKLET: String = "docklet";
+		public static const PANE_CLIENT: String = "paneClient";
 		public static const INTERACTIVE_WIDGET_CLIENT: String = "interactiveWidgetClient";
 		public static const LAYER_SELECTION_LISTENER: String = "layerSelectionListener";
 		public static const LAYER_CHANGE_LISTENER: String = "layerChangeListener";
@@ -33,12 +34,6 @@ package com.iblsoft.flexiweather.plugins
 					.withMetadata("icon", icon); 
 		}
 
-		public static function interactiveWidgetClient(classOrInstance: Object,
-				s_id: String = null): PluginAbility
-		{
-			return new PluginAbility(PluginAbility.INTERACTIVE_WIDGET_CLIENT, s_id, classOrInstance); 
-		}
-		
 		public static function docklet(classOrInstance: Object,
 				s_id: String, s_name: String): PluginAbility
 		{
@@ -46,6 +41,18 @@ package com.iblsoft.flexiweather.plugins
 					.withMetadata("name", s_name);
 		}
 
+		public static function paneClient(classOrInstance: Object,
+				s_id: String = null): PluginAbility
+		{
+			return new PluginAbility(PluginAbility.PANE_CLIENT, s_id, classOrInstance); 
+		}
+		
+		public static function interactiveWidgetClient(classOrInstance: Object,
+				s_id: String = null): PluginAbility
+		{
+			return new PluginAbility(PluginAbility.INTERACTIVE_WIDGET_CLIENT, s_id, classOrInstance); 
+		}
+		
 		public static function layerOptionsProvider(classOrInstance: Object,
 				s_id: String): PluginAbility
 		{
