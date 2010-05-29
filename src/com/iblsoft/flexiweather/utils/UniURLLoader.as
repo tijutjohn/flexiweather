@@ -123,7 +123,7 @@ package com.iblsoft.flexiweather.utils
 			var urlRequest: URLRequest = disconnectURLLoader(urlLoader);
 
 			Log.getLogger("UniURLLoader").info("I/O error: " + event.text);
-			dispatchFault(urlRequest, ERROR_IO, event.text);
+			dispatchFault(urlRequest, urlLoader.associatedData, ERROR_IO, event.text);
 		}
 
 		protected function onSecurityError(event: SecurityErrorEvent): void
@@ -132,7 +132,7 @@ package com.iblsoft.flexiweather.utils
 			var urlRequest: URLRequest = disconnectURLLoader(urlLoader);
 
 			Log.getLogger("UniURLLoader").info("Security error: " + event.text);
-			dispatchFault(urlRequest, ERROR_SECURITY, event.text);
+			dispatchFault(urlRequest, urlLoader.associatedData, ERROR_SECURITY, event.text);
 		}
 
 		protected function onImageLoaded(event: Event): void
@@ -146,7 +146,7 @@ package com.iblsoft.flexiweather.utils
 		{
 			var imageLoader: LoaderWithAssociatedData = LoaderWithAssociatedData(event.target.loader);
 			var urlRequest: URLRequest = disconnectImageLoader(imageLoader);
-			dispatchFault(urlRequest, ERROR_BAD_IMAGE, event.text);
+			dispatchFault(urlRequest, imageLoader.associatedData, ERROR_BAD_IMAGE, event.text);
 		}
 		
 		protected function dispatchResult(
@@ -158,7 +158,7 @@ package com.iblsoft.flexiweather.utils
 		}
 
 		protected function dispatchFault(
-				urlRequest: URLRequest, 
+				urlRequest: URLRequest, associatedData: Object,
 				faultCode: String,
 				faultString: String,
 				faultDetail: String = null): void
@@ -166,7 +166,7 @@ package com.iblsoft.flexiweather.utils
 			dispatchEvent(new UniURLLoaderEvent(
 					DATA_LOAD_FAILED,
 					new Fault(faultCode, faultString, faultDetail),
-					urlRequest,
+					urlRequest, associatedData,
 					false, true));  
 		}
 
