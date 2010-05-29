@@ -1,11 +1,9 @@
 package com.iblsoft.flexiweather.utils
 {
-	import flash.display.Loader;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.IOErrorEvent;
 	import flash.events.SecurityErrorEvent;
-	import flash.net.URLLoader;
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
@@ -14,6 +12,21 @@ package com.iblsoft.flexiweather.utils
 	import mx.logging.Log;
 	import mx.rpc.Fault;
 	
+	/**
+	 * Replacement of flash.net.URLLoader and flash.display.Loader classes
+	 * which unites abilities of both and provides automatic detection of received data format.
+	 * Recognised formats are:
+	 * - PNG images
+	 * - XML data
+	 * - other binary/text data
+	 * This class is designed to handle parallel HTTP requests fired by the load() method.
+	 * Each request may have associated data, which are then dispatched to UniURLLoader user
+	 * together with UniURLLoaderEvent.
+	 * Each call to load() method instanties internal a new URLLoader instance.
+	 * 
+	 * There are only 2 types of event (DATA_LOADED, DATA_LOAD_FAILED) dispatched out of this class,
+	 * so that the class can be used simplier.
+	*/
 	public class UniURLLoader extends EventDispatcher
 	{
 		// FIXME: We should have multiple Loader's for images!
@@ -31,33 +44,43 @@ package com.iblsoft.flexiweather.utils
 		public static const ERROR_SECURITY: String = "errorSecurity";
 		public static const ERROR_CANCELLED: String = "errorCancelled";
 		
-		public var data: Object; // user data
+		/** Deprecated - associated data. Use load(request, associatedData) instead. */
+		public var data: Object;
 		
 		public function UniURLLoader()
 		{}
 		
-		public function load(urlRequest: URLRequest): void
+		public function load(urlRequest: URLRequest, associatedData: Object = null): void
 		{
 			trace("Requesting " + urlRequest.url + " " + urlRequest.data);
-			var urlLoader: URLLoader = new URLLoader();
+			var urlLoader: URLLoaderWithAssociatedData = new URLLoaderWithAssociatedData();
+			urlLoader.associatedData = associatedData;
 			urlLoader.dataFormat = URLLoaderDataFormat.BINARY;
 			urlLoader.addEventListener(Event.COMPLETE, onDataComplete);
 			urlLoader.addEventListener(IOErrorEvent.IO_ERROR, onDataIOError);
 			urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onSecurityError);
 			urlLoader.load(urlRequest);
-			md_urlLoaderToRequestMap[urlLoader] = urlRequest;
+			md_urlLoaderToRequestMap[urlLoader] = {
+				request: urlRequest,
+				loader: urlLoader
+			};
 		}
 		
-		/*
-		public function cancel(urlRequest: URLRequest): void
+		public function cancel(urlRequest: URLRequest): Boolean
 		{
-			// TODO: We need a map from urlRequest to urlLoader
+			for each(var s_key: String in md_urlLoaderToRequestMap) {
+				if(md_urlLoaderToRequestMap[s_key].request == urlRequest) {
+					md_urlLoaderToRequestMap[s_key].request.loader.close();
+					delete md_urlLoaderToRequestMap[s_key];
+					return true;
+				}
+			}
+			return false;
 		}
-		*/
 		
 		protected function onDataComplete(event: Event): void
 		{
-			var urlLoader: URLLoader = URLLoader(event.target);
+			var urlLoader: URLLoaderWithAssociatedData = URLLoaderWithAssociatedData(event.target);
 			var urlRequest: URLRequest = disconnectURLLoader(urlLoader);
 
 			var rawData: ByteArray = event.target.data as ByteArray;
@@ -71,7 +94,8 @@ package com.iblsoft.flexiweather.utils
 			rawData.position = 0;
 			// 0x89 P N G
 			if(b0 == 0x89 && b1 == 0x50 && b2 == 0x4E && b3 == 0x47) {
-				var imageLoader: Loader = new Loader();
+				var imageLoader: LoaderWithAssociatedData = new LoaderWithAssociatedData();
+				imageLoader.associatedData = urlLoader.associatedData;
 				md_imageLoaderToRequestMap[imageLoader] = urlRequest;
 				imageLoader.contentLoaderInfo.addEventListener(Event.COMPLETE, onImageLoaded);
 	            imageLoader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, onImageLoadingIOError);
@@ -83,19 +107,19 @@ package com.iblsoft.flexiweather.utils
 				var s_data: String = rawData.readUTFBytes(rawData.length);
 				try {
 					var x: XML = new XML(s_data);
-					dispatchResult(urlRequest, x);
+					dispatchResult(x, urlRequest, urlLoader.associatedData);
 				}
 				catch(e: Error) {
-					dispatchResult(urlRequest, s_data);
+					dispatchResult(s_data, urlRequest, urlLoader.associatedData);
 				}
 			}
 			else
-				dispatchResult(urlRequest, rawData);
+				dispatchResult(rawData, urlRequest, urlLoader.associatedData);
 		}
 
 		protected function onDataIOError(event: IOErrorEvent): void
 		{
-			var urlLoader: URLLoader = URLLoader(event.target);
+			var urlLoader: URLLoaderWithAssociatedData = URLLoaderWithAssociatedData(event.target);
 			var urlRequest: URLRequest = disconnectURLLoader(urlLoader);
 
 			Log.getLogger("UniURLLoader").info("I/O error: " + event.text);
@@ -104,7 +128,7 @@ package com.iblsoft.flexiweather.utils
 
 		protected function onSecurityError(event: SecurityErrorEvent): void
 		{
-			var urlLoader: URLLoader = URLLoader(event.target);
+			var urlLoader: URLLoaderWithAssociatedData = URLLoaderWithAssociatedData(event.target);
 			var urlRequest: URLRequest = disconnectURLLoader(urlLoader);
 
 			Log.getLogger("UniURLLoader").info("Security error: " + event.text);
@@ -113,21 +137,23 @@ package com.iblsoft.flexiweather.utils
 
 		protected function onImageLoaded(event: Event): void
 		{
-			var imageLoader: Loader = Loader(event.target.loader);
+			var imageLoader: LoaderWithAssociatedData = LoaderWithAssociatedData(event.target.loader);
 			var urlRequest: URLRequest = disconnectImageLoader(imageLoader);
-			dispatchResult(urlRequest, imageLoader.content);
+			dispatchResult(imageLoader.content, urlRequest, imageLoader.associatedData);
 		}
 
 		protected function onImageLoadingIOError(event: IOErrorEvent): void
 		{
-			var imageLoader: Loader = Loader(event.target.loader);
+			var imageLoader: LoaderWithAssociatedData = LoaderWithAssociatedData(event.target.loader);
 			var urlRequest: URLRequest = disconnectImageLoader(imageLoader);
 			dispatchFault(urlRequest, ERROR_BAD_IMAGE, event.text);
 		}
 		
-		protected function dispatchResult(urlRequest: URLRequest, o: Object): void
+		protected function dispatchResult(
+				result: Object, urlRequest: URLRequest, associatedData: Object): void
 		{
-			var e: UniURLLoaderEvent = new UniURLLoaderEvent(DATA_LOADED, o, urlRequest, false, true);
+			var e: UniURLLoaderEvent = new UniURLLoaderEvent(
+					DATA_LOADED, result, urlRequest, associatedData, false, true);
 			dispatchEvent(e);  
 		}
 
@@ -144,17 +170,17 @@ package com.iblsoft.flexiweather.utils
 					false, true));  
 		}
 
-		protected function disconnectURLLoader(urlLoader: URLLoader): URLRequest
+		protected function disconnectURLLoader(urlLoader: URLLoaderWithAssociatedData): URLRequest
 		{
 			urlLoader.removeEventListener(Event.COMPLETE, onDataComplete);
 			urlLoader.removeEventListener(IOErrorEvent.IO_ERROR, onDataIOError);
 			urlLoader.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, onSecurityError);
-			var urlRequest: URLRequest = md_urlLoaderToRequestMap[urlLoader]; 
+			var urlRequest: URLRequest = md_urlLoaderToRequestMap[urlLoader].request; 
 			delete md_urlLoaderToRequestMap[urlLoader];
 			return urlRequest;
 		}
 
-		protected function disconnectImageLoader(imageLoader: Loader): URLRequest
+		protected function disconnectImageLoader(imageLoader: LoaderWithAssociatedData): URLRequest
 		{
 			imageLoader.contentLoaderInfo.removeEventListener(Event.COMPLETE, onImageLoaded);
             imageLoader.contentLoaderInfo.removeEventListener(IOErrorEvent.IO_ERROR, onImageLoadingIOError);
@@ -164,4 +190,17 @@ package com.iblsoft.flexiweather.utils
 		}
 		
 	}
+}
+
+import flash.net.URLLoader;
+import flash.display.Loader;
+
+class URLLoaderWithAssociatedData extends URLLoader
+{
+	public var associatedData: Object;
+}
+
+class LoaderWithAssociatedData extends Loader
+{
+	public var associatedData: Object;
 }
