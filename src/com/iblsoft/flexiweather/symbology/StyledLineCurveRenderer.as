@@ -9,7 +9,7 @@ package com.iblsoft.flexiweather.symbology
 	public class StyledLineCurveRenderer extends GraphicsCurveRenderer
 	{
 		public static const STYLE_SOLID: String = "Solid";
-		public static const DASHED_SOLID: String = "Dashed";
+		public static const STYLE_DASHED: String = "Dashed";
 
 		// style variables
 		protected var mf_thickness: Number;
