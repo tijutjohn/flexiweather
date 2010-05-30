@@ -33,10 +33,6 @@ package com.iblsoft.flexiweather.ogc
 		protected var mb_imageOK: Boolean = true;
 		protected var m_job: BackgroundJob;
 
-		protected var ms_requestedCRS: String = null;
-		protected var m_requestedBBox: BBox = null;
-		protected var m_request: URLRequest = null;
-
 		protected var ms_imageCRS: String = null;
 		protected var m_imageBBox: BBox = null;
 		
@@ -93,22 +89,23 @@ package com.iblsoft.flexiweather.ogc
 				m_job.cancel();
 			m_job = null;
 			
-			ms_requestedCRS = container.getCRS();
-			m_requestedBBox = container.getViewBBox();
-			m_request = m_cfg.toGetMapRequest(
-					ms_requestedCRS, m_requestedBBox.toBBOXString(),
+			var request: URLRequest = m_cfg.toGetMapRequest(
+					container.getCRS(), container.getViewBBox().toBBOXString(),
 					int(container.width), int(container.height),
 					getWMSStyleListString());
-			updateDimensionsInURLRequest(m_request);
-			updateCustomParametersInURLRequest(m_request);
+			updateDimensionsInURLRequest(request);
+			updateCustomParametersInURLRequest(request);
 			var img: Bitmap = null;
 
 			if(!b_forceUpdate)
-				img = m_cache.getImage(ms_requestedCRS, m_requestedBBox, m_request);
+				img = m_cache.getImage(container.getCRS(), container.getViewBBox(), request);
 			if(img == null) {
 				m_timer.reset();
 				m_job = BackgroundJobManager.getInstance().startJob("Rendering " + m_cfg.ma_layerNames.join("+"));
-				m_loader.load(m_request);
+				m_loader.load(request, {
+					requestedCRS: container.getCRS(),
+					requestedBBox: container.getViewBBox()
+				});
 				invalidateDynamicPart();
 			}
 			else {
@@ -118,8 +115,8 @@ package com.iblsoft.flexiweather.ogc
 				}
 				m_image = img;
 				mb_imageOK = true;
-				ms_imageCRS = ms_requestedCRS;
-				m_imageBBox = m_requestedBBox;
+				ms_imageCRS = container.getCRS();
+				m_imageBBox = container.getViewBBox();
 				invalidateDynamicPart();
 			}
 		}
@@ -128,6 +125,10 @@ package com.iblsoft.flexiweather.ogc
 		{
 			super.draw(graphics);
 			if(m_image != null) {
+				if(container.height <= 0)
+					return;
+				if(container.width <= 0)
+					return;
 				var currentBBox: BBox = container.getViewBBox();
 
 				// Check if CRS last rendered image == current CRS of container
@@ -224,10 +225,9 @@ package com.iblsoft.flexiweather.ogc
         		if(layer.mb_queryable)
         			a_queryableLayerNames.push(layer.name);
         	}
-			//callback.call(NaN, "Hello " + coord.toNiceString());
 			var pt: Point = container.coordToPoint(coord);
 			var url: URLRequest = m_cfg.toGetFeatureInfoRequest(
-					ms_requestedCRS, container.getViewBBox().toBBOXString(),
+					container.getCRS(), container.getViewBBox().toBBOXString(),
 					int(container.width), int(container.height),
 					a_queryableLayerNames, int(Math.round(pt.x)), int(Math.round(pt.y)),
 					getWMSStyleListString());
@@ -614,9 +614,13 @@ package com.iblsoft.flexiweather.ogc
 			if(result is Bitmap) {
 				m_image = result;
 				mb_imageOK = true;
-				ms_imageCRS = ms_requestedCRS;
-				m_imageBBox = m_requestedBBox;
-				m_cache.addImage(m_image, ms_requestedCRS, m_requestedBBox, m_request);
+				ms_imageCRS = event.associatedData.requestedCRS;
+				m_imageBBox = event.associatedData.requestedBBox;
+				m_cache.addImage(
+						m_image,
+						event.associatedData.requestedCRS,
+						event.associatedData.requestedBBox,
+						event.request);
 				onJobFinished();
 				return;
 			}
@@ -637,7 +641,6 @@ package com.iblsoft.flexiweather.ogc
 						"Error accessing layers '" + m_cfg.ma_layerNames.join(","))
 			}
 			m_image = null;
-			m_cache.addImage(null, ms_requestedCRS, m_requestedBBox, m_request);
 			mb_imageOK = false;
 			ms_imageCRS = null;
 			m_imageBBox = null;
@@ -652,7 +655,9 @@ package com.iblsoft.flexiweather.ogc
 
 		protected function onFeatureInfoLoaded(event: UniURLLoaderEvent): void
 		{
-			m_featureInfoCallBack.call(null, String(event.result));
+			if(m_featureInfoCallBack != null) {
+				m_featureInfoCallBack.call(null, String(event.result));
+			}
 			m_featureInfoCallBack = null;
 		}
 		
