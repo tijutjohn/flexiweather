@@ -1,11 +1,17 @@
 package com.iblsoft.flexiweather.symbology
 {
+	import com.iblsoft.flexiweather.utils.DistanceMarkingCurveRenderer;
+	
 	import flash.display.Graphics;
 	import flash.geom.Point;
-	import com.iblsoft.flexiweather.utils.DistanceMarkingCurveRenderer;
 
 	public class FrontCurveRenderer extends DistanceMarkingCurveRenderer
 	{
+		public static const MARK_WARM: uint = 0;
+		public static const MARK_COLD: uint = 1;
+		public static const MARK_OCCLUDED: uint = 2;
+		public static const MARK_STATIONARY: uint = 3;
+
 		// style variables
 		protected var mi_color: uint;
 		protected var mi_colorSecondary: uint;

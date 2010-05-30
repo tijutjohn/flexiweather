@@ -1,9 +1,10 @@
 package com.iblsoft.flexiweather.symbology
 {
+	import com.iblsoft.flexiweather.utils.CubicBezier;
 	import com.iblsoft.flexiweather.utils.GraphicsCurveRenderer;
+	
 	import flash.display.Graphics;
 	import flash.geom.Point;
-	import com.iblsoft.flexiweather.utils.CubicBezier;
 	
 	public class JetStreamCurveRenderer extends GraphicsCurveRenderer
 	{
@@ -16,7 +17,7 @@ package com.iblsoft.flexiweather.symbology
 		protected var mf_lastDY: Number = 0; 
 	
 		function JetStreamCurveRenderer(g: Graphics,
-			f_thickness: Number, i_color: uint, f_alpha: Number)
+			f_thickness: Number = 2, i_color: uint = 0x000000, f_alpha: Number = 1.0)
 		{
 			super(g);
 			mf_thickness = f_thickness;

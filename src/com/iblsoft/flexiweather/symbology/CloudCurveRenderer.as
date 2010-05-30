@@ -16,7 +16,7 @@ package com.iblsoft.flexiweather.symbology
 		protected var ml_marks: Array;
 		
 		function CloudCurveRenderer(g: Graphics,
-			f_thickness: Number, i_color: uint, f_alpha: Number)
+			f_thickness: Number = 2.0, i_color: uint = 0x00ff00, f_alpha: Number = 1.0)
 		{
 			super(g);
 			mf_thickness = f_thickness;
@@ -33,7 +33,7 @@ package com.iblsoft.flexiweather.symbology
 		
 		override public function finished(x: Number, y: Number): void
 		{
-			super.finish(x, y);
+			super.finished(x, y);
 	
 			var ptPrev: Point = null;
 			for each(var pt: Point in ml_marks) { 

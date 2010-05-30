@@ -1,8 +1,7 @@
 package com.iblsoft.flexiweather.symbology
 {
-	import flash.geom.Point;
-	import com.iblsoft.flexiweather.utils.CubicBezier;
 	import com.iblsoft.flexiweather.utils.DistanceMarkingCurveRenderer;
+	
 	import flash.display.Graphics;
 	
 	public class TurbulenceCurveRenderer extends DistanceMarkingCurveRenderer
@@ -16,7 +15,7 @@ package com.iblsoft.flexiweather.symbology
 		protected var mi_counter: int = 0;
 		
 		function TurbulenceCurveRenderer(g: Graphics,
-			f_thickness: Number, i_color: uint, f_alpha: Number)
+			f_thickness: Number = 2.0, i_color: uint = 0x000000, f_alpha: Number = 1.0)
 		{
 			super(g);
 			mf_thickness = f_thickness;
