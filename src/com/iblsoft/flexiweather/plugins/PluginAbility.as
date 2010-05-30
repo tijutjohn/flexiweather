@@ -88,12 +88,12 @@ package com.iblsoft.flexiweather.plugins
 				return IAbility(m_classOrInstance);
 		}
 		
-		public function getMetadata(s_key: String): Object
+		public function getMetadata(s_key: String, defaultValue: Object = null): Object
 		{
 			if(s_key in m_metadata)
 				return m_metadata[s_key];
 			else
-				return null;				
+				return defaultValue;				
 		}
 
 		// getters and setters
