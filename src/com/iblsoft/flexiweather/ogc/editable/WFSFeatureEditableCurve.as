@@ -23,7 +23,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			super.toInsertGML(xmlInsert);
 			var line: XML = <gml:LineString xmlns:gml="http://www.opengis.net/gml"></gml:LineString>;
-			line.appendChild(GMLUtils.encodeGML3Coordinates2D(coordinates));
+			line.appendChild(GMLUtils.encodeGML3Coordinates2D(getEffectiveCoordinates()));
 			addInsertGMLProperty(xmlInsert, null, "curve", line);
 		}
 
