@@ -68,10 +68,18 @@ package com.iblsoft.flexiweather.utils
 		
 		public function cancel(urlRequest: URLRequest): Boolean
 		{
-			for each(var s_key: String in md_urlLoaderToRequestMap) {
-				if(md_urlLoaderToRequestMap[s_key].request == urlRequest) {
-					md_urlLoaderToRequestMap[s_key].request.loader.close();
-					delete md_urlLoaderToRequestMap[s_key];
+			var key: Object;
+			for(key in md_urlLoaderToRequestMap) {
+				if(md_urlLoaderToRequestMap[key].request == urlRequest) {
+					md_urlLoaderToRequestMap[key].loader.close();
+					delete md_urlLoaderToRequestMap[key];
+					return true;
+				}
+			}
+			for(key in md_imageLoaderToRequestMap) {
+				if(md_imageLoaderToRequestMap[key].request == urlRequest) {
+					md_imageLoaderToRequestMap[key].loader.close();
+					delete md_imageLoaderToRequestMap[key];
 					return true;
 				}
 			}
@@ -82,6 +90,8 @@ package com.iblsoft.flexiweather.utils
 		{
 			var urlLoader: URLLoaderWithAssociatedData = URLLoaderWithAssociatedData(event.target);
 			var urlRequest: URLRequest = disconnectURLLoader(urlLoader);
+			if(urlRequest == null)
+				return;
 
 			var rawData: ByteArray = event.target.data as ByteArray;
 			//Log.getLogger("UniURLLoader").info("Received " + rawData.length + "B");
@@ -121,6 +131,8 @@ package com.iblsoft.flexiweather.utils
 		{
 			var urlLoader: URLLoaderWithAssociatedData = URLLoaderWithAssociatedData(event.target);
 			var urlRequest: URLRequest = disconnectURLLoader(urlLoader);
+			if(urlRequest == null)
+				return;
 
 			Log.getLogger("UniURLLoader").info("I/O error: " + event.text);
 			dispatchFault(urlRequest, urlLoader.associatedData, ERROR_IO, event.text);
@@ -130,6 +142,8 @@ package com.iblsoft.flexiweather.utils
 		{
 			var urlLoader: URLLoaderWithAssociatedData = URLLoaderWithAssociatedData(event.target);
 			var urlRequest: URLRequest = disconnectURLLoader(urlLoader);
+			if(urlRequest == null)
+				return;
 
 			Log.getLogger("UniURLLoader").info("Security error: " + event.text);
 			dispatchFault(urlRequest, urlLoader.associatedData, ERROR_SECURITY, event.text);
@@ -139,6 +153,9 @@ package com.iblsoft.flexiweather.utils
 		{
 			var imageLoader: LoaderWithAssociatedData = LoaderWithAssociatedData(event.target.loader);
 			var urlRequest: URLRequest = disconnectImageLoader(imageLoader);
+			if(urlRequest == null)
+				return;
+
 			dispatchResult(imageLoader.content, urlRequest, imageLoader.associatedData);
 		}
 
@@ -146,6 +163,9 @@ package com.iblsoft.flexiweather.utils
 		{
 			var imageLoader: LoaderWithAssociatedData = LoaderWithAssociatedData(event.target.loader);
 			var urlRequest: URLRequest = disconnectImageLoader(imageLoader);
+			if(urlRequest == null)
+				return;
+
 			dispatchFault(urlRequest, imageLoader.associatedData, ERROR_BAD_IMAGE, event.text);
 		}
 		
@@ -175,6 +195,8 @@ package com.iblsoft.flexiweather.utils
 			urlLoader.removeEventListener(Event.COMPLETE, onDataComplete);
 			urlLoader.removeEventListener(IOErrorEvent.IO_ERROR, onDataIOError);
 			urlLoader.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, onSecurityError);
+			if(!urlLoader in md_urlLoaderToRequestMap)
+				return null;
 			var urlRequest: URLRequest = md_urlLoaderToRequestMap[urlLoader].request; 
 			delete md_urlLoaderToRequestMap[urlLoader];
 			return urlRequest;
@@ -185,6 +207,8 @@ package com.iblsoft.flexiweather.utils
 			imageLoader.contentLoaderInfo.removeEventListener(Event.COMPLETE, onImageLoaded);
             imageLoader.contentLoaderInfo.removeEventListener(IOErrorEvent.IO_ERROR, onImageLoadingIOError);
 			var urlRequest: URLRequest = md_imageLoaderToRequestMap[imageLoader]; 
+			if(!imageLoader in md_imageLoaderToRequestMap)
+				return null;
 			delete md_imageLoaderToRequestMap[imageLoader];
 			return urlRequest;
 		}

@@ -31,7 +31,9 @@ package com.iblsoft.flexiweather.ogc
 		protected var m_featureInfoLoader: UniURLLoader = new UniURLLoader();
 		protected var m_image: Bitmap = null;
 		protected var mb_imageOK: Boolean = true;
+
 		protected var m_job: BackgroundJob;
+		protected var m_request: URLRequest;
 
 		protected var ms_imageCRS: String = null;
 		protected var m_imageBBox: BBox = null;
@@ -88,6 +90,9 @@ package com.iblsoft.flexiweather.ogc
 			if(m_job != null)
 				m_job.cancel();
 			m_job = null;
+			if(m_request != null)
+				m_loader.cancel(m_request);
+			m_request = null;
 			
 			var request: URLRequest = m_cfg.toGetMapRequest(
 					container.getCRS(), container.getViewBBox().toBBOXString(),
@@ -102,6 +107,7 @@ package com.iblsoft.flexiweather.ogc
 			if(img == null) {
 				m_timer.reset();
 				m_job = BackgroundJobManager.getInstance().startJob("Rendering " + m_cfg.ma_layerNames.join("+"));
+				m_request = request;
 				m_loader.load(request, {
 					requestedCRS: container.getCRS(),
 					requestedBBox: container.getViewBBox()
@@ -605,6 +611,7 @@ package com.iblsoft.flexiweather.ogc
 		// Event handlers
 		protected function onDataLoaded(event: UniURLLoaderEvent): void
 		{
+			m_request = null;
 			if(m_cfg.mi_autoRefreshPeriod > 0) {
 				m_timer.reset();
 				m_timer.delay = m_cfg.mi_autoRefreshPeriod * 1000.0;
@@ -631,6 +638,7 @@ package com.iblsoft.flexiweather.ogc
 
 		protected function onDataLoadFailed(event: UniURLLoaderEvent): void
 		{
+			m_request = null;
 			if(m_cfg.mi_autoRefreshPeriod > 0) {
 				m_timer.reset();
 				m_timer.delay = m_cfg.mi_autoRefreshPeriod * 1000.0;
