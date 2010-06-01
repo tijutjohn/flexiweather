@@ -56,5 +56,23 @@ package com.iblsoft.flexiweather.utils
 					a_dest.push(o); 
 			}
 		}
+		public static function isValueInside(a_source: Array, value: Object): Boolean
+		{
+			for each(var o: Object in a_source) {
+				if (value == o)
+					return true; 
+			}
+			return false;
+		}
+		public static function getItemIndexByPropertyName(a_source: ArrayCollection, propertyName: String, value: Object): int
+		{
+			for (var i: int = 0; i < a_source.length; i++)
+			{
+				var item: Object = a_source[i];
+				if (item[propertyName] == value)
+					return i;
+			} 
+			return -1;
+		}
 	}
 }
