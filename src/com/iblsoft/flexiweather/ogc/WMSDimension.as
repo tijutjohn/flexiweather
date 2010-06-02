@@ -108,6 +108,41 @@ package com.iblsoft.flexiweather.ogc
 					}
 				}
 			}
+			else {
+				if(s_value.indexOf("/") >= 0) {
+					// encycle all options
+					var a_numBits: Array = s_value.split("/", 3);
+					if(a_numBits.length > 1) {
+						var f_numFrom: Number = Number(a_numBits[0]); 
+						var f_numTo: Number = Number(a_numBits[1]);
+						if(!isNaN(f_numFrom) && !isNaN(f_numTo)) {
+							var f_numStep: Number = 1; // HACK:
+							if(a_numBits.length > 2)
+								f_numStep = Number(a_numBits[2]);
+							if(f_numStep < 0)
+								f_numStep = -f_numStep;
+							if(f_numFrom > f_numTo) {
+								var f_numSwap: Number = f_numFrom;
+								f_numFrom = f_numTo;
+								f_numTo = f_numSwap;
+							} 
+							if(f_numStep == 0)
+								f_numStep = 1; // HACK:  
+							while((f_numTo - f_numFrom) / f_numStep > 1000) {
+								f_numStep *= 10.0;
+							}
+							var f_num: Number;
+							for(f_num = f_numFrom; f_num < f_numTo; f_num += f_numStep) {
+								a_values.push({label: String(f_num), value: String(f_num), data: f_num});
+							}
+							if(f_numFrom != f_numTo) {
+								a_values.push({label: String(f_numTo), value: String(f_numTo), data: f_numTo});
+							}
+							return;
+						}
+					}
+				}
+			}
 			// default operation
 			a_values.push({label: s_label, value: s_value, data: data});
 		}
