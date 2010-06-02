@@ -126,7 +126,7 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function dimensionToParameterName(s_dim: String): String
 		{
-			if(s_dim == "TIME" || s_dim == "ELEVATION")
+			if(s_dim.toUpperCase() == "TIME" || s_dim.toUpperCase() == "ELEVATION")
 				return s_dim;
 			return "DIM_" + s_dim; 
 		}
