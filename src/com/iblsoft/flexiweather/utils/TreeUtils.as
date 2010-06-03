@@ -149,7 +149,7 @@ package com.iblsoft.flexiweather.utils
 						
 						for each (obj in (model as Object).children)
 						{
-							return getAllNodesForOpen(obj, nodesArray);
+							getAllNodesForOpen(obj, nodesArray);
 								
 						}
 					}
