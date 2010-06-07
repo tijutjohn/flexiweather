@@ -116,6 +116,9 @@ package com.iblsoft.flexiweather.ogc
 		{ return mi_lastUpdateFlashStamp; }
 
 		public function get label(): String
-		{ return ms_service.toUpperCase() + " " + fullURL + " (" + version.toString() + ")"; }		
+		{ return ms_service.toUpperCase() + " " + fullURL + " (" + version.toString() + ")"; }
+				
+		public function get serviceType(): String
+		{ return ms_service.toUpperCase(); }		
 	}
 }
