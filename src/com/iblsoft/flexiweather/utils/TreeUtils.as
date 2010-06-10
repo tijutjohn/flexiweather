@@ -27,11 +27,13 @@ package com.iblsoft.flexiweather.utils
 						if (obj[propertyName] == item[propertyName])
 						{
 							//item is found
-							return obj;
+							return obj.data;
 						} else {
 							if (obj.hasOwnProperty("children"))
 							{
-								return getItemByPropertyName(item, propertyName, obj.children);
+								var retObject: Object = getItemByPropertyName(item, propertyName, obj.children);
+								if (retObject)
+									return retObject;
 							}
 						}
 					}
@@ -40,7 +42,7 @@ package com.iblsoft.flexiweather.utils
 				if (model is Object)
 				{
 					if (model[propertyName] == item[propertyName])
-						return  model;
+						return  model.data;
 				}
 			}
 			
