@@ -5,7 +5,11 @@ package com.iblsoft.flexiweather.widgets
 	public class InteractiveLayerPlace
 	{
 		public var coord: Coord;
+		public var placeLabel: String;
+		
+		[Bindable]
 		public var pointColor: uint = 0xff0000;
+		[Bindable]
 		public var pointType: String = 'circle';
 		public var pointLetter: String = '';
 		public var pointLetterColor: uint = 0xffffff;
