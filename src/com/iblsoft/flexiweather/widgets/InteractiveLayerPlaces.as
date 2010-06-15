@@ -2,8 +2,10 @@ package com.iblsoft.flexiweather.widgets
 {
 	import com.iblsoft.flexiweather.proj.Coord;
 	
+	import flash.display.DisplayObjectContainer;
 	import flash.display.Graphics;
 	import flash.display.Sprite;
+	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	import flash.text.TextField;
 	
@@ -25,8 +27,14 @@ package com.iblsoft.flexiweather.widgets
 		{
 			super(container);
 			
+			mouseChildren = true;
+			mouseEnabled = true;
+			
 			_sprites = new Array();
 			ma_coords.addEventListener(CollectionEvent.COLLECTION_CHANGE, onCoordsCollectionChanged);
+			
+			mouseChildren = true;
+			mouseEnabled = true;
 		}
 		
 		private var _sprites: Array;
@@ -39,15 +47,19 @@ package com.iblsoft.flexiweather.widgets
 			while (numChildren > 0)
 			{
 				var sprite: PlaceSprite = removeChildAt(0) as PlaceSprite;
-				sprite.destroy();
-				_sprites.push(sprite);
+				if (sprite)
+				{
+					sprite.removeEventListener(MouseEvent.ROLL_OVER, onMouseOver);
+					sprite.removeEventListener(MouseEvent.ROLL_OUT, onMouseOut);
+					sprite.destroy();
+					_sprites.push(sprite);
+				}
 			}
 		}
 		
 		private function getNewPlaceSprite(): PlaceSprite
 		{
 			var sprite: PlaceSprite;
-			
 			if (_sprites && _sprites.length > 0)
 			{
 				sprite = _sprites.pop();
@@ -55,6 +67,7 @@ package com.iblsoft.flexiweather.widgets
 				sprite = new PlaceSprite();
 			}
 			
+			sprite.mouseEnabled = true;
 			addChild(sprite);
 			
 			return sprite;
@@ -67,10 +80,12 @@ package com.iblsoft.flexiweather.widgets
 			invalidateDynamicPart();
 		}
 
+
+        
 		/**
 		 * set all places at once 
 		 * @param places - ArrayCollection of InteractiveLayerPlace items
-		 * 
+		 * o
 		 */		
 		public function setPlaces(places: ArrayCollection): void
 		{
@@ -119,27 +134,28 @@ package com.iblsoft.flexiweather.widgets
 					{
 						var places: Array = placeObject as Array;
 						drawPlace(places);
-						/*
-						var xPos: Number = 0;
-						for each (var place: InteractiveLayerPlace in places)
-						{
-							xPos += drawPlace(place, xPos) + placeSpacing;
-						}*/
+
 					}
 				}
 				
 			}
 		}
 		
+		private var tooltip: PlaceSpriteTooltip;
+		
 		private function drawPlace(place: Object, xPos: Number = 0): void
 		{
 			var sprite: PlaceSprite = getNewPlaceSprite();
+			sprite.mouseEnabled = true;
+			sprite.mouseChildren = false;
+			
+			sprite.addEventListener(MouseEvent.ROLL_OVER, onMouseOver, true);
+			sprite.addEventListener(MouseEvent.ROLL_OUT, onMouseOut, true);
+			sprite.addEventListener(MouseEvent.CLICK, onSpriteMouseClick, true);
 			var c: Coord;
 			var pt:Point;
 			if (place is InteractiveLayerPlace)
 			{
-				
-				
 				c = place.coord;
 				pt = container.coordToPoint(c);
 				
@@ -156,6 +172,87 @@ package com.iblsoft.flexiweather.widgets
 			}
 			
 		}
+		
+		private function debugParent(object: DisplayObjectContainer, name: String): void
+		{
+			var str: String = 'DEBUG parent ['+object.name+']\n';
+			str += 'mouseEnabled: ' + object.mouseEnabled + ' mouseChildren: ' + object.mouseChildren + '\n';
+			str += 'parents: ';
+			while (object.parent)
+			{
+				str += object.parent.name + ' ['+object.parent.mouseEnabled+','+object.parent.mouseChildren+'] | ';
+				object = object.parent;
+			}	
+			
+			trace(str);
+		}
+		override public function onMouseClick(event:MouseEvent):Boolean
+		{
+			trace("\n\n**********************************");
+			trace('mouseClick' + event.target);
+			
+			if (event.target is PlaceSprite)
+			{
+				debugParent(event.target as DisplayObjectContainer, 'sprite');
+				onMouseOver(event);
+			} else {
+				onMouseOut(event);
+			}
+			
+			debugParent(event.target as DisplayObjectContainer, 'target');
+			debugParent(event.currentTarget as DisplayObjectContainer, 'currentTarget');
+			
+			if (event.currentTarget.name = 'm_iw' && event.currentTarget is InteractiveWidget)
+			{
+				var widget: InteractiveWidget = event.currentTarget as InteractiveWidget;
+
+			}
+				
+			return false;
+		}
+		private function onSpriteMouseClick(event: MouseEvent): void
+		{
+			trace('onSpriteMouseClick');
+		}
+		
+		override public function onMouseRollOver(event: MouseEvent): Boolean
+        { 
+        	trace('onMouseRollOver' + event.target);
+        	trace('onMouseRollOver' + event.currentTarget);
+        	return false; 
+        }
+        
+        override public function onMouseRollOut(event: MouseEvent): Boolean
+        { 
+        	trace('onMouseRollOut' + event.target);
+        	trace('onMouseRollOut' + event.currentTarget);
+        	return false; 
+        }
+        
+		private function onMouseOver(event: MouseEvent = null): void
+		{
+			trace('onMouseOver');
+			if (!tooltip)
+				tooltip = new PlaceSpriteTooltip();
+	
+			
+			addChild(tooltip);
+			
+							
+			var txt: String = (event.target as PlaceSprite).tooltip;
+			tooltip.draw(txt);
+			
+			tooltip.x = event.localX - tooltip.width / 2;
+			tooltip.y = event.localY + 10;
+		}
+		
+		private function onMouseOut(event: MouseEvent = null): void
+		{
+			trace('onMouseOut');
+			if (tooltip && tooltip.parent == this)
+				removeChild(tooltip);
+		}
+	
 		
 
 		// getters & setters
@@ -174,13 +271,41 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.proj.Coord;
 	import flash.filters.DropShadowFilter;
 	import flash.filters.GlowFilter;
+	import flash.events.MouseEvent;
 	
 
 class PlaceSpriteTooltip extends Sprite
 {
+	private var tf: TextField;
+	
 	public function PlaceSpriteTooltip(): void
 	{
+		tf = new TextField();
+		addChild(tf);
 		
+		tf.x = 5;
+		tf.y = 5;
+		
+	}
+	
+	public function draw(txt: String): void
+	{
+		var gr: Graphics = graphics;
+		
+		tf.text = txt;
+		tf.autoSize = 'left';
+		var format: TextFormat = tf.getTextFormat();
+		format.font = '_typewriter';
+		format.size = 13;
+		format.color = 0x555555;
+		tf.setTextFormat(format);
+		
+		
+		gr.clear();
+		gr.beginFill(0xf0f0f0);
+		gr.lineStyle(1, 0x888888);
+		gr.drawRect(0,0, tf.textWidth + 10, tf.textHeight + 10);
+		gr.endFill();
 	}
 }
 
@@ -198,6 +323,9 @@ class PlaceSprite extends Sprite
 	private var iconsPosition: int = 16;
 	private var gap: int = 3;
 	
+	private static var cnt: int = 0;
+	
+	
 	public function get placeWidth(): Number
 	{
 		return size / 2 + gap * 3 + labelTxt.textWidth;
@@ -206,8 +334,14 @@ class PlaceSprite extends Sprite
 	{
 		_letters = new Array();
 		createLabel();
+		
+		cnt++;
+		
+		name = 'PlaceSprite'+cnt;
+		
 
 	}
+	
 	
 	public function destroy(): void
 	{
@@ -234,11 +368,21 @@ class PlaceSprite extends Sprite
 	public function setLabelPosition(point: Point): void
 	{
 		labelTxt.x = point.x;
-		labelTxt.y = point.y - labelTxt.textHeight / 2;
+		labelTxt.y = point.y - labelTxt.textHeight / 2 -  2;
 	}
 	public function setLabelText(text: String): void
 	{
 		labelTxt.text = text;
+		
+		var format: TextFormat = labelTxt.getTextFormat();
+		//format.color = 0xffffff;
+		
+		labelTxt.autoSize = 'left';
+		
+		format.bold = false;
+		format.size = 13;
+		format.font = '_typewriter';
+		labelTxt.setTextFormat(format);
 	}
 	
 	/**
@@ -266,6 +410,8 @@ class PlaceSprite extends Sprite
 			{
 				placeName = place.placeLabel;
 				labelPoint = new Point(pt.x, pt.y);
+				
+				tooltip = place.tooltip;
 			}
 			pt.x += size + gap;
 			
@@ -277,6 +423,8 @@ class PlaceSprite extends Sprite
 		setLabelText(placeName);
 	}
 	
+	public var tooltip: String;
+	
 	/**
 	 * Draw single place (1 object inside) 
 	 * @param place
@@ -286,6 +434,7 @@ class PlaceSprite extends Sprite
 	 */	
 	public function draw(place: InteractiveLayerPlace, pt: Point, xPos: Number): void
 	{
+		tooltip = place.tooltip;
 		var gr: Graphics = graphics;
 		gr.clear();
 		
@@ -303,15 +452,8 @@ class PlaceSprite extends Sprite
 	{
 		var crossSize: int = 3;
 		
-//		gr.lineStyle(1, 0xffffff);
-//		
-//		var add: int = 1;
-//		
-//		gr.moveTo(pt.x - crossSize + add, pt.y - crossSize + add);
-//		gr.lineTo(pt.x + crossSize + add, pt.y + crossSize + add);
-//		gr.moveTo(pt.x + crossSize + add, pt.y - crossSize + add);
-//		gr.lineTo(pt.x - crossSize + add, pt.y + crossSize + add);
-		
+
+		/*
 		gr.lineStyle(1, 0x000000);
 		
 		var add: int = 0;
@@ -320,6 +462,12 @@ class PlaceSprite extends Sprite
 		gr.lineTo(pt.x + crossSize + add, pt.y + crossSize + add);
 		gr.moveTo(pt.x + crossSize + add, pt.y - crossSize + add);
 		gr.lineTo(pt.x - crossSize + add, pt.y + crossSize + add);
+		*/
+		
+		gr.lineStyle(1,0x880000);
+		gr.beginFill(0xff0000);
+		gr.drawCircle(pt.x, pt.y, 3);
+		gr.endFill();
 	}
 	
 	private function drawItem(gr: Graphics, pt: Point, place: InteractiveLayerPlace, xPos: Number = 0): void
@@ -353,28 +501,31 @@ class PlaceSprite extends Sprite
 		var format: TextFormat = letterTxt.getTextFormat();
 		format.color = place.pointLetterColor;
 		format.size = 12;
+		format.font = '_sans';
+//		letterTxt.border = true;
+//		letterTxt.borderColor = 0xffffff;
 		letterTxt.setTextFormat(format);
 		
 		letterTxt.x = pt.x - letterTxt.textWidth / 2 - 2;
-		letterTxt.y = pt.y - letterTxt.textHeight / 2 - 1 + iconsPosition;
+		letterTxt.y = pt.y - letterTxt.textHeight / 2 - 2 + iconsPosition;
+		
+		letterTxt.width = size;
+		letterTxt.height = size;
 	}
 	
 	private function createLabel(): void
 	{
-		labelTxt = new TextField();
-		labelTxt.width = 100;
-		labelTxt.height = 16;
+		if (!labelTxt)
+		{
+			labelTxt = new TextField();
+			var glow:GlowFilter = new GlowFilter(0xffffff,1,3,3,3);
+			filters = [glow];
+			labelTxt.height = 16;
+	
+			addChild(labelTxt);
+			
+		}
 		
-		var format: TextFormat = labelTxt.getTextFormat();
-		//format.color = 0xffffff;
-		format.bold = true;
-		format.size = 12;
-		labelTxt.setTextFormat(format);
-		
-		var glow:GlowFilter = new GlowFilter(0xffffff,1,3,3,3);
-		filters = [glow];
-
-		addChild(labelTxt);
 		
 	}
 }

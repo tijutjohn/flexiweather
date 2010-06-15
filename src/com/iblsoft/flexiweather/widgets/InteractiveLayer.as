@@ -22,6 +22,9 @@ package com.iblsoft.flexiweather.widgets
 		{
 			super();
 			
+			mouseEnabled = false;
+			mouseFocusEnabled = false;
+
 			//FIX for diplaying Layers in List. If there are multiple isntances of same Layer types
 			//there were problem with pairing layer uid and itemRenderer. This is fix/workaround to have alway
 			//unique UID set
