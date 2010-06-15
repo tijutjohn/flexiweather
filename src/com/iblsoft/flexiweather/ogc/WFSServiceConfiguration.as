@@ -6,6 +6,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.widgets.BackgroundJobManager;
 	
 	import flash.events.DataEvent;
+	import flash.events.Event;
 	import flash.net.URLRequest;
 	
 	import mx.collections.ArrayCollection;
@@ -71,7 +72,8 @@ package com.iblsoft.flexiweather.ogc
 				queryCapabilities();
 		}
 		
-		public function get featurTypes(): ArrayCollection
+		[Bindable (event='featureTypesChanged')]
+		public function get featureTypes(): ArrayCollection
 		{ return m_featureTypes; }
 		
 		protected function onCapabilitiesLoaded(event: UniURLLoaderEvent): void
@@ -111,6 +113,8 @@ package com.iblsoft.flexiweather.ogc
 						}
 						
 						dispatchEvent(new DataEvent(CAPABILITIES_UPDATED));
+						
+						dispatchEvent(new Event('featureTypesChanged'));
 					}
 				}
 				
