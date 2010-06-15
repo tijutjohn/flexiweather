@@ -54,7 +54,7 @@ package com.iblsoft.flexiweather.ogc
 				r.data = new URLVariables();
 			else
 				r.data = new URLVariables(m_data.toString());
-			r.data.SERVICE = "WMS";
+			r.data.SERVICE = ms_service.toUpperCase();
 			r.data.VERSION = m_version.toString();
 			r.data.REQUEST = s_request;
 			return r;
