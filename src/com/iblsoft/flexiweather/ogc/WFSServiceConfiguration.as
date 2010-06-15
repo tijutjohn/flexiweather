@@ -5,6 +5,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.widgets.BackgroundJob;
 	import com.iblsoft.flexiweather.widgets.BackgroundJobManager;
 	
+	import flash.events.DataEvent;
 	import flash.net.URLRequest;
 	
 	import mx.collections.ArrayCollection;
@@ -83,22 +84,45 @@ package com.iblsoft.flexiweather.ogc
 			m_capabilitiesLoadJob.finish();
 			m_capabilitiesLoadJob = null;
 			if(event.result is XML) {
-				/*
 				var xml: XML = event.result as XML;
 				
 				var s_version: String = xml.@version;
 				var version: Version = Version.fromString(s_version);
-				var wms: Namespace = version.isLessThan(1, 3, 0)
-						? new Namespace() : new Namespace("http://www.opengis.net/wfs"); 
-				var capability: XML = xml.wms::Capability[0];
-				if(capability != null) {
+				//var wfs: Namespace = version.isLessThan(1, 3, 0)
+				//		? new Namespace() : new Namespace("http://www.opengis.net/wfs"); 
+						
+				var wfs: Namespace = new Namespace("http://www.opengis.net/wfs");
+				//var wfs: Namespace = new Namespace("http://www.iblsoft.com/wfs");
+				
+				var capability: XMLList = xml.wfs::FeatureTypeList;
+				
+				var nFeatureType: WFSFeatureType;
+				
+				if (capability != null){
+					var fTypeList: XMLList = capability.wfs::FeatureType;
+					
+					if (fTypeList != null){
+						m_featureTypes = new ArrayCollection();
+						
+						for each (var fChild: XML in fTypeList){
+							nFeatureType = new WFSFeatureType(fChild, wfs, version);
+							
+							m_featureTypes.addItem(nFeatureType);
+						}
+						
+						dispatchEvent(new DataEvent(CAPABILITIES_UPDATED));
+					}
+				}
+				
+				//var nFeatureType: WFSFeatureType;
+				
+				/*if(capability != null) {
 					var layer: XML = capability.wms::Layer[0];
 					m_layers = new WMSLayerGroup(null, layer, wms, version);
 	
 					m_capabilities = xml;
 					dispatchEvent(new DataEvent(CAPABILITIES_UPDATED));
-				}
-				*/
+				}*/
 			}
 		}
 
