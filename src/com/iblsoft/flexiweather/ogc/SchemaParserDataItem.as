@@ -23,6 +23,9 @@ package com.iblsoft.flexiweather.ogc
 		 */		
 		public var tempFullName: String;
 		
+		/**
+		 * 
+		 */
 		public function get fullName(): String
 		{
 			var retName: String = name;
@@ -34,6 +37,20 @@ package com.iblsoft.flexiweather.ogc
 			
 			return retName;
 		}
+		
+		/**
+		 * 
+		 */
+		public function get fullNameNoRoot(): String
+		{
+			var retName: String = fullName;
+			
+			// CUT FIRST NAME
+			retName = retName.substr(retName.indexOf('/') + 1);
+			
+			return retName;
+		}
+		
 		public var type:String;
 		public var nullable:Boolean;
 		
