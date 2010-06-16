@@ -3,7 +3,6 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	
 	import flash.events.EventDispatcher;
-	import flash.events.IEventDispatcher;
 	
 	public class SchemaParserDataItem extends EventDispatcher
 	{
@@ -46,7 +45,9 @@ package com.iblsoft.flexiweather.ogc
 			var retName: String = fullName;
 			
 			// CUT FIRST NAME
-			retName = retName.substr(retName.indexOf('/') + 1);
+			var parts: Array = retName.split('/');
+			parts.shift();
+			retName = parts.join('/');
 			
 			return retName;
 		}
@@ -64,21 +65,15 @@ package com.iblsoft.flexiweather.ogc
 		public var minOccurs: int;
 		public var maxOccurs: int;
 		
-		/**
-		 * Class needs to know how many instance was created, otherwise there is no possibility to know if it can be created again (maxOccurences) 
-		 */		
-		private var _instancesCount: int;
+		
 		
 		public function get isMandatory(): Boolean
 		{
 			return minOccurs > 0;
 		}
 		
-		[Bindable (event="instancesCountChanged")]
-		public function get allowCreation(): Boolean
-		{
-			return _instancesCount < maxOccurs;
-		}
+		
+
 		
 		public function get hasChildren(): Boolean
 		{

@@ -1,8 +1,11 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import flash.events.Event;
+	import flash.events.EventDispatcher;
+	
 	import mx.collections.ArrayCollection;
 	
-	public class WFSFeatureType
+	public class WFSFeatureType extends EventDispatcher
 	{
 		internal var ms_name: String;
 		internal var ms_title: String;
@@ -10,6 +13,13 @@ package com.iblsoft.flexiweather.ogc
 		
 		internal var m_definition: SchemaParserDataItem;
 		
+		private var _items: ArrayCollection;
+		
+		[Bindable (event="itemsChanged")]
+		public function get items(): ArrayCollection
+		{
+			return _items;
+		}
 		public function WFSFeatureType(xml: XML, wms: Namespace, version: Version)
 		{
 			ms_name = String(xml.wms::Name);
@@ -51,6 +61,9 @@ package com.iblsoft.flexiweather.ogc
 		public function setDefinition(definition: SchemaParserDataItem):void
 		{
 			m_definition = definition;
+			
+			_items = new ArrayCollection(getScalarItems());
+			dispatchEvent(new Event('itemsChanged'));
 		}
 		
 		/**
