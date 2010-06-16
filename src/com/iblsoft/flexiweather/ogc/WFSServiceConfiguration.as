@@ -8,6 +8,7 @@ package com.iblsoft.flexiweather.ogc
 	import flash.events.DataEvent;
 	import flash.events.Event;
 	import flash.net.URLRequest;
+	import flash.net.URLVariables;
 	
 	import mx.collections.ArrayCollection;
 	
@@ -16,10 +17,14 @@ package com.iblsoft.flexiweather.ogc
 		public var id: String;
 		
 		internal var m_capabilitiesLoader: UniURLLoader = new UniURLLoader();
+		internal var m_featureTypesLoader: UniURLLoader = new UniURLLoader();
 		internal var m_capabilities: XML = null;
 		internal var m_capabilitiesLoadJob: BackgroundJob = null;
+		internal var m_featureTypesLoadJob: BackgroundJob = null;
 		
 		internal var m_featureTypes: ArrayCollection = null;
+		
+		internal var m_schemaParser: SchemaParser;
 		
 		public static const CAPABILITIES_UPDATED: String = "capabilitiesUpdated";
 
@@ -28,8 +33,14 @@ package com.iblsoft.flexiweather.ogc
 		public function WFSServiceConfiguration(s_url: String = null, version: Version = null)
 		{
 			super(s_url, "wfs", version);
+			
+			m_schemaParser = new SchemaParser();
+			
 			m_capabilitiesLoader.addEventListener(UniURLLoader.DATA_LOADED, onCapabilitiesLoaded);
 			m_capabilitiesLoader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onCapabilitiesLoadFailed);
+			
+			m_featureTypesLoader.addEventListener(UniURLLoader.DATA_LOADED, onFeatureTypesLoaded);
+			m_featureTypesLoader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onFeatureTypesLoadFailed);
 		}
 		
 		public function getFeatureTypeByName(s_name: String): WFSFeatureType
@@ -54,6 +65,24 @@ package com.iblsoft.flexiweather.ogc
 			//r.data.FORMAT = "image/png"; 
 			return r;
 		}
+		
+		/**
+		 * 
+		 */
+		public function toGetDescribeFeatureTypeRequest(featureTypeListVars: URLVariables): URLRequest
+		{
+			var r: URLRequest = new URLRequest(ms_baseURL);
+			 
+			if (featureTypeListVars != null){
+				r.data = new URLVariables(featureTypeListVars.toString());
+			}
+			
+			r.data.SERVICE = ms_service.toUpperCase();
+			r.data.VERSION = m_version.toString();
+			r.data.REQUEST = 'DescribeFeatureType';
+			
+			return r;
+		}
 
 		public function queryCapabilities(): void
 		{
@@ -63,6 +92,19 @@ package com.iblsoft.flexiweather.ogc
 				m_capabilitiesLoadJob.finish();
 			m_capabilitiesLoadJob = BackgroundJobManager.getInstance().startJob(
 					"Getting WFS capabilities for " + ms_baseURL);
+		}
+		
+		/**
+		 * 
+		 */
+		public function queryDescribeFeatureType(featureTypeListVars: URLVariables): void
+		{
+			var r: URLRequest = toGetDescribeFeatureTypeRequest(featureTypeListVars);
+			m_featureTypesLoader.load(r);
+			if(m_featureTypesLoadJob != null)
+				m_featureTypesLoadJob.finish();
+			m_featureTypesLoadJob = BackgroundJobManager.getInstance().startJob(
+					"Getting WFS describe feature type list " + ms_baseURL);
 		}
 		
 		override internal function update(): void
@@ -102,6 +144,8 @@ package com.iblsoft.flexiweather.ogc
 				
 				if (capability != null){
 					var fTypeList: XMLList = capability.wfs::FeatureType;
+					var featureTypeListVars: URLVariables = new URLVariables();
+					var typenameParam: Array = new Array();
 					
 					if (fTypeList != null){
 						m_featureTypes = new ArrayCollection();
@@ -110,23 +154,20 @@ package com.iblsoft.flexiweather.ogc
 							nFeatureType = new WFSFeatureType(fChild, wfs, version);
 							
 							m_featureTypes.addItem(nFeatureType);
+							
+							typenameParam.push(nFeatureType.title);
 						}
 						
-						dispatchEvent(new DataEvent(CAPABILITIES_UPDATED));
+						//dispatchEvent(new DataEvent(CAPABILITIES_UPDATED));
 						
-						dispatchEvent(new Event('featureTypesChanged'));
+						//dispatchEvent(new Event('featureTypesChanged'));
 					}
+					
+					featureTypeListVars.TYPENAME = typenameParam.join(',');
+					
+					// LOAD ALL FEATURE TYPES AS ONE REQUEST
+					queryDescribeFeatureType(featureTypeListVars);
 				}
-				
-				//var nFeatureType: WFSFeatureType;
-				
-				/*if(capability != null) {
-					var layer: XML = capability.wms::Layer[0];
-					m_layers = new WMSLayerGroup(null, layer, wms, version);
-	
-					m_capabilities = xml;
-					dispatchEvent(new DataEvent(CAPABILITIES_UPDATED));
-				}*/
 			}
 		}
 
@@ -137,5 +178,42 @@ package com.iblsoft.flexiweather.ogc
 			// keep old m_capabilities
 		}
 		
+		/**
+		 * 
+		 */
+		protected function onFeatureTypesLoaded(event: UniURLLoaderEvent): void
+		{
+			if (!m_featureTypesLoadJob)
+			{
+				trace("ERROR WFS m_featureTypesLoadJob IS null")
+				return;
+			}
+			
+			m_featureTypesLoadJob.finish();
+			m_featureTypesLoadJob = null;
+			if(event.result is XML) {
+				var xml: XML = event.result as XML;
+				
+				// PARSE DEFINITION
+				m_schemaParser.parseSchema(xml);
+				
+				// GO THRUE ALL FEATURE TYPES
+				for each (var tFeatureType: WFSFeatureType in m_featureTypes){
+					// FIND 
+					tFeatureType.setDefinition(m_schemaParser.getElementByName(tFeatureType.title));
+				}
+				
+				dispatchEvent(new Event('featureTypesChanged'));
+			}
+		}
+		
+		/**
+		 * 
+		 */
+		protected function onFeatureTypesLoadFailed(event: UniURLLoaderEvent): void
+		{
+			m_featureTypesLoadJob.finish();
+			m_featureTypesLoadJob = null;
+		}
 	}
 }

@@ -8,6 +8,8 @@ package com.iblsoft.flexiweather.ogc
 		internal var ms_title: String;
 		internal  var ma_crsWithBBoxes: ArrayCollection = new ArrayCollection();
 		
+		internal var m_definition: SchemaParserDataItem;
+		
 		public function WFSFeatureType(xml: XML, wms: Namespace, version: Version)
 		{
 			ms_name = String(xml.wms::Name);
@@ -42,6 +44,25 @@ package com.iblsoft.flexiweather.ogc
 
 		public function get title(): String
 		{ return ms_title; }
-
+		
+		/**
+		 * 
+		 */
+		public function setDefinition(definition: SchemaParserDataItem):void
+		{
+			m_definition = definition;
+		}
+		
+		/**
+		 * 
+		 */
+		public function getScalarItems(): Array
+		{
+			if (m_definition){
+				return(m_definition.getScalarItems());
+			} else {
+				return(null);
+			}
+		}
 	}
 }
