@@ -69,6 +69,7 @@ package com.iblsoft.flexiweather.widgets
 			}
 			
 			sprite.mouseEnabled = true;
+			sprite.mouseChildren = false;
 			addChild(sprite);
 			
 			return sprite;
@@ -140,8 +141,6 @@ package com.iblsoft.flexiweather.widgets
 		private function drawPlace(place: Object, xPos: Number = 0): void
 		{
 			var sprite: PlaceSprite = getNewPlaceSprite();
-			sprite.mouseEnabled = true;
-			sprite.mouseChildren = false;
 			
 			trace("DRAW PLACE" + sprite)
 			var c: Coord;
@@ -326,6 +325,7 @@ class PlaceSprite extends Sprite
 	
 	private static var cnt: int = 0;
 	
+	private var icons: Sprite;
 	
 	public function get placeWidth(): Number
 	{
@@ -337,6 +337,12 @@ class PlaceSprite extends Sprite
 		name = 'PlaceSprite'+cnt;
 		
 		_letters = new Array();
+		
+		icons = new Sprite();
+		addChild(icons);
+		
+		hitArea = icons;
+		
 		createLabel();
 		
 
@@ -374,7 +380,7 @@ class PlaceSprite extends Sprite
 	{
 		var txt: TextField = new TextField();
 		_letters.push(txt);
-		
+		txt.mouseEnabled = false;
 		addChild(txt);
 		
 		return txt;
@@ -396,6 +402,7 @@ class PlaceSprite extends Sprite
 		format.size = 13;
 		format.font = '_typewriter';
 		labelTxt.setTextFormat(format);
+		labelTxt.mouseEnabled = false;
 		
 	}
 	
@@ -407,7 +414,7 @@ class PlaceSprite extends Sprite
 	 */	
 	public function drawMultiple(places: Array, pt: Point): void
 	{
-		var gr: Graphics = graphics;
+		var gr: Graphics = icons.graphics;
 		gr.clear();
 		
 		var placeName: String = '';
@@ -449,7 +456,7 @@ class PlaceSprite extends Sprite
 	public function draw(place: InteractiveLayerPlace, pt: Point, xPos: Number): void
 	{
 		tooltip = place.tooltip;
-		var gr: Graphics = graphics;
+		var gr: Graphics = icons.graphics;
 		gr.clear();
 		
 		drawPointCross(gr, pt);
@@ -520,6 +527,7 @@ class PlaceSprite extends Sprite
 		letterTxt.x = pt.x - letterTxt.textWidth / 2 - 2;
 		letterTxt.y = pt.y - letterTxt.textHeight / 2 - 2 + iconsPosition;
 		
+//		letterTxt.mouseEnabled = false;
 		letterTxt.width = size;
 		letterTxt.height = size;
 	}
@@ -532,7 +540,9 @@ class PlaceSprite extends Sprite
 			var glow:GlowFilter = new GlowFilter(0xffffff,1,3,3,3);
 			filters = [glow];
 			labelTxt.height = 16;
-	
+//			labelTxt.mouseEnabled = false;
+			labelTxt.selectable = false;
+			labelTxt.border = false;
 			addChild(labelTxt);
 			
 			

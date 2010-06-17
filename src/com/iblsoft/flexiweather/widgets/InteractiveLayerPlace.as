@@ -9,7 +9,7 @@ package com.iblsoft.flexiweather.widgets
 		public var tooltip: String;
 		
 		[Bindable]
-		public var pointColor: uint = 0xff0000;
+		public var pointColor: uint = 0xffffff;
 		[Bindable]
 		public var pointType: String = 'circle';
 		public var pointLetter: String = '';

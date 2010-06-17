@@ -29,9 +29,16 @@ package com.iblsoft.flexiweather.widgets
         {
 			if(_p == null)
 				return false;
-			if(doPanTo(new Point(event.localX, event.localY), true)) {
-	        	//invalidateDynamicPart();
-	        }
+				
+			var endP: Point = new Point(event.localX, event.localY);
+			if (Point.distance(_p, endP) > 1)
+			{
+				if(doPanTo(endP, true)) {
+		        	//invalidateDynamicPart();
+		        }
+		 	} else {
+		 		trace("Pan is switched ON, but distance was small");
+		 	}
         	_p = null;
         	return true;
         }
