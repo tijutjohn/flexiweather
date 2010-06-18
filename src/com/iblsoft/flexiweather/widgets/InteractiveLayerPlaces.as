@@ -11,6 +11,7 @@ package com.iblsoft.flexiweather.widgets
 	
 	import mx.collections.ArrayCollection;
 	import mx.events.CollectionEvent;
+	import mx.events.DynamicEvent;
 	
 	public class InteractiveLayerPlaces extends InteractiveLayer
 	{
@@ -19,6 +20,8 @@ package com.iblsoft.flexiweather.widgets
 		protected var ma_coords: ArrayCollection = new ArrayCollection();
 
 		public static const CHANGE: String = "interactiveLayerPlacesChanged";
+		public static const SHOW_TOOLTIP: String = 'showTooltip';
+		public static const HIDE_TOOLTIP: String = 'hideTooltip';
 		 
 		public function InteractiveLayerPlaces(container: InteractiveWidget = null)
 		{
@@ -30,15 +33,13 @@ package com.iblsoft.flexiweather.widgets
 			_sprites = new Array();
 			ma_coords.addEventListener(CollectionEvent.COLLECTION_CHANGE, onCoordsCollectionChanged);
 			
-			mouseChildren = true;
-			mouseEnabled = true;
 		}
 		
 		private var _sprites: Array;
 		
 		private function clearOldState(): void
 		{
-			trace("CLEAR OLD STATE");
+//			trace("CLEAR OLD STATE");
 			var total: int = numChildren;
 			
 			while (numChildren > 0)
@@ -50,11 +51,11 @@ package com.iblsoft.flexiweather.widgets
 					_sprites.push(sprite);
 				} 
 				
-				if (tooltip && tooltip.parent == this)
-				{
-					removeChild(tooltip);
-					tooltip = null;
-				}
+//				if (tooltip && tooltip.parent == this)
+//				{
+//					removeChild(tooltip);
+//					tooltip = null;
+//				}
 			}
 		}
 		
@@ -69,7 +70,7 @@ package com.iblsoft.flexiweather.widgets
 			}
 			
 			sprite.mouseEnabled = true;
-			sprite.mouseChildren = false;
+			sprite.mouseChildren = true;
 			addChild(sprite);
 			
 			return sprite;
@@ -136,13 +137,11 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 		
-		private var tooltip: PlaceSpriteTooltip;
-		
 		private function drawPlace(place: Object, xPos: Number = 0): void
 		{
 			var sprite: PlaceSprite = getNewPlaceSprite();
 			
-			trace("DRAW PLACE" + sprite)
+//			trace("DRAW PLACE" + sprite)
 			var c: Coord;
 			var pt:Point;
 			if (place is InteractiveLayerPlace)
@@ -193,7 +192,7 @@ package com.iblsoft.flexiweather.widgets
 			{
 				sprite = getChildAt(i) as PlaceSprite;
 				if (sprite)
-					str += 'On display list: ' + sprite + ' tooltip: ' + sprite.tooltip + ' letters: ' + sprite.debugLetters() + ' | ';
+					str += 'On display list: ' + sprite + ' | ';
 			}
 			
 			trace(str);
@@ -203,7 +202,7 @@ package com.iblsoft.flexiweather.widgets
 			trace("\n\n**********************************");
 			trace('mouseClick' + event.target);
 			
-			if (event.target is PlaceSprite)
+			if (event.target is IconSprite)
 			{
 				//debugParent(event.target as DisplayObjectContainer, 'sprite');
 				onMouseOver(event);
@@ -227,30 +226,21 @@ package com.iblsoft.flexiweather.widgets
 		
 		private function onMouseOver(event: MouseEvent = null): void
 		{
-			if (!tooltip)
-				tooltip = new PlaceSpriteTooltip();
-	
-			tooltip.mouseChildren = false;
-			tooltip.mouseEnabled = false;
+			var txt: String = (event.target as IconSprite).tooltip;
 			
-			addChild(tooltip);
-			
-							
-			var txt: String = (event.target as PlaceSprite).tooltip;
-			tooltip.draw(txt);
-			
-			tooltip.x = event.localX - tooltip.width / 2;
-			tooltip.y = event.localY + 10;
-			
-			trace("Tooltip ["+tooltip.x + ", " + tooltip.y + "] ["+tooltip.width+","+tooltip.height+"] visible:" + tooltip.visible + " alpha: " + tooltip.alpha + " tooltip: " + tooltip.parent);
-			tooltip.visible = true;
-			tooltip.alpha = 1;
+			var de: DynamicEvent = new DynamicEvent(SHOW_TOOLTIP, true);
+			de['text'] = txt;
+			de['x'] = event.localX;
+			de['y'] = event.localY + 10;
+			dispatchEvent(de);
 		}
+		
+		
 		
 		private function onMouseOut(event: MouseEvent = null): void
 		{
-			if (tooltip && tooltip.parent == this)
-				removeChild(tooltip);
+			var de: DynamicEvent = new DynamicEvent(HIDE_TOOLTIP, true);
+			dispatchEvent(de);
 		}
 	
 		
@@ -272,46 +262,97 @@ package com.iblsoft.flexiweather.widgets
 	import flash.filters.DropShadowFilter;
 	import flash.filters.GlowFilter;
 	import flash.events.MouseEvent;
+	import mx.containers.Canvas;
+	import mx.controls.TextArea;
+	import mx.core.UIComponent;
+	import mx.core.UITextField;
 	
 
-class PlaceSpriteTooltip extends Sprite
+
+/*****************************************************************************************************************************************
+ * 
+ *  Class which draw 1 icon for location
+ * 
+*****************************************************************************************************************************************/
+
+class IconSprite extends Sprite
 {
-	private var tf: TextField;
+	//private var _letters: Array;
+	public var tooltip: String;
 	
-	public function PlaceSpriteTooltip(): void
+	private var iconsPosition: int = 16;
+	private var size: int = 16;
+	private function get halfSize(): Number
 	{
-		tf = new TextField();
-		addChild(tf);
-		
-		tf.x = 5;
-		tf.y = 5;
-		
+		return size / 2;
 	}
 	
-	public function draw(txt: String): void
+	public function IconSprite()
+	{
+		//_letters = new Array();
+	}
+	
+	public function drawItem( pt: Point, place: InteractiveLayerPlace, xPos: Number = 0): void
 	{
 		var gr: Graphics = graphics;
 		
-		tf.text = txt;
-		tf.autoSize = 'left';
-		var format: TextFormat = tf.getTextFormat();
-		format.font = '_sans';
-		format.size = 13;
-		format.color = 0x555555;
-		tf.setTextFormat(format);
+		gr.beginFill(place.pointColor);
+		gr.lineStyle(1,0);
 		
+		//move place in x axis (in case there is more place for same location)
+		pt.x += xPos;
 		
-		gr.clear();
-		gr.beginFill(0xf0f0f0);
-		gr.lineStyle(1, 0x888888);
-		gr.drawRect(0,0, tf.textWidth + 10, tf.textHeight + 10);
+		switch (place.pointType)
+		{
+			case 'Circle':
+				gr.drawCircle(pt.x, pt.y + iconsPosition, halfSize);
+				break;
+			default:
+			case 'Square':
+				gr.drawRect(pt.x - halfSize, pt.y - halfSize + iconsPosition, size, size);
+				break;
+		}
+		
 		gr.endFill();
+	}
+	
+	public function setLetterProperties(place: InteractiveLayerPlace, pt: Point): void
+	{
+		var letterTxt: TextField = createLetter();
+		letterTxt.text = place.pointLetter;
+		
+		var format: TextFormat = letterTxt.getTextFormat();
+		format.color = place.pointLetterColor;
+		format.size = 12;
+		format.font = '_sans';
+		letterTxt.setTextFormat(format);
+		
+		letterTxt.x = pt.x - letterTxt.textWidth / 2 - 2;
+		letterTxt.y = pt.y - letterTxt.textHeight / 2 - 2 + iconsPosition;
+		
+		letterTxt.width = size;
+		letterTxt.height = size;
+	}
+	
+	private function createLetter(): TextField
+	{
+		var txt: TextField = new TextField();
+		//_letters.push(txt);
+		txt.mouseEnabled = false;
+		addChild(txt);
+		
+		return txt;
 	}
 }
 
+/*****************************************************************************************************************************************
+ * 
+ *  Class which draw 1 location in map
+ * 
+*****************************************************************************************************************************************/
 class PlaceSprite extends Sprite
 {
-	private var _letters: Array;
+	
 	
 	private var labelTxt: TextField;
 	
@@ -320,7 +361,7 @@ class PlaceSprite extends Sprite
 	{
 		return size / 2;
 	}
-	private var iconsPosition: int = 16;
+	
 	private var gap: int = 3;
 	
 	private static var cnt: int = 0;
@@ -336,7 +377,7 @@ class PlaceSprite extends Sprite
 		cnt++;
 		name = 'PlaceSprite'+cnt;
 		
-		_letters = new Array();
+		
 		
 		icons = new Sprite();
 		addChild(icons);
@@ -348,7 +389,7 @@ class PlaceSprite extends Sprite
 
 	}
 	
-	
+	/*
 	public function debugLetters(): String
 	{
 		var retStr: String = '';
@@ -362,9 +403,10 @@ class PlaceSprite extends Sprite
 		}
 		return retStr;
 		
-	}
+	}*/
 	public function destroy(): void
 	{
+		/*
 		if (_letters && _letters.length > 0)
 		{
 			for each (var txt: TextField in _letters)
@@ -374,17 +416,9 @@ class PlaceSprite extends Sprite
 				txt = null;
 			}
 			_letters = [];
-		}
+		}*/
 	}
-	private function createLetter(): TextField
-	{
-		var txt: TextField = new TextField();
-		_letters.push(txt);
-		txt.mouseEnabled = false;
-		addChild(txt);
-		
-		return txt;
-	}
+
 	public function setLabelPosition(point: Point): void
 	{
 		labelTxt.x = point.x;
@@ -400,12 +434,19 @@ class PlaceSprite extends Sprite
 		
 		format.bold = false;
 		format.size = 13;
-		format.font = '_typewriter';
+		format.font = '_sans';
 		labelTxt.setTextFormat(format);
 		labelTxt.mouseEnabled = false;
 		
 	}
 	
+	private function destroyAllIcons(): void
+	{
+		while (icons.numChildren)
+		{
+			icons.removeChildAt(0);
+		}
+	}
 	/**
 	 * Draw multiple places. There will be just 1 label (from first place) and under there will be all icons 
 	 * @param places
@@ -414,6 +455,8 @@ class PlaceSprite extends Sprite
 	 */	
 	public function drawMultiple(places: Array, pt: Point): void
 	{
+		destroyAllIcons();
+		
 		var gr: Graphics = icons.graphics;
 		gr.clear();
 		
@@ -421,21 +464,22 @@ class PlaceSprite extends Sprite
 		var cnt: int = 0;
 		var labelPoint: Point;
 		
-		tooltip = ''
 		for each (var place: InteractiveLayerPlace in places)
 		{
-			drawItem(gr, pt, place);
+			var iconSprite: IconSprite = new IconSprite();
+			icons.addChild(iconSprite);
 			
-			setLetterProperties(place, pt);
+			iconSprite.drawItem(pt, place);
+			
+			iconSprite.setLetterProperties(place, pt);
 			
 			if (cnt == 0)
 			{
 				placeName = place.placeLabel;
 				labelPoint = new Point(pt.x, pt.y);
 				
-				tooltip = place.placeLabel;
 			}
-			tooltip += '\n\n' + place.tooltip;
+			iconSprite.tooltip = place.placeLabel + '\n\n' + place.tooltip;
 			pt.x += size + gap;
 			
 			cnt++;
@@ -446,7 +490,7 @@ class PlaceSprite extends Sprite
 		setLabelText(placeName);
 	}
 	
-	public var tooltip: String;
+	
 	
 	/**
 	 * Draw single place (1 object inside) 
@@ -457,15 +501,20 @@ class PlaceSprite extends Sprite
 	 */	
 	public function draw(place: InteractiveLayerPlace, pt: Point, xPos: Number): void
 	{
-		tooltip = place.placeLabel + '\n\n' + place.tooltip;
+		destroyAllIcons();
+		
+		var iconSprite: IconSprite = new IconSprite();
+		icons.addChild(iconSprite);
+		
+		iconSprite.tooltip = place.placeLabel + '\n\n' + place.tooltip;
 		
 		var gr: Graphics = icons.graphics;
 		gr.clear();
 		
 		drawPointCross(gr, pt);
-		drawItem(gr, pt, place, xPos);
+		iconSprite.drawItem(pt, place, xPos);
 		
-		setLetterProperties(place, pt);
+		iconSprite.setLetterProperties(place, pt);
 		
 		setLabelText(place.placeLabel);
 		setLabelPosition(new Point(pt.x  + gap, pt.y));
@@ -494,46 +543,9 @@ class PlaceSprite extends Sprite
 		gr.endFill();
 	}
 	
-	private function drawItem(gr: Graphics, pt: Point, place: InteractiveLayerPlace, xPos: Number = 0): void
-	{
-		gr.beginFill(place.pointColor);
-		gr.lineStyle(1,0);
-		
-		//move place in x axis (in case there is more place for same location)
-		pt.x += xPos;
-		
-		switch (place.pointType)
-		{
-			case 'Circle':
-				gr.drawCircle(pt.x, pt.y + iconsPosition, halfSize);
-				break;
-			default:
-			case 'Square':
-				gr.drawRect(pt.x - halfSize, pt.y - halfSize + iconsPosition, size, size);
-				break;
-		}
-		
-		gr.endFill();
-	}
 	
-	private function setLetterProperties(place: InteractiveLayerPlace, pt: Point): void
-	{
-		var letterTxt: TextField = createLetter();
-		letterTxt.text = place.pointLetter;
-		
-		var format: TextFormat = letterTxt.getTextFormat();
-		format.color = place.pointLetterColor;
-		format.size = 12;
-		format.font = '_sans';
-		letterTxt.setTextFormat(format);
-		
-		letterTxt.x = pt.x - letterTxt.textWidth / 2 - 2;
-		letterTxt.y = pt.y - letterTxt.textHeight / 2 - 2 + iconsPosition;
-		
-//		letterTxt.mouseEnabled = false;
-		letterTxt.width = size;
-		letterTxt.height = size;
-	}
+	
+
 	
 	private function createLabel(): void
 	{
