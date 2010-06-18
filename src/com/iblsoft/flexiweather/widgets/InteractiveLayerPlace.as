@@ -7,6 +7,8 @@ package com.iblsoft.flexiweather.widgets
 		public var coord: Coord;
 		public var placeLabel: String;
 		public var tooltip: String;
+		public var featureTypeName: String;
+		public var conditionName: String;
 		
 		[Bindable]
 		public var pointColor: uint = 0xffffff;

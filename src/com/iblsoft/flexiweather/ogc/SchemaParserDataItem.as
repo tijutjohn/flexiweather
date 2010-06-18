@@ -4,6 +4,8 @@ package com.iblsoft.flexiweather.ogc
 	
 	import flash.events.EventDispatcher;
 	
+	import mx.utils.UIDUtil;
+	
 	public class SchemaParserDataItem extends EventDispatcher
 	{
 		public static const TYPE_STRING: String 	= 'string';
@@ -80,11 +82,14 @@ package com.iblsoft.flexiweather.ogc
 			return (childrenParameters && childrenParameters.length > 0);
 		}
 		
+		public var uid: String;
+		
 		/**
 		 * 
 		 */
 		public function SchemaParserDataItem()
 		{
+			uid = UIDUtil.createUID();
 		}
 		
 		/**
@@ -153,6 +158,7 @@ package com.iblsoft.flexiweather.ogc
 		public function clone(): SchemaParserDataItem
 		{
 			var item: SchemaParserDataItem = new SchemaParserDataItem();
+			
 			item.name = name;
 			item.type = type;
 			item.nullable = nullable;

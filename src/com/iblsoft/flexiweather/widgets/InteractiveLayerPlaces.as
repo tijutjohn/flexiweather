@@ -295,7 +295,7 @@ class PlaceSpriteTooltip extends Sprite
 		tf.text = txt;
 		tf.autoSize = 'left';
 		var format: TextFormat = tf.getTextFormat();
-		format.font = '_typewriter';
+		format.font = '_sans';
 		format.size = 13;
 		format.color = 0x555555;
 		tf.setTextFormat(format);
@@ -421,6 +421,7 @@ class PlaceSprite extends Sprite
 		var cnt: int = 0;
 		var labelPoint: Point;
 		
+		tooltip = ''
 		for each (var place: InteractiveLayerPlace in places)
 		{
 			drawItem(gr, pt, place);
@@ -432,8 +433,9 @@ class PlaceSprite extends Sprite
 				placeName = place.placeLabel;
 				labelPoint = new Point(pt.x, pt.y);
 				
-				tooltip = place.tooltip;
+				tooltip = place.placeLabel;
 			}
+			tooltip += '\n\n' + place.tooltip;
 			pt.x += size + gap;
 			
 			cnt++;
@@ -455,7 +457,8 @@ class PlaceSprite extends Sprite
 	 */	
 	public function draw(place: InteractiveLayerPlace, pt: Point, xPos: Number): void
 	{
-		tooltip = place.tooltip;
+		tooltip = place.placeLabel + '\n\n' + place.tooltip;
+		
 		var gr: Graphics = icons.graphics;
 		gr.clear();
 		
