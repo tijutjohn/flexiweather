@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	
 	import flash.events.Event;
@@ -118,13 +119,40 @@ package com.iblsoft.flexiweather.ogc
 		 */
 		public function getFeature(resultXml: XML): WFSFeature
 		{
-			var ret: WFSFeature; // = new WFSFeature();
+			var retFeature: WFSFeature = new WFSFeature(ms_name); // = new WFSFeature();
 			
-			if (m_definition){
-				var t: Array = m_definition.getScalarValues(resultXml);
+			var wfs: Namespace = new Namespace('http://www.opengis.net/wfs');
+			var gml: Namespace = new Namespace('http://www.opengis.net/gml');
+			var ibl: Namespace = new Namespace('http://www.iblsoft.com/wfs');
+			
+			var location: XML = resultXml.gml::location[0];
+			
+			if (location)
+			{
+				var point: XML = location.gml::Point[0];
+				if (point)
+				{
+					var coordXML: XML = point.gml::coordinates[0];
+					if (coordXML)
+					{
+						var coordString: String = coordXML.text();
+						var coordArr: Array = coordString.split(',');
+						retFeature.location = new Coord('EPSG:4326' , coordArr[0], coordArr[1]);
+					} else {
+						trace('there is location with Point without coordinates: ' + point.toXMLString());
+//						Alert.show('there is location with Point without coordinates: ' + point.toXMLString(), 'Location problem', Alert.OK);
+					}
+				} else {
+					trace('there is location without: ' + location.toXMLString());
+//					Alert.show('there is location without: ' + location.toXMLString(), 'Location problem', Alert.OK);
+				}
 			}
 			
-			return(ret);
+			if (m_definition){
+				retFeature.values = new ArrayCollection(m_definition.getScalarValues(resultXml));
+			}
+			
+			return(retFeature);
 		}
 	}
 }

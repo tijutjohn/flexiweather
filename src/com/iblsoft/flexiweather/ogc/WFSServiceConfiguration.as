@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.utils.UniURLLoader;
 	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.widgets.BackgroundJob;
@@ -52,11 +53,38 @@ package com.iblsoft.flexiweather.ogc
 			{
 				for each (var featureType: WFSFeatureType in m_featureTypes)
 				{
-					if (featureType.name == s_name)
+					if ((featureType.name == s_name) || (featureType.title == s_name))
 						return featureType;
 				}
 			}
 			return null;
+		}
+
+		/**
+		 * Parse output, find feature types coresponding to the output and returns ArrayCollection of WFSFeature objects
+		 */
+		public function getFeatures(responseXML: XML): ArrayCollection
+		{
+			var ret: ArrayCollection = new ArrayCollection();
+			
+			var wfs: Namespace = new Namespace('http://www.opengis.net/wfs');
+			var gml: Namespace = new Namespace('http://www.opengis.net/gml');
+			
+			var fType: WFSFeatureType;
+			
+			for each (var featureMember: XML in responseXML.gml::featureMember)
+			{
+				var item: XML = featureMember.children()[0];
+							
+				fType = getFeatureTypeByName(item.localName());
+							
+				var sItems:ArrayCollection = fType.getScalarItems();
+				
+				ret.addItem(fType.getFeature(item));
+				//ArrayUtils.unionArrays(ret.source, fType.getFeature(item));
+			}
+			
+			return(ret);
 		}
 
 		public function toGetCapabilitiesRequest(): URLRequest
@@ -157,10 +185,6 @@ package com.iblsoft.flexiweather.ogc
 							
 							typenameParam.push(nFeatureType.title);
 						}
-						
-						//dispatchEvent(new DataEvent(CAPABILITIES_UPDATED));
-						
-						//dispatchEvent(new Event('featureTypesChanged'));
 					}
 					
 					featureTypeListVars.TYPENAME = typenameParam.join(',');
