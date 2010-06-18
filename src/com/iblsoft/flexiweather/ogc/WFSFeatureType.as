@@ -1,5 +1,7 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.utils.ArrayUtils;
+	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	
@@ -12,6 +14,8 @@ package com.iblsoft.flexiweather.ogc
 		internal  var ma_crsWithBBoxes: ArrayCollection = new ArrayCollection();
 		
 		protected var m_definition: SchemaParserDataItem;
+		
+		protected var m_definition_items: ArrayCollection;
 		
 		private var _items: ArrayCollection;
 		
@@ -64,20 +68,37 @@ package com.iblsoft.flexiweather.ogc
 		{
 			m_definition = definition;
 			
-			_items = new ArrayCollection(getScalarItems());
+			var tmpDefinitionItems: Array = [];
+			ArrayUtils.unionArrays(tmpDefinitionItems, m_definition.childrenParameters);
+			
+			
+			m_definition_items = new ArrayCollection();
+			_items = new ArrayCollection();
+			//_items = new ArrayCollection(getScalarItems());
+			
+			var nItem: SchemaParserDataItem;
+			for each (var defItem: SchemaParserDataItem in tmpDefinitionItems){
+				nItem = defItem.clone();
+				nItem.parentItem = null;
+				
+				ArrayUtils.unionArrays(_items.source, nItem.getScalarItems());
+			}
+			
+			
 			dispatchEvent(new Event('itemsChanged'));
 		}
 		
 		/**
 		 * 
 		 */
-		public function getScalarItems(): Array
+		public function getScalarItems(): ArrayCollection
 		{
-			if (m_definition){
+			return(_items);
+			/*if (m_definition){
 				return(m_definition.getScalarItems());
 			} else {
 				return(null);
-			}
+			}*/
 		}
 		
 		/**

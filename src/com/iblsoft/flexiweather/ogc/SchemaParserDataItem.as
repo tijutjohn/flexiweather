@@ -203,7 +203,7 @@ package com.iblsoft.flexiweather.ogc
 			
 			if (responseXML is XML){
 				var resObj:Object = new Object();
-				resObj.name = fullName;
+				resObj.name = fullNameNoRoot;
 				resObj.value = parseValue(String(XML(responseXML).text()));
 				
 				ret = [resObj];
@@ -255,7 +255,8 @@ package com.iblsoft.flexiweather.ogc
 			{
 				for each (var child: SchemaParserDataItem in childrenParameters)
 				{
-					item.childrenParameters.push(child.clone());	
+					item.addChild(child.clone());
+					//item.childrenParameters.push(child.clone());	
 				}
 			}
 			
