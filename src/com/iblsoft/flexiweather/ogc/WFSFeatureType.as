@@ -119,7 +119,7 @@ package com.iblsoft.flexiweather.ogc
 		 */
 		public function getFeature(resultXml: XML): WFSFeature
 		{
-			var retFeature: WFSFeature = new WFSFeature(ms_name); // = new WFSFeature();
+			var retFeature: WFSFeature = new WFSFeature(ms_title); // = new WFSFeature();
 			
 			var wfs: Namespace = new Namespace('http://www.opengis.net/wfs');
 			var gml: Namespace = new Namespace('http://www.opengis.net/gml');

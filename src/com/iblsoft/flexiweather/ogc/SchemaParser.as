@@ -95,13 +95,21 @@ package com.iblsoft.flexiweather.ogc
 						var defs:XMLList = rootList.(attribute('name') == sType);
 							
 						if (defs.length()){
-							// TAKE JUST FIRST !!!
+							// TAKE complexType DEFINITION
 							// localName() IS NAME WITHOUT ANY NAMESPACE DEFINITION
-							if (String(XML(defs[0]).localName()) == 'complexType'){
+							for each (var defItem: XML in defs){
+								if (defItem.localName() == 'complexType'){
+									ret.type = SchemaParserDataItem.TYPE_COMPLEX_TYPE;
+								
+									parseComplexType(defItem, ret);
+								}
+							}
+							
+							/*if (String(XML(defs[0]).localName()) == 'complexType'){
 								ret.type = SchemaParserDataItem.TYPE_COMPLEX_TYPE;
 								
 								parseComplexType(defs[0], ret);
-							}
+							}*/
 						} else {
 							// DID NOT FIND ANY TYPE DEFINITION FOR ELEMENT
 							// TRY IF THERE IS SOME def PARAMETER
@@ -143,20 +151,23 @@ package com.iblsoft.flexiweather.ogc
 			// 	sequence
 			//  simpleContent
 			
-			var complexTypeXMLDef: XML = XML(typeNode.children()[0]);
-			var complexTypeDef: String = String(complexTypeXMLDef.localName());
-				
-			switch (complexTypeDef){
-				case 'complexContent':
-					parseComplexContent(complexTypeXMLDef, itemInstance);
-					break;
-				case 'sequence':
-					parseSequence(complexTypeXMLDef, itemInstance);
-					break;
-				case 'simpleContent':
-					parseSimpleContent(complexTypeXMLDef, itemInstance);
-					break;
-			}
+			var complexTypeXMLDef: XMLList = typeNode.children();
+			//var complexTypeDef: String = String(complexTypeXMLDef.localName());
+			
+			
+			for each (var cItem: XML in complexTypeXMLDef){
+				switch (String(cItem.localName())){
+					case 'complexContent':
+						parseComplexContent(cItem, itemInstance);
+						break;
+					case 'sequence':
+						parseSequence(cItem, itemInstance);
+						break;
+					case 'simpleContent':
+						parseSimpleContent(cItem, itemInstance);
+						break;
+				}
+			} 
 		}
 			
 		/**
