@@ -25,6 +25,31 @@ package com.iblsoft.flexiweather.ogc
 		 */
 		public function get name(): String
 		{ return ms_name; }
+		
+		public function elementsToString(): String
+		{
+			var str: String = '';
+			for each (var elementObject: Object in values)
+			{
+				str += elementObject.name + ": " + elementObject.value.toString() + "\n";
+			}
+			return str;
+		}
+		
+		public function getElementValue(element: String): Object
+		{
+			if (values && values.length > 0)
+			{
+				for each (var elementObject: Object in values)
+				{
+					if (elementObject.name == element)
+						return elementObject.value;
+				}
+				
+			}
+			return null;
+			
+		}
 
 	}
 }

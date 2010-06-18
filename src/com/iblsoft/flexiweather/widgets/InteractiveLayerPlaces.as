@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.widgets
 {
+	import com.iblsoft.flexiweather.ogc.WFSFeature;
 	import com.iblsoft.flexiweather.proj.Coord;
 	
 	import flash.display.DisplayObjectContainer;
@@ -210,28 +211,19 @@ package com.iblsoft.flexiweather.widgets
 				onMouseOut(event);
 			}
 			
-//			debugSprites();
-			
-//			debugParent(event.target as DisplayObjectContainer, 'target');
-//			debugParent(event.currentTarget as DisplayObjectContainer, 'currentTarget');
-			
-//			if (event.currentTarget.name == 'm_iw' && event.currentTarget is InteractiveWidget)
-//			{
-//				var widget: InteractiveWidget = event.currentTarget as InteractiveWidget;
-//
-//			}
-				
 			return false;
 		}
 		
 		private function onMouseOver(event: MouseEvent = null): void
 		{
 			var txt: String = (event.target as IconSprite).tooltip;
+			var feature: WFSFeature = (event.target as IconSprite).place.feature;
 			
 			var de: DynamicEvent = new DynamicEvent(SHOW_TOOLTIP, true);
 			de['text'] = txt;
 			de['x'] = event.localX;
 			de['y'] = event.localY + 10;
+			de['feature'] = feature;
 			dispatchEvent(de);
 		}
 		
@@ -277,6 +269,7 @@ package com.iblsoft.flexiweather.widgets
 
 class IconSprite extends Sprite
 {
+	public var place: InteractiveLayerPlace;
 	//private var _letters: Array;
 	public var tooltip: String;
 	
@@ -292,8 +285,9 @@ class IconSprite extends Sprite
 		//_letters = new Array();
 	}
 	
-	public function drawItem( pt: Point, place: InteractiveLayerPlace, xPos: Number = 0): void
+	public function drawItem( pt: Point, _place: InteractiveLayerPlace, xPos: Number = 0): void
 	{
+		place = _place
 		var gr: Graphics = graphics;
 		
 		gr.beginFill(place.pointColor);
@@ -426,6 +420,10 @@ class PlaceSprite extends Sprite
 	}
 	public function setLabelText(text: String): void
 	{
+		if (!text)
+		{
+			text = '';
+		}
 		labelTxt.text = text;
 		
 		var format: TextFormat = labelTxt.getTextFormat();
@@ -552,9 +550,10 @@ class PlaceSprite extends Sprite
 		if (!labelTxt)
 		{
 			labelTxt = new TextField();
-			var glow:GlowFilter = new GlowFilter(0xffffff,1,3,3,3);
+			var glow:GlowFilter = new GlowFilter(0xffffff,1,5, 5);
 			filters = [glow];
 			labelTxt.height = 16;
+			//labelTxt.antiAliasType = Text
 //			labelTxt.mouseEnabled = false;
 			labelTxt.selectable = false;
 			labelTxt.border = false;

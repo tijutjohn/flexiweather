@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.widgets
 {
+	import com.iblsoft.flexiweather.ogc.WFSFeature;
 	import com.iblsoft.flexiweather.proj.Coord;
 	
 	public class InteractiveLayerPlace
@@ -9,6 +10,7 @@ package com.iblsoft.flexiweather.widgets
 		public var tooltip: String;
 		public var featureTypeName: String;
 		public var conditionName: String;
+		public var feature: WFSFeature;
 		
 		[Bindable]
 		public var pointColor: uint = 0xffffff;
