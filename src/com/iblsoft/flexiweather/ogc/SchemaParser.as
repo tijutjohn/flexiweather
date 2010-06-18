@@ -258,9 +258,9 @@ package com.iblsoft.flexiweather.ogc
 		 */
 		public function isSimpleType(typeName: String):Boolean
 		{
-			switch (typeName.toLowerCase()){
+			switch (typeName){
 				case 'string':
-				case 'dataTime':
+				case 'dateTime':
 				case 'double':
 				case 'decimal':
 				case 'integer':

@@ -11,7 +11,7 @@ package com.iblsoft.flexiweather.ogc
 		internal var ms_title: String;
 		internal  var ma_crsWithBBoxes: ArrayCollection = new ArrayCollection();
 		
-		internal var m_definition: SchemaParserDataItem;
+		protected var m_definition: SchemaParserDataItem;
 		
 		private var _items: ArrayCollection;
 		
@@ -22,8 +22,10 @@ package com.iblsoft.flexiweather.ogc
 		}
 		public function WFSFeatureType(xml: XML, wms: Namespace, version: Version)
 		{
-			ms_name = String(xml.wms::Name);
-			ms_title = String(xml.wms::Title);
+			if ((xml != null) && (wms != null)){
+				ms_name = String(xml.wms::Name);
+				ms_title = String(xml.wms::Title);
+			}
 			
 			//TODO parse SRS, Operations and LatLongBoundingBox for <FeatureType>
 		}
@@ -76,6 +78,32 @@ package com.iblsoft.flexiweather.ogc
 			} else {
 				return(null);
 			}
+		}
+		
+		/**
+		 * 
+		 */
+		public function getScalarValues(responseXML: XMLList): Array
+		{
+			if (m_definition){
+				return(m_definition.getScalarValues(responseXML));
+			} else {
+				return(null);
+			}
+		}
+		
+		/**
+		 * 
+		 */
+		public function getFeature(resultXml: XML): WFSFeature
+		{
+			var ret: WFSFeature; // = new WFSFeature();
+			
+			if (m_definition){
+				var t: Array = m_definition.getScalarValues(resultXml);
+			}
+			
+			return(ret);
 		}
 	}
 }

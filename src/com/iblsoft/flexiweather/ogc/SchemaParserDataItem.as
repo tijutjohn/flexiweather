@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
+	import com.iblsoft.flexiweather.utils.ISO8601Parser;
 	
 	import flash.events.EventDispatcher;
 	
@@ -155,6 +156,87 @@ package com.iblsoft.flexiweather.ogc
 			return null;	
 		}
 		
+		/**
+		 * 
+		 */
+		public function getScalarValues(responseXML: *): Array
+		{
+			var items: Array = [];
+			
+			if (type != TYPE_COMPLEX_TYPE){
+				return(resolveValueFromXML(responseXML));
+			} else {
+				if (childrenParameters && childrenParameters.length > 0)
+				{
+					for each (var dataItem: SchemaParserDataItem in childrenParameters)
+					{
+						var responseChilds: XMLList;
+						
+						//if (parentItem == null){
+						//	responseChilds = new XMLList(responseXML);
+						//} else {
+							responseChilds = XMLList(responseXML).elements(dataItem.name);
+							//var k = responseXML.children();
+						//}
+						
+						var childrenScalarItems: Array;
+						for each (var responseChild: XML in XMLList(responseXML).children()){
+							if (responseChild.localName() == dataItem.name){
+								childrenScalarItems = dataItem.getScalarValues(responseChild);
+								ArrayUtils.unionArrays(items, childrenScalarItems);
+							}
+						}
+					}
+					return items;
+				}
+			}
+			
+			return null;
+		}
+		
+		/**
+		 * 
+		 */
+		protected function resolveValueFromXML(responseXML: *): Array
+		{
+			var ret: Array = [];
+			
+			if (responseXML is XML){
+				var resObj:Object = new Object();
+				resObj.name = fullName;
+				resObj.value = parseValue(String(XML(responseXML).text()));
+				
+				ret = [resObj];
+			} else if (responseXML is XMLList){
+				// TODO - MORE VALUES
+			}
+			
+			return(ret);
+		}
+		
+		/**
+		 * 
+		 */
+		protected function parseValue(value: String): *
+		{
+			switch(type){
+				case SchemaParserDataItem.TYPE_STRING:
+					return(String(value));
+				case SchemaParserDataItem.TYPE_DATE:
+					return(ISO8601Parser.stringToDate(value));
+				case SchemaParserDataItem.TYPE_DECIMAL:
+				case SchemaParserDataItem.TYPE_DOUBLE:
+					return(Number(value));
+				case SchemaParserDataItem.TYPE_INTEGER:
+					return(int(value));
+				default:
+					return(value);
+			}
+		}
+		
+		/**
+		 * 
+		 */
 		public function clone(): SchemaParserDataItem
 		{
 			var item: SchemaParserDataItem = new SchemaParserDataItem();
