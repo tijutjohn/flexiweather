@@ -18,8 +18,14 @@ package com.iblsoft.flexiweather.ogc
 		
 		protected var m_definition_items: ArrayCollection;
 		
-		private var _items: ArrayCollection;
 		
+		private var _stringItems: ArrayCollection;
+		[Bindable (event="stringItemsChanged")]
+		public function get stringItems(): ArrayCollection
+		{
+			return _stringItems;
+		}
+		private var _items: ArrayCollection;
 		[Bindable (event="itemsChanged")]
 		public function get items(): ArrayCollection
 		{
@@ -30,6 +36,8 @@ package com.iblsoft.flexiweather.ogc
 			if ((xml != null) && (wms != null)){
 				ms_name = String(xml.wms::Name);
 				ms_title = String(xml.wms::Title);
+				
+				dispatchEvent(new Event('featureTypeChanged'));
 			}
 			
 			//TODO parse SRS, Operations and LatLongBoundingBox for <FeatureType>
@@ -56,9 +64,11 @@ package com.iblsoft.flexiweather.ogc
 			return true;
 		}
 		
+		[Bindable (event="featureTypeChanged")]
 		public function get name(): String
 		{ return ms_name; }
 
+		[Bindable (event="featureTypeChanged")]
 		public function get title(): String
 		{ return ms_title; }
 		
@@ -87,6 +97,9 @@ package com.iblsoft.flexiweather.ogc
 			
 			
 			dispatchEvent(new Event('itemsChanged'));
+			
+			_stringItems = getScalarItems([SchemaParserDataItem.TYPE_STRING]);
+			dispatchEvent(new Event('stringItemsChanged'));
 		}
 		
 		/**
