@@ -92,9 +92,26 @@ package com.iblsoft.flexiweather.ogc
 		/**
 		 * 
 		 */
-		public function getScalarItems(): ArrayCollection
+		public function getScalarItems(typeFilter: Array = null): ArrayCollection
 		{
-			return(_items);
+			if (typeFilter){
+				var retItems: ArrayCollection = new ArrayCollection();
+				
+				var tmpDefinitionItems: Array = [];
+				ArrayUtils.unionArrays(tmpDefinitionItems, m_definition.childrenParameters);
+				
+				var nItem: SchemaParserDataItem;
+				for each (var defItem: SchemaParserDataItem in tmpDefinitionItems){
+					nItem = defItem.clone();
+					nItem.parentItem = null;
+					
+					ArrayUtils.unionArrays(retItems.source, nItem.getScalarItems(typeFilter));
+				}
+				
+				return(retItems);
+			} else {
+				return(_items);
+			}
 			/*if (m_definition){
 				return(m_definition.getScalarItems());
 			} else {

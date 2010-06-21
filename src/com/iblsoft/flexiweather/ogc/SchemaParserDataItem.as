@@ -136,17 +136,25 @@ package com.iblsoft.flexiweather.ogc
 		 * @return 
 		 * 
 		 */		
-		public function getScalarItems(): Array
+		public function getScalarItems(typeFilter: Array = null): Array
 		{
 			if (type != TYPE_COMPLEX_TYPE)
-				return [this];
+				if (typeFilter){
+					if (resolveTypeFilter(typeFilter)){
+						return [this];
+					} else {
+						return null;
+					}
+				} else {
+					return [this];
+				}
 			else {
 				var items: Array = [];
 				if (childrenParameters && childrenParameters.length > 0)
 				{
 					for each (var dataItem: SchemaParserDataItem in childrenParameters)
 					{
-						var childrenScalarItems: Array = dataItem.getScalarItems();
+						var childrenScalarItems: Array = dataItem.getScalarItems(typeFilter);
 						ArrayUtils.unionArrays(items, childrenScalarItems);
 					}
 					return items;
@@ -154,6 +162,20 @@ package com.iblsoft.flexiweather.ogc
 			}
 			
 			return null;	
+		}
+		
+		/**
+		 * 
+		 */
+		protected function resolveTypeFilter(typeFilter: Array): Boolean
+		{
+			for each (var tFilter: String in typeFilter){
+				if (tFilter == type){
+					return(true);
+				}
+			}
+			
+			return(false);
 		}
 		
 		/**
