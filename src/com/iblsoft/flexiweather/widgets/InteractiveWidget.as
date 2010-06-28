@@ -13,9 +13,8 @@ package com.iblsoft.flexiweather.widgets
 	import flash.geom.Rectangle;
 	
 	import mx.core.Container;
-	import mx.events.ResizeEvent;
-	import mx.events.FlexEvent;
 	import mx.events.ChildExistenceChangedEvent;
+	import mx.events.ResizeEvent;
 
 	public class InteractiveWidget extends Container
 	{
@@ -141,6 +140,12 @@ package com.iblsoft.flexiweather.widgets
             	if(l.isDynamicPartInvalid())
             		l.draw(l.graphics); 
             }*/
+            if (isNaN(unscaledWidth) || isNaN(unscaledHeight))
+            {
+            	//when user press Cancel on printing interactiveWidget, both sizes was NaN
+            	return;
+            }
+            	
             graphics.clear();
             var matrix: Matrix = new Matrix();
             matrix.rotate(90);

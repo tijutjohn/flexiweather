@@ -157,12 +157,15 @@ package com.iblsoft.flexiweather.ogc
 				// fill the area around the map
 				var pt00: Point = matrix.transformPoint(new Point(0, 0));
 				var ptWH: Point = matrix.transformPoint(new Point(m_image.width - 1, m_image.height - 1));
-				graphics.beginFill(0xCCCCCC, 1);
-				graphics.drawRect(ptWH.x, 0, container.width - ptWH.x, container.height);
-				graphics.drawRect(0, 0, pt00.x, container.height);
-				graphics.drawRect(pt00.x, 0, ptWH.x - pt00.x, pt00.y);
-				graphics.drawRect(pt00.x, ptWH.y, ptWH.x - pt00.x, container.height - ptWH.y);
-				graphics.endFill();
+				if (!(isNaN(container.width) || isNaN(container.height)))
+				{
+					graphics.beginFill(0xCCCCCC, 1);
+					graphics.drawRect(ptWH.x, 0, container.width - ptWH.x, container.height);
+					graphics.drawRect(0, 0, pt00.x, container.height);
+					graphics.drawRect(pt00.x, 0, ptWH.x - pt00.x, pt00.y);
+					graphics.drawRect(pt00.x, ptWH.y, ptWH.x - pt00.x, container.height - ptWH.y);
+					graphics.endFill();
+				}
 			}
 		}
 		
@@ -664,7 +667,7 @@ package com.iblsoft.flexiweather.ogc
 		protected function onFeatureInfoLoaded(event: UniURLLoaderEvent): void
 		{
 			if(m_featureInfoCallBack != null) {
-				m_featureInfoCallBack.call(null, String(event.result));
+				m_featureInfoCallBack.call(null, String(event.result), this);
 			}
 			m_featureInfoCallBack = null;
 		}

@@ -1,8 +1,12 @@
 package com.iblsoft.flexiweather.widgets
 {
+	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.ogc.ISynchronisedObject;
+	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
 	import com.iblsoft.flexiweather.ogc.SynchronisedVariableChangeEvent;
+	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
+	import com.iblsoft.flexiweather.utils.DateUtils;
 	
 	import flash.events.DataEvent;
 	import flash.events.Event;
@@ -11,9 +15,6 @@ package com.iblsoft.flexiweather.widgets
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
 	import mx.events.FlexEvent;
-	import com.iblsoft.flexiweather.utils.DateUtils;
-	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
-	import mx.events.DynamicEvent;
 	
 	public class InteractiveLayerComposer extends InteractiveLayer
 	{
@@ -418,6 +419,56 @@ package com.iblsoft.flexiweather.widgets
 			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
 		}
         
+        private var _featureTooltipCallsRunning: Boolean;
+        private var _featureTooltipCallsCount: int;
+        private var _featureTooltipString: String;
+        public function getFeatureTooltipForAllLayers(coord: Coord): void
+        {
+        	if (!_featureTooltipCallsRunning)
+        	{
+	        	_featureTooltipCallsCount = 0;
+	        	_featureTooltipString = '';
+	        	for each (var layer: InteractiveLayer in layers)
+	        	{
+	        		if (layer.hasFeatureInfo() && layer.visible)
+	        		{
+	        			_featureTooltipCallsCount++;
+	        			layer.getFeatureInfo(coord, onFeatureInfoAvailable);
+	        		}
+	        	}
+	        	if (_featureTooltipCallsCount > 0)
+	        		_featureTooltipCallsRunning = true;
+	        }
+        }
+        
+        private function onFeatureInfoAvailable(s: String, layer: InteractiveLayer): void
+        {
+        	_featureTooltipCallsCount--;
+        	s = s.replace(/<table>/g, "<table><br/>");
+			s = s.replace(/<\/table>/g, "</table><br/>");
+			s = s.replace(/<tr>/g, "<tr><br/>");
+			s = s.replace(/<td>/g, "<td>&nbsp;");
+			
+			s = s.substring(s.indexOf('<body>'), s.length);
+			s = s.substring(6,s.indexOf('</html>'));
+			//remove body
+			s = s.substring(0,s.indexOf('</body>'));
+			var infoXML: XML = new XML(s);
+//			var info: String = infoXML.p[0].text();
+			var info: String = infoXML.text();
+        	trace("LayerComposer onFeatureInfoAvailable : " + info + " for layer: " + layer.name);
+        	_featureTooltipString += '<p><b><font color="#6EC1FF">'+layer.name+'</font></b></p>';
+        	_featureTooltipString += '<p>'+s+'</p><p></p>';
+        	
+        	var ile: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.FEATURE_INFO_RECEIVED, true);
+        	ile.text = _featureTooltipString;
+        	dispatchEvent(ile);
+        	
+        	if (_featureTooltipCallsCount < 1)
+        	{
+        		_featureTooltipCallsRunning = false;
+        	}
+        }
         //[Bindable]
         public function get layers(): ArrayCollection
         { return m_layers; }
