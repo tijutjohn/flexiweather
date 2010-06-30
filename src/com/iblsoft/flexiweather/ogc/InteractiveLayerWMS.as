@@ -358,7 +358,19 @@ package com.iblsoft.flexiweather.ogc
         			}
         		}
         	}
+        	
+        	//trace("getWMSDimensionsValues ["+s_dimName+"] = " +createDimensionsValuesString(a_dimValues));
         	return a_dimValues;
+        }
+        
+        private function createDimensionsValuesString(a_dimValues: Array): String
+        {
+        	var str: String = '';
+        	for each (var item: Object in a_dimValues)
+        	{
+        		str += item.value + ", ";
+        	}
+        	return str;
         }
 
 		/**

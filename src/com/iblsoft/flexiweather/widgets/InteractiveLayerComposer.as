@@ -123,6 +123,8 @@ package com.iblsoft.flexiweather.widgets
 			var l_timeAxis: Array = null;
 			for each(var l: InteractiveLayer in m_layers) {
 				var so: ISynchronisedObject = l as ISynchronisedObject;
+				var test: * = so.getSynchronisedVariables();
+				//trace("enumTimeAxis so: " + (so as Object).name + " synchro vars: " + test.toString());
             	if(so == null)
             		continue;
             	if(so.getSynchronisedVariables().indexOf("frame") < 0)
@@ -144,13 +146,30 @@ package com.iblsoft.flexiweather.widgets
 			return l_timeAxis; 			
 		}
 		
+		public function getDimensionDefaultValue(dimName: String): Object
+		{
+			var l_syncLayers: Array = [];
+			var l_timeAxis: Array = enumTimeAxis(l_syncLayers);
+//          	if(l_timeAxis == null) // no time axis
+//          		return null;
+          		
+          	var i: int;
+			var so: ISynchronisedObject;
+			
+          	for each(so in l_syncLayers) 
+          	{
+				var value: Object = (so as InteractiveLayerWMS).getWMSDimensionDefaultValue(dimName );
+          	}
+
+			return value;
+		}
 		public function getDimensionValues(dimName: String, b_intersection: Boolean = true): Array
 		{
 			
 			var l_syncLayers: Array = [];
 			var l_timeAxis: Array = enumTimeAxis(l_syncLayers);
-          	if(l_timeAxis == null) // no time axis
-          		return null;
+         	if(l_timeAxis == null) // no time axis
+         		return null;
           		
           	var i: int;
 			var so: ISynchronisedObject;
@@ -158,16 +177,17 @@ package com.iblsoft.flexiweather.widgets
 			var a_dimValues: Array;
           	for each(so in l_syncLayers) 
           	{
-				var values: Array = (so as InteractiveLayerWMS).getWMSDimensionsValues(dimName);
+          		//trace("\n Composer getDimensionValues ["+dimName+"] get values for layer: " + (so as Object).name);
+				var values: Array = (so as InteractiveLayerWMS).getWMSDimensionsValues(dimName, true);
           		
           		if(a_dimValues == null)
-        				a_dimValues = values;
-        			else {
-        				if(b_intersection)
-        					a_dimValues = ArrayUtils.intersectedArrays(a_dimValues, values);
-        				else
-        					ArrayUtils.unionArrays(a_dimValues, values);
-        			}	
+    				a_dimValues = values;
+    			else {
+    				if(b_intersection)
+    					a_dimValues = ArrayUtils.intersectedArrays(a_dimValues, values);
+    				else
+    					ArrayUtils.unionArrays(a_dimValues, values);
+    			}	
           	}
 
 			return a_dimValues;
@@ -391,7 +411,7 @@ package com.iblsoft.flexiweather.widgets
 		
 		protected function onLayerCollectionChanged(event: CollectionEvent): void
 		{
-			trace("onLayerCollectionChanged kind: " + event.kind);
+//			trace("onLayerCollectionChanged kind: " + event.kind);
 			
 			switch (event.kind)
 			{

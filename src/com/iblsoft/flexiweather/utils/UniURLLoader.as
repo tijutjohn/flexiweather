@@ -77,7 +77,7 @@ package com.iblsoft.flexiweather.utils
 				}
 			}
 			for(key in md_imageLoaderToRequestMap) {
-				if(md_imageLoaderToRequestMap[key].request == urlRequest) {
+				if(md_imageLoaderToRequestMap[key] && md_imageLoaderToRequestMap[key].request == urlRequest) {
 					md_imageLoaderToRequestMap[key].loader.close();
 					delete md_imageLoaderToRequestMap[key];
 					return true;
