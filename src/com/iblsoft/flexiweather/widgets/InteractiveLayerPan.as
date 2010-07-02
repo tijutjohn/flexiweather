@@ -31,14 +31,15 @@ package com.iblsoft.flexiweather.widgets
 				return false;
 				
 			var endP: Point = new Point(event.localX, event.localY);
-			if (Point.distance(_p, endP) > 1)
-			{
+			var dist: Number = Point.distance(_p, endP)
+			//if (dist > 1)
+			//{
 				if(doPanTo(endP, true)) {
 		        	//invalidateDynamicPart();
 		        }
-		 	} else {
-		 		trace("Pan is switched ON, but distance was small");
-		 	}
+		 	//} else {
+		 	//	trace("Pan is switched ON, but distance was small: " + dist);
+		 	//}
         	_p = null;
         	return true;
         }

@@ -38,10 +38,10 @@ package com.iblsoft.flexiweather.widgets
         {
 			if(_r == null)
 				return false;
-			_r.width = event.localX - _r.x;
-			_r.height = event.localY - _r.y;
+			_r.width = (event.localX - _r.x);
+			_r.height = (event.localY - _r.y);
 			
-			if(_r.width > 5 && _r.height > 5) {
+			if(Math.abs(_r.width) > 5 && Math.abs(_r.height) > 5) {
 	        	var r: Rectangle = container.getViewBBox().toRectangle();
 	        	var w: Number = container.width;
 	        	var h: Number = container.height;
