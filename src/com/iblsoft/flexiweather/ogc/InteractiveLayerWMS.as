@@ -171,13 +171,18 @@ package com.iblsoft.flexiweather.ogc
 		
 		override public function onAreaChanged(b_finalChange: Boolean): void
 		{
-			super.onAreaChanged(b_finalChange);
-			if(b_finalChange) {
-				m_cache.invalidate(ms_imageCRS, m_imageBBox);
-				updateData(false);
+			if (visible)
+			{
+				super.onAreaChanged(b_finalChange);
+				if(b_finalChange) {
+					m_cache.invalidate(ms_imageCRS, m_imageBBox);
+					updateData(false);
+				}
+				else
+					invalidateDynamicPart();
+			} else {
+				trace("onAreaCHanged layer NOT VISIBLE");
 			}
-			else
-				invalidateDynamicPart();
 		}
 		
 		override public function onContainerSizeChanged(): void
