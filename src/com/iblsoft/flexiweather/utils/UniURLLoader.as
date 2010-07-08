@@ -77,10 +77,18 @@ package com.iblsoft.flexiweather.utils
 				}
 			}
 			for(key in md_imageLoaderToRequestMap) {
-				if(md_imageLoaderToRequestMap[key] && md_imageLoaderToRequestMap[key].request == urlRequest) {
-					md_imageLoaderToRequestMap[key].loader.close();
-					delete md_imageLoaderToRequestMap[key];
-					return true;
+				var test: * = md_imageLoaderToRequestMap[key]
+				if( test && test.hasOwnProperty('request') && test.request)
+				{
+					
+					if (test.request == urlRequest) 
+					{
+						test.loader.close();
+						delete md_imageLoaderToRequestMap[key];
+						return true;
+					}
+				} else {
+					trace("UniURLLoader cancel Loade exists, but it has no request property");
 				}
 			}
 			return false;

@@ -409,6 +409,8 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 		
+		public var allowLayersSorting: Boolean = true;
+		
 		protected function onLayerCollectionChanged(event: CollectionEvent): void
 		{
 //			trace("onLayerCollectionChanged kind: " + event.kind);
@@ -422,18 +424,18 @@ package com.iblsoft.flexiweather.widgets
 				case CollectionEventKind.ADD:
 				case CollectionEventKind.REMOVE:
 				
-				
-					var l: InteractiveLayer;
-					while(numChildren > 0) {
-						l = getChildAt(0) as InteractiveLayer;
-						//unbindSubLayer(l);
-						removeChildAt(0);
-					}
-					// add layers as children in reversed order
-					for each(l in m_layers) {
-						addChildAt(l, 0);
-						//bindSubLayer(l);
-					}
+//					if (allowLayersSorting)
+//					{
+//						var l: InteractiveLayer;
+//						while(numChildren > 0) {
+//							l = getChildAt(0) as InteractiveLayer;
+//							removeChildAt(0);
+//						}
+//						// add layers as children in reversed order
+//						for each(l in m_layers) {
+//							addChildAt(l, 0);
+//						}
+//					}
 					break;
 			}
 			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));

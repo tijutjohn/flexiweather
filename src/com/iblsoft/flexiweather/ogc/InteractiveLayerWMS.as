@@ -787,7 +787,7 @@ class WMSCache
 				a.push(s_key);
 		}
 		for each(s_key in a) {
-			trace("WMSCache.invalidate(): removing image with key: " + md_cache[s_key].toString());
+//			trace("WMSCache.invalidate(): removing image with key: " + md_cache[s_key].toString());
 			delete md_cache[s_key];
 		}
 	}
