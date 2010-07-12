@@ -6,6 +6,7 @@ package com.iblsoft.flexiweather.utils
 	{
 		public static const LOADING: Boolean = false;
 		public static const STORING: Boolean = true;
+		public static const NONINDEXED: uint = 0xFFFFFFFF;
 		
 		internal var mb_mode: Boolean;
 		
@@ -15,35 +16,24 @@ package com.iblsoft.flexiweather.utils
 		}
 		
 		public function serialize(s_key: String, o: Serializable): void
-		{
-			var restorePoint: Object = downLevel(s_key);
-			try { 
-				o.serialize(this);
-			}
-			finally {
-				upLevel(restorePoint);
-			} 
-		}
+		{ __serialize(s_key, NONINDEXED, o); }
 		
-		public function hasKey(s_key: String): Boolean
-		{ return false; }	
+		public final function serializeString(s_key: String, s: String, s_default: String = null): String
+		{ return __serializeString(s_key, NONINDEXED, s); }
 
-		public function serializeString(s_key: String, s: String, s_default: String = null): String
-		{ return s; }
+		public final function serializeInt(s_key: String, i: int, i_default: int = 0): int
+		{ return __serializeInt(s_key, NONINDEXED, i); }
 
-		public function serializeInt(s_key: String, i: int, i_default: int = 0): int
-		{ return i; }
+		public final function serializeUInt(s_key: String, i: uint, i_default: uint = 0): uint
+		{ return __serializeUInt(s_key, NONINDEXED, i); }
 
-		public function serializeUInt(s_key: String, i: uint, i_default: uint = 0): uint
-		{ return i; }
+		public final function serializeBool(s_key: String, b: Boolean, b_default: Boolean = false): Boolean
+		{ return __serializeBool(s_key, NONINDEXED, b); }
 
-		public function serializeBool(s_key: String, b: Boolean, b_default: Boolean = false): Boolean
-		{ return b; }
+		public final function serializeNumber(s_key: String, f: Number, f_default: Number = NaN): Number
+		{ return __serializeNumber(s_key, NONINDEXED, f); }
 
-		public function serializeNumber(s_key: String, f: Number, f_default: Number = NaN): Number
-		{ return f; }
-
-		public function serializeNonpersistentArrayCollection(
+		public final function serializeNonpersistentArrayCollection(
 				s_key: String, a: ArrayCollection, c: Class): void
 		{
 			var i: int;
@@ -52,21 +42,19 @@ package com.iblsoft.flexiweather.utils
 				a.removeAll();
 				i = 0;
 				while(true) {
-					s = s_key + "." + i;
-					if(!hasKey(s))
+					if(!hasKey(s_key, i))
 						break;
-					a.addItem(__constructAndSerialize(s, c));
+					a.addItem(__constructAndSerialize(s_key, i, c));
 					++i; 
 				}
 			} else {
 				for(i = 0; i < a.length; ++i) {
-					s = s_key + "." + i;
-					__serialize(s, a[i]);
+					__serialize(s_key, i, a[i]);
 				}
 			}
 		}
 
-		public function serializeNonpersistentArray(
+		public final function serializeNonpersistentArray(
 				s_key: String, a: Array, c: Class): void
 		{
 			var i: int;
@@ -76,21 +64,19 @@ package com.iblsoft.flexiweather.utils
 					a.pop();
 				i = 0;
 				while(true) {
-					s = s_key + "." + i;
-					if(!hasKey(s))
+					if(!hasKey(s_key, i))
 						break;
-					a.push(__constructAndSerialize(s, c)); 
+					a.push(__constructAndSerialize(s_key, i, c)); 
 					++i; 
 				}
 			} else {
 				for(i = 0; i < a.length; ++i) {
-					s = s_key + "." + i;
-					__serialize(s, a[i]);
+					__serialize(s_key, i, a[i]);
 				}
 			}
 		}
 		
-		public function serializeNonpersistentArrayMap(
+		public final function serializeNonpersistentArrayMap(
 				s_key: String, a: Array, cKey: Class, cValue: Class): void
 		{
 			var i: int;
@@ -102,13 +88,12 @@ package com.iblsoft.flexiweather.utils
 					a.pop();
 				i = 0;
 				while(true) {
-					s = s_key + "." + i;
-					if(!hasKey(s))
+					if(!hasKey(s_key, i))
 						break;
-					restorePointObject = downLevel(s);
+					restorePointObject = downLevel(s_key, i);
 					try {
-						key = __constructAndSerialize("key", cKey); 
-						var value: Object = __constructAndSerialize("value", cValue);
+						key = __constructAndSerialize("key", NONINDEXED, cKey); 
+						var value: Object = __constructAndSerialize("value", NONINDEXED, cValue);
 						a[key] = value;
 					}
 					finally { 
@@ -119,11 +104,10 @@ package com.iblsoft.flexiweather.utils
 			} else {
 				i = 0;
 				for(key in a) {
-					s = s_key + "." + i;
-					restorePointObject = downLevel(s);
+					restorePointObject = downLevel(s_key, i);
 					try {
-						__serialize("key", key);
-						__serialize("value", a[key]);
+						__serialize("key", NONINDEXED, key);
+						__serialize("value", NONINDEXED, a[key]);
 					}
 					finally { 
 						upLevel(restorePointObject);
@@ -138,48 +122,73 @@ package com.iblsoft.flexiweather.utils
 		{
 		}
 		
-		protected function downLevel(s_key: String): Object
+		protected function downLevel(s_key: String, i_index: uint/* = NONINDEXED*/): Object
 		{ return null; }
 
 		protected function upLevel(restorePointObject: Object): void
 		{}
 		
-		protected function __serialize(s_key: String, o: Object): void
+		public function hasKey(s_key: String, i_index: uint/* = NONINDEXED*/): Boolean
+		{ return false; }	
+
+		protected function __serialize(s_key: String, i_index: uint/* = NONINDEXED*/, o: Object): Object
 		{
-			if(o is Serializable)
-				serialize(s_key, o as Serializable);
+			if(o is Serializable) {
+				var restorePoint: Object = downLevel(s_key, i_index);
+				try { 
+					o.serialize(this);
+				}
+				finally {
+					upLevel(restorePoint);
+				}
+			}
 			else if(o is String)
-				serializeString(s_key, o as String);
+				__serializeString(s_key, i_index, o as String);
 			else if(o is int)
-				serializeInt(s_key, o as int);
+				__serializeInt(s_key, i_index, o as int);
 			else if(o is uint)
-				serializeUInt(s_key, o as uint);
+				__serializeUInt(s_key, i_index, o as uint);
 			else if(o is Boolean)
-				serializeBool(s_key, o as Boolean);
+				__serializeBool(s_key, i_index, o as Boolean);
 			else if(o is Number)
-				serializeNumber(s_key, o as Number);
+				__serializeNumber(s_key, i_index, o as Number);
 			else
 				throw new Error("Unsupported serialization type '" + Class(o).toString() + "'");
-			
+			return o; 
 		}
 
-		protected function __constructAndSerialize(s_key: String, c: Class): Object
+		protected function __serializeString(s_key: String, i_index: uint/* = NONINDEXED*/, s: String, s_default: String = null): String
+		{ return s; }
+
+		protected function __serializeInt(s_key: String, i_index: uint/* = NONINDEXED*/, i: int, i_default: int = 0): int
+		{ return i; }
+
+		protected function __serializeUInt(s_key: String, i_index: uint/* = NONINDEXED*/, i: uint, i_default: uint = 0): uint
+		{ return i; }
+
+		protected function __serializeBool(s_key: String, i_index: uint/* = NONINDEXED*/, b: Boolean, b_default: Boolean = false): Boolean
+		{ return b; }
+
+		protected function __serializeNumber(s_key: String, i_index: uint/* = NONINDEXED*/, f: Number, f_default: Number = NaN): Number
+		{ return f; }
+
+		protected function __constructAndSerialize(s_key: String, i_index: uint/* = NONINDEXED*/, c: Class): Object
 		{
 			var o: Object;			
 			if(c == String)
-				o = serializeString(s_key, "");
+				o = __serializeString(s_key, i_index, "");
 			else if(c == int)
-				o = serializeInt(s_key, 0);
+				o = __serializeInt(s_key, i_index, 0);
 			else if(c == uint)
-				o = serializeUInt(s_key, 0);
+				o = __serializeUInt(s_key, i_index, 0);
 			else if(c == Boolean)
-				o = serializeBool(s_key, false);
+				o = __serializeBool(s_key, i_index, false);
 			else if(c == Number)
-				o = serializeNumber(s_key, 0.0);
+				o = __serializeNumber(s_key, i_index, 0.0);
 			else {
 				o = new c;
 				if(o is Serializable)
-					serialize(s_key, o as Serializable);
+					__serialize(s_key, i_index, o as Serializable);
 				else
 					throw Error("Unsupported serialization type '" + c + "'");
 			}
