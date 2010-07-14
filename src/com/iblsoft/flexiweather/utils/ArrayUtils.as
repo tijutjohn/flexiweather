@@ -72,8 +72,14 @@ package com.iblsoft.flexiweather.utils
 				} else {
 					if (obj is Object && o is Object)
 					{
-						if (obj.label == o.label)
-							return true;
+						if (obj.hasOwnProperty('label') && o.hasOwnProperty('label'))
+						{
+							if (obj.label == o.label)
+								return true;
+						} else {
+							if (obj === o)
+								return true;
+						}
 					}
 				}
 			}

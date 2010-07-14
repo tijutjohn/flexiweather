@@ -88,5 +88,10 @@ package com.iblsoft.flexiweather.ogc
 
 		public function get height(): Number
 		{ return mf_yMax - mf_yMin; }
+		
+		public function toString(): String
+		{
+			return 'BBox ' + xMin + " , " + yMin + " , " + xMax + " , " + yMax;
+		}
 	}
 }
