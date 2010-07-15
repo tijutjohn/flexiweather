@@ -38,76 +38,60 @@ package com.iblsoft.flexiweather.utils
 		}
 		
 		
-		public static function intersectedArrays(a1: Array, a2: Array): Array
+		public static function intersectedArrays(
+				a1: Array, a2: Array, comparator: Function = null): Array
 		{
+			if(comparator == null)
+				comparator = Operators.equalsStrictly;
 			if(a1 == null || a2 == null)
 				return [];
 			var a: Array = [];
 			for each(var o: Object in a1) {
-//				var id: int = a2.indexOf(o, 0);
-//				if(id >= 0)	
-//					a.push(o);
-				if(isObjectInside(a2, o))
+				if(isInside(a2, o, comparator))
 					a.push(o);
 			}
 			return a;
 		}
 
-		public static function unionArrays(a_dest: Array, a_with: Array): void
+		public static function unionArrays(
+				a_dest: Array, a_with: Array, comparator: Function = null): void
 		{
+			if(comparator == null)
+				comparator = Operators.equalsStrictly;
 			for each(var o: Object in a_with) {
-//				if(a_dest.indexOf(o) < 0)
-				if(!isObjectInside(a_dest, o))
+				if(!isInside(a_dest, o, comparator))
 					a_dest.push(o); 
 			}
 		}
-		public static function isObjectInside(arr: Array, obj: Object): Boolean
+
+		public static function isInside(
+				arr: Array, obj: Object, comparator: Function = null): Boolean
 		{
+			if(comparator == null)
+				comparator = Operators.equalsStrictly;
 			for each(var o: Object in arr)
 			{
-				if (obj is String && o is String)
-				{
-					if (obj == o)
-						return true;
-				} else {
-					if (obj is Object && o is Object)
-					{
-						if (obj.hasOwnProperty('label') && o.hasOwnProperty('label'))
-						{
-							if (obj.label == o.label)
-								return true;
-						} else {
-							if (obj === o)
-								return true;
-						}
-					}
-				}
+				if(comparator(obj, o))
+					return true;
 			}
 			return false;
 		}
-		public static function isValueInside(a_source: Array, value: Object): Boolean
-		{
-			for each(var o: Object in a_source) {
-				if (value == o)
-					return true; 
-			}
-			return false;
-		}
+
 		public static function getItemIndexByPropertyName(a_source: ArrayCollection, propertyName: String, value: Object): int
 		{
 			for (var i: int = 0; i < a_source.length; i++)
 			{
 				var item: Object = a_source[i];
-				if (item[propertyName] == value)
+				if(item[propertyName] == value)
 					return i;
 			} 
 			return -1;
 		}
 		
-		public static function getFilteredArrayFromArrayCollection(ac: ArrayCollection): Array
+		public static function getFilteredArrayFromArrayCollection(a_source: ArrayCollection): Array
 		{
 			var a: Array = [];
-			for each (var item: * in ac)
+			for each (var item: * in a_source)
 			{
 				a.push(item);
 			}

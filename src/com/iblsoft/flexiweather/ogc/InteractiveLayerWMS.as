@@ -44,11 +44,7 @@ package com.iblsoft.flexiweather.ogc
 		protected var ma_subLayerStyleNames: Array = [];
 		
 		protected var m_synchronisationRole: SynchronisationRole;
-		public function get synchronisationRole(): SynchronisationRole
-		{
-			return m_synchronisationRole;
-		}
-		
+
 		protected var m_cache: WMSCache = new WMSCache();
 		
 		protected var m_timer: Timer = new Timer(10000);
@@ -81,7 +77,6 @@ package com.iblsoft.flexiweather.ogc
 			if(m_cfg.mi_autoRefreshPeriod > 0)
 				m_timer.delay = m_cfg.mi_autoRefreshPeriod * 1000.0;
 			m_cfg.addEventListener(WMSLayerConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
-			
 //			updateData(true);
 		}
 		
@@ -717,6 +712,9 @@ package com.iblsoft.flexiweather.ogc
 
 		public function get dataLoader(): UniURLLoader
 		{ return m_loader; } 
+
+		public function get synchronisationRole(): SynchronisationRole
+		{ return m_synchronisationRole; }
 	}
 }
 
@@ -791,6 +789,4 @@ class WMSCache
 			delete md_cache[s_key];
 		}
 	}
-	
-	
 }

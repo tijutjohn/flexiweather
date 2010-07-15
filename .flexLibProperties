@@ -81,6 +81,7 @@
     <classEntry path="com.iblsoft.flexiweather.utils.ICurveRenderer"/>
     <classEntry path="com.iblsoft.flexiweather.utils.ISO8601Parser"/>
     <classEntry path="com.iblsoft.flexiweather.utils.NumberUtils"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.Operators"/>
     <classEntry path="com.iblsoft.flexiweather.utils.ScreenUtils"/>
     <classEntry path="com.iblsoft.flexiweather.utils.Serializable"/>
     <classEntry path="com.iblsoft.flexiweather.utils.SharedObjectStorage"/>
