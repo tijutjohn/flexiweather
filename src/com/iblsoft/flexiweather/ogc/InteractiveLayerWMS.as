@@ -37,6 +37,7 @@ package com.iblsoft.flexiweather.ogc
 
 		protected var ms_imageCRS: String = null;
 		protected var m_imageBBox: BBox = null;
+		protected var mb_updateAfterMakingVisible: Boolean = false;
 		
 		protected var m_cfg: WMSLayerConfiguration;
 		protected var md_dimensionValues: Dictionary = new Dictionary(); 
@@ -88,6 +89,15 @@ package com.iblsoft.flexiweather.ogc
 			if(m_request != null)
 				m_loader.cancel(m_request);
 			m_request = null;
+
+			if(!visible) {
+				mb_updateAfterMakingVisible = true;
+				m_image = null;
+				ms_imageCRS = null;
+				m_imageBBox = null;
+				m_timer.reset();
+				return;
+			}
 			
 			var request: URLRequest = m_cfg.toGetMapRequest(
 					container.getCRS(), container.getViewBBox().toBBOXString(),
@@ -166,18 +176,13 @@ package com.iblsoft.flexiweather.ogc
 		
 		override public function onAreaChanged(b_finalChange: Boolean): void
 		{
-			if (visible)
-			{
-				super.onAreaChanged(b_finalChange);
-				if(b_finalChange) {
-					m_cache.invalidate(ms_imageCRS, m_imageBBox);
-					updateData(false);
-				}
-				else
-					invalidateDynamicPart();
-			} else {
-				trace("onAreaCHanged layer NOT VISIBLE");
+			super.onAreaChanged(b_finalChange);
+			if(b_finalChange) {
+				m_cache.invalidate(ms_imageCRS, m_imageBBox);
+				updateData(false);
 			}
+			else
+				invalidateDynamicPart();
 		}
 		
 		override public function onContainerSizeChanged(): void
@@ -706,6 +711,16 @@ package com.iblsoft.flexiweather.ogc
 		
 		override public function get name(): String
 		{ return m_cfg.label; }
+		
+		override public function set visible(b_visible: Boolean): void
+		{
+			var b_visiblePrev: Boolean = super.visible;
+			super.visible = b_visible;
+			if(!b_visiblePrev && b_visible && mb_updateAfterMakingVisible) {
+				mb_updateAfterMakingVisible = false;
+				updateData(true);
+			}
+		}
 
 		public function get configuration(): WMSLayerConfiguration
 		{ return m_cfg; }
