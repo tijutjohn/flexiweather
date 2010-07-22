@@ -70,8 +70,9 @@ package com.iblsoft.flexiweather.utils
 		{
 			var key: Object;
 			for(key in md_urlLoaderToRequestMap) {
-				if(md_urlLoaderToRequestMap[key].request == urlRequest) {
+				if(md_urlLoaderToRequestMap[key].request === urlRequest) {
 					md_urlLoaderToRequestMap[key].loader.close();
+					disconnectURLLoader(URLLoaderWithAssociatedData(md_urlLoaderToRequestMap[key].loader)); 
 					delete md_urlLoaderToRequestMap[key];
 					return true;
 				}
@@ -84,6 +85,7 @@ package com.iblsoft.flexiweather.utils
 					if (test.request == urlRequest) 
 					{
 						test.loader.close();
+						disconnectImageLoader(LoaderWithAssociatedData(md_imageLoaderToRequestMap[key].loader)); // as LoaderWithAssociatedData);
 						delete md_imageLoaderToRequestMap[key];
 						return true;
 					}
