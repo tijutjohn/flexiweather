@@ -8,6 +8,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.utils.DateUtils;
 	
+	import flash.display.DisplayObject;
 	import flash.events.DataEvent;
 	import flash.events.Event;
 	
@@ -32,16 +33,78 @@ package com.iblsoft.flexiweather.widgets
 		public static const SYNCHRONISE_WITH: String = "synchroniseWith";
 		[Event(name = SYNCHRONISE_WITH, type = "mx.events.DynamicEvent")]
 
+		private var mb_orderingLayers: Boolean = false;
+
 		public function InteractiveLayerComposer(container: InteractiveWidget)
 		{
 			super(container);
 			m_layers.addEventListener(CollectionEvent.COLLECTION_CHANGE, onLayerCollectionChanged);
 		}
 		
+		/*public override function addChild(child: DisplayObject): DisplayObject
+		{
+			//InteractiveLayer(child).container = this;
+			//child.x = x;
+			//child.y = y;
+			//child.width = width;
+			//child.height = height;
+			var o: DisplayObject = super.addChild(child);
+			orderLayers();
+			return o;
+		}
+		
+		public override function addChildAt(child: DisplayObject, index: int): DisplayObject
+		{
+			var o: DisplayObject = super.addChildAt(child, index);
+			orderLayers();
+			return o;
+		}*/
+		
 		public function addLayer(l: InteractiveLayer): void
 		{
 			m_layers.addItemAt(l, 0);
 			bindSubLayer(l);
+			
+			//orderLayers();
+		}
+
+		public function orderLayers(): void
+		{
+			if(mb_orderingLayers)
+				return;
+			mb_orderingLayers = true;
+			try {
+				// stable-sort interactive layers in ma_layers according to their zOrder property
+				for(var i: int = 0; i < numChildren; ++i) {
+					var ilI: InteractiveLayer = InteractiveLayer(getChildAt(i)); 
+					for(var j: int = i + 1; j < numChildren; ++j) {
+						var ilJ: InteractiveLayer = InteractiveLayer(getChildAt(j));
+						if(ilJ.zOrder < ilI.zOrder) {
+							// swap Ith and Jth layer, we know that J > I
+							trace('[InteractiveLayerComposer.orderLayers] ... swapping ' + ilJ.name + ' with ' + ilI.name);
+							swapChildren(ilJ, ilI); 
+							//removeChildAt(j);
+							//removeChildAt(i);
+							//addChildAt(ilJ, i);
+							//addChildAt(ilI, j);
+						}
+					}
+				}
+				/*
+				trace("**********************************************")
+				trace("                 SORTING by ZORDER");
+				trace("**********************************************")
+				for(var i: int = 0; i < numChildren; ++i) 
+				{
+					var layer: InteractiveLayer = InteractiveLayer(getChildAt(i)); 
+					trace("LAYER ["+i+"] = " + layer.name); 
+				}
+				trace("**********************************************")
+				*/
+			}
+			finally {
+				mb_orderingLayers = false;
+			}
 		}
 
 		public function removeLayer(l: InteractiveLayer): void

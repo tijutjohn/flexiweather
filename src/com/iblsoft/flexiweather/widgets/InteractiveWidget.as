@@ -108,10 +108,12 @@ package com.iblsoft.flexiweather.widgets
 						var ilJ: InteractiveLayer = InteractiveLayer(getChildAt(j));
 						if(ilJ.zOrder < ilI.zOrder) {
 							// swap Ith and Jth layer, we know that J > I
-							removeChildAt(j);
-							removeChildAt(i);
-							addChildAt(ilJ, i);
-							addChildAt(ilI, j);
+							trace('[InteractiveWidget.orderLayers] ... swapping ' + ilJ.name + ' with ' + ilI.name);
+							swapChildren(ilJ, ilI);
+							//removeChildAt(j);
+							//removeChildAt(i);
+							//addChildAt(ilJ, i);
+							//addChildAt(ilI, j);
 						}
 					}
 				}
