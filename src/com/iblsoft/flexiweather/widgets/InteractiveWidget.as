@@ -8,9 +8,11 @@ package com.iblsoft.flexiweather.widgets
 	import flash.display.GradientType;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
+	import flash.events.TimerEvent;
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
+	import flash.utils.Timer;
 	
 	import mx.core.Container;
 	import mx.events.ChildExistenceChangedEvent;
@@ -291,8 +293,23 @@ package com.iblsoft.flexiweather.widgets
             }
         }
         
+        private var _resizeTimer: Timer;
         protected function onResized(Event: ResizeEvent): void
         {
+        	if (!_resizeTimer)
+        	{
+        		_resizeTimer = new Timer(500,1);
+        		_resizeTimer.addEventListener(TimerEvent.TIMER_COMPLETE, afterDelayedResize);
+        	}
+        	
+        	_resizeTimer.stop();
+        	_resizeTimer.start();
+        	trace("onResized, timer started");
+        }
+        
+        private function afterDelayedResize(event: TimerEvent = null): void
+        {
+        	trace("afterDelayedResize, timer finised, let's invalidate InteractiveWidget");
         	setViewBBox(m_viewBBox, true); // set the view bbox to update the aspects 
             for(var i: int = 0; i < numChildren; ++i) {
             	var l: InteractiveLayer = InteractiveLayer(getChildAt(i));

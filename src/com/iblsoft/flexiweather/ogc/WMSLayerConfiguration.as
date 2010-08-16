@@ -72,6 +72,21 @@ package com.iblsoft.flexiweather.ogc
 					"auto-refresh-period", mi_autoRefreshPeriod, 0);
 		}
 		
+		public function toGetLegendRequest(
+				i_width: int, i_height: int,
+				s_style: String = null): URLRequest
+		{
+			var r: URLRequest = m_service.toRequest("GetLegendGraphic");
+			r.data.LAYER = ma_layerNames[0];
+			r.data.WIDTH = i_width; 
+			r.data.HEIGHT = i_height;
+			if(s_style != null)
+				r.data.STYLE = s_style;
+//			r.data.FORMAT = "image/png"; 
+//			r.data.TRANSPARENT = "TRUE";
+			return r;
+		}
+		
 		public function toGetMapRequest(
 				s_crs: String, s_bbox: String,
 				i_width: int, i_height: int,

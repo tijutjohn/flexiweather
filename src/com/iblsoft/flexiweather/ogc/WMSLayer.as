@@ -26,11 +26,25 @@ package com.iblsoft.flexiweather.ogc
 				}
 				ma_dimensions.addItem(dim);
 			}
+			
+			var styleObject: Object;
 			for each(var elemStyle: XML in xml.wms::Style) {
-				ma_styles.addItem({
+				styleObject = {
 					name: String(elemStyle.wms::Name),
 					title: String(elemStyle.wms::Title)
-				});
+				};
+				
+				var legendXML: XML = elemStyle.wms::LegendURL[0] as XML;
+				
+				if(legendXML is XML)
+				{
+					var xlink: Namespace = new Namespace('http://www.w3.org/1999/xlink');
+					
+					var legendObj: Object = { url: String(legendXML.wms::OnlineResource.@xlink::href), width: Number(legendXML.@width), height: Number(legendXML.@height) };
+											
+					styleObject.legend = legendObj;
+				}
+				ma_styles.addItem(styleObject);
 			}
 		}
 		
@@ -63,5 +77,7 @@ package com.iblsoft.flexiweather.ogc
 
 		public function get styles(): ArrayCollection
 		{ return ma_styles;	}
+		
+		
 	}
 }

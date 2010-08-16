@@ -1,5 +1,9 @@
 package com.iblsoft.flexiweather.widgets
 {
+	import com.iblsoft.flexiweather.events.BackgroundJobEvent;
+	
+	import flash.events.EventDispatcher;
+	
 	import mx.collections.ArrayCollection;
 	import mx.controls.ProgressBar;
 	import mx.controls.ProgressBarLabelPlacement;
@@ -7,7 +11,7 @@ package com.iblsoft.flexiweather.widgets
 	import mx.core.UIComponent;
 	import mx.events.ResizeEvent;
 	
-	public class BackgroundJobManager
+	public class BackgroundJobManager extends EventDispatcher
 	{
 		internal static var sm_instance: BackgroundJobManager;
 
@@ -72,9 +76,20 @@ package com.iblsoft.flexiweather.widgets
 			}
 			mi_maxJobs++;
 			updateUI();
+			
+			dispatchJobEvent(BackgroundJobEvent.JOB_STARTED);
+			
 			return job;
 		}
 		
+		private function dispatchJobEvent(type: String): void
+		{
+			var bje: BackgroundJobEvent = new BackgroundJobEvent(type);
+			bje.runningJobs = m_jobs.length;
+			bje.doneJobs = mi_doneJobs;
+			bje.allJobs = mi_maxJobs;
+			dispatchEvent(bje);
+		}
 		public function finishJob(job: BackgroundJob): void
 		{
 			var i: int = m_jobs.getItemIndex(job);
@@ -82,6 +97,13 @@ package com.iblsoft.flexiweather.widgets
 				m_jobs.removeItemAt(i);
 				mi_doneJobs++;
 				updateUI();
+			}
+			
+			dispatchJobEvent(BackgroundJobEvent.JOB_FINISHED);
+			
+			if (m_jobs.length == 0)
+			{
+				dispatchJobEvent(BackgroundJobEvent.ALL_JOBS_FINISHED);
 			}
 		}
 		

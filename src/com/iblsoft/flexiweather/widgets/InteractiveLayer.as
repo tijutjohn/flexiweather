@@ -1,11 +1,14 @@
 package com.iblsoft.flexiweather.widgets
 {
+	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.proj.Coord;
 	
 	import flash.display.Graphics;
 	import flash.events.MouseEvent;
+	import flash.geom.Rectangle;
 	
+	import mx.containers.Canvas;
 	import mx.core.UIComponent;
 	
 	public class InteractiveLayer extends UIComponent
@@ -16,7 +19,24 @@ package com.iblsoft.flexiweather.widgets
 		private var mb_enabled: Boolean = true;
 		private var mi_zOrder: int = 0;
 		
+		protected var m_legendCallBack: Function;
+		protected var m_legendCanvas: Canvas;
+		protected var m_legendLabelAlign: String;
+		
+		public function get legendCanvas(): Canvas
+		{
+			return m_legendCanvas;
+		}
+		
 		public static var ID: int = 0;
+		
+		override public function set visible(b_visible: Boolean): void
+		{
+			super.visible = b_visible;
+			
+			var ile: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.VISIBILITY_CHANGED);
+			dispatchEvent(ile);
+		}
 		
 		public function InteractiveLayer(container: InteractiveWidget)
 		{
@@ -101,6 +121,16 @@ package com.iblsoft.flexiweather.widgets
         public function getFeatureInfo(coord: Coord, callback: Function): void
         {}
         
+        // map legend
+        public function hasLegend(): Boolean
+        { return false; }
+        
+        public function removeLegend(): void
+        {  }
+
+        public function renderLegend(canvas: Canvas, callback: Function, labelAlign: String = 'left', hintSize: Rectangle = null): Rectangle
+        {	return new Rectangle(); }
+        
         // extent access
         public function hasExtent(): Boolean
         { return false; }
@@ -123,6 +153,15 @@ package com.iblsoft.flexiweather.widgets
 			mi_zOrder = i_zOrder;
 			if(container != null)
 				container.orderLayers();
+		}
+		
+		/**
+		 * Clone interactiveLayer 
+		 * 
+		 */		
+		public function clone(): InteractiveLayer
+		{
+			return new InteractiveLayer(container);	
 		}
 	}
 }

@@ -29,7 +29,8 @@ package com.iblsoft.flexiweather.utils
 			s_key = fixKey(s_key, i_index);
 			if(isLoading()) {
 				var o: Object = m_current[s_key];
-				if(o == null)
+				//TODO Jozef, please check if this is correct behaviour
+				if(o == null || o == "")
 					return s_default; 
 				return String(o);
 			}

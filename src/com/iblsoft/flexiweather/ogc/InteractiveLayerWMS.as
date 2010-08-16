@@ -8,20 +8,27 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.widgets.BackgroundJob;
 	import com.iblsoft.flexiweather.widgets.BackgroundJobManager;
+	import com.iblsoft.flexiweather.widgets.GlowLabel;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.display.Bitmap;
+	import flash.display.DisplayObject;
 	import flash.display.Graphics;
 	import flash.events.DataEvent;
 	import flash.events.TimerEvent;
 	import flash.geom.Matrix;
 	import flash.geom.Point;
+	import flash.geom.Rectangle;
 	import flash.net.URLRequest;
 	import flash.net.URLVariables;
 	import flash.utils.Dictionary;
 	import flash.utils.Timer;
 	
+	import mx.containers.Canvas;
+	import mx.controls.Image;
+	import mx.core.UIComponent;
+	import mx.effects.Fade;
 	import mx.logging.Log;
 	
 	public class InteractiveLayerWMS extends InteractiveLayer
@@ -32,6 +39,12 @@ package com.iblsoft.flexiweather.ogc
 		protected var m_image: Bitmap = null;
 		protected var mb_imageOK: Boolean = true;
 
+		/**
+		 * Bitmap image holder for legend 
+		 */		
+		protected var m_legendImage: Bitmap = null;
+		protected var m_legendLoader: UniURLLoader = new UniURLLoader();
+		
 		protected var m_job: BackgroundJob;
 		protected var m_request: URLRequest;
 
@@ -56,6 +69,8 @@ package com.iblsoft.flexiweather.ogc
 			m_loader.addEventListener(UniURLLoader.DATA_LOADED, onDataLoaded);
 			m_loader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onDataLoadFailed);
 			
+			
+			
 			m_featureInfoLoader.addEventListener(UniURLLoader.DATA_LOADED, onFeatureInfoLoaded);
 			m_featureInfoLoader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onFeatureInfoLoadFailed);
 			
@@ -64,7 +79,31 @@ package com.iblsoft.flexiweather.ogc
 			setConfiguration(cfg);
 			//filters = [ new GlowFilter(0xffffe0, 0.8, 2, 2, 2) ];
 			m_timer.addEventListener(TimerEvent.TIMER_COMPLETE, onAutoRefreshTimerComplete)
-			m_timer.repeatCount = 1
+			m_timer.repeatCount = 1;
+			
+			createEffects();
+//			setStyle('addedEffect', fadeIn);
+			setStyle('showEffect', fadeIn);
+//			setStyle('removedEffect', fadeOut);
+			setStyle('hideEffect', fadeOut);
+		}
+		
+		private var fadeIn: Fade;
+		private var fadeOut: Fade;
+		
+		private function createEffects(): void
+		{
+			fadeIn = new Fade(this);
+			fadeIn.alphaFrom = 0;
+			fadeIn.alphaTo = 1;
+			fadeIn.duration = 300;
+			fadeIn.play([this]);
+			
+			fadeOut = new Fade(this);
+			fadeOut.alphaFrom = 1;
+			fadeOut.alphaTo = 0;
+			fadeOut.duration = 300;
+			fadeOut.play([this]);
 		}
 		
 		public function setConfiguration(cfg: WMSLayerConfiguration): void
@@ -221,6 +260,215 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 		
+		private function getLegendForStyleName(styleName: String): Object
+		{
+//			if (ma
+			return null;
+		}
+		// map legend
+        override public function hasLegend(): Boolean
+        { 
+        	//check if layer has legend	
+        	var style: Object = getWMSEffectiveStyle(0);
+        	
+        	if (style)
+        		return style.legend;
+        		
+        	return false;
+       	}
+
+		
+		 override public function removeLegend(): void
+		 {
+		 	super.removeLegend();
+		 	
+		 	if (m_legendCanvas)
+		 	{
+		 		while (m_legendCanvas.numChildren > 0)
+		 		{
+		 			var disp: UIComponent = m_legendCanvas.getChildAt(0) as UIComponent;
+		 			if (disp is Image)
+		 			{
+		 				((disp as Image).source as Bitmap).bitmapData.dispose();
+		 			}
+		 			m_legendCanvas.removeChildAt(0);
+		 			disp = null;
+		 			
+		 		}	
+		 	}
+		 	
+		 	//m_legendCanvas = null
+		 }
+		 
+        /**
+         * Render legend. If legend is not cached, it needs to be loaded. 
+         * @param canvas
+         * @param callback
+         * @param labelAlign
+         * @param hintSize
+         * @return 
+         * 
+         */		
+        override public function renderLegend(canvas: Canvas, callback: Function, labelAlign: String = 'left', hintSize: Rectangle = null): Rectangle
+        {
+        	super.renderLegend(canvas, callback, labelAlign, hintSize);
+        	
+        	var style: Object = getWMSEffectiveStyle(0);
+        	var legendObject: Object = style.legend;
+        	
+        	var w: int = legendObject.width;
+        	var h: int = legendObject.height;
+        	if (hintSize)
+        	{
+        		w = hintSize.width;
+        		h = hintSize.height;
+        	}
+        		
+			m_legendCanvas = canvas;
+			m_legendLabelAlign = labelAlign;
+        	m_legendCallBack = callback;
+			
+        	if (!isLegendCached(w, h))
+        	{
+	        	var url: URLRequest = m_cfg.toGetLegendRequest(
+						w, h,
+						style.name);
+						
+				m_legendLoader.addEventListener(UniURLLoader.DATA_LOADED, onLegendLoaded);
+				m_legendLoader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onLegendLoadFailed);
+			
+	        	m_legendLoader.load(url);
+	        	
+        	} else {
+        		createLegend();
+        	}
+        	
+        	
+        	var gap: int = 2;
+    		var labelHeight: int = 12;
+        	return new Rectangle(0,0, w, h + gap + labelHeight);
+        }
+        
+        /**
+         * Check if legend image is cached. If last legende loaded has same width and height. 
+         * @param newWidth
+         * @param newHeight
+         * 
+         */        
+        private function isLegendCached(newWidth: int, newHeight: int): Boolean
+        {
+        	if (m_legendImage)
+        	{
+        		if (m_legendImage.width == newWidth && m_legendImage.height == newHeight)
+        		{
+        			// legend is cached
+        			return true;
+        		}
+        	}
+        	return false;
+        }
+        
+        private function removeLegendListeners(): void
+        {
+        	m_legendLoader.removeEventListener(UniURLLoader.DATA_LOADED, onLegendLoaded);
+			m_legendLoader.removeEventListener(UniURLLoader.DATA_LOAD_FAILED, onLegendLoadFailed);
+        }
+        /**
+         * Function which handle legend load 
+         * @param event
+         * 
+         */        
+        protected function onLegendLoaded(event: UniURLLoaderEvent): void
+		{
+			var result: * = event.result;
+			if(result is Bitmap) {
+				m_legendImage = result;
+				createLegend();
+			}
+			removeLegendListeners();
+		}
+		
+		private function createLegend(): void
+		{
+			var gap: int = 2;
+			var labelHeight: int = 12;
+			
+			//add legend label (name of the layer)
+			var label: GlowLabel;
+			if (m_legendCanvas.numChildren > 0)
+			{
+				var labelTest: DisplayObject = m_legendCanvas.getChildAt(0);
+				if (labelTest is GlowLabel)
+				{
+					label = labelTest as GlowLabel;
+				}
+			}
+			if (!label)
+			{
+			 	label = new GlowLabel();
+				m_legendCanvas.addChild(label);
+			}
+			 	
+			label.glowBlur = 5;
+			label.glowColor = 0xffffff;
+			label.text = name;
+			label.width = m_legendImage.width;
+			label.setStyle('textAlign', m_legendLabelAlign);
+			
+			//add legend image
+			var image: Image;
+			if (m_legendCanvas.numChildren > 1)
+			{
+				var imageTest: DisplayObject = m_legendCanvas.getChildAt(1);
+				if (imageTest is Image)
+				{
+					image = imageTest as Image;
+				}
+			}
+			if (!image)
+			{
+			 	image = new Image();
+				m_legendCanvas.addChild(image);
+			}
+			 	
+			image.source = m_legendImage;
+			image.width = m_legendImage.width;
+			image.height = m_legendImage.height;
+			image.y = labelHeight + gap;
+			
+			m_legendCanvas.width = m_legendImage.width;
+			m_legendCanvas.height = m_legendImage.height + labelHeight + gap;
+			
+			
+			if(m_legendCallBack != null) {
+				m_legendCallBack.call(null, m_legendCanvas);
+			}
+			m_legendCallBack = null;
+		}
+		protected function onLegendLoadFailed(event: UniURLLoaderEvent): void
+		{
+			trace("onLegendLoadFailed");
+			removeLegendListeners();
+			/*
+			m_request = null;
+			if(m_cfg.mi_autoRefreshPeriod > 0) {
+				m_timer.reset();
+				m_timer.delay = m_cfg.mi_autoRefreshPeriod * 1000.0;
+				m_timer.start();
+			}
+			if(event != null) {
+				ExceptionUtils.logError(Log.getLogger("WMS"), event,
+						"Error accessing layers '" + m_cfg.ma_layerNames.join(","))
+			}
+			m_image = null;
+			mb_imageOK = false;
+			ms_imageCRS = null;
+			m_imageBBox = null;
+			onJobFinished();
+			*/
+		}
+        
+        
 		override public function hasFeatureInfo(): Boolean
 		{
         	for each(var layer: WMSLayer in getWMSLayers()) {
@@ -442,6 +690,7 @@ package com.iblsoft.flexiweather.ogc
     				b_foundAnyStyle = true;
     				a_layerStyles.push({
     						label: style.title != null ? (style.title + " (" + style.name + ")") : style.name,
+    						title: style.title != null  ? style.title : style.name,
     						name: style.name
     				});
     			} 
@@ -456,6 +705,18 @@ package com.iblsoft.flexiweather.ogc
         		return ma_subLayerStyleNames[i_subLayer];
         	else
         		return null;
+        }
+
+        public function getWMSEffectiveStyle(i_subLayer: uint): Object
+        {
+        	var s_styleName: String = getWMSStyleName(i_subLayer);
+        	if(s_styleName == null) {
+        		var layer:WMSLayer = m_cfg.ma_layerConfigurations[i_subLayer] as WMSLayer;
+				if (layer && layer.ma_styles && layer.ma_styles.length > 0) {
+					return layer.ma_styles[0];
+				}
+        	}
+        	return null;
         }
 
         public function setWMSStyleName(i_subLayer: uint, s_styleName: String): void
@@ -628,6 +889,8 @@ package com.iblsoft.flexiweather.ogc
 			return false;
 		}
 		
+		
+		
 		// Event handlers
 		protected function onDataLoaded(event: UniURLLoaderEvent): void
 		{
@@ -722,6 +985,21 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 
+		override public function clone(): InteractiveLayer
+		{
+			var newLayer: InteractiveLayerWMS = new InteractiveLayerWMS(container, m_cfg);
+			newLayer.alpha = alpha
+			newLayer.zOrder = zOrder;
+			newLayer.visible = visible;
+					
+			var styleName: String = getWMSStyleName(0)
+			newLayer.setWMSStyleName(0, styleName);
+			trace("\n\n CLONE InteractiveLayerWMS ["+newLayer.name+"] alpha: " + newLayer.alpha + " zOrder: " +  newLayer.zOrder);
+			
+			return newLayer;
+			
+		}
+	
 		public function get configuration(): WMSLayerConfiguration
 		{ return m_cfg; }
 
@@ -737,6 +1015,8 @@ import com.iblsoft.flexiweather.ogc.BBox;
 import flash.utils.Dictionary;
 import flash.net.URLRequest;
 import flash.display.Bitmap;
+import com.iblsoft.flexiweather.widgets.InteractiveLayer;
+import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
 
 class WMSCacheKey
 {
@@ -804,4 +1084,6 @@ class WMSCache
 			delete md_cache[s_key];
 		}
 	}
+	
+	
 }

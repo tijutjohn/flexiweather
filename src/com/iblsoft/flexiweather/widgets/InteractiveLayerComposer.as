@@ -8,7 +8,6 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.utils.DateUtils;
 	
-	import flash.display.DisplayObject;
 	import flash.events.DataEvent;
 	import flash.events.Event;
 	
@@ -74,15 +73,27 @@ package com.iblsoft.flexiweather.widgets
 				return;
 			mb_orderingLayers = true;
 			try {
+//				trace("**********************************************")
+//				trace("                 SORTING by ZORDER start state");
+//				trace("**********************************************")
+//				for(i = 0; i < numChildren; ++i) 
+//				{
+//					var layer: InteractiveLayer = InteractiveLayer(getChildAt(i)); 
+//					trace("LAYER ["+i+"] = " + layer.name + " order: " + layer.zOrder); 
+//				}
+//				trace("**********************************************")
+				
 				// stable-sort interactive layers in ma_layers according to their zOrder property
 				for(var i: int = 0; i < numChildren; ++i) {
 					var ilI: InteractiveLayer = InteractiveLayer(getChildAt(i)); 
 					for(var j: int = i + 1; j < numChildren; ++j) {
 						var ilJ: InteractiveLayer = InteractiveLayer(getChildAt(j));
+//						trace('[InteractiveLayerComposer.orderLayers] ... checking ' + ilJ.name + '['+ilJ.zOrder+'] with ' + ilI.name+'['+ilI.zOrder+']');
 						if(ilJ.zOrder < ilI.zOrder) {
 							// swap Ith and Jth layer, we know that J > I
-							trace('[InteractiveLayerComposer.orderLayers] ... swapping ' + ilJ.name + ' with ' + ilI.name);
+//							trace('\t [InteractiveLayerComposer.orderLayers] ... swapping ' + ilJ.name + '['+ilJ.zOrder+'] with ' + ilI.name+'['+ilI.zOrder+']');
 							swapChildren(ilJ, ilI); 
+							var ilI: InteractiveLayer = InteractiveLayer(getChildAt(i)); 
 							//removeChildAt(j);
 							//removeChildAt(i);
 							//addChildAt(ilJ, i);
@@ -90,17 +101,17 @@ package com.iblsoft.flexiweather.widgets
 						}
 					}
 				}
-				/*
-				trace("**********************************************")
-				trace("                 SORTING by ZORDER");
-				trace("**********************************************")
-				for(var i: int = 0; i < numChildren; ++i) 
-				{
-					var layer: InteractiveLayer = InteractiveLayer(getChildAt(i)); 
-					trace("LAYER ["+i+"] = " + layer.name); 
-				}
-				trace("**********************************************")
-				*/
+				
+//				trace("**********************************************")
+//				trace("                 SORTING by ZORDER end state");
+//				trace("**********************************************")
+//				for(i = 0; i < numChildren; ++i) 
+//				{
+//					var layer: InteractiveLayer = InteractiveLayer(getChildAt(i)); 
+//					trace("LAYER ["+i+"] = " + layer.name + " order: " + layer.zOrder); 
+//				}
+//				trace("**********************************************")
+				
 			}
 			finally {
 				mb_orderingLayers = false;
@@ -552,5 +563,22 @@ package com.iblsoft.flexiweather.widgets
         //[Bindable]
         public function get layers(): ArrayCollection
         { return m_layers; }
+        
+        /**
+		 * Clone interactiveLayer 
+		 * 
+		 */		
+		override public function clone(): InteractiveLayer
+		{
+			var composer: InteractiveLayerComposer =  new InteractiveLayerComposer(container);
+			
+			for each (var l: InteractiveLayer in layers)
+			{
+				var newLayer: InteractiveLayer = l.clone();
+				composer.addLayer(newLayer);
+			}
+			
+			return composer;
+		}
 	}
 }
