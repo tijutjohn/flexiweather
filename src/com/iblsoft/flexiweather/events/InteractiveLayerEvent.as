@@ -4,6 +4,7 @@ package com.iblsoft.flexiweather.events
 	
 	import flash.events.Event;
 	import flash.geom.Point;
+	import flash.geom.Rectangle;
 
 	public class InteractiveLayerEvent extends Event
 	{
@@ -11,10 +12,12 @@ package com.iblsoft.flexiweather.events
 		public  static const VISIBILITY_CHANGED: String = 'visibilityChanged';
 		public  static const LAYER_ROLL_OVER: String = 'layerRollOver';
 		public  static const LAYER_ROLL_OUT: String = 'layerRollOut';
+		public  static const LEGENDS_AREA_UPDATED: String = 'legendsAreaUpdated';
 		
 		public var text: String;
 		public var interactiveLayer: InteractiveLayer;
 		public var point: Point;
+		public var area: Rectangle;
 		
 		public function InteractiveLayerEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false)
 		{

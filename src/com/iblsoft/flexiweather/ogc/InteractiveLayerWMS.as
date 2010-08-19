@@ -269,7 +269,10 @@ package com.iblsoft.flexiweather.ogc
         override public function hasLegend(): Boolean
         { 
         	//check if layer has legend	
-        	var style: Object = getWMSEffectiveStyle(0);
+        	var styleName: String = getWMSStyleName(0);
+        	if (!styleName)
+        		styleName = '';
+        	var style: Object = getWMSStyleObject(0, styleName);
         	
         	if (style)
         		return style.legend;
@@ -313,7 +316,11 @@ package com.iblsoft.flexiweather.ogc
         {
         	super.renderLegend(canvas, callback, labelAlign, hintSize);
         	
-        	var style: Object = getWMSEffectiveStyle(0);
+        	var styleName: String = getWMSStyleName(0);
+        	if (!styleName)
+        		styleName = '';
+        	var style: Object = getWMSStyleObject(0, styleName);
+        	
         	var legendObject: Object = style.legend;
         	
         	var w: int = legendObject.width;
@@ -707,13 +714,29 @@ package com.iblsoft.flexiweather.ogc
         		return null;
         }
 
-        public function getWMSEffectiveStyle(i_subLayer: uint): Object
+        public function getWMSStyleObject(i_subLayer: uint, styleName: String = ''): Object
+        {
+			var layer:WMSLayer = m_cfg.ma_layerConfigurations[i_subLayer] as WMSLayer;
+			if (layer && layer.ma_styles && layer.ma_styles.length > 0) {
+				if (styleName == '')
+					return layer.ma_styles[0];
+				else {
+					for each (var styleObj: Object in layer.ma_styles)
+					{
+						if (styleObj.name == styleName)
+							return styleObj;
+					}
+				}
+			}
+        	return null;
+        }
+        public function getWMSEffectiveStyleName(i_subLayer: uint): String
         {
         	var s_styleName: String = getWMSStyleName(i_subLayer);
         	if(s_styleName == null) {
-        		var layer:WMSLayer = m_cfg.ma_layerConfigurations[i_subLayer] as WMSLayer;
+				var layer:WMSLayer = m_cfg.ma_layerConfigurations[i_subLayer] as WMSLayer;
 				if (layer && layer.ma_styles && layer.ma_styles.length > 0) {
-					return layer.ma_styles[0];
+					return layer.ma_styles[0].name;
 				}
         	}
         	return null;

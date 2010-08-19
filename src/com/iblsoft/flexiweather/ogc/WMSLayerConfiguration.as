@@ -23,6 +23,7 @@ package com.iblsoft.flexiweather.ogc
 		public var ms_dimensionRunName: String = null;
 		public var ms_dimensionForecastName: String = null;
 		public var ms_dimensionVerticalLevelName: String = null;
+		public var mb_legendIsDimensionDependant: Boolean;
 		public var ms_previewURL: String = null;
 		public var mi_autoRefreshPeriod: uint = 0;
 		
@@ -78,8 +79,8 @@ package com.iblsoft.flexiweather.ogc
 		{
 			var r: URLRequest = m_service.toRequest("GetLegendGraphic");
 			r.data.LAYER = ma_layerNames[0];
-			r.data.WIDTH = i_width; 
-			r.data.HEIGHT = i_height;
+//			r.data.WIDTH = i_width; 
+//			r.data.HEIGHT = i_height;
 			if(s_style != null)
 				r.data.STYLE = s_style;
 //			r.data.FORMAT = "image/png"; 

@@ -1,5 +1,7 @@
 package com.iblsoft.flexiweather.widgets
 {
+	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
+	
 	import flash.display.Graphics;
 	import flash.geom.Rectangle;
 	
@@ -62,6 +64,7 @@ package com.iblsoft.flexiweather.widgets
 		
 		private var _legendsToBeRendered: uint;
 		private var legendsBkgRectangle: Rectangle;
+		private var _currentRectangle: Rectangle;
 		
 		public function InteractiveLayerLegends(container:InteractiveWidget = null)
 		{
@@ -121,7 +124,22 @@ package com.iblsoft.flexiweather.widgets
 			m_layers.removeAll();
 		}
 		
-		public function renderLegendsStack(): void
+		private function  repositionedLegends(): void
+		{
+			renderLegendsStack(true);
+			trace("repositionedLegends: " + legendsBkgRectangle);	
+			
+			var ile: InteractiveLayerEvent = new InteractiveLayerEvent( InteractiveLayerEvent.LEGENDS_AREA_UPDATED);
+			ile.area = legendsBkgRectangle;
+			dispatchEvent(ile);
+		}
+		
+		/**
+		 * Load legends and do not layout them 
+		 * @return 
+		 * 
+		 */		
+		private function loadLegends(): Boolean
 		{
 			_legendsToBeRendered = 0;
 			var l: InteractiveLayer;
@@ -129,77 +147,12 @@ package com.iblsoft.flexiweather.widgets
 			//find total count of layers for which legend should be rendered
 			for each (l in m_layers)
 			{
-				if (l.hasLegend())
+				if (l.hasLegend() && l.visible)
 				{
 					_legendsToBeRendered++;
 				}
 			}
 			
-			var posX: int = 0;
-			var posY: int = 0;
-			
-			var hAlign: String = getStyle('horizontalAlign');
-			var vAlign: String = getStyle('verticalAlign');
-			var sizeX: int = 0;		 
-			var sizeY: int = 0;		 
-			var directionX: int = 0;
-			var directionY: int = 0;
-			
-			if ( getStyle('horizontalDirection') == 'left') {
-				directionX = -1;
-			} else {
-				if ( getStyle('horizontalDirection') == 'right') {
-					directionX = 1;
-				}
-			}
-			if ( getStyle('verticalDirection') == 'up') {
-				directionY = -1;
-			} else {
-				if ( getStyle('verticalDirection') == 'down') {
-					directionY = 1;
-				}
-			}
-					
-					
-			switch (hAlign)
-			{
-				case 'left':
-					posX = getStyle('paddingLeft');
-					break;
-				case 'center':
-					posX = width/2;
-					sizeX = -0.5;
-					break;
-				case 'right':
-					posX = width - getStyle('paddingRight');
-					sizeX = -1;
-					break;
-			}
-			switch (vAlign)
-			{
-				case 'top':
-					posY = getStyle('paddingTop');
-					break;
-				case 'middle':
-					posY = height/2;
-					sizeY = -0.5;
-					break;
-				case 'bottom':
-					posY = height - getStyle('paddingBottom');
-					sizeY = -1;
-					break;
-			}
-			
-			var startX: int = posX;
-			var startY: int = posY;
-			var endX: int = posX;
-			var endY: int = posY;
-			
-//			trace("renderLegendsStack horizontal align: " + getStyle('horizontalAlign') + " vertical: " + getStyle('verticalAlign'));
-//			trace("posX: " + posX + " posY: " + posY);
-			var initialReposition: Boolean = false;
-			
-			legendsBkgRectangle = new Rectangle();
 			for each (l in m_layers)
 			{
 				if (l.hasLegend() && l.visible)
@@ -212,54 +165,265 @@ package com.iblsoft.flexiweather.widgets
 						canvas = new Canvas();
 						addChild(canvas);
 					}
-					var rect: Rectangle = l.renderLegend(canvas, onLegendRendered, getStyle('labelAlign'), new Rectangle(0,0,300,24));
+					canvas.visible = false;
+					l.renderLegend(canvas, onLegendRendered, getStyle('labelAlign'));
+				}
+				
+			}
+			
+			return true;
+		}
+		/**
+		 * This function render all legens. If legends are not loaded, it loads them first. There can be problem that legend do not need to have set size, so there is problem
+		 * with finding correct bounding box. That's why this function is also used for repositioned legends after load. In that case parameter justReposition needs to be set to "true"  
+		 * @param justReposition - set to true if you want just reposition legends without loading
+		 * 
+		 */		
+		public function renderLegendsStack(justReposition: Boolean = false): void
+		{
+			trace("\n\n******************************");
+			trace("******************************");
+			trace("\trenderLegendsStack justReposition = " + justReposition);
+			
+			if (!justReposition)
+			{
+				loadLegends();
+				return;	
+			}
+//			_legendsToBeRendered = 0;
+			var l: InteractiveLayer;
+			
+			//find total count of layers for which legend should be rendered
+//			for each (l in m_layers)
+//			{
+//				if (l.hasLegend() && l.visible)
+//				{
+//					_legendsToBeRendered++;
+//				}
+//			}
+			
+			var posX: int = 0;
+			var posY: int = 0;
+			
+			var maxWidth: int = width;
+			var maxHeight: int = height;
+			
+			var paddingLeft: int = getStyle('paddingLeft');
+			var paddingRight: int = getStyle('paddingRight');
+			var paddingTop: int = getStyle('paddingTop');
+			var paddingBottom: int = getStyle('paddingBottom');
+			
+			var horizontalAlign: String = getStyle('horizontalAlign');
+			var verticalAlign: String = getStyle('verticalAlign');
+			var horizontalDirection: String = getStyle('horizontalDirection');
+			var verticalDirection: String = getStyle('verticalDirection');
+			
+			var hAlign: String = horizontalAlign;
+			var vAlign: String = verticalAlign;
+			var directionX: int = 0;
+			var directionY: int = 0;
+			
+			if ( horizontalDirection == 'left') {
+				directionX = -1;
+			} else {
+				if ( horizontalDirection == 'right') {
+					directionX = 1;
+				}
+			}
+			if ( verticalDirection == 'up') {
+				directionY = -1;
+			} else {
+				if ( verticalDirection == 'down') {
+					directionY = 1;
+				}
+			}
 					
-					if (!initialReposition)
+					
+			switch (hAlign)
+			{
+				case 'left':
+					posX = paddingLeft;
+					break;
+				case 'center':
+					posX = maxWidth/2;
+					break;
+				case 'right':
+					posX = maxWidth - paddingRight;
+					break;
+			}
+			switch (vAlign)
+			{
+				case 'top':
+					posY = paddingTop;
+					break;
+				case 'middle':
+					posY = maxHeight/2;
+					break;
+				case 'bottom':
+					posY = maxHeight - paddingBottom;
+					break;
+			}
+			
+			var initialX: int = posX;
+			var initialY: int = posY;
+			
+			var startX: int = posX;
+			var startY: int = posY;
+			var endX: int = posX;
+			var endY: int = posY;
+			var startX2: int = posX;
+			var startY2: int = posY;
+			var endX2: int = posX;
+			var endY2: int = posY;
+			
+			var rowItems: int = 0;
+			var colItems: int = 0;
+			
+//			trace("renderLegendsStack horizontal align: " + horizontalAlign + " vertical: " + verticalAlign);
+//			trace("posX: " + posX + " posY: " + posY);
+			var initialReposition: Boolean = false;
+			
+			legendsBkgRectangle = new Rectangle();
+			_currentRectangle = new Rectangle();
+				
+			var gapX: int = 10;
+			var gapY: int = 10;
+			if (getStyle('horizontalGap'))
+			{
+				gapX = getStyle('horizontalGap');
+			}
+			if (getStyle('verticalGap'))
+			{
+				gapY = getStyle('verticalGap');
+			}
+				
+			if (justReposition)
+			{
+				trace("    ");
+			}
+			for each (l in m_layers)
+			{
+				if (l.hasLegend() && l.visible)
+				{
+					var canvas: Canvas;
+					if (l.legendCanvas)
 					{
-						posX += sizeX * rect.width;
-						posY += sizeY * rect.height;
-						initialReposition = true;
+						canvas = l.legendCanvas;
+					} else {
+						canvas = new Canvas();
+						addChild(canvas);
+					}
+					canvas.visible = true;
+					
+					var rect: Rectangle
+					if (!justReposition)
+					{
+//						var rect: Rectangle = l.renderLegend(canvas, onLegendRendered, getStyle('labelAlign'), new Rectangle(0,0,300,24));
+						rect = l.renderLegend(canvas, onLegendRendered, getStyle('labelAlign'));
+					} else {
+						rect = new Rectangle(0,0, l.legendCanvas.width, l.legendCanvas.height);
 					}
 					
-//					trace("posX: " + posX + " posY: " + posY);
-					
-					canvas.x = posX;
-					canvas.y = posY;
-					
-					var gapX: int = 0;
-					var gapY: int = 0;
-					if (getStyle('horizontalGap'))
+					trace("\n LAYER " + l.name + " rect: " + rect + " \n")
+					//check if there is place for this legend
+					if ( horizontalDirection != 'none') 
 					{
-						gapX = getStyle('horizontalGap');
-					}
-					if (getStyle('verticalGap'))
+						var newMaxWidth: int = (maxWidth - paddingRight - paddingLeft);
+						var nextWidth: Number = legendsBkgRectangle.width + rect.width + gapX;
+						trace("\t nextWidth: " + nextWidth + " rowItems: " + rowItems + " newMaxWidth: " + newMaxWidth);
+						if (nextWidth > newMaxWidth && newMaxWidth > 0 && rowItems > 0)
+						{
+							trace("\t\tIt'w wider than width, make new row");
+							initialReposition = true;
+							startX2 = initialX;
+							endX2 = initialX;
+							posX = initialX;
+							if ( verticalAlign == 'top')
+								posY = legendsBkgRectangle.height + paddingTop + gapY;
+							else {
+								if ( verticalAlign == 'bottom' )
+									posY = maxHeight - legendsBkgRectangle.height - paddingTop - gapY;
+							}
+							rowItems = 0;
+						} 
+					} 
+
+					if ( verticalDirection != 'none') 
 					{
-						gapY = getStyle('verticalGap');
-					}
+						var newMaxHeight: int = (maxHeight - paddingTop - paddingBottom);
+						var nextHeight: Number = legendsBkgRectangle.height +  rect.height + gapY;
+						trace("\t nextHeight: " + nextHeight + " colItems: " + colItems + " newMaxHeight: " + newMaxHeight);
+						if (nextHeight > newMaxHeight && newMaxHeight > 0 && colItems > 0)
+						{
+							trace("\t\tIt's higher than height, make new column");
+							initialReposition = true;
+							posY = initialY;
+							startY2 = initialY;
+							endY2 = initialY;
+							if ( horizontalAlign == 'left')
+								posX = legendsBkgRectangle.width + paddingLeft + gapX;
+							else {
+								if ( horizontalAlign == 'right' )
+									posX = maxWidth - legendsBkgRectangle.width - paddingLeft - gapX;
+							}
+							colItems = 0;
+						} 
+					} 
+					
+					if (directionX != 0)
+						rowItems++;
+					if (directionY != 0)
+						colItems++;
+						
+					trace("\n\tposX: " + posX + " posY: " + posY);
+					
+					
+					if (directionX == -1 || horizontalAlign == 'right')
+						canvas.x = posX - rect.width;
+					if (directionX == 1|| horizontalAlign == 'left')
+						canvas.x = posX;
+					if (directionY == -1 || verticalAlign == 'bottom')
+						canvas.y = posY - rect.height;
+					if (directionY == 1 || verticalAlign == 'top')
+						canvas.y = posY;
+					
 					posX += directionX * (rect.width + gapX);
 					posY += directionY * (rect.height + gapY);
-					
-					
+					trace("\n\tnew posX: " + posX + " posY: " + posY);
 					
 					startX = Math.min(startX, canvas.x);
 					startY = Math.min(startY, canvas.y);
 					endX = Math.max(endX, canvas.x+ rect.width);
 					endY = Math.max(endY, canvas.y + rect.height);
 					
+					trace("\t\trect: " + rect);
+					trace("\t\tcanvas: ["+canvas.x+","+canvas.y+"] size: ["+canvas.width+","+canvas.height+"]");
+					trace("\t\tstartX: " + startX + " startY: " + startY + " endX: " + endX + " endY: " + endY);
+					trace("\tLegends: ["+maxWidth+","+maxHeight+"]");
+					
+					legendsBkgRectangle.width = Math.abs(endX - startX);// + paddingLeft + paddingRight;
+					legendsBkgRectangle.height = Math.abs(endY - startY);// + paddingTop + paddingBottom;
+					
+					_currentRectangle = legendsBkgRectangle;
+					if (directionX != 0)
+					{
+						endX2 = Math.max(endX2, canvas.x + rect.width);
+						startX2  = Math.min(startX2, canvas.x);
+						_currentRectangle.width = Math.abs(endX2 - startX2);// + paddingLeft + paddingRight;
+					} else {
+						if (directionY != 0)
+						{
+							startY2 = Math.min(startY2, canvas.y);
+							endY2 = Math.max(endY2, canvas.y + rect.height);
+							_currentRectangle.height = Math.abs(endY2 - startY2);// + paddingTop + paddingBottom;
+						}
+					}
+					trace("\t\tlegendsBkgRectangle: " + legendsBkgRectangle);
+					trace("\t\t_currentRectangle: " + _currentRectangle);
 				}
-				
-				var bkgClr: uint = 0xff0000;
-				var bkgPadding: int = 0;
-				if (getStyle('legendsBackgroundColor'))
-					bkgClr = getStyle('legendsBackgroundColor');
-				if (getStyle('legendsBackgroundPadding'))
-					bkgPadding = getStyle('legendsBackgroundPadding');
-				
-				legendsBkgRectangle.width = Math.abs(endX - startX) + bkgPadding * 2;
-				legendsBkgRectangle.height = Math.abs(endY - startY) + bkgPadding * 2;
-				
-				draw(graphics);
 			}
+			draw(graphics);
+			trace("******************************\n\n");
 		}
 		
 		private function drawLegendsBackground(rect: Rectangle): void
@@ -282,6 +446,9 @@ package com.iblsoft.flexiweather.widgets
 				
 				var hAlign: String = getStyle('horizontalAlign');
 				var vAlign: String = getStyle('verticalAlign');
+				
+				if (!rect)
+					rect = new Rectangle(0,0,0,0);
 				
 				switch (hAlign)
 				{
@@ -320,11 +487,13 @@ package com.iblsoft.flexiweather.widgets
 		{
 			_legendsToBeRendered--;
 			
+			
 //			trace("onLegendRendered  _legendsToBeRendered: " +_legendsToBeRendered + " canvas: " + cnv.width + ", " + cnv.height + " Position: " + cnv.x + " , " + cnv.y);
-//			if (_legendsToBeRendered < 1)
-//			{
-//				trace("ALL LEGENDS ARE LOADED");
-//			}
+			if (_legendsToBeRendered < 1)
+			{
+				trace("ALL LEGENDS ARE LOADED");
+				repositionedLegends();
+			}
 		}
 		
 	}
