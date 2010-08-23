@@ -52,7 +52,7 @@ package com.iblsoft.flexiweather.utils
 		
 		public function load(urlRequest: URLRequest, associatedData: Object = null): void
 		{
-			trace("Requesting " + urlRequest.url + " " + urlRequest.data);
+//			trace("Requesting " + urlRequest.url + " " + urlRequest.data);
 			var urlLoader: URLLoaderWithAssociatedData = new URLLoaderWithAssociatedData();
 			urlLoader.associatedData = associatedData;
 			urlLoader.dataFormat = URLLoaderDataFormat.BINARY;

@@ -375,6 +375,20 @@ package com.iblsoft.flexiweather.ogc
         	return false;
         }
         
+        private function clearLegendCache(): void
+        {
+        	if (m_legendImage)
+        	{
+        		if (m_legendImage.width > 0 && m_legendImage.height > 0)
+        		{
+        			m_legendImage.bitmapData.dispose();
+        			m_legendImage = null;
+        			
+        			
+        		}
+        	}
+        }
+        
         private function removeLegendListeners(): void
         {
         	m_legendLoader.removeEventListener(UniURLLoader.DATA_LOADED, onLegendLoaded);
@@ -405,7 +419,7 @@ package com.iblsoft.flexiweather.ogc
 			if (m_legendCanvas.numChildren > 0)
 			{
 				var labelTest: DisplayObject = m_legendCanvas.getChildAt(0);
-				if (labelTest is GlowLabel)
+				if (labelTest is GlowLabel && labelTest.name != 'styleLabel')
 				{
 					label = labelTest as GlowLabel;
 				}
@@ -415,6 +429,7 @@ package com.iblsoft.flexiweather.ogc
 			 	label = new GlowLabel();
 				m_legendCanvas.addChild(label);
 			}
+			
 			 	
 			label.glowBlur = 5;
 			label.glowColor = 0xffffff;
@@ -426,7 +441,7 @@ package com.iblsoft.flexiweather.ogc
 			var image: Image;
 			if (m_legendCanvas.numChildren > 1)
 			{
-				var imageTest: DisplayObject = m_legendCanvas.getChildAt(1);
+				var imageTest: DisplayObject = m_legendCanvas.getChildAt(m_legendCanvas.numChildren - 1);
 				if (imageTest is Image)
 				{
 					image = imageTest as Image;
@@ -649,6 +664,10 @@ package com.iblsoft.flexiweather.ogc
 		}
         public function setWMSDimensionValue(s_dimName: String, s_value: String): void
         {
+        	if (m_cfg.mb_legendIsDimensionDependant)
+        	{
+        		clearLegendCache();
+        	}
         	if(s_value != null)
         		md_dimensionValues[s_dimName] = s_value;
         	else

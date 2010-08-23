@@ -93,7 +93,7 @@ package com.iblsoft.flexiweather.widgets
 							// swap Ith and Jth layer, we know that J > I
 //							trace('\t [InteractiveLayerComposer.orderLayers] ... swapping ' + ilJ.name + '['+ilJ.zOrder+'] with ' + ilI.name+'['+ilI.zOrder+']');
 							swapChildren(ilJ, ilI); 
-							var ilI: InteractiveLayer = InteractiveLayer(getChildAt(i)); 
+							ilI = InteractiveLayer(getChildAt(i)); 
 							//removeChildAt(j);
 							//removeChildAt(i);
 							//addChildAt(ilJ, i);

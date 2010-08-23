@@ -428,6 +428,7 @@ package com.iblsoft.flexiweather.widgets
 		
 		private function drawLegendsBackground(rect: Rectangle): void
 		{
+			/*
 			if (getStyle('legendsBackgroundColor'))
 			{
 				var bkgClr: uint = 0xff0000;
@@ -481,7 +482,7 @@ package com.iblsoft.flexiweather.widgets
 				gr.drawRect(bkgX, bkgY, rect.width + bkgPadding, rect.height + bkgPadding);
 	//			gr.drawRect(bkgX , bkgY , rect.width , rect.height);
 				gr.endFill();
-			}
+			}*/
 		}
 		private function onLegendRendered(cnv: Canvas): void
 		{
