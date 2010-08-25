@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.utils.Duration;
@@ -29,6 +30,7 @@ package com.iblsoft.flexiweather.ogc
 	import mx.controls.Image;
 	import mx.core.UIComponent;
 	import mx.effects.Fade;
+	import mx.events.EffectEvent;
 	import mx.logging.Log;
 	
 	public class InteractiveLayerWMS extends InteractiveLayer
@@ -96,13 +98,25 @@ package com.iblsoft.flexiweather.ogc
 			fadeIn.alphaFrom = 0;
 			fadeIn.alphaTo = 1;
 			fadeIn.duration = 300;
-			fadeIn.play([this]);
 			
 			fadeOut = new Fade(this);
 			fadeOut.alphaFrom = 1;
 			fadeOut.alphaTo = 0;
 			fadeOut.duration = 300;
-			fadeOut.play([this]);
+			
+			fadeIn.addEventListener(EffectEvent.EFFECT_END, onEffectEnd);
+			fadeOut.addEventListener(EffectEvent.EFFECT_END, onEffectEnd);
+			
+		}
+		
+		private function onEffectEnd(event: EffectEvent): void
+		{
+			callLater(delayedEffectEnd);
+		}
+		private function delayedEffectEnd(): void
+		{
+			var ile: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.VISIBILITY_EFFECT_FINISHED);
+			dispatchEvent(ile);
 		}
 		
 		public function setConfiguration(cfg: WMSLayerConfiguration): void
@@ -1043,6 +1057,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			var b_visiblePrev: Boolean = super.visible;
 			super.visible = b_visible;
+			
 			if(!b_visiblePrev && b_visible && mb_updateAfterMakingVisible) {
 				mb_updateAfterMakingVisible = false;
 				updateData(true);

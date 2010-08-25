@@ -119,7 +119,7 @@ package com.iblsoft.flexiweather.widgets
 				return -1;
 			var ok: Boolean = true;
 			var size: int = 8;
-			var cnt
+			var cnt:int;
 			while (ok)
 			{
 				var format: TextFormat = textField.getTextFormat();

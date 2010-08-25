@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.widgets
 {
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
+	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
 	
 	import flash.display.Graphics;
 	import flash.geom.Rectangle;
@@ -63,7 +64,7 @@ package com.iblsoft.flexiweather.widgets
 		
 		internal var m_layers: ArrayCollection = new ArrayCollection();
 		
-		private var _legendsToBeRendered: uint;
+		private var _legendsToBeRendered: int;
 		private var legendsBkgRectangle: Rectangle;
 		private var _currentRectangle: Rectangle;
 		
@@ -100,7 +101,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			super.draw(graphics);
 			
-			drawLegendsBackground(legendsBkgRectangle);
+			//drawLegendsBackground(legendsBkgRectangle);
 		}
 		
 		override public function onAreaChanged(b_finalChange:Boolean):void
@@ -128,7 +129,7 @@ package com.iblsoft.flexiweather.widgets
 		private function  repositionedLegends(): void
 		{
 			renderLegendsStack(true);
-			trace("repositionedLegends: " + legendsBkgRectangle);	
+			//trace("repositionedLegends: " + legendsBkgRectangle);	
 			
 			var ile: InteractiveLayerEvent = new InteractiveLayerEvent( InteractiveLayerEvent.LEGENDS_AREA_UPDATED);
 			ile.area = legendsBkgRectangle;
@@ -156,10 +157,12 @@ package com.iblsoft.flexiweather.widgets
 				if (l.hasLegend() && l.visible)
 				{
 					canvas = m_canvasDictionary[l] as Canvas;
-					if (canvas)
-						continue;
 							
 					_legendsToBeRendered++;
+					if (canvas)
+					{
+						onLegendRendered(canvas);
+					}
 				}
 			}
 			
@@ -207,7 +210,7 @@ package com.iblsoft.flexiweather.widgets
 					return;	
 			}
 			
-			var l: InteractiveLayer;
+			var l: InteractiveLayerWMS;
 			
 			var posX: int = 0;
 			var posY: int = 0;
@@ -286,10 +289,10 @@ package com.iblsoft.flexiweather.widgets
 			var rowItems: int = 0;
 			var colItems: int = 0;
 			
-			trace("maxWidth: " + maxWidth + " maxHeight: " + maxHeight);
-//			trace("renderLegendsStack horizontal align: " + horizontalAlign + " vertical: " + verticalAlign);
-//			trace("posX: " + posX + " posY: " + posY);
 			var initialReposition: Boolean = false;
+			
+			trace("\n\nLEGENDS graphics clear");
+			graphics.clear();
 			
 			legendsBkgRectangle = new Rectangle();
 			_currentRectangle = new Rectangle();
@@ -305,121 +308,146 @@ package com.iblsoft.flexiweather.widgets
 				gapY = getStyle('verticalGap');
 			}
 				
+			var debug: Boolean = false;
+			
 			for each (l in m_layers)
 			{
-				if (l.hasLegend() && l.visible)
+				if (l.hasLegend())
 				{
 					var canvas: Canvas = m_canvasDictionary[l] as Canvas;
-					canvas.visible = true;
+					if (canvas)
+						canvas.visible = l.visible;
 					
-					var rect: Rectangle
-					rect = new Rectangle(0,0, canvas.width, canvas.height);
-					
-					trace("\n LAYER " + l.name + " rect: " + rect + " \n")
-					//check if there is place for this legend
-					if ( horizontalDirection != 'none') 
+					if (debug)
+						trace("LEGENDS layer visible: " + l.visible);
+					if (l.visible)
 					{
-						var newMaxWidth: int = (maxWidth - paddingRight - paddingLeft);
-						var nextWidth: Number = legendsBkgRectangle.width + rect.width + gapX;
-						trace("\t nextWidth: " + nextWidth + " rowItems: " + rowItems + " newMaxWidth: " + newMaxWidth);
-						if (nextWidth > newMaxWidth && newMaxWidth > 0 && rowItems > 0)
-						{
-							trace("\t\tIt'w wider than width, make new row");
-							initialReposition = true;
-							startX2 = initialX;
-							endX2 = initialX;
-							posX = initialX;
-							if ( verticalAlign == 'top')
-								posY = legendsBkgRectangle.height + paddingTop + gapY;
-							else {
-								if ( verticalAlign == 'bottom' )
-									posY = maxHeight - legendsBkgRectangle.height - paddingBottom - gapY;
-							}
-							rowItems = 0;
-						} 
-					} 
-
-					if ( verticalDirection != 'none') 
-					{
-						var newMaxHeight: int = (maxHeight - paddingTop - paddingBottom);
-						var nextHeight: Number = legendsBkgRectangle.height +  rect.height + gapY;
-						trace("\t nextHeight: " + nextHeight + " colItems: " + colItems + " newMaxHeight: " + newMaxHeight);
-						if (nextHeight > newMaxHeight && newMaxHeight > 0 && colItems > 0)
-						{
-							trace("\t\tIt's higher than height, make new column");
-							initialReposition = true;
-							posY = initialY;
-							startY2 = initialY;
-							endY2 = initialY;
-							if ( horizontalAlign == 'left')
-								posX = legendsBkgRectangle.width + paddingLeft + gapX;
-							else {
-								if ( horizontalAlign == 'right' )
-									posX = maxWidth - legendsBkgRectangle.width - paddingLeft - gapX;
-							}
-							colItems = 0;
-						} 
-					} 
-					
-					if (directionX != 0)
-						rowItems++;
-					if (directionY != 0)
-						colItems++;
+						var rect: Rectangle
+						rect = new Rectangle(0,0, canvas.width, canvas.height);
 						
-					trace("\n\tposX: " + posX + " posY: " + posY);
-					
-					
-					if (directionX == -1 || horizontalAlign == 'right')
-						canvas.x = posX - rect.width;
-					if (directionX == 1|| horizontalAlign == 'left')
-						canvas.x = posX;
-					if (directionY == -1 || verticalAlign == 'bottom')
-						canvas.y = posY - rect.height;
-					if (directionY == 1 || verticalAlign == 'top')
-						canvas.y = posY;
-					
-					posX += directionX * (rect.width + gapX);
-					posY += directionY * (rect.height + gapY);
-					trace("\n\tnew posX: " + posX + " posY: " + posY);
-					
-					startX = Math.min(startX, canvas.x);
-					startY = Math.min(startY, canvas.y);
-					endX = Math.max(endX, canvas.x+ rect.width);
-					endY = Math.max(endY, canvas.y + rect.height);
-					
-					trace("\t\trect: " + rect);
-					trace("\t\tcanvas: ["+canvas.x+","+canvas.y+"] size: ["+canvas.width+","+canvas.height+"]");
-					trace("\t\tstartX: " + startX + " startY: " + startY + " endX: " + endX + " endY: " + endY);
-					trace("\tLegends: ["+maxWidth+","+maxHeight+"]");
-					
-					legendsBkgRectangle.width = Math.abs(endX - startX);// + paddingLeft + paddingRight;
-					legendsBkgRectangle.height = Math.abs(endY - startY);// + paddingTop + paddingBottom;
-					
-					_currentRectangle = legendsBkgRectangle;
-					if (directionX != 0)
-					{
-						endX2 = Math.max(endX2, canvas.x + rect.width);
-						startX2  = Math.min(startX2, canvas.x);
-						_currentRectangle.width = Math.abs(endX2 - startX2);// + paddingLeft + paddingRight;
-					} else {
-						if (directionY != 0)
+						if (debug)
+							trace("\n LAYER " + l.name + " rect: " + rect + " \n")
+						//check if there is place for this legend
+						if ( horizontalDirection != 'none') 
 						{
-							startY2 = Math.min(startY2, canvas.y);
-							endY2 = Math.max(endY2, canvas.y + rect.height);
-							_currentRectangle.height = Math.abs(endY2 - startY2);// + paddingTop + paddingBottom;
+							var newMaxWidth: int = (maxWidth - paddingRight - paddingLeft);
+							var nextWidth: Number = legendsBkgRectangle.width + rect.width + gapX;
+							if (debug)
+								trace("\t nextWidth: " + nextWidth + " rowItems: " + rowItems + " newMaxWidth: " + newMaxWidth);
+							if (nextWidth > newMaxWidth && newMaxWidth > 0 && rowItems > 0)
+							{
+								if (debug)
+									trace("\t\tIt'w wider than width, make new row");
+								initialReposition = true;
+								startX2 = initialX;
+								endX2 = initialX;
+								posX = initialX;
+								if ( verticalAlign == 'top')
+									posY = legendsBkgRectangle.height + paddingTop + gapY;
+								else {
+									if ( verticalAlign == 'bottom' )
+										posY = maxHeight - legendsBkgRectangle.height - paddingBottom - gapY;
+								}
+								rowItems = 0;
+							} 
+						} 
+	
+						if ( verticalDirection != 'none') 
+						{
+							var newMaxHeight: int = (maxHeight - paddingTop - paddingBottom);
+							var nextHeight: Number = legendsBkgRectangle.height +  rect.height + gapY;
+							if (debug)
+								trace("\t nextHeight: " + nextHeight + " colItems: " + colItems + " newMaxHeight: " + newMaxHeight);
+							if (nextHeight > newMaxHeight && newMaxHeight > 0 && colItems > 0)
+							{
+								if (debug)
+									trace("\t\tIt's higher than height, make new column");
+								initialReposition = true;
+								posY = initialY;
+								startY2 = initialY;
+								endY2 = initialY;
+								if ( horizontalAlign == 'left')
+									posX = legendsBkgRectangle.width + paddingLeft + gapX;
+								else {
+									if ( horizontalAlign == 'right' )
+										posX = maxWidth - legendsBkgRectangle.width - paddingLeft - gapX;
+								}
+								colItems = 0;
+							} 
+						} 
+						
+						if (directionX != 0)
+							rowItems++;
+						if (directionY != 0)
+							colItems++;
+							
+						if (debug)
+							trace("\n\tposX: " + posX + " posY: " + posY);
+						
+						
+						if (directionX == -1 || horizontalAlign == 'right')
+							canvas.x = posX - rect.width;
+						if (directionX == 1|| horizontalAlign == 'left')
+							canvas.x = posX;
+						if (directionY == -1 || verticalAlign == 'bottom')
+							canvas.y = posY - rect.height;
+						if (directionY == 1 || verticalAlign == 'top')
+							canvas.y = posY;
+						
+						posX += directionX * (rect.width + gapX);
+						posY += directionY * (rect.height + gapY);
+						
+						if (debug)
+							trace("\n\tnew posX: " + posX + " posY: " + posY);
+						
+						startX = Math.min(startX, canvas.x);
+						startY = Math.min(startY, canvas.y);
+						endX = Math.max(endX, canvas.x+ rect.width);
+						endY = Math.max(endY, canvas.y + rect.height);
+						
+						if (debug)
+						{
+							trace("\t\trect: " + rect);
+							trace("\t\tcanvas: ["+canvas.x+","+canvas.y+"] size: ["+canvas.width+","+canvas.height+"]");
+							trace("\t\tstartX: " + startX + " startY: " + startY + " endX: " + endX + " endY: " + endY);
+							trace("\tLegends: ["+maxWidth+","+maxHeight+"]");
+						}
+						
+						drawLegendsBackground(new Rectangle(canvas.x, canvas.y, canvas.width, canvas.height));
+						
+						legendsBkgRectangle.width = Math.abs(endX - startX);// + paddingLeft + paddingRight;
+						legendsBkgRectangle.height = Math.abs(endY - startY);// + paddingTop + paddingBottom;
+						
+						_currentRectangle = legendsBkgRectangle;
+						if (directionX != 0)
+						{
+							endX2 = Math.max(endX2, canvas.x + rect.width);
+							startX2  = Math.min(startX2, canvas.x);
+							_currentRectangle.width = Math.abs(endX2 - startX2);// + paddingLeft + paddingRight;
+						} else {
+							if (directionY != 0)
+							{
+								startY2 = Math.min(startY2, canvas.y);
+								endY2 = Math.max(endY2, canvas.y + rect.height);
+								_currentRectangle.height = Math.abs(endY2 - startY2);// + paddingTop + paddingBottom;
+							}
+						}
+						
+						if (debug)
+						{
+							trace("\t\tlegendsBkgRectangle: " + legendsBkgRectangle);
+							trace("\t\t_currentRectangle: " + _currentRectangle);
 						}
 					}
-					trace("\t\tlegendsBkgRectangle: " + legendsBkgRectangle);
-					trace("\t\t_currentRectangle: " + _currentRectangle);
 				}
 			}
-			draw(graphics);
+			//draw(graphics);
 			trace("******************************\n\n");
 		}
 		
 		private function drawLegendsBackground(rect: Rectangle): void
 		{
-			/*
+			
 			if (getStyle('legendsBackgroundColor'))
 			{
 				var bkgClr: uint = 0xff0000;
@@ -433,47 +461,15 @@ package com.iblsoft.flexiweather.widgets
 				if (getStyle('legendsBackgroundPadding'))
 					bkgPadding = getStyle('legendsBackgroundPadding');
 					
-				var bkgX: int;
-				var bkgY: int;
-				
-				var hAlign: String = getStyle('horizontalAlign');
-				var vAlign: String = getStyle('verticalAlign');
-				
-				if (!rect)
-					rect = new Rectangle(0,0,0,0);
-				
-				switch (hAlign)
-				{
-					case 'left':
-						bkgX = getStyle('paddingLeft');
-						break;
-					case 'center':
-						bkgX = width/2 - 0.5 * rect.width;
-						break;
-					case 'right':
-						bkgX = width - rect.width - getStyle('paddingRight');
-						break;
-				}
-				switch (vAlign)
-				{
-					case 'top':
-						bkgY = getStyle('paddingTop');
-						break;
-					case 'middle':
-						bkgY = height/2 - rect.height /2;
-						break;
-					case 'bottom':
-						bkgY = height - rect.height - getStyle('paddingBottom');
-						break;
-				}
-				
 				var gr: Graphics = graphics;
 				gr.beginFill(bkgClr, bkgAlpha);
-	//			gr.drawRect(bkgX - bkgPadding, bkgY - bkgPadding, rect.width + bkgPadding * 2, rect.height + bkgPadding * 2);
-				gr.drawRect(bkgX, bkgY, rect.width + bkgPadding, rect.height + bkgPadding);
-	//			gr.drawRect(bkgX , bkgY , rect.width , rect.height);
+				gr.drawRect(rect.x - bkgPadding, rect.y - bkgPadding, rect.width + bkgPadding * 2, rect.height + bkgPadding * 2);
 				gr.endFill();
-			}*/
+				
+				trace("drawLegendsBackground "+bkgClr+", "+bkgAlpha);
+				trace("drawLegendsBackground "+width+", "+height);
+				trace("drawLegendsBackground "+(rect.x - bkgPadding)+", "+(rect.y - bkgPadding)+", "+(rect.width + bkgPadding)+", "+(rect.height + bkgPadding));
+			}
 		}
 		private function onLegendRendered(cnv: Canvas): void
 		{
@@ -485,6 +481,12 @@ package com.iblsoft.flexiweather.widgets
 				trace("ALL LEGENDS ARE LOADED");
 				repositionedLegends();
 			}
+		}
+		
+		override protected function updateDisplayList(unscaledWidth: Number, unscaledHeight: Number): void
+		{
+//			graphics.clear();
+//			draw(graphics);
 		}
 		
 	}
