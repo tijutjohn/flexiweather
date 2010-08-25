@@ -4,6 +4,7 @@ package com.iblsoft.flexiweather.widgets
 	
 	import flash.display.Graphics;
 	import flash.geom.Rectangle;
+	import flash.utils.Dictionary;
 	
 	import mx.collections.ArrayCollection;
 	import mx.containers.Canvas;
@@ -134,44 +135,58 @@ package com.iblsoft.flexiweather.widgets
 			dispatchEvent(ile);
 		}
 		
+		private var m_canvasDictionary: Dictionary = new Dictionary();
+		
 		/**
 		 * Load legends and do not layout them 
-		 * @return 
+		 * @return How many legends needs to be loaded
 		 * 
 		 */		
-		private function loadLegends(): Boolean
+		private function loadLegends(): int
 		{
 			_legendsToBeRendered = 0;
 			var l: InteractiveLayer;
 			
+			var canvas: Canvas;
+			
 			//find total count of layers for which legend should be rendered
 			for each (l in m_layers)
 			{
+				
 				if (l.hasLegend() && l.visible)
 				{
+					canvas = m_canvasDictionary[l] as Canvas;
+					if (canvas)
+						continue;
+							
 					_legendsToBeRendered++;
 				}
 			}
 			
+			if (_legendsToBeRendered == 0)
+				return _legendsToBeRendered;
+				
 			for each (l in m_layers)
 			{
 				if (l.hasLegend() && l.visible)
 				{
-					var canvas: Canvas;
-					if (l.legendCanvas)
+					canvas = m_canvasDictionary[l] as Canvas;
+					if (!canvas)
 					{
-						canvas = l.legendCanvas;
-					} else {
 						canvas = new Canvas();
 						addChild(canvas);
+						canvas.visible = false;
+						
+						m_canvasDictionary[l] = canvas;
+						
+						trace("InteractieLayerLegends renderLegend");
+						l.renderLegend(canvas, onLegendRendered, getStyle('labelAlign'));
 					}
-					canvas.visible = false;
-					l.renderLegend(canvas, onLegendRendered, getStyle('labelAlign'));
 				}
 				
 			}
 			
-			return true;
+			return _legendsToBeRendered;
 		}
 		/**
 		 * This function render all legens. If legends are not loaded, it loads them first. There can be problem that legend do not need to have set size, so there is problem
@@ -187,20 +202,12 @@ package com.iblsoft.flexiweather.widgets
 			
 			if (!justReposition)
 			{
-				loadLegends();
-				return;	
+				var needsLoaded: int = loadLegends();
+				if (needsLoaded > 0)
+					return;	
 			}
-//			_legendsToBeRendered = 0;
-			var l: InteractiveLayer;
 			
-			//find total count of layers for which legend should be rendered
-//			for each (l in m_layers)
-//			{
-//				if (l.hasLegend() && l.visible)
-//				{
-//					_legendsToBeRendered++;
-//				}
-//			}
+			var l: InteractiveLayer;
 			
 			var posX: int = 0;
 			var posY: int = 0;
@@ -279,6 +286,7 @@ package com.iblsoft.flexiweather.widgets
 			var rowItems: int = 0;
 			var colItems: int = 0;
 			
+			trace("maxWidth: " + maxWidth + " maxHeight: " + maxHeight);
 //			trace("renderLegendsStack horizontal align: " + horizontalAlign + " vertical: " + verticalAlign);
 //			trace("posX: " + posX + " posY: " + posY);
 			var initialReposition: Boolean = false;
@@ -297,32 +305,15 @@ package com.iblsoft.flexiweather.widgets
 				gapY = getStyle('verticalGap');
 			}
 				
-			if (justReposition)
-			{
-				trace("    ");
-			}
 			for each (l in m_layers)
 			{
 				if (l.hasLegend() && l.visible)
 				{
-					var canvas: Canvas;
-					if (l.legendCanvas)
-					{
-						canvas = l.legendCanvas;
-					} else {
-						canvas = new Canvas();
-						addChild(canvas);
-					}
+					var canvas: Canvas = m_canvasDictionary[l] as Canvas;
 					canvas.visible = true;
 					
 					var rect: Rectangle
-					if (!justReposition)
-					{
-//						var rect: Rectangle = l.renderLegend(canvas, onLegendRendered, getStyle('labelAlign'), new Rectangle(0,0,300,24));
-						rect = l.renderLegend(canvas, onLegendRendered, getStyle('labelAlign'));
-					} else {
-						rect = new Rectangle(0,0, l.legendCanvas.width, l.legendCanvas.height);
-					}
+					rect = new Rectangle(0,0, canvas.width, canvas.height);
 					
 					trace("\n LAYER " + l.name + " rect: " + rect + " \n")
 					//check if there is place for this legend
@@ -342,7 +333,7 @@ package com.iblsoft.flexiweather.widgets
 								posY = legendsBkgRectangle.height + paddingTop + gapY;
 							else {
 								if ( verticalAlign == 'bottom' )
-									posY = maxHeight - legendsBkgRectangle.height - paddingTop - gapY;
+									posY = maxHeight - legendsBkgRectangle.height - paddingBottom - gapY;
 							}
 							rowItems = 0;
 						} 
@@ -488,8 +479,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			_legendsToBeRendered--;
 			
-			
-//			trace("onLegendRendered  _legendsToBeRendered: " +_legendsToBeRendered + " canvas: " + cnv.width + ", " + cnv.height + " Position: " + cnv.x + " , " + cnv.y);
+			trace("\n\nonLegendRendered  _legendsToBeRendered: " +_legendsToBeRendered + " canvas: " + cnv.width + ", " + cnv.height + " Position: " + cnv.x + " , " + cnv.y);
 			if (_legendsToBeRendered < 1)
 			{
 				trace("ALL LEGENDS ARE LOADED");

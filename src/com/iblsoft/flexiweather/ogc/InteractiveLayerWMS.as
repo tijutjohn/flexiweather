@@ -43,7 +43,6 @@ package com.iblsoft.flexiweather.ogc
 		 * Bitmap image holder for legend 
 		 */		
 		protected var m_legendImage: Bitmap = null;
-		protected var m_legendLoader: UniURLLoader = new UniURLLoader();
 		
 		protected var m_job: BackgroundJob;
 		protected var m_request: URLRequest;
@@ -312,9 +311,9 @@ package com.iblsoft.flexiweather.ogc
          * @return 
          * 
          */		
-        override public function renderLegend(canvas: Canvas, callback: Function, labelAlign: String = 'left', hintSize: Rectangle = null): Rectangle
+        override public function renderLegend(canvas: Canvas, callback: Function, labelAlign: String = 'left', useCache: Boolean = false, hintSize: Rectangle = null): Rectangle
         {
-        	super.renderLegend(canvas, callback, labelAlign, hintSize);
+        	super.renderLegend(canvas, callback, labelAlign, useCache, hintSize);
         	
         	var styleName: String = getWMSStyleName(0);
         	if (!styleName)
@@ -331,25 +330,28 @@ package com.iblsoft.flexiweather.ogc
         		h = hintSize.height;
         	}
         		
-			m_legendCanvas = canvas;
-			m_legendLabelAlign = labelAlign;
-        	m_legendCallBack = callback;
+//			m_legendCanvas = canvas;
+//			m_legendLabelAlign = labelAlign;
+//        	m_legendCallBack = callback;
 			
-        	if (!isLegendCached(w, h))
+			trace("renderLegend");
+        	if (!useCache || (useCache && !isLegendCachedBySize(w, h)))
         	{
 	        	var url: URLRequest = m_cfg.toGetLegendRequest(
 						w, h,
 						style.name);
 						
-				m_legendLoader.addEventListener(UniURLLoader.DATA_LOADED, onLegendLoaded);
-				m_legendLoader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onLegendLoadFailed);
+				var associatedData: Object = {canvas: canvas, labelAlign: labelAlign, callback: callback, useCache: useCache};
+				
+				var legendLoader: UniURLLoader = new UniURLLoader();
+				legendLoader.addEventListener(UniURLLoader.DATA_LOADED, onLegendLoaded);
+				legendLoader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onLegendLoadFailed);
 			
-	        	m_legendLoader.load(url);
+	        	legendLoader.load(url, associatedData);
 	        	
         	} else {
-        		createLegend();
+        		createLegend(m_legendImage, canvas, labelAlign, callback);
         	}
-        	
         	
         	var gap: int = 2;
     		var labelHeight: int = 12;
@@ -357,12 +359,12 @@ package com.iblsoft.flexiweather.ogc
         }
         
         /**
-         * Check if legend image is cached. If last legende loaded has same width and height. 
+         * Check if legend image is cached. If last legend loaded has same width and height. 
          * @param newWidth
          * @param newHeight
          * 
          */        
-        private function isLegendCached(newWidth: int, newHeight: int): Boolean
+        private function isLegendCachedBySize(newWidth: int, newHeight: int): Boolean
         {
         	if (m_legendImage)
         	{
@@ -375,6 +377,27 @@ package com.iblsoft.flexiweather.ogc
         	return false;
         }
         
+        public function getLegendFromCanvas(cnv: Canvas): Image
+        {
+        	var image: Image;
+			if (cnv.numChildren > 1)
+			{
+				var imageTest: DisplayObject = cnv.getChildAt(cnv.numChildren - 1);
+				if (imageTest is Image)
+				{
+					image = imageTest as Image;
+				}
+			}
+			
+			return image;
+        }
+        
+        public function isLegendCached(cnv: Canvas): Boolean
+        {
+        	var image: Image = getLegendFromCanvas(cnv);
+        	return (image != null);
+        }
+        
         private function clearLegendCache(): void
         {
         	if (m_legendImage)
@@ -383,16 +406,14 @@ package com.iblsoft.flexiweather.ogc
         		{
         			m_legendImage.bitmapData.dispose();
         			m_legendImage = null;
-        			
-        			
         		}
         	}
         }
         
-        private function removeLegendListeners(): void
+        private function removeLegendListeners(legendLoader: UniURLLoader): void
         {
-        	m_legendLoader.removeEventListener(UniURLLoader.DATA_LOADED, onLegendLoaded);
-			m_legendLoader.removeEventListener(UniURLLoader.DATA_LOAD_FAILED, onLegendLoadFailed);
+        	legendLoader.removeEventListener(UniURLLoader.DATA_LOADED, onLegendLoaded);
+			legendLoader.removeEventListener(UniURLLoader.DATA_LOAD_FAILED, onLegendLoadFailed);
         }
         /**
          * Function which handle legend load 
@@ -401,24 +422,37 @@ package com.iblsoft.flexiweather.ogc
          */        
         protected function onLegendLoaded(event: UniURLLoaderEvent): void
 		{
+			trace("onLegendLoaded ");
 			var result: * = event.result;
 			if(result is Bitmap) {
-				m_legendImage = result;
-				createLegend();
+				
+				var useCache: Boolean = event.associatedData.useCache;
+				if (useCache)
+					m_legendImage = result;
+				createLegend(result, event.associatedData.canvas, event.associatedData.labelAlign, event.associatedData.callback);
 			}
-			removeLegendListeners();
+			removeLegendListeners(event.target as UniURLLoader);
 		}
 		
-		private function createLegend(): void
+		/**
+		 * 
+		 * @param image
+		 * @param cnv
+		 * @param labelAlign
+		 * @param callback
+		 * @param useCache
+		 * 
+		 */		
+		private function createLegend(bitmap: Bitmap, cnv: Canvas, labelAlign: String, callback: Function): void
 		{
 			var gap: int = 2;
 			var labelHeight: int = 12;
 			
 			//add legend label (name of the layer)
 			var label: GlowLabel;
-			if (m_legendCanvas.numChildren > 0)
+			if (cnv.numChildren > 0)
 			{
-				var labelTest: DisplayObject = m_legendCanvas.getChildAt(0);
+				var labelTest: DisplayObject = cnv.getChildAt(0);
 				if (labelTest is GlowLabel && labelTest.name != 'styleLabel')
 				{
 					label = labelTest as GlowLabel;
@@ -427,21 +461,21 @@ package com.iblsoft.flexiweather.ogc
 			if (!label)
 			{
 			 	label = new GlowLabel();
-				m_legendCanvas.addChild(label);
+				cnv.addChild(label);
 			}
 			
 			 	
 			label.glowBlur = 5;
 			label.glowColor = 0xffffff;
 			label.text = name;
-			label.width = m_legendImage.width;
-			label.setStyle('textAlign', m_legendLabelAlign);
+			label.width = bitmap.width;
+			label.setStyle('textAlign', labelAlign);
 			
 			//add legend image
 			var image: Image;
-			if (m_legendCanvas.numChildren > 1)
+			if (cnv.numChildren > 1)
 			{
-				var imageTest: DisplayObject = m_legendCanvas.getChildAt(m_legendCanvas.numChildren - 1);
+				var imageTest: DisplayObject = cnv.getChildAt(cnv.numChildren - 1);
 				if (imageTest is Image)
 				{
 					image = imageTest as Image;
@@ -450,44 +484,32 @@ package com.iblsoft.flexiweather.ogc
 			if (!image)
 			{
 			 	image = new Image();
-				m_legendCanvas.addChild(image);
+				cnv.addChild(image);
 			}
 			 	
-			image.source = m_legendImage;
-			image.width = m_legendImage.width;
-			image.height = m_legendImage.height;
+			image.source = bitmap;
+			image.width = bitmap.width;
+			image.height = bitmap.height;
 			image.y = labelHeight + gap;
 			
-			m_legendCanvas.width = m_legendImage.width;
-			m_legendCanvas.height = m_legendImage.height + labelHeight + gap;
+			cnv.width = image.width;
+			cnv.height = image.height + labelHeight + gap;
 			
 			
-			if(m_legendCallBack != null) {
-				m_legendCallBack.call(null, m_legendCanvas);
+			if(callback != null) {
+				trace("create legend calling callback function" + callback);
+//				callback.call(null, cnv);
+				callback.apply(null, [cnv]);
+			} else {
+				trace("create legend callback is null");
+				
 			}
-			m_legendCallBack = null;
+//			callback = null;
 		}
 		protected function onLegendLoadFailed(event: UniURLLoaderEvent): void
 		{
 			trace("onLegendLoadFailed");
-			removeLegendListeners();
-			/*
-			m_request = null;
-			if(m_cfg.mi_autoRefreshPeriod > 0) {
-				m_timer.reset();
-				m_timer.delay = m_cfg.mi_autoRefreshPeriod * 1000.0;
-				m_timer.start();
-			}
-			if(event != null) {
-				ExceptionUtils.logError(Log.getLogger("WMS"), event,
-						"Error accessing layers '" + m_cfg.ma_layerNames.join(","))
-			}
-			m_image = null;
-			mb_imageOK = false;
-			ms_imageCRS = null;
-			m_imageBBox = null;
-			onJobFinished();
-			*/
+			removeLegendListeners(event.target as UniURLLoader);
 		}
         
         
