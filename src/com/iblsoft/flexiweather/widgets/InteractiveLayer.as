@@ -125,7 +125,7 @@ package com.iblsoft.flexiweather.widgets
         public function hasLegend(): Boolean
         { return false; }
         
-        public function removeLegend(): void
+        public function removeLegend(canvas: Canvas): void
         {  }
 
         public function renderLegend(canvas: Canvas, callback: Function, labelAlign: String = 'left', useCache: Boolean = false , hintSize: Rectangle = null): Rectangle

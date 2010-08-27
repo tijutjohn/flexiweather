@@ -87,7 +87,7 @@ package com.iblsoft.flexiweather.widgets
 			if(i >= 0) {
 //				unbindSubLayer(l);
 				m_layers.removeItemAt(i);
-				l.removeLegend();
+				l.removeLegend(m_canvasDictionary[l]);
 			}
 		}
 		
@@ -138,6 +138,10 @@ package com.iblsoft.flexiweather.widgets
 		
 		private var m_canvasDictionary: Dictionary = new Dictionary();
 		
+		public function clear(): void
+		{
+			graphics.clear();
+		}
 		/**
 		 * Load legends and do not layout them 
 		 * @return How many legends needs to be loaded
@@ -317,7 +321,9 @@ package com.iblsoft.flexiweather.widgets
 					var canvas: Canvas = m_canvasDictionary[l] as Canvas;
 					if (canvas)
 						canvas.visible = l.visible;
-					
+					else
+						return;
+						
 					if (debug)
 						trace("LEGENDS layer visible: " + l.visible);
 					if (l.visible)
@@ -466,9 +472,9 @@ package com.iblsoft.flexiweather.widgets
 				gr.drawRect(rect.x - bkgPadding, rect.y - bkgPadding, rect.width + bkgPadding * 2, rect.height + bkgPadding * 2);
 				gr.endFill();
 				
-				trace("drawLegendsBackground "+bkgClr+", "+bkgAlpha);
-				trace("drawLegendsBackground "+width+", "+height);
-				trace("drawLegendsBackground "+(rect.x - bkgPadding)+", "+(rect.y - bkgPadding)+", "+(rect.width + bkgPadding)+", "+(rect.height + bkgPadding));
+//				trace("drawLegendsBackground "+bkgClr+", "+bkgAlpha);
+//				trace("drawLegendsBackground "+width+", "+height);
+//				trace("drawLegendsBackground "+(rect.x - bkgPadding)+", "+(rect.y - bkgPadding)+", "+(rect.width + bkgPadding)+", "+(rect.height + bkgPadding));
 			}
 		}
 		private function onLegendRendered(cnv: Canvas): void

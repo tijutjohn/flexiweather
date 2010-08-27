@@ -294,26 +294,23 @@ package com.iblsoft.flexiweather.ogc
        	}
 
 		
-		 override public function removeLegend(): void
+		 override public function removeLegend(canvas: Canvas): void
 		 {
-		 	super.removeLegend();
+		 	super.removeLegend(canvas);
 		 	
-		 	if (m_legendCanvas)
+		 	if (canvas)
 		 	{
-		 		while (m_legendCanvas.numChildren > 0)
+		 		while (canvas.numChildren > 0)
 		 		{
-		 			var disp: UIComponent = m_legendCanvas.getChildAt(0) as UIComponent;
+		 			var disp: UIComponent = canvas.getChildAt(0) as UIComponent;
 		 			if (disp is Image)
 		 			{
 		 				((disp as Image).source as Bitmap).bitmapData.dispose();
 		 			}
-		 			m_legendCanvas.removeChildAt(0);
+		 			canvas.removeChildAt(0);
 		 			disp = null;
-		 			
 		 		}	
 		 	}
-		 	
-		 	//m_legendCanvas = null
 		 }
 		 
         /**

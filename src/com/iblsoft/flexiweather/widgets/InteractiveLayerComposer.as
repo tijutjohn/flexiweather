@@ -40,6 +40,33 @@ package com.iblsoft.flexiweather.widgets
 			m_layers.addEventListener(CollectionEvent.COLLECTION_CHANGE, onLayerCollectionChanged);
 		}
 		
+		private var _dateFormat: String;
+		public function get dateFormat(): String
+		{
+			return _dateFormat;
+		}
+		public function set dateFormat(value: String): void
+		{
+			_dateFormat = value;
+			dispatchEvent(new Event('frameChanged'));
+		}
+		
+		[Bindable (event="frameChanged")]
+		public function get frame(): Date
+		{
+			var frameDate: Date = getSynchronizedFrameValue();
+			return frameDate;
+		}
+		[Bindable (event="frameChanged")]
+		public function get frameString(): String
+		{
+			var frameDate: Date = getSynchronizedFrameValue();
+			if (dateFormat && dateFormat.length > 0)
+				return DateUtils.strftime(frameDate, dateFormat);
+				
+			return '';
+		}
+		
 		/*public override function addChild(child: DisplayObject): DisplayObject
 		{
 			//InteractiveLayer(child).container = this;
@@ -173,13 +200,33 @@ package com.iblsoft.flexiweather.widgets
 		protected function onSynchronisedVariableChanged(event: SynchronisedVariableChangeEvent): void
 		{
 			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
+			dispatchEvent(new Event('frameChanged'));
 		}
 
 		protected function onSynchronisedVariableDomainChanged(event: SynchronisedVariableChangeEvent): void
 		{
 			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
+			dispatchEvent(new Event('frameChanged'));
 		}
 		
+		
+		private function getSynchronizedFrameValue(): Date
+		{
+			var l_syncLayers: Array = [];
+			var l_timeAxis: Array = enumTimeAxis(l_syncLayers);
+          	if(l_timeAxis == null) // no time axis
+          		return null;
+          		
+			var so: ISynchronisedObject;
+			
+          	for each(so in l_syncLayers) 
+          	{
+          		var frame: Date = so.getSynchronisedVariableValue("frame") as Date;
+          		trace("getSynchronizedFrameValue frame: " + frame);
+          	}
+
+			return frame;
+		}
 		/**
 		 * Layer composer need to dispatch event when new layer becomes primary 
 		 * 
@@ -545,9 +592,8 @@ package com.iblsoft.flexiweather.widgets
 			//remove body
 			s = s.substring(0,s.indexOf('</body>'));
 			var infoXML: XML = new XML(s);
-//			var info: String = infoXML.p[0].text();
 			var info: String = infoXML.text();
-        	trace("LayerComposer onFeatureInfoAvailable : " + info + " for layer: " + layer.name);
+//        	trace("LayerComposer onFeatureInfoAvailable : " + info + " for layer: " + layer.name);
         	_featureTooltipString += '<p><b><font color="#6EC1FF">'+layer.name+'</font></b></p>';
         	_featureTooltipString += '<p>'+s+'</p><p></p>';
         	
