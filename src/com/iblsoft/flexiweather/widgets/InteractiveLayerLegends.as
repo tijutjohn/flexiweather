@@ -95,7 +95,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			super.refresh(b_force);
 			
-//			trace("Legends refresh");
+//			debug("Legends refresh");
 		}
 		override public function draw(graphics:Graphics):void
 		{
@@ -108,13 +108,13 @@ package com.iblsoft.flexiweather.widgets
 		{
 			super.onAreaChanged(b_finalChange);
 			
-//			trace("Legends onAreaChanged");
+//			debug("Legends onAreaChanged");
 		}
 		override public function onContainerSizeChanged():void
 		{
 			super.onContainerSizeChanged();
 			
-//			trace("Legends onContainerSizeChanged");
+//			debug("Legends onContainerSizeChanged");
 			
 			renderLegendsStack();
 		}
@@ -129,7 +129,7 @@ package com.iblsoft.flexiweather.widgets
 		private function  repositionedLegends(): void
 		{
 			renderLegendsStack(true);
-			//trace("repositionedLegends: " + legendsBkgRectangle);	
+			//debug("repositionedLegends: " + legendsBkgRectangle);	
 			
 			var ile: InteractiveLayerEvent = new InteractiveLayerEvent( InteractiveLayerEvent.LEGENDS_AREA_UPDATED);
 			ile.area = legendsBkgRectangle;
@@ -186,7 +186,7 @@ package com.iblsoft.flexiweather.widgets
 						
 						m_canvasDictionary[l] = canvas;
 						
-						trace("InteractieLayerLegends renderLegend");
+						debug("InteractieLayerLegends renderLegend");
 						l.renderLegend(canvas, onLegendRendered, getStyle('labelAlign'));
 					}
 				}
@@ -203,9 +203,9 @@ package com.iblsoft.flexiweather.widgets
 		 */		
 		public function renderLegendsStack(justReposition: Boolean = false): void
 		{
-			trace("\n\n******************************");
-			trace("******************************");
-			trace("\trenderLegendsStack justReposition = " + justReposition);
+			debug("\n\n******************************");
+			debug("******************************");
+			debug("\trenderLegendsStack justReposition = " + justReposition);
 			
 			if (!justReposition)
 			{
@@ -295,7 +295,7 @@ package com.iblsoft.flexiweather.widgets
 			
 			var initialReposition: Boolean = false;
 			
-			trace("\n\nLEGENDS graphics clear");
+			debug("\n\nLEGENDS graphics clear");
 			graphics.clear();
 			
 			legendsBkgRectangle = new Rectangle();
@@ -312,7 +312,7 @@ package com.iblsoft.flexiweather.widgets
 				gapY = getStyle('verticalGap');
 			}
 				
-			var debug: Boolean = false;
+			var debugPos: Boolean = false;
 			
 			for each (l in m_layers)
 			{
@@ -324,26 +324,26 @@ package com.iblsoft.flexiweather.widgets
 					else
 						return;
 						
-					if (debug)
-						trace("LEGENDS layer visible: " + l.visible);
+					if (debugPos)
+						debug("LEGENDS layer visible: " + l.visible);
 					if (l.visible)
 					{
 						var rect: Rectangle
 						rect = new Rectangle(0,0, canvas.width, canvas.height);
 						
-						if (debug)
-							trace("\n LAYER " + l.name + " rect: " + rect + " \n")
+						if (debugPos)
+							debug("\n LAYER " + l.name + " rect: " + rect + " \n")
 						//check if there is place for this legend
 						if ( horizontalDirection != 'none') 
 						{
 							var newMaxWidth: int = (maxWidth - paddingRight - paddingLeft);
 							var nextWidth: Number = legendsBkgRectangle.width + rect.width + gapX;
-							if (debug)
-								trace("\t nextWidth: " + nextWidth + " rowItems: " + rowItems + " newMaxWidth: " + newMaxWidth);
+							if (debugPos)
+								debug("\t nextWidth: " + nextWidth + " rowItems: " + rowItems + " newMaxWidth: " + newMaxWidth);
 							if (nextWidth > newMaxWidth && newMaxWidth > 0 && rowItems > 0)
 							{
-								if (debug)
-									trace("\t\tIt'w wider than width, make new row");
+								if (debugPos)
+									debug("\t\tIt'w wider than width, make new row");
 								initialReposition = true;
 								startX2 = initialX;
 								endX2 = initialX;
@@ -362,12 +362,12 @@ package com.iblsoft.flexiweather.widgets
 						{
 							var newMaxHeight: int = (maxHeight - paddingTop - paddingBottom);
 							var nextHeight: Number = legendsBkgRectangle.height +  rect.height + gapY;
-							if (debug)
-								trace("\t nextHeight: " + nextHeight + " colItems: " + colItems + " newMaxHeight: " + newMaxHeight);
+							if (debugPos)
+								debug("\t nextHeight: " + nextHeight + " colItems: " + colItems + " newMaxHeight: " + newMaxHeight);
 							if (nextHeight > newMaxHeight && newMaxHeight > 0 && colItems > 0)
 							{
-								if (debug)
-									trace("\t\tIt's higher than height, make new column");
+								if (debugPos)
+									debug("\t\tIt's higher than height, make new column");
 								initialReposition = true;
 								posY = initialY;
 								startY2 = initialY;
@@ -387,8 +387,8 @@ package com.iblsoft.flexiweather.widgets
 						if (directionY != 0)
 							colItems++;
 							
-						if (debug)
-							trace("\n\tposX: " + posX + " posY: " + posY);
+						if (debugPos)
+							debug("\n\tposX: " + posX + " posY: " + posY);
 						
 						
 						if (directionX == -1 || horizontalAlign == 'right')
@@ -403,20 +403,20 @@ package com.iblsoft.flexiweather.widgets
 						posX += directionX * (rect.width + gapX);
 						posY += directionY * (rect.height + gapY);
 						
-						if (debug)
-							trace("\n\tnew posX: " + posX + " posY: " + posY);
+						if (debugPos)
+							debug("\n\tnew posX: " + posX + " posY: " + posY);
 						
 						startX = Math.min(startX, canvas.x);
 						startY = Math.min(startY, canvas.y);
 						endX = Math.max(endX, canvas.x+ rect.width);
 						endY = Math.max(endY, canvas.y + rect.height);
 						
-						if (debug)
+						if (debugPos)
 						{
-							trace("\t\trect: " + rect);
-							trace("\t\tcanvas: ["+canvas.x+","+canvas.y+"] size: ["+canvas.width+","+canvas.height+"]");
-							trace("\t\tstartX: " + startX + " startY: " + startY + " endX: " + endX + " endY: " + endY);
-							trace("\tLegends: ["+maxWidth+","+maxHeight+"]");
+							debug("\t\trect: " + rect);
+							debug("\t\tcanvas: ["+canvas.x+","+canvas.y+"] size: ["+canvas.width+","+canvas.height+"]");
+							debug("\t\tstartX: " + startX + " startY: " + startY + " endX: " + endX + " endY: " + endY);
+							debug("\tLegends: ["+maxWidth+","+maxHeight+"]");
 						}
 						
 						drawLegendsBackground(new Rectangle(canvas.x, canvas.y, canvas.width, canvas.height));
@@ -439,16 +439,16 @@ package com.iblsoft.flexiweather.widgets
 							}
 						}
 						
-						if (debug)
+						if (debugPos)
 						{
-							trace("\t\tlegendsBkgRectangle: " + legendsBkgRectangle);
-							trace("\t\t_currentRectangle: " + _currentRectangle);
+							debug("\t\tlegendsBkgRectangle: " + legendsBkgRectangle);
+							debug("\t\t_currentRectangle: " + _currentRectangle);
 						}
 					}
 				}
 			}
 			//draw(graphics);
-			trace("******************************\n\n");
+			debug("******************************\n\n");
 		}
 		
 		private function drawLegendsBackground(rect: Rectangle): void
@@ -472,19 +472,19 @@ package com.iblsoft.flexiweather.widgets
 				gr.drawRect(rect.x - bkgPadding, rect.y - bkgPadding, rect.width + bkgPadding * 2, rect.height + bkgPadding * 2);
 				gr.endFill();
 				
-//				trace("drawLegendsBackground "+bkgClr+", "+bkgAlpha);
-//				trace("drawLegendsBackground "+width+", "+height);
-//				trace("drawLegendsBackground "+(rect.x - bkgPadding)+", "+(rect.y - bkgPadding)+", "+(rect.width + bkgPadding)+", "+(rect.height + bkgPadding));
+//				debug("drawLegendsBackground "+bkgClr+", "+bkgAlpha);
+//				debug("drawLegendsBackground "+width+", "+height);
+//				debug("drawLegendsBackground "+(rect.x - bkgPadding)+", "+(rect.y - bkgPadding)+", "+(rect.width + bkgPadding)+", "+(rect.height + bkgPadding));
 			}
 		}
 		private function onLegendRendered(cnv: Canvas): void
 		{
 			_legendsToBeRendered--;
 			
-			trace("\n\nonLegendRendered  _legendsToBeRendered: " +_legendsToBeRendered + " canvas: " + cnv.width + ", " + cnv.height + " Position: " + cnv.x + " , " + cnv.y);
+			debug("\n\nonLegendRendered  _legendsToBeRendered: " +_legendsToBeRendered + " canvas: " + cnv.width + ", " + cnv.height + " Position: " + cnv.x + " , " + cnv.y);
 			if (_legendsToBeRendered < 1)
 			{
-				trace("ALL LEGENDS ARE LOADED");
+				debug("ALL LEGENDS ARE LOADED");
 				repositionedLegends();
 			}
 		}
@@ -495,5 +495,10 @@ package com.iblsoft.flexiweather.widgets
 //			draw(graphics);
 		}
 		
+		private function debug(str: String): void
+		{
+			return;
+			trace(str);
+		}
 	}
 }

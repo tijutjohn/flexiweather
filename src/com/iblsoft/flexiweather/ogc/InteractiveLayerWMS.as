@@ -433,7 +433,7 @@ package com.iblsoft.flexiweather.ogc
          */        
         protected function onLegendLoaded(event: UniURLLoaderEvent): void
 		{
-			trace("onLegendLoaded ");
+//			trace("onLegendLoaded ");
 			var result: * = event.result;
 			if(result is Bitmap) {
 				
@@ -508,14 +508,8 @@ package com.iblsoft.flexiweather.ogc
 			
 			
 			if(callback != null) {
-				trace("create legend calling callback function" + callback);
-//				callback.call(null, cnv);
 				callback.apply(null, [cnv]);
-			} else {
-				trace("create legend callback is null");
-				
 			}
-//			callback = null;
 		}
 		protected function onLegendLoadFailed(event: UniURLLoaderEvent): void
 		{
