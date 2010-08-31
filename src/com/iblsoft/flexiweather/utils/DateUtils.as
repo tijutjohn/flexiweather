@@ -66,8 +66,12 @@ package com.iblsoft.flexiweather.utils
 					default: return s_directive;
 				}				
 			}
-			const directivePattern:RegExp = /%./g;
-			return s_format.replace(directivePattern, convertDirective);
+			if (s_format)
+			{
+				const directivePattern:RegExp = /%./g;
+				return s_format.replace(directivePattern, convertDirective);
+			}
+			return dt.toString();
 		}
 		
 		public static function strptime(s_datetime:String, s_format:String,

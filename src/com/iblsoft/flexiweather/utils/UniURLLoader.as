@@ -33,6 +33,8 @@ package com.iblsoft.flexiweather.utils
 		protected var md_imageLoaderToRequestMap: Dictionary = new Dictionary();
 		protected var md_urlLoaderToRequestMap: Dictionary = new Dictionary();
 		
+		public static var baseURL: String;
+		
 		public static const DATA_LOADED: String = "dataLoaded";
 		public static const DATA_LOAD_FAILED: String = "dataLoadFailed";
 
@@ -50,9 +52,24 @@ package com.iblsoft.flexiweather.utils
 		public function UniURLLoader()
 		{}
 		
+		private function checkRequestBaseURL(urlRequest: URLRequest): void
+		{
+			if (urlRequest.url.indexOf("${BASE_URL}") >= 0)
+			{
+				trace("replace base url");
+				var regExp: RegExp = /\$\{BASE_URL\}/ig;
+				while ( regExp.exec(urlRequest.url) != null )
+				{
+					urlRequest.url = urlRequest.url.replace( regExp, baseURL);
+					trace("replace url: " + urlRequest.url + " baseURL: " + baseURL);
+				}
+			}	
+		}
 		public function load(urlRequest: URLRequest, associatedData: Object = null): void
 		{
-//			trace("Requesting " + urlRequest.url + " " + urlRequest.data);
+			checkRequestBaseURL(urlRequest);
+			
+			trace("Requesting " + urlRequest.url + " " + urlRequest.data);
 			var urlLoader: URLLoaderWithAssociatedData = new URLLoaderWithAssociatedData();
 			urlLoader.associatedData = associatedData;
 			urlLoader.dataFormat = URLLoaderDataFormat.BINARY;
