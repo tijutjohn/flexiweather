@@ -131,7 +131,13 @@ package com.iblsoft.flexiweather.utils {
 		}
 		
 		public static function stringToDate(s: String): Date
-		{ return sm_defaultParser.parseDateTime(s); }
+		{
+			//FIXME there were problem, that string was empty, do I did this basic fix. Is it needed to do something else
+			if (s == '')
+				return new Date();
+				 
+			return sm_defaultParser.parseDateTime(s); 
+		}
 		
 		public static function stringToDuration(s: String): Duration
 		{ return sm_defaultParser.parseDuration(s); }
