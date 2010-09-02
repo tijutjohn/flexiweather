@@ -33,7 +33,7 @@ package com.iblsoft.flexiweather.utils
 		protected var md_imageLoaderToRequestMap: Dictionary = new Dictionary();
 		protected var md_urlLoaderToRequestMap: Dictionary = new Dictionary();
 		
-		public static var baseURL: String;
+		public static var baseURL: String = '';
 		
 		public static const DATA_LOADED: String = "dataLoaded";
 		public static const DATA_LOAD_FAILED: String = "dataLoadFailed";
