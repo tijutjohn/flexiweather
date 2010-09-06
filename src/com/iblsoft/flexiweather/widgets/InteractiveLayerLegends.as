@@ -72,7 +72,7 @@ package com.iblsoft.flexiweather.widgets
 		public function set legendsToBeRendered(value: int): void
 		{
 			_legendsToBeRendered = value;
-			trace("_legendsToBeRendered = " + _legendsToBeRendered);
+			debug("_legendsToBeRendered = " + _legendsToBeRendered);
 		}
 		
 		private var legendsBkgRectangle: Rectangle;
@@ -151,15 +151,15 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (!cnv)
 			{
-				trace("addCanvasToDictionary cnv IS NULL ");
+				debug("addCanvasToDictionary cnv IS NULL ");
 			}
-			trace("\t\t InteractiveLayerLegends addCanvasToDictionary ["+layer.name+"/"+layer+"]: " + cnv);
+			debug("\t\t InteractiveLayerLegends addCanvasToDictionary ["+layer.name+"/"+layer+"]: " + cnv);
 			m_canvasDictionary[layer] = cnv;
 		}
 		private function getCanvasFromDictionary(layer: InteractiveLayer): Canvas
 		{
 			var cnv: Canvas = m_canvasDictionary[layer];
-			trace("\t\t InteractiveLayerLegends getCanvasFromDictionary ["+layer.name+"/"+layer+"]: " + cnv);
+			debug("\t\t InteractiveLayerLegends getCanvasFromDictionary ["+layer.name+"/"+layer+"]: " + cnv);
 			return cnv;
 		}
 		public function clear(): void
