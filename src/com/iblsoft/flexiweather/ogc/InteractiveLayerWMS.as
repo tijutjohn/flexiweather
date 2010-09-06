@@ -433,7 +433,7 @@ package com.iblsoft.flexiweather.ogc
          */        
         protected function onLegendLoaded(event: UniURLLoaderEvent): void
 		{
-//			trace("onLegendLoaded ");
+			trace("InteractiveLayerWMS onLegendLoaded ");
 			var result: * = event.result;
 			if(result is Bitmap) {
 				

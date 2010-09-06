@@ -65,6 +65,16 @@ package com.iblsoft.flexiweather.widgets
 		internal var m_layers: ArrayCollection = new ArrayCollection();
 		
 		private var _legendsToBeRendered: int;
+		public function get legendsToBeRendered(): int
+		{
+			return _legendsToBeRendered;
+		}
+		public function set legendsToBeRendered(value: int): void
+		{
+			_legendsToBeRendered = value;
+			trace("_legendsToBeRendered = " + _legendsToBeRendered);
+		}
+		
 		private var legendsBkgRectangle: Rectangle;
 		private var _currentRectangle: Rectangle;
 		
@@ -87,7 +97,7 @@ package com.iblsoft.flexiweather.widgets
 			if(i >= 0) {
 //				unbindSubLayer(l);
 				m_layers.removeItemAt(i);
-				l.removeLegend(m_canvasDictionary[l]);
+				l.removeLegend(getCanvasFromDictionary(l));
 			}
 		}
 		
@@ -129,7 +139,7 @@ package com.iblsoft.flexiweather.widgets
 		private function  repositionedLegends(): void
 		{
 			renderLegendsStack(true);
-			//debug("repositionedLegends: " + legendsBkgRectangle);	
+			debug("repositionedLegends: " + legendsBkgRectangle);	
 			
 			var ile: InteractiveLayerEvent = new InteractiveLayerEvent( InteractiveLayerEvent.LEGENDS_AREA_UPDATED);
 			ile.area = legendsBkgRectangle;
@@ -137,7 +147,21 @@ package com.iblsoft.flexiweather.widgets
 		}
 		
 		private var m_canvasDictionary: Dictionary = new Dictionary();
-		
+		private function addCanvasToDictionary(cnv: Canvas, layer: InteractiveLayer): void
+		{
+			if (!cnv)
+			{
+				trace("addCanvasToDictionary cnv IS NULL ");
+			}
+			trace("\t\t InteractiveLayerLegends addCanvasToDictionary ["+layer.name+"/"+layer+"]: " + cnv);
+			m_canvasDictionary[layer] = cnv;
+		}
+		private function getCanvasFromDictionary(layer: InteractiveLayer): Canvas
+		{
+			var cnv: Canvas = m_canvasDictionary[layer];
+			trace("\t\t InteractiveLayerLegends getCanvasFromDictionary ["+layer.name+"/"+layer+"]: " + cnv);
+			return cnv;
+		}
 		public function clear(): void
 		{
 			graphics.clear();
@@ -149,51 +173,86 @@ package com.iblsoft.flexiweather.widgets
 		 */		
 		private function loadLegends(): int
 		{
-			_legendsToBeRendered = 0;
+			debug("loadLegends");
+			legendsToBeRendered = 0;
 			var l: InteractiveLayer;
 			
 			var canvas: Canvas;
 			
 			//find total count of layers for which legend should be rendered
+			var _tempCanvases: Array = [];
 			for each (l in m_layers)
 			{
 				
 				if (l.hasLegend() && l.visible)
 				{
-					canvas = m_canvasDictionary[l] as Canvas;
+					canvas = getCanvasFromDictionary(l);
 							
-					_legendsToBeRendered++;
+					legendsToBeRendered++;
 					if (canvas)
 					{
-						onLegendRendered(canvas);
+						_tempCanvases.push(canvas);
 					}
 				}
 			}
 			
-			if (_legendsToBeRendered == 0)
-				return _legendsToBeRendered;
+			if (_tempCanvases.length)
+			{
+				while (_tempCanvases.length > 0)
+				{
+					canvas = _tempCanvases.shift();
+					onLegendRendered(canvas);
+				}
+			}
+			
+			if (legendsToBeRendered == 0)
+				return legendsToBeRendered;
 				
 			for each (l in m_layers)
 			{
 				if (l.hasLegend() && l.visible)
 				{
-					canvas = m_canvasDictionary[l] as Canvas;
+					canvas = getCanvasFromDictionary(l);
 					if (!canvas)
 					{
 						canvas = new Canvas();
 						addChild(canvas);
 						canvas.visible = false;
 						
-						m_canvasDictionary[l] = canvas;
+						addCanvasToDictionary(canvas, l);
 						
-						debug("InteractieLayerLegends renderLegend");
+						debug("InteractieLayerLegends loadLegends renderLegend => LOAD");
 						l.renderLegend(canvas, onLegendRendered, getStyle('labelAlign'));
 					}
 				}
 				
 			}
 			
-			return _legendsToBeRendered;
+			return legendsToBeRendered;
+		}
+		
+		private function checkIfAllLegendsAreLoaded(): Boolean
+		{
+			
+			var needLoading: Boolean;
+			
+			var l: InteractiveLayer;
+			var canvas: Canvas;
+			
+			for each (l in m_layers)
+			{
+				if (l.hasLegend() && l.visible)
+				{
+					canvas = getCanvasFromDictionary(l);
+					if (!canvas)
+					{
+						//it needs to be loaded
+						needLoading = true;
+					}		
+				}
+			}
+			debug("InteractieLayerLegends checkIfAllLegendsAreLoaded needLoading: " + needLoading);
+			return needLoading;
 		}
 		/**
 		 * This function render all legens. If legends are not loaded, it loads them first. There can be problem that legend do not need to have set size, so there is problem
@@ -206,6 +265,12 @@ package com.iblsoft.flexiweather.widgets
 			debug("\n\n******************************");
 			debug("******************************");
 			debug("\trenderLegendsStack justReposition = " + justReposition);
+			
+			if (checkIfAllLegendsAreLoaded())
+			{
+				loadLegends();
+				return;
+			}
 			
 			if (!justReposition)
 			{
@@ -318,11 +383,11 @@ package com.iblsoft.flexiweather.widgets
 			{
 				if (l.hasLegend())
 				{
-					var canvas: Canvas = m_canvasDictionary[l] as Canvas;
+					var canvas: Canvas = getCanvasFromDictionary(l);
 					if (canvas)
 						canvas.visible = l.visible;
 					else
-						return;
+						continue;
 						
 					if (debugPos)
 						debug("LEGENDS layer visible: " + l.visible);
@@ -479,10 +544,10 @@ package com.iblsoft.flexiweather.widgets
 		}
 		private function onLegendRendered(cnv: Canvas): void
 		{
-			_legendsToBeRendered--;
+			legendsToBeRendered--;
 			
-			debug("\n\nonLegendRendered  _legendsToBeRendered: " +_legendsToBeRendered + " canvas: " + cnv.width + ", " + cnv.height + " Position: " + cnv.x + " , " + cnv.y);
-			if (_legendsToBeRendered < 1)
+			debug("\n\nonLegendRendered  legendsToBeRendered: " +legendsToBeRendered + " canvas: " + cnv.width + ", " + cnv.height + " Position: " + cnv.x + " , " + cnv.y);
+			if (legendsToBeRendered < 1)
 			{
 				debug("ALL LEGENDS ARE LOADED");
 				repositionedLegends();
