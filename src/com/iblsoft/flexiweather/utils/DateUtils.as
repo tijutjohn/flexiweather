@@ -32,6 +32,9 @@ package com.iblsoft.flexiweather.utils
 		// %Y, %m, %d, %H, %M, %S, %a, %A, %b, %B, %%
 		public static function strftime(dt:Date, s_format:String, b_useUTC: Boolean = true):String
 		{
+			if (!dt)
+				return '';
+				
 			function convertDirective(s_directive:String, i_index:int, s_str:String):String
 			{
 				function twoDigitsStr(i_number:int):String
