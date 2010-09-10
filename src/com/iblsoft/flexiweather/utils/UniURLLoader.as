@@ -56,12 +56,11 @@ package com.iblsoft.flexiweather.utils
 		{
 			if (urlRequest.url.indexOf("${BASE_URL}") >= 0)
 			{
-				trace("replace base url");
 				var regExp: RegExp = /\$\{BASE_URL\}/ig;
 				while ( regExp.exec(urlRequest.url) != null )
 				{
 					urlRequest.url = urlRequest.url.replace( regExp, baseURL);
-					trace("replace url: " + urlRequest.url + " baseURL: " + baseURL);
+//					trace("replace url: " + urlRequest.url + " baseURL: " + baseURL);
 				}
 			}	
 		}
