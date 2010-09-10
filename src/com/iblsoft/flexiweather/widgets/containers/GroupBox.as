@@ -57,17 +57,16 @@ package com.iblsoft.flexiweather.widgets.containers
 		public function GroupBox()
 		{
 			super();
-		}
-		
-		override protected function createChildren():void
-		{
-			super.createChildren();
 			
 			_cnv = new Canvas();
 			_label = new Label();
 			
 			container = new Box();
-			
+		}
+		
+		override protected function createChildren():void
+		{
+			super.createChildren();			
 		}
 		
 		override protected function childrenCreated():void
@@ -84,10 +83,10 @@ package com.iblsoft.flexiweather.widgets.containers
 			container.percentWidth = 100;
 			container.percentHeight = 100;
 			
-			container.setStyle('paddingBottom',defaultPadding);
-			container.setStyle('paddingTop',defaultPadding);
-			container.setStyle('paddingLeft',defaultPadding);
-			container.setStyle('paddingRight',defaultPadding);
+			setStyle('paddingBottom',defaultPadding);
+			setStyle('paddingTop',defaultPadding);
+			setStyle('paddingLeft',defaultPadding);
+			setStyle('paddingRight',defaultPadding);
 			
 			horizontalScrollPolicy = ScrollPolicy.OFF
 			verticalScrollPolicy = ScrollPolicy.OFF
