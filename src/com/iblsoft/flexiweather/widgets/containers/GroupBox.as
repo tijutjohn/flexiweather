@@ -1,11 +1,13 @@
 package com.iblsoft.flexiweather.widgets.containers
 {
 	import flash.display.Graphics;
+	import flash.display.LineScaleMode;
 	
 	import mx.containers.Box;
 	import mx.containers.Canvas;
 	import mx.containers.VBox;
 	import mx.controls.Label;
+	import mx.core.ScrollPolicy;
 
 	public class GroupBox extends VBox
 	{
@@ -87,6 +89,9 @@ package com.iblsoft.flexiweather.widgets.containers
 			container.setStyle('paddingLeft',defaultPadding);
 			container.setStyle('paddingRight',defaultPadding);
 			
+			horizontalScrollPolicy = ScrollPolicy.OFF
+			verticalScrollPolicy = ScrollPolicy.OFF
+			
 		}
 		override public function setStyle(styleProp:String, newValue:*):void
 		{
@@ -128,7 +133,7 @@ package com.iblsoft.flexiweather.widgets.containers
 			
 			var gr: Graphics = graphics;
 			gr.clear();
-			gr.lineStyle(getStyle('borderThickness'),getStyle('borderColor'),1);
+			gr.lineStyle(getStyle('borderThickness'),getStyle('borderColor'),1, true, LineScaleMode.NONE);
 			
 			_label.text = _caption;
 			_label.x = _cornerRadius + cGap;
