@@ -39,6 +39,7 @@ package com.iblsoft.flexiweather.utils
 				var f_y: Number = f_sy + f_dy * f_ratio;
 				var f_xPrev: Number = f_sx + f_dx * (f_ratio - 0.01);
 				var f_yPrev: Number = f_sy + f_dy * (f_ratio - 0.01);
+
 				betweenMarkLineTo(f_x, f_y);
 				mf_nextMarkDistance = mf_currentDistance;
 				mark(f_x, f_y);

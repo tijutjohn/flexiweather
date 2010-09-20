@@ -1,15 +1,24 @@
 package com.iblsoft.flexiweather.symbology
 {
 	import com.iblsoft.flexiweather.utils.CubicBezier;
+	import com.iblsoft.flexiweather.utils.DistanceMarkingCurveRenderer;
 	import com.iblsoft.flexiweather.utils.GraphicsCurveRenderer;
 	
+	import flash.display.BitmapData;
+	import flash.display.CapsStyle;
 	import flash.display.Graphics;
+	import flash.display.LineScaleMode;
 	import flash.geom.Point;
 
-	public class StyledLineCurveRenderer extends GraphicsCurveRenderer
+	public class StyledLineCurveRenderer extends DistanceMarkingCurveRenderer
 	{
 		public static const STYLE_SOLID: String = "Solid";
 		public static const STYLE_DASHED: String = "Dashed";
+		public static const STYLE_DOTTED: String = "Dotted";
+		public static const STYLE_DASHDOT: String = "DashDot";
+		public static const STYLE_DASHDOTDOT: String = "DashDotDot";
+		public static const STYLE_HORIZONTAL_LINES: String = "HorizontalLines";
+		public static const STYLE_VERTICAL_LINES: String = "VerticalLines";
 
 		// style variables
 		protected var mf_thickness: Number;
@@ -18,29 +27,84 @@ package com.iblsoft.flexiweather.symbology
 		protected var ms_style: String;
 	
 		// runtime variables
-		protected var mf_currentDistance: Number = 0; 
-		protected var mf_lastMarkDistance: Number = -1000; 
+		//protected var mf_currentDistance: Number = 0; 
+		//protected var mf_lastMarkDistance: Number = -1000; 
 		protected var mf_markStep: Number = 6;
+		protected var mf_paternStep: Number = 6;
+		protected var mi_lastPaternStep: int = 0;
 		protected var mi_counter: int = 0;
+		protected var mf_actPaternDistance: Number = 0;
+		
+		protected var ma_paternDef: Array;
+		
+		protected var mp_lastMarkPoint: Point;
+		protected var mp_actMarkPoint: Point;
+		
+		protected var mb_markChanged: Boolean = false;
+		
+		protected var ma_markParts: Array = new Array();
+		
+		protected var mf_lastPaternRatio: Number = 0;
+		
+		public function set thickness(value: Number): void
+		{
+			mf_thickness = value;
+		}
+		
+		public function get thickness(): Number
+		{
+			return(mf_thickness);
+		}
 		
 		function StyledLineCurveRenderer(g: Graphics,
 			f_thickness: Number, i_color: uint, f_alpha: Number,
 			s_style: String)
 		{
 			super(g);
-			mf_thickness = f_thickness;
 			mi_color = i_color;
 			mf_alpha = f_alpha;
 			ms_style = s_style;
-			mf_markStep = f_thickness * 6;
-		}
+			
+			thickness = f_thickness;
+			
+			switch(ms_style){
+				case StyledLineCurveRenderer.STYLE_DASHED:
+					mf_markStep = mf_thickness * 6;
+					mf_paternStep = mf_thickness * 10;
+					ma_paternDef = new Array(1, 1, 1, 1, 1, 0, 0, 0, 0, 0);
+					break;
+				case StyledLineCurveRenderer.STYLE_DOTTED:
+					mf_markStep = mf_thickness * 1;
+					mf_paternStep = mf_thickness * 1;
+					ma_paternDef = new Array(1, 0);
+					break;
+				case StyledLineCurveRenderer.STYLE_DASHDOT:
+					mf_markStep = mf_thickness * 6;
+					mf_paternStep = mf_thickness * 11;
+					ma_paternDef = new Array(1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0);
+					break;
+				case StyledLineCurveRenderer.STYLE_DASHDOTDOT:
+					mf_markStep = mf_thickness * 6;
+					mf_paternStep = mf_thickness * 15;
+					ma_paternDef = new Array(1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0);
+					break;
+				default:
+					mf_markStep = mf_thickness * 6;
+					break;
+			}
+		} 
 	
 		override public function started(x: Number, y: Number): void
 		{
-			m_graphics.lineStyle(mf_thickness, mi_color, mf_alpha);
+			setDefaultLineStyle();
+			
 			m_graphics.moveTo(x, y);
+			mp_actMarkPoint = null;
+			mp_lastMarkPoint = null;
+			mf_actPaternDistance = 0;
+			mi_lastPaternStep = 0;
 			mi_counter = -1;
-			mark();
+			mark(x, y);
 		}
 	
 		override public function finished(x: Number, y: Number): void
@@ -54,55 +118,9 @@ package com.iblsoft.flexiweather.symbology
 			m_lastY = y;
 		}
 	
-		override public function lineTo(x: Number, y: Number): void
-		{
-			var f_dx: Number = x - m_lastX;
-			var f_dy: Number = y - m_lastY;
-			var f_sx: Number = m_lastX;
-			var f_sy: Number = m_lastY;
-			var f_len: Number = Math.sqrt(f_dx * f_dx + f_dy * f_dy);
-	
-			m_lastX = x;
-			m_lastY = y;
-	
-			if(false && f_len < 1) {
-				if(mf_lastMarkDistance + mf_markStep < mf_currentDistance) {
-					mf_currentDistance += f_len;
-					mf_lastMarkDistance = mf_currentDistance;
-					mark();
-				}
-				else
-					mf_currentDistance += f_len;
-			}
-			else {
-				var f_distanceFinal: Number = mf_currentDistance + f_len;
-				var f_distanceStart: Number = mf_currentDistance;
-	
-				var f_nextMarkDistance: Number =
-						mf_lastMarkDistance < 0.0 ? 0.0 : (mf_lastMarkDistance + mf_markStep);
-				while((			f_distanceStart < f_nextMarkDistance
-							&&	f_nextMarkDistance <= f_distanceFinal
-							&&	mf_markStep > 0)
-						|| f_nextMarkDistance == 0.0)
-				{
-					var f_ratio: Number = (f_nextMarkDistance - f_distanceStart) / f_len;
-					mf_currentDistance = f_distanceStart + f_ratio * f_len;
-					
-					var f_x: Number = f_sx + f_dx * f_ratio;
-					var f_y: Number = f_sy + f_dy * f_ratio;
-					var f_xPrev: Number = f_sx + f_dx * (f_ratio - 0.01); 
-					var f_yPrev: Number = f_sy + f_dy * (f_ratio - 0.01);
-					_lineTo(f_x, f_y);
-					mark();
-					
-					mf_lastMarkDistance = f_nextMarkDistance;
-					f_nextMarkDistance += mf_markStep;
-				}
-				mf_currentDistance = f_distanceFinal;
-			}
-			_lineTo(x, y); 
-		}
-	
+		/**
+		 * 
+		 */
 		override public function curveTo(controlX: Number, controlY: Number, anchorX: Number, anchorY: Number): void
 		{
 			CubicBezier.drawCurve(this,
@@ -112,30 +130,203 @@ package com.iblsoft.flexiweather.symbology
 					new Point(anchorX, anchorY));
 		}
 		
-		protected function mark(): void
+		/**
+		 * Default implemetation which creates a mark each 10 pixels.
+		 * Reimplement this method, it's not necessary to call this one.
+		 **/
+		override protected function mark(x: Number, y: Number): void
 		{
+			nextMarkDistance += mf_markStep;
+			
+			if (mp_actMarkPoint == null){
+				mp_lastMarkPoint = new Point(x, y);
+			} else {
+				mp_lastMarkPoint = mp_actMarkPoint.clone(); 
+			}
+			
+			mp_actMarkPoint = new Point(x, y);
+			
+			mb_markChanged = true;
+			
 			++mi_counter;
 		}
 		
+		/**
+		 * 
+		 */
+		protected function setDefaultLineStyle(useAlpha: Boolean = true): void
+		{
+			if (useAlpha){
+				m_graphics.lineStyle(mf_thickness, mi_color, mf_alpha, false, LineScaleMode.NONE, CapsStyle.SQUARE);
+			} else {
+				m_graphics.lineStyle(mf_thickness, mi_color, 0, false, LineScaleMode.NONE, CapsStyle.SQUARE);
+			}
+		}
+		
+		/**
+		 * 
+		 */
 		protected function _lineTo(f_x: Number, f_y: Number): void
 		{
 			switch(ms_style)
 			{
-			case "Solid":
+			case StyledLineCurveRenderer.STYLE_SOLID:
 			default:
 				m_graphics.lineTo(f_x, f_y);
 				break;
-			case "Dashed":
+			case StyledLineCurveRenderer.STYLE_DOTTED:
 				if(mi_counter % 2 == 0) {
+					setDefaultLineStyle();
 					m_graphics.lineTo(f_x, f_y);
 				}
 				else {
-					m_graphics.moveTo(f_x, f_y);
+					setDefaultLineStyle(false);
+					m_graphics.lineTo(f_x, f_y);
 				}
 				break;
+			
+			/*case StyledLineCurveRenderer.STYLE_DOTTED:
+			case StyledLineCurveRenderer.STYLE_DASHED:
+				if(mi_counter % 2 == 0) {
+					setDefaultLineStyle();
+					m_graphics.lineTo(f_x, f_y);
+				}
+				else {
+					setDefaultLineStyle(false);
+					m_graphics.lineTo(f_x, f_y);
+					//m_graphics.moveTo(f_x, f_y);
+				}
+				break;
+				
+			case StyledLineCurveRenderer.STYLE_DASHDOT:
+				if (mi_counter == 0){
+					setDefaultLineStyle(false);
+					m_graphics.lineTo(f_x, f_y);
+					//m_graphics.moveTo(f_x, f_y);
+				} else if ((mi_counter > 0) && (mi_counter <= 3)){
+					setDefaultLineStyle();
+					m_graphics.lineTo(f_x, f_y);
+				} else if (mi_counter == 4){
+					setDefaultLineStyle(false);
+					m_graphics.lineTo(f_x, f_y);
+					//m_graphics.moveTo(f_x, f_y);
+				} else if (mi_counter == 5){
+					setDefaultLineStyle();
+					m_graphics.lineTo(f_x, f_y);
+					mi_counter = -1;
+				}
+				
+				break;
+			*/
+			case StyledLineCurveRenderer.STYLE_DASHED:
+			case StyledLineCurveRenderer.STYLE_DASHDOT:
+			case StyledLineCurveRenderer.STYLE_DASHDOTDOT:
+				drawPatern(f_x, f_y, 0, 1);
+				
+				break;
 			}
+			
 			m_lastX = f_x;
 			m_lastY = f_y;
+		}
+		
+		/**
+		 * 
+		 */
+		protected function drawPatern(x: Number, y: Number, paternRatioFrom: Number, paternRatioTo: Number): void
+		{
+			var nPoint: Point = new Point(x - m_lastX, y - m_lastY);
+			var unitPoint: Point = unitVector(nPoint);
+			
+			var paternDef: Array = ma_paternDef;
+			var paternRatioDef: Array = new Array();
+			var mStep: Number = (1 / (paternDef.length - 1)) * mf_paternStep;
+			
+			var actPaternStart: Number = mf_actPaternDistance;
+			var actPaternStartP: Number = actPaternStart / mf_paternStep;
+			var actPaternEnd: Number = mf_actPaternDistance + nPoint.length;
+			var actPaternEndP: Number = actPaternStartP + (nPoint.length / mf_paternStep);
+			
+			var tmpPaternStep: Number = mi_lastPaternStep; //Math.floor(mf_actPaternDistance % mf_paternStep) % paternDef.length;
+			var actX: Number = m_lastX + (unitPoint.x * mStep);
+			var actY: Number = m_lastY + (unitPoint.y * mStep);
+			var tmpActDistance: Number = actPaternStart + mStep; 
+			tmpPaternStep = (tmpPaternStep + 1) % paternDef.length;
+			
+			// GO THRUE PATERN STEPS
+			while (tmpActDistance <= actPaternEnd){
+				mi_lastPaternStep = tmpPaternStep;
+				
+				actX = actX + (unitPoint.x * mStep);
+				actY = actY + (unitPoint.y * mStep);
+				
+				if (paternDef[tmpPaternStep] == 1){
+					setDefaultLineStyle();
+					m_graphics.lineTo(actX, actY);
+				} else {
+					setDefaultLineStyle(false);
+					m_graphics.lineTo(actX, actY);
+				}
+				
+				tmpActDistance = tmpActDistance + mStep;
+				tmpPaternStep = (tmpPaternStep + 1) % paternDef.length;
+			}
+			
+			mf_actPaternDistance = actPaternEnd; 
+		}
+		
+		/**
+		 * Default implemnetation which just draw a line.
+		 * Reimplement this method, it's not necessary to call this one.
+		 **/
+		override protected function betweenMarkLineTo(x: Number, y: Number): void
+		{
+			_lineTo(x, y);
+		}
+		
+		/**
+		 * 
+		 */
+		protected function getPointOnSegment(s_x: Number, s_y: Number, e_x: Number, e_y: Number, factor: Number): Point
+		{
+			return(new Point(s_x + ((e_x - s_x) * factor), s_y + ((e_y - s_y) * factor)));
+		}
+		
+		/**
+		 * 
+		 */
+		protected function normalVector(tPoint: Point, left: Boolean = true): Point
+		{
+			var unitVector: Point = unitVector(tPoint);
+			
+			if (left){
+				return(new Point(-unitVector.y, unitVector.x));
+			} else {
+				return(new Point(unitVector.y, -unitVector.x));
+			}
+			
+		}
+		
+		/**
+		 * 
+		 */
+		protected function unitVector(tPoint: Point): Point
+		{
+			var mag: Number = magnitudeVector(tPoint);
+			
+			if (mag > 0){
+				return(new Point(tPoint.x / mag, tPoint.y / mag));
+			} else {
+				return(new Point(0, 0));
+			}
+		}
+		
+		/**
+		 * 
+		 */
+		protected function magnitudeVector(tPoint: Point): Number
+		{
+			return(Math.sqrt((tPoint.x * tPoint.x) + (tPoint.y * tPoint.y)));
 		}
 	}
 }

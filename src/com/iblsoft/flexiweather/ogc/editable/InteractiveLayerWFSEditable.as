@@ -86,6 +86,8 @@ package com.iblsoft.flexiweather.ogc.editable
 			if(m_mouseClickCapturingItem != null)
 				ml_mouseClickCapturingItemStack.push(m_mouseClickCapturingItem);
 			m_mouseClickCapturingItem = item;
+			
+			trace('[InteractiveLayerWFSEditable.setMouseClickCapture]:' + ml_mouseClickCapturingItemStack.length);
 		}
 
 		public function releaseMouseClickCapture(item: IMouseEditableItem): void
@@ -100,6 +102,8 @@ package com.iblsoft.flexiweather.ogc.editable
 				m_mouseClickCapturingItem = ml_mouseClickCapturingItemStack.pop();
 			else
 				m_mouseClickCapturingItem = null;
+				
+			trace('[InteractiveLayerWFSEditable.releaseMouseClickCapture]:' + ml_mouseClickCapturingItemStack.length);
 		}
 
 		// IHighlightableEditableItemManager implementation
@@ -148,8 +152,9 @@ package com.iblsoft.flexiweather.ogc.editable
 		override protected function onFeatureAdded(feature: WFSFeatureBase): void
 		{
 			var item: IEditableItem = feature as IEditableItem;
-			if(item != null)
+			if(item != null) {
 				addEditableItem(item);
+			}
 		}
 
 		override protected function onFeatureRemoved(feature: WFSFeatureBase): void
@@ -188,17 +193,19 @@ package com.iblsoft.flexiweather.ogc.editable
 				if(m_mouseMoveCapturingItem.onMouseMove(new Point(event.localX, event.localY)))
 					return true;
 			// highlighting
-			var l_hitItems: Array = doHitTest(event.stageX, event.stageY, IHighlightableItem);
+			/*var l_hitItems: Array = doHitTest(event.stageX, event.stageY, IHighlightableItem);
 			for each(var hItem: IHighlightableItem in l_hitItems) {
 				highlightItem(hItem);
 				return true;
 			}
-			highlightItem(null);
+			highlightItem(null);*/
 			return false;
 		}
 
 		override public function onMouseClick(event: MouseEvent): Boolean
 		{
+			trace('here');
+			
 			if(event.ctrlKey || event.shiftKey)
 				return false;
 			if(m_mouseClickCapturingItem != null)

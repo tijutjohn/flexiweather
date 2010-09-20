@@ -6,6 +6,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.display.Graphics;
+	import flash.events.MouseEvent;
 	import flash.net.URLRequest;
 	import flash.net.URLVariables;
 	
@@ -52,6 +53,9 @@ package com.iblsoft.flexiweather.ogc
 			m_loader.load(url);
 		}
 		
+		/**
+		 * 
+		 */
 		public function addFeature(feature: WFSFeatureBase): void
 		{
 			addChild(feature);
