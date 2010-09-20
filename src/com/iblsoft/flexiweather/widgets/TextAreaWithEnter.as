@@ -36,32 +36,69 @@ package com.iblsoft.flexiweather.widgets
 			trace("TextAreaWithEnter onTextInput");
 			
 		}
+		private var _shiftPressed: Boolean;
+		
 		override protected function keyDownHandler(event:KeyboardEvent):void
 		{
 			super.keyDownHandler(event);
-			trace("TextAreaWithEnter onKeyDown: " + event.keyCode + " SHIFT: " + event.shiftKey + " Ctrl: " + event.ctrlKey + " ALT: " + event.altKey);
+			
 			
 			switch (event.keyCode)
 	        {
+	            case Keyboard.SHIFT:
+	            	_shiftPressed = true;
+	            	break;
+	            	
 	            case Keyboard.ENTER:
 	            {
-	            	if (!event.shiftKey)
+	            	if (event.shiftKey && !_shiftPressed)
 	            	{
-	                	dispatchEvent(new FlexEvent(FlexEvent.ENTER));
-	                	event.preventDefault();
+	            		_shiftPressed = true;
+	            	}
+	            	if (!_shiftPressed)
+	            	{
+	            		if (textField.text.length > 0)
+	            		{
+	                		dispatchEvent(new FlexEvent(FlexEvent.ENTER));
+		                	event.preventDefault();
+	              		} else {
+	              			event.preventDefault();
+	              			event.stopImmediatePropagation();
+	              			event.stopPropagation();
+	              			return;
+	              		}
+	                	
+	                	textField.text = '';
+	             		textField.validateNow();
+	             		textField.dispatchEvent( new Event( Event.CHANGE) );
+	             		
 	             	} else {
 	             		trace("ENTER (shift)");
-	             		textField.text += 'TEST';
+	             		textField.text += '\r';
+	             		textField.validateNow();
 	             		textField.dispatchEvent( new Event( Event.CHANGE) );
+	             		
+	             		selectionBeginIndex = textField.text.length;
+	             		selectionEndIndex = textField.text.length;
 	             	}
 	                break;
 	            }
 		 	}
+		 	
+		 	trace("TextAreaWithEnter onKeyDown: " + event.keyCode + " SHIFT: " + event.shiftKey + " /_shiftPressed: " + _shiftPressed + " Ctrl: " + event.ctrlKey + " ALT: " + event.altKey);
+		 	
 		}
 		override protected function keyUpHandler(event:KeyboardEvent):void
 		{
 			super.keyUpHandler(event);
 			trace("TextAreaWithEnter onKeyUp: " + event.keyCode + " SHIFT: " + event.shiftKey);
+			
+			switch (event.keyCode)
+	        {
+	            case Keyboard.SHIFT:
+	            	_shiftPressed = false;
+	            	break;
+	        }
 		}
 		
 	}
