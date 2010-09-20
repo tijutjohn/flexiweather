@@ -6,6 +6,7 @@ package com.iblsoft.flexiweather.plugins
 	{
 		public static const ACTION: String = "action";
 		public static const DOCKLET: String = "docklet";
+		public static const CHAT: String = "chat";
 		public static const PANE_CLIENT: String = "paneClient";
 		public static const INTERACTIVE_WIDGET_CLIENT: String = "interactiveWidgetClient";
 		public static const LAYER_SELECTION_LISTENER: String = "layerSelectionListener";
@@ -38,6 +39,13 @@ package com.iblsoft.flexiweather.plugins
 				s_id: String, s_name: String): PluginAbility
 		{
 			return new PluginAbility(PluginAbility.DOCKLET, s_id, classOrInstance) 
+					.withMetadata("name", s_name);
+		}
+		
+		public static function chat(classOrInstance: Object,
+				s_id: String, s_name: String): PluginAbility
+		{
+			return new PluginAbility(PluginAbility.CHAT, s_id, classOrInstance) 
 					.withMetadata("name", s_name);
 		}
 
