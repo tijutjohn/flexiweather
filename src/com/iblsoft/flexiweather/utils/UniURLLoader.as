@@ -54,15 +54,22 @@ package com.iblsoft.flexiweather.utils
 		
 		private function checkRequestBaseURL(urlRequest: URLRequest): void
 		{
-			if (urlRequest.url.indexOf("${BASE_URL}") >= 0)
+			urlRequest.url = convertBaseURL(urlRequest.url);
+		}
+		
+		
+		public function convertBaseURL(url: String): String
+		{
+			if (url.indexOf("${BASE_URL}") >= 0)
 			{
 				var regExp: RegExp = /\$\{BASE_URL\}/ig;
-				while ( regExp.exec(urlRequest.url) != null )
+				while ( regExp.exec(url) != null )
 				{
-					urlRequest.url = urlRequest.url.replace( regExp, baseURL);
+					url = url.replace( regExp, baseURL);
 //					trace("replace url: " + urlRequest.url + " baseURL: " + baseURL);
 				}
 			}	
+			return url;
 		}
 		public function load(urlRequest: URLRequest, associatedData: Object = null): void
 		{
