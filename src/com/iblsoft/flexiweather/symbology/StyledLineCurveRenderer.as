@@ -74,9 +74,9 @@ package com.iblsoft.flexiweather.symbology
 					ma_paternDef = new Array(1, 1, 1, 1, 1, 0, 0, 0, 0, 0);
 					break;
 				case StyledLineCurveRenderer.STYLE_DOTTED:
-					mf_markStep = mf_thickness * 1;
-					mf_paternStep = mf_thickness * 1;
-					ma_paternDef = new Array(1, 0);
+					mf_markStep = mf_thickness * 2;
+					mf_paternStep = mf_thickness * 2;
+					ma_paternDef = new Array(1, 1, 0, 0);
 					break;
 				case StyledLineCurveRenderer.STYLE_DASHDOT:
 					mf_markStep = mf_thickness * 6;

@@ -193,12 +193,12 @@ package com.iblsoft.flexiweather.ogc.editable
 				if(m_mouseMoveCapturingItem.onMouseMove(new Point(event.localX, event.localY)))
 					return true;
 			// highlighting
-			/*var l_hitItems: Array = doHitTest(event.stageX, event.stageY, IHighlightableItem);
+			var l_hitItems: Array = doHitTest(event.stageX, event.stageY, IHighlightableItem);
 			for each(var hItem: IHighlightableItem in l_hitItems) {
 				highlightItem(hItem);
 				return true;
 			}
-			highlightItem(null);*/
+			highlightItem(null);
 			return false;
 		}
 
@@ -224,7 +224,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				selectItem(sItem);
 				return true;
 			}
-			selectItem(null);
+			
 			return false;
 		}
 
@@ -255,6 +255,9 @@ package com.iblsoft.flexiweather.ogc.editable
 				if(mItem.onMouseDown(new Point(event.localX, event.localY)))
 					return true;
 			}
+			
+			selectItem(null);
+			
 			return false;
 		}
 
