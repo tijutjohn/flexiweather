@@ -3,6 +3,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	
+	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	
 	public class LayerConfiguration extends EventDispatcher implements Serializable
@@ -18,10 +19,14 @@ package com.iblsoft.flexiweather.ogc
 			ms_label = storage.serializeString("label", ms_label);
 		}
 		
+		[Bindable (event="labelChanged")]
 		public function get label(): String
 		{ return ms_label; }
 
 		public function set label(s: String): void
-		{ ms_label = s; }
+		{ 
+			ms_label = s;
+			dispatchEvent(new Event('labelChanged')); 
+		}
 	}
 }
