@@ -2,6 +2,6 @@ package com.iblsoft.flexiweather.ogc.editable
 {
 	public interface ISelectableItemManager
 	{
-		function selectItem(item: ISelectableItem): void;
+		function selectItem(item: ISelectableItem, dispatchChangeEvent: Boolean = true): void;
 	}
 }

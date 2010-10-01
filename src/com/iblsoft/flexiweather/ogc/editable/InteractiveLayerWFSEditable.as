@@ -86,8 +86,6 @@ package com.iblsoft.flexiweather.ogc.editable
 			if(m_mouseClickCapturingItem != null)
 				ml_mouseClickCapturingItemStack.push(m_mouseClickCapturingItem);
 			m_mouseClickCapturingItem = item;
-			
-			trace('[InteractiveLayerWFSEditable.setMouseClickCapture]:' + ml_mouseClickCapturingItemStack.length);
 		}
 
 		public function releaseMouseClickCapture(item: IMouseEditableItem): void
@@ -102,8 +100,6 @@ package com.iblsoft.flexiweather.ogc.editable
 				m_mouseClickCapturingItem = ml_mouseClickCapturingItemStack.pop();
 			else
 				m_mouseClickCapturingItem = null;
-				
-			trace('[InteractiveLayerWFSEditable.releaseMouseClickCapture]:' + ml_mouseClickCapturingItemStack.length);
 		}
 
 		// IHighlightableEditableItemManager implementation
@@ -126,7 +122,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		}
 
 		// ISelectableEditableItemManager implementation
-		public function selectItem(sItem: ISelectableItem): void
+		public function selectItem(sItem: ISelectableItem, dispatchChangeEvent: Boolean = true): void
 		{
 			if(sItem != null && sItem.selected)
 				return;
@@ -142,10 +138,13 @@ package com.iblsoft.flexiweather.ogc.editable
 			if(m_selectedItem != sItem) {
 				var oldSItem: ISelectableItem = m_selectedItem;
 				m_selectedItem = sItem;
-				dispatchEvent(new PropertyChangeEvent(
-						SELECTION_CHANGE, false, false,
-						PropertyChangeEventKind.UPDATE, "selectedItem",
-						oldSItem, m_selectedItem, this));
+				
+				if (dispatchChangeEvent){
+					dispatchEvent(new PropertyChangeEvent(
+							SELECTION_CHANGE, false, false,
+							PropertyChangeEventKind.UPDATE, "selectedItem",
+							oldSItem, m_selectedItem, this));
+				}
 			}
 		}
 
@@ -160,8 +159,16 @@ package com.iblsoft.flexiweather.ogc.editable
 		override protected function onFeatureRemoved(feature: WFSFeatureBase): void
 		{
 			var item: IEditableItem = feature as IEditableItem;
+			
+			var oldSItem: ISelectableItem = item as ISelectableItem;
+			
 			if(item != null)
 				removeEditableItem(item);
+				
+			dispatchEvent(new PropertyChangeEvent(
+							SELECTION_CHANGE, false, false,
+							PropertyChangeEventKind.UPDATE, "selectedItem",
+							oldSItem, null, this));
 		}
 		
 		public function doHitTest(
@@ -204,8 +211,6 @@ package com.iblsoft.flexiweather.ogc.editable
 
 		override public function onMouseClick(event: MouseEvent): Boolean
 		{
-			trace('here');
-			
 			if(event.ctrlKey || event.shiftKey)
 				return false;
 			if(m_mouseClickCapturingItem != null)

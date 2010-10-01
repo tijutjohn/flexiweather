@@ -10,7 +10,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		function setMouseClickCapture(item: IMouseEditableItem): void;
 		function releaseMouseClickCapture(item: IMouseEditableItem): void;
 
-		function selectItem(item: ISelectableItem): void;
+		function selectItem(item: ISelectableItem, dispatchChangeEvent: Boolean = true): void;
 		
 		function doHitTest(
 				f_stageX: Number, f_stageY: Number,

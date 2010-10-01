@@ -15,7 +15,8 @@ package com.iblsoft.flexiweather.ogc.editable
 		protected var mb_modified: Boolean = false;
 		protected var m_editableSprite: Sprite = new Sprite();
 		protected var ml_movablePoints: Array = [];
-
+		protected var mi_editmode: int = WFSFeatureEditableMode.ADD_POINTS_WITH_MOVE_POINTS;
+		
 		protected var m_editableItemManager: IEditableItemManager;
 		protected var m_master: InteractiveLayerWFSEditable;
 
@@ -240,5 +241,11 @@ package com.iblsoft.flexiweather.ogc.editable
 
 		public function get master(): InteractiveLayerWFSEditable
 		{ return m_master; }
+		
+		public function set editmode(v: int): void
+		{ mi_editmode = v; }
+			
+		public function get editmode(): int
+		{ return mi_editmode; }
 	}
 }
