@@ -13,6 +13,7 @@ package com.iblsoft.flexiweather.ogc
 		protected var ms_namespace: String;
 		protected var ms_typeName: String;
 		protected var ms_featureId: String;
+		protected var ms_internal_featureId: String;
 
 		protected var m_coordinates: ArrayCollection = new ArrayCollection();
 		protected var m_points: ArrayCollection = new ArrayCollection();
@@ -77,5 +78,11 @@ package com.iblsoft.flexiweather.ogc
 
 		public function get featureId(): String
 		{ return ms_featureId; }
+		
+		public function set internalFeatureId(s: String): void
+		{ ms_internal_featureId = s; }
+
+		public function get internalFeatureId(): String
+		{ return ms_internal_featureId; }
 	}
 }

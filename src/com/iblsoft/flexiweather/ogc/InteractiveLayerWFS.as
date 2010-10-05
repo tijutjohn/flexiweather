@@ -6,7 +6,6 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.display.Graphics;
-	import flash.events.MouseEvent;
 	import flash.net.URLRequest;
 	import flash.net.URLVariables;
 	
@@ -62,7 +61,40 @@ package com.iblsoft.flexiweather.ogc
 			ma_features.addItem(feature);
 			onFeatureAdded(feature);
 		}
+		
+		public function addFeatureAfterLoad(feature: WFSFeatureBase, a_features: ArrayCollection = null): void
+		{
+			if(feature != null) {
+				feature.update(this);
+				if (a_features)
+					a_features.addItem(feature);
+				addChild(feature);
+				onFeatureAdded(feature);
+			}
+		}
 
+		public function removeFeatureByID(feature: WFSFeatureBase): void
+		{
+			var internalID: String = feature.internalFeatureId;
+			
+			var i: int = ma_features.getItemIndex(feature);
+			if(i >= 0)
+				ma_features.removeItemAt(i);
+				
+			if (internalID)
+			{
+				var total: int = numChildren;
+				for (var i: int = 0; i < total; i++)
+				{
+					var currFeature: WFSFeatureBase = getChildAt(i) as WFSFeatureBase;
+					if (currFeature.internalFeatureId == internalID)
+					{
+						removeChildAt(i);
+						return;
+					} 
+				}
+			}
+		}
 		public function removeFeature(feature: WFSFeatureBase): void
 		{
 			removeChild(feature);
@@ -95,12 +127,13 @@ package com.iblsoft.flexiweather.ogc
 		override public function onAreaChanged(b_finalChange: Boolean): void
 		{
 			for each(var f: WFSFeatureBase in ma_features) {
+				trace("onAreaChanged ["+this+"] feature: " + f);
 				f.invalidatePoints();
 				f.update(this);
 			}
 		}
 
-		protected function parseFeatureMember(xml: XML, wfs: Namespace, gml: Namespace): WFSFeatureBase
+		public function parseFeatureMember(xml: XML, wfs: Namespace, gml: Namespace): WFSFeatureBase
 		{
 			return null;
 		}
@@ -111,6 +144,12 @@ package com.iblsoft.flexiweather.ogc
 			var xml: XML = event.result as XML;
 			if(xml == null)
 				return; // TODO: do some error handling
+				
+			createFeaturesFromXML( xml );
+		}
+		
+		public function createFeaturesFromXML( xml: XML): void
+		{
 			var wfs: Namespace = new Namespace("http://www.opengis.net/wfs");
 			var gml: Namespace = new Namespace("http://www.opengis.net/gml");
 			var a_features: ArrayCollection = new ArrayCollection(); 
@@ -118,12 +157,7 @@ package com.iblsoft.flexiweather.ogc
 			for each(var xmlFeatureMember: XML in xml.gml::featureMember) {
 				try {
 					var feature: WFSFeatureBase = parseFeatureMember(xmlFeatureMember, wfs, gml)
-					if(feature != null) {
-						feature.update(this);
-						a_features.addItem(feature);
-						addChild(feature);
-						onFeatureAdded(feature);
-					}
+					addFeatureAfterLoad(feature, a_features);
 				}
 				catch(e: Error) {
 					trace(e.getStackTrace());
@@ -137,6 +171,8 @@ package com.iblsoft.flexiweather.ogc
 			ma_features = a_features;
 			invalidateDynamicPart();
 		}
+		
+		
 		
 		public function onDataLoadFailed(event: UniURLLoaderEvent): void
 		{
