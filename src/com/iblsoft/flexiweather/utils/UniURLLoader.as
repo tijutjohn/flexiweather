@@ -75,7 +75,7 @@ package com.iblsoft.flexiweather.utils
 		{
 			checkRequestBaseURL(urlRequest);
 			
-			trace("Requesting " + urlRequest.url + " " + urlRequest.data);
+//			trace("Requesting " + urlRequest.url + " " + urlRequest.data);
 			var urlLoader: URLLoaderWithAssociatedData = new URLLoaderWithAssociatedData();
 			urlLoader.associatedData = associatedData;
 			urlLoader.dataFormat = URLLoaderDataFormat.BINARY;

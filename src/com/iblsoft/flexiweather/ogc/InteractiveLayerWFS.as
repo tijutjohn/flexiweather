@@ -84,7 +84,7 @@ package com.iblsoft.flexiweather.ogc
 			if (internalID)
 			{
 				var total: int = numChildren;
-				for (var i: int = 0; i < total; i++)
+				for (i = 0; i < total; i++)
 				{
 					var currFeature: WFSFeatureBase = getChildAt(i) as WFSFeatureBase;
 					if (currFeature.internalFeatureId == internalID)
@@ -94,6 +94,22 @@ package com.iblsoft.flexiweather.ogc
 					} 
 				}
 			}
+			
+			onFeatureRemoved(feature);
+		}
+		public function getFeatureByInternalID(id: String): WFSFeatureBase
+		{
+			var total: int = numChildren;
+			for (var i:int = 0; i < total; i++)
+			{
+				var currFeature: WFSFeatureBase = getChildAt(i) as WFSFeatureBase;
+				trace("InteractiveLayerWFS currFeature: " + currFeature.internalFeatureId + " ID: " + id);
+				if (currFeature.internalFeatureId == id)
+				{
+					return currFeature;
+				} 
+			}
+			return null;
 		}
 		public function removeFeature(feature: WFSFeatureBase): void
 		{

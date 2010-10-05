@@ -185,6 +185,7 @@ package com.iblsoft.flexiweather.ogc.editable
 					if(o != null && !ScreenUtils.isVisible(o))
 						continue;
 				}
+//				trace("doHitTest name: " + item['name'] + " edit: " + item.editPriority + " mode: " + item['editmode']);
 				if(item.hitTestPoint(f_stageX, f_stageY, true))
 					a.push(item);
 			}
