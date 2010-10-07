@@ -6,6 +6,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		public static var ADD_POINTS: int = 2;
 		public static var MOVE_POINTS: int = 3;
 		public static var ADD_POINTS_WITH_MOVE_POINTS: int = 4;
+		public static var ADD_POINTS_ON_CURVE: int = 5;
 		
 		public function WFSFeatureEditableMode()
 		{

@@ -27,6 +27,10 @@ package com.iblsoft.flexiweather.symbology
 	
 		override public function started(x: Number, y: Number): void
 		{
+			trace('mf_thickness:' + mf_thickness);
+			trace('mi_color:' + mi_color);
+			trace('mf_alpha:' + mf_alpha);
+			
 			m_graphics.lineStyle(mf_thickness, mi_color, mf_alpha);
 			m_graphics.moveTo(x, y);
 			mf_lastDX = 0;
