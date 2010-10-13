@@ -100,6 +100,7 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.BackgroundJob"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.BackgroundJobManager"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.GlowLabel"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.InputDialog"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayer"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerClickAction"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerClickActionEvent"/>

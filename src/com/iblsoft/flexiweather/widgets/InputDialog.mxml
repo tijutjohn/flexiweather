@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Generic dialog for imput of a single value in the style of Qt QInputDialog.
+-->
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="400" height="162">
+	<mx:Script>
+		<![CDATA[
+			import mx.controls.ComboBox;
+			import mx.managers.PopUpManager;
+			
+			public static const NORMAL: int = 0;
+			public static const PASSWORD: int = 2;
+			
+			[Bindable]
+			protected var ms_label: String;
+			[Bindable]
+			protected var mi_echoMode: int = NORMAL;
+			[Bindable]
+			protected var ms_text: String;
+
+			protected var m_okCallback: Function;
+			protected var m_cancelCallback: Function;
+			
+			public static function getText(
+					parent: DisplayObject,
+					s_title: String,
+					s_label: String,
+					i_echoMode: int = NORMAL,
+					s_text: String = null,
+					okCallback: Function = null,
+					cancelCallback: Function = null
+					): InputDialog
+			{
+				var d: InputDialog = new InputDialog();
+				d.title = s_title;
+				d.ms_label = s_label;
+				d.ms_text = s_text;	
+				d.mi_echoMode = i_echoMode;
+				d.m_okCallback = okCallback;
+				d.m_cancelCallback = cancelCallback;
+				PopUpManager.addPopUp(d, parent, true);
+				PopUpManager.centerPopUp(d);
+				return d;
+			}
+			
+			protected function onOK(): void
+			{
+				PopUpManager.removePopUp(this);
+				if(m_okCallback == null)
+					return;
+				m_okCallback(m_input.text);
+			}
+
+			protected function onCancel(): void
+			{
+				PopUpManager.removePopUp(this);
+				if(m_cancelCallback == null)
+					return;
+				m_cancelCallback();
+			}
+		]]>
+	</mx:Script>
+	<mx:VBox left="10" right="10" top="10" bottom="10">
+		<mx:TextArea id="m_label" width="100%" height="100%" text="{ms_label}" editable="false" borderStyle="none"/>
+		<mx:TextInput id="m_input" width="100%" editable="true" text="{ms_text}" displayAsPassword="{mi_echoMode != NORMAL}"/>
+		<mx:HBox width="100%" horizontalAlign="center">
+			<mx:Button id="m_buttonOK" label="OK" click="onOK()" width="{m_buttonCancel.width}"/>
+			<mx:Button id="m_buttonCancel" label="Cancel" click="onCancel()" />
+		</mx:HBox>
+	</mx:VBox>
+</mx:TitleWindow>
