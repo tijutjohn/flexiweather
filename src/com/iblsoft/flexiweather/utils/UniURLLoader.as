@@ -52,13 +52,7 @@ package com.iblsoft.flexiweather.utils
 		public function UniURLLoader()
 		{}
 		
-		private function checkRequestBaseURL(urlRequest: URLRequest): void
-		{
-			urlRequest.url = convertBaseURL(urlRequest.url);
-		}
-		
-		
-		public function convertBaseURL(url: String): String
+		public static function fromBaseURL(url: String): String
 		{
 			if (url.indexOf("${BASE_URL}") >= 0)
 			{
@@ -71,6 +65,17 @@ package com.iblsoft.flexiweather.utils
 			}	
 			return url;
 		}
+		
+		private function checkRequestBaseURL(urlRequest: URLRequest): void
+		{
+			urlRequest.url = convertBaseURL(urlRequest.url);
+		}
+		
+		public function convertBaseURL(url: String): String
+		{
+			return UniURLLoader.fromBaseURL(url);
+		}
+		
 		public function load(urlRequest: URLRequest, associatedData: Object = null): void
 		{
 			checkRequestBaseURL(urlRequest);
