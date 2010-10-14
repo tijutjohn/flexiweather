@@ -63,7 +63,7 @@ package com.iblsoft.flexiweather.widgets
 		override protected function updateDisplayList(unscaledWidth: Number, unscaledHeight: Number): void
 		{
 			graphics.clear();
-			draw(graphics);
+				draw(graphics);
 		}
 		
 		public function invalidateDynamicPart(b_invalid: Boolean = true): void
