@@ -4,8 +4,10 @@ package com.iblsoft.flexiweather.plugins
 	
 	public interface IPersisentConfiguration extends IAbility
 	{
-		function getStorageID(): String;
-		function serializePersistentConfiguration(config: Storage): void;
+		function getPersistentConfigurationId(): String;
+
+		function serializePersistentConfiguration(storage: Storage): void;
+
 		function setPersisentConfigurationManager(manager: IPersisentConfigurationManager): void;
 		
 	}

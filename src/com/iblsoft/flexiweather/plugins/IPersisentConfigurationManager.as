@@ -4,8 +4,6 @@ package com.iblsoft.flexiweather.plugins
 	
 	public interface IPersisentConfigurationManager
 	{
-		function forceConfigurationLoad(): void;
-		function forceConfigurationSave(storage: Storage = null): void;
-		function forceConfigurationReset(): void;
+		function forcePersistentConfigurationSave(): void;
 	}
 }
