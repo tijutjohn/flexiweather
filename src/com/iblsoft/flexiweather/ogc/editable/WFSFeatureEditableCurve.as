@@ -2,7 +2,6 @@ package com.iblsoft.flexiweather.ogc.editable
 {
 	import com.iblsoft.flexiweather.ogc.GMLUtils;
 	import com.iblsoft.flexiweather.proj.Coord;
-	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.utils.CubicBezier;
 	import com.iblsoft.flexiweather.utils.CurveLineSegment;
 	import com.iblsoft.flexiweather.utils.CurveLineSegmentRenderer;
@@ -89,7 +88,38 @@ package com.iblsoft.flexiweather.ogc.editable
 
 		// IMouseEditableItem implementation
 		public function onMouseMove(pt: Point): Boolean
-		{ return false; }
+		{
+			if ((mi_editmode == WFSFeatureEditableMode.ADD_POINTS_ON_CURVE) && (selected)){
+				var minIndex: uint = 0;
+				var minDist: Number = Math.abs(pt.subtract(Point(ma_points[0])).length);
+				var i: uint = 1;
+				var tDist: Number;
+				while(i < ma_points.length){
+					tDist = getDist(pt, Point(ma_points[i]));
+					if (tDist < minDist){
+						minDist = tDist;
+						minIndex = i;
+					}
+					i++;
+				}
+				
+				if (minDist < 20){
+					trace('FOUND MIN DIST !!!! ' + minDist + '(' + minIndex + ')');
+					return(true);
+				} else {
+					return(false);
+				}
+			} else {
+				return false;
+			}
+		}
+		
+		protected function getDist(p0: Point, p1: Point): Number
+		{
+			var p: Point = p0.subtract(p1);
+			
+			return(Math.abs(p.length));
+		}
 
 		public function onMouseClick(pt: Point): Boolean
 		{

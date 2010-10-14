@@ -69,8 +69,8 @@ package com.iblsoft.flexiweather.symbology
 			
 			switch(ms_style){
 				case StyledLineCurveRenderer.STYLE_DASHED:
-					mf_markStep = mf_thickness * 6;
-					mf_paternStep = mf_thickness * 10;
+					mf_markStep = mf_thickness * 2;
+					mf_paternStep = mf_thickness * 2;
 					ma_paternDef = new Array(1, 1, 1, 1, 1, 0, 0, 0, 0, 0);
 					break;
 				case StyledLineCurveRenderer.STYLE_DOTTED:
@@ -184,6 +184,16 @@ package com.iblsoft.flexiweather.symbology
 					m_graphics.lineTo(f_x, f_y);
 				}
 				break;
+			case StyledLineCurveRenderer.STYLE_DASHED:
+				if(mi_counter % 4 == 0) {
+					setDefaultLineStyle();
+					m_graphics.lineTo(f_x, f_y);
+				}
+				else {
+					setDefaultLineStyle(false);
+					m_graphics.lineTo(f_x, f_y);
+				}
+				break;
 			
 			/*case StyledLineCurveRenderer.STYLE_DOTTED:
 			case StyledLineCurveRenderer.STYLE_DASHED:
@@ -218,7 +228,7 @@ package com.iblsoft.flexiweather.symbology
 				
 				break;
 			*/
-			case StyledLineCurveRenderer.STYLE_DASHED:
+			
 			case StyledLineCurveRenderer.STYLE_DASHDOT:
 			case StyledLineCurveRenderer.STYLE_DASHDOTDOT:
 				drawPatern(f_x, f_y, 0, 1);

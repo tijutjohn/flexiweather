@@ -17,6 +17,11 @@ package com.iblsoft.flexiweather.ogc.editable
 		protected var ml_movablePoints: Array = [];
 		protected var mi_editmode: int = WFSFeatureEditableMode.ADD_POINTS_WITH_MOVE_POINTS;
 		
+		protected var m_use_monochrome: Boolean = false;
+		protected var m_monochrome_color: uint = 0x333333;
+		
+		protected var ma_points: Array;
+		
 		protected var m_editableItemManager: IEditableItemManager;
 		protected var m_master: InteractiveLayerWFSEditable;
 
@@ -243,9 +248,45 @@ package com.iblsoft.flexiweather.ogc.editable
 		{ return m_master; }
 		
 		public function set editmode(v: int): void
-		{ mi_editmode = v; }
+		{
+			mi_editmode = v;
+		}
 			
 		public function get editmode(): int
 		{ return mi_editmode; }
+		
+		public function set use_monochrome(val: Boolean): void
+		{
+			var needUpdate: Boolean = false;
+			if (m_use_monochrome != val){
+				needUpdate = true;
+			}
+			
+			m_use_monochrome = val;
+			
+			if (needUpdate){
+				update(m_master);
+			}
+		}
+		
+		public function get use_monochrome(): Boolean
+		{ return m_use_monochrome; }
+		
+		public function set monochrome_color(val: uint): void
+		{
+			var needUpdate: Boolean = false;
+			if (m_use_monochrome && (m_monochrome_color != val)){
+				needUpdate = true;
+			}
+			
+			m_monochrome_color = val;
+			
+			if (needUpdate){
+				update(m_master);
+			}
+		}
+		
+		public function get monochrome_color(): uint
+		{ return m_monochrome_color; }
 	}
 }
