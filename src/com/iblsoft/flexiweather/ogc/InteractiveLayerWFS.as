@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
 	import com.iblsoft.flexiweather.utils.UniURLLoader;
 	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
@@ -20,6 +21,9 @@ package com.iblsoft.flexiweather.ogc
 		
 		protected var ms_serviceURL: String = null;
 		protected var m_version: Version;
+
+		protected var m_use_monochrome: Boolean = false;
+		protected var m_monochrome_color: uint = 0x333333;
 
 		public function InteractiveLayerWFS(
 				container: InteractiveWidget,
@@ -221,5 +225,47 @@ package com.iblsoft.flexiweather.ogc
 
 		public function set serviceURL(s_serviceURL: String): void
 		{ ms_serviceURL = s_serviceURL; }
+		
+		public function set use_monochrome(val: Boolean): void
+		{
+			var needUpdate: Boolean = false;
+			if (m_use_monochrome != val){
+				needUpdate = true;
+			}
+			
+			m_use_monochrome = val;
+			
+			if (needUpdate){
+				for (var i: int = 0; i < numChildren; i++){
+					if (getChildAt(i) is WFSFeatureEditable){
+						WFSFeatureEditable(getChildAt(i)).update(this);
+					}
+				}
+			}
+		}
+		
+		public function get use_monochrome(): Boolean
+		{ return m_use_monochrome; }
+		
+		public function set monochrome_color(val: uint): void
+		{
+			var needUpdate: Boolean = false;
+			if (m_monochrome_color != val){
+				needUpdate = true;
+			}
+			
+			m_monochrome_color = val;
+			
+			if (needUpdate){
+				for (var i: int = 0; i < numChildren; i++){
+					if (getChildAt(i) is WFSFeatureEditable){
+						WFSFeatureEditable(getChildAt(i)).update(this);
+					}
+				}
+			}
+		}
+		
+		public function get monochrome_color(): uint
+		{ return m_monochrome_color; }
 	}
 }
