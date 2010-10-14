@@ -17,7 +17,7 @@ package com.iblsoft.flexiweather.utils
 		
 		public function serialize(s_key: String, o: Serializable): void
 		{ __serialize(s_key, NONINDEXED, o); }
-		
+
 		public final function serializeString(s_key: String, s: String, s_default: String = null): String
 		{ return __serializeString(s_key, NONINDEXED, s); }
 
@@ -116,8 +116,20 @@ package com.iblsoft.flexiweather.utils
 				}
 			}
 		}
-		
 
+		public function serializeWithCustomFunction(s_key: String, serializeFunction: Function): void
+		{
+			var restorePoint: Object = downLevel(s_key, NONINDEXED);
+			if(restorePoint == null)
+				throw StorageException("Failed to access storage node '" + s_key + "'");
+			try { 
+				serializeFunction(this);
+			}
+			finally {
+				upLevel(restorePoint);
+			}
+		}
+		
 		public function commit(): void
 		{
 		}
@@ -135,6 +147,8 @@ package com.iblsoft.flexiweather.utils
 		{
 			if(o is Serializable) {
 				var restorePoint: Object = downLevel(s_key, i_index);
+				if(restorePoint == null)
+					throw StorageException("Failed to access storage node '" + s_key + "'");
 				try { 
 					o.serialize(this);
 				}

@@ -124,8 +124,10 @@ package com.iblsoft.flexiweather.utils
 			}
 			else {
 				ch = m_current.elements(s_key);
+				if(i_index == NONINDEXED)
+					i_index = 0;
 				if(i_index >= ch.length())
-					return null; // nod index probably out of range 
+					return null; // node index probably out of range 
 				m_current = ch[i_index];
 			}
 			return currentBackup;
