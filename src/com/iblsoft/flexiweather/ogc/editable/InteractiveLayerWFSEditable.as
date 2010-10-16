@@ -146,10 +146,13 @@ package com.iblsoft.flexiweather.ogc.editable
 							oldSItem, m_selectedItem, this));
 				}
 			}
+			// force update of labels layout
+			container.labelLayout.update();
 		}
 
 		override protected function onFeatureAdded(feature: WFSFeatureBase): void
 		{
+			super.onFeatureAdded(feature);
 			var item: IEditableItem = feature as IEditableItem;
 			if(item != null) {
 				addEditableItem(item);
@@ -158,6 +161,7 @@ package com.iblsoft.flexiweather.ogc.editable
 
 		override protected function onFeatureRemoved(feature: WFSFeatureBase): void
 		{
+			super.onFeatureRemoved(feature);
 			var item: IEditableItem = feature as IEditableItem;
 			
 			var oldSItem: ISelectableItem = item as ISelectableItem;
@@ -166,9 +170,9 @@ package com.iblsoft.flexiweather.ogc.editable
 				removeEditableItem(item);
 				
 			dispatchEvent(new PropertyChangeEvent(
-							SELECTION_CHANGE, false, false,
-							PropertyChangeEventKind.UPDATE, "selectedItem",
-							oldSItem, null, this));
+					SELECTION_CHANGE, false, false,
+					PropertyChangeEventKind.UPDATE, "selectedItem",
+					oldSItem, null, this));
 		}
 		
 		public function doHitTest(
