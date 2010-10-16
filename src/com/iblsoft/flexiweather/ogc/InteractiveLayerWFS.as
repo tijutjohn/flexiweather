@@ -22,9 +22,9 @@ package com.iblsoft.flexiweather.ogc
 		protected var ms_serviceURL: String = null;
 		protected var m_version: Version;
 
-		protected var m_use_monochrome: Boolean = false;
-		protected var m_monochrome_color: uint = 0x333333;
-
+		protected var mb_useMonochrome: Boolean = false;
+		protected var mi_monochromeColor: uint = 0x333333;
+		
 		public function InteractiveLayerWFS(
 				container: InteractiveWidget,
 				version: Version)
@@ -56,42 +56,40 @@ package com.iblsoft.flexiweather.ogc
 			m_loader.load(url);
 		}
 		
-		/**
-		 * 
-		 */
 		public function addFeature(feature: WFSFeatureBase): void
 		{
+			feature.update(this);
 			addChild(feature);
 			ma_features.addItem(feature);
 			onFeatureAdded(feature);
 		}
 		
-		public function addFeatureAfterLoad(feature: WFSFeatureBase, a_features: ArrayCollection = null): void
+		private function addFeatureAfterLoad(feature: WFSFeatureBase, a_features: ArrayCollection = null): void
 		{
 			if(feature != null) {
 				feature.update(this);
-				if (a_features)
-					a_features.addItem(feature);
 				addChild(feature);
+				if(a_features)
+					a_features.addItem(feature);
 				onFeatureAdded(feature);
 			}
 		}
 
-		public function removeFeatureByID(feature: WFSFeatureBase): void
+		public function removeFeatureHavingSameInternalId(feature: WFSFeatureBase): void
 		{
-			var internalID: String = feature.internalFeatureId;
+			var s_internalId: String = feature.internalFeatureId;
 			
 			var i: int = ma_features.getItemIndex(feature);
 			if(i >= 0)
 				ma_features.removeItemAt(i);
 				
-			if (internalID)
+			if(s_internalId)
 			{
 				var total: int = numChildren;
-				for (i = 0; i < total; i++)
+				for(i = 0; i < total; i++)
 				{
 					var currFeature: WFSFeatureBase = getChildAt(i) as WFSFeatureBase;
-					if (currFeature.internalFeatureId == internalID)
+					if(currFeature.internalFeatureId == s_internalId)
 					{
 						removeChildAt(i);
 						return;
@@ -100,21 +98,23 @@ package com.iblsoft.flexiweather.ogc
 			}
 			
 			onFeatureRemoved(feature);
+			feature.cleanup(this);
 		}
-		public function getFeatureByInternalID(id: String): WFSFeatureBase
+
+		public function getFeatureByInternalId(id: String): WFSFeatureBase
 		{
-			var total: int = numChildren;
-			for (var i:int = 0; i < total; i++)
+			var i_count: int = numChildren;
+			for(var i:int = 0; i < i_count; i++)
 			{
 				var currFeature: WFSFeatureBase = getChildAt(i) as WFSFeatureBase;
-				trace("InteractiveLayerWFS currFeature: " + currFeature.internalFeatureId + " ID: " + id);
-				if (currFeature.internalFeatureId == id)
+				if(currFeature.internalFeatureId == id)
 				{
 					return currFeature;
 				} 
 			}
 			return null;
 		}
+
 		public function removeFeature(feature: WFSFeatureBase): void
 		{
 			removeChild(feature);
@@ -122,6 +122,7 @@ package com.iblsoft.flexiweather.ogc
 			if(i >= 0)
 				ma_features.removeItemAt(i);
 			onFeatureRemoved(feature);
+			feature.cleanup(this);
 		}
 		
         override public function refresh(b_force: Boolean): void
@@ -135,13 +136,11 @@ package com.iblsoft.flexiweather.ogc
 
 		override public function renderPreview(graphics: Graphics, f_width: Number, f_height: Number): void
 		{
-			{
-				graphics.lineStyle(2, 0xcc00cc, 0.7, true);
-				graphics.moveTo(0, 0);
-				graphics.lineTo(f_width - 1, f_height - 1);
-				graphics.moveTo(0, f_height - 1);
-				graphics.lineTo(f_width - 1, 0);
-			}
+			graphics.lineStyle(2, 0xcc00cc, 0.7, true);
+			graphics.moveTo(0, 0);
+			graphics.lineTo(f_width - 1, f_height - 1);
+			graphics.moveTo(0, f_height - 1);
+			graphics.lineTo(f_width - 1, 0);
 		}
 		
 		override public function onAreaChanged(b_finalChange: Boolean): void
@@ -199,10 +198,14 @@ package com.iblsoft.flexiweather.ogc
 		}
 
 		protected function onFeatureAdded(feature: WFSFeatureBase): void
-		{}
+		{
+			invalidateDynamicPart();
+		}
 
 		protected function onFeatureRemoved(feature: WFSFeatureBase): void
-		{}
+		{
+			invalidateDynamicPart();
+		}
 
 		public function addQueryFeature(s_featureId: String): void
 		{ ma_queryFeatures.addItem(s_featureId); }
@@ -226,46 +229,44 @@ package com.iblsoft.flexiweather.ogc
 		public function set serviceURL(s_serviceURL: String): void
 		{ ms_serviceURL = s_serviceURL; }
 		
-		public function set use_monochrome(val: Boolean): void
+		public function set useMonochrome(val: Boolean): void
 		{
-			var needUpdate: Boolean = false;
-			if (m_use_monochrome != val){
-				needUpdate = true;
-			}
+			var b_needUpdate: Boolean = false;
+			if(mb_useMonochrome != val)
+				b_needUpdate = true;
 			
-			m_use_monochrome = val;
+			mb_useMonochrome = val;
 			
-			if (needUpdate){
-				for (var i: int = 0; i < numChildren; i++){
-					if (getChildAt(i) is WFSFeatureEditable){
+			if(b_needUpdate) {
+				for(var i: int = 0; i < numChildren; i++){
+					if(getChildAt(i) is WFSFeatureEditable){
 						WFSFeatureEditable(getChildAt(i)).update(this);
 					}
 				}
 			}
 		}
 		
-		public function get use_monochrome(): Boolean
-		{ return m_use_monochrome; }
+		public function get useMonochrome(): Boolean
+		{ return mb_useMonochrome; }
 		
-		public function set monochrome_color(val: uint): void
+		public function set monochromeColor(i_color: uint): void
 		{
-			var needUpdate: Boolean = false;
-			if (m_monochrome_color != val){
-				needUpdate = true;
-			}
+			var b_needUpdate: Boolean = false;
+			if(mi_monochromeColor != i_color)
+				b_needUpdate = true;
 			
-			m_monochrome_color = val;
+			mi_monochromeColor = i_color;
 			
-			if (needUpdate){
-				for (var i: int = 0; i < numChildren; i++){
-					if (getChildAt(i) is WFSFeatureEditable){
+			if(b_needUpdate) {
+				for(var i: int = 0; i < numChildren; i++) {
+					if(getChildAt(i) is WFSFeatureEditable) {
 						WFSFeatureEditable(getChildAt(i)).update(this);
 					}
 				}
 			}
 		}
 		
-		public function get monochrome_color(): uint
-		{ return m_monochrome_color; }
+		public function get monochromeColor(): uint
+		{ return mi_monochromeColor; }
 	}
 }
