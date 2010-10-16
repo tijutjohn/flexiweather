@@ -36,6 +36,7 @@ package com.iblsoft.flexiweather.ogc
 		public function getPoint(i_pointIndex: uint): Point
 		{ return m_points[i_pointIndex]; }
 
+		/** Called after the feature is added to master or after any change (e.g. area change). */ 
 		public function update(master: InteractiveLayerWFS): void
 		{
 			if(mb_pointsDirty) {
@@ -49,7 +50,14 @@ package com.iblsoft.flexiweather.ogc
 				}
 			}
 		}
-		
+
+		/** Called internally before the feature is removed from the master. */ 
+		public function cleanup(master: InteractiveLayerWFS): void
+		{
+			//m_coordinates.removeAll();
+			//m_points.removeAll();
+		}
+
 		public function invalidatePoints(): void
 		{ mb_pointsDirty = true; }
 		
