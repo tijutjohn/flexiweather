@@ -15,15 +15,15 @@ package com.iblsoft.flexiweather.ogc.editable
 		protected var mb_modified: Boolean = false;
 		protected var m_editableSprite: Sprite = new Sprite();
 		protected var ml_movablePoints: Array = [];
-		protected var mi_editmode: int = WFSFeatureEditableMode.ADD_POINTS_WITH_MOVE_POINTS;
+		protected var mi_editMode: int = WFSFeatureEditableMode.ADD_POINTS_WITH_MOVE_POINTS;
 		
-		protected var m_use_monochrome: Boolean = false;
-		protected var m_monochrome_color: uint = 0x333333;
+		protected var mb_useMonochrome: Boolean = false;
+		protected var mi_monochromeColor: uint = 0x333333;
 		
 		protected var ma_points: Array;
 		
 		protected var m_editableItemManager: IEditableItemManager;
-		protected var m_master: InteractiveLayerWFSEditable;
+		protected var m_master: InteractiveLayerWFS;
 
 		public function WFSFeatureEditable(s_namespace: String, s_typeName: String, s_featureId: String)
 		{
@@ -35,8 +35,8 @@ package com.iblsoft.flexiweather.ogc.editable
 		override public function update(master: InteractiveLayerWFS): void
 		{
 			super.update(master);
-			m_master = InteractiveLayerWFSEditable(master);
-			var eim: IEditableItemManager = IEditableItemManager(master); 
+			m_master = master;
+			var eim: IEditableItemManager = master as IEditableItemManager; 
 
 			var mp: MoveablePoint;
 			var i: uint;
@@ -45,7 +45,8 @@ package com.iblsoft.flexiweather.ogc.editable
 					mp = new MoveablePoint(this, i);
 					ml_movablePoints.push(mp);
 					m_editableSprite.addChild(mp);
-					eim.addEditableItem(mp);
+					if(eim != null)
+						eim.addEditableItem(mp);
 					continue;
 				}
 				mp = ml_movablePoints[i];
@@ -59,7 +60,8 @@ package com.iblsoft.flexiweather.ogc.editable
 			}
 			for(; i < ml_movablePoints.length; ++i) {
 				mp = ml_movablePoints[i];
-				eim.removeEditableItem(mp);
+				if(eim != null)
+					eim.removeEditableItem(mp);
 				m_editableSprite.removeChild(mp);
 			}
 			while(m_points.length < ml_movablePoints.length) {
@@ -244,49 +246,45 @@ package com.iblsoft.flexiweather.ogc.editable
 		public function get modified(): Boolean
 		{ return mb_modified; }
 
-		public function get master(): InteractiveLayerWFSEditable
+		public function get master(): InteractiveLayerWFS
 		{ return m_master; }
 		
-		public function set editmode(v: int): void
+		public function set editMode(v: int): void
 		{
-			mi_editmode = v;
+			mi_editMode = v;
 		}
 			
-		public function get editmode(): int
-		{ return mi_editmode; }
+		public function get editMode(): int
+		{ return mi_editMode; }
 		
-		public function set use_monochrome(val: Boolean): void
+		public function set useMonochrome(val: Boolean): void
 		{
-			var needUpdate: Boolean = false;
-			if (m_use_monochrome != val){
-				needUpdate = true;
-			}
+			var b_needUpdate: Boolean = false;
+			if(mb_useMonochrome != val)
+				b_needUpdate = true;
 			
-			m_use_monochrome = val;
+			mb_useMonochrome = val;
 			
-			if (needUpdate){
+			if(b_needUpdate)
 				update(m_master);
-			}
 		}
 		
-		public function get use_monochrome(): Boolean
-		{ return m_use_monochrome; }
+		public function get useMonochrome(): Boolean
+		{ return mb_useMonochrome; }
 		
-		public function set monochrome_color(val: uint): void
+		public function set monochromeColor(i_color: uint): void
 		{
-			var needUpdate: Boolean = false;
-			if (m_use_monochrome && (m_monochrome_color != val)){
-				needUpdate = true;
-			}
+			var b_needUpdate: Boolean = false;
+			if (mb_useMonochrome && (mi_monochromeColor != i_color))
+				b_needUpdate = true;
 			
-			m_monochrome_color = val;
+			mi_monochromeColor = i_color;
 			
-			if (needUpdate){
+			if (b_needUpdate)
 				update(m_master);
-			}
 		}
 		
-		public function get monochrome_color(): uint
-		{ return m_monochrome_color; }
+		public function get monochromeColor(): uint
+		{ return mi_monochromeColor; }
 	}
 }

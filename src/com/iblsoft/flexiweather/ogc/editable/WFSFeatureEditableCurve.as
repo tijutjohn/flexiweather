@@ -89,7 +89,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		// IMouseEditableItem implementation
 		public function onMouseMove(pt: Point): Boolean
 		{
-			if ((mi_editmode == WFSFeatureEditableMode.ADD_POINTS_ON_CURVE) && (selected)){
+			if ((mi_editMode == WFSFeatureEditableMode.ADD_POINTS_ON_CURVE) && (selected)){
 				var minIndex: uint = 0;
 				var minDist: Number = Math.abs(pt.subtract(Point(ma_points[0])).length);
 				var i: uint = 1;
@@ -141,8 +141,8 @@ package com.iblsoft.flexiweather.ogc.editable
 			// snap to existing MoveablePoint
 			pt = snapPoint(pt);
 
-			if ((mi_editmode == WFSFeatureEditableMode.MOVE_POINTS) || 
-				(mi_editmode == WFSFeatureEditableMode.ADD_POINTS_WITH_MOVE_POINTS)){
+			if ((mi_editMode == WFSFeatureEditableMode.MOVE_POINTS) || 
+				(mi_editMode == WFSFeatureEditableMode.ADD_POINTS_WITH_MOVE_POINTS)){
 				// don't do anything if this click is on MoveablePoint belonging to this curve
 				var stagePt: Point = localToGlobal(pt);
 				for each(var mp: MoveablePoint in ml_movablePoints) {
@@ -151,8 +151,8 @@ package com.iblsoft.flexiweather.ogc.editable
 				}
 			}
 			
-			if ((mi_editmode == WFSFeatureEditableMode.ADD_POINTS) ||
-				(mi_editmode == WFSFeatureEditableMode.ADD_POINTS_WITH_MOVE_POINTS)){
+			if ((mi_editMode == WFSFeatureEditableMode.ADD_POINTS) ||
+				(mi_editMode == WFSFeatureEditableMode.ADD_POINTS_WITH_MOVE_POINTS)){
 				var a: ArrayCollection = getPoints();
 				var i_best: int = -1;
 				var f_bestDistance: Number = 0;
