@@ -15,8 +15,6 @@ package com.iblsoft.flexiweather.widgets
 	{
 		public var container: InteractiveWidget;
 		private var mb_dynamicPartInvalid: Boolean = false;
-		private var mb_visible: Boolean = true;
-		private var mb_enabled: Boolean = true;
 		private var mi_zOrder: int = 0;
 		
 		protected var m_legendCallBack: Function;
@@ -63,7 +61,7 @@ package com.iblsoft.flexiweather.widgets
 		override protected function updateDisplayList(unscaledWidth: Number, unscaledHeight: Number): void
 		{
 			graphics.clear();
-				draw(graphics);
+			draw(graphics);
 		}
 		
 		public function invalidateDynamicPart(b_invalid: Boolean = true): void
