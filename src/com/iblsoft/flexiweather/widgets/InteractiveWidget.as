@@ -3,6 +3,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
+	import com.iblsoft.flexiweather.utils.AnticollisionLayout;
 	
 	import flash.display.DisplayObject;
 	import flash.display.GradientType;
@@ -25,6 +26,12 @@ package com.iblsoft.flexiweather.widgets
         private var m_extentBBox: BBox = new BBox(-180, -90, 180, 90);
         private var mb_orderingLayers: Boolean = false;
 
+		private var mb_backgroundChessBoard: Boolean = false;
+
+		private var m_resizeTimer: Timer;
+
+		public var m_labelLayout: AnticollisionLayout = new AnticollisionLayout();
+
 		public function InteractiveWidget() {
 			super();
 			
@@ -41,19 +48,6 @@ package com.iblsoft.flexiweather.widgets
 			addEventListener(MouseEvent.ROLL_OVER, onMouseRollOver);
 			addEventListener(MouseEvent.ROLL_OUT, onMouseRollOut);
 			addEventListener(ResizeEvent.RESIZE, onResized);
-			
-			addEventListener(ChildExistenceChangedEvent.CHILD_ADD, onChildAdd);
-			addEventListener(ChildExistenceChangedEvent.CHILD_REMOVE, onChildRemove);
-		}
-		
-		private function onChildAdd(e: ChildExistenceChangedEvent): void
-		{
-//			trace("InteractiveWidget onChildAdd: " + numChildren);
-		}
-		private function onChildRemove(e: ChildExistenceChangedEvent): void
-		{
-//			trace("InteractiveWidget onChildRemove: " + numChildren);
-			
 		}
 		
 		public override function addChild(child: DisplayObject): DisplayObject
@@ -86,8 +80,6 @@ package com.iblsoft.flexiweather.widgets
 
 		public function removeLayer(l: InteractiveLayer): void
 		{
-			trace(l + " parent: " + parent);
-//			if(contains(l))
 			if(l.parent == this)
 				removeChild(l);
 		}
@@ -110,26 +102,11 @@ package com.iblsoft.flexiweather.widgets
 						var ilJ: InteractiveLayer = InteractiveLayer(getChildAt(j));
 						if(ilJ.zOrder < ilI.zOrder) {
 							// swap Ith and Jth layer, we know that J > I
-							trace('[InteractiveWidget.orderLayers] ... swapping ' + ilJ.name + ' with ' + ilI.name);
+							//trace('[InteractiveWidget.orderLayers] ... swapping ' + ilJ.name + ' with ' + ilI.name);
 							swapChildren(ilJ, ilI);
-							//removeChildAt(j);
-							//removeChildAt(i);
-							//addChildAt(ilJ, i);
-							//addChildAt(ilI, j);
 						}
 					}
 				}
-				/*
-				trace("**********************************************")
-				trace("                 SORTING by ZORDER");
-				trace("**********************************************")
-				for(var i: int = 0; i < numChildren; ++i) 
-				{
-					var layer: InteractiveLayer = InteractiveLayer(getChildAt(i)); 
-					trace("LAYER ["+i+"] = " + layer.name); 
-				}
-				trace("**********************************************")
-				*/
 			}
 			finally {
 				mb_orderingLayers = false;
@@ -139,30 +116,46 @@ package com.iblsoft.flexiweather.widgets
         override protected function updateDisplayList(
             	unscaledWidth: Number, unscaledHeight: Number): void
         {
-            /*for(var i: int = 0; i < _layers.length; ++i) {
-            	var l: InteractiveLayer = InteractiveLayer(_layers[i]);
-            	if(l.isDynamicPartInvalid())
-            		l.draw(l.graphics); 
-            }*/
             if (isNaN(unscaledWidth) || isNaN(unscaledHeight))
             {
             	//when user press Cancel on printing interactiveWidget, both sizes was NaN
             	return;
             }
-            	
-            graphics.clear();
-            var matrix: Matrix = new Matrix();
-            matrix.rotate(90);
-            graphics.beginGradientFill(GradientType.LINEAR, [0xAAAAAA, 0xFFFFFF], [1, 1], [0, 255], matrix);
-            graphics.drawRect(0, 0, width, height);
-            graphics.endFill();
+			
+			if(m_labelLayout.m_placementBitmap == null)
+				m_labelLayout.setBoundary(new Rectangle(0, 0, width, height)); 
+			if(m_labelLayout.needsUpdate())
+				m_labelLayout.update();
+
+			graphics.clear();
+
+			if(mb_backgroundChessBoard) {
+				var i_squareSize: uint = 10;
+				var i_row: uint = 0;
+				for(var y: uint = 0; y < height; y += i_squareSize, ++i_row) {
+					var b_flag: Boolean = (i_row & 1) != 0;
+					for(var x: uint = 0; x < width; x += i_squareSize) {
+						graphics.beginFill(b_flag ? 0xc0c0c0 : 0x808080);
+						graphics.drawRect(x, y, i_squareSize, i_squareSize);
+						graphics.endFill();
+						b_flag = !b_flag;
+					}
+				}
+			}
+			else {
+				var matrix: Matrix = new Matrix();
+				matrix.rotate(90);
+				graphics.beginGradientFill(GradientType.LINEAR, [0xAAAAAA, 0xFFFFFF], [1, 1], [0, 255], matrix);
+				graphics.drawRect(0, 0, width, height);
+				graphics.endFill();
+			}
+
+			// DEBUG: display label layout placement bitmap
+			//graphics.beginBitmapFill(m_labelLayout.m_placementBitmap);
+			//graphics.drawRect(0, 0, m_labelLayout.m_placementBitmap.width, m_labelLayout.m_placementBitmap.height);
+			//graphics.endFill();
+
             super.updateDisplayList(unscaledWidth, unscaledHeight);
-            /*for(var i: int = 0; i < _layers.length; ++i) {
-            	var l: InteractiveLayer = InteractiveLayer(_layers[i]);
-            	if(!l.visible)
-            		continue;
-            	l.draw(graphics); 
-            }*/
         }
 
 		protected function signalAreaChanged(b_finalChange: Boolean): void
@@ -214,6 +207,7 @@ package com.iblsoft.flexiweather.widgets
             	if(l.onMouseDown(event))
             		break; 
             }
+			postUserActionUpdate();			
         }
 
         protected function onMouseUp(event: MouseEvent): void
@@ -225,6 +219,7 @@ package com.iblsoft.flexiweather.widgets
             	if(l.onMouseUp(event))
             		break; 
             }
+			postUserActionUpdate();			
         }
 
         protected function onMouseMove(event: MouseEvent): void
@@ -236,6 +231,7 @@ package com.iblsoft.flexiweather.widgets
             	if(l.onMouseMove(event))
             		break; 
             }
+			postUserActionUpdate();			
         }
 
         protected function onMouseWheel(event: MouseEvent): void
@@ -247,6 +243,7 @@ package com.iblsoft.flexiweather.widgets
             	if(l.onMouseWheel(event))
             		break; 
             }
+			postUserActionUpdate();			
         }
         
         protected function onMouseClick(event: MouseEvent): void
@@ -258,6 +255,7 @@ package com.iblsoft.flexiweather.widgets
             	if(l.onMouseClick(event))
             		break; 
             }
+			postUserActionUpdate();			
         }
 
         protected function onMouseDoubleClick(event: MouseEvent): void
@@ -269,6 +267,7 @@ package com.iblsoft.flexiweather.widgets
             	if(l.onMouseDoubleClick(event))
             		break; 
             }
+			postUserActionUpdate();			
         }
 
         protected function onMouseRollOver(event: MouseEvent): void
@@ -280,6 +279,7 @@ package com.iblsoft.flexiweather.widgets
             	if(l.onMouseRollOver(event))
             		break; 
             }
+			postUserActionUpdate();			
         }
 
         protected function onMouseRollOut(event: MouseEvent): void
@@ -291,25 +291,23 @@ package com.iblsoft.flexiweather.widgets
             	if(l.onMouseRollOut(event))
             		break; 
             }
+			postUserActionUpdate();			
         }
         
-        private var _resizeTimer: Timer;
         protected function onResized(Event: ResizeEvent): void
         {
-        	if (!_resizeTimer)
+			m_labelLayout.setBoundary(new Rectangle(0, 0, width, height));
+			if(!m_resizeTimer)
         	{
-        		_resizeTimer = new Timer(500,1);
-        		_resizeTimer.addEventListener(TimerEvent.TIMER_COMPLETE, afterDelayedResize);
+        		m_resizeTimer = new Timer(500, 1);
+        		m_resizeTimer.addEventListener(TimerEvent.TIMER_COMPLETE, afterDelayedResize);
         	}
-        	
-        	_resizeTimer.stop();
-        	_resizeTimer.start();
-        	trace("onResized, timer started");
+        	m_resizeTimer.stop();
+        	m_resizeTimer.start();
         }
         
         private function afterDelayedResize(event: TimerEvent = null): void
         {
-        	trace("afterDelayedResize, timer finised, let's invalidate InteractiveWidget");
         	setViewBBox(m_viewBBox, true); // set the view bbox to update the aspects 
             for(var i: int = 0; i < numChildren; ++i) {
             	var l: InteractiveLayer = InteractiveLayer(getChildAt(i));
@@ -320,7 +318,19 @@ package com.iblsoft.flexiweather.widgets
             		l.invalidateDynamicPart();
             }
             scrollRect = new Rectangle(0, 0, width, height);
+			postUserActionUpdate();
         }
+		
+		private function postUserActionUpdate(): void
+		{
+			for(var i: int = 0; i < numChildren; ++i) {
+				var l: InteractiveLayer = InteractiveLayer(getChildAt(i));
+				if(l.isDynamicPartInvalid())
+					l.validateNow();
+			}
+			if(m_labelLayout.needsUpdate())
+				m_labelLayout.update();
+		}
         
         // Getters & setters
 
@@ -426,5 +436,14 @@ package com.iblsoft.flexiweather.widgets
 		[Bindable(event = "crsChanged")]
         public function set srs(s_crs: String): void
         { return setCRS(s_crs, true); }
+		
+		public function set backgroundChessBoard(b: Boolean): void
+		{
+			mb_backgroundChessBoard = b;
+			invalidateDisplayList();			
+		}
+
+		public function get labelLayout(): AnticollisionLayout
+		{ return m_labelLayout; }
 	}
 }
