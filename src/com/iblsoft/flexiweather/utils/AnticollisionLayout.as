@@ -1,8 +1,12 @@
 package com.iblsoft.flexiweather.utils
 {
+	import com.iblsoft.flexiweather.utils.geometry.ILineSegmentApproximableBounds;
+	import com.iblsoft.flexiweather.utils.geometry.LineSegment;
+	
 	import flash.display.BitmapData;
 	import flash.display.BlendMode;
 	import flash.display.DisplayObject;
+	import flash.display.Graphics;
 	import flash.display.Sprite;
 	import flash.events.TimerEvent;
 	import flash.geom.ColorTransform;
@@ -14,6 +18,20 @@ package com.iblsoft.flexiweather.utils
 	import mx.collections.ArrayCollection;
 	import mx.core.UIComponent;
 
+	/**
+	 * Special helper class for layout of DisplayObject's so that they don't overlap.
+	 * This can be for example used to lay out anchored annotation label around some objects.
+	 *     
+  	 * Collision resolution is performed using displacement of "objects" (DisplayObject's)
+	 * for which this is allowed. Objects which cannot be displaced are called "obstacles" here.
+	 * Collision is resolved by a partly bitmap algorithm (for obstacles).
+	 * 
+	 * Any object can be optionaly connected (anchored) to any other object in the layout.
+	 * For used displaced DisplayObject's it's recommend the ILineApproximableBounds
+	 * interface, which helps to put the anchor line nicely from edge-to-edge between objects.
+	 * If object does not implement ILineApproximableBounds the it's assumed that the object
+	 * is rectangle.
+	 **/
 	public class AnticollisionLayout extends Sprite
 	{
 		protected var m_boundaryRect: Rectangle;
@@ -22,6 +40,7 @@ package com.iblsoft.flexiweather.utils
 		protected var m_updateTimer: Timer;
 		
 		protected var ma_layoutObjects: ArrayCollection = new ArrayCollection();
+		protected var m_anchorsLayer: Sprite = new Sprite();
 		
 		public static const DISPLACE_NOT_ALLOWED: uint = 0;
 		public static const DISPLACE_AUTOMATIC: uint = 1;
@@ -32,24 +51,47 @@ package com.iblsoft.flexiweather.utils
 			m_updateTimer = new Timer(0, 1);
 			m_updateTimer.addEventListener(TimerEvent.TIMER_COMPLETE, onUpdateTimer, false, 0, true);
 			m_updateTimer.stop();
+			
+			addChild(m_anchorsLayer);
 		}
 		
+		/**
+		 * Adds externally managed DisplayObject which must not be displaced to the layout
+		 * Basically this means that all other objects will be displaced so that they don't
+		 * overlap with this one.
+		 **/
 		public function addObstacle(object: DisplayObject): void
 		{
 			setDirty();
-			ma_layoutObjects.addItem(new LayoutObject(object, DISPLACE_NOT_ALLOWED));
+			var lo: LayoutObject = new LayoutObject(object, false, DISPLACE_NOT_ALLOWED);
+			ma_layoutObjects.addItem(lo);
 		}
 
-		public function addObject(object: DisplayObject, i_displacementMode: uint = DISPLACE_AUTOMATIC): void
+		/**
+		 * Add a displaceble object to the layout. By default any displace is allowed
+		 * and object is added as the child to the layout.
+		 **/
+		public function addObject(
+				object: DisplayObject,
+				a_anchors: Array = null,
+				i_displacementMode: uint = DISPLACE_AUTOMATIC,
+				b_addAsChild: Boolean = true): void
 		{
 			setDirty();
-			ma_layoutObjects.addItem(new LayoutObject(object, i_displacementMode));
+			if(b_addAsChild)
+				addChild(object);
+			var lo: LayoutObject = new LayoutObject(object, b_addAsChild, i_displacementMode);
+			lo.ma_objectsToAnchor = a_anchors;
+			ma_layoutObjects.addItem(lo);
 		}
 		
 		public function removeObject(object: DisplayObject): Boolean
 		{
 			for(var i: int = 0; i < ma_layoutObjects.length; ++i) {
-				if(ma_layoutObjects[i].m_object === object) {
+				var lo: LayoutObject = ma_layoutObjects[i]; 
+				if(lo.m_object === object) {
+					if(lo.mb_managedChild)
+						removeChild(lo.m_object);
 					ma_layoutObjects.removeItemAt(i);
 					setDirty();
 					return true;
@@ -81,6 +123,9 @@ package com.iblsoft.flexiweather.utils
 		
 		public function reset(): void
 		{
+			for each(var lo: LayoutObject in ma_layoutObjects) {
+				removeChild(lo.m_object);
+			}
 			ma_layoutObjects.removeAll();
 			setDirty();
 		}
@@ -119,6 +164,7 @@ package com.iblsoft.flexiweather.utils
 				}
 			}
 			// second pass
+			var a_displacedObjects: Array = [];
 			for each(lo in ma_layoutObjects) {
 				if(!lo.m_object.visible)
 					continue;
@@ -159,7 +205,48 @@ package com.iblsoft.flexiweather.utils
 					}
 					lo.m_object.x = lo.m_referenceLocation.x + f_dx;
 					lo.m_object.y = lo.m_referenceLocation.y + f_dy;
+					if(f_dx != 0 || f_dy != 0 || !b_foundPlace)
+						a_displacedObjects.push(lo);
 					drawObjectPlacement(lo, f_dx, f_dy);
+				}
+			}
+			
+			// now we can assume that all objects are laid out
+			
+			// draw anchors between 
+			var g: Graphics = m_anchorsLayer.graphics;
+			g.clear();
+			for each(lo in a_displacedObjects) {
+				if(lo.ma_objectsToAnchor == null || lo.ma_objectsToAnchor.length == 0)
+					continue;
+				//if(lo.mi_displacementMode != DISPLACE_AUTOMATIC)
+				//	continue;
+				for each(var objectToAnchor: DisplayObject in lo.ma_objectsToAnchor) {
+					var boundsFrom: Rectangle = lo.m_object.getBounds(this);
+					var boundsTo: Rectangle = objectToAnchor.getBounds(this);
+
+					var a_boundingLineSegmentsFrom: Array = getLineSegmentApproximation(lo.m_object);
+					var a_boundingLineSegmentsTo: Array = getLineSegmentApproximation(objectToAnchor);
+
+					var bestPointTo: Point = boundsTo.bottomRight;
+					var bestPointFrom: Point = boundsFrom.topLeft;
+					var f_bestDistance: Number = 123e45;
+					
+					for each(var lineSegmentFrom: LineSegment in a_boundingLineSegmentsFrom) {
+						for each(var lineSegmentTo: LineSegment in a_boundingLineSegmentsTo) {
+							var connection: LineSegment = lineSegmentFrom.shortestConnectionToLineSegment(lineSegmentTo);
+							var f_distance: Number = connection.length;
+							if(f_distance < f_bestDistance) {
+								bestPointFrom = connection.startPoint; 
+								bestPointTo = connection.endPoint;
+								f_bestDistance = f_distance;
+							}
+						}
+					}
+					
+					drawAnnotationAnchor(g,
+							bestPointFrom.x, bestPointFrom.y,
+							bestPointTo.x, bestPointTo.y);
 				}
 			}
 		}
@@ -167,6 +254,44 @@ package com.iblsoft.flexiweather.utils
 		public function needsUpdate(): Boolean
 		{
 			return !mb_dirty;
+		}
+		
+		// helpers
+		public static function drawAnnotationAnchor(
+				graphics: Graphics,
+				f_x1: Number, f_y1: Number, f_x2: Number, f_y2: Number): void
+		{
+			var f_xc: Number = (f_x1 + f_x2) / 2;
+			var f_yc: Number = (f_y1 + f_y2) / 2;
+			graphics.lineStyle(2, 0, 1);
+			graphics.moveTo(f_x1, f_y1);
+			graphics.lineTo(f_x2, f_y2);
+		}
+		
+		private function getLineSegmentApproximation(object: DisplayObject): Array
+		{
+			var lsab: ILineSegmentApproximableBounds = object as ILineSegmentApproximableBounds;
+			var a: Array;
+			if(lsab != null)
+				a = lsab.getLineSegmentApproximationOfBounds();
+			else {
+				a = [];
+				var bounds: Rectangle = object.getBounds(this);
+				a.push(new LineSegment(bounds.left, bounds.top, bounds.right, bounds.top));
+				a.push(new LineSegment(bounds.right, bounds.top, bounds.right, bounds.bottom));
+				a.push(new LineSegment(bounds.right, bounds.bottom, bounds.left, bounds.bottom));
+				a.push(new LineSegment(bounds.left, bounds.bottom, bounds.left, bounds.top));
+			}
+			return a;
+			/*
+			var a_refined: Array = [];
+			for each(var ls: LineSegment in a) {
+				var ptM: Point = ls.midPoint;
+				a_refined.push(new LineSegment(ls.x1, ls.y1, ptM.x, ptM.y));
+				a_refined.push(new LineSegment(ptM.x, ptM.y, ls.x2, ls.y2));
+			}
+			return a_refined;
+			*/
 		}
 		
 		private function getLayoutObjectFor(object: DisplayObject): LayoutObject
@@ -234,69 +359,19 @@ import flash.geom.Point;
 class LayoutObject
 {
 	internal var m_object: DisplayObject;
+	internal var mb_managedChild: Boolean;
 	internal var mi_displacementMode: uint;
 	internal var m_referenceLocation: Point;
+	internal var ma_objectsToAnchor: Array;
 	
-	function LayoutObject(object: DisplayObject, i_displacementMode: uint)
+	function LayoutObject(
+			object: DisplayObject,
+			b_managedChild: Boolean,
+			i_displacementMode: uint)
 	{
 		m_object = object;
+		mb_managedChild = b_managedChild;
 		mi_displacementMode = i_displacementMode;
 		m_referenceLocation = new Point(object.x, object.y);
-	}
-}
-
-import flash.display.BitmapData;
-import flash.display.BlendMode;
-import flash.display.DisplayObject;
-import flash.display.DisplayObjectContainer;
-import flash.geom.Matrix;
-import flash.geom.ColorTransform;
-import flash.geom.Rectangle;
-
-class CollisionDetection
-{
-	public static function checkForCollision(firstObj: DisplayObject, secondObj: DisplayObject): Rectangle
-	{
-		var bounds1: Object = firstObj.getBounds(firstObj.root);
-		var bounds2: Object = secondObj.getBounds(secondObj.root);
-		
-		if(((bounds1.right < bounds2.left)
-				|| (bounds2.right < bounds1.left))
-				|| ((bounds1.bottom < bounds2.top)
-				|| (bounds2.bottom < bounds1.top)))
-			return null;
-		
-		var bounds: Object = {};
-		bounds.left = Math.max(bounds1.left, bounds2.left);
-		bounds.right= Math.min(bounds1.right, bounds2.right);
-		bounds.top = Math.max(bounds1.top, bounds2.top);
-		bounds.bottom = Math.min(bounds1.bottom, bounds2.bottom);
-		
-		var w: Number = bounds.right-bounds.left;
-		var h: Number = bounds.bottom-bounds.top;
-		
-		if(w < 1 || h < 1)
-			return null;
-		
-		var bitmapData: BitmapData = new BitmapData(w, h, false);
-		var matrix: Matrix = firstObj.transform.concatenatedMatrix;
-		matrix.tx -= bounds.left;
-		matrix.ty -= bounds.top;
-		bitmapData.draw(firstObj, matrix, new ColorTransform(1, 1, 1, 1, 255, -255, -255, 255));
-		
-		matrix = secondObj.transform.concatenatedMatrix;
-		matrix.tx -= bounds.left;
-		matrix.ty -= bounds.top;
-		bitmapData.draw(secondObj, matrix, new ColorTransform(1, 1, 1, 1, 255, 255, 255, 255), BlendMode.DIFFERENCE);
-		
-		var intersection: Rectangle = bitmapData.getColorBoundsRect(0xFFFFFFFF, 0xFF00FFFF);
-		
-		if(intersection.width == 0) 
-			return null;
-		
-		intersection.x += bounds.left;
-		intersection.y += bounds.top;
-		
-		return intersection;
 	}
 }
