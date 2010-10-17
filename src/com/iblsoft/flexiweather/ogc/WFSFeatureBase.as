@@ -13,7 +13,7 @@ package com.iblsoft.flexiweather.ogc
 		protected var ms_namespace: String;
 		protected var ms_typeName: String;
 		protected var ms_featureId: String;
-		protected var ms_internal_featureId: String;
+		protected var ms_internalFeatureId: String;
 
 		protected var m_master: InteractiveLayerWFS;
 
@@ -62,6 +62,7 @@ package com.iblsoft.flexiweather.ogc
 		/** Called internally before the feature is removed from the master. */ 
 		public function cleanup(): void
 		{
+			m_master = null;
 			m_coordinates.removeAll();
 			m_points.removeAll();
 		}
@@ -96,9 +97,12 @@ package com.iblsoft.flexiweather.ogc
 		{ return ms_featureId; }
 		
 		public function set internalFeatureId(s: String): void
-		{ ms_internal_featureId = s; }
+		{ ms_internalFeatureId = s; }
 
 		public function get internalFeatureId(): String
-		{ return ms_internal_featureId; }
+		{ return ms_internalFeatureId; }
+
+		public function get master(): InteractiveLayerWFS
+		{ return m_master; }
 	}
 }

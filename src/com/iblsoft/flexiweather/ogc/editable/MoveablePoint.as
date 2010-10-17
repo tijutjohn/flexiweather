@@ -21,9 +21,10 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			super();
 	
+			doubleClickEnabled = true;
+
 			m_feature = feature;
 			mi_pointIndex = i_pointIndex;
-	
 			m_pt = feature.getPoint(i_pointIndex);
 	
 			update();

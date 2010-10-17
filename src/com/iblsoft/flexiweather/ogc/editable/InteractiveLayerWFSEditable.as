@@ -7,6 +7,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.display.DisplayObject;
+	import flash.display.Sprite;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	
@@ -26,6 +27,8 @@ package com.iblsoft.flexiweather.ogc.editable
 		protected var ml_mouseMoveCapturingItemStack: Array = [];
 		protected var m_mouseClickCapturingItem: IMouseEditableItem = null;
 		protected var ml_mouseClickCapturingItemStack: Array = [];
+		
+		protected var m_editingComponentsContainer: Sprite = new Sprite;
 		 
 		[Event(name = SELECTION_CHANGE, type = "mx.events.PropertyChangeEvent")]
 
@@ -34,6 +37,9 @@ package com.iblsoft.flexiweather.ogc.editable
 				version: Version)
 		{
 			super(container, version);
+			mouseChildren = true;
+			// add a layer for any components which are realted to feature editing
+			addChild(m_editingComponentsContainer);
 		}
 
 		// IEditableItemManager implementation
@@ -292,5 +298,8 @@ package com.iblsoft.flexiweather.ogc.editable
 
 		public function set selectedItem(item: ISelectableItem): void
 		{ selectItem(item); }
+		
+		public function get editingComponentsContainer(): Sprite
+		{ return m_editingComponentsContainer; }
 	}
 }

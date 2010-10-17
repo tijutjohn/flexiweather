@@ -27,8 +27,15 @@ package com.iblsoft.flexiweather.ogc.editable
 		public function WFSFeatureEditable(s_namespace: String, s_typeName: String, s_featureId: String)
 		{
 			super(s_namespace, s_typeName, s_featureId);
-			addChild(m_editableSprite);
 			m_editableSprite.visible = false;
+		}
+		
+		override public function setMaster(master: InteractiveLayerWFS): void
+		{
+			super.setMaster(master);
+			var masterEditable: InteractiveLayerWFSEditable = master as InteractiveLayerWFSEditable;
+			if(masterEditable != null)
+				masterEditable.editingComponentsContainer.addChild(m_editableSprite);
 		}
 		
 		override public function update(): void
@@ -71,8 +78,13 @@ package com.iblsoft.flexiweather.ogc.editable
 		override public function cleanup(): void
 		{
 			super.cleanup();
+
+			var masterEditable: InteractiveLayerWFSEditable = master as InteractiveLayerWFSEditable;
+			if(masterEditable != null)
+				masterEditable.editingComponentsContainer.removeChild(m_editableSprite);
+
 			for each(var mp: MoveablePoint in ml_movablePoints)
-				m_editableSprite.addChild(mp);
+				m_editableSprite.removeChild(mp);
 			ml_movablePoints = [];
 		}
 		
@@ -255,9 +267,6 @@ package com.iblsoft.flexiweather.ogc.editable
 		public function get modified(): Boolean
 		{ return mb_modified; }
 
-		public function get master(): InteractiveLayerWFS
-		{ return m_master; }
-		
 		public function set editMode(v: int): void
 		{
 			mi_editMode = v;

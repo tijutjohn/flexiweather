@@ -35,6 +35,8 @@ package com.iblsoft.flexiweather.ogc
 			m_loader.addEventListener(UniURLLoader.DATA_LOADED, onDataLoaded);
 			m_loader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onDataLoadFailed);
 			m_version = version;
+			m_featuresContainer.mouseEnabled = false;
+			m_featuresContainer.mouseChildren = false;
 			addChild(m_featuresContainer);
 		}
 
