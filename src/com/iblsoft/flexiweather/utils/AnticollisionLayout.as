@@ -164,7 +164,6 @@ package com.iblsoft.flexiweather.utils
 				}
 			}
 			// second pass
-			var a_displacedObjects: Array = [];
 			for each(lo in ma_layoutObjects) {
 				if(!lo.m_object.visible)
 					continue;
@@ -205,8 +204,6 @@ package com.iblsoft.flexiweather.utils
 					}
 					lo.m_object.x = lo.m_referenceLocation.x + f_dx;
 					lo.m_object.y = lo.m_referenceLocation.y + f_dy;
-					if(f_dx != 0 || f_dy != 0 || !b_foundPlace)
-						a_displacedObjects.push(lo);
 					drawObjectPlacement(lo, f_dx, f_dy);
 				}
 			}
@@ -216,7 +213,9 @@ package com.iblsoft.flexiweather.utils
 			// draw anchors between 
 			var g: Graphics = m_anchorsLayer.graphics;
 			g.clear();
-			for each(lo in a_displacedObjects) {
+			for each(lo in ma_layoutObjects) {
+				if(!lo.m_object.visible)
+					continue;
 				if(lo.ma_objectsToAnchor == null || lo.ma_objectsToAnchor.length == 0)
 					continue;
 				//if(lo.mi_displacementMode != DISPLACE_AUTOMATIC)
