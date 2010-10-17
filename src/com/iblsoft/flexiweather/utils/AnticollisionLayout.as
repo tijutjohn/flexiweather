@@ -34,6 +34,12 @@ package com.iblsoft.flexiweather.utils
 			m_updateTimer.stop();
 		}
 		
+		public function addObstacle(object: DisplayObject): void
+		{
+			setDirty();
+			ma_layoutObjects.addItem(new LayoutObject(object, DISPLACE_NOT_ALLOWED));
+		}
+
 		public function addObject(object: DisplayObject, i_displacementMode: uint = DISPLACE_AUTOMATIC): void
 		{
 			setDirty();
@@ -43,7 +49,7 @@ package com.iblsoft.flexiweather.utils
 		public function removeObject(object: DisplayObject): Boolean
 		{
 			for(var i: int = 0; i < ma_layoutObjects.length; ++i) {
-				if(ma_layoutObjects[i].m_object == object) {
+				if(ma_layoutObjects[i].m_object === object) {
 					ma_layoutObjects.removeItemAt(i);
 					setDirty();
 					return true;
@@ -52,25 +58,27 @@ package com.iblsoft.flexiweather.utils
 			return false;
 		}
 
-		public function getReferenceLocation(object: DisplayObject): Point
+		public function getObjectReferenceLocation(object: DisplayObject): Point
 		{
-			for each(var lo: LayoutObject in ma_layoutObjects) {
-				if(lo.m_object == object)
-					return lo.m_referenceLocation;
-			}
-			return null;
+			var lo: LayoutObject = getLayoutObjectFor(object);
+			if(lo == null)
+				return null;
+			return lo.m_referenceLocation;
 		}
 
-		public function setReferenceLocation(object: DisplayObject, referenceLocation: Point): Boolean
+		public function updateObjectReferenceLocation(object: DisplayObject): Boolean
 		{
-			for each(var lo: LayoutObject in ma_layoutObjects) {
-				if(lo.m_object == object) {
-					lo.m_referenceLocation = referenceLocation;
-				}
+			var lo: LayoutObject = getLayoutObjectFor(object);
+			if(lo == null)
+				return false;
+			if(lo.m_referenceLocation.x != object.x
+					|| lo.m_referenceLocation.y != object.y) { 
+				setDirty();
+				lo.m_referenceLocation = new Point(object.x, object.y);
 			}
-			return false;
+			return true;
 		}
-
+		
 		public function reset(): void
 		{
 			ma_layoutObjects.removeAll();
@@ -104,12 +112,16 @@ package com.iblsoft.flexiweather.utils
 			var lo: LayoutObject; 
 			// first pass - render nonmoveable objects
 			for each(lo in ma_layoutObjects) {
+				if(!lo.m_object.visible)
+					continue;
 				if(lo.mi_displacementMode == DISPLACE_NOT_ALLOWED) {
 					drawObjectPlacement(lo, 0, 0);
 				}
 			}
 			// second pass
 			for each(lo in ma_layoutObjects) {
+				if(!lo.m_object.visible)
+					continue;
 				if(lo.mi_displacementMode == DISPLACE_AUTOMATIC) {
 					var f_dx: Number = 0;
 					var f_dy: Number = 0;
@@ -157,6 +169,16 @@ package com.iblsoft.flexiweather.utils
 			return !mb_dirty;
 		}
 		
+		private function getLayoutObjectFor(object: DisplayObject): LayoutObject
+		{
+			for each(var lo: LayoutObject in ma_layoutObjects) {
+				if(lo.m_object === object) {
+					return lo;
+				}
+			}
+			return null;
+		}
+
 		private var m_makeRed: ColorTransform = new ColorTransform(1, 1, 1, 1, 255, -255, -255, 255);
 
 		private function drawObjectPlacement(layoutObject: LayoutObject, f_dx: Number, f_dy: Number): void
