@@ -123,6 +123,9 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.GroupBox"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.GroupHBox"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.GroupVBox"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.geometry.ILineSegmentApproximableBounds"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.geometry.LineSegment"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.geometry.Vector2D"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
