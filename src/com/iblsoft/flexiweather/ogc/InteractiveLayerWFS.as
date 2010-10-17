@@ -131,7 +131,6 @@ package com.iblsoft.flexiweather.ogc
 				ma_features.removeItemAt(i);
 			onFeatureRemoved(feature);
 			feature.cleanup();
-			feature.setMaster(null);
 		}
 		
         override public function refresh(b_force: Boolean): void
