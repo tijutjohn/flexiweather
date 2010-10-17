@@ -72,6 +72,8 @@
     <classEntry path="com.iblsoft.flexiweather.symbology.JetStreamCurveRenderer"/>
     <classEntry path="com.iblsoft.flexiweather.symbology.StyledLineCurveRenderer"/>
     <classEntry path="com.iblsoft.flexiweather.symbology.TurbulenceCurveRenderer"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.AnnotationBox"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.AnnotationTextBox"/>
     <classEntry path="com.iblsoft.flexiweather.utils.AnticollisionLayout"/>
     <classEntry path="com.iblsoft.flexiweather.utils.ArrayLogTarget"/>
     <classEntry path="com.iblsoft.flexiweather.utils.ArrayUtils"/>
