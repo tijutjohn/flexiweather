@@ -56,7 +56,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				if(m_highlightedItem == item)
 					m_highlightedItem = null;
 				if(m_selectedItem == item)
-					m_selectedItem = null;
+					selectedItem = null;
 				if(m_mouseMoveCapturingItem == item)
 					m_mouseMoveCapturingItem = null;
 				if(m_mouseClickCapturingItem == item)
@@ -293,6 +293,8 @@ package com.iblsoft.flexiweather.ogc.editable
 		}
 		
 		// getters & setters
+
+		[Bindable]
 		public function get selectedItem(): ISelectableItem
 		{ return m_selectedItem; }
 
