@@ -7,6 +7,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.display.Graphics;
+	import flash.display.Sprite;
 	import flash.net.URLRequest;
 	import flash.net.URLVariables;
 	
@@ -16,6 +17,7 @@ package com.iblsoft.flexiweather.ogc
 	{
 		private var m_loader: UniURLLoader = new UniURLLoader();
 		private var ma_features: ArrayCollection = new ArrayCollection();
+		private var m_featuresContainer: Sprite = new Sprite();
 		private var ma_queryFeatures: ArrayCollection = new ArrayCollection();
 		private var md_queryParametersGET: Array = new Array();
 		
@@ -33,6 +35,7 @@ package com.iblsoft.flexiweather.ogc
 			m_loader.addEventListener(UniURLLoader.DATA_LOADED, onDataLoaded);
 			m_loader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onDataLoadFailed);
 			m_version = version;
+			addChild(m_featuresContainer);
 		}
 
 		public function updateData(): void
@@ -60,7 +63,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			feature.setMaster(this);
 			feature.update();
-			addChild(feature);
+			m_featuresContainer.addChild(feature);
 			ma_features.addItem(feature);
 			onFeatureAdded(feature);
 		}
@@ -70,7 +73,7 @@ package com.iblsoft.flexiweather.ogc
 			if(feature != null) {
 				feature.setMaster(this);
 				feature.update();
-				addChild(feature);
+				m_featuresContainer.addChild(feature);
 				if(a_features)
 					a_features.addItem(feature);
 				onFeatureAdded(feature);
@@ -87,13 +90,13 @@ package com.iblsoft.flexiweather.ogc
 				
 			if(s_internalId)
 			{
-				var total: int = numChildren;
+				var total: int = m_featuresContainer.numChildren;
 				for(i = 0; i < total; i++)
 				{
-					var currFeature: WFSFeatureBase = getChildAt(i) as WFSFeatureBase;
+					var currFeature: WFSFeatureBase = m_featuresContainer.getChildAt(i) as WFSFeatureBase;
 					if(currFeature.internalFeatureId == s_internalId)
 					{
-						removeChildAt(i);
+						m_featuresContainer.removeChildAt(i);
 						return;
 					} 
 				}
@@ -106,10 +109,10 @@ package com.iblsoft.flexiweather.ogc
 
 		public function getFeatureByInternalId(id: String): WFSFeatureBase
 		{
-			var i_count: int = numChildren;
+			var i_count: int = m_featuresContainer.numChildren;
 			for(var i:int = 0; i < i_count; i++)
 			{
-				var currFeature: WFSFeatureBase = getChildAt(i) as WFSFeatureBase;
+				var currFeature: WFSFeatureBase = m_featuresContainer.getChildAt(i) as WFSFeatureBase;
 				if(currFeature.internalFeatureId == id)
 				{
 					return currFeature;
@@ -120,7 +123,7 @@ package com.iblsoft.flexiweather.ogc
 
 		public function removeFeature(feature: WFSFeatureBase): void
 		{
-			removeChild(feature);
+			m_featuresContainer.removeChild(feature);
 			var i: int = ma_features.getItemIndex(feature);
 			if(i >= 0)
 				ma_features.removeItemAt(i);
@@ -188,7 +191,7 @@ package com.iblsoft.flexiweather.ogc
 			}
 			
 			for each(var oldFeature: WFSFeatureBase in ma_features) {
-				removeChild(oldFeature);
+				m_featuresContainer.removeChild(oldFeature);
 				onFeatureRemoved(oldFeature);
 			}
 			ma_features = a_features;
@@ -242,9 +245,9 @@ package com.iblsoft.flexiweather.ogc
 			mb_useMonochrome = val;
 			
 			if(b_needUpdate) {
-				for(var i: int = 0; i < numChildren; i++){
-					if(getChildAt(i) is WFSFeatureEditable){
-						WFSFeatureEditable(getChildAt(i)).update();
+				for(var i: int = 0; i < m_featuresContainer.numChildren; i++){
+					if(m_featuresContainer.getChildAt(i) is WFSFeatureEditable){
+						WFSFeatureEditable(m_featuresContainer.getChildAt(i)).update();
 					}
 				}
 			}
@@ -262,9 +265,9 @@ package com.iblsoft.flexiweather.ogc
 			mi_monochromeColor = i_color;
 			
 			if(b_needUpdate) {
-				for(var i: int = 0; i < numChildren; i++) {
-					if(getChildAt(i) is WFSFeatureEditable) {
-						WFSFeatureEditable(getChildAt(i)).update();
+				for(var i: int = 0; i < m_featuresContainer.numChildren; i++) {
+					if(m_featuresContainer.getChildAt(i) is WFSFeatureEditable) {
+						WFSFeatureEditable(m_featuresContainer.getChildAt(i)).update();
 					}
 				}
 			}
