@@ -233,11 +233,21 @@ package com.iblsoft.flexiweather.utils
 					
 					for each(var lineSegmentFrom: LineSegment in a_boundingLineSegmentsFrom) {
 						for each(var lineSegmentTo: LineSegment in a_boundingLineSegmentsTo) {
+							// approach: overall 2 closest points
+							/*
 							var connection: LineSegment = lineSegmentFrom.shortestConnectionToLineSegment(lineSegmentTo);
 							var f_distance: Number = connection.length;
 							if(f_distance < f_bestDistance) {
 								bestPointFrom = connection.startPoint; 
 								bestPointTo = connection.endPoint;
+								f_bestDistance = f_distance;
+							}
+							*/
+							// approach: mid-points of 2 closest line segments
+							var f_distance: Number = lineSegmentFrom.minimumDistanceToLineSegment(lineSegmentTo);
+							if(f_distance < f_bestDistance) {
+								bestPointFrom = lineSegmentFrom.midPoint; 
+								bestPointTo = lineSegmentTo.midPoint;
 								f_bestDistance = f_distance;
 							}
 						}

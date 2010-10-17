@@ -37,7 +37,33 @@ package com.iblsoft.flexiweather.utils.geometry
 				return new Point(x1 + dirVector.x * f_ratio, y1 + dirVector.y * f_ratio);
 			}
 		}
+
+		/**
+		 * Returns distance between a point and "this" line segments
+		 **/
+		public function distanceToPoint(x: Number, y: Number): Number
+		{
+			var pt: Point = closestPointToPoint(x, y);
+			return pt.subtract(new Point(x, y)).length;
+		}
+
+		/**
+		 * Returns minimum distance between "this" and "other" line segments
+		 **/
+		public function minimumDistanceToLineSegment(other: LineSegment): Number
+		{
+			if(false) // TODO: check for intersection of two lines
+				return 0;
+			return Math.min(
+				distanceToPoint(other.x1, other.y1),
+				distanceToPoint(other.x2, other.y2),
+				other.distanceToPoint(x1, y1),
+				other.distanceToPoint(x2, y2));
+		}
 		
+		/**
+		 * Returns shortest line segment which connects "this" and "other" line segments.
+		 **/
 		public function shortestConnectionToLineSegment(other: LineSegment): LineSegment
 		{
 			var closestToOtherS: Point = closestPointToPoint(other.x1, other.y1);
