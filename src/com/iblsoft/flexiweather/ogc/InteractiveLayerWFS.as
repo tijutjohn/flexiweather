@@ -58,7 +58,8 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function addFeature(feature: WFSFeatureBase): void
 		{
-			feature.update(this);
+			feature.setMaster(this);
+			feature.update();
 			addChild(feature);
 			ma_features.addItem(feature);
 			onFeatureAdded(feature);
@@ -67,7 +68,8 @@ package com.iblsoft.flexiweather.ogc
 		private function addFeatureAfterLoad(feature: WFSFeatureBase, a_features: ArrayCollection = null): void
 		{
 			if(feature != null) {
-				feature.update(this);
+				feature.setMaster(this);
+				feature.update();
 				addChild(feature);
 				if(a_features)
 					a_features.addItem(feature);
@@ -98,7 +100,8 @@ package com.iblsoft.flexiweather.ogc
 			}
 			
 			onFeatureRemoved(feature);
-			feature.cleanup(this);
+			feature.setMaster(null);
+			feature.cleanup();
 		}
 
 		public function getFeatureByInternalId(id: String): WFSFeatureBase
@@ -122,7 +125,8 @@ package com.iblsoft.flexiweather.ogc
 			if(i >= 0)
 				ma_features.removeItemAt(i);
 			onFeatureRemoved(feature);
-			feature.cleanup(this);
+			feature.cleanup();
+			feature.setMaster(null);
 		}
 		
         override public function refresh(b_force: Boolean): void
@@ -148,7 +152,7 @@ package com.iblsoft.flexiweather.ogc
 			for each(var f: WFSFeatureBase in ma_features) {
 				trace("onAreaChanged ["+this+"] feature: " + f);
 				f.invalidatePoints();
-				f.update(this);
+				f.update();
 			}
 		}
 
@@ -240,7 +244,7 @@ package com.iblsoft.flexiweather.ogc
 			if(b_needUpdate) {
 				for(var i: int = 0; i < numChildren; i++){
 					if(getChildAt(i) is WFSFeatureEditable){
-						WFSFeatureEditable(getChildAt(i)).update(this);
+						WFSFeatureEditable(getChildAt(i)).update();
 					}
 				}
 			}
@@ -260,7 +264,7 @@ package com.iblsoft.flexiweather.ogc
 			if(b_needUpdate) {
 				for(var i: int = 0; i < numChildren; i++) {
 					if(getChildAt(i) is WFSFeatureEditable) {
-						WFSFeatureEditable(getChildAt(i)).update(this);
+						WFSFeatureEditable(getChildAt(i)).update();
 					}
 				}
 			}

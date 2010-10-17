@@ -15,6 +15,8 @@ package com.iblsoft.flexiweather.ogc
 		protected var ms_featureId: String;
 		protected var ms_internal_featureId: String;
 
+		protected var m_master: InteractiveLayerWFS;
+
 		protected var m_coordinates: ArrayCollection = new ArrayCollection();
 		protected var m_points: ArrayCollection = new ArrayCollection();
 		protected var mb_pointsDirty: Boolean = false;
@@ -36,12 +38,18 @@ package com.iblsoft.flexiweather.ogc
 		public function getPoint(i_pointIndex: uint): Point
 		{ return m_points[i_pointIndex]; }
 
-		/** Called after the feature is added to master or after any change (e.g. area change). */ 
-		public function update(master: InteractiveLayerWFS): void
+		/** Called after the feature is added to master, before first call to update(). */
+		public function setMaster(master: InteractiveLayerWFS): void
+		{
+			m_master = master;
+		}
+
+		/** Called after the feature is added to master or after any change (e.g. area change). */
+		public function update(): void
 		{
 			if(mb_pointsDirty) {
 				mb_pointsDirty = false;
-				var iw: InteractiveWidget = master.container;
+				var iw: InteractiveWidget = m_master.container;
 				m_points = new ArrayCollection();
 				for(var i: uint = 0; i < m_coordinates.length; ++i) {
 					var c: Coord = m_coordinates[i];
@@ -52,10 +60,10 @@ package com.iblsoft.flexiweather.ogc
 		}
 
 		/** Called internally before the feature is removed from the master. */ 
-		public function cleanup(master: InteractiveLayerWFS): void
+		public function cleanup(): void
 		{
-			//m_coordinates.removeAll();
-			//m_points.removeAll();
+			m_coordinates.removeAll();
+			m_points.removeAll();
 		}
 
 		public function invalidatePoints(): void

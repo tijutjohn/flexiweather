@@ -23,7 +23,6 @@ package com.iblsoft.flexiweather.ogc.editable
 		protected var ma_points: Array;
 		
 		protected var m_editableItemManager: IEditableItemManager;
-		protected var m_master: InteractiveLayerWFS;
 
 		public function WFSFeatureEditable(s_namespace: String, s_typeName: String, s_featureId: String)
 		{
@@ -32,10 +31,9 @@ package com.iblsoft.flexiweather.ogc.editable
 			m_editableSprite.visible = false;
 		}
 		
-		override public function update(master: InteractiveLayerWFS): void
+		override public function update(): void
 		{
-			super.update(master);
-			m_master = master;
+			super.update();
 			var eim: IEditableItemManager = master as IEditableItemManager; 
 
 			var mp: MoveablePoint;
@@ -68,6 +66,14 @@ package com.iblsoft.flexiweather.ogc.editable
 				ml_movablePoints.pop();
 			}
 			m_editableSprite.visible = mb_selected;
+		}
+
+		override public function cleanup(): void
+		{
+			super.cleanup();
+			for each(var mp: MoveablePoint in ml_movablePoints)
+				m_editableSprite.addChild(mp);
+			ml_movablePoints = [];
 		}
 		
 		public function renderFallbackGraphics(i_preferredColor: uint = 0x5A90B1): void {
@@ -140,7 +146,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			m_points[i_pointIndex] = pt;
 			m_coordinates[i_pointIndex] = m_master.container.pointToCoord(pt.x, pt.y);
-			update(m_master);
+			update();
 			modified = true;
 		}
 		
@@ -148,7 +154,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			m_points.addItemAt(pt, i_pointIndex);
 			m_coordinates.addItemAt(m_master.container.pointToCoord(pt.x, pt.y), i_pointIndex);
-			update(m_master);
+			update();
 			modified = true;
 		}
 		
@@ -156,7 +162,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			m_points.removeItemAt(i_pointIndex);
 			m_coordinates.removeItemAt(i_pointIndex);
-			update(m_master);
+			update();
 		}
 
 		public function deselect(): void
@@ -266,7 +272,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			mb_useMonochrome = val;
 			
 			if(b_needUpdate)
-				update(m_master);
+				update();
 		}
 		
 		public function get useMonochrome(): Boolean
@@ -281,7 +287,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			mi_monochromeColor = i_color;
 			
 			if (b_needUpdate)
-				update(m_master);
+				update();
 		}
 		
 		public function get monochromeColor(): uint
