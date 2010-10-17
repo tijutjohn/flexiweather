@@ -53,7 +53,7 @@ package com.iblsoft.flexiweather.ogc
 				url.data['SRSNAME'] = container.getCRS();
 			}
 			url.data['TYPENAME'] = ma_queryFeatures.toArray().join(",");
-			m_loader.load(url);
+			m_loader.load(url, null, "Loading features");
 		}
 		
 		public function addFeature(feature: WFSFeatureBase): void

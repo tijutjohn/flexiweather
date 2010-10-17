@@ -1,5 +1,8 @@
 package com.iblsoft.flexiweather.utils
 {
+	import com.iblsoft.flexiweather.widgets.BackgroundJob;
+	import com.iblsoft.flexiweather.widgets.BackgroundJobManager;
+	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.IOErrorEvent;
@@ -54,12 +57,12 @@ package com.iblsoft.flexiweather.utils
 		
 		public static function fromBaseURL(url: String): String
 		{
-			if (url.indexOf("${BASE_URL}") >= 0)
+			if(url.indexOf("${BASE_URL}") >= 0)
 			{
 				var regExp: RegExp = /\$\{BASE_URL\}/ig;
-				while ( regExp.exec(url) != null )
+				while(regExp.exec(url) != null)
 				{
-					url = url.replace( regExp, baseURL);
+					url = url.replace(regExp, baseURL);
 //					trace("replace url: " + urlRequest.url + " baseURL: " + baseURL);
 				}
 			}	
@@ -76,7 +79,10 @@ package com.iblsoft.flexiweather.utils
 			return UniURLLoader.fromBaseURL(url);
 		}
 		
-		public function load(urlRequest: URLRequest, associatedData: Object = null): void
+		public function load(
+				urlRequest: URLRequest,
+				associatedData: Object = null,
+				s_backgroundJobName: String = null): void
 		{
 			checkRequestBaseURL(urlRequest);
 			
@@ -88,9 +94,14 @@ package com.iblsoft.flexiweather.utils
 			urlLoader.addEventListener(IOErrorEvent.IO_ERROR, onDataIOError);
 			urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onSecurityError);
 			urlLoader.load(urlRequest);
+			
+			var backgroundJob: BackgroundJob = null;
+			if(s_backgroundJobName != null)
+				backgroundJob = BackgroundJobManager.getInstance().startJob(s_backgroundJobName);
 			md_urlLoaderToRequestMap[urlLoader] = {
 				request: urlRequest,
-				loader: urlLoader
+				loader: urlLoader,
+				backgroundJob: backgroundJob
 			};
 		}
 		
@@ -106,11 +117,11 @@ package com.iblsoft.flexiweather.utils
 				}
 			}
 			for(key in md_imageLoaderToRequestMap) {
-				var test: * = md_imageLoaderToRequestMap[key]
-				if( test && test.hasOwnProperty('request') && test.request)
+				var test: * = md_imageLoaderToRequestMap[key];
+				if(test && test.hasOwnProperty('request') && test.request)
 				{
 					
-					if (test.request == urlRequest) 
+					if(test.request == urlRequest) 
 					{
 						test.loader.close();
 						disconnectImageLoader(LoaderWithAssociatedData(md_imageLoaderToRequestMap[key].loader)); // as LoaderWithAssociatedData);
@@ -235,6 +246,12 @@ package com.iblsoft.flexiweather.utils
 			urlLoader.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, onSecurityError);
 			if(!urlLoader in md_urlLoaderToRequestMap)
 				return null;
+
+			// finish background job if it was started
+			var backgroundJob: BackgroundJob = md_urlLoaderToRequestMap[urlLoader].backgroundJob;
+			if(backgroundJob != null)
+				BackgroundJobManager.getInstance().finishJob(backgroundJob);
+			
 			var urlRequest: URLRequest = md_urlLoaderToRequestMap[urlLoader].request; 
 			delete md_urlLoaderToRequestMap[urlLoader];
 			return urlRequest;
@@ -250,7 +267,6 @@ package com.iblsoft.flexiweather.utils
 			delete md_imageLoaderToRequestMap[imageLoader];
 			return urlRequest;
 		}
-		
 	}
 }
 
