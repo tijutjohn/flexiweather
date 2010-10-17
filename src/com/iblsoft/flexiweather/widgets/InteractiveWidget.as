@@ -7,6 +7,7 @@ package com.iblsoft.flexiweather.widgets
 	
 	import flash.display.DisplayObject;
 	import flash.display.GradientType;
+	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
@@ -16,7 +17,7 @@ package com.iblsoft.flexiweather.widgets
 	import flash.utils.Timer;
 	
 	import mx.core.Container;
-	import mx.events.ChildExistenceChangedEvent;
+	import mx.core.UIComponent;
 	import mx.events.ResizeEvent;
 
 	public class InteractiveWidget extends Container
@@ -29,8 +30,9 @@ package com.iblsoft.flexiweather.widgets
 		private var mb_backgroundChessBoard: Boolean = false;
 
 		private var m_resizeTimer: Timer;
-
-		public var m_labelLayout: AnticollisionLayout = new AnticollisionLayout();
+		
+		private var m_layerContainer: Container = new Container();
+		private var m_labelLayout: AnticollisionLayout = new AnticollisionLayout();
 
 		public function InteractiveWidget() {
 			super();
@@ -38,7 +40,12 @@ package com.iblsoft.flexiweather.widgets
 			mouseEnabled = true;
 			mouseFocusEnabled = true;
 			doubleClickEnabled = true;
+
+			addChild(m_layerContainer);
+			m_layerContainer.x = m_layerContainer.y = 0;
+			rawChildren.addChild(m_labelLayout);
 			clipContent = true;
+
 			addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
 			addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
 			addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
@@ -52,21 +59,36 @@ package com.iblsoft.flexiweather.widgets
 		
 		public override function addChild(child: DisplayObject): DisplayObject
 		{
-			InteractiveLayer(child).container = this;
-			child.x = x;
-			child.y = y;
-			child.width = width;
-			child.height = height;
-			var o: DisplayObject = super.addChild(child);
-			orderLayers();
-			return o;
+			if(child is InteractiveLayer) {
+				// InteractiveLayer based child are added to m_layerContainer
+				InteractiveLayer(child).container = this; // this also ensures that child is InteractiveLayer
+				child.x = x;
+				child.y = y;
+				child.width = width;
+				child.height = height;
+				var o: DisplayObject = m_layerContainer.addChild(child);
+				orderLayers();
+				return o;
+			}
+			else
+				return super.addChild(child);
 		}
 		
 		public override function addChildAt(child: DisplayObject, index: int): DisplayObject
 		{
-			var o: DisplayObject = super.addChildAt(child, index);
-			orderLayers();
-			return o;
+			if(child is InteractiveLayer) {
+				// InteractiveLayer based child are added to m_layerContainer
+				InteractiveLayer(child).container = this; // this also ensures that child is InteractiveLayer
+				child.x = x;
+				child.y = y;
+				child.width = width;
+				child.height = height;
+				var o: DisplayObject = m_layerContainer.addChildAt(child, index);
+				orderLayers();
+				return o;
+			}
+			else
+				return super.addChildAt(child, index);
 		}
 
 		public function addLayer(l: InteractiveLayer, index: int = -1): void
@@ -81,12 +103,13 @@ package com.iblsoft.flexiweather.widgets
 		public function removeLayer(l: InteractiveLayer): void
 		{
 			if(l.parent == this)
-				removeChild(l);
+				m_layerContainer.removeChild(l);
 		}
 		
 		public function removeAllLayers(): void
 		{
-			removeAllChildren();
+			while(m_layerContainer.numChildren)
+				m_layerContainer.getChildAt(m_layerContainer.numChildren - 1);
 		}
 		
 		public function orderLayers(): void
@@ -96,14 +119,14 @@ package com.iblsoft.flexiweather.widgets
 			mb_orderingLayers = true;
 			try {
 				// stable-sort interactive layers in ma_layers according to their zOrder property
-				for(var i: int = 0; i < numChildren; ++i) {
-					var ilI: InteractiveLayer = InteractiveLayer(getChildAt(i)); 
-					for(var j: int = i + 1; j < numChildren; ++j) {
-						var ilJ: InteractiveLayer = InteractiveLayer(getChildAt(j));
+				for(var i: int = 0; i < m_layerContainer.numChildren; ++i) {
+					var ilI: InteractiveLayer = InteractiveLayer(m_layerContainer.getChildAt(i)); 
+					for(var j: int = i + 1; j < m_layerContainer.numChildren; ++j) {
+						var ilJ: InteractiveLayer = InteractiveLayer(m_layerContainer.getChildAt(j));
 						if(ilJ.zOrder < ilI.zOrder) {
 							// swap Ith and Jth layer, we know that J > I
 							//trace('[InteractiveWidget.orderLayers] ... swapping ' + ilJ.name + ' with ' + ilI.name);
-							swapChildren(ilJ, ilI);
+							m_layerContainer.swapChildren(ilJ, ilI);
 						}
 					}
 				}
@@ -121,6 +144,9 @@ package com.iblsoft.flexiweather.widgets
             	//when user press Cancel on printing interactiveWidget, both sizes was NaN
             	return;
             }
+
+			m_layerContainer.width = width;
+			m_layerContainer.height = height;
 			
 			if(m_labelLayout.m_placementBitmap == null)
 				m_labelLayout.setBoundary(new Rectangle(0, 0, width, height)); 
@@ -165,8 +191,8 @@ package com.iblsoft.flexiweather.widgets
 
         protected function onAreaChanged(b_finalChange: Boolean): void
         {
-            for(var i: int = 0; i < numChildren; ++i) {
-            	var l: InteractiveLayer = InteractiveLayer(getChildAt(i));
+            for(var i: int = 0; i < m_layerContainer.numChildren; ++i) {
+            	var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getChildAt(i));
             	if(l.onAreaChanged(b_finalChange))
             		break;
             	if(!l.isDynamicPartInvalid())
@@ -200,8 +226,8 @@ package com.iblsoft.flexiweather.widgets
 
         protected function onMouseDown(event: MouseEvent): void
         {
-            for(var i: int = numChildren - 1; i >= 0; --i) {
-            	var l: InteractiveLayer = InteractiveLayer(getChildAt(i));
+            for(var i: int = m_layerContainer.numChildren - 1; i >= 0; --i) {
+            	var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getChildAt(i));
             	if(!l.enabled)
             		continue;
             	if(l.onMouseDown(event))
@@ -212,8 +238,8 @@ package com.iblsoft.flexiweather.widgets
 
         protected function onMouseUp(event: MouseEvent): void
         {
-            for(var i: int = numChildren - 1; i >= 0; --i) {
-            	var l: InteractiveLayer = InteractiveLayer(getChildAt(i));
+            for(var i: int = m_layerContainer.numChildren - 1; i >= 0; --i) {
+            	var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getChildAt(i));
             	if(!l.enabled)
             		continue;
             	if(l.onMouseUp(event))
@@ -224,8 +250,8 @@ package com.iblsoft.flexiweather.widgets
 
         protected function onMouseMove(event: MouseEvent): void
         {
-            for(var i: int = numChildren - 1; i >= 0; --i) {
-            	var l: InteractiveLayer = InteractiveLayer(getChildAt(i));
+            for(var i: int = m_layerContainer.numChildren - 1; i >= 0; --i) {
+            	var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getChildAt(i));
             	if(!l.enabled)
             		continue;
             	if(l.onMouseMove(event))
@@ -236,8 +262,8 @@ package com.iblsoft.flexiweather.widgets
 
         protected function onMouseWheel(event: MouseEvent): void
         {
-            for(var i: int = numChildren - 1; i >= 0; --i) {
-            	var l: InteractiveLayer = InteractiveLayer(getChildAt(i));
+            for(var i: int = m_layerContainer.numChildren - 1; i >= 0; --i) {
+            	var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getChildAt(i));
             	if(!l.enabled)
             		continue;
             	if(l.onMouseWheel(event))
@@ -248,8 +274,8 @@ package com.iblsoft.flexiweather.widgets
         
         protected function onMouseClick(event: MouseEvent): void
         {
-            for(var i: int = numChildren - 1; i >= 0; --i) {
-            	var l: InteractiveLayer = InteractiveLayer(getChildAt(i));
+            for(var i: int = m_layerContainer.numChildren - 1; i >= 0; --i) {
+            	var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getChildAt(i));
             	if(!l.enabled)
             		continue;
             	if(l.onMouseClick(event))
@@ -260,8 +286,8 @@ package com.iblsoft.flexiweather.widgets
 
         protected function onMouseDoubleClick(event: MouseEvent): void
         {
-            for(var i: int = numChildren - 1; i >= 0; --i) {
-            	var l: InteractiveLayer = InteractiveLayer(getChildAt(i));
+            for(var i: int = m_layerContainer.numChildren - 1; i >= 0; --i) {
+            	var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getChildAt(i));
             	if(!l.enabled)
             		continue;
             	if(l.onMouseDoubleClick(event))
@@ -272,8 +298,8 @@ package com.iblsoft.flexiweather.widgets
 
         protected function onMouseRollOver(event: MouseEvent): void
         {
-            for(var i: int = numChildren - 1; i >= 0; --i) {
-            	var l: InteractiveLayer = InteractiveLayer(getChildAt(i));
+            for(var i: int = m_layerContainer.numChildren - 1; i >= 0; --i) {
+            	var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getChildAt(i));
             	if(!l.enabled)
             		continue;
             	if(l.onMouseRollOver(event))
@@ -284,8 +310,8 @@ package com.iblsoft.flexiweather.widgets
 
         protected function onMouseRollOut(event: MouseEvent): void
         {
-            for(var i: int = numChildren - 1; i >= 0; --i) {
-            	var l: InteractiveLayer = InteractiveLayer(getChildAt(i));
+            for(var i: int = m_layerContainer.numChildren - 1; i >= 0; --i) {
+            	var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getChildAt(i));
             	if(!l.enabled)
             		continue;
             	if(l.onMouseRollOut(event))
@@ -309,8 +335,8 @@ package com.iblsoft.flexiweather.widgets
         private function afterDelayedResize(event: TimerEvent = null): void
         {
         	setViewBBox(m_viewBBox, true); // set the view bbox to update the aspects 
-            for(var i: int = 0; i < numChildren; ++i) {
-            	var l: InteractiveLayer = InteractiveLayer(getChildAt(i));
+            for(var i: int = 0; i < m_layerContainer.numChildren; ++i) {
+            	var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getChildAt(i));
             	l.width = width;
             	l.height = height;
             	l.onContainerSizeChanged();
@@ -323,8 +349,8 @@ package com.iblsoft.flexiweather.widgets
 		
 		private function postUserActionUpdate(): void
 		{
-			for(var i: int = 0; i < numChildren; ++i) {
-				var l: InteractiveLayer = InteractiveLayer(getChildAt(i));
+			for(var i: int = 0; i < m_layerContainer.numChildren; ++i) {
+				var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getChildAt(i));
 				if(l.isDynamicPartInvalid())
 					l.validateNow();
 			}
