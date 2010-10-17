@@ -103,6 +103,9 @@ package com.iblsoft.flexiweather.ogc.editable
 		public function fromGML(gml: XML): void
 		{}
 		
+		public function isInternal(): Boolean
+		{ return false; }
+
 		public function clone(): WFSFeatureEditable
 		{
 			var o: Object = this;
