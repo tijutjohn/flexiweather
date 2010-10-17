@@ -55,34 +55,41 @@ package com.iblsoft.flexiweather.ogc.editable
 			return createSmoothLineSegmentApproximation();
 		}
 
-		public function createStraightLineSegmentApproximation(): Array
+		public function createStraightLineSegmentApproximation(b_useCoordinates: Boolean = true): Array
 		{
 			var l: Array = [];
-			var cPrev: Coord = null;
 			var i_segment: uint = 0;
-			for each(var c: Coord in coordinates) {
+			var b_closed: Boolean = (this is IClosableCurve) && IClosableCurve(this).isCurveClosed();
+
+			var cPrev: Point = null;
+			var cFirst: Point = null;
+			// we use here, that Coord is derived from Point, and Coord.crs is not used
+			var a_coordinates: Array = b_useCoordinates ? coordinates : getPoints().toArray(); 
+			for each(var c: Point in a_coordinates) {
 				if(cPrev != null) {
 					l.push(new CurveLineSegment(i_segment,
 						cPrev.x, cPrev.y, c.x, c.y));
 				}
+				else
+					cFirst = c;
 				++i_segment;
 				cPrev = c;
 			} 
-			var b_closed: Boolean = (this is IClosableCurve) && IClosableCurve(this).isCurveClosed();
 			if(b_closed && cPrev != null) {
 				l.push(new CurveLineSegment(i_segment,
-					cPrev.x, cPrev.y, coordinates[0].x, coordinates[0].y));
+					cPrev.x, cPrev.y, cFirst.x, cFirst.y));
 			}
-			var segmentRenderer: CurveLineSegmentRenderer = new CurveLineSegmentRenderer();
-			CubicBezier.curveThroughPoints(segmentRenderer, coordinates);			
 			return l;
 		}
 
-		public function createSmoothLineSegmentApproximation(): Array
+		public function createSmoothLineSegmentApproximation(b_useCoordinates: Boolean = true): Array
 		{
 			var segmentRenderer: CurveLineSegmentRenderer = new CurveLineSegmentRenderer();
 			var b_closed: Boolean = (this is IClosableCurve) && IClosableCurve(this).isCurveClosed();
-			CubicBezier.curveThroughPoints(segmentRenderer, coordinates, b_closed);			
+			CubicBezier.curveThroughPoints(
+					segmentRenderer,
+					b_useCoordinates ? coordinates : getPoints().toArray(),
+					b_closed);			
 			return segmentRenderer.segments;
 		}
 
