@@ -17,7 +17,37 @@ package com.iblsoft.flexiweather.utils.geometry
 			this.x2 = x2;
 			this.y2 = y2;
 		}
+		
+		public static function fromPoints(s: Point, e: Point): LineSegment
+		{ return new LineSegment(s.x, s.y, e.x, e.y); }
 
+		/**
+		 * Returns intersection point of "this" and "other" line segment, or null
+		 * if it does not exist.
+		 */
+		public function intersectionWithLineSegment(
+			other: LineSegment): Point
+		{
+			var adx: Number = this.x2 - this.x1; // this direction vector 
+			var ady: Number = this.y2 - this.y1; 
+			var bdx: Number = other.x2 - other.x1; // other direction vector
+			var bdy: Number = other.y2 - other.y1;
+			var D: Number = adx * bdy - ady * bdx;
+			if(Math.abs(D) < 1e-6) // 0 - lines are parallel
+				return null;
+			var cdx: Number = this.x1 - other.x1; 
+			var cdy: Number = this.y1 - other.y1;
+			var s: Number = bdx * cdy - bdy * cdx;
+			if(s < 0 || s > D)
+				return null;
+			var t: Number = adx * cdy - ady * cdx;
+			if(t < 0 || t > D)
+				return null;
+			// intersectPt = a + u * (s/d); //or b + v * (t/d);
+			var r: Number = s/D;
+			return new Point(this.x1 + adx * r, this.y1 + ady * r); 
+		}   
+		
 		/**
 		 * Returns coordinates of closest point on the line segment.
 		 **/
@@ -52,7 +82,7 @@ package com.iblsoft.flexiweather.utils.geometry
 		 **/
 		public function minimumDistanceToLineSegment(other: LineSegment): Number
 		{
-			if(false) // TODO: check for intersection of two lines
+			if(intersectionWithLineSegment(other) != null)
 				return 0;
 			return Math.min(
 				distanceToPoint(other.x1, other.y1),
