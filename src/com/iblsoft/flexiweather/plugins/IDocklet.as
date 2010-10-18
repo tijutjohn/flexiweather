@@ -8,6 +8,7 @@ package com.iblsoft.flexiweather.plugins
 		function setDockletManager(docketManager: IDockletManager): void;
 
 		function getDocklet(s_id: String): UIComponent;
+		function canBeClosed(): Boolean;
 		function dockletIsOpening():void;
 		function dockletIsClosing():void;
 	}
