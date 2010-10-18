@@ -69,10 +69,10 @@ package com.iblsoft.flexiweather.ogc.editable
 				if(cPrev != null) {
 					l.push(new CurveLineSegment(i_segment,
 						cPrev.x, cPrev.y, c.x, c.y));
+					++i_segment;
 				}
 				else
 					cFirst = c;
-				++i_segment;
 				cPrev = c;
 			} 
 			if(b_closed && cPrev != null) {
