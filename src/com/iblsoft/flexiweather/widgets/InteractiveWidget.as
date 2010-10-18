@@ -198,7 +198,13 @@ package com.iblsoft.flexiweather.widgets
             	if(!l.isDynamicPartInvalid())
             		l.invalidateDynamicPart();
             }
+			m_labelLayout.setDirty();
         }
+		
+		internal function onLayerVisibilityChanged(layer: InteractiveLayer): void
+		{
+			m_labelLayout.setDirty();
+		}
         
         public function pointToCoord(x: Number, y: Number): Coord
         {

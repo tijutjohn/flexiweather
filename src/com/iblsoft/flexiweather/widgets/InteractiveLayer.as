@@ -34,6 +34,8 @@ package com.iblsoft.flexiweather.widgets
 			
 			var ile: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.VISIBILITY_CHANGED);
 			dispatchEvent(ile);
+			
+			container.onLayerVisibilityChanged(this);
 		}
 		
 		public function InteractiveLayer(container: InteractiveWidget)
