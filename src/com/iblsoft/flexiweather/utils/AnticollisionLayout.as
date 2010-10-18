@@ -8,12 +8,14 @@ package com.iblsoft.flexiweather.utils
 	import flash.display.DisplayObject;
 	import flash.display.Graphics;
 	import flash.display.Sprite;
+	import flash.events.Event;
 	import flash.events.TimerEvent;
 	import flash.geom.ColorTransform;
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.utils.Timer;
+	import flash.utils.getTimer;
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.UIComponent;
@@ -36,8 +38,9 @@ package com.iblsoft.flexiweather.utils
 	{
 		protected var m_boundaryRect: Rectangle;
 		public var m_placementBitmap: BitmapData; // HACK: change back to protected
-		protected var mb_dirty: Boolean = true;
-		protected var m_updateTimer: Timer;
+
+		protected var mi_lastUpdate: int = 0;
+		protected var mb_dirty: Boolean = false;
 		
 		protected var ma_layoutObjects: ArrayCollection = new ArrayCollection();
 		protected var m_anchorsLayer: Sprite = new Sprite();
@@ -48,10 +51,7 @@ package com.iblsoft.flexiweather.utils
 		public function AnticollisionLayout()
 		{
 			super();
-			m_updateTimer = new Timer(0, 1);
-			m_updateTimer.addEventListener(TimerEvent.TIMER_COMPLETE, onUpdateTimer, false, 0, true);
-			m_updateTimer.stop();
-			
+			addEventListener(Event.RENDER, onRender, false, 0, true); 
 			addChild(m_anchorsLayer);
 		}
 		
@@ -82,6 +82,7 @@ package com.iblsoft.flexiweather.utils
 				addChild(object);
 			var lo: LayoutObject = new LayoutObject(object, b_addAsChild, i_displacementMode);
 			lo.ma_objectsToAnchor = a_anchors;
+			lo.mb_manageVisibilityWithAnchors = a_anchors != null;
 			ma_layoutObjects.addItem(lo);
 		}
 		
@@ -138,8 +139,8 @@ package com.iblsoft.flexiweather.utils
 		
 		public function update(): void
 		{
-			mb_dirty = true;
-			m_updateTimer.stop();
+			mb_dirty = false;
+			mi_lastUpdate = getTimer();
 
 			var i_roundedWidth: uint = Math.round(m_boundaryRect.width + 0.9999999999);
 			var i_roundedHeight: uint = Math.round(m_boundaryRect.height + 0.9999999999);
@@ -154,20 +155,55 @@ package com.iblsoft.flexiweather.utils
 				m_placementBitmap.fillRect(new Rectangle(0, 0, i_roundedWidth, i_roundedHeight), 0x00FFFFFF);
 			}
 			
-			var lo: LayoutObject; 
-			// first pass - render nonmoveable objects
+			var lo: LayoutObject;
+			var loAnchored: LayoutObject;
+			var objectToAnchor: DisplayObject;
+			
+			// first pass - analyse current absolute visibility of objects
 			for each(lo in ma_layoutObjects) {
-				if(!lo.m_object.visible)
+				if(lo.mb_manageVisibilityWithAnchors)
+					lo.mb_visible = true;
+				else
+					lo.mb_visible = getAbsoluteVisibility(lo.m_object);
+				
+			}
+			
+			var b_change: Boolean = true;
+			while(b_change) {
+				b_change = false;
+				for each(lo in ma_layoutObjects) {
+					if(lo.ma_objectsToAnchor != null && lo.ma_objectsToAnchor.length > 0) {
+						for each(objectToAnchor in lo.ma_objectsToAnchor) {
+							loAnchored = getLayoutObjectFor(objectToAnchor);
+							if(loAnchored == null)
+								continue;
+							if(!loAnchored.mb_visible) {
+								if(lo.mb_visible) {
+									lo.mb_visible = false;
+									b_change = true;
+								}
+							}
+						}
+					}
+				}
+			} // while(b_change)
+			
+			// second pass - render nonmoveable objects
+			for each(lo in ma_layoutObjects) {
+				if(!lo.mb_visible)
 					continue;
 				if(lo.mi_displacementMode == DISPLACE_NOT_ALLOWED) {
 					drawObjectPlacement(lo, 0, 0);
 				}
 			}
-			// second pass
+
+			// third pass - displace & render other object
 			for each(lo in ma_layoutObjects) {
-				if(!lo.m_object.visible)
+				if(!lo.mb_visible)
 					continue;
 				if(lo.mi_displacementMode == DISPLACE_AUTOMATIC) {
+					if(lo.mb_visible != lo.m_object.visible)
+						lo.m_object.visible = lo.mb_visible; 
 					var f_dx: Number = 0;
 					var f_dy: Number = 0;
 					// get the bounds of object at it's reference (== original location)
@@ -214,13 +250,23 @@ package com.iblsoft.flexiweather.utils
 			var g: Graphics = m_anchorsLayer.graphics;
 			g.clear();
 			for each(lo in ma_layoutObjects) {
-				if(!lo.m_object.visible)
-					continue;
 				if(lo.ma_objectsToAnchor == null || lo.ma_objectsToAnchor.length == 0)
 					continue;
+
+				if(lo.mb_manageVisibilityWithAnchors)
+					lo.m_object.visible = lo.mb_visible;
+
+				if(!lo.mb_visible)
+					continue;
+
 				//if(lo.mi_displacementMode != DISPLACE_AUTOMATIC)
 				//	continue;
-				for each(var objectToAnchor: DisplayObject in lo.ma_objectsToAnchor) {
+				for each(objectToAnchor in lo.ma_objectsToAnchor) {
+					loAnchored = getLayoutObjectFor(objectToAnchor);
+					if(loAnchored == null)
+						continue;
+					if(!loAnchored.mb_visible)
+						continue;
 					var boundsFrom: Rectangle = lo.m_object.getBounds(this);
 					var boundsTo: Rectangle = objectToAnchor.getBounds(this);
 
@@ -262,11 +308,39 @@ package com.iblsoft.flexiweather.utils
 		
 		public function needsUpdate(): Boolean
 		{
-			return !mb_dirty;
+			return mb_dirty;
+		}
+		
+		public function setDirty(): void
+		{
+			mb_dirty = true;
 		}
 		
 		// helpers
-		public static function drawAnnotationAnchor(
+		protected function getAbsoluteVisibility(object: DisplayObject): Boolean
+		{
+			if(object == null)
+				return false;
+			// check if at least part of object is within m_boundaryRect
+			var bounds: Rectangle = object.getBounds(this);
+			if(bounds.right < m_boundaryRect.left)
+				return false;
+			if(bounds.left > m_boundaryRect.right)
+				return false;
+			if(bounds.bottom < m_boundaryRect.top)
+				return false;
+			if(bounds.top > m_boundaryRect.bottom)
+				return false;
+			// analyse chain of visibility flags
+			while(object != null) {
+				if(!object.visible)
+					return false;
+				object = object.parent;
+			}
+			return true;
+		}
+		
+		protected static function drawAnnotationAnchor(
 				graphics: Graphics,
 				f_x1: Number, f_y1: Number, f_x2: Number, f_y2: Number): void
 		{
@@ -347,17 +421,13 @@ package com.iblsoft.flexiweather.utils
 			return !b_hit;
 		}
 		
-		protected function setDirty(): void
+		protected function onRender(event: Event): void
 		{
-			mb_dirty = false;
-			m_updateTimer.reset();
-			m_updateTimer.start();
-		}
-		
-		protected function onUpdateTimer(event: TimerEvent): void
-		{
-			if(!mb_dirty)
-				update();
+			if(mb_dirty) {
+				if(getTimer() - mi_lastUpdate > 100) {
+					update();
+				}
+			}
 		}
 	}
 }
@@ -371,7 +441,10 @@ class LayoutObject
 	internal var mb_managedChild: Boolean;
 	internal var mi_displacementMode: uint;
 	internal var m_referenceLocation: Point;
+
 	internal var ma_objectsToAnchor: Array;
+	internal var mb_manageVisibilityWithAnchors: Boolean
+	internal var mb_visible: Boolean;
 	
 	function LayoutObject(
 			object: DisplayObject,
@@ -382,5 +455,6 @@ class LayoutObject
 		mb_managedChild = b_managedChild;
 		mi_displacementMode = i_displacementMode;
 		m_referenceLocation = new Point(object.x, object.y);
+		mb_manageVisibilityWithAnchors = false;
 	}
 }
