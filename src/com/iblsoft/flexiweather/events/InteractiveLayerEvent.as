@@ -9,6 +9,7 @@ package com.iblsoft.flexiweather.events
 	public class InteractiveLayerEvent extends Event
 	{
 		public  static const FEATURE_INFO_RECEIVED: String = 'featureInfoReceived';
+		public  static const FEATURES_IMPORTED: String = 'featuresImported';
 		public  static const VISIBILITY_CHANGED: String = 'visibilityChanged';
 		public  static const VISIBILITY_EFFECT_FINISHED: String = 'visibilityEffectFinished';
 		public  static const LAYER_ROLL_OVER: String = 'layerRollOver';
@@ -19,6 +20,7 @@ package com.iblsoft.flexiweather.events
 		public var interactiveLayer: InteractiveLayer;
 		public var point: Point;
 		public var area: Rectangle;
+		public var newFeaturesCount: int;
 		
 		public function InteractiveLayerEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false)
 		{
