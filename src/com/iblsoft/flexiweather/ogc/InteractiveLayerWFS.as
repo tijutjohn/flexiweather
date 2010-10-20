@@ -17,9 +17,6 @@ package com.iblsoft.flexiweather.ogc
 
 	public class InteractiveLayerWFS extends InteractiveLayer
 	{
-		public static const LAYER_DATA_LOADED: String = 'layerDataLoaded';
-		public static const LAYER_DATA_IMPORTED: String = 'layerDataImported';
-		
 		private var m_loader: UniURLLoader = new UniURLLoader();
 		private var ma_features: ArrayCollection = new ArrayCollection();
 		private var m_featuresContainer: Sprite = new Sprite();
@@ -223,7 +220,8 @@ package com.iblsoft.flexiweather.ogc
 				
 			createFeaturesFromXML( xml );
 			
-			dispatchEvent(new Event(LAYER_DATA_LOADED));
+			var importEvent: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.FEATURES_LOADED);
+			dispatchEvent(importEvent);
 		}
 		
 		public function importFeaturesFromXML( xml: XML): void
