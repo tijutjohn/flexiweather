@@ -91,7 +91,7 @@ package com.iblsoft.flexiweather.widgets
 		override protected function keyUpHandler(event:KeyboardEvent):void
 		{
 			super.keyUpHandler(event);
-			trace("TextAreaWithEnter onKeyUp: " + event.keyCode + " SHIFT: " + event.shiftKey);
+//			trace("TextAreaWithEnter onKeyUp: " + event.keyCode + " SHIFT: " + event.shiftKey);
 			
 			switch (event.keyCode)
 	        {
