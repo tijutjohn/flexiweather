@@ -73,6 +73,15 @@ package com.iblsoft.flexiweather.widgets
 			invalidateDisplayList();
 		}
 		
+		/**
+		 * Called by InteractiveWidget when layer is removed from it.
+		 * This method should implement cleanup of any side effects of the layer out of the
+		 * layer's graphics scope (for example use of labelLayout, created UI components etc.)
+		 **/ 
+		public function destroy(): void
+		{
+		}
+
 		public function isDynamicPartInvalid(): Boolean
 		{ return mb_dynamicPartInvalid; }
 		

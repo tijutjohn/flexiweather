@@ -126,14 +126,24 @@ package com.iblsoft.flexiweather.ogc
 					if(currFeature.internalFeatureId == s_internalId)
 					{
 						m_featuresContainer.removeChildAt(i);
-						return;
+						break;
 					} 
 				}
 			}
 			
 			onFeatureRemoved(feature);
-			feature.setMaster(null);
 			feature.cleanup();
+		}
+
+		public override function destroy(): void
+		{
+			super.destroy();
+			var i_count: int = m_featuresContainer.numChildren;
+			for(var i:int = 0; i < i_count; i++)
+			{
+				var feature: WFSFeatureBase = m_featuresContainer.getChildAt(i) as WFSFeatureBase;
+				feature.cleanup();
+			}
 		}
 
 		public function getFeatureByInternalId(id: String): WFSFeatureBase
@@ -144,7 +154,7 @@ package com.iblsoft.flexiweather.ogc
 				var currFeature: WFSFeatureBase = m_featuresContainer.getChildAt(i) as WFSFeatureBase;
 				if(currFeature.internalFeatureId == id)
 				{
-					return currFeature;
+					return currFeature;	
 				} 
 			}
 			return null;

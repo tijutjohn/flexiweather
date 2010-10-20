@@ -100,16 +100,22 @@ package com.iblsoft.flexiweather.widgets
 			orderLayers();
 		}
 
-		public function removeLayer(l: InteractiveLayer): void
+		public function removeLayer(l: InteractiveLayer, b_destroy: Boolean = false): void
 		{
-			if(l.parent == m_layerContainer)
+			if(l.parent == m_layerContainer) {
+				l.destroy();
 				m_layerContainer.removeChild(l);
+			}
 		}
 		
 		public function removeAllLayers(): void
 		{
-			while(m_layerContainer.numChildren)
-				m_layerContainer.getChildAt(m_layerContainer.numChildren - 1);
+			while(m_layerContainer.numChildren) {
+				var i: int = m_layerContainer.numChildren - 1;
+				var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getChildAt(i));
+				l.destroy();
+				m_layerContainer.removeChildAt(i);
+			}
 		}
 		
 		public function orderLayers(): void
