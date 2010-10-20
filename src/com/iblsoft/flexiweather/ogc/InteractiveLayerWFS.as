@@ -134,16 +134,23 @@ package com.iblsoft.flexiweather.ogc
 			onFeatureRemoved(feature);
 			feature.cleanup();
 		}
+		
+		public function removeAllFeatures(): void
+		{
+			var i_count: int = m_featuresContainer.numChildren;
+			for(var i: int = i_count - 1; i >= 0; --i)
+			{
+				var feature: WFSFeatureBase = m_featuresContainer.getChildAt(i) as WFSFeatureBase;
+				onFeatureRemoved(feature);
+				feature.cleanup();
+				m_featuresContainer.removeChildAt(i);
+			}
+		}
 
 		public override function destroy(): void
 		{
+			removeAllFeatures();
 			super.destroy();
-			var i_count: int = m_featuresContainer.numChildren;
-			for(var i:int = 0; i < i_count; i++)
-			{
-				var feature: WFSFeatureBase = m_featuresContainer.getChildAt(i) as WFSFeatureBase;
-				feature.cleanup();
-			}
 		}
 
 		public function getFeatureByInternalId(id: String): WFSFeatureBase
