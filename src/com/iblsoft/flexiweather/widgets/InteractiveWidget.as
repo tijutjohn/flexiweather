@@ -102,7 +102,7 @@ package com.iblsoft.flexiweather.widgets
 
 		public function removeLayer(l: InteractiveLayer): void
 		{
-			if(l.parent == this)
+			if(l.parent == m_layerContainer)
 				m_layerContainer.removeChild(l);
 		}
 		
