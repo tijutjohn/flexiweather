@@ -49,12 +49,14 @@ package com.iblsoft.flexiweather.ogc
 		{
 			if(mb_pointsDirty) {
 				mb_pointsDirty = false;
-				var iw: InteractiveWidget = m_master.container;
 				m_points = new ArrayCollection();
-				for(var i: uint = 0; i < m_coordinates.length; ++i) {
-					var c: Coord = m_coordinates[i];
-					var pt: Point = iw.coordToPoint(c);
-					m_points.addItem(pt);
+				if(m_coordinates.length) {
+					var iw: InteractiveWidget = m_master.container;
+					for(var i: uint = 0; i < m_coordinates.length; ++i) {
+						var c: Coord = m_coordinates[i];
+						var pt: Point = iw.coordToPoint(c);
+						m_points.addItem(pt);
+					}
 				}
 			}
 		}
