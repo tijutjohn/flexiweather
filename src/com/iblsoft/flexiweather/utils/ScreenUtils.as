@@ -47,13 +47,16 @@ package com.iblsoft.flexiweather.utils
 
 		public static function setEnabledWithDim(o: UIComponent, b_enabled: Boolean): void
 		{
-			if(o.enabled != b_enabled) {
-				o.enabled = b_enabled;
-				var l_filters: Array = o.filters;
-				if(!b_enabled)
-					BitmapFilterUtils.addFilterTo(o, sm_dimFilter);
-				else
-					BitmapFilterUtils.removeFilterFrom(o, sm_dimFilter);
+			if (o)
+			{
+				if(o.enabled != b_enabled) {
+					o.enabled = b_enabled;
+					var l_filters: Array = o.filters;
+					if(!b_enabled)
+						BitmapFilterUtils.addFilterTo(o, sm_dimFilter);
+					else
+						BitmapFilterUtils.removeFilterFrom(o, sm_dimFilter);
+				}
 			}
 		}
 	}
