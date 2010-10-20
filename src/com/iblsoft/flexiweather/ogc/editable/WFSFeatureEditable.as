@@ -4,6 +4,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.ogc.WFSFeatureBase;
 	
 	import flash.display.Sprite;
+	import flash.events.KeyboardEvent;
 	import flash.filters.GlowFilter;
 	import flash.geom.Point;
 	
@@ -249,7 +250,10 @@ package com.iblsoft.flexiweather.ogc.editable
 				i_outterGlowColor = 0xffff00;
 			filters = [ new GlowFilter(i_innerGlowColor, 1, 6, 6, 2), new GlowFilter(i_outterGlowColor, 1, 8, 8, 4) ];
 		}
-
+		
+		public function onKeyDown(evt: KeyboardEvent): Boolean
+		{ return false; }
+		
 		public function set selected(b: Boolean): void
 		{
 			if(mb_selected != b) {

@@ -141,5 +141,17 @@ package com.iblsoft.flexiweather.ogc.editable
 		
 		public function getFeature(): WFSFeatureEditable
 		{ return m_feature; }
+		
+		public function get selected(): Boolean
+		{
+			return(mb_selected);
+		}
+		
+		public function set selected(val: Boolean): void
+		{
+			mb_selected = val;
+			
+			update();
+		}
 	}
 }
