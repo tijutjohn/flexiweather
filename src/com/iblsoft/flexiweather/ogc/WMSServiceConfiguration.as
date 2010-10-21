@@ -92,7 +92,10 @@ package com.iblsoft.flexiweather.ogc
 
 		protected function onCapabilitiesLoadFailed(event: UniURLLoaderEvent): void
 		{
-			m_capabilitiesLoadJob.finish();
+			if (m_capabilitiesLoadJob)
+			{
+				m_capabilitiesLoadJob.finish();
+			}
 			m_capabilitiesLoadJob = null;
 			// keep old m_capabilities
 		}
