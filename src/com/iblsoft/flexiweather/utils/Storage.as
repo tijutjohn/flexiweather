@@ -19,19 +19,19 @@ package com.iblsoft.flexiweather.utils
 		{ __serialize(s_key, NONINDEXED, o); }
 
 		public final function serializeString(s_key: String, s: String, s_default: String = null): String
-		{ return __serializeString(s_key, NONINDEXED, s); }
+		{ return __serializeString(s_key, NONINDEXED, s, s_default); }
 
 		public final function serializeInt(s_key: String, i: int, i_default: int = 0): int
-		{ return __serializeInt(s_key, NONINDEXED, i); }
+		{ return __serializeInt(s_key, NONINDEXED, i, i_default); }
 
 		public final function serializeUInt(s_key: String, i: uint, i_default: uint = 0): uint
-		{ return __serializeUInt(s_key, NONINDEXED, i); }
+		{ return __serializeUInt(s_key, NONINDEXED, i, i_default); }
 
 		public final function serializeBool(s_key: String, b: Boolean, b_default: Boolean = false): Boolean
-		{ return __serializeBool(s_key, NONINDEXED, b); }
+		{ return __serializeBool(s_key, NONINDEXED, b, b_default); }
 
 		public final function serializeNumber(s_key: String, f: Number, f_default: Number = NaN): Number
-		{ return __serializeNumber(s_key, NONINDEXED, f); }
+		{ return __serializeNumber(s_key, NONINDEXED, f, f_default); }
 
 		public final function serializeNonpersistentArrayCollection(
 				s_key: String, a: ArrayCollection, c: Class): void
