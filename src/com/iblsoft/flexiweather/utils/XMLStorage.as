@@ -167,12 +167,15 @@ package com.iblsoft.flexiweather.utils
 			if(i_index == NONINDEXED) {
 				if(!isCurrentRoot()) {
 					s_key = fixAttributeKey(s_key, i_index);
-					return String(m_current[s_key]);
+					return s_key in m_current ? String(m_current[s_key]) : null;
 				}
 				i_index = 0;
 			}
 			var ch: XMLList = m_current.elements(s_key);
-			return String(ch[i_index]);
+			if(ch[i_index])
+				return String(ch[i_index]);
+			else
+				return null;
 		}
 
 		private function fixAttributeKey(s_key: String, i_index: uint): String
