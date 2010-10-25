@@ -26,6 +26,7 @@ package com.iblsoft.flexiweather.ogc
 	import flash.utils.Dictionary;
 	import flash.utils.Timer;
 	
+	import mx.binding.utils.BindingUtils;
 	import mx.containers.Canvas;
 	import mx.controls.Image;
 	import mx.core.UIComponent;
@@ -92,23 +93,40 @@ package com.iblsoft.flexiweather.ogc
 		private var fadeIn: Fade;
 		private var fadeOut: Fade;
 		
+		[Bindable]
+		public var alphaBackup: Number = 1;
 		private function createEffects(): void
 		{
 			fadeIn = new Fade(this);
 			fadeIn.alphaFrom = 0;
-			fadeIn.alphaTo = 1;
+			BindingUtils.bindProperty(fadeIn, 'alphaTo', this, "alphaBackup");
 			fadeIn.duration = 300;
 			
 			fadeOut = new Fade(this);
-			fadeOut.alphaFrom = 1;
 			fadeOut.alphaTo = 0;
+			BindingUtils.bindProperty(fadeOut, 'alphaFrom', this, "alpha");
 			fadeOut.duration = 300;
 			
 			fadeIn.addEventListener(EffectEvent.EFFECT_END, onEffectEnd);
+			fadeIn.addEventListener(EffectEvent.EFFECT_START, onEffectFadeInStart);
+			fadeOut.addEventListener(EffectEvent.EFFECT_START, onEffectFadeOutStart);
 			fadeOut.addEventListener(EffectEvent.EFFECT_END, onEffectEnd);
 			
 		}
 		
+		private function onEffectFadeInStart(event: EffectEvent): void
+		{
+//			trace("onEffectFadeInStart 1 _alphaBackup: " + _alphaBackup + " fadeIn.alphaTo: " + fadeIn.alphaTo);
+//			fadeIn.alphaTo = _alphaBackup;
+			trace("onEffectFadeInStart 2 alphaBackup: " + alphaBackup + " fadeIn.alphaTo: " + fadeIn.alphaTo);
+		}
+		private function onEffectFadeOutStart(event: EffectEvent): void
+		{
+//			trace("onEffectFadeOutStart 1 _alphaBackup: " + _alphaBackup + " fadeIn.alphaTo: " + fadeOut.alphaFrom);
+//			fadeOut.alphaFrom = alpha
+			alphaBackup = alpha;
+			trace("onEffectFadeOutStart 2 alphaBackup: " + alphaBackup + " fadeIn.alphaTo: " + fadeOut.alphaFrom);
+		}
 		private function onEffectEnd(event: EffectEvent): void
 		{
 			callLater(delayedEffectEnd);
