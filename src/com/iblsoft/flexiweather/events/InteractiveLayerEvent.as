@@ -5,6 +5,8 @@ package com.iblsoft.flexiweather.events
 	import flash.events.Event;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
+	
+	import mx.collections.ArrayCollection;
 
 	public class InteractiveLayerEvent extends Event
 	{
@@ -22,6 +24,7 @@ package com.iblsoft.flexiweather.events
 		public var point: Point;
 		public var area: Rectangle;
 		public var newFeaturesCount: int;
+		public var newFeatures: ArrayCollection;
 		
 		public function InteractiveLayerEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false)
 		{

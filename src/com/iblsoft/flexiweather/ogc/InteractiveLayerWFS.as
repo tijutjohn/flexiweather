@@ -9,7 +9,6 @@ package com.iblsoft.flexiweather.ogc
 	
 	import flash.display.Graphics;
 	import flash.display.Sprite;
-	import flash.events.Event;
 	import flash.net.URLRequest;
 	import flash.net.URLVariables;
 	
@@ -45,7 +44,7 @@ package com.iblsoft.flexiweather.ogc
 
 		public function importData(serviceURL: String, run: String, validity: String) : void
 		{
-			var url: URLRequest = new URLRequest(ms_serviceURL);
+			var url: URLRequest = new URLRequest(serviceURL);
 			
 			m_loader.addEventListener(UniURLLoader.DATA_LOADED, onImportLoaded);
 			
@@ -219,10 +218,11 @@ package com.iblsoft.flexiweather.ogc
 				return; // TODO: do some error handling
 				
 			var lenBefore: int = ma_features.length
-			importFeaturesFromXML( xml );
+			var newFeatures: ArrayCollection = importFeaturesFromXML( xml );
 			
 			var importEvent: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.FEATURES_IMPORTED);
 			importEvent.newFeaturesCount = ma_features.length - lenBefore;
+			importEvent.newFeatures = newFeatures;
 			dispatchEvent(importEvent);
 		}
 		
@@ -241,11 +241,11 @@ package com.iblsoft.flexiweather.ogc
 			dispatchEvent(importEvent);
 		}
 		
-		public function importFeaturesFromXML( xml: XML): void
+		public function importFeaturesFromXML( xml: XML): ArrayCollection
 		{
 			trace("importFeaturesFromXML");
 			//do same as load features, just create them
-			createFeaturesFromXML(xml, true);
+			return createFeaturesFromXML(xml, true);
 		}
 		
 		/**
@@ -254,7 +254,7 @@ package com.iblsoft.flexiweather.ogc
 		 * @param bRemoveOld Boolean flag if old features must be removed (Load = true, Import = false)
 		 * 
 		 */		
-		public function createFeaturesFromXML( xml: XML, bIsImport: Boolean = false): void
+		public function createFeaturesFromXML( xml: XML, bIsImport: Boolean = false): ArrayCollection
 		{
 			var bRemoveOld: Boolean = true;
 			if (bIsImport)
@@ -289,6 +289,8 @@ package com.iblsoft.flexiweather.ogc
 				ma_features.addAll(a_features);
 			}
 			invalidateDynamicPart();
+			
+			return a_features;
 		}
 		
 		
