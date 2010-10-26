@@ -136,6 +136,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			var f: WFSFeatureEditable = new c(
 					this.ms_namespace, this.ms_typeName, null);
 			var xml: XML = <Feature/>; 
+			//var xml: XML = <Feature xmlns="http://www.iblsoft.com/wfs" xmlns:wfs="http://www.opengis.net/wfs" xmlns:gml="http://www.opengis.net/gml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" />; 
 			this.toInsertGML(xml);
 			f.fromGML(xml);
 			return f;

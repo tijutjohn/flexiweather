@@ -2,9 +2,7 @@ package com.iblsoft.flexiweather.symbology
 {
 	import com.iblsoft.flexiweather.utils.CubicBezier;
 	import com.iblsoft.flexiweather.utils.DistanceMarkingCurveRenderer;
-	import com.iblsoft.flexiweather.utils.GraphicsCurveRenderer;
 	
-	import flash.display.BitmapData;
 	import flash.display.CapsStyle;
 	import flash.display.Graphics;
 	import flash.display.LineScaleMode;
@@ -19,6 +17,7 @@ package com.iblsoft.flexiweather.symbology
 		public static const STYLE_DASHDOTDOT: String = "DashDotDot";
 		public static const STYLE_HORIZONTAL_LINES: String = "HorizontalLines";
 		public static const STYLE_VERTICAL_LINES: String = "VerticalLines";
+		public static const STYLE_ICING_STYLE: String = "IcingStyle";
 
 		// style variables
 		protected var mf_thickness: Number;
@@ -46,6 +45,8 @@ package com.iblsoft.flexiweather.symbology
 		
 		protected var mf_lastPaternRatio: Number = 0;
 		
+		protected var mp_fIcingPoint: Point;
+		
 		public function set thickness(value: Number): void
 		{
 			mf_thickness = value;
@@ -69,6 +70,11 @@ package com.iblsoft.flexiweather.symbology
 			
 			switch(ms_style){
 				case StyledLineCurveRenderer.STYLE_DASHED:
+					mf_markStep = mf_thickness * 2;
+					mf_paternStep = mf_thickness * 2;
+					ma_paternDef = new Array(1, 1, 1, 1, 1, 0, 0, 0, 0, 0);
+					break;
+				case StyledLineCurveRenderer.STYLE_ICING_STYLE:
 					mf_markStep = mf_thickness * 2;
 					mf_paternStep = mf_thickness * 2;
 					ma_paternDef = new Array(1, 1, 1, 1, 1, 0, 0, 0, 0, 0);
@@ -193,6 +199,38 @@ package com.iblsoft.flexiweather.symbology
 					setDefaultLineStyle(false);
 					m_graphics.lineTo(f_x, f_y);
 				}
+				break;
+			case StyledLineCurveRenderer.STYLE_ICING_STYLE:
+				if(mi_counter % 6 < 4) {
+					setDefaultLineStyle();
+					m_graphics.lineTo(f_x, f_y);
+				}
+				else {
+					setDefaultLineStyle(false);
+					m_graphics.lineTo(f_x, f_y);
+				}
+				
+				trace('mi_counter:' + mi_counter);
+				
+				if ((mi_counter % 6) == 2){
+					mp_fIcingPoint = new Point(f_x, f_y);
+				} else if ((mi_counter % 6) == 3){
+					// CREATE NORMAL LINE
+					var ePoint: Point = new Point(f_x, f_y);
+					var vect: Point = ePoint.subtract(mp_fIcingPoint);
+					var cPoint: Point = mp_fIcingPoint.clone();
+					cPoint.x = cPoint.x + (vect.x / 2); 
+					cPoint.y = cPoint.y + (vect.y / 2);
+					
+					vect.normalize(1);
+					vect = normalVector(vect);
+					
+					m_graphics.moveTo(cPoint.x, cPoint.y);
+					m_graphics.lineTo(cPoint.x + (vect.x * 2), cPoint.y + (vect.y * 2));
+					
+					m_graphics.moveTo(f_x, f_y);
+				}
+				
 				break;
 			
 			/*case StyledLineCurveRenderer.STYLE_DOTTED:
