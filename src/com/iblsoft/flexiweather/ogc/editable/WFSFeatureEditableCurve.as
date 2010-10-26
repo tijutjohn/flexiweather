@@ -142,7 +142,7 @@ package com.iblsoft.flexiweather.ogc.editable
 
 		public function onMouseDown(pt: Point): Boolean
 		{
-			if(!selected)
+			if(!selected || justSelectable)
 				return false;
 
 			// snap to existing MoveablePoint

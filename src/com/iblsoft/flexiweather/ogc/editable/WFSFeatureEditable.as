@@ -17,6 +17,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		protected var m_editableSprite: Sprite = new Sprite();
 		protected var ml_movablePoints: Array = [];
 		protected var mi_editMode: int = WFSFeatureEditableMode.ADD_POINTS_WITH_MOVE_POINTS;
+		protected var mn_justSelectable: Boolean;
 		
 		protected var mb_useMonochrome: Boolean = false;
 		protected var mi_monochromeColor: uint = 0x333333;
@@ -28,7 +29,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		public function WFSFeatureEditable(s_namespace: String, s_typeName: String, s_featureId: String)
 		{
 			super(s_namespace, s_typeName, s_featureId);
-			m_editableSprite.visible = false;
+			editableSpriteVisible(false);
 		}
 		
 		override public function setMaster(master: InteractiveLayerWFS): void
@@ -73,7 +74,16 @@ package com.iblsoft.flexiweather.ogc.editable
 			while(m_points.length < ml_movablePoints.length) {
 				ml_movablePoints.pop();
 			}
-			m_editableSprite.visible = mb_selected;
+			editableSpriteVisible(mb_selected);
+			
+				
+		}
+		
+		private function editableSpriteVisible(bool: Boolean): void
+		{
+			m_editableSprite.visible = bool;
+			if (justSelectable)
+				m_editableSprite.visible = false;
 		}
 
 		override public function cleanup(): void
@@ -235,7 +245,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		protected function updateGlow(): void
 		{
 			if(mb_selected != m_editableSprite.visible) {
-				m_editableSprite.visible = mb_selected;
+				editableSpriteVisible(mb_selected);
 			}
 			if(!mb_highlighted && !mb_selected) {
 				filters = null; // [ new GlowFilter(0xff0000, 1, 8, 8, 4) ];
@@ -271,6 +281,14 @@ package com.iblsoft.flexiweather.ogc.editable
 		public function get modified(): Boolean
 		{ return mb_modified; }
 
+		public function set justSelectable(v: Boolean): void
+		{
+			mn_justSelectable = v;
+		}
+		
+		public function get justSelectable(): Boolean
+		{ return mn_justSelectable; }
+		
 		public function set editMode(v: int): void
 		{
 			mi_editMode = v;
