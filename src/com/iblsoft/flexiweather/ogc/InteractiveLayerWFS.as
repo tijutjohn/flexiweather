@@ -140,9 +140,19 @@ package com.iblsoft.flexiweather.ogc
 			for(var i: int = i_count - 1; i >= 0; --i)
 			{
 				var feature: WFSFeatureBase = m_featuresContainer.getChildAt(i) as WFSFeatureBase;
+				var id: int = ma_features.getItemIndex(feature);
+				if (id >= 0)
+				{
+					ma_features.removeItemAt(id);
+				}
 				onFeatureRemoved(feature);
 				feature.cleanup();
 				m_featuresContainer.removeChildAt(i);
+			}
+			if (ma_features.length > 0)
+			{
+				trace("after removing alll features, there are still features in ma_features: " + ma_features.length + " ["+this+"]")
+				ma_features.removeAll();
 			}
 		}
 
@@ -370,5 +380,8 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function get monochromeColor(): uint
 		{ return mi_monochromeColor; }
+		
+		public function get featuresContainer(): Sprite
+		{ return m_featuresContainer; }
 	}
 }
