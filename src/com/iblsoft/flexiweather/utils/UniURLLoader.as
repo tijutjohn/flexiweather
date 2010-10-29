@@ -9,6 +9,7 @@ package com.iblsoft.flexiweather.utils
 	import flash.events.SecurityErrorEvent;
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
+	import flash.net.navigateToURL;
 	import flash.utils.ByteArray;
 	import flash.utils.Dictionary;
 	
@@ -54,6 +55,11 @@ package com.iblsoft.flexiweather.utils
 		
 		public function UniURLLoader()
 		{}
+		
+		public static function navigateToURL(request: URLRequest): void
+		{
+			flash.net.navigateToURL(new URLRequest(UniURLLoader.fromBaseURL(request.url)));
+		}
 		
 		public static function fromBaseURL(url: String): String
 		{
