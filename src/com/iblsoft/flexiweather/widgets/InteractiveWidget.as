@@ -7,7 +7,6 @@ package com.iblsoft.flexiweather.widgets
 	
 	import flash.display.DisplayObject;
 	import flash.display.GradientType;
-	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
@@ -17,7 +16,6 @@ package com.iblsoft.flexiweather.widgets
 	import flash.utils.Timer;
 	
 	import mx.core.Container;
-	import mx.core.UIComponent;
 	import mx.events.ResizeEvent;
 
 	public class InteractiveWidget extends Container
@@ -32,6 +30,11 @@ package com.iblsoft.flexiweather.widgets
 		private var m_resizeTimer: Timer;
 		
 		private var m_layerContainer: Container = new Container();
+		[Bindable]
+		public function get layerContainer(): Container
+		{
+			return m_layerContainer;
+		}
 		private var m_labelLayout: AnticollisionLayout = new AnticollisionLayout();
 
 		public function InteractiveWidget() {
