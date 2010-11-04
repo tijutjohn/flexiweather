@@ -3,6 +3,8 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.utils.Duration;
 	import com.iblsoft.flexiweather.utils.ISO8601Parser;
 	
+	import flash.utils.getTimer;
+	
 	public class WMSDimension
 	{
 		internal var ms_name: String;
@@ -41,13 +43,25 @@ package com.iblsoft.flexiweather.ogc
 
 		public function loadExtent(xml: XML, wms: Namespace, version: Version): void
 		{
+//			var time: Number = getTimer();
+			
 			var s: String = String(xml);
+			var arr: Array = s.split(",");
+			
+//			trace("loadExtent " + xml.@name + " default: " + xml.@default + " items: " + arr.length);
+//			if (arr.length > 2000)
+//			{
+//				trace("stop");
+//			}
 			ms_default = xml.@default;
 			// TODO: strip white spaces
 			ma_values = [];
-			for each(var s_value: String in s.split(",")) {
+			for each(var s_value: String in arr) {
 				stringValueToObjects(ma_values, s_value, ms_units);
+				//trace("/t WMSDImension loadExtent TIME ("+s_value+"): " + (getTimer() - time) + " ms");
 			}
+			
+//			trace("WMSDImension loadExtent TIME: " + (getTimer() - time) + " ms");
 		}
 		
 		protected static function stringValueToObjects(
