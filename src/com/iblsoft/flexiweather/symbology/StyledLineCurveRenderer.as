@@ -15,15 +15,22 @@ package com.iblsoft.flexiweather.symbology
 		public static const STYLE_DOTTED: String = "Dotted";
 		public static const STYLE_DASHDOT: String = "DashDot";
 		public static const STYLE_DASHDOTDOT: String = "DashDotDot";
-		public static const STYLE_HORIZONTAL_LINES: String = "HorizontalLines";
-		public static const STYLE_VERTICAL_LINES: String = "VerticalLines";
 		public static const STYLE_ICING_STYLE: String = "IcingStyle";
+		
+		public static const FILL_STYLE_NONE: String = 'None';
+		public static const FILL_STYLE_SOLID: String = 'Solid';
+		public static const FILL_STYLE_HORIZONTAL_LINES: String = 'HorizontalLines';
+		public static const FILL_STYLE_VERTICAL_LINES: String = 'VerticalLines';
+		public static const FILL_STYLE_CROSING_LINES: String = 'CrossingLines';
 
 		// style variables
 		protected var mf_thickness: Number;
 		protected var mi_color: uint;
 		protected var mf_alpha: Number;
 		protected var ms_style: String;
+		
+		protected var ms_filLStyle: String;
+		protected var mi_fillColor: uint;
 	
 		// runtime variables
 		//protected var mf_currentDistance: Number = 0; 
@@ -59,12 +66,14 @@ package com.iblsoft.flexiweather.symbology
 		
 		function StyledLineCurveRenderer(g: Graphics,
 			f_thickness: Number, i_color: uint, f_alpha: Number,
-			s_style: String)
+			s_style: String, s_fillStyle: String = 'None', i_fillColor: uint = 0x000000)
 		{
 			super(g);
 			mi_color = i_color;
 			mf_alpha = f_alpha;
 			ms_style = s_style;
+			ms_filLStyle = s_fillStyle;
+			mi_fillColor = i_fillColor;
 			
 			thickness = f_thickness;
 			
@@ -85,13 +94,13 @@ package com.iblsoft.flexiweather.symbology
 					ma_paternDef = new Array(1, 1, 0, 0);
 					break;
 				case StyledLineCurveRenderer.STYLE_DASHDOT:
-					mf_markStep = mf_thickness * 6;
-					mf_paternStep = mf_thickness * 11;
+					mf_markStep = mf_thickness * 2;
+					mf_paternStep = mf_thickness * 2;
 					ma_paternDef = new Array(1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0);
 					break;
 				case StyledLineCurveRenderer.STYLE_DASHDOTDOT:
-					mf_markStep = mf_thickness * 6;
-					mf_paternStep = mf_thickness * 15;
+					mf_markStep = mf_thickness * 2;
+					mf_paternStep = mf_thickness * 2;
 					ma_paternDef = new Array(1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0);
 					break;
 				default:
@@ -268,8 +277,43 @@ package com.iblsoft.flexiweather.symbology
 			*/
 			
 			case StyledLineCurveRenderer.STYLE_DASHDOT:
+				var dashDotOffset: int = mi_counter % 8; 
+				if (dashDotOffset < 3) {
+					setDefaultLineStyle();
+					m_graphics.lineTo(f_x, f_y);
+				} else if ((dashDotOffset >= 3) && (dashDotOffset < 5)){
+					setDefaultLineStyle(false);
+					m_graphics.lineTo(f_x, f_y);
+				} else if ((dashDotOffset >= 5) && (dashDotOffset < 6)){
+					setDefaultLineStyle();
+					m_graphics.lineTo(f_x, f_y);
+				} else {
+					setDefaultLineStyle(false);
+					m_graphics.lineTo(f_x, f_y);
+				}
+				
+				break;
 			case StyledLineCurveRenderer.STYLE_DASHDOTDOT:
-				drawPatern(f_x, f_y, 0, 1);
+				var dashDotOffset: int = mi_counter % 11; 
+				if (dashDotOffset < 3) {
+					setDefaultLineStyle();
+					m_graphics.lineTo(f_x, f_y);
+				} else if ((dashDotOffset >= 3) && (dashDotOffset < 5)){
+					setDefaultLineStyle(false);
+					m_graphics.lineTo(f_x, f_y);
+				} else if ((dashDotOffset >= 5) && (dashDotOffset < 6)){
+					setDefaultLineStyle();
+					m_graphics.lineTo(f_x, f_y);
+				} else if ((dashDotOffset >= 6) && (dashDotOffset < 8)){
+					setDefaultLineStyle(false);
+					m_graphics.lineTo(f_x, f_y);
+				} else if ((dashDotOffset >= 8) && (dashDotOffset < 9)){
+					setDefaultLineStyle();
+					m_graphics.lineTo(f_x, f_y);
+				} else {
+					setDefaultLineStyle(false);
+					m_graphics.lineTo(f_x, f_y);
+				}
 				
 				break;
 			}

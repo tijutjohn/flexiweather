@@ -526,15 +526,26 @@ package com.iblsoft.flexiweather.utils
 				_points: Array, 
 				_closed: Boolean = false, 
 				_drawHiddenHitMask: Boolean = false,  // PREPARED PARAMETER FOR DRAWING HIT MASK AREA
-				_step: Number = 0.005): Array
+				_step: Number = 0.005,
+				_useSegmentation: Boolean = false): Array
 		{
 			var mPoints: Array = CubicBezier.calculateHermitSpline(_points, _closed, _step);
+			
+			var actSegment: int = 0;
 			
 			g.start(mPoints[0].x, mPoints[0].y);
 			g.moveTo(mPoints[0].x, mPoints[0].y);
 			
 			for (var i: int = 1; i < mPoints.length; i++){
 				g.lineTo(mPoints[i].x, mPoints[i].y);
+				
+				if ((actSegment != SPoint(mPoints[i]).segmentIndex) && (_useSegmentation)){
+					g.finish(mPoints[i].x, mPoints[i].y);
+					g.start(mPoints[i].x, mPoints[i].y);
+					g.moveTo(mPoints[i].x, mPoints[i].y);
+					actSegment = SPoint(mPoints[i]).segmentIndex;
+					trace(SPoint(mPoints[i]).segmentIndex);
+				}
 			}
 			
 			g.finish(mPoints[mPoints.length - 1].x, mPoints[mPoints.length - 1].y);
@@ -556,6 +567,7 @@ package com.iblsoft.flexiweather.utils
 			var nMPoint: MPoint;
 			for (var i: int = 0; i < _points.length; i++){
 				nMPoint = new MPoint(Point(_points[i]).clone());
+				nMPoint.segmentIndex = i;
 				
 				usePoints.push(nMPoint);
 				
@@ -564,6 +576,7 @@ package com.iblsoft.flexiweather.utils
 			
 			if (_closed){
 				nMPoint = new MPoint(Point(_points[0]).clone());
+				nMPoint.segmentIndex = _points.length;
 				
 				usePoints.push(nMPoint);
 			}
@@ -598,6 +611,11 @@ package com.iblsoft.flexiweather.utils
 			var x0: Number;
 			var y0: Number;
 			
+			var tmpRetPoint: SPoint = new SPoint(MPoint(usePoints[0]).point.x, MPoint(usePoints[0]).point.y);
+			
+			//retPoints.push(MPoint(usePoints[0]).point.clone());
+			retPoints.push(tmpRetPoint.clone());
+			
 			for (i = 0; i < usePoints.length; i++) {
 				point0 = MPoint(usePoints[i]);
 				if (i == (usePoints.length - 1)) {
@@ -609,9 +627,13 @@ package com.iblsoft.flexiweather.utils
 				} else {
 					point1 = MPoint(usePoints[i + 1]);
 				}
-						
+				
+				x0 = point0.point.x;
+				y0 = point0.point.y;
+				
 				var tDist: Number = 0;
 				for (var t: Number = 0; t <= 1.0; t = t + _step) {
+				//for (var t: Number = 0; t <= 1.0; t = t + (1 / 20)) {
 					//drawPoint = polynom(point0, point1, t);
 					//drawPoint = hermiteCurveEvaluate(t, point0, point1);
 							
@@ -621,15 +643,28 @@ package com.iblsoft.flexiweather.utils
 					tDist += new Point(drawPoint.x - x0, drawPoint.y - y0).length;
 							
 					//if ((tDist >= 1.0) || (t >= (1.0 - _step))){
+					if (tDist >= 1.0){
 						//trace(new Point(drawPoint.x - x0, drawPoint.y - y0).length);
 								
 						x0 = drawPoint.x;
 						y0 = drawPoint.y;
-								
-						retPoints.push(drawPoint.clone());
+						
+						tmpRetPoint = new SPoint(drawPoint.x, drawPoint.y);
+						tmpRetPoint.segmentIndex = i;
+						
+						//retPoints.push(drawPoint.clone());
+						retPoints.push(tmpRetPoint);
 											
 						tDist = 0;
-					//}
+					}
+				}
+				
+				if (tDist > 0){
+					tmpRetPoint = new SPoint(drawPoint.x, drawPoint.y);
+					tmpRetPoint.segmentIndex = i;
+					
+					//retPoints.push(drawPoint.clone());
+					retPoints.push(tmpRetPoint);
 				}
 			}
 			
@@ -834,6 +869,8 @@ class MPoint
 	
 	public var dist: Number = 0;
 	
+	public var segmentIndex: int = 0;
+	
 	public function MPoint(_point: Point = null, _deriv: Point = null)
 	{
 		if (_point != null){
@@ -843,5 +880,26 @@ class MPoint
 		if (_deriv != null){
 			deriv = _deriv.clone();
 		}
+	}
+}
+
+class SPoint extends Point
+{	
+	public var segmentIndex: int = 0;
+	
+	public function SPoint(x: Number = 0, y: Number = 0)
+	{
+		super(x, y);
+	}
+	
+	/**
+	 * 
+	 */
+	override public function clone():Point
+	{
+		var ret: SPoint = new SPoint(this.x, this.y);
+		ret.segmentIndex = this.segmentIndex;
+		
+		return(ret);
 	}
 }

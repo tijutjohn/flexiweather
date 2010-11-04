@@ -1,7 +1,6 @@
 package com.iblsoft.flexiweather.ogc.editable
 {
 	import com.iblsoft.flexiweather.ogc.GMLUtils;
-	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.utils.CubicBezier;
 	import com.iblsoft.flexiweather.utils.CurveLineSegment;
 	import com.iblsoft.flexiweather.utils.CurveLineSegmentRenderer;
@@ -86,11 +85,22 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			var segmentRenderer: CurveLineSegmentRenderer = new CurveLineSegmentRenderer();
 			var b_closed: Boolean = (this is IClosableCurve) && IClosableCurve(this).isCurveClosed();
-			CubicBezier.curveThroughPoints(
+			
+			var newSegmentRenderer: CurveLineSegmentRenderer = new CurveLineSegmentRenderer();
+			
+			CubicBezier.drawHermitSpline(
+					newSegmentRenderer,
+					b_useCoordinates ? coordinates : getPoints().toArray(),
+					b_closed, false, 0.005, true);
+					
+			/*CubicBezier.curveThroughPoints(
 					segmentRenderer,
 					b_useCoordinates ? coordinates : getPoints().toArray(),
-					b_closed);			
-			return segmentRenderer.segments;
+					b_closed);*/
+			
+			//return segmentRenderer.segments;
+			
+			return newSegmentRenderer.segments;
 		}
 
 		// IMouseEditableItem implementation
