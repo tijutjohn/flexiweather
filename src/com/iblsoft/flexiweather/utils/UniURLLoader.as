@@ -65,6 +65,11 @@ package com.iblsoft.flexiweather.utils
 		public function UniURLLoader()
 		{}
 		
+		public static function navigateToURL(request: URLRequest): void
+		{
+			flash.net.navigateToURL(new URLRequest(UniURLLoader.fromBaseURL(request.url)));
+		}
+
 		public static function fromBaseURL(s_url: String): String
 		{
 			if(s_url.indexOf("${BASE_URL}") >= 0)
