@@ -222,9 +222,9 @@ package com.iblsoft.flexiweather.utils
 					s_url += urlRequest.data;
 				}
 				s_proxyURL = s_proxyURL.replace("${URL}", encodeURIComponent(s_url));
-				Alert.show("Got error:\n" + event.text + "\n"
-						+ "Retrying:\n" + s_proxyURL + "\n",
-						"SecurityErrorEvent received");
+				//Alert.show("Got error:\n" + event.text + "\n"
+				//		+ "Retrying:\n" + s_proxyURL + "\n",
+				//		"SecurityErrorEvent received");
 				urlRequest.url = s_proxyURL;
 				urlLoader.b_crossDomainProxyRequest = true;
 				urlLoader.load(urlRequest);
