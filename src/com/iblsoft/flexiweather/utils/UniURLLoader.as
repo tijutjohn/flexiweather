@@ -9,10 +9,10 @@ package com.iblsoft.flexiweather.utils
 	import flash.events.SecurityErrorEvent;
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
-	import flash.net.navigateToURL;
 	import flash.utils.ByteArray;
 	import flash.utils.Dictionary;
 	
+	import mx.controls.Alert;
 	import mx.logging.Log;
 	import mx.rpc.Fault;
 	
@@ -38,6 +38,15 @@ package com.iblsoft.flexiweather.utils
 		protected var md_urlLoaderToRequestMap: Dictionary = new Dictionary();
 		
 		public static var baseURL: String = '';
+
+		/**
+		 * URL of the cross-domain script bridging script. The ${URL} pattern
+		 * in this string is replaced with the actual URL required to be proxied.
+		 * This string may use the ${BASE_URL} expansion.
+		 * 
+		 * Example: "http://server.com/proxy?url=${URL}"
+		 */
+		public static var crossDomainProxyURLPattern: String = null;
 		
 		public static const DATA_LOADED: String = "dataLoaded";
 		public static const DATA_LOAD_FAILED: String = "dataLoadFailed";
@@ -56,23 +65,18 @@ package com.iblsoft.flexiweather.utils
 		public function UniURLLoader()
 		{}
 		
-		public static function navigateToURL(request: URLRequest): void
+		public static function fromBaseURL(s_url: String): String
 		{
-			flash.net.navigateToURL(new URLRequest(UniURLLoader.fromBaseURL(request.url)));
-		}
-		
-		public static function fromBaseURL(url: String): String
-		{
-			if(url.indexOf("${BASE_URL}") >= 0)
+			if(s_url.indexOf("${BASE_URL}") >= 0)
 			{
 				var regExp: RegExp = /\$\{BASE_URL\}/ig;
-				while(regExp.exec(url) != null)
+				while(regExp.exec(s_url) != null)
 				{
-					url = url.replace(regExp, baseURL);
+					s_url = s_url.replace(regExp, baseURL);
 //					trace("replace url: " + urlRequest.url + " baseURL: " + baseURL);
 				}
 			}	
-			return url;
+			return s_url;
 		}
 		
 		private function checkRequestBaseURL(urlRequest: URLRequest): void
@@ -196,7 +200,25 @@ package com.iblsoft.flexiweather.utils
 		protected function onSecurityError(event: SecurityErrorEvent): void
 		{
 			var urlLoader: URLLoaderWithAssociatedData = URLLoaderWithAssociatedData(event.target);
-			var urlRequest: URLRequest = disconnectURLLoader(urlLoader);
+			var urlRequest: URLRequest;
+			
+			// Try to use cross-domain proxy if received "Error #2048: Security sandbox violation:" 
+			if(crossDomainProxyURLPattern != null
+					&& event.text.match(/#2048/)
+					&& !urlLoader.b_crossDomainProxyRequest) {
+				var s_proxyURL: String = fromBaseURL(crossDomainProxyURLPattern);
+				urlRequest = md_urlLoaderToRequestMap[urlLoader].request;
+				s_proxyURL = s_proxyURL.replace("${URL}", urlRequest.url);
+				//Alert.show("Got error:\n" + event.text + "\n"
+				//		+ "Retrying:\n" + s_proxyURL + "\n",
+				//		"SecurityErrorEvent received");
+				urlRequest.url = s_proxyURL;
+				urlLoader.b_crossDomainProxyRequest = true;
+				urlLoader.load(urlRequest);
+				return;
+			}
+
+			urlRequest = disconnectURLLoader(urlLoader);
 			if(urlRequest == null)
 				return;
 
@@ -276,12 +298,13 @@ package com.iblsoft.flexiweather.utils
 	}
 }
 
-import flash.net.URLLoader;
 import flash.display.Loader;
+import flash.net.URLLoader;
 
 class URLLoaderWithAssociatedData extends URLLoader
 {
 	public var associatedData: Object;
+	public var b_crossDomainProxyRequest: Boolean = false;
 }
 
 class LoaderWithAssociatedData extends Loader
