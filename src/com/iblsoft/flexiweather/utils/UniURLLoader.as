@@ -213,10 +213,18 @@ package com.iblsoft.flexiweather.utils
 					&& !urlLoader.b_crossDomainProxyRequest) {
 				var s_proxyURL: String = fromBaseURL(crossDomainProxyURLPattern);
 				urlRequest = md_urlLoaderToRequestMap[urlLoader].request;
-				s_proxyURL = s_proxyURL.replace("${URL}", encodeURI(urlRequest.url));
-				Alert.show("Got error:\n" + event.text + "\n"
-						+ "Retrying:\n" + s_proxyURL + "\n",
-						"SecurityErrorEvent received");
+				var s_url: String = urlRequest.url;
+				if(urlRequest.data) {
+					if(s_url.indexOf("?") >= 0)
+						s_url += "&";
+					else
+						s_url += "?";
+					s_url += urlRequest.data;
+				}
+				s_proxyURL = s_proxyURL.replace("${URL}", encodeURI(s_url));
+				//Alert.show("Got error:\n" + event.text + "\n"
+				//		+ "Retrying:\n" + s_proxyURL + "\n",
+				//		"SecurityErrorEvent received");
 				urlRequest.url = s_proxyURL;
 				urlLoader.b_crossDomainProxyRequest = true;
 				urlLoader.load(urlRequest);
