@@ -30,11 +30,7 @@ package com.iblsoft.flexiweather.widgets
 		private var m_resizeTimer: Timer;
 		
 		private var m_layerContainer: Container = new Container();
-		[Bindable]
-		public function get layerContainer(): Container
-		{
-			return m_layerContainer;
-		}
+
 		private var m_labelLayout: AnticollisionLayout = new AnticollisionLayout();
 
 		public function InteractiveWidget() {
@@ -484,6 +480,11 @@ package com.iblsoft.flexiweather.widgets
 			invalidateDisplayList();			
 		}
 
+		public function get layerContainer(): Container
+		{
+			return m_layerContainer;
+		}
+		
 		public function get labelLayout(): AnticollisionLayout
 		{ return m_labelLayout; }
 	}

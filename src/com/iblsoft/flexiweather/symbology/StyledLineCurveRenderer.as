@@ -183,6 +183,7 @@ package com.iblsoft.flexiweather.symbology
 		 */
 		protected function _lineTo(f_x: Number, f_y: Number): void
 		{
+			var dashDotOffset: int; 
 			switch(ms_style)
 			{
 			case StyledLineCurveRenderer.STYLE_SOLID:
@@ -277,7 +278,7 @@ package com.iblsoft.flexiweather.symbology
 			*/
 			
 			case StyledLineCurveRenderer.STYLE_DASHDOT:
-				var dashDotOffset: int = mi_counter % 8; 
+				dashDotOffset = mi_counter % 8; 
 				if (dashDotOffset < 3) {
 					setDefaultLineStyle();
 					m_graphics.lineTo(f_x, f_y);
@@ -294,7 +295,7 @@ package com.iblsoft.flexiweather.symbology
 				
 				break;
 			case StyledLineCurveRenderer.STYLE_DASHDOTDOT:
-				var dashDotOffset: int = mi_counter % 11; 
+				dashDotOffset = mi_counter % 11; 
 				if (dashDotOffset < 3) {
 					setDefaultLineStyle();
 					m_graphics.lineTo(f_x, f_y);
