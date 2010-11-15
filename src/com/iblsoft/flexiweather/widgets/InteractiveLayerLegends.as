@@ -159,7 +159,7 @@ package com.iblsoft.flexiweather.widgets
 		private function getCanvasFromDictionary(layer: InteractiveLayer): Canvas
 		{
 			var cnv: Canvas = m_canvasDictionary[layer];
-			debug("\t\t InteractiveLayerLegends getCanvasFromDictionary ["+layer.name+"/"+layer+"]: " + cnv);
+//			debug("\t\t InteractiveLayerLegends getCanvasFromDictionary ["+layer.name+"/"+layer+"]: " + cnv);
 			return cnv;
 		}
 		public function clear(): void
