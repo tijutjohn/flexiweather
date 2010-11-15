@@ -11,6 +11,7 @@ package com.iblsoft.flexiweather.ogc
 		internal var ms_name: String;
 		internal var ms_title: String;
 		internal  var ma_crsWithBBoxes: ArrayCollection = new ArrayCollection();
+		internal var ma_dimensions: ArrayCollection = new ArrayCollection();
 
 		public function WMSLayerBase(parent: WMSLayerGroup, xml: XML, wms: Namespace, version: Version)
 		{
@@ -78,6 +79,26 @@ package com.iblsoft.flexiweather.ogc
 					}
 				}
 			}
+
+			if(parent && parent.ma_dimensions) {
+				// inherit dimensions
+				ma_dimensions.addAll(parent.ma_dimensions);
+			}
+
+			for each(var elemDim: XML in xml.wms::Dimension) {
+				var dim: WMSDimension = new WMSDimension(elemDim, wms, version);
+				// in WMS < 1.3.0, dimension values are inside of <Extent> element
+				// having the same @name as the <Dimension> element
+				if(version.isLessThan(1, 3, 0)) {
+					for each(var elemExtent: XML in xml.wms::Extent) {
+						if(elemExtent.@name == dim.name) {
+							dim.loadExtent(elemExtent, wms, version);
+							break;
+						}
+					}
+				}
+				ma_dimensions.addItem(dim);
+			}
 		}
 
 		public function equals(other: WMSLayer): Boolean
@@ -93,6 +114,12 @@ package com.iblsoft.flexiweather.ogc
 			for(var i: int = 0; i < ma_crsWithBBoxes.length; ++i) {
 				var cb: CRSWithBBox = ma_crsWithBBoxes[i] as CRSWithBBox; 
 				if(!cb.equals(other.ma_crsWithBBoxes[i] as CRSWithBBox))
+					return false;
+			}
+			if(ma_dimensions.length != other.ma_dimensions.length)
+				return false;
+			for(i = 0; i < ma_dimensions.length; ++i) {
+				if(!ma_dimensions[i].equals(other.ma_dimensions[i]))
 					return false;
 			}
 			return true;
@@ -131,6 +158,9 @@ package com.iblsoft.flexiweather.ogc
 
 		public function get crsWithBBoxes(): ArrayCollection
 		{ return ma_crsWithBBoxes; }
+		
+		public function get dimensions(): ArrayCollection
+		{ return ma_dimensions;	}
 		
 		public function get label(): String
 		{

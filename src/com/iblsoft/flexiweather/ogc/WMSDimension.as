@@ -57,11 +57,11 @@ package com.iblsoft.flexiweather.ogc
 			// TODO: strip white spaces
 			ma_values = [];
 			for each(var s_value: String in arr) {
+				// Strip white spaces to workaround " , " separation used in
+				// http://openmetoc.met.no/metoc/metocwms?request=GetCapabilities&VERSION=1.1.1 
+				s_value = s_value.replace(/\s+\Z/, '').replace(/\A\s+/, '');
 				stringValueToObjects(ma_values, s_value, ms_units);
-				//trace("/t WMSDImension loadExtent TIME ("+s_value+"): " + (getTimer() - time) + " ms");
 			}
-			
-//			trace("WMSDImension loadExtent TIME: " + (getTimer() - time) + " ms");
 		}
 		
 		protected static function stringValueToObjects(
@@ -72,7 +72,8 @@ package com.iblsoft.flexiweather.ogc
 			var data: Object = s_value;
 			if(s_units != null)
 				s_units = s_units.toUpperCase(); 
-			if(s_units == "ISO8601") {
+			// Unit date_time is used at http://openmetoc.met.no/metoc/metocwms?request=GetCapabilities&VERSION=1.1.1 
+			if(s_units == "ISO8601" || s_units == "DATE_TIME") {
 				if(sm_dateTimeParser.looksLikeDuration(s_value)) {
 					try {
 						data = sm_dateTimeParser.parseDuration(s_value);
@@ -87,6 +88,7 @@ package com.iblsoft.flexiweather.ogc
 							// encycle all options
 							var a_bits: Array = s_value.split("/", 3);
 							if(a_bits.length == 3) {
+								
 								var f_from: Number = sm_dateTimeParser.parseDateTime(a_bits[0]).time;
 								var f_to: Number = sm_dateTimeParser.parseDateTime(a_bits[1]).time;
 								var f_step: Number = sm_dateTimeParser.parseDuration(a_bits[2]).milisecondsTotal;
