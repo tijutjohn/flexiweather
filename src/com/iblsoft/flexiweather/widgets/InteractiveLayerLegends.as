@@ -89,6 +89,8 @@ package com.iblsoft.flexiweather.widgets
 		public function addLayer(l: InteractiveLayer): void
 		{
 			m_layers.addItemAt(l, 0);
+			
+			l.addEventListener(InteractiveLayerEvent.VISIBILITY_EFFECT_FINISHED, onLayerVisibilityChanged);
 		}
 		
 		public function removeLayer(l: InteractiveLayer): void
@@ -96,6 +98,7 @@ package com.iblsoft.flexiweather.widgets
 			var i : int = m_layers.getItemIndex(l);
 			if(i >= 0) {
 //				unbindSubLayer(l);
+				l.removeEventListener(InteractiveLayerEvent.VISIBILITY_EFFECT_FINISHED, onLayerVisibilityChanged);
 				m_layers.removeItemAt(i);
 				l.removeLegend(getCanvasFromDictionary(l));
 			}
@@ -119,6 +122,11 @@ package com.iblsoft.flexiweather.widgets
 			super.onAreaChanged(b_finalChange);
 			
 //			debug("Legends onAreaChanged");
+		}
+		
+		private function onLayerVisibilityChanged(event: InteractiveLayerEvent): void
+		{
+			renderLegendsStack();
 		}
 		override public function onContainerSizeChanged():void
 		{
