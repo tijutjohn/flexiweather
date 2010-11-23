@@ -542,7 +542,7 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 		public function updateModifiedFeatures(oldFeatures: ArrayCollection, newFeatures: ArrayCollection): void
-		{e
+		{
 			for each(var oldFeature: WFSFeatureBase in oldFeatures) {
 				if (oldFeature.parent == m_featuresContainer)
 				{
