@@ -63,12 +63,26 @@ package com.iblsoft.flexiweather.ogc
 			m_loader.load(url, null, "Importing features");
 		}
 		
-		public function updateData(): void
+		/**
+		 * update WFS layer data (load them or refresh). 
+		 * @param type - type of updating. Possible values are: load, refresh.
+		 * 
+		 */		
+		public function updateData(type: String = 'load'): void
 		{
 			if(ms_serviceURL == null)
 				return;
 			
-			m_loader.addEventListener(UniURLLoader.DATA_LOADED, onDataLoaded);
+			switch (type)
+			{
+				case 'load':
+					m_loader.addEventListener(UniURLLoader.DATA_LOADED, onDataLoaded);
+					break;
+				case 'refresh':
+					m_loader.addEventListener(UniURLLoader.DATA_LOADED, onRefreshDataLoaded);
+					break;
+				
+			}
 			
 			var url: URLRequest = new URLRequest(ms_serviceURL);
 			if(url.data == null)
@@ -162,14 +176,56 @@ package com.iblsoft.flexiweather.ogc
 			super.destroy();
 		}
 
+		/**
+		 * Get Feature by featureID. If feature has featureID, it means it was saved into feature database already. 
+		 * @param id
+		 * @return 
+		 * 
+		 */		
+		public function getFeatureByFeatureId(id: String): WFSFeatureBase
+		{
+			return getFeatureByID(id, 'featureId');
+		}
+		public function getRemovedFeatureByFeatureId(id: String): WFSFeatureBase
+		{
+			return null
+		}
+		
+		/**
+		 * Get Feature by internalFeatureId. It used for collaboration editor. Feature has internalFeatureId even if it is not saved into feature database.
+		 * @param id
+		 * @return 
+		 * 
+		 */		
 		public function getFeatureByInternalId(id: String): WFSFeatureBase
+		{
+			return getFeatureByID(id, 'internalFeatureId');
+		}
+		
+		private function getFeatureByID(id: String, idType: String): WFSFeatureBase
 		{
 			var i_count: int = m_featuresContainer.numChildren;
 			for(var i:int = 0; i < i_count; i++)
 			{
 				var currFeature: WFSFeatureBase = m_featuresContainer.getChildAt(i) as WFSFeatureBase;
-				if(currFeature.internalFeatureId == id)
+				if(currFeature && currFeature[idType] == id)
 				{
+					return currFeature;	
+				} 
+			}
+			return null;
+		}
+		private function getFeatureFromArrayCollectionByID(id: String, idType: String, arrColl: ArrayCollection, bRemove: Boolean = false): WFSFeatureEditable
+		{
+			var i_count: int = arrColl.length;
+			for(var i:int = 0; i < i_count; i++)
+			{
+				var currFeature: WFSFeatureEditable = arrColl.getItemAt(i) as WFSFeatureEditable;
+				if(currFeature && currFeature[idType] == id)
+				{
+					if (bRemove)
+						arrColl.removeItemAt(i);
+						
 					return currFeature;	
 				} 
 			}
@@ -178,12 +234,15 @@ package com.iblsoft.flexiweather.ogc
 
 		public function removeFeature(feature: WFSFeatureBase): void
 		{
-			m_featuresContainer.removeChild(feature);
-			var i: int = ma_features.getItemIndex(feature);
-			if(i >= 0)
-				ma_features.removeItemAt(i);
-			onFeatureRemoved(feature);
-			feature.cleanup();
+			if (feature.parent == m_featuresContainer)
+			{
+				m_featuresContainer.removeChild(feature);
+				var i: int = ma_features.getItemIndex(feature);
+				if(i >= 0)
+					ma_features.removeItemAt(i);
+				onFeatureRemoved(feature);
+				feature.cleanup();
+			}
 		}
 		
         override public function refresh(b_force: Boolean): void
@@ -237,6 +296,22 @@ package com.iblsoft.flexiweather.ogc
 		}
 		
 		// event handlers
+		public function onRefreshDataLoaded(event: UniURLLoaderEvent): void
+		{
+			m_loader.removeEventListener(UniURLLoader.DATA_LOADED, onRefreshDataLoaded);
+			
+			var xml: XML = event.result as XML;
+			if(xml == null)
+				return; // TODO: do some error handling
+				
+			var object: Object = createRefreshedFeaturesFromXML( xml );
+			
+			var refreshEvent: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.FEATURES_LOADED);
+			refreshEvent.refreshFeaturesObject = object;
+			dispatchEvent(refreshEvent);
+			
+		}
+		
 		public function onDataLoaded(event: UniURLLoaderEvent): void
 		{
 			m_loader.removeEventListener(UniURLLoader.DATA_LOADED, onDataLoaded);
@@ -301,6 +376,187 @@ package com.iblsoft.flexiweather.ogc
 			invalidateDynamicPart();
 			
 			return a_features;
+		}
+		
+		/**
+		 * Function returns features, which was already saved to feature database (featureID is defined) 
+		 * @return 
+		 * 
+		 */		
+		protected function getFeatureDatabaseFeatures(): ArrayCollection
+		{
+			var arr: ArrayCollection = new ArrayCollection();
+			for each (var feature: WFSFeatureBase in ma_features)
+			{
+				if (feature.featureId)
+				{
+					arr.addItem(feature);
+				}
+			}
+			return arr;
+		}
+		/**
+		 * Function returns features, which was already saved to feature database (featureID is defined), but was removed from stage, but it's not saved to database yet.
+		 * @return 
+		 * 
+		 */		
+		protected function getRemovedFeatureDatabaseFeatures(): ArrayCollection
+		{
+			return null;
+		}
+		
+		/**
+		 * This function is called after Refresh is called and loaded. It will create feaures which are not exist. For features, which exist, it will check if 
+		 * feature is modified, if not, it will be replaced. If there is at least 1 feature modified, popup will be displayed and user will be asked if he wants
+		 * use current features or features from server.
+		 *  
+		 * @param xml
+		 * @param bIsImport
+		 * @return 
+		 * 
+		 */		
+		public function createRefreshedFeaturesFromXML( xml: XML): Object
+		{
+			var wfs: Namespace = new Namespace("http://www.opengis.net/wfs");
+			var gml: Namespace = new Namespace("http://www.opengis.net/gml");
+			
+			var returnObject: Object = {};
+			
+			var _features: ArrayCollection = new ArrayCollection(); 
+			var _modifiedFeaturesOld: ArrayCollection = new ArrayCollection(); 
+			var _removedFeatures: ArrayCollection = new ArrayCollection(); 
+			var _modifiedFeaturesNew: ArrayCollection = new ArrayCollection(); 
+			var _modifiedFeaturesCount: int = 0;
+			
+			var existingSavedFeatures: ArrayCollection = getFeatureDatabaseFeatures();
+			var existingRemovedFeatures: ArrayCollection = getRemovedFeatureDatabaseFeatures();
+			var serverFeatures: ArrayCollection = new ArrayCollection();
+			
+			var feature: WFSFeatureBase;
+			
+			for each(var xmlFeatureMember: XML in xml.gml::featureMember) 
+			{
+				try {
+					feature = parseFeatureMember(xmlFeatureMember, wfs, gml);
+					serverFeatures.addItem(feature);
+				}
+				catch(e: Error) {
+					trace(e.getStackTrace());
+				}
+			}
+			
+			trace("\nSTART saved: " + existingSavedFeatures.length + " existingRemovedFeatures: " + existingRemovedFeatures.length + " serverFeatures: " + serverFeatures.length);
+			
+			var existingFeature: WFSFeatureEditable;
+			
+			//all feature arrays are ready
+			while (serverFeatures.length > 0)
+			{
+				feature = serverFeatures.getItemAt(0) as WFSFeatureBase;
+				serverFeatures.removeItemAt(0);
+				
+				//find if feature exists
+				if (feature.featureId)
+				{
+					existingFeature = getFeatureFromArrayCollectionByID(feature.featureId, 'featureId', existingSavedFeatures, true);
+					if (!existingFeature)
+					{
+						//try to find feature in removed features
+						existingFeature = getFeatureFromArrayCollectionByID(feature.featureId, 'featureId', existingRemovedFeatures, true);
+						if (existingFeature)
+							existingFeature.modified = true;	
+					}
+					if (existingFeature)
+					{
+						if (existingFeature.modified)
+						{
+							_modifiedFeaturesCount++;
+							_modifiedFeaturesOld.addItem(existingFeature);
+							_modifiedFeaturesNew.addItem(feature);
+						} else {
+							//replace new feature with old one
+							//TODO remove existing feature first
+							if (existingFeature.parent == m_featuresContainer)
+							{
+								m_featuresContainer.removeChild(existingFeature);
+								onFeatureRemoved(existingFeature);
+							}
+					
+							//add new feature
+							addFeatureAfterLoad(feature, _features);
+						}
+					} else {
+						trace("dont exist, check in removed features");
+						addFeatureAfterLoad(feature, _features);
+					}
+				} else {
+					addFeatureAfterLoad(feature, _features);
+				}
+				
+				
+				trace("saved: " + existingSavedFeatures.length + " existingRemovedFeatures: " + existingRemovedFeatures.length + " serverFeatures: " + serverFeatures.length);
+				
+			}
+			
+			if (existingSavedFeatures.length > 0)
+			{
+				//there are still features, which was removed from server
+				while (existingSavedFeatures.length > 0)
+				{
+					existingFeature = existingSavedFeatures.getItemAt(0) as WFSFeatureEditable;
+					existingSavedFeatures.removeItemAt(0);
+					
+					if (existingFeature.modified)
+					{
+						_modifiedFeaturesCount++;
+						_removedFeatures.addItem(existingFeature);
+					} else {
+						//just remove it, because it was removed from server
+						if (existingFeature.parent == m_featuresContainer)
+						{
+							m_featuresContainer.removeChild(existingFeature);
+							onFeatureRemoved(existingFeature);
+						}
+					}
+				}
+			}
+			returnObject.features = _features
+			returnObject.modifiedFeaturesOld = _modifiedFeaturesOld;
+			returnObject.modifiedFeaturesNew = _modifiedFeaturesNew;
+			returnObject.modifiedFeaturesCount = _modifiedFeaturesCount;
+			returnObject.removedFeatures = _removedFeatures;
+			
+			ma_features = _features;
+			
+			return returnObject;
+		}
+		
+		public function removeDeletedFeatures(deletedFeatures: ArrayCollection): void
+		{
+			for each(var oldFeature: WFSFeatureBase in deletedFeatures) {
+				if (oldFeature.parent == m_featuresContainer)
+				{
+					m_featuresContainer.removeChild(oldFeature);
+					onFeatureRemoved(oldFeature);
+				} 
+			}
+		}
+		public function updateModifiedFeatures(oldFeatures: ArrayCollection, newFeatures: ArrayCollection): void
+		{e
+			for each(var oldFeature: WFSFeatureBase in oldFeatures) {
+				if (oldFeature.parent == m_featuresContainer)
+				{
+					m_featuresContainer.removeChild(oldFeature);
+					onFeatureRemoved(oldFeature);
+				} else {
+					//feature, which was removed by user, do it's not needed to remove it right now
+					trace("feature, which was removed by user, do it's not needed to remove it right now");
+				}
+			}
+			
+			for each(var newFeature: WFSFeatureBase in newFeatures) {
+				addFeatureAfterLoad(newFeature, ma_features);
+			}
 		}
 		
 		

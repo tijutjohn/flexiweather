@@ -606,7 +606,7 @@ package com.iblsoft.flexiweather.widgets
         		_featureTooltipCallsRunning = false;
         	}
         }
-        //[Bindable]
+        [Bindable]
         public function get layers(): ArrayCollection
         { return m_layers; }
         
