@@ -7,6 +7,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	import flash.events.KeyboardEvent;
 	import flash.filters.GlowFilter;
 	import flash.geom.Point;
+	import flash.ui.Keyboard;
 	
 	public class WFSFeatureEditable extends WFSFeatureBase
 			implements IEditableItem, IHighlightableItem, ISelectableItem
@@ -25,6 +26,10 @@ package com.iblsoft.flexiweather.ogc.editable
 		protected var ma_points: Array;
 		
 		protected var m_editableItemManager: IEditableItemManager;
+
+		protected var mi_actSelectedMoveablePointIndex: int = -1;
+
+		protected var m_firstInit: Boolean = true;
 
 		public function WFSFeatureEditable(s_namespace: String, s_typeName: String, s_featureId: String)
 		{
@@ -67,8 +72,10 @@ package com.iblsoft.flexiweather.ogc.editable
 			}
 			for(; i < ml_movablePoints.length; ++i) {
 				mp = ml_movablePoints[i];
-				if(eim != null)
+				if(eim != null) {
 					eim.removeEditableItem(mp);
+					// ADD CHECK ABOUT SELECTED MOVEABLE POINT
+				}
 				m_editableSprite.removeChild(mp);
 			}
 			while(m_points.length < ml_movablePoints.length) {
@@ -124,7 +131,10 @@ package com.iblsoft.flexiweather.ogc.editable
 		{}
 
 		public function fromGML(gml: XML): void
-		{}
+		{
+			// IF I'M INPORTING FEATURE FROM SOME XML, THIS IS ALREADY FINISHED FIRST EDITING MODE
+			m_firstInit = false;
+		}
 		
 		public function isInternal(): Boolean
 		{ return false; }
@@ -177,6 +187,33 @@ package com.iblsoft.flexiweather.ogc.editable
 			modified = true;
 		}
 		
+		/**
+		 * 
+		 */
+		public function selectMoveablePoint(i_pointIndex: int): void
+		{
+			var actSelPoint: MoveablePoint;
+			
+			// DESELECT ALL POINT
+			for (var i: uint = 0; i < ml_movablePoints.length; i++){
+				MoveablePoint(ml_movablePoints[i]).selected = false;
+			}
+			
+			if ((i_pointIndex >= 0) && (i_pointIndex < m_points.length)){ // IF SELECTED POINT IS IN m_points RANGE
+				// SELECT NEW
+				var selPoint: MoveablePoint = ml_movablePoints[i_pointIndex];
+				
+				if (selPoint){
+					selPoint.selected = true;
+					mi_actSelectedMoveablePointIndex = i_pointIndex;
+				} else {
+					mi_actSelectedMoveablePointIndex = -1;
+				}
+			} else {
+				mi_actSelectedMoveablePointIndex = -1;
+			}
+		}
+		
 		public function insertPointBefore(i_pointIndex: uint, pt: Point): void
 		{
 			m_points.addItemAt(pt, i_pointIndex);
@@ -194,8 +231,10 @@ package com.iblsoft.flexiweather.ogc.editable
 
 		public function deselect(): void
 		{
-			if(selected)
+			if(selected) {
 				m_editableItemManager.selectItem(null);
+				m_firstInit = false;
+			}
 		}
 
 		public function snapPoint(ptClicked: Point, ignoredFeature: WFSFeatureEditable = null): Point
@@ -262,8 +301,33 @@ package com.iblsoft.flexiweather.ogc.editable
 			filters = [ new GlowFilter(i_innerGlowColor, 1, 6, 6, 2), new GlowFilter(i_outterGlowColor, 1, 8, 8, 4) ];
 		}
 		
-		public function onKeyDown(evt: KeyboardEvent): Boolean
-		{ return false; }
+		/**
+		 * 
+		 */
+		public function onKeyDown(evt:KeyboardEvent):Boolean
+		{
+			if (evt.keyCode == Keyboard.DELETE){
+				if (mb_selected && (mi_actSelectedMoveablePointIndex > -1) && (m_points.length > 1) && (mi_actSelectedMoveablePointIndex < m_points.length)){
+					m_points.removeItemAt(mi_actSelectedMoveablePointIndex);
+					
+					update();
+					
+					if ((mi_actSelectedMoveablePointIndex >= 0) && (mi_actSelectedMoveablePointIndex < m_points.length)){
+						selectMoveablePoint(mi_actSelectedMoveablePointIndex);
+					} else if (mi_actSelectedMoveablePointIndex >= m_points.length){
+						selectMoveablePoint(m_points.length - 1);
+					} else {
+						selectMoveablePoint(-1);
+					}
+					
+					return true;
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}
+		}
 		
 		public function set selected(b: Boolean): void
 		{
@@ -327,5 +391,11 @@ package com.iblsoft.flexiweather.ogc.editable
 		
 		public function get monochromeColor(): uint
 		{ return mi_monochromeColor; }
+		
+		public function set firstInit(value: Boolean): void
+		{ m_firstInit = value; }
+		
+		public function get firstInit(): Boolean
+		{ return m_firstInit; }
 	}
 }

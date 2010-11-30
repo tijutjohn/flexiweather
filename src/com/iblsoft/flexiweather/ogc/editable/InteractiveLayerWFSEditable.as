@@ -208,8 +208,11 @@ package com.iblsoft.flexiweather.ogc.editable
 			if(event.ctrlKey || event.shiftKey)
 				return false;
 			if(m_mouseMoveCapturingItem != null)
-				if(m_mouseMoveCapturingItem.onMouseMove(new Point(event.localX, event.localY)))
+				//if(m_mouseMoveCapturingItem.onMouseMove(new Point(event.localX, event.localY)))
+				if(m_mouseMoveCapturingItem.onMouseMove(new Point(DisplayObject(event.currentTarget).mouseX, DisplayObject(event.currentTarget).mouseY))){
+					event.updateAfterEvent();
 					return true;
+				}
 			// highlighting
 			var l_hitItems: Array = doHitTest(event.stageX, event.stageY, IHighlightableItem);
 			for each(var hItem: IHighlightableItem in l_hitItems) {
@@ -225,12 +228,14 @@ package com.iblsoft.flexiweather.ogc.editable
 			if(event.ctrlKey || event.shiftKey)
 				return false;
 			if(m_mouseClickCapturingItem != null)
-				if(m_mouseClickCapturingItem.onMouseClick(new Point(event.localX, event.localY)))
+				//if(m_mouseClickCapturingItem.onMouseClick(new Point(event.localX, event.localY)))
+				if(m_mouseClickCapturingItem.onMouseClick(new Point(DisplayObject(event.currentTarget).mouseX, DisplayObject(event.currentTarget).mouseY)))
 					return true;
 			if(m_highlightedItem != null) {
 				var mItem: IMouseEditableItem = m_highlightedItem as IMouseEditableItem;
 				if(mItem != null) {
-					if(mItem.onMouseClick(new Point(event.localX, event.localY)))
+					//if(mItem.onMouseClick(new Point(event.localX, event.localY)))
+					if(mItem.onMouseClick(new Point(DisplayObject(event.currentTarget).mouseX, DisplayObject(event.currentTarget).mouseY)))
 						return true; 
 				}
 			}
@@ -249,11 +254,13 @@ package com.iblsoft.flexiweather.ogc.editable
 			if(event.ctrlKey || event.shiftKey)
 				return false;
 			if(m_mouseClickCapturingItem != null)
-				if(m_mouseClickCapturingItem.onMouseDoubleClick(new Point(event.localX, event.localY)))
+				//if(m_mouseClickCapturingItem.onMouseDoubleClick(new Point(event.localX, event.localY)))
+				if(m_mouseClickCapturingItem.onMouseDoubleClick(new Point(DisplayObject(event.currentTarget).mouseX, DisplayObject(event.currentTarget).mouseY)))
 					return true;
 			var l_hitItems: Array = doHitTest(event.stageX, event.stageY, IMouseEditableItem);
 			for each(var mItem: IMouseEditableItem in l_hitItems) {
-				if(mItem.onMouseDoubleClick(new Point(event.localX, event.localY)))
+				//if(mItem.onMouseDoubleClick(new Point(event.localX, event.localY)))
+				if(mItem.onMouseDoubleClick(new Point(DisplayObject(event.currentTarget).mouseX, DisplayObject(event.currentTarget).mouseY)))
 					return true;
 			}
 			return false;
@@ -264,11 +271,13 @@ package com.iblsoft.flexiweather.ogc.editable
 			if(event.ctrlKey || event.shiftKey)
 				return false;
 			if(m_mouseClickCapturingItem != null)
-				if(m_mouseClickCapturingItem.onMouseDown(new Point(event.localX, event.localY)))
+				//if(m_mouseClickCapturingItem.onMouseDown(new Point(event.localX, event.localY)))
+				if(m_mouseClickCapturingItem.onMouseDown(new Point(DisplayObject(event.currentTarget).mouseX, DisplayObject(event.currentTarget).mouseY)))
 					return true;
 			var l_hitItems: Array = doHitTest(event.stageX, event.stageY, IMouseEditableItem);
 			for each(var mItem: IMouseEditableItem in l_hitItems) {
-				if(mItem.onMouseDown(new Point(event.localX, event.localY)))
+				//if(mItem.onMouseDown(new Point(event.localX, event.localY)))
+				if(mItem.onMouseDown(new Point(DisplayObject(event.currentTarget).mouseX, DisplayObject(event.currentTarget).mouseY)))
 					return true;
 			}
 			

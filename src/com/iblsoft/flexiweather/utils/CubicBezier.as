@@ -526,7 +526,7 @@ package com.iblsoft.flexiweather.utils
 				_points: Array, 
 				_closed: Boolean = false, 
 				_drawHiddenHitMask: Boolean = false,  // PREPARED PARAMETER FOR DRAWING HIT MASK AREA
-				_step: Number = 0.005,
+				_step: Number = 0.01,
 				_useSegmentation: Boolean = false): Array
 		{
 			var mPoints: Array = CubicBezier.calculateHermitSpline(_points, _closed, _step);
@@ -630,6 +630,8 @@ package com.iblsoft.flexiweather.utils
 				
 				x0 = point0.point.x;
 				y0 = point0.point.y;
+				
+				//var nStep: Number = 
 				
 				var tDist: Number = 0;
 				for (var t: Number = 0; t <= 1.0; t = t + _step) {

@@ -1,6 +1,10 @@
 package com.iblsoft.flexiweather.ogc.editable
 {
+	import com.iblsoft.flexiweather.events.WFSCursorManagerEvent;
+	import com.iblsoft.flexiweather.events.WFSCursorManagerTypes;
+	
 	import flash.display.Sprite;
+	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	
 	public class MoveablePoint extends Sprite
@@ -17,6 +21,8 @@ package com.iblsoft.flexiweather.ogc.editable
 		protected var m_editableItemManager: IEditableItemManager;
 		protected var mb_dragging: Boolean = false;
 	
+		public var m_pointCursor: int = WFSCursorManagerTypes.CURSOR_ADD_POINT;
+	
 		public function MoveablePoint(feature: WFSFeatureEditable, i_pointIndex: uint)
 		{
 			super();
@@ -26,17 +32,35 @@ package com.iblsoft.flexiweather.ogc.editable
 			m_feature = feature;
 			mi_pointIndex = i_pointIndex;
 			m_pt = feature.getPoint(i_pointIndex);
-	
+			
+			//addEventListener(MouseEvent.MOUSE_OVER, onMouseOver);
+			//addEventListener(MouseEvent.MOUSE_OUT, onMouseOut);
+			
+			draw();
 			update();
 		}
 		
 		public function update(): void
 		{
-			graphics.clear();
+			this.x = m_pt.x;
+			this.y = m_pt.y;
+			
+			/*graphics.clear();
 
 			graphics.lineStyle(mb_highlighted ? 4 : 2, 0x000000);
 			graphics.beginFill(mb_selected ? 0x00ff00 : 0xffff00, 0.8);
 			graphics.drawCircle(m_pt.x, m_pt.y, mb_highlighted ? 7 : 5);
+			graphics.endFill();*/
+		}
+		
+		protected function draw(): void
+		{
+			graphics.clear();
+
+			graphics.lineStyle(mb_highlighted ? 4 : 2, 0x000000);
+			graphics.beginFill(mb_selected ? 0x00ff00 : 0xffff00, 0.8);
+			//graphics.drawCircle(m_pt.x, m_pt.y, mb_highlighted ? 7 : 5);
+			graphics.drawCircle(0, 0, mb_highlighted ? 7 : 5);
 			graphics.endFill();
 		}
 		
@@ -59,7 +83,9 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			if(mb_highlighted != b) {
 				mb_highlighted = b;
-				update();
+				
+				draw();
+				//update();
 			}
 		}
 	
@@ -97,6 +123,9 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			m_editableItemManager.setMouseMoveCapture(this);
 			m_editableItemManager.setMouseClickCapture(this);
+			
+			m_feature.selectMoveablePoint(mi_pointIndex);
+			
 			mb_dragging = true;
 			return true;
 		}
@@ -151,7 +180,22 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			mb_selected = val;
 			
-			update();
+			draw();
+		}
+		
+		public function onMouseOver(evt: MouseEvent = null): void
+		{
+			// IGNORE THIS IF USER IS DRAGGING THIS POINT
+			//if (!mb_dragging){
+			//	dispatchEvent(new WFSCursorManagerEvent(WFSCursorManagerEvent.CHANGE_CURSOR, WFSCursorManagerTypes.CURSOR_ADD_POINT, true));
+			//}
+		}
+		
+		public function onMouseOut(evt: MouseEvent = null): void
+		{
+			//if (!mb_dragging){
+			//	dispatchEvent(new WFSCursorManagerEvent(WFSCursorManagerEvent.CLEAR_CURSOR));
+			//}
 		}
 	}
 }

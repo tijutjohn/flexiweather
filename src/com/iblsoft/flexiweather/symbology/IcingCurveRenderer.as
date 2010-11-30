@@ -37,7 +37,7 @@ package com.iblsoft.flexiweather.symbology
 	
 		override public function started(x: Number, y: Number): void
 		{
-			trace('started');
+			//trace('started');
 			
 			mi_markCounter = 0;
 			ml_markPoints = [];
@@ -60,7 +60,7 @@ package com.iblsoft.flexiweather.symbology
 	
 		override public function finished(x: Number, y: Number): void
 		{
-			trace('finished ' + ml_markPoints.length);
+			//trace('finished ' + ml_markPoints.length);
 			
 			var i_markCounter: uint = 0;
 			for each(var mark: Mark in ml_markPoints) {
@@ -96,7 +96,7 @@ package com.iblsoft.flexiweather.symbology
 	
 		override protected function mark(x: Number, y: Number): void
 		{
-			trace('mark');
+			//trace('mark');
 			
 			nextMarkDistance += mf_markStep;
 			var pt: Point = new Point(x, y);

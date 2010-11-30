@@ -10,6 +10,7 @@ package com.iblsoft.flexiweather.symbology
 
 	public class StyledLineCurveRenderer extends DistanceMarkingCurveRenderer
 	{
+		public static const STYLE_NONE: String = "None";
 		public static const STYLE_SOLID: String = "Solid";
 		public static const STYLE_DASHED: String = "Dashed";
 		public static const STYLE_DOTTED: String = "Dotted";
@@ -22,6 +23,9 @@ package com.iblsoft.flexiweather.symbology
 		public static const FILL_STYLE_HORIZONTAL_LINES: String = 'HorizontalLines';
 		public static const FILL_STYLE_VERTICAL_LINES: String = 'VerticalLines';
 		public static const FILL_STYLE_CROSING_LINES: String = 'CrossingLines';
+		public static const FILL_STYLE_BACKWARD_DIAGONAL_LINES: String = 'BackwardDiagonalLines';
+		public static const FILL_STYLE_FORWARD_DIAGONAL_LINES: String = 'ForwardDiagonalLines';
+		public static const FILL_STYLE_CROSSING_DIAGONAL_LINES: String = 'CrossingDiagonalLines';
 
 		// style variables
 		protected var mf_thickness: Number;

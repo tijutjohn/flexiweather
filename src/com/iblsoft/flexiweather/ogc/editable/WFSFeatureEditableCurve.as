@@ -11,7 +11,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	
 	public class WFSFeatureEditableCurve extends WFSFeatureEditable
 			implements IMouseEditableItem
-	{
+	{	
 		public function WFSFeatureEditableCurve(s_namespace: String, s_typeName: String, s_featureId:String)
 		{
 			super(s_namespace, s_typeName, s_featureId);
@@ -121,7 +121,6 @@ package com.iblsoft.flexiweather.ogc.editable
 				}
 				
 				if (minDist < 20){
-					trace('FOUND MIN DIST !!!! ' + minDist + '(' + minIndex + ')');
 					return(true);
 				} else {
 					return(false);
@@ -154,14 +153,15 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			if(!selected || justSelectable)
 				return false;
-
+			
+			var stagePt: Point = localToGlobal(pt);
+			
 			// snap to existing MoveablePoint
 			pt = snapPoint(pt);
 
 			if ((mi_editMode == WFSFeatureEditableMode.MOVE_POINTS) || 
 				(mi_editMode == WFSFeatureEditableMode.ADD_POINTS_WITH_MOVE_POINTS)){
 				// don't do anything if this click is on MoveablePoint belonging to this curve
-				var stagePt: Point = localToGlobal(pt);
 				for each(var mp: MoveablePoint in ml_movablePoints) {
 					if(mp.hitTestPoint(stagePt.x, stagePt.y, true))
 						return false;
@@ -188,8 +188,7 @@ package com.iblsoft.flexiweather.ogc.editable
 							f_bestDistance = f_distance;
 						}  
 					}
-				}
-				else {
+				} else {
 					// add point at one of curve's ends
 					// check end point first, to prefer adding at the end point being added is
 					// the second point of the curve
@@ -199,13 +198,14 @@ package com.iblsoft.flexiweather.ogc.editable
 						f_bestDistance = f_distanceToLast;
 						b_keepDrag = false;
 					}
-					var f_distanceToFirst: Number = pt.subtract(a[0]).length;
+					/*var f_distanceToFirst: Number = pt.subtract(a[0]).length;
 					if(i_best == -1 || f_distanceToFirst < f_bestDistance) {
 						i_best = 0;
 						f_bestDistance = f_distanceToFirst;
 						b_keepDrag = false;
-					}
+					}*/
 				}
+				
 				if(i_best != -1) {
 					insertPointBefore(i_best, pt);
 					MoveablePoint(ml_movablePoints[i_best]).onMouseDown(pt);
