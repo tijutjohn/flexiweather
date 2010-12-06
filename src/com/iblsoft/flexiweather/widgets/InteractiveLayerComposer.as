@@ -610,6 +610,9 @@ package com.iblsoft.flexiweather.widgets
         public function get layers(): ArrayCollection
         { return m_layers; }
         
+        public function set layers(value: ArrayCollection): void
+        { m_layers = value; }
+        
         /**
 		 * Clone interactiveLayer 
 		 * 
