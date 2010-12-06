@@ -39,5 +39,11 @@ package com.iblsoft.flexiweather.ogc
 
 		public function get bbox(): BBox
 		{ return m_bbox; }
+		
+		public function set crs(value: String): void
+		{ ms_crs = value; }
+
+		public function set bbox(value: BBox): void
+		{ m_bbox = value; }
 	}
 }
