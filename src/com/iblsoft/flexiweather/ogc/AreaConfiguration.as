@@ -20,7 +20,7 @@ package com.iblsoft.flexiweather.ogc
 
 		public function get icon(): String
 		{
-			var url:String = "${BASE_URL}ria?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=background-dem,foreground-lines&STYLES=bright-colours,black-lines-dotted&CRS="+crsWithBBox.crs+"&BBOX="+crsWithBBox.bbox.toBBOXString();
+			var url:String = "${BASE_URL}/ria?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=background-dem,foreground-lines&STYLES=bright-colours,black-lines-dotted&CRS="+crsWithBBox.crs+"&BBOX="+crsWithBBox.bbox.toBBOXString();
 			url += "&WIDTH=" + AREA_ICON_WIDTH + "&HEIGHT=" + AREA_ICON_HEIGHT + "&FORMAT=image/png&TRANSPARENT=TRUE";
 			url = UniURLLoader.fromBaseURL(url);
 			

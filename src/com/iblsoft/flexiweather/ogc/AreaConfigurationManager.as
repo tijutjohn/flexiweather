@@ -94,6 +94,9 @@ package com.iblsoft.flexiweather.ogc
 					}
 				}
 				
+				var areaCustom: XML = <menuitem label='Custom...' data='custom.area'/>;
+				areasXMLList.appendChild(areaCustom);
+				
 				return areasXMLList;
 			}
 			return null;
