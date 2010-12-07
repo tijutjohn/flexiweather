@@ -74,7 +74,7 @@ package com.iblsoft.flexiweather.ogc
 				{
 					var groupName: String = area.ms_group_name;
 					var areaData: String = "area."+area.crsWithBBox.crs+","+area.crsWithBBox.bbox.xMin+","+area.crsWithBBox.bbox.yMin+","+area.crsWithBBox.bbox.xMax+","+area.crsWithBBox.bbox.yMax;
-					var areaXML: XML = <menuitem label={area.label} data={areaData}/>
+					var areaXML: XML = <menuitem label={area.label} data={areaData} icon={area.icon}/>
 					
 					if (groupName && groupName.length > 0)
 					{

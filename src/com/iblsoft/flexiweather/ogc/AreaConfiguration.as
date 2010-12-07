@@ -2,6 +2,10 @@ package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
+	import com.iblsoft.flexiweather.utils.UniURLLoader;
+	
+	import flash.net.URLRequest;
+	import flash.net.URLVariables;
 
 	public class AreaConfiguration implements Serializable
 	{
@@ -11,7 +15,15 @@ package com.iblsoft.flexiweather.ogc
 		internal var ms_name: String;
 		internal var ms_group_name: String;
 
-		
+		public function get icon(): String
+		{
+			var url:String = "${BASE_URL}ria?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=background-dem,foreground-lines&STYLES=bright-colours,black-lines-dotted&CRS="+crsWithBBox.crs+"&BBOX="+crsWithBBox.bbox.toBBOXString();
+			url += "&WIDTH=60&HEIGHT=48&FORMAT=image/png&TRANSPARENT=TRUE";
+			url = UniURLLoader.fromBaseURL(url);
+			
+			trace("AreaConfiguration icon url : " + url);
+			return url;
+		}
 		public function AreaConfiguration()
 		{
 		}
@@ -37,6 +49,40 @@ package com.iblsoft.flexiweather.ogc
 			crsWithBBox.bbox.mf_xMax = storage.serializeInt("max-x", crsWithBBox.bbox.mf_xMax, 0);
 			crsWithBBox.bbox.mf_yMin = storage.serializeInt("min-y", crsWithBBox.bbox.mf_yMin, 0);
 			crsWithBBox.bbox.mf_yMax = storage.serializeInt("max-y", crsWithBBox.bbox.mf_yMax, 0);
+		}
+		
+		public function toRequest(s_request: String): URLRequest
+		{
+			var r: URLRequest = new URLRequest('${BASE_URL}/ria');
+			r.data = new URLVariables();
+//			else
+//				r.data = new URLVariables(m_data.toString());
+			r.data.SERVICE = "WMS";
+			r.data.VERSION = "1.3.0";
+			r.data.REQUEST = s_request;
+			return r;
+		}
+		
+		public function toGetMapURL(): URLRequest
+		{
+//			var url="{$BASE_URL}/ria?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=background-dem,foreground-lines&CRS="+crsWithBBox.crs+"&BBOX="+crsWithBBox.bbox.toBBOXString();
+//			url += "WIDTH=48&HEIGHT=48&FORMAT=image/png&TRANSPARENT=TRUE";
+			
+			var r: URLRequest = toRequest("GetMap");
+			//add background and lines
+			r.data.LAYERS = "background-dem,foreground-lines";
+//			if(m_service.m_version.isLessThan(1, 3, 0)) 
+//				r.data.SRS = s_crs;
+//			else 
+				r.data.CRS = crsWithBBox.crs; 
+			r.data.BBOX = crsWithBBox.bbox.toBBOXString(); 
+			r.data.WIDTH = 48;//i_width; 
+			r.data.HEIGHT = 48;//i_height;
+//			if(s_stylesList != null)
+//				r.data.STYLES = s_stylesList;
+			r.data.FORMAT = "image/png"; 
+			r.data.TRANSPARENT = "TRUE";
+			return r;
 		}
 		
 		public function get label(): String
