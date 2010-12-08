@@ -65,6 +65,11 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 		
+		private function updateTotalJobsStatus(): void
+		{
+			mi_maxJobs -= mi_doneJobs;
+			mi_doneJobs = 0;
+		}
 		public function startJob(s_label: String): BackgroundJob
 		{
 			var job: BackgroundJob = new BackgroundJob(s_label, this);
@@ -99,6 +104,7 @@ package com.iblsoft.flexiweather.widgets
 				updateUI();
 			}
 			
+			
 			dispatchJobEvent(BackgroundJobEvent.JOB_FINISHED);
 			
 			if (m_jobs.length == 0)
@@ -109,6 +115,8 @@ package com.iblsoft.flexiweather.widgets
 		
 		protected function updateUI(): void
 		{
+			updateTotalJobsStatus();
+			
 			if(m_jobs.length > 0) {
 				
 				var s: String = "Pending jobs:";
