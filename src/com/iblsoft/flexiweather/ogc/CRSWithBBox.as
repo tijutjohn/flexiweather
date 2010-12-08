@@ -1,18 +1,19 @@
 package com.iblsoft.flexiweather.ogc
 {
-	import flash.geom.Rectangle;
+	import com.iblsoft.flexiweather.utils.Serializable;
+	import com.iblsoft.flexiweather.utils.Storage;
 	
 	/**
 	 * Object representing a reference system (CRS) with optional rectangular bounding box (BBox).
 	 * Object is constant.
 	 **/
-	public class CRSWithBBox
+	public class CRSWithBBox implements Serializable
 	{
 		internal var ms_crs: String;
 		internal var m_bbox: BBox = null;
 		 
 		public function CRSWithBBox(
-				s_crs: String, bbox: BBox = null)
+				s_crs: String = '', bbox: BBox = null)
 		{
 			ms_crs = s_crs;
 			m_bbox = bbox;
@@ -29,6 +30,21 @@ package com.iblsoft.flexiweather.ogc
 			if(m_bbox == null && other.m_bbox != null)
 				return false;
 			return m_bbox.equals(other.m_bbox);
+		}
+		
+		public function serialize(storage: Storage): void
+		{
+			if(storage.isLoading())
+			{
+				m_bbox = new BBox(0,0,0,0);
+			}
+			
+			crs = storage.serializeString("crs", crs, null);
+			
+			m_bbox.mf_xMin = storage.serializeInt("min-x", m_bbox.mf_xMin, 0);
+			m_bbox.mf_xMax = storage.serializeInt("max-x", m_bbox.mf_xMax, 0);
+			m_bbox.mf_yMin = storage.serializeInt("min-y", m_bbox.mf_yMin, 0);
+			m_bbox.mf_yMax = storage.serializeInt("max-y", m_bbox.mf_yMax, 0);
 		}
 		
 		public function hasBBox(): Boolean
