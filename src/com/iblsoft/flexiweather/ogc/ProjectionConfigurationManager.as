@@ -3,6 +3,8 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	
+	import flash.utils.Dictionary;
+	
 	import mx.collections.ArrayCollection;
 
 	public class ProjectionConfigurationManager implements Serializable
@@ -31,6 +33,35 @@ package com.iblsoft.flexiweather.ogc
 		{
 			storage.serializeNonpersistentArrayCollection("projection", ma_projections, CRSWithBBox);
 			trace("pr: " + ma_projections);
+		}
+		
+		private var ma_parsedProjectionsDictionary: Dictionary = new Dictionary();
+		private var ma_parsedProjections: ArrayCollection = new ArrayCollection();
+		
+		public function removeParsedProjections(): void
+		{
+			ma_parsedProjections.removeAll();
+//			ma_parsedProjectionsDictionary = new Dictionary();
+		}
+		
+		public function addParsedProjectionByCRS(crs: CRSWithBBox): void
+		{
+//			trace("ProjectionConfigurationManager addParsedAreaByCRS: " + crs.crs);
+			ma_parsedProjectionsDictionary[crs.crs] = crs;
+		}
+		public function initializeParsedProjections(): void
+		{
+			ma_parsedProjections.removeAll();
+			
+			for each (var crs: CRSWithBBox in ma_parsedProjectionsDictionary)
+			{
+				ma_parsedProjections.addItem(crs);
+			}
+			trace("ProjectionConfigurationManager initializeParsedAreas items: " + ma_parsedProjections.length);
+			
+//			trace("getAreaXMLList ma_areas1: " + ma_areas.length);
+//			ArrayUtils.unionArrays(ma_areas.source, ma_parsedAreas.source, compareProjections);
+//			trace("getAreaXMLList ma_areas2: " + ma_areas.length);
 		}
 		
 		public function addProjection(l: CRSWithBBox): void
@@ -89,5 +120,7 @@ package com.iblsoft.flexiweather.ogc
 		// getters & setters
 		public function get projections(): ArrayCollection
 		{ return ma_projections; }
+		public function get parsedProjections(): ArrayCollection
+		{ return ma_parsedProjections; }
 	}
 }

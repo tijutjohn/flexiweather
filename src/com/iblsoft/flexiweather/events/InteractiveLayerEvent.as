@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.events
 {
+	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	
 	import flash.events.Event;
@@ -18,6 +19,7 @@ package com.iblsoft.flexiweather.events
 		public  static const LAYER_ROLL_OVER: String = 'layerRollOver';
 		public  static const LAYER_ROLL_OUT: String = 'layerRollOut';
 		public  static const LEGENDS_AREA_UPDATED: String = 'legendsAreaUpdated';
+		public  static const AREA_CHANGED: String = 'areaChangeds';
 		
 		public var text: String;
 		public var interactiveLayer: InteractiveLayer;
@@ -25,6 +27,9 @@ package com.iblsoft.flexiweather.events
 		public var area: Rectangle;
 		public var newFeaturesCount: int;
 		public var newFeatures: ArrayCollection;
+		
+		public var topLeftCoord: Coord;
+		public var bottomRightCoord: Coord;
 		
 		public var refreshFeaturesObject: Object;
 		

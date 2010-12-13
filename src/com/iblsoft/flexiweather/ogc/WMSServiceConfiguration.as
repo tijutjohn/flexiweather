@@ -8,6 +8,8 @@ package com.iblsoft.flexiweather.ogc
 	import flash.events.DataEvent;
 	import flash.net.URLRequest;
 	
+	import mx.collections.ArrayCollection;
+	
 	public class WMSServiceConfiguration extends OGCServiceConfiguration
 	{
 		public var id: String;
@@ -46,6 +48,7 @@ package com.iblsoft.flexiweather.ogc
 		public function queryCapabilities(): void
 		{
 			var r: URLRequest = toGetCapabilitiesRequest();
+//			trace("queryCapabilities: " + r.url);
 			m_capabilitiesLoader.load(r);
 			if(m_capabilitiesLoadJob != null)
 				m_capabilitiesLoadJob.finish();
@@ -70,6 +73,7 @@ package com.iblsoft.flexiweather.ogc
 				trace("ERROR m_capabilitiesLoadJob IS null")
 				return;
 			}
+//			trace("onCapabilitiesLoaded: " + event.request.url);
 			m_capabilitiesLoadJob.finish();
 			m_capabilitiesLoadJob = null;
 			if(event.result is XML) {
@@ -87,6 +91,24 @@ package com.iblsoft.flexiweather.ogc
 					m_capabilities = xml;
 					dispatchEvent(new DataEvent(CAPABILITIES_UPDATED));
 				}
+			}
+			
+			//check all crs
+			if (m_layers && m_layers.layers)
+			{
+				var projectionManager: ProjectionConfigurationManager = ProjectionConfigurationManager.getInstance();
+				
+				projectionManager.removeParsedProjections();
+				for each (var currLayer: WMSLayerBase in m_layers.layers)
+				{
+					var crsColl: ArrayCollection = currLayer.crsWithBBoxes;
+//					trace("Layer: " + currLayer.ms_name + " crs: " + crsColl.length);	
+					for each (var crs: CRSWithBBox in crsColl)
+					{
+						projectionManager.addParsedProjectionByCRS(crs);
+					}
+				}
+				projectionManager.initializeParsedProjections();
 			}
 		}
 
