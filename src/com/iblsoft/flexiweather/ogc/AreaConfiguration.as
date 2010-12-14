@@ -14,9 +14,44 @@ package com.iblsoft.flexiweather.ogc
 		
 		public var crsWithBBox: CRSWithBBox;
 		
-		internal var ms_default_area: Boolean;
-		internal var ms_name: String;
+		private var ms_default_area: Boolean;
+		public function get isDefaultArea(): Boolean
+		{
+			return ms_default_area;
+		}
+		public function set isDefaultArea(value: Boolean): void
+		{
+			if (value != ms_default_area)
+			{
+				ms_default_area = value;
+			}
+		}
+		
+		private var ms_name: String;
+		public function get name(): String
+		{
+			return ms_name;
+		}
+		public function set name(value: String): void
+		{
+			if (value != ms_name)
+			{
+				ms_name = value;
+			}
+		}
+		
 		internal var ms_group_name: String;
+		public function get groupName(): String
+		{
+			return ms_group_name;
+		}
+		public function set groupName(value: String): void
+		{
+			if (value != ms_group_name)
+			{
+				ms_group_name = value;
+			}
+		}
 
 		public function get icon(): String
 		{

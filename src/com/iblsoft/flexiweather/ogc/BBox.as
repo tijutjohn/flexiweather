@@ -93,5 +93,11 @@ package com.iblsoft.flexiweather.ogc
 		{
 			return 'BBox ' + xMin + " , " + yMin + " , " + xMax + " , " + yMax;
 		}
+		
+		public function clone(): BBox
+		{
+			var bbox: BBox = new BBox(xMin, yMin, xMax, yMax);
+			return bbox;
+		}
 	}
 }

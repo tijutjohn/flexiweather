@@ -3,10 +3,15 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	
+	import flash.events.Event;
+	import flash.events.EventDispatcher;
+	
 	import mx.collections.ArrayCollection;
 
-	public class AreaConfigurationManager implements Serializable
+	public class AreaConfigurationManager extends EventDispatcher implements Serializable
 	{
+		public static const AREAS_CHANGED: String = 'areas changed';
+		
 		internal static var sm_instance: AreaConfigurationManager;
 
 		internal var ma_areas: ArrayCollection = new ArrayCollection();
@@ -35,6 +40,7 @@ package com.iblsoft.flexiweather.ogc
 		public function addArea(l: AreaConfiguration): void
 		{
 			ma_areas.addItem(l);
+			notify();
 		}
 		
 		public function removeArea(l: AreaConfiguration): void
@@ -42,9 +48,15 @@ package com.iblsoft.flexiweather.ogc
 			var i: int = ma_areas.getItemIndex(l);
 			if(i >= 0) {
 				ma_areas.removeItemAt(i);
+				notify();
 			}
 		}
 		
+		private function notify(): void
+		{
+			var event: Event = new Event(AREAS_CHANGED);
+			dispatchEvent(event);
+		}
 		private var areaGroups:Array = [];
 		
 		public function getDefaultArea(): AreaConfiguration
@@ -56,7 +68,7 @@ package com.iblsoft.flexiweather.ogc
 				
 				for each (var area: AreaConfiguration in ma_areas)
 				{
-					if (area.ms_default_area && area.ms_default_area == true)
+					if (area.isDefaultArea)
 						return area;
 				} 
 			}

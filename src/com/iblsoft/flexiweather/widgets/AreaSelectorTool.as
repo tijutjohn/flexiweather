@@ -21,6 +21,12 @@ package com.iblsoft.flexiweather.widgets
 		
 		private var _p: Point;
 		
+		private var _selectedBBox: BBox;
+		public function get selectedBBox(): BBox
+		{
+			return _selectedBBox;
+		}
+	
 		public function AreaSelectorTool(container: InteractiveWidget = null)
 		{
 			super(container);
@@ -51,7 +57,8 @@ package com.iblsoft.flexiweather.widgets
 		override public function onMouseDown(event: MouseEvent): Boolean
         {
 //			if(!event.ctrlKey && mb_requireCtrlKey || event.shiftKey)
-//				return false;
+			if(event.ctrlKey || event.shiftKey)
+				return false;
 //			if(!event.buttonDown)
 //				return false;
 			
@@ -85,6 +92,9 @@ package com.iblsoft.flexiweather.widgets
 
         override public function onMouseUp(event: MouseEvent): Boolean
         {
+        	if(event.ctrlKey || event.shiftKey)
+				return false;
+				
 			if(_r == null || _areaComponent.isResizing)
 				return false;
 				
@@ -121,6 +131,9 @@ package com.iblsoft.flexiweather.widgets
         
         override public function onMouseMove(event: MouseEvent):Boolean
         {
+        	if(event.ctrlKey || event.shiftKey)
+				return false;
+				
 			if(_r == null || !_mouseDown || _areaComponent.isResizing)
 				return false;
 				
@@ -170,13 +183,13 @@ package com.iblsoft.flexiweather.widgets
 			r.right = xMax;
 			r.bottom = yMax;
 				
-			var bbox: BBox = BBox.fromRectangle(r);
+			_selectedBBox = BBox.fromRectangle(r);
 					
 //					trace("BBOX: rect: " + r);
 //			trace(" bbox: " + bbox);
 			
-			var topLeftCoord: Coord = findCoordinates(bbox.xMin, bbox.yMax);
-			var bottomRightCoord: Coord = findCoordinates(bbox.xMax, bbox.yMin);
+			var topLeftCoord: Coord = findCoordinates(_selectedBBox.xMin, _selectedBBox.yMax);
+			var bottomRightCoord: Coord = findCoordinates(_selectedBBox.xMax, _selectedBBox.yMin);
 //			trace("end");
 			
 			var ile: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.AREA_CHANGED);
@@ -202,6 +215,7 @@ package com.iblsoft.flexiweather.widgets
 	import flash.geom.Point;
 	import flash.display.DisplayObject;
 	import com.iblsoft.flexiweather.widgets.AreaSelectorTool;
+	import com.iblsoft.flexiweather.ogc.BBox;
 	
 
 class AreaRectangle extends UIComponent
@@ -222,6 +236,7 @@ class AreaRectangle extends UIComponent
 	private var bottomY: Number;
 	
 	private var _r: Rectangle;
+	
 	
 	public function AreaRectangle()
 	{

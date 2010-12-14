@@ -61,5 +61,14 @@ package com.iblsoft.flexiweather.ogc
 
 		public function set bbox(value: BBox): void
 		{ m_bbox = value; }
+		
+		public function clone(): CRSWithBBox
+		{
+			var crsBBox: CRSWithBBox = new CRSWithBBox();
+			crsBBox.crs = crs;
+			crsBBox.bbox = bbox.clone();
+			
+			return crsBBox;
+		}
 	}
 }
