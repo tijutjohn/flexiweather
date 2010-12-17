@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<flexLibProperties version="1">
+<flexLibProperties includeAllClasses="true" version="1">
   <includeClasses>
     <classEntry path="com.iblsoft.flexiweather.events.BackgroundJobEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.InteractiveLayerEvent"/>
@@ -69,6 +69,7 @@
     <classEntry path="com.iblsoft.flexiweather.proj.Projection"/>
     <classEntry path="com.iblsoft.flexiweather.symbology.CloudCurveRenderer"/>
     <classEntry path="com.iblsoft.flexiweather.symbology.FrontCurveRenderer"/>
+    <classEntry path="com.iblsoft.flexiweather.symbology.IcingCurveRenderer"/>
     <classEntry path="com.iblsoft.flexiweather.symbology.JetStreamCurveRenderer"/>
     <classEntry path="com.iblsoft.flexiweather.symbology.StyledLineCurveRenderer"/>
     <classEntry path="com.iblsoft.flexiweather.symbology.TurbulenceCurveRenderer"/>
@@ -101,6 +102,9 @@
     <classEntry path="com.iblsoft.flexiweather.utils.UniURLLoader"/>
     <classEntry path="com.iblsoft.flexiweather.utils.UniURLLoaderEvent"/>
     <classEntry path="com.iblsoft.flexiweather.utils.XMLStorage"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.geometry.ILineSegmentApproximableBounds"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.geometry.LineSegment"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.geometry.Vector2D"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.BackgroundJob"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.BackgroundJobManager"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.GlowLabel"/>
@@ -123,9 +127,6 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.GroupBox"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.GroupHBox"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.GroupVBox"/>
-    <classEntry path="com.iblsoft.flexiweather.utils.geometry.ILineSegmentApproximableBounds"/>
-    <classEntry path="com.iblsoft.flexiweather.utils.geometry.LineSegment"/>
-    <classEntry path="com.iblsoft.flexiweather.utils.geometry.Vector2D"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
