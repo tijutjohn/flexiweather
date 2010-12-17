@@ -45,12 +45,21 @@ package com.iblsoft.flexiweather.widgets
 			super.childrenCreated();
 		}
 		
+		/**
+		 * on area change update selected BBox
+		 * @param b_finalChange
+		 * 
+		 */		
+		override public function onAreaChanged(b_finalChange:Boolean):void
+		{
+			super.onAreaChanged(b_finalChange);
+			updateRectangleFromViewBBox()
+		}
+		
 		private function getMousePoint(event: MouseEvent): Point
 		{
 			var p: Point = new Point(event.stageX, event.stageY);
 			p = this.globalToLocal(p);
-//			trace("local p: " + p);
-			
 			return p;
 		}
 		
@@ -70,7 +79,6 @@ package com.iblsoft.flexiweather.widgets
 			}
 			
     		_toolIsCreated = (event.target == _areaComponent);
-//        	trace("onMouseDown ["+_toolIsCreated+"] target: " + event.target + " ("+(event.target == _areaComponent)+") , curr: " + event.currentTarget + "  ("+(event.currentTarget == _areaComponent)+")");
     		
 			_areaComponent.mouseEnabled = _toolIsCreated;
 			
@@ -104,13 +112,12 @@ package com.iblsoft.flexiweather.widgets
 				//create new rectangle from old one with correct left, top, right, bottom properties (it matters on direction of draggine when zoom rectange is created
 				_r = new Rectangle(Math.min(_r.left, _r.right), Math.min(_r.top, _r.bottom), Math.abs(_r.left - _r.right),  Math.abs(_r.top - _r.bottom));
 				
-//				trace("onMouseUp " + _r);
-				
 				if((_r.width) > 5 && (_r.height) > 5) {
 		        	findAreaCoordinates();
-				}        
+				} else {
+					_r = null
+				}
 				_toolIsCreated = true;	
-	        	//_r = null;
 	        	_mouseDown = false;
 	        	invalidateDynamicPart();
 	  		} else {
@@ -139,12 +146,10 @@ package com.iblsoft.flexiweather.widgets
 				
         	if (!_toolIsCreated)
 			{
-//				trace("local: ["+event.localX+","+event.localY+"] stage: ["+event.stageX+","+event.stageY+"]");
 				_p = getMousePoint(event);
 				_r.width = _p.x - _r.x;
 				_r.height = _p.y - _r.y;
 				
-	//			trace("onMouseMove " + _r);
 	        	invalidateDynamicPart();
 	  		}
 	  		findAreaCoordinates();
@@ -163,11 +168,11 @@ package com.iblsoft.flexiweather.widgets
 		public function findAreaCoordinates(): void
 		{
 			var r: Rectangle = container.getViewBBox().toRectangle();
-//        	trace("AreaSelectorTool: viewBox rectangle: " + r);  
         	var w: Number = container.width;
         	var h: Number = container.height;
         	var bW: Number = r.width;
         	var bH: Number = r.height;
+        	
         	r.width = bW / w * _r.width;
         	r.height = bH / h * _r.height;
         	r.x = r.x + _r.x / w * bW;
@@ -184,20 +189,44 @@ package com.iblsoft.flexiweather.widgets
 			r.bottom = yMax;
 				
 			_selectedBBox = BBox.fromRectangle(r);
+//        	trace("AreaSelectorTool: viewBox r: " + r + " _r: " + _r);  
 					
-//					trace("BBOX: rect: " + r);
-//			trace(" bbox: " + bbox);
-			
 			var topLeftCoord: Coord = findCoordinates(_selectedBBox.xMin, _selectedBBox.yMax);
 			var bottomRightCoord: Coord = findCoordinates(_selectedBBox.xMax, _selectedBBox.yMin);
-//			trace("end");
 			
 			var ile: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.AREA_CHANGED);
 			ile.topLeftCoord = topLeftCoord;
 			ile.bottomRightCoord = bottomRightCoord;
 			dispatchEvent(ile);
-//		        	container.setViewBBox(bbox, true);
 		}
+		
+		private function updateRectangleFromViewBBox(): void
+		{
+			if (_r)
+			{
+				var bbox1: Rectangle = container.getViewBBox().toRectangle();
+				var r: BBox = _selectedBBox; //container.getViewBBox().toRectangle();
+				var r2: Rectangle = _selectedBBox.toRectangle(); //container.getViewBBox().toRectangle();
+	        	var w: Number = container.width;
+	        	var h: Number = container.height;
+	        	var bW: Number = r.width;
+	        	var bH: Number = r.height;
+	        	
+	        	var newWidth: Number = r.width * w / bbox1.width;
+	        	var newHeight: Number = r.height * h / bbox1.height;
+	        	
+	        	var newX: Number = (r2.x - bbox1.x) * w / bbox1.width;
+	        	var newY: Number = h - (r2.y - bbox1.y) * h / bbox1.height
+	        	_r.width = newWidth;
+	        	_r.height = newHeight;
+	        	_r.x = newX;
+	        	_r.y = newY - _r.height;
+	        	
+//	        	trace("updateRectangleFromViewBBox new Size: " + newWidth + " , " + newHeight);
+	        	
+			}
+		}
+		
 		public function findCoordinates(x: Number, y: Number): Coord
 		{
 			var c: Coord = new Coord(container.getCRS(),x,y);
