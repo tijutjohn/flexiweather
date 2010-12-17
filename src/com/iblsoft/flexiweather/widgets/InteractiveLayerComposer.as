@@ -91,9 +91,15 @@ package com.iblsoft.flexiweather.widgets
 			m_layers.addItemAt(l, 0);
 			bindSubLayer(l);
 			
+			notifyLayersChanged();
+			
 			//orderLayers();
 		}
 
+		private function notifyLayersChanged(): void
+		{
+			dispatchEvent(new Event("layersChanged"));
+		}
 		public function orderLayers(): void
 		{
 			if(mb_orderingLayers)
@@ -151,6 +157,7 @@ package com.iblsoft.flexiweather.widgets
 			if(i >= 0) {
 				unbindSubLayer(l);
 				m_layers.removeItemAt(i);
+				notifyLayersChanged();
 			}
 		}
 		
@@ -159,6 +166,8 @@ package com.iblsoft.flexiweather.widgets
 			for each(var l: InteractiveLayer in m_layers)
 				unbindSubLayer(l);
 			m_layers.removeAll();
+			
+			notifyLayersChanged();
 		}
 
 		public function getLayerCount(): uint
@@ -175,6 +184,8 @@ package com.iblsoft.flexiweather.widgets
 			if(i_current >= 0)
 				m_layers.removeItemAt(i_current);
 			m_layers.addItemAt(l, i);
+			
+			notifyLayersChanged();
 		}
 
 		override public function onAreaChanged(b_finalChange: Boolean): void
@@ -195,6 +206,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			invalidateDynamicPart();
 			m_layers.itemUpdated(event.target);
+			notifyLayersChanged();
 		}
 
 		protected function onSynchronisedVariableChanged(event: SynchronisedVariableChangeEvent): void
@@ -552,6 +564,7 @@ package com.iblsoft.flexiweather.widgets
 					for each(l in m_layers) {
 						addChildAt(l, 0);
 					}
+					notifyLayersChanged();
 					break;
 			}
 			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
@@ -606,12 +619,10 @@ package com.iblsoft.flexiweather.widgets
         		_featureTooltipCallsRunning = false;
         	}
         }
-        [Bindable]
+        [Bindable (event="layersChanged")]
         public function get layers(): ArrayCollection
         { return m_layers; }
         
-        public function set layers(value: ArrayCollection): void
-        { m_layers = value; }
         
         /**
 		 * Clone interactiveLayer 
