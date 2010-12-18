@@ -25,7 +25,7 @@ package com.iblsoft.flexiweather.proj
 		
 		public function toLaLoCoord(): Coord
 		{
-			var prj: Projection = Projection.getByCRS(Projection.CRS_GEOGRAPHIC);
+			var prj: Projection = Projection.getByCRS(crs);
 			if(prj == null)
 				return null;
 			return prj.prjXYToLaLoCoord(x, y);
