@@ -23,6 +23,14 @@ package com.iblsoft.flexiweather.proj
 		public function cloneCoord(): Coord
 		{ return new Coord(crs, x, y); }
 		
+		public function toLaLoCoord(): Coord
+		{
+			var prj: Projection = Projection.getByCRS(Projection.CRS_GEOGRAPHIC);
+			if(prj == null)
+				return null;
+			return prj.prjXYToLaLoCoord(x, y);
+		}
+		
 		public function toNiceString(): String
 		{
 			if(Projection.equalCRSs(crs, "CRS:84")) {

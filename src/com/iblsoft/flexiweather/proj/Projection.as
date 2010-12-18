@@ -1,6 +1,9 @@
 package com.iblsoft.flexiweather.proj
 {
 	import flash.geom.Point;
+	import flash.utils.Dictionary;
+	
+	import mx.logging.Log;
 	
 	import org.openscales.proj4as.ProjPoint;
 	import org.openscales.proj4as.ProjProjection;
@@ -11,16 +14,31 @@ package com.iblsoft.flexiweather.proj
 		public static const CRS_EPSG_GEOGRAPHIC: String = "EPSG:4326";
 		
 		protected var m_proj: ProjProjection;
+
+		protected static var m_cache: Dictionary = new Dictionary();
 		
-		public function Projection(): void
+		Projection.addCRSByProj4("CRS:84", "+title=Geographic WGS84 +proj=longlat +ellps=WGS84 +datum=WGS84 +units=degrees");
+
+		public function Projection(s_crs: String): void
 		{
+			// internally the proj4as creates a dictionary cache of CRS -> ProjProjection pairs
+			m_proj = ProjProjection.getProjProjection(s_crs);
+			if(m_proj == null)
+				Log.getLogger("Projection").error("Unknown CRS '" + s_crs + "'");
 		}
 
-		public static function createByCRS(s_crs: String): Projection
+		public static function getByCRS(s_crs: String): Projection
 		{
-			var p: Projection = new Projection();
-			p.m_proj = ProjProjection.getProjProjection(s_crs);
-			return p;
+			if(s_crs in m_cache)
+				return m_cache[s_crs];
+			var prj: Projection = new Projection(s_crs);
+			m_cache[s_crs] = prj;
+			return prj;
+		}
+		
+		public static function addCRSByProj4(s_crs: String, s_proj4String: String): void
+		{
+			ProjProjection.defs[s_crs] = s_proj4String;
 		}
 		
 		/**
@@ -99,5 +117,25 @@ package com.iblsoft.flexiweather.proj
 			return s_crs1 == s_crs2;
 		}
 		
+		public function get crs(): String
+		{
+			if(m_proj == null)
+				return "?";
+			return m_proj.srsCode;
+		}
+
+		public function get name(): String
+		{
+			if(m_proj == null)
+				return "?";
+			return m_proj.projName;
+		}
+
+		public function get units(): String
+		{
+			if(m_proj == null)
+				return "?";
+			return m_proj.projParams.units;
+		}
 	}
 }
