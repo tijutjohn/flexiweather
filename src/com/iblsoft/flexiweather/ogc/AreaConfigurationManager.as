@@ -3,14 +3,18 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	
+	import flash.display.Bitmap;
+	import flash.display.BitmapData;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
+	import flash.utils.Dictionary;
 	
 	import mx.collections.ArrayCollection;
 
 	public class AreaConfigurationManager extends EventDispatcher implements Serializable
 	{
 		public static const AREAS_CHANGED: String = 'areas changed';
+		public static const AREAS_THUMBNAILS_CACHE: Dictionary = new Dictionary();
 		
 		internal static var sm_instance: AreaConfigurationManager;
 
@@ -32,6 +36,29 @@ package com.iblsoft.flexiweather.ogc
 			return sm_instance;
 		}
 		
+		public static function getAreaThumbnail(s_key: String): Bitmap
+		{
+			if(s_key in AREAS_THUMBNAILS_CACHE) {
+				var bd: BitmapData = AREAS_THUMBNAILS_CACHE[s_key].image;
+				return new Bitmap(bd);
+				trace("getAreaThumbnail: " + s_key + " AREAS_THUMBNAILS_CACHE[s_key].image: " + AREAS_THUMBNAILS_CACHE[s_key].image);
+			}
+			trace("getAreaThumbnail null" );
+			return null;
+		}
+	
+		public static function addAreaThumbnail(img: Bitmap, s_key: String): void
+		{
+			
+			if (img.width == 0 || img.height == 0)
+				return;
+				
+			AREAS_THUMBNAILS_CACHE[s_key] = {
+				image: img.bitmapData
+			};
+			trace("addAreaThumbnail: " + s_key + " size" + img.width + " , " + img.height + " AREAS_THUMBNAILS_CACHE[s_key]: " + AREAS_THUMBNAILS_CACHE[s_key]);
+		}
+	
 		public function serialize(storage: Storage): void
 		{
 			storage.serializeNonpersistentArrayCollection("area", ma_areas, AreaConfiguration);
