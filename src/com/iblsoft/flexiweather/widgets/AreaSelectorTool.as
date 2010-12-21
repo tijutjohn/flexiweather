@@ -2,7 +2,9 @@ package com.iblsoft.flexiweather.widgets
 {
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.ogc.ProjectionConfiguration;
 	import com.iblsoft.flexiweather.proj.Coord;
+	import com.iblsoft.flexiweather.proj.Projection;
 	
 	import flash.display.DisplayObject;
 	import flash.events.MouseEvent;
@@ -20,6 +22,15 @@ package com.iblsoft.flexiweather.widgets
 		private var _toolIsCreated: Boolean;
 		
 		private var _p: Point;
+		
+		private var _projection: Projection;
+		private var _projectionConfiguration: ProjectionConfiguration;
+		public function set projectionConfiguration(value: ProjectionConfiguration): void
+		{
+			_projectionConfiguration = value;
+			
+			_projection = Projection.getByCfg(value);
+		}
 		
 		private var _selectedBBox: BBox;
 		public function get selectedBBox(): BBox
@@ -229,7 +240,15 @@ package com.iblsoft.flexiweather.widgets
 		
 		public function findCoordinates(x: Number, y: Number): Coord
 		{
-			var c: Coord = new Coord(container.getCRS(),x,y);
+//			if (_projection)
+//			{
+////				_projection.
+//
+//				var c: Coord = m_iw.pointToCoord(event.localX, event.localY).toLaLoCoord();
+//				trace(c != null ? c.toNiceString() : "?");
+//			}
+			var crs: String = container.getCRS(); 
+			var c: Coord = new Coord(crs,x,y).toLaLoCoord();
 //			trace("findCoordinates ["+x+","+y+"]: " + c.toString() + " nice: " + c.toNiceString());
 			return c;
 		}

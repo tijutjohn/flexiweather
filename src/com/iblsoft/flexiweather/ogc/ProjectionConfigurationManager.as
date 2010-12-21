@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
@@ -49,6 +50,21 @@ package com.iblsoft.flexiweather.ogc
 		{
 //			trace("ProjectionConfigurationManager addParsedAreaByCRS: " + crs.crs);
 			ma_parsedProjectionsDictionary[projection.crs] = projection;
+			addProj4Projection(projection);
+			
+		}
+		private function addProj4Projection(projection: ProjectionConfiguration): void
+		{
+			if (projection && projection.crs && projection.proj4String)
+		 		Projection.addCRSByProj4(projection.crs, projection.proj4String);
+		}
+		public function initializeProj4Projections(): void
+		{
+			 var allProjs: ArrayCollection = getAllProjections;
+			 for each (var proj: ProjectionConfiguration in allProjs)
+			 {
+			 	addProj4Projection(proj);
+			 }
 		}
 		public function initializeParsedProjections(): void
 		{
@@ -58,6 +74,7 @@ package com.iblsoft.flexiweather.ogc
 			for each (var projection: ProjectionConfiguration in ma_parsedProjectionsDictionary)
 			{
 				ma_parsedProjections.addItem(projection);
+				addProj4Projection(projection);
 			}
 			trace("ProjectionConfigurationManager initializeParsedAreas items: " + ma_parsedProjections.length);
 			
@@ -69,6 +86,7 @@ package com.iblsoft.flexiweather.ogc
 		public function addProjection(projection: ProjectionConfiguration): void
 		{
 			ma_projections.addItem(projection);
+			addProj4Projection(projection);
 		}
 		
 		public function removeProjection(projection: ProjectionConfiguration): void
