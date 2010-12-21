@@ -99,13 +99,16 @@ package com.iblsoft.flexiweather.ogc
 				var projectionManager: ProjectionConfigurationManager = ProjectionConfigurationManager.getInstance();
 				
 				projectionManager.removeParsedProjections();
+				var projConfig: ProjectionConfiguration;
+				
 				for each (var currLayer: WMSLayerBase in m_layers.layers)
 				{
 					var crsColl: ArrayCollection = currLayer.crsWithBBoxes;
 //					trace("Layer: " + currLayer.ms_name + " crs: " + crsColl.length);	
 					for each (var crs: CRSWithBBox in crsColl)
 					{
-						projectionManager.addParsedProjectionByCRS(crs);
+						projConfig = new ProjectionConfiguration(crs.crs, crs.bbox.clone());
+						projectionManager.addParsedProjectionByCRS(projConfig);
 					}
 				}
 				projectionManager.initializeParsedProjections();

@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	
@@ -31,7 +32,7 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function serialize(storage: Storage): void
 		{
-			storage.serializeNonpersistentArrayCollection("projection", ma_projections, CRSWithBBox);
+			storage.serializeNonpersistentArrayCollection("projection", ma_projections, ProjectionConfiguration);
 			trace("pr: " + ma_projections);
 		}
 		
@@ -44,18 +45,19 @@ package com.iblsoft.flexiweather.ogc
 //			ma_parsedProjectionsDictionary = new Dictionary();
 		}
 		
-		public function addParsedProjectionByCRS(crs: CRSWithBBox): void
+		public function addParsedProjectionByCRS(projection: ProjectionConfiguration): void
 		{
 //			trace("ProjectionConfigurationManager addParsedAreaByCRS: " + crs.crs);
-			ma_parsedProjectionsDictionary[crs.crs] = crs;
+			ma_parsedProjectionsDictionary[projection.crs] = projection;
 		}
 		public function initializeParsedProjections(): void
 		{
+			//FIXME check if every projection has proj4 string (mainly projection parsed from GetCapabilities)
 			ma_parsedProjections.removeAll();
 			
-			for each (var crs: CRSWithBBox in ma_parsedProjectionsDictionary)
+			for each (var projection: ProjectionConfiguration in ma_parsedProjectionsDictionary)
 			{
-				ma_parsedProjections.addItem(crs);
+				ma_parsedProjections.addItem(projection);
 			}
 			trace("ProjectionConfigurationManager initializeParsedAreas items: " + ma_parsedProjections.length);
 			
@@ -64,63 +66,38 @@ package com.iblsoft.flexiweather.ogc
 //			trace("getAreaXMLList ma_areas2: " + ma_areas.length);
 		}
 		
-		public function addProjection(l: CRSWithBBox): void
+		public function addProjection(projection: ProjectionConfiguration): void
 		{
-			ma_projections.addItem(l);
+			ma_projections.addItem(projection);
 		}
 		
-		public function removeProjection(l: CRSWithBBox): void
+		public function removeProjection(projection: ProjectionConfiguration): void
 		{
-			var i: int = ma_projections.getItemIndex(l);
+			var i: int = ma_projections.getItemIndex(projection);
 			if(i >= 0) {
 				ma_projections.removeItemAt(i);
 			}
 		}
-		/*
-		private var areaGroups:Array = [];
 		
-		public function getProjectionXMLList(): XML
-		{
-			if (ma_projections && ma_projections.length > 0)
-			{
-				var areasXMLList: XML = <menuitem label='Areas' data='area'/>;
-				var groupParentXML: XML;
-				
-				for each (var area: CRSWithBBox in ma_projections)
-				{
-					var groupName: String = area.ms_group_name;
-					var areaData: String = "area."+area.crsWithBBox.crs+","+area.crsWithBBox.bbox.xMin+","+area.crsWithBBox.bbox.yMin+","+area.crsWithBBox.bbox.xMax+","+area.crsWithBBox.bbox.yMax;
-					var areaXML: XML = <menuitem label={area.label} data={areaData} icon={area.icon}/>
-					
-					if (groupName && groupName.length > 0)
-					{
-						if (!areaGroups[groupName])
-						{
-							groupParentXML = <menuitem label={groupName}/>;
-							areaGroups[groupName] = groupParentXML;
-							areasXMLList.appendChild(groupParentXML);
-						} else {
-							groupParentXML = areaGroups[groupName];
-						}
-							
-						groupParentXML.appendChild(areaXML);	
-						
-					} else {
-						areasXMLList.appendChild(areaXML);
-					}
-				}
-				
-				var areaCustom: XML = <menuitem label='Custom...' data='custom.area'/>;
-				areasXMLList.appendChild(areaCustom);
-				
-				return areasXMLList;
-			}
-			return null;
-		}*/
 		// getters & setters
 		public function get projections(): ArrayCollection
 		{ return ma_projections; }
+		
 		public function get parsedProjections(): ArrayCollection
 		{ return ma_parsedProjections; }
+		
+		public function get getAllProjections(): ArrayCollection
+		{ 
+			var projections: ArrayCollection = projections; 
+			var projections2: ArrayCollection = parsedProjections; 
+			ArrayUtils.unionArrays(projections.source, projections2.source,  compareProjections);
+			
+			return projections;
+		}
+		
+		public function compareProjections(proj1: ProjectionConfiguration, proj2: ProjectionConfiguration): Boolean
+		{
+			return (proj1.crs == proj2.crs);
+		}
 	}
 }

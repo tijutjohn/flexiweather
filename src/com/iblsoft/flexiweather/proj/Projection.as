@@ -1,5 +1,7 @@
 package com.iblsoft.flexiweather.proj
 {
+	import com.iblsoft.flexiweather.ogc.ProjectionConfiguration;
+	
 	import flash.geom.Point;
 	import flash.utils.Dictionary;
 	
@@ -26,7 +28,7 @@ package com.iblsoft.flexiweather.proj
 			if(m_proj == null)
 				Log.getLogger("Projection").error("Unknown CRS '" + s_crs + "'");
 		}
-
+		
 		public static function getByCRS(s_crs: String): Projection
 		{
 			if(s_crs in m_cache)
@@ -34,6 +36,11 @@ package com.iblsoft.flexiweather.proj
 			var prj: Projection = new Projection(s_crs);
 			m_cache[s_crs] = prj;
 			return prj;
+		}
+		
+		public static function getByCfg(cfg: ProjectionConfiguration): Projection
+		{
+			return getByCRS(cfg.crs);
 		}
 		
 		public static function addCRSByProj4(s_crs: String, s_proj4String: String): void

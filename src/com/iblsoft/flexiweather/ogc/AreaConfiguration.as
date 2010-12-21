@@ -12,7 +12,7 @@ package com.iblsoft.flexiweather.ogc
 		public static const AREA_ICON_WIDTH: int = 60;
 		public static const AREA_ICON_HEIGHT: int = 60;
 		
-		public var crsWithBBox: CRSWithBBox;
+		public var projection: ProjectionConfiguration;
 		
 		private var ms_default_area: Boolean;
 		public function get isDefaultArea(): Boolean
@@ -55,7 +55,7 @@ package com.iblsoft.flexiweather.ogc
 
 		public function get icon(): String
 		{
-			var url:String = "${BASE_URL}/ria?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=background-dem,foreground-lines&STYLES=bright-colours,black-lines-dotted&CRS="+crsWithBBox.crs+"&BBOX="+crsWithBBox.bbox.toBBOXString();
+			var url:String = "${BASE_URL}/ria?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=background-dem,foreground-lines&STYLES=bright-colours,black-lines-dotted&CRS="+projection.crs+"&BBOX="+projection.bbox.toBBOXString();
 			url += "&WIDTH=" + AREA_ICON_WIDTH + "&HEIGHT=" + AREA_ICON_HEIGHT + "&FORMAT=image/png&TRANSPARENT=TRUE";
 			url = UniURLLoader.fromBaseURL(url);
 			
@@ -70,10 +70,10 @@ package com.iblsoft.flexiweather.ogc
 		{
 			if(storage.isLoading())
 			{
-				crsWithBBox = new CRSWithBBox('');
-				crsWithBBox.bbox = new BBox(0,0,0,0);
+				projection = new ProjectionConfiguration();
+//				projection.bbox = new BBox(0,0,0,0);
 			}
-			
+//			
 			ms_name = storage.serializeString(
 					"name", ms_name, null);
 			ms_group_name = storage.serializeString(
@@ -81,12 +81,12 @@ package com.iblsoft.flexiweather.ogc
 			ms_default_area = storage.serializeBool(
 					"default", ms_default_area, false);
 					
-			crsWithBBox.crs = storage.serializeString("crs", crsWithBBox.crs, null);
+			projection.crs = storage.serializeString("crs", projection.crs, null);
 			
-			crsWithBBox.bbox.mf_xMin = storage.serializeInt("min-x", crsWithBBox.bbox.mf_xMin, 0);
-			crsWithBBox.bbox.mf_xMax = storage.serializeInt("max-x", crsWithBBox.bbox.mf_xMax, 0);
-			crsWithBBox.bbox.mf_yMin = storage.serializeInt("min-y", crsWithBBox.bbox.mf_yMin, 0);
-			crsWithBBox.bbox.mf_yMax = storage.serializeInt("max-y", crsWithBBox.bbox.mf_yMax, 0);
+			projection.bbox.mf_xMin = storage.serializeInt("min-x", projection.bbox.mf_xMin, 0);
+			projection.bbox.mf_xMax = storage.serializeInt("max-x", projection.bbox.mf_xMax, 0);
+			projection.bbox.mf_yMin = storage.serializeInt("min-y", projection.bbox.mf_yMin, 0);
+			projection.bbox.mf_yMax = storage.serializeInt("max-y", projection.bbox.mf_yMax, 0);
 		}
 		
 		public function toRequest(s_request: String): URLRequest
@@ -103,7 +103,7 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function toGetMapURL(): URLRequest
 		{
-//			var url="{$BASE_URL}/ria?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=background-dem,foreground-lines&CRS="+crsWithBBox.crs+"&BBOX="+crsWithBBox.bbox.toBBOXString();
+//			var url="{$BASE_URL}/ria?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=background-dem,foreground-lines&CRS="+projection.crs+"&BBOX="+projection.bbox.toBBOXString();
 //			url += "WIDTH=48&HEIGHT=48&FORMAT=image/png&TRANSPARENT=TRUE";
 			
 			var r: URLRequest = toRequest("GetMap");
@@ -112,8 +112,8 @@ package com.iblsoft.flexiweather.ogc
 //			if(m_service.m_version.isLessThan(1, 3, 0)) 
 //				r.data.SRS = s_crs;
 //			else 
-				r.data.CRS = crsWithBBox.crs; 
-			r.data.BBOX = crsWithBBox.bbox.toBBOXString(); 
+				r.data.CRS = projection.crs; 
+			r.data.BBOX = projection.bbox.toBBOXString(); 
 			r.data.WIDTH = AREA_ICON_WIDTH;
 			r.data.HEIGHT = AREA_ICON_HEIGHT;
 //			if(s_stylesList != null)
