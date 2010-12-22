@@ -4,6 +4,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.utils.UniURLLoader;
 	
+	import flash.geom.Rectangle;
 	import flash.net.URLRequest;
 	import flash.net.URLVariables;
 
@@ -55,11 +56,32 @@ package com.iblsoft.flexiweather.ogc
 
 		public function get icon(): String
 		{
-			var url:String = "${BASE_URL}/ria?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=background-dem,foreground-lines&STYLES=bright-colours,black-lines-dotted&CRS="+projection.crs+"&BBOX="+projection.bbox.toBBOXString();
-			url += "&WIDTH=" + AREA_ICON_WIDTH + "&HEIGHT=" + AREA_ICON_HEIGHT + "&FORMAT=image/png&TRANSPARENT=TRUE";
+			if (!_thumbBBox)
+				createThumbnailBBox();
+				
+			
+			var w: int = AREA_ICON_WIDTH;
+			var h: int = AREA_ICON_WIDTH;
+			
+			var rect: Rectangle = projection.bbox.toRectangle();
+			var aspectRatio: Number = rect.width / rect.height;
+			if (aspectRatio > 1)
+			{
+				w *= aspectRatio;
+			} else {
+				h /= aspectRatio;
+			}
+//			var url:String = "${BASE_URL}/ria?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=background-dem,foreground-lines&STYLES=bright-colours,black-lines-dotted&CRS="+projection.crs+"&BBOX="+projection.bbox.toBBOXString();
+			var url:String; 
+			url = "${BASE_URL}/ria?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=background-dem,foreground-lines&STYLES=bright-colours,black-lines-dotted&CRS="+projection.crs;
+			if (!_thumbBBox)
+				url += "&BBOX="+projection.bbox.toBBOXString();
+			else
+				url += "&BBOX="+_thumbBBox.toBBOXString();
+			url += "&WIDTH=" + w + "&HEIGHT=" + h + "&FORMAT=image/png&TRANSPARENT=TRUE";
 			url = UniURLLoader.fromBaseURL(url);
 			
-			trace("AreaConfiguration icon url : " + url);
+			trace("AreaConfiguration icon ["+w+","+h+"] url : " + url);
 			return url;
 		}
 		public function AreaConfiguration()
@@ -87,8 +109,52 @@ package com.iblsoft.flexiweather.ogc
 			projection.bbox.mf_xMax = storage.serializeInt("max-x", projection.bbox.mf_xMax, 0);
 			projection.bbox.mf_yMin = storage.serializeInt("min-y", projection.bbox.mf_yMin, 0);
 			projection.bbox.mf_yMax = storage.serializeInt("max-y", projection.bbox.mf_yMax, 0);
+			
+			createThumbnailBBox();
 		}
 		
+		private var _thumbBBox: BBox;
+		 
+		public function update(): void
+		{
+			createThumbnailBBox();
+		}
+		private function createThumbnailBBox(): void
+		{
+			return;
+			if (projection && projection.bbox)
+			{
+				var maxExtent: BBox = ProjectionConfigurationManager.getInstance().getMaxExtentForProjection(projection);
+				if (!maxExtent)
+					return;
+				if (maxExtent.equals(projection.bbox))
+					return;
+				var rect: Rectangle = projection.bbox.toRectangle();
+				var aspectRatio: Number = rect.width / rect.height;
+				trace("aspectRatio: " + aspectRatio);
+				if (aspectRatio > 1)
+				{
+					_thumbBBox = projection.bbox.scaled(1, aspectRatio);
+				} else {
+					_thumbBBox = projection.bbox.scaled(1/aspectRatio, 1);
+				}
+				
+				debugBBoxes()
+			}	
+		}
+		
+		private function debugBBoxes(): void
+		{
+			var rect: Rectangle = projection.bbox.toRectangle();
+			var aspectRatio: Number = rect.width / rect.height;
+			trace("AREA ["+name+"] projection BBOX aspectRatio: " + aspectRatio);
+			if (_thumbBBox)
+			{
+				rect = _thumbBBox.toRectangle();
+				aspectRatio = rect.width / rect.height;
+				trace("AREA ["+name+"] _thumbBBox aspectRatio: " + aspectRatio);
+			}
+		}
 		public function toRequest(s_request: String): URLRequest
 		{
 			var r: URLRequest = new URLRequest('${BASE_URL}/ria');

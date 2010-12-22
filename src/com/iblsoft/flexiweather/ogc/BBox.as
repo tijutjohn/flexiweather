@@ -68,7 +68,7 @@ package com.iblsoft.flexiweather.ogc
 			var p: Point =  center;
 			var rect: Rectangle = toRectangle();
 			
-			return new BBox(p.x - rect.width * sy / 2, p.y - rect.height * sy / 2, p.x + rect.width * sy / 2, p.y + rect.height * sy / 2);
+			return new BBox(p.x - rect.width * sx / 2, p.y - rect.height * sy / 2, p.x + rect.width * sx / 2, p.y + rect.height * sy / 2);
 		}
 		
 		public function translated(dx: Number, dy: Number): BBox

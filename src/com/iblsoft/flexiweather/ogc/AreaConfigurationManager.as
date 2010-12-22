@@ -67,6 +67,7 @@ package com.iblsoft.flexiweather.ogc
 		public function editArea(area: AreaConfiguration): void
 		{
 			//FIXME edit area
+			area.update();
 			notify();
 		}
 		public function addArea(area: AreaConfiguration): void
