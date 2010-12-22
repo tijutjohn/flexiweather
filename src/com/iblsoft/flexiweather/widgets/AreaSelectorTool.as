@@ -7,6 +7,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.proj.Projection;
 	
 	import flash.display.DisplayObject;
+	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
@@ -15,6 +16,9 @@ package com.iblsoft.flexiweather.widgets
 
 	public class AreaSelectorTool extends InteractiveLayer
 	{
+		public static const AREA_CREATED: String = 'area created';
+		public static const AREA_CANCELLED: String = 'area cancelled';
+		
 		private var _areaComponent: AreaRectangle;
 		
 		private var _r: Rectangle;
@@ -125,8 +129,10 @@ package com.iblsoft.flexiweather.widgets
 				
 				if((_r.width) > 5 && (_r.height) > 5) {
 		        	findAreaCoordinates();
+		        	dispatchEvent(new Event(AREA_CREATED));
 				} else {
-					_r = null
+					_r = null;
+		        	dispatchEvent(new Event(AREA_CANCELLED));
 				}
 				_toolIsCreated = true;	
 	        	_mouseDown = false;

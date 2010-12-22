@@ -64,15 +64,20 @@ package com.iblsoft.flexiweather.ogc
 			storage.serializeNonpersistentArrayCollection("area", ma_areas, AreaConfiguration);
 		}
 		
-		public function addArea(l: AreaConfiguration): void
+		public function editArea(area: AreaConfiguration): void
 		{
-			ma_areas.addItem(l);
+			//FIXME edit area
+			notify();
+		}
+		public function addArea(area: AreaConfiguration): void
+		{
+			ma_areas.addItem(area);
 			notify();
 		}
 		
-		public function removeArea(l: AreaConfiguration): void
+		public function removeArea(area: AreaConfiguration): void
 		{
-			var i: int = ma_areas.getItemIndex(l);
+			var i: int = ma_areas.getItemIndex(area);
 			if(i >= 0) {
 				ma_areas.removeItemAt(i);
 				notify();
@@ -106,6 +111,8 @@ package com.iblsoft.flexiweather.ogc
 		{
 			if (ma_areas && ma_areas.length > 0)
 			{
+				areaGroups = [];
+				var submenuPos: int = 0;
 				var areasXMLList: XML = <menuitem label='Areas' data='area'/>;
 				var groupParentXML: XML;
 				
@@ -121,7 +128,13 @@ package com.iblsoft.flexiweather.ogc
 						{
 							groupParentXML = <menuitem label={groupName}/>;
 							areaGroups[groupName] = groupParentXML;
-							areasXMLList.appendChild(groupParentXML);
+							var len:int = areasXMLList.elements().length();
+							if (len == 0)
+								areasXMLList.appendChild(groupParentXML);
+							else
+								areasXMLList.insertChildAfter(areasXMLList.elements()[submenuPos-1], groupParentXML);
+							submenuPos++;
+							
 						} else {
 							groupParentXML = areaGroups[groupName];
 						}
