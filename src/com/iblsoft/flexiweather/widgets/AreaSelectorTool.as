@@ -153,6 +153,17 @@ package com.iblsoft.flexiweather.widgets
         	return true;
         }
         
+        public function createSelection(bbox: BBox): void
+        {
+        	_selectedBBox = bbox;
+        	
+        	_r = new Rectangle();
+        	
+        	updateRectangleFromViewBBox();
+        	
+        	invalidateDisplayList();
+        }
+        
         override public function onMouseMove(event: MouseEvent):Boolean
         {
         	if(event.ctrlKey || event.shiftKey)
@@ -243,6 +254,7 @@ package com.iblsoft.flexiweather.widgets
 	        	
 			}
 		}
+		
 		
 		public function findCoordinates(x: Number, y: Number): Coord
 		{

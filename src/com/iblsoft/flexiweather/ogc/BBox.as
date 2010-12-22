@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	
 	/**
@@ -55,6 +56,19 @@ package com.iblsoft.flexiweather.ogc
 		{
         	return String(mf_xMin) + "," + String(mf_yMin) + ","
 					+ String(mf_xMax) + "," + String(mf_yMax);
+		}
+		
+		public function get center(): Point
+		{
+			return new Point( mf_xMin + (mf_xMax - mf_xMin) / 2, mf_yMin + (mf_yMax - mf_yMin) / 2)
+		}
+		
+		public function scaled(sx: Number, sy: Number): BBox
+		{
+			var p: Point =  center;
+			var rect: Rectangle = toRectangle();
+			
+			return new BBox(p.x - rect.width * sy / 2, p.y - rect.height * sy / 2, p.x + rect.width * sy / 2, p.y + rect.height * sy / 2);
 		}
 		
 		public function translated(dx: Number, dy: Number): BBox

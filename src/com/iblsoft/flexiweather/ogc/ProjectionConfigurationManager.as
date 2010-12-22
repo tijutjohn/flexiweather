@@ -58,6 +58,18 @@ package com.iblsoft.flexiweather.ogc
 			if (projection && projection.crs && projection.proj4String)
 		 		Projection.addCRSByProj4(projection.crs, projection.proj4String);
 		}
+		
+		public function getMaxExtentForProjection(projection: ProjectionConfiguration): BBox
+		{
+			 var allProjs: ArrayCollection = getAllProjections;
+			 for each (var proj: ProjectionConfiguration in allProjs)
+			 {
+			 	if (proj.crs == projection.crs)
+			 		return proj.bbox;
+			 }
+			 return null;
+		}
+		
 		public function initializeProj4Projections(): void
 		{
 			 var allProjs: ArrayCollection = getAllProjections;
