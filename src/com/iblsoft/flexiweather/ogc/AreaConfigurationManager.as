@@ -15,6 +15,7 @@ package com.iblsoft.flexiweather.ogc
 	{
 		public static const AREAS_CHANGED: String = 'areas changed';
 		public static const AREAS_THUMBNAILS_CACHE: Dictionary = new Dictionary();
+		public static const AREAS_THUMBNAILS_CACHE2: Dictionary = new Dictionary();
 		
 		internal static var sm_instance: AreaConfigurationManager;
 
@@ -36,27 +37,55 @@ package com.iblsoft.flexiweather.ogc
 			return sm_instance;
 		}
 		
-		public static function getAreaThumbnail(s_key: String): Bitmap
+		public static function getAreaThumbnail(s_key: String, cacheID: int): Bitmap
 		{
-			if(s_key in AREAS_THUMBNAILS_CACHE) {
-				var bd: BitmapData = AREAS_THUMBNAILS_CACHE[s_key].image;
-				return new Bitmap(bd);
-				trace("getAreaThumbnail: " + s_key + " AREAS_THUMBNAILS_CACHE[s_key].image: " + AREAS_THUMBNAILS_CACHE[s_key].image);
+			var bd: BitmapData
+			if (cacheID == 1) {
+				if(s_key in AREAS_THUMBNAILS_CACHE) {
+					bd = AREAS_THUMBNAILS_CACHE[s_key].image;
+					trace("getAreaThumbnail: " + s_key + " AREAS_THUMBNAILS_CACHE[s_key].image: " + AREAS_THUMBNAILS_CACHE[s_key].image);
+				}
+			} else {
+				if (cacheID == 2)
+				{
+					if(s_key in AREAS_THUMBNAILS_CACHE2) {
+						bd = AREAS_THUMBNAILS_CACHE2[s_key].image;
+						trace("getAreaThumbnail: " + s_key + " AREAS_THUMBNAILS_CACHE[s_key].image: " + AREAS_THUMBNAILS_CACHE2[s_key].image);
+					}
+				}
+				
 			}
-			trace("getAreaThumbnail null" );
+			if (bd)
+				return new Bitmap(bd);
+				
+			if (s_key)
+				trace("getAreaThumbnail null" );
 			return null;
 		}
 	
-		public static function addAreaThumbnail(img: Bitmap, s_key: String): void
+		public static function addAreaThumbnail(img: Bitmap, s_key: String, cacheID: int): void
 		{
 			
 			if (img.width == 0 || img.height == 0)
 				return;
 				
-			AREAS_THUMBNAILS_CACHE[s_key] = {
-				image: img.bitmapData
-			};
-			trace("addAreaThumbnail: " + s_key + " size" + img.width + " , " + img.height + " AREAS_THUMBNAILS_CACHE[s_key]: " + AREAS_THUMBNAILS_CACHE[s_key]);
+			var bd: BitmapData = img.bitmapData.clone();
+			
+			if (cacheID == 1)
+			{	
+				AREAS_THUMBNAILS_CACHE[s_key] = {
+					image: bd
+				};
+				trace("addAreaThumbnail: " + s_key + " size" + img.width + " , " + img.height + " AREAS_THUMBNAILS_CACHE[s_key]: " + AREAS_THUMBNAILS_CACHE[s_key]);
+			} else {
+				if (cacheID == 2)
+				{	
+					AREAS_THUMBNAILS_CACHE2[s_key] = {
+						image: bd
+					};
+					trace("addAreaThumbnail2: " + s_key + " size" + img.width + " , " + img.height + " AREAS_THUMBNAILS_CACHE2[s_key]: " + AREAS_THUMBNAILS_CACHE2[s_key]);
+				}
+			}
 		}
 	
 		public function serialize(storage: Storage): void
