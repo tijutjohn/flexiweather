@@ -81,7 +81,7 @@ package com.iblsoft.flexiweather.ogc
 			url += "&WIDTH=" + w + "&HEIGHT=" + h + "&FORMAT=image/png&TRANSPARENT=TRUE";
 			url = UniURLLoader.fromBaseURL(url);
 			
-			trace("AreaConfiguration icon ["+w+","+h+"] url : " + url);
+//			trace("AreaConfiguration icon ["+w+","+h+"] url : " + url);
 			return url;
 		}
 		public function AreaConfiguration()
@@ -131,7 +131,7 @@ package com.iblsoft.flexiweather.ogc
 					return;
 				var rect: Rectangle = projection.bbox.toRectangle();
 				var aspectRatio: Number = rect.width / rect.height;
-				trace("aspectRatio: " + aspectRatio);
+//				trace("aspectRatio: " + aspectRatio);
 				if (aspectRatio > 1)
 				{
 					_thumbBBox = projection.bbox.scaled(1, aspectRatio);
@@ -147,12 +147,12 @@ package com.iblsoft.flexiweather.ogc
 		{
 			var rect: Rectangle = projection.bbox.toRectangle();
 			var aspectRatio: Number = rect.width / rect.height;
-			trace("AREA ["+name+"] projection BBOX aspectRatio: " + aspectRatio);
+//			trace("AREA ["+name+"] projection BBOX aspectRatio: " + aspectRatio);
 			if (_thumbBBox)
 			{
 				rect = _thumbBBox.toRectangle();
 				aspectRatio = rect.width / rect.height;
-				trace("AREA ["+name+"] _thumbBBox aspectRatio: " + aspectRatio);
+//				trace("AREA ["+name+"] _thumbBBox aspectRatio: " + aspectRatio);
 			}
 		}
 		public function toRequest(s_request: String): URLRequest
