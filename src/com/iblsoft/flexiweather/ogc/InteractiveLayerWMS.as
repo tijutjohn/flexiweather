@@ -151,6 +151,32 @@ package com.iblsoft.flexiweather.ogc
 //			updateData(true);
 		}
 		
+		/**
+		 * function returns full URL for getting map 
+		 * @return 
+		 * 
+		 */		
+		public function getFullURL(): String
+		{
+			var request: URLRequest = m_cfg.toGetMapRequest(
+					container.getCRS(), container.getViewBBox().toBBOXString(),
+					int(container.width), int(container.height),
+					getWMSStyleListString());
+			updateDimensionsInURLRequest(request);
+			updateCustomParametersInURLRequest(request);
+			
+			var s_url: String = request.url;
+			if(request.data) {
+				if(s_url.indexOf("?") >= 0)
+					s_url += "&";
+				else
+					s_url += "?";
+				s_url += request.data;
+			}
+			
+			return s_url;
+		}
+		
 		public function updateData(b_forceUpdate: Boolean): void
 		{
 			if(m_job != null)

@@ -3,6 +3,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.utils.UniURLLoader;
+	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
@@ -87,6 +88,13 @@ package com.iblsoft.flexiweather.ogc
 				var layersXMLList: XML = <menuitem label='Layers' data='layer'/>;
 				var groupParentXML: XML;
 				
+				var iw: InteractiveWidget = new InteractiveWidget();
+				iw.width = 150;
+				iw.height = 100;
+				
+				var lWMS: InteractiveLayerWMS;
+				var bbox: BBox;
+						
 				for each (var layer: WMSLayerConfiguration in ma_layers)
 				{
 					var lbl: String = layer.label;
@@ -102,15 +110,31 @@ package com.iblsoft.flexiweather.ogc
 					
 					var s_url: String = layer.previewURL;
 					var icon: String = '';
-					if(s_url == "<internal>") {
-						s_url = layer.service.fullURL;
-						//check if there is ${BASE_URL} in fullURL and convert it
-						s_url = UniURLLoader.fromBaseURL(s_url);
-						s_url = s_url.replace(/.*\//, "").replace(/\?.*/, "");
-						s_url = s_url.replace("/", "-");
-						s_url += "-" + layer.ma_layerNames.join("_").replace(" ", "-").toLowerCase();
-						s_url = "assets/layer-previews/" + s_url + ".png";
+					if(s_url == null || s_url.length == 0) {
+//						s_url = layer.service.fullURL;
+//						s_url = UniURLLoader.fromBaseURL(s_url);
+						
+						lWMS = new InteractiveLayerWMS(iw, layer);
+						bbox = lWMS.getExtent();
+						if(bbox != null)
+							iw.setExtentBBOX(bbox);
+						iw.addLayer(lWMS);
+						lWMS.dataLoader.data = { label: layer.label, cfg: layer };
+						s_url = lWMS.getFullURL();
+							
 						icon = s_url;
+					} else {
+					
+						if(s_url == "<internal>") {
+							s_url = layer.service.fullURL;
+							//check if there is ${BASE_URL} in fullURL and convert it
+							s_url = UniURLLoader.fromBaseURL(s_url);
+							s_url = s_url.replace(/.*\//, "").replace(/\?.*/, "");
+							s_url = s_url.replace("/", "-");
+							s_url += "-" + layer.ma_layerNames.join("_").replace(" ", "-").toLowerCase();
+							s_url = "assets/layer-previews/" + s_url + ".png";
+							icon = s_url;
+						}
 					}
 					
 					var layerData: String = "layer."+layer.label;
