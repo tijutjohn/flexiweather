@@ -41,19 +41,6 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 		
-		internal var ms_group_name: String;
-		public function get groupName(): String
-		{
-			return ms_group_name;
-		}
-		public function set groupName(value: String): void
-		{
-			if (value != ms_group_name)
-			{
-				ms_group_name = value;
-			}
-		}
-
 		public function get icon(): String
 		{
 			if (!_thumbBBox)
@@ -71,7 +58,6 @@ package com.iblsoft.flexiweather.ogc
 			} else {
 				h /= aspectRatio;
 			}
-//			var url:String = "${BASE_URL}/ria?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=background-dem,foreground-lines&STYLES=bright-colours,black-lines-dotted&CRS="+projection.crs+"&BBOX="+projection.bbox.toBBOXString();
 			var url:String; 
 			url = "${BASE_URL}/ria?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=background-dem,foreground-lines&STYLES=bright-colours,black-lines-dotted&CRS="+projection.crs;
 			if (!_thumbBBox)
@@ -93,13 +79,9 @@ package com.iblsoft.flexiweather.ogc
 			if(storage.isLoading())
 			{
 				projection = new ProjectionConfiguration();
-//				projection.bbox = new BBox(0,0,0,0);
 			}
-//			
 			ms_name = storage.serializeString(
 					"name", ms_name, null);
-			ms_group_name = storage.serializeString(
-					"group-name", ms_group_name, null);
 			ms_default_area = storage.serializeBool(
 					"default", ms_default_area, false);
 					
@@ -131,7 +113,6 @@ package com.iblsoft.flexiweather.ogc
 					return;
 				var rect: Rectangle = projection.bbox.toRectangle();
 				var aspectRatio: Number = rect.width / rect.height;
-//				trace("aspectRatio: " + aspectRatio);
 				if (aspectRatio > 1)
 				{
 					_thumbBBox = projection.bbox.scaled(1, aspectRatio);
@@ -169,9 +150,6 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function toGetMapURL(): URLRequest
 		{
-//			var url="{$BASE_URL}/ria?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=background-dem,foreground-lines&CRS="+projection.crs+"&BBOX="+projection.bbox.toBBOXString();
-//			url += "WIDTH=48&HEIGHT=48&FORMAT=image/png&TRANSPARENT=TRUE";
-			
 			var r: URLRequest = toRequest("GetMap");
 			//add background and lines
 			r.data.LAYERS = "background-dem,foreground-lines";

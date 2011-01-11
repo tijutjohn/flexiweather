@@ -2,6 +2,7 @@ package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
+	import com.iblsoft.flexiweather.utils.UniURLLoader;
 	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
@@ -35,6 +36,19 @@ package com.iblsoft.flexiweather.ogc
 		public function serialize(storage: Storage): void
 		{
 			storage.serializeNonpersistentArrayCollection("layer", ma_layers, WMSLayerConfiguration);
+		}
+		
+		public function getLayerByLabel(lbl: String): WMSLayerConfiguration
+		{
+			if (ma_layers && ma_layers.length > 0)
+			{
+				for each (var layer: WMSLayerConfiguration in ma_layers)
+				{
+					if (layer.label == lbl)
+						return layer;
+				}
+			}
+			return null;
 		}
 		
 		public function editLayer(l: WMSLayerConfiguration): void
@@ -75,10 +89,32 @@ package com.iblsoft.flexiweather.ogc
 				
 				for each (var layer: WMSLayerConfiguration in ma_layers)
 				{
-					var folderName: String = layer.folderName;
-					var layerData: String = ""//"layer."+layer.projection.crs+","+layer.projection.bbox.xMin+","+layer.projection.bbox.yMin+","+layer.projection.bbox.xMax+","+layer.projection.bbox.yMax;
-					var icon: String =  '';
-					var layerXML: XML = <menuitem label={layer.label} data={layerData} icon={icon}/>
+					var lbl: String = layer.label;
+					var folderName: String = '';
+					
+					if (lbl && lbl.indexOf('/') > 0)
+					{
+						var lastPos: int = lbl.lastIndexOf('/');
+						
+						folderName = lbl.substring(0, lastPos);
+						lbl = lbl.substring(lastPos+1, lbl.length);
+					}
+					
+					var s_url: String = layer.previewURL;
+					var icon: String = '';
+					if(s_url == "<internal>") {
+						s_url = layer.service.fullURL;
+						//check if there is ${BASE_URL} in fullURL and convert it
+						s_url = UniURLLoader.fromBaseURL(s_url);
+						s_url = s_url.replace(/.*\//, "").replace(/\?.*/, "");
+						s_url = s_url.replace("/", "-");
+						s_url += "-" + layer.ma_layerNames.join("_").replace(" ", "-").toLowerCase();
+						s_url = "assets/layer-previews/" + s_url + ".png";
+						icon = s_url;
+					}
+					
+					var layerData: String = "layer."+layer.label;
+					var layerXML: XML = <menuitem label={lbl} data={layerData} icon={icon}/>
 					
 					if (folderName && folderName.length > 0)
 					{
@@ -89,8 +125,7 @@ package com.iblsoft.flexiweather.ogc
 						layersXMLList.appendChild(layerXML);
 					}
 				}
-				
-				var layerCustom: XML = <menuitem label='Custom...' data='custom.layer'/>;
+				var layerCustom: XML = <menuitem label="Add custom WMS layer..." data="map.add-layer-custom"/>
 				layersXMLList.appendChild(layerCustom);
 				
 				return layersXMLList;

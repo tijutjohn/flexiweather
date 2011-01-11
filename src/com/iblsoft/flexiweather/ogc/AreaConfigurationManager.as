@@ -148,9 +148,17 @@ package com.iblsoft.flexiweather.ogc
 				
 				for each (var area: AreaConfiguration in ma_areas)
 				{
-					var groupName: String = area.ms_group_name;
+					var lbl: String =  area.label;
+					var groupName: String = '';
+					if (lbl.indexOf('/') > 0)
+					{
+						var lastPos: int = lbl.lastIndexOf('/');
+						//there is group name
+						groupName = lbl.substring(0, lastPos);
+						lbl = lbl.substring(lastPos + 1, lbl.length);
+					}
 					var areaData: String = "area."+area.projection.crs+","+area.projection.bbox.xMin+","+area.projection.bbox.yMin+","+area.projection.bbox.xMax+","+area.projection.bbox.yMax;
-					var areaXML: XML = <menuitem label={area.label} data={areaData} icon={area.icon}/>
+					var areaXML: XML = <menuitem label={lbl} data={areaData} icon={area.icon}/>
 					
 					if (groupName && groupName.length > 0)
 					{
