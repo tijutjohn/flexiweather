@@ -27,6 +27,8 @@ package com.iblsoft.flexiweather.ogc
 		public var ms_previewURL: String = null;
 		public var mi_autoRefreshPeriod: uint = 0;
 		
+		public var ms_folderName: String = null;
+		
 		public var ms_layerType: String = null;
 		
 		// runtime variables
@@ -68,6 +70,8 @@ package com.iblsoft.flexiweather.ogc
 					"dimension-level-name", ms_dimensionVerticalLevelName, null);
 
 			ms_previewURL = storage.serializeString("preview-url", ms_previewURL, "<internal>");
+			
+			ms_folderName = storage.serializeString("folder-name", ms_folderName, null);
 
 			mi_autoRefreshPeriod = storage.serializeInt(
 					"auto-refresh-period", mi_autoRefreshPeriod, 0);
@@ -234,6 +238,12 @@ package com.iblsoft.flexiweather.ogc
 
 		public function get dimensionVerticalLevelName(): String
 		{ return ms_dimensionVerticalLevelName; }
+		
+		public function set folderName(s: String): void
+		{ ms_folderName = s; }
+
+		public function get folderName(): String
+		{ return ms_folderName; }
 		
 		public function set previewURL(s: String): void
 		{ ms_previewURL = s; }
