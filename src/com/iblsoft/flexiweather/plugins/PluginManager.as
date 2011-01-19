@@ -61,12 +61,14 @@ package com.iblsoft.flexiweather.plugins
     		_plugins.addEventListener(START_LOADING, onStartLoading);
     		_plugins.addEventListener(STOP_LOADING, onStopLoading);
     		_plugins.addEventListener(ALL_PLUGINS_LOADED, onAllPluginsLoaded);
+    		_plugins.addEventListener(PluginEvent.PLUGIN_MODULES_PROGRESS, onPluginModulesProgress);
     		_plugins.addEventListener(PluginEvent.PLUGIN_MODULE_LOAD, onPluginLoad);
     		_plugins.addEventListener(PluginEvent.PLUGIN_MODULE_LOADED, onPluginLoaded);
     		
     		_pluginsInfo.addEventListener(START_LOADING, onStartLoading);
     		_pluginsInfo.addEventListener(STOP_LOADING, onStopLoading);
     		_pluginsInfo.addEventListener(ALL_PLUGINS_LOADED, onAllInfoPluginsLoaded);
+    		_pluginsInfo.addEventListener(PluginEvent.PLUGIN_MODULES_PROGRESS, onPluginModulesProgress);
     		_pluginsInfo.addEventListener(PluginEvent.PLUGIN_MODULE_LOAD, onPluginLoad);
     		_pluginsInfo.addEventListener(PluginEvent.PLUGIN_MODULE_LOADED, onPluginInfoLoaded);
 		}
@@ -107,10 +109,25 @@ package com.iblsoft.flexiweather.plugins
 			var event: Event = new Event(PluginManager.START_LOADING);
 			dispatchEvent(event);
 		}
+		
 		private function onStopLoading(event: Event): void
 		{
 			var event: Event = new Event(PluginManager.STOP_LOADING);
 			dispatchEvent(event);
+		}
+		
+		private function onPluginModulesProgress(event: PluginEvent): void
+		{
+			var loaders: int = _plugins.loaders.modulesLoadingCount + _pluginsInfo.loaders.modulesLoadingCount;	
+			var bytesLoaded: int = _plugins.loaders.bytesLoaded + _pluginsInfo.loaders.bytesLoaded;	
+			var bytesTotal: int = _plugins.loaders.bytesTotal + _pluginsInfo.loaders.bytesTotal;
+			
+			var pe: PluginEvent =  new PluginEvent(PluginEvent.PLUGIN_MODULES_PROGRESS);
+			pe.bytesLoaded = bytesLoaded;
+			pe.bytesTotal = bytesTotal;
+			pe.modulesLoading = loaders;
+			dispatchEvent(pe);
+				
 		}
 		
 		private function onPluginLoad(event: PluginEvent): void
@@ -264,6 +281,100 @@ package com.iblsoft.flexiweather.plugins
 	}
 }
 
+class ModuleLoaderItem
+{
+	public var bytesLoaded: int;
+	public var bytesTotal: int;
+	public var module: ModuleLoader;	
+}
+
+class ModuleLoaderCollection
+{
+	private var _collection: ArrayCollection = new ArrayCollection();
+	
+	public function get modulesLoadingCount(): int
+	{
+		return _collection.length;
+	}
+	public function get bytesLoaded(): int
+	{
+		var bytes: int = 0;
+		if (_collection && _collection.length > 0)
+		{
+			for each (var item: ModuleLoaderItem in _collection)
+			{
+				bytes += item.bytesLoaded;
+			}
+		}
+		return bytes;
+	}
+	public function get bytesTotal(): int
+	{
+		var bytes: int = 0;
+		if (_collection && _collection.length > 0)
+		{
+			for each (var item: ModuleLoaderItem in _collection)
+			{
+				bytes += item.bytesTotal;
+			}
+		}
+		return bytes;
+	}
+	
+	public function ModuleLoaderCollection()
+	{
+		
+	}
+
+	private function getModuleLoader(module: ModuleLoader): ModuleLoaderItem
+	{
+		if (_collection && _collection.length > 0)
+		{
+			for each (var item: ModuleLoaderItem in _collection)
+			{
+				if (item.module == module)
+					return item;
+			}
+		}
+		return null;
+	}	
+	
+	private function isModuleInside(module: ModuleLoader): Boolean
+	{
+		return getModuleLoader(module) != null;
+	}	
+	
+	public function addModuleLoaderItem(module: ModuleLoader, bytesLoaded: int, bytesTotal: int): void
+	{
+		if (!isModuleInside(module))
+		{
+			var loaderItem: ModuleLoaderItem = new ModuleLoaderItem();
+			loaderItem.module = module;
+			loaderItem.bytesLoaded = bytesLoaded;
+			loaderItem.bytesTotal = bytesTotal;
+			
+			_collection.addItem(loaderItem);
+		} else {
+			var item: ModuleLoaderItem = getModuleLoader(module);
+			item.bytesLoaded = bytesLoaded;
+			item.bytesTotal = bytesTotal;
+		}
+	}
+	
+	public function removeModuleLoader(module: ModuleLoader): void
+	{
+		if (isModuleInside(module))
+		{
+			var item: ModuleLoaderItem = getModuleLoader(module);
+			var pos: int = _collection.getItemIndex(item);
+			if (pos >= 0)
+			{
+				_collection.removeItemAt(pos);
+			}
+		}
+	}
+}
+
 class ModuleItem
 {
 	public var module: Module;
@@ -368,6 +479,7 @@ class ModuleCollection extends EventDispatcher
 	import com.iblsoft.flexiweather.plugins.IAbility;
 	import com.iblsoft.flexiweather.plugins.PluginAbility;
 	import mx.controls.Alert;
+	import mx.collections.ArrayCollection;
 	
 
 
@@ -378,6 +490,8 @@ class PluginCollection extends EventDispatcher
 	private var _pluginsInfoLoading: Array = [];
 	private var _pluginInfoModules: Array = [];
 	private var _pluginFunction: String;
+	
+	public var loaders: ModuleLoaderCollection = new ModuleLoaderCollection();
 	
 	public function get loadingPluginsCount(): int
 	{
@@ -453,6 +567,8 @@ class PluginCollection extends EventDispatcher
 		loader.addEventListener(ModuleEvent.SETUP, onModuleSetup);
 		loader.addEventListener(ModuleEvent.READY, onModuleReady);
 		_pluginsInfoLoading.push({info: moduleInfo, loader: loader});
+		
+		trace("\n\t PLUGIN MANAGER load module : " + url);
 		loader.loadModule();
 		
 		if (_pluginsInfoLoading.length == 1)
@@ -643,6 +759,12 @@ class PluginCollection extends EventDispatcher
 		return false;
 	}
 		
+	private function notifyLoadingProgress(): void
+	{
+		var event: PluginEvent = new PluginEvent(PluginEvent.PLUGIN_MODULES_PROGRESS);
+		dispatchEvent(event);
+	}
+	
 	private function notifyStartLoading(): void
 	{
 		var event: Event = new Event(PluginManager.START_LOADING);
@@ -691,6 +813,9 @@ class PluginCollection extends EventDispatcher
 		var loader: ModuleLoaderWithData = event.target as ModuleLoaderWithData;
 		removeModuleListeners(loader);
 		
+		loaders.removeModuleLoader(loader as ModuleLoader);
+		
+		trace("\t PLUGIN MANAGER module IS LOADED and ready : " + loader.url);
 		
 		// TODO: correctly create plugin or pluginInfo inside
 		createInfoPlugin(loader);
@@ -749,6 +874,13 @@ class PluginCollection extends EventDispatcher
 	private function onModuleProgress(event: ModuleEvent): void
 	{
 		var loader: ModuleLoader = event.target as ModuleLoader;
+		
+		var bytesLoaded: int = event.bytesLoaded;
+		var bytesTotal: int = event.bytesTotal;
+		
+		loaders.addModuleLoaderItem(loader, bytesLoaded, bytesTotal);
+		
+		notifyLoadingProgress();
 	}
 	
 	private function onModuleError(event: ModuleEvent): void
@@ -758,6 +890,8 @@ class PluginCollection extends EventDispatcher
 		Alert.show(event.errorText, "Module loading error ", Alert.OK);
 		
 		removeModuleListeners(loader);
+		
+		loaders.removeModuleLoader(loader);
 	}
 	
 	private function removeModuleListeners(loader: ModuleLoader): void

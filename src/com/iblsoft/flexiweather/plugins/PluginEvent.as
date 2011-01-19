@@ -8,6 +8,8 @@ package com.iblsoft.flexiweather.plugins
 	{
 		public static const PLUGIN_MODULE_LOADED: String = 'plugin module loaded';
 		public static const PLUGIN_MODULE_LOAD: String = 'plugin module load';
+
+		public static const PLUGIN_MODULES_PROGRESS: String = 'plugin modules progress';
 		
 		public var module: Module;
 		public var url: String;
@@ -16,6 +18,10 @@ package com.iblsoft.flexiweather.plugins
 		public var plugin: IPlugin;
 		
 		public var isSameModule: Boolean;
+		
+		public var bytesLoaded: int;
+		public var bytesTotal: int;
+		public var modulesLoading: int;
 		
 		public function PluginEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false)
 		{
@@ -29,6 +35,10 @@ package com.iblsoft.flexiweather.plugins
 			event.plugin = plugin;
 			event.isSameModule = isSameModule;
 			event.url = url;
+			
+			event.bytesLoaded = bytesLoaded;
+			event.bytesTotal = bytesTotal;
+			event.modulesLoading = modulesLoading;
 			
 			return event;
 		}
