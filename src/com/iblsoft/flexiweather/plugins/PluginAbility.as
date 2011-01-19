@@ -18,73 +18,75 @@ package com.iblsoft.flexiweather.plugins
 		private var ms_abilityType: String;
 		private var m_classOrInstance: Object;
 		private var ms_id: String;
+		private var ms_plugin_id: String;
 		private var m_metadata: Object = new Object;
 		
-		function PluginAbility(s_abilityType: String, s_id: String, classOrInstance: Object)
+		function PluginAbility(s_abilityType: String, s_id: String, s_plugin_id: String, classOrInstance: Object)
 		{
 			ms_abilityType = s_abilityType;
 			ms_id = s_id;
+			ms_plugin_id = s_plugin_id;
 			m_classOrInstance = classOrInstance;
 		}
 		
 		public static function action(classOrInstance: Object,
-				s_id: String, s_name: String, b_exclusive: Boolean, icon: Class): PluginAbility
+				s_id: String, s_plugin_id: String, s_name: String, b_exclusive: Boolean, icon: Class): PluginAbility
 		{
-			return new PluginAbility(PluginAbility.ACTION, s_id, classOrInstance)
+			return new PluginAbility(PluginAbility.ACTION, s_id, s_plugin_id, classOrInstance)
 					.withMetadata("name", s_name)
 					.withMetadata("exclusive", b_exclusive)
 					.withMetadata("icon", icon); 
 		}
 
 		public static function docklet(classOrInstance: Object,
-				s_id: String, s_name: String): PluginAbility
+				s_id: String, s_name: String, s_plugin_id: String = null): PluginAbility
 		{
-			return new PluginAbility(PluginAbility.DOCKLET, s_id, classOrInstance) 
+			return new PluginAbility(PluginAbility.DOCKLET, s_id, s_plugin_id, classOrInstance) 
 					.withMetadata("name", s_name);
 		}
 		
 		public static function chat(classOrInstance: Object,
-				s_id: String, s_name: String): PluginAbility
+				s_id: String, s_name: String,s_plugin_id: String = null): PluginAbility
 		{
-			return new PluginAbility(PluginAbility.CHAT, s_id, classOrInstance) 
+			return new PluginAbility(PluginAbility.CHAT, s_id, s_plugin_id, classOrInstance) 
 					.withMetadata("name", s_name);
 		}
 		
 		public static function persistentConfiguration(classOrInstance: Object,
-				s_id: String, s_name: String): PluginAbility
+				s_id: String, s_name: String, s_plugin_id: String = null): PluginAbility
 		{
-			return new PluginAbility(PluginAbility.PERSISTENT_CONFIGURATION, s_id, classOrInstance) 
+			return new PluginAbility(PluginAbility.PERSISTENT_CONFIGURATION, s_id, s_plugin_id, classOrInstance) 
 					.withMetadata("name", s_name);
 		}
 
 		public static function paneClient(classOrInstance: Object,
-				s_id: String = null): PluginAbility
+				s_id: String = null, s_plugin_id: String = null): PluginAbility
 		{
-			return new PluginAbility(PluginAbility.PANE_CLIENT, s_id, classOrInstance); 
+			return new PluginAbility(PluginAbility.PANE_CLIENT, s_id, s_plugin_id, classOrInstance); 
 		}
 		
 		public static function interactiveWidgetClient(classOrInstance: Object,
-				s_id: String = null): PluginAbility
+				s_id: String = null, s_plugin_id: String = null): PluginAbility
 		{
-			return new PluginAbility(PluginAbility.INTERACTIVE_WIDGET_CLIENT, s_id, classOrInstance); 
+			return new PluginAbility(PluginAbility.INTERACTIVE_WIDGET_CLIENT, s_id, s_plugin_id, classOrInstance); 
 		}
 		
 		public static function layerOptionsProvider(classOrInstance: Object,
-				s_id: String): PluginAbility
+				s_id: String, s_plugin_id: String = null): PluginAbility
 		{
-			return new PluginAbility(PluginAbility.LAYER_OPTIONS_PROVIDER, s_id, classOrInstance); 
+			return new PluginAbility(PluginAbility.LAYER_OPTIONS_PROVIDER, s_id, s_plugin_id, classOrInstance); 
 		}
 
 		public static function layerBehaviour(classOrInstance: Object,
-				s_id: String, s_name: String): PluginAbility
+				s_id: String, s_name: String, s_plugin_id: String = null): PluginAbility
 		{
-			return new PluginAbility(PluginAbility.LAYER_BEHAVIOUR, s_id, classOrInstance) 
+			return new PluginAbility(PluginAbility.LAYER_BEHAVIOUR, s_id, s_plugin_id, classOrInstance) 
 					.withMetadata("name", s_name);
 		}
 
-		public static function custom(s_abilityType: String, classOrInstance: Object, s_id: String): PluginAbility
+		public static function custom(s_abilityType: String, classOrInstance: Object, s_id: String, s_plugin_id: String = null): PluginAbility
 		{
-			return new PluginAbility(s_abilityType, s_id, classOrInstance); 
+			return new PluginAbility(s_abilityType, s_id, s_plugin_id, classOrInstance); 
 		}
 
 		public function withMetadata(s_key: String, value: Object): PluginAbility
@@ -115,6 +117,8 @@ package com.iblsoft.flexiweather.plugins
 		// getters and setters
 		public function get id(): String
 		{ return ms_id; }
+		public function get pluginId(): String
+		{ return ms_plugin_id; }
 
 		public function get abilityType(): String
 		{ return ms_abilityType; }
