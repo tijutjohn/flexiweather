@@ -15,6 +15,9 @@ package com.iblsoft.flexiweather.plugins
 		public static const GET_PLUGIN: String = 'get plugin';
 		public static const PLUGIN_DOES_NOT_EXISTS: String = 'plugin does not exists';
 		
+		public static const START_LOADING: String = 'start loading';
+		public static const STOP_LOADING: String = 'stop loading';
+		
 		public static const ALL_PLUGINS_LOADED: String = 'all plugins are loaded';
 		public static const ALL_PLUGINS_INFO_LOADED: String = 'all plugins info are loaded';
 		
@@ -27,6 +30,11 @@ package com.iblsoft.flexiweather.plugins
 		private var _plugins: PluginCollection;
 		private var _pluginsInfo: PluginCollection;
 		
+		[Bindable (event="countChanged")]
+		public function get loadingPluginsCount(): int
+		{
+			return _plugins.loadingPluginsCount + _pluginsInfo.loadingPluginsCount;
+		}
 		
 		public static function getInstance(): PluginManager
 		{
@@ -50,10 +58,14 @@ package com.iblsoft.flexiweather.plugins
     		_plugins = new PluginCollection("createPlugin");
     		_pluginsInfo = new PluginCollection("createPluginInfo");
     		
+    		_plugins.addEventListener(START_LOADING, onStartLoading);
+    		_plugins.addEventListener(STOP_LOADING, onStopLoading);
     		_plugins.addEventListener(ALL_PLUGINS_LOADED, onAllPluginsLoaded);
     		_plugins.addEventListener(PluginEvent.PLUGIN_MODULE_LOAD, onPluginLoad);
     		_plugins.addEventListener(PluginEvent.PLUGIN_MODULE_LOADED, onPluginLoaded);
     		
+    		_pluginsInfo.addEventListener(START_LOADING, onStartLoading);
+    		_pluginsInfo.addEventListener(STOP_LOADING, onStopLoading);
     		_pluginsInfo.addEventListener(ALL_PLUGINS_LOADED, onAllInfoPluginsLoaded);
     		_pluginsInfo.addEventListener(PluginEvent.PLUGIN_MODULE_LOAD, onPluginLoad);
     		_pluginsInfo.addEventListener(PluginEvent.PLUGIN_MODULE_LOADED, onPluginInfoLoaded);
@@ -90,6 +102,17 @@ package com.iblsoft.flexiweather.plugins
 		 *  PLUGINS INFO AND PLUGINS common functions
 		 * 
 		 *******************************************************************/
+		private function onStartLoading(event: Event): void
+		{
+			var event: Event = new Event(PluginManager.START_LOADING);
+			dispatchEvent(event);
+		}
+		private function onStopLoading(event: Event): void
+		{
+			var event: Event = new Event(PluginManager.STOP_LOADING);
+			dispatchEvent(event);
+		}
+		
 		private function onPluginLoad(event: PluginEvent): void
 		{
 			var item: ModuleItem = _modules.getModuleItemByURL(event.url);
@@ -356,6 +379,11 @@ class PluginCollection extends EventDispatcher
 	private var _pluginInfoModules: Array = [];
 	private var _pluginFunction: String;
 	
+	public function get loadingPluginsCount(): int
+	{
+		return _pluginsInfoLoading.length;
+	}
+	
 	public function PluginCollection(fnc: String = '')
 	{
 		_pluginFunction = fnc;
@@ -426,6 +454,11 @@ class PluginCollection extends EventDispatcher
 		loader.addEventListener(ModuleEvent.READY, onModuleReady);
 		_pluginsInfoLoading.push({info: moduleInfo, loader: loader});
 		loader.loadModule();
+		
+		if (_pluginsInfoLoading.length == 1)
+		{
+			notifyStartLoading();
+		}
 	}
 	
 	public function callPlugin(type: String, callback: Function, callbackParams: Array, unsuccessfulCallback: Function = null, ability: PluginAbility = null): void
@@ -545,6 +578,7 @@ class PluginCollection extends EventDispatcher
 								_pluginsInfoLoading.splice(i, 1);
 								if (_pluginsInfoLoading.length == 0)
 								{
+									notifyStopLoading();
 									notifyAllInfoPluginsAreLoaded();
 								}
 							}
@@ -609,6 +643,17 @@ class PluginCollection extends EventDispatcher
 		return false;
 	}
 		
+	private function notifyStartLoading(): void
+	{
+		var event: Event = new Event(PluginManager.START_LOADING);
+		dispatchEvent(event);
+	}
+	private function notifyStopLoading(): void
+	{
+		var event: Event = new Event(PluginManager.STOP_LOADING);
+		dispatchEvent(event);
+	}
+	
 	private function notifyPluginIsLoaded(plugin: IPlugin, pluginInfo: IPluginInfo, module: Module, url: String): void
 	{
 		var pe: PluginEvent = new PluginEvent(PluginEvent.PLUGIN_MODULE_LOADED);
