@@ -77,15 +77,48 @@ package com.iblsoft.flexiweather.ogc
 			dispatchEvent(event);
 		}
 		
+		private function checkIfLayerIsCompatibleWithCrs(configurations: Array, crs: String = null): Boolean
+		{
+			if (!crs)
+				return true;
+				
+			if (configurations && configurations.length > 0)
+			{
+				for each (var layer: WMSLayer in configurations)
+				{
+					var crsWithBBoxes: ArrayCollection = layer.crsWithBBoxes;
+					for each (var crsWithBBox: CRSWithBBox in crsWithBBoxes)
+					{
+						if (crsWithBBox.crs == crs)
+						{
+							return true;
+						}
+					}
+				}
+			}
+			
+			return false;
+		}
 		private var layerGroups:Array = [];
 		private var submenuPos: int = 0;
-		public function getMenuLayersXMLList(): XML
+		public function getMenuLayersXMLList(currentCRS: String = null, oldXMLList: XML = null): XML
 		{
 			if (ma_layers && ma_layers.length > 0)
 			{
 				layerGroups = [];
 				submenuPos = 0;
-				var layersXMLList: XML = <menuitem label='Layers' data='layer'/>;
+				var layersXMLList: XML;
+				if (oldXMLList)
+				{
+					while (oldXMLList.children().length() > 0)
+					{
+						delete oldXMLList.children()[0];
+					}	
+					layersXMLList = oldXMLList;
+					trace("stop");
+				} else {
+					layersXMLList = <menuitem label='Layers' data='layer' type='folder'/>;
+				}
 				var groupParentXML: XML;
 				
 				var iw: InteractiveWidget = new InteractiveWidget();
@@ -94,11 +127,25 @@ package com.iblsoft.flexiweather.ogc
 				
 				var lWMS: InteractiveLayerWMS;
 				var bbox: BBox;
-						
+				var compatibleWithCRS: Boolean = true;
+				var layerType: String = 'layer';
+				
 				for each (var layer: WMSLayerConfiguration in ma_layers)
 				{
 					var lbl: String = layer.label;
 					var folderName: String = '';
+					
+					var layerConfigurations: Array = layer.ma_layerConfigurations;
+					
+					compatibleWithCRS = checkIfLayerIsCompatibleWithCrs(layerConfigurations, currentCRS);
+					
+					if (currentCRS)
+					{
+						if (!compatibleWithCRS)
+						{
+							trace("Layer : " + lbl + " is not compatible with " + currentCRS);
+						}
+					}
 					
 					if (lbl && lbl.indexOf('/') > 0)
 					{
@@ -138,7 +185,7 @@ package com.iblsoft.flexiweather.ogc
 					}
 					
 					var layerData: String = "layer."+layer.label;
-					var layerXML: XML = <menuitem label={lbl} data={layerData} icon={icon}/>
+					var layerXML: XML = <menuitem label={lbl} data={layerData} icon={icon} compatibleWithCRS={compatibleWithCRS} type={layerType}/>
 					
 					if (folderName && folderName.length > 0)
 					{
@@ -149,7 +196,7 @@ package com.iblsoft.flexiweather.ogc
 						layersXMLList.appendChild(layerXML);
 					}
 				}
-				var layerCustom: XML = <menuitem label="Add custom WMS layer..." data="map.add-layer-custom"/>
+				var layerCustom: XML = <menuitem label="Add custom WMS layer..." data="map.add-layer-custom" type="action"/>
 				layersXMLList.appendChild(layerCustom);
 				
 				return layersXMLList;
