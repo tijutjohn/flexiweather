@@ -46,7 +46,7 @@ package com.iblsoft.flexiweather.widgets
 		}
         override public function onMouseRollOver(event:MouseEvent): Boolean
         {
-        	trace("ZOOM onMouseRollOver");
+//        	trace("ZOOM onMouseRollOver");
         	container.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
         	container.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
         	
@@ -54,7 +54,7 @@ package com.iblsoft.flexiweather.widgets
         }
         override public function onMouseRollOut(event:MouseEvent):Boolean
         {
-        	trace("ZOOM onMouseRollOut");
+//        	trace("ZOOM onMouseRollOut");
         	
         	container.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
         	container.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyUp);
@@ -63,7 +63,7 @@ package com.iblsoft.flexiweather.widgets
 
         private function onKeyDown(event: KeyboardEvent): void
         {
-        	trace("onKeyDown: " + event.keyCode + " ctrl: " + event.ctrlKey);
+//        	trace("onKeyDown: " + event.keyCode + " ctrl: " + event.ctrlKey);
         	if (!_showZoomingArea && event.ctrlKey)
         	{
         		_showZoomingArea = true;
@@ -72,7 +72,7 @@ package com.iblsoft.flexiweather.widgets
         }
         private function onKeyUp(event: KeyboardEvent): void
         {
-        	trace("onKeyUp: " + event.keyCode + " ctrl: " + event.ctrlKey);
+//        	trace("onKeyUp: " + event.keyCode + " ctrl: " + event.ctrlKey);
         	if (_showZoomingArea && !event.ctrlKey)
         	{
         		_showZoomingArea = false;
@@ -89,7 +89,7 @@ package com.iblsoft.flexiweather.widgets
 			if(!event.buttonDown)
 				return false;
 				
-			trace("zoom onMouseDown " + event.target + ", " + event.currentTarget);
+//			trace("zoom onMouseDown " + event.target + ", " + event.currentTarget);
 			if (event.target == _zoomAreaSprite)
 			{
 				_zoomStartY = event.localY;
@@ -141,7 +141,7 @@ package com.iblsoft.flexiweather.widgets
 				if (_zoomStartY > 0)
 				{
 					var diff: Number = (event.localY - _zoomStartY);
-					trace("zoom area: " + diff);
+//					trace("zoom area: " + diff);
 					onDeltaZoom(diff);
 					_zoomStartY = event.localY;
 				}
