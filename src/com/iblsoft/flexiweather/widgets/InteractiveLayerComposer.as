@@ -67,25 +67,6 @@ package com.iblsoft.flexiweather.widgets
 			return '';
 		}
 		
-		/*public override function addChild(child: DisplayObject): DisplayObject
-		{
-			//InteractiveLayer(child).container = this;
-			//child.x = x;
-			//child.y = y;
-			//child.width = width;
-			//child.height = height;
-			var o: DisplayObject = super.addChild(child);
-			orderLayers();
-			return o;
-		}
-		
-		public override function addChildAt(child: DisplayObject, index: int): DisplayObject
-		{
-			var o: DisplayObject = super.addChildAt(child, index);
-			orderLayers();
-			return o;
-		}*/
-		
 		public function addLayer(l: InteractiveLayer): void
 		{
 			m_layers.addItemAt(l, 0);
@@ -619,6 +600,20 @@ package com.iblsoft.flexiweather.widgets
         		_featureTooltipCallsRunning = false;
         	}
         }
+        
+        public function isCompatibleWithCRS(crs: String): Boolean
+        {
+        	if (m_layers && m_layers.length > 0)
+        	{
+        		for each (var layer: InteractiveLayerWMS in m_layers)
+        		{
+        			if (!layer.configuration.isCompatibleWithCRS(crs))
+        				return false;
+        		}
+        	}
+        	return true;
+        }
+        
         [Bindable (event="layersChanged")]
         public function get layers(): ArrayCollection
         { return m_layers; }

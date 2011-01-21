@@ -2,6 +2,7 @@ package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
+	import com.iblsoft.flexiweather.widgets.InteractiveLayerComposer;
 	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
@@ -137,13 +138,23 @@ package com.iblsoft.flexiweather.ogc
 		}
 		
 		private var submenuPos: int = 0;
-		public function getAreaXMLList(): XML
+		public function getAreaXMLList(layerComposer: InteractiveLayerComposer = null, oldXMLList: XML = null): XML
 		{
 			if (ma_areas && ma_areas.length > 0)
 			{
 				areaGroups = [];
 				submenuPos = 0;
-				var areasXMLList: XML = <menuitem label='Areas' data='area'/>;
+				var areasXMLList: XML;
+				if (oldXMLList)
+				{
+					while (oldXMLList.children().length() > 0)
+					{
+						delete oldXMLList.children()[0];
+					}	
+					areasXMLList = oldXMLList;
+				} else {
+					areasXMLList = <menuitem label='Areas' data='area' type='folder'/>;
+				}
 				var groupParentXML: XML;
 				
 				for each (var area: AreaConfiguration in ma_areas)
@@ -157,8 +168,14 @@ package com.iblsoft.flexiweather.ogc
 						groupName = lbl.substring(0, lastPos);
 						lbl = lbl.substring(lastPos + 1, lbl.length);
 					}
+					
+					var compatibleWithLayers: Boolean = true;
+					if (layerComposer)
+					{
+						compatibleWithLayers = layerComposer.isCompatibleWithCRS(area.projection.crs);
+					}
 					var areaData: String = "area."+area.projection.crs+","+area.projection.bbox.xMin+","+area.projection.bbox.yMin+","+area.projection.bbox.xMax+","+area.projection.bbox.yMax;
-					var areaXML: XML = <menuitem label={lbl} data={areaData} icon={area.icon}/>
+					var areaXML: XML = <menuitem label={lbl} data={areaData} icon={area.icon} compatibleWithLayers={compatibleWithLayers} type='area'/>
 					
 					if (groupName && groupName.length > 0)
 					{
@@ -170,7 +187,7 @@ package com.iblsoft.flexiweather.ogc
 					}
 				}
 				
-				var areaCustom: XML = <menuitem label='Custom...' data='custom.area'/>;
+				var areaCustom: XML = <menuitem label='Custom...' data='custom.area' type='action'/>;
 				areasXMLList.appendChild(areaCustom);
 				
 				return areasXMLList;

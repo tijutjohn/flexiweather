@@ -181,6 +181,21 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 
+		public function isCompatibleWithCRS(crs: String): Boolean
+		{
+			if (ma_layerConfigurations && ma_layerConfigurations.length > 0)
+			{
+				for each (var layer: WMSLayer in ma_layerConfigurations)
+				{
+					if (layer.isCompatibleWithCRS(crs))
+						return true;
+				}
+				return false;
+			}
+			
+			return true;
+		}
+		
 		// IBehaviouralObject implementation
 		public function setBehaviourString(s_behaviourId: String, s_value: String): void
 		{ ma_behaviours[s_behaviourId] = s_value; }

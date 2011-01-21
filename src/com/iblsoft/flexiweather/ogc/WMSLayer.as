@@ -48,6 +48,18 @@ package com.iblsoft.flexiweather.ogc
 			return true;
 		}
 		
+		public function isCompatibleWithCRS(crs: String): Boolean
+		{
+			for each (var crsWithBBox: CRSWithBBox in crsWithBBoxes)
+			{
+				if (crsWithBBox.crs == crs)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		
 		public function get queryable(): Boolean
 		{ return mb_queryable;	}
 

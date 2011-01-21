@@ -86,14 +86,8 @@ package com.iblsoft.flexiweather.ogc
 			{
 				for each (var layer: WMSLayer in configurations)
 				{
-					var crsWithBBoxes: ArrayCollection = layer.crsWithBBoxes;
-					for each (var crsWithBBox: CRSWithBBox in crsWithBBoxes)
-					{
-						if (crsWithBBox.crs == crs)
-						{
-							return true;
-						}
-					}
+					if (layer.isCompatibleWithCRS(crs))
+						return true;
 				}
 			}
 			
@@ -135,9 +129,7 @@ package com.iblsoft.flexiweather.ogc
 					var lbl: String = layer.label;
 					var folderName: String = '';
 					
-					var layerConfigurations: Array = layer.ma_layerConfigurations;
-					
-					compatibleWithCRS = checkIfLayerIsCompatibleWithCrs(layerConfigurations, currentCRS);
+					compatibleWithCRS =  layer.isCompatibleWithCRS(currentCRS);
 					
 					if (currentCRS)
 					{
