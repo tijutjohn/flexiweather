@@ -73,6 +73,27 @@ package com.iblsoft.flexiweather.ogc
 					"auto-refresh-period", mi_autoRefreshPeriod, 0);
 		}
 		
+		public function toGetGTileRequest(
+            s_crs: String, i_tileZoom: uint,
+            i_tileRow: uint, i_tileCol: uint,
+            s_style: String): URLRequest
+        {
+            var r: URLRequest = m_service.toRequest("GetGTile");
+            r.data.LAYER = ma_layerNames.length > 0 ? ma_layerNames[0] : '';
+            if(m_service.m_version.isLessThan(1, 3, 0)) 
+                r.data.SRS = s_crs;
+            else 
+                r.data.CRS = s_crs; 
+            r.data.TILEZOOM = i_tileZoom; 
+            r.data.TILEROW = i_tileRow; 
+            r.data.TILECOL = i_tileCol; 
+            if(s_style != null)
+                r.data.STYLE = s_style;
+            r.data.FORMAT = "image/png"; 
+            r.data.TRANSPARENT = "TRUE";
+            return r;
+        }
+        
 		public function toGetLegendRequest(
 				i_width: int, i_height: int,
 				s_style: String = null): URLRequest
