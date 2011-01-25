@@ -131,6 +131,17 @@ package com.iblsoft.flexiweather.ogc
 			onDataLoadFailed(null);
 		}
 
+		override public function onAreaChanged(b_finalChange: Boolean): void
+		{
+			super.onAreaChanged(b_finalChange);
+			if(b_finalChange) {
+				m_cache.invalidate(ms_imageCRS, m_imageBBox);
+				updateData(false);
+			}
+			else
+				invalidateDynamicPart();
+		}
+		
 		override public function clone(): InteractiveLayer
 		{
 			var newLayer: InteractiveLayerWMS = new InteractiveLayerWMS(container, m_cfg);

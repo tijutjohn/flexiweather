@@ -2,47 +2,58 @@ package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.ogc.cache.WMSTileCache;
 	import com.iblsoft.flexiweather.ogc.tiling.TileIndex;
+	import com.iblsoft.flexiweather.ogc.tiling.TiledArea;
+	import com.iblsoft.flexiweather.ogc.tiling.TilingUtils;
+	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.display.Bitmap;
+	import flash.display.BitmapData;
 	import flash.display.Graphics;
 	import flash.geom.Matrix;
+	import flash.geom.Point;
 	import flash.net.URLRequest;
+	import flash.text.TextField;
+	import flash.text.TextFormat;
 	
 	import mx.logging.Log;
 	
 	public class InteractiveLayerQTTMS extends InteractiveLayerMSBase
 	{
+		private var _tilingUtils: TilingUtils;
+		
 		public function InteractiveLayerQTTMS(container: InteractiveWidget, cfg: WMSLayerConfiguration)
 		{
 			super(container, cfg);
 			
 			m_cache = new WMSTileCache();
+			_tilingUtils = new TilingUtils();
 		}
 
-		private var _zoom: uint = 3;
+		private var _zoom: uint = 1;
+		public var tileScaleX: Number;
+		public var tileScaleY: Number;
+		
+		public function get layerZoom(): uint
+		{
+			return _zoom;
+		}
 		
 		override public function updateData(b_forceUpdate: Boolean): void
 		{
 			super.updateData(b_forceUpdate);
 			
-			var xPartsMax: int = Math.pow(2, _zoom);	
-			var yPartsMax: int = xPartsMax;
+			var crs: String = container.getCRS();
+			_tilingUtils.onAreaChanged(crs, getGTileBBoxForWholeCRS(crs));
+			var tiledArea: TiledArea = _tilingUtils.getTiledArea(container.getViewBBox(), _zoom);
 			
-			var mapWidth: int = width;
-			var mapHeight: int = height;
-			
-			var xParts: int = Math.min(xPartsMax, Math.ceil(mapWidth / 256));
-			var yParts: int = Math.min(yPartsMax, Math.ceil(mapHeight / 256));
-				
-			trace("xParts: " + xParts + " yParts: " + yParts);
-			
+			trace("updateData ["+name+"]: tiledArea : " + tiledArea.leftCol + ", " + tiledArea.topRow + " size: " + tiledArea.colTilesCount + " , " + tiledArea.rowTilesCount);
 			var request: URLRequest;
-			for(var i_row: uint = 0; i_row < yParts; ++i_row) 
+			for(var i_row: uint = tiledArea.topRow; i_row <= tiledArea.bottomRow; ++i_row) 
 			{
-				for(var i_col: uint = 0; i_col < xParts; ++i_col) {
+				for(var i_col: uint = tiledArea.leftCol; i_col <= tiledArea.rightCol; ++i_col) {
 					
 					request = m_cfg.toGetGTileRequest(
 							container.getCRS(), _zoom, i_row, i_col, 
@@ -56,31 +67,151 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 		
+		private function checkBBoxTiles(bbox: BBox): void
+		{
+			var crs: String = container.getCRS();
+			
+			//getGTileBBox(crs, 
+		}
+		private function getZoomForBBox(bbox: BBox): int
+		{
+//			var left: Number = bbox.xMin;
+//			var top: Number = bbox.yMax;
+//			var right: Number = bbox.xMax;
+//			var bottom: Number = bbox.yMin;
+			
+//			var topLeftTileIndex: TileIndex = _tilingUtils.getTileIndexForPosition(left, top);	
+//			var topRightTileIndex: TileIndex = _tilingUtils.getTileIndexForPosition(right, top);	
+//			var bottomRightTileIndex: TileIndex = _tilingUtils.getTileIndexForPosition(right, bottom);	
+//			var bottomLeftTileIndex: TileIndex = _tilingUtils.getTileIndexForPosition(left, bottom);	
+//			
+//			trace("new zoom tiles for zoom level: " + _zoom)
+//			trace("left top: " + topLeftTileIndex);
+//			trace("right top: " + topRightTileIndex);
+//			trace("right bottom: " + bottomRightTileIndex);
+//			trace("left bottom: " + bottomLeftTileIndex);
+			
+			var crs: String = container.getCRS();
+			_zoom = _tilingUtils.getZoom(container.getViewBBox(), new Point(width, height));
+			return _zoom;
+		}
 		override public function draw(graphics: Graphics): void
 		{
 			super.draw(graphics);
 			
-			var tilingBBox: BBox = getGTileBBoxForWholeCRS(container.getCRS()); // extent of tile z=0/r=0/c=0
-//			_zoom = 3;
+			var crs: String = container.getCRS();
+			
+			var currentBBox: BBox = container.getViewBBox();
+			var tilingBBox: BBox = getGTileBBoxForWholeCRS(crs); // extent of tile z=0/r=0/c=0
 
 			var matrix: Matrix;
 			var wmsTileCache: WMSTileCache = m_cache as WMSTileCache;
 			
 			var a_tiles: Array = wmsTileCache.getTiles(container.getCRS(), _zoom);
-			trace("draw tiles: " + a_tiles.length);
+//			trace("draw tiles ["+name+"]: " + a_tiles.length);
+			
+			var topLeftCoord: Coord;
+			var topRightCoord: Coord;
+			var bottomLeftCoord: Coord;
+			var bottomRightCoord: Coord;
+			
+			var topLeftPoint: Point;
+			var topRightPoint: Point;
+			var bottomLeftPoint: Point;
+			var bottomRightPoint: Point;
+			
+			var dump_tiles: Array = [];
+			
+			graphics.clear();
+			graphics.lineStyle(0,0,0);
+//			trace("y: " + this.y + " cont: " + container.y);
 			
 			for each(var t_tile: Object in a_tiles.reverse()) {
+				
 				var tileIndex: TileIndex = t_tile.tileIndex;
 				
-				trace("\ttile ["+name+"]: " + tileIndex.mi_tileCol + " , " + tileIndex.mi_tileRow + " zoom: " + tileIndex.mi_tileZoom);
-//				trace("\ttile ["+name+"]: " + (tileIndex.mi_tileCol * 256) + " , " + ( tileIndex.mi_tileRow * 256));
+				var tileBBox: BBox = getGTileBBox(crs, tileIndex);
+				topLeftCoord = new Coord(crs, tileBBox.xMin, tileBBox.yMax);
+				topLeftPoint = container.coordToPoint(topLeftCoord);
+				topRightPoint = container.coordToPoint(new Coord(crs, tileBBox.xMax, tileBBox.yMax));
+				bottomLeftPoint = container.coordToPoint(new Coord(crs, tileBBox.xMin, tileBBox.yMin));
+				bottomRightPoint = container.coordToPoint(new Coord(crs, tileBBox.xMax, tileBBox.yMin));
 				
+				var newWidth: int = Math.ceil( topRightPoint.x - topLeftPoint.x);
+				var newHeight: int = Math.ceil( bottomLeftPoint.y - topLeftPoint.y);
+				var sx: Number = newWidth / 256;
+				var sy: Number = newHeight / 256;
+				
+				var xx: int = Math.floor(topLeftPoint.x);
+				var yy: int = Math.floor(topLeftPoint.y);
 				matrix = new Matrix();
-				matrix.translate(tileIndex.mi_tileCol * 256, tileIndex.mi_tileRow * 256);
+				matrix.scale( sx, sy );
+				matrix.translate(xx, yy);
+					
 				graphics.beginBitmapFill(t_tile.image.bitmapData, matrix, false, true);
-				graphics.drawRect(tileIndex.mi_tileCol * 256, tileIndex.mi_tileRow * 256, m_image.width, m_image.height);
+				graphics.drawRect(xx, yy, newWidth , newHeight);
 				graphics.endFill();
+					
+				//draw tile border 
+//				graphics.lineStyle(1, 0xff0000,0.3);
+//				graphics.drawRect(xx, yy, newWidth , newHeight);
+					
+//				drawText(xx + ", " + yy + "\n" + topLeftCoord.toNiceString(), graphics, new Point(xx + 10, yy + 5));
+//				drawText(tileIndex.mi_tileCol + ", " + tileIndex.mi_tileRow, graphics, new Point(xx + 10, yy + 5));
+//				trace("********************************");
 			}
+			
+			tileScaleX = sx;
+			tileScaleY = sy;
+		}
+		
+		private var _tf:TextField = new TextField();
+		private var _tfBD:BitmapData;
+		private function drawText(txt: String, gr: Graphics, pos: Point): void
+		{
+			var tfWidth: int = 100;
+			var tfHeight: int = 30;
+			var format: TextFormat = _tf.getTextFormat();
+			format.size = 18;
+			_tf.setTextFormat(format)
+			_tf.text = txt;
+
+			_tfBD = new BitmapData(tfWidth, tfHeight, true, 0xffbbbbbb);
+			_tfBD.draw(_tf);
+			
+			var m: Matrix = new Matrix();
+			m.translate(pos.x, pos.y)
+			gr.lineStyle(0);
+			gr.beginBitmapFill(_tfBD, m, false);
+			gr.drawRect(pos.x, pos.y, tfWidth, tfHeight);
+			gr.endFill();
+		}
+		
+		
+		override public function onAreaChanged(b_finalChange: Boolean): void
+		{
+			super.onAreaChanged(b_finalChange);
+			
+			var crs: String = container.getCRS();
+			_tilingUtils.onAreaChanged(crs, getGTileBBoxForWholeCRS(crs));
+			
+			if(b_finalChange) {
+				
+				var oldZoom: int = _zoom;
+				
+				var currentBBox: BBox = container.getViewBBox();
+				//TODO find out new zoom and position
+				_zoom = getZoomForBBox(currentBBox);
+				if (_zoom != oldZoom)
+				{
+					m_cache.invalidate(ms_imageCRS, m_imageBBox);
+				}
+				trace("find out new zoom and position: " + currentBBox);
+				
+				updateData(false);
+			}
+			else
+				invalidateDynamicPart();
 		}
 		
 		override protected function onDataLoaded(event: UniURLLoaderEvent): void
@@ -111,6 +242,8 @@ package com.iblsoft.flexiweather.ogc
 		{
 			if(s_crs == "EPSG:4326")
 				return new BBox(-180, -90, 180, 90);
+			if(s_crs == "EPSG:54004")
+				return new BBox(0, -130000, 36000000, 13000000);
 
 			return null;
 		}
@@ -128,9 +261,17 @@ package com.iblsoft.flexiweather.ogc
 
 			// note that tile row numbers increase in the opposite way as the Y-axis
 
-			var f_yMin: Number = extent.yMax - tileIndex.mi_tileCol * f_tileHeight;
+			var f_yMin: Number = extent.yMax - (tileIndex.mi_tileRow + 1) * f_tileHeight;
 
-			return new BBox(f_xMin, f_yMin, f_xMin + f_tileWidth, f_yMin + f_tileHeight);
+			var tileBBox: BBox = new BBox(f_xMin, f_yMin, f_xMin + f_tileWidth, f_yMin + f_tileHeight);
+			
+			return tileBBox;
+		}
+		
+		
+		public function get tilingUtils(): TilingUtils
+		{
+			return _tilingUtils;
 		}
 		
 		override public function clone(): InteractiveLayer

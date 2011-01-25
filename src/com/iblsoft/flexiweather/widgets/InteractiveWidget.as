@@ -1,6 +1,8 @@
 package com.iblsoft.flexiweather.widgets
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.ogc.InteractiveLayerQTTMS;
+	import com.iblsoft.flexiweather.ogc.tiling.TileIndex;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.AnticollisionLayout;
@@ -210,6 +212,49 @@ package com.iblsoft.flexiweather.widgets
 		{
 			m_labelLayout.setDirty();
 		}
+        
+        public function getQTLayer(): InteractiveLayerQTTMS
+        {
+        	var layer: InteractiveLayerQTTMS;
+        	var total: int = layerContainer.numChildren;
+        	for (var i: int = 0; i < total; i++)
+        	{
+        		var currLayer: InteractiveLayer = layerContainer.getChildAt(i) as InteractiveLayer;
+        		if (currLayer is InteractiveLayerQTTMS)
+        		{
+        			layer = currLayer as InteractiveLayerQTTMS;
+        			break;
+        		}
+        	}
+        	
+        	if (layer)
+			{
+				return layer;
+			}
+			return null;
+        }
+        public function tilesScale(): Point
+        {
+        	var layer: InteractiveLayerQTTMS = getQTLayer();
+        	
+        	if (layer)
+			{
+				return new Point(int(100*layer.tileScaleX)/100, int(100 * layer.tileScaleY)/100);
+			}        	
+        	return null;
+        }
+        
+        public function pointToTileIndex(x: Number, y: Number): TileIndex
+        {
+        	var layer: InteractiveLayerQTTMS = getQTLayer();
+        	
+        	if (layer)
+			{
+				var coord: Coord = pointToCoord(x,y);
+				return layer.tilingUtils.getTileIndexForPosition(coord.x, coord.y, layer.layerZoom);
+			}        	
+        	return null;
+        }
         
         public function pointToCoord(x: Number, y: Number): Coord
         {
