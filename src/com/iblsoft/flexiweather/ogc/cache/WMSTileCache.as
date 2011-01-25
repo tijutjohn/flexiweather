@@ -9,7 +9,11 @@ package com.iblsoft.flexiweather.ogc.cache
 	
 	public class WMSTileCache implements ICache
 	{
+		public var maxCachedItems: int = 100;
+		
 		protected var md_cache: Dictionary = new Dictionary();
+		private var _itemCount: int = 0;
+		private var _items: Array = [];
 		
 		public function WMSTileCache()
 		{
@@ -35,6 +39,13 @@ package com.iblsoft.flexiweather.ogc.cache
 			return a;
 		}
 	
+		
+		public function isTileCached(s_crs: String, tileIndex: TileIndex, url: URLRequest): Boolean
+		{
+			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, null, tileIndex, url);
+			var s_key: String = ck.toString(); 
+			return md_cache[s_key] != undefined;			
+		}
 		public function addTile(img: Bitmap, s_crs: String, tileIndex: TileIndex, url: URLRequest): void
 		{
 			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, null, tileIndex, url);
@@ -44,6 +55,15 @@ package com.iblsoft.flexiweather.ogc.cache
 				lastUsed: new Date(),
 				image: img
 			};
+			
+			_items.push(s_key);
+			
+			if (_items.length > maxCachedItems)
+			{
+				s_key = _items.shift();
+				delete md_cache[s_key];
+			}
+			trace("cache item removed: " + _items.length);
 		}
 	
 		public function invalidate(s_crs: String, bbox: BBox): void

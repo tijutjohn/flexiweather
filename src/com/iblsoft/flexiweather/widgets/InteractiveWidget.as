@@ -509,6 +509,10 @@ package com.iblsoft.flexiweather.widgets
         public function getViewBBox(): BBox
         { return m_viewBBox; }
         
+        public function invalidate(): void
+        {
+        	signalAreaChanged(true);
+        }
         // getters & setters
 
 		[Bindable(event = "crsChanged")]

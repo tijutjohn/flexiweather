@@ -22,6 +22,8 @@ package com.iblsoft.flexiweather.ogc
 	
 	public class InteractiveLayerQTTMS extends InteractiveLayerMSBase
 	{
+		public static var imageSmooth: Boolean = true;
+		
 		private var _tilingUtils: TilingUtils;
 		
 		public function InteractiveLayerQTTMS(container: InteractiveWidget, cfg: WMSLayerConfiguration)
@@ -49,20 +51,30 @@ package com.iblsoft.flexiweather.ogc
 			_tilingUtils.onAreaChanged(crs, getGTileBBoxForWholeCRS(crs));
 			var tiledArea: TiledArea = _tilingUtils.getTiledArea(container.getViewBBox(), _zoom);
 			
+			var tiledCache: WMSTileCache = m_cache as WMSTileCache;
 			trace("updateData ["+name+"]: tiledArea : " + tiledArea.leftCol + ", " + tiledArea.topRow + " size: " + tiledArea.colTilesCount + " , " + tiledArea.rowTilesCount);
+			
 			var request: URLRequest;
+			var tileIndex: TileIndex = new TileIndex(_zoom);
+			
 			for(var i_row: uint = tiledArea.topRow; i_row <= tiledArea.bottomRow; ++i_row) 
 			{
 				for(var i_col: uint = tiledArea.leftCol; i_col <= tiledArea.rightCol; ++i_col) {
 					
+					
 					request = m_cfg.toGetGTileRequest(
-							container.getCRS(), _zoom, i_row, i_col, 
+							crs, _zoom, i_row, i_col, 
 							getWMSStyleListString());
-							
-					m_loader.load(request, {
-						requestedCRS: container.getCRS(),
-						requestedTileIndex: new TileIndex(_zoom, i_row, i_col)
-					});
+					
+					tileIndex = new TileIndex(_zoom, i_row, i_col );
+					
+					if (!tiledCache.isTileCached(crs, tileIndex, request))
+					{	
+						m_loader.load(request, {
+							requestedCRS: container.getCRS(),
+							requestedTileIndex: tileIndex
+						});
+					} 
 				}
 			}
 		}
@@ -131,16 +143,16 @@ package com.iblsoft.flexiweather.ogc
 				var tileIndex: TileIndex = t_tile.tileIndex;
 				
 				var tileBBox: BBox = getGTileBBox(crs, tileIndex);
-				topLeftCoord = new Coord(crs, tileBBox.xMin, tileBBox.yMax);
-				topLeftPoint = container.coordToPoint(topLeftCoord);
+//				topLeftCoord = new Coord(crs, tileBBox.xMin, tileBBox.yMax);
+				topLeftPoint = container.coordToPoint(new Coord(crs, tileBBox.xMin, tileBBox.yMax));
 				topRightPoint = container.coordToPoint(new Coord(crs, tileBBox.xMax, tileBBox.yMax));
 				bottomLeftPoint = container.coordToPoint(new Coord(crs, tileBBox.xMin, tileBBox.yMin));
-				bottomRightPoint = container.coordToPoint(new Coord(crs, tileBBox.xMax, tileBBox.yMin));
+//				bottomRightPoint = container.coordToPoint(new Coord(crs, tileBBox.xMax, tileBBox.yMin));
 				
 				var newWidth: int = Math.ceil( topRightPoint.x - topLeftPoint.x);
 				var newHeight: int = Math.ceil( bottomLeftPoint.y - topLeftPoint.y);
-				var sx: Number = newWidth / 256;
-				var sy: Number = newHeight / 256;
+				var sx: Number = int(100 * newWidth / 256)/100;
+				var sy: Number = int(100 * newHeight / 256)/100;
 				
 				var xx: int = Math.floor(topLeftPoint.x);
 				var yy: int = Math.floor(topLeftPoint.y);
@@ -148,7 +160,7 @@ package com.iblsoft.flexiweather.ogc
 				matrix.scale( sx, sy );
 				matrix.translate(xx, yy);
 					
-				graphics.beginBitmapFill(t_tile.image.bitmapData, matrix, false, true);
+				graphics.beginBitmapFill(t_tile.image.bitmapData, matrix, false, imageSmooth);
 				graphics.drawRect(xx, yy, newWidth , newHeight);
 				graphics.endFill();
 					
@@ -163,6 +175,7 @@ package com.iblsoft.flexiweather.ogc
 			
 			tileScaleX = sx;
 			tileScaleY = sy;
+			trace("QTTMS "+name+" scale: " + sx + " , " + sy);
 		}
 		
 		private var _tf:TextField = new TextField();
