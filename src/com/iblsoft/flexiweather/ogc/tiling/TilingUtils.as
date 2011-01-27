@@ -15,6 +15,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 		private var ms_crs: String;
 		private var m_extent: BBox;
 		
+		public var minimumZoom: int = 0;
+		public var maximumZoom: int = 10;
+		
 		public function TilingUtils()
 		{
 		}
@@ -44,11 +47,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 		}
 		public function getZoom(viewBBox: BBox, viewSize: Point): int
 		{
-			var minZoomLevel: int = 0;
-			var maxZoomLevel: int = 12;
-			
-			var newZoomLevel: int = minZoomLevel;
-			var bestZoomLevel: int = minZoomLevel;
+			var newZoomLevel: int = minimumZoom;
+			var bestZoomLevel: int = minimumZoom;
 			var bestDist: int = int.MAX_VALUE;
 			
 			var scale: Point;
@@ -63,12 +63,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 			var arr: Array = [];
 			while (!zoomFound)
 			{
-//				tilesInViewBBox = getViewTilesInExtent(newZoomLevel, viewBBox);
 				area = getTiledArea(viewBBox, newZoomLevel);
-//				scale = new Point( viewSize.x / (tilesInViewBBox.x * tileWidth) ,  viewSize.y / (tilesInViewBBox.x * tileHeight));
 				scale = new Point( viewSize.x / ((area.colTilesCount - 1) * tileWidth) ,  viewSize.y / ((area.rowTilesCount - 1) * tileHeight));
 				
-//				if (scale.x <= 1 || scale.y <= 1)
 				var scaleOK: Boolean = false;
 				if (checkColumnScale)
 				{
@@ -81,10 +78,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 						bestZoomLevel = newZoomLevel;
 					}
 					arr.push({zoom: newZoomLevel, dist: dist, dist2: dist2});
-//					scaleOK = scaleOK || (scale.x <= columnScaleMax);
 				}
-//				if (checkRowScale)
-//					scaleOK = scaleOK || (scale.y <= rowScaleMax);
 					
 				if (scaleOK)
 				{
@@ -93,7 +87,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 				} else {
 					newZoomLevel++;
 					
-					if (newZoomLevel > maxZoomLevel)
+					if (newZoomLevel > maximumZoom)
 						zoomFound = true;
 				}
 			}

@@ -19,7 +19,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 		}
 		public function toString(): String
 		{
-			return "" + mi_tileZoom + "/" + mi_tileRow + "/" + mi_tileCol; 
+//			return "" + mi_tileZoom + "/" + mi_tileRow + "/" + mi_tileCol; 
+			return "" + mi_tileZoom + "/" + mi_tileCol + "/" + mi_tileRow; 
 		}
 	}
 }

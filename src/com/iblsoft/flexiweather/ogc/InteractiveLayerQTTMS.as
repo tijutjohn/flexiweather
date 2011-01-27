@@ -5,6 +5,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.ogc.tiling.TiledArea;
 	import com.iblsoft.flexiweather.ogc.tiling.TilingUtils;
 	import com.iblsoft.flexiweather.proj.Coord;
+	import com.iblsoft.flexiweather.utils.UniURLLoader;
 	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
@@ -17,23 +18,66 @@ package com.iblsoft.flexiweather.ogc
 	import flash.net.URLRequest;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
+	import flash.utils.Timer;
 	
-	import mx.logging.Log;
-	
-	public class InteractiveLayerQTTMS extends InteractiveLayerMSBase
+	public class InteractiveLayerQTTMS extends InteractiveLayer
 	{
 		public static var imageSmooth: Boolean = true;
 		public static var drawBorders: Boolean = false;
 		public static var drawDebugText: Boolean = false;
 		
+		protected var m_loader: UniURLLoader = new UniURLLoader();
+		protected var m_image: Bitmap = null;
+		
+		protected var m_cache: WMSTileCache;
+		
+		protected var m_timer: Timer = new Timer(10000);
+		
+		protected var m_request: URLRequest;
+
+		public var minimumZoom: int = 0;
+		public var maximumZoom: int = 10;
+		
+		private var ms_baseURL: String;
+		private var ms_tilePattern: String;
+		private var ms_postURL: String;
+		private var ms_crs: String;
+		private var m_viewBBox: BBox = null;
+		
+		public function get crs(): String
+		{
+			return container.getCRS();
+			//return ms_crs;
+		}
+		
+		public function get viewBBox(): BBox
+		{
+			return container.getViewBBox();
+//			return m_viewBBox;
+		}
+		
 		private var _tilingUtils: TilingUtils;
 		
-		public function InteractiveLayerQTTMS(container: InteractiveWidget, cfg: WMSLayerConfiguration)
+		public function InteractiveLayerQTTMS(container: InteractiveWidget, s_baseURL: String, s_tilePattern: String,  s_postURL: String,  s_crs: String, bbox: BBox, minimumZoom: int = 0, maximumZoom: int = 10)
 		{
-			super(container, cfg);
+			super(container);
+			
+			ms_crs = s_crs;
+			m_viewBBox = bbox;
+			ms_baseURL = s_baseURL;
+			ms_tilePattern = s_tilePattern;
+			ms_postURL = s_postURL;
+			
+			this.minimumZoom = minimumZoom;
+			this.maximumZoom = maximumZoom;
 			
 			m_cache = new WMSTileCache();
 			_tilingUtils = new TilingUtils();
+			_tilingUtils.minimumZoom = minimumZoom;
+			_tilingUtils.maximumZoom = maximumZoom;
+			
+			m_loader.addEventListener(UniURLLoader.DATA_LOADED, onDataLoaded);
+			m_loader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onDataLoadFailed);
 		}
 
 		private var _zoom: uint = 1;
@@ -51,11 +95,23 @@ package com.iblsoft.flexiweather.ogc
 			return _currentTilesRequests;
 		}
 		
-		override public function updateData(b_forceUpdate: Boolean): void
+		private function getTileFromPattern(tileIndex: TileIndex): String
 		{
-			super.updateData(b_forceUpdate);
+			var ret: String = ms_tilePattern;
+			var arr: Array = ret.split('%COL%');
+			ret = arr.join(tileIndex.mi_tileCol);
+			arr = ret.split('%ROW%');
+			ret = arr.join(tileIndex.mi_tileRow);
+			arr = ret.split('%ZOOM%');
+			ret = arr.join(tileIndex.mi_tileZoom);
 			
-			var crs: String = container.getCRS();
+			return ret;
+		}
+		public function updateData(b_forceUpdate: Boolean): void
+		{
+//			super.updateData(b_forceUpdate);
+			
+//			var crs: String = container.getCRS();
 			_tilingUtils.onAreaChanged(crs, getGTileBBoxForWholeCRS(crs));
 			var tiledArea: TiledArea = _tilingUtils.getTiledArea(container.getViewBBox(), _zoom);
 			
@@ -68,21 +124,21 @@ package com.iblsoft.flexiweather.ogc
 			_currentTilesRequests = [];
 			for(var i_row: uint = tiledArea.topRow; i_row <= tiledArea.bottomRow; ++i_row) 
 			{
-				for(var i_col: uint = tiledArea.leftCol; i_col <= tiledArea.rightCol; ++i_col) {
+				for(var i_col: uint = tiledArea.leftCol; i_col <= tiledArea.rightCol; ++i_col) 
+				{
+					tileIndex = new TileIndex(_zoom, i_row, i_col );
 					
 					
-					request = m_cfg.toGetGTileRequest(
-							crs, _zoom, i_row, i_col, 
-							getWMSStyleListString());
+					request = new URLRequest(ms_baseURL + getTileFromPattern(tileIndex) + ms_postURL);
 					
 					_currentTilesRequests.push(request);
 					
-					tileIndex = new TileIndex(_zoom, i_row, i_col );
+					trace("col: " + i_col + " i_row: " + i_row + " url = " + request.url);
 					
 					if (!tiledCache.isTileCached(crs, tileIndex, request))
 					{	
 						m_loader.load(request, {
-							requestedCRS: container.getCRS(),
+							requestedCRS: crs,
 							requestedTileIndex: tileIndex
 						});
 					} 
@@ -99,17 +155,18 @@ package com.iblsoft.flexiweather.ogc
 		
 		private function findZoom(): void
 		{
-			var crs: String = container.getCRS();
+//			var crs: String = container.getCRS();
 			var extent: BBox = getGTileBBoxForWholeCRS(crs);
 			_tilingUtils.onAreaChanged(crs, extent);
 			
-			_zoom = _tilingUtils.getZoom(container.getViewBBox(), new Point(width, height));
+			_zoom = _tilingUtils.getZoom(viewBBox, new Point(width, height));
 		}
 		
 		override public function refresh(b_force: Boolean): void
 		{
 			 findZoom();
 			super.refresh(b_force);
+			updateData(b_force);
 		}
 		
 		override public function draw(graphics: Graphics): void
@@ -122,15 +179,15 @@ package com.iblsoft.flexiweather.ogc
 		
 		private function customDraw(graphics: Graphics, redrawBorder: Boolean = false): void
 		{
-			var crs: String = container.getCRS();
+//			var crs: String = container.getCRS();
 			
-			var currentBBox: BBox = container.getViewBBox();
+			var currentBBox: BBox = viewBBox;
 			var tilingBBox: BBox = getGTileBBoxForWholeCRS(crs); // extent of tile z=0/r=0/c=0
 
 			var matrix: Matrix;
 			var wmsTileCache: WMSTileCache = m_cache as WMSTileCache;
 			
-			var a_tiles: Array = wmsTileCache.getTiles(container.getCRS(), _zoom);
+			var a_tiles: Array = wmsTileCache.getTiles(crs, _zoom);
 //			trace("draw tiles ["+name+"]: " + a_tiles.length);
 			
 			var topLeftCoord: Coord;
@@ -229,7 +286,6 @@ package com.iblsoft.flexiweather.ogc
 		{
 			super.onAreaChanged(b_finalChange);
 			
-			var crs: String = container.getCRS();
 			_tilingUtils.onAreaChanged(crs, getGTileBBoxForWholeCRS(crs));
 			
 			if(b_finalChange) {
@@ -239,7 +295,7 @@ package com.iblsoft.flexiweather.ogc
 				findZoom();
 				if (_zoom != oldZoom)
 				{
-					m_cache.invalidate(ms_imageCRS, m_imageBBox);
+					m_cache.invalidate(crs, viewBBox);
 				}
 				updateData(false);
 			}
@@ -247,9 +303,15 @@ package com.iblsoft.flexiweather.ogc
 				invalidateDynamicPart();
 		}
 		
-		override protected function onDataLoaded(event: UniURLLoaderEvent): void
+		protected function onDataLoaded(event: UniURLLoaderEvent): void
 		{
-			super.onDataLoaded(event);
+			m_request = null;
+//			if(m_cfg.mi_autoRefreshPeriod > 0) {
+//				m_timer.reset();
+//				m_timer.delay = m_cfg.mi_autoRefreshPeriod * 1000.0;
+//				m_timer.start();
+//			}
+			
 			
 			var result: * = event.result;
 			var wmsTileCache: WMSTileCache = m_cache as WMSTileCache;
@@ -267,8 +329,27 @@ package com.iblsoft.flexiweather.ogc
 
 			}
 
-			ExceptionUtils.logError(Log.getLogger("WMS"), result, "Error accessing layers '" + m_cfg.ma_layerNames.join(","))
+//			ExceptionUtils.logError(Log.getLogger("WMS"), result, "Error accessing layers '" + m_cfg.ma_layerNames.join(","))
 			onDataLoadFailed(null);
+		}
+		
+		protected function onDataLoadFailed(event: UniURLLoaderEvent): void
+		{
+			m_request = null;
+//			if(m_cfg.mi_autoRefreshPeriod > 0) {
+//				m_timer.reset();
+//				m_timer.delay = m_cfg.mi_autoRefreshPeriod * 1000.0;
+//				m_timer.start();
+//			}
+//			if(event != null) {
+//				ExceptionUtils.logError(Log.getLogger("WMS"), event,
+//						"Error accessing layers '" + m_cfg.ma_layerNames.join(","))
+//			}
+			m_image = null;
+//			mb_imageOK = false;
+//			ms_imageCRS = null;
+//			m_imageBBox = null;
+//			onJobFinished();
 		}
 		
 		public function getGTileBBoxForWholeCRS(s_crs: String): BBox
@@ -309,17 +390,17 @@ package com.iblsoft.flexiweather.ogc
 			return _tilingUtils;
 		}
 		
+		public function get dataLoader(): UniURLLoader
+		{ return m_loader; } 
 		
 		override public function clone(): InteractiveLayer
 		{
-			var newLayer: InteractiveLayerQTTMS = new InteractiveLayerQTTMS(container, m_cfg);
+			var newLayer: InteractiveLayerQTTMS = new InteractiveLayerQTTMS(container, ms_baseURL, ms_tilePattern, ms_postURL, crs, viewBBox, minimumZoom, maximumZoom);
 			newLayer.alpha = alpha
 			newLayer.zOrder = zOrder;
 			newLayer.visible = visible;
 					
-			var styleName: String = getWMSStyleName(0)
-			newLayer.setWMSStyleName(0, styleName);
-			trace("\n\n CLONE InteractiveLayerQTTMS ["+newLayer.name+"] alpha: " + newLayer.alpha + " zOrder: " +  newLayer.zOrder);
+//			trace("\n\n CLONE InteractiveLayerQTTMS ["+newLayer.name+"] alpha: " + newLayer.alpha + " zOrder: " +  newLayer.zOrder);
 			
 			return newLayer;
 			

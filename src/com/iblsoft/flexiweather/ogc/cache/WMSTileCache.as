@@ -81,8 +81,8 @@ package com.iblsoft.flexiweather.ogc.cache
 			var a: Array = [];
 			for(var s_key: String in md_cache) {
 				var ck: WMSTileCacheKey = md_cache[s_key].cacheKey; 
-				if(ck.ms_crs == s_crs && ck.m_bbox.equals(bbox))
-					a.push(s_key);
+//				if(ck.ms_crs == s_crs && ck.m_bbox.equals(bbox))
+//					a.push(s_key);
 			}
 			for each(s_key in a) {
 	//			trace("WMSCache.invalidate(): removing image with key: " + md_cache[s_key].toString());
