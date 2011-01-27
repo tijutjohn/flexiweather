@@ -19,6 +19,16 @@ package com.iblsoft.flexiweather.ogc.cache
 		{
 		}
 
+		public function getTile(request: URLRequest): Object
+		{
+			var s_crs: String = request.data.CRS;
+			var tileIndex: TileIndex = new TileIndex(request.data.TILEZOOM, request.data.TILEROW, request.data.TILECOL);
+			
+			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, null, tileIndex, request);
+			var s_key: String = ck.toString(); 
+			return md_cache[s_key];
+		}
+		
 		public function getTiles(s_crs: String, i_tileZoom: uint): Array
 		{
 			var a: Array = [];
@@ -63,7 +73,7 @@ package com.iblsoft.flexiweather.ogc.cache
 				s_key = _items.shift();
 				delete md_cache[s_key];
 			}
-			trace("cache item removed: " + _items.length);
+//			trace("cache item removed: " + _items.length);
 		}
 	
 		public function invalidate(s_crs: String, bbox: BBox): void

@@ -48,6 +48,17 @@ package com.iblsoft.flexiweather.ogc
 			return true;
 		}
 		
+		public function isTilableForCRS(crs: String): Boolean
+		{
+			for each (var crsWithBBox: CRSWithBBox in crsWithBBoxes)
+			{
+				if (crsWithBBox.crs == crs)
+				{
+					return crsWithBBox is CRSWithBBoxAndTilingInfo;
+				}
+			}
+			return false;
+		}
 		public function isCompatibleWithCRS(crs: String): Boolean
 		{
 			for each (var crsWithBBox: CRSWithBBox in crsWithBBoxes)

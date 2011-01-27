@@ -23,6 +23,8 @@ package com.iblsoft.flexiweather.ogc
 	public class InteractiveLayerQTTMS extends InteractiveLayerMSBase
 	{
 		public static var imageSmooth: Boolean = true;
+		public static var drawBorders: Boolean = false;
+		public static var drawDebugText: Boolean = false;
 		
 		private var _tilingUtils: TilingUtils;
 		
@@ -43,6 +45,12 @@ package com.iblsoft.flexiweather.ogc
 			return _zoom;
 		}
 		
+		private var _currentTilesRequests: Array = [];
+		public function get currentTilesRequests(): Array
+		{
+			return _currentTilesRequests;
+		}
+		
 		override public function updateData(b_forceUpdate: Boolean): void
 		{
 			super.updateData(b_forceUpdate);
@@ -52,11 +60,12 @@ package com.iblsoft.flexiweather.ogc
 			var tiledArea: TiledArea = _tilingUtils.getTiledArea(container.getViewBBox(), _zoom);
 			
 			var tiledCache: WMSTileCache = m_cache as WMSTileCache;
-			trace("updateData ["+name+"]: tiledArea : " + tiledArea.leftCol + ", " + tiledArea.topRow + " size: " + tiledArea.colTilesCount + " , " + tiledArea.rowTilesCount);
+//			trace("updateData ["+name+"]: tiledArea : " + tiledArea.leftCol + ", " + tiledArea.topRow + " size: " + tiledArea.colTilesCount + " , " + tiledArea.rowTilesCount);
 			
 			var request: URLRequest;
 			var tileIndex: TileIndex = new TileIndex(_zoom);
 			
+			_currentTilesRequests = [];
 			for(var i_row: uint = tiledArea.topRow; i_row <= tiledArea.bottomRow; ++i_row) 
 			{
 				for(var i_col: uint = tiledArea.leftCol; i_col <= tiledArea.rightCol; ++i_col) {
@@ -65,6 +74,8 @@ package com.iblsoft.flexiweather.ogc
 					request = m_cfg.toGetGTileRequest(
 							crs, _zoom, i_row, i_col, 
 							getWMSStyleListString());
+					
+					_currentTilesRequests.push(request);
 					
 					tileIndex = new TileIndex(_zoom, i_row, i_col );
 					
@@ -79,38 +90,38 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 		
-		private function checkBBoxTiles(bbox: BBox): void
+		public function getTileFromCache(request: URLRequest): Object
 		{
-			var crs: String = container.getCRS();
+			var tiledCache: WMSTileCache = m_cache as WMSTileCache;
 			
-			//getGTileBBox(crs, 
+			return tiledCache.getTile(request); 
 		}
-		private function getZoomForBBox(bbox: BBox): int
+		
+		private function findZoom(): void
 		{
-//			var left: Number = bbox.xMin;
-//			var top: Number = bbox.yMax;
-//			var right: Number = bbox.xMax;
-//			var bottom: Number = bbox.yMin;
-			
-//			var topLeftTileIndex: TileIndex = _tilingUtils.getTileIndexForPosition(left, top);	
-//			var topRightTileIndex: TileIndex = _tilingUtils.getTileIndexForPosition(right, top);	
-//			var bottomRightTileIndex: TileIndex = _tilingUtils.getTileIndexForPosition(right, bottom);	
-//			var bottomLeftTileIndex: TileIndex = _tilingUtils.getTileIndexForPosition(left, bottom);	
-//			
-//			trace("new zoom tiles for zoom level: " + _zoom)
-//			trace("left top: " + topLeftTileIndex);
-//			trace("right top: " + topRightTileIndex);
-//			trace("right bottom: " + bottomRightTileIndex);
-//			trace("left bottom: " + bottomLeftTileIndex);
-			
 			var crs: String = container.getCRS();
+			var extent: BBox = getGTileBBoxForWholeCRS(crs);
+			_tilingUtils.onAreaChanged(crs, extent);
+			
 			_zoom = _tilingUtils.getZoom(container.getViewBBox(), new Point(width, height));
-			return _zoom;
 		}
+		
+		override public function refresh(b_force: Boolean): void
+		{
+			 findZoom();
+			super.refresh(b_force);
+		}
+		
 		override public function draw(graphics: Graphics): void
 		{
 			super.draw(graphics);
 			
+			customDraw(graphics);
+			
+		}
+		
+		private function customDraw(graphics: Graphics, redrawBorder: Boolean = false): void
+		{
 			var crs: String = container.getCRS();
 			
 			var currentBBox: BBox = container.getViewBBox();
@@ -165,17 +176,30 @@ package com.iblsoft.flexiweather.ogc
 				graphics.endFill();
 					
 				//draw tile border 
-//				graphics.lineStyle(1, 0xff0000,0.3);
-//				graphics.drawRect(xx, yy, newWidth , newHeight);
-					
+				if (drawBorders || redrawBorder)
+				{
+					graphics.lineStyle(1, 0xff0000,0.3);
+					graphics.drawRect(xx, yy, newWidth , newHeight);
+				}
+//				trace("tile: " + tileIndex + " pos: " + xx + " , " + yy + " size: " + newWidth + " , " + newHeight);
+				
+				dump_tiles.push({key: tileIndex.mi_tileRow + tileIndex.mi_tileCol / 10,  x: tileIndex.mi_tileCol, y: tileIndex.mi_tileRow, left: xx, top: yy, right: xx + newWidth, bottom: yy + newHeight });
 //				drawText(xx + ", " + yy + "\n" + topLeftCoord.toNiceString(), graphics, new Point(xx + 10, yy + 5));
-//				drawText(tileIndex.mi_tileCol + ", " + tileIndex.mi_tileRow, graphics, new Point(xx + 10, yy + 5));
+				if (drawDebugText)
+				{
+					drawText(tileIndex.mi_tileCol + ", " + tileIndex.mi_tileRow, graphics, new Point(xx + 10, yy + 5));
+				}
 //				trace("********************************");
 			}
 			
 			tileScaleX = sx;
 			tileScaleY = sy;
-			trace("QTTMS "+name+" scale: " + sx + " , " + sy);
+			
+//			dump_tiles.sortOn('key', Array.NUMERIC);
+//			for each (var tileObj: Object in dump_tiles)
+//			{
+//				trace("Tile: " + tileObj.x + "," + tileObj.y + " rect: " + tileObj.left + ", " + tileObj.top + " | " + tileObj.right + "," + tileObj.bottom);
+//			}
 		}
 		
 		private var _tf:TextField = new TextField();
@@ -194,7 +218,7 @@ package com.iblsoft.flexiweather.ogc
 			
 			var m: Matrix = new Matrix();
 			m.translate(pos.x, pos.y)
-			gr.lineStyle(0);
+			gr.lineStyle(0,0,0);
 			gr.beginBitmapFill(_tfBD, m, false);
 			gr.drawRect(pos.x, pos.y, tfWidth, tfHeight);
 			gr.endFill();
@@ -212,15 +236,11 @@ package com.iblsoft.flexiweather.ogc
 				
 				var oldZoom: int = _zoom;
 				
-				var currentBBox: BBox = container.getViewBBox();
-				//TODO find out new zoom and position
-				_zoom = getZoomForBBox(currentBBox);
+				findZoom();
 				if (_zoom != oldZoom)
 				{
 					m_cache.invalidate(ms_imageCRS, m_imageBBox);
 				}
-				trace("find out new zoom and position: " + currentBBox);
-				
 				updateData(false);
 			}
 			else
@@ -255,6 +275,8 @@ package com.iblsoft.flexiweather.ogc
 		{
 			if(s_crs == "EPSG:4326")
 				return new BBox(-180, -90, 180, 90);
+			if(s_crs == "EPSG:900913")
+				return new BBox(-20037508,-20037508,20037508,20037508.34);
 			if(s_crs == "EPSG:54004")
 				return new BBox(0, -130000, 36000000, 13000000);
 
@@ -286,6 +308,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			return _tilingUtils;
 		}
+		
 		
 		override public function clone(): InteractiveLayer
 		{

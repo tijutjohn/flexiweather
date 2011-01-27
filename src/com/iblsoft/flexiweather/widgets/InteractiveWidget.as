@@ -213,7 +213,7 @@ package com.iblsoft.flexiweather.widgets
 			m_labelLayout.setDirty();
 		}
         
-        public function getQTLayer(): InteractiveLayerQTTMS
+        public function getQTLayer(name: String = ''): InteractiveLayerQTTMS
         {
         	var layer: InteractiveLayerQTTMS;
         	var total: int = layerContainer.numChildren;
@@ -223,7 +223,8 @@ package com.iblsoft.flexiweather.widgets
         		if (currLayer is InteractiveLayerQTTMS)
         		{
         			layer = currLayer as InteractiveLayerQTTMS;
-        			break;
+        			if (name == '' || name == layer.name)
+        				break;
         		}
         	}
         	
