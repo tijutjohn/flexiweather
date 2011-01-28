@@ -12,7 +12,6 @@ package com.iblsoft.flexiweather.utils
 	import flash.utils.ByteArray;
 	import flash.utils.Dictionary;
 	
-	import mx.controls.Alert;
 	import mx.logging.Log;
 	import mx.rpc.Fault;
 	
@@ -166,8 +165,11 @@ package com.iblsoft.flexiweather.utils
 			var b3: int = rawData.length > 3 ? rawData.readUnsignedByte() : -1;
 			
 			rawData.position = 0;
+			var isPNG: Boolean = b0 == 0x89 && b1 == 0x50 && b2 == 0x4E && b3 == 0x47;
+			var isJPG: Boolean = b0 == 0xff && b1 == 0xd8 && b2 == 0xff && b3 == 0xe0;
+			 
 			// 0x89 P N G
-			if(b0 == 0x89 && b1 == 0x50 && b2 == 0x4E && b3 == 0x47) {
+			if(isPNG || isJPG) {
 				var imageLoader: LoaderWithAssociatedData = new LoaderWithAssociatedData();
 				imageLoader.associatedData = urlLoader.associatedData;
 				md_imageLoaderToRequestMap[imageLoader] = urlRequest;
