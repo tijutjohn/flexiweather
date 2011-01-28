@@ -72,14 +72,21 @@ package com.iblsoft.flexiweather.widgets
 			m_layers.addItemAt(l, 0);
 			bindSubLayer(l);
 			
-			notifyLayersChanged();
+			notifyLayersChanged(l);
 			
 			//orderLayers();
 		}
 
-		private function notifyLayersChanged(): void
+		private function notifyLayersChanged(layer: InteractiveLayer = null): void
 		{
-			dispatchEvent(new Event("layersChanged"));
+			if (layer)
+			{
+				trace("COMPOSER notifyLayersChanged: " + layer);
+				m_layers.itemUpdated(layer);	
+			} else {
+				trace("COMPOSER notifyLayersChanged ");
+				dispatchEvent(new Event("layersChanged"));
+			}
 		}
 		public function orderLayers(): void
 		{
@@ -138,7 +145,7 @@ package com.iblsoft.flexiweather.widgets
 			if(i >= 0) {
 				unbindSubLayer(l);
 				m_layers.removeItemAt(i);
-				notifyLayersChanged();
+				notifyLayersChanged(l);
 			}
 		}
 		
@@ -166,7 +173,7 @@ package com.iblsoft.flexiweather.widgets
 				m_layers.removeItemAt(i_current);
 			m_layers.addItemAt(l, i);
 			
-			notifyLayersChanged();
+			notifyLayersChanged(l);
 		}
 
 		override public function onAreaChanged(b_finalChange: Boolean): void
@@ -187,7 +194,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			invalidateDynamicPart();
 			m_layers.itemUpdated(event.target);
-			notifyLayersChanged();
+//			notifyLayersChanged();
 		}
 
 		protected function onSynchronisedVariableChanged(event: SynchronisedVariableChangeEvent): void
@@ -545,6 +552,7 @@ package com.iblsoft.flexiweather.widgets
 					for each(l in m_layers) {
 						addChildAt(l, 0);
 					}
+					trace("onLayerCollectionChanged reverse order");
 					notifyLayersChanged();
 					break;
 			}
