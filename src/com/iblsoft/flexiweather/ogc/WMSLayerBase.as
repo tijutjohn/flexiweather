@@ -134,7 +134,6 @@ package com.iblsoft.flexiweather.ogc
 							
 						}
 					}
-					trace(identifierArray);
 				}
 				// <CRS>
 				for each(var crs: XML in xml.wms::CRS) {

@@ -44,6 +44,22 @@ package com.iblsoft.flexiweather.ogc
 		private var ms_crs: String;
 		private var m_viewBBox: BBox = null;
 		
+		public function get baseURL(): String
+		{ return ms_baseURL; }
+		public function set baseURL(s_baseURL: String): void
+		{ ms_baseURL = s_baseURL; }
+		
+		public function get tilePattern(): String
+		{ return ms_tilePattern; }
+		public function set tilePattern(s_tilePattern: String): void
+		{ ms_tilePattern = s_tilePattern; }
+		
+		public function get postURL(): String
+		{ return ms_postURL; }
+		public function set postURL(s_postURL: String): void
+		{ ms_postURL = s_postURL; }
+		
+		
 		public function get crs(): String
 		{
 			return container.getCRS();

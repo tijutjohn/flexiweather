@@ -1,7 +1,7 @@
 package com.iblsoft.flexiweather.widgets
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
-	import com.iblsoft.flexiweather.ogc.InteractiveLayerQTTMS;
+	import com.iblsoft.flexiweather.ogc.tiling.InteractiveLayerWMSWithQTT;
 	import com.iblsoft.flexiweather.ogc.tiling.TileIndex;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
@@ -213,16 +213,16 @@ package com.iblsoft.flexiweather.widgets
 			m_labelLayout.setDirty();
 		}
         
-        public function getQTLayer(name: String = ''): InteractiveLayerQTTMS
+        public function getQTLayer(name: String = ''): InteractiveLayerWMSWithQTT
         {
-        	var layer: InteractiveLayerQTTMS;
+        	var layer: InteractiveLayerWMSWithQTT;
         	var total: int = layerContainer.numChildren;
         	for (var i: int = 0; i < total; i++)
         	{
         		var currLayer: InteractiveLayer = layerContainer.getChildAt(i) as InteractiveLayer;
-        		if (currLayer is InteractiveLayerQTTMS)
+        		if (currLayer is InteractiveLayerWMSWithQTT)
         		{
-        			layer = currLayer as InteractiveLayerQTTMS;
+        			layer = currLayer as InteractiveLayerWMSWithQTT;
         			if (name == '' || name == layer.name)
         				break;
         		}
@@ -236,23 +236,23 @@ package com.iblsoft.flexiweather.widgets
         }
         public function tilesScale(): Point
         {
-        	var layer: InteractiveLayerQTTMS = getQTLayer();
+        	var layer: InteractiveLayerWMSWithQTT = getQTLayer();
         	
         	if (layer)
 			{
-				return new Point(int(100*layer.tileScaleX)/100, int(100 * layer.tileScaleY)/100);
+				return new Point(int(100*layer.tileLayer.tileScaleX)/100, int(100 * layer.tileLayer.tileScaleY)/100);
 			}        	
         	return null;
         }
         
         public function pointToTileIndex(x: Number, y: Number): TileIndex
         {
-        	var layer: InteractiveLayerQTTMS = getQTLayer();
+        	var layer: InteractiveLayerWMSWithQTT = getQTLayer();
         	
         	if (layer)
 			{
 				var coord: Coord = pointToCoord(x,y);
-				return layer.tilingUtils.getTileIndexForPosition(coord.x, coord.y, layer.layerZoom);
+				return layer.tileLayer.tilingUtils.getTileIndexForPosition(coord.x, coord.y, layer.tileLayer.layerZoom);
 			}        	
         	return null;
         }

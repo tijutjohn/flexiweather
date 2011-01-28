@@ -2,7 +2,6 @@ package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.ogc.cache.ICache;
-	import com.iblsoft.flexiweather.ogc.cache.WMSTileCache;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.utils.Duration;
@@ -151,6 +150,16 @@ package com.iblsoft.flexiweather.ogc
 		}
 		
 		/**
+		 * If you want to change some data in request, you can implement it in this function. 
+		 * E.g if you want change request type for tile layer you can override this function and update it
+		 *  
+		 * 
+		 */		
+		protected function updateRequestData(request: URLRequest): void
+		{
+			
+		}
+		/**
 		 * function returns full URL for getting map 
 		 * @return 
 		 * 
@@ -163,6 +172,7 @@ package com.iblsoft.flexiweather.ogc
 					getWMSStyleListString());
 			updateDimensionsInURLRequest(request);
 			updateCustomParametersInURLRequest(request);
+			updateRequestData(request);
 			
 			var s_url: String = request.url;
 			if(request.data) {
