@@ -68,5 +68,14 @@ package com.iblsoft.flexiweather.proj
 		{
 			return crs + "[" + x + ";" + y + "]";			
 		} 
+		
+		/**
+		 * 
+		 */
+		public function toCRS84(): Coord
+		{
+			// IN THE FUTURE, WE NEED TO MAKE REAL CONVERSION FROM CRS TO CRS:84
+			return(new Coord(crs, x, y));
+		}
 	}
 }
