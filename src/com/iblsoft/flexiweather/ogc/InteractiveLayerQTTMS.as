@@ -66,11 +66,11 @@ package com.iblsoft.flexiweather.ogc
 		public function get crs(): String
 		{
 			var _crs: String =  container.getCRS();
-			if (_oldCRS != _crs)
-			{
-				//crs is changed, invalidate cache
-				m_cache.clearCache();
-			}
+//			if (_oldCRS != _crs)
+//			{
+//				//crs is changed, invalidate cache
+//				m_cache.clearCache();
+//			}
 			_oldCRS = _crs;
 			return _crs;
 		}
