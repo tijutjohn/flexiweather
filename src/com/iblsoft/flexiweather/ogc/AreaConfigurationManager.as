@@ -44,14 +44,14 @@ package com.iblsoft.flexiweather.ogc
 			if (cacheID == 1) {
 				if(s_key in AREAS_THUMBNAILS_CACHE) {
 					bd = AREAS_THUMBNAILS_CACHE[s_key].image;
-					trace("getAreaThumbnail: " + s_key + " AREAS_THUMBNAILS_CACHE[s_key].image: " + AREAS_THUMBNAILS_CACHE[s_key].image);
+//					trace("getAreaThumbnail: " + s_key + " AREAS_THUMBNAILS_CACHE[s_key].image: " + AREAS_THUMBNAILS_CACHE[s_key].image);
 				}
 			} else {
 				if (cacheID == 2)
 				{
 					if(s_key in AREAS_THUMBNAILS_CACHE2) {
 						bd = AREAS_THUMBNAILS_CACHE2[s_key].image;
-						trace("getAreaThumbnail: " + s_key + " AREAS_THUMBNAILS_CACHE[s_key].image: " + AREAS_THUMBNAILS_CACHE2[s_key].image);
+//						trace("getAreaThumbnail: " + s_key + " AREAS_THUMBNAILS_CACHE[s_key].image: " + AREAS_THUMBNAILS_CACHE2[s_key].image);
 					}
 				}
 				
@@ -59,8 +59,8 @@ package com.iblsoft.flexiweather.ogc
 			if (bd)
 				return new Bitmap(bd);
 				
-			if (s_key)
-				trace("getAreaThumbnail null" );
+//			if (s_key)
+//				trace("getAreaThumbnail null" );
 			return null;
 		}
 	
@@ -77,14 +77,14 @@ package com.iblsoft.flexiweather.ogc
 				AREAS_THUMBNAILS_CACHE[s_key] = {
 					image: bd
 				};
-				trace("addAreaThumbnail: " + s_key + " size" + img.width + " , " + img.height + " AREAS_THUMBNAILS_CACHE[s_key]: " + AREAS_THUMBNAILS_CACHE[s_key]);
+//				trace("addAreaThumbnail: " + s_key + " size" + img.width + " , " + img.height + " AREAS_THUMBNAILS_CACHE[s_key]: " + AREAS_THUMBNAILS_CACHE[s_key]);
 			} else {
 				if (cacheID == 2)
 				{	
 					AREAS_THUMBNAILS_CACHE2[s_key] = {
 						image: bd
 					};
-					trace("addAreaThumbnail2: " + s_key + " size" + img.width + " , " + img.height + " AREAS_THUMBNAILS_CACHE2[s_key]: " + AREAS_THUMBNAILS_CACHE2[s_key]);
+//					trace("addAreaThumbnail2: " + s_key + " size" + img.width + " , " + img.height + " AREAS_THUMBNAILS_CACHE2[s_key]: " + AREAS_THUMBNAILS_CACHE2[s_key]);
 				}
 			}
 		}
@@ -212,11 +212,6 @@ package com.iblsoft.flexiweather.ogc
 			
 			//check if there is more levels (split by "/")
 			groupsArr = groupName.split('/');
-			if (groupsArr.length > 1)
-			{
-				if (groupsArr[0] == 'test')
-					trace('test');
-			}
 			var level: int = 0;
 			var position: int;
 			
@@ -246,16 +241,10 @@ package com.iblsoft.flexiweather.ogc
 						position = parentGroupObject.submenuPos;
 					}
 					
-					if (currGroupName == 'States')
-					{
-						trace('stop');
-					}
 					var len:int = currGroupParentXML.elements().length();
-//					if (len == 0 )
 					if (len == 0 )
 						currGroupParentXML.appendChild(groupParentXML);
 					else {
-						trace("pos " + position + " len: " + len);
 						if (position > 0)
 							currGroupParentXML.insertChildAfter(currGroupParentXML.elements()[position - 1], groupParentXML);
 						else

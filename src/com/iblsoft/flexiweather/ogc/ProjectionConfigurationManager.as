@@ -88,7 +88,7 @@ package com.iblsoft.flexiweather.ogc
 				ma_parsedProjections.addItem(projection);
 				addProj4Projection(projection);
 			}
-			trace("ProjectionConfigurationManager initializeParsedAreas items: " + ma_parsedProjections.length);
+//			trace("ProjectionConfigurationManager initializeParsedAreas items: " + ma_parsedProjections.length);
 			
 //			trace("getAreaXMLList ma_areas1: " + ma_areas.length);
 //			ArrayUtils.unionArrays(ma_areas.source, ma_parsedAreas.source, compareProjections);

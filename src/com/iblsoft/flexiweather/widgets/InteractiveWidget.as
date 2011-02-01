@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.widgets
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.ogc.cache.TileAreaCache;
 	import com.iblsoft.flexiweather.ogc.tiling.InteractiveLayerWMSWithQTT;
 	import com.iblsoft.flexiweather.ogc.tiling.TileIndex;
 	import com.iblsoft.flexiweather.proj.Coord;
@@ -34,6 +35,8 @@ package com.iblsoft.flexiweather.widgets
 		private var m_layerContainer: Container = new Container();
 
 		private var m_labelLayout: AnticollisionLayout = new AnticollisionLayout();
+		
+		private var m_tileAreaCache: TileAreaCache = new TileAreaCache();
 
 		public function InteractiveWidget() {
 			super();
@@ -196,8 +199,18 @@ package com.iblsoft.flexiweather.widgets
 			onAreaChanged(b_finalChange);
 		}
 
+		private var _oldViewBBox: BBox = new BBox(0,0,0,0);
+		
         protected function onAreaChanged(b_finalChange: Boolean): void
         {
+        	if (_oldViewBBox.equals(m_viewBBox))
+			{
+				trace("InteractiveWidget view BBOX is not changed");
+				return;
+			}
+			
+			m_tileAreaCache.clearCache();
+			
             for(var i: int = 0; i < m_layerContainer.numChildren; ++i) {
             	var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getChildAt(i));
             	if(l.onAreaChanged(b_finalChange))
@@ -206,6 +219,8 @@ package com.iblsoft.flexiweather.widgets
             		l.invalidateDynamicPart();
             }
 			m_labelLayout.setDirty();
+			
+			_oldViewBBox = m_viewBBox.clone();
         }
 		
 		internal function onLayerVisibilityChanged(layer: InteractiveLayer): void
@@ -537,5 +552,11 @@ package com.iblsoft.flexiweather.widgets
 		
 		public function get labelLayout(): AnticollisionLayout
 		{ return m_labelLayout; }
+		
+		public function get tileAreaCache(): TileAreaCache
+		{
+			return m_tileAreaCache;
+		}
+		
 	}
 }

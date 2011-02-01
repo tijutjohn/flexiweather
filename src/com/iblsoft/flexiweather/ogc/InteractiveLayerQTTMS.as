@@ -1,5 +1,7 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.ogc.cache.TileArea;
+	import com.iblsoft.flexiweather.ogc.cache.TileAreaCache;
 	import com.iblsoft.flexiweather.ogc.cache.WMSTileCache;
 	import com.iblsoft.flexiweather.ogc.tiling.TileIndex;
 	import com.iblsoft.flexiweather.ogc.tiling.TiledArea;
@@ -60,10 +62,17 @@ package com.iblsoft.flexiweather.ogc
 		{ ms_postURL = s_postURL; }
 		
 		
+		private var _oldCRS: String;
 		public function get crs(): String
 		{
-			return container.getCRS();
-			//return ms_crs;
+			var _crs: String =  container.getCRS();
+			if (_oldCRS != _crs)
+			{
+				//crs is changed, invalidate cache
+				m_cache.clearCache();
+			}
+			_oldCRS = _crs;
+			return _crs;
 		}
 		
 		public function get viewBBox(): BBox
@@ -96,7 +105,12 @@ package com.iblsoft.flexiweather.ogc
 			m_loader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onDataLoadFailed);
 		}
 
-		private var _zoom: uint = 1;
+	
+		private var _zoom: int = -1;
+		public function get zoom(): int
+		{
+			return _zoom;
+		}
 		public var tileScaleX: Number;
 		public var tileScaleY: Number;
 		
@@ -123,6 +137,8 @@ package com.iblsoft.flexiweather.ogc
 			
 			return ret;
 		}
+		private var _totalVisibleTiles: int;
+		
 		public function updateData(b_forceUpdate: Boolean): void
 		{
 //			super.updateData(b_forceUpdate);
@@ -131,6 +147,7 @@ package com.iblsoft.flexiweather.ogc
 			_tilingUtils.onAreaChanged(crs, getGTileBBoxForWholeCRS(crs));
 			var tiledArea: TiledArea = _tilingUtils.getTiledArea(container.getViewBBox(), _zoom);
 			
+			trace("QTTMS updateData: " + _zoom + " tiledArea: " + tiledArea);
 			var tiledCache: WMSTileCache = m_cache as WMSTileCache;
 //			trace("updateData ["+name+"]: tiledArea : " + tiledArea.leftCol + ", " + tiledArea.topRow + " size: " + tiledArea.colTilesCount + " , " + tiledArea.rowTilesCount);
 			
@@ -138,9 +155,21 @@ package com.iblsoft.flexiweather.ogc
 			var tileIndex: TileIndex = new TileIndex(_zoom);
 			
 			_currentTilesRequests = [];
-			for(var i_row: uint = tiledArea.topRow; i_row <= tiledArea.bottomRow; ++i_row) 
+			
+			var loadRequests: Array = new Array();
+			
+			var rowMax: int = Math.min(tiledArea.bottomRow, Math.pow(2, _zoom) - 1);
+			var colMax: int = Math.min(tiledArea.rightCol, Math.pow(2, _zoom) - 1);
+			
+			if (rowMax < tiledArea.bottomRow || colMax < tiledArea.rightCol)
 			{
-				for(var i_col: uint = tiledArea.leftCol; i_col <= tiledArea.rightCol; ++i_col) 
+				trace("wrong max tiles");
+			}
+			_totalVisibleTiles= (rowMax - tiledArea.topRow + 1) * (colMax - tiledArea.leftCol + 1);
+			trace("_totalVisibleTiles: " + _totalVisibleTiles);
+			for(var i_row: uint = tiledArea.topRow; i_row <= rowMax; ++i_row) 
+			{
+				for(var i_col: uint = tiledArea.leftCol; i_col <= colMax; ++i_col) 
 				{
 					tileIndex = new TileIndex(_zoom, i_row, i_col );
 					
@@ -149,17 +178,63 @@ package com.iblsoft.flexiweather.ogc
 					
 					_currentTilesRequests.push(request);
 					
-					trace("col: " + i_col + " i_row: " + i_row + " url = " + request.url);
+//					trace("col: " + i_col + " i_row: " + i_row + " url = " + request.url);
 					
 					if (!tiledCache.isTileCached(crs, tileIndex, request))
 					{	
-						m_loader.load(request, {
-							requestedCRS: crs,
-							requestedTileIndex: tileIndex
-						});
+						loadRequests.push({request: request, requestedCRS: crs, requestedTileIndex: tileIndex});
+						
 					} 
 				}
 			}
+			
+			if (loadRequests.length > 0)
+			{
+				loadRequests.sort(sortTiles);
+				
+				for each (var requestObj: Object in loadRequests)
+				{
+//					trace("\t load QTTMS request: " + requestObj.requestedTileIndex);
+					
+					m_loader.load(requestObj.request, {
+						requestedCRS: requestObj.requestedCRS,
+						requestedTileIndex:  requestObj.requestedTileIndex
+					});
+				}
+			}
+		}
+		
+		private function sortTiles(reqObject1: Object, reqObject2: Object): int
+		{
+			var tileIndex1: TileIndex = reqObject1.requestedTileIndex;
+			var tileIndex2: TileIndex = reqObject2.requestedTileIndex;
+			
+			var layerCenter: Point = new Point(width / 2, height / 2);//container.getViewBBox().center;
+			
+			var tileCenter1: Point = getTilePosition(reqObject1.requestedCRS, tileIndex1);
+			var tileCenter2: Point = getTilePosition(reqObject2.requestedCRS, tileIndex2);
+			
+			var dist1: int = Point.distance(layerCenter, tileCenter1);
+			var dist2: int = Point.distance(layerCenter, tileCenter2);
+			
+			if (dist1 > dist2)
+			{
+				return 1;
+			} else {
+				if (dist1 < dist2)
+					return -1;
+			}
+			return 0;
+		} 
+		private function getTilePosition(crs: String, tileIndex: TileIndex): Point
+		{
+			var tileBBox: BBox = getGTileBBox(crs, tileIndex);
+			var topLeftPoint: Point = container.coordToPoint(new Coord(crs, tileBBox.xMin, tileBBox.yMax));
+			
+			topLeftPoint.x = Math.floor(topLeftPoint.x);
+			topLeftPoint.y = Math.floor(topLeftPoint.y);
+			
+			return topLeftPoint;
 		}
 		
 		public function getTileFromCache(request: URLRequest): Object
@@ -189,22 +264,36 @@ package com.iblsoft.flexiweather.ogc
 		{
 			super.draw(graphics);
 			
+			if (_zoom == -1)
+			{
+				trace("something is wrong, zoom is -1");
+				return;
+			}
 			customDraw(graphics);
 			
 		}
 		
 		private function customDraw(graphics: Graphics, redrawBorder: Boolean = false): void
 		{
-//			var crs: String = container.getCRS();
-			
+				
 			var currentBBox: BBox = viewBBox;
 			var tilingBBox: BBox = getGTileBBoxForWholeCRS(crs); // extent of tile z=0/r=0/c=0
 
+			var areaCache: TileAreaCache = container.tileAreaCache;
+			
 			var matrix: Matrix;
 			var wmsTileCache: WMSTileCache = m_cache as WMSTileCache;
 			
 			var a_tiles: Array = wmsTileCache.getTiles(crs, _zoom);
 //			trace("draw tiles ["+name+"]: " + a_tiles.length);
+//			var crs: String = container.getCRS();
+
+			var allTiles: Array = a_tiles.reverse();
+//			if (allTiles.length < _totalVisibleTiles)
+//			{
+//				trace("not all tiles are available 2: " + allTiles.length + " from " + _totalVisibleTiles);
+//				return;
+//			}
 			
 			var topLeftCoord: Coord;
 			var topRightCoord: Coord;
@@ -222,28 +311,109 @@ package com.iblsoft.flexiweather.ogc
 			graphics.lineStyle(0,0,0);
 //			trace("y: " + this.y + " cont: " + container.y);
 			
-			for each(var t_tile: Object in a_tiles.reverse()) {
+			var topLeftTileObject: TileArea;
+			var topLeftTilePosition: Point = new Point(int.MAX_VALUE, int.MAX_VALUE);
+			var tilesObj: Array = [];
+			var t_tile: Object;
+			var tileIndex: TileIndex;
+			
+			var newWidth: int;
+			var newHeight: int;
+			var sx: Number;
+			var sy: Number;
+			var xx: int;
+			var yy: int;
 				
-				var tileIndex: TileIndex = t_tile.tileIndex;
+			var tileObject: TileArea;
+			
+			var cnt: int = 0;
+			for each(t_tile in allTiles) {
 				
-				var tileBBox: BBox = getGTileBBox(crs, tileIndex);
-//				topLeftCoord = new Coord(crs, tileBBox.xMin, tileBBox.yMax);
-				topLeftPoint = container.coordToPoint(new Coord(crs, tileBBox.xMin, tileBBox.yMax));
-				topRightPoint = container.coordToPoint(new Coord(crs, tileBBox.xMax, tileBBox.yMax));
-				bottomLeftPoint = container.coordToPoint(new Coord(crs, tileBBox.xMin, tileBBox.yMin));
-//				bottomRightPoint = container.coordToPoint(new Coord(crs, tileBBox.xMax, tileBBox.yMin));
+				tileIndex = t_tile.tileIndex;
 				
-				var newWidth: int = Math.ceil( topRightPoint.x - topLeftPoint.x);
-				var newHeight: int = Math.ceil( bottomLeftPoint.y - topLeftPoint.y);
-				var sx: Number = int(100 * newWidth / 256)/100;
-				var sy: Number = int(100 * newHeight / 256)/100;
+//				tileObject = null;
+				tileObject = areaCache.getTile(tileIndex);
+				if (!tileObject)
+				{
+					var tileBBox: BBox = getGTileBBox(crs, tileIndex);
+					topLeftPoint = container.coordToPoint(new Coord(crs, tileBBox.xMin, tileBBox.yMax));
+					topRightPoint = container.coordToPoint(new Coord(crs, tileBBox.xMax, tileBBox.yMax));
+					bottomLeftPoint = container.coordToPoint(new Coord(crs, tileBBox.xMin, tileBBox.yMin));
+//					bottomRightPoint = container.coordToPoint(new Coord(crs, tileBBox.xMax, tileBBox.yMin));
 				
-				var xx: int = Math.floor(topLeftPoint.x);
-				var yy: int = Math.floor(topLeftPoint.y);
+					var origNewWidth: Number = topRightPoint.x - topLeftPoint.x;
+					var origNewHeight: Number = bottomLeftPoint.y - topLeftPoint.y;
+					
+					newWidth = Math.ceil( origNewWidth );
+					newHeight = Math.ceil( origNewHeight );
+				
+					sx = int(10000 * newWidth / 256)/10000;
+					sy = int(10000 * newHeight / 256)/10000;
+					
+					xx = Math.round(topLeftPoint.x);
+					yy = Math.round(topLeftPoint.y);
+					
+	
+					tileObject = new TileArea();
+					tileObject.tile = t_tile;
+					tileObject.x = xx;
+					tileObject.y = yy;
+					tileObject.sx = sx;
+					tileObject.sy = sy;
+					tileObject.width = newWidth;
+					tileObject.height = newHeight;
+					
+					areaCache.addTile(tileObject);
+				
+					
+				} else {
+					tileObject.tile = t_tile;
+				}
+				if (cnt == 0)
+				{
+					topLeftTileObject = tileObject;
+					topLeftTilePosition.x = tileIndex.mi_tileCol;
+					topLeftTilePosition.y = tileIndex.mi_tileRow;
+				}
+				cnt++;
+				tilesObj.push(tileObject);
+			}
+			
+			if (topLeftTileObject)
+			{
+				var changes: int = 0;
+				var topLeftIndex: TileIndex = topLeftTileObject.tile.tileIndex;
+				for each (tileObject in tilesObj)
+				{
+					t_tile = tileObject.tile;
+					tileIndex = t_tile.tileIndex;
+					
+					var newX: int = topLeftTileObject.x + (tileIndex.mi_tileCol - topLeftIndex.mi_tileCol) * topLeftTileObject.width;
+					var newY: int = topLeftTileObject.y + (tileIndex.mi_tileRow - topLeftIndex.mi_tileRow) * topLeftTileObject.height;
+					var positionChanged: Boolean = tileObject.updateTilePosition( newX, newY );
+					changes += (positionChanged == true)
+				}
+				trace(name + " changes: " + changes + " tiles: " + tilesObj.length + " pos: " + topLeftTileObject.x + " , " + topLeftTileObject.y);
+			}
+			
+			for each (tileObject in tilesObj)
+			{
+				t_tile = tileObject.tile;
+				newWidth = tileObject.width;
+				newHeight = tileObject.height;
+				
+				sx = tileObject.sx;
+				sy = tileObject.sy;
+				
+				xx = tileObject.x;
+				yy = tileObject.y;
+				
 				matrix = new Matrix();
+				trace("matrix: scale: " + sx + " , " + sy)
 				matrix.scale( sx, sy );
 				matrix.translate(xx, yy);
-					
+				trace("matrix: " + matrix);	
+				
 				graphics.beginBitmapFill(t_tile.image.bitmapData, matrix, false, imageSmooth);
 				graphics.drawRect(xx, yy, newWidth , newHeight);
 				graphics.endFill();
@@ -297,11 +467,18 @@ package com.iblsoft.flexiweather.ogc
 			gr.endFill();
 		}
 		
+		private var _oldViewBBox: BBox = new BBox(0,0,0,0);
 		
 		override public function onAreaChanged(b_finalChange: Boolean): void
 		{
 			super.onAreaChanged(b_finalChange);
 			
+			trace("\n" + name + " onAreaChanged b_finalChange: " + b_finalChange);
+			if (_oldViewBBox.equals(viewBBox))
+			{
+				trace(" view BBOX is not changed");
+				return;
+			}
 			_tilingUtils.onAreaChanged(crs, getGTileBBoxForWholeCRS(crs));
 			
 			if(b_finalChange) {
@@ -317,6 +494,8 @@ package com.iblsoft.flexiweather.ogc
 			}
 			else
 				invalidateDynamicPart();
+				
+			_oldViewBBox = viewBBox.clone();
 		}
 		
 		protected function onDataLoaded(event: UniURLLoaderEvent): void
@@ -422,4 +601,6 @@ package com.iblsoft.flexiweather.ogc
 			
 		}
 	}
+		import com.iblsoft.flexiweather.ogc.tiling.TileIndex;
+		
 }

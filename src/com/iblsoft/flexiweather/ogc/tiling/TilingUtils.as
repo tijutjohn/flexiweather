@@ -47,6 +47,11 @@ package com.iblsoft.flexiweather.ogc.tiling
 		}
 		public function getZoom(viewBBox: BBox, viewSize: Point): int
 		{
+			if (viewSize.x == 0 || viewSize.y == 0)
+			{
+				//can not get zoom for area with no size
+				return -1;
+			}
 			var newZoomLevel: int = minimumZoom;
 			var bestZoomLevel: int = minimumZoom;
 			var bestDist: int = int.MAX_VALUE;

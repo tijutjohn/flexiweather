@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.ogc.tiling.InteractiveLayerWMSWithQTT;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.utils.UniURLLoader;
@@ -153,7 +154,7 @@ package com.iblsoft.flexiweather.ogc
 //						s_url = layer.service.fullURL;
 //						s_url = UniURLLoader.fromBaseURL(s_url);
 						
-						lWMS = new InteractiveLayerWMS(iw, layer);
+						lWMS = new InteractiveLayerWMSWithQTT(iw, layer);
 						bbox = lWMS.getExtent();
 						if(bbox != null)
 							iw.setExtentBBOX(bbox);

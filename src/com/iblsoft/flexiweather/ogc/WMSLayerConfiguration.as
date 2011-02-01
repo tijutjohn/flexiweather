@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.ogc.editable.IInteractiveLayerProvider;
+	import com.iblsoft.flexiweather.ogc.tiling.InteractiveLayerWMSWithQTT;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
@@ -245,7 +246,7 @@ package com.iblsoft.flexiweather.ogc
 		// IInteractiveLayerProvider implementation
 		public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer
 		{
-			var l: InteractiveLayerWMS = new InteractiveLayerWMS(iw, this);
+			var l: InteractiveLayerWMSWithQTT = new InteractiveLayerWMSWithQTT(iw, this);
 			l.updateData(true);
 			return l;
 		}
