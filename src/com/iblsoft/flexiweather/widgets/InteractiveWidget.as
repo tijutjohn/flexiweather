@@ -1,7 +1,6 @@
 package com.iblsoft.flexiweather.widgets
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
-	import com.iblsoft.flexiweather.ogc.cache.TileAreaCache;
 	import com.iblsoft.flexiweather.ogc.tiling.InteractiveLayerWMSWithQTT;
 	import com.iblsoft.flexiweather.ogc.tiling.TileIndex;
 	import com.iblsoft.flexiweather.proj.Coord;
@@ -36,8 +35,6 @@ package com.iblsoft.flexiweather.widgets
 
 		private var m_labelLayout: AnticollisionLayout = new AnticollisionLayout();
 		
-		private var m_tileAreaCache: TileAreaCache = new TileAreaCache();
-
 		public function InteractiveWidget() {
 			super();
 			
@@ -209,8 +206,6 @@ package com.iblsoft.flexiweather.widgets
 				return;
 			}
 			
-			m_tileAreaCache.clearCache();
-			
             for(var i: int = 0; i < m_layerContainer.numChildren; ++i) {
             	var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getChildAt(i));
             	if(l.onAreaChanged(b_finalChange))
@@ -289,6 +284,7 @@ package com.iblsoft.flexiweather.widgets
         	}
         	else
         		return null; // TODO: implement reprojection somehow
+        	
         	return new Coord(
         		x * m_viewBBox.width / (width - 1) + m_viewBBox.xMin,
         		(height - 1 - y) * m_viewBBox.height / (height - 1) + m_viewBBox.yMin)
@@ -552,11 +548,6 @@ package com.iblsoft.flexiweather.widgets
 		
 		public function get labelLayout(): AnticollisionLayout
 		{ return m_labelLayout; }
-		
-		public function get tileAreaCache(): TileAreaCache
-		{
-			return m_tileAreaCache;
-		}
 		
 	}
 }

@@ -1,7 +1,5 @@
 package com.iblsoft.flexiweather.ogc
 {
-	import com.iblsoft.flexiweather.ogc.cache.TileArea;
-	import com.iblsoft.flexiweather.ogc.cache.TileAreaCache;
 	import com.iblsoft.flexiweather.ogc.cache.WMSTileCache;
 	import com.iblsoft.flexiweather.ogc.tiling.TileIndex;
 	import com.iblsoft.flexiweather.ogc.tiling.TiledArea;
@@ -158,13 +156,15 @@ package com.iblsoft.flexiweather.ogc
 			
 			var loadRequests: Array = new Array();
 			
-			var rowMax: int = Math.min(tiledArea.bottomRow, Math.pow(2, _zoom) - 1);
-			var colMax: int = Math.min(tiledArea.rightCol, Math.pow(2, _zoom) - 1);
+//			var rowMax: int = Math.min(tiledArea.bottomRow, Math.pow(2, _zoom) - 1);
+//			var colMax: int = Math.min(tiledArea.rightCol, Math.pow(2, _zoom) - 1);
+			var rowMax: int = tiledArea.bottomRow;
+			var colMax: int = tiledArea.rightCol;
 			
-			if (rowMax < tiledArea.bottomRow || colMax < tiledArea.rightCol)
-			{
-				trace("wrong max tiles");
-			}
+//			if (rowMax < tiledArea.bottomRow || colMax < tiledArea.rightCol)
+//			{
+//				trace("wrong max tiles");
+//			}
 			_totalVisibleTiles= (rowMax - tiledArea.topRow + 1) * (colMax - tiledArea.leftCol + 1);
 			trace("_totalVisibleTiles: " + _totalVisibleTiles);
 			for(var i_row: uint = tiledArea.topRow; i_row <= rowMax; ++i_row) 
@@ -279,140 +279,56 @@ package com.iblsoft.flexiweather.ogc
 			var currentBBox: BBox = viewBBox;
 			var tilingBBox: BBox = getGTileBBoxForWholeCRS(crs); // extent of tile z=0/r=0/c=0
 
-			var areaCache: TileAreaCache = container.tileAreaCache;
-			
 			var matrix: Matrix;
 			var wmsTileCache: WMSTileCache = m_cache as WMSTileCache;
 			
 			var a_tiles: Array = wmsTileCache.getTiles(crs, _zoom);
-//			trace("draw tiles ["+name+"]: " + a_tiles.length);
-//			var crs: String = container.getCRS();
-
 			var allTiles: Array = a_tiles.reverse();
-//			if (allTiles.length < _totalVisibleTiles)
-//			{
-//				trace("not all tiles are available 2: " + allTiles.length + " from " + _totalVisibleTiles);
-//				return;
-//			}
 			
 			var topLeftCoord: Coord;
 			var topRightCoord: Coord;
 			var bottomLeftCoord: Coord;
-			var bottomRightCoord: Coord;
 			
 			var topLeftPoint: Point;
 			var topRightPoint: Point;
 			var bottomLeftPoint: Point;
-			var bottomRightPoint: Point;
-			
-			var dump_tiles: Array = [];
 			
 			graphics.clear();
 			graphics.lineStyle(0,0,0);
-//			trace("y: " + this.y + " cont: " + container.y);
 			
-			var topLeftTileObject: TileArea;
-			var topLeftTilePosition: Point = new Point(int.MAX_VALUE, int.MAX_VALUE);
-			var tilesObj: Array = [];
 			var t_tile: Object;
 			var tileIndex: TileIndex;
 			
-			var newWidth: int;
-			var newHeight: int;
+			var newWidth: Number;
+			var newHeight: Number;
 			var sx: Number;
 			var sy: Number;
-			var xx: int;
-			var yy: int;
+			var xx: Number;
+			var yy: Number;
 				
-			var tileObject: TileArea;
-			
 			var cnt: int = 0;
 			for each(t_tile in allTiles) {
 				
 				tileIndex = t_tile.tileIndex;
 				
-//				tileObject = null;
-				tileObject = areaCache.getTile(tileIndex);
-				if (!tileObject)
-				{
-					var tileBBox: BBox = getGTileBBox(crs, tileIndex);
-					topLeftPoint = container.coordToPoint(new Coord(crs, tileBBox.xMin, tileBBox.yMax));
-					topRightPoint = container.coordToPoint(new Coord(crs, tileBBox.xMax, tileBBox.yMax));
-					bottomLeftPoint = container.coordToPoint(new Coord(crs, tileBBox.xMin, tileBBox.yMin));
-//					bottomRightPoint = container.coordToPoint(new Coord(crs, tileBBox.xMax, tileBBox.yMin));
-				
-					var origNewWidth: Number = topRightPoint.x - topLeftPoint.x;
-					var origNewHeight: Number = bottomLeftPoint.y - topLeftPoint.y;
-					
-					newWidth = Math.ceil( origNewWidth );
-					newHeight = Math.ceil( origNewHeight );
-				
-					sx = int(10000 * newWidth / 256)/10000;
-					sy = int(10000 * newHeight / 256)/10000;
-					
-					xx = Math.round(topLeftPoint.x);
-					yy = Math.round(topLeftPoint.y);
-					
-	
-					tileObject = new TileArea();
-					tileObject.tile = t_tile;
-					tileObject.x = xx;
-					tileObject.y = yy;
-					tileObject.sx = sx;
-					tileObject.sy = sy;
-					tileObject.width = newWidth;
-					tileObject.height = newHeight;
-					
-					areaCache.addTile(tileObject);
-				
-					
-				} else {
-					tileObject.tile = t_tile;
-				}
-				if (cnt == 0)
-				{
-					topLeftTileObject = tileObject;
-					topLeftTilePosition.x = tileIndex.mi_tileCol;
-					topLeftTilePosition.y = tileIndex.mi_tileRow;
-				}
-				cnt++;
-				tilesObj.push(tileObject);
-			}
+				var tileBBox: BBox = getGTileBBox(crs, tileIndex);
+				topLeftPoint = container.coordToPoint(new Coord(crs, tileBBox.xMin, tileBBox.yMax));
+				topRightPoint = container.coordToPoint(new Coord(crs, tileBBox.xMax, tileBBox.yMax));
+				bottomLeftPoint = container.coordToPoint(new Coord(crs, tileBBox.xMin, tileBBox.yMin));
 			
-			if (topLeftTileObject)
-			{
-				var changes: int = 0;
-				var topLeftIndex: TileIndex = topLeftTileObject.tile.tileIndex;
-				for each (tileObject in tilesObj)
-				{
-					t_tile = tileObject.tile;
-					tileIndex = t_tile.tileIndex;
-					
-					var newX: int = topLeftTileObject.x + (tileIndex.mi_tileCol - topLeftIndex.mi_tileCol) * topLeftTileObject.width;
-					var newY: int = topLeftTileObject.y + (tileIndex.mi_tileRow - topLeftIndex.mi_tileRow) * topLeftTileObject.height;
-					var positionChanged: Boolean = tileObject.updateTilePosition( newX, newY );
-					changes += (positionChanged == true)
-				}
-				trace(name + " changes: " + changes + " tiles: " + tilesObj.length + " pos: " + topLeftTileObject.x + " , " + topLeftTileObject.y);
-			}
-			
-			for each (tileObject in tilesObj)
-			{
-				t_tile = tileObject.tile;
-				newWidth = tileObject.width;
-				newHeight = tileObject.height;
-				
-				sx = tileObject.sx;
-				sy = tileObject.sy;
-				
-				xx = tileObject.x;
-				yy = tileObject.y;
+				var origNewWidth: Number = topRightPoint.x - topLeftPoint.x;
+				var origNewHeight: Number = bottomLeftPoint.y - topLeftPoint.y;
+
+				newWidth = ( origNewWidth );
+				newHeight = ( origNewHeight );
+				sx = newWidth / 256;
+				sy = newHeight / 256;
+				xx = topLeftPoint.x;
+				yy = topLeftPoint.y;
 				
 				matrix = new Matrix();
-				trace("matrix: scale: " + sx + " , " + sy)
 				matrix.scale( sx, sy );
 				matrix.translate(xx, yy);
-				trace("matrix: " + matrix);	
 				
 				graphics.beginBitmapFill(t_tile.image.bitmapData, matrix, false, imageSmooth);
 				graphics.drawRect(xx, yy, newWidth , newHeight);
@@ -424,25 +340,17 @@ package com.iblsoft.flexiweather.ogc
 					graphics.lineStyle(1, 0xff0000,0.3);
 					graphics.drawRect(xx, yy, newWidth , newHeight);
 				}
-//				trace("tile: " + tileIndex + " pos: " + xx + " , " + yy + " size: " + newWidth + " , " + newHeight);
 				
-				dump_tiles.push({key: tileIndex.mi_tileRow + tileIndex.mi_tileCol / 10,  x: tileIndex.mi_tileCol, y: tileIndex.mi_tileRow, left: xx, top: yy, right: xx + newWidth, bottom: yy + newHeight });
-//				drawText(xx + ", " + yy + "\n" + topLeftCoord.toNiceString(), graphics, new Point(xx + 10, yy + 5));
 				if (drawDebugText)
 				{
 					drawText(tileIndex.mi_tileCol + ", " + tileIndex.mi_tileRow, graphics, new Point(xx + 10, yy + 5));
 				}
-//				trace("********************************");
+					
 			}
 			
 			tileScaleX = sx;
 			tileScaleY = sy;
 			
-//			dump_tiles.sortOn('key', Array.NUMERIC);
-//			for each (var tileObj: Object in dump_tiles)
-//			{
-//				trace("Tile: " + tileObj.x + "," + tileObj.y + " rect: " + tileObj.left + ", " + tileObj.top + " | " + tileObj.right + "," + tileObj.bottom);
-//			}
 		}
 		
 		private var _tf:TextField = new TextField();
