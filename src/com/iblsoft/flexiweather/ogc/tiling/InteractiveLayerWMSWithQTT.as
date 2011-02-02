@@ -11,6 +11,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 	public class InteractiveLayerWMSWithQTT extends InteractiveLayerWMS
 	{
+		private var _specialCacheStrings: Array;
 		private var _tiledLayer: InteractiveLayerQTTMS;
 		public function get tileLayer(): InteractiveLayerQTTMS
 		{
@@ -20,7 +21,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 		public function get isTilable(): Boolean
 		{
 			var crs: String = container.getCRS();
-			//return m_cfg.isTilableForCRS(crs);
+//			return m_cfg.isTilableForCRS(crs);
 			
 			/**
 			 *  TODO: set isTilable to false, if you dont want to use tiling on WMS 
@@ -86,12 +87,26 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			if (isTilable)
 			{
+//				graphics.clear();
+//				_tiledLayer.graphics.clear();
+				updateTiledLayerURLBase();
 				_tiledLayer.refresh(b_force);
 			} else {
 				super.refresh(b_force);
 			}
 		}
 		
+		override public function updateDimensionsInURLRequest(url: URLRequest): void
+		{
+			super.updateDimensionsInURLRequest(url);
+			
+			_specialCacheStrings = [];
+			
+			for(var s_dimName: String in md_dimensionValues) {
+				var str: String = m_cfg.dimensionToParameterName(s_dimName) +"=" + md_dimensionValues[s_dimName];
+				_specialCacheStrings.push(str);
+			}
+		}
 		override protected function updateRequestData(request: URLRequest):void
 		{
 			super.updateRequestData(request);
@@ -115,14 +130,21 @@ package com.iblsoft.flexiweather.ogc.tiling
 			}
 			
 		}
+		
+		private function updateTiledLayerURLBase(): void
+		{
+			//update QTT Layer URL parts
+			_tiledLayer.baseURL = getFullURL();
+			_tiledLayer.setSpecialCacheStrings(_specialCacheStrings);
+		}
+		
 		override public function updateData(b_forceUpdate:Boolean):void
 		{
 //			trace("WMSWithQTT updateData ["+name+"]");
 			var gr: Graphics = graphics;
 			if (isTilable)
 			{
-				//update QTT Layer URL parts
-				_tiledLayer.baseURL = getFullURL();
+				updateTiledLayerURLBase();
 				_tiledLayer.updateData(b_forceUpdate);
 				changeTiledLayerVisibility(true);
 			} else {
@@ -137,6 +159,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			if (isTilable)
 			{
 //				trace("\t WMSWithQTT draw ["+name+"] zoom: " + _tiledLayer.zoom);
+				updateTiledLayerURLBase();
 				if (_tiledLayer.zoom < 1)
 				{
 					
@@ -157,7 +180,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 //			trace("WMSWithQTT onAreaChanged ["+name+"]");
 			if (isTilable)
 			{
-				_tiledLayer.baseURL = getFullURL();
+				updateTiledLayerURLBase();
 				_tiledLayer.onAreaChanged(b_finalChange);
 				
 				draw(graphics);
@@ -173,6 +196,24 @@ package com.iblsoft.flexiweather.ogc.tiling
 //			_tiledLayer.y = container.y;
 			_tiledLayer.width = container.width;
 			_tiledLayer.height = container.height;
+		}
+		
+		override public function synchroniseWith(s_variableId: String, value: Object): Boolean
+		{
+			var bool: Boolean = super.synchroniseWith(s_variableId, value);
+			
+			trace(name + " synchroniseWith " + bool);
+//			_specialCacheStrings
+//			if (isTilable)
+//			{
+//				//_tiledLayer.invalidateCache();
+//				_tiledLayer.baseURL = getFullURL();
+//				_tiledLayer.onAreaChanged(true);
+//				updateData(true);
+//				//draw(graphics);
+//			}
+			
+			return bool;
 		}
 		
 	}
