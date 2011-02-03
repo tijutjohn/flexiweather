@@ -1,5 +1,8 @@
 package com.iblsoft.flexiweather.utils
 {
+	import flash.utils.getDefinitionByName;
+	import flash.utils.getQualifiedClassName;
+	
 	import mx.collections.ArrayCollection;
 	
 	public class Storage
@@ -33,25 +36,65 @@ package com.iblsoft.flexiweather.utils
 		public final function serializeNumber(s_key: String, f: Number, f_default: Number = NaN): Number
 		{ return __serializeNumber(s_key, NONINDEXED, f, f_default); }
 
-		public final function serializeNonpersistentArrayCollection(
-				s_key: String, a: ArrayCollection, c: Class): void
+		public final function serializePersistentArrayCollection(
+			s_key: String, a: ArrayCollection, c: Class): void
+		{
+			serializePersistentArray(s_key, a.toArray(), c);
+		}
+		
+		public final function serializePersistentArray(
+			s_key: String, a: Array, baseClass: Class): void
 		{
 			var i: int;
 			var s: String;
+			var s_class: String;
+			var restorePointObject: Object;
 			if(isLoading()) {
-				a.removeAll();
+				while(a.length > 0)
+					a.pop();
 				i = 0;
 				while(true) {
 					if(!hasKey(s_key, i))
 						break;
-					a.addItem(__constructAndSerialize(s_key, i, c));
+					restorePointObject = downLevel(s_key, i);
+					var c: Class = null; 
+					try {
+						s_class = __serializeString("class", NONINDEXED, null);
+						try {
+							c = Class(getDefinitionByName(s_class));
+						}
+						catch(e: ReferenceError) {
+							throw StorageException("Unknown persistent class '" + s_class + "': " + e.message);
+						}
+					}
+					finally { 
+						upLevel(restorePointObject);
+					}
+					if(c as baseClass == null) {
+						throw StorageException("Unable to retype class '" + s_class + "' to '" + String(baseClass) + "'");
+					}
+					a.push(__constructAndSerialize(s_key, i, c)); 
 					++i; 
 				}
 			} else {
 				for(i = 0; i < a.length; ++i) {
+					restorePointObject = downLevel(s_key, i);
+					try {
+						s_class = getQualifiedClassName(a[i]);
+						__serializeString("class", NONINDEXED, s_class);
+					}
+					finally { 
+						upLevel(restorePointObject);
+					}
 					__serialize(s_key, i, a[i]);
 				}
 			}
+		}
+
+		public final function serializeNonpersistentArrayCollection(
+				s_key: String, a: ArrayCollection, c: Class): void
+		{
+			serializeNonpersistentArray(s_key, a.toArray(), c);
 		}
 
 		public final function serializeNonpersistentArray(
