@@ -155,6 +155,10 @@ package com.iblsoft.flexiweather.widgets
 		}
 		
 		private var m_canvasDictionary: Dictionary = new Dictionary();
+		public function clearCanvasDictionary(): void
+		{
+			m_canvasDictionary = new Dictionary();
+		}
 		private function addCanvasToDictionary(cnv: Canvas, layer: InteractiveLayer): void
 		{
 			if (!cnv)

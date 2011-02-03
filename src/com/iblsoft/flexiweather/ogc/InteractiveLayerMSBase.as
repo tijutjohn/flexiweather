@@ -226,6 +226,7 @@ package com.iblsoft.flexiweather.ogc
         {
         	super.refresh(b_force);
         	updateData(b_force);
+        	//rerender legend
         }
 
 		override public function hasPreview(): Boolean
@@ -324,12 +325,14 @@ package com.iblsoft.flexiweather.ogc
 //			m_legendLabelAlign = labelAlign;
 //        	m_legendCallBack = callback;
 			
-			trace("renderLegend");
-        	if (!useCache || (useCache && !isLegendCachedBySize(w, h)))
+			trace("renderLegend url: " + legendObject.url);
+          	if (!useCache || (useCache && !isLegendCachedBySize(w, h)))
         	{
 	        	var url: URLRequest = m_cfg.toGetLegendRequest(
 						w, h,
 						style.name);
+						
+				updateURLWithDimensions(url);
 						
 				var associatedData: Object = {canvas: canvas, labelAlign: labelAlign, callback: callback, useCache: useCache};
 				
@@ -644,14 +647,27 @@ package com.iblsoft.flexiweather.ogc
         	return a_dimValues;
         }
         
-        private function createDimensionsValuesString(a_dimValues: Array): String
+        private function updateURLWithDimensions(url: URLRequest): void
         {
         	var str: String = '';
-        	for each (var item: Object in a_dimValues)
+        	
+        	if (!url.data)
         	{
-        		str += item.value + ", ";
+        		url.data = new Object();
         	}
-        	return str;
+        	for each(var layer: WMSLayer in getWMSLayers()) 
+        	{
+        		for each(var dim: WMSDimension in layer.dimensions) {
+        			
+        			var value: Object = getWMSDimensionValue(dim.ms_name);
+        			if (!value)
+        				value = dim.ms_default;
+        				
+        			url.data[dim.ms_name] = value.toString();
+        			
+        		}
+        	}
+        	
         }
 
 		/**
