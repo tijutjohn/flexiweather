@@ -37,9 +37,9 @@ package com.iblsoft.flexiweather.utils
 		{ return __serializeNumber(s_key, NONINDEXED, f, f_default); }
 
 		public final function serializePersistentArrayCollection(
-			s_key: String, a: ArrayCollection, c: Class): void
+			s_key: String, a: ArrayCollection, baseClass: Class): void
 		{
-			serializePersistentArray(s_key, a.toArray(), c);
+			serializePersistentArray(s_key, a.toArray(), baseClass);
 		}
 		
 		public final function serializePersistentArray(
