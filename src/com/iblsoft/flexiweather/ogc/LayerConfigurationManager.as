@@ -1,9 +1,7 @@
 package com.iblsoft.flexiweather.ogc
 {
-	import com.iblsoft.flexiweather.ogc.tiling.InteractiveLayerWMSWithQTT;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
-	import com.iblsoft.flexiweather.utils.UniURLLoader;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.events.Event;
@@ -37,7 +35,8 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function serialize(storage: Storage): void
 		{
-			storage.serializeNonpersistentArrayCollection("layer", ma_layers, WMSLayerConfiguration);
+//			storage.serializeNonpersistentArrayCollection("layer", ma_layers, WMSLayerConfiguration);
+			storage.serializePersistentArrayCollection("layer", ma_layers, LayerConfiguration);
 		}
 		
 		public function getLayerByLabel(lbl: String): WMSLayerConfiguration
@@ -125,12 +124,12 @@ package com.iblsoft.flexiweather.ogc
 				var compatibleWithCRS: Boolean = true;
 				var layerType: String = 'layer';
 				
-				for each (var layer: WMSLayerConfiguration in ma_layers)
+				for each (var layerConfig: LayerConfiguration in ma_layers)
 				{
-					var lbl: String = layer.label;
+					var lbl: String = layerConfig.label;
 					var folderName: String = '';
 					
-					compatibleWithCRS =  layer.isCompatibleWithCRS(currentCRS);
+					compatibleWithCRS =  layerConfig.isCompatibleWithCRS(currentCRS);
 					
 					if (currentCRS)
 					{
@@ -148,36 +147,12 @@ package com.iblsoft.flexiweather.ogc
 						lbl = lbl.substring(lastPos+1, lbl.length);
 					}
 					
-					var s_url: String = layer.previewURL;
-					var icon: String = '';
-					if(s_url == null || s_url.length == 0) {
-//						s_url = layer.service.fullURL;
-//						s_url = UniURLLoader.fromBaseURL(s_url);
+					if (layerConfig is WMSWithQTTLayerConfiguration)
+						trace("stop");
 						
-						lWMS = new InteractiveLayerWMSWithQTT(iw, layer);
-						bbox = lWMS.getExtent();
-						if(bbox != null)
-							iw.setExtentBBOX(bbox);
-						iw.addLayer(lWMS);
-						lWMS.dataLoader.data = { label: layer.label, cfg: layer };
-						s_url = lWMS.getFullURL();
-							
-						icon = s_url;
-					} else {
+					var icon: String = layerConfig.getPreviewURL();
 					
-						if(s_url == "<internal>") {
-							s_url = layer.service.fullURL;
-							//check if there is ${BASE_URL} in fullURL and convert it
-							s_url = UniURLLoader.fromBaseURL(s_url);
-							s_url = s_url.replace(/.*\//, "").replace(/\?.*/, "");
-							s_url = s_url.replace("/", "-");
-							s_url += "-" + layer.ma_layerNames.join("_").replace(" ", "-").toLowerCase();
-							s_url = "assets/layer-previews/" + s_url + ".png";
-							icon = s_url;
-						}
-					}
-					
-					var layerData: String = "layer."+layer.label;
+					var layerData: String = "layer."+layerConfig.label;
 					var layerXML: XML = <menuitem label={lbl} data={layerData} icon={icon} compatibleWithCRS={compatibleWithCRS} type={layerType}/>
 					
 					if (folderName && folderName.length > 0)

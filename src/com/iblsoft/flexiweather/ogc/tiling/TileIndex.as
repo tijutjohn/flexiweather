@@ -6,7 +6,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 		public var mi_tileRow: uint;
 		public var mi_tileCol: uint;
 	
-		public function TileIndex(i_tileZoom: uint, i_tileRow: uint = 0, i_tileCol: uint = 0)
+		public function TileIndex(i_tileZoom: uint = 0, i_tileRow: uint = 0, i_tileCol: uint = 0)
 		{
 			mi_tileZoom = i_tileZoom;
 			changePosition(i_tileRow, i_tileCol);
@@ -16,6 +16,19 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			mi_tileRow = i_tileRow;
 			mi_tileCol = i_tileCol;
+		}
+		
+		public static function createTileIndexFromString(str: String): TileIndex
+		{
+			var tileIndex: TileIndex = new TileIndex();
+			var arr: Array = str.split('|');
+			str = arr[1] as String;
+			arr = str.split('/');
+			tileIndex.mi_tileZoom = arr[0];
+			tileIndex.mi_tileCol = arr[1];
+			tileIndex.mi_tileRow = arr[2];
+			
+			return tileIndex;
 		}
 		public function toString(): String
 		{

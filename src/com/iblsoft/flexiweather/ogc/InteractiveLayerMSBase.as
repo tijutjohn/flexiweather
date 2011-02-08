@@ -164,7 +164,7 @@ package com.iblsoft.flexiweather.ogc
 		 * @return 
 		 * 
 		 */		
-		public function getFullURL(): String
+		override public function getFullURL(): String
 		{
 			var request: URLRequest = m_cfg.toGetMapRequest(
 					container.getCRS(), container.getViewBBox().toBBOXString(),
@@ -183,6 +183,10 @@ package com.iblsoft.flexiweather.ogc
 				s_url += request.data;
 			}
 			
+			if (request.data.STYLE && request.data.STYLE.length > 0)
+			{
+				
+			}
 			return s_url;
 		}
 		

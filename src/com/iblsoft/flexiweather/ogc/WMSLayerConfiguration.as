@@ -1,8 +1,8 @@
 package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.ogc.editable.IInteractiveLayerProvider;
-	import com.iblsoft.flexiweather.ogc.tiling.InteractiveLayerWMSWithQTT;
 	import com.iblsoft.flexiweather.utils.Storage;
+	import com.iblsoft.flexiweather.utils.UniURLLoader;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
@@ -25,7 +25,6 @@ package com.iblsoft.flexiweather.ogc
 		public var ms_dimensionForecastName: String = null;
 		public var ms_dimensionVerticalLevelName: String = null;
 		public var mb_legendIsDimensionDependant: Boolean;
-		public var ms_previewURL: String = null;
 		public var mi_autoRefreshPeriod: uint = 0;
 		
 		public var ms_layerType: String = null;
@@ -219,7 +218,7 @@ package com.iblsoft.flexiweather.ogc
 			
 			return false;
 		}
-		public function isCompatibleWithCRS(crs: String): Boolean
+		override public function isCompatibleWithCRS(crs: String): Boolean
 		{
 			if (ma_layerConfigurations && ma_layerConfigurations.length > 0)
 			{
@@ -234,6 +233,54 @@ package com.iblsoft.flexiweather.ogc
 			return true;
 		}
 		
+		override public function hasPreview(): Boolean
+        { return true; }
+        
+		override public function getPreviewURL(): String
+		{
+			var s_url: String = '';
+			
+			if(ms_previewURL == null || ms_previewURL.length == 0) 
+			{
+				var iw: InteractiveWidget = new InteractiveWidget();
+				var lWMS: InteractiveLayerWMS = createInteractiveLayer(iw) as InteractiveLayerWMS;
+				if(lWMS != null)
+				{
+					var bbox: BBox = lWMS.getExtent();
+					if(bbox != null)
+						iw.setExtentBBOX(bbox);
+					iw.addLayer(lWMS);
+					lWMS.dataLoader.data = { label: label, cfg: this };
+					s_url = lWMS.getFullURL();
+						
+				} else {
+					trace("getMenuLayersXMLList interactive layer does not exist");
+				}
+			} else {
+			
+				if(ms_previewURL == "<internal>") {
+					s_url = service.fullURL;
+					//check if there is ${BASE_URL} in fullURL and convert it
+					s_url = UniURLLoader.fromBaseURL(s_url);
+					s_url = s_url.replace(/.*\//, "").replace(/\?.*/, "");
+					s_url = s_url.replace("/", "-");
+					s_url += "-" + ma_layerNames.join("_").replace(" ", "-").toLowerCase();
+					s_url = "assets/layer-previews/" + s_url + ".png";
+				}
+			}	
+			
+			return s_url;
+		}
+		
+		override public function renderPreview(f_width: Number, f_height: Number, iw: InteractiveWidget =  null): void
+		{
+			if (!iw)
+				iw = new InteractiveWidget();
+				
+			var lWMS: InteractiveLayerWMS = createInteractiveLayer(iw) as InteractiveLayerWMS;
+			lWMS.renderPreview(lWMS.graphics, f_width, f_height);
+		}
+		
 		// IBehaviouralObject implementation
 		public function setBehaviourString(s_behaviourId: String, s_value: String): void
 		{ ma_behaviours[s_behaviourId] = s_value; }
@@ -244,9 +291,9 @@ package com.iblsoft.flexiweather.ogc
 		}
 		
 		// IInteractiveLayerProvider implementation
-		public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer
+		override public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer
 		{
-			var l: InteractiveLayerWMSWithQTT = new InteractiveLayerWMSWithQTT(iw, this);
+			var l: InteractiveLayerWMS = new InteractiveLayerWMS(iw, this);
 			l.updateData(true);
 			return l;
 		}
@@ -287,12 +334,6 @@ package com.iblsoft.flexiweather.ogc
 
 		public function get dimensionVerticalLevelName(): String
 		{ return ms_dimensionVerticalLevelName; }
-		
-		public function set previewURL(s: String): void
-		{ ms_previewURL = s; }
-
-		public function get previewURL(): String
-		{ return ms_previewURL; }
 		
 		public function set layerType(s: String): void
 		{ ms_layerType = s; }

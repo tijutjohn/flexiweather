@@ -2,8 +2,10 @@ package com.iblsoft.flexiweather.ogc.cache
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.tiling.TileIndex;
+	import com.iblsoft.flexiweather.ogc.tiling.TiledArea;
 	
 	import flash.display.Bitmap;
+	import flash.geom.Point;
 	import flash.net.URLRequest;
 	import flash.utils.Dictionary;
 	
@@ -45,7 +47,8 @@ package com.iblsoft.flexiweather.ogc.cache
 		public function getTiles(s_crs: String, i_tileZoom: uint, specialStrings: Array): Array
 		{
 			var a: Array = [];
-			for each(var cacheRecord: Object in md_cache) {
+			for each(var cacheRecord: Object in md_cache) 
+			{
 				var cacheKey: WMSTileCacheKey = cacheRecord.cacheKey;
 				if(cacheKey.m_tileIndex == null)
 					continue;
@@ -57,15 +60,40 @@ package com.iblsoft.flexiweather.ogc.cache
 				{
 					var key: String = decodeURI(cacheKey.toString());
 					var specialStringInside: Boolean = true;
-					for each (var str: String in specialStrings)
+					var keyParts: Array = key.split('|');
+					
+					var specialStringsLength: int = 0;
+					var specialStringsFound: int = 0;
+					
+					var currKeyPart: String
+					
+					for each (currKeyPart in specialStrings)
 					{
-						if (key.indexOf(str) == -1)
+						if (currKeyPart.indexOf("SPECIAL_") == -1)
+							continue;
+						specialStringsLength++;
+					}
+					for each (currKeyPart in keyParts)
+					{
+						if (currKeyPart.indexOf("SPECIAL_") == -1)
+							continue;
+							
+						var id: int = specialStrings.indexOf(currKeyPart);
+						if (id < 0)
 						{
-							//special string is not in key, do not return this tile
-							 specialStringInside = false;
+							specialStringInside = false;
 							 break;
 						}
+						specialStringsFound++;
 					}
+					
+//					trace("specialStringsFound: " + specialStringsFound + " specialStringsLength: " + specialStringsLength);
+					if (specialStringsFound != specialStringsLength)
+					{
+						//not all special strings were inside
+						continue;
+					}
+					//TODO all special strings must be in key
 					if (!specialStringInside)
 						continue;
 				}
@@ -75,6 +103,7 @@ package com.iblsoft.flexiweather.ogc.cache
 					image: cacheRecord.image
 				});
 			}
+//			trace("GET TILES: " + a.length);
 			return a;
 		}
 	
@@ -85,9 +114,9 @@ package com.iblsoft.flexiweather.ogc.cache
 			var s_key: String = ck.toString(); 
 			var data: Object =  md_cache[s_key]; 
 //			trace("isTileCached check for undefined: " + (data != undefined) + " for null: " + (data != null) + " KEY: " + s_key);
-			return data != undefined;			
+			return data != null;			
 		}
-		public function addTile(img: Bitmap, s_crs: String, tileIndex: TileIndex, url: URLRequest, specialStrings: Array): void
+		public function addTile(img: Bitmap, s_crs: String, tileIndex: TileIndex, url: URLRequest, specialStrings: Array, tiledArea: TiledArea): void
 		{
 			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, null, tileIndex, url, specialStrings);
 			var s_key: String = decodeURI(ck.toString()); 
@@ -102,7 +131,10 @@ package com.iblsoft.flexiweather.ogc.cache
 			
 			if (_items.length > maxCachedItems)
 			{
-				s_key = _items.shift();
+				s_key = getCachedTileKeyOutsideTiledArea(tiledArea);
+				
+//				trace("REMOVE TILE : " +s_key);
+				
 				disposeTileBitmap(s_key);
 				
 				delete md_cache[s_key];
@@ -110,11 +142,67 @@ package com.iblsoft.flexiweather.ogc.cache
 //			trace("cache item removed: " + _items.length);
 		}
 		
+		private var _tiledArea: TiledArea;
+		private var _tiledAreaCenter: Point;
+		public function sortCache(tiledArea: TiledArea): void
+		{
+			return;
+			
+			if (tiledArea)
+			{
+				_tiledArea = tiledArea;
+				_tiledAreaCenter = _tiledArea.center;
+				
+				_items.sort(sortTileKeys);
+				
+//				trace(_items);
+			}
+		}
+		private function sortTileKeys(tileKey1: String, tileKey2: String): int
+		{
+			var tileIndex1: TileIndex = TileIndex.createTileIndexFromString(tileKey1);
+			var tileIndex2: TileIndex = TileIndex.createTileIndexFromString(tileKey2);
+			
+			var dist1: Number = Point.distance( _tiledAreaCenter, new Point(tileIndex1.mi_tileCol, tileIndex1.mi_tileRow) )
+			var dist2: Number = Point.distance( _tiledAreaCenter, new Point(tileIndex1.mi_tileCol, tileIndex1.mi_tileRow) )
+			
+//			trace(dist1 + "  , " + dist2);
+//			trace(tileIndex1 + "  , " + tileIndex2);
+			if (dist1 > dist1) {
+				return -1
+			} else {
+				if (dist1 < dist1) {
+					return 1;
+				} 
+			}
+			return 0;
+					
+		}
+		
+		private function getCachedTileKeyOutsideTiledArea(tiledArea: TiledArea): String
+		{
+			var total: int = _items.length;
+			for (var i: int = 0; i < total; i++)
+			{
+				var key: String = _items[i] as String;
+				if (tiledArea.isTileOutside(TileIndex.createTileIndexFromString(key)))
+				{
+					//key is outside, return it
+					_items.splice(key, 1);
+					return key;
+				}
+			}
+			return _items.shift();
+		} 
+		
 		private function disposeTileBitmap(s_key: String): void
 		{
 			var data: Object = md_cache[s_key];
-			var img:  Bitmap = data.image;
-			img.bitmapData.dispose();
+			if (data)
+			{
+				var img:  Bitmap = data.image;
+				img.bitmapData.dispose();
+			}
 		}
 	
 		public function invalidate(s_crs: String, bbox: BBox): void

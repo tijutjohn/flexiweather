@@ -165,6 +165,8 @@ package com.iblsoft.flexiweather.widgets
 				container.orderLayers();
 		}
 		
+		public function getFullURL(): String
+		{	return ''; }
 		/**
 		 * Clone interactiveLayer 
 		 * 

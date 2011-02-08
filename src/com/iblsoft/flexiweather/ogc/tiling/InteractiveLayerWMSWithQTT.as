@@ -5,8 +5,10 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import com.iblsoft.flexiweather.ogc.WMSLayerConfiguration;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
+	import flash.display.BitmapData;
 	import flash.display.Graphics;
 	import flash.events.DataEvent;
+	import flash.geom.Matrix;
 	import flash.net.URLRequest;
 
 	public class InteractiveLayerWMSWithQTT extends InteractiveLayerWMS
@@ -18,8 +20,13 @@ package com.iblsoft.flexiweather.ogc.tiling
 			return _tiledLayer;
 		}
 		
+		public var avoidTiling: Boolean;
+		
 		public function get isTilable(): Boolean
 		{
+			if (avoidTiling)
+				return false;
+				
 			var crs: String = container.getCRS();
 //			return m_cfg.isTilableForCRS(crs);
 			
@@ -29,9 +36,11 @@ package com.iblsoft.flexiweather.ogc.tiling
 			 */
 			return false;
 		}
-		public function InteractiveLayerWMSWithQTT(container:InteractiveWidget, cfg:WMSLayerConfiguration)
+		public function InteractiveLayerWMSWithQTT(container:InteractiveWidget, cfg:WMSLayerConfiguration, avoidTiling: Boolean = false)
 		{
 			super(container, cfg);
+			
+			this.avoidTiling = avoidTiling;
 			
 			_tiledLayer = new InteractiveLayerQTTMS(container, '', '&TileZoom=%ZOOM%&TileCol=%COL%&TileRow=%ROW%','&/png', container.getCRS(), null, 0, 12);
 			addChild(_tiledLayer);
@@ -75,7 +84,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 //			trace("InteractiveLayerWMSWithQTT onCapabilitiesUpdated: " + isTilable);
 			//refresh, capabilities are updated, so we can find out, if layer isTilable	
 			refresh(true);		
-			updateData(true);
+//			updateData(true);
 		}
 		
 		private function changeTiledLayerVisibility(visible: Boolean): void
@@ -87,8 +96,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			if (isTilable)
 			{
-//				graphics.clear();
-//				_tiledLayer.graphics.clear();
 				updateTiledLayerURLBase();
 				_tiledLayer.refresh(b_force);
 			} else {
@@ -103,7 +110,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			_specialCacheStrings = [];
 			
 			for(var s_dimName: String in md_dimensionValues) {
-				var str: String = m_cfg.dimensionToParameterName(s_dimName) +"=" + md_dimensionValues[s_dimName];
+				var str: String = "SPECIAL_"+m_cfg.dimensionToParameterName(s_dimName) +"=" + md_dimensionValues[s_dimName];
 				_specialCacheStrings.push(str);
 			}
 		}
@@ -126,6 +133,12 @@ package com.iblsoft.flexiweather.ogc.tiling
 				{
 					request.data.STYLE = request.data.STYLES;
 					delete request.data.STYLES;
+				}
+				
+				if (request.data.hasOwnProperty('STYLE'))
+				{
+					var str: String = "SPECIAL_STYLE=" + request.data.STYLE;
+					_specialCacheStrings.push(str);
 				}
 			}
 			
@@ -151,6 +164,38 @@ package com.iblsoft.flexiweather.ogc.tiling
 				changeTiledLayerVisibility(false);
 				super.updateData(b_forceUpdate);
 			}
+		}
+		
+		override public function renderPreview(graphics: Graphics, f_width: Number, f_height: Number): void
+		{
+			if (isTilable)
+			{
+				if(tileLayer.width > 0 && tileLayer.height > 0) {
+					var matrix: Matrix  = new Matrix();
+					matrix.translate(-f_width / 3, -f_width / 3);
+					matrix.scale(3, 3);
+					matrix.translate(tileLayer.width / 3, tileLayer.height / 3);
+					matrix.invert();
+					var bd: BitmapData = new BitmapData(tileLayer.width, tileLayer.height, true, 0x00000000);
+					bd.draw(tileLayer);
+					
+	  				graphics.beginBitmapFill(bd, matrix, false, true);
+					graphics.drawRect(0, 0, f_width, f_height);
+					graphics.endFill();
+				}
+				
+//				if(!mb_imageOK) {
+//					graphics.lineStyle(2, 0xcc0000, 0.7, true);
+//					graphics.moveTo(0, 0);
+//					graphics.lineTo(f_width - 1, f_height - 1);
+//					graphics.moveTo(0, f_height - 1);
+//					graphics.lineTo(f_width - 1, 0);
+//				}
+			
+			} else {
+				super.renderPreview(graphics, f_width, f_height);	
+			}
+			
 		}
 		
 		override public function draw(graphics: Graphics): void

@@ -39,7 +39,7 @@ package com.iblsoft.flexiweather.utils
 		public final function serializePersistentArrayCollection(
 			s_key: String, a: ArrayCollection, baseClass: Class): void
 		{
-			serializePersistentArray(s_key, a.toArray(), baseClass);
+			serializePersistentArray(s_key, a.source, baseClass);
 		}
 		
 		public final function serializePersistentArray(
@@ -70,7 +70,7 @@ package com.iblsoft.flexiweather.utils
 					finally { 
 						upLevel(restorePointObject);
 					}
-					if(c as baseClass == null) {
+					if((c is baseClass)) {
 						throw StorageException("Unable to retype class '" + s_class + "' to '" + String(baseClass) + "'");
 					}
 					a.push(__constructAndSerialize(s_key, i, c)); 
@@ -94,7 +94,7 @@ package com.iblsoft.flexiweather.utils
 		public final function serializeNonpersistentArrayCollection(
 				s_key: String, a: ArrayCollection, c: Class): void
 		{
-			serializeNonpersistentArray(s_key, a.toArray(), c);
+			serializeNonpersistentArray(s_key, a.source, c);
 		}
 
 		public final function serializeNonpersistentArray(

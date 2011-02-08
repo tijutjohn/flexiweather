@@ -202,7 +202,6 @@ package com.iblsoft.flexiweather.widgets
         {
         	if (_oldViewBBox.equals(m_viewBBox))
 			{
-				trace("InteractiveWidget view BBOX is not changed");
 				return;
 			}
 			

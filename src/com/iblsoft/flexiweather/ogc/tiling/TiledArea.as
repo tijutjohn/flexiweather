@@ -1,5 +1,7 @@
 package com.iblsoft.flexiweather.ogc.tiling
 {
+	import flash.geom.Point;
+	
 	public class TiledArea
 	{
 		public var topLeftTileIndex: TileIndex;
@@ -9,6 +11,15 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			this.topLeftTileIndex = topLeftTileIndex;
 			this.bottomRightTileIndex = bottomRightTileIndex;
+			
+			_center = new Point(leftCol + colTilesCount / 2, topRow + rowTilesCount / 2);
+		}
+		
+		private var _center: Point;
+		
+		public function get center(): Point
+		{
+			return _center;
 		}
 		
 		public function get topRow(): int
@@ -42,6 +53,20 @@ package com.iblsoft.flexiweather.ogc.tiling
 		public function toString(): String
 		{
 			return 'TiledArea (' + topLeftTileIndex + ", " + bottomRightTileIndex + ") size: " + colTilesCount + " , " + rowTilesCount;
+		}
+		
+		public function isTileOutside(tile: TileIndex): Boolean
+		{
+			if (tile.mi_tileCol < leftCol)
+				return true;
+			if (tile.mi_tileCol > rightCol)
+				return true;
+			if (tile.mi_tileRow < topRow)
+				return true;
+			if (tile.mi_tileRow > bottomRow)
+				return true;
+				
+			return false;
 		}
 
 	}
