@@ -84,7 +84,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 //			trace("InteractiveLayerWMSWithQTT onCapabilitiesUpdated: " + isTilable);
 			//refresh, capabilities are updated, so we can find out, if layer isTilable	
 			refresh(true);		
-//			updateData(true);
 		}
 		
 		private function changeTiledLayerVisibility(visible: Boolean): void
@@ -184,14 +183,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 					graphics.endFill();
 				}
 				
-//				if(!mb_imageOK) {
-//					graphics.lineStyle(2, 0xcc0000, 0.7, true);
-//					graphics.moveTo(0, 0);
-//					graphics.lineTo(f_width - 1, f_height - 1);
-//					graphics.moveTo(0, f_height - 1);
-//					graphics.lineTo(f_width - 1, 0);
-//				}
-			
 			} else {
 				super.renderPreview(graphics, f_width, f_height);	
 			}
@@ -237,8 +228,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 		override public function onContainerSizeChanged(): void
 		{
 			super.onContainerSizeChanged();
-//			_tiledLayer.x = container.x;
-//			_tiledLayer.y = container.y;
 			_tiledLayer.width = container.width;
 			_tiledLayer.height = container.height;
 		}
@@ -247,16 +236,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			var bool: Boolean = super.synchroniseWith(s_variableId, value);
 			
-			trace(name + " synchroniseWith " + bool);
-//			_specialCacheStrings
-//			if (isTilable)
-//			{
-//				//_tiledLayer.invalidateCache();
-//				_tiledLayer.baseURL = getFullURL();
-//				_tiledLayer.onAreaChanged(true);
-//				updateData(true);
-//				//draw(graphics);
-//			}
+//			trace(name + " synchroniseWith " + bool);
 			
 			return bool;
 		}

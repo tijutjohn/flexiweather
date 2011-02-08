@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.ogc.cache.WMSCache;
 	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.widgets.BackgroundJobManager;
@@ -48,6 +49,10 @@ package com.iblsoft.flexiweather.ogc
 					requestedBBox: container.getViewBBox()
 				});
 				invalidateDynamicPart();
+				
+				var ile: InteractiveLayerEvent = new InteractiveLayerEvent( InteractiveLayerEvent.LAYER_LOADIND_START, true );
+				ile.interactiveLayer = this;
+				dispatchEvent(ile);
 			}
 			else {
 				if(m_cfg.mi_autoRefreshPeriod > 0) {

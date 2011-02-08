@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.widgets
 {
+	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.tiling.InteractiveLayerWMSWithQTT;
 	import com.iblsoft.flexiweather.ogc.tiling.TileIndex;
@@ -92,8 +93,19 @@ package com.iblsoft.flexiweather.widgets
 				return super.addChildAt(child, index);
 		}
 
+		private function onLayerLoadingStart( event: InteractiveLayerEvent): void
+		{
+			trace("onLayerLoadingStart " + event.interactiveLayer.name);
+		}
+		private function onLayerLoaded( event: InteractiveLayerEvent): void
+		{
+			trace("onLayerLoaded " + event.interactiveLayer.name);
+		}
 		public function addLayer(l: InteractiveLayer, index: int = -1): void
 		{
+			l.addEventListener(InteractiveLayerEvent.LAYER_LOADED, onLayerLoaded);
+			l.addEventListener(InteractiveLayerEvent.LAYER_LOADIND_START, onLayerLoadingStart);
+			
 			if (index >= 0)
 				addChildAt(l, index);
 			else

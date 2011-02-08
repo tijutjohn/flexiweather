@@ -962,6 +962,10 @@ package com.iblsoft.flexiweather.ogc
 		// Event handlers
 		protected function onDataLoaded(event: UniURLLoaderEvent): void
 		{
+			var ile: InteractiveLayerEvent = new InteractiveLayerEvent( InteractiveLayerEvent.LAYER_LOADED, true );
+			ile.interactiveLayer = this;
+			dispatchEvent(ile);
+			
 			m_request = null;
 			if(m_cfg.mi_autoRefreshPeriod > 0) {
 				m_timer.reset();
