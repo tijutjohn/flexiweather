@@ -39,7 +39,25 @@ package com.iblsoft.flexiweather.ogc
 			var wmsCache: WMSCache = m_cache as WMSCache;
 			
 			if(!b_forceUpdate)
-				img = wmsCache.getImage(container.getCRS(), container.getViewBBox(), request);
+			{
+				var isCached: Boolean = wmsCache.isImageCached(container.getCRS(), container.getViewBBox(), request)
+				var imgTest: Bitmap = wmsCache.getImage(container.getCRS(), container.getViewBBox(), request);
+				
+				trace("isCached: " + isCached + " imgTest: " + imgTest);
+				if (isCached)
+				{
+					if (imgTest == null)
+					{
+						trace("Image does not exists, but it's already loading");
+						return;
+					}
+//					invalidateDynamicPart();
+				}
+				if (imgTest != null)
+				{
+					img = imgTest;
+				}
+			}
 			if(img == null) {
 				m_timer.reset();
 				m_job = BackgroundJobManager.getInstance().startJob("Rendering " + m_cfg.ma_layerNames.join("+"));
@@ -48,11 +66,13 @@ package com.iblsoft.flexiweather.ogc
 					requestedCRS: container.getCRS(),
 					requestedBBox: container.getViewBBox()
 				});
+				
 				invalidateDynamicPart();
 				
 				var ile: InteractiveLayerEvent = new InteractiveLayerEvent( InteractiveLayerEvent.LAYER_LOADIND_START, true );
 				ile.interactiveLayer = this;
 				dispatchEvent(ile);
+				wmsCache.startImageLoading( container.getCRS(), container.getViewBBox(), request );
 			}
 			else {
 				if(m_cfg.mi_autoRefreshPeriod > 0) {
@@ -113,6 +133,7 @@ package com.iblsoft.flexiweather.ogc
 		// Event handlers
 		override protected function onDataLoaded(event: UniURLLoaderEvent): void
 		{
+			trace("WMS onDataLoaded");
 			super.onDataLoaded(event);
 			
 			var wmsCache: WMSCache = m_cache as WMSCache;

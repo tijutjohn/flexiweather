@@ -71,6 +71,7 @@ package com.iblsoft.flexiweather.ogc
 			m_loader.addEventListener(UniURLLoader.DATA_LOADED, onDataLoaded);
 			m_loader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onDataLoadFailed);
 			
+			trace("\nnew InteractiveLayerMSBase add m_loader listeners");
 			m_featureInfoLoader.addEventListener(UniURLLoader.DATA_LOADED, onFeatureInfoLoaded);
 			m_featureInfoLoader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onFeatureInfoLoadFailed);
 			
@@ -192,13 +193,16 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function updateData(b_forceUpdate: Boolean): void
 		{
+			//do not clear job and request here. We have now cache which knows, that layer is already loading
+			/*
 			if(m_job != null)
 				m_job.cancel();
 			m_job = null;
 			if(m_request != null)
 				m_loader.cancel(m_request);
 			m_request = null;
-
+			*/
+			
 			if(!visible) {
 				mb_updateAfterMakingVisible = true;
 				m_image = null;
@@ -684,7 +688,7 @@ package com.iblsoft.flexiweather.ogc
 			var run: String = getWMSDimensionValue('RUN');
 			var forecast: String = getWMSDimensionValue('FORECAST');
 			
-			trace('run: ' + run + ' forecast: ' + forecast);
+//			trace('run: ' + run + ' forecast: ' + forecast);
 			
 			return new Date();
 		}
@@ -976,6 +980,7 @@ package com.iblsoft.flexiweather.ogc
 
 		protected function onDataLoadFailed(event: UniURLLoaderEvent): void
 		{
+			trace("MSBase onDataLoadFailed");
 			m_request = null;
 			if(m_cfg.mi_autoRefreshPeriod > 0) {
 				m_timer.reset();

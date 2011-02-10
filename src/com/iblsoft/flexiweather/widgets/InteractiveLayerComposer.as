@@ -81,10 +81,10 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (layer)
 			{
-				trace("COMPOSER notifyLayersChanged: " + layer);
+//				trace("COMPOSER notifyLayersChanged: " + layer);
 				m_layers.itemUpdated(layer);	
 			} else {
-				trace("COMPOSER notifyLayersChanged ");
+//				trace("COMPOSER notifyLayersChanged ");
 				dispatchEvent(new Event("layersChanged"));
 			}
 		}
@@ -222,7 +222,7 @@ package com.iblsoft.flexiweather.widgets
           	for each(so in l_syncLayers) 
           	{
           		var frame: Date = so.getSynchronisedVariableValue("frame") as Date;
-          		trace("getSynchronizedFrameValue frame: " + frame);
+//          		trace("getSynchronizedFrameValue frame: " + frame);
           	}
 
 			return frame;
@@ -552,7 +552,7 @@ package com.iblsoft.flexiweather.widgets
 					for each(l in m_layers) {
 						addChildAt(l, 0);
 					}
-					trace("onLayerCollectionChanged reverse order");
+//					trace("onLayerCollectionChanged reverse order");
 					notifyLayersChanged();
 					break;
 			}

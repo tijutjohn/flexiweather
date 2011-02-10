@@ -102,7 +102,7 @@ package com.iblsoft.flexiweather.widgets
 			{
 				var size: int = findFontSize(textField.width);
 				
-				trace("new size: " + size + " text: " + text);
+//				trace("new size: " + size + " text: " + text);
 				
 				var currFontSize: int = getStyle('fontSize');
 				if (currFontSize != size && size >= 8)

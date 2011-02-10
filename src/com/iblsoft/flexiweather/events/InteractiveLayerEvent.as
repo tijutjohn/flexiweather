@@ -23,6 +23,7 @@ package com.iblsoft.flexiweather.events
 		
 		public  static const LAYER_LOADIND_START: String = 'layerLoadingStart';
 		public  static const LAYER_LOADED: String = 'layerLoaded';
+		public  static const ALL_LAYERS_LOADED: String = 'allLayersLoaded';
 		
 		public var text: String;
 		public var interactiveLayer: InteractiveLayer;
