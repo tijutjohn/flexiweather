@@ -161,6 +161,21 @@ package com.iblsoft.flexiweather.widgets
 		public function getLayerCount(): uint
 		{ return m_layers.length; }
 
+
+		public function getLayerByID(layerID: String):InteractiveLayer
+		{
+			if (m_layers && m_layers.length > 0)
+			{
+				for each (var layer:InteractiveLayer in m_layers)
+				{
+					if (layer.id && layer.id == layerID)
+						return layer;
+				}
+			}
+			return null;
+		}
+
+		
 		public function getLayerAt(i_index: uint): InteractiveLayer
 		{ return InteractiveLayer(m_layers.getItemAt(i_index)); }
 		
