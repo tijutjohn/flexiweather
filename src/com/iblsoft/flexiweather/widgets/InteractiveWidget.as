@@ -223,7 +223,11 @@ package com.iblsoft.flexiweather.widgets
         {
         	if (_oldViewBBox.equals(m_viewBBox))
 			{
-				return;
+				if (!b_finalChange)
+				{
+//					trace("IWidget onAreaChanged oldView equals to new one: b_finalChange: " + b_finalChange);
+					return;
+				}
 			}
 			
             for(var i: int = 0; i < m_layerContainer.numChildren; ++i) {
