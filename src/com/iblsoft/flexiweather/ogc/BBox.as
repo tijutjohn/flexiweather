@@ -9,10 +9,10 @@ package com.iblsoft.flexiweather.ogc
 	 **/
 	public class BBox
 	{
-		internal var mf_xMin: Number;
-		internal var mf_yMin: Number;
-		internal var mf_xMax: Number;
-		internal var mf_yMax: Number;
+		private var mf_xMin: Number;
+		private var mf_yMin: Number;
+		private var mf_xMax: Number;
+		private var mf_yMax: Number;
 
 		public function BBox(
 				f_xMin: Number, f_yMin: Number, f_xMax: Number, f_yMax: Number)

@@ -15,8 +15,9 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function fromCRSWithBBox(crsWithBBox: CRSWithBBox): void
 		{
-			bbox = crsWithBBox.bbox;
-			crs = crsWithBBox.crs;
+//			bbox = crsWithBBox.bbox;
+//			crs = crsWithBBox.crs;
+			setCRSAndBBox(crsWithBBox.crs, crsWithBBox.bbox);
 		}
 		
 		public function get tileWidth(): int

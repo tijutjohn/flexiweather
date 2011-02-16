@@ -85,12 +85,25 @@ package com.iblsoft.flexiweather.ogc
 			ms_default_area = storage.serializeBool(
 					"default", ms_default_area, false);
 					
-			projection.crs = storage.serializeString("crs", projection.crs, null);
+//			projection.crs = storage.serializeString("crs", projection.crs, null);
+			var _crs: String = storage.serializeString("crs", projection.crs, null);
 			
-			projection.bbox.mf_xMin = storage.serializeInt("min-x", projection.bbox.mf_xMin, 0);
-			projection.bbox.mf_xMax = storage.serializeInt("max-x", projection.bbox.mf_xMax, 0);
-			projection.bbox.mf_yMin = storage.serializeInt("min-y", projection.bbox.mf_yMin, 0);
-			projection.bbox.mf_yMax = storage.serializeInt("max-y", projection.bbox.mf_yMax, 0);
+			var xMin: int = storage.serializeInt("min-x", projection.bbox.xMin, 0);
+			var yMin: int = storage.serializeInt("min-y", projection.bbox.yMin, 0);
+			var xMax: int = storage.serializeInt("max-x", projection.bbox.xMax, 0);
+			var yMax: int = storage.serializeInt("max-y", projection.bbox.yMax, 0);
+			
+			var newProjectionBBox: BBox = new BBox(xMin, yMin, xMax, yMax);
+			//projection.bbox = newProjectionBBox;
+			if(storage.isLoading())
+			{
+				projection = new ProjectionConfiguration(_crs, newProjectionBBox);
+			}
+			
+//			projection.bbox.mf_xMin = storage.serializeInt("min-x", projection.bbox.mf_xMin, 0);
+//			projection.bbox.mf_xMax = storage.serializeInt("max-x", projection.bbox.mf_xMax, 0);
+//			projection.bbox.mf_yMin = storage.serializeInt("min-y", projection.bbox.mf_yMin, 0);
+//			projection.bbox.mf_yMax = storage.serializeInt("max-y", projection.bbox.mf_yMax, 0);
 			
 			createThumbnailBBox();
 		}

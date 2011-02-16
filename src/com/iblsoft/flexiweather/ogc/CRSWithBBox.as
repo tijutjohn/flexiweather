@@ -8,8 +8,8 @@ package com.iblsoft.flexiweather.ogc
 	 **/
 	public class CRSWithBBox
 	{
-		internal var ms_crs: String;
-		internal var m_bbox: BBox = null;
+		private var ms_crs: String;
+		private var m_bbox: BBox = null;
 		
 		public function CRSWithBBox(
 				s_crs: String = '', bbox: BBox = null)
@@ -36,6 +36,17 @@ package com.iblsoft.flexiweather.ogc
 			return m_bbox.equals(other.m_bbox);
 		}
 		
+		/**
+		 * Call this method from extended classes (e.g. ProjectionConfiguration) to set crs and bbox 
+		 * @param newCRS
+		 * @param newBBox
+		 * 
+		 */		
+		protected function setCRSAndBBox(newCRS: String, newBBox: BBox): void
+		{
+			ms_crs = newCRS;
+			m_bbox = newBBox;
+		}
 		public function hasBBox(): Boolean
 		{ return m_bbox != null; }
 
@@ -45,17 +56,16 @@ package com.iblsoft.flexiweather.ogc
 		public function get bbox(): BBox
 		{ return m_bbox; }
 		
+		/*
 		public function set crs(value: String): void
 		{ ms_crs = value; }
 
 		public function set bbox(value: BBox): void
 		{ m_bbox = value; }
-		
+		*/
 		public function clone(): Object
 		{
-			var crsBBox: CRSWithBBox = new CRSWithBBox();
-			crsBBox.crs = crs;
-			crsBBox.bbox = bbox.clone();
+			var crsBBox: CRSWithBBox = new CRSWithBBox(crs, bbox.clone());
 			
 			return crsBBox;
 		}
