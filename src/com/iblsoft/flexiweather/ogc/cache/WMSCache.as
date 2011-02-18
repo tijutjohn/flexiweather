@@ -69,7 +69,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			var cacheItem: Object = md_cache[s_key];
 			trace("\t deleteCacheItem " + deleteCacheItem);
 			var bmp: Bitmap = cacheItem.image;
-			bmp.bitmapData.dispose();
+//			bmp.bitmapData.dispose();
 			
 			delete md_cache[s_key];
 		}
