@@ -191,6 +191,11 @@ package com.iblsoft.flexiweather.ogc
 			return s_url;
 		}
 		
+		public function setAnimationModeEnable(value: Boolean): void
+		{
+			m_cache.setAnimationModeEnable(value);	
+		}
+		
 		public function updateData(b_forceUpdate: Boolean): void
 		{
 			//do not clear job and request here. We have now cache which knows, that layer is already loading

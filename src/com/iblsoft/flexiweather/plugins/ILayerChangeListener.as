@@ -1,7 +1,6 @@
 package com.iblsoft.flexiweather.plugins
 {
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
-	import com.iblsoft.flexiweather.widgets.InteractiveLayerComposer;
 	
 	public interface ILayerChangeListener extends IAbility
 	{

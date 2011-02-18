@@ -43,12 +43,12 @@ package com.iblsoft.flexiweather.ogc
 				var isCached: Boolean = wmsCache.isImageCached(container.getCRS(), container.getViewBBox(), request)
 				var imgTest: Bitmap = wmsCache.getImage(container.getCRS(), container.getViewBBox(), request);
 				
-				trace("isCached: " + isCached + " imgTest: " + imgTest);
+//				trace("isCached: " + isCached + " imgTest: " + imgTest);
 				if (isCached)
 				{
 					if (imgTest == null)
 					{
-						trace("Image does not exists, but it's already loading");
+//						trace("Image does not exists, but it's already loading");
 						return;
 					}
 //					invalidateDynamicPart();

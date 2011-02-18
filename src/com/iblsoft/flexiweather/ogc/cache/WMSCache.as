@@ -3,18 +3,76 @@ package com.iblsoft.flexiweather.ogc.cache
 	import com.iblsoft.flexiweather.ogc.BBox;
 	
 	import flash.display.Bitmap;
+	import flash.events.TimerEvent;
 	import flash.net.URLRequest;
 	import flash.utils.Dictionary;
+	import flash.utils.Timer;
 	
 	public class WMSCache implements ICache
 	{
+		/**
+		 * Expiration time in seconds 
+		 */		
+		private var _checkExpirationTime: int = 10 * 1000; 
+		private var _expirationTime: int = 60; 
+		private var _expirationTimer: Timer;
+		
+		private var _animationModeEnabled: Boolean;
+		
 		protected var md_cache: Dictionary = new Dictionary();
 		protected var md_cache_loading: Dictionary = new Dictionary();
 		
+		
 		public function WMSCache()
 		{
+			_expirationTimer = new Timer(_checkExpirationTime);
+			_expirationTimer.addEventListener(TimerEvent.TIMER, onExpiration);
+			_expirationTimer.start();
 		}
 		
+		public function setAnimationModeEnable(value: Boolean): void
+		{
+			if (_animationModeEnabled != value)
+			{
+				_animationModeEnabled = value;
+				trace
+			}
+		}
+		private function onExpiration(event: TimerEvent): void
+		{
+			if (_animationModeEnabled)
+			{
+				//do not remove any cached data, animation is running
+				return;
+			}
+			var currTime: Date = new Date();
+			for (var s_key: String in md_cache)
+			{
+				var obj: Object  = md_cache[s_key];
+				
+				var lastUsed: Date = obj.lastUsed as Date;
+				if (lastUsed)
+				{
+					var diff: Number = currTime.time - lastUsed.time;
+					if (diff > (_expirationTime * 1000))
+					{
+						trace("Image from cache is expired, will be removed");
+						deleteCacheItem(s_key);
+					}
+					trace("diff: " + diff);
+				}
+			}
+		}
+		
+		private function deleteCacheItem(s_key: String): void
+		{
+			var cacheItem: Object = md_cache[s_key];
+			trace("\t deleteCacheItem " + deleteCacheItem);
+			var bmp: Bitmap = cacheItem.image;
+			bmp.bitmapData.dispose();
+			
+			delete md_cache[s_key];
+		}
 		private function getKey(s_crs: String, bbox: BBox, url: URLRequest): String
 		{
 			var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url);
@@ -79,7 +137,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			}
 			for each(s_key in a) {
 	//			trace("WMSCache.invalidate(): removing image with key: " + md_cache[s_key].toString());
-				delete md_cache[s_key];
+				deleteCacheItem(s_key);
 			}
 		}
 

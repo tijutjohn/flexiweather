@@ -2,7 +2,7 @@ package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
-	import com.iblsoft.flexiweather.widgets.InteractiveLayerComposer;
+	import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
 	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
@@ -138,7 +138,7 @@ package com.iblsoft.flexiweather.ogc
 		}
 		
 		private var submenuPos: int = 0;
-		public function getAreaXMLList(layerComposer: InteractiveLayerComposer = null, oldXMLList: XML = null): XML
+		public function getAreaXMLList(layerComposer: InteractiveLayerMap = null, oldXMLList: XML = null): XML
 		{
 			if (ma_areas && ma_areas.length > 0)
 			{

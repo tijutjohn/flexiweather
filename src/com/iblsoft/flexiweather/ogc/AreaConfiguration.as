@@ -72,6 +72,7 @@ package com.iblsoft.flexiweather.ogc
 		}
 		public function AreaConfiguration()
 		{
+			
 		}
 
 		public function serialize(storage: Storage): void
