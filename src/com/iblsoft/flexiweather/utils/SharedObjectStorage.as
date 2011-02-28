@@ -12,10 +12,11 @@ package com.iblsoft.flexiweather.utils
 			super(b_mode);
 			m_sharedObject = sharedObject;
 			m_current = m_sharedObject.data;
-			if(b_mode == Storage.STORING)
+			if(b_mode == Storage.STORING) {
 				for(var o: Object in m_current) {
 					delete m_current[o];
 				}
+			}
 		}
 
 		override public function hasKey(s_key: String, i_index: uint/* = NONINDEXED*/): Boolean
@@ -108,7 +109,7 @@ package com.iblsoft.flexiweather.utils
 		override protected function downLevel(s_key: String, i_index: uint /*= NONINDEXED*/): Object
 		{
 			s_key = fixKey(s_key, i_index);
-			if(mb_mode == STORING)
+			if(mb_mode == STORING && !(s_key in m_current))
 				m_current[s_key] = new Object();
 			var currentBackup: Object = m_current;
 			m_current = m_current[s_key];
