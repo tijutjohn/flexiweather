@@ -38,6 +38,9 @@ package com.iblsoft.flexiweather.ogc
 			var img: Bitmap = null;
 			var wmsCache: WMSCache = m_cache as WMSCache;
 			
+			// invalidate property "displayed" for cached items			
+			wmsCache.removeFromScreen();
+			
 			if(!b_forceUpdate)
 			{
 				var isCached: Boolean = wmsCache.isImageCached(container.getCRS(), container.getViewBBox(), request)

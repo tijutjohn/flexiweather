@@ -35,7 +35,6 @@ package com.iblsoft.flexiweather.ogc.cache
 			if (_animationModeEnabled != value)
 			{
 				_animationModeEnabled = value;
-				trace
 			}
 		}
 		private function onExpiration(event: TimerEvent): void
@@ -56,10 +55,10 @@ package com.iblsoft.flexiweather.ogc.cache
 					var diff: Number = currTime.time - lastUsed.time;
 					if (diff > (_expirationTime * 1000))
 					{
-						trace("Image from cache is expired, will be removed");
+//						trace("Image from cache is expired, will be removed");
 						deleteCacheItem(s_key);
 					}
-					trace("diff: " + diff);
+//					trace("diff: " + diff);
 				}
 			}
 		}
@@ -67,11 +66,21 @@ package com.iblsoft.flexiweather.ogc.cache
 		private function deleteCacheItem(s_key: String): void
 		{
 			var cacheItem: Object = md_cache[s_key];
-			trace("\t deleteCacheItem " + deleteCacheItem);
-			var bmp: Bitmap = cacheItem.image;
-//			bmp.bitmapData.dispose();
 			
-			delete md_cache[s_key];
+			
+			//dispose bitmap data, just for bitmaps which are not currently displayed
+			if (!cacheItem.displayed)
+			{
+//				trace("\t deleteCacheItem " + cacheItem);
+				var bmp: Bitmap = cacheItem.image;
+			
+				bmp.bitmapData.dispose();
+				delete md_cache[s_key];
+			} else {
+//				trace("\t deleteCacheItem: DO NOT DELETE IT " + cacheItem);
+				
+			}
+			
 		}
 		private function getKey(s_crs: String, bbox: BBox, url: URLRequest): String
 		{
@@ -93,6 +102,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			
 			if(s_key in md_cache) {
 				md_cache[s_key].lastUsed = new Date();
+				md_cache[s_key].displayed = true;
 				return md_cache[s_key].image;
 			}
 			return null;
@@ -120,6 +130,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			
 			md_cache[s_key] = {
 				cacheKey: ck,
+				displayed: true,
 				lastUsed: new Date(),
 				image: img
 			};
@@ -127,11 +138,20 @@ package com.iblsoft.flexiweather.ogc.cache
 			delete md_cache_loading[s_key];
 		}
 		
+		public function removeFromScreen(): void
+		{
+			for(var s_key: String in md_cache) 
+			{
+				md_cache[s_key].displayed = false;
+			}
+		}
+		
 		public function invalidate(s_crs: String, bbox: BBox): void
 		{
 			var a: Array = [];
 			for(var s_key: String in md_cache) {
 				var ck: WMSCacheKey = md_cache[s_key].cacheKey; 
+				md_cache[s_key].displayed = false;
 				if(ck.ms_crs == s_crs && ck.m_bbox.equals(bbox))
 					a.push(s_key);
 			}
