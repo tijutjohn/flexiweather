@@ -97,5 +97,23 @@ package com.iblsoft.flexiweather.utils
 			}
 			return a;
 		}
+		
+		public static function swapItemsInArrayCollectionSource(ac: ArrayCollection, item: Object, newPosition: int): void
+		{
+			var id: int = ac.getItemIndex(item);
+			if (id >= 0)
+			{
+				//only do swap if item is already in collection
+				if (id != newPosition)
+				{
+					//swap will be done, because position are not same
+					var swapObject: Object = ac.source[newPosition];
+					
+					ac.source[newPosition] = item;
+					ac.source[id] = swapObject;					
+					
+				}
+			}
+		}
 	}
 }

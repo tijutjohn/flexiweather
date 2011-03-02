@@ -14,11 +14,18 @@ package com.iblsoft.flexiweather.widgets
 	import flash.events.Event;
 	
 	import mx.events.CollectionEvent;
+	import mx.events.DynamicEvent;
 	
 	public class InteractiveLayerMap extends InteractiveLayerComposer implements Serializable
 	{
 		public static const TIME_AXIS_UPDATED: String = "timeAxisUpdated";
 		[Event(name = TIME_AXIS_UPDATED, type = "flash.events.DataEvent")]
+		
+		public static const TIME_AXIS_ADDED: String = "timeAxisAdded";
+		[Event(name = TIME_AXIS_ADDED, type = "mx.events.DynamicEvent")]
+		
+		public static const TIME_AXIS_REMOVED: String = "timeAxisRemoved";
+		[Event(name = TIME_AXIS_REMOVED, type = "mx.events.DynamicEvent")]
 		
 		public static const PRIMARY_LAYER_CHANGED: String = "primaryLayerChanged";
 		[Event(name = PRIMARY_LAYER_CHANGED, type = "flash.events.DataEvent")]
@@ -87,6 +94,23 @@ package com.iblsoft.flexiweather.widgets
 			dispatchEvent(new Event('frameChanged'));
 		}
 		
+		override public function addLayer(l:InteractiveLayer):void
+		{
+			super.addLayer(l);
+			
+			var dynamicEvent: DynamicEvent = new DynamicEvent(TIME_AXIS_ADDED);
+			trace("InteractiveLayerMap addlayer: " + l.name);
+			dynamicEvent['layer'] = l;
+			dispatchEvent(dynamicEvent);
+		}
+		override public function removeLayer(l:InteractiveLayer):void
+		{
+			super.removeLayer(l);
+			
+			var dynamicEvent: DynamicEvent = new DynamicEvent(TIME_AXIS_REMOVED);
+			dynamicEvent['layer'] = l;
+			dispatchEvent(dynamicEvent);
+		}
 		
 		private function getSynchronizedFrameValue(): Date
 		{

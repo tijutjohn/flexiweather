@@ -29,13 +29,16 @@ package com.iblsoft.flexiweather.widgets
 			m_layers.addItemAt(l, 0);
 			bindSubLayer(l);
 			
-			notifyLayersChanged(l);
+			//TODO notification are not needed, addItem notify already
+//			notifyLayersChanged(l);
 			
 			//orderLayers();
 		}
 
 		private function notifyLayersChanged(layer: InteractiveLayer = null): void
 		{
+			//TODO remove return from notifyLayersChanged
+			return;
 			if (layer)
 			{
 //				trace("COMPOSER notifyLayersChanged: " + layer);

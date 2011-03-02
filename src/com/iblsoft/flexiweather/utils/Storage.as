@@ -194,8 +194,9 @@ package com.iblsoft.flexiweather.utils
 					throw StorageException("Failed to access storage node '" + s_key + "'");
 				try { 
 					o.serialize(this);
-				}
-				finally {
+				} catch (error: Error) {
+					trace("Storage __serialize error catched: " + error.message);
+				} finally {
 					upLevel(restorePoint);
 				}
 			}
