@@ -2,7 +2,9 @@ package com.iblsoft.flexiweather.widgets
 {
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.ogc.ISynchronisedObject;
+	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
+	import com.iblsoft.flexiweather.ogc.SynchronisationRole;
 	import com.iblsoft.flexiweather.ogc.SynchronisedVariableChangeEvent;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
@@ -102,11 +104,47 @@ package com.iblsoft.flexiweather.widgets
 			trace("InteractiveLayerMap addlayer: " + l.name);
 			dynamicEvent['layer'] = l;
 			dispatchEvent(dynamicEvent);
+			
+			if (getPrimaryLayer() == null)
+			{
+				var so: ISynchronisedObject = l as ISynchronisedObject;
+            	if(so == null)
+            		return;
+            	if(so.getSynchronisedVariables().indexOf("frame") < 0)
+            		return;
+            	//this layer can be primary layer and there is no primary layer set, set this one as primaty layer	
+				setPrimaryLayer(l as InteractiveLayerMSBase);
+			}
 		}
+		
+		/**
+		 * Function find first suitable layer, which can primary layer (can have frames) 
+		 * 
+		 */		
+		private function findNewPrimaryLayer(): void
+		{
+			for each (var l: InteractiveLayerMSBase in m_layers)
+			{
+				var so: ISynchronisedObject = l as ISynchronisedObject;
+            	if(so == null)
+            		continue;
+            	if(so.getSynchronisedVariables().indexOf("frame") < 0)
+            		continue;
+            	//this layer can be primary layer and there is no primary layer set, set this one as primaty layer	
+				setPrimaryLayer(l);
+				return;
+			}
+		}
+		
 		override public function removeLayer(l:InteractiveLayer):void
 		{
 			super.removeLayer(l);
 			
+			if ((l as InteractiveLayerMSBase).isPrimaryLayer())
+			{
+				setPrimaryLayer(null);
+				findNewPrimaryLayer();
+			}
 			var dynamicEvent: DynamicEvent = new DynamicEvent(TIME_AXIS_REMOVED);
 			dynamicEvent['layer'] = l;
 			dispatchEvent(dynamicEvent);
@@ -129,11 +167,48 @@ package com.iblsoft.flexiweather.widgets
 
 			return frame;
 		}
+		
+		private var m_primaryLayer: InteractiveLayerMSBase;
+		public function getPrimaryLayer(): InteractiveLayerMSBase
+		{
+			for each (var layer: InteractiveLayer in m_layers)
+			{
+				if (layer is InteractiveLayerMSBase)
+				{
+					var layerMSBase: InteractiveLayerMSBase = layer as InteractiveLayerMSBase;
+					if (layerMSBase.isPrimaryLayer())
+						return layerMSBase;
+				}
+			}
+			return null;
+		}
+		public function setPrimaryLayer(layer: InteractiveLayerMSBase): void
+		{
+			if (m_primaryLayer != layer)
+			{
+				if (m_primaryLayer)
+				{
+					//previous primary layer is not primary layer anymore, set synchronisation role to NONE
+					m_primaryLayer.synchronisationRole.setRole(SynchronisationRole.NONE);
+				}
+				
+				m_primaryLayer = layer;
+				
+				if (m_primaryLayer)
+				{
+					//there is new primary layer, set synchronisation role to PRIMARY
+					m_primaryLayer.synchronisationRole.setRole(SynchronisationRole.PRIMARY);
+				}
+				
+				primaryLayerHasChanged();
+				
+			}
+		}
 		/**
 		 * Layer composer need to dispatch event when new layer becomes primary 
 		 * 
 		 */		
-		public function primaryLayerHasChanged(): void
+		private function primaryLayerHasChanged(): void
 		{
 			dispatchEvent(new DataEvent(PRIMARY_LAYER_CHANGED));
 		}

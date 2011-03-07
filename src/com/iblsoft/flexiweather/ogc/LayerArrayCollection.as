@@ -1,12 +1,10 @@
 package com.iblsoft.flexiweather.ogc
 {
-	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
-	
 	import mx.collections.ArrayCollection;
 
 	public class LayerArrayCollection extends ArrayCollection
 	{
-		public var layer: InteractiveLayer;
+		public var layer: InteractiveLayerMSBase;
 		
 		private var _selectedItem: Object;
 		public function get selectedItem(): Object
