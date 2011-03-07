@@ -50,7 +50,7 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function serialize(storage:Storage):void
 		{
-			proj4String = storage.serializeString("proj4String", proj4String, null);
+			proj4String = storage.serializeString("proj4-string", proj4String, null);
 			var _crs: String = storage.serializeString("crs", crs, null);
 			
 			var xMin: int = storage.serializeInt("min-x", bbox.xMin, 0);
