@@ -2,6 +2,8 @@ package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.ogc.cache.WMSCache;
+	import com.iblsoft.flexiweather.utils.Serializable;
+	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.widgets.BackgroundJobManager;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
@@ -16,13 +18,20 @@ package com.iblsoft.flexiweather.ogc
 	import mx.logging.Log;
 	
 	public class InteractiveLayerWMS extends InteractiveLayerMSBase
-			implements ISynchronisedObject
+			implements ISynchronisedObject, Serializable
 	{
 		public function InteractiveLayerWMS(container: InteractiveWidget, cfg: WMSLayerConfiguration)
 		{
 			super(container, cfg);
 			
 			m_cache = new WMSCache();
+		}
+		
+		public function serialize(storage: Storage): void
+		{
+			//super.serialize(storage);
+			
+			name = storage.serializeString("layer-name", name);
 		}
 		
 		override public function updateData(b_forceUpdate: Boolean): void

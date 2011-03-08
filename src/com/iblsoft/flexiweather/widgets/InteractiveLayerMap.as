@@ -91,7 +91,7 @@ package com.iblsoft.flexiweather.widgets
 		override public function serialize(storage: Storage): void
 		{
 			super.serialize(storage);
-			
+			storage.serializePersistentArrayCollection("layer", m_layers, InteractiveLayerWMS);
 			//TODO: implement InteractiveLayerMap serialize function
 		}
 		

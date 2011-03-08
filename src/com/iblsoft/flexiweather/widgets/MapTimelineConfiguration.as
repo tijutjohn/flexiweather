@@ -1,7 +1,10 @@
 package com.iblsoft.flexiweather.widgets
 {
+	import com.iblsoft.flexiweather.utils.Serializable;
+	import com.iblsoft.flexiweather.utils.Storage;
+	
 	[Bindable]
-	public class MapTimelineConfiguration
+	public class MapTimelineConfiguration implements Serializable
 	{
 		public static const ANIMATION_TYPE_TO_LAST_FRAME:String = 'to-last-frame';
 		public static const ANIMATION_TYPE_FROM_FIRST_FRAME:String = 'from-first-frame';
@@ -35,6 +38,21 @@ package com.iblsoft.flexiweather.widgets
 		public function limitsChangedByUser(): void
 		{
 			animationType = ANIMATION_TYPE_USER;
+		}
+		
+		public function serialize(storage: Storage): void
+		{
+			currentTimeFormat = storage.serializeString("current-time-format", currentTimeFormat, '%H:%M %d.%m.%Y');
+			dateFormat = storage.serializeString("date-format", dateFormat, '%d-%m');
+			dateFormat = storage.serializeString("time-format", dateFormat, '%HZ');
+			duration = storage.serializeInt("duration", duration, 1000);
+			durationStep = storage.serializeInt("duration-step", durationStep, 1000);
+			minDuration = storage.serializeInt("min-duration", minDuration, 1000);
+			maxDuration = storage.serializeInt("max-duration", maxDuration, 1000);
+			animationExtent = storage.serializeString("animation-extent", animationExtent, null);
+			animationType = storage.serializeString("animation-type", animationType, null);
+			mapVisibleUnderTimeline = storage.serializeBool("map-visible-under-timeline", mapVisibleUnderTimeline, true);
+			timelineVisibleAtStartup = storage.serializeBool("timeline-visible-at-startup", timelineVisibleAtStartup, true);
 		}
 		
 	}
