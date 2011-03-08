@@ -20,6 +20,8 @@ package com.iblsoft.flexiweather.widgets
 	
 	public class InteractiveLayerMap extends InteractiveLayerComposer implements Serializable
 	{
+		public static const TIMELINE_CONFIGURATION_CHANGE: String = "timelineConfigurationChange";
+		
 		public static const TIME_AXIS_UPDATED: String = "timeAxisUpdated";
 		[Event(name = TIME_AXIS_UPDATED, type = "flash.events.DataEvent")]
 		
@@ -65,6 +67,22 @@ package com.iblsoft.flexiweather.widgets
 			return '';
 		}
 		
+		private var m_timelineConfiguration: MapTimelineConfiguration;
+		private var m_timelineConfigurationChanged: Boolean;
+		[Bindable] 
+		public function get timelineConfiguration(): MapTimelineConfiguration
+		{
+			return m_timelineConfiguration;
+		}
+		public function set timelineConfiguration(value: MapTimelineConfiguration): void
+		{
+			m_timelineConfiguration  = value;
+			m_timelineConfigurationChanged = true;
+			//parseAnimationLimitDates();
+			
+			dispatchEvent(new Event(TIMELINE_CONFIGURATION_CHANGE));
+		}
+		
 		public function InteractiveLayerMap(container:InteractiveWidget)
 		{
 			super(container);
@@ -73,6 +91,8 @@ package com.iblsoft.flexiweather.widgets
 		override public function serialize(storage: Storage): void
 		{
 			super.serialize(storage);
+			
+			//TODO: implement InteractiveLayerMap serialize function
 		}
 		
 		override protected function onLayerCollectionChanged(event: CollectionEvent): void
