@@ -21,7 +21,7 @@ package com.iblsoft.flexiweather.widgets
 		
 		private var _areaComponent: AreaRectangle;
 		
-		private var _r: Rectangle;
+		private var _r: CustomRectangle;
 		private var _mouseDown: Boolean;
 		private var _toolIsCreated: Boolean;
 		
@@ -78,6 +78,7 @@ package com.iblsoft.flexiweather.widgets
 			return p;
 		}
 		
+		
 		override public function onMouseDown(event: MouseEvent): Boolean
         {
 //			if(!event.ctrlKey && mb_requireCtrlKey || event.shiftKey)
@@ -103,7 +104,7 @@ package com.iblsoft.flexiweather.widgets
 				
 				_p = getMousePoint(event);
 				
-        		_r = new Rectangle(_p.x, _p.y, 0, 0);
+        		_r = new CustomRectangle(_p.x, _p.y, 0, 0);
         		_mouseDown = true;
 //	        	trace("onMouseDown " + _r);
 	        	invalidateDynamicPart();
@@ -112,7 +113,8 @@ package com.iblsoft.flexiweather.widgets
 	  		}
         	return true;
         }
-
+		private var _lastCreatedRectangle: CustomRectangle;
+		
         override public function onMouseUp(event: MouseEvent): Boolean
         {
         	if(event.ctrlKey || event.shiftKey)
@@ -123,19 +125,22 @@ package com.iblsoft.flexiweather.widgets
 				
         	if (!_toolIsCreated)
 			{	
-					
 				//create new rectangle from old one with correct left, top, right, bottom properties (it matters on direction of draggine when zoom rectange is created
-				_r = new Rectangle(Math.min(_r.left, _r.right), Math.min(_r.top, _r.bottom), Math.abs(_r.left - _r.right),  Math.abs(_r.top - _r.bottom));
+				_r = new CustomRectangle(Math.min(_r.left, _r.right), Math.min(_r.top, _r.bottom), Math.abs(_r.left - _r.right),  Math.abs(_r.top - _r.bottom));
 				
+	        	_mouseDown = false;
 				if((_r.width) > 5 && (_r.height) > 5) {
 		        	findAreaCoordinates();
+		        	_lastCreatedRectangle = _r
 		        	dispatchEvent(new Event(AREA_CREATED));
 				} else {
-					_r = null;
+					_r = _lastCreatedRectangle;
 		        	dispatchEvent(new Event(AREA_CANCELLED));
+		        	_areaComponent.mouseEnabled = true;
+	  				_areaComponent.enableSprites(true);
+		        	return true;
 				}
 				_toolIsCreated = true;	
-	        	_mouseDown = false;
 	        	invalidateDynamicPart();
 	  		} else {
 	  			_areaComponent.stopDrag();
@@ -153,11 +158,16 @@ package com.iblsoft.flexiweather.widgets
         	return true;
         }
         
+        public function clearSelection(): void
+        {
+        	_areaComponent.draw(new CustomRectangle(0,0,0,0));
+        }
+        
         public function createSelection(bbox: BBox): void
         {
         	_selectedBBox = bbox;
         	
-        	_r = new Rectangle();
+        	_r = new CustomRectangle();
         	
         	updateRectangleFromViewBBox();
         	
@@ -249,7 +259,7 @@ package com.iblsoft.flexiweather.widgets
 	        	_r.height = newHeight;
 	        	_r.x = newX;
 	        	_r.y = newY - _r.height;
-	        	
+
 //	        	trace("updateRectangleFromViewBBox new Size: " + newWidth + " , " + newHeight);
 	        	
 			}
@@ -283,6 +293,17 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.widgets.AreaSelectorTool;
 	import com.iblsoft.flexiweather.ogc.BBox;
 	
+class CustomRectangle extends Rectangle
+{
+	
+	public function CustomRectangle(x:Number = 0, y:Number = 0, width:Number = 0, height:Number = 0)
+	{
+		super(x,y,width,height);
+
+	}
+	
+	
+}
 
 class AreaRectangle extends UIComponent
 {
@@ -301,7 +322,7 @@ class AreaRectangle extends UIComponent
 	private var topY: Number;
 	private var bottomY: Number;
 	
-	private var _r: Rectangle;
+	private var _r: CustomRectangle;
 	
 	
 	public function AreaRectangle()
@@ -334,9 +355,12 @@ class AreaRectangle extends UIComponent
 		_bottomEdge.mouseEnabled = enable;
 		_bottomRightCorner.mouseEnabled = enable;
 	}
-	public function draw(r: Rectangle = null, _toolIsCreating: Boolean = false): void
+	public function draw(r: CustomRectangle = null, _toolIsCreating: Boolean = false, drawEmptyRectangle: Boolean = false): void
 	{
 		enableSprites(!_toolIsCreating);
+		
+		if (_toolIsCreating && r && r.width == 0 && r.height == 0)
+			return;
 		
 		if (r)
 			_r = r;
