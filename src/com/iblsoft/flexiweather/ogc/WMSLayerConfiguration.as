@@ -52,12 +52,27 @@ package com.iblsoft.flexiweather.ogc
 			super.serialize(storage);
 			m_service.addEventListener(WMSServiceConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated)
 
-			storage.serializeNonpersistentArray(
-					"layer-name", ma_layerNames, String)
-			storage.serializeNonpersistentArray(
-					"style-name", ma_styleNames, String)
-			storage.serializeNonpersistentArrayMap(
-					"behaviour", ma_behaviours, String, String);
+			try {
+				storage.serializeNonpersistentArray("layer-name", ma_layerNames, String);
+			} catch (error: Error) {
+				trace("WMSLayeConfig ma_layerNames error: " + error.message);
+			}
+			try {
+				storage.serializeNonpersistentArray("style-name", ma_styleNames, String)
+			} catch (error: Error) {
+				trace("WMSLayeConfig ma_styleNames error: " + error.message);
+			}
+			try {
+				storage.serializeNonpersistentArrayMap("behaviour", ma_behaviours, String, String);
+				trace("ma_behaviours: ")
+				for (var k: String in ma_behaviours)
+				{
+					trace("ma_behaviours["+k+"] = " + ma_behaviours[k] + "<<");
+				}
+			} catch (error: Error) {
+				trace("WMSLayeConfig ma_behaviours error: " + error.message);
+			}
+			
 			ms_dimensionTimeName = storage.serializeString(
 					"dimension-time-name", ms_dimensionTimeName, null);
 			ms_dimensionRunName = storage.serializeString(

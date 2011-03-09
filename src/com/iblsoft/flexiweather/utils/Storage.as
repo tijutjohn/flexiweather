@@ -138,6 +138,9 @@ package com.iblsoft.flexiweather.utils
 						key = __constructAndSerialize("key", NONINDEXED, cKey); 
 						var value: Object = __constructAndSerialize("value", NONINDEXED, cValue);
 						a[key] = value;
+					} catch (error: Error)
+					{
+						trace("serializeNonpersistentArrayMap error1: key: " + s_key);
 					}
 					finally { 
 						upLevel(restorePointObject);
@@ -149,8 +152,17 @@ package com.iblsoft.flexiweather.utils
 				for(key in a) {
 					restorePointObject = downLevel(s_key, i);
 					try {
+						//TODO somewhere here is problem, that behaviour[key] == null (there should be "" instead of null)
+						var val: Object = a[key];
+						if (cValue == String && !val)
+						{
+							val = '';
+						}
 						__serialize("key", NONINDEXED, key);
-						__serialize("value", NONINDEXED, a[key]);
+						__serialize("value", NONINDEXED, val);
+					} catch (error: Error)
+					{
+						trace("serializeNonpersistentArrayMap error2: key: " + s_key);
 					}
 					finally { 
 						upLevel(restorePointObject);
