@@ -109,7 +109,6 @@ package com.iblsoft.flexiweather.ogc
 						delete oldXMLList.children()[0];
 					}	
 					layersXMLList = oldXMLList;
-					trace("stop");
 				} else {
 					layersXMLList = <menuitem label='Layers' data='layer' type='folder'/>;
 				}
@@ -147,8 +146,6 @@ package com.iblsoft.flexiweather.ogc
 						lbl = lbl.substring(lastPos+1, lbl.length);
 					}
 					
-					if (layerConfig is WMSWithQTTLayerConfiguration)
-						trace("stop");
 						
 					var icon: String = layerConfig.getPreviewURL();
 					

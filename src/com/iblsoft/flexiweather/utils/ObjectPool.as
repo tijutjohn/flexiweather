@@ -33,11 +33,6 @@ package com.iblsoft.flexiweather.utils
 				object = null;
 				return;
 			}
-			if (name == 'Labels')
-			{
-				if (tracingEnabled)
- 					trace("stop");
-			}
 			var id: int = _pool.indexOf(object);
 			if (id >= 0)
 			{
@@ -64,11 +59,6 @@ package com.iblsoft.flexiweather.utils
 			_cntGet++;
 			var obj: Object;
 			
-			if (name == 'Labels')
-			{
-				if (tracingEnabled)
- 					trace("stop");
-			}
 			if (reuseObjects && _pool.length > 0)
 			{
 				obj = _pool.shift();

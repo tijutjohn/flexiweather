@@ -49,10 +49,6 @@ package com.iblsoft.flexiweather.ogc
 			var arr: Array = s.split(",");
 			
 //			trace("loadExtent " + xml.@name + " default: " + xml.@default + " items: " + arr.length);
-//			if (arr.length > 2000)
-//			{
-//				trace("stop");
-//			}
 			ms_default = xml.@default;
 			// TODO: strip white spaces
 			ma_values = [];
