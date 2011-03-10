@@ -19,15 +19,19 @@ package com.iblsoft.flexiweather.ogc
 		public var ma_styleNames: Array = [];
 
 		public var ma_behaviours: Array = [];
+		public var ma_availableImageFormats: Array = [];
+		
 
 		public var ms_dimensionTimeName: String = null;
 		public var ms_dimensionRunName: String = null;
 		public var ms_dimensionForecastName: String = null;
 		public var ms_dimensionVerticalLevelName: String = null;
+		public var ms_imageFormat: String = null;
 		public var mb_legendIsDimensionDependant: Boolean;
 		public var mi_autoRefreshPeriod: uint = 0;
 		
 		public var ms_layerType: String = null;
+		
 		
 		// runtime variables
 		public var ma_layerConfigurations: Array;
@@ -86,6 +90,9 @@ package com.iblsoft.flexiweather.ogc
 			
 			mi_autoRefreshPeriod = storage.serializeInt(
 					"auto-refresh-period", mi_autoRefreshPeriod, 0);
+			ms_imageFormat = storage.serializeString(
+					"image-format", ms_imageFormat, "image/png");
+					
 		}
 		
 		public function toGetGTileRequest(
@@ -104,7 +111,7 @@ package com.iblsoft.flexiweather.ogc
             r.data.TILECOL = i_tileCol; 
             if(s_style != null)
                 r.data.STYLE = s_style;
-            r.data.FORMAT = "image/png"; 
+            r.data.FORMAT = ms_imageFormat; 
             r.data.TRANSPARENT = "TRUE";
             return r;
         }
@@ -141,8 +148,10 @@ package com.iblsoft.flexiweather.ogc
 			r.data.HEIGHT = i_height;
 			if(s_stylesList != null)
 				r.data.STYLES = s_stylesList;
-			r.data.FORMAT = "image/png"; 
+			r.data.FORMAT = ms_imageFormat; 
 			r.data.TRANSPARENT = "TRUE";
+			
+			trace("toGetMapRequest layers: " + r.data.LAYERS + " format: " + r.data.FORMAT);
 			return r;
 		}
 

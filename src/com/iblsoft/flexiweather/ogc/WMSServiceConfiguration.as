@@ -19,6 +19,11 @@ package com.iblsoft.flexiweather.ogc
 		internal var m_capabilitiesLoadJob: BackgroundJob = null;
 		
 		internal var m_layers: WMSLayerGroup = null;
+		private var _imageFormats: Array = [];
+		public function get imageFormats(): Array
+		{
+			return _imageFormats;
+		}
 		
 		public static const CAPABILITIES_UPDATED: String = "capabilitiesUpdated";
 
@@ -66,6 +71,26 @@ package com.iblsoft.flexiweather.ogc
 		public function get layers(): WMSLayerGroup
 		{ return m_layers; }
 		
+		private function getGetMapImageFormats(xml: XML): void
+		{
+			var wms: Namespace = version.isLessThan(1, 3, 0)
+						? new Namespace() : new Namespace("http://www.opengis.net/wms"); 
+			var xml1: XML = xml.wms::Request[0] as XML;
+			var xml2: XML = xml1.wms::GetMap[0] as XML;
+			
+			var formatsXML: XMLList = xml2.wms::Format;
+			
+			for each (var format: XML in formatsXML)
+			{
+				var imageFormat: String = format.valueOf();
+				if (imageFormat.indexOf('png') >= 0 || imageFormat.indexOf('jpg') >= 0 || imageFormat.indexOf('jpeg') >= 0)
+				{
+					_imageFormats.push(imageFormat);
+				}
+				trace(imageFormat);
+			}
+			trace("image formats: " + _imageFormats);
+		}
 		protected function onCapabilitiesLoaded(event: UniURLLoaderEvent): void
 		{
 			if (!m_capabilitiesLoadJob)
@@ -84,6 +109,8 @@ package com.iblsoft.flexiweather.ogc
 				var wms: Namespace = version.isLessThan(1, 3, 0)
 						? new Namespace() : new Namespace("http://www.opengis.net/wms"); 
 				var capability: XML = xml.wms::Capability[0];
+				getGetMapImageFormats(capability);
+				
 				if(capability != null) {
 					var layer: XML = capability.wms::Layer[0];
 					m_layers = new WMSLayerGroup(null, layer, wms, version);
