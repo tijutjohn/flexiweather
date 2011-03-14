@@ -87,9 +87,7 @@ package com.iblsoft.flexiweather.ogc
 				{
 					_imageFormats.push(imageFormat);
 				}
-				trace(imageFormat);
 			}
-			trace("image formats: " + _imageFormats);
 		}
 		protected function onCapabilitiesLoaded(event: UniURLLoaderEvent): void
 		{
