@@ -153,7 +153,7 @@ package com.iblsoft.flexiweather.widgets
 						var ilJ: InteractiveLayer = InteractiveLayer(m_layerContainer.getChildAt(j));
 						if(ilJ.zOrder < ilI.zOrder) {
 							// swap Ith and Jth layer, we know that J > I
-							//trace('[InteractiveWidget.orderLayers] ... swapping ' + ilJ.name + ' with ' + ilI.name);
+							trace('[InteractiveWidget.orderLayers] ... swapping ' + ilJ.name + ' with ' + ilI.name);
 							m_layerContainer.swapChildren(ilJ, ilI);
 						}
 					}
