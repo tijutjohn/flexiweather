@@ -113,53 +113,29 @@ package com.iblsoft.flexiweather.utils {
 			return d;
 		}
 		
-		public static function dateToDateString(dt: Date, bUseUTC: Boolean = true): String
+		public static function dateToDateString(dt: Date): String
 		{
 			var s: String;
-			if (bUseUTC)
-			{
-				s = dt.fullYearUTC + "-"
-						+ (dt.monthUTC + 1 < 10 ? "0" : "") + (dt.monthUTC + 1) + "-"
-						+ (dt.dateUTC < 10 ? "0" : "") + (dt.dateUTC);
-			} else {
-				s = dt.fullYear + "-"
-						+ (dt.month + 1 < 10 ? "0" : "") + (dt.month + 1) + "-"
-						+ (dt.date < 10 ? "0" : "") + (dt.date);
-			}
-			s += "Z";
+			s = dt.fullYearUTC + "-"
+					+ (dt.monthUTC + 1 < 10 ? "0" : "") + (dt.monthUTC + 1) + "-"
+					+ (dt.dateUTC < 10 ? "0" : "") + (dt.dateUTC);
 			return s;
 		}
-		public static function dateToString(dt: Date, bUseUTC: Boolean = true): String
+		public static function dateToString(dt: Date): String
 		{
 			var s: String;
-			if (bUseUTC)
-			{
-				s = dt.fullYearUTC + "-"
-						+ (dt.monthUTC + 1 < 10 ? "0" : "") + (dt.monthUTC + 1) + "-"
-						+ (dt.dateUTC < 10 ? "0" : "") + (dt.dateUTC)
-						+ "T"
-						+ (dt.hoursUTC < 10 ? "0" : "") + dt.hoursUTC + ":"
-						+ (dt.minutesUTC < 10 ? "0" : "") + dt.minutesUTC + ":"
-						+ (dt.secondsUTC < 10 ? "0" : "") + dt.secondsUTC;
-						
-				if(dt.millisecondsUTC > 0)
-					s += "." + (dt.millisecondsUTC < 10 ? "0" : "")
-							+ (dt.millisecondsUTC < 100 ? "0" : "")
-							+ dt.millisecondsUTC;
-			} else {
-				s = dt.fullYear + "-"
-						+ (dt.month + 1 < 10 ? "0" : "") + (dt.month + 1) + "-"
-						+ (dt.date < 10 ? "0" : "") + (dt.date)
-						+ "T"
-						+ (dt.hours < 10 ? "0" : "") + dt.hours + ":"
-						+ (dt.minutes < 10 ? "0" : "") + dt.minutes + ":"
-						+ (dt.seconds < 10 ? "0" : "") + dt.seconds;
-				
-				if(dt.milliseconds > 0)
-					s += "." + (dt.milliseconds < 10 ? "0" : "")
-							+ (dt.milliseconds < 100 ? "0" : "")
-							+ dt.milliseconds;
-			}
+			s = dt.fullYearUTC + "-"
+					+ (dt.monthUTC + 1 < 10 ? "0" : "") + (dt.monthUTC + 1) + "-"
+					+ (dt.dateUTC < 10 ? "0" : "") + (dt.dateUTC)
+					+ "T"
+					+ (dt.hoursUTC < 10 ? "0" : "") + dt.hoursUTC + ":"
+					+ (dt.minutesUTC < 10 ? "0" : "") + dt.minutesUTC + ":"
+					+ (dt.secondsUTC < 10 ? "0" : "") + dt.secondsUTC;
+					
+			if(dt.millisecondsUTC > 0)
+				s += "." + (dt.millisecondsUTC < 10 ? "0" : "")
+						+ (dt.millisecondsUTC < 100 ? "0" : "")
+						+ dt.millisecondsUTC;
 			s += "Z";
 			return s;
 		}
