@@ -4,6 +4,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	
+	import flash.display.DisplayObject;
 	import flash.events.Event;
 	
 	import mx.collections.ArrayCollection;
@@ -13,7 +14,7 @@ package com.iblsoft.flexiweather.widgets
 	
 	public class InteractiveLayerComposer extends InteractiveLayer implements Serializable
 	{
-        internal var m_layers: ArrayCollection = new ArrayCollection();
+        protected var m_layers: ArrayCollection = new ArrayCollection();
 
 		private var mb_orderingLayers: Boolean = false;
 
@@ -30,15 +31,16 @@ package com.iblsoft.flexiweather.widgets
 			bindSubLayer(l);
 			
 			//TODO notification are not needed, addItem notify already
-//			notifyLayersChanged(l);
+			notifyLayersChanged(l);
 			
 			//orderLayers();
 		}
+		
 
 		private function notifyLayersChanged(layer: InteractiveLayer = null): void
 		{
 			//TODO remove return from notifyLayersChanged
-			return;
+//			return;
 			if (layer)
 			{
 //				trace("COMPOSER notifyLayersChanged: " + layer);
@@ -147,7 +149,7 @@ package com.iblsoft.flexiweather.widgets
 			if(i_current >= 0)
 				m_layers.removeItemAt(i_current);
 			m_layers.addItemAt(l, i);
-			
+					
 			notifyLayersChanged(l);
 		}
 
@@ -212,7 +214,6 @@ package com.iblsoft.flexiweather.widgets
 		
 		protected function onLayerCollectionChanged(event: CollectionEvent): void
 		{
-//			trace("onLayerCollectionChanged kind: " + event.kind);
 			
 			switch (event.kind)
 			{

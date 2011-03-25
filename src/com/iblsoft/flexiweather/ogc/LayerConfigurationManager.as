@@ -5,11 +5,10 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.events.Event;
-	import flash.events.EventDispatcher;
 	
 	import mx.collections.ArrayCollection;
 
-	public class LayerConfigurationManager extends EventDispatcher implements Serializable
+	public class LayerConfigurationManager extends BaseConfigurationManager implements Serializable
 	{
 		public static const LAYERS_CHANGED: String = 'layers changed';
 	
@@ -93,13 +92,11 @@ package com.iblsoft.flexiweather.ogc
 			
 			return false;
 		}
-		private var layerGroups:Array = [];
-		private var submenuPos: int = 0;
 		public function getMenuLayersXMLList(currentCRS: String = null, oldXMLList: XML = null): XML
 		{
 			if (ma_layers && ma_layers.length > 0)
 			{
-				layerGroups = [];
+				groups = [];
 				submenuPos = 0;
 				var layersXMLList: XML;
 				if (oldXMLList)
@@ -176,6 +173,7 @@ package com.iblsoft.flexiweather.ogc
 		 * @return 
 		 * 
 		 */		
+		 /*
 		private function createGroupSubfoldersAndGetParent(folderName: String, layersXMLList: XML): XML
 		{
 			var groupParentXML: XML;
@@ -203,7 +201,7 @@ package com.iblsoft.flexiweather.ogc
 				} else {
 					currJoinedfolderName += '/'+currfolderName
 				}
-				if (!layerGroups[currJoinedfolderName])
+				if (!groups[currJoinedfolderName])
 				{
 					groupParentXML = <menuitem label={currfolderName}/>;
 					
@@ -211,7 +209,7 @@ package com.iblsoft.flexiweather.ogc
 					groupObject.parent = groupParentXML;
 					groupObject.submenuPos = 0;
 					
-					layerGroups[currJoinedfolderName] = groupObject;
+					groups[currJoinedfolderName] = groupObject;
 					
 					if (level == 0)
 					{
@@ -243,7 +241,7 @@ package com.iblsoft.flexiweather.ogc
 					
 					
 				} else {
-					groupObject = layerGroups[currJoinedfolderName];
+					groupObject = groups[currJoinedfolderName];
 					groupParentXML = groupObject.parent as XML;
 				}
 				
@@ -253,7 +251,7 @@ package com.iblsoft.flexiweather.ogc
 			}
 			
 			return groupParentXML;
-		}
+		}*/
 		
 		// getters & setters
 		public function get layers(): ArrayCollection

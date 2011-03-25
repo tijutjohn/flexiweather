@@ -140,6 +140,16 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 		
+		public function debugLayers(): void
+		{
+			var total: int = m_layerContainer.numChildren;
+			for (var i: int = 0; i < total; i++)
+			{
+				var layer: InteractiveLayer = InteractiveLayer(m_layerContainer.getChildAt(i)); 
+				trace("Widget debugLayers: " + i + ": " + layer.name);
+			}
+		}
+		
 		public function orderLayers(): void
 		{
 			if(mb_orderingLayers)
@@ -526,15 +536,15 @@ package com.iblsoft.flexiweather.widgets
 //	        }
         }
 
-        public function setExtentBBOX(bbox: BBox): void
+        public function setExtentBBOX(bbox: BBox, b_finalChange: Boolean = true): void
         {
         	m_extentBBox = bbox;
-        	setViewBBox(m_extentBBox, true); // this calls signalAreaChanged()
+        	setViewBBox(m_extentBBox, b_finalChange); // this calls signalAreaChanged()
         }
 
-        public function setExtentBBOXRaw(xmin: Number, ymin: Number, xmax: Number, ymax: Number): void
+        public function setExtentBBOXRaw(xmin: Number, ymin: Number, xmax: Number, ymax: Number, b_finalChange: Boolean = true): void
         {
-        	setExtentBBOX(new BBox(xmin, ymin, xmax, ymax));
+        	setExtentBBOX(new BBox(xmin, ymin, xmax, ymax), b_finalChange);
         }
         
         public function setViewFullExtent(): void

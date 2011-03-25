@@ -30,8 +30,45 @@ package com.iblsoft.flexiweather.ogc
 		public function serialize(storage: Storage): void
 		{
 			//super.serialize(storage);
+			var s_dimName: String;
 			
-			name = storage.serializeString("layer-name", name);
+			var styleName: String;
+			if (storage.isLoading())
+			{
+				styleName = storage.serializeString("style-name", name);
+				if (styleName)
+					setWMSStyleName(0, styleName);
+					
+				//TODO do we really need to add here 2nd parameter?
+				var primaryLayer: Boolean = storage.serializeBool("primary-layer", true);
+				trace("alpha: " + alpha);
+				var newAlpha: Number = storage.serializeNumber("transparency", alpha);
+				if (newAlpha < 1)
+				{
+					alpha = newAlpha;
+				}
+				trace("alpha: " + newAlpha);
+				for each(s_dimName in getWMSDimensionsNames()) {
+					var level: String = storage.serializeString(s_dimName, null, null);
+					if (level)
+						setWMSDimensionValue('ELEVATION', level );
+				}
+				
+			} else {
+				styleName = getWMSStyleName(0);
+				if (styleName)
+					storage.serializeString("style-name", styleName, null);
+				
+				for each(s_dimName in getWMSDimensionsNames()) {
+					if (s_dimName.toLowerCase() == 'elevation')
+						storage.serializeString('level', getWMSDimensionValue(s_dimName), null);
+				}
+				if (alpha < 1)
+					storage.serializeNumber("transparency", alpha);
+				
+				if (isPrimaryLayer())
+					storage.serializeBool("primary-layer", true);
+			}
 		}
 		
 		override public function updateData(b_forceUpdate: Boolean): void

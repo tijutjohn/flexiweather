@@ -7,12 +7,11 @@ package com.iblsoft.flexiweather.ogc
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.events.Event;
-	import flash.events.EventDispatcher;
 	import flash.utils.Dictionary;
 	
 	import mx.collections.ArrayCollection;
 
-	public class AreaConfigurationManager extends EventDispatcher implements Serializable
+	public class AreaConfigurationManager extends BaseConfigurationManager implements Serializable
 	{
 		public static const AREAS_CHANGED: String = 'areas changed';
 		public static const AREAS_THUMBNAILS_CACHE: Dictionary = new Dictionary();
@@ -119,7 +118,6 @@ package com.iblsoft.flexiweather.ogc
 			var event: Event = new Event(AREAS_CHANGED);
 			dispatchEvent(event);
 		}
-		private var areaGroups:Array = [];
 		
 		public function getDefaultArea(): AreaConfiguration
 		{
@@ -137,12 +135,11 @@ package com.iblsoft.flexiweather.ogc
 			return null;
 		}
 		
-		private var submenuPos: int = 0;
 		public function getAreaXMLList(layerComposer: InteractiveLayerMap = null, oldXMLList: XML = null): XML
 		{
 			if (ma_areas && ma_areas.length > 0)
 			{
-				areaGroups = [];
+				groups = [];
 				submenuPos = 0;
 				var areasXMLList: XML;
 				if (oldXMLList)
@@ -195,81 +192,7 @@ package com.iblsoft.flexiweather.ogc
 			return null;
 		}
 		
-		/**
-		 * Creates folders and subfolders for custom areas 
-		 * @param groupName - full group name... it can consists subfolders. Use / for subolders. E.g Continents/States
-		 * @param areasXMLList - root menu item
-		 * @return 
-		 * 
-		 */		
-		private function createGroupSubfoldersAndGetParent(groupName: String, areasXMLList: XML): XML
-		{
-			var groupParentXML: XML;
-			var currGroupParentXML: XML = areasXMLList;
-			var groupObject: Object;
-			var parentGroupObject: Object;
-			var groupsArr: Array;
-			
-			//check if there is more levels (split by "/")
-			groupsArr = groupName.split('/');
-			var level: int = 0;
-			var position: int;
-			
-			var currJoinedGroupName: String = ''
-			for each (var currGroupName: String in groupsArr)
-			{
-				if (level == 0)
-				{
-					currJoinedGroupName = currGroupName;
-				} else {
-					currJoinedGroupName += '/'+currGroupName
-				}
-				if (!areaGroups[currJoinedGroupName])
-				{
-					groupParentXML = <menuitem label={currGroupName}/>;
-					
-					groupObject = new Object();
-					groupObject.parent = groupParentXML;
-					groupObject.submenuPos = 0;
-					
-					areaGroups[currJoinedGroupName] = groupObject;
-					
-					if (level == 0)
-					{
-						position = submenuPos;
-					} else {
-						position = parentGroupObject.submenuPos;
-					}
-					
-					var len:int = currGroupParentXML.elements().length();
-					if (len == 0 )
-						currGroupParentXML.appendChild(groupParentXML);
-					else {
-						if (position > 0)
-							currGroupParentXML.insertChildAfter(currGroupParentXML.elements()[position - 1], groupParentXML);
-						else
-							currGroupParentXML.insertChildBefore(currGroupParentXML.elements()[position], groupParentXML);
-					}
-					if (level == 0)
-					{
-						submenuPos++;
-					} else {
-						parentGroupObject.submenuPos++;
-					}
-					
-					
-				} else {
-					groupObject = areaGroups[currJoinedGroupName];
-					groupParentXML = groupObject.parent as XML;
-				}
-				
-				parentGroupObject = groupObject;
-				currGroupParentXML = groupParentXML;
-				level++;
-			}
-			
-			return groupParentXML;
-		}
+		
 		// getters & setters
 		public function get areas(): ArrayCollection
 		{ return ma_areas; }

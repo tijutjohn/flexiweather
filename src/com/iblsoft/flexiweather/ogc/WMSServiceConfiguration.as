@@ -46,7 +46,6 @@ package com.iblsoft.flexiweather.ogc
 		public function toGetCapabilitiesRequest(): URLRequest
 		{
 			var r: URLRequest = toRequest("GetCapabilities");
-			//r.data.FORMAT = "image/png"; 
 			return r;
 		}
 

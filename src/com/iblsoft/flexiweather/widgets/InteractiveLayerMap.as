@@ -11,10 +11,12 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.utils.DateUtils;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
+	import com.iblsoft.flexiweather.utils.XMLStorage;
 	
 	import flash.events.DataEvent;
 	import flash.events.Event;
 	
+	import mx.collections.ArrayCollection;
 	import mx.events.CollectionEvent;
 	import mx.events.DynamicEvent;
 	
@@ -90,9 +92,47 @@ package com.iblsoft.flexiweather.widgets
 		
 		override public function serialize(storage: Storage): void
 		{
-			super.serialize(storage);
-			storage.serializePersistentArrayCollection("layer", m_layers, InteractiveLayerWMS);
-			//TODO: implement InteractiveLayerMap serialize function
+			//super.serialize(storage);
+			
+			var wrappers: ArrayCollection;
+			var wrapper: LayerSerializationWrapper;
+			var layer: InteractiveLayer;
+			
+			LayerSerializationWrapper.m_iw = container;
+			if (storage.isLoading())
+			{
+				wrappers = new ArrayCollection();
+				 
+				storage.serializeNonpersistentArrayCollection("layer", wrappers, LayerSerializationWrapper);
+				m_layers.removeAll();
+				var total: int = wrappers.length - 1;
+				for (var i: int = total; i >= 0; i--)
+				{
+					wrapper = wrappers.getItemAt(i) as LayerSerializationWrapper;
+					layer = wrapper.m_layer;
+					addLayer(layer);
+				}
+				
+//				for each(layer in m_layers) {
+//					addChildAt(layer, 0);
+//				}
+				
+				debugLayers();
+				container.debugLayers();
+			} else {
+				//create wrapper collection
+				wrappers = new ArrayCollection();
+				
+				for each (layer in m_layers)
+				{
+					wrapper = new LayerSerializationWrapper();
+					wrapper.m_layer = layer;
+					wrappers.addItem(wrapper);
+				}
+				
+				storage.serializeNonpersistentArrayCollection("layer", wrappers, LayerSerializationWrapper);
+				trace("Map serialize: " + (storage as XMLStorage).xml);
+			}
 		}
 		
 		override protected function onLayerCollectionChanged(event: CollectionEvent): void
@@ -580,6 +620,41 @@ package com.iblsoft.flexiweather.widgets
 			}
 			
 			return map;
+		}
+	}
+}
+
+import com.iblsoft.flexiweather.utils.Serializable;
+import com.iblsoft.flexiweather.ogc.LayerConfiguration;
+import com.iblsoft.flexiweather.widgets.InteractiveLayer;
+import com.iblsoft.flexiweather.utils.Storage;
+import com.iblsoft.flexiweather.ogc.LayerConfigurationManager;
+import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	
+class LayerSerializationWrapper implements Serializable
+{
+	public var m_layer: InteractiveLayer;
+	public static var m_iw: InteractiveWidget;
+
+	public function serialize(storage: Storage): void
+	{
+		if(storage.isLoading()) {
+			var s_layerName: String = storage.serializeString("layer-name", null, null);
+			var config: LayerConfiguration = LayerConfigurationManager.getInstance().getLayerByLabel(s_layerName);
+			
+			m_layer = config.createInteractiveLayer(m_iw);
+			if (m_layer is Serializable)
+			{
+				(m_layer as Serializable).serialize(storage);
+			}
+		}
+		else {
+			if (m_layer is Serializable)
+			{
+				storage.serializeString("layer-name", m_layer.name, null);
+				storage.serializeString("layer-name", m_layer.name, null);
+				(m_layer as Serializable).serialize(storage);
+			}
 		}
 	}
 }
