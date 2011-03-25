@@ -117,8 +117,8 @@ package com.iblsoft.flexiweather.widgets
 //					addChildAt(layer, 0);
 //				}
 				
-				debugLayers();
-				container.debugLayers();
+//				debugLayers();
+//				container.debugLayers();
 			} else {
 				//create wrapper collection
 				wrappers = new ArrayCollection();
