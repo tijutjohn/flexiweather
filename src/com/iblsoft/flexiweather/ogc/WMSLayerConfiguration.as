@@ -111,7 +111,9 @@ package com.iblsoft.flexiweather.ogc
             r.data.TILECOL = i_tileCol; 
             if(s_style != null)
                 r.data.STYLE = s_style;
-            r.data.FORMAT = ms_imageFormat; 
+                
+            
+            r.data.FORMAT = getCurrentImageFormat(); 
             r.data.TRANSPARENT = "TRUE";
             return r;
         }
@@ -122,12 +124,8 @@ package com.iblsoft.flexiweather.ogc
 		{
 			var r: URLRequest = m_service.toRequest("GetLegendGraphic");
 			r.data.LAYER = ma_layerNames[0];
-//			r.data.WIDTH = i_width; 
-//			r.data.HEIGHT = i_height;
 			if(s_style != null)
 				r.data.STYLE = s_style;
-//			r.data.FORMAT = "image/png"; 
-//			r.data.TRANSPARENT = "TRUE";
 			return r;
 		}
 		
@@ -148,13 +146,22 @@ package com.iblsoft.flexiweather.ogc
 			r.data.HEIGHT = i_height;
 			if(s_stylesList != null)
 				r.data.STYLES = s_stylesList;
-			r.data.FORMAT = ms_imageFormat; 
+				
+			r.data.FORMAT = getCurrentImageFormat(); 
 			r.data.TRANSPARENT = "TRUE";
 			
 			trace("toGetMapRequest layers: " + r.data.LAYERS + " format: " + r.data.FORMAT);
 			return r;
 		}
 
+		private function getCurrentImageFormat(): String
+		{
+			var format: String = ms_imageFormat;
+			if (format == null)
+				format = 'image/png';
+				
+			return format;
+		}
 		public function toGetFeatureInfoRequest(
 				s_crs: String, s_bbox: String,
 				i_width: int, i_height: int,
