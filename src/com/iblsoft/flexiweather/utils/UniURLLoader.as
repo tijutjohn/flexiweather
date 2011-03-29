@@ -32,6 +32,21 @@ package com.iblsoft.flexiweather.utils
 	*/
 	public class UniURLLoader extends EventDispatcher
 	{
+		public static const BINARY_FORMAT: String = 'binary';
+		public static const IMAGE_FORMAT: String = 'image';
+		public static const JSON_FORMAT: String = 'json';
+		public static const TEXT_FORMAT: String = 'text';
+		public static const XML_FORMAT: String = 'xml';
+		
+		/**
+		 * Array of allowed formats which will be loaded into loader. If there will be loaded format, which will not be included in allowedFormats array
+		 * there will be FAIL dispatched.
+		 * Please note, that it depends on order of formats in array. If TEXT will be included before XML, it will be checked if result is in TEXT format
+		 * and it will be dispatch as TEXT object. If you want to check XML first, please add XML format before TEXT format.
+		 * Supported formats are just formats which are defined in this class (see above) BINARY, IMAGE, JSON, TEXT, XML
+		 */		
+		public var allowedFormats: Array;
+		
 		// FIXME: We should have multiple Loader's for images!
 		protected var md_imageLoaderToRequestMap: Dictionary = new Dictionary();
 		protected var md_urlLoaderToRequestMap: Dictionary = new Dictionary();
@@ -55,6 +70,15 @@ package com.iblsoft.flexiweather.utils
 		
 		public static const ERROR_BAD_IMAGE: String = "errorBadImage";
 		public static const ERROR_IO: String = "errorIO";
+		
+		/**
+		 * result is received but format is not included in allowedFormats array
+		 */ 
+		public static const ERROR_UNEXPECTED_FORMAT: String = "errorUnexpectedFormat";
+		/**
+		 * result is received, and format is allowed, but content is invalid (not as expected)
+		 */
+		public static const ERROR_INVALID_CONTENT: String = "errorInvalidConter";
 		public static const ERROR_SECURITY: String = "errorSecurity";
 		public static const ERROR_CANCELLED: String = "errorCancelled";
 		
@@ -62,7 +86,9 @@ package com.iblsoft.flexiweather.utils
 		public var data: Object;
 		
 		public function UniURLLoader()
-		{}
+		{
+			allowedFormats = [XML_FORMAT, IMAGE_FORMAT];
+		}
 		
 		public static function navigateToURL(request: URLRequest): void
 		{
@@ -149,6 +175,11 @@ package com.iblsoft.flexiweather.utils
 			return false;
 		}
 		
+		protected function isResultContentCorrect(s_format: String, data: Object): Boolean
+		{
+			return true;
+		}
+		
 		protected function onDataComplete(event: Event): void
 		{
 			var urlLoader: URLLoaderWithAssociatedData = URLLoaderWithAssociatedData(event.target);
@@ -165,32 +196,70 @@ package com.iblsoft.flexiweather.utils
 			var b3: int = rawData.length > 3 ? rawData.readUnsignedByte() : -1;
 			
 			rawData.position = 0;
-			var isPNG: Boolean = b0 == 0x89 && b1 == 0x50 && b2 == 0x4E && b3 == 0x47;
-			var isJPG: Boolean = b0 == 0xff && b1 == 0xd8 && b2 == 0xff && b3 == 0xe0;
-			 
-			// 0x89 P N G
-			if(isPNG || isJPG) {
-				var imageLoader: LoaderWithAssociatedData = new LoaderWithAssociatedData();
-				imageLoader.associatedData = urlLoader.associatedData;
-				md_imageLoaderToRequestMap[imageLoader] = urlRequest;
-				imageLoader.contentLoaderInfo.addEventListener(Event.COMPLETE, onImageLoaded);
-	            imageLoader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, onImageLoadingIOError);
-				imageLoader.loadBytes(rawData);
-				return;
-			}
-			// < - this is quite a weak heuristics
-			else if(b0 == 0x3C) {
-				var s_data: String = rawData.readUTFBytes(rawData.length);
-				try {
-					var x: XML = new XML(s_data);
-					dispatchResult(x, urlRequest, urlLoader.associatedData);
+			
+			var s_data: String;
+			
+			for each (var currFormat: String in allowedFormats)
+			{
+				switch (currFormat)
+				{
+					case BINARY_FORMAT:
+						if(isResultContentCorrect(BINARY_FORMAT, rawData))
+							dispatchResult(rawData, urlRequest, urlLoader.associatedData);
+//						else
+//							dispatchFault(urlRequest, urlLoader.associatedData);
+						return;
+						break;
+					case IMAGE_FORMAT:
+						var isPNG: Boolean = b0 == 0x89 && b1 == 0x50 && b2 == 0x4E && b3 == 0x47;
+						var isJPG: Boolean = b0 == 0xff && b1 == 0xd8 && b2 == 0xff && b3 == 0xe0;
+						 
+						// 0x89 P N G
+						if(isPNG || isJPG) {
+							var imageLoader: LoaderWithAssociatedData = new LoaderWithAssociatedData();
+							imageLoader.associatedData = urlLoader.associatedData;
+							md_imageLoaderToRequestMap[imageLoader] = urlRequest;
+							imageLoader.contentLoaderInfo.addEventListener(Event.COMPLETE, onImageLoaded);
+				            imageLoader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, onImageLoadingIOError);
+							imageLoader.loadBytes(rawData);
+							return;
+						}
+						break;
+						
+					case JSON_FORMAT:
+					
+						break;
+					case XML_FORMAT:
+						// < - this is quite a weak heuristics
+						if(b0 == 0x3C) {
+							s_data = rawData.readUTFBytes(rawData.length);
+							try {
+								var x: XML = new XML(s_data);
+								
+								if(isResultContentCorrect(XML_FORMAT, x))
+									dispatchResult(x, urlRequest, urlLoader.associatedData);
+								else
+									dispatchFault(urlRequest, urlLoader.associatedData, ERROR_INVALID_CONTENT, 'Invalid XML content');
+								return;
+							}
+							catch(e: Error) {
+								// if XML parsing fails, just continue with other formats
+							}
+						}
+						break;
+					case TEXT_FORMAT:
+						// < - this is quite a weak heuristics
+						s_data = rawData.readUTFBytes(rawData.length);
+						if(isResultContentCorrect(TEXT_FORMAT, s_data))
+							dispatchResult(x, urlRequest, urlLoader.associatedData);
+						else
+							dispatchFault(urlRequest, urlLoader.associatedData, ERROR_INVALID_CONTENT, 'Invalid TEXT content');
+						return;
+						break;
 				}
-				catch(e: Error) {
-					dispatchResult(s_data, urlRequest, urlLoader.associatedData);
-				}
 			}
-			else
-				dispatchResult(rawData, urlRequest, urlLoader.associatedData);
+//			else
+//				dispatchResult(rawData, urlRequest, urlLoader.associatedData);
 		}
 
 		protected function onDataIOError(event: IOErrorEvent): void

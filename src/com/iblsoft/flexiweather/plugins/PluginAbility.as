@@ -15,6 +15,9 @@ package com.iblsoft.flexiweather.plugins
 		public static const LAYER_OPTIONS_PROVIDER: String = "layerOptionsProvider";
 		public static const LAYER_BEHAVIOUR: String = "layerBehaviour";
 		
+		public static const MENU_ITEM: String = "menuItem";
+		public static const SUBMENU_ITEM: String = "submenuItem";
+		
 		private var ms_abilityType: String;
 		private var m_classOrInstance: Object;
 		private var ms_id: String;
@@ -82,6 +85,27 @@ package com.iblsoft.flexiweather.plugins
 		{
 			return new PluginAbility(PluginAbility.LAYER_BEHAVIOUR, s_id, s_plugin_id, classOrInstance) 
 					.withMetadata("name", s_name);
+		}
+		
+		public static function menuItem(classOrInstance: Object,
+				s_id: String, s_name: String, i_priority: int, s_plugin_id: String = null): PluginAbility
+		{
+			var ability: PluginAbility = new PluginAbility(PluginAbility.MENU_ITEM, s_id, s_plugin_id, classOrInstance)
+			ability.withMetadata("name", s_name);
+			ability.withMetadata("priority", i_priority);
+			
+			return ability;
+		}
+		
+		public static function submenuItem(classOrInstance: Object,
+				s_id: String, s_mainMenu_id, s_name: String, i_priority: int, s_plugin_id: String = null): PluginAbility
+		{
+			var ability: PluginAbility = new PluginAbility(PluginAbility.SUBMENU_ITEM, s_id, s_plugin_id, classOrInstance)
+			ability.withMetadata("name", s_name);
+			ability.withMetadata("mainMenuID", s_mainMenu_id);
+			ability.withMetadata("priority", i_priority);
+			
+			return ability;
 		}
 
 		public static function custom(s_abilityType: String, classOrInstance: Object, s_id: String, s_plugin_id: String = null): PluginAbility
