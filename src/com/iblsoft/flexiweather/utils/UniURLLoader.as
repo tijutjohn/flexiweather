@@ -87,7 +87,7 @@ package com.iblsoft.flexiweather.utils
 		
 		public function UniURLLoader()
 		{
-			allowedFormats = [XML_FORMAT, IMAGE_FORMAT];
+			allowedFormats = [XML_FORMAT, IMAGE_FORMAT, JSON_FORMAT];
 		}
 		
 		public static function navigateToURL(request: URLRequest): void
@@ -227,7 +227,8 @@ package com.iblsoft.flexiweather.utils
 						break;
 						
 					case JSON_FORMAT:
-					
+						dispatchResult(rawData, urlRequest, urlLoader.associatedData);
+						return;
 						break;
 					case XML_FORMAT:
 						// < - this is quite a weak heuristics
@@ -258,8 +259,8 @@ package com.iblsoft.flexiweather.utils
 						break;
 				}
 			}
-//			else
-//				dispatchResult(rawData, urlRequest, urlLoader.associatedData);
+//			
+				dispatchResult(rawData, urlRequest, urlLoader.associatedData);
 		}
 
 		protected function onDataIOError(event: IOErrorEvent): void
