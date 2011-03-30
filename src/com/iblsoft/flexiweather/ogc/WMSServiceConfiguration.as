@@ -72,19 +72,24 @@ package com.iblsoft.flexiweather.ogc
 		
 		private function getGetMapImageFormats(xml: XML): void
 		{
-			var wms: Namespace = version.isLessThan(1, 3, 0)
-						? new Namespace() : new Namespace("http://www.opengis.net/wms"); 
-			var xml1: XML = xml.wms::Request[0] as XML;
-			var xml2: XML = xml1.wms::GetMap[0] as XML;
-			
-			var formatsXML: XMLList = xml2.wms::Format;
-			
-			for each (var format: XML in formatsXML)
+			if (xml)
 			{
-				var imageFormat: String = format.valueOf();
-				if (imageFormat.indexOf('png') >= 0 || imageFormat.indexOf('jpg') >= 0 || imageFormat.indexOf('jpeg') >= 0)
+				var wms: Namespace = version.isLessThan(1, 3, 0)
+							? new Namespace() : new Namespace("http://www.opengis.net/wms"); 
+				var xml1: XML = xml.wms::Request[0] as XML;
+				var xml2: XML = xml1.wms::GetMap[0] as XML;
+				
+				var formatsXML: XMLList = xml2.wms::Format;
+				if (formatsXML)
 				{
-					_imageFormats.push(imageFormat);
+					for each (var format: XML in formatsXML)
+					{
+						var imageFormat: String = format.valueOf();
+						if (imageFormat && (imageFormat.indexOf('png') >= 0 || imageFormat.indexOf('jpg') >= 0 || imageFormat.indexOf('jpeg') >= 0))
+						{
+							_imageFormats.push(imageFormat);
+						}
+					}
 				}
 			}
 		}
