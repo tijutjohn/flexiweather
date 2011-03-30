@@ -98,14 +98,14 @@ package com.iblsoft.flexiweather.plugins
 		}
 		
 		public static function submenuItem(classOrInstance: Object,
-				s_mainMenu_id: String, s_menu_id: String, s_name: String, i_priority: int, f_callback: Function = null, b_is_separator: Boolean = false, s_plugin_id: String = null): PluginAbility
+				s_mainMenu_id: String, s_menu_id: String, s_name: String, i_priority: int, s_type: String = '', f_callback: Function = null, s_plugin_id: String = null): PluginAbility
 		{
 			var ability: PluginAbility = new PluginAbility(PluginAbility.SUBMENU_ITEM, s_menu_id, s_plugin_id, classOrInstance)
 			ability.withMetadata("name", s_name);
 			ability.withMetadata("mainMenuID", s_mainMenu_id);
 			ability.withMetadata("priority", i_priority);
 			ability.withMetadata("callback", f_callback);
-			ability.withMetadata("isSeparator", b_is_separator);
+			ability.withMetadata("type", s_type);
 			
 			return ability;
 		}
