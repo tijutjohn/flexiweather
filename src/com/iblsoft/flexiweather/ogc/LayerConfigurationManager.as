@@ -92,7 +92,7 @@ package com.iblsoft.flexiweather.ogc
 			
 			return false;
 		}
-		public function getMenuLayersXMLList(currentCRS: String = null, oldXMLList: XML = null): XML
+		public function getMenuLayersXMLList(currentCRS: String = null, oldXMLList: XML = null): XMLList
 		{
 			if (ma_layers && ma_layers.length > 0)
 			{
@@ -161,7 +161,7 @@ package com.iblsoft.flexiweather.ogc
 				var layerCustom: XML = <menuitem label="Add custom WMS layer..." data="map.add-layer-custom" type="action"/>
 				layersXMLList.appendChild(layerCustom);
 				
-				return layersXMLList;
+				return layersXMLList.children();
 			}
 			return null;
 		}

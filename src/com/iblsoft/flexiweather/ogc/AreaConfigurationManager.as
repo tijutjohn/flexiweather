@@ -135,7 +135,7 @@ package com.iblsoft.flexiweather.ogc
 			return null;
 		}
 		
-		public function getAreaXMLList(layerComposer: InteractiveLayerMap = null, oldXMLList: XML = null): XML
+		public function getAreaXMLList(layerComposer: InteractiveLayerMap = null, oldXMLList: XML = null): XMLList
 		{
 			if (ma_areas && ma_areas.length > 0)
 			{
@@ -187,7 +187,7 @@ package com.iblsoft.flexiweather.ogc
 				var areaCustom: XML = <menuitem label='Custom...' data='custom.area' type='action'/>;
 				areasXMLList.appendChild(areaCustom);
 				
-				return areasXMLList;
+				return areasXMLList.children();
 			}
 			return null;
 		}

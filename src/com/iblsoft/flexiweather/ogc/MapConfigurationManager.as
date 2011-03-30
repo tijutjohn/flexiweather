@@ -62,7 +62,7 @@ package com.iblsoft.flexiweather.ogc
 			var event: Event = new Event(MAPS_CHANGED);
 			dispatchEvent(event);
 		}
-		public function getMapsXMLList(oldXMLList: XML = null): XML
+		public function getMapsXMLList(oldXMLList: XML = null): XMLList
 		{
 			if (ma_maps && ma_maps.length > 0)
 			{
@@ -109,7 +109,7 @@ package com.iblsoft.flexiweather.ogc
 //				var areaCustom: XML = <menuitem label='Custom...' data='custom.area' type='action'/>;
 //				mapsXMLList.appendChild(areaCustom);
 				
-				return mapsXMLList;
+				return mapsXMLList.children();
 			}
 			return null;
 		}
