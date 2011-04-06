@@ -78,7 +78,7 @@ package com.iblsoft.flexiweather.proj
 		public function prjXYToLaLoCoord(f_prjY: Number, f_prjX: Number): Coord
 		{
 			var laLoPt: Point = prjXYToLaLoPt(f_prjY, f_prjX);
-			return new Coord(Projection.CRS_GEOGRAPHIC, laLoPt.x * 180.0 / Math.PI, laLoPt.y * 180.0 / Math.PI);
+			return new Coord(Projection.CRS_GEOGRAPHIC, laLoPt.x, laLoPt.y);
 		}
 		
 		/**
@@ -87,7 +87,7 @@ package com.iblsoft.flexiweather.proj
 		public function prjPtToLaLoCoord(prjPt: Point): Coord
 		{
 			var laLoPt: Point = prjXYToLaLoPt(prjPt.x, prjPt.y);
-			return new Coord(Projection.CRS_GEOGRAPHIC, laLoPt.x * 180.0 / Math.PI, laLoPt.y * 180.0 / Math.PI);
+			return new Coord(Projection.CRS_GEOGRAPHIC, laLoPt.x, laLoPt.y);
 		}
 
 		/**
