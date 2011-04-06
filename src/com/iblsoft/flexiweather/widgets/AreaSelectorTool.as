@@ -205,6 +205,9 @@ package com.iblsoft.flexiweather.widgets
 		
 		public function findAreaCoordinates(): void
 		{
+			if (!_r)
+				return;
+				
 			var r: Rectangle = container.getViewBBox().toRectangle();
         	var w: Number = container.width;
         	var h: Number = container.height;
