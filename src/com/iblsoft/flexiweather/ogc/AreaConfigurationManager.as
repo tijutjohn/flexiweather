@@ -17,9 +17,9 @@ package com.iblsoft.flexiweather.ogc
 		public static const AREAS_THUMBNAILS_CACHE: Dictionary = new Dictionary();
 		public static const AREAS_THUMBNAILS_CACHE2: Dictionary = new Dictionary();
 		
-		internal static var sm_instance: AreaConfigurationManager;
+		private static var sm_instance: AreaConfigurationManager;
 
-		internal var ma_areas: ArrayCollection = new ArrayCollection();
+		private var ma_areas: ArrayCollection = new ArrayCollection();
 		
 		public function AreaConfigurationManager()
 		{
@@ -27,6 +27,8 @@ package com.iblsoft.flexiweather.ogc
                 throw new Error(
                 		"AreaConfigurationManager can only be accessed through "
                 		+ "AreaConfigurationManager.getInstance()");
+                		
+             ma_areas = new ArrayCollection();
 		}
 		
 		public static function getInstance(): AreaConfigurationManager
@@ -88,6 +90,12 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 	
+		public function setAllAreas(areas: ArrayCollection): void
+		{
+			ma_areas.removeAll();
+			ma_areas.addAll(areas);
+		}
+		
 		public function serialize(storage: Storage): void
 		{
 			storage.serializeNonpersistentArrayCollection("area", ma_areas, AreaConfiguration);
