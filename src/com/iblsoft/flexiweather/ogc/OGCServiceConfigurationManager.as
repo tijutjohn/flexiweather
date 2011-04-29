@@ -4,13 +4,15 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.utils.Storage;
 	
 	import flash.events.DataEvent;
+	import flash.events.Event;
+	import flash.events.EventDispatcher;
 	import flash.events.TimerEvent;
 	import flash.utils.Timer;
 	import flash.utils.getTimer;
 	
 	import mx.collections.ArrayCollection;
 
-	public class OGCServiceConfigurationManager implements Serializable
+	public class OGCServiceConfigurationManager extends EventDispatcher implements Serializable
 	{
 		internal static var sm_instance: OGCServiceConfigurationManager;
 
@@ -87,11 +89,20 @@ package com.iblsoft.flexiweather.ogc
 					if(osc.mi_lastUpdateFlashStamp + osc.updatePeriod >= i_currentFlashStamp)
 						continue;
 				}
+				if (osc is WMSServiceConfiguration)
+				{
+					var wmsServiceConfiguration: WMSServiceConfiguration = osc as WMSServiceConfiguration;
+					wmsServiceConfiguration.addEventListener(WMSServiceConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
+				}
 				osc.update();
 				osc.mi_lastUpdateFlashStamp = i_currentFlashStamp;
 			}
 		}
 		
+		private function onCapabilitiesUpdated(event: DataEvent): void
+		{
+			dispatchEvent(new Event(WMSServiceConfiguration.CAPABILITIES_UPDATED));
+		}
 		protected function onTimer(event: TimerEvent): void
 		{
 			update(false);
