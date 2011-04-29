@@ -52,6 +52,7 @@ package com.iblsoft.flexiweather.utils
 		protected var md_urlLoaderToRequestMap: Dictionary = new Dictionary();
 		
 		public static var baseURL: String = '';
+		public static var proxyBaseURL: String = '';
 
 		/**
 		 * URL of the cross-domain script bridging script. The ${URL} pattern
@@ -95,14 +96,20 @@ package com.iblsoft.flexiweather.utils
 			flash.net.navigateToURL(new URLRequest(UniURLLoader.fromBaseURL(request.url)));
 		}
 
-		public static function fromBaseURL(s_url: String): String
+		public static function fromBaseURL(s_url: String, s_customBaseUrl: String = null): String
 		{
+			var s_baseUrl: String = baseURL;
+			if (s_customBaseUrl && s_customBaseUrl.length > 0)
+			{
+				s_baseUrl = s_customBaseUrl;
+			}
+			
 			if(s_url.indexOf("${BASE_URL}") >= 0)
 			{
 				var regExp: RegExp = /\$\{BASE_URL\}/ig;
 				while(regExp.exec(s_url) != null)
 				{
-					s_url = s_url.replace(regExp, baseURL);
+					s_url = s_url.replace(regExp, s_baseUrl);
 //					trace("replace url: " + urlRequest.url + " baseURL: " + baseURL);
 				}
 			}	
@@ -283,7 +290,9 @@ package com.iblsoft.flexiweather.utils
 			if(crossDomainProxyURLPattern != null
 					&& event.text.match(/#2048/)
 					&& !urlLoader.b_crossDomainProxyRequest) {
-				var s_proxyURL: String = fromBaseURL(crossDomainProxyURLPattern);
+				
+				var s_proxyURL: String = fromBaseURL(crossDomainProxyURLPattern, proxyBaseURL);
+				
 				urlRequest = md_urlLoaderToRequestMap[urlLoader].request;
 				var s_url: String = urlRequest.url;
 				if(urlRequest.data) {
