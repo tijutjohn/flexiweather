@@ -330,7 +330,7 @@ package com.iblsoft.flexiweather.ogc
 		override public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer
 		{
 			var l: InteractiveLayerWMS = new InteractiveLayerWMS(iw, this);
-			l.updateData(false);
+			//l.updateData(false);
 //			l.updateData(true);
 			return l;
 		}

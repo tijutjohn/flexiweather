@@ -16,7 +16,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			var l: InteractiveLayerWMSWithQTT = new InteractiveLayerWMSWithQTT(iw, this);
 //			l.updateData(true);
-			l.updateData(false);
+//			l.updateData(false);
 			return l;
 		}
 		

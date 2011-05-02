@@ -82,8 +82,10 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			super.onCapabilitiesUpdated(event);
 //			trace("InteractiveLayerWMSWithQTT onCapabilitiesUpdated: " + isTilable);
-			//refresh, capabilities are updated, so we can find out, if layer isTilable	
-			refresh(true);		
+			//refresh, capabilities are updated, so we can find out, if layer isTilable
+			
+			//FIXME check only if there is change in isTilable, if it is, make refresh, otherwise do nothin
+			//refresh(true);		
 		}
 		
 		private function changeTiledLayerVisibility(visible: Boolean): void
