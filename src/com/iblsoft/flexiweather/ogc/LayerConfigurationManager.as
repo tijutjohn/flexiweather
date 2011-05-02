@@ -34,7 +34,6 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function serialize(storage: Storage): void
 		{
-//			storage.serializeNonpersistentArrayCollection("layer", ma_layers, WMSLayerConfiguration);
 			storage.serializePersistentArrayCollection("layer", ma_layers, LayerConfiguration);
 		}
 		
@@ -166,92 +165,6 @@ package com.iblsoft.flexiweather.ogc
 			return null;
 		}
 		
-		/**
-		 * Creates folders and subfolders for custom layers 
-		 * @param folderName - full group name... it can consists subfolders. Use / for subolders. E.g Continents/States
-		 * @param layersXMLList - root menu item
-		 * @return 
-		 * 
-		 */		
-		 /*
-		private function createGroupSubfoldersAndGetParent(folderName: String, layersXMLList: XML): XML
-		{
-			var groupParentXML: XML;
-			var currGroupParentXML: XML = layersXMLList;
-			var groupObject: Object;
-			var parentGroupObject: Object;
-			var groupsArr: Array;
-			
-			//check if there is more levels (split by "/")
-			groupsArr = folderName.split('/');
-			if (groupsArr.length > 1)
-			{
-				if (groupsArr[0] == 'test')
-					trace('test');
-			}
-			var level: int = 0;
-			var position: int;
-			
-			var currJoinedfolderName: String = ''
-			for each (var currfolderName: String in groupsArr)
-			{
-				if (level == 0)
-				{
-					currJoinedfolderName = currfolderName;
-				} else {
-					currJoinedfolderName += '/'+currfolderName
-				}
-				if (!groups[currJoinedfolderName])
-				{
-					groupParentXML = <menuitem label={currfolderName}/>;
-					
-					groupObject = new Object();
-					groupObject.parent = groupParentXML;
-					groupObject.submenuPos = 0;
-					
-					groups[currJoinedfolderName] = groupObject;
-					
-					if (level == 0)
-					{
-						position = submenuPos;
-					} else {
-						position = parentGroupObject.submenuPos;
-					}
-					
-//					if (currfolderName == 'States')
-//					{
-//						trace('stop');
-//					}
-					var len:int = currGroupParentXML.elements().length();
-					if (len == 0 )
-						currGroupParentXML.appendChild(groupParentXML);
-					else {
-//						trace("pos " + position + " len: " + len);
-						if (position > 0)
-							currGroupParentXML.insertChildAfter(currGroupParentXML.elements()[position - 1], groupParentXML);
-						else
-							currGroupParentXML.insertChildBefore(currGroupParentXML.elements()[position], groupParentXML);
-					}
-					if (level == 0)
-					{
-						submenuPos++;
-					} else {
-						parentGroupObject.submenuPos++;
-					}
-					
-					
-				} else {
-					groupObject = groups[currJoinedfolderName];
-					groupParentXML = groupObject.parent as XML;
-				}
-				
-				parentGroupObject = groupObject;
-				currGroupParentXML = groupParentXML;
-				level++;
-			}
-			
-			return groupParentXML;
-		}*/
 		
 		// getters & setters
 		public function get layers(): ArrayCollection
