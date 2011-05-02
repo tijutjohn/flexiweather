@@ -265,8 +265,10 @@ package com.iblsoft.flexiweather.ogc
 		
 		override public function onAreaChanged(b_finalChange: Boolean): void
 		{
+			//FIXME this should not be called if panning or zooming is still in progress
+			
 			for each(var f: WFSFeatureBase in ma_features) {
-				trace("onAreaChanged ["+this+"] feature: " + f);
+				//trace("onAreaChanged ["+this+"] feature: " + f);
 				f.invalidatePoints();
 				f.update();
 			}

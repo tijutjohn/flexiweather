@@ -142,6 +142,11 @@ package com.iblsoft.flexiweather.ogc
 			else 
 				r.data.CRS = s_crs; 
 			r.data.BBOX = s_bbox; 
+			if (i_width == 0 || i_height == 0)
+			{
+				trace("Stop, GetMap size = 0");
+				return null;
+			}
 			r.data.WIDTH = i_width; 
 			r.data.HEIGHT = i_height;
 			if(s_stylesList != null)

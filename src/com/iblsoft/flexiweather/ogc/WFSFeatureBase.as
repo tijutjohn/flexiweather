@@ -36,7 +36,12 @@ package com.iblsoft.flexiweather.ogc
 		{ return m_points; }
 		
 		public function getPoint(i_pointIndex: uint): Point
-		{ return m_points[i_pointIndex]; }
+		{
+			if (m_points && m_points.length > i_pointIndex)
+				return m_points[i_pointIndex];
+			
+			return null;
+		}
 
 		/** Called after the feature is added to master, before first call to update(). */
 		public function setMaster(master: InteractiveLayerWFS): void

@@ -79,6 +79,10 @@ package com.iblsoft.flexiweather.ogc
 					container.getCRS(), container.getViewBBox().toBBOXString(),
 					int(container.width), int(container.height),
 					getWMSStyleListString());
+			
+			if (!request)
+				return;
+			
 			updateDimensionsInURLRequest(request);
 			updateCustomParametersInURLRequest(request);
 			var img: Bitmap = null;

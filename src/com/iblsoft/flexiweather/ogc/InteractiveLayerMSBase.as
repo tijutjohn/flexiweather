@@ -171,6 +171,9 @@ package com.iblsoft.flexiweather.ogc
 					container.getCRS(), container.getViewBBox().toBBOXString(),
 					int(container.width), int(container.height),
 					getWMSStyleListString());
+			if (!request)
+				return null;
+			
 			updateDimensionsInURLRequest(request);
 			updateCustomParametersInURLRequest(request);
 			updateRequestData(request);
