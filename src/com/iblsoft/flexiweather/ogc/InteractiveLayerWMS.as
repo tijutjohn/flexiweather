@@ -25,6 +25,7 @@ package com.iblsoft.flexiweather.ogc
 			super(container, cfg);
 			
 			m_cache = new WMSCache();
+			(m_cache as WMSCache).name = cfg.label + " cache";
 		}
 		
 		public function serialize(storage: Storage): void
@@ -88,8 +89,7 @@ package com.iblsoft.flexiweather.ogc
 			var img: Bitmap = null;
 			var wmsCache: WMSCache = m_cache as WMSCache;
 			
-			// invalidate property "displayed" for cached items			
-			wmsCache.removeFromScreen();
+			
 			
 			if(!b_forceUpdate)
 			{
@@ -110,7 +110,11 @@ package com.iblsoft.flexiweather.ogc
 				{
 					img = imgTest;
 				}
+			} else {
+				// invalidate property "displayed" for cached items		
+				wmsCache.removeFromScreen();
 			}
+			
 			if(img == null) {
 				m_timer.reset();
 				m_job = BackgroundJobManager.getInstance().startJob("Rendering " + m_cfg.ma_layerNames.join("+"));
@@ -190,6 +194,12 @@ package com.iblsoft.flexiweather.ogc
 			super.onDataLoaded(event);
 			
 			var wmsCache: WMSCache = m_cache as WMSCache;
+			if (_invalidateCacheAfterImageLoad)
+			{
+				wmsCache.invalidate(ms_imageCRS, m_imageBBox);
+				trace("WMS onDataLoaded ms_imageCRS: " + ms_imageCRS + " m_imageBBox: " + m_imageBBox);
+				_invalidateCacheAfterImageLoad = false;
+			}
 			
 			var result: * = event.result;
 			if(result is Bitmap) {
@@ -210,11 +220,14 @@ package com.iblsoft.flexiweather.ogc
 			onDataLoadFailed(null);
 		}
 
+		private var _invalidateCacheAfterImageLoad: Boolean;
 		override public function onAreaChanged(b_finalChange: Boolean): void
 		{
 			super.onAreaChanged(b_finalChange);
 			if(b_finalChange) {
-				m_cache.invalidate(ms_imageCRS, m_imageBBox);
+				trace("WMS onAreaChanged ms_imageCRS: " + ms_imageCRS + " m_imageBBox: " + m_imageBBox);
+				_invalidateCacheAfterImageLoad = true;
+//				m_cache.invalidate(ms_imageCRS, m_imageBBox);
 				updateData(false);
 			}
 			else

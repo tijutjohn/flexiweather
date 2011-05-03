@@ -10,6 +10,7 @@ package com.iblsoft.flexiweather.ogc.cache
 	
 	public class WMSCache implements ICache
 	{
+		public var name: String;
 		/**
 		 * Expiration time in seconds 
 		 */		
@@ -19,6 +20,7 @@ package com.iblsoft.flexiweather.ogc.cache
 		
 		private var _animationModeEnabled: Boolean;
 		
+		private var md_cache_length: int = 0;
 		protected var md_cache: Dictionary = new Dictionary();
 		protected var md_cache_loading: Dictionary = new Dictionary();
 		
@@ -47,9 +49,9 @@ package com.iblsoft.flexiweather.ogc.cache
 			var currTime: Date = new Date();
 			for (var s_key: String in md_cache)
 			{
-				var obj: Object  = md_cache[s_key];
+				var cacheItem: CacheItem = md_cache[s_key] as CacheItem;
 				
-				var lastUsed: Date = obj.lastUsed as Date;
+				var lastUsed: Date = cacheItem.lastUsed as Date;
 				if (lastUsed)
 				{
 					var diff: Number = currTime.time - lastUsed.time;
@@ -61,11 +63,14 @@ package com.iblsoft.flexiweather.ogc.cache
 //					trace("diff: " + diff);
 				}
 			}
+			debugCache();
 		}
 		
 		private function deleteCacheItem(s_key: String): void
 		{
-			var cacheItem: Object = md_cache[s_key];
+//			return;
+			
+			var cacheItem: CacheItem = md_cache[s_key] as CacheItem;
 			
 			
 			//dispose bitmap data, just for bitmaps which are not currently displayed
@@ -75,6 +80,7 @@ package com.iblsoft.flexiweather.ogc.cache
 				var bmp: Bitmap = cacheItem.image;
 			
 				bmp.bitmapData.dispose();
+				md_cache_length--;
 				delete md_cache[s_key];
 			} else {
 //				trace("\t deleteCacheItem: DO NOT DELETE IT " + cacheItem);
@@ -101,9 +107,10 @@ package com.iblsoft.flexiweather.ogc.cache
 			var s_key: String = getKey(s_crs, bbox, url);
 			
 			if(s_key in md_cache) {
-				md_cache[s_key].lastUsed = new Date();
-				md_cache[s_key].displayed = true;
-				return md_cache[s_key].image;
+				var item: CacheItem = md_cache[s_key] as CacheItem; 
+				item.lastUsed = new Date();
+				item.displayed = true;
+				return item.image;
 			}
 			return null;
 		}
@@ -128,30 +135,40 @@ package com.iblsoft.flexiweather.ogc.cache
 			var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url);
 			var s_key: String = getKey(s_crs, bbox, url);
 			
-			md_cache[s_key] = {
-				cacheKey: ck,
-				displayed: true,
-				lastUsed: new Date(),
-				image: img
-			};
+			var item: CacheItem = new CacheItem();
+			item.cacheKey = ck;
+			item.displayed = true;
+			item.lastUsed = new Date();
+			item.image = img;
+			
+			md_cache[s_key] = item;
+			md_cache_length++;
+			debugCache();
 			
 			delete md_cache_loading[s_key];
 		}
 		
+		private function debugCache(): void
+		{
+			trace("WMSCache ["+name+"] items: " + md_cache_length);
+		}
 		public function removeFromScreen(): void
 		{
 			for(var s_key: String in md_cache) 
 			{
-				md_cache[s_key].displayed = false;
+				var item: CacheItem = md_cache[s_key] as CacheItem; 
+				item.displayed = false;
 			}
 		}
 		
 		public function invalidate(s_crs: String, bbox: BBox): void
 		{
 			var a: Array = [];
-			for(var s_key: String in md_cache) {
-				var ck: WMSCacheKey = md_cache[s_key].cacheKey; 
-				md_cache[s_key].displayed = false;
+			for(var s_key: String in md_cache) 
+			{
+				var item: CacheItem = md_cache[s_key] as CacheItem; 
+				var ck: WMSCacheKey = item.cacheKey; 
+				item.displayed = false;
 				if(ck.ms_crs == s_crs && ck.m_bbox.equals(bbox))
 					a.push(s_key);
 			}
@@ -159,7 +176,50 @@ package com.iblsoft.flexiweather.ogc.cache
 	//			trace("WMSCache.invalidate(): removing image with key: " + md_cache[s_key].toString());
 				deleteCacheItem(s_key);
 			}
+			debugCache();
 		}
 
 	}
+}
+import com.iblsoft.flexiweather.ogc.cache.WMSCacheKey;
+
+import flash.display.Bitmap;
+
+import mx.messaging.AbstractConsumer;
+
+class CacheItem
+{
+	public static var CID: int = 0;
+	
+	private var _id: int;
+	
+	public var cacheKey: WMSCacheKey;
+	public var lastUsed: Date;
+	public var image: Bitmap;
+	
+	private var _displayed: Boolean;
+	public function get displayed():Boolean 
+	{
+		trace(this + " GET displayed = " + _displayed);
+		return _displayed;
+	}
+	
+	public function set displayed(value:Boolean):void 
+	{
+		_displayed = value;
+		trace(this + " SET displayed = " + _displayed);
+	}
+	
+	public function CacheItem()
+	{
+		CID++;
+		_id = CID
+		trace("New " + this);
+	}
+	
+	public function toString(): String
+	{
+		return "CacheItem " + _id;
+	}
+		
 }
