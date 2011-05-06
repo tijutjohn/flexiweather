@@ -76,9 +76,17 @@ package com.iblsoft.flexiweather.ogc
 		{
 			super.updateData(b_forceUpdate);
 			
+			var i_width: int = int(container.width);
+			var i_height: int = int(container.height);
+			
+			if (forcedLayerWidth > 0)
+				i_width = forcedLayerWidth;
+			if (forcedLayerHeight> 0)
+				i_height = forcedLayerHeight;
+			
 			var request: URLRequest = m_cfg.toGetMapRequest(
 					container.getCRS(), container.getViewBBox().toBBOXString(),
-					int(container.width), int(container.height),
+					i_width, i_height,
 					getWMSStyleListString());
 			
 			if (!request)
@@ -160,14 +168,18 @@ package com.iblsoft.flexiweather.ogc
 				
 				var matrix: Matrix = new Matrix();
 				// source image pixels to BBOX
-				matrix.scale(m_imageBBox.width / m_image.width, -m_imageBBox.height / m_image.height);
+				var f_scaleX: Number = m_imageBBox.width / m_image.width; 
+				var f_scaleY: Number = -m_imageBBox.height / m_image.height; 
+				matrix.scale(f_scaleX, f_scaleY );
+				
 				matrix.translate(m_imageBBox.xMin, m_imageBBox.yMax);
 				// BBOX to destination graphics image pixels
 				matrix.translate(-currentBBox.xMin, -currentBBox.yMax);
 				matrix.scale(container.width / currentBBox.width, -container.height / currentBBox.height);
 				//matrix.invert();
+				
 
-				graphics.beginBitmapFill(m_image.bitmapData, matrix, false, true);
+				graphics.beginBitmapFill(m_image.bitmapData, matrix, true, true);
 				graphics.drawRect(0, 0, m_image.width, m_image.height);
 				graphics.endFill();
 				
@@ -225,7 +237,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			super.onAreaChanged(b_finalChange);
 			if(b_finalChange) {
-				trace("WMS onAreaChanged ms_imageCRS: " + ms_imageCRS + " m_imageBBox: " + m_imageBBox);
+//				trace("WMS onAreaChanged ms_imageCRS: " + ms_imageCRS + " m_imageBBox: " + m_imageBBox);
 				_invalidateCacheAfterImageLoad = true;
 //				m_cache.invalidate(ms_imageCRS, m_imageBBox);
 				updateData(false);

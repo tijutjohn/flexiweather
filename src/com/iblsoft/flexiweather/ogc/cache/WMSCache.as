@@ -150,7 +150,7 @@ package com.iblsoft.flexiweather.ogc.cache
 		
 		private function debugCache(): void
 		{
-			trace("WMSCache ["+name+"] items: " + md_cache_length);
+//			trace("WMSCache ["+name+"] items: " + md_cache_length);
 		}
 		public function removeFromScreen(): void
 		{
@@ -200,21 +200,21 @@ class CacheItem
 	private var _displayed: Boolean;
 	public function get displayed():Boolean 
 	{
-		trace(this + " GET displayed = " + _displayed);
+//		trace(this + " GET displayed = " + _displayed);
 		return _displayed;
 	}
 	
 	public function set displayed(value:Boolean):void 
 	{
 		_displayed = value;
-		trace(this + " SET displayed = " + _displayed);
+//		trace(this + " SET displayed = " + _displayed);
 	}
 	
 	public function CacheItem()
 	{
 		CID++;
 		_id = CID
-		trace("New " + this);
+//		trace("New " + this);
 	}
 	
 	public function toString(): String

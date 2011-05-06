@@ -21,6 +21,29 @@ package com.iblsoft.flexiweather.widgets
 		protected var m_legendCanvas: Canvas;
 		protected var m_legendLabelAlign: String;
 		
+		private var _forcedLayerWidth: int = 0;
+		public function get forcedLayerWidth():int 
+		{
+			
+			return _forcedLayerWidth;
+		}
+		
+		public function set forcedLayerWidth(value:int):void 
+		{
+			_forcedLayerWidth = value;
+		}
+		
+		private var _forcedLayerHeight: int = 0;
+		public function get forcedLayerHeight():int 
+		{
+			return _forcedLayerHeight;
+		}
+		
+		public function set forcedLayerHeight(value:int):void 
+		{
+			_forcedLayerHeight = value;
+		}
+		
 		public function get legendCanvas(): Canvas
 		{
 			return m_legendCanvas;

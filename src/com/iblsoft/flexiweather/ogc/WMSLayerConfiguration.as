@@ -147,6 +147,7 @@ package com.iblsoft.flexiweather.ogc
 				trace("Stop, GetMap size = 0");
 				return null;
 			}
+			
 			r.data.WIDTH = i_width; 
 			r.data.HEIGHT = i_height;
 			if(s_stylesList != null)
@@ -155,7 +156,7 @@ package com.iblsoft.flexiweather.ogc
 			r.data.FORMAT = getCurrentImageFormat(); 
 			r.data.TRANSPARENT = "TRUE";
 			
-			trace("toGetMapRequest layers: " + r.data.LAYERS + " format: " + r.data.FORMAT);
+//			trace("toGetMapRequest layers: " + r.data.LAYERS + " format: " + r.data.FORMAT);
 			return r;
 		}
 
