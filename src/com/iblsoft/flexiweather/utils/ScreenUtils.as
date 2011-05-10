@@ -8,12 +8,14 @@ package com.iblsoft.flexiweather.utils
 	import mx.core.Application;
 	import mx.core.UIComponent;
 	
+	import mx.core.FlexGlobals;
+	
 	public class ScreenUtils
 	{
 		public static function moveSpriteToButKeepFullyOnScreen(c: Sprite, pt: Point): void
 		{
-			var f_sw: Number = Application.application.screen.width;
-			var f_sh: Number = Application.application.screen.height;
+			var f_sw: Number = FlexGlobals.topLevelApplication.screen.width;
+			var f_sh: Number = FlexGlobals.topLevelApplication.screen.height;
 			c.x = pt.x;
 			c.y = pt.y;
 			if(c.x + c.width > f_sw)
