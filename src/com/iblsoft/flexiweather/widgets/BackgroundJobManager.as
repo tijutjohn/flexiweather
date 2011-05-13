@@ -8,14 +8,19 @@ package com.iblsoft.flexiweather.widgets
 	import mx.controls.ProgressBar;
 	import mx.controls.ProgressBarLabelPlacement;
 	import mx.controls.ProgressBarMode;
+	import mx.core.IFlexDisplayObject;
 	import mx.core.UIComponent;
 	import mx.events.ResizeEvent;
+	
+	import spark.components.Group;
+	import spark.components.VGroup;
+	import spark.components.supportClasses.GroupBase;
 	
 	public class BackgroundJobManager extends EventDispatcher
 	{
 		internal static var sm_instance: BackgroundJobManager;
 
-		internal var m_default_progressBar: ProgressBar
+		internal var m_defaultProgressBar: ProgressBar;
 		
 		public var m_progressBar: JobPreloader;
 		
@@ -38,30 +43,32 @@ package com.iblsoft.flexiweather.widgets
 			return sm_instance;
 		}
 		
-		public function setupIndicator(parent: UIComponent): void
+		public function setupIndicator(parent: IFlexDisplayObject): void
 		{
-			if (m_default_progressBar)
-				m_default_progressBar.labelPlacement = ProgressBarLabelPlacement.CENTER;
+			if (m_defaultProgressBar)
+				m_defaultProgressBar.labelPlacement = ProgressBarLabelPlacement.CENTER;
 			parent.addEventListener(ResizeEvent.RESIZE, onParentResize);
-			parent.addChild(m_default_progressBar);
+			if(parent is Group)
+				Group(parent).addElement(m_defaultProgressBar);
+			else if(parent is UIComponent)
+				UIComponent(parent).addChild(m_defaultProgressBar);
 			onParentResize(null);
 		}
 		
 		public function createDefaultPreloader():void
 		{
-			m_default_progressBar = new ProgressBar();
+			m_defaultProgressBar = new ProgressBar();
 		}
 		
 		public function onParentResize(event: ResizeEvent): void
 		{
-			if (m_default_progressBar)
+			if (m_defaultProgressBar)
 			{
-				m_default_progressBar.width = 200;
-				m_default_progressBar.height = m_default_progressBar.parent.height - 5;
-				m_default_progressBar.setStyle("trackHeight", 23);
-				m_default_progressBar.labelPlacement = ProgressBarLabelPlacement.CENTER;
-				m_default_progressBar.x = m_default_progressBar.parent.width - m_default_progressBar.width - 5;
-				m_default_progressBar.y = (m_default_progressBar.parent.height - m_default_progressBar.height) / 2;
+				m_defaultProgressBar.width = 200;
+				m_defaultProgressBar.height = m_defaultProgressBar.parent.height - 5;
+				m_defaultProgressBar.labelPlacement = ProgressBarLabelPlacement.CENTER;
+				m_defaultProgressBar.x = m_defaultProgressBar.parent.width - m_defaultProgressBar.width - 5;
+				m_defaultProgressBar.y = (m_defaultProgressBar.parent.height - m_defaultProgressBar.height) / 2;
 			}
 		}
 		
@@ -131,23 +138,23 @@ package com.iblsoft.flexiweather.widgets
 					m_progressBar.toolTip = s;
 				}
 				
-				if (m_default_progressBar)
+				if (m_defaultProgressBar)
 				{
-					m_default_progressBar.label = mi_doneJobs + "/" + mi_maxJobs + " jobs done";
+					m_defaultProgressBar.label = mi_doneJobs + "/" + mi_maxJobs + " jobs done";
 					
 					if(mi_maxJobs > 1) {
-						m_default_progressBar.indeterminate = false;
-						m_default_progressBar.minimum = 0;
-						m_default_progressBar.maximum = mi_maxJobs;
-						m_default_progressBar.mode = ProgressBarMode.MANUAL;
-						m_default_progressBar.setProgress(mi_doneJobs, mi_maxJobs);
+						m_defaultProgressBar.indeterminate = false;
+						m_defaultProgressBar.minimum = 0;
+						m_defaultProgressBar.maximum = mi_maxJobs;
+						m_defaultProgressBar.mode = ProgressBarMode.MANUAL;
+						m_defaultProgressBar.setProgress(mi_doneJobs, mi_maxJobs);
 					}
 					else {
-						m_default_progressBar.mode = ProgressBarMode.EVENT;
-						m_default_progressBar.indeterminate = true;
+						m_defaultProgressBar.mode = ProgressBarMode.EVENT;
+						m_defaultProgressBar.indeterminate = true;
 					}
-					m_default_progressBar.toolTip = s;
-					m_default_progressBar.visible = true;
+					m_defaultProgressBar.toolTip = s;
+					m_defaultProgressBar.visible = true;
 				}
 				
 				
@@ -155,8 +162,8 @@ package com.iblsoft.flexiweather.widgets
 			else {
 				if (m_progressBar)
 					m_progressBar.visible = false;
-				if (m_default_progressBar)
-					m_default_progressBar.visible = false;
+				if (m_defaultProgressBar)
+					m_defaultProgressBar.visible = false;
 			}
 		}
 		
