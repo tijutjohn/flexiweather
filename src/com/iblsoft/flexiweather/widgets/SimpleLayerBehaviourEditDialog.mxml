@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="400" height="244"
+<s:TitleWindow xmlns:mx="library://ns.adobe.com/flex/mx"  xmlns:s="library://ns.adobe.com/flex/spark" xmlns:fx="http://ns.adobe.com/mxml/2009"  
+			   width="400" height="244"
 		implements="com.iblsoft.flexiweather.plugins.ILayerBehaviour"
-		title="Layer Behaviour" showCloseButton="true"
+		title="Layer Behaviour" 
 		creationComplete="onCreated()" close="onCancelClicked()">
-	<mx:Script>
+	<fx:Script>
 		<![CDATA[
 			import mx.managers.PopUpManager;
 			import com.iblsoft.flexiweather.plugins.IPlugin;
@@ -56,12 +57,12 @@
 					m_cancelCallback.call(null, ms_behaviourId);
 			}
 		]]>
-	</mx:Script>
-	<mx:Label x="10" y="10" text="Behaviour Id:"/>
+	</fx:Script>
+	<s:Label  x="10" y="10" text="Behaviour Id:"/>
 	<mx:TextInput x="99" y="8" width="271" id="editBehaviourId" enabled="false"/>
-	<mx:Label x="10" y="36" text="Value:"/>
-	<mx:TextArea x="99" y="35" width="271" height="128" id="editValue" wordWrap="true"/>
-	<mx:Button x="77" y="172" label="OK" width="70" click="onOKClicked()"/>
-	<mx:Button x="233" y="172" label="Cancel" width="70" click="onCancelClicked()"/>
-	<mx:Button x="155" y="172" label="Restore" width="70" click="onRestoreClicked()"/>
-</mx:TitleWindow>
+	<s:Label  x="10" y="36" text="Value:"/>
+	<mx:TextArea  x="99" y="35" width="271" height="128" id="editValue" wordWrap="true"/>
+	<s:Button  x="77" y="172" label="OK" width="70" click="onOKClicked()"/>
+	<s:Button  x="233" y="172" label="Cancel" width="70" click="onCancelClicked()"/>
+	<s:Button  x="155" y="172" label="Restore" width="70" click="onRestoreClicked()"/>
+</s:TitleWindow>

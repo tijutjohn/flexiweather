@@ -1,15 +1,22 @@
 package com.iblsoft.flexiweather.widgets
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.proj.Coord;
 	
 	import flash.display.Graphics;
 	import flash.display.Sprite;
 	import flash.events.Event;
+	import flash.events.GesturePhase;
 	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
+	import flash.events.TransformGestureEvent;
 	import flash.geom.Rectangle;
+	import flash.ui.Multitouch;
 	import flash.utils.Timer;
+	
+	import mx.events.DynamicEvent;
+	import mx.messaging.AbstractConsumer;
 	
 	public class InteractiveLayerZoom extends InteractiveLayer
 	{
@@ -27,12 +34,116 @@ package com.iblsoft.flexiweather.widgets
 			super(container);
 			m_wheelZoomTimer.stop();
 			m_wheelZoomTimer.addEventListener(TimerEvent.TIMER_COMPLETE, onMouseWheelTimer);
+			waitForContainer();
+		}
+		private function waitForContainer(): void
+		{
+			if (!container || !container.stage)
+				callLater(waitForContainer)
+			else {	
+				if (Multitouch.supportedGestures)
+				{
+					container.stage.addEventListener(TransformGestureEvent.GESTURE_ZOOM, onGestureZoom);
+					container.stage.addEventListener(TransformGestureEvent.GESTURE_PAN, onGesturePan);
+					container.stage.addEventListener(TransformGestureEvent.GESTURE_SWIPE, onGestureSwipe);
+//					addEventListener(TransformGestureEvent.GESTURE_ZOOM, onGestureZoom);
+//					addEventListener(TransformGestureEvent.GESTURE_PAN, onGesturePan);
+//					addEventListener(TransformGestureEvent.GESTURE_SWIPE, onGestureSwipe);
+				}
+			}
 		}
 		
 		override protected function createChildren():void
 		{
 			super.createChildren();
+		
+				createChildrenNoGesturesMode();
+//			if (!Multitouch.supportedGestures)
+//			{
+//			} else {
+//				addEventListener(TransformGestureEvent.GESTURE_ZOOM, onGestureZoom);
+//			}
+				
 			
+			
+		}
+		
+		private function onGestureSwipe(event: TransformGestureEvent): void
+		{
+			trace("onGestureSwipe: phase: " + event.phase + " -> "  + event.offsetX + " , " + event.offsetY);
+		}
+		private function onGesturePan(event: TransformGestureEvent): void
+		{
+			trace("onGesturePan: phase: " + event.phase + " -> " + event.offsetX + " , " + event.offsetY);
+		}
+		private function onGestureZoom(event: TransformGestureEvent): void
+		{
+			
+			trace("onGestureZoom: target: " + event.target);
+			trace("onGestureZoom: target: " + event.currentTarget);
+			trace("onGestureZoom: phase: " + event.phase + " ->  scale: " + event.scaleX + ", " + event.scaleY);
+			trace("onGestureZoom: local: " + event.localX + ", " + event.localY);
+//			trace("onGestureZoom: offset: " + event.offsetX + ", " + event.offsetY);
+//			trace("onGestureZoom: rotation: " + event.rotation + ", " + event.offsetY);
+			
+			var b_finalChange: Boolean = event.phase == GesturePhase.END;
+			
+			var x: int = event.localX;
+			var y: int = event.localX;
+			gestureZoom(x, y, event.scaleX, event.scaleY, b_finalChange);
+		}
+		
+		private var _middleX: int = 0;
+		private var _middleY: int = 0;
+		private var _oldMiddle: Coord;
+		private var _scale: Number = 1;
+		
+		private function gestureZoom(middleX: int, middleY: int,  scaleX: Number, scaleY: Number, b_finalChange: Boolean): void
+		{
+			var r: Rectangle = container.getViewBBox().toRectangle();
+			var rOld: Rectangle = container.getViewBBox().toRectangle();
+			
+			var w: Number = container.width;
+			var h: Number = container.height;
+			var bW: Number = r.width;
+			var bH: Number = r.height;
+			
+			var scale: Number = (scaleX + scaleY) / 2;
+			var middle: Coord = container.pointToCoord(middleX, middleY);
+			if(!middle)
+				return;
+			if (_oldMiddle)
+				trace("\n middle: " + middle.toString() + " old: " + _oldMiddle.toString());
+			else
+				trace("\n middle: " + middle.toString() + " old: NULL ");
+			
+			r.x = middle.x - (middle.x - rOld.x) / scale;
+			r.y = middle.y - (middle.y - rOld.y) / scale;
+			
+//			if (_oldMiddle)
+//			{
+//				r.x -= middle.x - _oldMiddle.x;
+//				r.y -= middle.y - _oldMiddle.y;
+//				_oldMiddle = null;
+//			} else {
+//				_oldMiddle = middle;
+//			}
+				_oldMiddle = middle;
+			
+			_middleX = middleX;
+			_middleY = middleY;
+			_scale = scale;
+			
+			r.width = rOld.width / scale;
+			r.height = rOld.height / scale;
+			
+			container.setViewBBox(BBox.fromRectangle(r), b_finalChange);
+			
+			invalidateDynamicPart();
+			
+		}
+		private function createChildrenNoGesturesMode(): void
+		{
 			_zoomAreaSprite = new Sprite();
 			addChild(_zoomAreaSprite);
 			
@@ -46,7 +157,8 @@ package com.iblsoft.flexiweather.widgets
 		}
         override public function onMouseRollOver(event:MouseEvent): Boolean
         {
-//        	trace("ZOOM onMouseRollOver");
+//        	trace("\n\nZOOM onMouseRollOver");
+        	
         	container.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
         	container.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
         	
@@ -235,6 +347,11 @@ package com.iblsoft.flexiweather.widgets
 			gr.endFill();
 			
 			_zoomAreaSprite.visible = _showZoomingArea;
+			
+			var gr2: Graphics = graphics;
+			gr2.beginFill(0xff0000);
+			gr2.drawCircle(_middleX, _middleY, 30 * _scale);
+			gr2.endFill();
 			
 			if(_r != null) {
 				graphics.beginFill(0, 0.5);

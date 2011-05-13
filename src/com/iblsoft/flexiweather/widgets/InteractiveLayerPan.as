@@ -2,15 +2,22 @@ package com.iblsoft.flexiweather.widgets
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
 	
+	import flash.display.Graphics;
 	import flash.events.Event;
+	import flash.events.GesturePhase;
 	import flash.events.MouseEvent;
+	import flash.events.TransformGestureEvent;
 	import flash.geom.Point;
+	import flash.text.TextField;
+	import flash.ui.Multitouch;
 	import flash.utils.clearInterval;
 	import flash.utils.setInterval;
 	
 	import mx.effects.Move;
 	import mx.effects.easing.Quadratic;
+	import mx.events.ChildExistenceChangedEvent;
 	import mx.events.TweenEvent;
+	import mx.messaging.AbstractConsumer;
 	
 	public class InteractiveLayerPan extends InteractiveLayer
 	{
@@ -33,8 +40,48 @@ package com.iblsoft.flexiweather.widgets
 		public function InteractiveLayerPan(container: InteractiveWidget = null)
 		{
 			super(container);
+			
+			addEventListener(ChildExistenceChangedEvent.CHILD_ADD, onChildAdd);
+			waitForContainer();
+		}
+		private function waitForContainer(): void
+		{
+			if (!container || !container.stage)
+				callLater(waitForContainer)
+			else {	
+				if (Multitouch.supportedGestures)
+				{
+					container.stage.addEventListener(TransformGestureEvent.GESTURE_PAN, onGesturePan);
+					container.stage.addEventListener(TransformGestureEvent.GESTURE_SWIPE, onGestureSwipe);
+				}
+			}
 		}
 		
+		private function onChildAdd(event: ChildExistenceChangedEvent): void
+		{
+		}
+		
+		
+		private function onGesturePan(event: TransformGestureEvent): void
+		{
+			trace("onGesturePan: phase: " + event.phase + " -> " + event.offsetX + " , " + event.offsetY);
+			
+			var b_finalChange: Boolean = event.phase == GesturePhase.END;
+			
+			doRealPan(event.offsetX, event.offsetY, b_finalChange);
+		}
+
+		private function onGestureSwipe(event: TransformGestureEvent): void
+		{
+			if(mb_requireShiftKey)
+				return;
+			trace("onGestureSwipe: phase: " + event.phase + " -> " + event.offsetX + " , " + event.offsetY);
+			
+			var b_finalChange: Boolean = event.phase == GesturePhase.END;
+			
+			doRealPan(event.offsetX, event.offsetY, b_finalChange);
+		}
+
         override public function onMouseDown(event: MouseEvent): Boolean
         {
 			if(!event.shiftKey && mb_requireShiftKey || event.ctrlKey)
@@ -203,16 +250,58 @@ package com.iblsoft.flexiweather.widgets
 			_p = p;
 			
 			if(Math.abs(pDiff.x) > 1 || Math.abs(pDiff.y) > 1 || b_finalChange) {
-	        	var r: BBox = container.getViewBBox();
-	        	var w: Number = container.width;
-	        	var h: Number = container.height;
-	        	pDiff.x = pDiff.x * r.width / w;
-	        	pDiff.y = pDiff.y * r.height / h;
-	        	container.setViewBBox(r.translated(-pDiff.x, pDiff.y), b_finalChange);
+//	        	var r: BBox = container.getViewBBox();
+//	        	var w: Number = container.width;
+//	        	var h: Number = container.height;
+//	        	pDiff.x = pDiff.x * r.width / w;
+//	        	pDiff.y = pDiff.y * r.height / h;
+//	        	container.setViewBBox(r.translated(-pDiff.x, pDiff.y), b_finalChange);
+				doRealPan(pDiff.x, pDiff.y, b_finalChange);
 				return true;        	
 			}
 			return false;        	
         }
+		
+		private var _diff: Point;
+		private function doRealPan(xDiff: Number, yDiff: Number, b_finalChange: Boolean): void
+		{
+			var r: BBox = container.getViewBBox();
+			var w: Number = container.width;
+			var h: Number = container.height;
+			xDiff = xDiff * r.width / w;
+			yDiff = yDiff * r.height / h;
+			
+			if (!_diff)
+				_diff = new Point(xDiff, yDiff);
+			
+			_diff.x = xDiff;
+			_diff.y = yDiff;
+			invalidateDynamicPart(true);
+			
+			container.setViewBBox(r.translated(-xDiff, yDiff), b_finalChange);
+		}
+		
+		private var _txt: TextField;
+		override protected function createChildren():void
+		{
+			super.createChildren();
+			
+			_txt = new TextField();
+			addChild(_txt);
+		}
+		override public function draw(graphics: Graphics): void
+		{
+			super.draw(graphics);
+			
+			var gr: Graphics = graphics;
+			
+			if (_diff)
+			{
+				_txt.text = 'PAN: ' + _diff.x + ' , ' + _diff.y;
+				_txt.x = (width - _txt.textWidth)/2
+				_txt.y = (height - _txt.textHeight)/2
+			}
+		}
 
 		// getters & setters
 		[Bindable]
