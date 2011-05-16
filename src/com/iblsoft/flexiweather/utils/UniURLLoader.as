@@ -7,12 +7,15 @@ package com.iblsoft.flexiweather.utils
 	import flash.events.EventDispatcher;
 	import flash.events.IOErrorEvent;
 	import flash.events.SecurityErrorEvent;
+	import flash.net.URLLoader;
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
+	import flash.net.URLRequestHeader;
 	import flash.utils.ByteArray;
 	import flash.utils.Dictionary;
 	
 	import mx.logging.Log;
+	import mx.messaging.AbstractConsumer;
 	import mx.rpc.Fault;
 	
 	/**
@@ -126,6 +129,10 @@ package com.iblsoft.flexiweather.utils
 			return UniURLLoader.fromBaseURL(url);
 		}
 		
+		public static var useBasicAuthInRequest: Boolean = false;
+		public static var basicAuthUsername: String;
+		public static var basicAuthPassword: String;
+		
 		public function load(
 				urlRequest: URLRequest,
 				associatedData: Object = null,
@@ -133,6 +140,12 @@ package com.iblsoft.flexiweather.utils
 		{
 			checkRequestBaseURL(urlRequest);
 			
+			if (useBasicAuthInRequest)
+			{
+				var rhArray:Array = new Array(new URLRequestHeader("Proxy-Authenticate", "username="+basicAuthUsername+":passwords="+basicAuthPassword)); 
+				urlRequest.requestHeaders = rhArray;
+			}
+				
 //			trace("Requesting " + urlRequest.url + " " + urlRequest.data);
 			var urlLoader: URLLoaderWithAssociatedData = new URLLoaderWithAssociatedData();
 			urlLoader.associatedData = associatedData;
