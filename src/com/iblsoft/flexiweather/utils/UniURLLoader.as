@@ -17,6 +17,7 @@ package com.iblsoft.flexiweather.utils
 	import mx.logging.Log;
 	import mx.messaging.AbstractConsumer;
 	import mx.rpc.Fault;
+	import mx.utils.Base64Encoder;
 	
 	/**
 	 * Replacement of flash.net.URLLoader and flash.display.Loader classes
@@ -142,11 +143,32 @@ package com.iblsoft.flexiweather.utils
 			
 			if (useBasicAuthInRequest)
 			{
-				var rhArray:Array = new Array(new URLRequestHeader("Proxy-Authenticate", "username="+basicAuthUsername+":passwords="+basicAuthPassword)); 
-				urlRequest.requestHeaders = rhArray;
+				//check if autentification is there already
+				var already_authenticated: Boolean = false;
+				if (urlRequest.requestHeaders.length > 0)
+				{
+					var header: URLRequestHeader = urlRequest.requestHeaders[0] as URLRequestHeader;
+					if (header.name == 'WWW-Authenticate')
+					{
+						already_authenticated = true;
+					}
+				}
+				if (!already_authenticated)
+				{
+					
+					var encoder: Base64Encoder = new Base64Encoder();
+					encoder.insertNewLines = false; 
+					encoder.encode(basicAuthUsername + ":"+basicAuthPassword);
+					var credsHeader: URLRequestHeader = new URLRequestHeader("Authorization", "Basic " + encoder.toString())
+					urlRequest.requestHeaders.push(credsHeader);
+				} else {
+					trace("im already authenticated, do not add authentication again");
+				}
+				
+//				trace("send headers: " + rhArray[0]);
 			}
 				
-//			trace("Requesting " + urlRequest.url + " " + urlRequest.data);
+			trace("UNIURLLoader load " + urlRequest.url + " " + urlRequest.data);
 			var urlLoader: URLLoaderWithAssociatedData = new URLLoaderWithAssociatedData();
 			urlLoader.associatedData = associatedData;
 			urlLoader.dataFormat = URLLoaderDataFormat.BINARY;
