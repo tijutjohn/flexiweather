@@ -2,7 +2,8 @@
 <!--
   Generic dialog for imput of a single value in the style of Qt QInputDialog.
 -->
-<s:TitleWindow xmlns:mx="library://ns.adobe.com/flex/mx"  xmlns:s="library://ns.adobe.com/flex/spark" xmlns:fx="http://ns.adobe.com/mxml/2009" width="400" height="162">
+<s:TitleWindow xmlns:mx="library://ns.adobe.com/flex/mx"  xmlns:s="library://ns.adobe.com/flex/spark" xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   maxWidth="800" minWidth="400">
 	<fx:Script>
 		<![CDATA[
 			import spark.components.ComboBox;
