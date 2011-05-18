@@ -79,15 +79,18 @@ package com.iblsoft.flexiweather.ogc
 				var xml1: XML = xml.wms::Request[0] as XML;
 				var xml2: XML = xml1.wms::GetMap[0] as XML;
 				
-				var formatsXML: XMLList = xml2.wms::Format;
-				if (formatsXML)
+				if (xml2)
 				{
-					for each (var format: XML in formatsXML)
+					var formatsXML: XMLList = xml2.wms::Format;
+					if (formatsXML)
 					{
-						var imageFormat: String = format.valueOf();
-						if (imageFormat && (imageFormat.indexOf('png') >= 0 || imageFormat.indexOf('jpg') >= 0 || imageFormat.indexOf('jpeg') >= 0))
+						for each (var format: XML in formatsXML)
 						{
-							_imageFormats.push(imageFormat);
+							var imageFormat: String = format.valueOf();
+							if (imageFormat && (imageFormat.indexOf('png') >= 0 || imageFormat.indexOf('jpg') >= 0 || imageFormat.indexOf('jpeg') >= 0))
+							{
+								_imageFormats.push(imageFormat);
+							}
 						}
 					}
 				}
