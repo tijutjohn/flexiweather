@@ -348,10 +348,10 @@ package com.iblsoft.flexiweather.widgets
 			
 			_zoomAreaSprite.visible = _showZoomingArea;
 			
-			var gr2: Graphics = graphics;
-			gr2.beginFill(0xff0000);
-			gr2.drawCircle(_middleX, _middleY, 30 * _scale);
-			gr2.endFill();
+//			var gr2: Graphics = graphics;
+//			gr2.beginFill(0xff0000);
+//			gr2.drawCircle(_middleX, _middleY, 30 * _scale);
+//			gr2.endFill();
 			
 			if(_r != null) {
 				graphics.beginFill(0, 0.5);

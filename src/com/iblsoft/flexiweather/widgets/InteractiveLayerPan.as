@@ -281,26 +281,27 @@ package com.iblsoft.flexiweather.widgets
 			container.setViewBBox(r.translated(-xDiff, yDiff), b_finalChange);
 		}
 		
-		private var _txt: TextField;
+//		private var _txt: TextField;
+		/*
 		override protected function createChildren():void
 		{
 			super.createChildren();
 			
 			_txt = new TextField();
 			addChild(_txt);
-		}
+		}*/
 		override public function draw(graphics: Graphics): void
 		{
 			super.draw(graphics);
 			
 			var gr: Graphics = graphics;
 			
-			if (_diff)
-			{
-				_txt.text = 'PAN: ' + _diff.x + ' , ' + _diff.y;
-				_txt.x = (width - _txt.textWidth)/2
-				_txt.y = (height - _txt.textHeight)/2
-			}
+//			if (_diff)
+//			{
+//				_txt.text = 'PAN: ' + _diff.x + ' , ' + _diff.y;
+//				_txt.x = (width - _txt.textWidth)/2
+//				_txt.y = (height - _txt.textHeight)/2
+//			}
 		}
 
 		// getters & setters
