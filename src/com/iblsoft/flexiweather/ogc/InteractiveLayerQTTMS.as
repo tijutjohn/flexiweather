@@ -16,6 +16,7 @@ package com.iblsoft.flexiweather.ogc
 	import flash.display.BitmapData;
 	import flash.display.Graphics;
 	import flash.events.Event;
+	import flash.filters.GlowFilter;
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.net.URLRequest;
@@ -46,7 +47,7 @@ package com.iblsoft.flexiweather.ogc
 			return m_cache;
 		}
 		
-		private var _specialCacheStrings: Array;
+		private var ma_specialCacheStrings: Array;
 		
 		protected var m_timer: Timer = new Timer(10000);
 		
@@ -188,7 +189,7 @@ package com.iblsoft.flexiweather.ogc
 					ma_currentTilesRequests.push(request);
 					
 //					trace("col: " + i_col + " i_row: " + i_row + " url = " + request.url);
-					if(!tiledCache.isTileCached(crs, tileIndex, request, _specialCacheStrings))
+					if(!tiledCache.isTileCached(crs, tileIndex, request, ma_specialCacheStrings))
 					{	
 						loadRequests.push({request: request, requestedCRS: crs, requestedTileIndex: tileIndex});
 					} 
@@ -203,11 +204,9 @@ package com.iblsoft.flexiweather.ogc
 				
 				var bkJobManager: BackgroundJobManager = BackgroundJobManager.getInstance();
 				var job: BackgroundJob;
-				_tileCurrentlyLoading = loadRequests.length;
+				mi_tilesCurrentlyLoading = loadRequests.length;
 				for each(var requestObj: Object in loadRequests)
 				{
-//					trace("\t load QTTMS request: " + requestObj.requestedTileIndex);
-					
 					job = bkJobManager.startJob("Rendering tile " + requestObj.requestedTileIndex + " for layer: " + name);
 					
 					m_loader.load(requestObj.request, {
@@ -224,7 +223,7 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 		
-		private var _tileCurrentlyLoading: int;
+		private var mi_tilesCurrentlyLoading: int;
 		
 		private function sortTiles(reqObject1: Object, reqObject2: Object): int
 		{
@@ -263,7 +262,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			var tiledCache: WMSTileCache = m_cache as WMSTileCache;
 			
-			return tiledCache.getTile(request, _specialCacheStrings); 
+			return tiledCache.getTile(request, ma_specialCacheStrings); 
 		}
 		
 		private function findZoom(): void
@@ -288,7 +287,7 @@ package com.iblsoft.flexiweather.ogc
 			
 			if(mi_zoom == -1)
 			{
-				trace("something is wrong, zoom is -1");
+				trace("something is wrong, tile zoom is -1");
 				return;
 			}
 			customDraw(graphics);
@@ -296,18 +295,14 @@ package com.iblsoft.flexiweather.ogc
 		
 		private function customDraw(graphics: Graphics, redrawBorder: Boolean = false): void
 		{
-				
 			var currentBBox: BBox = viewBBox;
 			var tilingBBox: BBox = getGTileBBoxForWholeCRS(crs); // extent of tile z=0/r=0/c=0
 
 			var matrix: Matrix;
 			var wmsTileCache: WMSTileCache = m_cache as WMSTileCache;
 			
-			var a_tiles: Array = wmsTileCache.getTiles(crs, mi_zoom, _specialCacheStrings);
+			var a_tiles: Array = wmsTileCache.getTiles(crs, mi_zoom, ma_specialCacheStrings);
 			var allTiles: Array = a_tiles.reverse();
-			
-			
-//			trace("customDraw TILES: " + allTiles.length);
 			
 			var topLeftCoord: Coord;
 			var topRightCoord: Coord;
@@ -367,7 +362,10 @@ package com.iblsoft.flexiweather.ogc
 				
 				if(drawDebugText)
 				{
-					drawText(tileIndex.mi_tileCol + ", " + tileIndex.mi_tileRow, graphics, new Point(xx + 10, yy + 5));
+					drawText(tileIndex.mi_tileZoom + ", "
+							+ tileIndex.mi_tileCol + ", "
+							+ tileIndex.mi_tileRow,
+							graphics, new Point(xx + 10, yy + 5));
 				}
 					
 			}
@@ -383,14 +381,17 @@ package com.iblsoft.flexiweather.ogc
 		private var _tfBD:BitmapData;
 		private function drawText(txt: String, gr: Graphics, pos: Point): void
 		{
+			if(!_tf.filters || !_tf.filters.length) {
+				_tf.filters = [new GlowFilter(0xffffffff)];
+			}
 			var tfWidth: int = 100;
 			var tfHeight: int = 30;
 			var format: TextFormat = _tf.getTextFormat();
 			format.size = 18;
-			_tf.setTextFormat(format)
+			_tf.setTextFormat(format);
 			_tf.text = txt;
 
-			_tfBD = new BitmapData(tfWidth, tfHeight, true, 0xffbbbbbb);
+			_tfBD = new BitmapData(tfWidth, tfHeight, true, 0);
 			_tfBD.draw(_tf);
 			
 			var m: Matrix = new Matrix();
@@ -432,7 +433,7 @@ package com.iblsoft.flexiweather.ogc
 		
 		private function checkIfAllTilesAreLoaded(): void
 		{
-			if(_tileCurrentlyLoading == 0)
+			if(mi_tilesCurrentlyLoading == 0)
 			{
 				dispatchEvent(new Event(ALL_TILES_LOADED));
 			}
@@ -440,7 +441,7 @@ package com.iblsoft.flexiweather.ogc
 		
 		protected function onDataLoaded(event: UniURLLoaderEvent): void
 		{
-			_tileCurrentlyLoading--;
+			mi_tilesCurrentlyLoading--;
 			checkIfAllTilesAreLoaded();
 			
 			m_request = null;
@@ -458,7 +459,7 @@ package com.iblsoft.flexiweather.ogc
 					event.associatedData.requestedCRS,
 					event.associatedData.requestedTileIndex,
 					event.request,
-					_specialCacheStrings, m_tiledArea);
+					ma_specialCacheStrings, m_tiledArea);
 				draw(graphics);
 				return;
 
@@ -487,7 +488,7 @@ package com.iblsoft.flexiweather.ogc
 //			m_imageBBox = null;
 //			onJobFinished();
 
-			_tileCurrentlyLoading--;
+			mi_tilesCurrentlyLoading--;
 			checkIfAllTilesAreLoaded();
 		}
 		
@@ -557,7 +558,7 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function setSpecialCacheStrings(arr: Array): void
 		{
-			_specialCacheStrings = arr;
+			ma_specialCacheStrings = arr;
 		}
 	}
 		

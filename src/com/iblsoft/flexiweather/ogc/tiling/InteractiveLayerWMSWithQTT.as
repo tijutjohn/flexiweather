@@ -55,19 +55,17 @@ package com.iblsoft.flexiweather.ogc.tiling
 		override protected function createChildren():void
 		{
 			super.createChildren();
-//			_tiledLayer = new InteractiveLayerQTTMS(container, '', '&TileZoom=%ZOOM%&TileCol=%COL%&TileRow=%ROW%','&/png', container.getCRS(), null, 0, 12);
 		}
+
 		override protected function childrenCreated():void
 		{
 			super.childrenCreated();
-//			addChild(_tiledLayer);
-//			
-//			changeTiledLayerVisibility(false);
 		}
 		
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 		{
 			super.updateDisplayList(unscaledWidth, unscaledHeight);
+			m_tiledLayer.name = name + " (tiled)";
 			
 			if (isTileable)
 			{

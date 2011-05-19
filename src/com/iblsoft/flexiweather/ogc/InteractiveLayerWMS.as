@@ -98,7 +98,6 @@ package com.iblsoft.flexiweather.ogc
 			var wmsCache: WMSCache = m_cache as WMSCache;
 			
 			
-			
 			if(!b_forceUpdate)
 			{
 				var isCached: Boolean = wmsCache.isImageCached(container.getCRS(), container.getViewBBox(), request)
