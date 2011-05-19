@@ -57,8 +57,8 @@ package com.iblsoft.flexiweather.ogc
 		public var maximumZoom: int = 10;
 		
 		private var ms_baseURL: String;
-		private var ms_crs: String;
-		private var m_viewBBox: BBox = null;
+		private var ms_primaryCRS: String;
+		private var m_primaryCRSTilingExtent: BBox = null;
 		
 		public function get baseURL(): String
 		{ return ms_baseURL; }
@@ -82,12 +82,15 @@ package com.iblsoft.flexiweather.ogc
 		
 		private var m_tilingUtils: TilingUtils;
 		
-		public function InteractiveLayerQTTMS(container: InteractiveWidget, s_baseURL: String, s_crs: String, bbox: BBox, minimumZoom: int = 0, maximumZoom: int = 10)
+		public function InteractiveLayerQTTMS(
+				container: InteractiveWidget, s_baseURL: String,
+				s_primaryCRS: String, primaryCRSTilingExtent: BBox,
+				minimumZoom: int = 0, maximumZoom: int = 10)
 		{
 			super(container);
 			
-			ms_crs = s_crs;
-			m_viewBBox = bbox;
+			ms_primaryCRS = s_primaryCRS;
+			m_primaryCRSTilingExtent = primaryCRSTilingExtent;
 			ms_baseURL = s_baseURL;
 			
 			this.minimumZoom = minimumZoom;
@@ -494,13 +497,12 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function getGTileBBoxForWholeCRS(s_crs: String): BBox
 		{
+			if(s_crs == ms_primaryCRS && m_primaryCRSTilingExtent)
+				return m_primaryCRSTilingExtent;
 			if(s_crs == "EPSG:4326")
 				return new BBox(-180, -90, 180, 90);
 			if(s_crs == "EPSG:900913")
 				return new BBox(-20037508,-20037508,20037508,20037508.34);
-			if(s_crs == "EPSG:54004")
-				return new BBox(0, -130000, 36000000, 13000000);
-
 			return null;
 		}
 
