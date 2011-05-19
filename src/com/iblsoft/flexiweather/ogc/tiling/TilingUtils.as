@@ -130,7 +130,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 			
 			//debugZoomLevels(arr);
 			
-			return bestZoomLevel;
+			// HACK do +1
+			return bestZoomLevel + 1;
 		}
 		
 		private function debugZoomLevels(arr: Array): void
