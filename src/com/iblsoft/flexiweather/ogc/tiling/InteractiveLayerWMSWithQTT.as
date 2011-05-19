@@ -28,13 +28,13 @@ package com.iblsoft.flexiweather.ogc.tiling
 				return false;
 				
 			var crs: String = container.getCRS();
-//			return m_cfg.isTilableForCRS(crs);
+			return m_cfg.isTilableForCRS(crs);
 			
 			/**
 			 *  TODO: set isTilable to false, if you dont want to use tiling on WMS 
 			 * (e.g. because tilling is not working with all features - e.g animation)
 			 */
-			return false;
+//			return false;
 		}
 		public function InteractiveLayerWMSWithQTT(container:InteractiveWidget, cfg:WMSLayerConfiguration, avoidTiling: Boolean = false)
 		{
@@ -42,7 +42,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			
 			this.avoidTiling = avoidTiling;
 			
-			_tiledLayer = new InteractiveLayerQTTMS(container, '', '&TileZoom=%ZOOM%&TileCol=%COL%&TileRow=%ROW%','&/png', container.getCRS(), null, 0, 12);
+			_tiledLayer = new InteractiveLayerQTTMS(container, '', '&TileZoom=%ZOOM%&TileCol=%COL%&TileRow=%ROW%','&/png', container.getCRS(), null, 1, 12);
 			addChild(_tiledLayer);
 			
 			changeTiledLayerVisibility(false);

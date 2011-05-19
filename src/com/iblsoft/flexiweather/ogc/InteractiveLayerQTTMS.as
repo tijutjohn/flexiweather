@@ -161,6 +161,11 @@ package com.iblsoft.flexiweather.ogc
 		{
 //			super.updateData(b_forceUpdate);
 			
+			if (_zoom <= 0)
+			{
+				//wrong zoom, do not continue
+				return;
+			}
 //			var crs: String = container.getCRS();
 			_tilingUtils.onAreaChanged(crs, getGTileBBoxForWholeCRS(crs));
 			m_tiledArea = _tilingUtils.getTiledArea(container.getViewBBox(), _zoom);
@@ -427,7 +432,7 @@ package com.iblsoft.flexiweather.ogc
 			super.onAreaChanged(b_finalChange);
 			
 //			trace("\n" + name + " onAreaChanged b_finalChange: " + b_finalChange);
-			if (_oldViewBBox.equals(viewBBox))
+			if (_oldViewBBox.equals(viewBBox) &&!b_finalChange)
 			{
 				trace(" view BBOX is not changed");
 				return;

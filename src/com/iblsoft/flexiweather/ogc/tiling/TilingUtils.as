@@ -15,13 +15,34 @@ package com.iblsoft.flexiweather.ogc.tiling
 		private var ms_crs: String;
 		private var m_extent: BBox;
 		
-		public var minimumZoom: int = 0;
-		public var maximumZoom: int = 10;
+		private var _minimumZoom: int = 1;
+		private var _maximumZoom: int = 10;
 		
 		public function TilingUtils()
 		{
 		}
 		
+
+		public function get minimumZoom():int
+		{
+			return _minimumZoom;
+		}
+
+		public function set minimumZoom(value:int):void
+		{
+			_minimumZoom = value;
+		}
+
+		public function get maximumZoom():int
+		{
+			return _maximumZoom;
+		}
+
+		public function set maximumZoom(value:int):void
+		{
+			_maximumZoom = value;
+		}
+
 		public function onAreaChanged(s_crs: String, extent: BBox): void
 		{
 			ms_crs = s_crs
@@ -44,7 +65,10 @@ package com.iblsoft.flexiweather.ogc.tiling
 //			var leftCol: int = Math.floor((viewBBox.xMin - m_extent.xMin) / tileBBox.x);
 //			var topRow: int = Math.floor((m_extent.yMax - viewBBox.yMax) / tileBBox.y);
 			
-			var area: TiledArea = new TiledArea(new TileIndex(zoomLevel, topRow, leftCol), new TileIndex(zoomLevel, Math.ceil(topRow + viewTiles.y), Math.ceil(leftCol + viewTiles.x)));
+			var _maxTileID: int = zoomLevel * zoomLevel - 1;
+			var topLeftIndex: TileIndex = new TileIndex(zoomLevel, Math.min(_maxTileID, Math.max(0,topRow)), Math.min(_maxTileID, Math.max(0,leftCol)));
+			var bottomRightIndex: TileIndex = new TileIndex(zoomLevel, Math.min(_maxTileID, Math.ceil(topRow + viewTiles.y)),  Math.min(_maxTileID, Math.ceil(leftCol + viewTiles.x)));
+			var area: TiledArea = new TiledArea(topLeftIndex, bottomRightIndex );
 //			trace("getTiledArea viewBBox: " + viewBBox + " area: " + area);
 //			trace("getTiledArea viewTiles: " + viewTiles);
 			return area;
