@@ -45,17 +45,19 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		public function onAreaChanged(s_crs: String, extent: BBox): void
 		{
-			ms_crs = s_crs
+			ms_crs = s_crs;
 			m_extent = extent;
 		}
 		
 		public function getTiledArea(viewBBox: BBox, zoomLevel: int): TiledArea
 		{
+			if(!m_extent)
+				return null;
 			var maxColTiles: int = getColTiles(zoomLevel);
 			var maxRowTiles: int = getRowTiles(zoomLevel);
 			
 			var tileBBox: Point = new Point(m_extent.width / maxColTiles, m_extent.height / maxRowTiles);
-			var viewTiles: Point = new Point( (viewBBox.width / tileBBox.x), (viewBBox.height / tileBBox.y));
+			var viewTiles: Point = new Point((viewBBox.width / tileBBox.x), (viewBBox.height / tileBBox.y));
 			
 			var leftCol: int = Math.floor((viewBBox.xMin - m_extent.xMin) / tileBBox.x);
 			var topRow: int = Math.floor((m_extent.yMax - viewBBox.yMax) / tileBBox.y);
@@ -76,7 +78,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 		}
 		public function getZoom(viewBBox: BBox, viewSize: Point): int
 		{
-			if (viewSize.x == 0 || viewSize.y == 0)
+			if (viewSize.x == 0 || viewSize.y == 0 || !m_extent)
 			{
 				//can not get zoom for area with no size
 				return -1;
