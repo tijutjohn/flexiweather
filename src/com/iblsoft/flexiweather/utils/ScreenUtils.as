@@ -5,10 +5,8 @@ package com.iblsoft.flexiweather.utils
 	import flash.filters.BitmapFilter;
 	import flash.geom.Point;
 	
-	import mx.core.Application;
-	import mx.core.UIComponent;
-	
 	import mx.core.FlexGlobals;
+	import mx.core.UIComponent;
 	
 	public class ScreenUtils
 	{
