@@ -179,14 +179,13 @@ package com.iblsoft.flexiweather.ogc
 			updateRequestData(request);
 			
 			var s_url: String = request.url;
-			if(request.data) {
-				if(s_url.indexOf("?") >= 0)
+			if (request.data) {
+				if (s_url.indexOf("?") >= 0)
 					s_url += "&";
 				else
 					s_url += "?";
 				s_url += request.data;
 			}
-			
 			if (request.data.STYLE && request.data.STYLE.length > 0)
 			{
 				
