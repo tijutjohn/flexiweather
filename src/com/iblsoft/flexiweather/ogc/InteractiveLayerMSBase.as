@@ -911,8 +911,20 @@ package com.iblsoft.flexiweather.ogc
 					var l_times: Array = getWMSDimensionsValues(m_cfg.dimensionTimeName);
 					var l_resultTimes: Array = [];
 					for each(var time: Object in l_times) {
-						l_resultTimes.push(time.data);
+						if (time.data is Date) {
+							l_resultTimes.push(time.data);
+						} else {
+							trace("PROBLEM: InteractiveLayerMSBase getSynchronisedVariableValuesList forecast.data is not Date: " + forecast.data);
+						}
 					}
+					
+					//sort forecast by Date
+					if (l_resultTimes && l_resultTimes.length > 0)
+					{
+						//sort Duration
+						l_resultTimes.sort(sortDates);
+					}
+					
 					return l_resultTimes;
 				}
 				else if(m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null) {
@@ -922,7 +934,18 @@ package com.iblsoft.flexiweather.ogc
 					var l_forecasts: Array = getWMSDimensionsValues(m_cfg.dimensionForecastName);
 					var l_resultForecasts: Array = [];
 					for each(var forecast: Object in l_forecasts) {
-						l_resultForecasts.push(new Date(run.time + Duration(forecast.data).milisecondsTotal));
+						if (forecast && (forecast.data is Duration))
+						{
+							l_resultForecasts.push(new Date(run.time + Duration(forecast.data).milisecondsTotal));
+						} else {
+							trace("PROBLEM: InteractiveLayerMSBase getSynchronisedVariableValuesList forecast.data is not Number: " + forecast.data);
+						}
+					}
+					//sort forecast by Duration
+					if (l_forecasts && l_forecasts.length > 0)
+					{
+						//sort Duration
+						l_forecasts.sort(sortDurations);
 					}
 					return l_resultForecasts;
 				}
@@ -933,6 +956,45 @@ package com.iblsoft.flexiweather.ogc
 				return null;
 		}
 
+		public static function sortDates(obj1: Object, obj2: Object): int
+		{
+			var date1: Date = obj1 as Date; 
+			var date2: Date = obj2 as Date;
+			
+			if (date1 && date2)
+			{
+				var dSec1: Number = date1.time; 
+				var dSec2: Number = date2.time; 
+				if (dSec1 > dSec2)
+				{
+					return 1;
+				} else {
+					if (dSec1 < dSec2)
+						return -1;
+				}
+			}
+			return 0;
+		}
+		public static function sortDurations(obj1: Object, obj2: Object): int
+		{
+			var duration1: Duration = obj1.data as Duration; 
+			var duration2: Duration = obj2.data as Duration;
+			
+			if (duration1 && duration2)
+			{
+				var dSec1: Number = duration1.secondsTotal; 
+				var dSec2: Number = duration2.secondsTotal; 
+				if (dSec1 > dSec2)
+				{
+					return 1;
+				} else {
+					if (dSec1 < dSec2)
+						return -1;
+				}
+			}
+			return 0;
+		}
+		
 		public function synchroniseWith(s_variableId: String, value: Object): Boolean
 		{
 			if(s_variableId == "frame") {
