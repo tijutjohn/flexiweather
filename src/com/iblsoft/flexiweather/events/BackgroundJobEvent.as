@@ -12,7 +12,7 @@ package com.iblsoft.flexiweather.events
 		public var doneJobs: int;
 		public var allJobs: int;
 		
-		//test
+		
 		public function BackgroundJobEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false)
 		{
 			super(type, bubbles, cancelable);
