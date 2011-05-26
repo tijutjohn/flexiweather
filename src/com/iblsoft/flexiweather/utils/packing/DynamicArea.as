@@ -260,5 +260,26 @@ package com.iblsoft.flexiweather.utils.packing
 			if (secondArea)
 				secondArea.draw(gr);
 		}
+		
+		public function getBiggestItemArea(rectangle: Rectangle): void
+		{
+			if (!empty)
+			{
+				if (itemArea.left < rectangle.left || itemArea.width == 0)
+					rectangle.left = itemArea.left;
+				if (itemArea.right > rectangle.right || itemArea.width == 0)
+					rectangle.right = itemArea.right;
+				if (itemArea.top < rectangle.top || itemArea.height == 0)
+					rectangle.top = itemArea.top;
+				if (itemArea.bottom > rectangle.bottom || itemArea.height == 0)
+					rectangle.bottom = itemArea.bottom;
+			}
+			
+			
+			if (firstArea)
+				firstArea.getBiggestItemArea(rectangle);
+			if (secondArea)
+				secondArea.getBiggestItemArea(rectangle);
+		}
 	}
 }
