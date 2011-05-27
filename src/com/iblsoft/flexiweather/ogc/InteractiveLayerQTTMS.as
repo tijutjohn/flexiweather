@@ -82,6 +82,8 @@ package com.iblsoft.flexiweather.ogc
 		
 		private var m_tilingUtils: TilingUtils;
 		
+		private var _jobs: TilesJobs;
+		
 		public function InteractiveLayerQTTMS(
 				container: InteractiveWidget, s_baseURL: String,
 				s_primaryCRS: String, primaryCRSTilingExtent: BBox,
@@ -103,6 +105,8 @@ package com.iblsoft.flexiweather.ogc
 			
 			m_loader.addEventListener(UniURLLoader.DATA_LOADED, onDataLoaded);
 			m_loader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onDataLoadFailed);
+			
+			_jobs = new TilesJobs();
 		}
 
 		private var mi_zoom: int = -1;
@@ -194,6 +198,7 @@ package com.iblsoft.flexiweather.ogc
 //					trace("col: " + i_col + " i_row: " + i_row + " url = " + request.url);
 					if(!tiledCache.isTileCached(crs, tileIndex, request, ma_specialCacheStrings))
 					{	
+//						_jobs.addNewTileJob(tileIndex.mi_tileCol, tileIndex.mi_tileRow, job);
 						loadRequests.push({request: request, requestedCRS: crs, requestedTileIndex: tileIndex});
 					} 
 				}
@@ -206,17 +211,20 @@ package com.iblsoft.flexiweather.ogc
 				loadRequests.sort(sortTiles);
 				
 				var bkJobManager: BackgroundJobManager = BackgroundJobManager.getInstance();
-				var job: BackgroundJob;
+//				var job: BackgroundJob;
+				var jobName: String;
 				mi_tilesCurrentlyLoading = loadRequests.length;
 				for each(var requestObj: Object in loadRequests)
 				{
-					job = bkJobManager.startJob("Rendering tile " + requestObj.requestedTileIndex + " for layer: " + name);
+					jobName = "Rendering tile " + requestObj.requestedTileIndex + " for layer: " + name
+//					job = bkJobManager.startJob("Rendering tile " + requestObj.requestedTileIndex + " for layer: " + name);
+					//this already cancel previou job for current tile
+					_jobs.addNewTileJobRequest(requestObj.requestedTileIndex.mi_tileCol, requestObj.requestedTileIndex.mi_tileRow, m_loader, requestObj.request);
 					
 					m_loader.load(requestObj.request, {
-						job: job,
 						requestedCRS: requestObj.requestedCRS,
 						requestedTileIndex:  requestObj.requestedTileIndex
-					});
+					}, jobName);
 				}
 			} else {
 				//all tiles was cached, draw them
@@ -564,4 +572,65 @@ package com.iblsoft.flexiweather.ogc
 		}
 	}
 		
+}
+import com.iblsoft.flexiweather.utils.UniURLLoader;
+import com.iblsoft.flexiweather.widgets.BackgroundJob;
+
+import flash.net.URLRequest;
+import flash.utils.Dictionary;
+
+import mx.messaging.AbstractConsumer;
+
+class TilesJobs {
+	
+	private var _jobs: Dictionary;
+	
+	public function TilesJobs()
+	{
+		_jobs = new Dictionary();	
+	}
+	public function addNewTileJobRequest(x: int, y: int, urlLoader: UniURLLoader, urlRequest: URLRequest): void
+	{
+		var _existingJob: TileJob = _jobs[x+"_"+y] as TileJob;
+		if (_existingJob)
+		{
+			_existingJob.cancelRequests();
+			_existingJob.urlLoader = urlLoader;
+			_existingJob.urlRequest = urlRequest;
+		} else {
+			_jobs[x+"_"+y] = new TileJob(x,y,urlRequest, urlLoader);
+		}
+		
+	}
+}
+class TileJob {
+
+	private var _x: int;
+	private var _y: int;
+	private var _urlRequest: URLRequest;
+	private var _urlLoader: UniURLLoader;
+	public function set urlRequest(value:URLRequest):void
+	{
+		_urlRequest = value;
+	}
+
+	public function set urlLoader(value:UniURLLoader):void
+	{
+		_urlLoader = value;
+	}
+	
+	public function TileJob(x: int, y: int, request: URLRequest, loader: UniURLLoader)
+	{
+		_x = x;
+		_y = y;
+		_urlRequest = request;
+		_urlLoader = loader;
+	}
+
+
+
+	public function cancelRequests(): void
+	{
+		_urlLoader.cancel(_urlRequest);
+	}
 }
