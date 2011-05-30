@@ -1,7 +1,10 @@
 package com.iblsoft.flexiweather.ogc.tiling
 {
+	import com.iblsoft.flexiweather.ogc.CRSWithBBox;
+	import com.iblsoft.flexiweather.ogc.CRSWithBBoxAndTilingInfo;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerQTTMS;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
+	import com.iblsoft.flexiweather.ogc.WMSLayer;
 	import com.iblsoft.flexiweather.ogc.WMSLayerConfiguration;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
@@ -24,6 +27,10 @@ package com.iblsoft.flexiweather.ogc.tiling
 			return m_tiledLayer;
 		}
 		
+		/**
+		 * Set this isTileable to false, if you dont want to use tiling on WMS 
+		 * (e.g. because tilling is not working with all features - e.g animation)
+		 */
 		public var avoidTiling: Boolean;
 		
 		public function get isTileable(): Boolean
@@ -31,13 +38,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 			if (avoidTiling)
 				return false;
 				
-			var crs: String = container.getCRS();
-			return m_cfg.isTilableForCRS(crs);
-			
-			/**
-			 *  TODO: set isTilable to false, if you dont want to use tiling on WMS 
-			 * (e.g. because tilling is not working with all features - e.g animation)
-			 */
+			var s_crs: String = container.getCRS();
+			return m_tiledLayer.getGTileBBoxForWholeCRS(s_crs) || m_cfg.isTileableForCRS(s_crs);
 		}
 
 		public function InteractiveLayerWMSWithQTT(container:InteractiveWidget, cfg:WMSLayerConfiguration, avoidTiling: Boolean = false)
@@ -82,11 +84,19 @@ package com.iblsoft.flexiweather.ogc.tiling
 		override protected function onCapabilitiesUpdated(event: DataEvent): void
 		{
 			super.onCapabilitiesUpdated(event);
-//			trace("InteractiveLayerWMSWithQTT onCapabilitiesUpdated: " + isTilable);
-			//refresh, capabilities are updated, so we can find out, if layer isTilable
-			
-			//FIXME check only if there is change in isTilable, if it is, make refresh, otherwise do nothin
-			//refresh(true);		
+			var a_layers: Array = getWMSLayers();
+
+			m_tiledLayer.clearCRSWithTilingExtents();
+			if(a_layers.length == 1) {
+				var l: WMSLayer = a_layers[0];
+				for each(var crsWithBBox: CRSWithBBox in l.crsWithBBoxes) {
+					if(crsWithBBox is CRSWithBBoxAndTilingInfo) {
+						var ti: CRSWithBBoxAndTilingInfo = CRSWithBBoxAndTilingInfo(crsWithBBox);
+						m_tiledLayer.addCRSWithTilingExtent(ti.crs, ti.tilingExtent);
+					}
+				}
+			}
+			m_tiledLayer.invalidateDynamicPart();
 		}
 		
 		private function changeTiledLayerVisibility(visible: Boolean): void
@@ -112,7 +122,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 			ma_specialCacheStrings = [];
 			
 			for(var s_dimName: String in md_dimensionValues) {
-				var str: String = "SPECIAL_"+m_cfg.dimensionToParameterName(s_dimName) +"=" + md_dimensionValues[s_dimName];
+				var str: String = "SPECIAL_" + m_cfg.dimensionToParameterName(s_dimName) + "="
+						+ md_dimensionValues[s_dimName];
 				ma_specialCacheStrings.push(str);
 			}
 		}
@@ -193,10 +204,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 		
 		override public function draw(graphics: Graphics): void
 		{
-//			trace("WMSWithQTT draw ["+name+"] isTilable: " + isTilable);
 			if (isTileable)
 			{
-//				trace("\t WMSWithQTT draw ["+name+"] zoom: " + _tiledLayer.zoom);
 				updateTiledLayerURLBase();
 				if (m_tiledLayer.zoom < 1)
 				{
@@ -214,7 +223,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 		
 		override public function onAreaChanged(b_finalChange: Boolean): void
 		{
-//			trace("WMSWithQTT onAreaChanged ["+name+"]");
 			if (isTileable)
 			{
 				updateTiledLayerURLBase();
@@ -235,10 +243,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 		
 		override public function synchroniseWith(s_variableId: String, value: Object): Boolean
 		{
-			var bool: Boolean = super.synchroniseWith(s_variableId, value);
-//			trace(name + " synchroniseWith " + bool);
-			return bool;
+			var b: Boolean = super.synchroniseWith(s_variableId, value);
+			return b;
 		}
-		
 	}
 }

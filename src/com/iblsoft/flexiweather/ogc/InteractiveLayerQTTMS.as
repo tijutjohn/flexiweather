@@ -22,6 +22,7 @@ package com.iblsoft.flexiweather.ogc
 	import flash.net.URLRequest;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
+	import flash.utils.Dictionary;
 	import flash.utils.Timer;
 	
 	[Event(name='drawTiles', type='')]
@@ -36,7 +37,6 @@ package com.iblsoft.flexiweather.ogc
 		public static var drawDebugText: Boolean = false;
 		
 		protected var m_loader: UniURLLoader = new UniURLLoader();
-		protected var m_image: Bitmap = null;
 		
 		protected var m_tiledArea: TiledArea;
 		
@@ -51,14 +51,20 @@ package com.iblsoft.flexiweather.ogc
 		
 		protected var m_timer: Timer = new Timer(10000);
 		
-		protected var m_request: URLRequest;
-
 		public var minimumZoom: int = 0;
 		public var maximumZoom: int = 10;
 		
 		private var ms_baseURL: String;
-		private var ms_primaryCRS: String;
-		private var m_primaryCRSTilingExtent: BBox = null;
+		private var md_crsToTilingExtent: Dictionary = new Dictionary();
+		private var ms_oldCRS: String;
+		private var m_tilingUtils: TilingUtils;
+		private var m_jobs: TileJobs;
+		private var mi_zoom: int = -1;
+		public var tileScaleX: Number;
+		public var tileScaleY: Number;
+		private var ma_currentTilesRequests: Array = [];
+		private var mi_totalVisibleTiles: int;
+		private var mi_tilesCurrentlyLoading: int;
 		
 		public function get baseURL(): String
 		{ return ms_baseURL; }
@@ -66,12 +72,10 @@ package com.iblsoft.flexiweather.ogc
 		public function set baseURL(s_baseURL: String): void
 		{ ms_baseURL = s_baseURL; }
 				
-		private var _oldCRS: String;
-
 		public function get crs(): String
 		{
 			var _crs: String =  container.getCRS();
-			_oldCRS = _crs;
+			ms_oldCRS = _crs;
 			return _crs;
 		}
 		
@@ -80,10 +84,6 @@ package com.iblsoft.flexiweather.ogc
 			return container.getViewBBox();
 		}
 		
-		private var m_tilingUtils: TilingUtils;
-		
-		private var _jobs: TilesJobs;
-		
 		public function InteractiveLayerQTTMS(
 				container: InteractiveWidget, s_baseURL: String,
 				s_primaryCRS: String, primaryCRSTilingExtent: BBox,
@@ -91,8 +91,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			super(container);
 			
-			ms_primaryCRS = s_primaryCRS;
-			m_primaryCRSTilingExtent = primaryCRSTilingExtent;
+			md_crsToTilingExtent[s_primaryCRS] = primaryCRSTilingExtent;
 			ms_baseURL = s_baseURL;
 			
 			this.minimumZoom = minimumZoom;
@@ -106,26 +105,19 @@ package com.iblsoft.flexiweather.ogc
 			m_loader.addEventListener(UniURLLoader.DATA_LOADED, onDataLoaded);
 			m_loader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onDataLoadFailed);
 			
-			_jobs = new TilesJobs();
+			m_jobs = new TileJobs();
 		}
-
-		private var mi_zoom: int = -1;
 
 		public function get zoom(): int
 		{
 			return mi_zoom;
 		}
 
-		public var tileScaleX: Number;
-		public var tileScaleY: Number;
-		
 		public function get layerZoom(): uint
 		{
 			return mi_zoom;
 		}
 		
-		private var ma_currentTilesRequests: Array = [];
-
 		public function get currentTilesRequests(): Array
 		{
 			return ma_currentTilesRequests;
@@ -140,11 +132,19 @@ package com.iblsoft.flexiweather.ogc
 			return ret;
 		}
 
-		private var mi_totalVisibleTiles: int;
-		
 		public function invalidateCache(): void
 		{
 			m_cache.invalidate(crs, getGTileBBoxForWholeCRS(crs));
+		}
+
+		public function clearCRSWithTilingExtents(): void
+		{
+			md_crsToTilingExtent = new Dictionary(); 
+		}
+
+		public function addCRSWithTilingExtent(s_tilingCRS: String, crsTilingExtent: BBox): void
+		{
+			md_crsToTilingExtent[s_tilingCRS] = crsTilingExtent;
 		}
 
 		public function updateData(b_forceUpdate: Boolean): void
@@ -219,7 +219,7 @@ package com.iblsoft.flexiweather.ogc
 					jobName = "Rendering tile " + requestObj.requestedTileIndex + " for layer: " + name
 //					job = bkJobManager.startJob("Rendering tile " + requestObj.requestedTileIndex + " for layer: " + name);
 					//this already cancel previou job for current tile
-					_jobs.addNewTileJobRequest(requestObj.requestedTileIndex.mi_tileCol, requestObj.requestedTileIndex.mi_tileRow, m_loader, requestObj.request);
+					m_jobs.addNewTileJobRequest(requestObj.requestedTileIndex.mi_tileCol, requestObj.requestedTileIndex.mi_tileRow, m_loader, requestObj.request);
 					
 					m_loader.load(requestObj.request, {
 						requestedCRS: requestObj.requestedCRS,
@@ -233,8 +233,6 @@ package com.iblsoft.flexiweather.ogc
 				dispatchEvent(new Event(ALL_TILES_LOADED));
 			}
 		}
-		
-		private var mi_tilesCurrentlyLoading: int;
 		
 		private function sortTiles(reqObject1: Object, reqObject2: Object): int
 		{
@@ -455,18 +453,14 @@ package com.iblsoft.flexiweather.ogc
 			mi_tilesCurrentlyLoading--;
 			checkIfAllTilesAreLoaded();
 			
-			m_request = null;
-			
 			var result: * = event.result;
 			var wmsTileCache: WMSTileCache = m_cache as WMSTileCache;
 			
 			onJobFinished(event.associatedData.job);
 			
 			if(result is Bitmap) {
-				m_image = result;
-
 				wmsTileCache.addTile(
-					m_image,
+					Bitmap(result),
 					event.associatedData.requestedCRS,
 					event.associatedData.requestedTileIndex,
 					event.request,
@@ -476,39 +470,21 @@ package com.iblsoft.flexiweather.ogc
 
 			}
 
-//			ExceptionUtils.logError(Log.getLogger("WMS"), result, "Error accessing layers '" + m_cfg.ma_layerNames.join(","))
 			onDataLoadFailed(null);
 		}
 		
 		protected function onDataLoadFailed(event: UniURLLoaderEvent): void
 		{
-			
-			m_request = null;
-//			if(m_cfg.mi_autoRefreshPeriod > 0) {
-//				m_timer.reset();
-//				m_timer.delay = m_cfg.mi_autoRefreshPeriod * 1000.0;
-//				m_timer.start();
-//			}
-//			if(event != null) {
-//				ExceptionUtils.logError(Log.getLogger("WMS"), event,
-//						"Error accessing layers '" + m_cfg.ma_layerNames.join(","))
-//			}
-			m_image = null;
-//			mb_imageOK = false;
-//			ms_imageCRS = null;
-//			m_imageBBox = null;
-//			onJobFinished();
-
 			mi_tilesCurrentlyLoading--;
 			checkIfAllTilesAreLoaded();
 		}
 		
 		public function getGTileBBoxForWholeCRS(s_crs: String): BBox
 		{
-			if(s_crs == ms_primaryCRS && m_primaryCRSTilingExtent)
-				return m_primaryCRSTilingExtent;
+			if(s_crs in md_crsToTilingExtent)
+				return md_crsToTilingExtent[s_crs];
 			if(s_crs == "EPSG:4326")
-				return new BBox(-180, -90, 180, 90);
+				return new BBox(-180, -180, 180, 180);
 			if(s_crs == "EPSG:900913")
 				return new BBox(-20037508,-20037508,20037508,20037508.34);
 			return null;
@@ -581,56 +557,56 @@ import flash.utils.Dictionary;
 
 import mx.messaging.AbstractConsumer;
 
-class TilesJobs {
+class TileJobs
+{
+	private var m_jobs: Dictionary;
 	
-	private var _jobs: Dictionary;
-	
-	public function TilesJobs()
+	public function TileJobs()
 	{
-		_jobs = new Dictionary();	
+		m_jobs = new Dictionary();	
 	}
 	public function addNewTileJobRequest(x: int, y: int, urlLoader: UniURLLoader, urlRequest: URLRequest): void
 	{
-		var _existingJob: TileJob = _jobs[x+"_"+y] as TileJob;
+		var _existingJob: TileJob = m_jobs[x+"_"+y] as TileJob;
 		if (_existingJob)
 		{
 			_existingJob.cancelRequests();
 			_existingJob.urlLoader = urlLoader;
 			_existingJob.urlRequest = urlRequest;
 		} else {
-			_jobs[x+"_"+y] = new TileJob(x,y,urlRequest, urlLoader);
+			m_jobs[x+"_"+y] = new TileJob(x,y,urlRequest, urlLoader);
 		}
 		
 	}
 }
-class TileJob {
 
-	private var _x: int;
-	private var _y: int;
-	private var _urlRequest: URLRequest;
-	private var _urlLoader: UniURLLoader;
+class TileJob
+{
+	private var mi_x: int;
+	private var mi_y: int;
+	private var m_urlRequest: URLRequest;
+	private var m_urlLoader: UniURLLoader;
+
 	public function set urlRequest(value:URLRequest):void
 	{
-		_urlRequest = value;
+		m_urlRequest = value;
 	}
 
 	public function set urlLoader(value:UniURLLoader):void
 	{
-		_urlLoader = value;
+		m_urlLoader = value;
 	}
 	
 	public function TileJob(x: int, y: int, request: URLRequest, loader: UniURLLoader)
 	{
-		_x = x;
-		_y = y;
-		_urlRequest = request;
-		_urlLoader = loader;
+		mi_x = x;
+		mi_y = y;
+		m_urlRequest = request;
+		m_urlLoader = loader;
 	}
-
-
 
 	public function cancelRequests(): void
 	{
-		_urlLoader.cancel(_urlRequest);
+		m_urlLoader.cancel(m_urlRequest);
 	}
 }

@@ -51,24 +51,12 @@ package com.iblsoft.flexiweather.ogc
 		public function serialize(storage:Storage):void
 		{
 			proj4String = storage.serializeString("proj4-string", proj4String, null);
-			var _crs: String = storage.serializeString("crs", crs, null);
-			
-			var xMin: int = storage.serializeInt("min-x", bbox.xMin, 0);
-			var yMin: int = storage.serializeInt("min-y", bbox.yMin, 0);
-			var xMax: int = storage.serializeInt("max-x", bbox.xMax, 0);
-			var yMax: int = storage.serializeInt("max-y", bbox.yMax, 0);
-			
-			var newBBox: BBox = new BBox(xMin, yMin, xMax, yMax);
-//			bbox = newBBox;
-			
-			setCRSAndBBox(_crs, newBBox);
-			
-			
-//			bbox.mf_xMin = storage.serializeInt("min-x", bbox.mf_xMin, 0);
-//			bbox.mf_xMax = storage.serializeInt("max-x", bbox.mf_xMax, 0);
-//			bbox.mf_yMin = storage.serializeInt("min-y", bbox.mf_yMin, 0);
-//			bbox.mf_yMax = storage.serializeInt("max-y", bbox.mf_yMax, 0);
-			
+			ms_crs = storage.serializeString("crs", ms_crs, null);
+			var xMin: Number = storage.serializeNumber("min-x", m_bbox.xMin, 0);
+			var yMin: Number = storage.serializeNumber("min-y", m_bbox.yMin, 0);
+			var xMax: Number = storage.serializeNumber("max-x", m_bbox.xMax, 0);
+			var yMax: Number = storage.serializeNumber("max-y", m_bbox.yMax, 0);
+			m_bbox = new BBox(xMin, yMin, xMax, yMax);
 			parseTitle();
 		}
 		

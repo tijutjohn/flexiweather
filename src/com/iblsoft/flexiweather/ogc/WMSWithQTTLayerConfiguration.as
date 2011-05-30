@@ -11,16 +11,13 @@ package com.iblsoft.flexiweather.ogc
 		{
 		}
 		
-		
 		override public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer
 		{
 			var l: InteractiveLayerWMSWithQTT = new InteractiveLayerWMSWithQTT(iw, this);
-//			l.updateData(true);
-//			l.updateData(false);
 			return l;
 		}
 		
-		override public function renderPreview(f_width: Number, f_height: Number, iw: InteractiveWidget =  null): void
+		override public function renderPreview(f_width: Number, f_height: Number, iw: InteractiveWidget = null): void
 		{
 			if (!iw)
 				iw = new InteractiveWidget();
@@ -33,8 +30,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			var s_url: String = '';
 			
-			if(ms_previewURL == null || ms_previewURL.length == 0) 
-			{
+			if(ms_previewURL == null || ms_previewURL.length == 0) {
 				var iw: InteractiveWidget = new InteractiveWidget();
 				var lWMSWithQTT: InteractiveLayerWMSWithQTT = createInteractiveLayer(iw) as InteractiveLayerWMSWithQTT;
 				lWMSWithQTT.avoidTiling = true;
@@ -48,11 +44,12 @@ package com.iblsoft.flexiweather.ogc
 					lWMSWithQTT.dataLoader.data = { label: label, cfg: this };
 					s_url = lWMSWithQTT.getFullURL();
 						
-				} else {
+				}
+				else {
 					trace("getMenuLayersXMLList interactive layer does not exist");
 				}
-			} else {
-			
+			} 
+			else {
 				if(ms_previewURL == "<internal>") {
 					s_url = service.fullURL;
 					//check if there is ${BASE_URL} in fullURL and convert it
@@ -66,6 +63,5 @@ package com.iblsoft.flexiweather.ogc
 			
 			return s_url;
 		}
-
 	}
 }

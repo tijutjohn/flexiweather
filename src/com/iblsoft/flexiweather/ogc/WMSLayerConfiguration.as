@@ -239,15 +239,15 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 
-		public function isTilableForCRS(crs: String): Boolean
+		public function isTileableForCRS(crs: String): Boolean
 		{
 			if (ma_layerConfigurations && ma_layerConfigurations.length > 0)
 			{
 				for each (var layer: WMSLayer in ma_layerConfigurations)
 				{
 					if (!layer)
-						trace("WMSLayerConfiguration: layer is NULL")
-					if (layer && layer.isTilableForCRS(crs))
+						trace("WMSLayerConfiguration.isTileableForCRS(): layer is NULL")
+					if (layer && layer.isTileableForCRS(crs))
 						return true;
 				}
 				return false;
@@ -255,6 +255,7 @@ package com.iblsoft.flexiweather.ogc
 			
 			return false;
 		}
+
 		override public function isCompatibleWithCRS(crs: String): Boolean
 		{
 			if (ma_layerConfigurations && ma_layerConfigurations.length > 0)
