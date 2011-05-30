@@ -52,7 +52,7 @@ package com.iblsoft.flexiweather.ogc
 			else {
 				var s_crs: String;
 				var crsBBox: BBox = null;
-				var crsWithBBox: CRSWithBBox;
+				var originalCRSWithBBox: CRSWithBBox;
 				
 				var a_detectedCRSs: Array = [];
 				// <BoundingBox CRS=... minx=...
@@ -75,63 +75,57 @@ package com.iblsoft.flexiweather.ogc
 					}
 				} 
 				// <Identifier authority=...
-				if(xml.wms::Identifier.length() != 0) {
+				if(xml.wms::Identifier.@authority == 'http://www.iblsoft.com/wms/ext/getgtile') {
 					var identifierString: String = xml.wms::Identifier[0];
 					var identifierArray: Array = identifierString.split(';');
 					var tileWidth: int = 0;
 					var tileHeight: int = 0;
 					var arr: Array;
 					
-					var boundary: String = 'crs-boundary:';
 					var crsBBoxTiled: CRSWithBBoxAndTilingInfo;
 					
-					for each (var item: String in identifierArray)
-					{
-						if (item.indexOf('size:') == 0)
-						{
+					for each(var item: String in identifierArray) {
+						if(item.indexOf('size:') == 0) {
 							arr = item.split(':');
 							arr = (arr[1] as String).split('x');
 							tileWidth = arr[0];
 							tileHeight = arr[1];
 						}
-						if (item.indexOf(boundary) == 0)
-						{
-							item = item.substring(boundary.length, item.length);
+						if(item.indexOf('crs-boundary:') == 0) {
+							item = item.substring('crs-boundary:'.length, item.length);
 							arr = item.split('[');
-							var crsString: String = arr[0];
-							var bboxString: String = (arr[1] as String);
-							bboxString = bboxString.substr(0, bboxString.length - 1);
-							arr = bboxString.split(',');
+							var s_tilingCRS: String = arr[0];
+							var s_tilingExtent: String = (arr[1] as String);
+							s_tilingExtent = s_tilingExtent.substr(0, s_tilingExtent.length - 1);
+							arr = s_tilingExtent.split(',');
+							var tilingExtent: BBox = new BBox(
+									Number(arr[0]), Number(arr[1]),
+									Number(arr[2]),	Number(arr[3]));
 							
-							var total: int = ma_crsWithBBoxes.length;
-							var crsFound: Boolean = false;
-							
-							var supportsTilling: Boolean = tileWidth > 0 && tileHeight > 0;
-							for (var i: int = 0; i < total; i++)
-							{	
-								crsWithBBox = ma_crsWithBBoxes.getItemAt(i) as CRSWithBBox;
-								if (crsWithBBox.crs == crsString)
-								{
-									crsFound = true;
-									if (crsWithBBox is CRSWithBBoxAndTilingInfo)
-									{
-										trace("already CRSWithBBoxAndTilingInfo");
-									} else {
-										crsBBoxTiled = new CRSWithBBoxAndTilingInfo('', null, tileWidth, tileHeight);
-										crsBBoxTiled.fromCRSWithBBox(crsWithBBox);
-										ma_crsWithBBoxes.removeItemAt(i);
-										ma_crsWithBBoxes.addItemAt(crsBBoxTiled, i);
+							var b_crsFound: Boolean = false;
+							for(var i: uint = 0; i < ma_crsWithBBoxes.length; i++) {	
+								originalCRSWithBBox = ma_crsWithBBoxes[i] as CRSWithBBox;
+								if(originalCRSWithBBox.crs == s_tilingCRS) {
+									b_crsFound = true;
+									if(originalCRSWithBBox is CRSWithBBoxAndTilingInfo) {
+										trace("WMSLayerBase.WMSLayerBase(): already having CRSWithBBoxAndTilingInfo for " + s_tilingCRS);
+									}
+									else {
+										crsBBoxTiled = new CRSWithBBoxAndTilingInfo(
+												originalCRSWithBBox.crs, originalCRSWithBBox.bbox,
+												tilingExtent, tileWidth, tileHeight);
+										ma_crsWithBBoxes[i] = crsBBoxTiled;
 									}
 									break;
 								}
 							}
 							//there is no such crs already defined, add it as new CRS
-							if (!crsFound)
-							{
-								crsBBoxTiled = new CRSWithBBoxAndTilingInfo(crsString, new BBox(arr[0], arr[1], arr[2], arr[3]), tileWidth, tileHeight);
+							if(!b_crsFound) {
+								crsBBoxTiled = new CRSWithBBoxAndTilingInfo(
+										s_tilingCRS, null,
+										tilingExtent, tileWidth, tileHeight);
 								ma_crsWithBBoxes.addItem(crsBBoxTiled);
 							}
-							
 						}
 					}
 				}
