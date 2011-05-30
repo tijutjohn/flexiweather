@@ -69,7 +69,7 @@ package com.iblsoft.flexiweather.ogc.cache
 						trace("TILE from cache is expired, will be removed");
 						delete md_cache[s_key];
 					}
-					trace("diff: " + diff);
+//					trace("diff: " + diff);
 				}
 			}
 		}
