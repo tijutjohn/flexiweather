@@ -174,18 +174,18 @@ package com.iblsoft.flexiweather.ogc
 				ptImageEndPoint.x += 1;
 				ptImageEndPoint.y += 1;
 
-				trace("InteractiveLayerWMS.draw(): image-w=" + m_image.width + " image-h=" + m_image.height);
+				//trace("InteractiveLayerWMS.draw(): image-w=" + m_image.width + " image-h=" + m_image.height);
 				var ptImageSize: Point = ptImageEndPoint.subtract(ptImageStartPoint);
 				ptImageSize.x = int(Math.round(ptImageSize.x));
 				ptImageSize.y = int(Math.round(ptImageSize.y));
 
 				var matrix: Matrix = new Matrix();
 				matrix.scale(ptImageSize.x / m_image.width, ptImageSize.y / m_image.height);
-				trace("InteractiveLayerWMS.draw(): scale-x=" + matrix.a + " scale-y=" + matrix.d);
+				//trace("InteractiveLayerWMS.draw(): scale-x=" + matrix.a + " scale-y=" + matrix.d);
 				
 				matrix.translate(ptImageStartPoint.x, ptImageStartPoint.y);
 				graphics.beginBitmapFill(m_image.bitmapData, matrix, true, true);
-				trace("InteractiveLayerWMS.draw(): x=" + ptImageStartPoint.x + " y=" + ptImageStartPoint.y + " w=" + ptImageSize.x + " h=" + ptImageSize.y);
+				//trace("InteractiveLayerWMS.draw(): x=" + ptImageStartPoint.x + " y=" + ptImageStartPoint.y + " w=" + ptImageSize.x + " h=" + ptImageSize.y);
 				graphics.drawRect(ptImageStartPoint.x, ptImageStartPoint.y, ptImageSize.x, ptImageSize.y);
 				graphics.endFill();
 			}
