@@ -108,11 +108,11 @@ package com.iblsoft.flexiweather.proj
 		}
 
 		/**
-		 * Alternative to laLoToPrjPt() accepting Point object at the input.
+		 * Alternative to laLoToPrjPt() accepting Point object (in radians) as the input.
 		 **/
-		public function laLoPtToPrjPt(laLoPt: Point): Point
+		public function laLoPtToPrjPt(laLoPtRad: Point): Point
 		{
-			return laLoToPrjPt(laLoPt.x, laLoPt.y);
+			return laLoToPrjPt(laLoPtRad.x, laLoPtRad.y);
 		}
 
 		public static function equalCRSs(s_crs1: String, s_crs2: String): Boolean
