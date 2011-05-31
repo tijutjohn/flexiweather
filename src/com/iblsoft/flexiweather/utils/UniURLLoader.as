@@ -168,13 +168,17 @@ package com.iblsoft.flexiweather.utils
 //				trace("send headers: " + rhArray[0]);
 			}
 				
-			trace("UNIURLLoader load " + urlRequest.url + " " + urlRequest.data);
+//			trace("UNIURLLoader load " + urlRequest.url + " " + urlRequest.data);
 			var urlLoader: URLLoaderWithAssociatedData = new URLLoaderWithAssociatedData();
 			urlLoader.associatedData = associatedData;
 			urlLoader.dataFormat = URLLoaderDataFormat.BINARY;
 			urlLoader.addEventListener(Event.COMPLETE, onDataComplete);
 			urlLoader.addEventListener(IOErrorEvent.IO_ERROR, onDataIOError);
 			urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onSecurityError);
+			
+			UniURLLoaderManager.instance.addLoader( urlRequest);
+			
+			Log.getLogger('UniURLLoader').info("load " + urlRequest.url + " " + urlRequest.data);
 			urlLoader.load(urlRequest);
 			
 			var backgroundJob: BackgroundJob = null;
@@ -409,7 +413,11 @@ package com.iblsoft.flexiweather.utils
 			if(backgroundJob != null)
 				BackgroundJobManager.getInstance().finishJob(backgroundJob);
 			
+			
 			var urlRequest: URLRequest = md_urlLoaderToRequestMap[urlLoader].request; 
+			
+			UniURLLoaderManager.instance.removeLoader(urlRequest);
+			
 			delete md_urlLoaderToRequestMap[urlLoader];
 			return urlRequest;
 		}

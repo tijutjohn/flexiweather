@@ -10,6 +10,8 @@ package com.iblsoft.flexiweather.widgets
 	
 	import mx.containers.Canvas;
 	import mx.core.UIComponent;
+	import mx.logging.ILogger;
+	import mx.logging.Log;
 	
 	public class InteractiveLayer extends UIComponent
 	{
@@ -86,6 +88,7 @@ package com.iblsoft.flexiweather.widgets
 		
 		override protected function updateDisplayList(unscaledWidth: Number, unscaledHeight: Number): void
 		{
+//			Log.getLogger("InteractiveLayer").info("updateDisplayList unscaledWidth: " + unscaledWidth + " unscaledHeight: " + unscaledHeight);
 			graphics.clear();
 			draw(graphics);
 		}
@@ -117,6 +120,8 @@ package com.iblsoft.flexiweather.widgets
 			this.y = container.y;
 			this.width = container.width;
 			this.height = container.height;
+//			Log.getLogger("InteractiveLayer").info("onContainerSizeChanged: " + this.width + " , " + this.height);
+			
 		}
 
         public function onMouseDown(event: MouseEvent): Boolean

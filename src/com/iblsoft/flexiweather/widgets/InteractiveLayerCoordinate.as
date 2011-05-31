@@ -4,13 +4,13 @@ package com.iblsoft.flexiweather.widgets
 	
 	import flash.events.MouseEvent;
 	
-	import mx.controls.Text;
+	import spark.components.Label;
 	
 	public class InteractiveLayerCoordinate extends InteractiveLayer
 	{
-		internal var m_textLabel: Text;
+		internal var m_textLabel: Label;
 		
-		public function InteractiveLayerCoordinate(container: InteractiveWidget, textLabel: Text)
+		public function InteractiveLayerCoordinate(container: InteractiveWidget, textLabel: Label)
 		{
 			super(container);
 			m_textLabel = textLabel;
