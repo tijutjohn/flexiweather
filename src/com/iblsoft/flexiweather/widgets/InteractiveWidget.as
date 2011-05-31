@@ -23,7 +23,8 @@ package com.iblsoft.flexiweather.widgets
 
 	public class InteractiveWidget extends Container
 	{
-        private var ms_crs: String = "EPSG:4326";
+        private var ms_crs: String = Projection.CRS_EPSG_GEOGRAPHIC;
+		private var m_crsProjection: Projection = Projection.getByCRS(ms_crs);
         private var m_viewBBox: BBox = new BBox(-180, -90, 180, 90);
         private var m_extentBBox: BBox = new BBox(-180, -90, 180, 90);
         private var mb_orderingLayers: Boolean = false;
@@ -257,50 +258,7 @@ package com.iblsoft.flexiweather.widgets
 			m_labelLayout.setDirty();
 		}
         
-        public function getQTLayer(name: String = ''): InteractiveLayerWMSWithQTT
-        {
-        	var layer: InteractiveLayerWMSWithQTT;
-        	var total: int = layerContainer.numChildren;
-        	for (var i: int = 0; i < total; i++)
-        	{
-        		var currLayer: InteractiveLayer = layerContainer.getChildAt(i) as InteractiveLayer;
-        		if (currLayer is InteractiveLayerWMSWithQTT)
-        		{
-        			layer = currLayer as InteractiveLayerWMSWithQTT;
-        			if (name == '' || name == layer.name)
-        				break;
-        		}
-        	}
-        	
-        	if (layer)
-			{
-				return layer;
-			}
-			return null;
-        }
-        public function tilesScale(): Point
-        {
-        	var layer: InteractiveLayerWMSWithQTT = getQTLayer();
-        	
-        	if (layer)
-			{
-				return new Point(int(100*layer.tileLayer.tileScaleX)/100, int(100 * layer.tileLayer.tileScaleY)/100);
-			}        	
-        	return null;
-        }
-        
-        public function pointToTileIndex(x: Number, y: Number): TileIndex
-        {
-        	var layer: InteractiveLayerWMSWithQTT = getQTLayer();
-        	
-        	if (layer)
-			{
-				var coord: Coord = pointToCoord(x,y);
-				return layer.tileLayer.tilingUtils.getTileIndexForPosition(coord.x, coord.y, layer.tileLayer.layerZoom);
-			}        	
-        	return null;
-        }
-        
+		/** Converts screen point (pixels) into Coord with current CRS. */ 
         public function pointToCoord(x: Number, y: Number): Coord
         {
         	return new Coord(
@@ -309,19 +267,28 @@ package com.iblsoft.flexiweather.widgets
 	        		(height - 1 - y) * m_viewBBox.height / (height - 1) + m_viewBBox.yMin)
         }
 
+		/** Converts screen point (pixels) into Coord with current CRS. */ 
         public function coordToPoint(c: Coord): Point
         {
+			var ptInOurCRS: Point;
         	if(Projection.equalCRSs(c.crs, ms_crs)) {
-        		return new Point(
-        				(c.x - m_viewBBox.xMin) * (width - 1) / m_viewBBox.width,
-        				height - 1 - (c.y - m_viewBBox.yMin) * (height - 1) / m_viewBBox.height);
+				ptInOurCRS = c;
         	}
-        	else
-        		return null; // TODO: implement reprojection somehow
-        	
-        	return new Coord(
-        		x * m_viewBBox.width / (width - 1) + m_viewBBox.xMin,
-        		(height - 1 - y) * m_viewBBox.height / (height - 1) + m_viewBBox.yMin)
+        	else {
+				if(m_crsProjection == null) {
+					trace("InteractiveWidget.coordToPoint(): Unknown IW projection for CRS=" + ms_crs);
+					return null;
+				}
+				var sourceProjection: Projection = Projection.getByCRS(c.crs);
+				if(sourceProjection == null) {
+					trace("InteractiveWidget.coordToPoint(): Unknown projection for CRS=" + c.crs);
+					return null;
+				}
+				ptInOurCRS = m_crsProjection.laLoPtToPrjPt(sourceProjection.prjXYToLaLoPt(c.x, c.y));
+			}
+			return new Point(
+					(ptInOurCRS.x - m_viewBBox.xMin) * (width - 1) / m_viewBBox.width,
+					height - 1 - (ptInOurCRS.y - m_viewBBox.yMin) * (height - 1) / m_viewBBox.height);
         }
 
         // Mouse events handling
@@ -469,11 +436,15 @@ package com.iblsoft.flexiweather.widgets
         {
         	if(ms_crs != s_crs) {
 	        	ms_crs = s_crs;
+				m_crsProjection = Projection.getByCRS(s_crs);
 	        	signalAreaChanged(b_finalChange);
 	        	dispatchEvent(new Event("crsChanged"));
         	}
         }
         
+		public function getCRSProjection(): Projection
+		{ return m_crsProjection; }
+		
         public function setViewBBoxRaw(xmin: Number, ymin: Number, xmax: Number, ymax: Number, b_finalChange: Boolean): void
         {
         	setViewBBox(new BBox(xmin, ymin, xmax, ymax), b_finalChange);
