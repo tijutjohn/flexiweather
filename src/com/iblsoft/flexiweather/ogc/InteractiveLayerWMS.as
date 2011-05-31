@@ -2,6 +2,7 @@ package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.ogc.cache.WMSCache;
+	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
@@ -165,35 +166,27 @@ package com.iblsoft.flexiweather.ogc
 				if(container.getCRS() != ms_imageCRS)
 					return; // otherwise we cannot draw it
 				
-				var matrix: Matrix = new Matrix();
-				// source image pixels to BBOX
-				var f_scaleX: Number = m_imageBBox.width / m_image.width; 
-				var f_scaleY: Number = -m_imageBBox.height / m_image.height; 
-				matrix.scale(f_scaleX, f_scaleY );
-				
-				matrix.translate(m_imageBBox.xMin, m_imageBBox.yMax);
-				// BBOX to destination graphics image pixels
-				matrix.translate(-currentBBox.xMin, -currentBBox.yMax);
-				matrix.scale(container.width / currentBBox.width, -container.height / currentBBox.height);
-				//matrix.invert();
-				
+				var ptImageStartPoint: Point =
+						container.coordToPoint(new Coord(ms_imageCRS, m_imageBBox.xMin, m_imageBBox.yMax));
+				var ptImageEndPoint: Point =
+					container.coordToPoint(new Coord(ms_imageCRS, m_imageBBox.xMax, m_imageBBox.yMin));
+				ptImageEndPoint.x += 1;
+				ptImageEndPoint.y += 1;
 
-				graphics.beginBitmapFill(m_image.bitmapData, matrix, true, true);
-				graphics.drawRect(0, 0, m_image.width, m_image.height);
-				graphics.endFill();
+				trace("InteractiveLayerWMS.draw(): image-w=" + m_image.width + " image-h=" + m_image.height);
+				var ptImageSize: Point = ptImageEndPoint.subtract(ptImageStartPoint);
+				ptImageSize.x = int(Math.round(ptImageSize.x));
+				ptImageSize.y = int(Math.round(ptImageSize.y));
+
+				var matrix: Matrix = new Matrix();
+				matrix.scale(ptImageSize.x / m_image.width, ptImageSize.y / m_image.height);
+				trace("InteractiveLayerWMS.draw(): scale-x=" + matrix.a + " scale-y=" + matrix.d);
 				
-				// fill the area around the map
-				var pt00: Point = matrix.transformPoint(new Point(0, 0));
-				var ptWH: Point = matrix.transformPoint(new Point(m_image.width - 1, m_image.height - 1));
-				if (!(isNaN(container.width) || isNaN(container.height)))
-				{
-					graphics.beginFill(0xCCCCCC, 1);
-					graphics.drawRect(ptWH.x, 0, container.width - ptWH.x, container.height);
-					graphics.drawRect(0, 0, pt00.x, container.height);
-					graphics.drawRect(pt00.x, 0, ptWH.x - pt00.x, pt00.y);
-					graphics.drawRect(pt00.x, ptWH.y, ptWH.x - pt00.x, container.height - ptWH.y);
-					graphics.endFill();
-				}
+				matrix.translate(ptImageStartPoint.x, ptImageStartPoint.y);
+				graphics.beginBitmapFill(m_image.bitmapData, matrix, true, true);
+				trace("InteractiveLayerWMS.draw(): x=" + ptImageStartPoint.x + " y=" + ptImageStartPoint.y + " w=" + ptImageSize.x + " h=" + ptImageSize.y);
+				graphics.drawRect(ptImageStartPoint.x, ptImageStartPoint.y, ptImageSize.x, ptImageSize.y);
+				graphics.endFill();
 			}
 		}
 		
