@@ -5,8 +5,9 @@ package com.iblsoft.flexiweather.widgets
 	import flash.events.TextEvent;
 	import flash.ui.Keyboard;
 	
-	import mx.controls.TextArea;
 	import mx.events.FlexEvent;
+	
+	import spark.components.TextArea;
 
 	/**
 	 *  Dispatched when the user presses the Enter key.
@@ -57,7 +58,7 @@ package com.iblsoft.flexiweather.widgets
 	            	}
 	            	if (!_shiftPressed)
 	            	{
-	            		if (textField.text.length > 0)
+	            		if (textDisplay.text.length > 0)
 	            		{
 	                		dispatchEvent(new FlexEvent(FlexEvent.ENTER));
 		                	event.preventDefault();
@@ -68,18 +69,18 @@ package com.iblsoft.flexiweather.widgets
 	              			return;
 	              		}
 	                	
-	                	textField.text = '';
-	             		textField.validateNow();
-	             		textField.dispatchEvent( new Event( Event.CHANGE) );
+	                	textDisplay.text = '';
+//	             		textDisplay.validateNow();
+	             		textDisplay.dispatchEvent( new Event( Event.CHANGE) );
 	             		
 	             	} else {
 	             		trace("ENTER (shift)");
-	             		textField.text += '\r';
-	             		textField.validateNow();
-	             		textField.dispatchEvent( new Event( Event.CHANGE) );
+	             		textDisplay.text += '\r';
+//	             		textDisplay.validateNow();
+	             		textDisplay.dispatchEvent( new Event( Event.CHANGE) );
 	             		
-	             		selectionBeginIndex = textField.text.length;
-	             		selectionEndIndex = textField.text.length;
+//	             		selectionBeginIndex = textDisplay.text.length;
+//	             		selectionEndIndex = textDisplay.text.length;
 	             	}
 	                break;
 	            }
