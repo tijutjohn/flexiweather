@@ -508,7 +508,9 @@ package com.iblsoft.flexiweather.ogc
 		override public function clone(): InteractiveLayer
 		{
 			var newLayer: InteractiveLayerQTTMS = new InteractiveLayerQTTMS(
-					container, ms_baseURL, crs, viewBBox.clone(), minimumZoom, maximumZoom);
+					container, ms_baseURL, null, null, minimumZoom, maximumZoom);
+			for(var s_crs: String in md_crsToTilingExtent)
+				newLayer.addCRSWithTilingExtent(s_crs, md_crsToTilingExtent[s_crs]); 
 			newLayer.alpha = alpha
 			newLayer.zOrder = zOrder;
 			newLayer.visible = visible;
