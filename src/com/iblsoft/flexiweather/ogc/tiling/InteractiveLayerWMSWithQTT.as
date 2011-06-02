@@ -42,16 +42,20 @@ package com.iblsoft.flexiweather.ogc.tiling
 			return m_tiledLayer.getGTileBBoxForWholeCRS(s_crs) || m_cfg.isTileableForCRS(s_crs);
 		}
 
-		public function InteractiveLayerWMSWithQTT(container:InteractiveWidget, cfg:WMSLayerConfiguration, avoidTiling: Boolean = false)
+		public function InteractiveLayerWMSWithQTT(
+				container: InteractiveWidget,
+				cfg: WMSLayerConfiguration,
+				b_avoidTiling: Boolean = false)
 		{
 			super(container, cfg);
 			
-			this.avoidTiling = avoidTiling;
+			this.avoidTiling = b_avoidTiling;
 			
 			m_tiledLayer = new InteractiveLayerQTTMS(container, '', container.getCRS(), null, 1, 12);
 			addChild(m_tiledLayer);
 			
 			changeTiledLayerVisibility(false);
+			updateTiledLayerCRSs();
 		}
 		
 		override protected function createChildren():void
@@ -84,19 +88,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 		override protected function onCapabilitiesUpdated(event: DataEvent): void
 		{
 			super.onCapabilitiesUpdated(event);
-			var a_layers: Array = getWMSLayers();
-
-			m_tiledLayer.clearCRSWithTilingExtents();
-			if(a_layers.length == 1) {
-				var l: WMSLayer = a_layers[0];
-				for each(var crsWithBBox: CRSWithBBox in l.crsWithBBoxes) {
-					if(crsWithBBox is CRSWithBBoxAndTilingInfo) {
-						var ti: CRSWithBBoxAndTilingInfo = CRSWithBBoxAndTilingInfo(crsWithBBox);
-						m_tiledLayer.addCRSWithTilingExtent(ti.crs, ti.tilingExtent);
-					}
-				}
-			}
-			m_tiledLayer.invalidateDynamicPart();
+			
+			updateTiledLayerCRSs();
 		}
 		
 		private function changeTiledLayerVisibility(visible: Boolean): void
@@ -164,6 +157,22 @@ package com.iblsoft.flexiweather.ogc.tiling
 			m_tiledLayer.setSpecialCacheStrings(ma_specialCacheStrings);
 		}
 		
+		private function updateTiledLayerCRSs(): void
+		{
+			var a_layers: Array = getWMSLayers();
+			
+			m_tiledLayer.clearCRSWithTilingExtents();
+			if(a_layers.length == 1) {
+				var l: WMSLayer = a_layers[0];
+				for each(var crsWithBBox: CRSWithBBox in l.crsWithBBoxes) {
+					if(crsWithBBox is CRSWithBBoxAndTilingInfo) {
+						var ti: CRSWithBBoxAndTilingInfo = CRSWithBBoxAndTilingInfo(crsWithBBox);
+						m_tiledLayer.addCRSWithTilingExtent(ti.crs, ti.tilingExtent);
+					}
+				}
+			}
+		}
+		
 		override public function updateData(b_forceUpdate:Boolean):void
 		{
 //			trace("WMSWithQTT updateData ["+name+"]");
@@ -207,9 +216,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 			if (isTileable)
 			{
 				updateTiledLayerURLBase();
-				if (m_tiledLayer.zoom < 1)
-				{
-				}
 				//clear WMS graphics
 				graphics.clear();
 				
@@ -227,8 +233,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			{
 				updateTiledLayerURLBase();
 				m_tiledLayer.onAreaChanged(b_finalChange);
-				
-				draw(graphics);
+				invalidateDynamicPart();
 			} else {
 				super.onAreaChanged(b_finalChange);
 			}
