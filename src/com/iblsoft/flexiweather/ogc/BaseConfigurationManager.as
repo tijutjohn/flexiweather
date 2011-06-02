@@ -11,6 +11,21 @@ package com.iblsoft.flexiweather.ogc
 		{
 		}
 		
+		
+		protected function fixLabel(lbl: String): String
+		{
+			var test: String = 'global/'; 
+			if (lbl.indexOf(test) == 0)
+				return lbl.substr(test.length);
+			test = 'groups/';
+			if (lbl.indexOf(test) == 0)
+				return lbl.substr(test.length);
+			test = 'users/';
+			if (lbl.indexOf(test) == 0)
+				return 'user/'+lbl.substr(test.length);
+			
+			return lbl;
+		}
 		/**
 		 * Creates folders and subfolders for custom areas 
 		 * @param groupName - full group name... it can consists subfolders. Use / for subolders. E.g Continents/States

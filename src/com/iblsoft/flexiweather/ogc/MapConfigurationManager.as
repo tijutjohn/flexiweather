@@ -84,6 +84,9 @@ package com.iblsoft.flexiweather.ogc
 				for each (var map: MapConfiguration in ma_maps)
 				{
 					var lbl: String =  map.label;
+					
+					lbl = fixLabel(lbl);
+					
 					var groupName: String = '';
 					if (lbl && lbl.indexOf('/') > 0)
 					{

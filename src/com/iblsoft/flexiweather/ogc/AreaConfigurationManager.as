@@ -165,6 +165,8 @@ package com.iblsoft.flexiweather.ogc
 				for each (var area: AreaConfiguration in ma_areas)
 				{
 					var lbl: String =  area.label;
+					
+					lbl = fixLabel(lbl);
 					var groupName: String = '';
 					if (lbl.indexOf('/') > 0)
 					{
