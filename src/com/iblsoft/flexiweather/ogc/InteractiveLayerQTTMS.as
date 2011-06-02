@@ -26,6 +26,10 @@ package com.iblsoft.flexiweather.ogc
 	import flash.utils.Timer;
 	
 	[Event(name='drawTiles', type='')]
+	
+	/**
+	 * Generic Quad Tree (like Google Maps) tiling layer
+	 **/
 	public class InteractiveLayerQTTMS extends InteractiveLayer
 	{
 		public static const DRAW_TILES: String = 'drawTiles';
@@ -66,24 +70,6 @@ package com.iblsoft.flexiweather.ogc
 		private var mi_totalVisibleTiles: int;
 		private var mi_tilesCurrentlyLoading: int;
 		
-		public function get baseURL(): String
-		{ return ms_baseURL; }
-
-		public function set baseURL(s_baseURL: String): void
-		{ ms_baseURL = s_baseURL; }
-				
-		public function get crs(): String
-		{
-			var _crs: String =  container.getCRS();
-			ms_oldCRS = _crs;
-			return _crs;
-		}
-		
-		public function get viewBBox(): BBox
-		{
-			return container.getViewBBox();
-		}
-		
 		public function InteractiveLayerQTTMS(
 				container: InteractiveWidget, s_baseURL: String,
 				s_primaryCRS: String, primaryCRSTilingExtent: BBox,
@@ -91,8 +77,11 @@ package com.iblsoft.flexiweather.ogc
 		{
 			super(container);
 			
-			md_crsToTilingExtent[s_primaryCRS] = primaryCRSTilingExtent;
 			ms_baseURL = s_baseURL;
+
+			if(s_primaryCRS != null && primaryCRSTilingExtent != null) {
+				md_crsToTilingExtent[s_primaryCRS] = primaryCRSTilingExtent;
+			}
 			
 			this.minimumZoom = minimumZoom;
 			this.maximumZoom = maximumZoom;
@@ -546,8 +535,25 @@ package com.iblsoft.flexiweather.ogc
 		{
 			ma_specialCacheStrings = arr;
 		}
-	}
+
+		public function get baseURL(): String
+		{ return ms_baseURL; }
 		
+		public function set baseURL(s_baseURL: String): void
+		{ ms_baseURL = s_baseURL; }
+		
+		public function get crs(): String
+		{
+			var _crs: String =  container.getCRS();
+			ms_oldCRS = _crs;
+			return _crs;
+		}
+		
+		public function get viewBBox(): BBox
+		{
+			return container.getViewBBox();
+		}
+	}
 }
 import com.iblsoft.flexiweather.utils.UniURLLoader;
 import com.iblsoft.flexiweather.widgets.BackgroundJob;
