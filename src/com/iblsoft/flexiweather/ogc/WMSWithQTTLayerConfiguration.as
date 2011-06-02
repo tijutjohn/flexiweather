@@ -1,20 +1,31 @@
 package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.ogc.tiling.InteractiveLayerWMSWithQTT;
+	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.utils.UniURLLoader;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	public class WMSWithQTTLayerConfiguration extends WMSLayerConfiguration
 	{
+		public var minimumZoomLevel: uint = 1;
+		public var maximumZoomLevel: uint = 12;
+		
 		public function WMSWithQTTLayerConfiguration()
 		{
 		}
 		
 		override public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer
 		{
-			var l: InteractiveLayerWMSWithQTT = new InteractiveLayerWMSWithQTT(iw, this);
+			var l: InteractiveLayerWMSWithQTT = new InteractiveLayerWMSWithQTT(iw, this, false);
 			return l;
+		}
+		
+		override public function serialize(storage: Storage): void
+		{
+			super.serialize(storage);
+			minimumZoomLevel = storage.serializeUInt("minimum-zoom-level", minimumZoomLevel, 1);
+			maximumZoomLevel = storage.serializeUInt("maximum-zoom-level", maximumZoomLevel, 12);
 		}
 		
 		override public function renderPreview(f_width: Number, f_height: Number, iw: InteractiveWidget = null): void

@@ -6,6 +6,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
 	import com.iblsoft.flexiweather.ogc.WMSLayer;
 	import com.iblsoft.flexiweather.ogc.WMSLayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.WMSWithQTTLayerConfiguration;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.display.BitmapData;
@@ -44,14 +45,15 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		public function InteractiveLayerWMSWithQTT(
 				container: InteractiveWidget,
-				cfg: WMSLayerConfiguration,
+				cfg: WMSWithQTTLayerConfiguration,
 				b_avoidTiling: Boolean = false)
 		{
 			super(container, cfg);
 			
 			this.avoidTiling = b_avoidTiling;
 			
-			m_tiledLayer = new InteractiveLayerQTTMS(container, '', container.getCRS(), null, 1, 12);
+			m_tiledLayer = new InteractiveLayerQTTMS(container, null,
+					'', null, null, cfg.minimumZoomLevel, cfg.maximumZoomLevel);
 			addChild(m_tiledLayer);
 			
 			changeTiledLayerVisibility(false);
@@ -153,7 +155,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 		private function updateTiledLayerURLBase(): void
 		{
 			//update QTT Layer URL parts
-			m_tiledLayer.baseURL = getFullURL() + '&TILEZOOM=%ZOOM%&TILECOL=%COL%&TILEROW=%ROW%';
+			m_tiledLayer.baseURLPattern = getFullURL() + '&TILEZOOM=%ZOOM%&TILECOL=%COL%&TILEROW=%ROW%';
 			m_tiledLayer.setSpecialCacheStrings(ma_specialCacheStrings);
 		}
 		

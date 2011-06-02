@@ -55,10 +55,10 @@ package com.iblsoft.flexiweather.ogc
 		
 		protected var m_timer: Timer = new Timer(10000);
 		
-		public var minimumZoom: int = 0;
-		public var maximumZoom: int = 10;
+		protected var m_cfg: QTTMSLayerConfiguration;
+		/** This is used only if overriding using the setter, otherwise the value from m_cfg is used. */ 
+		protected var ms_explicitBaseURLPattern: String;
 		
-		private var ms_baseURL: String;
 		private var md_crsToTilingExtent: Dictionary = new Dictionary();
 		private var ms_oldCRS: String;
 		private var m_tilingUtils: TilingUtils;
@@ -71,30 +71,44 @@ package com.iblsoft.flexiweather.ogc
 		private var mi_tilesCurrentlyLoading: int;
 		
 		public function InteractiveLayerQTTMS(
-				container: InteractiveWidget, s_baseURL: String,
-				s_primaryCRS: String, primaryCRSTilingExtent: BBox,
-				minimumZoom: int = 0, maximumZoom: int = 10)
+				container: InteractiveWidget,
+				cfg: QTTMSLayerConfiguration,
+				s_baseURLPattern: String = null, s_primaryCRS: String = null, primaryCRSTilingExtent: BBox = null,
+				minimumZoomLevel: uint = 0, maximumZoomLevel: uint = 10)
 		{
 			super(container);
 			
-			ms_baseURL = s_baseURL;
-
-			if(s_primaryCRS != null && primaryCRSTilingExtent != null) {
-				md_crsToTilingExtent[s_primaryCRS] = primaryCRSTilingExtent;
+			if(cfg == null) {
+				cfg = new QTTMSLayerConfiguration();
+				cfg.baseURLPattern = s_baseURLPattern;
+				if(s_primaryCRS != null && primaryCRSTilingExtent != null)
+						cfg.tilingCRSsAndExtents.push(new CRSWithBBox(s_primaryCRS, primaryCRSTilingExtent));
+				cfg.minimumZoomLevel = minimumZoomLevel;
+				cfg.maximumZoomLevel = maximumZoomLevel;
 			}
+			m_cfg = cfg;
 			
-			this.minimumZoom = minimumZoom;
-			this.maximumZoom = maximumZoom;
-			
+			for each(var crsWithBBox: CRSWithBBox in cfg.tilingCRSsAndExtents) {
+				md_crsToTilingExtent[crsWithBBox.crs] = crsWithBBox.bbox;
+			}
+
 			m_cache = new WMSTileCache();
 			m_tilingUtils = new TilingUtils();
-			m_tilingUtils.minimumZoom = minimumZoom;
-			m_tilingUtils.maximumZoom = maximumZoom;
+			m_tilingUtils.minimumZoom = cfg.minimumZoomLevel;
+			m_tilingUtils.maximumZoom = cfg.maximumZoomLevel;
 			
 			m_loader.addEventListener(UniURLLoader.DATA_LOADED, onDataLoaded);
 			m_loader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onDataLoadFailed);
 			
 			m_jobs = new TileJobs();
+		}
+
+		public override function invalidateSize(): void
+		{
+			if(container != null) {
+				width = container.width;
+				height = container.height;
+			}
 		}
 
 		public function get zoom(): int
@@ -112,13 +126,17 @@ package com.iblsoft.flexiweather.ogc
 			return ma_currentTilesRequests;
 		}
 		
+		public static function expandURLPattern(s_url: String, tileIndex: TileIndex): String
+		{
+			s_url = s_url.replace('%COL%', String(tileIndex.mi_tileCol));
+			s_url = s_url.replace('%ROW%', String(tileIndex.mi_tileRow));
+			s_url = s_url.replace('%ZOOM%', String(tileIndex.mi_tileZoom));
+			return s_url;
+		}
+
 		private function getExpandedURL(tileIndex: TileIndex): String
 		{
-			var ret: String = ms_baseURL;
-			ret = ret.replace('%COL%', String(tileIndex.mi_tileCol));
-			ret = ret.replace('%ROW%', String(tileIndex.mi_tileRow));
-			ret = ret.replace('%ZOOM%', String(tileIndex.mi_tileZoom));
-			return ret;
+			return expandURLPattern(baseURLPattern, tileIndex);
 		}
 
 		public function invalidateCache(): void
@@ -510,16 +528,11 @@ package com.iblsoft.flexiweather.ogc
 		
 		override public function clone(): InteractiveLayer
 		{
-			var newLayer: InteractiveLayerQTTMS = new InteractiveLayerQTTMS(
-					container, ms_baseURL, crs, viewBBox.clone(), minimumZoom, maximumZoom);
+			var newLayer: InteractiveLayerQTTMS = new InteractiveLayerQTTMS(container, m_cfg);
 			newLayer.alpha = alpha
 			newLayer.zOrder = zOrder;
 			newLayer.visible = visible;
-					
-//			trace("\n\n CLONE InteractiveLayerQTTMS ["+newLayer.name+"] alpha: " + newLayer.alpha + " zOrder: " +  newLayer.zOrder);
-			
 			return newLayer;
-			
 		}
 		
 		protected function onJobFinished(job: BackgroundJob): void
@@ -536,11 +549,15 @@ package com.iblsoft.flexiweather.ogc
 			ma_specialCacheStrings = arr;
 		}
 
-		public function get baseURL(): String
-		{ return ms_baseURL; }
+		public function get baseURLPattern(): String
+		{
+			if(ms_explicitBaseURLPattern == null)
+				return m_cfg.baseURLPattern;
+			return ms_explicitBaseURLPattern;
+		}
 		
-		public function set baseURL(s_baseURL: String): void
-		{ ms_baseURL = s_baseURL; }
+		public function set baseURLPattern(s_baseURL: String): void
+		{ ms_explicitBaseURLPattern = s_baseURL; }
 		
 		public function get crs(): String
 		{
