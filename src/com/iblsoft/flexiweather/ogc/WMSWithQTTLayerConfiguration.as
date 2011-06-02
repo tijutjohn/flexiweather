@@ -11,8 +11,9 @@ package com.iblsoft.flexiweather.ogc
 		public var minimumZoomLevel: uint = 1;
 		public var maximumZoomLevel: uint = 12;
 		
-		public function WMSWithQTTLayerConfiguration()
+		public function WMSWithQTTLayerConfiguration(service: WMSServiceConfiguration = null, a_layerNames: Array = null)
 		{
+			super(service, a_layerNames);
 		}
 		
 		override public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer
