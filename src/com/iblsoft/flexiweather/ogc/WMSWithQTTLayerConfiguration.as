@@ -7,8 +7,9 @@ package com.iblsoft.flexiweather.ogc
 	
 	public class WMSWithQTTLayerConfiguration extends WMSLayerConfiguration
 	{
-		public function WMSWithQTTLayerConfiguration()
+		public function WMSWithQTTLayerConfiguration(service: WMSServiceConfiguration = null, a_layerNames: Array = null)
 		{
+			super(service, a_layerNames);
 		}
 		
 		override public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer
