@@ -105,10 +105,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 				}
 			}
 			
-			//trace("Zoom found: " + bestZoomLevel + " dist: " + bestDist);
-			
-			//debugZoomLevels(arr);
-			
 			return bestZoomLevel;
 		}
 		
