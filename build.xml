@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Flexi Weather" basedir=".">
-	<taskdef resource="flexTasks.tasks" classpath="${basedir}/flexTasks/lib/flexTasks.jar" />
+	<taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar"/>
 	<property name="FLEX_HOME" value="${FLEX_HOME}" />
 	<property name="APP_ROOT" value="src" />
 	<target name="main">
