@@ -67,7 +67,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 //			var leftCol: int = Math.floor((viewBBox.xMin - m_extent.xMin) / tileBBox.x);
 //			var topRow: int = Math.floor((m_extent.yMax - viewBBox.yMax) / tileBBox.y);
 			
-			var _maxTileID: int = zoomLevel * zoomLevel - 1;
+			var _maxTileID: int = 1 << (zoomLevel + 1) - 1;
 			var topLeftIndex: TileIndex = new TileIndex(zoomLevel, Math.min(_maxTileID, Math.max(0,topRow)), Math.min(_maxTileID, Math.max(0,leftCol)));
 			var bottomRightIndex: TileIndex = new TileIndex(zoomLevel, Math.min(_maxTileID, Math.ceil(topRow + viewTiles.y)),  Math.min(_maxTileID, Math.ceil(leftCol + viewTiles.x)));
 			var area: TiledArea = new TiledArea(topLeftIndex, bottomRightIndex );
