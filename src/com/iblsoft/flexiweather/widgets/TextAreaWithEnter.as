@@ -71,13 +71,13 @@ package com.iblsoft.flexiweather.widgets
 	                	
 	                	textDisplay.text = '';
 //	             		textDisplay.validateNow();
-	             		textDisplay.dispatchEvent( new Event( Event.CHANGE) );
+//	             		textDisplay.dispatchEvent( new Event( Event.CHANGE) );
 	             		
 	             	} else {
 	             		trace("ENTER (shift)");
 	             		textDisplay.text += '\r';
 //	             		textDisplay.validateNow();
-	             		textDisplay.dispatchEvent( new Event( Event.CHANGE) );
+//	             		textDisplay.dispatchEvent( new Event( Event.CHANGE) );
 	             		
 //	             		selectionBeginIndex = textDisplay.text.length;
 //	             		selectionEndIndex = textDisplay.text.length;
