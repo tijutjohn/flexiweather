@@ -6,6 +6,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	import flash.display.Sprite;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
+	import flash.system.Capabilities;
 	
 	public class MoveablePoint extends Sprite
 			implements IMouseEditableItem, IHighlightableItem
@@ -60,7 +61,10 @@ package com.iblsoft.flexiweather.ogc.editable
 			graphics.lineStyle(mb_highlighted ? 4 : 2, 0x000000);
 			graphics.beginFill(mb_selected ? 0x00ff00 : 0xffff00, 0.8);
 			//graphics.drawCircle(m_pt.x, m_pt.y, mb_highlighted ? 7 : 5);
-			graphics.drawCircle(0, 0, mb_highlighted ? 7 : 5);
+			var i_resize: uint = 0;
+			if(Capabilities.touchscreenType)
+				i_resize = 10;
+			graphics.drawCircle(0, 0, i_resize + (mb_highlighted ? 7 : 5));
 			graphics.endFill();
 		}
 		
