@@ -77,7 +77,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			
 			if (isTileable)
 			{
-				if (m_tiledLayer.zoom == -1)
+				if (m_tiledLayer.zoomLevel == -1)
 				{
 					m_tiledLayer.width = container.width;
 					m_tiledLayer.height = container.height;
@@ -194,19 +194,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			if (isTileable)
 			{
-				if(tileLayer.width > 0 && tileLayer.height > 0) {
-					var matrix: Matrix  = new Matrix();
-					matrix.translate(-f_width / 3, -f_width / 3);
-					matrix.scale(3, 3);
-					matrix.translate(tileLayer.width / 3, tileLayer.height / 3);
-					matrix.invert();
-					var bd: BitmapData = new BitmapData(tileLayer.width, tileLayer.height, true, 0x00000000);
-					bd.draw(tileLayer);
-					
-	  				graphics.beginBitmapFill(bd, matrix, false, true);
-					graphics.drawRect(0, 0, f_width, f_height);
-					graphics.endFill();
-				}
+				tileLayer.renderPreview(graphics, f_width, f_height);
 			} else {
 				super.renderPreview(graphics, f_width, f_height);	
 			}

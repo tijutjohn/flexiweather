@@ -111,21 +111,6 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 
-		public function get zoom(): int
-		{
-			return mi_zoom;
-		}
-
-		public function get layerZoom(): uint
-		{
-			return mi_zoom;
-		}
-		
-		public function get currentTilesRequests(): Array
-		{
-			return ma_currentTilesRequests;
-		}
-		
 		public static function expandURLPattern(s_url: String, tileIndex: TileIndex): String
 		{
 			s_url = s_url.replace('%COL%', String(tileIndex.mi_tileCol));
@@ -141,7 +126,7 @@ package com.iblsoft.flexiweather.ogc
 
 		public function invalidateCache(): void
 		{
-			m_cache.invalidate(crs, getGTileBBoxForWholeCRS(crs));
+			m_cache.invalidate(container.crs, getGTileBBoxForWholeCRS(container.crs));
 		}
 
 		public function clearCRSWithTilingExtents(): void
@@ -156,20 +141,17 @@ package com.iblsoft.flexiweather.ogc
 
 		public function updateData(b_forceUpdate: Boolean): void
 		{
-//			super.updateData(b_forceUpdate);
-			
-			if(mi_zoom <= 0)
+			if(mi_zoom < 0)
 			{
-				//wrong zoom, do not continue
+				// wrong zoom, do not continue
 				return;
 			}
-//			var crs: String = container.getCRS();
-			m_tilingUtils.onAreaChanged(crs, getGTileBBoxForWholeCRS(crs));
+			var s_crs: String = container.crs;
+			
+			m_tilingUtils.onAreaChanged(s_crs, getGTileBBoxForWholeCRS(s_crs));
 			m_tiledArea = m_tilingUtils.getTiledArea(container.getViewBBox(), mi_zoom);
 			
-//			trace("QTTMS updateData: " + _zoom + " m_tiledArea: " + m_tiledArea);
 			var tiledCache: WMSTileCache = m_cache as WMSTileCache;
-//			trace("updateData ["+name+"]: m_tiledArea : " + m_tiledArea.leftCol + ", " + m_tiledArea.topRow + " size: " + m_tiledArea.colTilesCount + " , " + m_tiledArea.rowTilesCount);
 			
 			var request: URLRequest;
 			var tileIndex: TileIndex = new TileIndex(mi_zoom);
@@ -178,35 +160,29 @@ package com.iblsoft.flexiweather.ogc
 			
 			var loadRequests: Array = new Array();
 			
-//			var rowMax: int = Math.min(m_tiledArea.bottomRow, Math.pow(2, _zoom) - 1);
-//			var colMax: int = Math.min(m_tiledArea.rightCol, Math.pow(2, _zoom) - 1);
 			var rowMax: int = m_tiledArea.bottomRow;
 			var colMax: int = m_tiledArea.rightCol;
 			
-//			if(rowMax < m_tiledArea.bottomRow || colMax < m_tiledArea.rightCol)
-//			{
-//				trace("wrong max tiles");
-//			}
 			mi_totalVisibleTiles = (rowMax - m_tiledArea.topRow + 1) * (colMax - m_tiledArea.leftCol + 1);
-//			trace("ROWS: " + m_tiledArea.topRow + " , " + rowMax);
-//			trace("COLS: " + m_tiledArea.leftCol + " , " + colMax);
-//			trace("_totalVisibleTiles: " + _totalVisibleTiles);
+
 			for(var i_row: uint = m_tiledArea.topRow; i_row <= rowMax; ++i_row) 
 			{
 				for(var i_col: uint = m_tiledArea.leftCol; i_col <= colMax; ++i_col) 
 				{
 					tileIndex = new TileIndex(mi_zoom, i_row, i_col);
 					request = new URLRequest(getExpandedURL(tileIndex));
-					//need to convert ${BASE_URL} because it's used in cachKey
+					// need to convert ${BASE_URL} because it's used in cachKey
 					request.url = UniURLLoader.fromBaseURL(request.url);
 					
 					ma_currentTilesRequests.push(request);
 					
-//					trace("col: " + i_col + " i_row: " + i_row + " url = " + request.url);
-					if(!tiledCache.isTileCached(crs, tileIndex, request, ma_specialCacheStrings))
+					if(!tiledCache.isTileCached(s_crs, tileIndex, request, ma_specialCacheStrings))
 					{	
-//						_jobs.addNewTileJob(tileIndex.mi_tileCol, tileIndex.mi_tileRow, job);
-						loadRequests.push({request: request, requestedCRS: crs, requestedTileIndex: tileIndex});
+						loadRequests.push({
+							request: request,
+							requestedCRS: container.crs,
+							requestedTileIndex: tileIndex
+						});
 					} 
 				}
 			}
@@ -218,14 +194,12 @@ package com.iblsoft.flexiweather.ogc
 				loadRequests.sort(sortTiles);
 				
 				var bkJobManager: BackgroundJobManager = BackgroundJobManager.getInstance();
-//				var job: BackgroundJob;
 				var jobName: String;
 				mi_tilesCurrentlyLoading = loadRequests.length;
 				for each(var requestObj: Object in loadRequests)
 				{
 					jobName = "Rendering tile " + requestObj.requestedTileIndex + " for layer: " + name
-//					job = bkJobManager.startJob("Rendering tile " + requestObj.requestedTileIndex + " for layer: " + name);
-					//this already cancel previou job for current tile
+					// this already cancel previou job for current tile
 					m_jobs.addNewTileJobRequest(requestObj.requestedTileIndex.mi_tileCol, requestObj.requestedTileIndex.mi_tileRow, m_loader, requestObj.request);
 					
 					m_loader.load(requestObj.request, {
@@ -234,7 +208,7 @@ package com.iblsoft.flexiweather.ogc
 					}, jobName);
 				}
 			} else {
-				//all tiles was cached, draw them
+				// all tiles were cached, draw them
 				draw(graphics);
 				
 				dispatchEvent(new Event(ALL_TILES_LOADED));
@@ -283,16 +257,14 @@ package com.iblsoft.flexiweather.ogc
 		
 		private function findZoom(): void
 		{
-//			var crs: String = container.getCRS();
-			var extent: BBox = getGTileBBoxForWholeCRS(crs);
-			m_tilingUtils.onAreaChanged(crs, extent);
-			
-			mi_zoom = m_tilingUtils.getZoom(viewBBox, new Point(width, height));
+			var tilingExtent: BBox = getGTileBBoxForWholeCRS(container.crs);
+			m_tilingUtils.onAreaChanged(container.crs, tilingExtent);
+			mi_zoom = m_tilingUtils.getZoom(container.getViewBBox(), new Point(width, height));
 		}
 		
 		override public function refresh(b_force: Boolean): void
 		{
-			 findZoom();
+			findZoom();
 			super.refresh(b_force);
 			updateData(b_force);
 		}
@@ -300,24 +272,28 @@ package com.iblsoft.flexiweather.ogc
 		override public function draw(graphics: Graphics): void
 		{
 			super.draw(graphics);
-			
-			if(mi_zoom == -1)
-			{
-				trace("something is wrong, tile zoom is -1");
-				return;
-			}
 			customDraw(graphics);
 		}
 		
 		private function customDraw(graphics: Graphics, redrawBorder: Boolean = false): void
 		{
-			var currentBBox: BBox = viewBBox;
-			var tilingBBox: BBox = getGTileBBoxForWholeCRS(crs); // extent of tile z=0/r=0/c=0
+			if(mi_zoom == -1)
+			{
+				trace("InteractiveLayerQTTMS.customDraw(): Isomething is wrong, tile zoom is -1");
+				return;
+			}
+
+			var currentBBox: BBox = container.getViewBBox();
+			var tilingBBox: BBox = getGTileBBoxForWholeCRS(container.crs); // extent of tile z=0/r=0/c=0
+			if(tilingBBox == null) {
+				trace("InteractiveLayerQTTMS.customDraw(): No tiling extent for CRS " + container.crs);
+				return;
+			}
 
 			var matrix: Matrix;
 			var wmsTileCache: WMSTileCache = m_cache as WMSTileCache;
 			
-			var a_tiles: Array = wmsTileCache.getTiles(crs, mi_zoom, ma_specialCacheStrings);
+			var a_tiles: Array = wmsTileCache.getTiles(container.crs, mi_zoom, ma_specialCacheStrings);
 			var allTiles: Array = a_tiles.reverse();
 			
 			var topLeftCoord: Coord;
@@ -342,14 +318,15 @@ package com.iblsoft.flexiweather.ogc
 			var yy: Number;
 				
 			var cnt: int = 0;
+			var s_crs: String = container.crs;
 			for each(t_tile in allTiles) {
 				
 				tileIndex = t_tile.tileIndex;
 				
-				var tileBBox: BBox = getGTileBBox(crs, tileIndex);
-				topLeftPoint = container.coordToPoint(new Coord(crs, tileBBox.xMin, tileBBox.yMax));
-				topRightPoint = container.coordToPoint(new Coord(crs, tileBBox.xMax, tileBBox.yMax));
-				bottomLeftPoint = container.coordToPoint(new Coord(crs, tileBBox.xMin, tileBBox.yMin));
+				var tileBBox: BBox = getGTileBBox(s_crs, tileIndex);
+				topLeftPoint = container.coordToPoint(new Coord(s_crs, tileBBox.xMin, tileBBox.yMax));
+				topRightPoint = container.coordToPoint(new Coord(s_crs, tileBBox.xMax, tileBBox.yMax));
+				bottomLeftPoint = container.coordToPoint(new Coord(s_crs, tileBBox.xMin, tileBBox.yMin));
 			
 				var origNewWidth: Number = topRightPoint.x - topLeftPoint.x;
 				var origNewHeight: Number = bottomLeftPoint.y - topLeftPoint.y;
@@ -393,6 +370,26 @@ package com.iblsoft.flexiweather.ogc
 			dispatchEvent(new Event(DRAW_TILES));
 		}
 		
+		public override function hasPreview(): Boolean
+		{ return mi_zoom != -1; }
+		
+		public override function renderPreview(graphics: Graphics, f_width: Number, f_height: Number): void
+		{
+			if(!width || !height)
+				return;
+			var matrix: Matrix  = new Matrix();
+			matrix.translate(-f_width / 3, -f_width / 3);
+			matrix.scale(3, 3);
+			matrix.translate(width / 3, height / 3);
+			matrix.invert();
+			var bd: BitmapData = new BitmapData(width, height, true, 0x00000000);
+			bd.draw(this);
+			
+			graphics.beginBitmapFill(bd, matrix, false, true);
+			graphics.drawRect(0, 0, f_width, f_height);
+			graphics.endFill();
+		}
+		
 		private var _tf:TextField = new TextField();
 		private var _tfBD:BitmapData;
 		private function drawText(txt: String, gr: Graphics, pos: Point): void
@@ -423,12 +420,12 @@ package com.iblsoft.flexiweather.ogc
 		override public function onAreaChanged(b_finalChange: Boolean): void
 		{
 			super.onAreaChanged(b_finalChange);
-			if(_oldViewBBox.equals(viewBBox) &&!b_finalChange)
+			if(_oldViewBBox.equals(container.getViewBBox()) &&!b_finalChange)
 			{
 				trace(" view BBOX is not changed");
 				return;
 			}
-			m_tilingUtils.onAreaChanged(crs, getGTileBBoxForWholeCRS(crs));
+			m_tilingUtils.onAreaChanged(container.crs, getGTileBBoxForWholeCRS(container.crs));
 			
 			if(b_finalChange) {
 				
@@ -437,14 +434,14 @@ package com.iblsoft.flexiweather.ogc
 				findZoom();
 				if(mi_zoom != oldZoom)
 				{
-					m_cache.invalidate(crs, viewBBox);
+					m_cache.invalidate(container.crs, container.getViewBBox());
 				}
 				updateData(false);
 			}
 			else
 				invalidateDynamicPart();
 				
-			_oldViewBBox = viewBBox.clone();
+			_oldViewBBox = container.getViewBBox();
 		}
 		
 		private function checkIfAllTilesAreLoaded(): void
@@ -559,17 +556,8 @@ package com.iblsoft.flexiweather.ogc
 		public function set baseURLPattern(s_baseURL: String): void
 		{ ms_explicitBaseURLPattern = s_baseURL; }
 		
-		public function get crs(): String
-		{
-			var _crs: String =  container.getCRS();
-			ms_oldCRS = _crs;
-			return _crs;
-		}
-		
-		public function get viewBBox(): BBox
-		{
-			return container.getViewBBox();
-		}
+		public function get zoomLevel(): int
+		{ return mi_zoom; }
 	}
 }
 import com.iblsoft.flexiweather.utils.UniURLLoader;

@@ -128,12 +128,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 				}
 			}
 			
-			//trace("Zoom found: " + bestZoomLevel + " dist: " + bestDist);
-			
-			//debugZoomLevels(arr);
-			
-			// HACK do +1
-			return bestZoomLevel + 1;
+			return bestZoomLevel;
 		}
 		
 		private function debugZoomLevels(arr: Array): void
