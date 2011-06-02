@@ -23,6 +23,7 @@ package com.iblsoft.flexiweather.ogc
 		override public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer
 		{
 			var l: InteractiveLayerQTTMS = new InteractiveLayerQTTMS(iw, this);
+			l.name = label;
 			return l;
 		}
 		
