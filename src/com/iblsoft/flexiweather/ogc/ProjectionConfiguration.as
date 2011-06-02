@@ -48,16 +48,12 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 		
-		public function serialize(storage:Storage):void
+		override public function serialize(storage: Storage): void
 		{
+			super.serialize(storage);
 			proj4String = storage.serializeString("proj4-string", proj4String, null);
-			ms_crs = storage.serializeString("crs", ms_crs, null);
-			var xMin: Number = storage.serializeNumber("min-x", m_bbox.xMin, 0);
-			var yMin: Number = storage.serializeNumber("min-y", m_bbox.yMin, 0);
-			var xMax: Number = storage.serializeNumber("max-x", m_bbox.xMax, 0);
-			var yMax: Number = storage.serializeNumber("max-y", m_bbox.yMax, 0);
-			m_bbox = new BBox(xMin, yMin, xMax, yMax);
-			parseTitle();
+			if(storage.isLoading())
+				parseTitle();
 		}
 		
 		override public function clone(): Object
