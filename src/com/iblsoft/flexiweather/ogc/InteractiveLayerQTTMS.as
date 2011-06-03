@@ -469,10 +469,12 @@ package com.iblsoft.flexiweather.ogc
 		{
 			if(s_crs in md_crsToTilingExtent)
 				return md_crsToTilingExtent[s_crs];
+			/*
 			if(s_crs == "EPSG:4326")
 				return new BBox(-180, -180, 180, 180);
 			if(s_crs == "EPSG:900913")
 				return new BBox(-20037508,-20037508,20037508,20037508.34);
+			*/
 			return null;
 		}
 
