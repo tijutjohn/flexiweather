@@ -14,10 +14,11 @@ package com.iblsoft.flexiweather.widgets
 	 *
 	 *  @eventType mx.events.FlexEvent.ENTER
 	 */
-	[Event(name="enter", type="mx.events.FlexEvent")]
+	[Event(name="customEnter", type="flash.events.Event")]
 	
 	public class TextAreaWithEnter extends TextArea
 	{
+		public static const CUSTOM_ENTER: String = "customEnter";
 		public function TextAreaWithEnter()
 		{
 			super();
@@ -60,13 +61,13 @@ package com.iblsoft.flexiweather.widgets
 	            	{
 	            		if (textDisplay.text.length > 0)
 	            		{
-	                		dispatchEvent(new FlexEvent(FlexEvent.ENTER));
 		                	event.preventDefault();
+	                		dispatchEvent(new Event(CUSTOM_ENTER));
 	              		} else {
 	              			event.preventDefault();
 	              			event.stopImmediatePropagation();
 	              			event.stopPropagation();
-	              			return;
+	              			return;	
 	              		}
 	                	
 	                	textDisplay.text = '';
