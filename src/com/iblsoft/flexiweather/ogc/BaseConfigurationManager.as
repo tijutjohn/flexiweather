@@ -2,6 +2,8 @@ package com.iblsoft.flexiweather.ogc
 {
 	import flash.events.EventDispatcher;
 	
+	import mx.utils.ObjectUtil;
+	
 	public class BaseConfigurationManager extends EventDispatcher
 	{
 		protected var groups:Array = [];
@@ -11,7 +13,37 @@ package com.iblsoft.flexiweather.ogc
 		{
 		}
 		
-		
+		protected function sortArray(item1: Object, item2: Object, array: Array = null): int
+		{
+			var label1: String = fixLabel(item1.label).toLowerCase();
+			var label2: String = fixLabel(item2.label).toLowerCase();
+			
+			var isFolder1: Boolean = isFolder(label1);
+			var isFolder2: Boolean = isFolder(label1);
+			
+			if (isFolder1 && !isFolder2)
+			{
+				return 1;
+			} else {
+				if (!isFolder1 && isFolder2)
+				{
+					return -1;
+				} else {
+					if ((isFolder1 && isFolder2) || (!isFolder1 && !isFolder2))
+					{
+						return ObjectUtil.compare(label1, label2);
+					}
+						
+				}
+				
+			}
+			
+			return 0;
+		}
+		private function isFolder(path: String): Boolean
+		{
+			return path.indexOf('/') >= 0;
+		}
 		protected function fixLabel(lbl: String): String
 		{
 			var test: String = 'global/'; 

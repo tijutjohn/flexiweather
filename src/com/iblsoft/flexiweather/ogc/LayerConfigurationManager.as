@@ -7,6 +7,9 @@ package com.iblsoft.flexiweather.ogc
 	import flash.events.Event;
 	
 	import mx.collections.ArrayCollection;
+	import mx.collections.Sort;
+	
+	import spark.collections.SortField;
 
 	public class LayerConfigurationManager extends BaseConfigurationManager implements Serializable
 	{
@@ -118,6 +121,13 @@ package com.iblsoft.flexiweather.ogc
 				var bbox: BBox;
 				var compatibleWithCRS: Boolean = true;
 				var layerType: String = 'layer';
+				
+				var sort: Sort = new Sort();
+				var labelField: SortField = new SortField('label');
+				sort.fields = [labelField];
+				sort.compareFunction = sortArray;
+				ma_layers.sort = sort;
+				ma_layers.refresh();
 				
 				for each (var layerConfig: LayerConfiguration in ma_layers)
 				{

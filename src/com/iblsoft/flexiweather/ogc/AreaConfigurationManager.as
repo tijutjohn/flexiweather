@@ -10,6 +10,9 @@ package com.iblsoft.flexiweather.ogc
 	import flash.utils.Dictionary;
 	
 	import mx.collections.ArrayCollection;
+	import mx.collections.Sort;
+	
+	import spark.collections.SortField;
 
 	public class AreaConfigurationManager extends BaseConfigurationManager implements Serializable
 	{
@@ -162,6 +165,16 @@ package com.iblsoft.flexiweather.ogc
 				}
 				var groupParentXML: XML;
 				
+				
+				//sort array first
+				var sort: Sort = new Sort();
+				var labelField: SortField = new SortField('label');
+				sort.fields = [labelField];
+				sort.compareFunction = sortArray;
+				ma_areas.sort = sort;
+				ma_areas.refresh();
+					
+				
 				for each (var area: AreaConfiguration in ma_areas)
 				{
 					var lbl: String =  area.label;
@@ -194,6 +207,7 @@ package com.iblsoft.flexiweather.ogc
 					}
 				}
 				
+				areasXMLList
 				var areaCustom: XML = <menuitem label='Custom...' data='custom.area' type='action'/>;
 				areasXMLList.appendChild(areaCustom);
 				
