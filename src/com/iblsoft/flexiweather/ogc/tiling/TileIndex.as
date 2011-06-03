@@ -11,24 +11,19 @@ package com.iblsoft.flexiweather.ogc.tiling
 			if (i_tileZoom <= 0)
 			{
 				i_tileZoom = 2;
-				trace("Strop tileZoom is negative");
+				trace("TileIndex.TileIndex(): Stop tileZoom is negative");
 			}
 			
-			var _maxTilePos: int = i_tileZoom * i_tileZoom - 1;
+			var _maxTilePos: int = 1 << (i_tileZoom + 1) - 1;
 			if (i_tileRow > _maxTilePos || i_tileCol > _maxTilePos || i_tileCol < 0 || i_tileRow < 0)
 			{
-				trace("stop, wrong tile for zoom: " + i_tileZoom);
+				trace("TileIndex.TileIndex(): Stop, wrong tile for zoom: " + i_tileZoom);
 			}
 			mi_tileZoom = i_tileZoom;
-			changePosition(i_tileRow, i_tileCol);
-		}
-	
-		public function changePosition(i_tileRow: int, i_tileCol: int): void
-		{
 			mi_tileRow = i_tileRow;
 			mi_tileCol = i_tileCol;
 		}
-		
+	
 		public static function createTileIndexFromString(str: String): TileIndex
 		{
 			var tileIndex: TileIndex = new TileIndex();
@@ -41,6 +36,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			
 			return tileIndex;
 		}
+
 		public function toString(): String
 		{
 //			return "" + mi_tileZoom + "/" + mi_tileRow + "/" + mi_tileCol; 
