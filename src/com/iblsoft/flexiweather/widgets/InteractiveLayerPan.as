@@ -28,9 +28,9 @@ package com.iblsoft.flexiweather.widgets
 		internal var mb_requireShiftKey: Boolean = true;
 		
 		private var _moveInterval: int;
-        private var _moveIntervalPoint: Point;
-        
-        private var _oldMouseX: int;
+		private var _moveIntervalPoint: Point;
+		
+		private var _oldMouseX: int;
 		private var _oldMouseY: int;
 		private var _diffMouseX: int;
 		private var _diffMouseY: int;
@@ -61,7 +61,6 @@ package com.iblsoft.flexiweather.widgets
 		{
 		}
 		
-		
 		private function onGesturePan(event: TransformGestureEvent): void
 		{
 			trace("onGesturePan: phase: " + event.phase + " -> " + event.offsetX + " , " + event.offsetY);
@@ -82,8 +81,8 @@ package com.iblsoft.flexiweather.widgets
 			doRealPan(event.offsetX, event.offsetY, b_finalChange);
 		}
 
-        override public function onMouseDown(event: MouseEvent): Boolean
-        {
+		override public function onMouseDown(event: MouseEvent): Boolean
+		{
 			if(!event.shiftKey && mb_requireShiftKey || event.ctrlKey)
 				return false;
 			if(!event.buttonDown)
@@ -98,12 +97,12 @@ package com.iblsoft.flexiweather.widgets
 				addEventListener(Event.ENTER_FRAME, onEnterFrame);
 			}
 			
-        	_p = new Point(event.localX, event.localY);
-        	_oldPoint = _p;
-        	_oldStartPoint = _p;
-        	_moveIntervalPoint = _p;
-        	return true;
-        }
+			_p = new Point(event.localX, event.localY);
+			_oldPoint = _p;
+			_oldStartPoint = _p;
+			_moveIntervalPoint = _p;
+			return true;
+		}
 
 		private function getFinalPanPoint(point: Point, oldPoint: Point): Point
 		{
@@ -120,27 +119,30 @@ package com.iblsoft.flexiweather.widgets
 		{
 			_moveIntervalPoint = new Point(int(event.value[0]), int(event.value[1]));
 			if(doPanTo(_moveIntervalPoint, true, 'onMoveAnimateEnd')) {
-		        	//invalidateDynamicPart();
-	        }
-	        _p = null;
+				//invalidateDynamicPart();
+			}
+			_p = null;
 		}
+
 		private var _animPoint: Point = new Point();
+
 		private function onMoveAnimate(event: TweenEvent): void
 		{
 			_moveIntervalPoint = new Point(int(event.value[0]), int(event.value[1]));
 			if (Point.distance(_moveIntervalPoint, _animPoint) > 0)
 			{ 
 				if(doPanTo(_moveIntervalPoint, false, 'onMoveAnimate')) {
-			        invalidateDynamicPart();
-		        }
+					invalidateDynamicPart();
+				}
 		 	}
-	        _animPoint = _moveIntervalPoint;
+			_animPoint = _moveIntervalPoint;
 		}
-        override public function onMouseUp(event: MouseEvent): Boolean
-        {
-        	if (supportsPanAnimation)
-        		removeEventListener(Event.ENTER_FRAME, onEnterFrame);
-        	
+
+		override public function onMouseUp(event: MouseEvent): Boolean
+		{
+			if (supportsPanAnimation)
+				removeEventListener(Event.ENTER_FRAME, onEnterFrame);
+			
 			if(_p == null)
 				return false;
 				
@@ -149,9 +151,8 @@ package com.iblsoft.flexiweather.widgets
 			var endP: Point = new Point(event.localX, event.localY);
 			var dist: Number = Point.distance(_p, endP)
 			var lastDistance: Number = Point.distance(_oldPoint, endP);
-			
-		        
-		    if (supportsPanAnimation && lastDistance > 1)
+
+			if (supportsPanAnimation && lastDistance > 1)
 			{
 				var finalPoint: Point = getFinalPanPoint(endP, _oldPoint);
 				
@@ -169,34 +170,34 @@ package com.iblsoft.flexiweather.widgets
 				
 			} else {
 				if(doPanTo(endP, true, 'OnMouseUp')) {
-	        		//invalidateDynamicPart();
-	        	}
-	        	_p = null;
+					//invalidateDynamicPart();
+				}
+				_p = null;
 			}
 			_oldStartPoint = null;
-        	return true;
-        }
-        
-       
-        
-        private function onMouseMoveDelay(): void
-        {
-        	if(doPanTo(_moveIntervalPoint, true, 'onMouseMoveDelay')) {
-	        	invalidateDynamicPart();
-	        }
-        }
-        
-        private var _oldPoint: Point;
-        
-        override public function onMouseMove(event:MouseEvent):Boolean
-        {
+			return true;
+		}
+		
+		   
+		
+		private function onMouseMoveDelay(): void
+		{
+			if(doPanTo(_moveIntervalPoint, true, 'onMouseMoveDelay')) {
+				invalidateDynamicPart();
+			}
+		}
+		
+		private var _oldPoint: Point;
+		
+		override public function onMouseMove(event:MouseEvent):Boolean
+		{
 			if(_oldStartPoint == null)
 				return false;
 				
 			var finalChange: Boolean = false; //false
 			if (!supportsPanAnimation)
 			{
-	        	_oldPoint = _moveIntervalPoint;
+				_oldPoint = _moveIntervalPoint;
 				_moveIntervalPoint = new Point(event.localX, event.localY);
 			}
 			
@@ -208,12 +209,12 @@ package com.iblsoft.flexiweather.widgets
 //				trace("onMouseMove target: " + event.target + " CURRENT TARGET: " + event.currentTarget);
 //				trace("onMouseMove target: " + event.localX +","+ event.localY);
 				if(doPanTo(_moveIntervalPoint, finalChange, 'onMouseMove')) {
-		        	invalidateDynamicPart();
-		        }
+					invalidateDynamicPart();
+				}
 		 	}
-	        
-        	return true;
-        }
+			
+			return true;
+		}
 
 		
 		private function onEnterFrame(event: Event): void
@@ -229,7 +230,7 @@ package com.iblsoft.flexiweather.widgets
 			
 			
 			_oldPoint = _moveIntervalPoint;
-	        
+			
 			_moveIntervalPoint = new Point(_oldMouseX, _oldMouseY);
 			
 			if (_diffMouseX != 0 || _diffMouseY != 0)
@@ -238,29 +239,29 @@ package com.iblsoft.flexiweather.widgets
 //			trace("\t enter frame  " + _moveIntervalPoint);
 		}
 			
-        protected function doPanTo(p: Point, b_finalChange: Boolean, test: String): Boolean
-        {
-        	if (!_p && !_oldStartPoint)
-        	{
-        		return false;
-        	}
-        	
+		protected function doPanTo(p: Point, b_finalChange: Boolean, test: String): Boolean
+		{
+			if (!_p && !_oldStartPoint)
+			{
+				return false;
+			}
+			
 			var pDiff: Point = p.subtract(_p);
 //			trace("p diff ["+test+"]: " + pDiff + " p : " + p + " _p: " + _p);
 			_p = p;
 			
 			if(Math.abs(pDiff.x) > 1 || Math.abs(pDiff.y) > 1 || b_finalChange) {
-//	        	var r: BBox = container.getViewBBox();
-//	        	var w: Number = container.width;
-//	        	var h: Number = container.height;
-//	        	pDiff.x = pDiff.x * r.width / w;
-//	        	pDiff.y = pDiff.y * r.height / h;
-//	        	container.setViewBBox(r.translated(-pDiff.x, pDiff.y), b_finalChange);
+//				var r: BBox = container.getViewBBox();
+//				var w: Number = container.width;
+//				var h: Number = container.height;
+//				pDiff.x = pDiff.x * r.width / w;
+//				pDiff.y = pDiff.y * r.height / h;
+//				container.setViewBBox(r.translated(-pDiff.x, pDiff.y), b_finalChange);
 				doRealPan(pDiff.x, pDiff.y, b_finalChange);
-				return true;        	
+				return true;			
 			}
-			return false;        	
-        }
+			return false;			
+		}
 		
 		private var _diff: Point;
 		private function doRealPan(xDiff: Number, yDiff: Number, b_finalChange: Boolean): void
