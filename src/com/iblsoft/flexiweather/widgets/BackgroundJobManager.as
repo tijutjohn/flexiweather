@@ -2,6 +2,7 @@ package com.iblsoft.flexiweather.widgets
 {
 	import com.iblsoft.flexiweather.events.BackgroundJobEvent;
 	
+	import flash.display.DisplayObject;
 	import flash.events.EventDispatcher;
 	
 	import mx.collections.ArrayCollection;
@@ -9,6 +10,7 @@ package com.iblsoft.flexiweather.widgets
 	import mx.controls.ProgressBarLabelPlacement;
 	import mx.controls.ProgressBarMode;
 	import mx.core.IFlexDisplayObject;
+	import mx.core.IVisualElement;
 	import mx.core.UIComponent;
 	import mx.events.ResizeEvent;
 	
@@ -20,14 +22,12 @@ package com.iblsoft.flexiweather.widgets
 	{
 		internal static var sm_instance: BackgroundJobManager;
 
-		internal var m_defaultProgressBar: ProgressBar;
-		
-		public var m_progressBar: JobPreloader;
+		public var m_progressBar: JobProgressIndicator;
 		
 		internal var m_jobs: ArrayCollection = new ArrayCollection();
 		
-		internal var mi_maxJobs: int = 0;
-		internal var mi_doneJobs: int = 0;
+		internal var mi_jobsCount: int = 0;
+		internal var mi_jobsDone: int = 0;
  
 		public function BackgroundJobManager()
 		{
@@ -45,48 +45,32 @@ package com.iblsoft.flexiweather.widgets
 		
 		public function setupIndicator(parent: IFlexDisplayObject): void
 		{
-			if (m_defaultProgressBar)
-				m_defaultProgressBar.labelPlacement = ProgressBarLabelPlacement.CENTER;
-			parent.addEventListener(ResizeEvent.RESIZE, onParentResize);
 			if(parent is Group)
-				Group(parent).addElement(m_defaultProgressBar);
+				Group(parent).addElement(m_progressBar.jobProgressGetDisplayObject() as IVisualElement);
 			else if(parent is UIComponent)
-				UIComponent(parent).addChild(m_defaultProgressBar);
-			onParentResize(null);
+				UIComponent(parent).addChild(m_progressBar.jobProgressGetDisplayObject() as DisplayObject);
 		}
 		
 		public function createDefaultPreloader():void
 		{
-			m_defaultProgressBar = new ProgressBar();
-		}
-		
-		public function onParentResize(event: ResizeEvent): void
-		{
-			if (m_defaultProgressBar)
-			{
-				m_defaultProgressBar.width = 200;
-				m_defaultProgressBar.height = m_defaultProgressBar.parent.height - 5;
-				m_defaultProgressBar.labelPlacement = ProgressBarLabelPlacement.CENTER;
-				m_defaultProgressBar.x = m_defaultProgressBar.parent.width - m_defaultProgressBar.width - 5;
-				m_defaultProgressBar.y = (m_defaultProgressBar.parent.height - m_defaultProgressBar.height) / 2;
-			}
+			m_progressBar = new ProgressBarJobProgressIndicator(new ProgressBar());
 		}
 		
 		private function updateTotalJobsStatus(): void
 		{
-			mi_maxJobs -= mi_doneJobs;
-			mi_doneJobs = 0;
+			mi_jobsCount -= mi_jobsDone;
+			mi_jobsDone = 0;
 		}
 		public function startJob(s_label: String): BackgroundJob
 		{
 			var job: BackgroundJob = new BackgroundJob(s_label, this);
 			m_jobs.addItem(job);
-			if(mi_doneJobs == mi_maxJobs) {
+			if(mi_jobsDone == mi_jobsCount) {
 				// all jobs done, start counting from scratch
-				mi_doneJobs = 0;
-				mi_maxJobs = 0;
+				mi_jobsDone = 0;
+				mi_jobsCount = 0;
 			}
-			mi_maxJobs++;
+			mi_jobsCount++;
 			updateUI();
 			
 			dispatchJobEvent(BackgroundJobEvent.JOB_STARTED);
@@ -98,8 +82,8 @@ package com.iblsoft.flexiweather.widgets
 		{
 			var bje: BackgroundJobEvent = new BackgroundJobEvent(type);
 			bje.runningJobs = m_jobs.length;
-			bje.doneJobs = mi_doneJobs;
-			bje.allJobs = mi_maxJobs;
+			bje.doneJobs = mi_jobsDone;
+			bje.allJobs = mi_jobsCount;
 			dispatchEvent(bje);
 		}
 		public function finishJob(job: BackgroundJob): void
@@ -107,7 +91,7 @@ package com.iblsoft.flexiweather.widgets
 			var i: int = m_jobs.getItemIndex(job);
 			if(i >= 0) {
 				m_jobs.removeItemAt(i);
-				mi_doneJobs++;
+				mi_jobsDone++;
 				updateUI();
 			}
 			
@@ -131,39 +115,13 @@ package com.iblsoft.flexiweather.widgets
 					s += "\n  " + job.ms_label;
 				}
 				
-				if (m_progressBar)
-				{
-					m_progressBar.updateUI(mi_doneJobs, mi_maxJobs);
-					m_progressBar.visible = true;
-					m_progressBar.toolTip = s;
-				}
-				
-				if (m_defaultProgressBar)
-				{
-					m_defaultProgressBar.label = mi_doneJobs + "/" + mi_maxJobs + " jobs done";
-					
-					if(mi_maxJobs > 1) {
-						m_defaultProgressBar.indeterminate = false;
-						m_defaultProgressBar.minimum = 0;
-						m_defaultProgressBar.maximum = mi_maxJobs;
-						m_defaultProgressBar.mode = ProgressBarMode.MANUAL;
-						m_defaultProgressBar.setProgress(mi_doneJobs, mi_maxJobs);
-					}
-					else {
-						m_defaultProgressBar.mode = ProgressBarMode.EVENT;
-						m_defaultProgressBar.indeterminate = true;
-					}
-					m_defaultProgressBar.toolTip = s;
-					m_defaultProgressBar.visible = true;
-				}
-				
+				if(m_progressBar != null)
+					m_progressBar.jobProgressUpdate(mi_jobsDone, mi_jobsCount, s);
 				
 			}
 			else {
-				if (m_progressBar)
-					m_progressBar.visible = false;
-				if (m_defaultProgressBar)
-					m_defaultProgressBar.visible = false;
+				if(m_progressBar)
+					m_progressBar.jobProgressFinished();
 			}
 		}
 		

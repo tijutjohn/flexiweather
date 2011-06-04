@@ -166,6 +166,9 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.GroupBox"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.GroupHBox"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.GroupVBox"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.JobProgressIndicator"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.ProgressBarJobProgressIndicator"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.LabelJobProgressIndicator"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
