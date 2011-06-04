@@ -11,6 +11,7 @@ package com.iblsoft.flexiweather.widgets
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
 	import flash.events.TransformGestureEvent;
+	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.ui.Multitouch;
 	import flash.utils.Timer;
@@ -20,15 +21,19 @@ package com.iblsoft.flexiweather.widgets
 	
 	public class InteractiveLayerZoom extends InteractiveLayer
 	{
-		protected var _r: Rectangle;
 		protected var mb_requireCtrlKey: Boolean = true;
+
+		protected var m_areaZoomingRectangle: Rectangle;
 
 		protected var m_wheelZoomTimer: Timer = new Timer(500, 1); 
 		protected var mb_finalChangeOccuredAfterWheelZoom: Boolean = true; 
 		
-		private var _zoomAreaSprite: Sprite;
-		private var _showZoomingArea: Boolean = false;
-		
+		private var m_slideZoomSprite: Sprite;
+		private var mi_slideZoomStartY: int = -1;
+		private var mb_showSlideZoomingSprite: Boolean = false;
+
+		private var m_previousGestureZoomMidPoint: Coord = null;
+
 		public function InteractiveLayerZoom(container: InteractiveWidget = null)
 		{
 			super(container);
@@ -36,6 +41,7 @@ package com.iblsoft.flexiweather.widgets
 			m_wheelZoomTimer.addEventListener(TimerEvent.TIMER_COMPLETE, onMouseWheelTimer);
 			waitForContainer();
 		}
+
 		private function waitForContainer(): void
 		{
 			if (!container || !container.stage)
@@ -44,11 +50,6 @@ package com.iblsoft.flexiweather.widgets
 				if (Multitouch.supportedGestures)
 				{
 					container.stage.addEventListener(TransformGestureEvent.GESTURE_ZOOM, onGestureZoom);
-					container.stage.addEventListener(TransformGestureEvent.GESTURE_PAN, onGesturePan);
-					container.stage.addEventListener(TransformGestureEvent.GESTURE_SWIPE, onGestureSwipe);
-//					addEventListener(TransformGestureEvent.GESTURE_ZOOM, onGestureZoom);
-//					addEventListener(TransformGestureEvent.GESTURE_PAN, onGesturePan);
-//					addEventListener(TransformGestureEvent.GESTURE_SWIPE, onGestureSwipe);
 				}
 			}
 		}
@@ -57,231 +58,140 @@ package com.iblsoft.flexiweather.widgets
 		{
 			super.createChildren();
 		
-				createChildrenNoGesturesMode();
-//			if (!Multitouch.supportedGestures)
-//			{
-//			} else {
-//				addEventListener(TransformGestureEvent.GESTURE_ZOOM, onGestureZoom);
-//			}
-				
-			
-			
+			createChildrenNoGesturesMode();
 		}
-		
-		private function onGestureSwipe(event: TransformGestureEvent): void
-		{
-			trace("onGestureSwipe: phase: " + event.phase + " -> "  + event.offsetX + " , " + event.offsetY);
-		}
-		private function onGesturePan(event: TransformGestureEvent): void
-		{
-			trace("onGesturePan: phase: " + event.phase + " -> " + event.offsetX + " , " + event.offsetY);
-		}
-		private function onGestureZoom(event: TransformGestureEvent): void
-		{
-			
-			trace("onGestureZoom: target: " + event.target);
-			trace("onGestureZoom: target: " + event.currentTarget);
-			trace("onGestureZoom: phase: " + event.phase + " ->  scale: " + event.scaleX + ", " + event.scaleY);
-			trace("onGestureZoom: local: " + event.localX + ", " + event.localY);
-//			trace("onGestureZoom: offset: " + event.offsetX + ", " + event.offsetY);
-//			trace("onGestureZoom: rotation: " + event.rotation + ", " + event.offsetY);
-			
-			var b_finalChange: Boolean = event.phase == GesturePhase.END;
-			
-			var x: int = event.localX;
-			var y: int = event.localX;
-			gestureZoom(x, y, event.scaleX, event.scaleY, b_finalChange);
-		}
-		
-		private var _middleX: int = 0;
-		private var _middleY: int = 0;
-		private var _oldMiddle: Coord;
-		private var _scale: Number = 1;
-		
-		private function gestureZoom(middleX: int, middleY: int,  scaleX: Number, scaleY: Number, b_finalChange: Boolean): void
-		{
-			var r: Rectangle = container.getViewBBox().toRectangle();
-			var rOld: Rectangle = container.getViewBBox().toRectangle();
-			
-			var w: Number = container.width;
-			var h: Number = container.height;
-			var bW: Number = r.width;
-			var bH: Number = r.height;
-			
-			var scale: Number = (scaleX + scaleY) / 2;
-			var middle: Coord = container.pointToCoord(middleX, middleY);
-			if(!middle)
-				return;
-			if (_oldMiddle)
-				trace("\n middle: " + middle.toString() + " old: " + _oldMiddle.toString());
-			else
-				trace("\n middle: " + middle.toString() + " old: NULL ");
-			
-			r.x = middle.x - (middle.x - rOld.x) / scale;
-			r.y = middle.y - (middle.y - rOld.y) / scale;
-			
-//			if (_oldMiddle)
-//			{
-//				r.x -= middle.x - _oldMiddle.x;
-//				r.y -= middle.y - _oldMiddle.y;
-//				_oldMiddle = null;
-//			} else {
-//				_oldMiddle = middle;
-//			}
-				_oldMiddle = middle;
-			
-			_middleX = middleX;
-			_middleY = middleY;
-			_scale = scale;
-			
-			r.width = rOld.width / scale;
-			r.height = rOld.height / scale;
-			
-			container.setViewBBox(BBox.fromRectangle(r), b_finalChange);
-			
-			invalidateDynamicPart();
-			
-		}
+
 		private function createChildrenNoGesturesMode(): void
 		{
-			_zoomAreaSprite = new Sprite();
-			addChild(_zoomAreaSprite);
+			m_slideZoomSprite = new Sprite();
+			addChild(m_slideZoomSprite);
 			
-			_zoomAreaSprite.visible = _showZoomingArea;
-			
+			m_slideZoomSprite.visible = mb_showSlideZoomingSprite;
 		}
-		
+
 		override public function destroy(): void
 		{
-			removeChild(_zoomAreaSprite);
+			removeChild(m_slideZoomSprite);
 		}
-        override public function onMouseRollOver(event:MouseEvent): Boolean
-        {
-//        	trace("\n\nZOOM onMouseRollOver");
-        	
-        	container.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
-        	container.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
-        	
-        	return true;
-        }
-        override public function onMouseRollOut(event:MouseEvent):Boolean
-        {
-//        	trace("ZOOM onMouseRollOut");
-        	
-        	container.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
-        	container.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyUp);
-        	return true;
-        }
 
-        private function onKeyDown(event: KeyboardEvent): void
-        {
-//        	trace("onKeyDown: " + event.keyCode + " ctrl: " + event.ctrlKey);
-        	if (!_showZoomingArea && event.ctrlKey)
-        	{
-        		_showZoomingArea = true;
-        		invalidateDisplayList();
-        	}
-        }
-        private function onKeyUp(event: KeyboardEvent): void
-        {
-//        	trace("onKeyUp: " + event.keyCode + " ctrl: " + event.ctrlKey);
-        	if (_showZoomingArea && !event.ctrlKey)
-        	{
-        		_showZoomingArea = false;
-//        		_zoomAreaSprite.visible = false;
-        		invalidateDisplayList();
-        	}
-        }
-        
-        private var _zoomStartY: int = -1;
-        override public function onMouseDown(event: MouseEvent): Boolean
-        {
+		override public function onMouseRollOver(event:MouseEvent): Boolean
+		{
+			container.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+			container.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
+			
+			return true;
+		}
+
+		override public function onMouseRollOut(event:MouseEvent):Boolean
+		{
+			container.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+			container.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyUp);
+			return true;
+		}
+
+		private function onKeyDown(event: KeyboardEvent): void
+		{
+			if (!mb_showSlideZoomingSprite && event.ctrlKey)
+			{
+				mb_showSlideZoomingSprite = true;
+				invalidateDisplayList();
+			}
+		}
+		private function onKeyUp(event: KeyboardEvent): void
+		{
+			if (mb_showSlideZoomingSprite && !event.ctrlKey)
+			{
+				mb_showSlideZoomingSprite = false;
+				invalidateDisplayList();
+			}
+		}
+		
+		override public function onMouseDown(event: MouseEvent): Boolean
+		{
 			if(!event.ctrlKey && mb_requireCtrlKey || event.shiftKey)
 				return false;
 			if(!event.buttonDown)
 				return false;
 				
-//			trace("zoom onMouseDown " + event.target + ", " + event.currentTarget);
-			if (event.target == _zoomAreaSprite)
+			if (event.target == m_slideZoomSprite)
 			{
-				_zoomStartY = event.localY;
+				mi_slideZoomStartY = event.localY;
 			} else {
-	        	_r = new Rectangle(event.localX, event.localY, 0, 0);
-	        	invalidateDynamicPart();
+				m_areaZoomingRectangle = new Rectangle(event.localX, event.localY, 0, 0);
+				invalidateDynamicPart();
 	  		}
-        	return true;
-        }
+			return true;
+		}
 
-        override public function onMouseUp(event: MouseEvent): Boolean
-        {
-			if(_r == null)
+		override public function onMouseUp(event: MouseEvent): Boolean
+		{
+			if(m_areaZoomingRectangle == null)
 				return false;
 				
-			if (event.target == _zoomAreaSprite)
+			if (event.target == m_slideZoomSprite)
 			{
-				_zoomStartY = -1;
+				mi_slideZoomStartY = -1;
 			} else {
 				//create new rectangle from old one with correct left, top, right, bottom properties (it matters on direction of draggine when zoom rectange is created
-				_r = new Rectangle(Math.min(_r.left, _r.right), Math.min(_r.top, _r.bottom), Math.abs(_r.left - _r.right),  Math.abs(_r.top - _r.bottom));
+				m_areaZoomingRectangle = new Rectangle(Math.min(m_areaZoomingRectangle.left, m_areaZoomingRectangle.right), Math.min(m_areaZoomingRectangle.top, m_areaZoomingRectangle.bottom), Math.abs(m_areaZoomingRectangle.left - m_areaZoomingRectangle.right),  Math.abs(m_areaZoomingRectangle.top - m_areaZoomingRectangle.bottom));
 				
-				if((_r.width) > 5 && (_r.height) > 5) {
-		        	var r: Rectangle = container.getViewBBox().toRectangle();
-		        	var w: Number = container.width;
-		        	var h: Number = container.height;
-		        	var bW: Number = r.width;
-		        	var bH: Number = r.height;
-		        	r.width = bW / w * _r.width;
-		        	r.height = bH / h * _r.height;
-		        	r.x = r.x + _r.x / w * bW;
-		        	r.y = r.y + (h - _r.bottom) / h * bH;
-		        	container.setViewBBox(BBox.fromRectangle(r), true);
-				}        	
-	        	_r = null;
-	        	invalidateDynamicPart();
+				if((m_areaZoomingRectangle.width) > 5 && (m_areaZoomingRectangle.height) > 5) {
+					var r: Rectangle = container.getViewBBox().toRectangle();
+					var w: Number = container.width;
+					var h: Number = container.height;
+					var bW: Number = r.width;
+					var bH: Number = r.height;
+					r.width = bW / w * m_areaZoomingRectangle.width;
+					r.height = bH / h * m_areaZoomingRectangle.height;
+					r.x = r.x + m_areaZoomingRectangle.x / w * bW;
+					r.y = r.y + (h - m_areaZoomingRectangle.bottom) / h * bH;
+					container.setViewBBox(BBox.fromRectangle(r), true);
+				}			
+				m_areaZoomingRectangle = null;
+				invalidateDynamicPart();
 	 		 }
-        	return true;
-        }
-        
-        override public function onMouseMove(event: MouseEvent):Boolean
-        {
-        	if (event.target == _zoomAreaSprite)
+			return true;
+		}
+
+		override public function onMouseMove(event: MouseEvent):Boolean
+		{
+			if (event.target == m_slideZoomSprite)
 			{
 				if(!event.ctrlKey && mb_requireCtrlKey || event.shiftKey)
 					return false;
 				if(!event.buttonDown)
 					return false;
-				if (_zoomStartY > 0)
+				if (mi_slideZoomStartY > 0)
 				{
-					var diff: Number = (event.localY - _zoomStartY);
-//					trace("zoom area: " + diff);
+					var diff: Number = (event.localY - mi_slideZoomStartY);
 					onDeltaZoom(diff);
-					_zoomStartY = event.localY;
+					mi_slideZoomStartY = event.localY;
 				}
 			} else {
-				if(_r == null)
+				if(m_areaZoomingRectangle == null)
 					return false;
-				_r.width = event.localX - _r.x;
-				_r.height = event.localY - _r.y;
-	        	invalidateDynamicPart();
+				m_areaZoomingRectangle.width = event.localX - m_areaZoomingRectangle.x;
+				m_areaZoomingRectangle.height = event.localY - m_areaZoomingRectangle.y;
+				invalidateDynamicPart();
 	  		}
-        	return true;
-        }
-        
-        override public function onAreaChanged(b_finalChange:Boolean): void
-        {
-        	if(b_finalChange) {
-        		// remember final area change
-        		mb_finalChangeOccuredAfterWheelZoom = true;
-        	} else {
-        		if(m_wheelZoomTimer.running) {
-	        		// non-final area change occured while waiting for final change,
-	        		// so just waiting timeout
+			return true;
+		}
+		
+		override public function onAreaChanged(b_finalChange:Boolean): void
+		{
+			if(b_finalChange) {
+				// remember final area change
+				mb_finalChangeOccuredAfterWheelZoom = true;
+			} else {
+				if(m_wheelZoomTimer.running) {
+					// non-final area change occured while waiting for final change,
+					// so just waiting timeout
 					m_wheelZoomTimer.repeatCount = 1;
 					m_wheelZoomTimer.reset();
 					m_wheelZoomTimer.start();
-        		}
-        	}
-        }
+				}
+			}
+		}
 
 		override public function onMouseWheel(event: MouseEvent): Boolean
 		{
@@ -292,37 +202,37 @@ package com.iblsoft.flexiweather.widgets
 		
 		private function onDeltaZoom(delta: int): Boolean
 		{
-        	var bbox: Rectangle = container.getViewBBox().toRectangle();
-        	var f_bboxCenterX: Number = bbox.x + bbox.width / 2.0; 
-        	var f_bboxCenterY: Number = bbox.y + bbox.height / 2.0;
-        	var f_width: Number = bbox.width;
-        	var f_height: Number = bbox.height;
-        	var b_changed: Boolean = false;
+			var bbox: Rectangle = container.getViewBBox().toRectangle();
+			var f_bboxCenterX: Number = bbox.x + bbox.width / 2.0; 
+			var f_bboxCenterY: Number = bbox.y + bbox.height / 2.0;
+			var f_width: Number = bbox.width;
+			var f_height: Number = bbox.height;
+			var b_changed: Boolean = false;
 			if(delta > 0) {
-	        	f_width *= 0.75;
-	        	f_height *= 0.75;
-	        	b_changed = true;
+				f_width *= 0.75;
+				f_height *= 0.75;
+				b_changed = true;
 			}
 			if(delta < 0) {
-	        	f_width /= 0.75;
-	        	f_height /= 0.75;
-	        	b_changed = true;
+				f_width /= 0.75;
+				f_height /= 0.75;
+				b_changed = true;
 			}
 			if(b_changed) {
 				m_wheelZoomTimer.repeatCount = 1;
 				m_wheelZoomTimer.reset();
 				m_wheelZoomTimer.start();
 				// do only non-final area change
-	        	container.setViewBBox(BBox.fromRectangle(new Rectangle(
-		        		f_bboxCenterX - f_width / 2.0,
-		        		f_bboxCenterY - f_height / 2.0,
-		        		f_width,
-		        		f_height)), false);
-	        	invalidateDynamicPart();
-	        	
-	        	// but start timer to defer final zoom change, but only if final change
-	        	// doesn't occur in between (initiated by someone else)
-	        	mb_finalChangeOccuredAfterWheelZoom = false;
+				container.setViewBBox(BBox.fromRectangle(new Rectangle(
+						f_bboxCenterX - f_width / 2.0,
+						f_bboxCenterY - f_height / 2.0,
+						f_width,
+						f_height)), false);
+				invalidateDynamicPart();
+				
+				// but start timer to defer final zoom change, but only if final change
+				// doesn't occur in between (initiated by someone else)
+				mb_finalChangeOccuredAfterWheelZoom = false;
 		 	}
 			return true;
 		}
@@ -335,30 +245,67 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 		
+		private function onGestureZoom(event: TransformGestureEvent): void
+		{
+			var b_finalChange: Boolean = event.phase == GesturePhase.END;
+			if(event.phase == GesturePhase.BEGIN)
+				m_previousGestureZoomMidPoint = null;
+			
+			var newViewBBox: Rectangle = container.getViewBBox().toRectangle();
+			var oldViewBBox: Rectangle = container.getViewBBox().toRectangle();
+			
+			var f_pxWidth: Number = container.width;
+			var f_pxHeight: Number = container.height;
+			var f_viewWidth: Number = oldViewBBox.width;
+			var f_viewHeight: Number = oldViewBBox.height;
+			
+			var f_aspectedScale: Number= (event.scaleX + event.scaleY) / 2;
+
+			var newMidPoint: Coord = container.pointToCoord(event.localX, event.localY);
+			if(!newMidPoint)
+				return;
+			
+			// apply scaling of the view BBox
+			newViewBBox.x = newMidPoint.x - (newMidPoint.x - oldViewBBox.x) / f_aspectedScale;
+			newViewBBox.y = newMidPoint.y - (newMidPoint.y - oldViewBBox.y) / f_aspectedScale;
+			
+			if (m_previousGestureZoomMidPoint)
+			{
+				// apply panning
+				newViewBBox.x -= newMidPoint.x - m_previousGestureZoomMidPoint.x;
+				newViewBBox.y -= newMidPoint.y - m_previousGestureZoomMidPoint.y;
+				m_previousGestureZoomMidPoint = null;
+			}
+			else {
+				m_previousGestureZoomMidPoint = newMidPoint;
+			}
+			
+			newViewBBox.width = oldViewBBox.width / f_aspectedScale;
+			newViewBBox.height = oldViewBBox.height / f_aspectedScale;
+			
+			container.setViewBBox(BBox.fromRectangle(newViewBBox), b_finalChange);
+			
+			invalidateDynamicPart();
+		}
+		
 		override public function draw(graphics: Graphics): void
 		{
 			super.draw(graphics);
 			
 			//draw zoom area on right side
-			var gr: Graphics = _zoomAreaSprite.graphics;
+			var gr: Graphics = m_slideZoomSprite.graphics;
 			gr.clear()
 			gr.beginFill(0,0.35);
 			gr.drawRoundRectComplex( width - 50, 20, 30, height - 40, 5, 5, 5, 5);
 			gr.endFill();
 			
-			_zoomAreaSprite.visible = _showZoomingArea;
+			m_slideZoomSprite.visible = mb_showSlideZoomingSprite;
 			
-//			var gr2: Graphics = graphics;
-//			gr2.beginFill(0xff0000);
-//			gr2.drawCircle(_middleX, _middleY, 30 * _scale);
-//			gr2.endFill();
-			
-			if(_r != null) {
+			if(m_areaZoomingRectangle != null) {
 				graphics.beginFill(0, 0.5);
 				graphics.lineStyle(1, 0xFFFFFF, 0.8);
-				graphics.drawRect(_r.x, _r.y, _r.width, _r.height);
+				graphics.drawRect(m_areaZoomingRectangle.x, m_areaZoomingRectangle.y, m_areaZoomingRectangle.width, m_areaZoomingRectangle.height);
 				graphics.endFill();
-//				graphics.drawRect(_r.x, _r.y, _r.width, _r.height);
 			}
 		}
 		
