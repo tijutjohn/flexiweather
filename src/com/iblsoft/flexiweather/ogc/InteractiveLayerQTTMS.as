@@ -97,6 +97,35 @@ package com.iblsoft.flexiweather.ogc
 			m_jobs = new TileJobs();
 		}
 
+		public override function invalidateSize(): void
+		{
+			super.invalidateSize();
+			if (container != null)
+			{
+				width = container.width;
+				height = container.height;
+			}
+		}
+		
+		public override function validateSize(b_recursive: Boolean = false): void
+		{
+			super.validateSize(b_recursive);
+			var i_oldZoom: int = mi_zoom;
+			findZoom();
+			if (i_oldZoom != mi_zoom)
+			{
+				updateData(false);
+			}
+		}
+
+		public static function expandURLPattern(s_url: String, tileIndex: TileIndex): String
+		{
+			s_url = s_url.replace('%COL%', String(tileIndex.mi_tileCol));
+			s_url = s_url.replace('%ROW%', String(tileIndex.mi_tileRow));
+			s_url = s_url.replace('%ZOOM%', String(tileIndex.mi_tileZoom));
+			return s_url;
+		}
+
 		private function getExpandedURL(tileIndex: TileIndex): String
 		{
 			var ret: String = ms_baseURL;
@@ -397,24 +426,15 @@ package com.iblsoft.flexiweather.ogc
 			gr.endFill();
 		}
 		
-		private var _oldViewBBox: BBox = new BBox(0,0,0,0);
-		
 		override public function onAreaChanged(b_finalChange: Boolean): void
 		{
 			super.onAreaChanged(b_finalChange);
-			if(_oldViewBBox.equals(container.getViewBBox()) &&!b_finalChange)
-			{
-				trace(" view BBOX is not changed");
-				return;
-			}
 			m_tilingUtils.onAreaChanged(container.crs, getGTileBBoxForWholeCRS(container.crs));
-			
-			if(b_finalChange) {
-				
-				var oldZoom: int = mi_zoom;
+			if(b_finalChange || mi_zoom < 0) {
+				var i_oldZoom: int = mi_zoom;
 				
 				findZoom();
-				if(mi_zoom != oldZoom)
+				if(mi_zoom != i_oldZoom)
 				{
 					m_cache.invalidate(container.crs, container.getViewBBox());
 				}
@@ -422,8 +442,6 @@ package com.iblsoft.flexiweather.ogc
 			}
 			else
 				invalidateDynamicPart();
-				
-			_oldViewBBox = container.getViewBBox();
 		}
 		
 		private function checkIfAllTilesAreLoaded(): void
