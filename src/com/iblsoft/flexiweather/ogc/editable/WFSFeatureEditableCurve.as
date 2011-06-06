@@ -208,10 +208,15 @@ package com.iblsoft.flexiweather.ogc.editable
 				
 				if(i_best != -1) {
 					insertPointBefore(i_best, pt);
-					MoveablePoint(ml_movablePoints[i_best]).onMouseDown(pt);
-					if(!b_keepDrag) {
-						MoveablePoint(ml_movablePoints[i_best]).onMouseUp(pt);
-						MoveablePoint(ml_movablePoints[i_best]).onMouseClick(pt);
+					var newPoint: MoveablePoint;
+					if (i_best < ml_movablePoints.length)
+					{
+						newPoint = MoveablePoint(ml_movablePoints[i_best]);
+						newPoint.onMouseDown(pt);
+						if(!b_keepDrag) {
+							newPoint.onMouseUp(pt);
+							newPoint.onMouseClick(pt);
+						}
 					}
 				}
 				return true;
