@@ -403,7 +403,8 @@ package com.iblsoft.flexiweather.widgets
         
         private function afterDelayedResize(event: TimerEvent = null): void
         {
-        	setViewBBox(m_viewBBox, true); // set the view bbox to update the aspects 
+//        	setViewBBox(m_viewBBox, true); // set the view bbox to update the aspects 
+        	setViewBBox(m_viewBBox, false); // set the view bbox to update the aspects 
             for(var i: int = 0; i < m_layerContainer.numChildren; ++i) {
             	var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getChildAt(i));
             	l.width = width;

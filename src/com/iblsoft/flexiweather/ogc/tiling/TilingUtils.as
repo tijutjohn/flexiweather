@@ -71,8 +71,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 			var topLeftIndex: TileIndex = new TileIndex(zoomLevel, Math.min(_maxTileID, Math.max(0,topRow)), Math.min(_maxTileID, Math.max(0,leftCol)));
 			var bottomRightIndex: TileIndex = new TileIndex(zoomLevel, Math.min(_maxTileID, Math.ceil(topRow + viewTiles.y)),  Math.min(_maxTileID, Math.ceil(leftCol + viewTiles.x)));
 			var area: TiledArea = new TiledArea(topLeftIndex, bottomRightIndex );
-//			trace("getTiledArea viewBBox: " + viewBBox + " area: " + area);
-//			trace("getTiledArea viewTiles: " + viewTiles);
+			//trace("getTiledArea viewBBox: " + viewBBox + " area: " + area);
+			//trace("getTiledArea zoom: " + zoomLevel + " viewTiles: " + viewTiles);
 			return area;
 			
 		}
@@ -86,6 +86,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 			var newZoomLevel: int = minimumZoom;
 			var bestZoomLevel: int = minimumZoom;
 			var bestDist: int = int.MAX_VALUE;
+			var bestScale: Point;
+			var bestArea: TiledArea;
 			
 			var scale: Point;
 			var tilesInViewBBox: Point;
@@ -100,22 +102,32 @@ package com.iblsoft.flexiweather.ogc.tiling
 			while (!zoomFound)
 			{
 				area = getTiledArea(viewBBox, newZoomLevel);
-				scale = new Point( viewSize.x / ((area.colTilesCount - 1) * tileWidth) ,  viewSize.y / ((area.rowTilesCount - 1) * tileHeight));
+//				scale = new Point( viewSize.x / ((area.colTilesCount - 1) * tileWidth) ,  viewSize.y / ((area.rowTilesCount - 1) * tileHeight));
+				scale = new Point( viewSize.x / ((area.colTilesCount ) * tileWidth) ,  viewSize.y / ((area.rowTilesCount) * tileHeight));
 				
-				var scaleOK: Boolean = false;
-				if (checkColumnScale)
+				if ((viewSize.x <= (area.colTilesCount * 256)) && (viewSize.y <= (area.rowTilesCount * 256)))
 				{
-					var dist: Number = Math.sqrt((columnScaleMax - scale.x) * (columnScaleMax - scale.x)  + (rowScaleMax - scale.y) * (rowScaleMax - scale.y) );
-					var dist2: Number = Math.abs(columnScaleMax - scale.x) + Math.abs(rowScaleMax - scale.y);
 					
-					if (dist < bestDist)
+					
+					var scaleOK: Boolean = false;
+					if (checkColumnScale)
 					{
-						bestDist = dist;
-						bestZoomLevel = newZoomLevel;
+						//trace("For zoom: " + newZoomLevel + " scale must be: " + scale + " view: " + viewSize + " tiledAreaSize: " + (area.colTilesCount * 256)+"," +(area.rowTilesCount * 256));
+						
+						var dist: Number = Math.sqrt((columnScaleMax - scale.x) * (columnScaleMax - scale.x)  + (rowScaleMax - scale.y) * (rowScaleMax - scale.y) );
+						var dist2: Number = Math.abs(columnScaleMax - scale.x) + Math.abs(rowScaleMax - scale.y);
+						
+						if (dist < bestDist)
+						{
+							bestDist = dist;
+							bestScale = scale;
+							bestArea = area;
+							bestZoomLevel = newZoomLevel;
+						}
+						arr.push({zoom: newZoomLevel, dist: dist, dist2: dist2, scale: scale});
 					}
-					arr.push({zoom: newZoomLevel, dist: dist, dist2: dist2});
+						
 				}
-					
 				if (scaleOK)
 				{
 					zoomFound = true;
@@ -127,7 +139,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 						zoomFound = true;
 				}
 			}
-			
+			//trace("\nTilingUtils getZoom for viewBBox: " + viewBBox.toString() + " size: " + viewSize + " LEVEL FOUND: " + bestZoomLevel);
 			return bestZoomLevel;
 		}
 		
