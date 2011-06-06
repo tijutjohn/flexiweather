@@ -8,9 +8,17 @@ package com.iblsoft.flexiweather.ogc
 	public class WMSDimension
 	{
 		internal var ms_name: String;
-		internal var ma_values: Array;
+		private var ma_values: Array;
 		internal var ms_units: String;
 		internal var ms_default: String;
+
+		/**
+		 * String representing values of dimensions as found in the GetCapabilities document.
+		 * It will be parsed if the values getter is invoked.
+		 **/
+		private var ms_values: String = null;
+		private var mb_valuesHaveToBeParsed: Boolean = true;
+
 		protected static var sm_dateTimeParser: ISO8601Parser = new ISO8601Parser();
 		
 		public function WMSDimension(xml: XML, wms: Namespace, version: Version)
@@ -30,12 +38,8 @@ package com.iblsoft.flexiweather.ogc
 				return false;
 			if(ms_units != other.ms_units)
 				return false;
-			if(ma_values.length != other.ma_values.length)
+			if(ms_values != other.ms_values)
 				return false;
-			for(var i: int = 0; i < ma_values.length; ++i) {
-				if(ma_values[i] != other.ma_values[i])
-					return false;
-			} 
 			if(ms_default != other.ms_default)
 				return false;
 			return true;
@@ -43,14 +47,22 @@ package com.iblsoft.flexiweather.ogc
 
 		public function loadExtent(xml: XML, wms: Namespace, version: Version): void
 		{
-//			var time: Number = getTimer();
-			
-			var s: String = String(xml);
-			var arr: Array = s.split(",");
-			
-//			trace("loadExtent " + xml.@name + " default: " + xml.@default + " items: " + arr.length);
 			ms_default = xml.@default;
-			// TODO: strip white spaces
+
+			var s: String = String(xml);
+			if(ms_values == null)
+				ms_values = s;
+			else {
+				ms_values += ",";
+				ms_values + s;
+			}
+			mb_valuesHaveToBeParsed = true;
+		}
+		
+		private function parseData(): void
+		{
+			var arr: Array = ms_values == null ? [] : ms_values.split(",");
+			
 			ma_values = [];
 			for each(var s_value: String in arr) {
 				// Strip white spaces to workaround " , " separation used in
@@ -58,8 +70,9 @@ package com.iblsoft.flexiweather.ogc
 				s_value = s_value.replace(/\s+\Z/, '').replace(/\A\s+/, '');
 				stringValueToObjects(ma_values, s_value, ms_units);
 			}
+			mb_valuesHaveToBeParsed = false;
 		}
-		
+
 		protected static function stringValueToObjects(
 				a_values: Array,
 				s_value: String, s_units: String): void
@@ -172,6 +185,10 @@ package com.iblsoft.flexiweather.ogc
 		{ return ms_name; }
 
 		public function get values(): Array
-		{ return ma_values; }
+		{
+			if(mb_valuesHaveToBeParsed)
+				parseData();
+			return ma_values;
+		}
 	}
 }
