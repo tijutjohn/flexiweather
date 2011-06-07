@@ -73,7 +73,8 @@ package com.iblsoft.flexiweather.ogc
 			if(s_sameCRS == null) {
 				for each(c in l_coords) {
 					s = c.x + " " + c.y;
-					x.appendChild(<gml:pos xmlns:gml="http://www.opengis.net/gml" srsName={c.crs}>{s}</gml:pos>);
+					if (x)
+						x.appendChild(<gml:pos xmlns:gml="http://www.opengis.net/gml" srsName={c.crs}>{s}</gml:pos>);
 				}
 				return x;
 			}
