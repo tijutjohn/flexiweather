@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.utils
 {
+	import com.iblsoft.flexiweather.ogc.IWFSFeatureWithAnnotation;
 	import com.iblsoft.flexiweather.utils.geometry.ILineSegmentApproximableBounds;
 	import com.iblsoft.flexiweather.utils.geometry.LineSegment;
 	
@@ -299,9 +300,14 @@ package com.iblsoft.flexiweather.utils
 						}
 					}
 					
+					var clr: uint = 0;
+					if (objectToAnchor is IWFSFeatureWithAnnotation)
+					{
+						clr = (objectToAnchor as IWFSFeatureWithAnnotation).annotation.color;
+					}
 					drawAnnotationAnchor(g,
 							bestPointFrom.x, bestPointFrom.y,
-							bestPointTo.x, bestPointTo.y);
+							bestPointTo.x, bestPointTo.y, clr);
 				}
 			}
 		}
@@ -342,11 +348,11 @@ package com.iblsoft.flexiweather.utils
 		
 		protected static function drawAnnotationAnchor(
 				graphics: Graphics,
-				f_x1: Number, f_y1: Number, f_x2: Number, f_y2: Number): void
+				f_x1: Number, f_y1: Number, f_x2: Number, f_y2: Number, color: uint): void
 		{
 			var f_xc: Number = (f_x1 + f_x2) / 2;
 			var f_yc: Number = (f_y1 + f_y2) / 2;
-			graphics.lineStyle(2, 0, 1);
+			graphics.lineStyle(2, color, 1);
 			graphics.moveTo(f_x1, f_y1);
 			graphics.lineTo(f_x2, f_y2);
 		}

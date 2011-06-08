@@ -25,7 +25,7 @@ package com.iblsoft.flexiweather.utils
 			m_label.height = measuredHeight - 4;
 		}
 		
-		public override function meassureContent(): void
+		public override function measureContent(): void
 		{
 			m_label.width = m_label.textWidth;
 			m_label.height = m_label.textHeight;

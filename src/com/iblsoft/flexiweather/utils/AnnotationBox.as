@@ -1,11 +1,15 @@
 package com.iblsoft.flexiweather.utils
 {
 	import flash.display.Sprite;
+	import flash.text.TextField;
+	import flash.text.TextFormat;
 	
 	public class AnnotationBox extends Sprite
 	{
 		public var measuredWidth: Number = 0;
 		public var measuredHeight: Number = 0;
+		
+		private var _color: uint;
 		
 		public function AnnotationBox()
 		{
@@ -14,18 +18,36 @@ package com.iblsoft.flexiweather.utils
 			mouseChildren = false;
 		}
 		
+
+		public function get color():uint
+		{
+			return _color;
+		}
+
+		public function set color(value:uint):void
+		{
+			_color = value;
+		}
+		
+		protected function updateLabelColor(lbl: TextField, clr: uint): void
+		{
+			var format: TextFormat  = lbl.getTextFormat();
+			format.color = clr;
+			lbl.setTextFormat(format);
+		}
+		
 		public function update(): void
 		{
-			meassureContent();
+			measureContent();
 			graphics.clear();
 			graphics.beginFill(0xFFFFFF, 1);
-			graphics.lineStyle(1, 0, 1);
+			graphics.lineStyle(1, color, 1);
 			graphics.drawRect(0, 0, measuredWidth, measuredHeight);
 			graphics.endFill();
 			updateContent();
 		}
 		
-		public function meassureContent(): void
+		public function measureContent(): void
 		{
 		}
 		
