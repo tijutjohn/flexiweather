@@ -84,7 +84,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			var object: Object = md_cache[s_key];
 			var bitmap: Bitmap = object.image as Bitmap;
 			
-			return bitmap.parent;
+			return (bitmap.parent != null);
 		}
 		
 		public function getTile(request: URLRequest, specialStrings: Array): Object
