@@ -15,7 +15,7 @@ package com.iblsoft.flexiweather.ogc.cache
 		 * Expiration time in seconds 
 		 */		
 		private var _checkExpirationTime: int = 10 * 1000; 
-		private var _expirationTime: int = 60; 
+		private var _expirationTime: int = 5;
 		private var _expirationTimer: Timer;
 		
 		private var _animationModeEnabled: Boolean;
@@ -58,7 +58,12 @@ package com.iblsoft.flexiweather.ogc.cache
 					if (diff > (_expirationTime * 1000))
 					{
 //						trace("Image from cache is expired, will be removed");
-						deleteCacheItem(s_key);
+						if (!cacheItem.isImageOnDisplayList())
+						{
+							deleteCacheItem(s_key);
+						} else {
+							trace("onExpiration: image is on displalist");
+						}
 					}
 //					trace("diff: " + diff);
 				}
@@ -105,7 +110,7 @@ package com.iblsoft.flexiweather.ogc.cache
 		public function getImage(s_crs: String, bbox: BBox, url: URLRequest): Bitmap
 		{
 			var s_key: String = getKey(s_crs, bbox, url);
-			
+			trace("WMS CACHE getImage s_key: " + s_key);
 			if(s_key in md_cache) {
 				var item: CacheItem = md_cache[s_key] as CacheItem; 
 				item.lastUsed = new Date();
@@ -154,23 +159,38 @@ package com.iblsoft.flexiweather.ogc.cache
 		}
 		public function removeFromScreen(): void
 		{
+			trace("WMS CACHE removeFromScreen");
 			for(var s_key: String in md_cache) 
 			{
+				trace("\t WMS CACHE removeFromScreen key: " + s_key);
 				var item: CacheItem = md_cache[s_key] as CacheItem; 
-				item.displayed = false;
+				
+				if (!item.isImageOnDisplayList()) 
+				{
+					item.displayed = false;
+				} else {
+					trace("ATTENTION iamge is on displayList");
+				}
 			}
 		}
 		
 		public function invalidate(s_crs: String, bbox: BBox): void
 		{
+			trace("WMS CACHE invalidate s_crs: " + s_crs + " bbox : " + bbox);
+			
 			var a: Array = [];
 			for(var s_key: String in md_cache) 
 			{
 				var item: CacheItem = md_cache[s_key] as CacheItem; 
-				var ck: WMSCacheKey = item.cacheKey; 
-				item.displayed = false;
-				if(ck.ms_crs == s_crs && ck.m_bbox.equals(bbox))
-					a.push(s_key);
+				if (!item.isImageOnDisplayList())
+				{
+					var ck: WMSCacheKey = item.cacheKey; 
+					item.displayed = false;
+					if(ck.ms_crs == s_crs && ck.m_bbox.equals(bbox))
+						a.push(s_key);
+				} else {
+					trace("ATTENTION iamge is on displayList");
+				}
 			}
 			for each(s_key in a) {
 	//			trace("WMSCache.invalidate(): removing image with key: " + md_cache[s_key].toString());
@@ -204,8 +224,19 @@ class CacheItem
 		return _displayed;
 	}
 	
+	public function isImageOnDisplayList(): Boolean
+	{
+		if (image)
+			return image.parent;
+		
+		return false;
+	}
 	public function set displayed(value:Boolean):void 
 	{
+		if (!value)
+		{
+			trace("WMSCHace displayed = " + value);
+		}
 		_displayed = value;
 //		trace(this + " SET displayed = " + _displayed);
 	}
