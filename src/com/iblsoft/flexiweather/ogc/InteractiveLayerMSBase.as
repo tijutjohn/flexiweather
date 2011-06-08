@@ -935,7 +935,7 @@ package com.iblsoft.flexiweather.ogc
 						if (time.data is Date) {
 							l_resultTimes.push(time.data);
 						} else {
-							trace("PROBLEM: InteractiveLayerMSBase getSynchronisedVariableValuesList forecast.data is not Date: " + forecast.data);
+							trace("PROBLEM: InteractiveLayerMSBase getSynchronisedVariableValuesList time.data is not Date: " + time.data);
 						}
 					}
 					
