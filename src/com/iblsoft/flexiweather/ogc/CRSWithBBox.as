@@ -1,12 +1,14 @@
 package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.proj.Projection;
+	import com.iblsoft.flexiweather.utils.Serializable;
+	import com.iblsoft.flexiweather.utils.Storage;
 	
 	/**
 	 * Object representing a reference system (CRS) with optional rectangular bounding box (BBox).
 	 * Object is constant.
 	 **/
-	public class CRSWithBBox
+	public class CRSWithBBox implements Serializable
 	{
 		protected var ms_crs: String;
 		protected var m_bbox: BBox = null;
@@ -35,7 +37,28 @@ package com.iblsoft.flexiweather.ogc
 				return false;
 			return m_bbox.equals(other.m_bbox);
 		}
-		
+
+		public function serialize(storage: Storage): void
+		{
+			ms_crs = storage.serializeString("crs", ms_crs);
+			var xMin: Number = NaN;
+			var yMin: Number = NaN;
+			var xMax: Number = NaN;
+			var yMax: Number = NaN;
+			if(storage.isStoring() || m_bbox != null) {
+				xMin = storage.serializeNumber("min-x", m_bbox.xMin);
+				yMin = storage.serializeNumber("min-y", m_bbox.yMin);
+				xMax = storage.serializeNumber("max-x", m_bbox.xMax);
+				yMax = storage.serializeNumber("max-y", m_bbox.yMax);
+			}
+			if(storage.isLoading()) {
+				if(isNaN(xMin) && isNaN(yMin) && isNaN(xMax) && isNaN(yMax))
+					m_bbox = null;
+				else
+					m_bbox = new BBox(xMin, yMin, xMax, yMax);
+			}
+		}
+
 		public function hasBBox(): Boolean
 		{ return m_bbox != null; }
 

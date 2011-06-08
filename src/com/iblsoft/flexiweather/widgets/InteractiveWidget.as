@@ -403,7 +403,8 @@ package com.iblsoft.flexiweather.widgets
         
         private function afterDelayedResize(event: TimerEvent = null): void
         {
-        	setViewBBox(m_viewBBox, true); // set the view bbox to update the aspects 
+//        	setViewBBox(m_viewBBox, true); // set the view bbox to update the aspects 
+        	setViewBBox(m_viewBBox, false); // set the view bbox to update the aspects 
             for(var i: int = 0; i < m_layerContainer.numChildren; ++i) {
             	var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getChildAt(i));
             	l.width = width;
@@ -462,30 +463,37 @@ package com.iblsoft.flexiweather.widgets
         	
         	// this is the aspect ratio of currently requeste bbox
         	var f_bboxApect: Number = bbox.width / bbox.height;
-        	var f_componentApect: Number = width / height;
+        	var f_componentAspect: Number = width / height;
+			if (isNaN(f_componentAspect))
+				f_componentAspect = 1;
+				
 
         	var f_newBBoxWidth: Number;
         	var f_newBBoxHeight: Number;
         	
         	if(f_bboxApect < f_extentAspect) {
         		// extent looks wider 
-        		f_newBBoxWidth = f_componentApect * f_extentAspect * bbox.height;
+        		f_newBBoxWidth = f_componentAspect * f_extentAspect * bbox.height;
         		f_newBBoxHeight = bbox.height;
         	}
         	else {
         		// extent looks higher
         		f_newBBoxWidth =  bbox.width;
-        		f_newBBoxHeight = bbox.width / f_extentAspect / f_componentApect;
+        		f_newBBoxHeight = bbox.width / f_extentAspect / f_componentAspect;
         	}
         	
         	if(f_newBBoxHeight > m_extentBBox.height) {
         		f_newBBoxHeight = m_extentBBox.height;
-        		f_newBBoxWidth = f_componentApect * f_extentAspect * f_newBBoxHeight;
+        		f_newBBoxWidth = f_componentAspect * f_extentAspect * f_newBBoxHeight;
         	}
         	if(f_newBBoxWidth > m_extentBBox.width) {
         		f_newBBoxWidth = m_extentBBox.width;
-        		f_newBBoxHeight = f_newBBoxWidth / f_componentApect / f_extentAspect;
+        		f_newBBoxHeight = f_newBBoxWidth / f_componentAspect / f_extentAspect;
         	}
+			if (isNaN(f_newBBoxHeight))
+			{
+				trace("stop f_newBBoxHeight is NaN");
+			}
         	var viewBBox: Rectangle = new Rectangle(
 	        		f_bboxCenterX - f_newBBoxWidth / 2.0,
 	        		f_bboxCenterY - f_newBBoxHeight / 2.0,

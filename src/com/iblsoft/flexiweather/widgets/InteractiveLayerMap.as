@@ -281,6 +281,8 @@ package com.iblsoft.flexiweather.widgets
 			var l_timeAxis: Array = null;
 			for each(var l: InteractiveLayer in m_layers) {
 				var so: ISynchronisedObject = l as ISynchronisedObject;
+				if(so == null)
+					continue;
 				var test: * = so.getSynchronisedVariables();
 				//trace("enumTimeAxis so: " + (so as Object).name + " synchro vars: " + test.toString());
             	if(so == null)

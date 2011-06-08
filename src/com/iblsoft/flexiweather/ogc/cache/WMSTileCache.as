@@ -67,13 +67,26 @@ package com.iblsoft.flexiweather.ogc.cache
 					if (diff > (_expirationTime * 1000))
 					{
 						trace("TILE from cache is expired, will be removed");
-						delete md_cache[s_key];
+						if (!isTileOnDisplayList(s_key))
+						{
+							delete md_cache[s_key];
+						} else {
+							trace("TILE IS DISPLAY LIST, DO NOT DELETE IT");
+						}
 					}
-					trace("diff: " + diff);
+//					trace("diff: " + diff);
 				}
 			}
 		}
-
+		
+		private function isTileOnDisplayList(s_key: String): Boolean
+		{
+			var object: Object = md_cache[s_key];
+			var bitmap: Bitmap = object.image as Bitmap;
+			
+			return (bitmap.parent != null);
+		}
+		
 		public function getTile(request: URLRequest, specialStrings: Array): Object
 		{
 			var s_crs: String = request.data.CRS;
@@ -259,7 +272,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			for(var s_key: String in md_cache) {
 				var ck: WMSTileCacheKey = md_cache[s_key].cacheKey; 
 //				if(ck.ms_crs == s_crs && ck.m_bbox.equals(bbox))
-				if(ck.ms_key == s_key)
+				if(ck.ms_key == s_key && !isTileOnDisplayList(s_key))
 					a.push(s_key);
 			}
 			for each(s_key in a) {

@@ -7,7 +7,9 @@ package com.iblsoft.flexiweather.ogc
 	import flash.events.Event;
 	
 	import mx.collections.ArrayCollection;
-
+	import mx.collections.Sort;
+	import mx.collections.SortField;
+	
 	public class LayerConfigurationManager extends BaseConfigurationManager implements Serializable
 	{
 		public static const LAYERS_CHANGED: String = 'layers changed';
@@ -37,11 +39,11 @@ package com.iblsoft.flexiweather.ogc
 			storage.serializePersistentArrayCollection("layer", ma_layers, LayerConfiguration);
 		}
 		
-		public function getLayerByLabel(lbl: String): WMSLayerConfiguration
+		public function getLayerByLabel(lbl: String): LayerConfiguration
 		{
 			if (ma_layers && ma_layers.length > 0)
 			{
-				for each (var layer: WMSLayerConfiguration in ma_layers)
+				for each (var layer: LayerConfiguration in ma_layers)
 				{
 					if (layer.label == lbl)
 						return layer;
@@ -118,6 +120,13 @@ package com.iblsoft.flexiweather.ogc
 				var bbox: BBox;
 				var compatibleWithCRS: Boolean = true;
 				var layerType: String = 'layer';
+				
+				var sort: Sort = new Sort();
+				var labelField: SortField = new SortField('label');
+				sort.fields = [labelField];
+				sort.compareFunction = sortArray;
+				ma_layers.sort = sort;
+				ma_layers.refresh();
 				
 				for each (var layerConfig: LayerConfiguration in ma_layers)
 				{

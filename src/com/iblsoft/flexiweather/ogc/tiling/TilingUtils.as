@@ -15,26 +15,49 @@ package com.iblsoft.flexiweather.ogc.tiling
 		private var ms_crs: String;
 		private var m_extent: BBox;
 		
-		public var minimumZoom: int = 0;
-		public var maximumZoom: int = 10;
+		private var _minimumZoom: int = 1;
+		private var _maximumZoom: int = 10;
 		
 		public function TilingUtils()
 		{
 		}
 		
+
+		public function get minimumZoom():int
+		{
+			return _minimumZoom;
+		}
+
+		public function set minimumZoom(value:int):void
+		{
+			_minimumZoom = value;
+		}
+
+		public function get maximumZoom():int
+		{
+			return _maximumZoom;
+		}
+
+		public function set maximumZoom(value:int):void
+		{
+			_maximumZoom = value;
+		}
+
 		public function onAreaChanged(s_crs: String, extent: BBox): void
 		{
-			ms_crs = s_crs
+			ms_crs = s_crs;
 			m_extent = extent;
 		}
 		
 		public function getTiledArea(viewBBox: BBox, zoomLevel: int): TiledArea
 		{
+			if(!m_extent)
+				return null;
 			var maxColTiles: int = getColTiles(zoomLevel);
 			var maxRowTiles: int = getRowTiles(zoomLevel);
 			
 			var tileBBox: Point = new Point(m_extent.width / maxColTiles, m_extent.height / maxRowTiles);
-			var viewTiles: Point = new Point( (viewBBox.width / tileBBox.x), (viewBBox.height / tileBBox.y));
+			var viewTiles: Point = new Point((viewBBox.width / tileBBox.x), (viewBBox.height / tileBBox.y));
 			
 			var leftCol: int = Math.floor((viewBBox.xMin - m_extent.xMin) / tileBBox.x);
 			var topRow: int = Math.floor((m_extent.yMax - viewBBox.yMax) / tileBBox.y);
@@ -48,14 +71,14 @@ package com.iblsoft.flexiweather.ogc.tiling
 			var topLeftIndex: TileIndex = new TileIndex(zoomLevel, Math.min(_maxTileID, Math.max(0,topRow)), Math.min(_maxTileID, Math.max(0,leftCol)));
 			var bottomRightIndex: TileIndex = new TileIndex(zoomLevel, Math.min(_maxTileID, Math.ceil(topRow + viewTiles.y)),  Math.min(_maxTileID, Math.ceil(leftCol + viewTiles.x)));
 			var area: TiledArea = new TiledArea(topLeftIndex, bottomRightIndex );
-//			trace("getTiledArea viewBBox: " + viewBBox + " area: " + area);
-//			trace("getTiledArea viewTiles: " + viewTiles);
+			//trace("getTiledArea viewBBox: " + viewBBox + " area: " + area);
+			//trace("getTiledArea zoom: " + zoomLevel + " viewTiles: " + viewTiles);
 			return area;
 			
 		}
 		public function getZoom(viewBBox: BBox, viewSize: Point): int
 		{
-			if (viewSize.x == 0 || viewSize.y == 0)
+			if (viewSize.x == 0 || viewSize.y == 0 || !m_extent)
 			{
 				//can not get zoom for area with no size
 				return -1;
@@ -63,6 +86,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 			var newZoomLevel: int = minimumZoom;
 			var bestZoomLevel: int = minimumZoom;
 			var bestDist: int = int.MAX_VALUE;
+			var bestScale: Point;
+			var bestArea: TiledArea;
 			
 			var scale: Point;
 			var tilesInViewBBox: Point;
@@ -77,22 +102,32 @@ package com.iblsoft.flexiweather.ogc.tiling
 			while (!zoomFound)
 			{
 				area = getTiledArea(viewBBox, newZoomLevel);
-				scale = new Point( viewSize.x / ((area.colTilesCount - 1) * tileWidth) ,  viewSize.y / ((area.rowTilesCount - 1) * tileHeight));
+//				scale = new Point( viewSize.x / ((area.colTilesCount - 1) * tileWidth) ,  viewSize.y / ((area.rowTilesCount - 1) * tileHeight));
+				scale = new Point( viewSize.x / ((area.colTilesCount ) * tileWidth) ,  viewSize.y / ((area.rowTilesCount) * tileHeight));
 				
-				var scaleOK: Boolean = false;
-				if (checkColumnScale)
+				if ((viewSize.x <= (area.colTilesCount * 256)) && (viewSize.y <= (area.rowTilesCount * 256)))
 				{
-					var dist: Number = Math.sqrt((columnScaleMax - scale.x) * (columnScaleMax - scale.x)  + (rowScaleMax - scale.y) * (rowScaleMax - scale.y) );
-					var dist2: Number = Math.abs(columnScaleMax - scale.x) + Math.abs(rowScaleMax - scale.y);
 					
-					if (dist < bestDist)
+					
+					var scaleOK: Boolean = false;
+					if (checkColumnScale)
 					{
-						bestDist = dist;
-						bestZoomLevel = newZoomLevel;
+						//trace("For zoom: " + newZoomLevel + " scale must be: " + scale + " view: " + viewSize + " tiledAreaSize: " + (area.colTilesCount * 256)+"," +(area.rowTilesCount * 256));
+						
+						var dist: Number = Math.sqrt((columnScaleMax - scale.x) * (columnScaleMax - scale.x)  + (rowScaleMax - scale.y) * (rowScaleMax - scale.y) );
+						var dist2: Number = Math.abs(columnScaleMax - scale.x) + Math.abs(rowScaleMax - scale.y);
+						
+						if (dist < bestDist)
+						{
+							bestDist = dist;
+							bestScale = scale;
+							bestArea = area;
+							bestZoomLevel = newZoomLevel;
+						}
+						arr.push({zoom: newZoomLevel, dist: dist, dist2: dist2, scale: scale});
 					}
-					arr.push({zoom: newZoomLevel, dist: dist, dist2: dist2});
+						
 				}
-					
 				if (scaleOK)
 				{
 					zoomFound = true;
@@ -104,7 +139,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 						zoomFound = true;
 				}
 			}
-			
+			//trace("\nTilingUtils getZoom for viewBBox: " + viewBBox.toString() + " size: " + viewSize + " LEVEL FOUND: " + bestZoomLevel);
 			return bestZoomLevel;
 		}
 		
