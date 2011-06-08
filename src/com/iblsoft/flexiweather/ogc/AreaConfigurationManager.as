@@ -207,15 +207,30 @@ package com.iblsoft.flexiweather.ogc
 					}
 				}
 				
-				areasXMLList
-				var areaCustom: XML = <menuitem label='Custom...' data='custom.area' type='action'/>;
-				areasXMLList.appendChild(areaCustom);
+				areasXMLList.appendChild(getCustomArea());
 				
 				return areasXMLList.children();
 			}
-			return null;
+			
+			return getNoAreasXMLList();
 		}
 		
+		public  function getNoAreasXMLList(): XMLList
+		{
+			var areasXMLList: XML;
+			
+			areasXMLList = <menuitem label='Areas' data='area' type='folder'/>;
+			areasXMLList.appendChild(getCustomArea());
+			
+			return areasXMLList.children();
+			
+		}
+		private function getCustomArea(): XML
+		{
+			var areaCustom: XML = <menuitem label='Custom...' data='custom.area' type='action'/>;
+			return areaCustom;
+			
+		}
 		
 		// getters & setters
 		public function get areas(): ArrayCollection
