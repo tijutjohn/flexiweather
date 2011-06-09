@@ -241,14 +241,24 @@ package com.iblsoft.flexiweather.utils
 				
 				if (s_url.indexOf('ecmwf') >= 0)
 				{
+					s_url = 'http://wrep.ecmwf.int/wms/?token=MetOceanIE';
+					if (s_url.indexOf('GetCapabilities') >= 0)
+						trace("Stop GetCapabilities");
+					
 						trace("Stop ECMWF");
+				}
+				if (s_url.indexOf('?') >= 0)
+				{
+					s_url = (s_url.split('?') as Array)[0] as String;
 				}
 				Log.getLogger('SecurityError').info('s_url: ' + s_url);
 				Log.getLogger('SecurityError').info('s_url.indexOf("?"): ' + (s_url.indexOf("?")));
 				if(urlRequest.data) {
 					if(s_url.indexOf("?") >= 0)
-						s_url += "&";
-					else
+					{
+						if (s_url.indexOf("?") != (s_url.length - 1))
+							s_url += "&";
+					} else
 						s_url += "?";
 					
 					Log.getLogger('SecurityError').info('STEP 1 s_url: ' + s_url);
@@ -397,12 +407,19 @@ package com.iblsoft.flexiweather.utils
 				urlRequest = md_urlLoaderToRequestMap[urlLoader].request;
 				var s_url: String = urlRequest.url;
 				
+				if (s_url.indexOf('?') >= 0)
+				{
+					s_url = (s_url.split('?') as Array)[0] as String;
+				}
+				
 				Log.getLogger('SecurityError').info('s_url: ' + s_url);
 				Log.getLogger('SecurityError').info('s_url.indexOf("?"): ' + (s_url.indexOf("?")));
 				if(urlRequest.data) {
 					if(s_url.indexOf("?") >= 0)
-						s_url += "&";
-					else
+					{
+						if (s_url.indexOf("?") != (s_url.length - 1))
+							s_url += "&";
+					} else
 						s_url += "?";
 					
 					Log.getLogger('SecurityError').info('STEP 1 s_url: ' + s_url);
