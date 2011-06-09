@@ -325,7 +325,7 @@ package com.iblsoft.flexiweather.utils
 			var urlLoader: URLLoaderWithAssociatedData = URLLoaderWithAssociatedData(event.target);
 			var urlRequest: URLRequest;
 			
-			// Try to use cross-domain proxy if received "Error #2048: Security sandbox violation:" 
+			// Try to use cross-domain 	 if received "Error #2048: Security sandbox violation:" 
 			if(crossDomainProxyURLPattern != null
 					&& event.text.match(/#2048/)
 					&& !urlLoader.b_crossDomainProxyRequest) {
@@ -334,14 +334,23 @@ package com.iblsoft.flexiweather.utils
 				
 				urlRequest = md_urlLoaderToRequestMap[urlLoader].request;
 				var s_url: String = urlRequest.url;
+				
+				Log.getLogger('SecurityError').info('s_url: ' + s_url);
+				Log.getLogger('SecurityError').info('s_url.indexOf("?"): ' + (s_url.indexOf("?")));
 				if(urlRequest.data) {
 					if(s_url.indexOf("?") >= 0)
 						s_url += "&";
 					else
 						s_url += "?";
+					
+					Log.getLogger('SecurityError').info('STEP 1 s_url: ' + s_url);
+					
 					s_url += urlRequest.data;
+					Log.getLogger('SecurityError').info('STEP 2 s_url: ' + s_url);
+					
 				}
 				s_proxyURL = s_proxyURL.replace("${URL}", encodeURIComponent(s_url));
+				Log.getLogger('SecurityError').info('s_proxyURL: ' + s_proxyURL);
 				//Alert.show("Got error:\n" + event.text + "\n"
 				//		+ "Retrying:\n" + s_proxyURL + "\n",
 				//		"SecurityErrorEvent received");
