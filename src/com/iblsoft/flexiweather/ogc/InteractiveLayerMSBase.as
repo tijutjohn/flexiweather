@@ -464,6 +464,7 @@ package com.iblsoft.flexiweather.ogc
 			removeLegendListeners(event.target as UniURLLoader);
 		}
 		
+		
 		/**
 		 * 
 		 * @param image
@@ -498,6 +499,9 @@ package com.iblsoft.flexiweather.ogc
 			label.glowBlur = 5;
 			label.glowColor = 0xffffff;
 			label.text = name;
+			label.validateNow();
+			//FIX for legends text height
+			labelHeight = label.textHeight;
 			
 			label.setStyle('textAlign', labelAlign);
 			
