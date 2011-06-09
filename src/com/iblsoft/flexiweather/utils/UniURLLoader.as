@@ -135,11 +135,34 @@ package com.iblsoft.flexiweather.utils
 		public static var basicAuthUsername: String;
 		public static var basicAuthPassword: String;
 		
+		private function checkRequestData(urlRequest: URLRequest): void
+		{
+			var url: String = decodeURIComponent(urlRequest.url);
+			var urlArr: Array = url.split('?');
+			if (urlArr.length == 2)
+			{
+				urlRequest.url = urlArr[0];
+				
+				var dataStr: String = urlArr[1];
+				var dataArr: Array = dataStr.split('&');
+				for each (var str: String in dataArr)
+				{
+					if (str && str.length > 0 && str.indexOf('=') > 0)
+					{
+						if (!urlRequest.data)
+							urlRequest.data = new URLVariables();
+						var valArr: Array = str.split('=');
+						urlRequest.data[valArr[0]] = valArr[1];
+					}
+				}
+			}
+		}
 		public function load(
 				urlRequest: URLRequest,
 				associatedData: Object = null,
 				s_backgroundJobName: String = null): void
 		{
+			checkRequestData(urlRequest);
 			checkRequestBaseURL(urlRequest);
 			
 			if (useBasicAuthInRequest)
@@ -247,12 +270,13 @@ package com.iblsoft.flexiweather.utils
 					
 						trace("Stop ECMWF");
 				}
-				if (s_url.indexOf('?') >= 0)
-				{
-					s_url = (s_url.split('?') as Array)[0] as String;
-				}
+//				if (s_url.indexOf('?') >= 0)
+//				{
+//					s_url = (s_url.split('?') as Array)[0] as String;
+//				}
 				Log.getLogger('SecurityError').info('s_url: ' + s_url);
 				Log.getLogger('SecurityError').info('s_url.indexOf("?"): ' + (s_url.indexOf("?")));
+				/*
 				if(urlRequest.data) {
 					if(s_url.indexOf("?") >= 0)
 					{
@@ -276,8 +300,9 @@ package com.iblsoft.flexiweather.utils
 						}
 					}
 					Log.getLogger('SecurityError').info('STEP 2 s_url: ' + s_url);
-					
-				}
+				
+					urlRequest.data = null
+				}*/
 				s_proxyURL = s_proxyURL.replace("${URL}", encodeURIComponent(s_url));
 				Log.getLogger('SecurityError').info('s_proxyURL: ' + s_proxyURL);
 				//Alert.show("Got error:\n" + event.text + "\n"
@@ -406,11 +431,6 @@ package com.iblsoft.flexiweather.utils
 				
 				urlRequest = md_urlLoaderToRequestMap[urlLoader].request;
 				var s_url: String = urlRequest.url;
-				
-				if (s_url.indexOf('?') >= 0)
-				{
-					s_url = (s_url.split('?') as Array)[0] as String;
-				}
 				
 				Log.getLogger('SecurityError').info('s_url: ' + s_url);
 				Log.getLogger('SecurityError').info('s_url.indexOf("?"): ' + (s_url.indexOf("?")));
