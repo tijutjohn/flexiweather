@@ -11,6 +11,7 @@ package com.iblsoft.flexiweather.utils
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
 	import flash.net.URLRequestHeader;
+	import flash.net.URLVariables;
 	import flash.utils.ByteArray;
 	import flash.utils.Dictionary;
 	
@@ -226,8 +227,69 @@ package com.iblsoft.flexiweather.utils
 			return true;
 		}
 		
+		protected function test(event: Event): void
+		{
+			var urlLoader: URLLoaderWithAssociatedData = URLLoaderWithAssociatedData(event.target);
+			var urlRequest: URLRequest;
+			
+			// Try to use cross-domain 	 if received "Error #2048: Security sandbox violation:" 
+				
+				var s_proxyURL: String = fromBaseURL(crossDomainProxyURLPattern, proxyBaseURL);
+				
+				urlRequest = md_urlLoaderToRequestMap[urlLoader].request;
+				var s_url: String = urlRequest.url;
+				
+				if (s_url.indexOf('ecmwf') >= 0)
+				{
+						trace("Stop ECMWF");
+				}
+				Log.getLogger('SecurityError').info('s_url: ' + s_url);
+				Log.getLogger('SecurityError').info('s_url.indexOf("?"): ' + (s_url.indexOf("?")));
+				if(urlRequest.data) {
+					if(s_url.indexOf("?") >= 0)
+						s_url += "&";
+					else
+						s_url += "?";
+					
+					Log.getLogger('SecurityError').info('STEP 1 s_url: ' + s_url);
+					
+					if (urlRequest.data is URLVariables)
+					{
+						s_url += urlRequest.data;
+					} else {
+						if (urlRequest.data is Object)
+						{
+							for (var dataItemName: String in urlRequest.data)
+							{
+								s_url += dataItemName + "=" + urlRequest.data[dataItemName];
+							}
+						}
+					}
+					Log.getLogger('SecurityError').info('STEP 2 s_url: ' + s_url);
+					
+				}
+				s_proxyURL = s_proxyURL.replace("${URL}", encodeURIComponent(s_url));
+				Log.getLogger('SecurityError').info('s_proxyURL: ' + s_proxyURL);
+				//Alert.show("Got error:\n" + event.text + "\n"
+				//		+ "Retrying:\n" + s_proxyURL + "\n",
+				//		"SecurityErrorEvent received");
+				urlRequest.url = s_proxyURL;
+				urlLoader.b_crossDomainProxyRequest = true;
+				urlLoader.load(urlRequest);
+				return;
+			
+//			urlRequest = disconnectURLLoader(urlLoader);
+//			if(urlRequest == null)
+//				return;
+//			
+//			Log.getLogger("UniURLLoader").info("Security error: " + event.text);
+//			dispatchFault(urlRequest, urlLoader.associatedData, ERROR_SECURITY, event.text);
+		}
+		
 		protected function onDataComplete(event: Event): void
 		{
+//			test(event);
+			
 			var urlLoader: URLLoaderWithAssociatedData = URLLoaderWithAssociatedData(event.target);
 			var urlRequest: URLRequest = disconnectURLLoader(urlLoader);
 			if(urlRequest == null)
@@ -345,7 +407,19 @@ package com.iblsoft.flexiweather.utils
 					
 					Log.getLogger('SecurityError').info('STEP 1 s_url: ' + s_url);
 					
-					s_url += urlRequest.data;
+					if (urlRequest.data is URLVariables)
+					{
+						s_url += urlRequest.data;
+					} else {
+						if (urlRequest.data is Object)
+						{
+							for (var dataItemName: String in urlRequest.data)
+							{
+								s_url += dataItemName + "=" + urlRequest.data[dataItemName];
+							}
+						}
+					}
+					
 					Log.getLogger('SecurityError').info('STEP 2 s_url: ' + s_url);
 					
 				}
