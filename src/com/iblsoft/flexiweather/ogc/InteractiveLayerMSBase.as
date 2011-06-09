@@ -347,7 +347,17 @@ package com.iblsoft.flexiweather.ogc
 	        	var url: URLRequest = m_cfg.toGetLegendRequest(
 						w, h,
 						style.name);
-						
+				
+				trace("LEGEND URL1: " + url.url);
+				if (!(url.url.indexOf('${BASE_URL}') == 0))
+				{
+					
+					url = new URLRequest(legendObject.url);
+					trace("LEGEND URL2: " + url.url);
+				} else {
+					trace(" ${BASE_URL} are not using legend url from capabilities"); 
+				}
+				
 				updateURLWithDimensions(url);
 					
 				if (isNaN(legendScaleX))
