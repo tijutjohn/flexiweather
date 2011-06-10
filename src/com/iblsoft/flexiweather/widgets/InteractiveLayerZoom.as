@@ -25,7 +25,7 @@ package com.iblsoft.flexiweather.widgets
 
 		protected var m_areaZoomingRectangle: Rectangle;
 
-		protected var m_wheelZoomTimer: Timer = new Timer(500, 1); 
+		protected var m_wheelZoomTimer: Timer = new Timer(2500, 1); 
 		protected var mb_finalChangeOccuredAfterWheelZoom: Boolean = true; 
 		
 		private var m_slideZoomSprite: Sprite;

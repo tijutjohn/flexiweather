@@ -430,6 +430,9 @@ package com.iblsoft.flexiweather.utils
 				var s_proxyURL: String = fromBaseURL(crossDomainProxyURLPattern, proxyBaseURL);
 				
 				urlRequest = md_urlLoaderToRequestMap[urlLoader].request;
+				
+				checkRequestData(urlRequest);
+				
 				var s_url: String = urlRequest.url;
 				
 				Log.getLogger('SecurityError').info('s_url: ' + s_url);

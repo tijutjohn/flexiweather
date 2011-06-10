@@ -174,6 +174,10 @@ package com.iblsoft.flexiweather.ogc
 			if (!request)
 				return null;
 			
+			if (request.url.indexOf('${BASE_URL}') == -1)
+			{
+				trace("stop");
+			}
 			updateDimensionsInURLRequest(request);
 			updateCustomParametersInURLRequest(request);
 			updateRequestData(request);
@@ -704,7 +708,7 @@ package com.iblsoft.flexiweather.ogc
         	
         	if (!url.data)
         	{
-        		url.data = new Object();
+        		url.data = new URLVariables();
         	}
         	for each(var layer: WMSLayer in getWMSLayers()) 
         	{
