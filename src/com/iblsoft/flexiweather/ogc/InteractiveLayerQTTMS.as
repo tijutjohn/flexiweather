@@ -355,11 +355,6 @@ package com.iblsoft.flexiweather.ogc
 				matrix.scale(sx, sy);
 				matrix.translate(xx, yy);
 				
-				if (!t_tile.image || !t_tile.image.bitmapData)
-				{
-					trace("Stop");
-				}
-				
 				graphics.beginBitmapFill(t_tile.image.bitmapData, matrix, false, imageSmooth);
 				graphics.drawRect(xx, yy, newWidth , newHeight);
 				graphics.endFill();

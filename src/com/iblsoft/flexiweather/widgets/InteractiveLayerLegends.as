@@ -14,6 +14,8 @@ package com.iblsoft.flexiweather.widgets
 	
 	import mx.collections.ArrayCollection;
 	import mx.containers.Canvas;
+	import mx.logging.ILogger;
+	import mx.logging.Log;
 	
 	[Style(name="horizontalGap", type="Number", format="Length", inherit="no")]
 	
@@ -87,7 +89,7 @@ package com.iblsoft.flexiweather.widgets
 
 
 
-		
+		private var _logger: ILogger;
 
 		public function get maximumArea():Rectangle
 		{
@@ -146,6 +148,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			super(container);
 			
+			_logger = Log.getLogger('InteractiveLayerLegends');
 			mouseChildren = true;
 			mouseEnabled = true;
 		}
@@ -173,6 +176,7 @@ package com.iblsoft.flexiweather.widgets
 				l.removeEventListener(InteractiveLayerEvent.VISIBILITY_EFFECT_FINISHED, onLayerVisibilityChanged);
 				m_layers.removeItemAt(i);
 				l.removeLegend(getCanvasFromDictionary(l));
+				delete m_canvasDictionary[l];
 			}
 		}
 		
@@ -261,10 +265,10 @@ package com.iblsoft.flexiweather.widgets
 					oldScaleY = oldScaleObj.oldScaleY;
 				}
 				var rect: Rectangle = new Rectangle(0,0, cnv.width / oldScaleX * _legendScaleX, cnv.height / oldScaleY * _legendScaleY);
-//				trace("\ngetRectangleFromLayer rect: " + rect);
-//				trace("getRectangleFromLayer cnv size: " + cnv.width + " , " + cnv.height);
-//				trace("getRectangleFromLayer cnv scale: " + oldScaleX + " , " + oldScaleY);
-//				trace("getRectangleFromLayer _legendScaleX: " + _legendScaleX + " , " + _legendScaleX);
+//				debug("\ngetRectangleFromLayer rect: " + rect);
+//				debug("getRectangleFromLayer cnv size: " + cnv.width + " , " + cnv.height);
+//				debug("getRectangleFromLayer cnv scale: " + oldScaleX + " , " + oldScaleY);
+//				debug("getRectangleFromLayer _legendScaleX: " + _legendScaleX + " , " + _legendScaleX);
 				
 				_scaleDict[cnv] = {oldScaleX: _legendScaleX, oldScaleY: _legendScaleY};
 				return rect;
@@ -388,11 +392,13 @@ package com.iblsoft.flexiweather.widgets
 			
 			for each (l in m_layers)
 			{
+				debug("LEGENDS checkIfAllLegendsAreLoaded l: " + l.name);
 				if (l.hasLegend() && l.visible)
 				{
 					canvas = getCanvasFromDictionary(l);
 					if (!canvas)
 					{
+						debug("\t LEGENDS checkIfAllLegendsAreLoaded NEEDS LOADING l: " + l.name);
 						//it needs to be loaded
 						needLoading = true;
 					}		
@@ -488,7 +494,7 @@ package com.iblsoft.flexiweather.widgets
 		
 		private function notify(type: String): void
 		{
-			trace("InteractiveLayerLegends NOTIFY: " + type);
+			debug("InteractiveLayerLegends NOTIFY: " + type);
 			dispatchEvent(new Event(type));
 		}
 		public function renderLegendsStack(justReposition: Boolean = false): void
@@ -511,7 +517,7 @@ package com.iblsoft.flexiweather.widgets
 				var needsLoaded: int = loadLegends();
 				if (needsLoaded > 0)
 				{
-					trace("\nrenderLegendsStack needsLoaded: " + needsLoaded + " DO NOT CONTINUE");
+					debug("\nrenderLegendsStack needsLoaded: " + needsLoaded + " DO NOT CONTINUE");
 					return;
 				}
 			}*/
@@ -534,8 +540,10 @@ package com.iblsoft.flexiweather.widgets
 			
 			if (maxWidth < 100 || maxHeight < 100)
 			{
-				trace("Small area: STOP");
+				debug("Small area: STOP");
 			}
+			
+			debug("maxWidth: " + maxWidth + " maxHeight: " + maxHeight);
 			
 			var paddingLeft: int = getStyle('paddingLeft');
 			var paddingRight: int = getStyle('paddingRight');
@@ -689,7 +697,7 @@ package com.iblsoft.flexiweather.widgets
 			//					properties = placeRectangle(l, properties);
 			//				}
 			
-			trace("\n\n NEW ROUND");
+			debug("\n\n NEW ROUND");
 //			areas = new Array();
 			
 //			var lRect: InteractiveLayerWMS = getLayerAt(0) as InteractiveLayerWMS;
@@ -752,7 +760,7 @@ package com.iblsoft.flexiweather.widgets
 				}
 			}
 			
-			trace("getAllLegendLayers : " + _arr.length);
+			debug("getAllLegendLayers : " + _arr.length);
 			return _arr;
 		}
 		private function nextStep(): void
@@ -836,7 +844,7 @@ package com.iblsoft.flexiweather.widgets
 						var rect: Rectangle = getRectangleFromLayer(l);
 						if (rect.width == 0 || rect.height == 0)
 						{
-							trace("Wron rect, skip");
+							debug("Wron rect, skip");
 							return null;
 						}
 						//rect = new Rectangle(0,0, canvas.width, canvas.height);
@@ -846,14 +854,14 @@ package com.iblsoft.flexiweather.widgets
 						_topArea.findSuitableArea(rect, 'both', areas);
 						if (areas.length > 0)
 						{
-							trace("Areas found: " + areas.length);
+							debug("Areas found: " + areas.length);
 //							if (chbDensity.selected)
 //								areas.sort(sortAreas);
 							var bestArea: DynamicArea = areas[0].area;
 							var bestDenstiy: Number = areas[0].density;
 							if (bestArea.area.width == 0 || bestArea.area.height == 0)
 							{
-								trace("stop area is 0");
+								debug("stop area is 0");
 							}
 							//								var currRect: Rectangle = bestArea.area.clone();
 							bestArea.createFromItem(rect, properties.firstAreaDirection, properties.secondAreaDirection);
@@ -872,7 +880,7 @@ package com.iblsoft.flexiweather.widgets
 						
 						//							} else {
 						} else {
-							trace("Areas: did not found suitable area : topArea: " + _topArea.area);
+							debug("Areas: did not found suitable area : topArea: " + _topArea.area);
 						}
 					}
 				}
@@ -1157,7 +1165,7 @@ package com.iblsoft.flexiweather.widgets
 		
 		private function updateLegendScale(l: InteractiveLayer): void
 		{
-//			trace("updateLegendScale scale ["+legendScaleX+","+legendScaleY+"]")
+//			debug("updateLegendScale scale ["+legendScaleX+","+legendScaleY+"]")
 //			var canvas: Canvas = getCanvasFromDictionary(l);
 //			l.renderLegend(canvas, null, legendScaleX, legendScaleY, getStyle('labelAlign'), true);
 		}
@@ -1213,7 +1221,8 @@ package com.iblsoft.flexiweather.widgets
 		private function debug(str: String): void
 		{
 //			return;
-			trace("InteractiveLayerLegends debug > " + str);
+			trace(str);
+			_logger.debug(str);
 		}
 	}
 }

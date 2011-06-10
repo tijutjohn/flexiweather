@@ -7,13 +7,18 @@ package com.iblsoft.flexiweather.utils
 	import flash.events.EventDispatcher;
 	import flash.events.IOErrorEvent;
 	import flash.events.SecurityErrorEvent;
+	import flash.net.URLLoader;
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
+	import flash.net.URLRequestHeader;
+	import flash.net.URLVariables;
 	import flash.utils.ByteArray;
 	import flash.utils.Dictionary;
 	
 	import mx.logging.Log;
+	import mx.messaging.AbstractConsumer;
 	import mx.rpc.Fault;
+	import mx.utils.Base64Encoder;
 	
 	/**
 	 * Replacement of flash.net.URLLoader and flash.display.Loader classes
@@ -126,20 +131,101 @@ package com.iblsoft.flexiweather.utils
 			return UniURLLoader.fromBaseURL(url);
 		}
 		
+		public static var useBasicAuthInRequest: Boolean = false;
+		public static var basicAuthUsername: String;
+		public static var basicAuthPassword: String;
+		
+		private function checkRequestData(urlRequest: URLRequest): void
+		{
+			var url: String = decodeURIComponent(urlRequest.url);
+			var urlArr: Array = url.split('?');
+			if (urlArr.length == 2)
+			{
+				urlRequest.url = urlArr[0];
+				
+				var dataStr: String = urlArr[1];
+				var dataArr: Array = dataStr.split('&');
+				for each (var str: String in dataArr)
+				{
+					if (str && str.length > 0 && str.indexOf('=') > 0)
+					{
+						if (!urlRequest.data)
+							urlRequest.data = new URLVariables();
+						var valArr: Array = str.split('=');
+						var varName: String = valArr[0];
+						var varValue: String = valArr[1];
+						if (urlRequest.hasOwnProperty(varName))
+						{
+							trace("variable already exists in request variables ["+varName+"]: oldValue " + urlRequest[varName] + " newValue: " + varValue); 
+						} else {
+							urlRequest.data[valArr[0]] = valArr[1];
+						}
+					}
+				}
+				if (urlRequest.data)
+				{
+					var vars: URLVariables = urlRequest.data as URLVariables;
+					if (vars)
+					{
+						urlRequest.url += "?";
+						//now we have all datas in variables, move it to url
+						for (var item: String in urlRequest.data)
+						{
+							urlRequest.url += item + "=" + urlRequest.data[item] + "&";
+						}
+						urlRequest.url = urlRequest.url.substr(0, urlRequest.url.length-1);
+						urlRequest.data = null;
+					}
+				}
+//				urlRequest.data = null;
+			}
+		}
 		public function load(
 				urlRequest: URLRequest,
 				associatedData: Object = null,
 				s_backgroundJobName: String = null): void
 		{
+			checkRequestData(urlRequest);
 			checkRequestBaseURL(urlRequest);
 			
-//			trace("Requesting " + urlRequest.url + " " + urlRequest.data);
+			if (useBasicAuthInRequest)
+			{
+				//check if autentification is there already
+				var already_authenticated: Boolean = false;
+				if (urlRequest.requestHeaders.length > 0)
+				{
+					var header: URLRequestHeader = urlRequest.requestHeaders[0] as URLRequestHeader;
+					if (header.name == 'WWW-Authenticate')
+					{
+						already_authenticated = true;
+					}
+				}
+				if (!already_authenticated)
+				{
+					
+					var encoder: Base64Encoder = new Base64Encoder();
+					encoder.insertNewLines = false; 
+					encoder.encode(basicAuthUsername + ":"+basicAuthPassword);
+					var credsHeader: URLRequestHeader = new URLRequestHeader("Authorization", "Basic " + encoder.toString())
+					urlRequest.requestHeaders.push(credsHeader);
+				} else {
+					trace("im already authenticated, do not add authentication again");
+				}
+				
+//				trace("send headers: " + rhArray[0]);
+			}
+				
+//			trace("UNIURLLoader load " + urlRequest.url + " " + urlRequest.data);
 			var urlLoader: URLLoaderWithAssociatedData = new URLLoaderWithAssociatedData();
 			urlLoader.associatedData = associatedData;
 			urlLoader.dataFormat = URLLoaderDataFormat.BINARY;
 			urlLoader.addEventListener(Event.COMPLETE, onDataComplete);
 			urlLoader.addEventListener(IOErrorEvent.IO_ERROR, onDataIOError);
 			urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onSecurityError);
+			
+			UniURLLoaderManager.instance.addLoader( urlRequest);
+			
+			Log.getLogger('UniURLLoader').info("load " + urlRequest.url + " " + urlRequest.data);
 			urlLoader.load(urlRequest);
 			
 			var backgroundJob: BackgroundJob = null;
@@ -187,8 +273,86 @@ package com.iblsoft.flexiweather.utils
 			return true;
 		}
 		
+		protected function test(event: Event): void
+		{
+			var urlLoader: URLLoaderWithAssociatedData = URLLoaderWithAssociatedData(event.target);
+			var urlRequest: URLRequest;
+			
+			// Try to use cross-domain 	 if received "Error #2048: Security sandbox violation:" 
+				
+				var s_proxyURL: String = fromBaseURL(crossDomainProxyURLPattern, proxyBaseURL);
+				
+				urlRequest = md_urlLoaderToRequestMap[urlLoader].request;
+				
+				checkRequestData(urlRequest);
+				
+				var s_url: String = urlRequest.url;
+				
+//				if (s_url.indexOf('ecmwf') >= 0)
+//				{
+//					s_url = 'http://wrep.ecmwf.int/wms/?token=MetOceanIE';
+//					if (s_url.indexOf('GetCapabilities') >= 0)
+//						trace("Stop GetCapabilities");
+//					
+//						trace("Stop ECMWF");
+//				}
+//				if (s_url.indexOf('?') >= 0)
+//				{
+//					s_url = (s_url.split('?') as Array)[0] as String;
+//				}
+				Log.getLogger('SecurityError').info('s_url: ' + s_url);
+				Log.getLogger('SecurityError').info('s_url.indexOf("?"): ' + (s_url.indexOf("?")));
+				/*
+				if(urlRequest.data) {
+					if(s_url.indexOf("?") >= 0)
+					{
+						if (s_url.indexOf("?") != (s_url.length - 1))
+							s_url += "&";
+					} else
+						s_url += "?";
+					
+					Log.getLogger('SecurityError').info('STEP 1 s_url: ' + s_url);
+					
+					if (urlRequest.data is URLVariables)
+					{
+						s_url += urlRequest.data;
+					} else {
+						if (urlRequest.data is Object)
+						{
+							for (var dataItemName: String in urlRequest.data)
+							{
+								s_url += dataItemName + "=" + urlRequest.data[dataItemName];
+							}
+						}
+					}
+					Log.getLogger('SecurityError').info('STEP 2 s_url: ' + s_url);
+				
+					urlRequest.data = null
+				}*/
+				s_proxyURL = s_proxyURL.replace("${URL}", encodeURIComponent(s_url));
+				Log.getLogger('SecurityError').info('s_proxyURL: ' + s_proxyURL);
+				//Alert.show("Got error:\n" + event.text + "\n"
+				//		+ "Retrying:\n" + s_proxyURL + "\n",
+				//		"SecurityErrorEvent received");
+				urlRequest.url = s_proxyURL;
+				checkRequestData(urlRequest);
+				
+				urlLoader.b_crossDomainProxyRequest = true;
+				urlLoader.load(urlRequest);
+				return;
+			
+//			urlRequest = disconnectURLLoader(urlLoader);
+//			if(urlRequest == null)
+//				return;
+//			
+//			Log.getLogger("UniURLLoader").info("Security error: " + event.text);
+//			dispatchFault(urlRequest, urlLoader.associatedData, ERROR_SECURITY, event.text);
+		}
+		
 		protected function onDataComplete(event: Event): void
 		{
+//			test(event);
+			
 			var urlLoader: URLLoaderWithAssociatedData = URLLoaderWithAssociatedData(event.target);
 			var urlRequest: URLRequest = disconnectURLLoader(urlLoader);
 			if(urlRequest == null)
@@ -286,7 +450,7 @@ package com.iblsoft.flexiweather.utils
 			var urlLoader: URLLoaderWithAssociatedData = URLLoaderWithAssociatedData(event.target);
 			var urlRequest: URLRequest;
 			
-			// Try to use cross-domain proxy if received "Error #2048: Security sandbox violation:" 
+			// Try to use cross-domain 	 if received "Error #2048: Security sandbox violation:" 
 			if(crossDomainProxyURLPattern != null
 					&& event.text.match(/#2048/)
 					&& !urlLoader.b_crossDomainProxyRequest) {
@@ -294,19 +458,46 @@ package com.iblsoft.flexiweather.utils
 				var s_proxyURL: String = fromBaseURL(crossDomainProxyURLPattern, proxyBaseURL);
 				
 				urlRequest = md_urlLoaderToRequestMap[urlLoader].request;
+				
+				checkRequestData(urlRequest);
+				
 				var s_url: String = urlRequest.url;
+				
+				Log.getLogger('SecurityError').info('s_url: ' + s_url);
+				Log.getLogger('SecurityError').info('s_url.indexOf("?"): ' + (s_url.indexOf("?")));
 				if(urlRequest.data) {
 					if(s_url.indexOf("?") >= 0)
-						s_url += "&";
-					else
+					{
+						if (s_url.indexOf("?") != (s_url.length - 1))
+							s_url += "&";
+					} else
 						s_url += "?";
-					s_url += urlRequest.data;
+					
+					Log.getLogger('SecurityError').info('STEP 1 s_url: ' + s_url);
+					
+					if (urlRequest.data is URLVariables)
+					{
+						s_url += urlRequest.data;
+					} else {
+						if (urlRequest.data is Object)
+						{
+							for (var dataItemName: String in urlRequest.data)
+							{
+								s_url += dataItemName + "=" + urlRequest.data[dataItemName];
+							}
+						}
+					}
+					
+					Log.getLogger('SecurityError').info('STEP 2 s_url: ' + s_url);
+					
 				}
 				s_proxyURL = s_proxyURL.replace("${URL}", encodeURIComponent(s_url));
+				Log.getLogger('SecurityError').info('s_proxyURL: ' + s_proxyURL);
 				//Alert.show("Got error:\n" + event.text + "\n"
 				//		+ "Retrying:\n" + s_proxyURL + "\n",
 				//		"SecurityErrorEvent received");
 				urlRequest.url = s_proxyURL;
+				checkRequestData(urlRequest);
 				urlLoader.b_crossDomainProxyRequest = true;
 				urlLoader.load(urlRequest);
 				return;
@@ -374,7 +565,11 @@ package com.iblsoft.flexiweather.utils
 			if(backgroundJob != null)
 				BackgroundJobManager.getInstance().finishJob(backgroundJob);
 			
+			
 			var urlRequest: URLRequest = md_urlLoaderToRequestMap[urlLoader].request; 
+			
+			UniURLLoaderManager.instance.removeLoader(urlRequest);
+			
 			delete md_urlLoaderToRequestMap[urlLoader];
 			return urlRequest;
 		}

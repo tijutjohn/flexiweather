@@ -17,6 +17,7 @@ package com.iblsoft.flexiweather.ogc
 	import flash.display.DisplayObject;
 	import flash.display.Graphics;
 	import flash.events.DataEvent;
+	import flash.events.Event;
 	import flash.events.TimerEvent;
 	import flash.geom.Matrix;
 	import flash.geom.Point;
@@ -33,6 +34,8 @@ package com.iblsoft.flexiweather.ogc
 	import mx.effects.Fade;
 	import mx.events.EffectEvent;
 	import mx.logging.Log;
+	
+	[Event(name="wmsStyleChanged", type="flash.events.Event")]
 	
 	public class InteractiveLayerMSBase extends InteractiveLayer
 			implements ISynchronisedObject
@@ -174,6 +177,10 @@ package com.iblsoft.flexiweather.ogc
 			if (!request)
 				return null;
 			
+			if (request.url.indexOf('${BASE_URL}') == -1)
+			{
+				trace("stop");
+			}
 			updateDimensionsInURLRequest(request);
 			updateCustomParametersInURLRequest(request);
 			updateRequestData(request);
@@ -284,8 +291,11 @@ package com.iblsoft.flexiweather.ogc
         	var style: Object = getWMSStyleObject(0, styleName);
         	
         	if (style)
+			{
+				trace("MSBAse ["+name+"] hasLegend style: "  + style.legend);
         		return style.legend;
-        		
+			}	
+			trace("MSBAse hasLegend NO style: ");
         	return false;
        	}
 
@@ -309,6 +319,10 @@ package com.iblsoft.flexiweather.ogc
 		 	}
 		 }
 		 
+		 override public function invalidateLegend():void
+		 {
+			 trace("invalidateLegend");
+		 }
         /**
          * Render legend. If legend is not cached, it needs to be loaded. 
          * @param canvas
@@ -329,6 +343,8 @@ package com.iblsoft.flexiweather.ogc
         	
         	var legendObject: Object = style.legend;
         	
+			trace("MSBAse renderLegend style: " + style.legend);
+			
         	var w: int = legendObject.width;
         	var h: int = legendObject.height;
         	if (hintSize)
@@ -347,7 +363,17 @@ package com.iblsoft.flexiweather.ogc
 	        	var url: URLRequest = m_cfg.toGetLegendRequest(
 						w, h,
 						style.name);
-						
+				
+				trace("LEGEND URL1: " + url.url);
+				if (!(url.url.indexOf('${BASE_URL}') == 0))
+				{
+					
+					url = new URLRequest(legendObject.url);
+					trace("LEGEND URL2: " + url.url);
+				} else {
+					trace(" ${BASE_URL} are not using legend url from capabilities"); 
+				}
+				
 				updateURLWithDimensions(url);
 					
 				if (isNaN(legendScaleX))
@@ -454,6 +480,7 @@ package com.iblsoft.flexiweather.ogc
 			removeLegendListeners(event.target as UniURLLoader);
 		}
 		
+		
 		/**
 		 * 
 		 * @param image
@@ -488,6 +515,9 @@ package com.iblsoft.flexiweather.ogc
 			label.glowBlur = 5;
 			label.glowColor = 0xffffff;
 			label.text = name;
+			label.validateNow();
+			//FIX for legends text height
+			labelHeight = label.textHeight;
 			
 			label.setStyle('textAlign', labelAlign);
 			
@@ -690,7 +720,7 @@ package com.iblsoft.flexiweather.ogc
         	
         	if (!url.data)
         	{
-        		url.data = new Object();
+        		url.data = new URLVariables();
         	}
         	for each(var layer: WMSLayer in getWMSLayers()) 
         	{
@@ -822,10 +852,15 @@ package com.iblsoft.flexiweather.ogc
 
         public function setWMSStyleName(i_subLayer: uint, s_styleName: String): void
         {
+			
+			clearLegendCache();
+			
         	if(s_styleName != null)
 	       		ma_subLayerStyleNames[i_subLayer] = s_styleName;
 	       	else
 	       		delete ma_subLayerStyleNames[i_subLayer];
+			
+			dispatchEvent(new Event(InteractiveLayerWMS.WMS_STYLE_CHANGED));
         }
         
         public function getWMSStyleListString(): String

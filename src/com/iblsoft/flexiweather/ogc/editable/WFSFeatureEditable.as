@@ -328,7 +328,23 @@ package com.iblsoft.flexiweather.ogc.editable
 				return false;
 			}
 		}
-		
+
+		/**
+		 * It returns color, which was entered as clr parameter. If feature need to use monochromeColor (in Collaboration Feature Editor) it will return value of monochrome color. 
+		 * @param clr
+		 * @return 
+		 * 
+		 */		
+		public function getCurrentColor(clr: uint): uint
+		{
+			if (useMonochrome){
+				clr = monochromeColor;
+			} else if (master.useMonochrome){
+				clr = master.monochromeColor;
+			}
+			
+			return clr;
+		}
 		public function set selected(b: Boolean): void
 		{
 			if(mb_selected != b) {
