@@ -18,9 +18,13 @@ package com.iblsoft.flexiweather.ogc
 	
 	import mx.logging.Log;
 	
+	[Event(name="wmsStyleChanged", type="flash.events.Event")]
+	
 	public class InteractiveLayerWMS extends InteractiveLayerMSBase
 			implements ISynchronisedObject, Serializable
 	{
+		public static const WMS_STYLE_CHANGED: String = 'wmsStyleChanged';
+		
 		public function InteractiveLayerWMS(container: InteractiveWidget, cfg: WMSLayerConfiguration)
 		{
 			super(container, cfg);

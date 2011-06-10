@@ -162,6 +162,9 @@ package com.iblsoft.flexiweather.widgets
         // map legend
         public function hasLegend(): Boolean
         { return false; }
+		
+        public function invalidateLegend(): void
+        { }
         
         public function removeLegend(canvas: Canvas): void
         {  }

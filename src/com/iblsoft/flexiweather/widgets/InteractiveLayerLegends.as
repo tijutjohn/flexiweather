@@ -176,6 +176,7 @@ package com.iblsoft.flexiweather.widgets
 				l.removeEventListener(InteractiveLayerEvent.VISIBILITY_EFFECT_FINISHED, onLayerVisibilityChanged);
 				m_layers.removeItemAt(i);
 				l.removeLegend(getCanvasFromDictionary(l));
+				delete m_canvasDictionary[l];
 			}
 		}
 		
@@ -391,11 +392,13 @@ package com.iblsoft.flexiweather.widgets
 			
 			for each (l in m_layers)
 			{
+				debug("LEGENDS checkIfAllLegendsAreLoaded l: " + l.name);
 				if (l.hasLegend() && l.visible)
 				{
 					canvas = getCanvasFromDictionary(l);
 					if (!canvas)
 					{
+						debug("\t LEGENDS checkIfAllLegendsAreLoaded NEEDS LOADING l: " + l.name);
 						//it needs to be loaded
 						needLoading = true;
 					}		
@@ -1217,7 +1220,8 @@ package com.iblsoft.flexiweather.widgets
 		
 		private function debug(str: String): void
 		{
-			return;
+//			return;
+			trace(str);
 			_logger.debug(str);
 		}
 	}
