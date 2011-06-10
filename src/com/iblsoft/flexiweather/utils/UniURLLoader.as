@@ -152,9 +152,17 @@ package com.iblsoft.flexiweather.utils
 						if (!urlRequest.data)
 							urlRequest.data = new URLVariables();
 						var valArr: Array = str.split('=');
-						urlRequest.data[valArr[0]] = valArr[1];
+						var varName: String = valArr[0];
+						var varValue: String = valArr[1];
+						if (urlRequest.hasOwnProperty(varName))
+						{
+							trace("variable already exists in request variables ["+varName+"]: oldValue " + urlRequest[varName] + " newValue: " + varValue); 
+						} else {
+							urlRequest.data[valArr[0]] = valArr[1];
+						}
 					}
 				}
+//				urlRequest.data = null;
 			}
 		}
 		public function load(
@@ -260,16 +268,19 @@ package com.iblsoft.flexiweather.utils
 				var s_proxyURL: String = fromBaseURL(crossDomainProxyURLPattern, proxyBaseURL);
 				
 				urlRequest = md_urlLoaderToRequestMap[urlLoader].request;
+				
+				checkRequestData(urlRequest);
+				
 				var s_url: String = urlRequest.url;
 				
-				if (s_url.indexOf('ecmwf') >= 0)
-				{
-					s_url = 'http://wrep.ecmwf.int/wms/?token=MetOceanIE';
-					if (s_url.indexOf('GetCapabilities') >= 0)
-						trace("Stop GetCapabilities");
-					
-						trace("Stop ECMWF");
-				}
+//				if (s_url.indexOf('ecmwf') >= 0)
+//				{
+//					s_url = 'http://wrep.ecmwf.int/wms/?token=MetOceanIE';
+//					if (s_url.indexOf('GetCapabilities') >= 0)
+//						trace("Stop GetCapabilities");
+//					
+//						trace("Stop ECMWF");
+//				}
 //				if (s_url.indexOf('?') >= 0)
 //				{
 //					s_url = (s_url.split('?') as Array)[0] as String;
@@ -309,6 +320,8 @@ package com.iblsoft.flexiweather.utils
 				//		+ "Retrying:\n" + s_proxyURL + "\n",
 				//		"SecurityErrorEvent received");
 				urlRequest.url = s_proxyURL;
+				checkRequestData(urlRequest);
+				
 				urlLoader.b_crossDomainProxyRequest = true;
 				urlLoader.load(urlRequest);
 				return;
@@ -469,6 +482,7 @@ package com.iblsoft.flexiweather.utils
 				//		+ "Retrying:\n" + s_proxyURL + "\n",
 				//		"SecurityErrorEvent received");
 				urlRequest.url = s_proxyURL;
+				checkRequestData(urlRequest);
 				urlLoader.b_crossDomainProxyRequest = true;
 				urlLoader.load(urlRequest);
 				return;
