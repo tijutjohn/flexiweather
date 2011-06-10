@@ -162,6 +162,21 @@ package com.iblsoft.flexiweather.utils
 						}
 					}
 				}
+				if (urlRequest.data)
+				{
+					var vars: URLVariables = urlRequest.data as URLVariables;
+					if (vars)
+					{
+						urlRequest.url += "?";
+						//now we have all datas in variables, move it to url
+						for (var item: String in urlRequest.data)
+						{
+							urlRequest.url += item + "=" + urlRequest.data[item] + "&";
+						}
+						urlRequest.url = urlRequest.url.substr(0, urlRequest.url.length-1);
+						urlRequest.data = null;
+					}
+				}
 //				urlRequest.data = null;
 			}
 		}
