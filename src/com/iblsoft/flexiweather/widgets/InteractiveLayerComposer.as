@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.widgets
 {
+	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
@@ -182,6 +183,23 @@ package com.iblsoft.flexiweather.widgets
 			invalidateDynamicPart();
 			m_layers.itemUpdated(event.target);
 		}
+		
+		override public function negotiateBBox(newBBox: BBox): BBox
+		{
+			var s_crs: String = container.getCRS();
+			
+			trace("\n\n\tInteractiveLayerComposer negotiateBBox newBBox at startup: :" + newBBox.toLaLoString(s_crs));
+			for(var i: int = 0; i < m_layers.length; ++i) {
+				
+				var l: InteractiveLayer = InteractiveLayer(m_layers.getItemAt(i));
+				newBBox = l.negotiateBBox(newBBox);
+				trace("\tInteractiveLayerComposer negotiateBBox newBBox ["+i+"] :" + newBBox.toLaLoString(s_crs));
+			}
+			trace("\tInteractiveLayerComposer negotiateBBox newBBox at end: :" + newBBox.toLaLoString(s_crs));
+			
+			return newBBox;
+		}
+
 		
         // data refreshing
         override public function refresh(b_force: Boolean): void

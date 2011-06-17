@@ -451,7 +451,7 @@ package com.iblsoft.flexiweather.widgets
         	setViewBBox(new BBox(xmin, ymin, xmax, ymax), b_finalChange);
         }
 
-        public function setViewBBox(bbox: BBox, b_finalChange: Boolean): void
+        public function setViewBBox(bbox: BBox, b_finalChange: Boolean, b_negotiateBBox: Boolean = true): void
         {
         	// aspect is the bigger the bbox is wider than higher
         	
@@ -509,11 +509,49 @@ package com.iblsoft.flexiweather.widgets
 	        	viewBBox.offset(0, -viewBBox.bottom + m_extentBBox.yMax);
 
 	        var newBBox: BBox = BBox.fromRectangle(viewBBox);
+			
+			/*
 //	        if(!m_viewBBox.equals(newBBox)) {
 		        m_viewBBox = newBBox;
 	        	signalAreaChanged(b_finalChange);
 //	        }
+			*/
+			
+			if (b_negotiateBBox)
+				negotiateBBox(newBBox, b_finalChange);
+			else
+				setViewBBoxAfterNegotiation(newBBox, b_finalChange);
+
         }
+		
+		private function negotiateBBox(newBBox: BBox, b_finalChange: Boolean): void
+		{
+			trace("\t IWidget negotiateBBox newBBox at startup: :" + newBBox.toLaLoString(ms_crs));
+			for(var i: int = 0; i < m_layerContainer.numChildren; ++i) {
+				
+				var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getChildAt(i));
+				
+				newBBox = l.negotiateBBox(newBBox);
+				if (newBBox)
+					trace("\t\t IWidget negotiateBBox newBBox :" + newBBox.toLaLoString(ms_crs));
+				else 
+					trace("\t\t IWidget negotiateBBox newBBox IS NULL");
+					
+			}
+			trace("IWidget negotiateBBox newBBox at end: :" + newBBox.toLaLoString(ms_crs));
+			
+			setViewBBoxAfterNegotiation(newBBox, b_finalChange);
+		}
+		
+		private function setViewBBoxAfterNegotiation(newBBox: BBox, b_finalChange: Boolean): void
+		{
+			trace("\t IWidget setViewBBoxAfterNegotiation newBBox :" + newBBox.toLaLoString(ms_crs));
+			m_viewBBox = newBBox;
+			signalAreaChanged(b_finalChange);
+		}
+		
+
+
 
         public function setExtentBBOX(bbox: BBox, b_finalChange: Boolean = true): void
         {
