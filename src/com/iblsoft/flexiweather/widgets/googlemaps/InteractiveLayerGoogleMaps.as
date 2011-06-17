@@ -5,11 +5,14 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 	import com.google.maps.Map3D;
 	import com.google.maps.MapEvent;
 	import com.google.maps.MapType;
+	import com.google.maps.interfaces.IMapType;
+	import com.iblsoft.flexiweather.ILayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
+	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
@@ -17,14 +20,18 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 	import flash.events.Event;
 	import flash.geom.Point;
 	
-	public class InteractiveLayerGoogleMaps extends InteractiveLayer implements Serializable
+	public class InteractiveLayerGoogleMaps extends InteractiveLayer implements Serializable, IConfigurableLayer
 	{
 		private var m_map: Map3D;
 		private var mb_mapIsReady: Boolean;
 		private var mb_mapIsInitialized: Boolean;
 		
 		private var m_cfg: GoogleMapLayerConfiguration;
-		
+
+		public function get configuration(): ILayerConfiguration
+		{
+			return m_cfg;
+		}
 		public function InteractiveLayerGoogleMaps(container:InteractiveWidget, cfg: GoogleMapLayerConfiguration)
 		{
 			super(container);
@@ -113,6 +120,11 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 			m_map.mouseEnabled = false;
 			mouseChildren = false;
 			mouseEnabled = false;
+			
+			//set view bbox on adding google maps to negotiate current bbox
+			var _bbox: BBox = container.getViewBBox();
+			trace("google maps initializeMap _bbox: " + _bbox);
+			container.setViewBBox(_bbox, true);
 		}
 		
 		override public function negotiateBBox(newBBox: BBox): BBox
@@ -148,12 +160,14 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 				var _center: LatLng = _bounds.getCenter();  
 	//			var zoom: Number = 3;
 				if (isNaN(f_zoom))
+				{
 					f_zoom = 3;
+				}
 	  			trace("zoom: " + f_zoom)
 	  			trace("_center: " + _center);
 	  			try {
 //	  				m_map.setCenter(new LatLng(40.736072,-73.992062), 14, MapType.NORMAL_MAP_TYPE);
-					m_map.setCenter(_center, f_zoom, MapType.NORMAL_MAP_TYPE);
+					m_map.setCenter(_center, f_zoom);
 	  			} catch (err: Error) {
 	  				trace("GoogleMaps setCenter error: " + err.message);
 	  			}
@@ -250,13 +264,16 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 //				var _center: LatLng = _bounds.getCenter();  
 				var _center: LatLng = getCenter(_bounds);
 	//			var zoom: Number = 3;
-				if (isNaN(f_zoom))
-					f_zoom = 3;
+				if (isNaN(f_zoom)) {
+//					f_zoom = 3;
+					callLater(updateData, [b_forceUpdate]);
+					return;
+				}
 	  			trace("InteractiveLayerGoogleMaps updateData zoom: " + f_zoom)
 	  			trace("InteractiveLayerGoogleMaps updateData _center: " + _center);
 	  			try {
 //	  				m_map.setCenter(new LatLng(40.736072,-73.992062), 14, MapType.NORMAL_MAP_TYPE);
-					m_map.setCenter(_center, f_zoom, MapType.NORMAL_MAP_TYPE);
+					m_map.setCenter(_center, f_zoom);
 	  			} catch (err: Error) {
 	  				trace("GoogleMaps setCenter error: " + err.message);
 	  			}
@@ -291,6 +308,11 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 				graphics.moveTo(0, f_height - 1);
 				graphics.lineTo(f_width - 1, 0);
 //			}
+		}
+		
+		public function setMapType(type: IMapType): void
+		{
+			m_map.setMapType(type);
 		}
 		
 	}

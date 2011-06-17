@@ -453,6 +453,7 @@ package com.iblsoft.flexiweather.widgets
 
         public function setViewBBox(bbox: BBox, b_finalChange: Boolean, b_negotiateBBox: Boolean = true): void
         {
+			trace("InteractiveWidget.setViewBBox (bbox: " +  bbox);
         	// aspect is the bigger the bbox is wider than higher
         	
         	// this is the aspect ratio we want to maintain
@@ -526,19 +527,22 @@ package com.iblsoft.flexiweather.widgets
 		
 		private function negotiateBBox(newBBox: BBox, b_finalChange: Boolean): void
 		{
-			trace("\t IWidget negotiateBBox newBBox at startup: :" + newBBox.toLaLoString(ms_crs));
+//			trace("\t IWidget negotiateBBox newBBox at startup: :" + newBBox.toLaLoString(ms_crs));
+			trace("\t IWidget negotiateBBox newBBox at startup: :" + newBBox);
 			for(var i: int = 0; i < m_layerContainer.numChildren; ++i) {
 				
 				var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getChildAt(i));
 				
 				newBBox = l.negotiateBBox(newBBox);
-				if (newBBox)
-					trace("\t\t IWidget negotiateBBox newBBox :" + newBBox.toLaLoString(ms_crs));
-				else 
+				if (newBBox) {
+//					trace("\t\t IWidget negotiateBBox newBBox :" + newBBox.toLaLoString(ms_crs));
+					trace("\t\t IWidget negotiateBBox newBBox :" + newBBox);
+				} else 
 					trace("\t\t IWidget negotiateBBox newBBox IS NULL");
 					
 			}
-			trace("IWidget negotiateBBox newBBox at end: :" + newBBox.toLaLoString(ms_crs));
+//			trace("IWidget negotiateBBox newBBox at end: :" + newBBox.toLaLoString(ms_crs));
+			trace("IWidget negotiateBBox newBBox at end: :" + newBBox);
 			
 			setViewBBoxAfterNegotiation(newBBox, b_finalChange);
 		}

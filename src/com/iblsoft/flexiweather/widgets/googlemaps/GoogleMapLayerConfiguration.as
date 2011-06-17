@@ -1,13 +1,17 @@
 package com.iblsoft.flexiweather.widgets.googlemaps
 {
+	import com.iblsoft.flexiweather.ILayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.CRSWithBBox;
 	import com.iblsoft.flexiweather.ogc.LayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.editable.IInteractiveLayerProvider;
 	import com.iblsoft.flexiweather.utils.Storage;
+	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	
+	import spark.components.Group;
 
-	public class GoogleMapLayerConfiguration extends LayerConfiguration implements IInteractiveLayerProvider
+	public class GoogleMapLayerConfiguration extends LayerConfiguration implements IInteractiveLayerProvider, ILayerConfiguration
 	{
 		/** Array of CRSWithBBox */
 		public var tilingCRSsAndExtents: Array = [];
@@ -75,5 +79,17 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 				s_url = ms_previewURL;
 			return s_url;
 		}*/
+		
+		override public function hasCustomLayerOptions(): Boolean
+		{
+			return true;
+		}
+		
+		override public function createCustomLayerOption(layer: IConfigurableLayer): Group
+		{
+			var options: GoogleMapsLayerOption = new GoogleMapsLayerOption();
+			options.layer = layer as InteractiveLayerGoogleMaps;
+			return options;	
+		}
 	}
 }
