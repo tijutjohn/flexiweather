@@ -1,5 +1,8 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.proj.Coord;
+	import com.iblsoft.flexiweather.proj.Projection;
+	
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	
@@ -52,6 +55,21 @@ package com.iblsoft.flexiweather.ogc
 					xml.eastBoundLongitude, xml.northBoundLatitudey);
 		}
 
+		public function toLaLoString(crs: String): String
+		{
+			//TODO remove conversion to LaLo in BBOX.toBBoxString
+			var prj: Projection = Projection.getByCRS(crs);
+			if(prj == null)
+				return null;
+			var minLalo: Coord = prj.prjXYToLaLoCoord(mf_xMin, mf_yMin);
+			var maxLalo: Coord = prj.prjXYToLaLoCoord(mf_xMax, mf_yMax);
+			
+			var toDeg: Number = 180 / Math.PI;
+			
+			return String(minLalo.y * toDeg) + "," + String(minLalo.x * toDeg) + ","
+				+ String(maxLalo.y * toDeg) + "," + String(maxLalo.x * toDeg);
+		}
+		
 		public function toBBOXString(): String
 		{
         	return String(mf_xMin) + "," + String(mf_yMin) + ","

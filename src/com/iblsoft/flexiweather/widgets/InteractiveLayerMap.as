@@ -200,8 +200,8 @@ package com.iblsoft.flexiweather.widgets
 		{
 			super.removeLayer(l);
 			
-			if ((l as InteractiveLayerMSBase).isPrimaryLayer())
-			{
+			if ((l is InteractiveLayerMSBase) && (l as InteractiveLayerMSBase).isPrimaryLayer())
+		  {
 				setPrimaryLayer(null);
 				findNewPrimaryLayer();
 			}

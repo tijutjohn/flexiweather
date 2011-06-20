@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" 
+		 minWidth="250" minHeight="100" width="250" height="100">
+	
+	<mx:HBox>
+		<mx:Label text="Map type:"/>
+		<mx:Button label="Hybrid" click="switchMapType(MapType.HYBRID_MAP_TYPE)"/>
+		<mx:Button label="Normal" click="switchMapType(MapType.NORMAL_MAP_TYPE)"/>
+		<mx:Button label="Physical" click="switchMapType(MapType.PHYSICAL_MAP_TYPE)"/>
+		<mx:Button label="Satellite" click="switchMapType(MapType.SATELLITE_MAP_TYPE)"/>
+	</mx:HBox>
+	
+	<mx:Script>
+		<![CDATA[
+			import com.google.maps.MapType;
+			import com.google.maps.interfaces.IMapType;
+			
+			public var layer: InteractiveLayerGoogleMaps;
+			
+			private function switchMapType(type: IMapType): void
+			{
+				if (layer)
+				{
+					layer.setMapType(type);
+				}
+			}
+		]]>
+	</mx:Script>
+</mx:Canvas>

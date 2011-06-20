@@ -1,8 +1,9 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.ILayerConfiguration;
 	import com.iblsoft.flexiweather.utils.Storage;
 	
-	public class OGCLayerConfiguration extends LayerConfiguration
+	public class OGCLayerConfiguration extends LayerConfiguration implements ILayerConfiguration
 	{
 		// runtime variable
 		protected var m_service: OGCServiceConfiguration;

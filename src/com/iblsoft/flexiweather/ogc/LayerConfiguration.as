@@ -1,14 +1,18 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.ILayerConfiguration;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
+	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	
-	public class LayerConfiguration extends EventDispatcher implements Serializable
+	import mx.containers.Canvas;
+	
+	public class LayerConfiguration extends EventDispatcher implements Serializable, ILayerConfiguration
 	{
 		protected var ms_label: String;
 		protected var ms_previewURL: String = null;
@@ -63,6 +67,16 @@ package com.iblsoft.flexiweather.ogc
 				return ms_previewURL;
 				
 			return getPreviewURL();
+		}
+		
+		public function hasCustomLayerOptions(): Boolean
+		{
+			return false;
+		}
+		
+		public function createCustomLayerOption(layer: IConfigurableLayer): Canvas
+		{
+			return new Canvas();	
 		}
 	}
 }
