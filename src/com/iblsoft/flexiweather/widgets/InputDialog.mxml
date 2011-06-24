@@ -6,7 +6,6 @@
 			   maxWidth="800" minWidth="400">
 	<fx:Script>
 		<![CDATA[
-			import spark.components.ComboBox;
 			import mx.managers.PopUpManager;
 			
 			public static const NORMAL: int = 0;
