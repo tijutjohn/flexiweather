@@ -208,6 +208,8 @@ package com.iblsoft.flexiweather.widgets
 			var dynamicEvent: DynamicEvent = new DynamicEvent(TIME_AXIS_REMOVED);
 			dynamicEvent['layer'] = l;
 			dispatchEvent(dynamicEvent);
+			
+			l.destroy();
 		}
 		
 		private function getSynchronizedFrameValue(): Date

@@ -124,7 +124,7 @@ package com.iblsoft.flexiweather.widgets
 			
 		}
 
-		public function negotiateBBox(newBBox: BBox): BBox
+		public function negotiateBBox(newBBox: BBox, changeZoom: Boolean = true): BBox
 		{ return newBBox; }
 		
         public function onMouseDown(event: MouseEvent): Boolean

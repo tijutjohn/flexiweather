@@ -451,9 +451,32 @@ package com.iblsoft.flexiweather.widgets
         	setViewBBox(new BBox(xmin, ymin, xmax, ymax), b_finalChange);
         }
 
+		/**
+		 * Set View bounding box for all layers
+		 *  
+		 * @param bbox - new bounding box to be changed to
+		 * @param b_finalChange - false if it is change in some running action (like user has draging map or zooming in or out). If action is finished, set b_finalChange = true
+		 * @param b_negotiateBBox - if bounding box needs to be negotiated (because some layers e.g. google can not set any bounding box (because of zoom)
+		 * @param b_changeZoom - This is temporary argument, just for Google Maps fix of scaling maps on Map PAN
+		 * 
+		 */		
         public function setViewBBox(bbox: BBox, b_finalChange: Boolean, b_negotiateBBox: Boolean = true): void
         {
-			trace("InteractiveWidget.setViewBBox (bbox: " +  bbox);
+			//FIXME remove b_changeZoom 
+			
+			var b_changeZoom: Boolean = true;
+			var oldBox: BBox = getViewBBox();
+			
+			var bboxWidthDiff: int = Math.abs(bbox.width - oldBox.width);
+			var bboxHeightDiff: int = Math.abs(bbox.height - oldBox.height);
+			
+//			trace("InteractiveWidget.setViewBBox DIFF " + bboxWidthDiff + " , " + bboxHeightDiff);
+			if (bboxHeightDiff == 0 && bboxWidthDiff == 0)
+			{
+				b_changeZoom = false;
+			}
+			
+//			trace("InteractiveWidget.setViewBBox (bbox: " +  bbox+") final change: " + b_finalChange);
         	// aspect is the bigger the bbox is wider than higher
         	
         	// this is the aspect ratio we want to maintain
@@ -519,37 +542,37 @@ package com.iblsoft.flexiweather.widgets
 			*/
 			
 			if (b_negotiateBBox)
-				negotiateBBox(newBBox, b_finalChange);
+				negotiateBBox(newBBox, b_finalChange, b_changeZoom);
 			else
 				setViewBBoxAfterNegotiation(newBBox, b_finalChange);
 
         }
 		
-		private function negotiateBBox(newBBox: BBox, b_finalChange: Boolean): void
+		private function negotiateBBox(newBBox: BBox, b_finalChange: Boolean, b_changeZoom: Boolean = true): void
 		{
 //			trace("\t IWidget negotiateBBox newBBox at startup: :" + newBBox.toLaLoString(ms_crs));
-			trace("\t IWidget negotiateBBox newBBox at startup: :" + newBBox);
+//			trace("\t IWidget negotiateBBox newBBox at startup: :" + newBBox);
 			for(var i: int = 0; i < m_layerContainer.numChildren; ++i) {
 				
 				var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getChildAt(i));
 				
-				newBBox = l.negotiateBBox(newBBox);
-				if (newBBox) {
+				newBBox = l.negotiateBBox(newBBox, b_changeZoom);
+//				if (newBBox) {
 //					trace("\t\t IWidget negotiateBBox newBBox :" + newBBox.toLaLoString(ms_crs));
-					trace("\t\t IWidget negotiateBBox newBBox :" + newBBox);
-				} else 
-					trace("\t\t IWidget negotiateBBox newBBox IS NULL");
+//					trace("\t\t IWidget negotiateBBox newBBox :" + newBBox);
+//				} else 
+//					trace("\t\t IWidget negotiateBBox newBBox IS NULL");
 					
 			}
 //			trace("IWidget negotiateBBox newBBox at end: :" + newBBox.toLaLoString(ms_crs));
-			trace("IWidget negotiateBBox newBBox at end: :" + newBBox);
+//			trace("IWidget negotiateBBox newBBox at end: :" + newBBox);
 			
 			setViewBBoxAfterNegotiation(newBBox, b_finalChange);
 		}
 		
 		private function setViewBBoxAfterNegotiation(newBBox: BBox, b_finalChange: Boolean): void
 		{
-			trace("\t IWidget setViewBBoxAfterNegotiation newBBox :" + newBBox.toLaLoString(ms_crs));
+//			trace("\t IWidget setViewBBoxAfterNegotiation newBBox :" + newBBox.toLaLoString(ms_crs));
 			m_viewBBox = newBBox;
 			signalAreaChanged(b_finalChange);
 		}
