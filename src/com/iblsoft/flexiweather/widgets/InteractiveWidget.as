@@ -462,8 +462,6 @@ package com.iblsoft.flexiweather.widgets
 		 */		
         public function setViewBBox(bbox: BBox, b_finalChange: Boolean, b_negotiateBBox: Boolean = true): void
         {
-			//FIXME remove b_changeZoom 
-			
 			var b_changeZoom: Boolean = true;
 			var oldBox: BBox = getViewBBox();
 			
@@ -572,7 +570,8 @@ package com.iblsoft.flexiweather.widgets
 		
 		private function setViewBBoxAfterNegotiation(newBBox: BBox, b_finalChange: Boolean): void
 		{
-//			trace("\t IWidget setViewBBoxAfterNegotiation newBBox :" + newBBox.toLaLoString(ms_crs));
+			trace("\t IWidget setViewBBoxAfterNegotiation newBBox :" + newBBox.toLaLoString(ms_crs));
+			trace("\t IWidget setViewBBoxAfterNegotiation newBBox :" + newBBox);
 			m_viewBBox = newBBox;
 			signalAreaChanged(b_finalChange);
 		}

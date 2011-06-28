@@ -66,7 +66,14 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 			//FIXME remove harcoded GoogleMap API Key to configuration
 			m_map.sensor = "false";
 			m_map.key="ABQIAAAAH8k5scGjdxg3Yv6Rib0PTRSGpsRUUtKRAxSpaWXDxfvzoVavuhRINMFI-z2FR2XOe7s5zVypkDNl4A";
+			
+			//this must be set, otherwise google maps will not work in AIR (on mobiles)
+			m_map.url = 'http://www.iblsoft.com';
+			
+			m_map.addEventListener(MapEvent.COMPONENT_INITIALIZED, onComponentInitialized);
 			m_map.addEventListener(MapEvent.MAP_READY, onMapReady);
+			m_map.addEventListener(MapEvent.MAP_READY_INTERNAL, onMapReadyInternal);
+			m_map.addEventListener(MapEvent.MAP_PREINITIALIZE, onMapPreinitialize);
 //			m_map.addEventListener(MapMouseEvent.DRAG_START, onMapDragStart);
 //			m_map.addEventListener(MapMouseEvent.DRAG_STEP, onMapDragStep);
 			m_map.percentWidth = 100;
@@ -74,36 +81,20 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 			addChild(m_map);
 		}
 		
-		/*
-		private function onMapDragStep(event: MapMouseEvent): void
+		private function onComponentInitialized(event:MapEvent):void
 		{
-			trace("onMapDragStep: " + m_map.dragMode);
-			m_map.dragMode = MapAction.DRAGMODE_LATLNG;
-			trace("onMapDragStep: " + m_map.dragMode);
-		}
-		private function onMapDragStart(event: MapMouseEvent): void
-		{
-			trace("onMapDragStart: " + m_map.dragMode);
-			m_map.dragMode = MapAction.DRAGMODE_LATLNG;
-			trace("onMapDragStart: " + m_map.dragMode);
-		}
-		*/
-		override protected function childrenCreated():void
-		{
-			super.childrenCreated();
-			
-			
+			trace("GoogleMaps onComponentInitialized");
 			
 		}
-		
-		override public function destroy(): void
+		private function onMapReadyInternal(event:MapEvent):void
 		{
-			super.destroy();
-			mb_mapIsInitialized = false;
-			m_map.removeEventListener(MapEvent.MAP_READY, onMapReady);
-			removeChild(m_map);
+			trace("GoogleMaps onMapReadyInternal");
 			
-			m_map = null;
+		}
+		private function onMapPreinitialize(event:MapEvent):void
+		{
+			trace("GoogleMaps onMapPreinitialize");
+			
 		}
 		
 		private function onMapReady(event:Event):void 
@@ -118,6 +109,17 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 			mb_mapIsReady = true;
 			updateData(false);
 		}
+
+		override public function destroy(): void
+		{
+			super.destroy();
+			mb_mapIsInitialized = false;
+			m_map.removeEventListener(MapEvent.MAP_READY, onMapReady);
+			removeChild(m_map);
+			
+			m_map = null;
+		}
+		
 		
 		override public function onContainerSizeChanged(): void
 		{
@@ -162,14 +164,23 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 			mouseChildren = false;
 			mouseEnabled = false;
 			
+			_layerJustCreated = true;
 			//set view bbox on adding google maps to negotiate current bbox
 			var _bbox: BBox = container.getViewBBox();
 			trace("google maps initializeMap _bbox: " + _bbox);
 			container.setViewBBox(_bbox, true);
+			
 		}
 		
+		private var _layerJustCreated: Boolean;
 		override public function negotiateBBox(newBBox: BBox, changeZoom: Boolean = true): BBox
 		{
+			if (_layerJustCreated)
+			{
+				//for the first time after layer creation always change zoom (because CRS of widget is not changed, but layer is added as new layer, so it needs to set correct zoom
+				changeZoom = true;
+				_layerJustCreated = false;
+			}
 			if (!changeZoom)
 			{
 				trace("do not change zoom: " + m_map.getZoom());
@@ -195,30 +206,29 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 				var _sw: LatLng = new LatLng(_swCoord.y * toDegree, _swCoord.x * toDegree);
 				var _ne: LatLng = new LatLng(_neCoord.y * toDegree, _neCoord.x * toDegree);  
 				
-//				var _bounds: LatLngBounds = new LatLngBounds(_sw, _ne);  
+				var _bounds: LatLngBounds = new LatLngBounds(_sw, _ne);  
 				
-				var _bounds: LatLngBounds = new LatLngBounds();
-				_bounds.extend(_sw);  
-				_bounds.extend(_ne);  
-				
-//				trace("OLD ZOOM: " + m_map.getZoom());
 				if (changeZoom)
 				{
 					var oldZoom: Number = m_map.getZoom();
-					var f_zoom: Number = m_map.getBoundsZoomLevel(_bounds);
+					var f_zoom: Number = getZoom(_bounds);
 					if (isNaN(f_zoom))
 					{
-						setTimeout(delayedSetCenter, 500, _bounds, -1, changeZoom);
+						setTimeout(delayedSetCenter, 500, _bbox, _bounds, -1, changeZoom);
 						return newBBox;
 					}
 				}
-				var _center: LatLng = _bounds.getCenter();  
-
-	  			trace("\nGoogle Maps negotiateBBox SIZE: " + m_map.width + " , " + m_map.height);
+				var _origBBoxCenter: Point = _bbox.center;
+				var _centerCoord: Coord = new Coord(s_crs, _origBBoxCenter.x, _origBBoxCenter.y).toLaLoCoord(); 
+				var _center: LatLng = new LatLng(_centerCoord.y, _centerCoord.x, true);
 				
-	  			trace("Google Maps negotiateBBox newBBox: " + newBBox + " changeZoom: " + changeZoom)
-	  			trace("Google Maps negotiateBBox _bounds: " + _bounds)
-	  			trace("Google Maps negotiateBBox zoom: " + f_zoom + " old zoom: " + oldZoom)
+	  			trace("\nGoogle Maps maps center: " + _center.lng() + " , " + _center.lat());
+	  			trace("Google Maps bbox center: " + _centerCoord.x + " , " + _centerCoord.y);
+//	  			trace("\nGoogle Maps negotiateBBox SIZE: " + m_map.width + " , " + m_map.height);
+				
+//	  			trace("Google Maps negotiateBBox newBBox: " + newBBox + " changeZoom: " + changeZoom)
+//	  			trace("Google Maps negotiateBBox _bounds: " + _bounds)
+//	  			trace("Google Maps negotiateBBox zoom: " + f_zoom + " old zoom: " + oldZoom)
 //	  			trace("_center: " + _center);
 	  			try {
 					if (changeZoom)
@@ -229,7 +239,7 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 					}
 	  			} catch (err: Error) {
 	  				trace("GoogleMaps setCenter error: " + err.message);
-					setTimeout(delayedSetCenter, 500, _bounds, f_zoom, changeZoom);
+					setTimeout(delayedSetCenter, 500, _bbox, _bounds, f_zoom, changeZoom);
 //					callLater(delayedSetCenter(_center, f_zoom));
 					return newBBox;
 	  			}
@@ -262,25 +272,27 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 			return newBBox;
 		}
 		
-		private function delayedSetCenter(_bounds: LatLngBounds, f_zoom: Number, changeZoom: Boolean): void
+		private function delayedSetCenter(_bbox: BBox, _bounds: LatLngBounds, f_zoom: Number, changeZoom: Boolean): void
 		{
-			trace("\n\n delayedSetCenter " + _center + " ZOOM: " + f_zoom);
-			
 			if (changeZoom)
 			{
 				// if f_zoom was -1, it was not possible top set it before, get zoom now
 				if (f_zoom == -1)
 				{
 					var oldZoom: Number = m_map.getZoom();
-					f_zoom = m_map.getBoundsZoomLevel(_bounds);
+					f_zoom = getZoom(_bounds);
 					if (isNaN(f_zoom))
 					{
-						setTimeout(delayedSetCenter, 500, _bounds, -1);
+						setTimeout(delayedSetCenter, 500, _bbox, _bounds, -1, true);
 						return;
 					}
 				}
 			}
-			var _center: LatLng = _bounds.getCenter();  
+			var s_crs: String = container.getCRS();
+			
+			var _origBBoxCenter: Point = _bbox.center;
+			var _centerCoord: Coord = new Coord(s_crs, _origBBoxCenter.x, _origBBoxCenter.y).toLaLoCoord(); 
+			var _center: LatLng = new LatLng(_centerCoord.y, _centerCoord.x, true);
 			
 			try {
 				if (changeZoom)
@@ -292,16 +304,13 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 			} catch (err: Error) {
 				trace("GoogleMaps delayedSetCenter setCenter error: " + err.message);
 //				callLater(delayedSetCenter(_center, f_zoom));
-				setTimeout(delayedSetCenter, 500, _center, f_zoom);
+				setTimeout(delayedSetCenter, 500, _bbox, _bounds, f_zoom, changeZoom);
 				return;
 			}
 			
-			//	  			trace("old _bounds: " + _bounds)
 			var _bounds: LatLngBounds = m_map.getLatLngBounds();
-			//	  			trace("new _bounds: " + _bounds)
 			
 			var toRad: Number =  Math.PI / 180;
-			var s_crs: String = container.getCRS();
 			
 			var _projection: Projection = Projection.getByCRS(s_crs);
 			var f_westLongRad: Number = _bounds.getWest() * toRad;
@@ -317,6 +326,12 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 			container.setViewBBox(_googleMapsBBox, true, true);
 		}
 		
+		private function getZoom(_bounds: LatLngBounds): Number
+		{
+			var f_zoom: Number = m_map.getBoundsZoomLevel(_bounds);
+			trace("GET ZOOM: " + f_zoom + " for bounds: " + _bounds);
+			return f_zoom;
+		}
 		private function getCenter(bounds: LatLngBounds): LatLng
 		{
 			var sw: LatLng = bounds.getSouthWest();
@@ -340,14 +355,14 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 				if (!mb_mapIsInitialized)
 				{
 					initializeMap();
+					callLater(updateData, [b_forceUpdate]);
+					return;
 				}
 				if (container.width > 0 && container.height > 0)
 				{
 					m_map.width = container.width;
 					m_map.height = container.height;
 				}
-//					m_map.width = 900;
-//					m_map.height = 700
 				
 				var s_crs: String = container.getCRS();
 				var _bbox: BBox = container.getViewBBox();
@@ -359,11 +374,9 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 				 
 				var _sw: LatLng = new LatLng(_swCoord.y * toDegree, _swCoord.x * toDegree);
 				var _ne: LatLng = new LatLng(_neCoord.y * toDegree, _neCoord.x * toDegree);  
-//				var _bounds: LatLngBounds = new LatLngBounds(_sw, _ne);  
 	  			
-	  			var _bounds: LatLngBounds = new LatLngBounds();
-				_bounds.extend(_sw);  
-				_bounds.extend(_ne);  
+				var _bounds: LatLngBounds = new LatLngBounds(_sw, _ne);  
+				
 				
 				var _currBounds: LatLngBounds = m_map.getLatLngBounds();
 				if (_bounds.equals(_currBounds))
@@ -411,21 +424,6 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 
 		}
 		
-		/*
-		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
-		{
-			super.updateDisplayList(unscaledWidth, unscaledHeight);
-			
-			if (unscaledWidth > 0 && unscaledHeight > 0)
-			{
-				if (m_map)
-				{
-					m_map.width = unscaledWidth;
-					m_map.height = unscaledHeight;
-				}
-					
-			}
-		}*/
 		
 		override public function hasPreview():Boolean
 		{
