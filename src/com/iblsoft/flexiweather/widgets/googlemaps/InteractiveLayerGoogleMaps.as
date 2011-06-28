@@ -20,8 +20,10 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
+	import flash.display.Bitmap;
 	import flash.display.Graphics;
 	import flash.events.Event;
+	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.utils.setTimeout;
 	
@@ -151,6 +153,9 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 				m_map.setSize(new Point(width, height));
 			m_map.x=0;
 			m_map.y=0;
+			
+			m_map.width = container.width;
+			m_map.height = container.height;
 			
 			m_map.mouseChildren = false;
 			m_map.mouseEnabled = false;
@@ -336,13 +341,13 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 				{
 					initializeMap();
 				}
-				if (width > 0 && height > 0)
+				if (container.width > 0 && container.height > 0)
 				{
-					m_map.width = width;
-					m_map.height = height;
+					m_map.width = container.width;
+					m_map.height = container.height;
 				}
-					m_map.width = 900;
-					m_map.height = 700
+//					m_map.width = 900;
+//					m_map.height = 700
 				
 				var s_crs: String = container.getCRS();
 				var _bbox: BBox = container.getViewBBox();
@@ -422,25 +427,28 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 			}
 		}*/
 		
+		override public function hasPreview():Boolean
+		{
+			return true;
+		}
 		override public function renderPreview(graphics: Graphics, f_width: Number, f_height: Number): void
 		{
-//			if(m_image != null) {
-//				var matrix: Matrix = new Matrix();
-//				matrix.translate(-f_width / 3, -f_width / 3);
-//				matrix.scale(3, 3);
-//				matrix.translate(m_image.width / 3, m_image.height / 3);
-//				matrix.invert();
-//  				graphics.beginBitmapFill(m_image.bitmapData, matrix, false, true);
-//				graphics.drawRect(0, 0, f_width, f_height);
-//				graphics.endFill();
-//			}
-//			if(!mb_imageOK) {
-				graphics.lineStyle(2, 0xcc0000, 0.7, true);
-				graphics.moveTo(0, 0);
-				graphics.lineTo(f_width - 1, f_height - 1);
-				graphics.moveTo(0, f_height - 1);
-				graphics.lineTo(f_width - 1, 0);
-//			}
+			var bitmap: Bitmap = m_map.getPrintableBitmap();
+			var matrix: Matrix = new Matrix();
+			matrix.translate(-f_width / 3, -f_width / 3);
+			matrix.scale(3, 3);
+			matrix.translate(bitmap.width / 3, bitmap.height / 3);
+			matrix.invert();
+  			graphics.beginBitmapFill(bitmap.bitmapData, matrix, false, true);
+			graphics.drawRect(0, 0, f_width, f_height);
+			graphics.endFill();
+
+//				graphics.lineStyle(2, 0xcc0000, 0.7, true);
+//				graphics.moveTo(0, 0);
+//				graphics.lineTo(f_width - 1, f_height - 1);
+//				graphics.moveTo(0, f_height - 1);
+//				graphics.lineTo(f_width - 1, 0);
+
 		}
 		
 		public function setMapType(type: IMapType): void
