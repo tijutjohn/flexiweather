@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.ILayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.editable.IInteractiveLayerProvider;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.utils.UniURLLoader;
@@ -13,7 +14,7 @@ package com.iblsoft.flexiweather.ogc
 	import mx.collections.ArrayCollection;
 	
 	public class WMSLayerConfiguration extends OGCLayerConfiguration
-			implements IBehaviouralObject, IInteractiveLayerProvider
+			implements IBehaviouralObject, IInteractiveLayerProvider, ILayerConfiguration
 	{
 		public var ma_layerNames: Array = [];
 		public var ma_styleNames: Array = [];

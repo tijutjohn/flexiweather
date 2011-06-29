@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.ILayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.cache.WMSTileCache;
 	import com.iblsoft.flexiweather.ogc.tiling.TileIndex;
 	import com.iblsoft.flexiweather.ogc.tiling.TiledArea;
@@ -9,6 +10,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.widgets.BackgroundJob;
 	import com.iblsoft.flexiweather.widgets.BackgroundJobManager;
+	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
@@ -30,7 +32,7 @@ package com.iblsoft.flexiweather.ogc
 	/**
 	 * Generic Quad Tree (like Google Maps) tiling layer
 	 **/
-	public class InteractiveLayerQTTMS extends InteractiveLayer
+	public class InteractiveLayerQTTMS extends InteractiveLayer implements IConfigurableLayer
 	{
 		public static const DRAW_TILES: String = 'drawTiles';
 		public static const START_TILES_LOADING: String = 'startTilesLoading';
@@ -55,7 +57,14 @@ package com.iblsoft.flexiweather.ogc
 		
 		protected var m_timer: Timer = new Timer(10000);
 		
+		
+		
 		protected var m_cfg: QTTMSLayerConfiguration;
+		public function get configuration():ILayerConfiguration
+		{
+			return m_cfg;
+		}
+		
 		/** This is used only if overriding using the setter, otherwise the value from m_cfg is used. */ 
 		protected var ms_explicitBaseURLPattern: String;
 		

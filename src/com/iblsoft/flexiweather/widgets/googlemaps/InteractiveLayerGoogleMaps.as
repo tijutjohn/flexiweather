@@ -431,21 +431,24 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 		}
 		override public function renderPreview(graphics: Graphics, f_width: Number, f_height: Number): void
 		{
-			var bitmap: Bitmap = m_map.getPrintableBitmap();
-			var matrix: Matrix = new Matrix();
-			matrix.translate(-f_width / 3, -f_width / 3);
-			matrix.scale(3, 3);
-			matrix.translate(bitmap.width / 3, bitmap.height / 3);
-			matrix.invert();
-  			graphics.beginBitmapFill(bitmap.bitmapData, matrix, false, true);
-			graphics.drawRect(0, 0, f_width, f_height);
-			graphics.endFill();
+			try {
+				var bitmap: Bitmap = m_map.getPrintableBitmap();
+				var matrix: Matrix = new Matrix();
+				matrix.translate(-f_width / 3, -f_width / 3);
+				matrix.scale(3, 3);
+				matrix.translate(bitmap.width / 3, bitmap.height / 3);
+				matrix.invert();
+	  			graphics.beginBitmapFill(bitmap.bitmapData, matrix, false, true);
+				graphics.drawRect(0, 0, f_width, f_height);
+				graphics.endFill();
+			} catch (error: Error) {
 
-//				graphics.lineStyle(2, 0xcc0000, 0.7, true);
-//				graphics.moveTo(0, 0);
-//				graphics.lineTo(f_width - 1, f_height - 1);
-//				graphics.moveTo(0, f_height - 1);
-//				graphics.lineTo(f_width - 1, 0);
+				graphics.lineStyle(2, 0xcc0000, 0.7, true);
+				graphics.moveTo(0, 0);
+				graphics.lineTo(f_width - 1, f_height - 1);
+				graphics.moveTo(0, f_height - 1);
+				graphics.lineTo(f_width - 1, 0);
+			}
 
 		}
 		

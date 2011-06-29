@@ -262,7 +262,7 @@ package com.iblsoft.flexiweather.widgets
         {
         	if (m_layers && m_layers.length > 0)
         	{
-        		for each (var layer: InteractiveLayerWMS in m_layers)
+        		for each (var layer: IConfigurableLayer in m_layers)
         		{
         			if (!layer.configuration.isCompatibleWithCRS(crs))
         				return false;
