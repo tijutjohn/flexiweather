@@ -13,7 +13,7 @@ package com.iblsoft.flexiweather.widgets
 	
 	public class InteractiveLayerRoute extends InteractiveLayer
 	{
-		protected var ma_coords: ArrayCollection = new ArrayCollection();
+		private var _ma_coords: ArrayCollection;
 		protected var m_highlightedCoord: Coord = null;
 		protected var m_selectedCoord: Coord = null;
 //		protected var m_highlightedLineFrom: Coord = null;
@@ -33,12 +33,28 @@ package com.iblsoft.flexiweather.widgets
 			setStyle("pointFillAlpha", 1.0);
 			setStyle("pointHighlightFillColor", 0xFFFFFF);
 			setStyle("pointHighlightFillAlpha", 1.0);
-			ma_coords.addEventListener(CollectionEvent.COLLECTION_CHANGE, onCoordsCollectionChanged);
+			_ma_coords  = new ArrayCollection();
 		}
 		
+
+		[Bindable]
+		public function get ma_coords():ArrayCollection
+		{
+			return _ma_coords;
+		}
+
+		public function set ma_coords(value:ArrayCollection):void
+		{
+			if (_ma_coords)
+				_ma_coords.removeEventListener(CollectionEvent.COLLECTION_CHANGE, onCoordsCollectionChanged);
+			_ma_coords = value;
+			if (_ma_coords)
+				_ma_coords.addEventListener(CollectionEvent.COLLECTION_CHANGE, onCoordsCollectionChanged);
+		}
+
 		override public function onAreaChanged(b_finalChange: Boolean): void
 		{
-			ma_coords.removeAll();
+			//ma_coords.removeAll();
 			invalidateDynamicPart();
 		}
 
@@ -110,6 +126,7 @@ package com.iblsoft.flexiweather.widgets
 		
 		protected function onCoordsCollectionChanged(event: CollectionEvent): void
 		{
+			trace("onCoordsCollectionChanged: " + _ma_coords.length);
 			invalidateDynamicPart();
 		}
 		
