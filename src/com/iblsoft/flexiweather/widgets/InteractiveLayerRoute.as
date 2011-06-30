@@ -5,6 +5,7 @@ package com.iblsoft.flexiweather.widgets
 	import flash.display.Graphics;
 	import flash.display.JointStyle;
 	import flash.display.LineScaleMode;
+	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	
@@ -33,17 +34,16 @@ package com.iblsoft.flexiweather.widgets
 			setStyle("pointFillAlpha", 1.0);
 			setStyle("pointHighlightFillColor", 0xFFFFFF);
 			setStyle("pointHighlightFillAlpha", 1.0);
-			_ma_coords  = new ArrayCollection();
+			coords  = new ArrayCollection();
 		}
 		
-
-		[Bindable]
-		public function get ma_coords():ArrayCollection
+		[Bindable (event="coordsChanged")]
+		public function get coords():ArrayCollection
 		{
 			return _ma_coords;
 		}
 
-		public function set ma_coords(value:ArrayCollection):void
+		public function set coords(value:ArrayCollection):void
 		{
 			if (_ma_coords)
 				_ma_coords.removeEventListener(CollectionEvent.COLLECTION_CHANGE, onCoordsCollectionChanged);
@@ -52,9 +52,17 @@ package com.iblsoft.flexiweather.widgets
 				_ma_coords.addEventListener(CollectionEvent.COLLECTION_CHANGE, onCoordsCollectionChanged);
 		}
 
+		private function notifyChange(): void
+		{
+			dispatchEvent(new Event("coordsChanged"));
+		}
+		
+		public function clearRoute(): void
+		{
+			_ma_coords.removeAll();
+		}
 		override public function onAreaChanged(b_finalChange: Boolean): void
 		{
-			//ma_coords.removeAll();
 			invalidateDynamicPart();
 		}
 
@@ -72,7 +80,9 @@ package com.iblsoft.flexiweather.widgets
 				m_selectedCoord = cHit;
 			}
 			else {
-				ma_coords.addItem(c);
+				_ma_coords.addItem(c);
+				notifyChange();
+				
 				setHighlightedCoord(c);
 				m_selectedCoord = c;
 			}
@@ -100,8 +110,10 @@ package com.iblsoft.flexiweather.widgets
 			}
 			else {
 				c = container.pointToCoord(event.localX, event.localY);
-				var i: int = ma_coords.getItemIndex(m_selectedCoord);
-				ma_coords.setItemAt(c, i);
+				var i: int = _ma_coords.getItemIndex(m_selectedCoord);
+				_ma_coords.setItemAt(c, i);
+				notifyChange();
+				
 				m_selectedCoord = c;
 				m_highlightedCoord = c;
 				invalidateDynamicPart();				
@@ -117,8 +129,10 @@ package com.iblsoft.flexiweather.widgets
 			var mousePt: Point = new Point(event.localX, event.localY);
 			c = getHitCoord(mousePt);
 			if(c != null) {
-				var i: int = ma_coords.getItemIndex(c);
-				ma_coords.removeItemAt(i);
+				var i: int = _ma_coords.getItemIndex(c);
+				_ma_coords.removeItemAt(i);
+				notifyChange();
+				
 				invalidateDynamicPart();
 			}
 			return true;
@@ -145,7 +159,7 @@ package com.iblsoft.flexiweather.widgets
 			var f_pointFillAlpha: uint = Number(getStyle("pointFillAlpha"));
 			var i_pointHighlightFillColor: uint = uint(getStyle("pointHighlightFillColor"));
 			var f_pointHighlightFillAlpha: uint = Number(getStyle("pointHighlightFillAlpha"));
-			for each(var c: Coord in ma_coords) {			
+			for each(var c: Coord in _ma_coords) {			
 				pt = container.coordToPoint(c);
 				if(ptPrev != null) {
 					// draw glow
@@ -183,7 +197,7 @@ package com.iblsoft.flexiweather.widgets
 				}
 				ptPrev = pt;
 			}
-			for each(c in ma_coords) {			
+			for each(c in _ma_coords) {			
 				pt = container.coordToPoint(c);
 				graphics.beginFill(
 						m_highlightedCoord != c ? i_pointFillColor : i_pointHighlightFillColor,
@@ -198,7 +212,7 @@ package com.iblsoft.flexiweather.widgets
 		{		
 			var cBest: Coord = null;
 			var f_best: Number = NaN;
-			for each(var c: Coord in ma_coords) {
+			for each(var c: Coord in _ma_coords) {
 				var pt: Point = container.coordToPoint(c);
 				var f_dist: Number = pt.subtract(ptHit).length;
 				if((f_dist <= 7 && cBest == null) || f_dist < f_best) {
@@ -217,8 +231,5 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 		
-		// getters & setters
-		public function get coords(): ArrayCollection
-		{ return ma_coords; }
 	}
 }
