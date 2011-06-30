@@ -227,7 +227,7 @@ class CacheItem
 	public function isImageOnDisplayList(): Boolean
 	{
 		if (image)
-			return image.parent;
+			return image.parent != null;
 		
 		return false;
 	}
