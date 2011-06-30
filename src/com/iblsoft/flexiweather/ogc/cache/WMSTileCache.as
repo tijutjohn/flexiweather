@@ -66,15 +66,15 @@ package com.iblsoft.flexiweather.ogc.cache
 					var diff: Number = currTime.time - lastUsed.time;
 					if (diff > (_expirationTime * 1000))
 					{
-						trace("TILE from cache is expired, will be removed");
+						debug("TILE from cache is expired, will be removed");
 						if (!isTileOnDisplayList(s_key))
 						{
 							delete md_cache[s_key];
 						} else {
-							trace("TILE IS DISPLAY LIST, DO NOT DELETE IT");
+							debug("TILE IS DISPLAY LIST, DO NOT DELETE IT");
 						}
 					}
-//					trace("diff: " + diff);
+//					debug("diff: " + diff);
 				}
 			}
 		}
@@ -148,7 +148,7 @@ package com.iblsoft.flexiweather.ogc.cache
 						specialStringsFound++;
 					}
 					
-//					trace("specialStringsFound: " + specialStringsFound + " specialStringsLength: " + specialStringsLength);
+//					debug("specialStringsFound: " + specialStringsFound + " specialStringsLength: " + specialStringsLength);
 					if (specialStringsFound != specialStringsLength)
 					{
 						//not all special strings were inside
@@ -164,7 +164,7 @@ package com.iblsoft.flexiweather.ogc.cache
 					image: cacheRecord.image
 				});
 			}
-//			trace("GET TILES: " + a.length);
+//			debug("GET TILES: " + a.length);
 			return a;
 		}
 	
@@ -174,14 +174,14 @@ package com.iblsoft.flexiweather.ogc.cache
 			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, null, tileIndex, url, specialStrings);
 			var s_key: String = ck.toString(); 
 			var data: Object =  md_cache[s_key]; 
-//			trace("isTileCached check for undefined: " + (data != undefined) + " for null: " + (data != null) + " KEY: " + s_key);
+//			debug("isTileCached check for undefined: " + (data != undefined) + " for null: " + (data != null) + " KEY: " + s_key);
 			return data != null;			
 		}
 		public function addTile(img: Bitmap, s_crs: String, tileIndex: TileIndex, url: URLRequest, specialStrings: Array, tiledArea: TiledArea): void
 		{
 			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, null, tileIndex, url, specialStrings);
 			var s_key: String = decodeURI(ck.toString()); 
-//			trace("WMSTileCache addTile: " + s_key);
+//			debug("WMSTileCache addTile: " + s_key);
 			md_cache[s_key] = {
 				cacheKey: ck,
 				lastUsed: new Date(),
@@ -194,13 +194,13 @@ package com.iblsoft.flexiweather.ogc.cache
 			{
 				s_key = getCachedTileKeyOutsideTiledArea(tiledArea);
 				
-//				trace("REMOVE TILE : " +s_key);
+//				debug("REMOVE TILE : " +s_key);
 				
 				disposeTileBitmap(s_key);
 				
 				delete md_cache[s_key];
 			}
-//			trace("cache item removed: " + _items.length);
+//			debug("cache item removed: " + _items.length);
 		}
 		
 		private var _tiledArea: TiledArea;
@@ -216,7 +216,7 @@ package com.iblsoft.flexiweather.ogc.cache
 				
 				_items.sort(sortTileKeys);
 				
-//				trace(_items);
+//				debug(_items);
 			}
 		}
 		private function sortTileKeys(tileKey1: String, tileKey2: String): int
@@ -227,8 +227,8 @@ package com.iblsoft.flexiweather.ogc.cache
 			var dist1: Number = Point.distance( _tiledAreaCenter, new Point(tileIndex1.mi_tileCol, tileIndex1.mi_tileRow) )
 			var dist2: Number = Point.distance( _tiledAreaCenter, new Point(tileIndex1.mi_tileCol, tileIndex1.mi_tileRow) )
 			
-//			trace(dist1 + "  , " + dist2);
-//			trace(tileIndex1 + "  , " + tileIndex2);
+//			debug(dist1 + "  , " + dist2);
+//			debug(tileIndex1 + "  , " + tileIndex2);
 			if (dist1 > dist1) {
 				return -1
 			} else {
@@ -281,15 +281,20 @@ package com.iblsoft.flexiweather.ogc.cache
 				{
 					_items.splice(id, 1);
 				}
-//				trace("WMSCache.invalidate(): removing image with key: " + md_cache[s_key].toString());
-				trace("WMSCache.invalidate(): removing image with key: " + s_key + " cache tiles count: " + cachedTilesCount);
+//				debug("WMSCache.invalidate(): removing image with key: " + md_cache[s_key].toString());
+				debug("WMSCache.invalidate(): removing image with key: " + s_key + " cache tiles count: " + cachedTilesCount);
 				disposeTileBitmap(s_key);
 				delete md_cache[s_key];
 			}
 			
-			trace("\n invalidate cache tiles count: " + cachedTilesCount);
+			debug("\n invalidate cache tiles count: " + cachedTilesCount);
 		
 		}
 
+		private function debug(str: String): void
+		{
+			return;
+			trace("WMSTileCache: " + str)
+		}
 	}
 }

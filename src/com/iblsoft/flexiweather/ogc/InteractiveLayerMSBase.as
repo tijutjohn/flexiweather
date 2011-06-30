@@ -10,6 +10,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.widgets.BackgroundJob;
 	import com.iblsoft.flexiweather.widgets.GlowLabel;
+	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
@@ -38,7 +39,7 @@ package com.iblsoft.flexiweather.ogc
 	[Event(name="wmsStyleChanged", type="flash.events.Event")]
 	
 	public class InteractiveLayerMSBase extends InteractiveLayer
-			implements ISynchronisedObject
+			implements ISynchronisedObject, IConfigurableLayer
 	{
 		protected var m_loader: UniURLLoader = new UniURLLoader();
 		protected var m_featureInfoLoader: UniURLLoader = new UniURLLoader();
@@ -56,6 +57,7 @@ package com.iblsoft.flexiweather.ogc
 		protected var ms_imageCRS: String = null;
 		protected var m_imageBBox: BBox = null;
 		protected var mb_updateAfterMakingVisible: Boolean = false;
+		
 		
 		protected var m_cfg: WMSLayerConfiguration;
 		protected var md_dimensionValues: Dictionary = new Dictionary(); 
@@ -1196,7 +1198,7 @@ package com.iblsoft.flexiweather.ogc
 			
 		}
 	
-		public function get configuration(): WMSLayerConfiguration
+		public function get configuration(): ILayerConfiguration
 		{ return m_cfg; }
 
 		public function get dataLoader(): UniURLLoader

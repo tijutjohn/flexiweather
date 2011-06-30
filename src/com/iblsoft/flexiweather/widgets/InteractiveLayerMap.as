@@ -201,13 +201,15 @@ package com.iblsoft.flexiweather.widgets
 			super.removeLayer(l);
 			
 			if ((l is InteractiveLayerMSBase) && (l as InteractiveLayerMSBase).isPrimaryLayer())
-		  {
+			{
 				setPrimaryLayer(null);
 				findNewPrimaryLayer();
 			}
 			var dynamicEvent: DynamicEvent = new DynamicEvent(TIME_AXIS_REMOVED);
 			dynamicEvent['layer'] = l;
 			dispatchEvent(dynamicEvent);
+			
+			l.destroy();
 		}
 		
 		private function getSynchronizedFrameValue(): Date

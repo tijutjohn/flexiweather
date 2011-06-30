@@ -1,4 +1,4 @@
-package com.iblsoft.flexiweather
+package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;

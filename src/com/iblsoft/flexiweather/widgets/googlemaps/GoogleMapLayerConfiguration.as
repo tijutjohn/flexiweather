@@ -1,6 +1,6 @@
 package com.iblsoft.flexiweather.widgets.googlemaps
 {
-	import com.iblsoft.flexiweather.ILayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.ILayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.CRSWithBBox;
 	import com.iblsoft.flexiweather.ogc.LayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.editable.IInteractiveLayerProvider;
@@ -27,6 +27,7 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 		override public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer
 		{
 			var l: InteractiveLayerGoogleMaps = new InteractiveLayerGoogleMaps(iw, this);
+			l.name = 'Google Maps';
 			return l;
 		}
 		
@@ -42,7 +43,7 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 		}
 		
 		override public function hasPreview(): Boolean
-        { return false; }
+        { return true; }
         
 		override public function renderPreview(f_width: Number, f_height: Number, iw: InteractiveWidget =  null): void
 		{

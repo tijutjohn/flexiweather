@@ -13,7 +13,7 @@ package com.iblsoft.flexiweather.ogc
 	import mx.collections.ArrayCollection;
 	
 	public class WMSLayerConfiguration extends OGCLayerConfiguration
-			implements IBehaviouralObject, IInteractiveLayerProvider
+			implements IBehaviouralObject, IInteractiveLayerProvider, ILayerConfiguration
 	{
 		public var ma_layerNames: Array = [];
 		public var ma_styleNames: Array = [];

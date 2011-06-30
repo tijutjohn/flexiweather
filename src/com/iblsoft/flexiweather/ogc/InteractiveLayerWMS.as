@@ -7,6 +7,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.widgets.BackgroundJobManager;
+	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
@@ -21,7 +22,7 @@ package com.iblsoft.flexiweather.ogc
 	[Event(name="wmsStyleChanged", type="flash.events.Event")]
 	
 	public class InteractiveLayerWMS extends InteractiveLayerMSBase
-			implements ISynchronisedObject, Serializable
+			implements ISynchronisedObject, Serializable, IConfigurableLayer
 	{
 		public static const WMS_STYLE_CHANGED: String = 'wmsStyleChanged';
 		
