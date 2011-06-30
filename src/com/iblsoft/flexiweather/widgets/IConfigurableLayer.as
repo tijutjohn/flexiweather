@@ -1,6 +1,6 @@
 package com.iblsoft.flexiweather.widgets
 {
-	import com.iblsoft.flexiweather.ILayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.ILayerConfiguration;
 
 	public interface IConfigurableLayer
 	{

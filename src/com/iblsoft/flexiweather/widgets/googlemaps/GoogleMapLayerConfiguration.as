@@ -1,6 +1,6 @@
 package com.iblsoft.flexiweather.widgets.googlemaps
 {
-	import com.iblsoft.flexiweather.ILayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.ILayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.CRSWithBBox;
 	import com.iblsoft.flexiweather.ogc.LayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.editable.IInteractiveLayerProvider;

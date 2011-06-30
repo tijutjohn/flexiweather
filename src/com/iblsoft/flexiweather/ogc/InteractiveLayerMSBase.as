@@ -1,6 +1,5 @@
 package com.iblsoft.flexiweather.ogc
 {
-	import com.iblsoft.flexiweather.ILayerConfiguration;
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.ogc.cache.ICache;
 	import com.iblsoft.flexiweather.proj.Coord;
