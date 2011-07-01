@@ -15,17 +15,15 @@ package com.iblsoft.flexiweather.ogc
 	
 	public class WFSServiceConfiguration extends OGCServiceConfiguration
 	{
-		public var id: String;
+		private var m_capabilitiesLoader: UniURLLoader = new UniURLLoader();
+		private var m_featureTypesLoader: UniURLLoader = new UniURLLoader();
+		private var m_capabilities: XML = null;
+		private var m_capabilitiesLoadJob: BackgroundJob = null;
+		private var m_featureTypesLoadJob: BackgroundJob = null;
 		
-		internal var m_capabilitiesLoader: UniURLLoader = new UniURLLoader();
-		internal var m_featureTypesLoader: UniURLLoader = new UniURLLoader();
-		internal var m_capabilities: XML = null;
-		internal var m_capabilitiesLoadJob: BackgroundJob = null;
-		internal var m_featureTypesLoadJob: BackgroundJob = null;
+		private var m_featureTypes: ArrayCollection = null;
 		
-		internal var m_featureTypes: ArrayCollection = null;
-		
-		internal var m_schemaParser: SchemaParser;
+		private var m_schemaParser: SchemaParser;
 		
 		public static const CAPABILITIES_UPDATED: String = "capabilitiesUpdated";
 
@@ -99,14 +97,14 @@ package com.iblsoft.flexiweather.ogc
 		 */
 		public function toGetDescribeFeatureTypeRequest(featureTypeListVars: URLVariables): URLRequest
 		{
-			var r: URLRequest = new URLRequest(ms_baseURL);
+			var r: URLRequest = new URLRequest(baseURL);
 			 
 			if (featureTypeListVars != null){
 				r.data = new URLVariables(featureTypeListVars.toString());
 			}
 			
-			r.data.SERVICE = ms_service.toUpperCase();
-			r.data.VERSION = m_version.toString();
+			r.data.SERVICE = serviceType;
+			r.data.VERSION = version.toString();
 			r.data.REQUEST = 'DescribeFeatureType';
 			
 			return r;
@@ -119,7 +117,7 @@ package com.iblsoft.flexiweather.ogc
 			if(m_capabilitiesLoadJob != null)
 				m_capabilitiesLoadJob.finish();
 			m_capabilitiesLoadJob = BackgroundJobManager.getInstance().startJob(
-					"Getting WFS capabilities for " + ms_baseURL);
+					"Getting WFS capabilities for " + baseURL);
 		}
 		
 		/**
@@ -132,10 +130,10 @@ package com.iblsoft.flexiweather.ogc
 			if(m_featureTypesLoadJob != null)
 				m_featureTypesLoadJob.finish();
 			m_featureTypesLoadJob = BackgroundJobManager.getInstance().startJob(
-					"Getting WFS describe feature type list " + ms_baseURL);
+					"Getting WFS describe feature type list " + baseURL);
 		}
 		
-		override internal function update(): void
+		override public function update(): void
 		{
 			super.update();
 			if(enabled)

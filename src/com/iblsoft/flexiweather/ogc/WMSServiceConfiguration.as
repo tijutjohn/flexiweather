@@ -12,13 +12,11 @@ package com.iblsoft.flexiweather.ogc
 	
 	public class WMSServiceConfiguration extends OGCServiceConfiguration
 	{
-		public var id: String;
+		private var m_capabilitiesLoader: UniURLLoader = new UniURLLoader();
+		private var m_capabilities: XML = null;
+		private var m_capabilitiesLoadJob: BackgroundJob = null;
 		
-		internal var m_capabilitiesLoader: UniURLLoader = new UniURLLoader();
-		internal var m_capabilities: XML = null;
-		internal var m_capabilitiesLoadJob: BackgroundJob = null;
-		
-		internal var m_layers: WMSLayerGroup = null;
+		private var m_layers: WMSLayerGroup = null;
 		private var _imageFormats: Array = [];
 		public function get imageFormats(): Array
 		{
@@ -57,10 +55,10 @@ package com.iblsoft.flexiweather.ogc
 			if(m_capabilitiesLoadJob != null)
 				m_capabilitiesLoadJob.finish();
 			m_capabilitiesLoadJob = BackgroundJobManager.getInstance().startJob(
-					"Getting WMS capabilities for " + ms_baseURL);
+					"Getting WMS capabilities for " + baseURL);
 		}
 		
-		override internal function update(): void
+		override public function update(): void
 		{
 			super.update();
 			if(enabled)

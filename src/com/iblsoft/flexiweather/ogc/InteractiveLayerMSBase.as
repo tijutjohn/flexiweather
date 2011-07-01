@@ -2,6 +2,7 @@ package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.ogc.cache.ICache;
+	import com.iblsoft.flexiweather.ogc.events.GetCapabilitiesEvent;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.utils.Duration;
@@ -76,7 +77,7 @@ package com.iblsoft.flexiweather.ogc
 			m_loader.addEventListener(UniURLLoader.DATA_LOADED, onDataLoaded);
 			m_loader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onDataLoadFailed);
 			
-			trace("\nnew InteractiveLayerMSBase add m_loader listeners");
+			debug("\nnew InteractiveLayerMSBase add m_loader listeners");
 			m_featureInfoLoader.addEventListener(UniURLLoader.DATA_LOADED, onFeatureInfoLoaded);
 			m_featureInfoLoader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onFeatureInfoLoadFailed);
 			
@@ -120,16 +121,16 @@ package com.iblsoft.flexiweather.ogc
 		
 		private function onEffectFadeInStart(event: EffectEvent): void
 		{
-//			trace("onEffectFadeInStart 1 _alphaBackup: " + _alphaBackup + " fadeIn.alphaTo: " + fadeIn.alphaTo);
+//			debug("onEffectFadeInStart 1 _alphaBackup: " + _alphaBackup + " fadeIn.alphaTo: " + fadeIn.alphaTo);
 //			fadeIn.alphaTo = _alphaBackup;
-			trace("onEffectFadeInStart 2 alphaBackup: " + alphaBackup + " fadeIn.alphaTo: " + fadeIn.alphaTo);
+			debug("onEffectFadeInStart 2 alphaBackup: " + alphaBackup + " fadeIn.alphaTo: " + fadeIn.alphaTo);
 		}
 		private function onEffectFadeOutStart(event: EffectEvent): void
 		{
-//			trace("onEffectFadeOutStart 1 _alphaBackup: " + _alphaBackup + " fadeIn.alphaTo: " + fadeOut.alphaFrom);
+//			debug("onEffectFadeOutStart 1 _alphaBackup: " + _alphaBackup + " fadeIn.alphaTo: " + fadeOut.alphaFrom);
 //			fadeOut.alphaFrom = alpha
 			alphaBackup = alpha;
-			trace("onEffectFadeOutStart 2 alphaBackup: " + alphaBackup + " fadeIn.alphaTo: " + fadeOut.alphaFrom);
+			debug("onEffectFadeOutStart 2 alphaBackup: " + alphaBackup + " fadeIn.alphaTo: " + fadeOut.alphaFrom);
 		}
 		private function onEffectEnd(event: EffectEvent): void
 		{
@@ -145,13 +146,16 @@ package com.iblsoft.flexiweather.ogc
 		{
 			if(m_cfg != null) {
 				m_cfg.removeEventListener(WMSLayerConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
+				m_cfg.removeEventListener(WMSLayerConfiguration.CAPABILITIES_RECEIVED, onCapabilitiesReceived);
 			}
 			m_cfg = cfg;
 
 			m_timer.stop();
 			if(m_cfg.mi_autoRefreshPeriod > 0)
 				m_timer.delay = m_cfg.mi_autoRefreshPeriod * 1000.0;
+			
 			m_cfg.addEventListener(WMSLayerConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
+			m_cfg.addEventListener(WMSLayerConfiguration.CAPABILITIES_RECEIVED, onCapabilitiesReceived);
 //			updateData(true);
 		}
 		
@@ -181,7 +185,7 @@ package com.iblsoft.flexiweather.ogc
 			
 			if (request.url.indexOf('${BASE_URL}') == -1)
 			{
-				trace("stop");
+				debug("stop");
 			}
 			updateDimensionsInURLRequest(request);
 			updateCustomParametersInURLRequest(request);
@@ -294,10 +298,10 @@ package com.iblsoft.flexiweather.ogc
         	
         	if (style)
 			{
-				trace("MSBAse ["+name+"] hasLegend style: "  + style.legend);
+//				debug("MSBAse ["+name+"] hasLegend style: "  + style.legend);
         		return style.legend;
 			}	
-			trace("MSBAse hasLegend NO style: ");
+//			debug("MSBAse hasLegend NO style: ");
         	return false;
        	}
 
@@ -323,7 +327,7 @@ package com.iblsoft.flexiweather.ogc
 		 
 		 override public function invalidateLegend():void
 		 {
-			 trace("invalidateLegend");
+			 debug("invalidateLegend");
 		 }
         /**
          * Render legend. If legend is not cached, it needs to be loaded. 
@@ -345,7 +349,7 @@ package com.iblsoft.flexiweather.ogc
         	
         	var legendObject: Object = style.legend;
         	
-			trace("MSBAse renderLegend style: " + style.legend);
+			debug("MSBAse renderLegend style: " + style.legend);
 			
         	var w: int = legendObject.width;
         	var h: int = legendObject.height;
@@ -359,21 +363,21 @@ package com.iblsoft.flexiweather.ogc
 //			m_legendLabelAlign = labelAlign;
 //        	m_legendCallBack = callback;
 			
-			trace("renderLegend url: " + legendObject.url + " scale ["+legendScaleX+","+legendScaleY+"]");
+			debug("renderLegend url: " + legendObject.url + " scale ["+legendScaleX+","+legendScaleY+"]");
           	if (!useCache || (useCache && !isLegendCachedBySize(w, h)))
         	{
 	        	var url: URLRequest = m_cfg.toGetLegendRequest(
 						w, h,
 						style.name);
 				
-				trace("LEGEND URL1: " + url.url);
+				debug("LEGEND URL1: " + url.url);
 				if (!(url.url.indexOf('${BASE_URL}') == 0))
 				{
 					
 					url = new URLRequest(legendObject.url);
-					trace("LEGEND URL2: " + url.url);
+					debug("LEGEND URL2: " + url.url);
 				} else {
-					trace(" ${BASE_URL} are not using legend url from capabilities"); 
+					debug(" ${BASE_URL} are not using legend url from capabilities"); 
 				}
 				
 				updateURLWithDimensions(url);
@@ -468,7 +472,7 @@ package com.iblsoft.flexiweather.ogc
          */        
         protected function onLegendLoaded(event: UniURLLoaderEvent): void
 		{
-			trace("InteractiveLayerWMS onLegendLoaded ");
+			debug("InteractiveLayerWMS onLegendLoaded ");
 			var result: * = event.result;
 			if(result is Bitmap) {
 				
@@ -551,9 +555,9 @@ package com.iblsoft.flexiweather.ogc
 			
 			label.width = image.width;
 			
-			trace("\n\t createLegend legendScaleX: " + legendScaleX + " legendScaleY: " + legendScaleY);
-			trace("t createLegend image: " + image.width + " , " + image.height);
-			trace("t createLegend image scale: " + image.scaleX + " , " + image.scaleY);
+			debug("\n\t createLegend legendScaleX: " + legendScaleX + " legendScaleY: " + legendScaleY);
+			debug("t createLegend image: " + image.width + " , " + image.height);
+			debug("t createLegend image scale: " + image.scaleX + " , " + image.scaleY);
 			cnv.width = image.width;
 			cnv.height = image.height + labelHeight + gap;
 			
@@ -564,7 +568,7 @@ package com.iblsoft.flexiweather.ogc
 		}
 		protected function onLegendLoadFailed(event: UniURLLoaderEvent): void
 		{
-			trace("onLegendLoadFailed");
+			debug("onLegendLoadFailed");
 			removeLegendListeners(event.target as UniURLLoader);
 		}
         
@@ -712,7 +716,7 @@ package com.iblsoft.flexiweather.ogc
         		}
         	}
         	
-        	//trace("getWMSDimensionsValues ["+s_dimName+"] = " +createDimensionsValuesString(a_dimValues));
+        	//debug("getWMSDimensionsValues ["+s_dimName+"] = " +createDimensionsValuesString(a_dimValues));
         	return a_dimValues;
         }
         
@@ -749,7 +753,7 @@ package com.iblsoft.flexiweather.ogc
 			var run: String = getWMSDimensionValue('RUN');
 			var forecast: String = getWMSDimensionValue('FORECAST');
 			
-//			trace('run: ' + run + ' forecast: ' + forecast);
+//			debug('run: ' + run + ' forecast: ' + forecast);
 			
 			return new Date();
 		}
@@ -972,7 +976,7 @@ package com.iblsoft.flexiweather.ogc
 						if (time.data is Date) {
 							l_resultTimes.push(time.data);
 						} else {
-							trace("PROBLEM: InteractiveLayerMSBase getSynchronisedVariableValuesList time.data is not Date: " + time.data);
+							debug("PROBLEM: InteractiveLayerMSBase getSynchronisedVariableValuesList time.data is not Date: " + time.data);
 						}
 					}
 					
@@ -996,7 +1000,7 @@ package com.iblsoft.flexiweather.ogc
 						{
 							l_resultForecasts.push(new Date(run.time + Duration(forecast.data).milisecondsTotal));
 						} else {
-							trace("PROBLEM: InteractiveLayerMSBase getSynchronisedVariableValuesList forecast.data is not Number: " + forecast.data);
+							debug("PROBLEM: InteractiveLayerMSBase getSynchronisedVariableValuesList forecast.data is not Number: " + forecast.data);
 						}
 					}
 					//sort forecast by Duration
@@ -1108,7 +1112,7 @@ package com.iblsoft.flexiweather.ogc
 
 		protected function onDataLoadFailed(event: UniURLLoaderEvent): void
 		{
-			trace("MSBase onDataLoadFailed");
+			debug("MSBase onDataLoadFailed");
 			m_request = null;
 			if(m_cfg.mi_autoRefreshPeriod > 0) {
 				m_timer.reset();
@@ -1126,6 +1130,11 @@ package com.iblsoft.flexiweather.ogc
 			onJobFinished();
 		}
 		
+		protected function onCapabilitiesReceived(event: DataEvent): void
+		{
+			dispatchEvent(new GetCapabilitiesEvent(
+				GetCapabilitiesEvent.CAPABILITIES_RECEIVED));
+		}
 		protected function onCapabilitiesUpdated(event: DataEvent): void
 		{
 			dispatchEvent(new SynchronisedVariableChangeEvent(
@@ -1184,7 +1193,7 @@ package com.iblsoft.flexiweather.ogc
 					
 			var styleName: String = getWMSStyleName(0)
 			newLayer.setWMSStyleName(0, styleName);
-			trace("\n\n CLONE InteractiveLayerWMS ["+newLayer.name+"] alpha: " + newLayer.alpha + " zOrder: " +  newLayer.zOrder);
+			debug("\n\n CLONE InteractiveLayerWMS ["+newLayer.name+"] alpha: " + newLayer.alpha + " zOrder: " +  newLayer.zOrder);
 			
 			//clone all dimensions
 			var dimNames: Array = getWMSDimensionsNames();
@@ -1193,11 +1202,16 @@ package com.iblsoft.flexiweather.ogc
 				var value : String = getWMSDimensionValue(dimName);
 				newLayer.setWMSDimensionValue(dimName, value);
 			}
-			trace("OLD: " + name + " label: " + id);
+			debug("OLD: " + name + " label: " + id);
 			return newLayer;
 			
 		}
-	
+
+		private function debug(str: String): void
+		{
+			return;
+			trace(str);
+		}
 		public function get configuration(): ILayerConfiguration
 		{ return m_cfg; }
 

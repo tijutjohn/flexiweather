@@ -9,16 +9,17 @@ package com.iblsoft.flexiweather.ogc
 	
 	public class OGCServiceConfiguration extends EventDispatcher implements Serializable
 	{
-		internal var ms_fullURL: String;
-		internal var ms_service: String;
-		internal var m_version: Version;
+		private var ms_id: String;
+		private var ms_fullURL: String;
+		private var ms_service: String;
+		private var m_version: Version;
 
-		internal var mi_updatePeriod: uint; // in ms
-		internal var mb_enabled: Boolean =  true;
+		private var mi_updatePeriod: uint; // in ms
+		private var mb_enabled: Boolean =  true;
 
 		// runtime variables
-		internal var ms_baseURL: String;
-		internal var m_data: URLVariables;
+		private var ms_baseURL: String;
+		private var m_data: URLVariables;
 		internal var mi_lastUpdateFlashStamp: int = -1000000;
 
 		public function OGCServiceConfiguration(s_url: String, s_service: String, version: Version)
@@ -60,7 +61,7 @@ package com.iblsoft.flexiweather.ogc
 			return r;
 		}
 		
-		internal function update(): void
+		public function update(): void
 		{
 		}
 		
@@ -82,6 +83,13 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 		
+		public function get id(): String
+		{ return ms_id; }
+
+		public function set id(s_id: String): void
+		{
+			ms_id = s_id;
+		}
 		public function get fullURL(): String
 		{ return ms_fullURL; }
 

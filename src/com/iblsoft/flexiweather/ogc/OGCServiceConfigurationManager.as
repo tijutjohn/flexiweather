@@ -46,7 +46,16 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 		
-		public function getService(
+		public function getAllServicesNames(): Array
+		{
+			var arr: Array = [];
+			for each(var osc: OGCServiceConfiguration in ma_services) 
+			{
+				arr.push(osc.id);
+			}
+			return arr;
+		}
+		public function getService(serviceID: String,
 				s_fullURL: String, version: Version,
 				serviceConfigurationClass: Class): OGCServiceConfiguration
 		{
@@ -58,6 +67,7 @@ package com.iblsoft.flexiweather.ogc
 					return osc;
 			}
 			osc = new serviceConfigurationClass(s_fullURL, version) as OGCServiceConfiguration;
+			osc.id = serviceID;
 			addService(osc);
 			return osc;
 		}
@@ -78,24 +88,60 @@ package com.iblsoft.flexiweather.ogc
 				m_timer.stop();
 		}
 		
-		public function update(b_force: Boolean = true): void
+		private var _currentServices: Array = [];
+		private var _runningServices: Array = [];
+		public function getServiceByName(serviceName: String): OGCServiceConfiguration
 		{
+			for each(var osc: OGCServiceConfiguration in ma_services) 
+			{
+				if (osc.id == serviceName)
+					return osc;
+			}
+			return null;
+		}
+		
+		private function stopAllRunningServices(): void
+		{
+			for each (var wmsServiceConfiguration: WMSServiceConfiguration in _runningServices)
+			{
+				wmsServiceConfiguration.removeEventListener(WMSServiceConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
+			}
+			_runningServices = [];
+		}
+		/**
+		 * Update just services, which is in services argument, not all services stored in manager 
+		 * @param services
+		 * @param b_force
+		 * 
+		 */		
+		public function update(currServices: Array, b_force: Boolean = true): void
+		{
+			_currentServices = currServices;
+			
+			stopAllRunningServices();
+			
 			var i_currentFlashStamp: int = getTimer();
-			for each(var osc: OGCServiceConfiguration in ma_services) {
-				if(!b_force) {
-					if(osc.updatePeriod == 0
-							&& osc.mi_lastUpdateFlashStamp != -1000000)
-						continue;
-					if(osc.mi_lastUpdateFlashStamp + osc.updatePeriod >= i_currentFlashStamp)
-						continue;
-				}
-				if (osc is WMSServiceConfiguration)
+//			for each(var osc: OGCServiceConfiguration in ma_services) 
+			for each(var oscName: String in currServices) 
+			{
+				var osc: OGCServiceConfiguration = getServiceByName(oscName);
+				if (osc)
 				{
-					var wmsServiceConfiguration: WMSServiceConfiguration = osc as WMSServiceConfiguration;
-					wmsServiceConfiguration.addEventListener(WMSServiceConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
+					if(!b_force) {
+						if(osc.updatePeriod == 0 && osc.mi_lastUpdateFlashStamp != -1000000)
+							continue;
+						if(osc.mi_lastUpdateFlashStamp + osc.updatePeriod >= i_currentFlashStamp)
+							continue;
+					}
+					if (osc is WMSServiceConfiguration)
+					{
+						var wmsServiceConfiguration: WMSServiceConfiguration = osc as WMSServiceConfiguration;
+						_runningServices.push(wmsServiceConfiguration);
+						wmsServiceConfiguration.addEventListener(WMSServiceConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
+					}
+					osc.update();
+					osc.mi_lastUpdateFlashStamp = i_currentFlashStamp;
 				}
-				osc.update();
-				osc.mi_lastUpdateFlashStamp = i_currentFlashStamp;
 			}
 		}
 		
@@ -105,7 +151,7 @@ package com.iblsoft.flexiweather.ogc
 		}
 		protected function onTimer(event: TimerEvent): void
 		{
-			update(false);
+			update(_currentServices, false);
 		}
 		
 		public function get services(): ArrayCollection
