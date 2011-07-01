@@ -113,11 +113,14 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 		override public function destroy(): void
 		{
 			super.destroy();
-			mb_mapIsInitialized = false;
-			m_map.removeEventListener(MapEvent.MAP_READY, onMapReady);
-			removeChild(m_map);
-			
-			m_map = null;
+			if (m_map)
+			{
+				mb_mapIsInitialized = false;
+				m_map.removeEventListener(MapEvent.MAP_READY, onMapReady);
+				removeChild(m_map);
+				
+				m_map = null;
+			}
 		}
 		
 		
