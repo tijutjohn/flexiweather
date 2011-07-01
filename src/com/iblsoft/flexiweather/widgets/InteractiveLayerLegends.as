@@ -1220,7 +1220,7 @@ package com.iblsoft.flexiweather.widgets
 		
 		private function debug(str: String): void
 		{
-//			return;
+			return;
 			trace(str);
 			_logger.debug(str);
 		}
