@@ -57,15 +57,15 @@ package com.iblsoft.flexiweather.ogc.cache
 					var diff: Number = currTime.time - lastUsed.time;
 					if (diff > (_expirationTime * 1000))
 					{
-//						trace("Image from cache is expired, will be removed");
+//						debug("Image from cache is expired, will be removed");
 						if (!cacheItem.isImageOnDisplayList())
 						{
 							deleteCacheItem(s_key);
-						} else {
-							trace("onExpiration: image is on displalist");
+//						} else {
+//							debug("onExpiration: image is on displalist");
 						}
 					}
-//					trace("diff: " + diff);
+//					debug("diff: " + diff);
 				}
 			}
 			debugCache();
@@ -81,14 +81,14 @@ package com.iblsoft.flexiweather.ogc.cache
 			//dispose bitmap data, just for bitmaps which are not currently displayed
 			if (!cacheItem.displayed)
 			{
-//				trace("\t deleteCacheItem " + cacheItem);
+//				debug("\t deleteCacheItem " + cacheItem);
 				var bmp: Bitmap = cacheItem.image;
 			
 				bmp.bitmapData.dispose();
 				md_cache_length--;
 				delete md_cache[s_key];
 			} else {
-//				trace("\t deleteCacheItem: DO NOT DELETE IT " + cacheItem);
+//				debug("\t deleteCacheItem: DO NOT DELETE IT " + cacheItem);
 				
 			}
 			
@@ -110,7 +110,7 @@ package com.iblsoft.flexiweather.ogc.cache
 		public function getImage(s_crs: String, bbox: BBox, url: URLRequest): Bitmap
 		{
 			var s_key: String = getKey(s_crs, bbox, url);
-			trace("WMS CACHE getImage s_key: " + s_key);
+			debug("WMS CACHE getImage s_key: " + s_key);
 			if(s_key in md_cache) {
 				var item: CacheItem = md_cache[s_key] as CacheItem; 
 				item.lastUsed = new Date();
@@ -155,28 +155,28 @@ package com.iblsoft.flexiweather.ogc.cache
 		
 		private function debugCache(): void
 		{
-//			trace("WMSCache ["+name+"] items: " + md_cache_length);
+//			debug("WMSCache ["+name+"] items: " + md_cache_length);
 		}
 		public function removeFromScreen(): void
 		{
-			trace("WMS CACHE removeFromScreen");
+			debug("WMS CACHE removeFromScreen");
 			for(var s_key: String in md_cache) 
 			{
-				trace("\t WMS CACHE removeFromScreen key: " + s_key);
+				debug("\t WMS CACHE removeFromScreen key: " + s_key);
 				var item: CacheItem = md_cache[s_key] as CacheItem; 
 				
 				if (!item.isImageOnDisplayList()) 
 				{
 					item.displayed = false;
 				} else {
-					trace("ATTENTION iamge is on displayList");
+					debug("ATTENTION iamge is on displayList");
 				}
 			}
 		}
 		
 		public function invalidate(s_crs: String, bbox: BBox): void
 		{
-			trace("WMS CACHE invalidate s_crs: " + s_crs + " bbox : " + bbox);
+			debug("WMS CACHE invalidate s_crs: " + s_crs + " bbox : " + bbox);
 			
 			var a: Array = [];
 			for(var s_key: String in md_cache) 
@@ -189,16 +189,21 @@ package com.iblsoft.flexiweather.ogc.cache
 					if(ck.ms_crs == s_crs && ck.m_bbox.equals(bbox))
 						a.push(s_key);
 				} else {
-					trace("ATTENTION iamge is on displayList");
+					debug("ATTENTION iamge is on displayList");
 				}
 			}
 			for each(s_key in a) {
-	//			trace("WMSCache.invalidate(): removing image with key: " + md_cache[s_key].toString());
+	//			debug("WMSCache.invalidate(): removing image with key: " + md_cache[s_key].toString());
 				deleteCacheItem(s_key);
 			}
 			debugCache();
 		}
 
+		private function debug(str: String): void
+		{
+			return;
+			trace(str);
+		}
 	}
 }
 import com.iblsoft.flexiweather.ogc.cache.WMSCacheKey;
@@ -227,16 +232,16 @@ class CacheItem
 	public function isImageOnDisplayList(): Boolean
 	{
 		if (image)
-			return image.parent;
+			return image.parent != null;
 		
 		return false;
 	}
 	public function set displayed(value:Boolean):void 
 	{
-		if (!value)
-		{
-			trace("WMSCHace displayed = " + value);
-		}
+//		if (!value)
+//		{
+//			trace("WMSCHace displayed = " + value);
+//		}
 		_displayed = value;
 //		trace(this + " SET displayed = " + _displayed);
 	}

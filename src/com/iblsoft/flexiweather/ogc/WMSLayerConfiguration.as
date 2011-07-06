@@ -37,7 +37,10 @@ package com.iblsoft.flexiweather.ogc
 		public var ma_layerConfigurations: Array;
 
 		public static const CAPABILITIES_UPDATED: String = "capabilitiesUpdated";
+		public static const CAPABILITIES_RECEIVED: String = "capabilitiesReceived";
+		
 		[Event(name = CAPABILITIES_UPDATED, type = "flash.events.DataEvent")]
+		[Event(name = CAPABILITIES_RECEIVED, type = "flash.events.DataEvent")]
 
 		public function WMSLayerConfiguration(service: WMSServiceConfiguration = null, a_layerNames: Array = null)
 		{
@@ -102,7 +105,7 @@ package com.iblsoft.flexiweather.ogc
         {
             var r: URLRequest = m_service.toRequest("GetGTile");
             r.data.LAYER = ma_layerNames.length > 0 ? ma_layerNames[0] : '';
-            if(m_service.m_version.isLessThan(1, 3, 0)) 
+            if(m_service.version.isLessThan(1, 3, 0)) 
                 r.data.SRS = s_crs;
             else 
                 r.data.CRS = s_crs; 
@@ -137,7 +140,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			var r: URLRequest = m_service.toRequest("GetMap");
 			r.data.LAYERS = s_layersOverride == null ? ma_layerNames.join(",") : s_layersOverride;
-			if(m_service.m_version.isLessThan(1, 3, 0)) 
+			if(m_service.version.isLessThan(1, 3, 0)) 
 				r.data.SRS = s_crs;
 			else 
 				r.data.CRS = s_crs; 
@@ -178,7 +181,7 @@ package com.iblsoft.flexiweather.ogc
 			var r: URLRequest = m_service.toRequest("GetFeatureInfo");
 			r.data.LAYERS = ma_layerNames.join(",");
 			r.data.QUERY_LAYERS = a_queriedLayerNames.join(",");
-			if(m_service.m_version.isLessThan(1, 3, 0)) {
+			if(m_service.version.isLessThan(1, 3, 0)) {
 				r.data.SRS = s_crs;
 				r.data.X = i_x;
 				r.data.Y = i_y;
@@ -207,6 +210,9 @@ package com.iblsoft.flexiweather.ogc
 		
 		protected function onCapabilitiesUpdated(event: Event): void
 		{
+			var layer: WMSLayer
+			var layerConf: WMSLayer
+			
 			var a_layers: ArrayCollection = new ArrayCollection();
 			for(var i: int = 0; i < ma_layerNames.length; ++i) {
 				var l: WMSLayer = null;
@@ -218,16 +224,21 @@ package com.iblsoft.flexiweather.ogc
 			if(ma_layerConfigurations == null)
 				b_changed = true;
 			else {
-				for(i = 0; i < a_layers.length; ++i) {
-					if(a_layers[i] == null) {
-						if(ma_layerConfigurations[i] == null)
+				for(i = 0; i < a_layers.length; ++i) 
+				{
+					layer = a_layers[i] as WMSLayer;
+					layerConf = ma_layerConfigurations[i] as WMSLayer
+					if(layer == null) 
+					{
+						if(layerConf == null)
 							continue;
 						else {
 							b_changed = true;
 							break;
 						}
 					}
-					if(!a_layers[i].equals(ma_layerConfigurations[i])) {
+					if(!layer.equals(layerConf)) 
+					{
 						b_changed = true;
 						break;
 					} 
@@ -235,8 +246,15 @@ package com.iblsoft.flexiweather.ogc
 			}
 			if(b_changed) {
 				ma_layerConfigurations = a_layers.toArray();
+				for each (layer  in ma_layerConfigurations)
+				{
+					trace(layer);
+				}
 				dispatchEvent(new DataEvent(CAPABILITIES_UPDATED));
+			} else {
+				trace("WMSLayerConfiguration onCapabilitiesUpdated -> there is no change");
 			}
+			dispatchEvent(new DataEvent(CAPABILITIES_RECEIVED));
 		}
 
 		public function isTileableForCRS(crs: String): Boolean

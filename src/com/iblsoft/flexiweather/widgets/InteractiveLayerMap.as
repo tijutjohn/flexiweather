@@ -183,16 +183,20 @@ package com.iblsoft.flexiweather.widgets
 		 */		
 		private function findNewPrimaryLayer(): void
 		{
-			for each (var l: InteractiveLayerMSBase in m_layers)
+			for each (var l: InteractiveLayer in m_layers)
 			{
-				var so: ISynchronisedObject = l as ISynchronisedObject;
-            	if(so == null)
-            		continue;
-            	if(so.getSynchronisedVariables().indexOf("frame") < 0)
-            		continue;
-            	//this layer can be primary layer and there is no primary layer set, set this one as primaty layer	
-				setPrimaryLayer(l);
-				return;
+				if ( l is InteractiveLayerMSBase)
+				{
+					var lWMS: InteractiveLayerMSBase = l as InteractiveLayerMSBase;
+					var so: ISynchronisedObject = lWMS as ISynchronisedObject;
+	            	if(so == null)
+	            		continue;
+	            	if(so.getSynchronisedVariables().indexOf("frame") < 0)
+	            		continue;
+	            	//this layer can be primary layer and there is no primary layer set, set this one as primaty layer	
+					setPrimaryLayer(lWMS);
+					return;
+				}
 			}
 		}
 		

@@ -12,13 +12,11 @@ package com.iblsoft.flexiweather.ogc
 	
 	public class WMSServiceConfiguration extends OGCServiceConfiguration
 	{
-		public var id: String;
+		private var m_capabilitiesLoader: UniURLLoader = new UniURLLoader();
+		private var m_capabilities: XML = null;
+		private var m_capabilitiesLoadJob: BackgroundJob = null;
 		
-		internal var m_capabilitiesLoader: UniURLLoader = new UniURLLoader();
-		internal var m_capabilities: XML = null;
-		internal var m_capabilitiesLoadJob: BackgroundJob = null;
-		
-		internal var m_layers: WMSLayerGroup = null;
+		private var m_layers: WMSLayerGroup = null;
 		private var _imageFormats: Array = [];
 		public function get imageFormats(): Array
 		{
@@ -57,10 +55,10 @@ package com.iblsoft.flexiweather.ogc
 			if(m_capabilitiesLoadJob != null)
 				m_capabilitiesLoadJob.finish();
 			m_capabilitiesLoadJob = BackgroundJobManager.getInstance().startJob(
-					"Getting WMS capabilities for " + ms_baseURL);
+					"Getting WMS capabilities for " + baseURL);
 		}
 		
-		override internal function update(): void
+		override public function update(): void
 		{
 			super.update();
 			if(enabled)
@@ -79,18 +77,15 @@ package com.iblsoft.flexiweather.ogc
 				var xml1: XML = xml.wms::Request[0] as XML;
 				var xml2: XML = xml1.wms::GetMap[0] as XML;
 				
-				if (xml2)
+				var formatsXML: XMLList = xml2.wms::Format;
+				if (formatsXML)
 				{
-					var formatsXML: XMLList = xml2.wms::Format;
-					if (formatsXML)
+					for each (var format: XML in formatsXML)
 					{
-						for each (var format: XML in formatsXML)
+						var imageFormat: String = format.valueOf();
+						if (imageFormat && (imageFormat.indexOf('png') >= 0 || imageFormat.indexOf('jpg') >= 0 || imageFormat.indexOf('jpeg') >= 0))
 						{
-							var imageFormat: String = format.valueOf();
-							if (imageFormat && (imageFormat.indexOf('png') >= 0 || imageFormat.indexOf('jpg') >= 0 || imageFormat.indexOf('jpeg') >= 0))
-							{
-								_imageFormats.push(imageFormat);
-							}
+							_imageFormats.push(imageFormat);
 						}
 					}
 				}
