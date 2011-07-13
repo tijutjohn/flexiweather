@@ -329,6 +329,18 @@ package com.iblsoft.flexiweather.utils
 			return Math.abs(date1.time - date2.time);
 		}
 		
+		public static function getTommorow(): Date
+		{
+			var now: Date = new Date();
+			now.setHours(0);
+			now.setMinutes(0);
+			now.setSeconds(0);
+			
+			var dayMs: Number = 24 * 60 * 60 * 1000;
+			var tommorow: Date = new Date(now.getTime() + dayMs); 
+				
+			return tommorow;
+		}
 		public static function getMinimumDate(date: Date, maximumDate: Date): Date
 		{
 			if (date.time <= maximumDate.time)
