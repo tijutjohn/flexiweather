@@ -246,7 +246,7 @@ package com.iblsoft.flexiweather.ogc
 			}
 			if(b_changed) {
 				ma_layerConfigurations = a_layers.toArray();
-				for each (var layer  in ma_layerConfigurations)
+				for each (layer  in ma_layerConfigurations)
 				{
 					trace(layer);
 				}
