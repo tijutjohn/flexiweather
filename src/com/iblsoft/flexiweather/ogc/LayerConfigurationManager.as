@@ -53,17 +53,17 @@ package com.iblsoft.flexiweather.ogc
 			return null;
 		}
 		
-		public function editLayer(l: WMSLayerConfiguration): void
+		public function editLayer(l: ILayerConfiguration): void
 		{
 			notify();
 		}
-		public function addLayer(l: WMSLayerConfiguration): void
+		public function addLayer(l: ILayerConfiguration): void
 		{
 			ma_layers.addItem(l);
 			notify();
 		}
 		
-		public function removeLayer(l: WMSLayerConfiguration): void
+		public function removeLayer(l: ILayerConfiguration): void
 		{
 			var i: int = ma_layers.getItemIndex(l);
 			if(i >= 0) {
@@ -167,7 +167,7 @@ package com.iblsoft.flexiweather.ogc
 						layersXMLList.appendChild(layerXML);
 					}
 				}
-				var layerCustom: XML = <menuitem label="Add custom WMS layer..." data="map.add-layer-custom" type="action"/>
+				var layerCustom: XML = <menuitem label="Add custom layer..." data="map.add-layer-custom" type="action"/>
 				layersXMLList.appendChild(layerCustom);
 				
 				return layersXMLList.children();
