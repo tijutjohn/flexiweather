@@ -7,11 +7,12 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 	import com.google.maps.MapAction;
 	import com.google.maps.MapEvent;
 	import com.google.maps.MapMouseEvent;
+	import com.google.maps.MapOptions;
 	import com.google.maps.MapType;
 	import com.google.maps.View;
 	import com.google.maps.interfaces.IMapType;
-	import com.iblsoft.flexiweather.ogc.ILayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.ogc.ILayerConfiguration;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.Serializable;
@@ -36,6 +37,8 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 		
 		private var m_cfg: GoogleMapLayerConfiguration;
 
+		private var _mapType: String;
+		
 		public function get configuration(): ILayerConfiguration
 		{
 			return m_cfg;
@@ -94,7 +97,29 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 		private function onMapPreinitialize(event:MapEvent):void
 		{
 			trace("GoogleMaps onMapPreinitialize");
-			
+			var mapOptions: MapOptions = new MapOptions();	
+			mapOptions.mapType = getGoogleMapType(m_cfg.mapType);
+			m_map.setInitOptions(mapOptions);
+		}
+		
+		private function getGoogleMapType(type: String): IMapType
+		{
+			switch (type)
+			{
+				case GoogleMapLayerConfiguration.MAP_TYPE_NORMAL:
+					return MapType.NORMAL_MAP_TYPE;
+					break;
+				case GoogleMapLayerConfiguration.MAP_TYPE_PHYSICAL:
+					return MapType.PHYSICAL_MAP_TYPE;
+					break;
+				case GoogleMapLayerConfiguration.MAP_TYPE_SATELLITE:
+					return MapType.SATELLITE_MAP_TYPE;
+					break;
+				case GoogleMapLayerConfiguration.MAP_TYPE_HYBRID:
+					return MapType.HYBRID_MAP_TYPE;
+					break;
+			}
+			return MapType.NORMAL_MAP_TYPE;
 		}
 		
 		private function onMapReady(event:Event):void 
@@ -454,6 +479,7 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 			}
 
 		}
+		
 		
 		public function setMapType(type: IMapType): void
 		{

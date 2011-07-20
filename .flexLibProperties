@@ -15,7 +15,10 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.ExceptionUtils"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.GMLUtils"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.IBehaviouralObject"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.ILayerConfiguration"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.IOGCServicesConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.ISynchronisedObject"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.IWFSFeatureWithAnnotation"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.InteractiveLayerQTTMS"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.InteractiveLayerWFS"/>
@@ -30,6 +33,7 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.OGCServiceConfigurationManager"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.ProjectionConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.ProjectionConfigurationManager"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.QTTMSLayerConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.SchemaParser"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.SchemaParserDataItem"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.SchemaParserDataItemAttribute"/>
@@ -67,6 +71,7 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableCurve"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableMode"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.events.GetCapabilitiesEvent"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.tiling.InteractiveLayerWMSWithQTT"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.tiling.TileIndex"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.tiling.TiledArea"/>
@@ -132,6 +137,7 @@
     <classEntry path="com.iblsoft.flexiweather.utils.TreeUtils"/>
     <classEntry path="com.iblsoft.flexiweather.utils.UniURLLoader"/>
     <classEntry path="com.iblsoft.flexiweather.utils.UniURLLoaderEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.UniURLLoaderManager"/>
     <classEntry path="com.iblsoft.flexiweather.utils.XMLStorage"/>
     <classEntry path="com.iblsoft.flexiweather.utils.geometry.ILineSegmentApproximableBounds"/>
     <classEntry path="com.iblsoft.flexiweather.utils.geometry.LineSegment"/>
@@ -140,10 +146,14 @@
     <classEntry path="com.iblsoft.flexiweather.utils.loaders.ImageLoader"/>
     <classEntry path="com.iblsoft.flexiweather.utils.loaders.JSONLoader"/>
     <classEntry path="com.iblsoft.flexiweather.utils.loaders.XMLLoader"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.packing.DynamicArea"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.packing.PackingLayoutProperties"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.packing.Padding"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.AreaSelectorTool"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.BackgroundJob"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.BackgroundJobManager"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.GlowLabel"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.IConfigurableLayer"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InputDialog"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayer"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerClickAction"/>
@@ -159,16 +169,19 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerZoom"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveWidget"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.JobPreloader"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.JobProgressIndicator"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.LabelJobProgressIndicator"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.MapTimelineConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.ModuleLoaderWithData"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.ProgressBarJobProgressIndicator"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.SimpleLayerBehaviourEditDialog"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.TextAreaWithEnter"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.GroupBox"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.GroupHBox"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.GroupVBox"/>
-    <classEntry path="com.iblsoft.flexiweather.widgets.JobProgressIndicator"/>
-    <classEntry path="com.iblsoft.flexiweather.widgets.ProgressBarJobProgressIndicator"/>
-    <classEntry path="com.iblsoft.flexiweather.widgets.LabelJobProgressIndicator"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.GoogleMapLayerConfiguration"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.GoogleMapsLayerOption"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.InteractiveLayerGoogleMaps"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

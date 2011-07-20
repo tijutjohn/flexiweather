@@ -92,5 +92,8 @@ package com.iblsoft.flexiweather.ogc
 				s_url = ms_previewURL;
 			return s_url;
 		}
+		
+		public function get serviceType(): String
+		{ return "QTT"; }
 	}
 }
