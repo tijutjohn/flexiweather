@@ -15,6 +15,10 @@ package com.iblsoft.flexiweather.ogc
 		
 		protected function sortArray(item1: Object, item2: Object, array: Array = null): int
 		{
+			//if item has not defined labels do not compare it
+			if (!item1.label || !item2.label)
+				return 1;
+			
 			var label1: String = fixLabel(item1.label).toLowerCase();
 			var label2: String = fixLabel(item2.label).toLowerCase();
 			
@@ -46,6 +50,9 @@ package com.iblsoft.flexiweather.ogc
 		}
 		protected function fixLabel(lbl: String): String
 		{
+			if (!lbl)
+				return null;
+			
 			var test: String = 'global/'; 
 			if (lbl.indexOf(test) == 0)
 				return lbl.substr(test.length);

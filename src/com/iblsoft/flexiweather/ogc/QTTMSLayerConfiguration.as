@@ -11,11 +11,31 @@ package com.iblsoft.flexiweather.ogc
 	public class QTTMSLayerConfiguration extends LayerConfiguration implements IInteractiveLayerProvider, ILayerConfiguration
 	{
 		public var baseURLPattern: String;
-		/** Array of CRSWithBBox */
+		/** Array of CRSWithBBox (items are QTTAreaData instances */
 		public var tilingCRSsAndExtents: Array = [];
 		public var minimumZoomLevel: uint = 1;
 		public var maximumZoomLevel: uint = 12;
 		
+		public function get crs(): String
+		{
+			if (tilingCRSsAndExtents && tilingCRSsAndExtents.length > 0)
+			{
+				var data: QTTAreaData = tilingCRSsAndExtents[0] as QTTAreaData;
+				if (data && data.crsWithBBox)
+					return data.crsWithBBox.crs;
+			}
+			return null;
+		}
+		public function get urlPattern(): String
+		{
+			if (tilingCRSsAndExtents && tilingCRSsAndExtents.length > 0)
+			{
+				var data: QTTAreaData = tilingCRSsAndExtents[0] as QTTAreaData;
+				if (data)
+					return data.urlPattern;
+			}
+			return null;
+		}
 		public function QTTMSLayerConfiguration()
 		{
 		}
@@ -31,7 +51,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			super.serialize(storage);
 			baseURLPattern = storage.serializeString("url-pattern", baseURLPattern);
-			storage.serializeNonpersistentArray("tiling-crs-and-extent", tilingCRSsAndExtents, CRSWithBBox);
+			storage.serializeNonpersistentArray("tiling-crs-and-extent", tilingCRSsAndExtents, QTTAreaData);
 			minimumZoomLevel = storage.serializeUInt("minimum-zoom-level", minimumZoomLevel, 1);
 			maximumZoomLevel = storage.serializeUInt("maximum-zoom-level", maximumZoomLevel, 12);
 		}
@@ -47,8 +67,9 @@ package com.iblsoft.flexiweather.ogc
 		
 		override public function isCompatibleWithCRS(s_crs: String): Boolean
 		{
-			for each(var crsWithBBox: CRSWithBBox in tilingCRSsAndExtents) {
-				if(crsWithBBox.crs == s_crs)
+			for each(var qttData: QTTAreaData in tilingCRSsAndExtents) {
+				var crsWithBBox: CRSWithBBox = qttData.crsWithBBox;  
+				if(crsWithBBox && crsWithBBox.crs == s_crs)
 					return true;
 			}
 			return false;
