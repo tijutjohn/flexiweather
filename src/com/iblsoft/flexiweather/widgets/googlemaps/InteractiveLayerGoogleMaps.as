@@ -159,6 +159,15 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 		override public function onAreaChanged(b_finalChange: Boolean): void
 		{
 			super.onAreaChanged(b_finalChange);
+			
+			//check if CRS is supported
+			var newCRS: String = container.crs;
+			if (newCRS != 'EPSG:900913')
+			{
+				m_map.visible = false;
+				return;
+			}
+			m_map.visible = true;
 			if(b_finalChange) {
 				updateData(false);
 			}

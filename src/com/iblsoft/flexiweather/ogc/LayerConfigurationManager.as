@@ -40,11 +40,11 @@ package com.iblsoft.flexiweather.ogc
 			storage.serializePersistentArrayCollection("layer", ma_layers, LayerConfiguration);
 		}
 		
-		public function getLayerByLabel(lbl: String): LayerConfiguration
+		public function getLayerConfigurationByLabel(lbl: String): ILayerConfiguration
 		{
 			if (ma_layers && ma_layers.length > 0)
 			{
-				for each (var layer: LayerConfiguration in ma_layers)
+				for each (var layer: ILayerConfiguration in ma_layers)
 				{
 					if (layer.label == lbl)
 						return layer;

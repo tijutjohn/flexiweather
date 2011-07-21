@@ -26,6 +26,8 @@ package com.iblsoft.flexiweather.ogc
 	import flash.utils.Dictionary;
 	import flash.utils.Timer;
 	
+	import spark.primitives.Graphic;
+	
 	[Event(name='drawTiles', type='')]
 	
 	/**
@@ -67,7 +69,8 @@ package com.iblsoft.flexiweather.ogc
 		/** This is used only if overriding using the setter, otherwise the value from m_cfg is used. */ 
 		protected var ms_explicitBaseURLPattern: String;
 		
-		private var md_crsToTilingExtent: Dictionary = new Dictionary();
+//		private var md_crsToTilingExtent: Dictionary = new Dictionary();
+		
 		private var ms_oldCRS: String;
 		private var m_tilingUtils: TilingUtils;
 		private var m_jobs: TileJobs;
@@ -86,24 +89,29 @@ package com.iblsoft.flexiweather.ogc
 		{
 			super(container);
 			
+			var tilingInfo: QTTilingInfo
 			if(cfg == null) {
 				cfg = new QTTMSLayerConfiguration();
-				cfg.baseURLPattern = s_baseURLPattern;
-				if(s_primaryCRS != null && primaryCRSTilingExtent != null)
-						cfg.tilingCRSsAndExtents.push(new CRSWithBBox(s_primaryCRS, primaryCRSTilingExtent));
-				cfg.minimumZoomLevel = minimumZoomLevel;
-				cfg.maximumZoomLevel = maximumZoomLevel;
+				tilingInfo = new QTTilingInfo(s_baseURLPattern, new CRSWithBBox(s_primaryCRS, primaryCRSTilingExtent));
+//				cfg.urlPattern = s_baseURLPattern;
+//				if(s_primaryCRS != null && primaryCRSTilingExtent != null)
+//						cfg.tilingCRSsAndExtents.push(new CRSWithBBox(s_primaryCRS, primaryCRSTilingExtent));
+				tilingInfo.minimumZoomLevel = minimumZoomLevel;
+				tilingInfo.maximumZoomLevel = maximumZoomLevel;
+				cfg.addQTTilingInfo(tilingInfo);
 			}
 			m_cfg = cfg;
 			
+			/*
 			for each(var crsWithBBox: CRSWithBBox in cfg.tilingCRSsAndExtents) {
 				md_crsToTilingExtent[crsWithBBox.crs] = crsWithBBox.bbox;
 			}
-
+			*/
+			
 			m_cache = new WMSTileCache();
 			m_tilingUtils = new TilingUtils();
-			m_tilingUtils.minimumZoom = cfg.minimumZoomLevel;
-			m_tilingUtils.maximumZoom = cfg.maximumZoomLevel;
+			m_tilingUtils.minimumZoom = minimumZoomLevel;
+			m_tilingUtils.maximumZoom = maximumZoomLevel;
 			
 			m_loader.addEventListener(UniURLLoader.DATA_LOADED, onDataLoaded);
 			m_loader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onDataLoadFailed);
@@ -134,9 +142,14 @@ package com.iblsoft.flexiweather.ogc
 
 		public static function expandURLPattern(s_url: String, tileIndex: TileIndex): String
 		{
-			s_url = s_url.replace('%COL%', String(tileIndex.mi_tileCol));
-			s_url = s_url.replace('%ROW%', String(tileIndex.mi_tileRow));
-			s_url = s_url.replace('%ZOOM%', String(tileIndex.mi_tileZoom));
+			if (s_url)
+			{
+				s_url = s_url.replace('%COL%', String(tileIndex.mi_tileCol));
+				s_url = s_url.replace('%ROW%', String(tileIndex.mi_tileRow));
+				s_url = s_url.replace('%ZOOM%', String(tileIndex.mi_tileZoom));
+			} else {
+				trace("expandURLPattern problem with url");
+			}
 			return s_url;
 		}
 
@@ -150,14 +163,21 @@ package com.iblsoft.flexiweather.ogc
 			m_cache.invalidate(container.crs, getGTileBBoxForWholeCRS(container.crs));
 		}
 
+		
 		public function clearCRSWithTilingExtents(): void
 		{
-			md_crsToTilingExtent = new Dictionary(); 
+			m_cfg.removeAllTilingInfo();
+			//md_crsToTilingExtent = new Dictionary(); 
 		}
 
-		public function addCRSWithTilingExtent(s_tilingCRS: String, crsTilingExtent: BBox): void
+		public function addCRSWithTilingExtent(s_urlPattern: String, s_tilingCRS: String, crsTilingExtent: BBox): void
 		{
-			md_crsToTilingExtent[s_tilingCRS] = crsTilingExtent;
+			var crsWithBBox: CRSWithBBox = new CRSWithBBox(s_tilingCRS, crsTilingExtent);
+			var tilingInfo: QTTilingInfo = new QTTilingInfo(s_urlPattern, crsWithBBox);
+			
+			m_cfg.addQTTilingInfo(tilingInfo);
+			
+			//md_crsToTilingExtent[s_tilingCRS] = crsTilingExtent;
 		}
 
 		public function updateData(b_forceUpdate: Boolean): void
@@ -186,26 +206,31 @@ package com.iblsoft.flexiweather.ogc
 			
 			mi_totalVisibleTiles = (rowMax - m_tiledArea.topRow + 1) * (colMax - m_tiledArea.leftCol + 1);
 
-			for(var i_row: uint = m_tiledArea.topRow; i_row <= rowMax; ++i_row) 
+			if (baseURLPattern)
 			{
-				for(var i_col: uint = m_tiledArea.leftCol; i_col <= colMax; ++i_col) 
+				for(var i_row: uint = m_tiledArea.topRow; i_row <= rowMax; ++i_row) 
 				{
-					tileIndex = new TileIndex(mi_zoom, i_row, i_col);
-					request = new URLRequest(getExpandedURL(tileIndex));
-					// need to convert ${BASE_URL} because it's used in cachKey
-					request.url = UniURLLoader.fromBaseURL(request.url);
-					
-					ma_currentTilesRequests.push(request);
-					
-					if(!tiledCache.isTileCached(s_crs, tileIndex, request, ma_specialCacheStrings))
-					{	
-						loadRequests.push({
-							request: request,
-							requestedCRS: container.crs,
-							requestedTileIndex: tileIndex
-						});
-					} 
+					for(var i_col: uint = m_tiledArea.leftCol; i_col <= colMax; ++i_col) 
+					{
+						tileIndex = new TileIndex(mi_zoom, i_row, i_col);
+						request = new URLRequest(getExpandedURL(tileIndex));
+						// need to convert ${BASE_URL} because it's used in cachKey
+						request.url = UniURLLoader.fromBaseURL(request.url);
+						
+						ma_currentTilesRequests.push(request);
+						
+						if(!tiledCache.isTileCached(s_crs, tileIndex, request, ma_specialCacheStrings))
+						{	
+							loadRequests.push({
+								request: request,
+								requestedCRS: container.crs,
+								requestedTileIndex: tileIndex
+							});
+						} 
+					}
 				}
+			} else {
+				trace("baseURLpattern is NULL");
 			}
 			
 			if(loadRequests.length > 0)
@@ -398,6 +423,24 @@ package com.iblsoft.flexiweather.ogc
 		{
 			if(!width || !height)
 				return;
+
+			
+			var newCRS: String = container.crs;
+			var tilingInfo: QTTilingInfo = m_cfg.getQTTilingInfoForCRS(newCRS);
+			if (!tilingInfo)
+			{
+				//crs is not supported
+				graphics.lineStyle(2, 0xcc0000, 0.7, true);
+				graphics.moveTo(0, 0);
+				graphics.lineTo(f_width - 1, f_height - 1);
+				graphics.moveTo(0, f_height - 1);
+				graphics.lineTo(f_width - 1, 0);
+				
+				return;
+			}
+			
+			
+			
 			var matrix: Matrix  = new Matrix();
 			matrix.translate(-f_width / 3, -f_width / 3);
 			matrix.scale(3, 3);
@@ -436,17 +479,47 @@ package com.iblsoft.flexiweather.ogc
 			gr.endFill();
 		}
 		
+		public function getGTileBBoxForWholeCRS(s_crs: String): BBox
+		{
+			var tilingInfo: QTTilingInfo = m_cfg.getQTTilingInfoForCRS(s_crs);
+			if (tilingInfo)
+				return tilingInfo.crsWithBBox.bbox;
+			
+//			if(s_crs in md_crsToTilingExtent)
+//				return md_crsToTilingExtent[s_crs];
+			
+			return null;
+		}
+		
 		override public function onAreaChanged(b_finalChange: Boolean): void
 		{
 			super.onAreaChanged(b_finalChange);
-			m_tilingUtils.onAreaChanged(container.crs, getGTileBBoxForWholeCRS(container.crs));
+			
+			//check if CRS is supported
+			var newCRS: String = container.crs;
+			
+			var tilingInfo: QTTilingInfo = m_cfg.getQTTilingInfoForCRS(newCRS);
+			if (!tilingInfo)
+			{
+				//crs is not supported
+				var gr: Graphics = graphics; 
+				
+				//TODO correctly remove map 
+				gr.clear();
+				return;
+			}
+			var newBBox: BBox = getGTileBBoxForWholeCRS(container.crs)
+			var viewBBox: BBox = container.getViewBBox();
+			
+			m_tilingUtils.onAreaChanged(newCRS, newBBox);
+			
 			if(b_finalChange || mi_zoom < 0) {
 				var i_oldZoom: int = mi_zoom;
 				
 				findZoom();
 				if(mi_zoom != i_oldZoom)
 				{
-					m_cache.invalidate(container.crs, container.getViewBBox());
+					m_cache.invalidate(newCRS, viewBBox);
 				}
 				updateData(false);
 			}
@@ -493,18 +566,6 @@ package com.iblsoft.flexiweather.ogc
 			checkIfAllTilesAreLoaded();
 		}
 		
-		public function getGTileBBoxForWholeCRS(s_crs: String): BBox
-		{
-			if(s_crs in md_crsToTilingExtent)
-				return md_crsToTilingExtent[s_crs];
-			/*
-			if(s_crs == "EPSG:4326")
-				return new BBox(-180, -180, 180, 180);
-			if(s_crs == "EPSG:900913")
-				return new BBox(-20037508,-20037508,20037508,20037508.34);
-			*/
-			return null;
-		}
 
 		public function getGTileBBox(s_crs: String, tileIndex: TileIndex): BBox
 		{
@@ -561,12 +622,24 @@ package com.iblsoft.flexiweather.ogc
 		public function get baseURLPattern(): String
 		{
 			if(ms_explicitBaseURLPattern == null)
-				return m_cfg.baseURLPattern;
+			{
+				var tilingInfo: QTTilingInfo;
+				//TODO get current CRS 
+				var crs: String = container.getCRS();
+//				var tilingInfo: QTTilingInfo = m_cfg.getQTTilingInfoForCRS(crs);
+				if (m_cfg.tilingCRSsAndExtents && m_cfg.tilingCRSsAndExtents.length > 0)
+					tilingInfo = m_cfg.getQTTilingInfoForCRS(crs);
+				
+				if (tilingInfo && tilingInfo.urlPattern)
+					return tilingInfo.urlPattern;
+			}
 			return ms_explicitBaseURLPattern;
 		}
 		
+		/*
 		public function set baseURLPattern(s_baseURL: String): void
 		{ ms_explicitBaseURLPattern = s_baseURL; }
+		*/
 		
 		public function get zoomLevel(): int
 		{ return mi_zoom; }

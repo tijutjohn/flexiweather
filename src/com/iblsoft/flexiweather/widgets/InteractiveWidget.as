@@ -111,6 +111,7 @@ package com.iblsoft.flexiweather.widgets
 				dispatchEvent(ile);
 			}
 		}
+		
 		public function addLayer(l: InteractiveLayer, index: int = -1): void
 		{
 			l.addEventListener(InteractiveLayerEvent.LAYER_LOADED, onLayerLoaded);
@@ -120,9 +121,13 @@ package com.iblsoft.flexiweather.widgets
 				addChildAt(l, index);
 			else
 				addChild(l);
+			
+			//when new layer is added to container, call onAreaChange to notify layer, that layer is already added to container, so it can render itself
+			l.onAreaChanged(true);
+			
 			orderLayers();
 		}
-
+		
 		public function removeLayer(l: InteractiveLayer, b_destroy: Boolean = false): void
 		{
 			if(l.parent == m_layerContainer) {

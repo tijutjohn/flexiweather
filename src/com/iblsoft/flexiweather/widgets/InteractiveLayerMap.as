@@ -632,11 +632,12 @@ package com.iblsoft.flexiweather.widgets
 	}
 }
 
-import com.iblsoft.flexiweather.utils.Serializable;
+import com.iblsoft.flexiweather.ogc.ILayerConfiguration;
 import com.iblsoft.flexiweather.ogc.LayerConfiguration;
-import com.iblsoft.flexiweather.widgets.InteractiveLayer;
-import com.iblsoft.flexiweather.utils.Storage;
 import com.iblsoft.flexiweather.ogc.LayerConfigurationManager;
+import com.iblsoft.flexiweather.utils.Serializable;
+import com.iblsoft.flexiweather.utils.Storage;
+import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 class LayerSerializationWrapper implements Serializable
@@ -648,7 +649,7 @@ class LayerSerializationWrapper implements Serializable
 	{
 		if(storage.isLoading()) {
 			var s_layerName: String = storage.serializeString("layer-name", null, null);
-			var config: LayerConfiguration = LayerConfigurationManager.getInstance().getLayerByLabel(s_layerName);
+			var config: ILayerConfiguration = LayerConfigurationManager.getInstance().getLayerConfigurationByLabel(s_layerName);
 			
 			m_layer = config.createInteractiveLayer(m_iw);
 			if (m_layer is Serializable)

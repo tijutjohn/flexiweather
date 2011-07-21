@@ -90,8 +90,11 @@ package com.iblsoft.flexiweather.ogc
 			if (forcedLayerHeight> 0)
 				i_height = forcedLayerHeight;
 			
+			var currCRS: String = container.getCRS(); 
+			var viewBBox: BBox = container.getViewBBox(); 
+			
 			var request: URLRequest = m_cfg.toGetMapRequest(
-					container.getCRS(), container.getViewBBox().toBBOXString(),
+					currCRS, viewBBox.toBBOXString(),
 					i_width, i_height,
 					getWMSStyleListString());
 			
@@ -106,8 +109,8 @@ package com.iblsoft.flexiweather.ogc
 			
 			if(!b_forceUpdate)
 			{
-				var isCached: Boolean = wmsCache.isImageCached(container.getCRS(), container.getViewBBox(), request)
-				var imgTest: Bitmap = wmsCache.getImage(container.getCRS(), container.getViewBBox(), request);
+				var isCached: Boolean = wmsCache.isImageCached(currCRS, viewBBox, request)
+				var imgTest: Bitmap = wmsCache.getImage(currCRS, viewBBox, request);
 				
 //				trace("isCached: " + isCached + " imgTest: " + imgTest);
 				if (isCached)
@@ -133,8 +136,8 @@ package com.iblsoft.flexiweather.ogc
 				m_job = BackgroundJobManager.getInstance().startJob("Rendering " + m_cfg.ma_layerNames.join("+"));
 				m_request = request;
 				m_loader.load(request, {
-					requestedCRS: container.getCRS(),
-					requestedBBox: container.getViewBBox()
+					requestedCRS: currCRS,
+					requestedBBox: viewBBox
 				});
 				
 				invalidateDynamicPart();
@@ -142,7 +145,7 @@ package com.iblsoft.flexiweather.ogc
 				var ile: InteractiveLayerEvent = new InteractiveLayerEvent( InteractiveLayerEvent.LAYER_LOADIND_START, true );
 				ile.interactiveLayer = this;
 				dispatchEvent(ile);
-				wmsCache.startImageLoading( container.getCRS(), container.getViewBBox(), request );
+				wmsCache.startImageLoading( currCRS, viewBBox, request );
 			}
 			else {
 				if(m_cfg.mi_autoRefreshPeriod > 0) {
@@ -151,8 +154,8 @@ package com.iblsoft.flexiweather.ogc
 				}
 				m_image = img;
 				mb_imageOK = true;
-				ms_imageCRS = container.getCRS();
-				m_imageBBox = container.getViewBBox();
+				ms_imageCRS = currCRS;
+				m_imageBBox = viewBBox;
 				invalidateDynamicPart();
 			}
 		}

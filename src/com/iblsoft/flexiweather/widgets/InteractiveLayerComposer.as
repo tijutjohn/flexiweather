@@ -34,6 +34,9 @@ package com.iblsoft.flexiweather.widgets
 			//TODO notification are not needed, addItem notify already
 			notifyLayersChanged(l);
 			
+			//when new layer is added to container, call onAreaChange to notify layer, that layer is already added to container, so it can render itself
+			l.onAreaChanged(true);
+			
 			//orderLayers();
 		}
 		
