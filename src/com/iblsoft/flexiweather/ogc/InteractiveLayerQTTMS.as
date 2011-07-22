@@ -491,24 +491,54 @@ package com.iblsoft.flexiweather.ogc
 			return null;
 		}
 		
-		override public function onAreaChanged(b_finalChange: Boolean): void
+		private function hideMap(): void
 		{
-			super.onAreaChanged(b_finalChange);
-			
-			//check if CRS is supported
+			var gr: Graphics = graphics; 
+			gr.clear();
+		}
+		private function isZoomCompatible(newZoom: int): Boolean
+		{
 			var newCRS: String = container.crs;
+			var tilingInfo: QTTilingInfo = m_cfg.getQTTilingInfoForCRS(newCRS);
+			if (!tilingInfo)
+			{
+				hideMap();
+				return false;
+			}
+			if (newZoom < tilingInfo.minimumZoomLevel || newZoom > tilingInfo.maximumZoomLevel)
+			{
+				hideMap();
+				return false;
+			}
 			
+			return true;
+			
+		}
+		private function isCRSCompatible(): Boolean
+		{
+			var newCRS: String = container.crs;
 			var tilingInfo: QTTilingInfo = m_cfg.getQTTilingInfoForCRS(newCRS);
 			if (!tilingInfo)
 			{
 				//crs is not supported
-				var gr: Graphics = graphics; 
-				
-				//TODO correctly remove map 
-				gr.clear();
+				hideMap();
+				return false;
+			}
+			return true;
+			
+		}
+		override public function onAreaChanged(b_finalChange: Boolean): void
+		{
+			super.onAreaChanged(b_finalChange);
+			
+			var newCRS: String = container.crs;
+			
+			//check if CRS is supported
+			if (!isCRSCompatible)
+			{
 				return;
 			}
-			var newBBox: BBox = getGTileBBoxForWholeCRS(container.crs)
+			var newBBox: BBox = getGTileBBoxForWholeCRS(newCRS);
 			var viewBBox: BBox = container.getViewBBox();
 			
 			m_tilingUtils.onAreaChanged(newCRS, newBBox);
@@ -517,6 +547,9 @@ package com.iblsoft.flexiweather.ogc
 				var i_oldZoom: int = mi_zoom;
 				
 				findZoom();
+				if (!isZoomCompatible(mi_zoom))
+					return;
+					
 				if(mi_zoom != i_oldZoom)
 				{
 					m_cache.invalidate(newCRS, viewBBox);

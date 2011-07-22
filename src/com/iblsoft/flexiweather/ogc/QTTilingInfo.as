@@ -39,7 +39,10 @@ package com.iblsoft.flexiweather.ogc
 //				crsWithBBox = new CRSWithBBox();
 //			}
 //		}
-		
+		public function updateCRSWithBBox(value: CRSWithBBox)
+		{
+			_crsWithBBox = value;
+		}
 		public function serialize(storage: Storage): void
 		{
 //			if(storage.isStoring() || m_bbox != null) {
