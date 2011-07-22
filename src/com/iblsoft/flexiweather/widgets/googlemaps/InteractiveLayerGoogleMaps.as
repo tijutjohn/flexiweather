@@ -38,7 +38,10 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 		private var m_cfg: GoogleMapLayerConfiguration;
 
 		private var _mapType: String;
-		
+		public function get mapType(): String
+		{
+			return _mapType;
+		}
 		public function get configuration(): ILayerConfiguration
 		{
 			return m_cfg;
@@ -68,6 +71,20 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 		public function serialize(storage: Storage): void
 		{
 			trace("InteractiveLayerGoogleMaps serialize");
+			
+			if (storage.isLoading())
+			{
+				var newAlpha: Number = storage.serializeNumber("transparency", alpha);
+				if (newAlpha < 1)
+				{
+					alpha = newAlpha;
+				}
+				_mapType = storage.serializeString('map-type', _mapType);
+			} else {
+				storage.serializeString('map-type', _mapType, GoogleMapLayerConfiguration.MAP_TYPE_NORMAL);
+				if (alpha < 1)
+					storage.serializeNumber("transparency", alpha);
+			}	
 		}
 		
 		override protected  function createChildren():void
@@ -112,8 +129,13 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 		private function onMapPreinitialize(event:MapEvent):void
 		{
 			trace(this + " onMapPreinitialize");
-			var mapOptions: MapOptions = new MapOptions();	
-			mapOptions.mapType = getGoogleMapType(m_cfg.mapType);
+			var mapOptions: MapOptions = new MapOptions();
+			var mapType: String = m_cfg.mapType;
+			if (_mapType)
+				mapType = _mapType;
+
+			mapOptions.mapType = getGoogleMapType(mapType);
+			
 			(event.currentTarget as Map).setInitOptions(mapOptions);
 		}
 		
@@ -135,6 +157,25 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 					break;
 			}
 			return MapType.NORMAL_MAP_TYPE;
+		}
+		private function getMapTypeFromGoogleMapType(type: IMapType): String
+		{
+			switch (type)
+			{
+				case MapType.NORMAL_MAP_TYPE:
+					return GoogleMapLayerConfiguration.MAP_TYPE_NORMAL;
+					break;
+				case MapType.PHYSICAL_MAP_TYPE:
+					return GoogleMapLayerConfiguration.MAP_TYPE_PHYSICAL;
+					break;
+				case MapType.SATELLITE_MAP_TYPE:
+					return GoogleMapLayerConfiguration.MAP_TYPE_SATELLITE;
+					break;
+				case MapType.HYBRID_MAP_TYPE:
+					return GoogleMapLayerConfiguration.MAP_TYPE_HYBRID;
+					break;
+			}
+			return GoogleMapLayerConfiguration.MAP_TYPE_NORMAL;
 		}
 		
 		private function onMapReady(event:Event):void 
@@ -171,17 +212,28 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 			m_map.setSize(new Point(container.width, container.height));
 			
 		}
-		
+		private function showMap(): void
+		{
+			if (m_map)
+				m_map.visible = true;
+			
+		}
+		private function hideMap(): void
+		{
+			if (m_map)
+				m_map.visible = false;
+			
+		}
 		private function inCRSCompatible(): Boolean
 		{
 			var newCRS: String = container.crs;
 			if (newCRS != 'EPSG:900913')
 			{
-				m_map.visible = false;
+				hideMap();
 				return false;
 			}
 			
-			m_map.visible = true;
+			showMap();
 			return true;
 			
 		}
@@ -533,6 +585,7 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 		
 		public function setMapType(type: IMapType): void
 		{
+			_mapType = getMapTypeFromGoogleMapType(type);
 			m_map.setMapType(type);
 		}
 		

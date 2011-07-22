@@ -5,6 +5,8 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.ogc.tiling.TiledArea;
 	import com.iblsoft.flexiweather.ogc.tiling.TilingUtils;
 	import com.iblsoft.flexiweather.proj.Coord;
+	import com.iblsoft.flexiweather.utils.Serializable;
+	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.utils.UniURLLoader;
 	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.widgets.BackgroundJob;
@@ -33,7 +35,7 @@ package com.iblsoft.flexiweather.ogc
 	/**
 	 * Generic Quad Tree (like Google Maps) tiling layer
 	 **/
-	public class InteractiveLayerQTTMS extends InteractiveLayer implements IConfigurableLayer
+	public class InteractiveLayerQTTMS extends InteractiveLayer implements IConfigurableLayer, Serializable
 	{
 		public static const DRAW_TILES: String = 'drawTiles';
 		public static const START_TILES_LOADING: String = 'startTilesLoading';
@@ -119,6 +121,25 @@ package com.iblsoft.flexiweather.ogc
 			m_jobs = new TileJobs();
 		}
 
+		public function serialize(storage: Storage): void
+		{
+			trace("InteractiveLayerQTTMS serialize");
+			
+			if (storage.isLoading())
+			{
+				var newAlpha: Number = storage.serializeNumber("transparency", alpha);
+				if (newAlpha < 1)
+				{
+					alpha = newAlpha;
+				}
+			} else {
+				if (alpha < 1) 
+				{
+					storage.serializeNumber("transparency", alpha);
+				}
+			}
+		}
+		
 		public override function invalidateSize(): void
 		{
 			super.invalidateSize();

@@ -55,8 +55,8 @@
 				if (_layer)
 				{
 					var cfg: GoogleMapLayerConfiguration = value.configuration as GoogleMapLayerConfiguration;
-					label = cfg.label;
-					var type: String = cfg.mapType;
+					label = _layer.layerName;
+					var type: String = _layer.mapType;//cfg.mapType;
 					switch (type)
 					{
 						default:
@@ -108,7 +108,8 @@
 			{
 				if (layer)
 				{
-					layer.configuration.label = txtLayerName.text;
+//					layer.configuration.label = txtLayerName.text;
+					layer.layerName = txtLayerName.text;
 				}
 			}
 				

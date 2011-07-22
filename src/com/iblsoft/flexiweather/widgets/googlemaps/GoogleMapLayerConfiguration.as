@@ -39,6 +39,7 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 		override public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer
 		{
 			var l: InteractiveLayerGoogleMaps = new InteractiveLayerGoogleMaps(iw, this);
+			l.layerName = label; //'Static/Google Maps';
 			l.name = label; //'Static/Google Maps';
 			return l;
 		}

@@ -34,15 +34,15 @@
 				_layer = value;
 				if (_layer)
 				{
-					var cfg: QTTMSLayerConfiguration = value.configuration as QTTMSLayerConfiguration;
-					label = cfg.label;
+//					var cfg: QTTMSLayerConfiguration = value.configuration as QTTMSLayerConfiguration;
+					label = value.layerName;
 				}
 			}
 			private function changeLabel(): void
 			{
 				if (layer)
 				{
-					layer.configuration.label = txtLayerName.text;
+					layer.layerName = txtLayerName.text;
 				}
 			}
 			

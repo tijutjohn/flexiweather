@@ -19,6 +19,7 @@ package com.iblsoft.flexiweather.ogc
 		override public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer
 		{
 			var l: InteractiveLayerWMSWithQTT = new InteractiveLayerWMSWithQTT(iw, this, false);
+			l.layerName = label;
 			return l;
 		}
 		
