@@ -73,7 +73,7 @@ package com.iblsoft.flexiweather.ogc
 		
 		override public function hasCustomLayerOptions(): Boolean
 		{
-			return true;
+			return false;
 		}
 		
 		override public function createCustomLayerOption(layer: IConfigurableLayer): Group

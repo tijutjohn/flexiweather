@@ -44,14 +44,20 @@ package com.iblsoft.flexiweather.ogc
 				if(ma_services.length > 0 && !m_timer.running)
 					m_timer.start();
 			}
+		
 		}
 		
+		/**
+		 * Will return array of all services baseURLs (prviously IDs) to be able to pair services with layers 
+		 * @return 
+		 * 
+		 */		
 		public function getAllServicesNames(): Array
 		{
 			var arr: Array = [];
 			for each(var osc: OGCServiceConfiguration in ma_services) 
 			{
-				arr.push(osc.id);
+				arr.push(osc.baseURL);
 			}
 			return arr;
 		}
@@ -94,7 +100,8 @@ package com.iblsoft.flexiweather.ogc
 		{
 			for each(var osc: OGCServiceConfiguration in ma_services) 
 			{
-				if (osc.id == serviceName)
+//				if (osc.id == serviceName)
+				if (osc.baseURL == serviceName)
 					return osc;
 			}
 			return null;

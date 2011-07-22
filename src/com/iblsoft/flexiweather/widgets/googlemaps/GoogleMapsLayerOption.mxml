@@ -8,10 +8,6 @@
 	</fx:Declarations>
 
 	<s:VGroup width="100%" height="100%" >
-		<s:HGroup width="100%">
-			<s:Label text="Label:" width="120"/>
-			<s:TextInput id="txtLayerName" width="100%" text="{label}" change="changeLabel()"/>
-		</s:HGroup>
 		<s:HGroup>
 			<s:Label text="Map type:" width="120"/>
 			<s:ButtonBar click="switchMapType()" id="mapTypeBar" selectedIndex="{selectMapTypeIndex}">
@@ -24,10 +20,6 @@
 					</s:ArrayCollection>
 				</s:dataProvider>
 			</s:ButtonBar>
-			<!--s:Button label="Hybrid" click="switchMapType(MapType.HYBRID_MAP_TYPE)"/>
-			<s:Button label="Normal" click="switchMapType(MapType.NORMAL_MAP_TYPE)"/>
-			<s:Button label="Physical" click="switchMapType(MapType.PHYSICAL_MAP_TYPE)"/>
-			<s:Button label="Satellite" click="switchMapType(MapType.SATELLITE_MAP_TYPE)"/-->
 		</s:HGroup>
 	</s:VGroup>  
 	
@@ -38,8 +30,6 @@
 			
 			[Bindable]
 			public var selectMapTypeIndex:int;
-			[Bindable]
-			public var label: String;
 			
 			private var _layer: InteractiveLayerGoogleMaps;
 			
@@ -55,7 +45,6 @@
 				if (_layer)
 				{
 					var cfg: GoogleMapLayerConfiguration = value.configuration as GoogleMapLayerConfiguration;
-					label = _layer.layerName;
 					var type: String = _layer.mapType;//cfg.mapType;
 					switch (type)
 					{
@@ -104,15 +93,6 @@
 				}
 			}
 			
-			private function changeLabel(): void
-			{
-				if (layer)
-				{
-//					layer.configuration.label = txtLayerName.text;
-					layer.layerName = txtLayerName.text;
-				}
-			}
-				
 		]]>
 	</fx:Script>
 </s:Group>

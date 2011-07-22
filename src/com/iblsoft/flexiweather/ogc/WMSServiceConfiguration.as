@@ -50,7 +50,7 @@ package com.iblsoft.flexiweather.ogc
 		public function queryCapabilities(): void
 		{
 			var r: URLRequest = toGetCapabilitiesRequest();
-//			trace("queryCapabilities: " + r.url);
+			trace("queryCapabilities: " + r.url);
 			m_capabilitiesLoader.load(r);
 			if(m_capabilitiesLoadJob != null)
 				m_capabilitiesLoadJob.finish();
