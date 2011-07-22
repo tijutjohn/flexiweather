@@ -114,7 +114,7 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 			trace(this + " onMapPreinitialize");
 			var mapOptions: MapOptions = new MapOptions();	
 			mapOptions.mapType = getGoogleMapType(m_cfg.mapType);
-			m_map.setInitOptions(mapOptions);
+			(event.currentTarget as Map).setInitOptions(mapOptions);
 		}
 		
 		private function getGoogleMapType(type: String): IMapType
@@ -157,7 +157,7 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 			{
 				mb_mapIsInitialized = false;
 				m_map.removeEventListener(MapEvent.MAP_READY, onMapReady);
-				m_map.unload();
+//				m_map.unload();
 				removeChild(m_map);
 				
 				m_map = null;

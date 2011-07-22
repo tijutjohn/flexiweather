@@ -5,8 +5,11 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.ogc.tiling.TileIndex;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.utils.UniURLLoader;
+	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	
+	import spark.components.Group;
 	
 	public class QTTMSLayerConfiguration extends LayerConfiguration implements IInteractiveLayerProvider, ILayerConfiguration
 	{
@@ -65,6 +68,18 @@ package com.iblsoft.flexiweather.ogc
 			var l: InteractiveLayerQTTMS = new InteractiveLayerQTTMS(iw, this);
 			l.name = label;
 			return l;
+		}
+		
+		override public function hasCustomLayerOptions(): Boolean
+		{
+			return true;
+		}
+		
+		override public function createCustomLayerOption(layer: IConfigurableLayer): Group
+		{
+			var options: QTTLayerOptions = new QTTLayerOptions();
+			options.layer = layer as InteractiveLayerQTTMS;
+			return options;	
 		}
 		
 		override public function serialize(storage: Storage): void

@@ -252,7 +252,11 @@ package com.iblsoft.flexiweather.widgets
 					}
 					// add layers as children in reversed order
 					for each(l in m_layers) {
-						addChildAt(l, 0);
+						if (l)
+							addChildAt(l, 0);
+						else {
+							trace("onLayerCollectionChanged: Layer is null")
+						}
 					}
 //					trace("onLayerCollectionChanged reverse order");
 					notifyLayersChanged();

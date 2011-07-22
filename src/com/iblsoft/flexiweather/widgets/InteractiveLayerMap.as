@@ -110,7 +110,8 @@ package com.iblsoft.flexiweather.widgets
 				{
 					wrapper = wrappers.getItemAt(i) as LayerSerializationWrapper;
 					layer = wrapper.m_layer;
-					addLayer(layer);
+					if (layer)
+						addLayer(layer);
 				}
 				
 //				for each(layer in m_layers) {
