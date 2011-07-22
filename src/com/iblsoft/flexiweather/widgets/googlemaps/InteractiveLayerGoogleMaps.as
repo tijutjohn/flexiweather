@@ -51,6 +51,15 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 			
 		}
 		
+		override public function toString(): String
+		{
+			if (m_map && m_map.isLoaded())
+			{
+				return 'InteractiveLayerGoogleMaps ['+uid+'] type: ';
+			}
+			return 'InteractiveLayerGoogleMaps ['+uid+']';
+		}
+		
 		public function setAnimationModeEnable(value: Boolean): void
 		{
 			//do nothing
@@ -63,40 +72,46 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 		
 		override protected  function createChildren():void
 		{
+			trace(this + " createChildren");
 			super.createChildren();
 			
-			m_map = new Map();
-			//FIXME remove harcoded GoogleMap API Key to configuration
-			m_map.sensor = "false";
-			m_map.key="ABQIAAAAH8k5scGjdxg3Yv6Rib0PTRSGpsRUUtKRAxSpaWXDxfvzoVavuhRINMFI-z2FR2XOe7s5zVypkDNl4A";
+			//FIXME why is this call 3 times??
 			
-			//this must be set, otherwise google maps will not work in AIR (on mobiles)
-			m_map.url = 'http://www.iblsoft.com';
-			
-			m_map.addEventListener(MapEvent.COMPONENT_INITIALIZED, onComponentInitialized);
-			m_map.addEventListener(MapEvent.MAP_READY, onMapReady);
-			m_map.addEventListener(MapEvent.MAP_READY_INTERNAL, onMapReadyInternal);
-			m_map.addEventListener(MapEvent.MAP_PREINITIALIZE, onMapPreinitialize);
-//			m_map.addEventListener(MapMouseEvent.DRAG_START, onMapDragStart);
-//			m_map.addEventListener(MapMouseEvent.DRAG_STEP, onMapDragStep);
-			m_map.percentWidth = 100;
-			m_map.percentHeight = 100;
-			addChild(m_map);
+			if (!m_map)
+			{
+				m_map = new Map();
+				//FIXME remove harcoded GoogleMap API Key to configuration
+				m_map.sensor = "false";
+				m_map.key="ABQIAAAAH8k5scGjdxg3Yv6Rib0PTRSGpsRUUtKRAxSpaWXDxfvzoVavuhRINMFI-z2FR2XOe7s5zVypkDNl4A";
+				
+				//this must be set, otherwise google maps will not work in AIR (on mobiles)
+				m_map.url = 'http://www.iblsoft.com';
+				
+				m_map.addEventListener(MapEvent.COMPONENT_INITIALIZED, onComponentInitialized);
+				m_map.addEventListener(MapEvent.MAP_READY, onMapReady);
+				m_map.addEventListener(MapEvent.MAP_READY_INTERNAL, onMapReadyInternal);
+				m_map.addEventListener(MapEvent.MAP_PREINITIALIZE, onMapPreinitialize);
+	//			m_map.addEventListener(MapMouseEvent.DRAG_START, onMapDragStart);
+	//			m_map.addEventListener(MapMouseEvent.DRAG_STEP, onMapDragStep);
+				m_map.percentWidth = 100;
+				m_map.percentHeight = 100;
+				addChild(m_map);
+			}
 		}
 		
 		private function onComponentInitialized(event:MapEvent):void
 		{
-			trace("GoogleMaps onComponentInitialized");
+			trace(this + " onComponentInitialized");
 			
 		}
 		private function onMapReadyInternal(event:MapEvent):void
 		{
-			trace("GoogleMaps onMapReadyInternal");
+			trace(this + " onMapReadyInternal");
 			
 		}
 		private function onMapPreinitialize(event:MapEvent):void
 		{
-			trace("GoogleMaps onMapPreinitialize");
+			trace(this + " onMapPreinitialize");
 			var mapOptions: MapOptions = new MapOptions();	
 			mapOptions.mapType = getGoogleMapType(m_cfg.mapType);
 			m_map.setInitOptions(mapOptions);
@@ -130,7 +145,7 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 			
 //			mouseChildren = false;
 //			mouseEnabled = false;
-			trace("GoogleMaps onMapReady");
+			trace(this + " onMapReady");
 			mb_mapIsReady = true;
 			updateData(false);
 		}
@@ -142,6 +157,7 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 			{
 				mb_mapIsInitialized = false;
 				m_map.removeEventListener(MapEvent.MAP_READY, onMapReady);
+				m_map.unload();
 				removeChild(m_map);
 				
 				m_map = null;
@@ -156,18 +172,27 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 			
 		}
 		
+		private function inCRSCompatible(): Boolean
+		{
+			var newCRS: String = container.crs;
+			if (newCRS != 'EPSG:900913')
+			{
+				m_map.visible = false;
+				return false;
+			}
+			
+			m_map.visible = true;
+			return true;
+			
+		}
 		override public function onAreaChanged(b_finalChange: Boolean): void
 		{
 			super.onAreaChanged(b_finalChange);
 			
 			//check if CRS is supported
-			var newCRS: String = container.crs;
-			if (newCRS != 'EPSG:900913')
-			{
-				m_map.visible = false;
+			if (!inCRSCompatible())
 				return;
-			}
-			m_map.visible = true;
+			
 			if(b_finalChange) {
 				updateData(false);
 			}
@@ -204,7 +229,7 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 			_layerJustCreated = true;
 			//set view bbox on adding google maps to negotiate current bbox
 			var _bbox: BBox = container.getViewBBox();
-			trace("google maps initializeMap _bbox: " + _bbox);
+			trace(this + "  initializeMap _bbox: " + _bbox);
 			container.setViewBBox(_bbox, true);
 			
 		}
@@ -212,6 +237,9 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 		private var _layerJustCreated: Boolean;
 		override public function negotiateBBox(newBBox: BBox, changeZoom: Boolean = true): BBox
 		{
+			if (!inCRSCompatible())
+				return newBBox;
+
 			if (_layerJustCreated)
 			{
 				//for the first time after layer creation always change zoom (because CRS of widget is not changed, but layer is added as new layer, so it needs to set correct zoom
@@ -387,6 +415,9 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 		}
 		public function updateData(b_forceUpdate: Boolean): void
 		{
+			if (!inCRSCompatible())
+				return;
+
 			if (m_map &&  mb_mapIsReady)
 			{
 				if (!mb_mapIsInitialized)
@@ -468,6 +499,16 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 		}
 		override public function renderPreview(graphics: Graphics, f_width: Number, f_height: Number): void
 		{
+			if (!inCRSCompatible())
+			{
+				graphics.lineStyle(2, 0xcc0000, 0.7, true);
+				graphics.moveTo(0, 0);
+				graphics.lineTo(f_width - 1, f_height - 1);
+				graphics.moveTo(0, f_height - 1);
+				graphics.lineTo(f_width - 1, 0);
+				return;
+			}
+
 			try {
 				var bitmap: Bitmap = m_map.getPrintableBitmap();
 				var matrix: Matrix = new Matrix();
