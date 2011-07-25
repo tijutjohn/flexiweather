@@ -24,6 +24,9 @@ package com.iblsoft.flexiweather.widgets
 	{
 		public static const TIMELINE_CONFIGURATION_CHANGE: String = "timelineConfigurationChange";
 		
+		public static const LAYERS_SERIALIZED_AND_READY: String = "layersSerializedAndReady";
+		[Event(name = LAYERS_SERIALIZED_AND_READY, type = "mx.events.DynamicEvent")]
+		
 		public static const TIME_AXIS_UPDATED: String = "timeAxisUpdated";
 		[Event(name = TIME_AXIS_UPDATED, type = "flash.events.DataEvent")]
 		
@@ -106,17 +109,22 @@ package com.iblsoft.flexiweather.widgets
 				storage.serializeNonpersistentArrayCollection("layer", wrappers, LayerSerializationWrapper);
 				m_layers.removeAll();
 				var total: int = wrappers.length - 1;
+				
+				var newLayers: Array = [];
 				for (var i: int = total; i >= 0; i--)
 				{
 					wrapper = wrappers.getItemAt(i) as LayerSerializationWrapper;
 					layer = wrapper.m_layer;
-					if (layer)
-						addLayer(layer);
+					newLayers.push(layer);
+//					if (layer)
+//						addLayer(layer);
 				}
 				
-//				for each(layer in m_layers) {
-//					addChildAt(layer, 0);
-//				}
+				var de: DynamicEvent = new DynamicEvent(LAYERS_SERIALIZED_AND_READY);
+				de['layers'] = newLayers;
+				dispatchEvent(de);
+				
+
 				
 //				debugLayers();
 //				container.debugLayers();
@@ -155,6 +163,16 @@ package com.iblsoft.flexiweather.widgets
 		{
 			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
 			dispatchEvent(new Event('frameChanged'));
+		}
+		
+		public function getLayersOrderString(): String
+		{
+			var str: String = '';
+			for each (var l: InteractiveLayer in m_layers)
+			{
+				str += "\t layer: " + l.layerName + "\n";
+			}
+			return str;
 		}
 		
 		override public function addLayer(l:InteractiveLayer):void

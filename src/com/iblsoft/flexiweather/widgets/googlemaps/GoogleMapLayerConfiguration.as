@@ -3,6 +3,7 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 	import com.google.maps.MapType;
 	import com.google.maps.interfaces.IMapType;
 	import com.iblsoft.flexiweather.ogc.CRSWithBBox;
+	import com.iblsoft.flexiweather.ogc.IBehaviouralObject;
 	import com.iblsoft.flexiweather.ogc.ILayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.LayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.editable.IInteractiveLayerProvider;
@@ -13,7 +14,7 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 	
 	import spark.components.Group;
 
-	public class GoogleMapLayerConfiguration extends LayerConfiguration implements IInteractiveLayerProvider, ILayerConfiguration
+	public class GoogleMapLayerConfiguration extends LayerConfiguration implements IInteractiveLayerProvider, ILayerConfiguration, IBehaviouralObject
 	{
 		public static const MAP_TYPE_NORMAL: String = 'normal';
 		public static const MAP_TYPE_PHYSICAL: String = 'physical';
@@ -24,6 +25,8 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 		public var tilingCRSsAndExtents: Array = [];
 		public var minimumZoomLevel: uint = 1;
 		public var maximumZoomLevel: uint = 12;
+
+		public var ma_behaviours: Array = [];
 		
 		/**
 		 * Possible values are all static const MAP_TYPE_ 
@@ -49,6 +52,18 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 			
 			super.serialize(storage);
 			trace("GoogleMapLayerConfiguration serialize");
+			
+			try {
+				storage.serializeNonpersistentArrayMap("behaviour", ma_behaviours, String, String);
+				trace("GoogleMapLayerConfiguration ma_behaviours: ")
+				for (var k: String in ma_behaviours)
+				{
+					trace("GoogleMapLayerConfiguration ma_behaviours["+k+"] = " + ma_behaviours[k] + "<<");
+				}
+			} catch (error: Error) {
+				trace("GoogleMapLayerConfiguration ma_behaviours error: " + error.message);
+			}
+			
 			storage.serializeNonpersistentArray("tiling-crs-and-extent", tilingCRSsAndExtents, CRSWithBBox);
 			minimumZoomLevel = storage.serializeUInt("minimum-zoom-level", minimumZoomLevel, 1);
 			maximumZoomLevel = storage.serializeUInt("maximum-zoom-level", maximumZoomLevel, 12);
@@ -97,12 +112,29 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 				s_url = ms_previewURL;
 			return s_url;
 		}*/
+
+		// IBehaviouralObject implementation
+		public function setBehaviourString(s_behaviourId: String, s_value: String): void
+		{ 
+			ma_behaviours[s_behaviourId] = s_value; 
+		}
+		
+		public function getBehaviourString(s_behaviourId: String, s_default: String = null): String
+		{
+			return (s_behaviourId in ma_behaviours) ? ma_behaviours[s_behaviourId] : s_default;
+		}
+		
+		public function hasBehaviourString(s_behaviourId: String): Boolean
+		{ return s_behaviourId in ma_behaviours; }
 		
 		override public function hasCustomLayerOptions(): Boolean
 		{
 			return true;
 		}
 		
+		public function get behaviours(): Array
+		{ return ma_behaviours; }
+
 		override public function createCustomLayerOption(layer: IConfigurableLayer): Group
 		{
 			var options: GoogleMapsLayerOption = new GoogleMapsLayerOption();

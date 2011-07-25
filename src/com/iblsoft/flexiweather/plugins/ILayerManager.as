@@ -11,6 +11,7 @@ package com.iblsoft.flexiweather.plugins
 		function getLayerCount(): uint;
 		function getLayerAt(i_index: uint): InteractiveLayer;
 		function moveLayerToIndex(l: InteractiveLayer, i_index: uint): void;
+		function getLayersOrderString(): String;
 		function getInteractiveWidget(): InteractiveWidget;
 	}
 }

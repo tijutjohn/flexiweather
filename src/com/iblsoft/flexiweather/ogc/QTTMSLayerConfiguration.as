@@ -11,12 +11,13 @@ package com.iblsoft.flexiweather.ogc
 	
 	import spark.components.Group;
 	
-	public class QTTMSLayerConfiguration extends LayerConfiguration implements IInteractiveLayerProvider, ILayerConfiguration
+	public class QTTMSLayerConfiguration extends LayerConfiguration implements IInteractiveLayerProvider, ILayerConfiguration, IBehaviouralObject
 	{
 //		public var baseURLPattern: String;
 		/** Array of CRSWithBBox (items are QTTAreaData instances */
 		public var tilingCRSsAndExtents: Array = [];
-		
+
+		public var ma_behaviours: Array = [];
 		
 		public function QTTMSLayerConfiguration()
 		{
@@ -86,6 +87,18 @@ package com.iblsoft.flexiweather.ogc
 		override public function serialize(storage: Storage): void
 		{
 			super.serialize(storage);
+			
+			try {
+				storage.serializeNonpersistentArrayMap("behaviour", ma_behaviours, String, String);
+				trace("QTTMSLayerConfiguration ma_behaviours: ")
+				for (var k: String in ma_behaviours)
+				{
+					trace("QTTMSLayerConfiguration ma_behaviours["+k+"] = " + ma_behaviours[k] + "<<");
+				}
+			} catch (error: Error) {
+				trace("QTTMSLayerConfiguration ma_behaviours error: " + error.message);
+			}
+			
 //			baseURLPattern = storage.serializeString("url-pattern", baseURLPattern);
 			storage.serializeNonpersistentArray("tiling-crs-and-extent", tilingCRSsAndExtents, QTTilingInfo);
 		}
@@ -130,6 +143,23 @@ package com.iblsoft.flexiweather.ogc
 			return s_url;
 		}
 	*/	
+		// IBehaviouralObject implementation
+		public function setBehaviourString(s_behaviourId: String, s_value: String): void
+		{ 
+			ma_behaviours[s_behaviourId] = s_value; 
+		}
+		
+		public function getBehaviourString(s_behaviourId: String, s_default: String = null): String
+		{
+			return (s_behaviourId in ma_behaviours) ? ma_behaviours[s_behaviourId] : s_default;
+		}
+		
+		public function hasBehaviourString(s_behaviourId: String): Boolean
+		{ return s_behaviourId in ma_behaviours; }
+		
+		public function get behaviours(): Array
+		{ return ma_behaviours; }
+
 		public function get serviceType(): String
 		{ return "QTT"; }
 		

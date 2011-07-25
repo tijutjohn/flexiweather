@@ -6,7 +6,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
-	public class WMSWithQTTLayerConfiguration extends WMSLayerConfiguration
+	public class WMSWithQTTLayerConfiguration extends WMSLayerConfiguration implements IBehaviouralObject
 	{
 		public var minimumZoomLevel: uint = 1;
 		public var maximumZoomLevel: uint = 12;
