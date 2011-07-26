@@ -292,6 +292,9 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 			if (!inCRSCompatible())
 				return newBBox;
 
+			var s_crs: String = container.getCRS();
+			trace("InteractiveLayerGoogleMaps negotiateBBox: START: " + newBBox.toBBOXString());
+			trace("InteractiveLayerGoogleMaps negotiateBBox: START lalo: " + newBBox.toLaLoString(s_crs));
 			if (_layerJustCreated)
 			{
 				//for the first time after layer creation always change zoom (because CRS of widget is not changed, but layer is added as new layer, so it needs to set correct zoom
@@ -310,7 +313,7 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 					return newBBox;
 				}
 				
-				var s_crs: String = container.getCRS();
+				
 				var _bbox: BBox = newBBox;
 				
 				
@@ -383,8 +386,14 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 //	  			_swCoord = new Coord(s_crs, _googleMapsBBox.xMin, _googleMapsBBox.yMin).toLaLoCoord(); 
 //				_neCoord = new Coord(s_crs, _googleMapsBBox.xMax, _googleMapsBBox.yMax).toLaLoCoord();
 //				trace("new bbox coords: " + _swCoord.toNiceString() + " | " + _neCoord.toNiceString());
+				
+				trace("InteractiveLayerGoogleMaps negotiateBBox: END 2: " + _googleMapsBBox.toBBOXString());
+				trace("InteractiveLayerGoogleMaps negotiateBBox: END 2 lalo: " + _googleMapsBBox.toLaLoString(s_crs));
+				
 	  			return _googleMapsBBox;
 			}
+			trace("InteractiveLayerGoogleMaps negotiateBBox: END 1: " + newBBox.toBBOXString());
+			trace("InteractiveLayerGoogleMaps negotiateBBox: END 1 lalo: " + newBBox.toLaLoString(s_crs));
 			
 			return newBBox;
 		}
