@@ -589,9 +589,11 @@ package com.iblsoft.flexiweather.widgets
 			trace("\t IWidget setViewBBoxAfterNegotiation newBBox :" + newBBox.toLaLoString(ms_crs));
 			trace("\t IWidget setViewBBoxAfterNegotiation newBBox :" + newBBox);
 			//dispath view bbox changed event to notify about change
-			dispatchEvent(new Event(VIEW_BBOX_CHANGED));
 			
 			m_viewBBox = newBBox;
+			
+			dispatchEvent(new Event(VIEW_BBOX_CHANGED));
+			
 			signalAreaChanged(b_finalChange);
 		}
 		

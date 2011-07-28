@@ -64,8 +64,10 @@ package com.iblsoft.flexiweather.ogc
 			var minLalo: Coord = prj.prjXYToLaLoCoord(mf_xMin, mf_yMin);
 			var maxLalo: Coord = prj.prjXYToLaLoCoord(mf_xMax, mf_yMax);
 			
-			var toDeg: Number = 180 / Math.PI;
-//			var toDeg: Number = 1;//180 / Math.PI;
+			trace("BBox: toLaLoString minLalo: " + minLalo.toLaLoCoord());
+			trace("BBox: toLaLoString maxLalo: " + maxLalo.toLaLoCoord());
+//			var toDeg: Number = 180 / Math.PI;
+			var toDeg: Number = 1;//180 / Math.PI;
 			
 			return String(minLalo.y * toDeg) + "," + String(minLalo.x * toDeg) + ","
 				+ String(maxLalo.y * toDeg) + "," + String(maxLalo.x * toDeg);
