@@ -4,6 +4,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
+	import com.iblsoft.flexiweather.widgets.googlemaps.InteractiveLayerGoogleMaps;
 	
 	import flash.display.DisplayObject;
 	import flash.events.Event;
@@ -200,6 +201,11 @@ package com.iblsoft.flexiweather.widgets
 				if (!latestBBox.equals(newBBox))
 				{
 					trace("WARNING: COMPOSER bbox changed by layer " + l.layerName);
+					if (l is InteractiveLayerGoogleMaps)
+					{
+						var viewBBox: BBox = (l as InteractiveLayerGoogleMaps).getViewBBox();
+						trace("\t current view for google maps: " + viewBBox);
+					}
 				}
 				newBBox = latestBBox;
 				trace("\tInteractiveLayerComposer negotiateBBox newBBox ["+i+"] :" + newBBox.toLaLoString(s_crs));

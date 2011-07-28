@@ -21,8 +21,11 @@ package com.iblsoft.flexiweather.widgets
 	import mx.core.Container;
 	import mx.events.ResizeEvent;
 
+	[Event (name="viewBBoxChanged", type="flash.events.Event")]
 	public class InteractiveWidget extends Container
 	{
+		public static const VIEW_BBOX_CHANGED: String = 'viewBBoxChanged';
+		
         private var ms_crs: String = Projection.CRS_EPSG_GEOGRAPHIC;
 		private var m_crsProjection: Projection = Projection.getByCRS(ms_crs);
         private var m_viewBBox: BBox = new BBox(-180, -90, 180, 90);
@@ -585,6 +588,9 @@ package com.iblsoft.flexiweather.widgets
 		{
 			trace("\t IWidget setViewBBoxAfterNegotiation newBBox :" + newBBox.toLaLoString(ms_crs));
 			trace("\t IWidget setViewBBoxAfterNegotiation newBBox :" + newBBox);
+			//dispath view bbox changed event to notify about change
+			dispatchEvent(new Event(VIEW_BBOX_CHANGED));
+			
 			m_viewBBox = newBBox;
 			signalAreaChanged(b_finalChange);
 		}

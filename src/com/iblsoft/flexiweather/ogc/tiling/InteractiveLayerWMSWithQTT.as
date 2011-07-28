@@ -24,6 +24,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 	{
 		public static const WMS_TILING_URL_PATTERN: String = '&TILEZOOM=%ZOOM%&TILECOL=%COL%&TILEROW=%ROW%';
 		
+		public static var avoidTilingForAllLayers: Boolean = false;
+		
 		private var ma_specialCacheStrings: Array;
 		private var m_tiledLayer: InteractiveLayerQTTMS;
 
@@ -32,15 +34,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 			return m_tiledLayer;
 		}
 		
-		/**
-		 * Set this isTileable to false, if you dont want to use tiling on WMS 
-		 * (e.g. because tilling is not working with all features - e.g animation)
-		 */
-		public var avoidTiling: Boolean;
-		
 		public function get isTileable(): Boolean
 		{
-			if (avoidTiling)
+			if ((m_cfg as WMSWithQTTLayerConfiguration).avoidTiling || avoidTilingForAllLayers)
 				return false;
 				
 			var s_crs: String = container.getCRS();
@@ -49,12 +45,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		public function InteractiveLayerWMSWithQTT(
 				container: InteractiveWidget,
-				cfg: WMSWithQTTLayerConfiguration,
-				b_avoidTiling: Boolean = false)
+				cfg: WMSWithQTTLayerConfiguration): void
 		{
 			super(container, cfg);
-			
-			this.avoidTiling = b_avoidTiling;
 			
 			var tiledLayerConfig: QTTMSLayerConfiguration = new QTTMSLayerConfiguration();
 			m_tiledLayer = new InteractiveLayerQTTMS(container, tiledLayerConfig,

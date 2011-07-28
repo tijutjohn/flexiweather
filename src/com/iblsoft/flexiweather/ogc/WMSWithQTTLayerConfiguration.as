@@ -8,6 +8,8 @@ package com.iblsoft.flexiweather.ogc
 	
 	public class WMSWithQTTLayerConfiguration extends WMSLayerConfiguration implements IBehaviouralObject
 	{
+		public var avoidTiling:Boolean;
+		
 		public var minimumZoomLevel: uint = 1;
 		public var maximumZoomLevel: uint = 12;
 		
@@ -18,7 +20,7 @@ package com.iblsoft.flexiweather.ogc
 		
 		override public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer
 		{
-			var l: InteractiveLayerWMSWithQTT = new InteractiveLayerWMSWithQTT(iw, this, false);
+			var l: InteractiveLayerWMSWithQTT = new InteractiveLayerWMSWithQTT(iw, this);
 			l.layerName = label;
 			return l;
 		}
@@ -26,6 +28,7 @@ package com.iblsoft.flexiweather.ogc
 		override public function serialize(storage: Storage): void
 		{
 			super.serialize(storage);
+			avoidTiling = storage.serializeBool("avoid-tiling", avoidTiling, false);
 			minimumZoomLevel = storage.serializeUInt("minimum-zoom-level", minimumZoomLevel, 1);
 			maximumZoomLevel = storage.serializeUInt("maximum-zoom-level", maximumZoomLevel, 12);
 		}
@@ -46,7 +49,8 @@ package com.iblsoft.flexiweather.ogc
 			if(ms_previewURL == null || ms_previewURL.length == 0) {
 				var iw: InteractiveWidget = new InteractiveWidget();
 				var lWMSWithQTT: InteractiveLayerWMSWithQTT = createInteractiveLayer(iw) as InteractiveLayerWMSWithQTT;
-				lWMSWithQTT.avoidTiling = true;
+				var lCfg: WMSWithQTTLayerConfiguration = new WMSWithQTTLayerConfiguration();
+				lCfg.avoidTiling = true;
 				
 				if(lWMSWithQTT != null)
 				{

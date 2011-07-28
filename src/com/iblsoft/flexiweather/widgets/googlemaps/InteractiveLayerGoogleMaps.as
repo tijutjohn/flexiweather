@@ -285,6 +285,16 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 			container.setViewBBox(_bbox, true);
 			
 		}
+		public function getViewBBox(): BBox
+		{ 
+			if (m_map)
+			{
+				var latLngBounds: LatLngBounds = m_map.getLatLngBounds();
+				var bbox: BBox = new BBox(latLngBounds.getWest(), latLngBounds.getSouth(), latLngBounds.getEast(), latLngBounds.getNorth());
+				return bbox;
+			}
+			return null; 
+		}
 		
 		private var _layerJustCreated: Boolean;
 		override public function negotiateBBox(newBBox: BBox, changeZoom: Boolean = true): BBox
@@ -292,6 +302,8 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 			if (!inCRSCompatible())
 				return newBBox;
 
+			//TODO need to be sure, that newBBox is set with CRS from container...otherwise newBBox.toLaLoString(s_crs) will be wrong..
+			
 			var s_crs: String = container.getCRS();
 			trace("InteractiveLayerGoogleMaps negotiateBBox: START: " + newBBox.toBBOXString());
 			trace("InteractiveLayerGoogleMaps negotiateBBox: START lalo: " + newBBox.toLaLoString(s_crs));
@@ -397,6 +409,7 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 			
 			return newBBox;
 		}
+		
 		
 		private function delayedSetCenter(_bbox: BBox, _bounds: LatLngBounds, f_zoom: Number, changeZoom: Boolean): void
 		{

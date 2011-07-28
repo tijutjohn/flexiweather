@@ -21,6 +21,8 @@
 				</s:dataProvider>
 			</s:ButtonBar>
 		</s:HGroup>
+		<s:Label text="ViewBBox: {viewBBox}"/>
+		
 	</s:VGroup>  
 	
 	<fx:Script>
@@ -30,6 +32,9 @@
 			
 			[Bindable]
 			public var selectMapTypeIndex:int;
+			
+			[Bindable]
+			public var viewBBox: String;
 			
 			private var _layer: InteractiveLayerGoogleMaps;
 			
@@ -46,6 +51,7 @@
 				{
 					var cfg: GoogleMapLayerConfiguration = value.configuration as GoogleMapLayerConfiguration;
 					var type: String = _layer.mapType;//cfg.mapType;
+					viewBBox = layer.getViewBBox().toString();
 					switch (type)
 					{
 						default:
