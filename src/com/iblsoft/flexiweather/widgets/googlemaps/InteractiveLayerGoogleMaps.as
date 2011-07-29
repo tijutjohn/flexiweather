@@ -9,6 +9,7 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 	import com.google.maps.MapMouseEvent;
 	import com.google.maps.MapOptions;
 	import com.google.maps.MapType;
+	import com.google.maps.MapZoomEvent;
 	import com.google.maps.View;
 	import com.google.maps.interfaces.IMapType;
 	import com.iblsoft.flexiweather.ogc.BBox;
@@ -28,12 +29,18 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 	import flash.geom.Point;
 	import flash.utils.setTimeout;
 	
+	import mx.collections.ArrayCollection;
+	
 	public class InteractiveLayerGoogleMaps extends InteractiveLayer implements Serializable, IConfigurableLayer
 	{
+		public static const MAP_UDPATED: String = 'mapUpdated';
+		
 //		private var m_map: Map3D;
 		private var m_map: Map;
 		private var mb_mapIsReady: Boolean;
 		private var mb_mapIsInitialized: Boolean;
+		
+		public var negotiatedBBoxes: ArrayCollection = new ArrayCollection();
 		
 		private var m_cfg: GoogleMapLayerConfiguration;
 
@@ -87,6 +94,8 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 			}	
 		}
 		
+		public static var mapID: int = 0;
+		
 		override protected  function createChildren():void
 		{
 			trace(this + " createChildren");
@@ -96,7 +105,11 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 			
 			if (!m_map)
 			{
+				mapID++;
+				
 				m_map = new Map();
+				m_map.id = mapID.toString();
+				
 				//FIXME remove harcoded GoogleMap API Key to configuration
 				m_map.sensor = "false";
 				m_map.key="ABQIAAAAH8k5scGjdxg3Yv6Rib0PTRSGpsRUUtKRAxSpaWXDxfvzoVavuhRINMFI-z2FR2XOe7s5zVypkDNl4A";
@@ -108,12 +121,36 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 				m_map.addEventListener(MapEvent.MAP_READY, onMapReady);
 				m_map.addEventListener(MapEvent.MAP_READY_INTERNAL, onMapReadyInternal);
 				m_map.addEventListener(MapEvent.MAP_PREINITIALIZE, onMapPreinitialize);
+				m_map.addEventListener(MapEvent.VIEW_CHANGED, onMapViewChanged);
+				m_map.addEventListener(MapEvent.TILES_LOADED, onMapTilesLoaded);
+				m_map.addEventListener(MapZoomEvent.ZOOM_CHANGED, onMapZoomChanged);
 	//			m_map.addEventListener(MapMouseEvent.DRAG_START, onMapDragStart);
 	//			m_map.addEventListener(MapMouseEvent.DRAG_STEP, onMapDragStep);
 				m_map.percentWidth = 100;
 				m_map.percentHeight = 100;
 				addChild(m_map);
 			}
+		}
+		
+		protected function onMapZoomChanged(event:MapZoomEvent):void
+		{
+			// TODO Auto-generated method stub
+			trace("Google Maps ["+m_map.id+"] zoom changed: " + event.zoomLevel + " ("+m_map.getZoom()+") feature: " + event.feature);
+		}
+		
+		private function onMapViewChanged(event:MapEvent):void
+		{
+			// TODO Auto-generated method stub
+			var viewbbox: BBox = getViewBBox();
+			trace("Google Maps ["+m_map.id+"] view changed:  feature: " + event.feature);
+			
+		}
+		private function onMapTilesLoaded(event:MapEvent):void
+		{
+			// TODO Auto-generated method stub
+			var viewbbox: BBox = getViewBBox();
+			trace("Google Maps ["+m_map.id+"] onMapTilesLoaded zoom: " + m_map.getZoom() + " center: " + m_map.getCenter());
+			
 		}
 		
 		private function onComponentInitialized(event:MapEvent):void
@@ -188,7 +225,7 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 //			mouseEnabled = false;
 			trace(this + " onMapReady");
 			mb_mapIsReady = true;
-			updateData(false);
+			//updateData(false);
 		}
 
 		override public function destroy(): void
@@ -279,9 +316,16 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 			mouseEnabled = false;
 			
 			_layerJustCreated = true;
-			//set view bbox on adding google maps to negotiate current bbox
+			
+			callLater(setInitialBBoxRequest);
+//			setTimeout(setInitialBBoxRequest, 1000);
+		}
+		
+		private function setInitialBBoxRequest(): void
+		{
+//			set view bbox on adding google maps to negotiate current bbox
 			var _bbox: BBox = container.getViewBBox();
-			trace(this + "  initializeMap _bbox: " + _bbox);
+			trace(this + "  initializeMap SET _bbox: " + _bbox + " LaLo: " + _bbox.toLaLoString(container.getCRS()));
 			container.setViewBBox(_bbox, true);
 			
 		}
@@ -289,8 +333,19 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 		{ 
 			if (m_map)
 			{
-				var latLngBounds: LatLngBounds = m_map.getLatLngBounds();
-				var bbox: BBox = new BBox(latLngBounds.getWest(), latLngBounds.getSouth(), latLngBounds.getEast(), latLngBounds.getNorth());
+				var bbox: BBox;
+				
+				try {
+					var latLngBounds: LatLngBounds = m_map.getLatLngBounds();
+					bbox= new BBox(latLngBounds.getSouth(), latLngBounds.getWest(), latLngBounds.getNorth(), latLngBounds.getEast());
+					trace("InteractiveLayerGoogleMaps getViewBBox ["+m_map.id+"] latLngBounds: " + latLngBounds);
+	//				trace("InteractiveLayerGoogleMaps getViewBBox bbox: " + bbox.toLaLoString(container.getCRS()));
+					trace("InteractiveLayerGoogleMaps getViewBBox ["+m_map.id+"] bbox: " + bbox.toLaLoString("CRS:84"));
+				} catch (e: Error) {
+					bbox = new BBox(0,0,0,0);
+				} finally {
+					
+				}				
 				return bbox;
 			}
 			return null; 
@@ -305,8 +360,8 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 			//TODO need to be sure, that newBBox is set with CRS from container...otherwise newBBox.toLaLoString(s_crs) will be wrong..
 			
 			var s_crs: String = container.getCRS();
-			trace("InteractiveLayerGoogleMaps negotiateBBox: START: " + newBBox.toBBOXString());
-			trace("InteractiveLayerGoogleMaps negotiateBBox: START lalo: " + newBBox.toLaLoString(s_crs));
+			trace("InteractiveLayerGoogleMaps negotiateBBox: ["+m_map.id+"] START: " + newBBox.toBBOXString());
+			trace("InteractiveLayerGoogleMaps negotiateBBox: ["+m_map.id+"] START lalo: " + newBBox.toLaLoString(s_crs));
 			if (_layerJustCreated)
 			{
 				//for the first time after layer creation always change zoom (because CRS of widget is not changed, but layer is added as new layer, so it needs to set correct zoom
@@ -324,6 +379,7 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 					initializeMap();
 					return newBBox;
 				}
+			
 				
 				
 				var _bbox: BBox = newBBox;
@@ -339,11 +395,14 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 				var _ne: LatLng = new LatLng(_neCoord.y * toDegree, _neCoord.x * toDegree);  
 				
 				var _bounds: LatLngBounds = new LatLngBounds(_sw, _ne);  
+				var _origMapCenter: LatLng = getCenter(_bounds);
+				var _origMapCenter2: LatLng = m_map.getCenter();
+				var oldZoom: Number = m_map.getZoom();
+				var f_zoom: Number = getZoom(_bounds);
 				
+				trace("InteractiveLayerGoogleMaps negotiateBBox: START PROPS: zoom: OLD: " + oldZoom + " NEW: " + f_zoom + " CENTER: OLD: " + _origMapCenter2 + " NEW: " + _origMapCenter);
 				if (changeZoom)
 				{
-					var oldZoom: Number = m_map.getZoom();
-					var f_zoom: Number = getZoom(_bounds);
 					if (isNaN(f_zoom))
 					{
 						setTimeout(delayedSetCenter, 500, _bbox, _bounds, -1, changeZoom);
@@ -351,6 +410,7 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 					}
 				}
 				var _origBBoxCenter: Point = _bbox.center;
+				
 				var _centerCoord: Coord = new Coord(s_crs, _origBBoxCenter.x, _origBBoxCenter.y).toLaLoCoord(); 
 				var _center: LatLng = new LatLng(_centerCoord.y, _centerCoord.x, true);
 				
@@ -399,13 +459,22 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 //				_neCoord = new Coord(s_crs, _googleMapsBBox.xMax, _googleMapsBBox.yMax).toLaLoCoord();
 //				trace("new bbox coords: " + _swCoord.toNiceString() + " | " + _neCoord.toNiceString());
 				
-				trace("InteractiveLayerGoogleMaps negotiateBBox: END 2: " + _googleMapsBBox.toBBOXString());
-				trace("InteractiveLayerGoogleMaps negotiateBBox: END 2 lalo: " + _googleMapsBBox.toLaLoString(s_crs));
+				trace("InteractiveLayerGoogleMaps negotiateBBox: ["+m_map.id+"] END 2: " + _googleMapsBBox.toBBOXString());
+				trace("InteractiveLayerGoogleMaps negotiateBBox: ["+m_map.id+"] END 2 lalo: " + _googleMapsBBox.toLaLoString(s_crs));
+				
+				//at the end set original center and bounds back
+//				trace("InteractiveLayerGoogleMaps negotiateBBox: ["+m_map.id+"] set props back zoom: " + oldZoom + " , center: " + _origMapCenter2);
+//				m_map.setCenter(_origMapCenter2, oldZoom);
+//				trace("InteractiveLayerGoogleMaps negotiateBBox: ["+m_map.id+"] end PROPS: zoom: : " + m_map.getZoom() + " CENTER: " + m_map.getCenter());
+				
+				dispatchEvent(new Event(MAP_UDPATED));
+				
+				negotiatedBBoxes.addItemAt(_googleMapsBBox, 0);
 				
 	  			return _googleMapsBBox;
 			}
-			trace("InteractiveLayerGoogleMaps negotiateBBox: END 1: " + newBBox.toBBOXString());
-			trace("InteractiveLayerGoogleMaps negotiateBBox: END 1 lalo: " + newBBox.toLaLoString(s_crs));
+			trace("InteractiveLayerGoogleMaps negotiateBBox: ["+m_map.id+"] END 1: " + newBBox.toBBOXString());
+			trace("InteractiveLayerGoogleMaps negotiateBBox: ["+m_map.id+"] END 1 lalo: " + newBBox.toLaLoString(s_crs));
 			
 			return newBBox;
 		}
@@ -509,6 +578,8 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 				var s_crs: String = container.getCRS();
 				var _bbox: BBox = container.getViewBBox();
 				
+				trace("\n\nGoogleMaps ["+m_map.id+"]  updateData: to ["+s_crs+"] bbox: " + _bbox.toLaLoString(s_crs));
+					
 				var _swCoord: Coord = new Coord(s_crs, _bbox.xMin, _bbox.yMin).toLaLoCoord(); 
 				var _neCoord: Coord = new Coord(s_crs, _bbox.xMax, _bbox.yMax).toLaLoCoord();
 				
@@ -532,7 +603,7 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 //	  			trace("_neCoord: " + _neCoord)
 //	  			trace("_sw: " + _sw)
 //	  			trace("_ne: " + _ne)
-//	  			trace("InteractiveLayerGoogleMaps updateData _bounds: " + _bounds)
+	  			trace("InteractiveLayerGoogleMaps updateData ["+m_map.id+"]  _bounds: " + _bounds)
 	  			
 				// Create a bounding box  
 	  
@@ -547,7 +618,7 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 					callLater(updateData, [b_forceUpdate]);
 					return;
 				}
-	  			trace("\n InteractiveLayerGoogleMaps updateData zoom: " + f_zoom)
+	  			trace("\n InteractiveLayerGoogleMaps updateData ["+m_map.id+"] zoom: " + f_zoom)
 //	  			trace("InteractiveLayerGoogleMaps updateData _center: " + _center);
 	  			try {
 //	  				m_map.setCenter(new LatLng(40.736072,-73.992062), 14, MapType.NORMAL_MAP_TYPE);
@@ -556,10 +627,23 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 	  				trace("GoogleMaps setCenter error: " + err.message);
 	  			}
 	  			
-//	  			trace("InteractiveLayerGoogleMaps updateData old _bounds: " + _bounds)
+	  			trace("InteractiveLayerGoogleMaps updateData ["+m_map.id+"] old _bounds: " + _bounds)
 	  			_bounds = m_map.getLatLngBounds();
-//	  			trace("InteractiveLayerGoogleMaps updateData new _bounds: " + _bounds)
-	  			
+	  			trace("InteractiveLayerGoogleMaps updateData ["+m_map.id+"] new _bounds: " + _bounds)
+				
+				trace("InteractiveLayerGoogleMaps updateData: ["+m_map.id+"] end PROPS: zoom: : " + m_map.getZoom() + " CENTER: " + m_map.getCenter());
+				var currViewBBox: BBox = getViewBBox();
+				trace("InteractiveLayerGoogleMaps updateData: ["+m_map.id+"] end PROPS: viewBBox: : " + currViewBBox.toLaLoString("CRS:84"));
+				var cBBox: BBox = container.getViewBBox();
+				cBBox = cBBox.forProjection('CRS:84');
+				
+				if (!currViewBBox.equals(cBBox))
+				{
+					trace("bboxes are not same, try udpateData again");
+					callLater(updateData, [b_forceUpdate]);
+				} else {
+					dispatchEvent(new Event(MAP_UDPATED));
+				}
 			} else {
 				callLater(updateData, [b_forceUpdate]);
 			}

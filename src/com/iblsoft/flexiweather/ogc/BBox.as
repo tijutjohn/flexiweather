@@ -6,6 +6,8 @@ package com.iblsoft.flexiweather.ogc
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	
+	import spark.formatters.NumberFormatter;
+	
 	/**
 	 * Object representing a unchangable rectangular bounding box.
 	 * Object is constant. 
@@ -55,6 +57,25 @@ package com.iblsoft.flexiweather.ogc
 					xml.eastBoundLongitude, xml.northBoundLatitudey);
 		}
 
+		public function forProjection(crs: String): BBox
+		{
+			var prj: Projection = Projection.getByCRS(crs);
+			if(prj == null)
+				return null;
+			var minLalo: Coord = prj.prjXYToLaLoCoord(mf_xMin, mf_yMin);
+			var maxLalo: Coord = prj.prjXYToLaLoCoord(mf_xMax, mf_yMax);
+			
+			//			trace("BBox: toLaLoString minLalo: " + minLalo.toLaLoCoord());
+			//			trace("BBox: toLaLoString maxLalo: " + maxLalo.toLaLoCoord());
+			//	
+			var bbox: BBox = new BBox(minLalo.x, minLalo.y, maxLalo.x, maxLalo.y);
+			return bbox;
+		}
+		private function formatNumber(num: Number): Number
+		{
+			return int(num * 100)/100;
+		}
+		
 		public function toLaLoString(crs: String): String
 		{
 			//TODO remove conversion to LaLo in BBOX.toBBoxString
@@ -64,13 +85,11 @@ package com.iblsoft.flexiweather.ogc
 			var minLalo: Coord = prj.prjXYToLaLoCoord(mf_xMin, mf_yMin);
 			var maxLalo: Coord = prj.prjXYToLaLoCoord(mf_xMax, mf_yMax);
 			
-			trace("BBox: toLaLoString minLalo: " + minLalo.toLaLoCoord());
-			trace("BBox: toLaLoString maxLalo: " + maxLalo.toLaLoCoord());
-//			var toDeg: Number = 180 / Math.PI;
-			var toDeg: Number = 1;//180 / Math.PI;
-			
-			return String(minLalo.y * toDeg) + "," + String(minLalo.x * toDeg) + ","
-				+ String(maxLalo.y * toDeg) + "," + String(maxLalo.x * toDeg);
+//			trace("BBox: toLaLoString minLalo: " + minLalo.toLaLoCoord());
+//			trace("BBox: toLaLoString maxLalo: " + maxLalo.toLaLoCoord());
+//			
+			return String(formatNumber(minLalo.y)) + "," + String(formatNumber(minLalo.x)) + ","
+				+ String(formatNumber(maxLalo.y)) + "," + String(formatNumber(maxLalo.x));
 		}
 		
 		public function toBBOXString(): String

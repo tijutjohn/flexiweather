@@ -209,7 +209,13 @@ package com.iblsoft.flexiweather.ogc
 			if (_invalidateCacheAfterImageLoad)
 			{
 				wmsCache.invalidate(ms_imageCRS, m_imageBBox);
-				trace("WMS onDataLoaded ms_imageCRS: " + ms_imageCRS + " m_imageBBox: " + m_imageBBox);
+				var lalo: String =  '';
+				if (m_imageBBox)
+				{
+					lalo = " LaLo: " + m_imageBBox.toLaLoString(ms_imageCRS);
+				}
+				
+				trace("WMS onDataLoaded ms_imageCRS: " + ms_imageCRS + " m_imageBBox: " + m_imageBBox + lalo);
 				_invalidateCacheAfterImageLoad = false;
 			}
 			

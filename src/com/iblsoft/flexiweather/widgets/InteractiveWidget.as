@@ -556,9 +556,9 @@ package com.iblsoft.flexiweather.widgets
 		
 		private function negotiateBBox(newBBox: BBox, b_finalChange: Boolean, b_changeZoom: Boolean = true): void
 		{
-			trace("\n *****************************************************************************");
-			trace("\t IWidget negotiateBBox newBBox at startup: :" + newBBox.toLaLoString(ms_crs));
-			trace("\t IWidget negotiateBBox newBBox at startup: :" + newBBox);
+//			trace("\n *****************************************************************************");
+//			trace("\t IWidget negotiateBBox newBBox at startup: :" + newBBox.toLaLoString(ms_crs));
+//			trace("\t IWidget negotiateBBox newBBox at startup: :" + newBBox);
 			var latestBBox: BBox;
 			for(var i: int = 0; i < m_layerContainer.numChildren; ++i) {
 				
@@ -570,18 +570,18 @@ package com.iblsoft.flexiweather.widgets
 					trace("WARNING: bbox changed by layer " + l.layerName);
 				}
 				newBBox = latestBBox;
-				if (newBBox) {
-					trace("\t\t IWidget negotiateBBox newBBox :" + newBBox.toLaLoString(ms_crs));
-					trace("\t\t IWidget negotiateBBox newBBox :" + newBBox);
-				} else 
-					trace("\t\t IWidget negotiateBBox newBBox IS NULL");
+//				if (newBBox) {
+//					trace("\t\t IWidget negotiateBBox newBBox :" + newBBox.toLaLoString(ms_crs));
+//					trace("\t\t IWidget negotiateBBox newBBox :" + newBBox);
+//				} else 
+//					trace("\t\t IWidget negotiateBBox newBBox IS NULL");
 					
 			}
-			trace("IWidget negotiateBBox newBBox at end: :" + newBBox.toLaLoString(ms_crs));
-			trace("IWidget negotiateBBox newBBox at end: :" + newBBox);
+//			trace("IWidget negotiateBBox newBBox at end: :" + newBBox.toLaLoString(ms_crs));
+//			trace("IWidget negotiateBBox newBBox at end: :" + newBBox);
 			
 			setViewBBoxAfterNegotiation(newBBox, b_finalChange);
-			trace("*****************************************************************************\n");
+//			trace("*****************************************************************************\n");
 		}
 		
 		private function setViewBBoxAfterNegotiation(newBBox: BBox, b_finalChange: Boolean): void

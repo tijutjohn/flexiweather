@@ -192,7 +192,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			var s_crs: String = container.getCRS();
 			
-			trace("\n\n\tInteractiveLayerComposer negotiateBBox newBBox at startup: :" + newBBox.toLaLoString(s_crs));
+//			trace("\n\n\tInteractiveLayerComposer negotiateBBox newBBox at startup: :" + newBBox.toLaLoString(s_crs));
 			var latestBBox: BBox;
 			for(var i: int = 0; i < m_layers.length; ++i) {
 				
@@ -208,9 +208,9 @@ package com.iblsoft.flexiweather.widgets
 					}
 				}
 				newBBox = latestBBox;
-				trace("\tInteractiveLayerComposer negotiateBBox newBBox ["+i+"] :" + newBBox.toLaLoString(s_crs));
+//				trace("\tInteractiveLayerComposer negotiateBBox newBBox ["+i+"] :" + newBBox.toLaLoString(s_crs));
 			}
-			trace("\tInteractiveLayerComposer negotiateBBox newBBox at end: :" + newBBox.toLaLoString(s_crs));
+//			trace("\tInteractiveLayerComposer negotiateBBox newBBox at end: :" + newBBox.toLaLoString(s_crs));
 			
 			return newBBox;
 		}
