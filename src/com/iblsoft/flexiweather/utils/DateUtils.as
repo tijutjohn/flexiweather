@@ -301,18 +301,30 @@ package com.iblsoft.flexiweather.utils
 			    "previousGroupStart":i_previousGroupStart, "previousGroupEnd":i_previousGroupEnd};
 		}
 		
+		/**
+		 * change date in way that subtract timezoneOffset. So hoursUTC will be hours and so on... 
+		 * @param date
+		 * @return 
+		 * 
+		 */
 		public static function convertToLocalTime(date: Date): Date
 		{
 			var newDate: Date = new Date();
-			newDate.setTime(date.time + date.timezoneOffset * 60 * 1000);
+			newDate.setTime(date.time - date.timezoneOffset * 60 * 1000);
 			
 			return newDate;
 		}
 		
+		/**
+		 * change date in way that adds timezoneOffset. So hours will be hoursUTC and so on... 
+		 * @param date
+		 * @return 
+		 * 
+		 */		
 		public static function convertToUTCDate(date: Date): Date
 		{
 			var newDate: Date = new Date();
-			newDate.setTime(date.time - date.timezoneOffset * 60 * 1000);
+			newDate.setTime(date.time + date.timezoneOffset * 60 * 1000);
 			
 			return newDate;
 		}
