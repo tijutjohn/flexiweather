@@ -68,8 +68,6 @@ package com.iblsoft.flexiweather.widgets
 			if(child is InteractiveLayer) {
 				// InteractiveLayer based child are added to m_layerContainer
 				InteractiveLayer(child).container = this; // this also ensures that child is InteractiveLayer
-				child.x = x;
-				child.y = y;
 				child.width = width;
 				child.height = height;
 				var o: DisplayObject = m_layerContainer.addChild(child);
