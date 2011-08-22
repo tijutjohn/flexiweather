@@ -555,7 +555,7 @@ package com.iblsoft.flexiweather.ogc
 			var newCRS: String = container.crs;
 			
 			//check if CRS is supported
-			if (!isCRSCompatible)
+			if (!isCRSCompatible())
 			{
 				return;
 			}

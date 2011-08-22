@@ -1,5 +1,9 @@
 package com.iblsoft.flexiweather.plugins
 {
+	import com.iblsoft.flexiweather.plugins.data.ModuleCollection;
+	import com.iblsoft.flexiweather.plugins.data.ModuleItem;
+	import com.iblsoft.flexiweather.plugins.data.PluginCollection;
+	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	
@@ -8,6 +12,12 @@ package com.iblsoft.flexiweather.plugins
 	import mx.modules.Module;
 	import mx.modules.ModuleLoader;
 	
+	/**
+	 * Singleton class handle all Plugin. There are 2 types of plugins: internal and external 
+	 * and 2 types of plugin type: PluginInfo and Plugin 
+	 * @author fkormanak
+	 * 
+	 */	
 	public class PluginManager extends EventDispatcher
 	{
 		public static const ACTION_CALL_PLUGIN: String = 'call plugin action';
@@ -46,50 +56,55 @@ package com.iblsoft.flexiweather.plugins
 		
 		public function PluginManager()
 		{
-			 if (sm_instance != null)
-			 {
-                throw new Error(
-                		"PluginManager can only be accessed through "
-                		+ "PluginManager.getInstance()");
-    		}
-    		
-    		_modules = new ModuleCollection();
-    		
-    		_plugins = new PluginCollection("createPlugin");
-    		_pluginsInfo = new PluginCollection("createPluginInfo");
-    		
-    		_plugins.addEventListener(START_LOADING, onStartLoading);
-    		_plugins.addEventListener(STOP_LOADING, onStopLoading);
-    		_plugins.addEventListener(ALL_PLUGINS_LOADED, onAllPluginsLoaded);
-    		_plugins.addEventListener(PluginEvent.PLUGIN_MODULES_PROGRESS, onPluginModulesProgress);
-    		_plugins.addEventListener(PluginEvent.PLUGIN_MODULE_LOAD, onPluginLoad);
-    		_plugins.addEventListener(PluginEvent.PLUGIN_MODULE_LOADED, onPluginLoaded);
-    		
-    		_pluginsInfo.addEventListener(START_LOADING, onStartLoading);
-    		_pluginsInfo.addEventListener(STOP_LOADING, onStopLoading);
-    		_pluginsInfo.addEventListener(ALL_PLUGINS_LOADED, onAllInfoPluginsLoaded);
-    		_pluginsInfo.addEventListener(PluginEvent.PLUGIN_MODULES_PROGRESS, onPluginModulesProgress);
-    		_pluginsInfo.addEventListener(PluginEvent.PLUGIN_MODULE_LOAD, onPluginLoad);
-    		_pluginsInfo.addEventListener(PluginEvent.PLUGIN_MODULE_LOADED, onPluginInfoLoaded);
+			if (sm_instance != null)
+			{
+				throw new Error(
+					"PluginManager can only be accessed through "
+					+ "PluginManager.getInstance()");
+			}
+			
+			_modules = new ModuleCollection();
+			
+			_plugins = new PluginCollection("createPlugin");
+			_pluginsInfo = new PluginCollection("createPluginInfo");
+			
+			_plugins.addEventListener(START_LOADING, onStartLoading);
+			_plugins.addEventListener(STOP_LOADING, onStopLoading);
+			_plugins.addEventListener(ALL_PLUGINS_LOADED, onAllPluginsLoaded);
+			_plugins.addEventListener(PluginEvent.PLUGIN_MODULES_PROGRESS, onPluginModulesProgress);
+			_plugins.addEventListener(PluginEvent.PLUGIN_MODULE_LOAD, onPluginLoad);
+			_plugins.addEventListener(PluginEvent.PLUGIN_MODULE_LOADED, onPluginLoaded);
+			
+			_pluginsInfo.addEventListener(START_LOADING, onStartLoading);
+			_pluginsInfo.addEventListener(STOP_LOADING, onStopLoading);
+			_pluginsInfo.addEventListener(ALL_PLUGINS_LOADED, onAllInfoPluginsLoaded);
+			_pluginsInfo.addEventListener(PluginEvent.PLUGIN_MODULES_PROGRESS, onPluginModulesProgress);
+			_pluginsInfo.addEventListener(PluginEvent.PLUGIN_MODULE_LOAD, onPluginLoad);
+			_pluginsInfo.addEventListener(PluginEvent.PLUGIN_MODULE_LOADED, onPluginInfoLoaded);
 		}
 		
+		/**
+		 * Add internal plugin to internal plugin collection 
+		 * @param type Type of plugin
+		 * @param plugin Instance of plugin
+		 * 
+		 */	
 		public function addInteralPlugin(type: String, plugin: IPlugin): void
 		{
 			_internalPlugins.push({type: type, plugin: plugin});
 		}
-		private function getInternalPlugin(type: String): IPlugin
-		{
-			if (_internalPlugins && _internalPlugins.length > 0)
-			{
-				for each (var pluginObject: Object in _internalPlugins)
-				{
-					if (pluginObject && pluginObject.type == type)
-						return pluginObject.plugin;
-				}
-			}
-			return null;
-		}
 		
+		
+		
+		
+		/**
+		 * Add information about plugin. 
+		 * 
+		 * @param type Type of plugin
+		 * @param infoUrl URL of PluginInfo module
+		 * @param url URL of Plugin module
+		 * 
+		 */	
 		public function addPluginInfo(type: String, infoUrl: String, url: String): void
 		{
 			_modules.addModule(new ModuleItem(null, infoUrl));
@@ -104,18 +119,37 @@ package com.iblsoft.flexiweather.plugins
 		 *  PLUGINS INFO AND PLUGINS common functions
 		 * 
 		 *******************************************************************/
+		
+		/**
+		 * Dispatch START_LOADING event when Plugin or PluginInfo is about to start loading
+		 *  
+		 * @param event
+		 * 
+		 */	
 		private function onStartLoading(event: Event): void
 		{
 			var event: Event = new Event(PluginManager.START_LOADING);
 			dispatchEvent(event);
 		}
 		
+		/**
+		 * Dispatch STOP_LOADING event when Plugin or PluginInfo is loaded
+		 *  
+		 * @param event
+		 * 
+		 */	
 		private function onStopLoading(event: Event): void
 		{
 			var event: Event = new Event(PluginManager.STOP_LOADING);
 			dispatchEvent(event);
 		}
 		
+		/**
+		 * Dispatch PLUGIN_MODULES_PROGRESS event on Plugin or PluginInfo load progress
+		 *  
+		 * @param event
+		 * 
+		 */	
 		private function onPluginModulesProgress(event: PluginEvent): void
 		{
 			var loaders: int = _plugins.loaders.modulesLoadingCount + _pluginsInfo.loaders.modulesLoadingCount;	
@@ -127,7 +161,7 @@ package com.iblsoft.flexiweather.plugins
 			pe.bytesTotal = bytesTotal;
 			pe.modulesLoading = loaders;
 			dispatchEvent(pe);
-				
+			
 		}
 		
 		private function onPluginLoad(event: PluginEvent): void
@@ -138,16 +172,43 @@ package com.iblsoft.flexiweather.plugins
 				item.startModuleLoading();
 			} 	
 		}
-		 
+		
 		/*******************************************************************
 		 * 
 		 *  PLUGINS INFO
 		 * 
 		 *******************************************************************/
-		 
+		
 		public function loadAllInfoPluginModules(): void
 		{
 			_pluginsInfo.loadAllInfoPluginModules();
+		}
+		
+		/**
+		 * Helper function dump all plugins loaded by type 
+		 * @param type 2 different types: 'plugin', 'pluginInfo'
+		 * 
+		 */		
+		public function dumpPlugins(type: String): void
+		{
+			var collection: PluginCollection;
+			switch (type)
+			{
+				case 'plugin':
+					collection = _plugins;
+					break;
+				case 'pluginInfo':
+					collection = _pluginsInfo;
+					break;
+			}
+			trace("***************************************************************");
+			trace("Dump plugins: " + type);
+			var plugins: Array = collection.getAllPlugins();
+			for each (var info: Object in plugins)
+			{
+				trace("\t" + type + " type: " + info.type);
+			}
+			trace("***************************************************************");
 		}
 		
 		public function getAllInfoPlugins(): Array
@@ -174,7 +235,7 @@ package com.iblsoft.flexiweather.plugins
 		}
 		public function getInfoPluginByType(type: String): IPluginInfo
 		{
-			return _pluginsInfo.getPlugin(type) as IPluginInfo;
+			return _pluginsInfo.getPluginInfo(type) as IPluginInfo;
 		}
 		
 		private function onAllInfoPluginsLoaded(event: Event): void
@@ -187,6 +248,18 @@ package com.iblsoft.flexiweather.plugins
 		 * 
 		 *******************************************************************/
 		
+		public function loadPlugin(type: String, bLoadPluginInfoFirst: Boolean = false): void
+		{
+			_plugins.loadPlugin(type);
+		}
+		public function loadPluginModules(modules: Array): void
+		{
+			for each (var pluginType: String in modules)
+			{
+				loadPlugin(pluginType);
+			}
+		}
+		
 		public function loadAllPluginModules(): void
 		{
 			_plugins.loadAllInfoPluginModules();
@@ -195,7 +268,8 @@ package com.iblsoft.flexiweather.plugins
 		{
 			return _plugins.getAllPlugins();
 		}
-		public function getPlugin(type: String): IPlugin
+		
+		public function getPlugin(type: String, bLoadPlugin: Boolean = false): IPlugin
 		{
 			var plugin: IPlugin;
 			
@@ -203,7 +277,7 @@ package com.iblsoft.flexiweather.plugins
 			plugin = getInternalPlugin(type);
 			if (plugin)
 				return plugin;
-				
+			
 			//check if both modules are same (pluginInfo module and plugin module)
 			var infoURLObject: Object = _pluginsInfo.getModuleInfo(type);
 			var urlObject: Object = _plugins.getModuleInfo(type);
@@ -213,7 +287,7 @@ package com.iblsoft.flexiweather.plugins
 			plugin = _plugins.getPlugin(type) as IPlugin;
 			if (plugin)
 				return plugin;
-				
+			
 			var pluginModuleItem: ModuleItem = _modules.getModuleItemByURL(url);
 			if (pluginModuleItem.isReady)
 			{
@@ -256,11 +330,11 @@ package com.iblsoft.flexiweather.plugins
 		public function callPlugin(type: String, callback: Function, callbackParams: Array = null, unsuccessfulCallback: Function = null, ability: PluginAbility = null): void
 		{
 			var plugin: IPlugin = getPlugin(type);
-			 
+			
 			if (!plugin)
 			{
 				//check if pluginInfo exists
-				var pluginInfo: Object = getInfoPluginByType(type);
+				var pluginInfo: IPluginInfo = getInfoPluginByType(type);
 				if (!pluginInfo)
 				{
 					if (unsuccessfulCallback != null)
@@ -273,632 +347,22 @@ package com.iblsoft.flexiweather.plugins
 					callbackParams.unshift(plugin);
 				else
 					callbackParams = [plugin];
-					
+				
 				callback.apply(null, callbackParams);
 			}
 		}
 		
-	}
-}
-
-class ModuleLoaderItem
-{
-	public var bytesLoaded: int;
-	public var bytesTotal: int;
-	public var module: ModuleLoader;	
-}
-
-class ModuleLoaderCollection
-{
-	private var _collection: ArrayCollection = new ArrayCollection();
-	
-	public function get modulesLoadingCount(): int
-	{
-		return _collection.length;
-	}
-	public function get bytesLoaded(): int
-	{
-		var bytes: int = 0;
-		if (_collection && _collection.length > 0)
+		private function getInternalPlugin(type: String): IPlugin
 		{
-			for each (var item: ModuleLoaderItem in _collection)
+			if (_internalPlugins && _internalPlugins.length > 0)
 			{
-				bytes += item.bytesLoaded;
-			}
-		}
-		return bytes;
-	}
-	public function get bytesTotal(): int
-	{
-		var bytes: int = 0;
-		if (_collection && _collection.length > 0)
-		{
-			for each (var item: ModuleLoaderItem in _collection)
-			{
-				bytes += item.bytesTotal;
-			}
-		}
-		return bytes;
-	}
-	
-	public function ModuleLoaderCollection()
-	{
-		
-	}
-
-	private function getModuleLoader(module: ModuleLoader): ModuleLoaderItem
-	{
-		if (_collection && _collection.length > 0)
-		{
-			for each (var item: ModuleLoaderItem in _collection)
-			{
-				if (item.module == module)
-					return item;
-			}
-		}
-		return null;
-	}	
-	
-	private function isModuleInside(module: ModuleLoader): Boolean
-	{
-		return getModuleLoader(module) != null;
-	}	
-	
-	public function addModuleLoaderItem(module: ModuleLoader, bytesLoaded: int, bytesTotal: int): void
-	{
-		if (!isModuleInside(module))
-		{
-			var loaderItem: ModuleLoaderItem = new ModuleLoaderItem();
-			loaderItem.module = module;
-			loaderItem.bytesLoaded = bytesLoaded;
-			loaderItem.bytesTotal = bytesTotal;
-			
-			_collection.addItem(loaderItem);
-		} else {
-			var item: ModuleLoaderItem = getModuleLoader(module);
-			item.bytesLoaded = bytesLoaded;
-			item.bytesTotal = bytesTotal;
-		}
-	}
-	
-	public function removeModuleLoader(module: ModuleLoader): void
-	{
-		if (isModuleInside(module))
-		{
-			var item: ModuleLoaderItem = getModuleLoader(module);
-			var pos: int = _collection.getItemIndex(item);
-			if (pos >= 0)
-			{
-				_collection.removeItemAt(pos);
-			}
-		}
-	}
-}
-
-class ModuleItem
-{
-	public var module: Module;
-	public var url: String;
-	private var _isLoading: Boolean;
-	private var _isReady: Boolean;
-	
-	public function get isLoading(): Boolean
-	{
-		return _isLoading;
-	}
-	public function get isReady(): Boolean
-	{
-		return _isReady;
-	}
-	
-	public function ModuleItem(module: Module, url: String)
-	{
-		this.module = module;
-		this.url = url;
-	} 
-	
-	public function startModuleLoading(): void
-	{
-		trace("Module ["+url+"] starts loading");
-		_isLoading = true;
-	}
-	public function moduleIsLoadedAndReady(module: Module): void
-	{
-		trace("Module ["+url+"] is ready");
-		this.module = module;
-		_isLoading = false;
-		_isReady = true;
-	}
-}	
-
-class ModuleCollection extends EventDispatcher
-{
-	private var _modules: Array = [];
-	public function ModuleCollection(): void
-	{
-		
-	}	
-	
-	public function addModule(item: ModuleItem): void
-	{
-		if (getModuleItemByURL(item.url))
-		{
-			if (isModuleReady(item.url))
-			{
-				//module is ready do not do anything
-			} else {
-				//module item is there, but module is not loaded yet (still do not do anything)
-			}
-		} else {
-			_modules.push(item);
-		}
-	}
-	
-	public function isModuleItemInside(url: String): Boolean
-	{
-		var item: ModuleItem = getModuleItemByURL(url);
-		return item != null;
-	}
-	public function isModuleReady(url: String): Boolean
-	{
-		var module: ModuleItem = getModuleItemByURL(url);
-		return module.isReady;
-	}
-	
-	public function getModuleItemByURL(url: String): ModuleItem
-	{
-		for each (var module: ModuleItem in _modules)
-		{
-			if (module.url == url)
-				return module;
-		}
-		return null;
-	}
-	public function getModuleByURL(url: String): Module
-	{
-		var item: ModuleItem = getModuleItemByURL(url);
-		if (item)
-			return item.module;
-			
-		return null;
-	}
-}	
-
-	import mx.events.ModuleEvent;
-	import mx.modules.ModuleLoader;
-	import mx.modules.Module;
-	import mx.core.ClassFactory;
-	import flash.events.Event;
-	import flash.events.EventDispatcher;
-	import com.iblsoft.flexiweather.plugins.PluginManager;
-	import com.iblsoft.flexiweather.widgets.ModuleLoaderWithData;
-	import com.iblsoft.flexiweather.plugins.PluginEvent;
-	import com.iblsoft.flexiweather.plugins.IPluginInfo;
-	import com.iblsoft.flexiweather.plugins.IPlugin;
-	import com.iblsoft.flexiweather.plugins.IPluginInfoModule;
-	import com.iblsoft.flexiweather.plugins.IAbility;
-	import com.iblsoft.flexiweather.plugins.PluginAbility;
-	import mx.controls.Alert;
-	import mx.collections.ArrayCollection;
-	
-
-
-class PluginCollection extends EventDispatcher
-{
-	private var _typesSorted: Array = [];
-	private var _pluginsInfo: Array = [];
-	private var _pluginsInfoLoading: Array = [];
-	private var _pluginInfoModules: Array = [];
-	private var _pluginFunction: String;
-	
-	public var loaders: ModuleLoaderCollection = new ModuleLoaderCollection();
-	
-	public function get loadingPluginsCount(): int
-	{
-		return _pluginsInfoLoading.length;
-	}
-	
-	public function PluginCollection(fnc: String = '')
-	{
-		_pluginFunction = fnc;
-	}
-	
-	public function addPluginInfo(type: String, url: String): void
-	{
-		_typesSorted.push(type);
-		
-		//find if module already exists
-		var infoObject: Object;
-		for each (var object: Object in _pluginInfoModules)
-		{
-			if (object.url == url)
-			{
-				infoObject = object;
-				break;
-			}
-		}
-		if (infoObject)
-			infoObject.plugins += ','+type;
-		else 
-			_pluginInfoModules.push({plugins: type, url: url});
-	}
-		
-	public function loadAllInfoPluginModules(): void
-	{
-		if (_pluginInfoModules && _pluginInfoModules.length > 0)
-		{
-			for each (var moduleInfo: Object in _pluginInfoModules)
-			{
-				loadPluginModule(moduleInfo);
-			}
-		}
-	}
-	
-	public function getModuleInfo(type: String): Object
-	{
-		if (_pluginInfoModules && _pluginInfoModules.length > 0)
-		{
-			for each (var moduleInfo: Object in _pluginInfoModules)
-			{
-				var pluginTypes: String = moduleInfo.plugins;
-				var typesArr: Array = pluginTypes.split(',');
-				for each (var currType: String in typesArr)
-				{ 
-					if (currType == type)
-						return moduleInfo;
-				}
-			}
-		}
-		return null;
-	}
-	
-	private function loadPluginModule(moduleInfo: Object, data: Object = null): void
-	{
-		var url: String = moduleInfo.url;
-		
-		var pe: PluginEvent = new PluginEvent(PluginEvent.PLUGIN_MODULE_LOAD);
-		pe.url = url;
-		dispatchEvent(pe);
-		
-		var loader: ModuleLoaderWithData = new ModuleLoaderWithData(data);
-		loader.url = url;
-		loader.addEventListener(ModuleEvent.ERROR, onModuleError);
-		loader.addEventListener(ModuleEvent.PROGRESS, onModuleProgress);
-		loader.addEventListener(ModuleEvent.SETUP, onModuleSetup);
-		loader.addEventListener(ModuleEvent.READY, onModuleReady);
-		_pluginsInfoLoading.push({info: moduleInfo, loader: loader});
-		
-		trace("\n\t PLUGIN MANAGER load module : " + url);
-		loader.loadModule();
-		
-		if (_pluginsInfoLoading.length == 1)
-		{
-			notifyStartLoading();
-		}
-	}
-	
-	public function callPlugin(type: String, callback: Function, callbackParams: Array, unsuccessfulCallback: Function = null, ability: PluginAbility = null): void
-	{
-		var moduleInfo: Object = getModuleInfo(type);
-		if (moduleInfo)
-		{
-			var data: Object = {action: PluginManager.ACTION_CALL_PLUGIN, type: type, callback: callback, params: callbackParams, unsuccessfulCallback: unsuccessfulCallback, ability: ability};
-			loadPluginModule(moduleInfo, data);
-		} else {
-			if (unsuccessfulCallback != null)
-				unsuccessfulCallback.apply();
-		}
-	}
-	
-	public function getAllPlugins(): Array
-	{
-		return _pluginsInfo;
-	}
-		
-
-	public function getPluginModule(plugin: Object): Module
-	{
-		return getPluginParam(plugin, "module") as Module;
-	}
-	public function getPluginURL(plugin: Object): String
-	{
-		return getPluginParam(plugin, "url") as String;
-	}
-	public function getPluginType(plugin: Object): String
-	{
-		return getPluginParam(plugin, "type") as String;
-	}
-	
-	private function getPluginParam(plugin: Object, paramName: String): Object
-	{
-		if (_pluginsInfo && _pluginsInfo.length > 0)
-		{
-			for each (var moduleInfo: Object in _pluginsInfo)
-			{
-				var currPluginInfo: Object = moduleInfo.pluginInfo;
-				if (currPluginInfo && currPluginInfo.id == plugin.id)
+				for each (var pluginObject: Object in _internalPlugins)
 				{
-					if (moduleInfo.hasOwnProperty(paramName))
-						return moduleInfo[paramName];
+					if (pluginObject && pluginObject.type == type)
+						return pluginObject.plugin;
 				}
 			}
+			return null;
 		}
-		return null;
-	}
-	public function getPluginTypeParam(type: String, paramName: String): Object
-	{
-		if (_pluginsInfo && _pluginsInfo.length > 0)
-		{
-			for each (var moduleInfo: Object in _pluginsInfo)
-			{
-				var currPluginInfo: Object = moduleInfo.pluginInfo;
-				if (currPluginInfo && currPluginInfo.id == type)
-				{
-					if (moduleInfo.hasOwnProperty(paramName))
-						return moduleInfo.paramName;
-				}
-			}
-		}
-		return null;
-	}
-	
-	public function getPlugin(type: String): Object
-	{
-		if (_pluginsInfo && _pluginsInfo.length > 0)
-		{
-			for each (var moduleInfo: Object in _pluginsInfo)
-			{
-				var currPluginInfo: Object = moduleInfo.pluginInfo;
-				if (moduleInfo.type == type)
-				{
-					return currPluginInfo;
-				}
-			}
-		}
-		
-		return null;
-	}
-		
-	private function createInfoPlugin(loader: ModuleLoader): void
-	{
-		var pluginInfo: Object;
-
-		var info: Object;
-		
-		//find module info	
-		if (_pluginsInfoLoading && _pluginsInfoLoading.length > 0)
-		{
-			var total: int = _pluginsInfoLoading.length;
-			
-			for (var i: int = 0; i < total; i++)
-			{
-				var moduleInfo: Object = _pluginsInfoLoading[i];
-				
-				info = moduleInfo.info;
-				var currLoader: Object = moduleInfo.loader;
-				
-				if (loader == currLoader)
-				{
-					var module: Module = loader.child as Module;
-					if (!module)
-					{
-						trace("module does not exists");
-					} else {
-						var pluginTypes: String = info.plugins;
-						var typesArr: Array = pluginTypes.split(',');
-//						for each (var type: String in typesArr)
-//						{ 
-							if (createPluginFromParams(module, typesArr, moduleInfo.info.url))
-							{
-								//remove plugins from loading array
-								_pluginsInfoLoading.splice(i, 1);
-								if (_pluginsInfoLoading.length == 0)
-								{
-									notifyStopLoading();
-									notifyAllInfoPluginsAreLoaded();
-								}
-							}
-							
-//							break;
-//						}
-					}
-					
-					return;
-				}
-			}	
-		}	
-	}
-	
-	public function createPluginFromParams(module: Module, types: Array, url: String): Boolean
-	{
-		trace("createPluginFromParams type: " + type + " url: " + url);
-		var pluginInfo: Object;
-		if (_pluginFunction && _pluginFunction.length > 3)
-		{
-			if (types.length > 1)
-			{
-				trace("More types");
-			}
-			for each (var type: String in types)
-			{
-				pluginInfo = module[_pluginFunction](type);
-				if (pluginInfo)
-				{
-					
-					var moduleInfo: Object;
-					if (_pluginsInfo.length > 0)
-					{
-						for each (var info: Object in _pluginsInfo)
-						{
-							if (info.type == type)
-							{
-								moduleInfo = info;
-								break;
-							}
-						}
-					}
-					if (moduleInfo)
-						moduleInfo.pluginInfo = pluginInfo;
-					else			
-						_pluginsInfo.push({type: type, pluginInfo: pluginInfo, url: url, module: module});
-					
-					var isPluginInfo: Boolean = pluginInfo is IPluginInfo;
-					var isPlugin: Boolean = pluginInfo is IPlugin;
-					
-					notifyPluginIsLoaded(pluginInfo as IPlugin, pluginInfo as IPluginInfo, module, url);
-					
-				} else {
-					trace("PLUGIN WAS NOT CREATED");
-				}
-			}
-			return true;
-		} else {
-			trace("no plugin function defined");
-		}
-		
-		return false;
-	}
-		
-	private function notifyLoadingProgress(): void
-	{
-		var event: PluginEvent = new PluginEvent(PluginEvent.PLUGIN_MODULES_PROGRESS);
-		dispatchEvent(event);
-	}
-	
-	private function notifyStartLoading(): void
-	{
-		var event: Event = new Event(PluginManager.START_LOADING);
-		dispatchEvent(event);
-	}
-	private function notifyStopLoading(): void
-	{
-		var event: Event = new Event(PluginManager.STOP_LOADING);
-		dispatchEvent(event);
-	}
-	
-	private function notifyPluginIsLoaded(plugin: IPlugin, pluginInfo: IPluginInfo, module: Module, url: String): void
-	{
-		var pe: PluginEvent = new PluginEvent(PluginEvent.PLUGIN_MODULE_LOADED);
-		
-		pe.plugin = plugin;
-		pe.pluginInfo = pluginInfo;
-			
-		pe.module = module;
-		pe.url = url;
-		dispatchEvent(pe);
-	}
-	
-	private function notifyAllInfoPluginsAreLoaded(): void
-	{
-		var temp: Array = [];
-		var plugin: Object;
-		
-		for each (var type: String in _typesSorted)
-		{
-			plugin = getPlugin(type);
-			if (!plugin)
-			{
-				trace("notifyAllInfoPluginsAreLoaded: NO PLUGIN !!!");
-			} else {
-				temp.push({type: type, pluginInfo: plugin, url: getPluginTypeParam(type, 'url'), module: getPluginTypeParam(type, 'module')});
-			}	
-		}
-		_pluginsInfo = temp;
-		
-		dispatchEvent(new Event(PluginManager.ALL_PLUGINS_LOADED));
-	}
-	
-	private function onModuleReady(event: ModuleEvent): void
-	{
-		var loader: ModuleLoaderWithData = event.target as ModuleLoaderWithData;
-		removeModuleListeners(loader);
-		
-		loaders.removeModuleLoader(loader as ModuleLoader);
-		
-		trace("\t PLUGIN MANAGER module IS LOADED and ready : " + loader.url);
-		
-		// TODO: correctly create plugin or pluginInfo inside
-		createInfoPlugin(loader);
-		if (loader.associatedData)
-		{
-			trace("Module loader has data: " + loader.associatedData);
-			switch (loader.associatedData.action)
-			{
-				case PluginManager.ACTION_CALL_PLUGIN:
-					var plugin: IPlugin = getPlugin(loader.associatedData.type) as IPlugin;
-					var ability: PluginAbility = loader.associatedData.ability as PluginAbility;
-					var abilityImplementationInstance: IAbility;
-					
-					if (ability)
-						abilityImplementationInstance = plugin.getAbilityImplementation(ability);
-						
-					if (plugin)
-					{
-						var callback: Function = loader.associatedData.callback as Function;
-						if (callback != null)
-						{
-							var callbackParams: Array = loader.associatedData.params as Array;
-							if (callbackParams)
-								callbackParams.unshift(plugin);
-							else
-								callbackParams = [plugin];
-							
-							if (ability)
-							{
-								callback.apply(abilityImplementationInstance, callbackParams);
-							} else {
-								callback.apply(null, callbackParams);
-							}
-						}
-					} else {
-						var unsuccessfulCallback: Function = loader.associatedData.unsuccessfulCallback as Function;
-						if (unsuccessfulCallback != null)
-						{
-							if (ability)
-							{
-								unsuccessfulCallback.apply(abilityImplementationInstance);
-							} else {
-								unsuccessfulCallback.apply(null);
-							}
-						}
-					}
-					break;
-			}
-		}
-	}
-	private function onModuleSetup(event: ModuleEvent): void
-	{
-		var loader: ModuleLoader = event.target as ModuleLoader;
-	}
-	
-	private function onModuleProgress(event: ModuleEvent): void
-	{
-		var loader: ModuleLoader = event.target as ModuleLoader;
-		
-		var bytesLoaded: int = event.bytesLoaded;
-		var bytesTotal: int = event.bytesTotal;
-		
-		loaders.addModuleLoaderItem(loader, bytesLoaded, bytesTotal);
-		
-		notifyLoadingProgress();
-	}
-	
-	private function onModuleError(event: ModuleEvent): void
-	{
-		var loader: ModuleLoader = event.target as ModuleLoader;
-		
-		Alert.show(event.errorText, "Module loading error ", Alert.OK);
-		
-		removeModuleListeners(loader);
-		
-		loaders.removeModuleLoader(loader);
-	}
-	
-	private function removeModuleListeners(loader: ModuleLoader): void
-	{
-		loader.removeEventListener(ModuleEvent.ERROR, onModuleError);
-		loader.removeEventListener(ModuleEvent.PROGRESS, onModuleProgress);
-		loader.removeEventListener(ModuleEvent.SETUP, onModuleSetup);
-		loader.removeEventListener(ModuleEvent.READY, onModuleReady);
 	}
 }
