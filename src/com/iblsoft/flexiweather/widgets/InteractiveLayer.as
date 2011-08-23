@@ -119,12 +119,10 @@ package com.iblsoft.flexiweather.widgets
 
 		public function onContainerSizeChanged(): void
 		{
-			this.x = container.x;
-			this.y = container.y;
+			this.x = 0;
+			this.y = 0;
 			this.width = container.width;
 			this.height = container.height;
-//			Log.getLogger("InteractiveLayer").info("onContainerSizeChanged: " + this.width + " , " + this.height);
-			
 		}
 
 		public function negotiateBBox(newBBox: BBox, changeZoom: Boolean = true): BBox
