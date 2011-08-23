@@ -142,7 +142,7 @@ package com.iblsoft.flexiweather.ogc
 				
 				invalidateDynamicPart();
 				
-				var ile: InteractiveLayerEvent = new InteractiveLayerEvent( InteractiveLayerEvent.LAYER_LOADIND_START, true );
+				var ile: InteractiveLayerEvent = new InteractiveLayerEvent( InteractiveLayerEvent.LAYER_LOADING_START, true );
 				ile.interactiveLayer = this;
 				dispatchEvent(ile);
 				wmsCache.startImageLoading( currCRS, viewBBox, request );
