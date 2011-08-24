@@ -4,6 +4,8 @@ package com.iblsoft.flexiweather.plugins
 
 	public interface IPopup
 	{
+		function setPopupManager(popupManager: IPopupManager): void;
+		
 		function getPopup(): IFlexDisplayObject;
 		function canBeClosed(): Boolean;
 		function popupIsOpening():void;
