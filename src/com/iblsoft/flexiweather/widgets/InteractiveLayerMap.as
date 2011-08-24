@@ -668,8 +668,8 @@ class LayerSerializationWrapper implements Serializable
 	public function serialize(storage: Storage): void
 	{
 		if(storage.isLoading()) {
-			var s_layerName: String = storage.serializeString("layer-name", null, null);
-			var s_layerType: String = storage.serializeString("layer-type", null, null);
+			var s_layerName: String = storage.serializeString("layer-name", null, null)
+			var s_layerType: String = storage.serializeString("layer-type", null, s_layerName);
 			var config: ILayerConfiguration = LayerConfigurationManager.getInstance().getLayerConfigurationByLabel(s_layerType);
 			
 			m_layer = config.createInteractiveLayer(m_iw);
