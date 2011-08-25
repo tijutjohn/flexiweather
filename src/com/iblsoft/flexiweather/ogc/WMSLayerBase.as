@@ -143,6 +143,12 @@ package com.iblsoft.flexiweather.ogc
 				ma_dimensions.addAll(parent.ma_dimensions);
 			}
 
+			if(parent && parent.ma_crsWithBBoxes) {
+				// inherit CRSs and bounding boxes, this may create some duplication (same CRS defined multiple times)
+				// but this is not a big problem because if search for bounding box we take the first found item. 
+				ma_crsWithBBoxes.addAll(parent.ma_crsWithBBoxes);
+			}
+
 			for each(var elemDim: XML in xml.wms::Dimension) {
 				var dim: WMSDimension = new WMSDimension(elemDim, wms, version);
 				// in WMS < 1.3.0, dimension values are inside of <Extent> element
