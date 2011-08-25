@@ -584,10 +584,10 @@ package com.iblsoft.flexiweather.widgets
 		
 		private function setViewBBoxAfterNegotiation(newBBox: BBox, b_finalChange: Boolean): void
 		{
-			trace("\t IWidget setViewBBoxAfterNegotiation newBBox :" + newBBox.toLaLoString(ms_crs));
-			trace("\t IWidget setViewBBoxAfterNegotiation newBBox :" + newBBox);
+//			trace("\t IWidget setViewBBoxAfterNegotiation newBBox :" + newBBox.toLaLoString(ms_crs));
+//			trace("\t IWidget setViewBBoxAfterNegotiation newBBox :" + newBBox);
+
 			//dispath view bbox changed event to notify about change
-			
 			m_viewBBox = newBBox;
 			
 			dispatchEvent(new Event(VIEW_BBOX_CHANGED));

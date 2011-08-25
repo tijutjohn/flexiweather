@@ -136,13 +136,13 @@ package com.iblsoft.flexiweather.ogc
 					
 					compatibleWithCRS =  layerConfig.isCompatibleWithCRS(currentCRS);
 					
-					if (currentCRS)
-					{
-						if (!compatibleWithCRS)
-						{
-							trace("Layer : " + lbl + " is not compatible with " + currentCRS);
-						}
-					}
+//					if (currentCRS)
+//					{
+//						if (!compatibleWithCRS)
+//						{
+//							trace("Layer : " + lbl + " is not compatible with " + currentCRS);
+//						}
+//					}
 					
 					if (lbl && lbl.indexOf('/') > 0)
 					{
