@@ -20,6 +20,19 @@ package com.iblsoft.flexiweather.plugins.data
 		{
 		}
 		
+		public function clone(): ModuleInfo
+		{
+			var mi: ModuleInfo = new ModuleInfo();
+			mi.plugins = plugins;
+			mi.type = type;
+			mi.url = url;
+			mi.paramName = paramName;
+			mi.module = module;
+			mi.plugin = plugin;
+			mi.pluginInfo = pluginInfo;
+			
+			return mi;
+		}
 
 		public function get plugin():IPlugin
 		{

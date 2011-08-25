@@ -22,10 +22,28 @@ package com.iblsoft.flexiweather.plugins.data
 	
 	public class PluginCollection extends EventDispatcher
 	{
+		private var _name: String;
+		public function get name(): String
+		{
+			return _name;
+		}
+		
 		private var _typesSorted: Array = [];
+		/** 
+		 * list of all plugins
+		 */
 		private var _pluginsInfo: Array = [];
+		
+		/**
+		 * info of all modules currently loading
+		 */
 		private var _pluginsInfoLoading: Array = [];
+		
+		/**
+		 * list of all modules
+		 */
 		private var _pluginInfoModules: Array = [];
+		
 		private var _pluginFunction: String;
 		
 		public var loaders: ModuleLoaderCollection = new ModuleLoaderCollection();
@@ -35,9 +53,15 @@ package com.iblsoft.flexiweather.plugins.data
 			return _pluginsInfoLoading.length;
 		}
 		
-		public function PluginCollection(fnc: String = '')
+		public function PluginCollection(name: String, fnc: String = '')
 		{
+			_name = name;
 			_pluginFunction = fnc;
+		}
+		
+		private function addItemToPluginsInfo(item: Object): void
+		{
+			_pluginsInfo.push(item);
 		}
 		
 		/**
@@ -192,7 +216,12 @@ package com.iblsoft.flexiweather.plugins.data
 		
 		public function getAllPlugins(): Array
 		{
-			return _pluginsInfo;
+			var clonedArray: Array = [];
+			for each (var module: ModuleInfo in _pluginsInfo)
+			{
+				clonedArray.push(module.clone());
+			}
+			return clonedArray;
 		}
 		
 		
@@ -277,6 +306,7 @@ package com.iblsoft.flexiweather.plugins.data
 		
 		private function createInfoPlugin(loader: ModuleLoader): void
 		{
+			trace(this + " createInfoPlugin" );
 			var pluginInfo: IPluginInfo;
 			
 			var info: ModuleInfo;
@@ -302,8 +332,7 @@ package com.iblsoft.flexiweather.plugins.data
 						} else {
 							var pluginTypes: String = info.plugins;
 							var typesArr: Array = pluginTypes.split(',');
-							//						for each (var type: String in typesArr)
-							//						{ 
+							
 							if (createPluginFromParams(module, typesArr, moduleInfoLoading.info.url))
 							{
 								//remove plugins from loading array
@@ -314,11 +343,7 @@ package com.iblsoft.flexiweather.plugins.data
 									notifyAllInfoPluginsAreLoaded();
 								}
 							}
-							
-							//							break;
-							//						}
 						}
-						
 						return;
 					}
 				}	
@@ -349,6 +374,8 @@ package com.iblsoft.flexiweather.plugins.data
 				}
 			}
 			if (moduleInfo) {
+				moduleInfo.url = url;
+				moduleInfo.module = module;
 				if (pluginInfo)
 					moduleInfo.pluginInfo = pluginInfo;
 				if (plugin)
@@ -359,13 +386,13 @@ package com.iblsoft.flexiweather.plugins.data
 				newModuleInfo.type = type;
 				if (pluginInfo is IPluginInfo)
 					newModuleInfo.pluginInfo = pluginInfo as IPluginInfo;
-				if (pluginInfo is IPlugin)
-					newModuleInfo.plugin = pluginInfo as IPlugin;
+				if (plugin is IPlugin)
+					newModuleInfo.plugin = plugin as IPlugin;
 				
 				newModuleInfo.url = url;
 				newModuleInfo.module = module;
 				
-				_pluginsInfo.push(newModuleInfo);
+				addItemToPluginsInfo(newModuleInfo);
 			}
 			
 			var isPluginInfo: Boolean = pluginInfo is IPluginInfo;
@@ -376,7 +403,7 @@ package com.iblsoft.flexiweather.plugins.data
 		
 		public function createPluginFromParams(module: Module, types: Array, url: String): Boolean
 		{
-			trace("createPluginFromParams type: " + type + " url: " + url);
+			trace(this + " createPluginFromParams type: " + types + " url: " + url);
 			
 			if (_pluginFunction && _pluginFunction.length > 3)
 			{
@@ -439,6 +466,7 @@ package com.iblsoft.flexiweather.plugins.data
 		
 		private function notifyAllInfoPluginsAreLoaded(): void
 		{
+			
 			var temp: Array = [];
 			var pluginInfo: IPluginInfo;
 			var plugin: IPlugin;
@@ -571,6 +599,11 @@ package com.iblsoft.flexiweather.plugins.data
 			loader.removeEventListener(ModuleEvent.PROGRESS, onModuleProgress);
 			loader.removeEventListener(ModuleEvent.SETUP, onModuleSetup);
 			loader.removeEventListener(ModuleEvent.READY, onModuleReady);
+		}
+		
+		override public function toString(): String
+		{
+			return "PublicCollection ["+name+"]";
 		}
 	}
 }
