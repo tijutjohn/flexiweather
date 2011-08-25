@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.plugins
 {
 	import com.iblsoft.flexiweather.plugins.data.ModuleCollection;
+	import com.iblsoft.flexiweather.plugins.data.ModuleInfo;
 	import com.iblsoft.flexiweather.plugins.data.ModuleItem;
 	import com.iblsoft.flexiweather.plugins.data.PluginCollection;
 	
@@ -65,8 +66,8 @@ package com.iblsoft.flexiweather.plugins
 			
 			_modules = new ModuleCollection();
 			
-			_plugins = new PluginCollection("createPlugin");
-			_pluginsInfo = new PluginCollection("createPluginInfo");
+			_plugins = new PluginCollection("plugins","createPlugin");
+			_pluginsInfo = new PluginCollection("pluginsInfo","createPluginInfo");
 			
 			_plugins.addEventListener(START_LOADING, onStartLoading);
 			_plugins.addEventListener(STOP_LOADING, onStopLoading);
@@ -204,9 +205,9 @@ package com.iblsoft.flexiweather.plugins
 			trace("***************************************************************");
 			trace("Dump plugins: " + type);
 			var plugins: Array = collection.getAllPlugins();
-			for each (var info: Object in plugins)
+			for each (var info: ModuleInfo in plugins)
 			{
-				trace("\t" + type + " type: " + info.type);
+				trace("\t" + type + " type: " + info.type + " plugins: " + info.plugins + " plugin: " + info.plugin + " info: " + info.pluginInfo);
 			}
 			trace("***************************************************************");
 		}
@@ -284,16 +285,20 @@ package com.iblsoft.flexiweather.plugins
 			var infoURL: String = infoURLObject.url;
 			var url: String = urlObject.url;
 			
+			//check plugin in plugins collection
 			plugin = _plugins.getPlugin(type) as IPlugin;
 			if (plugin)
 				return plugin;
 			
+			
+			//create plugin from info module
 			var pluginModuleItem: ModuleItem = _modules.getModuleItemByURL(url);
 			if (pluginModuleItem.isReady)
 			{
 				_plugins.createPluginFromParams(pluginModuleItem.module, [type], url);
 				plugin  = _plugins.getPlugin(type) as IPlugin;
 			} else {
+				//same module for infoPlugin and plugin
 				if (infoURL == url && infoURL != null)
 				{
 					var pluginInfoModuleItem: ModuleItem = _modules.getModuleItemByURL(infoURL);
