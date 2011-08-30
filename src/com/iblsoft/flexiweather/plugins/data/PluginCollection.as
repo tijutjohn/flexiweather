@@ -4,6 +4,7 @@ package com.iblsoft.flexiweather.plugins.data
 	import com.iblsoft.flexiweather.plugins.IPlugin;
 	import com.iblsoft.flexiweather.plugins.IPluginInfo;
 	import com.iblsoft.flexiweather.plugins.IPluginInfoModule;
+	import com.iblsoft.flexiweather.plugins.IPluginModule;
 	import com.iblsoft.flexiweather.plugins.ModuleLoaderCollection;
 	import com.iblsoft.flexiweather.plugins.PluginAbility;
 	import com.iblsoft.flexiweather.plugins.PluginEvent;
@@ -12,6 +13,7 @@ package com.iblsoft.flexiweather.plugins.data
 	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
+	import flash.system.ApplicationDomain;
 	
 	import mx.collections.ArrayCollection;
 	import mx.controls.Alert;
@@ -180,6 +182,9 @@ package com.iblsoft.flexiweather.plugins.data
 				dispatchEvent(pe);
 				
 				var loader: ModuleLoaderWithData = new ModuleLoaderWithData(data);
+				
+				loader.applicationDomain = ApplicationDomain.currentDomain;
+				
 				loader.url = url;
 				loader.addEventListener(ModuleEvent.ERROR, onModuleError);
 				loader.addEventListener(ModuleEvent.PROGRESS, onModuleProgress);

@@ -36,12 +36,28 @@ package com.iblsoft.flexiweather.utils
 		public final function serializeNumber(s_key: String, f: Number, f_default: Number = NaN): Number
 		{ return __serializeNumber(s_key, NONINDEXED, f, f_default); }
 
+		/**
+		 * serialize items of arrayCollection. on deserialize corretly typed classes will be created
+		 * baseClass serves just for type compatibility check (if all items of array has baseClass in its inheritance) 
+		 * @param s_key
+		 * @param a
+		 * @param baseClass
+		 * 
+		 */			
 		public final function serializePersistentArrayCollection(
 			s_key: String, a: ArrayCollection, baseClass: Class): void
 		{
 			serializePersistentArray(s_key, a.source, baseClass);
 		}
 		
+		/**
+		 * serialize items of array. on deserialize corretly typed classes will be created
+		 * baseClass serves just for type compatibility check (if all items of array has baseClass in its inheritance) 
+		 * @param s_key
+		 * @param a
+		 * @param baseClass
+		 * 
+		 */		
 		public final function serializePersistentArray(
 			s_key: String, a: Array, baseClass: Class): void
 		{
@@ -97,6 +113,14 @@ package com.iblsoft.flexiweather.utils
 			serializeNonpersistentArray(s_key, a.source, c);
 		}
 
+		/**
+		 * serialize items of array. Deserialize needs Class to be defined to create class
+		 * 
+		 * @param s_key
+		 * @param a
+		 * @param c - class
+		 * 
+		 */		
 		public final function serializeNonpersistentArray(
 				s_key: String, a: Array, c: Class): void
 		{
