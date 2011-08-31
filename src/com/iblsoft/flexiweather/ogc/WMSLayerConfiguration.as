@@ -279,7 +279,7 @@ package com.iblsoft.flexiweather.ogc
 			{
 				for each (var layer: WMSLayer in ma_layerConfigurations)
 				{
-					if (layer.isCompatibleWithCRS(crs))
+					if (layer && layer.isCompatibleWithCRS(crs))
 						return true;
 				}
 				return false;
