@@ -116,8 +116,6 @@ package com.iblsoft.flexiweather.widgets
 
 		public function onContainerSizeChanged(): void
 		{
-			this.x = 0;
-			this.y = 0;
 			this.width = container.width;
 			this.height = container.height;
 		}
