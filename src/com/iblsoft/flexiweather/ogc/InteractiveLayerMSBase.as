@@ -169,6 +169,11 @@ package com.iblsoft.flexiweather.ogc
 		{
 			
 		}
+		
+		override public function getFullURLWithSize(width: int, height: int): String
+		{
+			return getGetMapFullUrl( width, height );
+		}
 		/**
 		 * function returns full URL for getting map 
 		 * @return 
@@ -176,9 +181,14 @@ package com.iblsoft.flexiweather.ogc
 		 */		
 		override public function getFullURL(): String
 		{
+			return getGetMapFullUrl( int(container.width), int(container.height) );
+		}
+		
+		private function getGetMapFullUrl(width: int, height: int): String
+		{
 			var request: URLRequest = m_cfg.toGetMapRequest(
 					container.getCRS(), container.getViewBBox().toBBOXString(),
-					int(container.width), int(container.height),
+					width, height,
 					getWMSStyleListString());
 			if (!request)
 				return null;

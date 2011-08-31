@@ -121,28 +121,7 @@ package com.iblsoft.flexiweather.ogc
 			}
 			return false;
 		}
-/*
-		override public function getPreviewURL(): String
-		{
-			var s_url: String = '';
-			
-			if(ms_previewURL == "<internal>") {
-				s_url = label.replace(/\//, "_"); 
-				s_url = "assets/layer-previews/" + s_url + ".png";
-			}
-			else if(ms_previewURL == null || ms_previewURL.length == 0) {
-				
-				var currQTTilingInfo: QTTilingInfo;
-				
-				var i_middleTile: uint = (1 << currQTTilingInfo.minimumZoomLevel) / 2;
-				s_url = InteractiveLayerQTTMS.expandURLPattern(currQTTilingInfo.urlPattern,
-						new TileIndex(currQTTilingInfo.minimumZoomLevel, i_middleTile, i_middleTile));
-			} 
-			else
-				s_url = ms_previewURL;
-			return s_url;
-		}
-	*/	
+
 		// IBehaviouralObject implementation
 		public function setBehaviourString(s_behaviourId: String, s_value: String): void
 		{ 

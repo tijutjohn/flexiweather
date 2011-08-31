@@ -154,7 +154,12 @@ package com.iblsoft.flexiweather.ogc
 					
 						
 					var icon: String = layerConfig.getPreviewURL();
-					
+					if (!icon)
+					{
+						trace("stop, icon is null");
+						//just to test problem with icon is null -> remove next line when fixed
+						layerConfig.getPreviewURL();
+					}
 					var layerData: String = "layer."+layerConfig.label;
 					var layerXML: XML = <menuitem label={lbl} data={layerData} icon={icon} compatibleWithCRS={compatibleWithCRS} type={layerType}/>
 					

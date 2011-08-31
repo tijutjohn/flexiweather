@@ -306,7 +306,7 @@ package com.iblsoft.flexiweather.ogc
 						iw.setExtentBBOX(bbox);
 					iw.addLayer(lWMS);
 					lWMS.dataLoader.data = { label: label, cfg: this };
-					s_url = lWMS.getFullURL();
+					s_url = lWMS.getFullURLWithSize(150, 100);
 						
 				} else {
 					trace("getMenuLayersXMLList interactive layer does not exist");

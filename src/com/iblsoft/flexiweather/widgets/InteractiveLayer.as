@@ -200,6 +200,11 @@ package com.iblsoft.flexiweather.widgets
 				container.orderLayers();
 		}
 		
+		public function getFullURLWithSize(width: int, height: int): String
+		{
+			return '';
+		}
+		
 		public function getFullURL(): String
 		{	return ''; }
 		/**
