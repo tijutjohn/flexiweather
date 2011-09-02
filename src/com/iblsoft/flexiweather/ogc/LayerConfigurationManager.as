@@ -2,6 +2,7 @@ package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
+	import com.iblsoft.flexiweather.utils.UniURLLoader;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.events.Event;
@@ -159,6 +160,11 @@ package com.iblsoft.flexiweather.ogc
 						trace("stop, icon is null");
 						//just to test problem with icon is null -> remove next line when fixed
 						layerConfig.getPreviewURL();
+					}
+					
+					if (icon)
+					{
+						icon = UniURLLoader.fromBaseURL(icon);
 					}
 					var layerData: String = "layer."+layerConfig.label;
 					var layerXML: XML = <menuitem label={lbl} data={layerData} icon={icon} compatibleWithCRS={compatibleWithCRS} type={layerType}/>
