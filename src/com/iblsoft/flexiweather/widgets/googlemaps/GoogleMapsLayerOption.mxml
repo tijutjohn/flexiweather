@@ -73,6 +73,8 @@
 				{
 					var cfg: GoogleMapLayerConfiguration = value.configuration as GoogleMapLayerConfiguration;
 					var type: String = _layer.mapType;//cfg.mapType;
+					if (type == null)
+						type = cfg.mapType
 					viewBBox = layer.getViewBBox().toString();
 					negotiatedBBoxes = layer.negotiatedBBoxes;
 					
@@ -93,6 +95,8 @@
 							break;
 					}
 				}
+				
+				trace("GoogleMapslayerOption SET layer selectMapTypeIndex: " + selectMapTypeIndex);
 			}
 
 			private function switchMapType(): void

@@ -68,7 +68,6 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 			minimumZoomLevel = storage.serializeUInt("minimum-zoom-level", minimumZoomLevel, 1);
 			maximumZoomLevel = storage.serializeUInt("maximum-zoom-level", maximumZoomLevel, 12);
 			mapType = storage.serializeString("map-type", mapType);
-//			label = storage.serializeString("label", label);
 			
 		}
 		
