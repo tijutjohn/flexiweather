@@ -233,7 +233,7 @@ package com.iblsoft.flexiweather.utils
 			
 			UniURLLoaderManager.instance.addLoader( urlRequest);
 			
-			Log.getLogger('UniURLLoader').info("load " + urlRequest.url + " " + urlRequest.data);
+			Log.getLogger('UniURLLoader').info("load " + urlRequest.url + " data:" + urlRequest.data);
 			urlLoader.load(urlRequest);
 			
 			var backgroundJob: BackgroundJob = null;
