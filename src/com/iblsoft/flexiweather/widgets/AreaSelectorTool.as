@@ -160,6 +160,7 @@ package com.iblsoft.flexiweather.widgets
         
         public function clearSelection(): void
         {
+			_r = null;
         	_areaComponent.draw(new CustomRectangle(0,0,0,0));
         }
         
