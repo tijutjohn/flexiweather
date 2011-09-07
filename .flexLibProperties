@@ -182,6 +182,17 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.GoogleMapLayerConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.GoogleMapsLayerOption"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.InteractiveLayerGoogleMaps"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.QTTLayerOptions"/>
+    <classEntry path="com.iblsoft.flexiweather.plugins.data.PluginCollection"/>
+    <classEntry path="com.iblsoft.flexiweather.plugins.data.ModuleInfo"/>
+    <classEntry path="com.iblsoft.flexiweather.plugins.data.ModuleInfoLoading"/>
+    <classEntry path="com.iblsoft.flexiweather.plugins.data.ModuleCollection"/>
+    <classEntry path="com.iblsoft.flexiweather.plugins.data.ModuleItem"/>
+    <classEntry path="com.iblsoft.flexiweather.plugins.ModuleLoaderCollection"/>
+    <classEntry path="com.iblsoft.flexiweather.plugins.data.ModuleLoaderItem"/>
+    <classEntry path="com.iblsoft.flexiweather.plugins.IPopup"/>
+    <classEntry path="com.iblsoft.flexiweather.plugins.IPopupManager"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.URLUtils"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
