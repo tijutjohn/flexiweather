@@ -61,10 +61,14 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function getMaxExtentForProjection(projection: ProjectionConfiguration): BBox
 		{
+			return getMaxExtentForCRS(projection.crs);
+		}
+		public function getMaxExtentForCRS(crs: String): BBox
+		{
 			 var allProjs: ArrayCollection = getAllProjections;
 			 for each (var proj: ProjectionConfiguration in allProjs)
 			 {
-			 	if (proj.crs == projection.crs)
+			 	if (proj.crs == crs)
 			 		return proj.bbox;
 			 }
 			 return null;

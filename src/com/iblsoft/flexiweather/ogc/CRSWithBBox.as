@@ -18,8 +18,17 @@ package com.iblsoft.flexiweather.ogc
 		{
 			if (s_crs == '')
 				s_crs = Projection.CRS_GEOGRAPHIC;
+			
+			//FIXME fix this, BBox with width and height cause problems (e.g. Zoom to layer extent)
 			if (!bbox)
-				bbox = new BBox(0, 0, 0, 0);
+			{
+				//get maxExtent for crs
+				var extent: BBox = ProjectionConfigurationManager.getInstance().getMaxExtentForCRS(s_crs);
+				if (extent)
+					bbox = extent;
+				else
+					bbox = new BBox(0, 0, 0, 0);
+			}
 				
 			ms_crs = s_crs;
 			m_bbox = bbox;
