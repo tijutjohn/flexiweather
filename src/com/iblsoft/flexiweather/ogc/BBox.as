@@ -57,6 +57,11 @@ package com.iblsoft.flexiweather.ogc
 					xml.eastBoundLongitude, xml.northBoundLatitudey);
 		}
 
+		public function get isEmpty(): Boolean
+		{
+			return (width == 0 || height == 0);
+		}
+		
 		public function forProjection(crs: String): BBox
 		{
 			var prj: Projection = Projection.getByCRS(crs);
@@ -65,9 +70,6 @@ package com.iblsoft.flexiweather.ogc
 			var minLalo: Coord = prj.prjXYToLaLoCoord(mf_xMin, mf_yMin);
 			var maxLalo: Coord = prj.prjXYToLaLoCoord(mf_xMax, mf_yMax);
 			
-			//			trace("BBox: toLaLoString minLalo: " + minLalo.toLaLoCoord());
-			//			trace("BBox: toLaLoString maxLalo: " + maxLalo.toLaLoCoord());
-			//	
 			var bbox: BBox = new BBox(minLalo.x, minLalo.y, maxLalo.x, maxLalo.y);
 			return bbox;
 		}
@@ -85,9 +87,6 @@ package com.iblsoft.flexiweather.ogc
 			var minLalo: Coord = prj.prjXYToLaLoCoord(mf_xMin, mf_yMin);
 			var maxLalo: Coord = prj.prjXYToLaLoCoord(mf_xMax, mf_yMax);
 			
-//			trace("BBox: toLaLoString minLalo: " + minLalo.toLaLoCoord());
-//			trace("BBox: toLaLoString maxLalo: " + maxLalo.toLaLoCoord());
-//			
 			return String(formatNumber(minLalo.y)) + "," + String(formatNumber(minLalo.x)) + ","
 				+ String(formatNumber(maxLalo.y)) + "," + String(formatNumber(maxLalo.x));
 		}

@@ -132,9 +132,13 @@ package com.iblsoft.flexiweather.ogc
 				{
 					var crsColl: ArrayCollection = currLayer.crsWithBBoxes;
 //					trace("Layer: " + currLayer.ms_name + " crs: " + crsColl.length);	
+					var newBBox: BBox; 
 					for each (var crs: CRSWithBBox in crsColl)
 					{
-						projConfig = new ProjectionConfiguration(crs.crs, crs.bbox.clone());
+						if (crs.bbox)
+							newBBox = crs.bbox.clone();
+						
+						projConfig = new ProjectionConfiguration(crs.crs, newBBox);
 						projectionManager.addParsedProjectionByCRS(projConfig);
 					}
 				}

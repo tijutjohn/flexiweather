@@ -23,11 +23,12 @@ package com.iblsoft.flexiweather.ogc
 			if (!bbox)
 			{
 				//get maxExtent for crs
-				var extent: BBox = ProjectionConfigurationManager.getInstance().getMaxExtentForCRS(s_crs);
-				if (extent)
-					bbox = extent;
-				else
-					bbox = new BBox(0, 0, 0, 0);
+//				var extent: BBox = ProjectionConfigurationManager.getInstance().getMaxExtentForCRS(s_crs);
+//				if (extent)
+//					bbox = extent;
+//				else
+//					bbox = new BBox(0, 0, 0, 0);
+				bbox = new BBox(0, 0, 0, 0);
 			}
 				
 			ms_crs = s_crs;
