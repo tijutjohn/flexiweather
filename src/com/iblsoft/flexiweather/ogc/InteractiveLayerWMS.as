@@ -48,13 +48,15 @@ package com.iblsoft.flexiweather.ogc
 					
 				//TODO do we really need to add here 2nd parameter?
 				var primaryLayer: Boolean = storage.serializeBool("primary-layer", true);
-				trace("alpha: " + alpha);
+				if (primaryLayer)
+				{
+					synchronisationRole.setRole(SynchronisationRole.PRIMARY);
+				}
 				var newAlpha: Number = storage.serializeNumber("transparency", alpha);
 				if (newAlpha < 1)
 				{
 					alpha = newAlpha;
 				}
-				trace("alpha: " + newAlpha);
 				for each(s_dimName in getWMSDimensionsNames()) {
 					var level: String = storage.serializeString(s_dimName, null, null);
 					if (level)
