@@ -95,8 +95,6 @@ package com.iblsoft.flexiweather.widgets
 		
 		override public function serialize(storage: Storage): void
 		{
-			//super.serialize(storage);
-			
 			var wrappers: ArrayCollection;
 			var wrapper: LayerSerializationWrapper;
 			var layer: InteractiveLayer;
@@ -116,18 +114,12 @@ package com.iblsoft.flexiweather.widgets
 					wrapper = wrappers.getItemAt(i) as LayerSerializationWrapper;
 					layer = wrapper.m_layer;
 					newLayers.push(layer);
-//					if (layer)
-//						addLayer(layer);
 				}
 				
 				var de: DynamicEvent = new DynamicEvent(LAYERS_SERIALIZED_AND_READY);
 				de['layers'] = newLayers;
 				dispatchEvent(de);
-				
 
-				
-//				debugLayers();
-//				container.debugLayers();
 			} else {
 				//create wrapper collection
 				wrappers = new ArrayCollection();
@@ -146,8 +138,6 @@ package com.iblsoft.flexiweather.widgets
 		
 		override protected function onLayerCollectionChanged(event: CollectionEvent): void
 		{
-//			trace("onLayerCollectionChanged kind: " + event.kind);
-			
 			super.onLayerCollectionChanged(event);
 			
 			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
@@ -191,6 +181,7 @@ package com.iblsoft.flexiweather.widgets
             		return;
             	if(so.getSynchronisedVariables().indexOf("frame") < 0)
             		return;
+				
             	//this layer can be primary layer and there is no primary layer set, set this one as primaty layer	
 				setPrimaryLayer(l as InteractiveLayerMSBase);
 			}
