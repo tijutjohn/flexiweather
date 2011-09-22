@@ -204,20 +204,12 @@ package com.iblsoft.flexiweather.ogc
 		// Event handlers
 		override protected function onDataLoaded(event: UniURLLoaderEvent): void
 		{
-			trace("WMS onDataLoaded");
 			super.onDataLoaded(event);
 			
 			var wmsCache: WMSCache = m_cache as WMSCache;
 			if (_invalidateCacheAfterImageLoad)
 			{
 				wmsCache.invalidate(ms_imageCRS, m_imageBBox);
-				var lalo: String =  '';
-				if (m_imageBBox)
-				{
-					lalo = " LaLo: " + m_imageBBox.toLaLoString(ms_imageCRS);
-				}
-				
-				trace("WMS onDataLoaded ms_imageCRS: " + ms_imageCRS + " m_imageBBox: " + m_imageBBox + lalo);
 				_invalidateCacheAfterImageLoad = false;
 			}
 			
