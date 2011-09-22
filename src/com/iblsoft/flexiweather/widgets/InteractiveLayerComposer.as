@@ -38,7 +38,6 @@ package com.iblsoft.flexiweather.widgets
 			//when new layer is added to container, call onAreaChange to notify layer, that layer is already added to container, so it can render itself
 			l.onAreaChanged(true);
 			
-			//orderLayers();
 		}
 		
 
@@ -48,10 +47,8 @@ package com.iblsoft.flexiweather.widgets
 //			return;
 			if (layer)
 			{
-//				trace("COMPOSER notifyLayersChanged: " + layer);
 				m_layers.itemUpdated(layer);	
 			} else {
-//				trace("COMPOSER notifyLayersChanged ");
 				dispatchEvent(new Event("layersChanged"));
 			}
 		}
@@ -164,10 +161,9 @@ package com.iblsoft.flexiweather.widgets
             	
             	var fnc: Function = l[functionName] as Function;
             	fnc.apply(l, params);
-            	
-            	trace("COMPOSER: callLayersFunction " + functionName + " on layer: " + l);
 			}
 		}
+		
 		override public function onAreaChanged(b_finalChange: Boolean): void
 		{
 			for each(var l: InteractiveLayer in m_layers) {
@@ -200,11 +196,11 @@ package com.iblsoft.flexiweather.widgets
 				latestBBox = l.negotiateBBox(newBBox, changeZoom);
 				if (!latestBBox.equals(newBBox))
 				{
-					trace("WARNING: COMPOSER bbox changed by layer " + l.layerName);
+//					trace("WARNING: COMPOSER bbox changed by layer " + l.layerName);
 					if (l is InteractiveLayerGoogleMaps)
 					{
 						var viewBBox: BBox = (l as InteractiveLayerGoogleMaps).getViewBBox();
-						trace("\t current view for google maps: " + viewBBox);
+//						trace("\t current view for google maps: " + viewBBox);
 					}
 				}
 				newBBox = latestBBox;

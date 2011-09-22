@@ -83,7 +83,6 @@ package com.iblsoft.flexiweather.widgets
 		{
 			m_timelineConfiguration  = value;
 			m_timelineConfigurationChanged = true;
-			//parseAnimationLimitDates();
 			
 			dispatchEvent(new Event(TIMELINE_CONFIGURATION_CHANGE));
 		}
@@ -114,7 +113,10 @@ package com.iblsoft.flexiweather.widgets
 					wrapper = wrappers.getItemAt(i) as LayerSerializationWrapper;
 					layer = wrapper.m_layer;
 					newLayers.push(layer);
+					
+					addLayer(layer);
 				}
+				
 				
 				var de: DynamicEvent = new DynamicEvent(LAYERS_SERIALIZED_AND_READY);
 				de['layers'] = newLayers;
