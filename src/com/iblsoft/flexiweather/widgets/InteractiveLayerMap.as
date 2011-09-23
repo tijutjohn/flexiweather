@@ -169,23 +169,28 @@ package com.iblsoft.flexiweather.widgets
 		
 		override public function addLayer(l:InteractiveLayer):void
 		{
-			super.addLayer(l);
-			
-			var dynamicEvent: DynamicEvent = new DynamicEvent(TIME_AXIS_ADDED);
-			trace("InteractiveLayerMap addlayer: " + l.name);
-			dynamicEvent['layer'] = l;
-			dispatchEvent(dynamicEvent);
-			
-			if (getPrimaryLayer() == null)
+			if (l)
 			{
-				var so: ISynchronisedObject = l as ISynchronisedObject;
-            	if(so == null)
-            		return;
-            	if(so.getSynchronisedVariables().indexOf("frame") < 0)
-            		return;
+				super.addLayer(l);
 				
-            	//this layer can be primary layer and there is no primary layer set, set this one as primaty layer	
-				setPrimaryLayer(l as InteractiveLayerMSBase);
+				var dynamicEvent: DynamicEvent = new DynamicEvent(TIME_AXIS_ADDED);
+				trace("InteractiveLayerMap addlayer: " + l.name);
+				dynamicEvent['layer'] = l;
+				dispatchEvent(dynamicEvent);
+				
+				if (getPrimaryLayer() == null)
+				{
+					var so: ISynchronisedObject = l as ISynchronisedObject;
+	            	if(so == null)
+	            		return;
+	            	if(so.getSynchronisedVariables().indexOf("frame") < 0)
+	            		return;
+					
+	            	//this layer can be primary layer and there is no primary layer set, set this one as primaty layer	
+					setPrimaryLayer(l as InteractiveLayerMSBase);
+				}
+			} else {
+				trace("Layer is null, do not add it to InteractiveLayerMap");
 			}
 		}
 		
