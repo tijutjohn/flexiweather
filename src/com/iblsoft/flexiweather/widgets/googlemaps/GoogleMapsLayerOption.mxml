@@ -34,7 +34,7 @@
 							]]>
 						</fx:Script>
 						<s:HGroup width="100%" paddingBottom="3" paddingLeft="3" paddingRight="3" paddingTop="3">
-							<s:Label width="120" text="{(data as BBox).toLaLoString('EPSG:900913')}" fontSize="9"/>
+							<s:Label width="120" text="{(data as BBox).toBBOXString()}" fontSize="9"/>
 						</s:HGroup>
 					</s:ItemRenderer>
 				</fx:Component>

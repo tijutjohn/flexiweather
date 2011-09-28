@@ -69,26 +69,6 @@ package com.iblsoft.flexiweather.ogc
 			return bbox;
 		}
 
-		private function formatNumber(num: Number): Number
-		{
-			return int(num * 100)/100;
-		}
-
-		public function toLaLoString(crs: String): String
-		{
-			//TODO remove conversion to LaLo in BBOX.toBBoxString
-			var prj: Projection = Projection.getByCRS(crs);
-			if(prj == null)
-				return null;
-			var minLalo: Coord = prj.prjXYToLaLoCoord(mf_xMin, mf_yMin);
-			var maxLalo: Coord = prj.prjXYToLaLoCoord(mf_xMax, mf_yMax);
-			
-//			trace("BBox: toLaLoString minLalo: " + minLalo.toLaLoCoord());
-//			trace("BBox: toLaLoString maxLalo: " + maxLalo.toLaLoCoord());
-//			
-			return String(formatNumber(minLalo.y)) + "," + String(formatNumber(minLalo.x)) + ","
-				+ String(formatNumber(maxLalo.y)) + "," + String(formatNumber(maxLalo.x));
-		}
 
 		public function toBBOXString(): String
 		{

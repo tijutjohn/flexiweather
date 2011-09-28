@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
@@ -68,7 +69,24 @@ package com.iblsoft.flexiweather.ogc
 					m_bbox = new BBox(xMin, yMin, xMax, yMax);
 			}
 		}
-
+		
+		private function formatNumber(num: Number): Number
+		{
+			return int(num * 100)/100;
+		}
+		
+		public function toLaLoString(): String
+		{
+			var prj: Projection = Projection.getByCRS(ms_crs);
+			if(prj == null)
+				return null;
+			var minLalo: Coord = prj.prjXYToLaLoCoord(m_bbox.xMin, m_bbox.yMin);
+			var maxLalo: Coord = prj.prjXYToLaLoCoord(m_bbox.xMax, m_bbox.yMax);
+			
+			return String(formatNumber(minLalo.y)) + "," + String(formatNumber(minLalo.x)) + ","
+				+ String(formatNumber(maxLalo.y)) + "," + String(formatNumber(maxLalo.x));
+		}
+		
 		public function hasBBox(): Boolean
 		{ return m_bbox != null; }
 
@@ -78,13 +96,6 @@ package com.iblsoft.flexiweather.ogc
 		public function get bbox(): BBox
 		{ return m_bbox; }
 		
-		/*
-		public function set crs(value: String): void
-		{ ms_crs = value; }
-
-		public function set bbox(value: BBox): void
-		{ m_bbox = value; }
-		*/
 		public function clone(): Object
 		{
 			var crsBBox: CRSWithBBox = new CRSWithBBox(crs, bbox.clone());
