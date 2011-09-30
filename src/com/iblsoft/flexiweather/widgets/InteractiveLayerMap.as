@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.widgets
 {
+	import com.iblsoft.flexiweather.events.GetFeatureInfoEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.ogc.ISynchronisedObject;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
@@ -114,7 +115,7 @@ package com.iblsoft.flexiweather.widgets
 					layer = wrapper.m_layer;
 					newLayers.push(layer);
 					
-					addLayer(layer);
+//					addLayer(layer);
 				}
 				
 				
@@ -581,6 +582,7 @@ package com.iblsoft.flexiweather.widgets
 		}
 		
 		 private var _featureTooltipCallsRunning: Boolean;
+        private var _featureTooltipCallsTotalCount: int;
         private var _featureTooltipCallsCount: int;
         private var _featureTooltipString: String;
         public function getFeatureTooltipForAllLayers(coord: Coord): void
@@ -593,6 +595,7 @@ package com.iblsoft.flexiweather.widgets
 	        	{
 	        		if (layer.hasFeatureInfo() && layer.visible)
 	        		{
+						_featureTooltipCallsTotalCount++;
 	        			_featureTooltipCallsCount++;
 	        			layer.getFeatureInfo(coord, onFeatureInfoAvailable);
 	        		}
@@ -604,6 +607,8 @@ package com.iblsoft.flexiweather.widgets
         
         private function onFeatureInfoAvailable(s: String, layer: InteractiveLayer): void
         {
+			var firstFeatureInfo: Boolean = (_featureTooltipCallsCount == _featureTooltipCallsTotalCount);
+			
         	_featureTooltipCallsCount--;
         	s = s.replace(/<table>/g, "<table><br/>");
 			s = s.replace(/<\/table>/g, "</table><br/>");
@@ -617,17 +622,22 @@ package com.iblsoft.flexiweather.widgets
 			var infoXML: XML = new XML(s);
 			var info: String = infoXML.text();
 //        	trace("LayerComposer onFeatureInfoAvailable : " + info + " for layer: " + layer.name);
-        	_featureTooltipString += '<p><b><font color="#6EC1FF">'+layer.name+'</font></b></p>';
-        	_featureTooltipString += '<p>'+s+'</p><p></p>';
-        	
-        	var ile: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.FEATURE_INFO_RECEIVED, true);
-        	ile.text = _featureTooltipString;
-        	dispatchEvent(ile);
+        	_featureTooltipString += '<p><b><font color="#6EC1FF">'+layer.name+'</font></b>';
+//        	_featureTooltipString += '<p>'+s+'</p><p></p>';
+//			_featureTooltipString += '</p>';
+//        	_featureTooltipString += '<p>';
+			_featureTooltipString += s+'</p>';
         	
         	if (_featureTooltipCallsCount < 1)
         	{
         		_featureTooltipCallsRunning = false;
         	}
+        	var gfie: GetFeatureInfoEvent = new GetFeatureInfoEvent(GetFeatureInfoEvent.FEATURE_INFO_RECEIVED, true);
+        	gfie.text = _featureTooltipString;
+			gfie.firstFeatureInfo = firstFeatureInfo;
+			gfie.lastFeatureInfo = !_featureTooltipCallsRunning;
+        	dispatchEvent(gfie);
+        	
         }
         
          /**

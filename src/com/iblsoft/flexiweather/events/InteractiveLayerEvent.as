@@ -11,7 +11,6 @@ package com.iblsoft.flexiweather.events
 
 	public class InteractiveLayerEvent extends Event
 	{
-		public  static const FEATURE_INFO_RECEIVED: String = 'featureInfoReceived';
 		public  static const FEATURES_LOADED: String = 'featuresLoaded';
 		public  static const FEATURES_IMPORTED: String = 'featuresImported';
 		public  static const VISIBILITY_CHANGED: String = 'visibilityChanged';
