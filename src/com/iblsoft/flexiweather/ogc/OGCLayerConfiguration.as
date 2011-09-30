@@ -18,12 +18,13 @@ package com.iblsoft.flexiweather.ogc
 			super.serialize(storage);
 			if(storage.isLoading()) {
 				// dynamically link to OGCServiceConfiguration instance  
-				var s_id: String = storage.serializeString("id", null);
+//				var s_id: String = storage.serializeString("id", null);
 				var s_url: String = storage.serializeString("service-url", null);
 				var s_version: String = storage.serializeString("protocol-version", null);
 
+				//FRANTO change s_id to s_url
 				m_service = OGCServiceConfigurationManager.getInstance().getService(
-						s_id,
+						s_url,
 						s_url, Version.fromString(s_version), WMSServiceConfiguration) as
 								WMSServiceConfiguration;
 			} else {

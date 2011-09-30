@@ -23,6 +23,9 @@ package com.iblsoft.flexiweather.widgets
 		protected var m_legendCanvas: Canvas;
 		protected var m_legendLabelAlign: String;
 		
+		[Bindable]
+		public var layerName: String;
+		
 		private var _forcedLayerWidth: int = 0;
 		public function get forcedLayerWidth():int 
 		{
@@ -116,6 +119,8 @@ package com.iblsoft.flexiweather.widgets
 
 		public function onContainerSizeChanged(): void
 		{
+			this.x = 0;
+			this.y = 0;
 			this.width = container.width;
 			this.height = container.height;
 		}
@@ -195,6 +200,10 @@ package com.iblsoft.flexiweather.widgets
 				container.orderLayers();
 		}
 		
+		public function getFullURLWithSize(width: int, height: int): String
+		{
+			return '';
+		}
 		public function getFullURL(): String
 		{	return ''; }
 		/**

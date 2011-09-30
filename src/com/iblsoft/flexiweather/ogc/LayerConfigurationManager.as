@@ -2,6 +2,7 @@ package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
+	import com.iblsoft.flexiweather.utils.UniURLLoader;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.events.Event;
@@ -39,11 +40,11 @@ package com.iblsoft.flexiweather.ogc
 			storage.serializePersistentArrayCollection("layer", ma_layers, LayerConfiguration);
 		}
 		
-		public function getLayerByLabel(lbl: String): LayerConfiguration
+		public function getLayerConfigurationByLabel(lbl: String): ILayerConfiguration
 		{
 			if (ma_layers && ma_layers.length > 0)
 			{
-				for each (var layer: LayerConfiguration in ma_layers)
+				for each (var layer: ILayerConfiguration in ma_layers)
 				{
 					if (layer.label == lbl)
 						return layer;
@@ -52,17 +53,17 @@ package com.iblsoft.flexiweather.ogc
 			return null;
 		}
 		
-		public function editLayer(l: WMSLayerConfiguration): void
+		public function editLayer(l: ILayerConfiguration): void
 		{
 			notify();
 		}
-		public function addLayer(l: WMSLayerConfiguration): void
+		public function addLayer(l: ILayerConfiguration): void
 		{
 			ma_layers.addItem(l);
 			notify();
 		}
 		
-		public function removeLayer(l: WMSLayerConfiguration): void
+		public function removeLayer(l: ILayerConfiguration): void
 		{
 			var i: int = ma_layers.getItemIndex(l);
 			if(i >= 0) {
@@ -135,13 +136,13 @@ package com.iblsoft.flexiweather.ogc
 					
 					compatibleWithCRS =  layerConfig.isCompatibleWithCRS(currentCRS);
 					
-					if (currentCRS)
-					{
-						if (!compatibleWithCRS)
-						{
-							trace("Layer : " + lbl + " is not compatible with " + currentCRS);
-						}
-					}
+//					if (currentCRS)
+//					{
+//						if (!compatibleWithCRS)
+//						{
+//							trace("Layer : " + lbl + " is not compatible with " + currentCRS);
+//						}
+//					}
 					
 					if (lbl && lbl.indexOf('/') > 0)
 					{
@@ -153,7 +154,17 @@ package com.iblsoft.flexiweather.ogc
 					
 						
 					var icon: String = layerConfig.getPreviewURL();
+					if (!icon)
+					{
+						trace("stop, icon is null");
+						//just to test problem with icon is null -> remove next line when fixed
+						layerConfig.getPreviewURL();
+					}
 					
+					if (icon)
+					{
+						icon = UniURLLoader.fromBaseURL(icon);
+					}
 					var layerData: String = "layer."+layerConfig.label;
 					var layerXML: XML = <menuitem label={lbl} data={layerData} icon={icon} compatibleWithCRS={compatibleWithCRS} type={layerType}/>
 					
@@ -166,7 +177,7 @@ package com.iblsoft.flexiweather.ogc
 						layersXMLList.appendChild(layerXML);
 					}
 				}
-				var layerCustom: XML = <menuitem label="Add custom WMS layer..." data="map.add-layer-custom" type="action"/>
+				var layerCustom: XML = <menuitem label="Add custom layer..." data="map.add-layer-custom" type="action"/>
 				layersXMLList.appendChild(layerCustom);
 				
 				return layersXMLList.children();

@@ -111,7 +111,7 @@ package com.iblsoft.flexiweather.widgets
 		public function addLayer(l: InteractiveLayer, index: int = -1): void
 		{
 			l.addEventListener(InteractiveLayerEvent.LAYER_LOADED, onLayerLoaded);
-			l.addEventListener(InteractiveLayerEvent.LAYER_LOADIND_START, onLayerLoadingStart);
+			l.addEventListener(InteractiveLayerEvent.LAYER_LOADING_START, onLayerLoadingStart);
 			
 			if (index >= 0)
 				addChildAt(l, index);

@@ -575,7 +575,11 @@ package com.iblsoft.flexiweather.ogc
         
 		override public function hasFeatureInfo(): Boolean
 		{
-        	for each(var layer: WMSLayer in getWMSLayers()) {
+			var wmsLayers: Array = getWMSLayers();
+			trace("InteractiveLayerMSBase hasFeatureInfo ["+name+"]: wmsLayers: " + wmsLayers.length);
+        	for each(var layer: WMSLayer in wmsLayers) 
+			{
+				trace("\t InteractiveLayerMSBase hasFeatureInfo layer: " + layer.name + " mb_queryable: " + layer.mb_queryable);
         		if(layer.mb_queryable)
         			return true;
         	}

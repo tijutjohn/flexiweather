@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.widgets
 {
+	import com.iblsoft.flexiweather.events.GetFeatureInfoEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.ogc.ISynchronisedObject;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
@@ -23,6 +24,9 @@ package com.iblsoft.flexiweather.widgets
 	public class InteractiveLayerMap extends InteractiveLayerComposer implements Serializable
 	{
 		public static const TIMELINE_CONFIGURATION_CHANGE: String = "timelineConfigurationChange";
+		
+		public static const LAYERS_SERIALIZED_AND_READY: String = "layersSerializedAndReady";
+		[Event(name = LAYERS_SERIALIZED_AND_READY, type = "mx.events.DynamicEvent")]
 		
 		public static const TIME_AXIS_UPDATED: String = "timeAxisUpdated";
 		[Event(name = TIME_AXIS_UPDATED, type = "flash.events.DataEvent")]
@@ -80,7 +84,6 @@ package com.iblsoft.flexiweather.widgets
 		{
 			m_timelineConfiguration  = value;
 			m_timelineConfigurationChanged = true;
-			//parseAnimationLimitDates();
 			
 			dispatchEvent(new Event(TIMELINE_CONFIGURATION_CHANGE));
 		}
@@ -92,8 +95,6 @@ package com.iblsoft.flexiweather.widgets
 		
 		override public function serialize(storage: Storage): void
 		{
-			//super.serialize(storage);
-			
 			var wrappers: ArrayCollection;
 			var wrapper: LayerSerializationWrapper;
 			var layer: InteractiveLayer;
@@ -106,19 +107,22 @@ package com.iblsoft.flexiweather.widgets
 				storage.serializeNonpersistentArrayCollection("layer", wrappers, LayerSerializationWrapper);
 				m_layers.removeAll();
 				var total: int = wrappers.length - 1;
+				
+				var newLayers: Array = [];
 				for (var i: int = total; i >= 0; i--)
 				{
 					wrapper = wrappers.getItemAt(i) as LayerSerializationWrapper;
 					layer = wrapper.m_layer;
-					addLayer(layer);
+					newLayers.push(layer);
+					
+//					addLayer(layer);
 				}
+
 				
-//				for each(layer in m_layers) {
-//					addChildAt(layer, 0);
-//				}
-				
-//				debugLayers();
-//				container.debugLayers();
+				var de: DynamicEvent = new DynamicEvent(LAYERS_SERIALIZED_AND_READY);
+				de['layers'] = newLayers;
+				dispatchEvent(de);
+
 			} else {
 				//create wrapper collection
 				wrappers = new ArrayCollection();
@@ -137,8 +141,6 @@ package com.iblsoft.flexiweather.widgets
 		
 		override protected function onLayerCollectionChanged(event: CollectionEvent): void
 		{
-//			trace("onLayerCollectionChanged kind: " + event.kind);
-			
 			super.onLayerCollectionChanged(event);
 			
 			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
@@ -156,8 +158,20 @@ package com.iblsoft.flexiweather.widgets
 			dispatchEvent(new Event('frameChanged'));
 		}
 		
+		public function getLayersOrderString(): String
+		{
+			var str: String = '';
+			for each (var l: InteractiveLayer in m_layers)
+			{
+				str += "\t layer: " + l.layerName + "\n";
+			}
+			return str;
+		}
+		
 		override public function addLayer(l:InteractiveLayer):void
 		{
+			if (l)
+			{
 			super.addLayer(l);
 			
 			var dynamicEvent: DynamicEvent = new DynamicEvent(TIME_AXIS_ADDED);
@@ -172,8 +186,12 @@ package com.iblsoft.flexiweather.widgets
             		return;
             	if(so.getSynchronisedVariables().indexOf("frame") < 0)
             		return;
+					
             	//this layer can be primary layer and there is no primary layer set, set this one as primaty layer	
 				setPrimaryLayer(l as InteractiveLayerMSBase);
+			}
+			} else {
+				trace("Layer is null, do not add it to InteractiveLayerMap");
 			}
 		}
 		
@@ -564,6 +582,7 @@ package com.iblsoft.flexiweather.widgets
 		}
 		
 		 private var _featureTooltipCallsRunning: Boolean;
+        private var _featureTooltipCallsTotalCount: int;
         private var _featureTooltipCallsCount: int;
         private var _featureTooltipString: String;
         public function getFeatureTooltipForAllLayers(coord: Coord): void
@@ -576,6 +595,7 @@ package com.iblsoft.flexiweather.widgets
 	        	{
 	        		if (layer.hasFeatureInfo() && layer.visible)
 	        		{
+						_featureTooltipCallsTotalCount++;
 	        			_featureTooltipCallsCount++;
 	        			layer.getFeatureInfo(coord, onFeatureInfoAvailable);
 	        		}
@@ -587,6 +607,8 @@ package com.iblsoft.flexiweather.widgets
         
         private function onFeatureInfoAvailable(s: String, layer: InteractiveLayer): void
         {
+			var firstFeatureInfo: Boolean = (_featureTooltipCallsCount == _featureTooltipCallsTotalCount);
+			
         	_featureTooltipCallsCount--;
         	s = s.replace(/<table>/g, "<table><br/>");
 			s = s.replace(/<\/table>/g, "</table><br/>");
@@ -600,17 +622,22 @@ package com.iblsoft.flexiweather.widgets
 			var infoXML: XML = new XML(s);
 			var info: String = infoXML.text();
 //        	trace("LayerComposer onFeatureInfoAvailable : " + info + " for layer: " + layer.name);
-        	_featureTooltipString += '<p><b><font color="#6EC1FF">'+layer.name+'</font></b></p>';
-        	_featureTooltipString += '<p>'+s+'</p><p></p>';
-        	
-        	var ile: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.FEATURE_INFO_RECEIVED, true);
-        	ile.text = _featureTooltipString;
-        	dispatchEvent(ile);
+        	_featureTooltipString += '<p><b><font color="#6EC1FF">'+layer.name+'</font></b>';
+//        	_featureTooltipString += '<p>'+s+'</p><p></p>';
+//			_featureTooltipString += '</p>';
+//        	_featureTooltipString += '<p>';
+			_featureTooltipString += s+'</p>';
         	
         	if (_featureTooltipCallsCount < 1)
         	{
         		_featureTooltipCallsRunning = false;
         	}
+        	var gfie: GetFeatureInfoEvent = new GetFeatureInfoEvent(GetFeatureInfoEvent.FEATURE_INFO_RECEIVED, true);
+        	gfie.text = _featureTooltipString;
+			gfie.firstFeatureInfo = firstFeatureInfo;
+			gfie.lastFeatureInfo = !_featureTooltipCallsRunning;
+        	dispatchEvent(gfie);
+        	
         }
         
          /**
@@ -632,11 +659,13 @@ package com.iblsoft.flexiweather.widgets
 	}
 }
 
-import com.iblsoft.flexiweather.utils.Serializable;
+import com.iblsoft.flexiweather.ogc.ILayerConfiguration;
 import com.iblsoft.flexiweather.ogc.LayerConfiguration;
-import com.iblsoft.flexiweather.widgets.InteractiveLayer;
-import com.iblsoft.flexiweather.utils.Storage;
 import com.iblsoft.flexiweather.ogc.LayerConfigurationManager;
+import com.iblsoft.flexiweather.utils.Serializable;
+import com.iblsoft.flexiweather.utils.Storage;
+import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
+import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 class LayerSerializationWrapper implements Serializable
@@ -647,10 +676,12 @@ class LayerSerializationWrapper implements Serializable
 	public function serialize(storage: Storage): void
 	{
 		if(storage.isLoading()) {
-			var s_layerName: String = storage.serializeString("layer-name", null, null);
-			var config: LayerConfiguration = LayerConfigurationManager.getInstance().getLayerByLabel(s_layerName);
+			var s_layerName: String = storage.serializeString("layer-name", null, null)
+			var s_layerType: String = storage.serializeString("layer-type", null, s_layerName);
+			var config: ILayerConfiguration = LayerConfigurationManager.getInstance().getLayerConfigurationByLabel(s_layerType);
 			
 			m_layer = config.createInteractiveLayer(m_iw);
+			m_layer.layerName = s_layerName;
 			if (m_layer is Serializable)
 			{
 				(m_layer as Serializable).serialize(storage);
@@ -659,8 +690,9 @@ class LayerSerializationWrapper implements Serializable
 		else {
 			if (m_layer is Serializable)
 			{
-				storage.serializeString("layer-name", m_layer.name, null);
-				storage.serializeString("layer-name", m_layer.name, null);
+				storage.serializeString("layer-name", m_layer.layerName, null);
+				var config2: ILayerConfiguration = (m_layer as IConfigurableLayer).configuration
+				storage.serializeString("layer-type", config2.label, null);
 				(m_layer as Serializable).serialize(storage);
 			}
 		}
