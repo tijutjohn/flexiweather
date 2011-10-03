@@ -4,6 +4,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import com.iblsoft.flexiweather.ogc.CRSWithBBoxAndTilingInfo;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerQTTMS;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
+	import com.iblsoft.flexiweather.ogc.QTTMSLayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.QTTilingInfo;
 	import com.iblsoft.flexiweather.ogc.WMSLayer;
 	import com.iblsoft.flexiweather.ogc.WMSLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.WMSWithQTTLayerConfiguration;
@@ -20,6 +22,10 @@ package com.iblsoft.flexiweather.ogc.tiling
 	 **/
 	public class InteractiveLayerWMSWithQTT extends InteractiveLayerWMS
 	{
+		public static const WMS_TILING_URL_PATTERN: String = '&TILEZOOM=%ZOOM%&TILECOL=%COL%&TILEROW=%ROW%';
+		
+		public static var avoidTilingForAllLayers: Boolean = false;
+		
 		private var ma_specialCacheStrings: Array;
 		private var m_tiledLayer: InteractiveLayerQTTMS;
 
@@ -28,17 +34,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 			return m_tiledLayer;
 		}
 		
-		/**
-		 * Set this isTileable to false, if you dont want to use tiling on WMS 
-		 * (e.g. because tilling is not working with all features - e.g animation)
-		 */
-		public var avoidTiling: Boolean;
-		
 		public function get isTileable(): Boolean
 		{
-			return false;
-			
-			if (avoidTiling)
+			if ((m_cfg as WMSWithQTTLayerConfiguration).avoidTiling || avoidTilingForAllLayers)
 				return false;
 				
 			var s_crs: String = container.getCRS();
@@ -47,14 +45,12 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		public function InteractiveLayerWMSWithQTT(
 				container: InteractiveWidget,
-				cfg: WMSWithQTTLayerConfiguration,
-				b_avoidTiling: Boolean = false)
+				cfg: WMSWithQTTLayerConfiguration): void
 		{
 			super(container, cfg);
 			
-			this.avoidTiling = b_avoidTiling;
-			
-			m_tiledLayer = new InteractiveLayerQTTMS(container, null,
+			var tiledLayerConfig: QTTMSLayerConfiguration = new QTTMSLayerConfiguration();
+			m_tiledLayer = new InteractiveLayerQTTMS(container, tiledLayerConfig,
 					'', null, null, cfg.minimumZoomLevel, cfg.maximumZoomLevel);
 			addChild(m_tiledLayer);
 			
@@ -156,22 +152,39 @@ package com.iblsoft.flexiweather.ogc.tiling
 		
 		private function updateTiledLayerURLBase(): void
 		{
+			var crs: String = container.getCRS();
+			var config:QTTMSLayerConfiguration = m_tiledLayer.configuration as QTTMSLayerConfiguration;
+			
+			var tilingInfo: QTTilingInfo = config.getQTTilingInfoForCRS(crs);
+			if (!tilingInfo)
+			{
+				trace("updateTiledLayerURLBase problem with CRS"); 
+			} else {
+				tilingInfo.urlPattern = getFullURL() + WMS_TILING_URL_PATTERN;
+			}
+			/*
 			//update QTT Layer URL parts
-			m_tiledLayer.baseURLPattern = getFullURL() + '&TILEZOOM=%ZOOM%&TILECOL=%COL%&TILEROW=%ROW%';
+			m_tiledLayer.baseURLPattern = getFullURL() + WMS_TILING_URL_PATTERN;
+			*/
 			m_tiledLayer.setSpecialCacheStrings(ma_specialCacheStrings);
 		}
+		
 		
 		private function updateTiledLayerCRSs(): void
 		{
 			var a_layers: Array = getWMSLayers();
 			
+			//var config:QTTMSLayerConfiguration = m_tiledLayer.configuration as QTTMSLayerConfiguration;
+			
 			m_tiledLayer.clearCRSWithTilingExtents();
 			if(a_layers.length == 1) {
 				var l: WMSLayer = a_layers[0];
-				for each(var crsWithBBox: CRSWithBBox in l.crsWithBBoxes) {
-					if(crsWithBBox is CRSWithBBoxAndTilingInfo) {
+				for each(var crsWithBBox: CRSWithBBox in l.crsWithBBoxes) 
+				{
+					if(crsWithBBox is CRSWithBBoxAndTilingInfo) 
+					{
 						var ti: CRSWithBBoxAndTilingInfo = CRSWithBBoxAndTilingInfo(crsWithBBox);
-						m_tiledLayer.addCRSWithTilingExtent(ti.crs, ti.tilingExtent);
+						m_tiledLayer.addCRSWithTilingExtent(WMS_TILING_URL_PATTERN, ti.crs, ti.tilingExtent);
 					}
 				}
 			}

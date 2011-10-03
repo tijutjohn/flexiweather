@@ -147,7 +147,6 @@ package com.iblsoft.flexiweather.ogc
 			r.data.BBOX = s_bbox; 
 			if (i_width == 0 || i_height == 0)
 			{
-				trace("Stop, GetMap size = 0");
 				return null;
 			}
 			
@@ -280,7 +279,7 @@ package com.iblsoft.flexiweather.ogc
 			{
 				for each (var layer: WMSLayer in ma_layerConfigurations)
 				{
-					if (layer.isCompatibleWithCRS(crs))
+					if (layer && layer.isCompatibleWithCRS(crs))
 						return true;
 				}
 				return false;
@@ -307,7 +306,7 @@ package com.iblsoft.flexiweather.ogc
 						iw.setExtentBBOX(bbox);
 					iw.addLayer(lWMS);
 					lWMS.dataLoader.data = { label: label, cfg: this };
-					s_url = lWMS.getFullURL();
+					s_url = lWMS.getFullURLWithSize(150, 100);
 						
 				} else {
 					trace("getMenuLayersXMLList interactive layer does not exist");
@@ -352,6 +351,7 @@ package com.iblsoft.flexiweather.ogc
 			var l: InteractiveLayerWMS = new InteractiveLayerWMS(iw, this);
 			//l.updateData(false);
 //			l.updateData(true);
+			l.layerName = label;
 			return l;
 		}
 

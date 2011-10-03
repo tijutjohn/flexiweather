@@ -115,13 +115,23 @@ package com.iblsoft.flexiweather.ogc
 		{
 			createThumbnailBBox();
 		}
+
+		public function get maxExtent(): BBox
+		{
+			var maxExtent: BBox = ProjectionConfigurationManager.getInstance().getMaxExtentForProjection(projection);
+			if (maxExtent)
+				return maxExtent;
+			if (projection && projection.bbox)
+				return projection.bbox;
+			
+			return null;
+		}
+		
 		private function createThumbnailBBox(): void
 		{
 			return;
 			if (projection && projection.bbox)
 			{
-				var maxExtent: BBox = ProjectionConfigurationManager.getInstance().getMaxExtentForProjection(projection);
-				if (!maxExtent)
 					return;
 				if (maxExtent.equals(projection.bbox))
 					return;

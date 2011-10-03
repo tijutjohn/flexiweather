@@ -7,8 +7,10 @@ package com.iblsoft.flexiweather.ogc
 	import flash.geom.Rectangle;
 	
 	/**
-	 * Object representing a unchangable rectangular bounding box.
-	 * Object is constant. 
+	 * Representation of a contants (non-changable) rectangular 2D bounding box.
+	 * Intanstances can be safely stored in container or passed to external code without
+	 * worrying that anybody else will modify them (comparing to flash.geom.Rectangle).
+	 * This class provides basic rectangle manipulation methods. 
 	 **/
 	public class BBox
 	{
@@ -31,9 +33,9 @@ package com.iblsoft.flexiweather.ogc
 			if(other == null)
 				return false;
 			return mf_xMin == other.mf_xMin
-					&&  mf_yMin == other.mf_yMin 
-					&&  mf_xMax == other.mf_xMax 
-					&&  mf_yMax == other.mf_yMax; 
+					&& mf_yMin == other.mf_yMin
+					&& mf_xMax == other.mf_xMax
+					&& mf_yMax == other.mf_yMax; 
 		}
 		
 		public function toRectangle(): Rectangle
@@ -55,32 +57,30 @@ package com.iblsoft.flexiweather.ogc
 					xml.eastBoundLongitude, xml.northBoundLatitudey);
 		}
 
-		public function toLaLoString(crs: String): String
+		public function forProjection(crs: String): BBox
 		{
-			//TODO remove conversion to LaLo in BBOX.toBBoxString
 			var prj: Projection = Projection.getByCRS(crs);
 			if(prj == null)
 				return null;
 			var minLalo: Coord = prj.prjXYToLaLoCoord(mf_xMin, mf_yMin);
 			var maxLalo: Coord = prj.prjXYToLaLoCoord(mf_xMax, mf_yMax);
 			
-			var toDeg: Number = 180 / Math.PI;
-			
-			return String(minLalo.y * toDeg) + "," + String(minLalo.x * toDeg) + ","
-				+ String(maxLalo.y * toDeg) + "," + String(maxLalo.x * toDeg);
+			var bbox: BBox = new BBox(minLalo.x, minLalo.y, maxLalo.x, maxLalo.y);
+			return bbox;
 		}
-		
+
+
 		public function toBBOXString(): String
 		{
-        	return String(mf_xMin) + "," + String(mf_yMin) + ","
+			return String(mf_xMin) + "," + String(mf_yMin) + ","
 					+ String(mf_xMax) + "," + String(mf_yMax);
 		}
-		
+
 		public function get center(): Point
 		{
-			return new Point( mf_xMin + (mf_xMax - mf_xMin) / 2, mf_yMin + (mf_yMax - mf_yMin) / 2)
+			return new Point(mf_xMin + (mf_xMax - mf_xMin) / 2, mf_yMin + (mf_yMax - mf_yMin) / 2)
 		}
-		
+
 		public function scaled(sx: Number, sy: Number): BBox
 		{
 			var p: Point =  center;
@@ -93,16 +93,49 @@ package com.iblsoft.flexiweather.ogc
 		{
 			return new BBox(mf_xMin + dx, mf_yMin + dy, mf_xMax + dx, mf_yMax + dy);
 		}
-		
+
+		/** Returns new BBox which is union of this and other BBox. */
 		public function extendedWith(other: BBox): BBox
 		{
 			return new BBox(
-				Math.min(mf_xMin, other.mf_xMin),
-				Math.min(mf_yMin, other.mf_yMin),
-				Math.max(mf_xMax, other.mf_xMax),
-				Math.max(mf_yMax, other.mf_yMax));
+					Math.min(mf_xMin, other.mf_xMin),
+					Math.min(mf_yMin, other.mf_yMin),
+					Math.max(mf_xMax, other.mf_xMax),
+					Math.max(mf_yMax, other.mf_yMax));
 		}
 
+		/** Checks in this BBox contains other BBox. By definition this contains this. */
+		public function contains(other: BBox): Boolean
+		{
+			return other.mf_xMin >= mf_xMin && other.mf_xMin <= mf_xMax
+					&& other.mf_xMax >= mf_xMin && other.mf_xMax <= mf_xMax
+					&& other.mf_yMin >= mf_yMin && other.mf_yMin <= mf_yMax
+					&& other.mf_yMax >= mf_yMin && other.mf_yMax <= mf_yMax;
+		}
+
+		/** Returns new BBox which is intersection of this and other BBox. */
+		public function intersected(other: BBox): BBox
+		{
+			var intersected: BBox = new BBox(mf_xMin, mf_yMin, mf_xMax, mf_yMax);
+			if(other.mf_xMin > intersected.mf_xMin)
+				intersected.mf_xMin = other.mf_xMin;
+			if(other.mf_xMax < intersected.mf_xMax)
+				intersected.mf_xMax = other.mf_xMax;
+			if(other.mf_yMin > intersected.mf_yMin)
+				intersected.mf_yMin = other.mf_yMin;
+			if(other.mf_yMax < intersected.mf_yMax)
+				intersected.mf_yMax = other.mf_yMax;
+			return intersected;
+		}
+		
+		public function get isEmpty(): Boolean
+		{
+			return width == 0 || height == 0;
+		}
+		
+		public function get surface(): Number
+		{ return width * height; }
+		
 		public function get xMin(): Number
 		{ return mf_xMin; }
 
@@ -123,7 +156,7 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function toString(): String
 		{
-			return 'BBox ' + xMin + " , " + yMin + " , " + xMax + " , " + yMax;
+			return 'BBox ' + xMin + ", " + yMin + ", " + xMax + ", " + yMax;
 		}
 		
 		public function clone(): BBox

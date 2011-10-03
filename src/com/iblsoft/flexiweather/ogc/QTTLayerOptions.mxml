@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml"
+		 minWidth="250" minHeight="100" width="250" height="100">
+
+	<mx:VBox width="100%" height="100%" >
+		<mx:HBox width="100%">
+			<mx:Label text="Label:" width="120"/>
+			<mx:TextInput id="txtLayerName" width="100%" text="{label}" change="changeLabel()"/>
+		</mx:HBox>
+	</mx:VBox>  
+	
+	<mx:Script>
+		<![CDATA[
+			[Bindable]
+			public var selectMapTypeIndex:int;
+			
+			private var _layer: InteractiveLayerQTTMS;
+			
+			public function get layer():InteractiveLayerQTTMS
+			{
+				return _layer;
+			}
+			
+			public function set layer(value:InteractiveLayerQTTMS):void
+			{
+				_layer = value;
+				if (_layer)
+				{
+//					var cfg: QTTMSLayerConfiguration = value.configuration as QTTMSLayerConfiguration;
+					label = value.layerName;
+				}
+			}
+			private function changeLabel(): void
+			{
+				if (layer)
+				{
+					layer.layerName = txtLayerName.text;
+				}
+			}
+			
+		]]>
+	</mx:Script>
+</mx:Canvas>

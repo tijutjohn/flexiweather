@@ -169,6 +169,11 @@ package com.iblsoft.flexiweather.ogc
 		{
 			
 		}
+		
+		override public function getFullURLWithSize(width: int, height: int): String
+		{
+			return getGetMapFullUrl( width, height );
+		}
 		/**
 		 * function returns full URL for getting map 
 		 * @return 
@@ -176,9 +181,14 @@ package com.iblsoft.flexiweather.ogc
 		 */		
 		override public function getFullURL(): String
 		{
+			return getGetMapFullUrl( int(container.width), int(container.height) );
+		}
+		
+		private function getGetMapFullUrl(width: int, height: int): String
+		{
 			var request: URLRequest = m_cfg.toGetMapRequest(
 					container.getCRS(), container.getViewBBox().toBBOXString(),
-					int(container.width), int(container.height),
+					width, height,
 					getWMSStyleListString());
 			if (!request)
 				return null;
@@ -575,11 +585,7 @@ package com.iblsoft.flexiweather.ogc
         
 		override public function hasFeatureInfo(): Boolean
 		{
-			var wmsLayers: Array = getWMSLayers();
-			trace("InteractiveLayerMSBase hasFeatureInfo ["+name+"]: wmsLayers: " + wmsLayers.length);
-        	for each(var layer: WMSLayer in wmsLayers) 
-			{
-				trace("\t InteractiveLayerMSBase hasFeatureInfo layer: " + layer.name + " mb_queryable: " + layer.mb_queryable);
+        	for each(var layer: WMSLayer in getWMSLayers()) {
         		if(layer.mb_queryable)
         			return true;
         	}
