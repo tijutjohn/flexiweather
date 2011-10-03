@@ -7,6 +7,7 @@ package com.iblsoft.flexiweather.plugins
 		public static const ACTION: String = "action";
 		public static const DOCKLET: String = "docklet";
 		public static const CHAT: String = "chat";
+		public static const POPUP: String = "popup";
 		public static const PERSISTENT_CONFIGURATION: String = "persistenConfiguration";
 		public static const PANE_CLIENT: String = "paneClient";
 		public static const INTERACTIVE_WIDGET_CLIENT: String = "interactiveWidgetClient";
@@ -46,6 +47,17 @@ package com.iblsoft.flexiweather.plugins
 		{
 			return new PluginAbility(PluginAbility.DOCKLET, s_id, s_plugin_id, classOrInstance) 
 					.withMetadata("name", s_name);
+		}
+		
+		public static function popup(classOrInstance: Object,
+				s_id: String, s_name: String, b_isModal: Boolean,  s_plugin_id: String = null): PluginAbility
+		{
+			var ability: PluginAbility = new PluginAbility(PluginAbility.POPUP, s_id, s_plugin_id, classOrInstance);
+			
+			ability.withMetadata("name", s_name);
+			ability.withMetadata("isModal", b_isModal);
+			
+			return ability;
 		}
 		
 		public static function chat(classOrInstance: Object,
@@ -98,14 +110,19 @@ package com.iblsoft.flexiweather.plugins
 		}
 		
 		public static function submenuItem(classOrInstance: Object,
-				s_mainMenu_id: String, s_menu_id: String, s_name: String, i_priority: int, s_type: String = '', f_callback: Function = null, s_plugin_id: String = null): PluginAbility
+				s_mainMenu_id: String, s_menu_id: String, s_name: String, i_priority: int, s_type: String = '', f_callback: Function = null, s_plugin_id: String = null, s_menuString: String = ''): PluginAbility
 		{
+			if (s_menuString != '')
+			{
+				trace("stop");
+			}
 			var ability: PluginAbility = new PluginAbility(PluginAbility.SUBMENU_ITEM, s_menu_id, s_plugin_id, classOrInstance)
 			ability.withMetadata("name", s_name);
 			ability.withMetadata("mainMenuID", s_mainMenu_id);
 			ability.withMetadata("priority", i_priority);
 			ability.withMetadata("callback", f_callback);
 			ability.withMetadata("type", s_type);
+			ability.withMetadata("menuString", s_menuString);
 			
 			return ability;
 		}
