@@ -617,6 +617,13 @@ package com.iblsoft.flexiweather.widgets
 			s = s.replace(/<tr>/g, "<tr><br/>");
 			s = s.replace(/<td>/g, "<td>&nbsp;");
 			
+			s = s.replace(/<small>/g, "<p>");
+			
+			s = s.replace(/<\/small>/g, "</p>");
+			
+			//TODO this needs to be fixed on server
+			s = s.replace(/<small\/>/g, "</p>");
+			
 			s = s.substring(s.indexOf('<body>'), s.length);
 			s = s.substring(6,s.indexOf('</html>'));
 			//remove body
