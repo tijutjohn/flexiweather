@@ -12,11 +12,11 @@
 			public static const PASSWORD: int = 2;
 			
 			[Bindable]
-			protected var ms_label: String;
+			public var ms_label: String;
 			[Bindable]
-			protected var mi_echoMode: int = NORMAL;
+			public var mi_echoMode: int = NORMAL;
 			[Bindable]
-			protected var ms_text: String;
+			public var ms_text: String;
 
 			protected var m_okCallback: Function;
 			protected var m_cancelCallback: Function;

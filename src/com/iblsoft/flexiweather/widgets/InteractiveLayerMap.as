@@ -607,6 +607,8 @@ package com.iblsoft.flexiweather.widgets
         
         private function onFeatureInfoAvailable(s: String, layer: InteractiveLayer): void
         {
+			trace("onFeatureInfoAvailable: " + s);
+			
 			var firstFeatureInfo: Boolean = (_featureTooltipCallsCount == _featureTooltipCallsTotalCount);
 			
         	_featureTooltipCallsCount--;

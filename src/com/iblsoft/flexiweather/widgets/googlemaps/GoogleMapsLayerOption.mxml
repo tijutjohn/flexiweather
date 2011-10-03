@@ -2,21 +2,87 @@
 <mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" 
 		 minWidth="250" minHeight="100" width="250" height="100">
 	
-	<mx:HBox>
-		<mx:Label text="Map type:"/>
-		<mx:Button label="Hybrid" click="switchMapType(MapType.HYBRID_MAP_TYPE)"/>
-		<mx:Button label="Normal" click="switchMapType(MapType.NORMAL_MAP_TYPE)"/>
-		<mx:Button label="Physical" click="switchMapType(MapType.PHYSICAL_MAP_TYPE)"/>
-		<mx:Button label="Satellite" click="switchMapType(MapType.SATELLITE_MAP_TYPE)"/>
-	</mx:HBox>
+	<mx:VBox width="100%" height="100%" >
+    <mx:HBox>
+      <mx:Label text="Map type:"/>
+      <mx:Button label="Hybrid" click="switchMapType(MapType.HYBRID_MAP_TYPE)"/>
+      <mx:Button label="Normal" click="switchMapType(MapType.NORMAL_MAP_TYPE)"/>
+      <mx:Button label="Physical" click="switchMapType(MapType.PHYSICAL_MAP_TYPE)"/>
+      <mx:Button label="Satellite" click="switchMapType(MapType.SATELLITE_MAP_TYPE)"/>
+    </mx:HBox>
+    <mx:Label text="ViewBBox: {viewBBox}"/>
+		<mx:Label text="Negotiated BBoxes (latest first)" fontWeight="bold"/>
+		<mx:List dataProvider="{negotiatedBBoxes}" width="100%" rowCount="{negotiatedBBoxes.length}">
+			<mx:itemRenderer>
+				<mx:Component>
+			        <mx:HBox width="100%" paddingBottom="3" paddingLeft="3" paddingRight="3" paddingTop="3">
+						<mx:Script>
+							<![CDATA[
+								import com.iblsoft.flexiweather.ogc.BBox;
+							]]>
+						</mx:Script>
+						<mx:Label width="120" text="{(data as BBox).toBBOXString()}" fontSize="9"/>
+          			</mx:HBox>
+				</mx:Component>
+			</mx:itemRenderer>
+		</mx:List>
+	</mx:VBox> 
 	
 	<mx:Script>
 		<![CDATA[
+			import mx.collections.ArrayCollection;
 			import com.google.maps.MapType;
 			import com.google.maps.interfaces.IMapType;
 			
-			public var layer: InteractiveLayerGoogleMaps;
+			[Bindable]
+			public var selectMapTypeIndex:int;
+			[Bindable]
+			public var negotiatedBBoxes:ArrayCollection;
 			
+			[Bindable]
+			public var viewBBox: String;
+			
+			private var _layer: InteractiveLayerGoogleMaps;
+			
+
+			public function get layer():InteractiveLayerGoogleMaps
+			{
+				return _layer;
+			}
+
+			public function set layer(value:InteractiveLayerGoogleMaps):void
+			{
+				_layer = value;
+				if (_layer)
+				{
+					var cfg: GoogleMapLayerConfiguration = value.configuration as GoogleMapLayerConfiguration;
+					var type: String = _layer.mapType;//cfg.mapType;
+					if (type == null)
+						type = cfg.mapType
+					viewBBox = layer.getViewBBox().toString();
+					negotiatedBBoxes = layer.negotiatedBBoxes;
+					
+					switch (type)
+					{
+						default:
+						case GoogleMapLayerConfiguration.MAP_TYPE_NORMAL:
+							selectMapTypeIndex = 0;
+							break;
+						case GoogleMapLayerConfiguration.MAP_TYPE_PHYSICAL:
+							selectMapTypeIndex = 1;
+							break;
+						case GoogleMapLayerConfiguration.MAP_TYPE_SATELLITE:
+							selectMapTypeIndex = 2;
+							break;
+						case GoogleMapLayerConfiguration.MAP_TYPE_HYBRID:
+							selectMapTypeIndex = 3;
+							break;
+					}
+				}
+				
+				trace("GoogleMapslayerOption SET layer selectMapTypeIndex: " + selectMapTypeIndex);
+			}
+
 			private function switchMapType(type: IMapType): void
 			{
 				if (layer)

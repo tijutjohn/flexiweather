@@ -4,6 +4,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
+	import com.iblsoft.flexiweather.widgets.googlemaps.InteractiveLayerGoogleMaps;
 	
 	import flash.display.DisplayObject;
 	import flash.events.Event;
@@ -34,7 +35,9 @@ package com.iblsoft.flexiweather.widgets
 			//TODO notification are not needed, addItem notify already
 			notifyLayersChanged(l);
 			
-			//orderLayers();
+			//when new layer is added to container, call onAreaChange to notify layer, that layer is already added to container, so it can render itself
+			l.onAreaChanged(true);
+			
 		}
 		
 
@@ -44,10 +47,8 @@ package com.iblsoft.flexiweather.widgets
 //			return;
 			if (layer)
 			{
-//				trace("COMPOSER notifyLayersChanged: " + layer);
 				m_layers.itemUpdated(layer);	
 			} else {
-//				trace("COMPOSER notifyLayersChanged ");
 				dispatchEvent(new Event("layersChanged"));
 			}
 		}
@@ -160,10 +161,9 @@ package com.iblsoft.flexiweather.widgets
             	
             	var fnc: Function = l[functionName] as Function;
             	fnc.apply(l, params);
-            	
-            	trace("COMPOSER: callLayersFunction " + functionName + " on layer: " + l);
 			}
 		}
+		
 		override public function onAreaChanged(b_finalChange: Boolean): void
 		{
 			for each(var l: InteractiveLayer in m_layers) {
@@ -189,10 +189,21 @@ package com.iblsoft.flexiweather.widgets
 			var s_crs: String = container.getCRS();
 			
 //			trace("\n\n\tInteractiveLayerComposer negotiateBBox newBBox at startup: :" + newBBox.toLaLoString(s_crs));
+			var latestBBox: BBox;
 			for(var i: int = 0; i < m_layers.length; ++i) {
 				
 				var l: InteractiveLayer = InteractiveLayer(m_layers.getItemAt(i));
-				newBBox = l.negotiateBBox(newBBox, changeZoom);
+				latestBBox = l.negotiateBBox(newBBox, changeZoom);
+				if (!latestBBox.equals(newBBox))
+				{
+//					trace("WARNING: COMPOSER bbox changed by layer " + l.layerName);
+					if (l is InteractiveLayerGoogleMaps)
+					{
+						var viewBBox: BBox = (l as InteractiveLayerGoogleMaps).getViewBBox();
+//						trace("\t current view for google maps: " + viewBBox);
+					}
+				}
+				newBBox = latestBBox;
 //				trace("\tInteractiveLayerComposer negotiateBBox newBBox ["+i+"] :" + newBBox.toLaLoString(s_crs));
 			}
 //			trace("\tInteractiveLayerComposer negotiateBBox newBBox at end: :" + newBBox.toLaLoString(s_crs));
@@ -249,7 +260,11 @@ package com.iblsoft.flexiweather.widgets
 					}
 					// add layers as children in reversed order
 					for each(l in m_layers) {
-						addChildAt(l, 0);
+						if (l)
+							addChildAt(l, 0);
+						else {
+							trace("onLayerCollectionChanged: Layer is null")
+						}
 					}
 //					trace("onLayerCollectionChanged reverse order");
 					notifyLayersChanged();

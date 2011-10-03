@@ -21,8 +21,11 @@ package com.iblsoft.flexiweather.widgets
 	import mx.core.Container;
 	import mx.events.ResizeEvent;
 
+	[Event (name="viewBBoxChanged", type="flash.events.Event")]
 	public class InteractiveWidget extends Container
 	{
+		public static const VIEW_BBOX_CHANGED: String = 'viewBBoxChanged';
+		
         private var ms_crs: String = Projection.CRS_EPSG_GEOGRAPHIC;
 		private var m_crsProjection: Projection = Projection.getByCRS(ms_crs);
         private var m_viewBBox: BBox = new BBox(-180, -90, 180, 90);
@@ -65,7 +68,6 @@ package com.iblsoft.flexiweather.widgets
 			if(child is InteractiveLayer) {
 				// InteractiveLayer based child are added to m_layerContainer
 				InteractiveLayer(child).container = this; // this also ensures that child is InteractiveLayer
-				
 				child.width = width;
 				child.height = height;
 				var o: DisplayObject = m_layerContainer.addChild(child);
@@ -81,6 +83,8 @@ package com.iblsoft.flexiweather.widgets
 			if(child is InteractiveLayer) {
 				// InteractiveLayer based child are added to m_layerContainer
 				InteractiveLayer(child).container = this; // this also ensures that child is InteractiveLayer
+				child.x = x;
+				child.y = y;
 				child.width = width;
 				child.height = height;
 				var o: DisplayObject = m_layerContainer.addChildAt(child, index);
@@ -108,6 +112,7 @@ package com.iblsoft.flexiweather.widgets
 				dispatchEvent(ile);
 			}
 		}
+		
 		public function addLayer(l: InteractiveLayer, index: int = -1): void
 		{
 			l.addEventListener(InteractiveLayerEvent.LAYER_LOADED, onLayerLoaded);
@@ -117,9 +122,13 @@ package com.iblsoft.flexiweather.widgets
 				addChildAt(l, index);
 			else
 				addChild(l);
+			
+			//when new layer is added to container, call onAreaChange to notify layer, that layer is already added to container, so it can render itself
+			l.onAreaChanged(true);
+			
 			orderLayers();
 		}
-
+		
 		public function removeLayer(l: InteractiveLayer, b_destroy: Boolean = false): void
 		{
 			if(l.parent == m_layerContainer) {
@@ -545,13 +554,20 @@ package com.iblsoft.flexiweather.widgets
 		
 		private function negotiateBBox(newBBox: BBox, b_finalChange: Boolean, b_changeZoom: Boolean = true): void
 		{
+//			trace("\n *****************************************************************************");
 //			trace("\t IWidget negotiateBBox newBBox at startup: :" + newBBox.toLaLoString(ms_crs));
 //			trace("\t IWidget negotiateBBox newBBox at startup: :" + newBBox);
+			var latestBBox: BBox;
 			for(var i: int = 0; i < m_layerContainer.numChildren; ++i) {
 				
 				var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getChildAt(i));
 				
-				newBBox = l.negotiateBBox(newBBox, b_changeZoom);
+				latestBBox = l.negotiateBBox(newBBox, b_changeZoom);
+				if (!latestBBox.equals(newBBox))
+				{
+					trace("WARNING: bbox changed by layer " + l.layerName);
+				}
+				newBBox = latestBBox;
 //				if (newBBox) {
 //					trace("\t\t IWidget negotiateBBox newBBox :" + newBBox.toLaLoString(ms_crs));
 //					trace("\t\t IWidget negotiateBBox newBBox :" + newBBox);
@@ -563,13 +579,19 @@ package com.iblsoft.flexiweather.widgets
 //			trace("IWidget negotiateBBox newBBox at end: :" + newBBox);
 			
 			setViewBBoxAfterNegotiation(newBBox, b_finalChange);
+//			trace("*****************************************************************************\n");
 		}
 		
 		private function setViewBBoxAfterNegotiation(newBBox: BBox, b_finalChange: Boolean): void
 		{
-			trace("\t IWidget setViewBBoxAfterNegotiation newBBox :" + newBBox.toLaLoString(ms_crs));
-			trace("\t IWidget setViewBBoxAfterNegotiation newBBox :" + newBBox);
+//			trace("\t IWidget setViewBBoxAfterNegotiation newBBox :" + newBBox.toLaLoString(ms_crs));
+//			trace("\t IWidget setViewBBoxAfterNegotiation newBBox :" + newBBox);
+
+			//dispath view bbox changed event to notify about change
 			m_viewBBox = newBBox;
+			
+			dispatchEvent(new Event(VIEW_BBOX_CHANGED));
+			
 			signalAreaChanged(b_finalChange);
 		}
 		

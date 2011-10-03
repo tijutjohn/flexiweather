@@ -204,6 +204,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			return '';
 		}
+		
 		public function getFullURL(): String
 		{	return ''; }
 		/**
