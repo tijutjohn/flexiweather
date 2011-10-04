@@ -17,7 +17,9 @@ package com.iblsoft.flexiweather.widgets
 	import flash.events.DataEvent;
 	import flash.events.Event;
 	
+	import mx.charts.CategoryAxis;
 	import mx.collections.ArrayCollection;
+	import mx.controls.Alert;
 	import mx.events.CollectionEvent;
 	import mx.events.DynamicEvent;
 	
@@ -589,6 +591,7 @@ package com.iblsoft.flexiweather.widgets
         {
         	if (!_featureTooltipCallsRunning)
         	{
+				_featureTooltipCallsTotalCount = 0;
 	        	_featureTooltipCallsCount = 0;
 	        	_featureTooltipString = '';
 	        	for each (var layer: InteractiveLayer in layers)
@@ -612,9 +615,11 @@ package com.iblsoft.flexiweather.widgets
 			{
 				trace("Stop tag <small> is included in feature info");
 			}
+			trace("InteractiveLayerMap onFeatureInfoAvailable _featureTooltipCallsCount: " + _featureTooltipCallsCount + " _featureTooltipCallsTotalCount: " + _featureTooltipCallsTotalCount); 
 			var firstFeatureInfo: Boolean = (_featureTooltipCallsCount == _featureTooltipCallsTotalCount);
 			
         	_featureTooltipCallsCount--;
+			
         	s = s.replace(/<table>/g, "<table><br/>");
 			s = s.replace(/<\/table>/g, "</table><br/>");
 			s = s.replace(/<tr>/g, "<tr><br/>");
@@ -627,28 +632,55 @@ package com.iblsoft.flexiweather.widgets
 			//TODO this needs to be fixed on server
 			s = s.replace(/<small\/>/g, "</p>");
 			
-			s = s.substring(s.indexOf('<body>'), s.length);
-			s = s.substring(6,s.indexOf('</html>'));
+			//remove <p></p>
+			s = s.replace(/<p><\/p>/g, "");
+			
+			s = s.substring(s.indexOf('<body'), s.length);
+			//find closest >, which close <body tag
+			var bodyTagClose: int = s.indexOf('>') + 1;
+			
+			s = s.substring(bodyTagClose ,s.indexOf('</html>'));
 			//remove body
 			s = s.substring(0,s.indexOf('</body>'));
-			var infoXML: XML = new XML(s);
-			var info: String = infoXML.text();
-//        	trace("LayerComposer onFeatureInfoAvailable : " + info + " for layer: " + layer.name);
-        	_featureTooltipString += '<p><b><font color="#6EC1FF">'+layer.name+'</font></b>';
-//        	_featureTooltipString += '<p>'+s+'</p><p></p>';
-//			_featureTooltipString += '</p>';
-//        	_featureTooltipString += '<p>';
-			_featureTooltipString += s+'</p>';
-        	
+			
+			var parsingCorrect: Boolean = true;
+			try {
+				var infoXML: XML = new XML(s);
+			} catch (error: Error) {
+				parsingCorrect = false;
+				trace("ERROR parsing FEatureINFO");
+				Alert.show(error.message, "Problem with parsing GetFeatureInfo request", Alert.OK);
+			}
         	if (_featureTooltipCallsCount < 1)
         	{
         		_featureTooltipCallsRunning = false;
         	}
-        	var gfie: GetFeatureInfoEvent = new GetFeatureInfoEvent(GetFeatureInfoEvent.FEATURE_INFO_RECEIVED, true);
-        	gfie.text = _featureTooltipString;
-			gfie.firstFeatureInfo = firstFeatureInfo;
-			gfie.lastFeatureInfo = !_featureTooltipCallsRunning;
-        	dispatchEvent(gfie);
+			
+			var gfie: GetFeatureInfoEvent;
+			
+			if (parsingCorrect)
+			{
+				var info: String = infoXML.text();
+	        	_featureTooltipString += '<p><b><font color="#6EC1FF">'+layer.name+'</font></b>';
+				_featureTooltipString += s+'</p>';
+	        	
+				
+				trace("InteractiveLayerMap onFeatureInfoAvailable _featureTooltipCallsRunning: " + _featureTooltipCallsRunning);
+				
+				gfie = new GetFeatureInfoEvent(GetFeatureInfoEvent.FEATURE_INFO_RECEIVED, true);
+	        	gfie.text = _featureTooltipString;
+				gfie.firstFeatureInfo = firstFeatureInfo;
+				gfie.lastFeatureInfo = !_featureTooltipCallsRunning;
+	        	dispatchEvent(gfie);
+				
+				trace("InteractiveLayerMap onFeatureInfoAvailable event gfie.firstFeatureInfo: " + gfie.firstFeatureInfo + " gfie.lastFeatureInfo: " + gfie.lastFeatureInfo);
+			} else {
+				gfie = new GetFeatureInfoEvent(GetFeatureInfoEvent.FEATURE_INFO_RECEIVED, true);
+				gfie.text = 'parsing problem';
+				gfie.firstFeatureInfo = firstFeatureInfo;
+				gfie.lastFeatureInfo = !_featureTooltipCallsRunning;
+				dispatchEvent(gfie);
+			}
         	
         }
         

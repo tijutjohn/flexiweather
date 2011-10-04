@@ -1161,7 +1161,7 @@ package com.iblsoft.flexiweather.ogc
 		
 		protected function onFeatureInfoLoadFailed(event: UniURLLoaderEvent): void
 		{
-			m_featureInfoCallBack.call(null, event.result.toString());
+			m_featureInfoCallBack.call(null, String(event.result), this);
 			m_featureInfoCallBack = null;
 		}
 		
