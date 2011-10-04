@@ -10,6 +10,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.utils.DateUtils;
+	import com.iblsoft.flexiweather.utils.HTMLUtils;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.utils.XMLStorage;
@@ -620,28 +621,7 @@ package com.iblsoft.flexiweather.widgets
 			
         	_featureTooltipCallsCount--;
 			
-        	s = s.replace(/<table>/g, "<table><br/>");
-			s = s.replace(/<\/table>/g, "</table><br/>");
-			s = s.replace(/<tr>/g, "<tr><br/>");
-			s = s.replace(/<td>/g, "<td>&nbsp;");
-			
-			s = s.replace(/<small>/g, "<p>");
-			
-			s = s.replace(/<\/small>/g, "</p>");
-			
-			//TODO this needs to be fixed on server
-			s = s.replace(/<small\/>/g, "</p>");
-			
-			//remove <p></p>
-			s = s.replace(/<p><\/p>/g, "");
-			
-			s = s.substring(s.indexOf('<body'), s.length);
-			//find closest >, which close <body tag
-			var bodyTagClose: int = s.indexOf('>') + 1;
-			
-			s = s.substring(bodyTagClose ,s.indexOf('</html>'));
-			//remove body
-			s = s.substring(0,s.indexOf('</body>'));
+        	s = HTMLUtils.fixFeatureInfoHTML(s);
 			
 			var parsingCorrect: Boolean = true;
 			try {
@@ -667,20 +647,17 @@ package com.iblsoft.flexiweather.widgets
 				
 				trace("InteractiveLayerMap onFeatureInfoAvailable _featureTooltipCallsRunning: " + _featureTooltipCallsRunning);
 				
-				gfie = new GetFeatureInfoEvent(GetFeatureInfoEvent.FEATURE_INFO_RECEIVED, true);
-	        	gfie.text = _featureTooltipString;
-				gfie.firstFeatureInfo = firstFeatureInfo;
-				gfie.lastFeatureInfo = !_featureTooltipCallsRunning;
-	        	dispatchEvent(gfie);
-				
-				trace("InteractiveLayerMap onFeatureInfoAvailable event gfie.firstFeatureInfo: " + gfie.firstFeatureInfo + " gfie.lastFeatureInfo: " + gfie.lastFeatureInfo);
 			} else {
-				gfie = new GetFeatureInfoEvent(GetFeatureInfoEvent.FEATURE_INFO_RECEIVED, true);
-				gfie.text = 'parsing problem';
-				gfie.firstFeatureInfo = firstFeatureInfo;
-				gfie.lastFeatureInfo = !_featureTooltipCallsRunning;
-				dispatchEvent(gfie);
+				_featureTooltipString += '<p><b><font color="#6EC1FF">'+layer.name+'</font></b>';
+				_featureTooltipString += 'parsing problem</p>'
+					
 			}
+			gfie = new GetFeatureInfoEvent(GetFeatureInfoEvent.FEATURE_INFO_RECEIVED, true);
+			gfie.text = _featureTooltipString;
+			gfie.firstFeatureInfo = firstFeatureInfo;
+			gfie.lastFeatureInfo = !_featureTooltipCallsRunning;
+			dispatchEvent(gfie);
+			trace("InteractiveLayerMap onFeatureInfoAvailable event gfie.firstFeatureInfo: " + gfie.firstFeatureInfo + " gfie.lastFeatureInfo: " + gfie.lastFeatureInfo);
         	
         }
         
