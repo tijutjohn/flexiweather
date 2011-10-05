@@ -10,6 +10,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.utils.DateUtils;
+	import com.iblsoft.flexiweather.utils.HTMLUtils;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.utils.XMLStorage;
@@ -18,6 +19,7 @@ package com.iblsoft.flexiweather.widgets
 	import flash.events.Event;
 	
 	import mx.collections.ArrayCollection;
+	import mx.controls.Alert;
 	import mx.events.CollectionEvent;
 	import mx.events.DynamicEvent;
 	
@@ -117,7 +119,7 @@ package com.iblsoft.flexiweather.widgets
 					
 //					addLayer(layer);
 				}
-
+				
 				
 				var de: DynamicEvent = new DynamicEvent(LAYERS_SERIALIZED_AND_READY);
 				de['layers'] = newLayers;
@@ -172,24 +174,24 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (l)
 			{
-			super.addLayer(l);
-			
-			var dynamicEvent: DynamicEvent = new DynamicEvent(TIME_AXIS_ADDED);
-			trace("InteractiveLayerMap addlayer: " + l.name);
-			dynamicEvent['layer'] = l;
-			dispatchEvent(dynamicEvent);
-			
-			if (getPrimaryLayer() == null)
-			{
-				var so: ISynchronisedObject = l as ISynchronisedObject;
-            	if(so == null)
-            		return;
-            	if(so.getSynchronisedVariables().indexOf("frame") < 0)
-            		return;
+				super.addLayer(l);
+				
+				var dynamicEvent: DynamicEvent = new DynamicEvent(TIME_AXIS_ADDED);
+				trace("InteractiveLayerMap addlayer: " + l.name);
+				dynamicEvent['layer'] = l;
+				dispatchEvent(dynamicEvent);
+				
+				if (getPrimaryLayer() == null)
+				{
+					var so: ISynchronisedObject = l as ISynchronisedObject;
+	            	if(so == null)
+	            		return;
+	            	if(so.getSynchronisedVariables().indexOf("frame") < 0)
+	            		return;
 					
-            	//this layer can be primary layer and there is no primary layer set, set this one as primaty layer	
-				setPrimaryLayer(l as InteractiveLayerMSBase);
-			}
+	            	//this layer can be primary layer and there is no primary layer set, set this one as primaty layer	
+					setPrimaryLayer(l as InteractiveLayerMSBase);
+				}
 			} else {
 				trace("Layer is null, do not add it to InteractiveLayerMap");
 			}
@@ -589,6 +591,7 @@ package com.iblsoft.flexiweather.widgets
         {
         	if (!_featureTooltipCallsRunning)
         	{
+				_featureTooltipCallsTotalCount = 0;
 	        	_featureTooltipCallsCount = 0;
 	        	_featureTooltipString = '';
 	        	for each (var layer: InteractiveLayer in layers)
@@ -607,45 +610,53 @@ package com.iblsoft.flexiweather.widgets
         
         private function onFeatureInfoAvailable(s: String, layer: InteractiveLayer): void
         {
-			trace("onFeatureInfoAvailable: " + s);
-			
+
+			if (s.indexOf('small') >= 0)
+			{
+				trace("Stop tag <small> is included in feature info");
+			}
+			trace("InteractiveLayerMap onFeatureInfoAvailable _featureTooltipCallsCount: " + _featureTooltipCallsCount + " _featureTooltipCallsTotalCount: " + _featureTooltipCallsTotalCount); 
 			var firstFeatureInfo: Boolean = (_featureTooltipCallsCount == _featureTooltipCallsTotalCount);
 			
         	_featureTooltipCallsCount--;
-        	s = s.replace(/<table>/g, "<table><br/>");
-			s = s.replace(/<\/table>/g, "</table><br/>");
-			s = s.replace(/<tr>/g, "<tr><br/>");
-			s = s.replace(/<td>/g, "<td>&nbsp;");
 			
-			s = s.replace(/<small>/g, "<p>");
+        	s = HTMLUtils.fixFeatureInfoHTML(s);
 			
-			s = s.replace(/<\/small>/g, "</p>");
-			
-			//TODO this needs to be fixed on server
-			s = s.replace(/<small\/>/g, "</p>");
-			
-			s = s.substring(s.indexOf('<body>'), s.length);
-			s = s.substring(6,s.indexOf('</html>'));
-			//remove body
-			s = s.substring(0,s.indexOf('</body>'));
-			var infoXML: XML = new XML(s);
-			var info: String = infoXML.text();
-//        	trace("LayerComposer onFeatureInfoAvailable : " + info + " for layer: " + layer.name);
-        	_featureTooltipString += '<p><b><font color="#6EC1FF">'+layer.name+'</font></b>';
-//        	_featureTooltipString += '<p>'+s+'</p><p></p>';
-//			_featureTooltipString += '</p>';
-//        	_featureTooltipString += '<p>';
-			_featureTooltipString += s+'</p>';
-        	
+			var parsingCorrect: Boolean = true;
+			try {
+				var infoXML: XML = new XML(s);
+			} catch (error: Error) {
+				parsingCorrect = false;
+				trace("ERROR parsing FEatureINFO");
+				Alert.show(error.message, "Problem with parsing GetFeatureInfo request", Alert.OK);
+			}
         	if (_featureTooltipCallsCount < 1)
         	{
         		_featureTooltipCallsRunning = false;
         	}
-        	var gfie: GetFeatureInfoEvent = new GetFeatureInfoEvent(GetFeatureInfoEvent.FEATURE_INFO_RECEIVED, true);
-        	gfie.text = _featureTooltipString;
+			
+			var gfie: GetFeatureInfoEvent;
+			
+			if (parsingCorrect)
+			{
+				var info: String = infoXML.text();
+	        	_featureTooltipString += '<p><b><font color="#6EC1FF">'+layer.name+'</font></b>';
+				_featureTooltipString += s+'</p>';
+	        	
+				
+				trace("InteractiveLayerMap onFeatureInfoAvailable _featureTooltipCallsRunning: " + _featureTooltipCallsRunning);
+				
+			} else {
+				_featureTooltipString += '<p><b><font color="#6EC1FF">'+layer.name+'</font></b>';
+				_featureTooltipString += '<p><b><font color="#ff0000">parsing problem</font></b></p></p>'
+					
+			}
+			gfie = new GetFeatureInfoEvent(GetFeatureInfoEvent.FEATURE_INFO_RECEIVED, true);
+			gfie.text = _featureTooltipString;
 			gfie.firstFeatureInfo = firstFeatureInfo;
 			gfie.lastFeatureInfo = !_featureTooltipCallsRunning;
-        	dispatchEvent(gfie);
+			dispatchEvent(gfie);
+			trace("InteractiveLayerMap onFeatureInfoAvailable event gfie.firstFeatureInfo: " + gfie.firstFeatureInfo + " gfie.lastFeatureInfo: " + gfie.lastFeatureInfo);
         	
         }
         
