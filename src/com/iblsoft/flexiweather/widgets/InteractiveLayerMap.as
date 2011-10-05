@@ -18,7 +18,6 @@ package com.iblsoft.flexiweather.widgets
 	import flash.events.DataEvent;
 	import flash.events.Event;
 	
-	import mx.charts.CategoryAxis;
 	import mx.collections.ArrayCollection;
 	import mx.controls.Alert;
 	import mx.events.CollectionEvent;
