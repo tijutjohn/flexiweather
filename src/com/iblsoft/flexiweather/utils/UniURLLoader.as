@@ -56,7 +56,15 @@ package com.iblsoft.flexiweather.utils
 		protected var md_imageLoaderToRequestMap: Dictionary = new Dictionary();
 		protected var md_urlLoaderToRequestMap: Dictionary = new Dictionary();
 		
-		public static var baseURL: String = '';
+		private static var _baseURL: String = '';
+		public static function get baseURL(): String
+		{
+			return _baseURL;
+		}
+		public static function set baseURL(value: String): void
+		{
+			_baseURL = value;
+		}
 		public static var proxyBaseURL: String = '';
 
 		/**
@@ -225,7 +233,7 @@ package com.iblsoft.flexiweather.utils
 			
 			UniURLLoaderManager.instance.addLoader( urlRequest);
 			
-			Log.getLogger('UniURLLoader').info("load " + urlRequest.url + " " + urlRequest.data);
+			Log.getLogger('UniURLLoader').info("load " + urlRequest.url + " data:" + urlRequest.data);
 			urlLoader.load(urlRequest);
 			
 			var backgroundJob: BackgroundJob = null;
