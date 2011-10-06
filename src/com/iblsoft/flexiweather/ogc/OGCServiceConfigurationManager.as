@@ -94,14 +94,35 @@ package com.iblsoft.flexiweather.ogc
 				m_timer.stop();
 		}
 		
+		private var _currentType: String;
+		
 		private var _currentServices: Array = [];
 		private var _runningServices: Array = [];
-		public function getServiceByName(serviceName: String): OGCServiceConfiguration
+		private function getServiceByName(serviceName: String): OGCServiceConfiguration
 		{
 			for each(var osc: OGCServiceConfiguration in ma_services) 
 			{
 //				if (osc.id == serviceName)
 				if (osc.baseURL == serviceName)
+					return osc;
+			}
+			return null;
+		}
+		
+		/**
+		 * This function is here because of backward compatibility with 1.3.x MapViewer. All other application should use getServiceByName and service must be compared via "baseURL" property
+		 * 1.3.x MapViewer with old configuration type is using comparing with "id" property
+		 *  
+		 * @param serviceID
+		 * @param property
+		 * @return 
+		 * 
+		 */		
+		private function getServiceByID(serviceID: String): OGCServiceConfiguration
+		{
+			for each(var osc: OGCServiceConfiguration in ma_services) 
+			{
+				if (osc.id == serviceID)
 					return osc;
 			}
 			return null;
@@ -119,19 +140,30 @@ package com.iblsoft.flexiweather.ogc
 		 * Update just services, which is in services argument, not all services stored in manager 
 		 * @param services
 		 * @param b_force
-		 * 
+		 * @param type - all application must use default value "name", old 1.3.x MapViewer should using "id" (backward compatibility)
+		 *  
 		 */		
-		public function update(currServices: Array, b_force: Boolean = true): void
+		public function update(currServices: Array, b_force: Boolean = true, type: String = 'name'): void
 		{
+			_currentType = type;
 			_currentServices = currServices;
 			
 			stopAllRunningServices();
 			
 			var i_currentFlashStamp: int = getTimer();
-//			for each(var osc: OGCServiceConfiguration in ma_services) 
+			
+			var osc: OGCServiceConfiguration;
+			
 			for each(var oscName: String in currServices) 
 			{
-				var osc: OGCServiceConfiguration = getServiceByName(oscName);
+				if (type == 'id')
+				{
+					//this is backward compatibility for 1.3.x MapViewer
+					osc = getServiceByID(oscName);
+				} else {
+					osc = getServiceByName(oscName);
+				}
+				
 				if (osc)
 				{
 					if(!b_force) {
@@ -158,7 +190,7 @@ package com.iblsoft.flexiweather.ogc
 		}
 		protected function onTimer(event: TimerEvent): void
 		{
-			update(_currentServices, false);
+			update(_currentServices, false, _currentType);
 		}
 		
 		public function get services(): ArrayCollection
