@@ -30,9 +30,6 @@ package com.iblsoft.flexiweather.ogc
 		public var mb_legendIsDimensionDependant: Boolean;
 		public var mi_autoRefreshPeriod: uint = 0;
 		
-		public var ms_layerType: String = null;
-		
-		
 		// runtime variables
 		public var ma_layerConfigurations: Array;
 
@@ -392,11 +389,14 @@ package com.iblsoft.flexiweather.ogc
 		public function get dimensionVerticalLevelName(): String
 		{ return ms_dimensionVerticalLevelName; }
 		
-		public function set layerType(s: String): void
-		{ ms_layerType = s; }
-
 		public function get layerType(): String
-		{ return ms_layerType; }
+		{  
+			if (ma_layerNames && ma_layerNames.length > 0)
+			{
+				return ma_layerNames[0] as String;
+			}
+			return null;
+		}
 		
 	}
 }
