@@ -143,6 +143,11 @@ package com.iblsoft.flexiweather.utils
 		public static var basicAuthUsername: String;
 		public static var basicAuthPassword: String;
 		
+		/**
+		 * 
+		 * @param urlRequest
+		 * 
+		 */		
 		private function checkRequestData(urlRequest: URLRequest): void
 		{
 			var url: String = decodeURIComponent(urlRequest.url);
@@ -160,13 +165,13 @@ package com.iblsoft.flexiweather.utils
 						if (!urlRequest.data)
 							urlRequest.data = new URLVariables();
 						var valArr: Array = str.split('=');
-						var varName: String = valArr[0];
-						var varValue: String = valArr[1];
+						var varName: String = valArr.shift();
+						var varValue: String = valArr.join('=');
 						if (urlRequest.hasOwnProperty(varName))
 						{
 							trace("variable already exists in request variables ["+varName+"]: oldValue " + urlRequest[varName] + " newValue: " + varValue); 
 						} else {
-							urlRequest.data[valArr[0]] = valArr[1];
+							urlRequest.data[varName] = varValue;
 						}
 					}
 				}
@@ -193,6 +198,7 @@ package com.iblsoft.flexiweather.utils
 				associatedData: Object = null,
 				s_backgroundJobName: String = null): void
 		{
+			
 			checkRequestData(urlRequest);
 			checkRequestBaseURL(urlRequest);
 			

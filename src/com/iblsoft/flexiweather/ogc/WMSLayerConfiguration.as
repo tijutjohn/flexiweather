@@ -155,7 +155,6 @@ package com.iblsoft.flexiweather.ogc
 			r.data.FORMAT = getCurrentImageFormat(); 
 			r.data.TRANSPARENT = "TRUE";
 			
-//			trace("toGetMapRequest layers: " + r.data.LAYERS + " format: " + r.data.FORMAT);
 			return r;
 		}
 

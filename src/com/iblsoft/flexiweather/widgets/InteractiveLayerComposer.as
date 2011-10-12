@@ -1,7 +1,9 @@
 package com.iblsoft.flexiweather.widgets
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
+	import com.iblsoft.flexiweather.ogc.WMSLayerConfiguration;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.widgets.googlemaps.InteractiveLayerGoogleMaps;
@@ -32,7 +34,6 @@ package com.iblsoft.flexiweather.widgets
 			m_layers.addItemAt(l, 0);
 			bindSubLayer(l);
 			
-			//TODO notification are not needed, addItem notify already
 			notifyLayersChanged(l);
 			
 			//when new layer is added to container, call onAreaChange to notify layer, that layer is already added to container, so it can render itself
@@ -132,6 +133,13 @@ package com.iblsoft.flexiweather.widgets
 			{
 				for each (var layer:InteractiveLayer in m_layers)
 				{
+					trace("\t InteractiveLayerCompose getLayerByID["+layerID+"] layer.id: " + layer.id + " name: " + layer.name + " label: " + layer.layerName);
+					if (layer is InteractiveLayerMSBase)
+					{
+						var config: WMSLayerConfiguration = (layer as InteractiveLayerMSBase).configuration as WMSLayerConfiguration;
+						trace("\t InteractiveLayerCompose config: " + config.label);
+					}
+						
 					if (layer.id && layer.id == layerID)
 						return layer;
 				}
