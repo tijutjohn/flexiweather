@@ -85,12 +85,23 @@ package com.iblsoft.flexiweather.ogc
 						var imageFormat: String = format.valueOf();
 						if (imageFormat && (imageFormat.indexOf('png') >= 0 || imageFormat.indexOf('jpg') >= 0 || imageFormat.indexOf('jpeg') >= 0))
 						{
-							_imageFormats.push(imageFormat);
+							if (!imageFormatExist(imageFormat))
+								_imageFormats.push(imageFormat);
 						}
 					}
 				}
 			}
 		}
+		private function imageFormatExist(imageFormat: String): Boolean
+		{
+			for each (var format: String in _imageFormats)
+			{
+				if (format == imageFormat)
+					return true;
+			}
+			return false;
+		}
+		
 		protected function onCapabilitiesLoaded(event: UniURLLoaderEvent): void
 		{
 			if (!m_capabilitiesLoadJob)

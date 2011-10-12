@@ -98,16 +98,16 @@ package com.iblsoft.flexiweather.widgets
 		private var m_layersLoading: int = 0;
 		private function onLayerLoadingStart( event: InteractiveLayerEvent): void
 		{
-			trace("onLayerLoadingStart " + event.interactiveLayer.name);
+//			trace("onLayerLoadingStart " + event.interactiveLayer.name);
 			m_layersLoading++;
 		}
 		private function onLayerLoaded( event: InteractiveLayerEvent): void
 		{
 			m_layersLoading--;
-			trace("onLayerLoaded " + event.interactiveLayer.name + " layers currently loading: " + m_layersLoading);
+//			trace("onLayerLoaded " + event.interactiveLayer.name + " layers currently loading: " + m_layersLoading);
 			if (m_layersLoading <= 0)
 			{
-				trace("ALL layers are loaded");
+//				trace("ALL layers are loaded");
 				var ile: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.ALL_LAYERS_LOADED);
 				dispatchEvent(ile);
 			}
@@ -170,7 +170,7 @@ package com.iblsoft.flexiweather.widgets
 						var ilJ: InteractiveLayer = InteractiveLayer(m_layerContainer.getChildAt(j));
 						if(ilJ.zOrder < ilI.zOrder) {
 							// swap Ith and Jth layer, we know that J > I
-							trace('[InteractiveWidget.orderLayers] ... swapping ' + ilJ.name + ' with ' + ilI.name);
+//							trace('[InteractiveWidget.orderLayers] ... swapping ' + ilJ.name + ' with ' + ilI.name);
 							m_layerContainer.swapChildren(ilJ, ilI);
 						}
 					}

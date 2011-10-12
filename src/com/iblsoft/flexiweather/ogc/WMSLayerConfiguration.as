@@ -241,13 +241,7 @@ package com.iblsoft.flexiweather.ogc
 			}
 			if(b_changed) {
 				ma_layerConfigurations = a_layers.toArray();
-				for each (layer  in ma_layerConfigurations)
-				{
-					trace(layer);
-				}
 				dispatchEvent(new DataEvent(CAPABILITIES_UPDATED));
-			} else {
-				trace("WMSLayerConfiguration onCapabilitiesUpdated -> there is no change");
 			}
 			dispatchEvent(new DataEvent(CAPABILITIES_RECEIVED));
 		}
