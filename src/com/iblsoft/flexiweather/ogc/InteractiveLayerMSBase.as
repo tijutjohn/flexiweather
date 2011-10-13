@@ -646,6 +646,19 @@ package com.iblsoft.flexiweather.ogc
         	return a;
 		}
         
+        public function supportWMSDimension(s_dimName: String): Boolean
+		{
+			var a_dimNames: Array = [];
+        	for each(var layer: WMSLayer in getWMSLayers()) {
+        		for each(var dim: WMSDimension in layer.dimensions) {
+        			if(dim.name == s_dimName)
+        				return true;
+        		}
+        	}
+        	return false;
+			
+		}
+		
         public function getWMSDimensionsNames(): Array
         {
 			var a_dimNames: Array = [];

@@ -4,7 +4,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.ogc.ISynchronisedObject;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
-	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
+	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.SynchronisationRole;
 	import com.iblsoft.flexiweather.ogc.SynchronisedVariableChangeEvent;
 	import com.iblsoft.flexiweather.proj.Coord;
@@ -344,11 +344,88 @@ package com.iblsoft.flexiweather.widgets
 			
           	for each(so in l_syncLayers) 
           	{
-				var value: Object = (so as InteractiveLayerWMS).getWMSDimensionDefaultValue(dimName );
+				var value: Object = (so as InteractiveLayerMSBase).getWMSDimensionDefaultValue(dimName );
           	}
 
 			return value;
 		}
+		
+		/**
+		 * get all dimensions for this layer map
+		 *  
+		 * @param dimName
+		 * @param b_intersection
+		 * @return 
+		 * 
+		 */		
+		public function getDimensions(b_intersection: Boolean = true): Array
+		{
+			
+			var l_syncLayers: Array = [];
+			var l_timeAxis: Array = enumTimeAxis(l_syncLayers);
+         	if(l_timeAxis == null) // no time axis
+         		return null;
+          		
+          	var i: int;
+			var so: ISynchronisedObject;
+			
+			var a_dimensions: Array;
+          	for each(so in l_syncLayers) 
+          	{
+          		//trace("\n Composer getDimensionValues ["+dimName+"] get values for layer: " + (so as Object).name);
+				var values: Array = (so as InteractiveLayerMSBase).getWMSDimensionsNames()
+          		
+          		if(a_dimensions == null)
+    				a_dimensions = values;
+    			else {
+    				if(b_intersection)
+    					a_dimensions = ArrayUtils.intersectedArrays(a_dimensions, values);
+    				else
+    					ArrayUtils.unionArrays(a_dimensions, values);
+    			}	
+          	}
+
+			return a_dimensions;
+				
+		}
+		
+		/**
+		 * get all WMS layers, which support dimension
+		 *  
+		 * @param dimName
+		 * @return 
+		 * 
+		 */		
+		public function getWMSLayersForDimension(dimName: String): Array
+		{
+			
+			var l_syncLayers: Array = [];
+			var l_timeAxis: Array = enumTimeAxis(l_syncLayers);
+         	if(l_timeAxis == null) // no time axis
+         		return null;
+          		
+          	var i: int;
+			var so: ISynchronisedObject;
+			
+			var a_layers: Array = [];
+          	for each(so in l_syncLayers) 
+          	{
+          		//trace("\n Composer getDimensionValues ["+dimName+"] get values for layer: " + (so as Object).name);
+				if ((so as InteractiveLayerMSBase).supportWMSDimension(dimName))
+					a_layers.push(so);
+          	}
+
+			return a_layers;
+				
+		}
+		/**
+		 * get all dimension values for this layer map
+		 *  
+		 * @param dimName
+		 * @param b_intersection
+		 * @return 
+		 * 
+		 */		
 		public function getDimensionValues(dimName: String, b_intersection: Boolean = true): Array
 		{
 			
@@ -364,7 +441,7 @@ package com.iblsoft.flexiweather.widgets
           	for each(so in l_syncLayers) 
           	{
           		//trace("\n Composer getDimensionValues ["+dimName+"] get values for layer: " + (so as Object).name);
-				var values: Array = (so as InteractiveLayerWMS).getWMSDimensionsValues(dimName, true);
+				var values: Array = (so as InteractiveLayerMSBase).getWMSDimensionsValues(dimName, true);
           		
           		if(a_dimValues == null)
     				a_dimValues = values;
