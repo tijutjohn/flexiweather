@@ -1,10 +1,23 @@
 package com.iblsoft.flexiweather.utils
 {
+	import com.iblsoft.flexiweather.net.data.UniURLLoaderData;
+	import com.iblsoft.flexiweather.net.interfaces.IURLLoaderBasicAuth;
+	import com.iblsoft.flexiweather.net.interfaces.IURLLoaderBasicAuthListener;
+	import com.iblsoft.flexiweather.net.managers.UniURLLoaderBasicAuthManager;
+	import com.iblsoft.flexiweather.net.managers.UniURLLoaderManager;
+	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.widgets.BackgroundJob;
 	import com.iblsoft.flexiweather.widgets.BackgroundJobManager;
+	import com.iblsoft.flexiweather.widgets.basicauth.controls.BasicAuthCredentialsPopup;
+	import com.iblsoft.flexiweather.widgets.basicauth.controls.IBasicAuthCredentialsPopup;
+	import com.iblsoft.flexiweather.widgets.basicauth.data.BasicAuthAccount;
+	import com.iblsoft.flexiweather.widgets.basicauth.events.BasicAuthEvent;
 	
+	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
+	import flash.events.HTTPStatusEvent;
+	import flash.events.IEventDispatcher;
 	import flash.events.IOErrorEvent;
 	import flash.events.SecurityErrorEvent;
 	import flash.net.URLLoader;
@@ -15,10 +28,18 @@ package com.iblsoft.flexiweather.utils
 	import flash.utils.ByteArray;
 	import flash.utils.Dictionary;
 	
+	import mx.controls.Alert;
+	import mx.core.ClassFactory;
+	import mx.core.FlexGlobals;
+	import mx.core.IFlexDisplayObject;
 	import mx.logging.Log;
+	import mx.managers.PopUpManager;
 	import mx.messaging.AbstractConsumer;
 	import mx.rpc.Fault;
 	import mx.utils.Base64Encoder;
+	import mx.utils.URLUtil;
+	
+	import spark.components.TitleWindow;
 	
 	/**
 	 * Replacement of flash.net.URLLoader and flash.display.Loader classes
@@ -35,13 +56,23 @@ package com.iblsoft.flexiweather.utils
 	 * There are only 2 types of event (DATA_LOADED, DATA_LOAD_FAILED) dispatched out of this class,
 	 * so that the class can be used simplier.
 	*/
-	public class UniURLLoader extends EventDispatcher
+	public class UniURLLoader extends EventDispatcher implements IURLLoaderBasicAuth
 	{
 		public static const BINARY_FORMAT: String = 'binary';
 		public static const IMAGE_FORMAT: String = 'image';
 		public static const JSON_FORMAT: String = 'json';
 		public static const TEXT_FORMAT: String = 'text';
 		public static const XML_FORMAT: String = 'xml';
+		
+		
+		/**
+		 *  basicAuthURLLoaderClass must be of Class which implement IURLLoaderBasicAuthListener
+		 * it server for listening to HTTPStatusEvent.HTTP_RESPONSE_STATUS which is available only in AIR projects and consists of response headers with BasicAuth information (e.g. REALM)
+		 */		
+		public static var basicAuthURLLoaderClass: Class;
+		private var _baLoader: IURLLoaderBasicAuthListener;
+		
+		public static var basicAuthCredentialsPopupClass: IBasicAuthCredentialsPopup;
 		
 		/**
 		 * Array of allowed formats which will be loaded into loader. If there will be loaded format, which will not be included in allowedFormats array
@@ -75,6 +106,11 @@ package com.iblsoft.flexiweather.utils
 		 * Example: "http://server.com/proxy?url=${URL}"
 		 */
 		public static var crossDomainProxyURLPattern: String = null;
+		
+		[Event(name = AUTHORIZATION_FAILED, type = "com.iblsoft.flexiweather.utils.UniURLLoaderEvent")]
+		public static const AUTHORIZATION_FAILED: String = "authorizationFailed";
+		
+		public static const LOAD_STARTED: String = "loadStarted";
 		
 		public static const DATA_LOADED: String = "dataLoaded";
 		public static const DATA_LOAD_FAILED: String = "dataLoadFailed";
@@ -139,9 +175,6 @@ package com.iblsoft.flexiweather.utils
 			return UniURLLoader.fromBaseURL(url);
 		}
 		
-		public static var useBasicAuthInRequest: Boolean = false;
-		public static var basicAuthUsername: String;
-		public static var basicAuthPassword: String;
 		
 		/**
 		 * 
@@ -193,40 +226,226 @@ package com.iblsoft.flexiweather.utils
 //				urlRequest.data = null;
 			}
 		}
+		
+		private function showBasicAuthPopup(domain: String, realm: String): void
+		{
+			var popup: BasicAuthCredentialsPopup;
+			/*
+			if (basicAuthCredentialsPopupClass)
+			{
+				popup = basicAuthCredentialsPopupClass.getPopup();
+			} else {
+				popup = new BasicAuthCredentialsPopup();
+			}
+			*/
+			popup = new BasicAuthCredentialsPopup();
+			popup.domain = domain;
+			popup.realm = realm;
+			popup.addEventListener(BasicAuthEvent.CREDENTIALS_READY, onBasicAuthCredentialsReady);
+			popup.addEventListener(BasicAuthEvent.AUTHENTICATION_CANCELLED, onBasicAuthCancelled);
+			PopUpManager.addPopUp(popup, FlexGlobals.topLevelApplication as DisplayObject);
+			PopUpManager.centerPopUp(popup);
+		}
+		
+		private function removeBasicAuthPopupListeners(popup: IBasicAuthCredentialsPopup): void
+		{
+			popup.removeEventListener(BasicAuthEvent.CREDENTIALS_READY, onBasicAuthCredentialsReady);
+			popup.removeEventListener(BasicAuthEvent.AUTHENTICATION_CANCELLED, onBasicAuthCancelled);
+		}
+		
+		private function onBasicAuthCancelled(event: BasicAuthEvent): void
+		{
+			var popup: TitleWindow = event.target as TitleWindow;
+			removeBasicAuthPopupListeners(popup as IBasicAuthCredentialsPopup);
+			PopUpManager.removePopUp(popup);
+			
+			//stop all requests for current realm and domain
+			var domain: String = event.domain;
+			var realm: String = event.realm;
+			
+			var basicAuthManager: UniURLLoaderBasicAuthManager = UniURLLoaderBasicAuthManager.instance;
+			basicAuthManager.stopAllStoppedRequests(domain, realm);
+			
+		}
+		
+		private function onBasicAuthCredentialsReady(event: BasicAuthEvent): void
+		{
+			var popup: TitleWindow = event.target as TitleWindow;
+			removeBasicAuthPopupListeners(popup as IBasicAuthCredentialsPopup);
+			PopUpManager.removePopUp(popup);
+			
+			var basicAuthManager: UniURLLoaderBasicAuthManager = UniURLLoaderBasicAuthManager.instance;
+			
+			var firstRequest: Object = UniURLLoaderBasicAuthManager.instance.getFirstRequestByDomain(event.domain);
+			var loader: UniURLLoader = firstRequest.loader as UniURLLoader;
+			var request: URLRequest = firstRequest.request as URLRequest;
+			var associatedData: Object = firstRequest.associatedData as Object;
+			var s_backgroundJobName: String = firstRequest.backgroundJobName as String;
+			
+			var basicAccount: BasicAuthAccount = new BasicAuthAccount(event.username, event.password, event.domain, event.realm);
+			loader.load(request, associatedData, s_backgroundJobName, true, basicAccount);
+		}
+		
+		/**
+		 * Get domain string from URL. It's needed for getting BasicAuth credentials saved in Shared objects (for mobile development) 
+		 * @param urlRequest
+		 * @return 
+		 * 
+		 */		
+		private function getDomain(urlRequest: URLRequest): String
+		{
+			var url: String = urlRequest.url;
+			var domain: String = URLUtil.getServerNameWithPort(url);
+			return domain;
+		}
+		
+		/**
+		 * Return object with properties "name" and "password". If BasicAuth credentails for "domain" do not exists, null is returned
+		 *  
+		 * @param domain Domain name
+		 * @return 
+		 * 
+		 */		
+		private function getBasicAuthCredentialsForDomain(domain: String, realm: String): BasicAuthAccount
+		{
+			var credentials: BasicAuthAccount = UniURLLoaderBasicAuthManager.instance.getAccountForDomain(domain, realm);
+			return credentials;
+		}
+		
+		/**
+		 * 
+		 * @param urlRequest
+		 * @param associatedData
+		 * @param s_backgroundJobName
+		 * @return true - request must be stopped (Basic URL popup opened), false - request can be loaded
+		 * 
+		 */		
+		private function addBasicAuthToURLRequest(urlRequest: URLRequest, 
+												  associatedData: Object = null,
+												  s_backgroundJobName: String = null,
+												  basicAuthAccount: BasicAuthAccount = null): Boolean
+		{
+			var domain: String = getDomain(urlRequest);
+			var credentials: BasicAuthAccount;
+			var username: String; 
+			var password: String; 
+			var realm: String; 
+			
+			if (basicAuthAccount)
+				realm = basicAuthAccount.realm;
+			
+			if (basicAuthAccount && basicAuthAccount.name && basicAuthAccount.password)
+			{
+				username = basicAuthAccount.name;
+				password = basicAuthAccount.password;
+				
+			} else {
+				credentials = getBasicAuthCredentialsForDomain(domain, realm);
+			
+				if (credentials)
+				{
+					username = credentials.name;
+					password = credentials.password;
+					realm = credentials.realm;
+				}
+			}
+			
+			var basicAuthManager: UniURLLoaderBasicAuthManager = UniURLLoaderBasicAuthManager.instance;
+			
+			//check if autentification is there already
+			var basicAuthCredentialsReady: Boolean = ( username && password);
+			var waitForBasicAuthCredentials: Boolean = basicAuthManager.waitingForCredentials(domain, realm);
+			if (waitForBasicAuthCredentials && associatedData.uniURLLoaderBasicAuthInfo == 'first message')
+			{
+				//this is message which will test correct Basic auth credentials, so let it be loaded
+				waitForBasicAuthCredentials = false;
+			}
+			var already_authenticated: Boolean = false;
+			
+			if (!already_authenticated && waitForBasicAuthCredentials && !basicAuthCredentialsReady)
+			{
+				UniURLLoaderBasicAuthManager.instance.addRequest(urlRequest, this, associatedData, s_backgroundJobName);
+				return true;
+			}
+			if (!already_authenticated)
+			{
+				if (!associatedData)
+				{
+					associatedData = {};
+				}
+				var associatedBasicAuth: BasicAuthAccount = associatedData.uniURLLoaderBasicAuthAccount as BasicAuthAccount;
+				if (!associatedBasicAuth)
+				{
+					associatedBasicAuth = new BasicAuthAccount();
+				}
+				associatedBasicAuth.domain = domain;
+				associatedBasicAuth.name = username;
+				associatedBasicAuth.password = password;
+				associatedBasicAuth.realm = realm;
+				associatedData.uniURLLoaderBasicAuthAccount = associatedBasicAuth;
+				
+				if (!basicAuthCredentialsReady)
+				{
+					associatedData.uniURLLoaderBasicAuthInfo = 'first message';
+					
+					basicAuthManager.addRequest(urlRequest, this, associatedData, s_backgroundJobName);
+					basicAuthManager.waitForCredentials(domain, realm);
+					showBasicAuthPopup(domain, realm);
+					return true;
+				}
+				
+				var encoder: Base64Encoder = new Base64Encoder();
+				encoder.insertNewLines = false; 
+				encoder.encode(username + ":"+password);
+				var credsHeader: URLRequestHeader = new URLRequestHeader("Authorization", "Basic " + encoder.toString())
+				urlRequest.requestHeaders.push(credsHeader);
+			} else {
+				trace("im already authenticated, do not add authentication again");
+			}
+			
+			//				trace("send headers: " + rhArray[0]);
+			
+			return false;
+		}
+		/**
+		 * Main load function for loading request through UniURLLoader
+		 *  
+		 * @param urlRequest
+		 * @param associatedData
+		 * @param s_backgroundJobName
+		 * 
+		 */		
 		public function load(
 				urlRequest: URLRequest,
 				associatedData: Object = null,
-				s_backgroundJobName: String = null): void
+				s_backgroundJobName: String = null,
+				useBasicAuthInRequest: Boolean = false,
+				basicAuthAccount: BasicAuthAccount = null): void
 		{
 			
 			checkRequestData(urlRequest);
 			checkRequestBaseURL(urlRequest);
 			
+			var basicAuthManager: UniURLLoaderBasicAuthManager = UniURLLoaderBasicAuthManager.instance;
+			//check if basicAut was used for this domain before
+			var realm: String;
+			if (basicAuthAccount)
+				realm = basicAuthAccount.realm;
+			
+			if (!useBasicAuthInRequest)
+			{
+				
+				var usedBaiscAuthBefore: Boolean = basicAuthManager.useBasicAuth(urlRequest, realm);
+				if (usedBaiscAuthBefore)
+					useBasicAuthInRequest = true;
+			}
 			if (useBasicAuthInRequest)
 			{
-				//check if autentification is there already
-				var already_authenticated: Boolean = false;
-				if (urlRequest.requestHeaders.length > 0)
-				{
-					var header: URLRequestHeader = urlRequest.requestHeaders[0] as URLRequestHeader;
-					if (header.name == 'WWW-Authenticate')
-					{
-						already_authenticated = true;
-					}
-				}
-				if (!already_authenticated)
-				{
-					
-					var encoder: Base64Encoder = new Base64Encoder();
-					encoder.insertNewLines = false; 
-					encoder.encode(basicAuthUsername + ":"+basicAuthPassword);
-					var credsHeader: URLRequestHeader = new URLRequestHeader("Authorization", "Basic " + encoder.toString())
-					urlRequest.requestHeaders.push(credsHeader);
-				} else {
-					trace("im already authenticated, do not add authentication again");
-				}
-				
-//				trace("send headers: " + rhArray[0]);
+				var stopRequest: Boolean = addBasicAuthToURLRequest(urlRequest, associatedData, s_backgroundJobName, basicAuthAccount);
+				if (stopRequest)
+					return;
+			} else {
+				basicAuthManager.addRequest(urlRequest, this, associatedData, s_backgroundJobName);
 			}
 				
 //			trace("UNIURLLoader load " + urlRequest.url + " " + urlRequest.data);
@@ -234,10 +453,19 @@ package com.iblsoft.flexiweather.utils
 			urlLoader.associatedData = associatedData;
 			urlLoader.dataFormat = URLLoaderDataFormat.BINARY;
 			urlLoader.addEventListener(Event.COMPLETE, onDataComplete);
+			urlLoader.addEventListener(HTTPStatusEvent.HTTP_STATUS, onHTTPStatus);
 			urlLoader.addEventListener(IOErrorEvent.IO_ERROR, onDataIOError);
 			urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onSecurityError);
 			
-			UniURLLoaderManager.instance.addLoader( urlRequest);
+			//implement listening for HTTP_RESPONSE_STATUS available only in AIR
+			if (basicAuthURLLoaderClass)
+			{
+				var classFactory: ClassFactory = new ClassFactory(basicAuthURLLoaderClass);
+				_baLoader = classFactory.newInstance() as IURLLoaderBasicAuthListener;
+				_baLoader.addBasicAuthListeners(this, urlLoader);
+			}
+			
+			UniURLLoaderManager.instance.addLoaderRequest( urlRequest);
 			
 			Log.getLogger('UniURLLoader').info("load " + urlRequest.url + " data:" + urlRequest.data);
 			urlLoader.load(urlRequest);
@@ -250,6 +478,123 @@ package com.iblsoft.flexiweather.utils
 				loader: urlLoader,
 				backgroundJob: backgroundJob
 			};
+			
+			
+			var e: UniURLLoaderEvent = new UniURLLoaderEvent(LOAD_STARTED, null, urlRequest, associatedData);
+			dispatchEvent(e);
+		}
+		
+		public function setResponseHeaders(headers: Array, responseURL: String, status: int, loader: Object): void
+		{
+			trace("UniURLLoader onHttpResponseStatus: status: " + status + " url: " + responseURL);
+			var realm: String;
+			var basicAuthAccount: BasicAuthAccount;
+			
+			for each( var header: URLRequestHeader in headers )  {
+				trace( "name: " + header.name + "\nvalue: " + header.value + "\n" );
+				if (header.name == 'WWW-Authenticate')
+				{
+					realm = header.value;
+					var pos: int = realm.indexOf('"');
+					if (pos > -1)
+					{
+						var pos2: int = realm.indexOf('"', pos+1);
+						var correctBasicRealm: String = realm.substring(pos + 1, pos2);
+						trace("REALM header: " + realm);
+						trace("REALM: " + correctBasicRealm);
+						
+						if (loader.associatedData)
+						{
+							if (loader.associatedData.uniURLLoaderBasicAuthAccount)
+							{
+								basicAuthAccount = loader.associatedData.uniURLLoaderBasicAuthAccount as BasicAuthAccount;
+								basicAuthAccount.realm = correctBasicRealm;
+							} else {
+								basicAuthAccount = new BasicAuthAccount();
+								basicAuthAccount.realm = correctBasicRealm;
+							}
+							loader.associatedData.uniURLLoaderBasicAuthAccount = basicAuthAccount;
+						}
+						
+					}
+					
+					if (status == 401)
+					{
+						var basicAuthManager: UniURLLoaderBasicAuthManager = UniURLLoaderBasicAuthManager.instance;
+						
+						var urlLoader: URLLoaderWithAssociatedData = URLLoaderWithAssociatedData(loader);
+						var urlRequest: URLRequest = md_urlLoaderToRequestMap[urlLoader].request;
+						
+						/**
+						 * check if domain and realm was authenticated before. 
+						 * if yes - just load it again with correct basic auth crendentials
+						 * if not - open basic auth popup
+						 */
+						
+						basicAuthAccount = loader.associatedData.uniURLLoaderBasicAuthAccount as BasicAuthAccount;
+						realm = null;
+						
+						if (basicAuthAccount)
+							realm = basicAuthAccount.realm;
+						
+						if (realm)
+						{
+							var usedBasicAuthBefore: Boolean = basicAuthManager.useBasicAuth(urlRequest, realm);
+							if (usedBasicAuthBefore)
+							{
+								//it was authenticated before
+								load(urlRequest, loader.associatedData, null, true, basicAuthAccount);
+								return;
+							}
+						}
+						
+						openBasicAuthDialog(urlRequest);
+						
+						var e: UniURLLoaderEvent = new UniURLLoaderEvent(UniURLLoader.AUTHORIZATION_FAILED, null, null, null);
+						dispatchEvent(e);
+					}
+				}
+			}
+		}
+		
+		private function onHTTPStatus(event: HTTPStatusEvent): void
+		{
+			trace("onHTTPStatus: " + event.status);
+			if (event.status && event.status == 401)
+			{
+				/*
+				var basicAuthManager: UniURLLoaderBasicAuthManager = UniURLLoaderBasicAuthManager.instance;
+				
+				var urlLoader: URLLoaderWithAssociatedData = URLLoaderWithAssociatedData(event.target);
+				var urlRequest: URLRequest = md_urlLoaderToRequestMap[urlLoader].request;
+				
+				openBasicAuthDialog(urlRequest);
+				
+				var e: UniURLLoaderEvent = new UniURLLoaderEvent(UniURLLoader.AUTHORIZATION_FAILED, null, null, null);
+				dispatchEvent(e);
+				*/
+			}
+		}
+		
+		private function openBasicAuthDialog(urlRequest: URLRequest): void
+		{
+			//show basic auth popup
+			var basicAuthManager: UniURLLoaderBasicAuthManager = UniURLLoaderBasicAuthManager.instance;
+			var requestObject: UniURLLoaderData = basicAuthManager.getFirstRequestByRequest(urlRequest);
+			
+			if (requestObject)
+			{
+				//reset waiting for credentials, because it is for the first time, or credentials was incorrect last time
+				var domain: String = getDomain(urlRequest);
+				var basicAuthAccount: BasicAuthAccount = requestObject.associatedData.uniURLLoaderBasicAuthAccount as BasicAuthAccount; 
+				var realm: String;
+				if (basicAuthAccount)
+					realm = basicAuthAccount.realm;
+				basicAuthManager.doNotWaitForCredentials(domain, realm);
+				
+				//load it again with basic auth
+				load(requestObject.request, requestObject.associatedData, requestObject.backgroundJobName, true, basicAuthAccount);
+			}
 		}
 		
 		public function cancel(urlRequest: URLRequest): Boolean
@@ -365,13 +710,32 @@ package com.iblsoft.flexiweather.utils
 		
 		protected function onDataComplete(event: Event): void
 		{
-//			test(event);
+			
+			trace("onDataComplete");
+			var basicAuthManager: UniURLLoaderBasicAuthManager = UniURLLoaderBasicAuthManager.instance;
+			
 			
 			var urlLoader: URLLoaderWithAssociatedData = URLLoaderWithAssociatedData(event.target);
 			var urlRequest: URLRequest = disconnectURLLoader(urlLoader);
 			if(urlRequest == null)
 				return;
 
+			if (urlLoader.associatedData && urlLoader.associatedData.uniURLLoaderBasicAuthInfo == 'first message')
+			{
+				var domain: String = getDomain(urlRequest);
+				var basicAccount: BasicAuthAccount = urlLoader.associatedData.uniURLLoaderBasicAuthAccount as BasicAuthAccount;
+				var realm: String = basicAccount.realm;
+				var accountAdded: Boolean = basicAuthManager.addAccount(basicAccount.name, basicAccount.password, basicAccount.domain, realm);
+				
+				
+				//check if there any queued basic auth request and call them
+				if (accountAdded)
+				{
+					basicAuthManager.doNotWaitForCredentials(domain, realm);
+					basicAuthManager.runAllStoppedRequests(urlRequest);
+				}
+			}
+			
 			var rawData: ByteArray = event.target.data as ByteArray;
 			//Log.getLogger("UniURLLoader").info("Received " + rawData.length + "B");
 
@@ -422,6 +786,13 @@ package com.iblsoft.flexiweather.utils
 							try {
 								var x: XML = new XML(s_data);
 								
+								//FAST check 401 - Unauthorized
+								if (HTMLUtils.isHTMLFormat(s_data) && HTMLUtils.isHTML401Unauthorized(s_data))
+								{
+									//do not do anything it's 401 unathorized html page, should handle this with HTTPStatusEvent
+									return;
+								}
+								
 								if(isResultContentCorrect(XML_FORMAT, x))
 									dispatchResult(x, urlRequest, urlLoader.associatedData);
 								else
@@ -450,6 +821,7 @@ package com.iblsoft.flexiweather.utils
 
 		protected function onDataIOError(event: IOErrorEvent): void
 		{
+			trace("onDataIOError");
 			var urlLoader: URLLoaderWithAssociatedData = URLLoaderWithAssociatedData(event.target);
 			var urlRequest: URLRequest = disconnectURLLoader(urlLoader);
 			if(urlRequest == null)
@@ -568,6 +940,11 @@ package com.iblsoft.flexiweather.utils
 
 		protected function disconnectURLLoader(urlLoader: URLLoaderWithAssociatedData): URLRequest
 		{
+			if (_baLoader)
+			{
+				_baLoader.removeBasicAuthListeners();
+			}
+			
 			urlLoader.removeEventListener(Event.COMPLETE, onDataComplete);
 			urlLoader.removeEventListener(IOErrorEvent.IO_ERROR, onDataIOError);
 			urlLoader.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, onSecurityError);
@@ -582,7 +959,7 @@ package com.iblsoft.flexiweather.utils
 			
 			var urlRequest: URLRequest = md_urlLoaderToRequestMap[urlLoader].request; 
 			
-			UniURLLoaderManager.instance.removeLoader(urlRequest);
+			UniURLLoaderManager.instance.removeLoaderRequest(urlRequest);
 			
 			delete md_urlLoaderToRequestMap[urlLoader];
 			return urlRequest;
@@ -598,6 +975,14 @@ package com.iblsoft.flexiweather.utils
 			delete md_imageLoaderToRequestMap[imageLoader];
 			return urlRequest;
 		}
+		
+		
+		
+		override public function toString(): String
+		{
+			return "UniURLLoader";
+		}
+		
 	}
 }
 

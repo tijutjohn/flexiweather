@@ -6,6 +6,67 @@ package com.iblsoft.flexiweather.utils
 		{
 		}
 		
+		public static function isHTMLFormat(s_data: String): Boolean
+		{
+			try {
+				var x: XML = new XML(s_data);
+			} catch (error: Error) {
+				//it's not XML format, so it can not be HTML format
+				return false;
+			}
+			var head: Boolean;
+			var body: Boolean;
+			for each (var node: XML in x.children())
+			{
+				trace(node);
+				if (node.name().localName == 'head')
+					head = true;
+				if (node.name().localName == 'body')
+					body = true;
+			}
+			return head && body;
+		}
+		
+		public static function isHTML401Unauthorized(s_data: String): Boolean
+		{
+			var isHTML: Boolean = isHTMLFormat(s_data);
+			if (!isHTML)
+			{
+				//it's not HTML, so it can not be 401 HTML page
+				return false
+			}
+			var x: XML = new XML(s_data);
+			
+			var head: Boolean;
+			var body: Boolean;
+			for each (var node: XML in x.children())
+			{
+				trace(node);
+				if (node.name().localName == 'head')
+				{
+					//check all head children() to find <title> tag
+					if (node.children().length())
+					{
+						for each (var headChildNode: XML in node.children())
+						{
+							if (headChildNode.name().localName == 'title')
+							{
+								var titleString: String = headChildNode.text();
+								
+								var is401: Boolean = titleString.indexOf('401') >= 0;
+								var isAuthorizationRelated: Boolean = titleString.toLocaleLowerCase().indexOf('authoriza') >= 0;
+								var isUnauthorized: Boolean = titleString.toLocaleLowerCase().indexOf('unauthorized') >= 0;
+								
+								return is401 && (isUnauthorized || isAuthorizationRelated);
+							}
+						}
+					}
+				}
+				
+			}
+			return false;
+		}
+		
 		public static function fixFeatureInfoHTML(s: String): String
 		{
 			var originalHTML: String = s;

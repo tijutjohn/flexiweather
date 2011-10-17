@@ -1,8 +1,10 @@
 package com.iblsoft.flexiweather.plugins
 {
+	import flash.events.IEventDispatcher;
+	
 	import mx.core.IFlexDisplayObject;
 
-	public interface IPopup
+	public interface IPopup extends IEventDispatcher
 	{
 		function setPopupManager(popupManager: IPopupManager): void;
 		

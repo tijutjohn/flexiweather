@@ -2,6 +2,7 @@
 <flexLibProperties includeAllClasses="false" useMultiPlatformConfig="false" version="1">
   <includeClasses>
     <classEntry path="com.iblsoft.flexiweather.events.BackgroundJobEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.events.GetFeatureInfoEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.InteractiveLayerEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.WFSCursorManagerEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.WFSCursorManagerTypes"/>
@@ -33,7 +34,9 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.OGCServiceConfigurationManager"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.ProjectionConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.ProjectionConfigurationManager"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.QTTLayerOptions"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.QTTMSLayerConfiguration"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.QTTilingInfo"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.SchemaParser"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.SchemaParserDataItem"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.SchemaParserDataItemAttribute"/>
@@ -97,9 +100,18 @@
     <classEntry path="com.iblsoft.flexiweather.plugins.IPluginInfo"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.IPluginInfoModule"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.IPluginModule"/>
+    <classEntry path="com.iblsoft.flexiweather.plugins.IPopup"/>
+    <classEntry path="com.iblsoft.flexiweather.plugins.IPopupManager"/>
+    <classEntry path="com.iblsoft.flexiweather.plugins.ModuleLoaderCollection"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.PluginAbility"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.PluginEvent"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.PluginManager"/>
+    <classEntry path="com.iblsoft.flexiweather.plugins.data.ModuleCollection"/>
+    <classEntry path="com.iblsoft.flexiweather.plugins.data.ModuleInfo"/>
+    <classEntry path="com.iblsoft.flexiweather.plugins.data.ModuleInfoLoading"/>
+    <classEntry path="com.iblsoft.flexiweather.plugins.data.ModuleItem"/>
+    <classEntry path="com.iblsoft.flexiweather.plugins.data.ModuleLoaderItem"/>
+    <classEntry path="com.iblsoft.flexiweather.plugins.data.PluginCollection"/>
     <classEntry path="com.iblsoft.flexiweather.proj.Coord"/>
     <classEntry path="com.iblsoft.flexiweather.proj.Projection"/>
     <classEntry path="com.iblsoft.flexiweather.symbology.CloudCurveRenderer"/>
@@ -122,6 +134,7 @@
     <classEntry path="com.iblsoft.flexiweather.utils.DistanceMarkingCurveRenderer"/>
     <classEntry path="com.iblsoft.flexiweather.utils.Duration"/>
     <classEntry path="com.iblsoft.flexiweather.utils.GraphicsCurveRenderer"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.HTMLUtils"/>
     <classEntry path="com.iblsoft.flexiweather.utils.ICurveRenderer"/>
     <classEntry path="com.iblsoft.flexiweather.utils.IObjectPoolObject"/>
     <classEntry path="com.iblsoft.flexiweather.utils.ISO8601Parser"/>
@@ -135,9 +148,10 @@
     <classEntry path="com.iblsoft.flexiweather.utils.StorageException"/>
     <classEntry path="com.iblsoft.flexiweather.utils.TimerWithData"/>
     <classEntry path="com.iblsoft.flexiweather.utils.TreeUtils"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.URLUtils"/>
     <classEntry path="com.iblsoft.flexiweather.utils.UniURLLoader"/>
     <classEntry path="com.iblsoft.flexiweather.utils.UniURLLoaderEvent"/>
-    <classEntry path="com.iblsoft.flexiweather.utils.UniURLLoaderManager"/>
+    <classEntry path="com.iblsoft.flexiweather.net.managers.UniURLLoaderManager"/>
     <classEntry path="com.iblsoft.flexiweather.utils.XMLStorage"/>
     <classEntry path="com.iblsoft.flexiweather.utils.geometry.ILineSegmentApproximableBounds"/>
     <classEntry path="com.iblsoft.flexiweather.utils.geometry.LineSegment"/>
@@ -182,17 +196,16 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.GoogleMapLayerConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.GoogleMapsLayerOption"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.InteractiveLayerGoogleMaps"/>
-    <classEntry path="com.iblsoft.flexiweather.ogc.QTTLayerOptions"/>
-    <classEntry path="com.iblsoft.flexiweather.plugins.data.PluginCollection"/>
-    <classEntry path="com.iblsoft.flexiweather.plugins.data.ModuleInfo"/>
-    <classEntry path="com.iblsoft.flexiweather.plugins.data.ModuleInfoLoading"/>
-    <classEntry path="com.iblsoft.flexiweather.plugins.data.ModuleCollection"/>
-    <classEntry path="com.iblsoft.flexiweather.plugins.data.ModuleItem"/>
-    <classEntry path="com.iblsoft.flexiweather.plugins.ModuleLoaderCollection"/>
-    <classEntry path="com.iblsoft.flexiweather.plugins.data.ModuleLoaderItem"/>
-    <classEntry path="com.iblsoft.flexiweather.plugins.IPopup"/>
-    <classEntry path="com.iblsoft.flexiweather.plugins.IPopupManager"/>
-    <classEntry path="com.iblsoft.flexiweather.utils.URLUtils"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.DebugUtils"/>
+    <classEntry path="com.iblsoft.flexiweather.net.managers.UniURLLoaderBasicAuthManager"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.basicauth.controls.IBasicAuthCredentialsPopup"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.basicauth.controls.BasicAuthCredentialsPopupBase"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.basicauth.controls.BasicAuthCredentialsPopup"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.basicauth.events.BasicAuthEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.basicauth.data.BasicAuthAccount"/>
+    <classEntry path="com.iblsoft.flexiweather.net.data.UniURLLoaderData"/>
+    <classEntry path="com.iblsoft.flexiweather.net.interfaces.IURLLoaderBasicAuth"/>
+    <classEntry path="com.iblsoft.flexiweather.net.interfaces.IURLLoaderBasicAuthListener"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

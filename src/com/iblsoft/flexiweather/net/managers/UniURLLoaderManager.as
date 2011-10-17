@@ -1,7 +1,8 @@
-package com.iblsoft.flexiweather.utils
+package com.iblsoft.flexiweather.net.managers
 {
 	import flash.events.EventDispatcher;
 	import flash.net.URLRequest;
+	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
 
 	public class UniURLLoaderManager extends EventDispatcher
 	{
@@ -22,12 +23,12 @@ package com.iblsoft.flexiweather.utils
 		{
 		}
 		
-		public function addLoader(request: URLRequest): void
+		public function addLoaderRequest(request: URLRequest): void
 		{
 			var e: UniURLLoaderEvent = new UniURLLoaderEvent(ADD_LOADER, null, request, null);
 			dispatchEvent(e);
 		}
-		public function removeLoader(request: URLRequest): void
+		public function removeLoaderRequest(request: URLRequest): void
 		{
 			var e: UniURLLoaderEvent = new UniURLLoaderEvent(REMOVE_LOADER, null, request, null);
 			dispatchEvent(e);
