@@ -4,16 +4,25 @@ package com.iblsoft.flexiweather.net.managers
 	import com.iblsoft.flexiweather.utils.SharedObjectStorage;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.utils.UniURLLoader;
+	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.widgets.basicauth.data.BasicAuthAccount;
 	
+	import flash.events.EventDispatcher;
 	import flash.net.SharedObject;
 	import flash.net.URLRequest;
 	import flash.utils.Dictionary;
 	
 	import mx.utils.URLUtil;
 
-	public class UniURLLoaderBasicAuthManager
+	/**
+	 * Application needs valid applicationName to be set, to work correctly for different applications.  Name must consists of letters, numbers and _. Other characters are not allowed, bcause of SharedObject limitations.
+	 * @author fkormanak
+	 * 
+	 */	
+	public class UniURLLoaderBasicAuthManager extends EventDispatcher
 	{
+		private var _applicationName: String;
+		
 		private var _waitingForCredentials: Dictionary;
 		private var _requests: Dictionary;
 		private var _accounts: Array;
@@ -22,6 +31,28 @@ package com.iblsoft.flexiweather.net.managers
 		
 		private static var _instance: UniURLLoaderBasicAuthManager;
 		
+
+		public function get applicationName():String
+		{
+			return _applicationName;
+		}
+
+		/**
+		 * Name must consists of letters, numbers and _. Other characters are not allowed, bcause of SharedObject limitations 
+		 * @param value
+		 * 
+		 */		
+		public function set applicationName(value:String):void
+		{
+			if (value)
+			{
+				//remove spaces, it shareObject can not have spaces in name
+				value = value.split(' ').join('');
+			}
+			_applicationName = value;
+			loadAccounts();
+		}
+
 		public static function get instance(): UniURLLoaderBasicAuthManager
 		{
 			if (!_instance)
@@ -36,15 +67,30 @@ package com.iblsoft.flexiweather.net.managers
 			_accounts = [];
 			_requests = new Dictionary();
 			_waitingForCredentials = new Dictionary();
-			loadAccounts();
+			applicationName = '';
+//			loadAccounts();
 		}
 		
+		/**
+		 * Check if BasicAuth credentials already exists. Domain is extracted from request parameter 
+		 * @param request
+		 * @param realm
+		 * @return 
+		 * 
+		 */		
 		public function useBasicAuth(request: URLRequest, realm: String): Boolean
 		{
 			var domain: String = getDomain(request);
 			return useBasicAuthForDomain(domain, realm);
 		}
 		
+		/**
+		 * Check if BasicAuth credentials already exists. 
+		 * @param request
+		 * @param realm
+		 * @return 
+		 * 
+		 */		
 		public function useBasicAuthForDomain(domain: String, realm: String): Boolean
 		{
 			var account: BasicAuthAccount = getAccountForDomain(domain, realm);
@@ -107,14 +153,16 @@ package com.iblsoft.flexiweather.net.managers
 		
 		private function loadAccounts(): void
 		{
-			var st : SharedObjectStorage=new SharedObjectStorage( Storage.LOADING, SharedObject.getLocal( "basic-auth-accounts" ));
-			st.serializeNonpersistentArray('accounts', _accounts, BasicAuthAccount);
+			var st : SharedObjectStorage=new SharedObjectStorage( Storage.LOADING, SharedObject.getLocal( applicationName+"_basic-auth-accounts" ));
+			if (st)
+				st.serializeNonpersistentArray('accounts', _accounts, BasicAuthAccount);
 			
 		}
 		private function saveAccounts(): void
 		{
-			var st : SharedObjectStorage=new SharedObjectStorage( Storage.STORING, SharedObject.getLocal( "basic-auth-accounts" ));
-			st.serializeNonpersistentArray('accounts', _accounts, BasicAuthAccount);
+			var st : SharedObjectStorage=new SharedObjectStorage( Storage.STORING, SharedObject.getLocal( applicationName+"_basic-auth-accounts" ));
+			if (st)
+				st.serializeNonpersistentArray('accounts', _accounts, BasicAuthAccount);
 			
 		}
 		
@@ -146,7 +194,7 @@ package com.iblsoft.flexiweather.net.managers
 		 * 	Request functionality
 		 * 
 		 *********************************************************************************************/
-		
+		/*
 		public function getFirstRequestByDomain(domain: String): UniURLLoaderData
 		{
 			var domainRequests: Array = getDomainRequestArray(domain);
@@ -157,16 +205,56 @@ package com.iblsoft.flexiweather.net.managers
 			return null;
 			
 		}
+		
 		public function getFirstRequestByRequest(request: URLRequest): UniURLLoaderData
 		{
 			var domain: String = getDomain(request);
 			var domainRequests: Array = getDomainRequestArray(domain);
 			trace("getFirstRequestByRequest: ["+domain+"]:" + domainRequests); 
+			for each (var data: UniURLLoaderData in domainRequests)
+			{
+				trace("\t " + data);
+			}
 			if (domainRequests.length > 0)
 				return domainRequests.shift();
 			
 			return null;
 		}
+		*/
+		public function getRequestByURLWithRealm(request: URLRequest, realm: String): UniURLLoaderData
+		{
+			var domain: String = getDomain(request);
+			var domainRequests: Array = getRealmDomainRequestArray(domain);
+			trace("getRequestByURLWithRealm: ["+domain+"]:" + domainRequests);
+			var data: UniURLLoaderData;
+			for each (data in domainRequests)
+			{
+				trace("\t " + data);
+			}
+			var total: int = domainRequests.length;
+			var found: int = -1;
+			for (var i: int = 0; i < total; i++)
+			{
+				data = domainRequests[i] as UniURLLoaderData;
+				if (data.request.url == request.url && data.associatedData && data.associatedData.uniURLLoaderBasicAuthAccount)
+				{
+					var basicAuthAccount: BasicAuthAccount = data.associatedData.uniURLLoaderBasicAuthAccount as BasicAuthAccount;
+					if (basicAuthAccount && basicAuthAccount.realm == realm)
+						found = i;				
+				}
+			}
+				
+			
+			if (found > -1)
+			{
+				var requests: Array = domainRequests.splice(found, 1);
+				return requests[0] as UniURLLoaderData;
+			}
+			
+			return null;
+			
+		}
+		
 		
 		
 		/**
@@ -181,23 +269,61 @@ package com.iblsoft.flexiweather.net.managers
 			var domain: String = URLUtil.getServerNameWithPort(url);
 			return domain;
 		}
-		private function getDomainRequestArray(domain: String): Array
+		private function getRealmDomainRequestArray(domain: String): Array
 		{
 			if (!_requests[domain])
 				_requests[domain] = new Array();
 			
+			
 			return _requests[domain];
 			
 		}
+		
+		/**
+		 * Just create request data and do not store them in request buffer 
+		 * @param request
+		 * @param loader
+		 * @param associatedData
+		 * @param backgroundJobName
+		 * @return 
+		 * 
+		 */		
+		public function createRequest(request: URLRequest, 
+										  loader: UniURLLoader, 
+										  associatedData: Object = null,
+										  backgroundJobName: String = null): UniURLLoaderData
+		{
+			var data: UniURLLoaderData = new UniURLLoaderData(request, loader, associatedData, backgroundJobName);
+			return data;
+		}
+		
+		
+		/**
+		 * Create request data and store them in buffer 
+		 * @param request
+		 * @param loader
+		 * @param associatedData
+		 * @param backgroundJobName
+		 * @return 
+		 * 
+		 */		
 		public function addRequest(request: URLRequest, 
 										  loader: UniURLLoader, 
 										  associatedData: Object = null,
-										  backgroundJobName: String = null): void
+										  backgroundJobName: String = null): UniURLLoaderData
 		{
-			var domain: String = getDomain(request);
-			var domainRequests: Array = getDomainRequestArray(domain);
+			if (request.url.indexOf('listAll') >= 0)
+			{
+				trace("check listAll request");
+			}
 			
-			domainRequests.push(new UniURLLoaderData(request, loader, associatedData, backgroundJobName));
+			var domain: String = getDomain(request);
+			var domainRequests: Array = getRealmDomainRequestArray(domain);
+			
+			var data: UniURLLoaderData = createRequest(request, loader, associatedData, backgroundJobName);
+			domainRequests.push(data);
+			
+			return data;
 		}
 		
 		public function setAuthenticated(value: Boolean): void
@@ -207,47 +333,80 @@ package com.iblsoft.flexiweather.net.managers
 		
 		public function stopAllStoppedRequests(domain: String, realm: String): void
 		{
-			var domainRequests: Array = getDomainRequestArray(domain);
+			var domainRequests: Array = getRealmDomainRequestArray(domain);
 			
 			trace("runAllStoppedRequests for ["+domainRequests+"] " + domainRequests.length);
-			while (domainRequests.length > 0)
+			if (domainRequests.length > 0)
 			{
-				var requestObject: UniURLLoaderData = domainRequests.shift();
-				
-				var loader: UniURLLoader = requestObject.loader;
-				var request: URLRequest = requestObject.request;
-				var associatedData: Object = requestObject.associatedData;
-				var s_backgroundJobName: String = requestObject.backgroundJobName;
-				
-				//check realm, and if it is different, just add request back
-				var basicAuthAccount: BasicAuthAccount = associatedData.uniURLLoaderBasicAuthAccount as BasicAuthAccount;
-				if (basicAuthAccount)
+				var pos: int = domainRequests.length - 1;
+				while (pos > -1)
 				{
-					var currRealm: String = basicAuthAccount.realm;
-					if (currRealm && currRealm != realm)
+					
+					var requestObject: UniURLLoaderData = domainRequests[pos] as UniURLLoaderData;
+					
+					var loader: UniURLLoader = requestObject.loader;
+					var request: URLRequest = requestObject.request;
+					var associatedData: Object = requestObject.associatedData;
+					var s_backgroundJobName: String = requestObject.backgroundJobName;
+					
+					//check realm, and if it is different, just add request back
+					var basicAuthAccount: BasicAuthAccount = associatedData.uniURLLoaderBasicAuthAccount as BasicAuthAccount;
+					if (basicAuthAccount)
 					{
-						addRequest(request, loader, associatedData, s_backgroundJobName);
+						var currRealm: String = basicAuthAccount.realm;
+						if (currRealm && currRealm != realm)
+						{
+							addRequest(request, loader, associatedData, s_backgroundJobName);
+						} else {
+							domainRequests.splice(pos, 1);
+						}
 					}
+					pos--;
 				}
 			}
 			
 		}
-		public function runAllStoppedRequests(request: URLRequest): void
+		public function runAllStoppedRequests(request: URLRequest, loggedBasicAccount: BasicAuthAccount): void
 		{
 			var domain: String = getDomain(request);
-			var domainRequests: Array = getDomainRequestArray(domain);
+			var domainRequests: Array = getRealmDomainRequestArray(domain);
 			
 			trace("runAllStoppedRequests for ["+domainRequests+"] " + domainRequests.length);
-			while (domainRequests.length > 0)
+			
+			if (domainRequests.length > 0)
 			{
-				var requestObject: UniURLLoaderData = domainRequests.shift();
-				
-				var loader: UniURLLoader = requestObject.loader;
-				var request: URLRequest = requestObject.request;
-				var associatedData: Object = requestObject.associatedData;
-				var s_backgroundJobName: String = requestObject.backgroundJobName;
-				
-				loader.load(request, associatedData, s_backgroundJobName, true);
+				var realm: String = loggedBasicAccount.realm;
+				var pos: int = domainRequests.length - 1;
+				while (pos > -1)
+				{
+					var requestObject: UniURLLoaderData = domainRequests[pos] as UniURLLoaderData;
+					
+					var loader: UniURLLoader = requestObject.loader;
+					var request: URLRequest = requestObject.request;
+					var s_backgroundJobName: String = requestObject.backgroundJobName;
+					var associatedData: Object = requestObject.associatedData;
+					
+					if (associatedData && associatedData.uniURLLoaderBasicAuthAccount)
+					{
+						var basicAuthAccount: BasicAuthAccount = associatedData.uniURLLoaderBasicAuthAccount as BasicAuthAccount;
+						if (basicAuthAccount && basicAuthAccount.realm == realm)
+						{
+							domainRequests.splice(pos, 1);
+							
+							var rn: UniURLLoaderEvent = new UniURLLoaderEvent(UniURLLoader.RUN_STOPPED_REQUEST, null, request, associatedData);
+							loader.dispatchEvent(rn);
+							loader.load(request, associatedData, s_backgroundJobName, true, loggedBasicAccount);
+							
+						}
+					} else {
+						domainRequests.splice(pos, 1);
+						
+						var rn2: UniURLLoaderEvent = new UniURLLoaderEvent(UniURLLoader.RUN_STOPPED_REQUEST, null, request, associatedData);
+						loader.dispatchEvent(rn2);
+						loader.load(request, associatedData, s_backgroundJobName, true, loggedBasicAccount);
+					}
+					pos--;
+				}
 			}
 		}
 	}

@@ -109,6 +109,8 @@ package com.iblsoft.flexiweather.utils
 		
 		[Event(name = AUTHORIZATION_FAILED, type = "com.iblsoft.flexiweather.utils.UniURLLoaderEvent")]
 		public static const AUTHORIZATION_FAILED: String = "authorizationFailed";
+		public static const RUN_STOPPED_REQUEST: String = "runStoppedRequest";
+		public static const STOP_REQUEST: String = "stopRequest";
 		
 		public static const LOAD_STARTED: String = "loadStarted";
 		
@@ -138,6 +140,7 @@ package com.iblsoft.flexiweather.utils
 		public function UniURLLoader()
 		{
 			allowedFormats = [XML_FORMAT, IMAGE_FORMAT, JSON_FORMAT];
+			
 		}
 		
 		public static function navigateToURL(request: URLRequest): void
@@ -227,7 +230,7 @@ package com.iblsoft.flexiweather.utils
 			}
 		}
 		
-		private function showBasicAuthPopup(domain: String, realm: String): void
+		private function showBasicAuthPopup(domain: String, realm: String, data: UniURLLoaderData): void
 		{
 			var popup: BasicAuthCredentialsPopup;
 			/*
@@ -241,6 +244,7 @@ package com.iblsoft.flexiweather.utils
 			popup = new BasicAuthCredentialsPopup();
 			popup.domain = domain;
 			popup.realm = realm;
+			popup.requestData = data;
 			popup.addEventListener(BasicAuthEvent.CREDENTIALS_READY, onBasicAuthCredentialsReady);
 			popup.addEventListener(BasicAuthEvent.AUTHENTICATION_CANCELLED, onBasicAuthCancelled);
 			PopUpManager.addPopUp(popup, FlexGlobals.topLevelApplication as DisplayObject);
@@ -276,11 +280,11 @@ package com.iblsoft.flexiweather.utils
 			
 			var basicAuthManager: UniURLLoaderBasicAuthManager = UniURLLoaderBasicAuthManager.instance;
 			
-			var firstRequest: Object = UniURLLoaderBasicAuthManager.instance.getFirstRequestByDomain(event.domain);
-			var loader: UniURLLoader = firstRequest.loader as UniURLLoader;
-			var request: URLRequest = firstRequest.request as URLRequest;
-			var associatedData: Object = firstRequest.associatedData as Object;
-			var s_backgroundJobName: String = firstRequest.backgroundJobName as String;
+			var requestData: UniURLLoaderData = event.requestData;
+			var loader: UniURLLoader = requestData.loader as UniURLLoader;
+			var request: URLRequest = requestData.request as URLRequest;
+			var associatedData: Object = requestData.associatedData as Object;
+			var s_backgroundJobName: String = requestData.backgroundJobName as String;
 			
 			var basicAccount: BasicAuthAccount = new BasicAuthAccount(event.username, event.password, event.domain, event.realm);
 			loader.load(request, associatedData, s_backgroundJobName, true, basicAccount);
@@ -365,6 +369,9 @@ package com.iblsoft.flexiweather.utils
 			if (!already_authenticated && waitForBasicAuthCredentials && !basicAuthCredentialsReady)
 			{
 				UniURLLoaderBasicAuthManager.instance.addRequest(urlRequest, this, associatedData, s_backgroundJobName);
+//				basicAuthManager.addEventListener(UniURLLoader.RUN_STOPPED_REQUEST, onRunStoppedRequest);
+				var ae: UniURLLoaderEvent = new UniURLLoaderEvent(UniURLLoader.STOP_REQUEST, null, urlRequest, associatedData);
+				dispatchEvent(ae);
 				return true;
 			}
 			if (!already_authenticated)
@@ -388,9 +395,9 @@ package com.iblsoft.flexiweather.utils
 				{
 					associatedData.uniURLLoaderBasicAuthInfo = 'first message';
 					
-					basicAuthManager.addRequest(urlRequest, this, associatedData, s_backgroundJobName);
+					var requestData: UniURLLoaderData = basicAuthManager.createRequest(urlRequest, this, associatedData, s_backgroundJobName);
 					basicAuthManager.waitForCredentials(domain, realm);
-					showBasicAuthPopup(domain, realm);
+					showBasicAuthPopup(domain, realm, requestData);
 					return true;
 				}
 				
@@ -426,6 +433,13 @@ package com.iblsoft.flexiweather.utils
 			checkRequestData(urlRequest);
 			checkRequestBaseURL(urlRequest);
 			
+			// if there is no associatedDat, add empty one
+			if (!associatedData)
+			{
+				associatedData = new Object();
+				associatedData.uniURLLoaderBasicAuthAccount = new BasicAuthAccount();
+			}
+			
 			var basicAuthManager: UniURLLoaderBasicAuthManager = UniURLLoaderBasicAuthManager.instance;
 			//check if basicAut was used for this domain before
 			var realm: String;
@@ -434,9 +448,8 @@ package com.iblsoft.flexiweather.utils
 			
 			if (!useBasicAuthInRequest)
 			{
-				
-				var usedBaiscAuthBefore: Boolean = basicAuthManager.useBasicAuth(urlRequest, realm);
-				if (usedBaiscAuthBefore)
+				var usedBasicAuthBefore: Boolean = basicAuthManager.useBasicAuth(urlRequest, realm);
+				if (usedBasicAuthBefore)
 					useBasicAuthInRequest = true;
 			}
 			if (useBasicAuthInRequest)
@@ -446,6 +459,9 @@ package com.iblsoft.flexiweather.utils
 					return;
 			} else {
 				basicAuthManager.addRequest(urlRequest, this, associatedData, s_backgroundJobName);
+//				basicAuthManager.addEventListener(UniURLLoader.RUN_STOPPED_REQUEST, onRunStoppedRequest);
+				var ae: UniURLLoaderEvent = new UniURLLoaderEvent(UniURLLoader.STOP_REQUEST, null, urlRequest, associatedData);
+				dispatchEvent(ae);
 			}
 				
 //			trace("UNIURLLoader load " + urlRequest.url + " " + urlRequest.data);
@@ -531,7 +547,18 @@ package com.iblsoft.flexiweather.utils
 						 * if not - open basic auth popup
 						 */
 						
-						basicAuthAccount = loader.associatedData.uniURLLoaderBasicAuthAccount as BasicAuthAccount;
+						if (loader.associatedData) {
+							basicAuthAccount = loader.associatedData.uniURLLoaderBasicAuthAccount as BasicAuthAccount;
+						} else {
+							loader.associatedData = new Object();
+							loader.associatedData.uniURLLoaderBasicAuthAccount = new BasicAuthAccount();
+							basicAuthAccount = loader.associatedData.uniURLLoaderBasicAuthAccount as BasicAuthAccount;
+						}
+						
+//						if (!urlLoader.associatedData)
+//						{
+//							urlRequest.
+//						}
 						realm = null;
 						
 						if (basicAuthAccount)
@@ -548,9 +575,9 @@ package com.iblsoft.flexiweather.utils
 							}
 						}
 						
-						openBasicAuthDialog(urlRequest);
+						openBasicAuthDialog(urlRequest, realm);
 						
-						var e: UniURLLoaderEvent = new UniURLLoaderEvent(UniURLLoader.AUTHORIZATION_FAILED, null, null, null);
+						var e: UniURLLoaderEvent = new UniURLLoaderEvent(UniURLLoader.AUTHORIZATION_FAILED, null, urlRequest, loader.associatedData);
 						dispatchEvent(e);
 					}
 				}
@@ -576,24 +603,30 @@ package com.iblsoft.flexiweather.utils
 			}
 		}
 		
-		private function openBasicAuthDialog(urlRequest: URLRequest): void
+		private function openBasicAuthDialog(urlRequest: URLRequest, realm: String): void
 		{
 			//show basic auth popup
 			var basicAuthManager: UniURLLoaderBasicAuthManager = UniURLLoaderBasicAuthManager.instance;
-			var requestObject: UniURLLoaderData = basicAuthManager.getFirstRequestByRequest(urlRequest);
 			
-			if (requestObject)
+			
+			var domain: String = getDomain(urlRequest);
+			var basicAuthPopupOpened: Boolean = basicAuthManager.waitingForCredentials(domain, realm);
+			if (!basicAuthPopupOpened)
 			{
-				//reset waiting for credentials, because it is for the first time, or credentials was incorrect last time
-				var domain: String = getDomain(urlRequest);
-				var basicAuthAccount: BasicAuthAccount = requestObject.associatedData.uniURLLoaderBasicAuthAccount as BasicAuthAccount; 
-				var realm: String;
-				if (basicAuthAccount)
-					realm = basicAuthAccount.realm;
-				basicAuthManager.doNotWaitForCredentials(domain, realm);
+				var requestObject: UniURLLoaderData = basicAuthManager.getRequestByURLWithRealm(urlRequest, realm);
 				
-				//load it again with basic auth
-				load(requestObject.request, requestObject.associatedData, requestObject.backgroundJobName, true, basicAuthAccount);
+				if (requestObject)
+				{
+					//reset waiting for credentials, because it is for the first time, or credentials was incorrect last time
+					var basicAuthAccount: BasicAuthAccount = requestObject.associatedData.uniURLLoaderBasicAuthAccount as BasicAuthAccount; 
+					var realm: String;
+					if (basicAuthAccount)
+						realm = basicAuthAccount.realm;
+					//basicAuthManager.doNotWaitForCredentials(domain, realm);
+					
+					//load it again with basic auth
+					load(requestObject.request, requestObject.associatedData, requestObject.backgroundJobName, true, basicAuthAccount);
+				}
 			}
 		}
 		
@@ -708,6 +741,16 @@ package com.iblsoft.flexiweather.utils
 //			dispatchFault(urlRequest, urlLoader.associatedData, ERROR_SECURITY, event.text);
 		}
 		
+		/*
+		private function onRunStoppedRequest(event: UniURLLoaderEvent): void
+		{
+			var basicAuthManager: UniURLLoaderBasicAuthManager = UniURLLoaderBasicAuthManager.instance;
+			basicAuthManager.removeEventListener(UniURLLoader.RUN_STOPPED_REQUEST, onRunStoppedRequest);
+			
+			dispatchEvent(event);
+		}
+		*/
+		
 		protected function onDataComplete(event: Event): void
 		{
 			
@@ -724,15 +767,14 @@ package com.iblsoft.flexiweather.utils
 			{
 				var domain: String = getDomain(urlRequest);
 				var basicAccount: BasicAuthAccount = urlLoader.associatedData.uniURLLoaderBasicAuthAccount as BasicAuthAccount;
-				var realm: String = basicAccount.realm;
-				var accountAdded: Boolean = basicAuthManager.addAccount(basicAccount.name, basicAccount.password, basicAccount.domain, realm);
-				
-				
 				//check if there any queued basic auth request and call them
-				if (accountAdded)
+				if (basicAccount && basicAccount.name && basicAccount.password)
 				{
+					var realm: String = basicAccount.realm;
+					var accountAdded: Boolean = basicAuthManager.addAccount(basicAccount.name, basicAccount.password, basicAccount.domain, realm);
+				
 					basicAuthManager.doNotWaitForCredentials(domain, realm);
-					basicAuthManager.runAllStoppedRequests(urlRequest);
+					basicAuthManager.runAllStoppedRequests(urlRequest, basicAccount);
 				}
 			}
 			

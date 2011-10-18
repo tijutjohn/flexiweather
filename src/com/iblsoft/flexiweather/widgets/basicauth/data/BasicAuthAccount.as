@@ -35,5 +35,20 @@ package com.iblsoft.flexiweather.widgets.basicauth.data
 			}
 			
 		}
+		
+		public function toString(): String
+		{
+			var str: String =  "BasicAuthAccount: ";
+			if (name)
+				str += " name: " + name;
+			if (password)
+				str += " password: " + password;
+			if (domain)
+				str += " domain: " + domain;
+			if (realm)
+				str += " realm: " + realm;
+			
+			return str;
+		}
 	}
 }

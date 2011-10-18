@@ -17,5 +17,25 @@ package com.iblsoft.flexiweather.net.data
 			this.associatedData = associatedData;
 			this.backgroundJobName = backgroundJobName;
 		}
+		
+		public function toString(): String
+		{
+			var str: String =  "UniURLLoaderData: ";
+			if (request)
+				str += " Request: " + request.url;
+			if (loader)
+				str += " Loader: " + loader;
+			if (associatedData)
+			{
+				for each (var name: String in associatedData)
+				{
+					str += "\t" + name + " = " + associatedData[name]; 
+				}
+			}
+			if (backgroundJobName)
+				str += " backgroundJobName: " + backgroundJobName;
+			
+			return str;
+		}
 	}
 }

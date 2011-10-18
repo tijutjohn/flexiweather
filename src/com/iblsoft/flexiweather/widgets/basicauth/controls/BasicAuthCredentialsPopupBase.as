@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.widgets.basicauth.controls
 {
+	import com.iblsoft.flexiweather.net.data.UniURLLoaderData;
 	import com.iblsoft.flexiweather.plugins.IPopupManager;
 	import com.iblsoft.flexiweather.widgets.basicauth.events.BasicAuthEvent;
 	
@@ -15,26 +16,30 @@ package com.iblsoft.flexiweather.widgets.basicauth.controls
 		[Bindable]
 		public var realm: String;
 		
+		public var requestData: UniURLLoaderData;
+		
 		public function BasicAuthCredentialsPopupBase()
 		{
 			super();
 		}
 		
-		public function login(username: String, password: String, domain: String, realm: String): void
+		public function login(username: String, password: String, domain: String, realm: String, data: UniURLLoaderData): void
 		{
 			var bae: BasicAuthEvent = new BasicAuthEvent(BasicAuthEvent.CREDENTIALS_READY);
 			bae.username = username;
 			bae.password = password;
 			bae.domain = domain;
 			bae.realm = realm;
+			bae.requestData = data;
 			dispatchEvent(bae);
 		}
 		
-		public function cancelAuthentication(domain:String, realm:String):void
+		public function cancelAuthentication(domain:String, realm:String, data: UniURLLoaderData):void
 		{
 			var bae: BasicAuthEvent = new BasicAuthEvent(BasicAuthEvent.AUTHENTICATION_CANCELLED);
 			bae.domain = domain;
 			bae.realm = realm;
+			bae.requestData = data;
 			dispatchEvent(bae);
 			
 		}

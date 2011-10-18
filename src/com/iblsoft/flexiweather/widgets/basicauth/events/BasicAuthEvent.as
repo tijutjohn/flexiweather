@@ -1,5 +1,7 @@
 package com.iblsoft.flexiweather.widgets.basicauth.events
 {
+	import com.iblsoft.flexiweather.net.data.UniURLLoaderData;
+	
 	import flash.events.Event;
 	
 	public class BasicAuthEvent extends Event
@@ -11,6 +13,8 @@ package com.iblsoft.flexiweather.widgets.basicauth.events
 		public var password: String;
 		public var domain: String;
 		public var realm: String;
+		
+		public var requestData: UniURLLoaderData;
 		
 		public function BasicAuthEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false)
 		{
