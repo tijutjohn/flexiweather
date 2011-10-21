@@ -18,7 +18,6 @@ package com.iblsoft.flexiweather.utils
 			var body: Boolean;
 			for each (var node: XML in x.children())
 			{
-				trace(node);
 				if (node.name().localName == 'head')
 					head = true;
 				if (node.name().localName == 'body')
@@ -41,7 +40,6 @@ package com.iblsoft.flexiweather.utils
 			var body: Boolean;
 			for each (var node: XML in x.children())
 			{
-				trace(node);
 				if (node.name().localName == 'head')
 				{
 					//check all head children() to find <title> tag

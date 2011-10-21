@@ -410,7 +410,6 @@ package com.iblsoft.flexiweather.utils
 				basicAuthAccount: BasicAuthAccount = null,
 				basicAuthRequestData: UniURLLoaderData = null): void
 		{
-			trace("load " + basicAuthRequestData);
 			checkRequestData(urlRequest);
 			checkRequestBaseURL(urlRequest);
 			
@@ -443,10 +442,6 @@ package com.iblsoft.flexiweather.utils
 					return;
 			} else {
 				uniURLLoaderData = basicAuthManager.createRequest(urlRequest, this, associatedData, s_backgroundJobName);
-				trace("LOAD uni data: " + uniURLLoaderData);
-//				basicAuthManager.addEventListener(UniURLLoader.RUN_STOPPED_REQUEST, onRunStoppedRequest);
-//				var ae: UniURLLoaderEvent = new UniURLLoaderEvent(UniURLLoader.STOP_REQUEST, null, urlRequest, associatedData);
-//				dispatchEvent(ae);
 			}
 				
 //			trace("UNIURLLoader load " + urlRequest.url + " " + urlRequest.data);
@@ -454,7 +449,6 @@ package com.iblsoft.flexiweather.utils
 			urlLoader.associatedData = associatedData;
 			urlLoader.dataFormat = URLLoaderDataFormat.BINARY;
 			urlLoader.addEventListener(Event.COMPLETE, onDataComplete);
-			urlLoader.addEventListener(HTTPStatusEvent.HTTP_STATUS, onHTTPStatus);
 			urlLoader.addEventListener(IOErrorEvent.IO_ERROR, onDataIOError);
 			urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onSecurityError);
 			
@@ -579,25 +573,6 @@ package com.iblsoft.flexiweather.utils
 						dispatchEvent(e);
 					}
 				}
-			}
-		}
-		
-		private function onHTTPStatus(event: HTTPStatusEvent): void
-		{
-			trace("onHTTPStatus: " + event.status);
-			if (event.status && event.status == 401)
-			{
-				/*
-				var basicAuthManager: UniURLLoaderBasicAuthManager = UniURLLoaderBasicAuthManager.instance;
-				
-				var urlLoader: URLLoaderWithAssociatedData = URLLoaderWithAssociatedData(event.target);
-				var urlRequest: URLRequest = md_urlLoaderToRequestMap[urlLoader].request;
-				
-				openBasicAuthDialog(urlRequest);
-				
-				var e: UniURLLoaderEvent = new UniURLLoaderEvent(UniURLLoader.AUTHORIZATION_FAILED, null, null, null);
-				dispatchEvent(e);
-				*/
 			}
 		}
 		
@@ -775,8 +750,6 @@ package com.iblsoft.flexiweather.utils
 		
 		protected function onDataComplete(event: Event): void
 		{
-			
-			trace("onDataComplete");
 			var basicAuthManager: UniURLLoaderBasicAuthManager = UniURLLoaderBasicAuthManager.instance;
 			
 			
