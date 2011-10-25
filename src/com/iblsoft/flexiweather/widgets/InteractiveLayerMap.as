@@ -4,7 +4,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.ogc.ISynchronisedObject;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
-	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
+	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
 	import com.iblsoft.flexiweather.ogc.SynchronisationRole;
 	import com.iblsoft.flexiweather.ogc.SynchronisedVariableChangeEvent;
 	import com.iblsoft.flexiweather.proj.Coord;
@@ -115,11 +115,15 @@ package com.iblsoft.flexiweather.widgets
 				{
 					wrapper = wrappers.getItemAt(i) as LayerSerializationWrapper;
 					layer = wrapper.m_layer;
+					if (layer is InteractiveLayerMSBase)
+					{
+						if ((layer as InteractiveLayerMSBase).isPrimaryLayer())
+						{
+							setPrimaryLayer(layer as InteractiveLayerMSBase);
+						}
+					}
 					newLayers.push(layer);
-					
-//					addLayer(layer);
 				}
-				
 				
 				var de: DynamicEvent = new DynamicEvent(LAYERS_SERIALIZED_AND_READY);
 				de['layers'] = newLayers;
@@ -336,9 +340,6 @@ package com.iblsoft.flexiweather.widgets
 		{
 			var l_syncLayers: Array = [];
 			var l_timeAxis: Array = enumTimeAxis(l_syncLayers);
-//          	if(l_timeAxis == null) // no time axis
-//          		return null;
-          		
           	var i: int;
 			var so: ISynchronisedObject;
 			
