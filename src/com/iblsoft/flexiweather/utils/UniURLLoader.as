@@ -452,6 +452,23 @@ package com.iblsoft.flexiweather.utils
 			urlLoader.addEventListener(IOErrorEvent.IO_ERROR, onDataIOError);
 			urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onSecurityError);
 			
+			//FIXME remove this. It's just for testing Proxy
+			/*
+				var backgroundJob: BackgroundJob = null;
+				if(s_backgroundJobName != null)
+					backgroundJob = BackgroundJobManager.getInstance().startJob(s_backgroundJobName);
+				md_urlLoaderToRequestMap[urlLoader] = {
+					request: urlRequest,
+					loader: urlLoader,
+					backgroundJob: backgroundJob
+				};
+			
+				loadCrossDomainProxyURLPattern(urlLoader);
+				return;
+			*/
+			//FIXME end of remove section.
+			
+			
 			//implement listening for HTTP_RESPONSE_STATUS available only in AIR
 			if (basicAuthURLLoaderClass)
 			{
@@ -876,53 +893,10 @@ package com.iblsoft.flexiweather.utils
 			// Try to use cross-domain 	 if received "Error #2048: Security sandbox violation:" 
 			if(crossDomainProxyURLPattern != null
 					&& event.text.match(/#2048/)
-					&& !urlLoader.b_crossDomainProxyRequest) {
+					&& !urlLoader.b_crossDomainProxyRequest) 
+			{
 				
-				var s_proxyURL: String = fromBaseURL(crossDomainProxyURLPattern, proxyBaseURL);
-				
-				urlRequest = md_urlLoaderToRequestMap[urlLoader].request;
-				
-				checkRequestData(urlRequest);
-				
-				var s_url: String = urlRequest.url;
-				
-				Log.getLogger('SecurityError').info('s_url: ' + s_url);
-				Log.getLogger('SecurityError').info('s_url.indexOf("?"): ' + (s_url.indexOf("?")));
-				if(urlRequest.data) {
-					if(s_url.indexOf("?") >= 0)
-					{
-						if (s_url.indexOf("?") != (s_url.length - 1))
-							s_url += "&";
-					} else
-						s_url += "?";
-					
-					Log.getLogger('SecurityError').info('STEP 1 s_url: ' + s_url);
-					
-					if (urlRequest.data is URLVariables)
-					{
-						s_url += urlRequest.data;
-					} else {
-						if (urlRequest.data is Object)
-						{
-							for (var dataItemName: String in urlRequest.data)
-							{
-								s_url += dataItemName + "=" + urlRequest.data[dataItemName];
-							}
-						}
-					}
-					
-					Log.getLogger('SecurityError').info('STEP 2 s_url: ' + s_url);
-					
-				}
-				s_proxyURL = s_proxyURL.replace("${URL}", encodeURIComponent(s_url));
-				Log.getLogger('SecurityError').info('s_proxyURL: ' + s_proxyURL);
-				//Alert.show("Got error:\n" + event.text + "\n"
-				//		+ "Retrying:\n" + s_proxyURL + "\n",
-				//		"SecurityErrorEvent received");
-				urlRequest.url = s_proxyURL;
-				checkRequestData(urlRequest);
-				urlLoader.b_crossDomainProxyRequest = true;
-				urlLoader.load(urlRequest);
+				loadCrossDomainProxyURLPattern(urlLoader);
 				return;
 			}
 
@@ -934,6 +908,59 @@ package com.iblsoft.flexiweather.utils
 			dispatchFault(urlRequest, urlLoader.associatedData, ERROR_SECURITY, event.text);
 		}
 
+		private function loadCrossDomainProxyURLPattern(urlLoader: URLLoaderWithAssociatedData): void
+		{
+			var urlRequest: URLRequest;
+			
+			var s_proxyURL: String = fromBaseURL(crossDomainProxyURLPattern, proxyBaseURL);
+			
+			urlRequest = md_urlLoaderToRequestMap[urlLoader].request;
+			
+			checkRequestData(urlRequest);
+			
+			var s_url: String = urlRequest.url;
+			
+			Log.getLogger('SecurityError').info('s_url: ' + s_url);
+			Log.getLogger('SecurityError').info('s_url.indexOf("?"): ' + (s_url.indexOf("?")));
+			if(urlRequest.data) {
+				if(s_url.indexOf("?") >= 0)
+				{
+					if (s_url.indexOf("?") != (s_url.length - 1))
+						s_url += "&";
+				} else
+					s_url += "?";
+				
+				Log.getLogger('SecurityError').info('STEP 1 s_url: ' + s_url);
+				
+				if (urlRequest.data is URLVariables)
+				{
+					s_url += urlRequest.data;
+				} else {
+					if (urlRequest.data is Object)
+					{
+						for (var dataItemName: String in urlRequest.data)
+						{
+							s_url += dataItemName + "=" + urlRequest.data[dataItemName];
+						}
+					}
+				}
+				
+				urlRequest.data = null;
+				
+				Log.getLogger('SecurityError').info('STEP 2 s_url: ' + s_url);
+				
+			}
+			s_proxyURL = s_proxyURL.replace("${URL}", encodeURIComponent(s_url));
+			Log.getLogger('SecurityError').info('s_proxyURL: ' + s_proxyURL);
+			//Alert.show("Got error:\n" + event.text + "\n"
+			//		+ "Retrying:\n" + s_proxyURL + "\n",
+			//		"SecurityErrorEvent received");
+			urlRequest.url = s_proxyURL;
+			checkRequestData(urlRequest);
+			urlLoader.b_crossDomainProxyRequest = true;
+			urlLoader.load(urlRequest);
+		}
+		
 		protected function onImageLoaded(event: Event): void
 		{
 			var imageLoader: LoaderWithAssociatedData = LoaderWithAssociatedData(event.target.loader);
