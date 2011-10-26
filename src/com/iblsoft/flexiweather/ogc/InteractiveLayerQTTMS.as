@@ -37,6 +37,8 @@ package com.iblsoft.flexiweather.ogc
 	 **/
 	public class InteractiveLayerQTTMS extends InteractiveLayer implements IConfigurableLayer, Serializable
 	{
+		public static const UPDATE_TILING_PATTERN: String = 'updateTilingPattern';
+		
 		public static const DRAW_TILES: String = 'drawTiles';
 		public static const START_TILES_LOADING: String = 'startTilesLoading';
 		public static const ALL_TILES_LOADED: String = 'onAllTilesLoaded';
@@ -71,7 +73,6 @@ package com.iblsoft.flexiweather.ogc
 		/** This is used only if overriding using the setter, otherwise the value from m_cfg is used. */ 
 		protected var ms_explicitBaseURLPattern: String;
 		
-//		private var md_crsToTilingExtent: Dictionary = new Dictionary();
 		
 		private var ms_oldCRS: String;
 		private var m_tilingUtils: TilingUtils;
@@ -153,12 +154,24 @@ package com.iblsoft.flexiweather.ogc
 		public override function validateSize(b_recursive: Boolean = false): void
 		{
 			super.validateSize(b_recursive);
+			
+			
 			var i_oldZoom: int = mi_zoom;
 			findZoom();
 			if (i_oldZoom != mi_zoom)
 			{
+				/**
+				 * check if tiling pattern has been update with all data needed 
+				 * (default pattern is just InteractiveLayerWMSWithQTT.WMS_TILING_URL_PATTERN ('&TILEZOOM=%ZOOM%&TILECOL=%COL%&TILEROW=%ROW%') without any WMS data)
+				 */ 
+				notifyTilingPatternUpdate();
 				updateData(false);
 			}
+		}
+		
+		private function notifyTilingPatternUpdate(): void
+		{
+			dispatchEvent(new Event(UPDATE_TILING_PATTERN));
 		}
 
 		public static function expandURLPattern(s_url: String, tileIndex: TileIndex): String
@@ -201,6 +214,35 @@ package com.iblsoft.flexiweather.ogc
 			//md_crsToTilingExtent[s_tilingCRS] = crsTilingExtent;
 		}
 
+		/**
+		 * Function which loadData. It's good habit to call this function when you want to load your data to have one channel for loading data.
+		 * It's easier to testing and it's one place for checking requests
+		 *  
+		 * @param urlRequest
+		 * @param associatedData
+		 * @param s_backgroundJobName
+		 * 
+		 */	
+		public function loadData(
+			urlRequest: URLRequest,
+			associatedData: Object = null,
+			s_backgroundJobName: String = null): void
+		{
+			var url: String = urlRequest.url;
+			m_loader.load(urlRequest, associatedData, s_backgroundJobName);
+			
+			//check associated data
+			/*
+			if (associatedData)
+			{
+				for (var item: String in associatedData)
+				{
+					trace("InteractiveLayerQTTMS loadData : " + item + "=" + associatedData[item]);
+				}
+			}*/
+			
+		}
+		
 		public function updateData(b_forceUpdate: Boolean): void
 		{
 			if(mi_zoom < 0)
@@ -269,7 +311,7 @@ package com.iblsoft.flexiweather.ogc
 					// this already cancel previou job for current tile
 					m_jobs.addNewTileJobRequest(requestObj.requestedTileIndex.mi_tileCol, requestObj.requestedTileIndex.mi_tileRow, m_loader, requestObj.request);
 					
-					m_loader.load(requestObj.request, {
+					loadData(requestObj.request, {
 						requestedCRS: requestObj.requestedCRS,
 						requestedTileIndex:  requestObj.requestedTileIndex
 					}, jobName);

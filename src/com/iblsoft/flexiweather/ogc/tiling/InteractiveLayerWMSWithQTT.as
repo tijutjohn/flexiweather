@@ -14,6 +14,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import flash.display.BitmapData;
 	import flash.display.Graphics;
 	import flash.events.DataEvent;
+	import flash.events.Event;
 	import flash.geom.Matrix;
 	import flash.net.URLRequest;
 
@@ -52,6 +53,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 			var tiledLayerConfig: QTTMSLayerConfiguration = new QTTMSLayerConfiguration();
 			m_tiledLayer = new InteractiveLayerQTTMS(container, tiledLayerConfig,
 					'', null, null, cfg.minimumZoomLevel, cfg.maximumZoomLevel);
+			
+			m_tiledLayer.addEventListener(InteractiveLayerQTTMS.UPDATE_TILING_PATTERN, onUpdateTilingPattern);
 			addChild(m_tiledLayer);
 			
 			changeTiledLayerVisibility(false);
@@ -148,6 +151,11 @@ package com.iblsoft.flexiweather.ogc.tiling
 				}
 			}
 			
+		}
+		
+		private function onUpdateTilingPattern(event: Event): void
+		{
+			updateTiledLayerURLBase();
 		}
 		
 		private function updateTiledLayerURLBase(): void

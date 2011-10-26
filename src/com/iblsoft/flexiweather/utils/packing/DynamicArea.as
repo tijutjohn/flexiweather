@@ -32,18 +32,13 @@ package com.iblsoft.flexiweather.utils.packing
 		}
 		public function createFromItem(item:Rectangle, firstAreaDirection: String, secondAreaDirection: String, totalArea: Rectangle = null): void
 		{
-			trace("createFromItem firstAreaDirection: " + firstAreaDirection + " secondAreaDirection: " + secondAreaDirection);
 			if (totalArea)
 				area = totalArea;
 			
 			empty = false;
 			firstArea = new DynamicArea(this);
 			secondArea = new DynamicArea(this);
-			
-			
 			creatAreas(item, firstAreaDirection + "-" + secondAreaDirection);
-//			firstArea.create(createSideArea(item, firstAreaDirection));
-//			secondArea.create(createSideArea(item, secondAreaDirection));
 		}
 		private function creatAreas(item: Rectangle, directions: String):  void
 		{

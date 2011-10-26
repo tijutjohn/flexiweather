@@ -195,7 +195,7 @@ package com.iblsoft.flexiweather.ogc
 			
 			if (request.url.indexOf('${BASE_URL}') == -1)
 			{
-				debug("stop");
+				debug("getGetMapFullUrl stop");
 			}
 			updateDimensionsInURLRequest(request);
 			updateCustomParametersInURLRequest(request);
@@ -222,17 +222,29 @@ package com.iblsoft.flexiweather.ogc
 			m_cache.setAnimationModeEnable(value);	
 		}
 		
+		/**
+		 * Function which loadData. It's good habit to call this function when you want to load your data to have one channel for loading data.
+		 * It's easier to testing and it's one place for checking requests
+		 *  
+		 * @param urlRequest
+		 * @param associatedData
+		 * @param s_backgroundJobName
+		 * 
+		 */	
+		public function loadData(
+			urlRequest: URLRequest,
+			associatedData: Object = null,
+			s_backgroundJobName: String = null): void
+		{
+			m_loader.load(urlRequest, associatedData, s_backgroundJobName);
+		}
+		
 		public function updateData(b_forceUpdate: Boolean): void
 		{
 			//do not clear job and request here. We have now cache which knows, that layer is already loading
 			if(m_job != null)
 				m_job.cancel();
 			m_job = null;
-			/*
-			if(m_request != null)
-				m_loader.cancel(m_request);
-			m_request = null;
-			*/
 			
 			if(!visible) {
 				mb_updateAfterMakingVisible = true;
@@ -242,7 +254,6 @@ package com.iblsoft.flexiweather.ogc
 				m_timer.reset();
 				return;
 			}
-			
 		}
 
 		public override function draw(graphics: Graphics): void

@@ -80,6 +80,23 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 		
+		/**
+		 * Function which loadData. It's good habit to call this function when you want to load your data to have one channel for loading data.
+		 * It's easier to testing and it's one place for checking requests
+		 *  
+		 * @param urlRequest
+		 * @param associatedData
+		 * @param s_backgroundJobName
+		 * 
+		 */		
+		override public function loadData(
+			urlRequest: URLRequest,
+			associatedData: Object = null,
+			s_backgroundJobName: String = null): void
+		{
+			super.loadData(urlRequest, associatedData, s_backgroundJobName);
+		}
+			
 		override public function updateData(b_forceUpdate: Boolean): void
 		{
 			super.updateData(b_forceUpdate);
@@ -137,7 +154,8 @@ package com.iblsoft.flexiweather.ogc
 				m_timer.reset();
 				m_job = BackgroundJobManager.getInstance().startJob("Rendering " + m_cfg.ma_layerNames.join("+"));
 				m_request = request;
-				m_loader.load(request, {
+				
+				loadData(request, {
 					requestedCRS: currCRS,
 					requestedBBox: viewBBox
 				});
