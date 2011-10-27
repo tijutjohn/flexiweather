@@ -206,6 +206,20 @@ package com.iblsoft.flexiweather.plugins.data
 			}
 		}
 		
+		public function get loadingPluginsNames(): Array
+		{
+			if (_pluginsInfoLoading && _pluginsInfoLoading.length > 0)
+			{
+				var arr: Array = [];
+			
+				for each (var infoLoading: ModuleInfoLoading in _pluginsInfoLoading)
+				{
+					arr.push(infoLoading.info.url);		
+				}
+				return arr;
+			}
+			return null;
+		}
 		public function callPlugin(type: String, callback: Function, callbackParams: Array, unsuccessfulCallback: Function = null, ability: PluginAbility = null): void
 		{
 			var moduleInfo: ModuleInfo = getModuleInfo(type);
@@ -418,6 +432,10 @@ package com.iblsoft.flexiweather.plugins.data
 				}
 				for each (var type: String in types)
 				{
+					if (type == 'debugConsole')
+					{
+						trace("stop, debug console is loading");
+					}
 					try {
 						var createdPluginObj: Object = module[_pluginFunction](type);
 						

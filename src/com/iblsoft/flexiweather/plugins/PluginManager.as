@@ -4,6 +4,7 @@ package com.iblsoft.flexiweather.plugins
 	import com.iblsoft.flexiweather.plugins.data.ModuleInfo;
 	import com.iblsoft.flexiweather.plugins.data.ModuleItem;
 	import com.iblsoft.flexiweather.plugins.data.PluginCollection;
+	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
@@ -45,6 +46,25 @@ package com.iblsoft.flexiweather.plugins
 		public function get loadingPluginsCount(): int
 		{
 			return _plugins.loadingPluginsCount + _pluginsInfo.loadingPluginsCount;
+		}
+		[Bindable (event="countChanged")]
+		public function get loadingPluginsNames(): Array
+		{
+			var pluginsURLs: Array = _plugins.loadingPluginsNames; 
+			var pluginInfosURLs: Array = _pluginsInfo.loadingPluginsNames; 
+			if (pluginsURLs && pluginInfosURLs)
+			{
+				ArrayUtils.unionArrays(pluginsURLs,pluginInfosURLs);
+				return pluginsURLs;
+			} else {
+				if (pluginInfosURLs) {
+					return pluginInfosURLs;
+				} else {
+					if (pluginsURLs)
+						return pluginsURLs;
+				}
+			}
+			return null;
 		}
 		
 		public static function getInstance(): PluginManager

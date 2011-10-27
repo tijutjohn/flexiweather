@@ -29,6 +29,11 @@ package com.iblsoft.flexiweather.widgets
 		internal var mi_jobsCount: int = 0;
 		internal var mi_jobsDone: int = 0;
  
+		private var ms_pendingJobsDescription: String;
+		public function get pendingJobsDescription(): String
+		{
+			return ms_pendingJobsDescription;
+		}
 		public function BackgroundJobManager()
 		{
             if (sm_instance != null) {
@@ -110,13 +115,13 @@ package com.iblsoft.flexiweather.widgets
 			
 			if(m_jobs.length > 0) {
 				
-				var s: String = "Pending jobs:";
+				ms_pendingJobsDescription = "Pending jobs:";
 				for each(var job: BackgroundJob in m_jobs) {
-					s += "\n  " + job.ms_label;
+					ms_pendingJobsDescription += "\n  " + job.ms_label;
 				}
 				
 				if(m_progressBar != null)
-					m_progressBar.jobProgressUpdate(mi_jobsDone, mi_jobsCount, s);
+					m_progressBar.jobProgressUpdate(mi_jobsDone, mi_jobsCount, ms_pendingJobsDescription);
 				
 			}
 			else {
