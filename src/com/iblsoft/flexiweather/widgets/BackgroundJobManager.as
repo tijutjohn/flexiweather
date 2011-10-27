@@ -105,6 +105,7 @@ package com.iblsoft.flexiweather.widgets
 			
 			if (m_jobs.length == 0)
 			{
+				noJobs();
 				dispatchJobEvent(BackgroundJobEvent.ALL_JOBS_FINISHED);
 			}
 		}
@@ -125,9 +126,15 @@ package com.iblsoft.flexiweather.widgets
 				
 			}
 			else {
+				noJobs();
 				if(m_progressBar)
 					m_progressBar.jobProgressFinished();
 			}
+		}
+		
+		private function noJobs(): void
+		{
+			ms_pendingJobsDescription = 'No pending jobs at all';
 		}
 		
 		public function hasJobs(): Boolean

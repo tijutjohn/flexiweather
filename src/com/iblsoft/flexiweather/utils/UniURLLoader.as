@@ -5,6 +5,7 @@ package com.iblsoft.flexiweather.utils
 	import com.iblsoft.flexiweather.net.interfaces.IURLLoaderBasicAuthListener;
 	import com.iblsoft.flexiweather.net.managers.UniURLLoaderBasicAuthManager;
 	import com.iblsoft.flexiweather.net.managers.UniURLLoaderManager;
+	import com.iblsoft.flexiweather.plugins.IConsole;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.widgets.BackgroundJob;
 	import com.iblsoft.flexiweather.widgets.BackgroundJobManager;
@@ -64,6 +65,7 @@ package com.iblsoft.flexiweather.utils
 		public static const TEXT_FORMAT: String = 'text';
 		public static const XML_FORMAT: String = 'xml';
 		
+		public static var debugConsole: IConsole;
 		
 		/**
 		 *  basicAuthURLLoaderClass must be of Class which implement IURLLoaderBasicAuthListener
@@ -482,6 +484,10 @@ package com.iblsoft.flexiweather.utils
 //			Log.getLogger('UniURLLoader').info("load " + urlRequest.url + " data:" + urlRequest.data);
 			urlLoader.load(urlRequest);
 			
+			if (debugConsole)
+			{
+				debugConsole.print("Load URL: " + urlRequest.url, 'Info', 'UniURLLoader');
+			}
 			var backgroundJob: BackgroundJob = null;
 			if(s_backgroundJobName != null)
 				backgroundJob = BackgroundJobManager.getInstance().startJob(s_backgroundJobName);
