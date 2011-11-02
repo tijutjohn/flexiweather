@@ -103,6 +103,8 @@ package com.iblsoft.flexiweather.widgets
 			{
 				mb_showSlideZoomingSprite = false;
 				invalidateDisplayList();
+				//automatically after CtrlKey is Up, update data
+				onMouseWheelTimer();
 			}
 		}
 		

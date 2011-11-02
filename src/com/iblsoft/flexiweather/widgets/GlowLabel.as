@@ -3,13 +3,18 @@ package com.iblsoft.flexiweather.widgets
 	import flash.filters.GlowFilter;
 	import flash.text.TextFormat;
 	
-	import mx.controls.Text;
-
-	public class GlowLabel extends Text
+	import spark.components.Label;
+	
+	public class GlowLabel extends Label
 	{
 		public var autoSize: Boolean;
 		public var defaultText: String;
 		
+		override public function set y(value:Number):void
+		{
+			super.y = value;
+			trace("GlowLabel y: " + value);
+		}
 		private var _glowColor: uint;
 		private var _glowColorChanged: Boolean;
 		public function get glowColor(): uint
@@ -47,6 +52,7 @@ package com.iblsoft.flexiweather.widgets
 		public function GlowLabel()
 		{
 			super();
+			trace("create new GlowLabel");
 		}
 		
 		override protected function createChildren(): void
@@ -94,13 +100,14 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 		
+		/*
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 		{
 			super.updateDisplayList(unscaledWidth, unscaledHeight);
 			
 			if (autoSize)
 			{
-				var size: int = findFontSize(textField.width);
+//				var size: int = findFontSize(textField.width);
 				
 //				trace("new size: " + size + " text: " + text);
 				
@@ -113,6 +120,8 @@ package com.iblsoft.flexiweather.widgets
 			}
 				
 		}
+		*/
+		/*
 		private function findFontSize(preferredWidth: int): int
 		{
 			if (preferredWidth == 0)
@@ -142,9 +151,8 @@ package com.iblsoft.flexiweather.widgets
 				size++;
 			}
 			return 8;
-			
-			
 		}
+		*/
 		
 	}
 }

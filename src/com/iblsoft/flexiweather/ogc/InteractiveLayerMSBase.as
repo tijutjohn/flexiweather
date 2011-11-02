@@ -543,8 +543,9 @@ package com.iblsoft.flexiweather.ogc
 			label.glowColor = 0xffffff;
 			label.text = name;
 			label.validateNow();
-			//FIX for legends text height
-			labelHeight = label.textHeight;
+			
+			//FIXME FIX for legends text height
+			labelHeight = label.height;
 			
 			label.setStyle('textAlign', labelAlign);
 			
