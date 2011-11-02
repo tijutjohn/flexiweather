@@ -57,12 +57,12 @@ package com.iblsoft.flexiweather.ogc.cache
 					var diff: Number = currTime.time - lastUsed.time;
 					if (diff > (_expirationTime * 1000))
 					{
-//						debug("Image from cache is expired, will be removed");
+						debug("Image from cache is expired, will be removed");
 						if (!cacheItem.isImageOnDisplayList())
 						{
 							deleteCacheItem(s_key);
-//						} else {
-//							debug("onExpiration: image is on displalist");
+						} else {
+							debug("onExpiration: image is on displalist");
 						}
 					}
 //					debug("diff: " + diff);
@@ -96,15 +96,18 @@ package com.iblsoft.flexiweather.ogc.cache
 		private function getKey(s_crs: String, bbox: BBox, url: URLRequest): String
 		{
 			var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url);
-			var s_key: String = ck.toString(); 
+			var s_key: String = ck.toString();
+			
+//			debug("getKey : " + s_key);
 			return s_key;			
 		}
 		
 		public function isImageCached(s_crs: String, bbox: BBox, url: URLRequest): Boolean
 		{
 			var s_key: String = getKey(s_crs, bbox, url);
-			
-			return (md_cache[s_key] || md_cache_loading[s_key])
+			var b_isCached: Boolean = (md_cache[s_key] || md_cache_loading[s_key]);
+			debug("isImageCached is cached: " + b_isCached + " ["+ s_key+"]");
+			return b_isCached;
 		}
 		
 		public function getImage(s_crs: String, bbox: BBox, url: URLRequest): Bitmap
@@ -131,7 +134,7 @@ package com.iblsoft.flexiweather.ogc.cache
 		public function startImageLoading(s_crs: String, bbox: BBox, url: URLRequest): void
 		{
 			var s_key: String = getKey(s_crs, bbox, url);
-			
+			debug("startImageLoading : " + s_key);
 			md_cache_loading[s_key] = true;
 		}
 		
@@ -139,6 +142,7 @@ package com.iblsoft.flexiweather.ogc.cache
 		{
 			var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url);
 			var s_key: String = getKey(s_crs, bbox, url);
+			debug("addImage: " + s_key);
 			
 			var item: CacheItem = new CacheItem();
 			item.cacheKey = ck;
@@ -176,7 +180,7 @@ package com.iblsoft.flexiweather.ogc.cache
 		
 		public function invalidate(s_crs: String, bbox: BBox): void
 		{
-			debug("WMS CACHE invalidate s_crs: " + s_crs + " bbox : " + bbox);
+//			debug("WMS CACHE invalidate s_crs: " + s_crs + " bbox : " + bbox);
 			
 			var a: Array = [];
 			for(var s_key: String in md_cache) 
@@ -202,7 +206,7 @@ package com.iblsoft.flexiweather.ogc.cache
 		private function debug(str: String): void
 		{
 			return;
-			trace(str);
+			trace("WMSCache Debug: " + str);
 		}
 	}
 }
