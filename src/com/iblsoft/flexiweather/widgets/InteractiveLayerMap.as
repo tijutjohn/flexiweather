@@ -2,6 +2,7 @@ package com.iblsoft.flexiweather.widgets
 {
 	import com.iblsoft.flexiweather.events.GetFeatureInfoEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
+	import com.iblsoft.flexiweather.events.InteractiveLayerMapEvent;
 	import com.iblsoft.flexiweather.ogc.ISynchronisedObject;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
@@ -17,6 +18,8 @@ package com.iblsoft.flexiweather.widgets
 	
 	import flash.events.DataEvent;
 	import flash.events.Event;
+	import flash.events.TimerEvent;
+	import flash.utils.Timer;
 	
 	import mx.collections.ArrayCollection;
 	import mx.controls.Alert;
@@ -47,6 +50,24 @@ package com.iblsoft.flexiweather.widgets
 		
 		public static const SYNCHRONISE_WITH: String = "synchroniseWith";
 		[Event(name = SYNCHRONISE_WITH, type = "mx.events.DynamicEvent")]
+		
+		
+		/**
+		 * first frame date from last periodical check 
+		 */		
+		private var _currentFirstFrame: Date;
+
+		/**
+		 * last frame date from last periodical check 
+		 */		
+		private var _currentLastFrame: Date;
+		
+		/**
+		 * now frame date from last periodical check 
+		 */		
+		private var _currentNowFrame: Date;
+		
+		private var _periodicTimer: Timer;
 		
 		private var _dateFormat: String;
 		public function get dateFormat(): String
@@ -93,6 +114,54 @@ package com.iblsoft.flexiweather.widgets
 		public function InteractiveLayerMap(container:InteractiveWidget)
 		{
 			super(container);
+			
+			_periodicTimer = new Timer(10 * 1000);
+			_periodicTimer.addEventListener(TimerEvent.TIMER, onPeriodicTimerTick);
+			_periodicTimer.start();
+		}
+		
+		private function onPeriodicTimerTick(event: TimerEvent): void
+		{
+			periodicCheck();
+		}
+		
+		/**
+		 * Function is called periodically to check if there are changes in frames. It checks current first, last and now frames and compares
+		 * them with lastly first, last and now frames and if there is any change, it dispatch proper events 
+		 * 
+		 */		
+		private function periodicCheck(): void
+		{
+			var firstDate: Date = getFirstFrame();
+			var lastDate: Date = getLastFrame();
+			var nowDate: Date = getNowFrame();
+			
+			var ilme: InteractiveLayerMapEvent;
+			
+			if (firstDate && (!_currentFirstFrame || _currentFirstFrame.time != firstDate.time))
+			{
+				//there were change in first frame
+				_currentFirstFrame = firstDate;
+				ilme = new InteractiveLayerMapEvent(InteractiveLayerMapEvent.FIRST_FRAME_CHANGED);
+				ilme.frameDate = firstDate;
+				dispatchEvent(ilme);
+			}
+			if (lastDate && (!_currentLastFrame || _currentLastFrame.time != lastDate.time))
+			{
+				//there were change in last frame
+				_currentLastFrame = lastDate;
+				ilme = new InteractiveLayerMapEvent(InteractiveLayerMapEvent.LAST_FRAME_CHANGED);
+				ilme.frameDate = lastDate;
+				dispatchEvent(ilme);
+			}
+			if (nowDate && (!_currentNowFrame || _currentNowFrame.time != nowDate.time))
+			{
+				//there were change in now frame
+				_currentNowFrame = nowDate;
+				ilme = new InteractiveLayerMapEvent(InteractiveLayerMapEvent.NOW_FRAME_CHANGED);
+				ilme.frameDate = nowDate;
+				dispatchEvent(ilme);
+			}
 		}
 		
 		override public function serialize(storage: Storage): void
