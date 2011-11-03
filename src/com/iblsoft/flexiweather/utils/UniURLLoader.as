@@ -781,7 +781,7 @@ package com.iblsoft.flexiweather.utils
 			if(urlRequest == null)
 				return;
 
-			if (urlLoader.associatedData && urlLoader.associatedData.uniURLLoaderBasicAuthInfo == 'first message')
+			if (urlLoader.associatedData && urlLoader.associatedData.hasOwnProperty("uniURLLoaderBasicAuthInfo") && urlLoader.associatedData.uniURLLoaderBasicAuthInfo == 'first message')
 			{
 				var domain: String = getDomain(urlRequest);
 				var basicAccount: BasicAuthAccount = urlLoader.associatedData.uniURLLoaderBasicAuthAccount as BasicAuthAccount;
