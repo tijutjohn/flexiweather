@@ -288,6 +288,11 @@ package com.iblsoft.flexiweather.ogc
 			return newLayer;
 			
 		}
+		
+		override public function toString(): String
+		{
+			return "InteractiveLayerWMS " + name  ;
+		}
 	
 	}
 }

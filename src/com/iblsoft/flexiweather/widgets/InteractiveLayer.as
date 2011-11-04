@@ -215,5 +215,10 @@ package com.iblsoft.flexiweather.widgets
 		{
 			return new InteractiveLayer(container);	
 		}
+		
+		override public function toString(): String
+		{
+			return "InteractiveLayer " + name;
+		}
 	}
 }

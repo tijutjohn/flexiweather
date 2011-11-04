@@ -823,6 +823,16 @@ package com.iblsoft.flexiweather.widgets
 			
 			return map;
 		}
+		
+		override public function toString(): String
+		{
+			var retStr: String =  "InteractiveLayerMap " ;
+			for each (var l: InteractiveLayer in layers)
+			{
+				retStr += "\n\t"+l;
+			}
+			return retStr;
+		}
 	}
 }
 

@@ -37,9 +37,15 @@ package com.iblsoft.flexiweather.ogc.tiling
 		
 		public function get isTileable(): Boolean
 		{
+			var configAvoidTiling: Boolean = (m_cfg as WMSWithQTTLayerConfiguration).avoidTiling;
+			
 			if ((m_cfg as WMSWithQTTLayerConfiguration).avoidTiling || avoidTilingForAllLayers)
+			{
+				m_tiledLayer.avoidTiling = true;
 				return false;
+			}
 				
+			m_tiledLayer.avoidTiling = false;
 			var s_crs: String = container.getCRS();
 			return m_tiledLayer.getGTileBBoxForWholeCRS(s_crs) || m_cfg.isTileableForCRS(s_crs);
 		}
@@ -263,6 +269,16 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			var b: Boolean = super.synchroniseWith(s_variableId, value);
 			return b;
+		}
+		
+		override public function toString(): String
+		{
+			var retStr: String = "InteractiveLayerWMSWithQTT " + name + " isTileable: " + isTileable ;
+			if (m_tiledLayer)
+			{
+				retStr += "\n\t\t" + m_tiledLayer;
+			}
+			return retStr;
 		}
 	}
 }

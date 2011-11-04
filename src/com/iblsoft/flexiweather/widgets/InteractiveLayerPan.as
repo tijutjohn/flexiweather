@@ -315,5 +315,10 @@ package com.iblsoft.flexiweather.widgets
 
 		public function set notRequireShiftKey(b: Boolean): void
 		{ mb_requireShiftKey = !b; }
+		
+		override public function toString(): String
+		{
+			return "InteractiveLayerPan ";
+		}
 	}
 }

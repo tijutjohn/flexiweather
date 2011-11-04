@@ -51,8 +51,16 @@ package com.iblsoft.flexiweather.ogc
 		
 		protected var m_tiledArea: TiledArea;
 		
-		protected var m_cache: WMSTileCache;
+		
 
+
+		private var _avoidTiling: Boolean;
+		public function set avoidTiling(value:Boolean):void
+		{
+			_avoidTiling = value;
+		}
+
+		protected var m_cache: WMSTileCache;
 		public function get cache(): WMSTileCache
 		{
 			return m_cache;
@@ -245,6 +253,12 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function updateData(b_forceUpdate: Boolean): void
 		{
+			if (_avoidTiling)
+			{
+				//tiling for this layer is for now avoided, do not update data
+				return;
+			}
+			
 			if(mi_zoom < 0)
 			{
 				// wrong zoom, do not continue
@@ -739,6 +753,11 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function get zoomLevel(): int
 		{ return mi_zoom; }
+		
+		override public function toString(): String
+		{
+			return "InteractiveLayerQTTMS " + name  ;
+		}
 	}
 }
 import com.iblsoft.flexiweather.utils.UniURLLoader;
@@ -801,4 +820,6 @@ class TileJob
 	{
 		m_urlLoader.cancel(m_urlRequest);
 	}
+	
+	
 }

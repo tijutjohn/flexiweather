@@ -321,5 +321,10 @@ package com.iblsoft.flexiweather.widgets
 
 		public function set notRequireCtrlKey(b: Boolean): void
 		{ mb_requireCtrlKey = !b; }
+		
+		override public function toString(): String
+		{
+			return "InteractiveLayerZoom "  ;
+		}
 	}
 }

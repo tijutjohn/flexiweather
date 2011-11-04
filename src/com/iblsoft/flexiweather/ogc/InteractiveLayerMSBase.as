@@ -1255,5 +1255,10 @@ package com.iblsoft.flexiweather.ogc
 
 		public function get synchronisationRole(): SynchronisationRole
 		{ return m_synchronisationRole; }
+		
+		override public function toString(): String
+		{
+			return "InteractiveLayerMSBase " + name;
+		}
 	}
 }

@@ -644,6 +644,10 @@ package com.iblsoft.flexiweather.widgets
 		
 		public function get labelLayout(): AnticollisionLayout
 		{ return m_labelLayout; }
-		
+
+		override public function toString(): String
+		{
+			return "InteractiveWidget ";
+		}
 	}
 }
