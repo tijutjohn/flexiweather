@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<flexLibProperties includeAllClasses="false" useMultiPlatformConfig="false" version="1">
+<flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="1">
   <includeClasses>
+    <classEntry path="com.iblsoft.flexiweather.components.ResizableDropDownList"/>
     <classEntry path="com.iblsoft.flexiweather.events.BackgroundJobEvent"/>
-    <classEntry path="com.iblsoft.flexiweather.events.GetFeatureInfoEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.InteractiveLayerEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.events.InteractiveLayerMapEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.WFSCursorManagerEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.WFSCursorManagerTypes"/>
     <classEntry path="com.iblsoft.flexiweather.events.WFSEvent"/>
@@ -82,6 +83,8 @@
     <classEntry path="com.iblsoft.flexiweather.plugins.IAbility"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.IAction"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.IActionManager"/>
+    <classEntry path="com.iblsoft.flexiweather.plugins.IConsole"/>
+    <classEntry path="com.iblsoft.flexiweather.plugins.IConsoleManager"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.IDocklet"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.IDockletManager"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.IInteractiveWidgetClient"/>
@@ -134,7 +137,6 @@
     <classEntry path="com.iblsoft.flexiweather.utils.DistanceMarkingCurveRenderer"/>
     <classEntry path="com.iblsoft.flexiweather.utils.Duration"/>
     <classEntry path="com.iblsoft.flexiweather.utils.GraphicsCurveRenderer"/>
-    <classEntry path="com.iblsoft.flexiweather.utils.HTMLUtils"/>
     <classEntry path="com.iblsoft.flexiweather.utils.ICurveRenderer"/>
     <classEntry path="com.iblsoft.flexiweather.utils.IObjectPoolObject"/>
     <classEntry path="com.iblsoft.flexiweather.utils.ISO8601Parser"/>
@@ -151,7 +153,6 @@
     <classEntry path="com.iblsoft.flexiweather.utils.URLUtils"/>
     <classEntry path="com.iblsoft.flexiweather.utils.UniURLLoader"/>
     <classEntry path="com.iblsoft.flexiweather.utils.UniURLLoaderEvent"/>
-    <classEntry path="com.iblsoft.flexiweather.net.managers.UniURLLoaderManager"/>
     <classEntry path="com.iblsoft.flexiweather.utils.XMLStorage"/>
     <classEntry path="com.iblsoft.flexiweather.utils.geometry.ILineSegmentApproximableBounds"/>
     <classEntry path="com.iblsoft.flexiweather.utils.geometry.LineSegment"/>
@@ -193,24 +194,10 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.GroupBox"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.GroupHBox"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.GroupVBox"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.containers.skins.GroupBoxSkin"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.GoogleMapLayerConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.GoogleMapsLayerOption"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.InteractiveLayerGoogleMaps"/>
-    <classEntry path="com.iblsoft.flexiweather.utils.DebugUtils"/>
-    <classEntry path="com.iblsoft.flexiweather.net.managers.UniURLLoaderBasicAuthManager"/>
-    <classEntry path="com.iblsoft.flexiweather.widgets.basicauth.controls.IBasicAuthCredentialsPopup"/>
-    <classEntry path="com.iblsoft.flexiweather.widgets.basicauth.controls.BasicAuthCredentialsPopupBase"/>
-    <classEntry path="com.iblsoft.flexiweather.widgets.basicauth.controls.BasicAuthCredentialsPopup"/>
-    <classEntry path="com.iblsoft.flexiweather.widgets.basicauth.events.BasicAuthEvent"/>
-    <classEntry path="com.iblsoft.flexiweather.widgets.basicauth.data.BasicAuthAccount"/>
-    <classEntry path="com.iblsoft.flexiweather.net.data.UniURLLoaderData"/>
-    <classEntry path="com.iblsoft.flexiweather.net.interfaces.IURLLoaderBasicAuth"/>
-    <classEntry path="com.iblsoft.flexiweather.net.interfaces.IURLLoaderBasicAuthListener"/>
-    <classEntry path="com.iblsoft.flexiweather.plugins.IConsoleManager"/>
-    <classEntry path="com.iblsoft.flexiweather.plugins.IConsole"/>
-    <classEntry path="com.iblsoft.flexiweather.events.InteractiveLayerMapEvent"/>
-    <classEntry path="com.iblsoft.flexiweather.components.ResizableDropDownList"/>
-    <classEntry path="com.iblsoft.flexiweather.widgets.containers.skins.GroupBoxSkin"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
