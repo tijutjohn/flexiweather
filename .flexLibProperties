@@ -206,6 +206,11 @@
     <classEntry path="com.iblsoft.flexiweather.net.data.UniURLLoaderData"/>
     <classEntry path="com.iblsoft.flexiweather.net.interfaces.IURLLoaderBasicAuth"/>
     <classEntry path="com.iblsoft.flexiweather.net.interfaces.IURLLoaderBasicAuthListener"/>
+    <classEntry path="com.iblsoft.flexiweather.plugins.IConsoleManager"/>
+    <classEntry path="com.iblsoft.flexiweather.plugins.IConsole"/>
+    <classEntry path="com.iblsoft.flexiweather.events.InteractiveLayerMapEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.components.ResizableDropDownList"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.containers.skins.GroupBoxSkin"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

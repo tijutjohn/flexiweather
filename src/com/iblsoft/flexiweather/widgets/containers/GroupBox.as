@@ -1,23 +1,64 @@
 package com.iblsoft.flexiweather.widgets.containers
 {
+	import com.iblsoft.flexiweather.widgets.containers.skins.GroupBoxSkin;
+	
 	import flash.display.Graphics;
 	import flash.display.LineScaleMode;
+	import flash.events.Event;
 	
-	import mx.containers.Box;
-	import mx.containers.Canvas;
-	import mx.containers.VBox;
-	import mx.controls.Label;
-	import mx.core.ScrollPolicy;
+	import flashx.textLayout.formats.VerticalAlign;
+	
+	import mx.core.IVisualElement;
+	
+	import spark.components.Group;
+	import spark.components.Label;
+	import spark.components.SkinnableContainer;
+	import spark.components.VGroup;
+	import spark.core.IDisplayText;
+	import spark.layouts.HorizontalLayout;
+	import spark.layouts.VerticalLayout;
+	import spark.layouts.supportClasses.LayoutBase;
+	import spark.primitives.Rect;
 
-	public class GroupBox extends VBox
+	public class GroupBox extends SkinnableContainer
 	{
-		public var container:Box;
+		[SkinPart (require="true")]
+		public var contents: Group;
 		
-		public var defaultPadding: int = 10;
-		private var _cnv: Canvas;
-		private var _label: Label;
+		[SkinPart (require="true")]
+		public var topGroup: Group;
 		
+		[SkinPart (require="true")]
+		public var titleDisplay: IDisplayText;
+		
+		[SkinPart (require="true")]
+		public var background: Rect;
+		[SkinPart (require="true")]
+		public var titleBackground: Rect;
+		
+		[SkinPart (require="true")]
+		public var border: Rect;
+		
+		private var _captionGap: int;
+		
+		[Bindable]
+		public function get captionGap():int
+		{
+			return _captionGap;
+		}
+
+		public function set captionGap(value:int):void
+		{
+			if (_captionGap != value)
+			{
+				_captionGap = value;
+				if (skin)
+					skin.invalidateDisplayList();
+			}
+		}
+
 		private var _cornerRadius: int = 10;
+		
 		[Bindable]
 		public function get cornerRadius(): int
 		{
@@ -26,135 +67,93 @@ package com.iblsoft.flexiweather.widgets.containers
 		public function set cornerRadius(value: int): void
 		{
 			_cornerRadius = value;
-			invalidateDisplayList();	
+			if (skin)
+				skin.invalidateDisplayList();
 		}
 		
-		private var _captionGap: int = 5;
+		
+		//----------------------------------
+		//  title
+		//----------------------------------
+		
+		/**
+		 *  @private
+		 */
+		private var _title:String = "";
+		
+		/**
+		 *  @private
+		 */
+		private var titleChanged:Boolean;
+		
 		[Bindable]
-		public function get captionGap(): int
+		[Inspectable(category="General", defaultValue="")]
+		
+		/**
+		 *  Title or caption displayed in the title bar. 
+		 *
+		 *  @default ""
+		 *  
+		 *  @langversion 3.0
+		 *  @playerversion Flash 10
+		 *  @playerversion AIR 1.5
+		 *  @productversion Flex 4
+		 */
+		public function get title():String 
 		{
-			return _captionGap;
-		}
-		public function set captionGap(value: int): void
-		{
-			_captionGap = value;
-			invalidateDisplayList();	
+			return _title;
 		}
 		
-		private var _caption: String = '';
+		/**
+		 *  @private
+		 */
+		public function set title(value:String):void 
+		{
+			_title = value;
+			
+			if (titleDisplay)
+				titleDisplay.text = title;
+			
+			if (skin)
+				skin.invalidateDisplayList();
+		}
 		
-		[Bindable]
-		public function get caption(): String
-		{
-			return _caption;
-		}
-		public function set caption(value: String): void
-		{
-			_caption = value;
-			invalidateDisplayList();
-		}
+		
 		
 		public function GroupBox()
 		{
 			super();
 			
-			_cnv = new Canvas();
-			_label = new Label();
-			
-			container = new Box();
+			setStyle('skinClass', GroupBoxSkin);
 		}
 		
-		override protected function createChildren():void
+		override protected function attachSkin():void
 		{
-			super.createChildren();			
+			super.attachSkin();
+			
+			trace("groupbox: attachskin");
 		}
-		
-		override protected function childrenCreated():void
+		/**
+		 *  @private
+		 */
+		override protected function partAdded(partName:String, instance:Object):void
 		{
-			super.childrenCreated();
+			super.partAdded(partName, instance);
 			
-			setStyle('verticalGap',0);
 			
-			_cnv.addChild(_label);
-			addChildAt(_cnv, 0);
-			_cnv.percentWidth = 100;
-			
-			addChild(container);
-			container.percentWidth = 100;
-			container.percentHeight = 100;
-			
-			setStyle('paddingBottom',defaultPadding);
-			setStyle('paddingTop',defaultPadding);
-			setStyle('paddingLeft',defaultPadding);
-			setStyle('paddingRight',defaultPadding);
-			
-			horizontalScrollPolicy = ScrollPolicy.OFF
-			verticalScrollPolicy = ScrollPolicy.OFF
-			
-		}
-		override public function setStyle(styleProp:String, newValue:*):void
-		{
-			if (styleProp.indexOf('padding') == 0)
+			if (instance == titleDisplay)
 			{
-				if (container)
-				{
-					container.setStyle(styleProp, newValue);
-				} else {
-					callLater(setStyle, [styleProp, newValue]);
-				}
-				return;
-			}	
-			super.setStyle(styleProp, newValue);
-		}
-		
-		override protected function commitProperties():void
-		{
-			super.commitProperties();
-			
-			_label.text = _caption;
-		}
-		
-		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
-		{
-			super.updateDisplayList(unscaledWidth, unscaledHeight);
-			
-			var cGap: int = _captionGap;
-			
-			if (caption == '')
-			{
-				_cnv.includeInLayout = false;
-				_cnv.visible = false;
-				cGap = 0;
-			} else {
-				_cnv.includeInLayout = true;
-				_cnv.visible = true;
+				titleDisplay.text = title;
+				invalidateDisplayList();
 			}
 			
-			var gr: Graphics = graphics;
-			gr.clear();
-			gr.lineStyle(getStyle('borderThickness'),getStyle('borderColor'),1, true, LineScaleMode.NONE);
-			
-			_label.text = _caption;
-			_label.x = _cornerRadius + cGap;
-			_label.validateNow();
-			
-			var topLineYpos: int = _label.textHeight / 2;
-			gr.moveTo(_cornerRadius + cGap + _label.textWidth + cGap, topLineYpos);
-			gr.lineTo(unscaledWidth - _cornerRadius, topLineYpos);
-			
-			gr.curveTo( unscaledWidth, topLineYpos, unscaledWidth, _cornerRadius + topLineYpos);
-			
-			gr.lineTo(unscaledWidth, unscaledHeight - _cornerRadius);
-			gr.curveTo( unscaledWidth, unscaledHeight, unscaledWidth - _cornerRadius, unscaledHeight);
-			gr.lineTo(_cornerRadius, unscaledHeight);
-			gr.curveTo( 0, unscaledHeight, 0, unscaledHeight - _cornerRadius);
-			gr.lineTo(0, _cornerRadius + topLineYpos);
-			gr.curveTo( 0, topLineYpos, _cornerRadius, topLineYpos );
 		}
 		
-		override protected function createBorder():void
+		override protected function partRemoved(partName:String, instance:Object):void
 		{
+			super.partRemoved(partName, instance);
 			
 		}
+		
 	}
 }
