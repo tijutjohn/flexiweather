@@ -10,8 +10,6 @@ package com.iblsoft.flexiweather.widgets
 	
 	import mx.containers.Canvas;
 	import mx.core.UIComponent;
-	import mx.logging.ILogger;
-	import mx.logging.Log;
 	
 	public class InteractiveLayer extends UIComponent
 	{
@@ -168,13 +166,13 @@ package com.iblsoft.flexiweather.widgets
         { return false; }
 		
         public function invalidateLegend(): void
-        { }
+        {}
         
         public function removeLegend(canvas: Canvas): void
-        {  }
+        {}
 
         public function renderLegend(canvas: Canvas, callback: Function, legendScaleX: Number, legendScaleY: Number, labelAlign: String = 'left', useCache: Boolean = false , hintSize: Rectangle = null): Rectangle
-        {	return new Rectangle(); }
+        { return new Rectangle(); }
         
         // extent access
         public function hasExtent(): Boolean
@@ -207,6 +205,7 @@ package com.iblsoft.flexiweather.widgets
 		
 		public function getFullURL(): String
 		{	return ''; }
+
 		/**
 		 * Clone interactiveLayer 
 		 * 
