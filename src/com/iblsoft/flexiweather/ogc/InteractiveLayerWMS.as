@@ -270,7 +270,7 @@ package com.iblsoft.flexiweather.ogc
 			var imagePart: ImagePart;
 			if(ma_imageParts.length > 0) {
 				var matrix: Matrix = new Matrix();
-				imagePart = ImagePart(imagePart[0]);
+				imagePart = ImagePart(ma_imageParts[0]);
 				matrix.translate(-f_width / 3, -f_width / 3);
 				matrix.scale(3, 3);
 				matrix.translate(imagePart.m_image.width / 3, imagePart.m_image.height / 3);
