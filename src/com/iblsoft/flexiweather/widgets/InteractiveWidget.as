@@ -296,6 +296,80 @@ package com.iblsoft.flexiweather.widgets
 					(ptInOurCRS.x - m_viewBBox.xMin) * (width - 1) / m_viewBBox.width,
 					height - 1 - (ptInOurCRS.y - m_viewBBox.yMin) * (height - 1) / m_viewBBox.height);
         }
+		
+		/**
+		 * Splits coordinates of BBox (in the currently used CRS) into partial sub-BBoxes of the
+		 * IW's View BBox, which are visible.
+		 * When panning over the anti-meridian (assuming the IW's View BBox is bigger than
+		 * Projection extent BBOx - the source BBox must be split into typically 2 sub-parts
+		 * one to the left (east hemisphere) and on the righ (west hemisphere). If the view is zoomed
+		 * out enough even multiple reflection of the part can be seen.
+		 **/
+		public function mapBBoxToViewParts(currentViewBBox: BBox): Array
+		{
+			var a: Array = [];
+			if(m_crsProjection.wrapsHorizontally) {
+				var f_crsExtentBBoxWidth: Number = m_crsProjection.extentBBox.width;
+				for(var i: int = 0; i < 10; i++) {
+					var i_delta: int = (i & 1 ? 1 : -1) * ((i + 1) >> 1); // generates sequence 0, 1, -1, 2, -2, ..., 5, -5
+					var reflectedBBox: BBox = currentViewBBox.translated(f_crsExtentBBoxWidth * i_delta, 0)
+					var intersectionOfReflectedBBoxWithCRSExtentBBox: BBox =
+							reflectedBBox.intersected(m_crsProjection.extentBBox); 
+					if(intersectionOfReflectedBBoxWithCRSExtentBBox) {
+						var b_foundEnvelopingBBox: Boolean = false;
+						for each(var otherBBox: BBox in a) {
+							if(otherBBox.contains(intersectionOfReflectedBBoxWithCRSExtentBBox)) {
+								b_foundEnvelopingBBox = true;
+								break;
+							}
+						}
+						if(!b_foundEnvelopingBBox) {
+							//trace("InteractiveWidget.mapBBoxToViewParts(): reflected "
+							//	+ i_delta + " part " + intersectionOfReflectedBBoxWithCRSExtentBBox.toString());
+							a.push(intersectionOfReflectedBBoxWithCRSExtentBBox);
+						}
+					}
+				}
+			}
+			if(a.length == 0) {
+				var primaryPartBBox: BBox = currentViewBBox;
+				primaryPartBBox = primaryPartBBox.intersected(m_crsProjection.extentBBox);
+				if(primaryPartBBox == null) // no intersection!
+					primaryPartBBox = currentViewBBox; // just keep the current view BBox and let's see what server returns
+				a.push(primaryPartBBox);
+				//("InteractiveWidget.mapBBoxToViewParts(): primary part only " + primaryPartBBox.toString());
+			}
+			return a;
+		}
+
+		/**
+		 * Converts coordinates of BBox (in the currently used CRS) into its visual reflections
+		 * if the IW's View BBox is bigger than extent BBox of the Projection.
+		 * Then at certain zoom-out distance the same BBox may appear multiple times withing the View.
+		 * Visualy this looks like multiple reflection of the same BBox in the View.   
+		 **/
+		public function mapBBoxToViewReflections(bbox: BBox): Array
+		{
+			var f_crsExtentBBoxWidth: Number = m_crsProjection.extentBBox.width;
+			if(!m_crsProjection.wrapsHorizontally) {
+				//trace("InteractiveWidget.mapBBoxToViewReflections(): mapping to primary part "
+				//		+ bbox.toString());
+				return [bbox];
+			}
+			else {
+				var a: Array = [];
+				for(var i: int = 0; i < 11; i++) {
+					var i_delta: int = (i & 1 ? 1 : -1) * ((i + 1) >> 1); // generates sequence 0, 1, -1, 2, -2, ..., 5, -5
+					var reflectedBBox: BBox = bbox.translated(f_crsExtentBBoxWidth * i_delta, 0)
+					if(reflectedBBox.intersects(m_viewBBox)) {
+						//trace("InteractiveWidget.mapBBoxToViewReflections(): mapping to reflection "
+						//	+ i_delta + " into " + reflectedBBox.toString());
+						a.push(reflectedBBox);
+					}
+				}
+				return a;
+			}
+		}			
 
         // Mouse events handling
 
@@ -421,7 +495,7 @@ package com.iblsoft.flexiweather.widgets
             }
             scrollRect = new Rectangle(0, 0, width, height);
 			postUserActionUpdate();
-        }
+		}
 		
 		private function postUserActionUpdate(): void
 		{
@@ -433,29 +507,34 @@ package com.iblsoft.flexiweather.widgets
 			if(m_labelLayout.needsUpdate())
 				m_labelLayout.update();
 		}
-        
-        // Getters & setters
+		
+		// Getters & setters
 
-        public function getCRS(): String
-        { return ms_crs; }
-
-        public function setCRS(s_crs: String, b_finalChange: Boolean = true): void
-        {
-        	if(ms_crs != s_crs) {
-	        	ms_crs = s_crs;
+		public function getCRS(): String
+		{ return ms_crs; }
+		
+		public function setCRS(s_crs: String, b_finalChange: Boolean = true): void
+		{
+			if(ms_crs != s_crs) {
+				ms_crs = s_crs;
 				m_crsProjection = Projection.getByCRS(s_crs);
-	        	signalAreaChanged(b_finalChange);
-	        	dispatchEvent(new Event("crsChanged"));
-        	}
-        }
-        
+				signalAreaChanged(b_finalChange);
+				dispatchEvent(new Event("crsChanged"));
+			}
+		}
+		
 		public function getCRSProjection(): Projection
 		{ return m_crsProjection; }
 		
-        public function setViewBBoxRaw(xmin: Number, ymin: Number, xmax: Number, ymax: Number, b_finalChange: Boolean): void
-        {
-        	setViewBBox(new BBox(xmin, ymin, xmax, ymax), b_finalChange);
-        }
+		public function setViewBBoxRaw(xmin: Number, ymin: Number, xmax: Number, ymax: Number, b_finalChange: Boolean): void
+		{
+			setViewBBox(new BBox(xmin, ymin, xmax, ymax), b_finalChange);
+		}
+
+		public function isCRSWrappingOverXAxis(): Boolean
+		{
+			return ms_crs == 'CRS:84' || ms_crs == 'EPSG:4326' || ms_crs == 'EPSG:900913'; 
+		}
 
 		/**
 		 * Set View bounding box for all layers
@@ -464,7 +543,6 @@ package com.iblsoft.flexiweather.widgets
 		 * @param b_finalChange - false if it is change in some running action (like user has draging map or zooming in or out). If action is finished, set b_finalChange = true
 		 * @param b_negotiateBBox - if bounding box needs to be negotiated (because some layers e.g. google can not set any bounding box (because of zoom)
 		 * @param b_changeZoom - This is temporary argument, just for Google Maps fix of scaling maps on Map PAN
-		 * 
 		 */		
         public function setViewBBox(bbox: BBox, b_finalChange: Boolean, b_negotiateBBox: Boolean = true): void
         {
@@ -584,10 +662,8 @@ package com.iblsoft.flexiweather.widgets
 		
 		private function setViewBBoxAfterNegotiation(newBBox: BBox, b_finalChange: Boolean): void
 		{
-//			trace("\t IWidget setViewBBoxAfterNegotiation newBBox :" + newBBox.toLaLoString(ms_crs));
-//			trace("\t IWidget setViewBBoxAfterNegotiation newBBox :" + newBBox);
-
 			//dispath view bbox changed event to notify about change
+			
 			m_viewBBox = newBBox;
 			
 			dispatchEvent(new Event(VIEW_BBOX_CHANGED));
@@ -596,40 +672,44 @@ package com.iblsoft.flexiweather.widgets
 		}
 		
 
+	public function setExtentBBOX(bbox: BBox, b_finalChange: Boolean = true): void
+	{
+		m_extentBBox = bbox;
+		setViewBBox(m_extentBBox, b_finalChange); // this calls signalAreaChanged()
+	}
+	
+	public function setExtentBBOXRaw(xmin: Number, ymin: Number, xmax: Number, ymax: Number, b_finalChange: Boolean = true): void
+	{
+		setExtentBBOX(new BBox(xmin, ymin, xmax, ymax), b_finalChange);
+	}
+	
+	public function setViewFullExtent(): void
+	{
+		setViewBBox(m_extentBBox, true);
+	}
+	
+	public function getExtentBBox(): BBox
+	{
+		return m_extentBBox;
+	}
+	
+	public function getViewBBox(): BBox
+	{ return m_viewBBox; }
+	
+	public function invalidate(): void
+	{
+		signalAreaChanged(true);
+	}
 
-
-        public function setExtentBBOX(bbox: BBox, b_finalChange: Boolean = true): void
-        {
-        	m_extentBBox = bbox;
-        	setViewBBox(m_extentBBox, b_finalChange); // this calls signalAreaChanged()
-        }
-
-        public function setExtentBBOXRaw(xmin: Number, ymin: Number, xmax: Number, ymax: Number, b_finalChange: Boolean = true): void
-        {
-        	setExtentBBOX(new BBox(xmin, ymin, xmax, ymax), b_finalChange);
-        }
-        
-        public function setViewFullExtent(): void
-        {
-        	setViewBBox(m_extentBBox, true);
-        }
-
-        public function getViewBBox(): BBox
-        { return m_viewBBox; }
-        
-        public function invalidate(): void
-        {
-        	signalAreaChanged(true);
-        }
-        // getters & setters
-
-		[Bindable(event = "crsChanged")]
-        public function get crs(): String
-        { return getCRS(); }
-
-		[Bindable(event = "crsChanged")]
-        public function set srs(s_crs: String): void
-        { return setCRS(s_crs, true); }
+	// getters & setters
+	
+	[Bindable(event = "crsChanged")]
+	public function get crs(): String
+	{ return getCRS(); }
+	
+	[Bindable(event = "crsChanged")]
+	public function set srs(s_crs: String): void
+	{ return setCRS(s_crs, true); }
 		
 		public function set backgroundChessBoard(b: Boolean): void
 		{
