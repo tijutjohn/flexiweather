@@ -113,7 +113,10 @@ package com.iblsoft.flexiweather.ogc
 					&& other.mf_yMax >= mf_yMin && other.mf_yMax <= mf_yMax;
 		}
 
-		/** Returns new BBox which is intersection of this and other BBox. */
+		/**
+		 * Returns new BBox which is intersection of this and other BBox.
+		 * If the intersection does not exists, returns null! Both BBox'es have to be normalize on input.
+		 * */
 		public function intersected(other: BBox): BBox
 		{
 			var intersected: BBox = new BBox(mf_xMin, mf_yMin, mf_xMax, mf_yMax);
@@ -125,7 +128,14 @@ package com.iblsoft.flexiweather.ogc
 				intersected.mf_yMin = other.mf_yMin;
 			if(other.mf_yMax < intersected.mf_yMax)
 				intersected.mf_yMax = other.mf_yMax;
+			if(intersected.mf_xMin > intersected.mf_xMax || intersected.mf_yMin > intersected.mf_yMax)
+				return null;
 			return intersected;
+		}
+
+		public function intersects(other: BBox): Boolean
+		{
+			return intersected(other) != null;
 		}
 		
 		public function get isEmpty(): Boolean
