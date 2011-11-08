@@ -14,22 +14,21 @@ package com.iblsoft.flexiweather.ogc.cache
 		/**
 		 * Expiration time in seconds 
 		 */		
-		private var _checkExpirationTime: int = 10 * 1000; 
-		private var _expirationTime: int = 5;
-		private var _expirationTimer: Timer;
+		private var mf_expirationCheckTime: int = 10 * 1000; 
+		private var mf_expirationTime: int = 5;
+		private var m_expirationTimer: Timer;
 		
 		private var _animationModeEnabled: Boolean;
 		
-		private var md_cache_length: int = 0;
+		private var mi_cacheItemCount: int = 0;
 		protected var md_cache: Dictionary = new Dictionary();
-		protected var md_cache_loading: Dictionary = new Dictionary();
-		
+		protected var md_cacheLoading: Dictionary = new Dictionary();
 		
 		public function WMSCache()
 		{
-			_expirationTimer = new Timer(_checkExpirationTime);
-			_expirationTimer.addEventListener(TimerEvent.TIMER, onExpiration);
-			_expirationTimer.start();
+			m_expirationTimer = new Timer(mf_expirationCheckTime);
+			m_expirationTimer.addEventListener(TimerEvent.TIMER, onExpiration);
+			m_expirationTimer.start();
 		}
 		
 		public function setAnimationModeEnable(value: Boolean): void
@@ -55,17 +54,18 @@ package com.iblsoft.flexiweather.ogc.cache
 				if (lastUsed)
 				{
 					var diff: Number = currTime.time - lastUsed.time;
-					if (diff > (_expirationTime * 1000))
+					if (diff > (mf_expirationTime * 1000))
 					{
-						debug("Image from cache is expired, will be removed");
+//						debug("WMSCache.onExpiration(): Image from cache is expired, will be removed");
 						if (!cacheItem.isImageOnDisplayList())
 						{
 							deleteCacheItem(s_key);
-						} else {
-							debug("onExpiration: image is on displalist");
 						}
+//						else {
+//							debug("WMSCache.onExpiration(): image is on displalist");
+//						}
 					}
-//					debug("diff: " + diff);
+//					debug("WMSCache.onExpiration(): diff=" + diff);
 				}
 			}
 			debugCache();
@@ -74,46 +74,38 @@ package com.iblsoft.flexiweather.ogc.cache
 		private function deleteCacheItem(s_key: String): void
 		{
 //			return;
-			
+
 			var cacheItem: CacheItem = md_cache[s_key] as CacheItem;
 			
-			
-			//dispose bitmap data, just for bitmaps which are not currently displayed
+			// dispose bitmap data, just for bitmaps which are not currently displayed
 			if (!cacheItem.displayed)
 			{
 //				debug("\t deleteCacheItem " + cacheItem);
 				var bmp: Bitmap = cacheItem.image;
 			
 				bmp.bitmapData.dispose();
-				md_cache_length--;
+				mi_cacheItemCount--;
 				delete md_cache[s_key];
 			} else {
 //				debug("\t deleteCacheItem: DO NOT DELETE IT " + cacheItem);
-				
 			}
-			
 		}
 		private function getKey(s_crs: String, bbox: BBox, url: URLRequest): String
 		{
 			var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url);
-			var s_key: String = ck.toString();
-			
-//			debug("getKey : " + s_key);
+			var s_key: String = ck.toString(); 
 			return s_key;			
 		}
 		
 		public function isImageCached(s_crs: String, bbox: BBox, url: URLRequest): Boolean
 		{
 			var s_key: String = getKey(s_crs, bbox, url);
-			var b_isCached: Boolean = (md_cache[s_key] || md_cache_loading[s_key]);
-			debug("isImageCached is cached: " + b_isCached + " ["+ s_key+"]");
-			return b_isCached;
+			return md_cache[s_key] || md_cacheLoading[s_key];
 		}
 		
 		public function getImage(s_crs: String, bbox: BBox, url: URLRequest): Bitmap
 		{
 			var s_key: String = getKey(s_crs, bbox, url);
-			debug("WMS CACHE getImage s_key: " + s_key);
 			if(s_key in md_cache) {
 				var item: CacheItem = md_cache[s_key] as CacheItem; 
 				item.lastUsed = new Date();
@@ -134,15 +126,14 @@ package com.iblsoft.flexiweather.ogc.cache
 		public function startImageLoading(s_crs: String, bbox: BBox, url: URLRequest): void
 		{
 			var s_key: String = getKey(s_crs, bbox, url);
-			debug("startImageLoading : " + s_key);
-			md_cache_loading[s_key] = true;
+			
+			md_cacheLoading[s_key] = true;
 		}
 		
 		public function addImage(img: Bitmap, s_crs: String, bbox: BBox, url: URLRequest): void
 		{
 			var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url);
 			var s_key: String = getKey(s_crs, bbox, url);
-			debug("addImage: " + s_key);
 			
 			var item: CacheItem = new CacheItem();
 			item.cacheKey = ck;
@@ -151,19 +142,20 @@ package com.iblsoft.flexiweather.ogc.cache
 			item.image = img;
 			
 			md_cache[s_key] = item;
-			md_cache_length++;
+			mi_cacheItemCount++;
 			debugCache();
 			
-			delete md_cache_loading[s_key];
+			delete md_cacheLoading[s_key];
 		}
 		
 		private function debugCache(): void
 		{
 //			debug("WMSCache ["+name+"] items: " + md_cache_length);
 		}
+
 		public function removeFromScreen(): void
 		{
-			debug("WMS CACHE removeFromScreen");
+			debug("WMSCache.removeFromScreen(): WMS CACHE removeFromScreen");
 			for(var s_key: String in md_cache) 
 			{
 				debug("\t WMS CACHE removeFromScreen key: " + s_key);
@@ -173,14 +165,14 @@ package com.iblsoft.flexiweather.ogc.cache
 				{
 					item.displayed = false;
 				} else {
-					debug("ATTENTION iamge is on displayList");
+					debug("WMSCache.removeFromScreen(): ATTENTION image is on displayList");
 				}
 			}
 		}
 		
 		public function invalidate(s_crs: String, bbox: BBox): void
 		{
-//			debug("WMS CACHE invalidate s_crs: " + s_crs + " bbox : " + bbox);
+			debug("WMSCache.invalidate(): WMS CACHE invalidate s_crs: " + s_crs + " bbox : " + bbox);
 			
 			var a: Array = [];
 			for(var s_key: String in md_cache) 
@@ -193,11 +185,11 @@ package com.iblsoft.flexiweather.ogc.cache
 					if(ck.ms_crs == s_crs && ck.m_bbox.equals(bbox))
 						a.push(s_key);
 				} else {
-					debug("ATTENTION iamge is on displayList");
+					debug("WMSCache.invalidate(): ATTENTION iamge is on displayList");
 				}
 			}
 			for each(s_key in a) {
-	//			debug("WMSCache.invalidate(): removing image with key: " + md_cache[s_key].toString());
+//				debug("WMSCache.invalidate(): removing image with key: " + md_cache[s_key].toString());
 				deleteCacheItem(s_key);
 			}
 			debugCache();
@@ -206,7 +198,7 @@ package com.iblsoft.flexiweather.ogc.cache
 		private function debug(str: String): void
 		{
 			return;
-			trace("WMSCache Debug: " + str);
+			trace(str);
 		}
 	}
 }
@@ -237,7 +229,6 @@ class CacheItem
 	{
 		if (image)
 			return image.parent != null;
-		
 		return false;
 	}
 	public function set displayed(value:Boolean):void 
@@ -253,7 +244,7 @@ class CacheItem
 	public function CacheItem()
 	{
 		CID++;
-		_id = CID
+		_id = CID;
 //		trace("New " + this);
 	}
 	
@@ -261,5 +252,4 @@ class CacheItem
 	{
 		return "CacheItem " + _id;
 	}
-		
 }
