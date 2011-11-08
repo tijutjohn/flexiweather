@@ -252,8 +252,8 @@ package com.iblsoft.flexiweather.ogc
 			{
 				for each (var layer: WMSLayer in ma_layerConfigurations)
 				{
-					if (!layer)
-						trace("WMSLayerConfiguration.isTileableForCRS(): layer is NULL")
+					//if (!layer)
+					//	trace("WMSLayerConfiguration.isTileableForCRS(): layer is NULL")
 					if (layer && layer.isTileableForCRS(crs))
 						return true;
 				}
