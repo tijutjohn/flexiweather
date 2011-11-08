@@ -44,21 +44,13 @@ package com.iblsoft.flexiweather.ogc
 	{
 		protected var m_loader: UniURLLoader = new UniURLLoader();
 		protected var m_featureInfoLoader: UniURLLoader = new UniURLLoader();
-		protected var m_image: Bitmap = null;
-		protected var mb_imageOK: Boolean = true;
 
 		/**
 		 * Bitmap image holder for legend 
-		 */		
+		 */
 		protected var m_legendImage: Bitmap = null;
 		
-		protected var m_job: BackgroundJob;
-		protected var m_request: URLRequest;
-
-		protected var ms_imageCRS: String = null;
-		protected var m_imageBBox: BBox = null;
 		protected var mb_updateAfterMakingVisible: Boolean = false;
-		
 		
 		protected var m_cfg: WMSLayerConfiguration;
 		protected var md_dimensionValues: Dictionary = new Dictionary(); 
@@ -69,8 +61,6 @@ package com.iblsoft.flexiweather.ogc
 
 		protected var m_cache: ICache;
 		
-		protected var m_timer: Timer = new Timer(10000);
-
 		public function InteractiveLayerMSBase(container: InteractiveWidget, cfg: WMSLayerConfiguration)
 		{
 			super(container);
@@ -85,9 +75,6 @@ package com.iblsoft.flexiweather.ogc
 			
 			setConfiguration(cfg);
 			//filters = [ new GlowFilter(0xffffe0, 0.8, 2, 2, 2) ];
-			m_timer.addEventListener(TimerEvent.TIMER_COMPLETE, onAutoRefreshTimerComplete)
-			m_timer.repeatCount = 1;
-			
 			createEffects();
 //			setStyle('addedEffect', fadeIn);
 			setStyle('showEffect', fadeIn);
@@ -150,13 +137,8 @@ package com.iblsoft.flexiweather.ogc
 			}
 			m_cfg = cfg;
 
-			m_timer.stop();
-			if(m_cfg.mi_autoRefreshPeriod > 0)
-				m_timer.delay = m_cfg.mi_autoRefreshPeriod * 1000.0;
-			
 			m_cfg.addEventListener(WMSLayerConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
 			m_cfg.addEventListener(WMSLayerConfiguration.CAPABILITIES_RECEIVED, onCapabilitiesReceived);
-//			updateData(true);
 		}
 		
 		/**
@@ -195,7 +177,7 @@ package com.iblsoft.flexiweather.ogc
 			
 			if (request.url.indexOf('${BASE_URL}') == -1)
 			{
-				debug("getGetMapFullUrl stop");
+				debug("stop");
 			}
 			updateDimensionsInURLRequest(request);
 			updateCustomParametersInURLRequest(request);
@@ -222,36 +204,10 @@ package com.iblsoft.flexiweather.ogc
 			m_cache.setAnimationModeEnable(value);	
 		}
 		
-		/**
-		 * Function which loadData. It's good habit to call this function when you want to load your data to have one channel for loading data.
-		 * It's easier to testing and it's one place for checking requests
-		 *  
-		 * @param urlRequest
-		 * @param associatedData
-		 * @param s_backgroundJobName
-		 * 
-		 */	
-		public function loadData(
-			urlRequest: URLRequest,
-			associatedData: Object = null,
-			s_backgroundJobName: String = null): void
-		{
-			m_loader.load(urlRequest, associatedData, s_backgroundJobName);
-		}
-		
 		public function updateData(b_forceUpdate: Boolean): void
 		{
-			//do not clear job and request here. We have now cache which knows, that layer is already loading
-			if(m_job != null)
-				m_job.cancel();
-			m_job = null;
-			
 			if(!visible) {
 				mb_updateAfterMakingVisible = true;
-				m_image = null;
-				ms_imageCRS = null;
-				m_imageBBox = null;
-				m_timer.reset();
 				return;
 			}
 		}
@@ -279,30 +235,6 @@ package com.iblsoft.flexiweather.ogc
         	//rerender legend
         }
 
-		override public function hasPreview(): Boolean
-		{ return true; }
-
-		override public function renderPreview(graphics: Graphics, f_width: Number, f_height: Number): void
-		{
-			if(m_image != null) {
-				var matrix: Matrix = new Matrix();
-				matrix.translate(-f_width / 3, -f_width / 3);
-				matrix.scale(3, 3);
-				matrix.translate(m_image.width / 3, m_image.height / 3);
-				matrix.invert();
-  				graphics.beginBitmapFill(m_image.bitmapData, matrix, false, true);
-				graphics.drawRect(0, 0, f_width, f_height);
-				graphics.endFill();
-			}
-			if(!mb_imageOK) {
-				graphics.lineStyle(2, 0xcc0000, 0.7, true);
-				graphics.moveTo(0, 0);
-				graphics.lineTo(f_width - 1, f_height - 1);
-				graphics.moveTo(0, f_height - 1);
-				graphics.lineTo(f_width - 1, 0);
-			}
-		}
-		
 		private function getLegendForStyleName(styleName: String): Object
 		{
 //			if (ma
@@ -1133,36 +1065,17 @@ package com.iblsoft.flexiweather.ogc
 		// Event handlers
 		protected function onDataLoaded(event: UniURLLoaderEvent): void
 		{
-			var ile: InteractiveLayerEvent = new InteractiveLayerEvent( InteractiveLayerEvent.LAYER_LOADED, true );
+			var ile: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.LAYER_LOADED, true);
 			ile.interactiveLayer = this;
 			dispatchEvent(ile);
-			
-			m_request = null;
-			if(m_cfg.mi_autoRefreshPeriod > 0) {
-				m_timer.reset();
-				m_timer.delay = m_cfg.mi_autoRefreshPeriod * 1000.0;
-				m_timer.start();
-			}
 		}
 
 		protected function onDataLoadFailed(event: UniURLLoaderEvent): void
 		{
-			debug("MSBase onDataLoadFailed");
-			m_request = null;
-			if(m_cfg.mi_autoRefreshPeriod > 0) {
-				m_timer.reset();
-				m_timer.delay = m_cfg.mi_autoRefreshPeriod * 1000.0;
-				m_timer.start();
-			}
 			if(event != null) {
 				ExceptionUtils.logError(Log.getLogger("WMS"), event,
 						"Error accessing layers '" + m_cfg.ma_layerNames.join(","))
 			}
-			m_image = null;
-			mb_imageOK = false;
-			ms_imageCRS = null;
-			m_imageBBox = null;
-			onJobFinished();
 		}
 		
 		protected function onCapabilitiesReceived(event: DataEvent): void
@@ -1188,20 +1101,6 @@ package com.iblsoft.flexiweather.ogc
 		{
 			m_featureInfoCallBack.call(null, String(event.result), this);
 			m_featureInfoCallBack = null;
-		}
-		
-		protected function onJobFinished(): void
-		{
-			if(m_job != null) {
-				m_job.finish();
-				m_job = null;
-			}
-			invalidateDynamicPart();
-		}
-		
-		protected function onAutoRefreshTimerComplete(event: TimerEvent): void
-		{
-			updateData(true);
 		}
 		
 		override public function get name(): String
