@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.widgets
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.proj.Projection;
 	
 	import flash.display.Graphics;
 	import flash.events.Event;
@@ -241,8 +242,7 @@ package com.iblsoft.flexiweather.widgets
 			
 		protected function doPanTo(p: Point, b_finalChange: Boolean, test: String): Boolean
 		{
-			if (!_p && !_oldStartPoint)
-			{
+			if (!_p && !_oldStartPoint) {
 				return false;
 			}
 			
@@ -279,7 +279,28 @@ package com.iblsoft.flexiweather.widgets
 			_diff.y = yDiff;
 			invalidateDynamicPart(true);
 			
-			container.setViewBBox(r.translated(-xDiff, yDiff), b_finalChange);
+			var projection: Projection = container.getCRSProjection();
+			r = r.translated(-xDiff, yDiff);
+			var extentBBox: BBox = container.getExtentBBox();
+			if(projection.wrapsHorizontally && !extentBBox.contains(r) && xDiff != 0) {
+				var f_wrappingStep: Number = -xDiff;
+				while(extentBBox.translated(f_wrappingStep, 0).intersects(r)) {
+					extentBBox = extentBBox.translated(f_wrappingStep, 0);
+					if(extentBBox.contains(r)) {
+						var a1: Array = container.mapBBoxToViewReflections(extentBBox);
+						var a2: Array = container.mapBBoxToViewReflections(r);
+						for(var i: int = 0; i < a1.length && i < a2.length; ++i) {
+							if(projection.extentBBox.contains(a1[i])) {
+								extentBBox = a1[i];
+								r = a2[i];
+							}
+						}
+						container.setExtentBBOX(extentBBox, false);
+						break;
+					}
+				}
+			}
+			container.setViewBBox(r, b_finalChange);
 		}
 		
 //		private var _txt: TextField;
