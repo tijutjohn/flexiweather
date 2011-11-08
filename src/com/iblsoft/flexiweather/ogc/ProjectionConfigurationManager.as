@@ -51,12 +51,12 @@ package com.iblsoft.flexiweather.ogc
 //			trace("ProjectionConfigurationManager addParsedAreaByCRS: " + crs.crs);
 			ma_parsedProjectionsDictionary[projection.crs] = projection;
 			addProj4Projection(projection);
-			
 		}
+
 		private function addProj4Projection(projection: ProjectionConfiguration): void
 		{
 			if (projection && projection.crs && projection.proj4String)
-		 		Projection.addCRSByProj4(projection.crs, projection.proj4String);
+		 		Projection.addCRSByProj4(projection.crs, projection.proj4String, projection.bbox);
 		}
 		
 		public function getMaxExtentForProjection(projection: ProjectionConfiguration): BBox
