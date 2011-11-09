@@ -269,6 +269,9 @@ package com.iblsoft.flexiweather.ogc
 			m_tilingUtils.onAreaChanged(s_crs, getGTileBBoxForWholeCRS(s_crs));
 			m_tiledArea = m_tilingUtils.getTiledArea(container.getViewBBox(), mi_zoom);
 			
+			if (!m_tiledArea)
+				return;
+			
 			var tiledCache: WMSTileCache = m_cache as WMSTileCache;
 			
 			var request: URLRequest;
@@ -382,7 +385,20 @@ package com.iblsoft.flexiweather.ogc
 		{
 			var tilingExtent: BBox = getGTileBBoxForWholeCRS(container.crs);
 			m_tilingUtils.onAreaChanged(container.crs, tilingExtent);
-			mi_zoom = m_tilingUtils.getZoom(container.getViewBBox(), new Point(width, height));
+			var viewBBox: BBox = container.getViewBBox();
+			
+			//new Jozef tiling zoom equation
+			var newZoomLevel2: Number = 1;
+			if (tilingExtent)
+			{
+				var test: Number = (tilingExtent.width * width) / (viewBBox.width * 256);
+				var newZoomLevel2: Number = Math.log(test) * Math.LOG2E;
+				trace("New Jozef' zoom:  " + newZoomLevel2);
+			}
+			
+			mi_zoom = Math.round(newZoomLevel2);
+			//mi_zoom = m_tilingUtils.getZoom(viewBBox, new Point(width, height));
+			trace("FIND ZOOM:  zoom = " + mi_zoom + " new zoom: " + newZoomLevel2);
 		}
 		
 		override public function refresh(b_force: Boolean): void
@@ -617,6 +633,9 @@ package com.iblsoft.flexiweather.ogc
 			}
 			var newBBox: BBox = getGTileBBoxForWholeCRS(newCRS);
 			var viewBBox: BBox = container.getViewBBox();
+			
+//			trace("onAreaChanged newBBox: " + newBBox);
+//			trace("onAreaChanged viewBBox: " + viewBBox);
 			
 			m_tilingUtils.onAreaChanged(newCRS, newBBox);
 			

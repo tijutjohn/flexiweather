@@ -56,7 +56,7 @@ package com.iblsoft.flexiweather.ogc
 		private function addProj4Projection(projection: ProjectionConfiguration): void
 		{
 			if (projection && projection.crs && projection.proj4String)
-		 		Projection.addCRSByProj4(projection.crs, projection.proj4String, projection.bbox);
+		 		Projection.addCRSByProj4(projection.crs, projection.proj4String, projection.bbox, projection.wrapsHorizontally);
 		}
 		
 		public function getMaxExtentForProjection(projection: ProjectionConfiguration): BBox

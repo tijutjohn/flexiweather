@@ -61,6 +61,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 			
 			var leftCol: int = Math.floor((viewBBox.xMin - m_extent.xMin) / tileBBox.x);
 			var topRow: int = Math.floor((m_extent.yMax - viewBBox.yMax) / tileBBox.y);
+//			trace("getTiledArea m_extent" + m_extent.width + ", " + m_extent.height)
+//			trace("getTiledArea viewBBox:" + viewBBox.width + ", " + viewBBox.height)
+//			trace("getTiledArea leftCol:" + leftCol + ", topRow: " + topRow)
 //			var tileBBox: Point = new Point(m_extent.width / maxColTiles, m_extent.height / maxRowTiles);
 //			var viewTiles: Point = new Point( Math.ceil(viewBBox.width / tileBBox.x), Math.ceil(viewBBox.height / tileBBox.y));
 //			
@@ -76,6 +79,15 @@ package com.iblsoft.flexiweather.ogc.tiling
 			return area;
 			
 		}
+		
+		/**
+		 * For now this method is deprecated, we have new equation for counting tile zoom level in InteractiveLayerQTTMS.findZoom 
+		 * @param viewBBox
+		 * @param viewSize
+		 * @return 
+		 * 
+		 */		
+		/*
 		public function getZoom(viewBBox: BBox, viewSize: Point): int
 		{
 			if (viewSize.x == 0 || viewSize.y == 0 || !m_extent)
@@ -99,6 +111,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 			tileHeight = 256;
 			var zoomFound: Boolean = false;
 			var arr: Array = [];
+			
+			
 			while (!zoomFound)
 			{
 				area = getTiledArea(viewBBox, newZoomLevel);
@@ -142,6 +156,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			//trace("\nTilingUtils getZoom for viewBBox: " + viewBBox.toString() + " size: " + viewSize + " LEVEL FOUND: " + bestZoomLevel);
 			return bestZoomLevel;
 		}
+		*/
 		
 		private function debugZoomLevels(arr: Array): void
 		{

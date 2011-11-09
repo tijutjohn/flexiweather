@@ -361,7 +361,11 @@ package com.iblsoft.flexiweather.ogc
 		private function onFinishedRequest(request: URLRequest): void
 		{
 			if(request)
-				ma_requests.removeItemAt(ma_requests.getItemIndex(request));
+			{
+				var id: int = ma_requests.getItemIndex(request);
+				if (id > -1)
+					ma_requests.removeItemAt(id);
+			}
 
 			if(ma_requests.length == 0) {
 				for(var i: int = 0; i < ma_imageParts.length; ) {
