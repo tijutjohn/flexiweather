@@ -3,6 +3,7 @@ package com.iblsoft.flexiweather.widgets.containers
 	import spark.layouts.VerticalLayout;
 	import spark.layouts.supportClasses.LayoutBase;
 
+	[Exclude(name="layout", kind="property")]
 	public class GroupVBox extends GroupBox
 	{
 		private function get verticalLayout():VerticalLayout

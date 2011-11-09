@@ -20,6 +20,19 @@ package com.iblsoft.flexiweather.widgets.containers
 	import spark.layouts.supportClasses.LayoutBase;
 	import spark.primitives.Rect;
 
+	/**
+	 *  The background color of the application. This color is used as the stage color for the
+	 *  application and the background color for the HTML embed tag.
+	 *   
+	 *  @langversion 3.0
+	 *  @playerversion Flash 10
+	 *  @playerversion AIR 1.5
+	 *  @productversion Flex 4
+	 */
+	[Style(name="backgroundColor", type="uint", format="Color", inherit="no", theme="spark")]
+	[Style(name="borderColor", type="uint", format="Color", inherit="no", theme="spark")]
+	[Style(name="titleColor", type="uint", format="Color", inherit="no", theme="spark")]
+	
 	public class GroupBox extends SkinnableContainer
 	{
 		[SkinPart (require="true")]
@@ -125,6 +138,7 @@ package com.iblsoft.flexiweather.widgets.containers
 			super();
 			
 			setStyle('skinClass', GroupBoxSkin);
+			setStyle('backgroundColor', 0xffffff);
 		}
 		
 		override protected function attachSkin():void

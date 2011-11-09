@@ -112,10 +112,13 @@
                 setPartCornerRadii(border, true); 
                 setPartCornerRadii(background, true);
             }
+			
+			var bkgColor:  uint = getStyle("backgroundColor");
             
+			titleDisplay.setStyle('color', getStyle("titleColor"));
             borderStroke.color = getStyle("borderColor");
             borderStroke.alpha = getStyle("borderAlpha");
-			titleBackgroundFill.color = getStyle("backgroundColor");
+			titleBackgroundFill.color = bkgColor;
             backgroundFill.color = getStyle("backgroundColor");
             backgroundFill.alpha = getStyle("backgroundAlpha");
             

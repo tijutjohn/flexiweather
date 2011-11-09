@@ -5,6 +5,7 @@ package com.iblsoft.flexiweather.widgets.containers
 	import spark.layouts.HorizontalLayout;
 	import spark.layouts.supportClasses.LayoutBase;
 	
+	[Exclude(name="layout", kind="property")]
 	public class GroupHBox extends GroupBox
 	{
 		private function get horizontalLayout():HorizontalLayout
