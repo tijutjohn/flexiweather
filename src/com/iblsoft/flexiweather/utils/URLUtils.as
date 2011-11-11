@@ -57,13 +57,15 @@ package com.iblsoft.flexiweather.utils
 		{
 			var protocol: String = URLUtil.getProtocol(url);
 			//remove protocol from url
-			url = url.substring(protocol.length + 3, url.length);
+			if (protocol.length > 0)
+				url = url.substring(protocol.length + 3, url.length);
 			
 			if (url.indexOf(originString) >= 0)
 			{
 				url = url.split(originString).join(newString);
 			}
-			url = protocol + '://'+url;
+			if (protocol.length > 0)
+				url = protocol + '://'+url;
 			
 			return url;
 		}
