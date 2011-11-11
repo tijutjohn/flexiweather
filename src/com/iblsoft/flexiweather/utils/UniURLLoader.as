@@ -76,6 +76,7 @@ package com.iblsoft.flexiweather.utils
 		 */
 		public static var crossDomainProxyURLPattern: String = null;
 		
+		public static const LOAD_STARTED: String = "loadStarted";
 		public static const DATA_LOADED: String = "dataLoaded";
 		public static const DATA_LOAD_FAILED: String = "dataLoadFailed";
 
@@ -126,8 +127,12 @@ package com.iblsoft.flexiweather.utils
 //					trace("replace url: " + urlRequest.url + " baseURL: " + baseURL);
 				}
 			}	
+			trace("URL before sanity: " + s_url);
+			s_url = URLUtils.urlSanityCheck(s_url);
+			trace("URL after sanity: " + s_url);
 			return s_url;
 		}
+		
 		
 		private function checkRequestBaseURL(urlRequest: URLRequest): void
 		{
@@ -160,13 +165,13 @@ package com.iblsoft.flexiweather.utils
 						if (!urlRequest.data)
 							urlRequest.data = new URLVariables();
 						var valArr: Array = str.split('=');
-						var varName: String = valArr[0];
-						var varValue: String = valArr[1];
+				var varName: String = valArr.shift();
+						var varValue: String = valArr.join('=');
 						if (urlRequest.hasOwnProperty(varName))
 						{
 							trace("variable already exists in request variables ["+varName+"]: oldValue " + urlRequest[varName] + " newValue: " + varValue); 
 						} else {
-							urlRequest.data[valArr[0]] = valArr[1];
+							urlRequest.data[varName] = varValue;
 						}
 					}
 				}
@@ -193,6 +198,7 @@ package com.iblsoft.flexiweather.utils
 				associatedData: Object = null,
 				s_backgroundJobName: String = null): void
 		{
+			
 			checkRequestData(urlRequest);
 			checkRequestBaseURL(urlRequest);
 			
@@ -231,7 +237,7 @@ package com.iblsoft.flexiweather.utils
 			urlLoader.addEventListener(IOErrorEvent.IO_ERROR, onDataIOError);
 			urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onSecurityError);
 			
-			UniURLLoaderManager.instance.addLoader( urlRequest);
+			UniURLLoaderManager.instance.addLoaderRequest( urlRequest);
 			
 			Log.getLogger('UniURLLoader').info("load " + urlRequest.url + " data:" + urlRequest.data);
 			urlLoader.load(urlRequest);
@@ -244,6 +250,10 @@ package com.iblsoft.flexiweather.utils
 				loader: urlLoader,
 				backgroundJob: backgroundJob
 			};
+			
+			
+			var e: UniURLLoaderEvent = new UniURLLoaderEvent(LOAD_STARTED, null, urlRequest, associatedData);
+			dispatchEvent(e);
 		}
 		
 		public function cancel(urlRequest: URLRequest): Boolean
@@ -461,7 +471,24 @@ package com.iblsoft.flexiweather.utils
 			// Try to use cross-domain 	 if received "Error #2048: Security sandbox violation:" 
 			if(crossDomainProxyURLPattern != null
 					&& event.text.match(/#2048/)
-					&& !urlLoader.b_crossDomainProxyRequest) {
+					&& !urlLoader.b_crossDomainProxyRequest) 
+			{
+				
+				loadCrossDomainProxyURLPattern(urlLoader);
+				return;
+			}
+
+			urlRequest = disconnectURLLoader(urlLoader);
+			if(urlRequest == null)
+				return;
+
+			Log.getLogger("UniURLLoader").info("Security error: " + event.text);
+			dispatchFault(urlRequest, urlLoader.associatedData, ERROR_SECURITY, event.text);
+		}
+
+		private function loadCrossDomainProxyURLPattern(urlLoader: URLLoaderWithAssociatedData): void
+		{
+			var urlRequest: URLRequest;
 				
 				var s_proxyURL: String = fromBaseURL(crossDomainProxyURLPattern, proxyBaseURL);
 				
@@ -496,6 +523,7 @@ package com.iblsoft.flexiweather.utils
 						}
 					}
 					
+			urlRequest.data = null;
 					Log.getLogger('SecurityError').info('STEP 2 s_url: ' + s_url);
 					
 				}
@@ -507,16 +535,7 @@ package com.iblsoft.flexiweather.utils
 				urlRequest.url = s_proxyURL;
 				checkRequestData(urlRequest);
 				urlLoader.b_crossDomainProxyRequest = true;
-				urlLoader.load(urlRequest);
-				return;
-			}
-
-			urlRequest = disconnectURLLoader(urlLoader);
-			if(urlRequest == null)
-				return;
-
-			Log.getLogger("UniURLLoader").info("Security error: " + event.text);
-			dispatchFault(urlRequest, urlLoader.associatedData, ERROR_SECURITY, event.text);
+		urlLoader.load(urlRequest);
 		}
 
 		protected function onImageLoaded(event: Event): void
@@ -576,7 +595,7 @@ package com.iblsoft.flexiweather.utils
 			
 			var urlRequest: URLRequest = md_urlLoaderToRequestMap[urlLoader].request; 
 			
-			UniURLLoaderManager.instance.removeLoader(urlRequest);
+		UniURLLoaderManager.instance.removeLoaderRequest(urlRequest);
 			
 			delete md_urlLoaderToRequestMap[urlLoader];
 			return urlRequest;
@@ -591,6 +610,10 @@ package com.iblsoft.flexiweather.utils
 				return null;
 			delete md_imageLoaderToRequestMap[imageLoader];
 			return urlRequest;
+		}
+		override public function toString(): String
+		{
+			return "UniURLLoader";
 		}
 	}
 }

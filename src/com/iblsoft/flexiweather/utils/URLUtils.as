@@ -1,5 +1,7 @@
 package com.iblsoft.flexiweather.utils
 {
+	import mx.utils.URLUtil;
+
 	public class URLUtils
 	{
 		public function URLUtils()
@@ -27,6 +29,42 @@ package com.iblsoft.flexiweather.utils
 					url = arr[0] + "?" + arr2.join('&');
 				}
 			}
+			return url;
+		}
+		
+		/**
+		 * Function will check URL for //, which can be created by replacing tag ${BASE_URL}
+		 *  
+		 * @param url
+		 * @return 
+		 * 
+		 */		
+		public static function urlSanityCheck(url: String): String
+		{
+			if (url.indexOf('?') > 0)
+			{
+				var urlArr: Array = url.split('?');
+				urlArr[0] = replaceDomainURLString(urlArr[0], '//','/');
+				url = urlArr.join('?');
+				return url;
+			}
+			
+			url = replaceDomainURLString(url,  '//','/');
+			return url;
+		}
+		
+		private static function replaceDomainURLString(url: String, originString: String, newString: String): String
+		{
+			var protocol: String = URLUtil.getProtocol(url);
+			//remove protocol from url
+			url = url.substring(protocol.length + 3, url.length);
+			
+			if (url.indexOf(originString) >= 0)
+			{
+				url = url.split(originString).join(newString);
+			}
+			url = protocol + '://'+url;
+			
 			return url;
 		}
 	}
