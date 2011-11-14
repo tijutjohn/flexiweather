@@ -69,7 +69,7 @@ package com.iblsoft.flexiweather.ogc.cache
 						debug("TILE from cache is expired, will be removed");
 						if (!isTileOnDisplayList(s_key))
 						{
-							delete md_cache[s_key];
+							deleteTile(s_key);
 						} else {
 							debug("TILE IS DISPLAY LIST, DO NOT DELETE IT");
 						}
@@ -177,7 +177,7 @@ package com.iblsoft.flexiweather.ogc.cache
 //			debug("isTileCached check for undefined: " + (data != undefined) + " for null: " + (data != null) + " KEY: " + s_key);
 			return data != null;			
 		}
-		public function addTile(img: Bitmap, s_crs: String, tileIndex: TileIndex, url: URLRequest, specialStrings: Array, tiledArea: TiledArea): void
+		public function addTile(img: Bitmap, s_crs: String, tileIndex: TileIndex, url: URLRequest, specialStrings: Array, tiledArea: TiledArea, viewPart: BBox): void
 		{
 			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, null, tileIndex, url, specialStrings);
 			var s_key: String = decodeURI(ck.toString()); 
@@ -196,12 +196,18 @@ package com.iblsoft.flexiweather.ogc.cache
 				
 //				debug("REMOVE TILE : " +s_key);
 				
-				disposeTileBitmap(s_key);
-				
-				delete md_cache[s_key];
+				deleteTile(s_key);
 			}
 //			debug("cache item removed: " + _items.length);
 		}
+		
+		public function deleteTile(s_key: String): void
+		{
+			debug("deleteTile: " + s_key);
+			disposeTileBitmap(s_key);
+			delete md_cache[s_key];
+		}
+			
 		
 		private var _tiledArea: TiledArea;
 		private var _tiledAreaCenter: Point;
@@ -283,8 +289,7 @@ package com.iblsoft.flexiweather.ogc.cache
 				}
 //				debug("WMSCache.invalidate(): removing image with key: " + md_cache[s_key].toString());
 				debug("WMSCache.invalidate(): removing image with key: " + s_key + " cache tiles count: " + cachedTilesCount);
-				disposeTileBitmap(s_key);
-				delete md_cache[s_key];
+				deleteTile(s_key);
 			}
 			
 			debug("\n invalidate cache tiles count: " + cachedTilesCount);
@@ -293,7 +298,6 @@ package com.iblsoft.flexiweather.ogc.cache
 
 		private function debug(str: String): void
 		{
-			return;
 			trace("WMSTileCache: " + str)
 		}
 	}

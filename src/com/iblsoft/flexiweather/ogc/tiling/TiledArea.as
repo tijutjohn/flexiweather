@@ -49,6 +49,10 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			return bottomRightTileIndex.mi_tileRow - topLeftTileIndex.mi_tileRow + 1;
 		}
+		public function get totalVisibleTilesCount(): int
+		{
+			return (bottomRow - topRow + 1) * (rightCol - leftCol + 1);
+		}
 		
 		public function toString(): String
 		{

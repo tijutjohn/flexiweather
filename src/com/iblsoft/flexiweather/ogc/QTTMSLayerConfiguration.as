@@ -14,7 +14,7 @@ package com.iblsoft.flexiweather.ogc
 	public class QTTMSLayerConfiguration extends LayerConfiguration implements IInteractiveLayerProvider, ILayerConfiguration, IBehaviouralObject
 	{
 //		public var baseURLPattern: String;
-		/** Array of CRSWithBBox (items are QTTAreaData instances */
+		/** Array of QTTilingInfo instances */
 		public var tilingCRSsAndExtents: Array = [];
 
 		public var ma_behaviours: Array = [];

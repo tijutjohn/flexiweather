@@ -3,14 +3,30 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 
+	/**
+	 * QuadTree tiling info. There is stored urlPattern, crs, bbox and minimum and maximum zoom  
+	 * @author fkormanak
+	 * 
+	 */	
 	public class QTTilingInfo implements Serializable
 	{
 		
 		private var _urlPattern: String;
 		private var _crsWithBBox: CRSWithBBox;
-		public var minimumZoomLevel: uint = 1;
+		private var _minimumZoomLevel: uint = 0;
 		public var maximumZoomLevel: uint = 12;
 		
+
+
+		public function get minimumZoomLevel():uint
+		{
+			return _minimumZoomLevel;
+		}
+
+		public function set minimumZoomLevel(value:uint):void
+		{
+			_minimumZoomLevel = value;
+		}
 
 		public function get urlPattern():String
 		{

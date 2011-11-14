@@ -312,10 +312,14 @@ package com.iblsoft.flexiweather.widgets
 				var f_crsExtentBBoxWidth: Number = m_crsProjection.extentBBox.width;
 				for(var i: int = 0; i < 10; i++) {
 					var i_delta: int = (i & 1 ? 1 : -1) * ((i + 1) >> 1); // generates sequence 0, 1, -1, 2, -2, ..., 5, -5
+//					trace("\t mapBBoxToViewParts delta: " + i_delta);
 					var reflectedBBox: BBox = currentViewBBox.translated(f_crsExtentBBoxWidth * i_delta, 0)
 					var intersectionOfReflectedBBoxWithCRSExtentBBox: BBox =
-							reflectedBBox.intersected(m_crsProjection.extentBBox); 
-					if(intersectionOfReflectedBBoxWithCRSExtentBBox) {
+							reflectedBBox.intersected(m_crsProjection.extentBBox);
+					
+//					trace("\t mapBBoxToViewParts ............reflectedBBox: " + reflectedBBox);
+//					trace("\t mapBBoxToViewParts inters. of reflected BBox: " + intersectionOfReflectedBBoxWithCRSExtentBBox);
+					if(intersectionOfReflectedBBoxWithCRSExtentBBox && intersectionOfReflectedBBoxWithCRSExtentBBox.width > 0 && intersectionOfReflectedBBoxWithCRSExtentBBox.height > 0) {
 						var b_foundEnvelopingBBox: Boolean = false;
 						for each(var otherBBox: BBox in a) {
 							if(otherBBox.contains(intersectionOfReflectedBBoxWithCRSExtentBBox)) {
@@ -327,7 +331,7 @@ package com.iblsoft.flexiweather.widgets
 							//trace("InteractiveWidget.mapBBoxToViewParts(): reflected "
 							//	+ i_delta + " part " + intersectionOfReflectedBBoxWithCRSExtentBBox.toString());
 							a.push(intersectionOfReflectedBBoxWithCRSExtentBBox);
-						}
+						} 
 					}
 				}
 			}
@@ -348,7 +352,7 @@ package com.iblsoft.flexiweather.widgets
 		 * Then at certain zoom-out distance the same BBox may appear multiple times withing the View.
 		 * Visualy this looks like multiple reflection of the same BBox in the View.   
 		 **/
-		public function mapBBoxToViewReflections(bbox: BBox): Array
+		public function mapBBoxToViewReflections(bbox: BBox, returnIntersectedBBox: Boolean = false): Array
 		{
 			var f_crsExtentBBoxWidth: Number = m_crsProjection.extentBBox.width;
 			if(!m_crsProjection.wrapsHorizontally) {
@@ -361,10 +365,16 @@ package com.iblsoft.flexiweather.widgets
 				for(var i: int = 0; i < 11; i++) {
 					var i_delta: int = (i & 1 ? 1 : -1) * ((i + 1) >> 1); // generates sequence 0, 1, -1, 2, -2, ..., 5, -5
 					var reflectedBBox: BBox = bbox.translated(f_crsExtentBBoxWidth * i_delta, 0)
-					if(reflectedBBox.intersects(m_viewBBox)) {
-						//trace("InteractiveWidget.mapBBoxToViewReflections(): mapping to reflection "
-						//	+ i_delta + " into " + reflectedBBox.toString());
-						a.push(reflectedBBox);
+						
+					var intersectedBBox: BBox = reflectedBBox.intersected(m_viewBBox); 
+					if(intersectedBBox) {
+//						trace("InteractiveWidget.mapBBoxToViewReflections(): mapping to reflection "
+//							+ i_delta + " into " + reflectedBBox.toString());
+						
+						if (!returnIntersectedBBox)
+							a.push(reflectedBBox);
+						else
+							a.push(intersectedBBox);
 					}
 				}
 				return a;
@@ -533,7 +543,8 @@ package com.iblsoft.flexiweather.widgets
 
 		public function isCRSWrappingOverXAxis(): Boolean
 		{
-			return ms_crs == 'CRS:84' || ms_crs == 'EPSG:4326' || ms_crs == 'EPSG:900913'; 
+			m_crsProjection = Projection.getByCRS(ms_crs);
+			return m_crsProjection.wrapsHorizontally; 
 		}
 
 		/**
@@ -588,14 +599,17 @@ package com.iblsoft.flexiweather.widgets
         		f_newBBoxHeight = bbox.width / f_extentAspect / f_componentAspect;
         	}
         	
-        	if(f_newBBoxHeight > m_extentBBox.height) {
-        		f_newBBoxHeight = m_extentBBox.height;
-        		f_newBBoxWidth = f_componentAspect * f_extentAspect * f_newBBoxHeight;
-        	}
-        	if(f_newBBoxWidth > m_extentBBox.width) {
-        		f_newBBoxWidth = m_extentBBox.width;
-        		f_newBBoxHeight = f_newBBoxWidth / f_componentAspect / f_extentAspect;
-        	}
+			if (!isCRSWrappingOverXAxis())
+			{
+	        	if(f_newBBoxHeight > m_extentBBox.height) {
+	        		f_newBBoxHeight = m_extentBBox.height;
+	        		f_newBBoxWidth = f_componentAspect * f_extentAspect * f_newBBoxHeight;
+	        	}
+	        	if(f_newBBoxWidth > m_extentBBox.width) {
+	        		f_newBBoxWidth = m_extentBBox.width;
+	        		f_newBBoxHeight = f_newBBoxWidth / f_componentAspect / f_extentAspect;
+	        	}
+			}
 			if (isNaN(f_newBBoxHeight))
 			{
 				trace("stop f_newBBoxHeight is NaN");

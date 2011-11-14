@@ -4,7 +4,9 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.ogc.tiling.TileIndex;
 	import com.iblsoft.flexiweather.ogc.tiling.TiledArea;
 	import com.iblsoft.flexiweather.ogc.tiling.TilingUtils;
+	import com.iblsoft.flexiweather.plugins.IConsole;
 	import com.iblsoft.flexiweather.proj.Coord;
+	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.utils.UniURLLoader;
@@ -49,11 +51,9 @@ package com.iblsoft.flexiweather.ogc
 		
 		protected var m_loader: UniURLLoader = new UniURLLoader();
 		
-		protected var m_tiledArea: TiledArea;
+		private var _tileIndicesMapper: TileIndicesMapper;
+		private var _viewPartsReflections: ViewPartReflectionsHelper;
 		
-		
-
-
 		private var _avoidTiling: Boolean;
 		public function set avoidTiling(value:Boolean):void
 		{
@@ -119,6 +119,9 @@ package com.iblsoft.flexiweather.ogc
 			}
 			*/
 			
+			_tileIndicesMapper = new TileIndicesMapper();
+			_viewPartsReflections = new ViewPartReflectionsHelper(container);
+			
 			m_cache = new WMSTileCache();
 			m_tilingUtils = new TilingUtils();
 			m_tilingUtils.minimumZoom = minimumZoomLevel;
@@ -166,6 +169,10 @@ package com.iblsoft.flexiweather.ogc
 			
 			var i_oldZoom: int = mi_zoom;
 			findZoom();
+			if (mi_zoom == 0)
+			{
+				trace("check zoom level 0");	
+			}
 			if (i_oldZoom != mi_zoom)
 			{
 				/**
@@ -266,10 +273,42 @@ package com.iblsoft.flexiweather.ogc
 			}
 			var s_crs: String = container.crs;
 			
-			m_tilingUtils.onAreaChanged(s_crs, getGTileBBoxForWholeCRS(s_crs));
-			m_tiledArea = m_tilingUtils.getTiledArea(container.getViewBBox(), mi_zoom);
+			var currentViewBBox: BBox = container.getViewBBox();
 			
-			if (!m_tiledArea)
+			var tiledAreas: Array = [];
+			var _tiledArea: TiledArea;
+			
+			//update CRS and extent BBox
+			m_tilingUtils.onAreaChanged(s_crs, getGTileBBoxForWholeCRS(s_crs));
+			
+			mi_totalVisibleTiles =  0;
+			
+			var projection: Projection = Projection.getByCRS(s_crs);
+			var projectionParts: Array = container.mapBBoxToViewParts(projection.extentBBox);
+			if (projectionParts.length > 0)
+			{
+				for each (var part: BBox in projectionParts)
+				{
+					var partReflections: Array = container.mapBBoxToViewReflections(part, true)
+					for each (var partReflection: BBox in partReflections)
+					{
+						//find suitable visible parts for current reflection
+						var reflectionVisibleParts: Array = container.mapBBoxToViewParts(partReflection);
+						
+						for each (var reflectionVisiblePart: BBox in reflectionVisibleParts)
+						{
+							_tiledArea = m_tilingUtils.getTiledArea(reflectionVisiblePart, mi_zoom);
+							if (_tiledArea)
+							{
+								tiledAreas.push({tiledArea: _tiledArea, viewPart: reflectionVisiblePart});
+								mi_totalVisibleTiles += _tiledArea.totalVisibleTilesCount;
+							}
+						}
+					}
+				}
+			}
+			
+			if (tiledAreas.length == 0)
 				return;
 			
 			var tiledCache: WMSTileCache = m_cache as WMSTileCache;
@@ -281,32 +320,57 @@ package com.iblsoft.flexiweather.ogc
 			
 			var loadRequests: Array = new Array();
 			
-			var rowMax: int = m_tiledArea.bottomRow;
-			var colMax: int = m_tiledArea.rightCol;
+//			var rowMax: int = m_tiledArea.bottomRow;
+//			var colMax: int = m_tiledArea.rightCol;
 			
-			mi_totalVisibleTiles = (rowMax - m_tiledArea.topRow + 1) * (colMax - m_tiledArea.leftCol + 1);
-
+			var i_width: int = int(container.width);
+			var i_height: int = int(container.height);
+			
+			if (forcedLayerWidth > 0)
+				i_width = forcedLayerWidth;
+			if (forcedLayerHeight > 0)
+				i_height = forcedLayerHeight;
+			
+			var f_horizontalPixelSize: Number = currentViewBBox.width / i_width;
+			var f_verticalPixelSize: Number = currentViewBBox.height / i_height;
+			
 			if (baseURLPattern)
 			{
-				for(var i_row: uint = m_tiledArea.topRow; i_row <= rowMax; ++i_row) 
+				for each (var partObject: Object in tiledAreas)
 				{
-					for(var i_col: uint = m_tiledArea.leftCol; i_col <= colMax; ++i_col) 
+					var tiledArea: TiledArea = partObject.tiledArea as TiledArea;
+					var viewPart: BBox = partObject.viewPart as BBox;
+					
+//					trace("UPDATE DATA viewPart: " + viewPart + " | " + tiledArea);
+					for(var i_row: uint = tiledArea.topRow; i_row <= tiledArea.bottomRow; ++i_row) 
 					{
-						tileIndex = new TileIndex(mi_zoom, i_row, i_col);
-						request = new URLRequest(getExpandedURL(tileIndex));
-						// need to convert ${BASE_URL} because it's used in cachKey
-						request.url = UniURLLoader.fromBaseURL(request.url);
-						
-						ma_currentTilesRequests.push(request);
-						
-						if(!tiledCache.isTileCached(s_crs, tileIndex, request, ma_specialCacheStrings))
-						{	
-							loadRequests.push({
-								request: request,
-								requestedCRS: container.crs,
-								requestedTileIndex: tileIndex
-							});
-						} 
+						for(var i_col: uint = tiledArea.leftCol; i_col <= tiledArea.rightCol; ++i_col) 
+						{
+							tileIndex = new TileIndex(mi_zoom, i_row, i_col);
+//							trace("\t tile: " + tileIndex);
+							//check if tileIndex is already created from other tiledArea part
+							if (!_tileIndicesMapper.tileIndexInside(tileIndex))
+							{
+								_tileIndicesMapper.addTileIndex(tileIndex, viewPart);
+								
+								request = new URLRequest(getExpandedURL(tileIndex));
+								// need to convert ${BASE_URL} because it's used in cachKey
+								request.url = UniURLLoader.fromBaseURL(request.url);
+								
+								
+								if(!tiledCache.isTileCached(s_crs, tileIndex, request, ma_specialCacheStrings))
+								{	
+									ma_currentTilesRequests.push(request);
+									loadRequests.push({
+										request: request,
+										requestedCRS: container.crs,
+										requestedTileIndex: tileIndex,
+										requestedTiledArea: tiledArea,
+										requestedViewPart: viewPart
+									});
+								}
+							}
+						}
 					}
 				}
 			} else {
@@ -328,10 +392,13 @@ package com.iblsoft.flexiweather.ogc
 					// this already cancel previou job for current tile
 					m_jobs.addNewTileJobRequest(requestObj.requestedTileIndex.mi_tileCol, requestObj.requestedTileIndex.mi_tileRow, m_loader, requestObj.request);
 					
-					loadData(requestObj.request, {
-						requestedCRS: requestObj.requestedCRS,
-						requestedTileIndex:  requestObj.requestedTileIndex
-					}, jobName);
+					var assocData: Object = {
+							requestedCRS: requestObj.requestedCRS,
+							requestedTileIndex:  requestObj.requestedTileIndex,
+							tiledArea: requestObj.requestedTiledArea,
+							viewPart: requestObj.requestedViewPart
+					}
+					loadData(requestObj.request, assocData, jobName);
 				}
 			} else {
 				// all tiles were cached, draw them
@@ -339,6 +406,11 @@ package com.iblsoft.flexiweather.ogc
 				
 				dispatchEvent(new Event(ALL_TILES_LOADED));
 			}
+		}
+		
+		private function updateDataPart(): void
+		{
+			
 		}
 		
 		private function sortTiles(reqObject1: Object, reqObject2: Object): int
@@ -392,13 +464,15 @@ package com.iblsoft.flexiweather.ogc
 			if (tilingExtent)
 			{
 				var test: Number = (tilingExtent.width * width) / (viewBBox.width * 256);
-				var newZoomLevel2: Number = Math.log(test) * Math.LOG2E;
+				newZoomLevel2 = Math.log(test) * Math.LOG2E;
 				trace("New Jozef' zoom:  " + newZoomLevel2);
+				//zoom level must be alway 0 or more
+				newZoomLevel2 = Math.max(0, newZoomLevel2);
 			}
 			
 			mi_zoom = Math.round(newZoomLevel2);
 			//mi_zoom = m_tilingUtils.getZoom(viewBBox, new Point(width, height));
-			trace("FIND ZOOM:  zoom = " + mi_zoom + " new zoom: " + newZoomLevel2);
+			trace("FIND ZOOM:  zoom = " + mi_zoom);
 		}
 		
 		override public function refresh(b_force: Boolean): void
@@ -414,6 +488,7 @@ package com.iblsoft.flexiweather.ogc
 			customDraw(graphics);
 		}
 		
+		private var _debugDrawInfoArray: Array;
 		private function customDraw(graphics: Graphics, redrawBorder: Boolean = false): void
 		{
 			if(mi_zoom == -1)
@@ -422,18 +497,72 @@ package com.iblsoft.flexiweather.ogc
 				return;
 			}
 
+			_debugDrawInfoArray = [];
+			
+			var s_crs: String = container.crs;
 			var currentBBox: BBox = container.getViewBBox();
-			var tilingBBox: BBox = getGTileBBoxForWholeCRS(container.crs); // extent of tile z=0/r=0/c=0
+			var tilingBBox: BBox = getGTileBBoxForWholeCRS(s_crs); // extent of tile z=0/r=0/c=0
 			if(tilingBBox == null) {
 				trace("InteractiveLayerQTTMS.customDraw(): No tiling extent for CRS " + container.crs);
 				return;
 			}
 
-			var matrix: Matrix;
 			var wmsTileCache: WMSTileCache = m_cache as WMSTileCache;
 			
-			var a_tiles: Array = wmsTileCache.getTiles(container.crs, mi_zoom, ma_specialCacheStrings);
+			//get cache tiles
+ 			var a_tiles: Array = wmsTileCache.getTiles(container.crs, mi_zoom, ma_specialCacheStrings);
 			var allTiles: Array = a_tiles.reverse();
+			
+			graphics.clear();
+			graphics.lineStyle(0,0,0);
+			
+			var t_tile: Object;
+			var tileIndex: TileIndex;
+				
+			var cnt: int = 0;
+			var viewPart: BBox;
+			
+			for each(t_tile in allTiles) {
+				
+				tileIndex = t_tile.tileIndex;
+				viewPart = _tileIndicesMapper.getTileIndexViewPart(tileIndex);
+				
+				_debugDrawInfoArray.push(tileIndex);
+				
+				drawTile(tileIndex, s_crs, t_tile.image.bitmapData, redrawBorder);
+			}
+			
+//			if (_console)
+//			{
+//				_console.print("\tCUSTOM DRAW SUMMARY: " + _debugDrawInfoArray+"\nEND", "Info", "Tilling"); 
+//			}
+			
+			//FIXME change this, now there can be more tiledArea
+//			m_cache.sortCache(m_tiledArea);
+			
+			dispatchEvent(new Event(DRAW_TILES));
+		}
+		
+		private function drawTile(tileIndex: TileIndex, s_crs: String, bitmapData: BitmapData, redrawBorder: Boolean = false): void
+		{
+			var tileBBox: BBox = getGTileBBox(s_crs, tileIndex);
+			
+			var reflectedTileBBoxes: Array = container.mapBBoxToViewReflections(tileBBox);
+			
+//			trace("\t\t customDraw tileBBox["+tileIndex.mi_tileCol + "_" + tileIndex.mi_tileRow + "_" + tileIndex.mi_tileZoom+"]: " + tileBBox);
+			if (reflectedTileBBoxes.length > 0)
+			{
+				for each (var reflectedTileBBox: BBox in reflectedTileBBoxes)
+				{
+//					trace("\t\t customDraw reflected tileBBox["+tileIndex.mi_tileCol + "_" + tileIndex.mi_tileRow + "_" + tileIndex.mi_tileZoom+"]: " + reflectedTileBBox);
+					drawReflectedTile(tileIndex, reflectedTileBBox, s_crs, bitmapData, redrawBorder);
+				}
+			}
+		}
+		
+		private function drawReflectedTile(tileIndex: TileIndex, tileBBox: BBox, s_crs: String, bitmapData: BitmapData, redrawBorder: Boolean = false): void
+		{
+			var matrix: Matrix;
 			
 			var topLeftCoord: Coord;
 			var topRightCoord: Coord;
@@ -443,72 +572,128 @@ package com.iblsoft.flexiweather.ogc
 			var topRightPoint: Point;
 			var bottomLeftPoint: Point;
 			
-			graphics.clear();
-			graphics.lineStyle(0,0,0);
-			
-			var t_tile: Object;
-			var tileIndex: TileIndex;
-			
 			var newWidth: Number;
 			var newHeight: Number;
 			var sx: Number;
 			var sy: Number;
 			var xx: Number;
 			var yy: Number;
-				
-			var cnt: int = 0;
-			var s_crs: String = container.crs;
-			for each(t_tile in allTiles) {
-				
-				tileIndex = t_tile.tileIndex;
-				
-				var tileBBox: BBox = getGTileBBox(s_crs, tileIndex);
-				topLeftPoint = container.coordToPoint(new Coord(s_crs, tileBBox.xMin, tileBBox.yMax));
-				topRightPoint = container.coordToPoint(new Coord(s_crs, tileBBox.xMax, tileBBox.yMax));
-				bottomLeftPoint = container.coordToPoint(new Coord(s_crs, tileBBox.xMin, tileBBox.yMin));
 			
-				var origNewWidth: Number = topRightPoint.x - topLeftPoint.x;
-				var origNewHeight: Number = bottomLeftPoint.y - topLeftPoint.y;
-
-				newWidth = origNewWidth;
-				newHeight = origNewHeight;
-				sx = newWidth / 256;
-				sy = newHeight / 256;
-				xx = topLeftPoint.x;
-				yy = topLeftPoint.y;
-				
-				matrix = new Matrix();
-				matrix.scale(sx, sy);
-				matrix.translate(xx, yy);
-				
-				graphics.beginBitmapFill(t_tile.image.bitmapData, matrix, false, imageSmooth);
+			topLeftPoint = container.coordToPoint(new Coord(s_crs, tileBBox.xMin, tileBBox.yMax));
+			topRightPoint = container.coordToPoint(new Coord(s_crs, tileBBox.xMax, tileBBox.yMax));
+			bottomLeftPoint = container.coordToPoint(new Coord(s_crs, tileBBox.xMin, tileBBox.yMin));
+			
+			var origNewWidth: Number = topRightPoint.x - topLeftPoint.x;
+			var origNewHeight: Number = bottomLeftPoint.y - topLeftPoint.y;
+			
+			newWidth = origNewWidth;
+			newHeight = origNewHeight;
+			sx = newWidth / 256;
+			sy = newHeight / 256;
+			xx = topLeftPoint.x;
+			yy = topLeftPoint.y;
+			
+			matrix = new Matrix();
+			matrix.scale(sx, sy);
+			matrix.translate(xx, yy);
+			
+			graphics.beginBitmapFill(bitmapData, matrix, false, imageSmooth);
+			graphics.drawRect(xx, yy, newWidth , newHeight);
+			graphics.endFill();
+			
+			//draw tile border 
+			if(drawBorders || redrawBorder)
+			{
+				graphics.lineStyle(1, 0xff0000,0.3);
 				graphics.drawRect(xx, yy, newWidth , newHeight);
-				graphics.endFill();
-					
-				//draw tile border 
-				if(drawBorders || redrawBorder)
-				{
-					graphics.lineStyle(1, 0xff0000,0.3);
-					graphics.drawRect(xx, yy, newWidth , newHeight);
-				}
-				
-				if(drawDebugText)
-				{
-					drawText(tileIndex.mi_tileZoom + ", "
-							+ tileIndex.mi_tileCol + ", "
-							+ tileIndex.mi_tileRow,
-							graphics, new Point(xx + 10, yy + 5));
-				}
-					
+			}
+			
+			if(drawDebugText)
+			{
+				drawText(tileIndex.mi_tileZoom + ", "
+					+ tileIndex.mi_tileCol + ", "
+					+ tileIndex.mi_tileRow,
+					graphics, new Point(xx + 10, yy + 5));
 			}
 			
 			tileScaleX = sx;
 			tileScaleY = sy;
-			
-			m_cache.sortCache(m_tiledArea);
-			dispatchEvent(new Event(DRAW_TILES));
 		}
 		
+		private var _console: IConsole;
+		public function debugGetParameter(parameter: String): String
+		{
+			switch (parameter.toLowerCase())
+			{
+				case 'zoom':
+					return mi_zoom.toString();
+					break;
+				case 'crs':
+					return container.getCRS();
+					break;
+				case 'viewbbox':
+					return container.getViewBBox().toBBOXString();
+					break;
+				case 'extentbbox':
+					return container.getExtentBBox().toBBOXString();
+					break;
+			}
+			return 'Parameter not defined';
+		}
+		public function debugDraw(console: IConsole, tag: String = ''): void
+		{
+			//FIXME temporary fix, until DebugConsole will be moved to FlexiWeather
+			_console = console;
+			console.print('Debug QTT Draw', 'Info', 'Tilling');
+			
+			draw(graphics);
+			
+		}
+		public function debugWrapInformation(console: IConsole, tag: String = ''): void
+		{
+			//FIXME temporary fix, until DebugConsole will be moved to FlexiWeather
+			_console = console;
+			console.print('Debug Wrap Information', 'Info', 'Wrap Info');
+			
+			//test
+//			for (var i: int = 0; i < 8; i++)
+//			{
+//				var maxID: int =  (1 << (i + 1) - 1) - 1;
+//				console.print('zoom test i:' + i + ' zoom: ' + maxID, 'Info', 'Wrap Info');
+//				
+//			}
+			
+			var currentBBox: BBox = container.getViewBBox();
+			
+			var a1: Array = container.mapBBoxToViewReflections(currentBBox);
+			var a2: Array = container.mapBBoxToViewParts(currentBBox);
+			var bbox: BBox
+			var bbox2: BBox
+			if (a1.length > 1)
+			{
+				for each(bbox in a1)
+				{
+					console.print('\t reflection: ' + bbox, 'Info', 'Wrap Info');
+				}
+			}
+			if (a2.length > 1)
+			{
+				for each(bbox in a2)
+				{
+					console.print('\t part: ' + bbox, 'Info', 'Wrap Info');
+					
+					var a3: Array = container.mapBBoxToViewParts(bbox);
+					if (a3.length > 0)
+					{
+						for each(bbox2 in a3)
+						{
+							console.print('\t\t part reflection: ' + bbox2, 'Info', 'Wrap Info');
+						}
+					}
+				}
+			}
+			
+		}
 		public override function hasPreview(): Boolean
 		{ return mi_zoom != -1; }
 		
@@ -577,9 +762,6 @@ package com.iblsoft.flexiweather.ogc
 			var tilingInfo: QTTilingInfo = m_cfg.getQTTilingInfoForCRS(s_crs);
 			if (tilingInfo)
 				return tilingInfo.crsWithBBox.bbox;
-			
-//			if(s_crs in md_crsToTilingExtent)
-//				return md_crsToTilingExtent[s_crs];
 			
 			return null;
 		}
@@ -680,7 +862,10 @@ package com.iblsoft.flexiweather.ogc
 					event.associatedData.requestedCRS,
 					event.associatedData.requestedTileIndex,
 					event.request,
-					ma_specialCacheStrings, m_tiledArea);
+					ma_specialCacheStrings, 
+					event.associatedData.tiledArea,
+					event.associatedData.viewPart
+					);
 				draw(graphics);
 				return;
 
@@ -779,8 +964,11 @@ package com.iblsoft.flexiweather.ogc
 		}
 	}
 }
+import com.iblsoft.flexiweather.ogc.BBox;
+import com.iblsoft.flexiweather.ogc.tiling.TileIndex;
 import com.iblsoft.flexiweather.utils.UniURLLoader;
 import com.iblsoft.flexiweather.widgets.BackgroundJob;
+import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 
 import flash.net.URLRequest;
 import flash.utils.Dictionary;
@@ -839,6 +1027,83 @@ class TileJob
 	{
 		m_urlLoader.cancel(m_urlRequest);
 	}
+}
+
+class TileIndicesMapper
+{
+	private var _tileIndices: Dictionary = new Dictionary();
 	
+	public function TileMapper()
+	{
+		
+	}
 	
+	private function getMapperKey(tileIndex: TileIndex): String
+	{
+		return tileIndex.mi_tileCol + "_" + tileIndex.mi_tileRow + "_" + tileIndex.mi_tileZoom;
+	}
+	private function getMapperItem(tileIndex: TileIndex): Object
+	{
+		return _tileIndices[getMapperKey(tileIndex)];
+	}
+	
+	public function getTileIndexViewPart(tileIndex: TileIndex): BBox
+	{
+		return getMapperItem(tileIndex).viewPart;
+	}
+	
+	public function setTileIndexViewPart(tileIndex: TileIndex, viewPart: BBox): void
+	{
+		addTileIndex(tileIndex, viewPart);
+	}
+	
+	public function addTileIndex(tileIndex: TileIndex, viewPart: BBox): void
+	{
+		_tileIndices[getMapperKey(tileIndex)] = {tileIndex: tileIndex, viewPart: viewPart};
+	}
+	
+	public function removeTileIndex(tileIndex: TileIndex, viewPart: BBox): void
+	{
+		delete _tileIndices[getMapperKey(tileIndex)]
+	}
+	
+	public function tileIndexInside(tileIndex: TileIndex): Boolean
+	{
+		return getMapperItem(tileIndex) != null;
+		
+	}
+}
+
+
+class ViewPartReflectionsHelper
+{
+	private var _dictionary: Dictionary = new Dictionary();
+	private var _container: InteractiveWidget;
+	
+	function ViewPartReflectionsHelper(iw: InteractiveWidget)
+	{
+		_container = iw;
+	}
+	
+	private function getDictionaryKey(viewPart: BBox): String
+	{
+		return viewPart.toBBOXString();	
+	}
+	
+	public function addViewPartReflections(viewPart: BBox): Array
+	{
+		var arr: Array = _container.mapBBoxToViewReflections(viewPart);
+		_dictionary[getDictionaryKey(viewPart)] = arr;
+		return arr;
+	}
+	
+	public function getViewPartReflections(viewPart: BBox): Array
+	{
+		if (_dictionary[getDictionaryKey(viewPart)])
+		{
+			return _dictionary[getDictionaryKey(viewPart)];
+		} else {
+			return addViewPartReflections(viewPart);
+		}
+	}
 }

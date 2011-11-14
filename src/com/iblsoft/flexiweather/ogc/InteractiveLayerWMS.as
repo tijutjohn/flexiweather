@@ -301,9 +301,9 @@ package com.iblsoft.flexiweather.ogc
 			super.onDataLoaded(event);
 
 			var imagePart: ImagePart = event.associatedData.requestedImagePart;
-			trace("InteractiveLayerWMS.onDataLoaded(): received part "
-					+ imagePart.ms_imageCRS + ": "
-					+ imagePart.m_imageBBox.toString());
+//			trace("InteractiveLayerWMS.onDataLoaded(): received part "
+//					+ imagePart.ms_imageCRS + ": "
+//					+ imagePart.m_imageBBox.toString());
 
 			var wmsCache: WMSCache = m_cache as WMSCache;
 			/* FIXME:
@@ -322,9 +322,9 @@ package com.iblsoft.flexiweather.ogc
 				
 				for(var i: int = 0; i < ma_imageParts.length; ) {
 					if(imagePart.intersectsOrHasDifferentCRS(ma_imageParts[i])) {
-						trace("InteractiveLayerWMS.onDataLoaded(): removing old " + i + " part "
-							+ ImagePart(ma_imageParts[i]).ms_imageCRS + ": "
-							+ ImagePart(ma_imageParts[i]).m_imageBBox.toString());
+//						trace("InteractiveLayerWMS.onDataLoaded(): removing old " + i + " part "
+//							+ ImagePart(ma_imageParts[i]).ms_imageCRS + ": "
+//							+ ImagePart(ma_imageParts[i]).m_imageBBox.toString());
 						ma_imageParts.removeItemAt(i);
 					}
 					else

@@ -22,6 +22,8 @@ package com.iblsoft.flexiweather.widgets
 	{
 		internal static var sm_instance: BackgroundJobManager;
 
+		public static var maximumTileDescriptionCount: int = 25;
+		
 		public var m_progressBar: JobProgressIndicator;
 		
 		internal var m_jobs: ArrayCollection = new ArrayCollection();
@@ -116,9 +118,22 @@ package com.iblsoft.flexiweather.widgets
 			
 			if(m_jobs.length > 0) {
 				
+				var job: BackgroundJob;
 				ms_pendingJobsDescription = "Pending jobs:";
-				for each(var job: BackgroundJob in m_jobs) {
-					ms_pendingJobsDescription += "\n  " + job.ms_label;
+				if (m_jobs.length > maximumTileDescriptionCount)
+				{
+					//fix for many jobs queue. Just display first let's say 50 and 1 sentence (... and (total - 50) pending jobs)
+					for (var i: int = 0; i < maximumTileDescriptionCount; i++)
+					{
+						job = m_jobs.getItemAt(i) as BackgroundJob;
+						ms_pendingJobsDescription += "\n  " + job.ms_label;
+					}
+					ms_pendingJobsDescription += "\n... and " + (m_jobs.length - maximumTileDescriptionCount) + " more pending jobs";
+					
+				} else {
+					for each(job in m_jobs) {
+						ms_pendingJobsDescription += "\n  " + job.ms_label;
+					}
 				}
 				
 				if(m_progressBar != null)

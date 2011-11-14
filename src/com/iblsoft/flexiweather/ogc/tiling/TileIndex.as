@@ -8,7 +8,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	
 		public function TileIndex(i_tileZoom: int = 0, i_tileRow: int = 0, i_tileCol: int = 0)
 		{
-			if (i_tileZoom <= 0)
+			if (i_tileZoom < 0)
 			{
 				i_tileZoom = 2;
 				trace("TileIndex.TileIndex(): Stop tileZoom is negative");

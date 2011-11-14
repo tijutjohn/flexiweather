@@ -64,7 +64,7 @@ package com.iblsoft.flexiweather.widgets
 		
 		private function onGesturePan(event: TransformGestureEvent): void
 		{
-			trace("onGesturePan: phase: " + event.phase + " -> " + event.offsetX + " , " + event.offsetY);
+//			trace("onGesturePan: phase: " + event.phase + " -> " + event.offsetX + " , " + event.offsetY);
 			
 			var b_finalChange: Boolean = event.phase == GesturePhase.END;
 			
@@ -75,7 +75,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if(mb_requireShiftKey)
 				return;
-			trace("onGestureSwipe: phase: " + event.phase + " -> " + event.offsetX + " , " + event.offsetY);
+//			trace("onGestureSwipe: phase: " + event.phase + " -> " + event.offsetX + " , " + event.offsetY);
 			
 			var b_finalChange: Boolean = event.phase == GesturePhase.END;
 			
