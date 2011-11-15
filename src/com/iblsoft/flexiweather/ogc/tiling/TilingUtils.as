@@ -61,24 +61,11 @@ package com.iblsoft.flexiweather.ogc.tiling
 			
 			var leftCol: int = Math.floor((viewBBox.xMin - m_extent.xMin) / tileBBox.x);
 			var topRow: int = Math.floor((m_extent.yMax - viewBBox.yMax) / tileBBox.y);
-//			trace("getTiledArea m_extent" + m_extent.width + ", " + m_extent.height)
-//			trace("getTiledArea viewBBox:" + viewBBox.width + ", " + viewBBox.height)
-//			trace("getTiledArea leftCol:" + leftCol + ", topRow: " + topRow)
-//			var tileBBox: Point = new Point(m_extent.width / maxColTiles, m_extent.height / maxRowTiles);
-//			var viewTiles: Point = new Point( Math.ceil(viewBBox.width / tileBBox.x), Math.ceil(viewBBox.height / tileBBox.y));
-//			
-//			var leftCol: int = Math.floor((viewBBox.xMin - m_extent.xMin) / tileBBox.x);
-//			var topRow: int = Math.floor((m_extent.yMax - viewBBox.yMax) / tileBBox.y);
 			
-			
-//			var _maxTileID: int = Math.pow(2, zoomLevel) - 1;
 			var _maxTileID: int = (1 << (zoomLevel + 1) - 1) - 1;
-			trace("zoomLevel : max: " + _maxTileID);
 			var topLeftIndex: TileIndex = new TileIndex(zoomLevel, Math.min(_maxTileID, Math.max(0,topRow)), Math.min(_maxTileID, Math.max(0,leftCol)));
 			var bottomRightIndex: TileIndex = new TileIndex(zoomLevel, Math.min(_maxTileID, Math.ceil(topRow + viewTiles.y)),  Math.min(_maxTileID, Math.ceil(leftCol + viewTiles.x)));
 			var area: TiledArea = new TiledArea(topLeftIndex, bottomRightIndex );
-			//trace("getTiledArea viewBBox: " + viewBBox + " area: " + area);
-			//trace("getTiledArea zoom: " + zoomLevel + " viewTiles: " + viewTiles);
 			return area;
 			
 		}

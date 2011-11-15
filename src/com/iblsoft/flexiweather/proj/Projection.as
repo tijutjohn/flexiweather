@@ -187,5 +187,10 @@ package com.iblsoft.flexiweather.proj
 				return "?";
 			return m_proj.projParams.units;
 		}
+		
+		public function toString(): String
+		{
+			return "Projection " + name + " units: " + units + " crs: " + crs + " extentBBox: " + extentBBox + " wrap horizontally: " + wrapsHorizontally
+		}
 	}
 }

@@ -465,14 +465,13 @@ package com.iblsoft.flexiweather.ogc
 			{
 				var test: Number = (tilingExtent.width * width) / (viewBBox.width * 256);
 				newZoomLevel2 = Math.log(test) * Math.LOG2E;
-				trace("New Jozef' zoom:  " + newZoomLevel2);
+//				trace("New Jozef' zoom:  " + newZoomLevel2);
 				//zoom level must be alway 0 or more
 				newZoomLevel2 = Math.max(0, newZoomLevel2);
 			}
 			
 			mi_zoom = Math.round(newZoomLevel2);
 			//mi_zoom = m_tilingUtils.getZoom(viewBBox, new Point(width, height));
-			trace("FIND ZOOM:  zoom = " + mi_zoom);
 		}
 		
 		override public function refresh(b_force: Boolean): void

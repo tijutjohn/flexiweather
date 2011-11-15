@@ -370,9 +370,9 @@ package com.iblsoft.flexiweather.ogc
 			if(ma_requests.length == 0) {
 				for(var i: int = 0; i < ma_imageParts.length; ) {
 					if(ma_imageParts[i].mi_updateCycleAge < mi_updateCycleAge) {
-						trace("InteractiveLayerWMS.onFinishedRequest(): removing old " + i + " part "
-							+ ImagePart(ma_imageParts[i]).ms_imageCRS + ": "
-							+ ImagePart(ma_imageParts[i]).m_imageBBox.toString());
+//						trace("InteractiveLayerWMS.onFinishedRequest(): removing old " + i + " part "
+//							+ ImagePart(ma_imageParts[i]).ms_imageCRS + ": "
+//							+ ImagePart(ma_imageParts[i]).m_imageBBox.toString());
 						ma_imageParts.removeItemAt(i);
 					}
 					else

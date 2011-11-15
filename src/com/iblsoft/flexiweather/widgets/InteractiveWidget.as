@@ -619,15 +619,20 @@ package com.iblsoft.flexiweather.widgets
 	        		f_bboxCenterY - f_newBBoxHeight / 2.0,
 	        		f_newBBoxWidth,
 	        		f_newBBoxHeight);
-	        if(viewBBox.x < m_extentBBox.xMin)
-	        	viewBBox.offset(-viewBBox.x + m_extentBBox.xMin, 0);
+			
 	        if(viewBBox.y < m_extentBBox.yMin)
 	        	viewBBox.offset(0, -viewBBox.y + m_extentBBox.yMin);
-	        if(viewBBox.right > m_extentBBox.xMax)
-	        	viewBBox.offset(-viewBBox.right + m_extentBBox.xMax, 0);
 	        if(viewBBox.bottom > m_extentBBox.yMax)
 	        	viewBBox.offset(0, -viewBBox.bottom + m_extentBBox.yMax);
-
+			
+			if (!isCRSWrappingOverXAxis())
+			{
+		        if(viewBBox.x < m_extentBBox.xMin)
+		        	viewBBox.offset(-viewBBox.x + m_extentBBox.xMin, 0);
+		        if(viewBBox.right > m_extentBBox.xMax)
+		        	viewBBox.offset(-viewBBox.right + m_extentBBox.xMax, 0);
+			}
+			
 	        var newBBox: BBox = BBox.fromRectangle(viewBBox);
 			
 			/*

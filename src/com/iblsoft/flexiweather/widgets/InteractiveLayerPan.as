@@ -38,6 +38,8 @@ package com.iblsoft.flexiweather.widgets
 		
 		private var _animate: Move;
 		
+		private var _wrapLimiter: WrapLimiter;
+		
 		public function InteractiveLayerPan(container: InteractiveWidget = null)
 		{
 			super(container);
@@ -50,6 +52,9 @@ package com.iblsoft.flexiweather.widgets
 			if (!container || !container.stage)
 				callLater(waitForContainer)
 			else {	
+				
+				_wrapLimiter = new WrapLimiter(container, 1);
+				
 				if (Multitouch.supportedGestures)
 				{
 					container.stage.addEventListener(TransformGestureEvent.GESTURE_PAN, onGesturePan);
@@ -279,27 +284,48 @@ package com.iblsoft.flexiweather.widgets
 			_diff.y = yDiff;
 			invalidateDynamicPart(true);
 			
+//			debug("\ndoRealPan");
+//			debug("\t r: " + r);
 			var projection: Projection = container.getCRSProjection();
 			r = r.translated(-xDiff, yDiff);
 			var extentBBox: BBox = container.getExtentBBox();
+			
+			
+//			debug("\t projection:  " + projection.toString());
+//			debug("\t extentBBox:  " + extentBBox.toBBOXString());
+//			debug("\t xDiff:  " +xDiff + " , " + yDiff);
+			
 			if(projection.wrapsHorizontally && !extentBBox.contains(r) && xDiff != 0) {
 				var f_wrappingStep: Number = -xDiff;
 				while(extentBBox.translated(f_wrappingStep, 0).intersects(r)) {
 					extentBBox = extentBBox.translated(f_wrappingStep, 0);
+//					debug("\t\t intersected bbox: " + extentBBox.toBBOXString());
 					if(extentBBox.contains(r)) {
+//						debug("\t\t\t intersected bbox contains r: " + extentBBox.toBBOXString());
 						var a1: Array = container.mapBBoxToViewReflections(extentBBox);
 						var a2: Array = container.mapBBoxToViewReflections(r);
 						for(var i: int = 0; i < a1.length && i < a2.length; ++i) {
+//							debug("\t\t\t a1["+i+"] " + a1[i] + " a2["+i+"] " + a2[i]);
 							if(projection.extentBBox.contains(a1[i])) {
 								extentBBox = a1[i];
 								r = a2[i];
+//								debug("\t\t\t\t selected extent: " + extentBBox + " r: " + r);
 							}
 						}
+//						debug("\n setExtentBBOX original: "  + extentBBox + "\n");
+						extentBBox = _wrapLimiter.moveViewBBoxBack(extentBBox);
+//						debug("\n setExtentBBOX fixed offset back: "  + extentBBox + "\n");
 						container.setExtentBBOX(extentBBox, false);
 						break;
 					}
 				}
 			}
+//			debug("\n setViewBBox original: "  + r + "\n");
+			//check if viewBBox wi ll be moved and in that case move extentBBox first
+			var moveX: Number = _wrapLimiter.getWrapMoveBackSize(r);
+			if (moveX != 0)
+				r = _wrapLimiter.moveViewBBoxBack(r);
+//			debug("\n setViewBBox fixed offset back: "  + r + "\n");
 			container.setViewBBox(r, b_finalChange);
 		}
 		
@@ -341,5 +367,99 @@ package com.iblsoft.flexiweather.widgets
 		{
 			return "InteractiveLayerPan ";
 		}
+		
+		public function debug(str: String): void
+		{
+			trace(this + ": " + str);
+		}
+	}
+}
+import com.iblsoft.flexiweather.ogc.BBox;
+import com.iblsoft.flexiweather.proj.Projection;
+import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+
+class WrapLimiter
+{
+	private var _container: InteractiveWidget;
+	private var _projection: Projection;
+	private var _maxReflections: int = 1;
+	
+	public function WrapLimiter(container: InteractiveWidget, maxReflections: int)
+	{
+		_container = container;	
+		_maxReflections = maxReflections
+	}
+	
+	public function projectionExtentWidth(): Number
+	{
+		var projectionBBox: BBox = _projection.extentBBox;
+		var projWidth: int = projectionBBox.width;
+		
+		return projWidth;
+	}
+	public function rightWrapLimitForMovingBack(): Number
+	{
+		var projectionBBox: BBox = _projection.extentBBox;
+		var projWidth: Number = projectionExtentWidth();		
+		
+		var rightMinimumForOffsetBack: Number = projectionBBox.xMin + 2 *projWidth;// * (_maxReflections + 1);
+		return rightMinimumForOffsetBack;
+	}
+	public function leftWrapLimitForMovingBack(): Number
+	{
+		var projectionBBox: BBox = _projection.extentBBox;
+		var projWidth: int = projectionBBox.width;
+		
+		var leftMinimumForOffsetBack: int = projectionBBox.xMin - projWidth;// * _maxReflections;
+		return leftMinimumForOffsetBack;
+	}
+	
+	public function getWrapMoveBackSize(bbox: BBox): Number
+	{
+		_projection = _container.getCRSProjection();
+		var rightMinimumForOffsetBack: Number = rightWrapLimitForMovingBack();
+		var leftMinimumForOffsetBack: Number = leftWrapLimitForMovingBack();
+		
+		var moveX: Number;
+		var projWidth: Number;
+		if (bbox.xMin > rightMinimumForOffsetBack)
+		{
+			projWidth = projectionExtentWidth();
+			moveX = -1 * projWidth;
+			return moveX;
+		}
+		if (bbox.xMin < leftMinimumForOffsetBack)
+		{
+			projWidth = projectionExtentWidth();
+			moveX = 2 * projWidth;
+			return moveX;
+		}
+		return 0;
+	}
+	public function moveViewBBoxBack(bbox: BBox): BBox
+	{
+		_projection = _container.getCRSProjection();
+		var rightMinimumForOffsetBack: Number = rightWrapLimitForMovingBack();
+		var leftMinimumForOffsetBack: Number = rightWrapLimitForMovingBack();
+		
+		var moveX: Number;
+		var projWidth: Number;
+		if (bbox.xMin > rightMinimumForOffsetBack || bbox.xMin < leftMinimumForOffsetBack)
+		{
+			moveX = getWrapMoveBackSize(bbox);
+			bbox = moveViewBBoxBackBy(bbox, moveX, 0);
+		}
+		return bbox;
+	}
+	
+	public function moveViewBBoxBackBy(bbox: BBox, xDiff: Number, yDiff: Number): BBox
+	{
+		bbox = bbox.translated(xDiff, yDiff);
+		return bbox;
+	}
+	
+	public function debug(str: String): void
+	{
+		trace("WrapLimiter: " + str);
 	}
 }

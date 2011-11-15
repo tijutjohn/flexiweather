@@ -66,12 +66,12 @@ package com.iblsoft.flexiweather.ogc.cache
 					var diff: Number = currTime.time - lastUsed.time;
 					if (diff > (_expirationTime * 1000))
 					{
-						debug("TILE from cache is expired, will be removed");
+//						debug("TILE from cache is expired, will be removed");
 						if (!isTileOnDisplayList(s_key))
 						{
 							deleteTile(s_key);
-						} else {
-							debug("TILE IS DISPLAY LIST, DO NOT DELETE IT");
+//						} else {
+//							debug("TILE IS DISPLAY LIST, DO NOT DELETE IT");
 						}
 					}
 //					debug("diff: " + diff);
@@ -203,7 +203,7 @@ package com.iblsoft.flexiweather.ogc.cache
 		
 		public function deleteTile(s_key: String): void
 		{
-			debug("deleteTile: " + s_key);
+//			debug("deleteTile: " + s_key);
 			disposeTileBitmap(s_key);
 			delete md_cache[s_key];
 		}
@@ -288,11 +288,11 @@ package com.iblsoft.flexiweather.ogc.cache
 					_items.splice(id, 1);
 				}
 //				debug("WMSCache.invalidate(): removing image with key: " + md_cache[s_key].toString());
-				debug("WMSCache.invalidate(): removing image with key: " + s_key + " cache tiles count: " + cachedTilesCount);
+//				debug("WMSCache.invalidate(): removing image with key: " + s_key + " cache tiles count: " + cachedTilesCount);
 				deleteTile(s_key);
 			}
 			
-			debug("\n invalidate cache tiles count: " + cachedTilesCount);
+//			debug("\n invalidate cache tiles count: " + cachedTilesCount);
 		
 		}
 
