@@ -20,6 +20,7 @@ package com.iblsoft.flexiweather.utils
 	import flash.events.HTTPStatusEvent;
 	import flash.events.IEventDispatcher;
 	import flash.events.IOErrorEvent;
+	import flash.events.ProgressEvent;
 	import flash.events.SecurityErrorEvent;
 	import flash.net.URLLoader;
 	import flash.net.URLLoaderDataFormat;
@@ -452,6 +453,7 @@ package com.iblsoft.flexiweather.utils
 			urlLoader.associatedData = associatedData;
 			urlLoader.dataFormat = URLLoaderDataFormat.BINARY;
 			urlLoader.addEventListener(Event.COMPLETE, onDataComplete);
+			urlLoader.addEventListener(ProgressEvent.PROGRESS, onDataProgress);
 			urlLoader.addEventListener(IOErrorEvent.IO_ERROR, onDataIOError);
 			urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onSecurityError);
 			
@@ -771,6 +773,11 @@ package com.iblsoft.flexiweather.utils
 			dispatchEvent(event);
 		}
 		*/
+		
+		protected function onDataProgress(event: ProgressEvent): void
+		{
+			dispatchEvent(event);	
+		}
 		
 		protected function onDataComplete(event: Event): void
 		{

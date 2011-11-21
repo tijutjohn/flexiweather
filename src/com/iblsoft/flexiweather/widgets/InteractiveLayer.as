@@ -13,6 +13,17 @@ package com.iblsoft.flexiweather.widgets
 	
 	public class InteractiveLayer extends UIComponent
 	{
+		protected var _type: String;
+		
+		/**
+		 * Layer type. String representation of layer type. Useful when user wants to get layer from InteractiveWidget or InteractiveLayerComposer 
+		 * and wants just compare type by string. (e.g type == 'pan'). 
+		 */		
+		public function get type(): String
+		{
+			return _type;
+		}
+		
 		public var container: InteractiveWidget;
 		private var mb_dynamicPartInvalid: Boolean = false;
 		private var mi_zOrder: int = 0;

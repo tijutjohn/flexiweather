@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.widgets
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.plugins.IConsole;
 	import com.iblsoft.flexiweather.proj.Projection;
 	
 	import flash.display.Graphics;
@@ -22,6 +23,8 @@ package com.iblsoft.flexiweather.widgets
 	
 	public class InteractiveLayerPan extends InteractiveLayer
 	{
+		public static const PAN: String = 'pan';
+		
 		public var supportsPanAnimation: Boolean;
 		
 		internal var _oldStartPoint: Point;
@@ -43,6 +46,8 @@ package com.iblsoft.flexiweather.widgets
 		public function InteractiveLayerPan(container: InteractiveWidget = null)
 		{
 			super(container);
+			
+			_type = PAN;
 			
 			addEventListener(ChildExistenceChangedEvent.CHILD_ADD, onChildAdd);
 			waitForContainer();
@@ -268,6 +273,26 @@ package com.iblsoft.flexiweather.widgets
 			return false;			
 		}
 		
+		private function extentRatio(): Number
+		{
+			var projection: Projection = container.getCRSProjection();
+			var viewBBox: BBox = container.getExtentBBox();
+			
+			var extentRatio: Number = 100 * viewBBox.width / projection.extentBBox.width;
+	
+			return extentRatio;
+		}
+		private function allowWrapHorizontally(): Boolean
+		{
+			var projection: Projection = container.getCRSProjection();
+			var extentRatio: Number = extentRatio();
+			
+			var percentageTreshold: Number = 1;
+			var withinTreshold: Boolean = Math.abs(100 - extentRatio) < percentageTreshold;
+			
+			return projection.wrapsHorizontally && withinTreshold;
+		}
+		
 		private var _diff: Point;
 		private function doRealPan(xDiff: Number, yDiff: Number, b_finalChange: Boolean): void
 		{
@@ -295,7 +320,8 @@ package com.iblsoft.flexiweather.widgets
 //			debug("\t extentBBox:  " + extentBBox.toBBOXString());
 //			debug("\t xDiff:  " +xDiff + " , " + yDiff);
 			
-			if(projection.wrapsHorizontally && !extentBBox.contains(r) && xDiff != 0) {
+			var allowHorizontalWrap: Boolean = allowWrapHorizontally(); 
+			if(allowHorizontalWrap && !extentBBox.contains(r) && xDiff != 0) {
 				var f_wrappingStep: Number = -xDiff;
 				while(extentBBox.translated(f_wrappingStep, 0).intersects(r)) {
 					extentBBox = extentBBox.translated(f_wrappingStep, 0);
@@ -326,6 +352,17 @@ package com.iblsoft.flexiweather.widgets
 			if (moveX != 0)
 				r = _wrapLimiter.moveViewBBoxBack(r);
 //			debug("\n setViewBBox fixed offset back: "  + r + "\n");
+			
+			
+			
+			if (!allowHorizontalWrap)
+			{
+				if(r.xMin < extentBBox.xMin)
+					r = r.translated(-r.xMin + extentBBox.xMin, 0);
+				if(r.xMax > extentBBox.xMax)
+					r = r.translated(-r.xMax + extentBBox.xMax, 0);
+			}
+			
 			container.setViewBBox(r, b_finalChange);
 		}
 		
@@ -368,10 +405,23 @@ package com.iblsoft.flexiweather.widgets
 			return "InteractiveLayerPan ";
 		}
 		
+		public function wrapDebug(console: IConsole): void
+		{
+			console.print('PAN Wrap Debug', 'Info', 'Pan');
+			console.print("\t allowWrapHorizontally: " + allowWrapHorizontally(), 'Info', 'Pan');
+			console.print("\t extentRatio: " + extentRatio(), 'Info', 'Pan');
+			console.print("\t left: " + _wrapLimiter.leftWrapLimitForMovingBack(), 'Info', 'Pan');
+			console.print("\t right: " + _wrapLimiter.rightWrapLimitForMovingBack(), 'Info', 'Pan');
+			var r: BBox = container.getViewBBox();
+			console.print("\t size: " + _wrapLimiter.getWrapMoveBackSize(r), 'Info', 'Pan');
+		}
+		
 		public function debug(str: String): void
 		{
 			trace(this + ": " + str);
 		}
+		
+		
 	}
 }
 import com.iblsoft.flexiweather.ogc.BBox;
@@ -390,8 +440,14 @@ class WrapLimiter
 		_maxReflections = maxReflections
 	}
 	
+	private function getProjection(): void
+	{
+		_projection = _container.getCRSProjection();
+		
+	}
 	public function projectionExtentWidth(): Number
 	{
+		getProjection();
 		var projectionBBox: BBox = _projection.extentBBox;
 		var projWidth: int = projectionBBox.width;
 		
@@ -399,6 +455,7 @@ class WrapLimiter
 	}
 	public function rightWrapLimitForMovingBack(): Number
 	{
+		getProjection();
 		var projectionBBox: BBox = _projection.extentBBox;
 		var projWidth: Number = projectionExtentWidth();		
 		
@@ -407,6 +464,7 @@ class WrapLimiter
 	}
 	public function leftWrapLimitForMovingBack(): Number
 	{
+		getProjection();
 		var projectionBBox: BBox = _projection.extentBBox;
 		var projWidth: int = projectionBBox.width;
 		
@@ -416,7 +474,7 @@ class WrapLimiter
 	
 	public function getWrapMoveBackSize(bbox: BBox): Number
 	{
-		_projection = _container.getCRSProjection();
+		getProjection();
 		var rightMinimumForOffsetBack: Number = rightWrapLimitForMovingBack();
 		var leftMinimumForOffsetBack: Number = leftWrapLimitForMovingBack();
 		
@@ -438,7 +496,7 @@ class WrapLimiter
 	}
 	public function moveViewBBoxBack(bbox: BBox): BBox
 	{
-		_projection = _container.getCRSProjection();
+		getProjection();
 		var rightMinimumForOffsetBack: Number = rightWrapLimitForMovingBack();
 		var leftMinimumForOffsetBack: Number = rightWrapLimitForMovingBack();
 		

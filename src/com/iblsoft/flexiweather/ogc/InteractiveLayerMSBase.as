@@ -12,6 +12,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.widgets.BackgroundJob;
 	import com.iblsoft.flexiweather.widgets.GlowLabel;
 	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
+	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
@@ -39,10 +40,9 @@ package com.iblsoft.flexiweather.ogc
 	
 	[Event(name="wmsStyleChanged", type="flash.events.Event")]
 	
-	public class InteractiveLayerMSBase extends InteractiveLayer
+	public class InteractiveLayerMSBase extends InteractiveDataLayer
 			implements ISynchronisedObject, IConfigurableLayer
 	{
-		protected var m_loader: UniURLLoader = new UniURLLoader();
 		protected var m_featureInfoLoader: UniURLLoader = new UniURLLoader();
 
 		/**
@@ -64,10 +64,7 @@ package com.iblsoft.flexiweather.ogc
 		public function InteractiveLayerMSBase(container: InteractiveWidget, cfg: WMSLayerConfiguration)
 		{
 			super(container);
-			m_loader.addEventListener(UniURLLoader.DATA_LOADED, onDataLoaded);
-			m_loader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onDataLoadFailed);
 			
-			debug("\nnew InteractiveLayerMSBase add m_loader listeners");
 			m_featureInfoLoader.addEventListener(UniURLLoader.DATA_LOADED, onFeatureInfoLoaded);
 			m_featureInfoLoader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onFeatureInfoLoadFailed);
 			
@@ -1060,18 +1057,11 @@ package com.iblsoft.flexiweather.ogc
 			return false;
 		}
 		
-		
-		
-		// Event handlers
-		protected function onDataLoaded(event: UniURLLoaderEvent): void
-		{
-			var ile: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.LAYER_LOADED, true);
-			ile.interactiveLayer = this;
-			dispatchEvent(ile);
-		}
 
-		protected function onDataLoadFailed(event: UniURLLoaderEvent): void
+		override protected function onDataLoadFailed(event: UniURLLoaderEvent): void
 		{
+			super.onDataLoadFailed(event);
+			
 			if(event != null) {
 				ExceptionUtils.logError(Log.getLogger("WMS"), event,
 						"Error accessing layers '" + m_cfg.ma_layerNames.join(","))
@@ -1148,9 +1138,6 @@ package com.iblsoft.flexiweather.ogc
 		}
 		public function get configuration(): ILayerConfiguration
 		{ return m_cfg; }
-
-		public function get dataLoader(): UniURLLoader
-		{ return m_loader; } 
 
 		public function get synchronisationRole(): SynchronisationRole
 		{ return m_synchronisationRole; }

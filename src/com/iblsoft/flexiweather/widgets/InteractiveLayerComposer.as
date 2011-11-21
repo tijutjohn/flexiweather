@@ -16,7 +16,7 @@ package com.iblsoft.flexiweather.widgets
 	import mx.events.CollectionEventKind;
 	import mx.events.FlexEvent;
 	
-	public class InteractiveLayerComposer extends InteractiveLayer implements Serializable
+	public class InteractiveLayerComposer extends InteractiveDataLayer implements Serializable
 	{
         protected var m_layers: ArrayCollection = new ArrayCollection();
 

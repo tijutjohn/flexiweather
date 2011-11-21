@@ -19,6 +19,7 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
+	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
@@ -31,7 +32,7 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 	
 	import mx.collections.ArrayCollection;
 	
-	public class InteractiveLayerGoogleMaps extends InteractiveLayer implements Serializable, IConfigurableLayer
+	public class InteractiveLayerGoogleMaps extends InteractiveDataLayer implements Serializable, IConfigurableLayer
 	{
 		public static const MAP_UDPATED: String = 'mapUpdated';
 		

@@ -135,7 +135,12 @@ package com.iblsoft.flexiweather.ogc
 			var f_horizontalPixelSize: Number = currentViewBBox.width / i_width;
 			var f_verticalPixelSize: Number = currentViewBBox.height / i_height;
 
-			for each(var partBBoxToUpdate: BBox in container.mapBBoxToViewParts(currentViewBBox)) {
+			var projection: Projection = Projection.getByCRS(s_currentCRS);
+			var parts: Array = container.mapBBoxToViewParts(currentViewBBox);
+//			var parts: Array = container.mapBBoxToViewParts(projection.extentBBox);
+			trace("WMS parts: " + parts);
+			
+			for each(var partBBoxToUpdate: BBox in parts) {
 				updateDataPart(
 						s_currentCRS, partBBoxToUpdate,
 						uint(Math.round(partBBoxToUpdate.width / f_horizontalPixelSize)),
@@ -181,9 +186,11 @@ package com.iblsoft.flexiweather.ogc
 				ma_requests.addItem(request);
 				if(ma_requests.length == 1) {
 					m_autoRefreshTimer.reset();
-					var ile: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.LAYER_LOADING_START, true);
-					ile.interactiveLayer = this;
-					dispatchEvent(ile);
+					
+					notifyLoadingStart();
+//					var ile: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.LAYER_LOADING_START, true);
+//					ile.interactiveLayer = this;
+//					dispatchEvent(ile);
 				}
 				
 				m_loader.load(request,
@@ -225,13 +232,15 @@ package com.iblsoft.flexiweather.ogc
 				return;
 
 			var s_currentCRS: String = container.getCRS();
-			//trace("InteractiveLayerWMS.draw(): currentViewBBox=" + container.getViewBBox().toString());
+//			trace("InteractiveLayerWMS.draw(): currentViewBBox=" + container.getViewBBox().toString());
 			for each(var imagePart: ImagePart in ma_imageParts) {
 				// Check if CRS of the image part == current CRS of the container
 				if(s_currentCRS != imagePart.ms_imageCRS)
 					continue; // otherwise we cannot draw it
-				for each(var reflectedBBox: BBox in container.mapBBoxToViewReflections(imagePart.m_imageBBox)) {
-					//trace("InteractiveLayerWMS.draw(): drawing reflection " + reflectedBBox.toString());
+				
+				var reflectedBBoxes:Array = container.mapBBoxToViewReflections(imagePart.m_imageBBox);
+				for each(var reflectedBBox: BBox in reflectedBBoxes) {
+//					trace("\t InteractiveLayerWMS.draw(): drawing reflection " + reflectedBBox.toString());
 					drawImagePart(imagePart.m_image, imagePart.ms_imageCRS, reflectedBBox);
 				}
 			}
@@ -385,9 +394,9 @@ package com.iblsoft.flexiweather.ogc
 					m_autoRefreshTimer.delay = m_cfg.mi_autoRefreshPeriod * 1000.0;
 					m_autoRefreshTimer.start();
 				}
-				var ile: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.LAYER_LOADED, true);
-				ile.interactiveLayer = this;
-				dispatchEvent(ile);
+//				var ile: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.LAYER_LOADED, true);
+//				ile.interactiveLayer = this;
+//				dispatchEvent(ile);
 			}
 		}
 		

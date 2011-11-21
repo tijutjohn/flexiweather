@@ -4,6 +4,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
 	import com.iblsoft.flexiweather.utils.UniURLLoader;
 	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
+	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
@@ -14,9 +15,9 @@ package com.iblsoft.flexiweather.ogc
 	
 	import mx.collections.ArrayCollection;
 
-	public class InteractiveLayerWFS extends InteractiveLayer
+	public class InteractiveLayerWFS extends InteractiveDataLayer
 	{
-		private var m_loader: UniURLLoader = new UniURLLoader();
+//		private var m_loader: UniURLLoader = new UniURLLoader();
 		private var ma_features: ArrayCollection = new ArrayCollection();
 		private var m_featuresContainer: Sprite = new Sprite();
 		private var ma_queryFeatures: ArrayCollection = new ArrayCollection();
@@ -34,7 +35,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			super(container);
 			
-			m_loader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onDataLoadFailed);
+//			m_loader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onDataLoadFailed);
 			
 			m_version = version;
 			m_featuresContainer.mouseEnabled = false;
@@ -46,7 +47,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			var url: URLRequest = new URLRequest(serviceURL);
 			
-			m_loader.addEventListener(UniURLLoader.DATA_LOADED, onImportLoaded);
+			dataLoader.addEventListener(UniURLLoader.DATA_LOADED, onImportLoaded);
 			
 			if(url.data == null)
 				url.data = new URLVariables();
@@ -60,7 +61,7 @@ package com.iblsoft.flexiweather.ogc
 				url.data['SRSNAME'] = container.getCRS();
 			}
 			url.data['TYPENAME'] = ma_queryFeatures.toArray().join(",");
-			m_loader.load(url, null, "Importing features");
+			dataLoader.load(url, null, "Importing features");
 		}
 		
 		/**
@@ -76,10 +77,10 @@ package com.iblsoft.flexiweather.ogc
 			switch (type)
 			{
 				case 'load':
-					m_loader.addEventListener(UniURLLoader.DATA_LOADED, onDataLoaded);
+					dataLoader.addEventListener(UniURLLoader.DATA_LOADED, onDataLoaded);
 					break;
 				case 'refresh':
-					m_loader.addEventListener(UniURLLoader.DATA_LOADED, onRefreshDataLoaded);
+					dataLoader.addEventListener(UniURLLoader.DATA_LOADED, onRefreshDataLoaded);
 					break;
 				
 			}
@@ -98,7 +99,7 @@ package com.iblsoft.flexiweather.ogc
 				url.data['SRSNAME'] = container.getCRS();
 			}
 			url.data['TYPENAME'] = ma_queryFeatures.toArray().join(",");
-			m_loader.load(url, null, "Loading features");
+			dataLoader.load(url, null, "Loading features");
 		}
 		
 		public function addFeature(feature: WFSFeatureBase): void
@@ -282,7 +283,7 @@ package com.iblsoft.flexiweather.ogc
 		// event handlers
 		public function onImportLoaded(event: UniURLLoaderEvent): void
 		{
-			m_loader.removeEventListener(UniURLLoader.DATA_LOADED, onImportLoaded);
+			dataLoader.removeEventListener(UniURLLoader.DATA_LOADED, onImportLoaded);
 			
 			var xml: XML = event.result as XML;
 			if(xml == null)
@@ -298,9 +299,9 @@ package com.iblsoft.flexiweather.ogc
 		}
 		
 		// event handlers
-		public function onRefreshDataLoaded(event: UniURLLoaderEvent): void
+		protected function onRefreshDataLoaded(event: UniURLLoaderEvent): void
 		{
-			m_loader.removeEventListener(UniURLLoader.DATA_LOADED, onRefreshDataLoaded);
+			dataLoader.removeEventListener(UniURLLoader.DATA_LOADED, onRefreshDataLoaded);
 			
 			var xml: XML = event.result as XML;
 			if(xml == null)
@@ -314,9 +315,9 @@ package com.iblsoft.flexiweather.ogc
 			
 		}
 		
-		public function onDataLoaded(event: UniURLLoaderEvent): void
+		override protected function onDataLoaded(event: UniURLLoaderEvent): void
 		{
-			m_loader.removeEventListener(UniURLLoader.DATA_LOADED, onDataLoaded);
+			dataLoader.removeEventListener(UniURLLoader.DATA_LOADED, onDataLoaded);
 			
 			var xml: XML = event.result as XML;
 			if(xml == null)
@@ -563,7 +564,7 @@ package com.iblsoft.flexiweather.ogc
 		
 		
 		
-		public function onDataLoadFailed(event: UniURLLoaderEvent): void
+		override protected function onDataLoadFailed(event: UniURLLoaderEvent): void
 		{
 		}
 

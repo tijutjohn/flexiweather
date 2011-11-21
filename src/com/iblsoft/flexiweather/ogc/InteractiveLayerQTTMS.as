@@ -14,6 +14,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.widgets.BackgroundJob;
 	import com.iblsoft.flexiweather.widgets.BackgroundJobManager;
 	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
+	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
@@ -37,7 +38,7 @@ package com.iblsoft.flexiweather.ogc
 	/**
 	 * Generic Quad Tree (like Google Maps) tiling layer
 	 **/
-	public class InteractiveLayerQTTMS extends InteractiveLayer implements IConfigurableLayer, Serializable
+	public class InteractiveLayerQTTMS extends InteractiveDataLayer implements IConfigurableLayer, Serializable
 	{
 		public static const UPDATE_TILING_PATTERN: String = 'updateTilingPattern';
 		
@@ -49,7 +50,7 @@ package com.iblsoft.flexiweather.ogc
 		public static var drawBorders: Boolean = false;
 		public static var drawDebugText: Boolean = false;
 		
-		protected var m_loader: UniURLLoader = new UniURLLoader();
+//		protected var m_loader: UniURLLoader = new UniURLLoader();
 		
 		private var _tileIndicesMapper: TileIndicesMapper;
 		private var _viewPartsReflections: ViewPartReflectionsHelper;
@@ -126,9 +127,6 @@ package com.iblsoft.flexiweather.ogc
 			m_tilingUtils = new TilingUtils();
 			m_tilingUtils.minimumZoom = minimumZoomLevel;
 			m_tilingUtils.maximumZoom = maximumZoomLevel;
-			
-			m_loader.addEventListener(UniURLLoader.DATA_LOADED, onDataLoaded);
-			m_loader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onDataLoadFailed);
 			
 			m_jobs = new TileJobs();
 		}
@@ -244,7 +242,7 @@ package com.iblsoft.flexiweather.ogc
 			s_backgroundJobName: String = null): void
 		{
 			var url: String = urlRequest.url;
-			m_loader.load(urlRequest, associatedData, s_backgroundJobName);
+			dataLoader.load(urlRequest, associatedData, s_backgroundJobName);
 			
 			//check associated data
 			/*
@@ -390,7 +388,7 @@ package com.iblsoft.flexiweather.ogc
 				{
 					jobName = "Rendering tile " + requestObj.requestedTileIndex + " for layer: " + name
 					// this already cancel previou job for current tile
-					m_jobs.addNewTileJobRequest(requestObj.requestedTileIndex.mi_tileCol, requestObj.requestedTileIndex.mi_tileRow, m_loader, requestObj.request);
+					m_jobs.addNewTileJobRequest(requestObj.requestedTileIndex.mi_tileCol, requestObj.requestedTileIndex.mi_tileRow, dataLoader, requestObj.request);
 					
 					var assocData: Object = {
 							requestedCRS: requestObj.requestedCRS,
@@ -845,7 +843,7 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 		
-		protected function onDataLoaded(event: UniURLLoaderEvent): void
+		override protected function onDataLoaded(event: UniURLLoaderEvent): void
 		{
 			mi_tilesCurrentlyLoading--;
 			checkIfAllTilesAreLoaded();
@@ -873,7 +871,7 @@ package com.iblsoft.flexiweather.ogc
 			onDataLoadFailed(null);
 		}
 		
-		protected function onDataLoadFailed(event: UniURLLoaderEvent): void
+		override protected function onDataLoadFailed(event: UniURLLoaderEvent): void
 		{
 			mi_tilesCurrentlyLoading--;
 			checkIfAllTilesAreLoaded();
@@ -905,9 +903,6 @@ package com.iblsoft.flexiweather.ogc
 		{
 			return m_tilingUtils;
 		}
-		
-		public function get dataLoader(): UniURLLoader
-		{ return m_loader; } 
 		
 		override public function clone(): InteractiveLayer
 		{
