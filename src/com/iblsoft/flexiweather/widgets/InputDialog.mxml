@@ -2,7 +2,7 @@
 <!--
   Generic dialog for imput of a single value in the style of Qt QInputDialog.
 -->
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="400" height="162">
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="500" height="182">
 	<mx:Script>
 		<![CDATA[
 			import mx.controls.ComboBox;
