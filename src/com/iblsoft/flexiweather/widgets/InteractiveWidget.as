@@ -19,6 +19,7 @@ package com.iblsoft.flexiweather.widgets
 	import flash.utils.Timer;
 	
 	import mx.core.Container;
+	import mx.core.UIComponent;
 	import mx.events.ResizeEvent;
 
 	[Event (name="viewBBoxChanged", type="flash.events.Event")]
@@ -31,6 +32,8 @@ package com.iblsoft.flexiweather.widgets
         private var m_viewBBox: BBox = new BBox(-180, -90, 180, 90);
         private var m_extentBBox: BBox = new BBox(-180, -90, 180, 90);
         private var mb_orderingLayers: Boolean = false;
+
+		private var mb_autoLayout: Boolean = false;
 
 		private var mb_backgroundChessBoard: Boolean = false;
 
@@ -498,57 +501,97 @@ package com.iblsoft.flexiweather.widgets
 
         	var f_newBBoxWidth: Number;
         	var f_newBBoxHeight: Number;
-        	
-        	if(f_bboxApect < f_extentAspect) {
-        		// extent looks wider 
-        		f_newBBoxWidth = f_componentAspect * f_extentAspect * bbox.height;
-        		f_newBBoxHeight = bbox.height;
-        	}
-        	else {
-        		// extent looks higher
-        		f_newBBoxWidth =  bbox.width;
-        		f_newBBoxHeight = bbox.width / f_extentAspect / f_componentAspect;
-        	}
-        	
-        	if(f_newBBoxHeight > m_extentBBox.height) {
-        		f_newBBoxHeight = m_extentBBox.height;
-        		f_newBBoxWidth = f_componentAspect * f_extentAspect * f_newBBoxHeight;
-        	}
-        	if(f_newBBoxWidth > m_extentBBox.width) {
-        		f_newBBoxWidth = m_extentBBox.width;
-        		f_newBBoxHeight = f_newBBoxWidth / f_componentAspect / f_extentAspect;
-        	}
-			if (isNaN(f_newBBoxHeight))
+			
+			if (!mb_autoLayout)
 			{
-				trace("stop f_newBBoxHeight is NaN");
-			}
-        	var viewBBox: Rectangle = new Rectangle(
-	        		f_bboxCenterX - f_newBBoxWidth / 2.0,
-	        		f_bboxCenterY - f_newBBoxHeight / 2.0,
-	        		f_newBBoxWidth,
-	        		f_newBBoxHeight);
-	        if(viewBBox.x < m_extentBBox.xMin)
-	        	viewBBox.offset(-viewBBox.x + m_extentBBox.xMin, 0);
-	        if(viewBBox.y < m_extentBBox.yMin)
-	        	viewBBox.offset(0, -viewBBox.y + m_extentBBox.yMin);
-	        if(viewBBox.right > m_extentBBox.xMax)
-	        	viewBBox.offset(-viewBBox.right + m_extentBBox.xMax, 0);
-	        if(viewBBox.bottom > m_extentBBox.yMax)
-	        	viewBBox.offset(0, -viewBBox.bottom + m_extentBBox.yMax);
+	        	
+	        	if(f_bboxApect < f_extentAspect) {
+	        		// extent looks wider 
+	        		f_newBBoxWidth = f_componentAspect * f_extentAspect * bbox.height;
+	        		f_newBBoxHeight = bbox.height;
+	        	}
+	        	else {
+	        		// extent looks higher
+	        		f_newBBoxWidth =  bbox.width;
+	        		f_newBBoxHeight = bbox.width / f_extentAspect / f_componentAspect;
+	        	}
+	        	
+	        	if(f_newBBoxHeight > m_extentBBox.height) {
+	        		f_newBBoxHeight = m_extentBBox.height;
+	        		f_newBBoxWidth = f_componentAspect * f_extentAspect * f_newBBoxHeight;
+	        	}
+	        	if(f_newBBoxWidth > m_extentBBox.width) {
+	        		f_newBBoxWidth = m_extentBBox.width;
+	        		f_newBBoxHeight = f_newBBoxWidth / f_componentAspect / f_extentAspect;
+	        	}
+				if (isNaN(f_newBBoxHeight))
+				{
+					trace("stop f_newBBoxHeight is NaN");
+				}
+	        	var viewBBox: Rectangle = new Rectangle(
+		        		f_bboxCenterX - f_newBBoxWidth / 2.0,
+		        		f_bboxCenterY - f_newBBoxHeight / 2.0,
+		        		f_newBBoxWidth,
+		        		f_newBBoxHeight);
+		        if(viewBBox.x < m_extentBBox.xMin)
+		        	viewBBox.offset(-viewBBox.x + m_extentBBox.xMin, 0);
+		        if(viewBBox.y < m_extentBBox.yMin)
+		        	viewBBox.offset(0, -viewBBox.y + m_extentBBox.yMin);
+		        if(viewBBox.right > m_extentBBox.xMax)
+		        	viewBBox.offset(-viewBBox.right + m_extentBBox.xMax, 0);
+		        if(viewBBox.bottom > m_extentBBox.yMax)
+		        	viewBBox.offset(0, -viewBBox.bottom + m_extentBBox.yMax);
+	
+		        var newBBox: BBox = BBox.fromRectangle(viewBBox);
+				
+				/*
+				//	        if(!m_viewBBox.equals(newBBox)) {
+				m_viewBBox = newBBox;
+				signalAreaChanged(b_finalChange);
+				//	        }
+				*/
+				
+				if (b_negotiateBBox)
+					negotiateBBox(newBBox, b_finalChange, b_changeZoom);
+				else
+					setViewBBoxAfterNegotiation(newBBox, b_finalChange);
 
-	        var newBBox: BBox = BBox.fromRectangle(viewBBox);
+				
+				
+			} else {
+				//auto layout in widget parent
+				var widgetParent: Container = parent as Container; 
+				if (widgetParent)
+				{
+					var parentWidth: Number = widgetParent.width;
+					var parentHeight: Number = widgetParent.height;
+					var f_parentAspect: Number = parentWidth / parentHeight;
+					
+					var widgetXPosition: Number = 0;
+					var widgetYPosition: Number = 0;
+					var widgetWidth: Number = parentWidth;
+					var widgetHeight: Number = parentHeight;
+					
+					if(f_bboxApect < f_parentAspect) {
+						// extent looks wider 
+						widgetWidth = widgetHeight * f_bboxApect;
+						widgetXPosition = (parentWidth - widgetWidth) / 2;
+					}
+					else {
+						// extent looks higher
+						widgetHeight = widgetWidth / f_bboxApect;
+						widgetYPosition = (parentHeight - widgetHeight) / 2;
+					}
+					
+					this.width = widgetWidth;
+					this.height = widgetHeight;
+					this.x = widgetXPosition;
+					this.y = widgetYPosition;
+					
+					setViewBBoxAfterNegotiation(bbox, b_finalChange);
+				}
+			}
 			
-			/*
-//	        if(!m_viewBBox.equals(newBBox)) {
-		        m_viewBBox = newBBox;
-	        	signalAreaChanged(b_finalChange);
-//	        }
-			*/
-			
-			if (b_negotiateBBox)
-				negotiateBBox(newBBox, b_finalChange, b_changeZoom);
-			else
-				setViewBBoxAfterNegotiation(newBBox, b_finalChange);
 
         }
 		
@@ -644,6 +687,12 @@ package com.iblsoft.flexiweather.widgets
 		
 		public function get labelLayout(): AnticollisionLayout
 		{ return m_labelLayout; }
+		
+		public function set autoLayoutInParent(value: Boolean): void
+		{ mb_autoLayout = value; }
+		
+		public function get autoLayoutInParent(): Boolean
+		{ return mb_autoLayout; }
 		
 	}
 }
