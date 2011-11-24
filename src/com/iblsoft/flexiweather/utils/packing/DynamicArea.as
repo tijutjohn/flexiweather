@@ -32,7 +32,6 @@ package com.iblsoft.flexiweather.utils.packing
 		}
 		public function createFromItem(item:Rectangle, firstAreaDirection: String, secondAreaDirection: String, totalArea: Rectangle = null): void
 		{
-			trace("createFromItem firstAreaDirection: " + firstAreaDirection + " secondAreaDirection: " + secondAreaDirection);
 			if (totalArea)
 				area = totalArea;
 			

@@ -127,9 +127,7 @@ package com.iblsoft.flexiweather.utils
 //					trace("replace url: " + urlRequest.url + " baseURL: " + baseURL);
 				}
 			}	
-			trace("URL before sanity: " + s_url);
 			s_url = URLUtils.urlSanityCheck(s_url);
-			trace("URL after sanity: " + s_url);
 			return s_url;
 		}
 		
