@@ -69,7 +69,7 @@ package com.iblsoft.flexiweather.ogc
 		 * @param type - type of updating. Possible values are: load, refresh.
 		 * 
 		 */		
-		public function updateData(type: String = 'load'): void
+		public function updateWFSData(type: String = 'load'): void
 		{
 			if(ms_serviceURL == null)
 				return;
@@ -249,7 +249,7 @@ package com.iblsoft.flexiweather.ogc
         override public function refresh(b_force: Boolean): void
         {
         	super.refresh(b_force);
-        	updateData();
+			updateWFSData();
         }
 
 		override public function hasPreview(): Boolean

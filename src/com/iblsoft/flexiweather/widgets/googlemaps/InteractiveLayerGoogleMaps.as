@@ -282,7 +282,7 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 				return;
 			
 			if(b_finalChange) {
-				updateData(false);
+				invalidateData(false);
 			}
 			else
 				invalidateDynamicPart();
@@ -550,8 +550,10 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 //			customTrace("getCenter  1: " + center1 + " center2: " + center2);
 			return center2;
 		}
-		public function updateData(b_forceUpdate: Boolean): void
+		override protected function updateData(b_forceUpdate: Boolean): void
 		{
+			super.updateData(b_forceUpdate);
+			
 			if (!inCRSCompatible())
 				return;
 
@@ -560,7 +562,7 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 				if (!mb_mapIsInitialized)
 				{
 					initializeMap();
-					callLater(updateData, [b_forceUpdate]);
+					callLater(invalidateData, [b_forceUpdate]);
 					return;
 				}
 				if (container.width > 0 && container.height > 0)
@@ -609,7 +611,7 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 	//			var zoom: Number = 3;
 				if (isNaN(f_zoom)) {
 //					f_zoom = 3;
-					callLater(updateData, [b_forceUpdate]);
+					callLater(invalidateData, [b_forceUpdate]);
 					return;
 				}
 //	  			customTrace("\n InteractiveLayerGoogleMaps updateData ["+m_map.id+"] zoom: " + f_zoom)
@@ -634,12 +636,12 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 				if (!currViewBBox.equals(cBBox))
 				{
 //					customTrace("bboxes are not same, try udpateData again");
-					callLater(updateData, [b_forceUpdate]);
+					callLater(invalidateData, [b_forceUpdate]);
 				} else {
 					dispatchEvent(new Event(MAP_UDPATED));
 				}
 			} else {
-				callLater(updateData, [b_forceUpdate]);
+				callLater(invalidateData, [b_forceUpdate]);
 			}
 
 		}

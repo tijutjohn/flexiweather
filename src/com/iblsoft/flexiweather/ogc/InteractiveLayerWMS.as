@@ -105,7 +105,7 @@ package com.iblsoft.flexiweather.ogc
 				m_autoRefreshTimer.delay = m_cfg.mi_autoRefreshPeriod * 1000.0;
 		}
 
-		override public function updateData(b_forceUpdate: Boolean): void
+		override protected function updateData(b_forceUpdate: Boolean): void
 		{
 			super.updateData(b_forceUpdate);
 			++mi_updateCycleAge;
@@ -402,7 +402,7 @@ package com.iblsoft.flexiweather.ogc
 		
 		protected function onAutoRefreshTimerComplete(event: TimerEvent): void
 		{
-			updateData(true);
+			invalidateData(true);
 		}
 		
 		private var _invalidateCacheAfterImageLoad: Boolean;
@@ -413,7 +413,7 @@ package com.iblsoft.flexiweather.ogc
 				//				trace("WMS onAreaChanged ms_imageCRS: " + ms_imageCRS + " m_imageBBox: " + m_imageBBox);
 				_invalidateCacheAfterImageLoad = true;
 				//				m_cache.invalidate(ms_imageCRS, m_imageBBox);
-				updateData(false);
+				invalidateData(false);
 			}
 			else
 				invalidateDynamicPart();

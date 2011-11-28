@@ -201,8 +201,10 @@ package com.iblsoft.flexiweather.ogc
 			m_cache.setAnimationModeEnable(value);	
 		}
 		
-		public function updateData(b_forceUpdate: Boolean): void
+		override protected function updateData(b_forceUpdate: Boolean): void
 		{
+			super.updateData(b_forceUpdate);
+			
 			if(!visible) {
 				mb_updateAfterMakingVisible = true;
 				return;
@@ -222,13 +224,13 @@ package com.iblsoft.flexiweather.ogc
 		override public function onContainerSizeChanged(): void
 		{
 			super.onContainerSizeChanged();
-			updateData(false);
+			invalidateData(false);
 		}
 		
         override public function refresh(b_force: Boolean): void
         {
         	super.refresh(b_force);
-        	updateData(b_force);
+			invalidateData(b_force);
         	//rerender legend
         }
 
@@ -1103,7 +1105,7 @@ package com.iblsoft.flexiweather.ogc
 			
 			if(!b_visiblePrev && b_visible && mb_updateAfterMakingVisible) {
 				mb_updateAfterMakingVisible = false;
-				updateData(true);
+				invalidateData(true);
 			}
 		}
 

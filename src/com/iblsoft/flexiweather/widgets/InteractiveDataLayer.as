@@ -124,6 +124,45 @@ package com.iblsoft.flexiweather.widgets
 			m_loader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onDataLoadFailed);
 		}
 		
+		private var _invalidateDataFlag: Boolean;
+		private var _invalidateDataForceUpdateFlag: Boolean;
+		
+		/**
+		 * Invalidation function for <code>updateData</code> function. It works exactly as invalidateProperties, invalidateSize or invalidateDisplayList.
+		 * You can call as many times as you want invalidateData function and updateData will be called just once each frame (if neeeded) 
+		 * @param b_forceUpdate
+		 * 
+		 */
+		public function invalidateData(b_forceUpdate: Boolean): void
+		{
+			_invalidateDataFlag = true;
+			_invalidateDataForceUpdateFlag = _invalidateDataForceUpdateFlag || b_forceUpdate;
+			invalidateProperties();
+		}
+		
+		
+		protected function updateData(b_forceUpdate: Boolean): void
+		{
+		}
+		
+		
+		override protected function commitProperties():void
+		{
+			super.commitProperties();
+			
+			if (_invalidateDataFlag)
+			{
+				updateData(_invalidateDataForceUpdateFlag);
+				_invalidateDataFlag = false;
+			}
+			_invalidateDataForceUpdateFlag = false;
+		}
+		
+		/*****************************************************************************************************************
+		 * 
+		 * 													Status functionality
+		 * 
+		 ****************************************************************************************************************/
 		protected function setStatus(newStatus: String): void
 		{
 			_status = newStatus;

@@ -1,6 +1,9 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.events.InteractiveLayerQTTEvent;
 	import com.iblsoft.flexiweather.ogc.cache.WMSTileCache;
+	import com.iblsoft.flexiweather.ogc.tiling.ITilesProvider;
+	import com.iblsoft.flexiweather.ogc.tiling.QTTTileRequest;
 	import com.iblsoft.flexiweather.ogc.tiling.TileIndex;
 	import com.iblsoft.flexiweather.ogc.tiling.TiledArea;
 	import com.iblsoft.flexiweather.ogc.tiling.TilingUtils;
@@ -31,6 +34,8 @@ package com.iblsoft.flexiweather.ogc
 	import flash.utils.Dictionary;
 	import flash.utils.Timer;
 	
+	import mx.controls.Alert;
+	
 	import spark.primitives.Graphic;
 	
 	[Event(name='drawTiles', type='')]
@@ -43,8 +48,6 @@ package com.iblsoft.flexiweather.ogc
 		public static const UPDATE_TILING_PATTERN: String = 'updateTilingPattern';
 		
 		public static const DRAW_TILES: String = 'drawTiles';
-		public static const START_TILES_LOADING: String = 'startTilesLoading';
-		public static const ALL_TILES_LOADED: String = 'onAllTilesLoaded';
 		
 		public static var imageSmooth: Boolean = true;
 		public static var drawBorders: Boolean = false;
@@ -92,6 +95,8 @@ package com.iblsoft.flexiweather.ogc
 		private var ma_currentTilesRequests: Array = [];
 		private var mi_totalVisibleTiles: int;
 		private var mi_tilesCurrentlyLoading: int;
+		
+		public var tilesProvider: ITilesProvider;
 		
 		public function InteractiveLayerQTTMS(
 				container: InteractiveWidget,
@@ -178,7 +183,7 @@ package com.iblsoft.flexiweather.ogc
 				 * (default pattern is just InteractiveLayerWMSWithQTT.WMS_TILING_URL_PATTERN ('&TILEZOOM=%ZOOM%&TILECOL=%COL%&TILEROW=%ROW%') without any WMS data)
 				 */ 
 				notifyTilingPatternUpdate();
-				updateData(false);
+				invalidateData(false);
 			}
 		}
 		
@@ -243,43 +248,20 @@ package com.iblsoft.flexiweather.ogc
 		{
 			var url: String = urlRequest.url;
 			dataLoader.load(urlRequest, associatedData, s_backgroundJobName);
-			
-			//check associated data
-			/*
-			if (associatedData)
-			{
-				for (var item: String in associatedData)
-				{
-					trace("InteractiveLayerQTTMS loadData : " + item + "=" + associatedData[item]);
-				}
-			}*/
-			
 		}
 		
-		public function updateData(b_forceUpdate: Boolean): void
+		/**
+		 * Request all tiled areas for which we need update data.
+		 * If projection does not allow wrap across dateline, there will be always 1 tiled area.
+		 * @return 
+		 * If wrap across dateline is allowed, there can be more tiled areas returned
+		 * 
+		 */		
+		protected function getNeededTiledAreas(): Array
 		{
-			if (_avoidTiling)
-			{
-				//tiling for this layer is for now avoided, do not update data
-				return;
-			}
-			
-			if(mi_zoom < 0)
-			{
-				// wrong zoom, do not continue
-				return;
-			}
-			var s_crs: String = container.crs;
-			
-			var currentViewBBox: BBox = container.getViewBBox();
-			
 			var tiledAreas: Array = [];
 			var _tiledArea: TiledArea;
-			
-			//update CRS and extent BBox
-			m_tilingUtils.onAreaChanged(s_crs, getGTileBBoxForWholeCRS(s_crs));
-			
-			mi_totalVisibleTiles =  0;
+			var s_crs: String = container.crs;
 			
 			var projection: Projection = Projection.getByCRS(s_crs);
 			var projectionParts: Array = container.mapBBoxToViewParts(projection.extentBBox);
@@ -306,18 +288,12 @@ package com.iblsoft.flexiweather.ogc
 				}
 			}
 			
-			if (tiledAreas.length == 0)
-				return;
-			
-			var tiledCache: WMSTileCache = m_cache as WMSTileCache;
-			
-			var request: URLRequest;
-			var tileIndex: TileIndex = new TileIndex(mi_zoom);
-			
-			ma_currentTilesRequests = [];
-			
-			var loadRequests: Array = new Array();
-			
+			return tiledAreas;
+		}
+		
+		protected function prepareData(tiledAreas: Array): Array
+		{
+			/*
 			var i_width: int = int(container.width);
 			var i_height: int = int(container.height);
 			
@@ -328,79 +304,174 @@ package com.iblsoft.flexiweather.ogc
 			
 			var f_horizontalPixelSize: Number = currentViewBBox.width / i_width;
 			var f_verticalPixelSize: Number = currentViewBBox.height / i_height;
+			*/
+			var loadRequests: Array = new Array();
 			
-			if (baseURLPattern)
+			var tiledCache: WMSTileCache = m_cache as WMSTileCache;
+			
+			var tileIndex: TileIndex;
+			var request: URLRequest;
+			var s_crs: String = container.crs;
+			
+			for each (var partObject: Object in tiledAreas)
 			{
-				for each (var partObject: Object in tiledAreas)
+				var tiledArea: TiledArea = partObject.tiledArea as TiledArea;
+				var viewPart: BBox = partObject.viewPart as BBox;
+				
+				for(var i_row: uint = tiledArea.topRow; i_row <= tiledArea.bottomRow; ++i_row) 
 				{
-					var tiledArea: TiledArea = partObject.tiledArea as TiledArea;
-					var viewPart: BBox = partObject.viewPart as BBox;
-					
-//					trace("UPDATE DATA viewPart: " + viewPart + " | " + tiledArea);
-					for(var i_row: uint = tiledArea.topRow; i_row <= tiledArea.bottomRow; ++i_row) 
+					for(var i_col: uint = tiledArea.leftCol; i_col <= tiledArea.rightCol; ++i_col) 
 					{
-						for(var i_col: uint = tiledArea.leftCol; i_col <= tiledArea.rightCol; ++i_col) 
+						tileIndex = new TileIndex(mi_zoom, i_row, i_col);
+						//check if tileIndex is already created from other tiledArea part
+						if (!_tileIndicesMapper.tileIndexInside(tileIndex))
 						{
-							tileIndex = new TileIndex(mi_zoom, i_row, i_col);
-//							trace("\t tile: " + tileIndex);
-							//check if tileIndex is already created from other tiledArea part
-							if (!_tileIndicesMapper.tileIndexInside(tileIndex))
-							{
-								_tileIndicesMapper.addTileIndex(tileIndex, viewPart);
-								
-								request = new URLRequest(getExpandedURL(tileIndex));
-								// need to convert ${BASE_URL} because it's used in cachKey
-								request.url = UniURLLoader.fromBaseURL(request.url);
-								
-								
-								if(!tiledCache.isTileCached(s_crs, tileIndex, request, ma_specialCacheStrings))
-								{	
-									ma_currentTilesRequests.push(request);
-									loadRequests.push({
-										request: request,
-										requestedCRS: container.crs,
-										requestedTileIndex: tileIndex,
-										requestedTiledArea: tiledArea,
-										requestedViewPart: viewPart
-									});
-								}
+							_tileIndicesMapper.addTileIndex(tileIndex, viewPart);
+							
+							request = new URLRequest(getExpandedURL(tileIndex));
+							// need to convert ${BASE_URL} because it's used in cachKey
+							request.url = UniURLLoader.fromBaseURL(request.url);
+							
+							
+							if(!tiledCache.isTileCached(s_crs, tileIndex, request, ma_specialCacheStrings))
+							{	
+								ma_currentTilesRequests.push(request);
+								loadRequests.push({
+									request: request,
+									requestedCRS: s_crs,
+									requestedTileIndex: tileIndex,
+									requestedTiledArea: tiledArea,
+									requestedViewPart: viewPart
+								});
 							}
 						}
 					}
 				}
-			} else {
-				trace("baseURLpattern is NULL");
 			}
 			
+			return loadRequests;
+		}
+		
+		protected function loadAllData(loadRequests: Array): void
+		{
 			if(loadRequests.length > 0)
 			{
-				dispatchEvent(new Event(START_TILES_LOADING));
-				
-				loadRequests.sort(sortTiles);
-				
-				var bkJobManager: BackgroundJobManager = BackgroundJobManager.getInstance();
-				var jobName: String;
-				mi_tilesCurrentlyLoading = loadRequests.length;
-				for each(var requestObj: Object in loadRequests)
+				if (tilesProvider)
 				{
-					jobName = "Rendering tile " + requestObj.requestedTileIndex + " for layer: " + name
-					// this already cancel previou job for current tile
-					m_jobs.addNewTileJobRequest(requestObj.requestedTileIndex.mi_tileCol, requestObj.requestedTileIndex.mi_tileRow, dataLoader, requestObj.request);
+					dispatchEvent(new InteractiveLayerQTTEvent(InteractiveLayerQTTEvent.TILES_LOADING_STARTED, true));
 					
-					var assocData: Object = {
+					loadRequests.sort(sortTiles);
+					
+					var bkJobManager: BackgroundJobManager = BackgroundJobManager.getInstance();
+					var jobName: String;
+					mi_tilesCurrentlyLoading = loadRequests.length;
+					
+					var data: Array = [];
+					for each(var requestObj: Object in loadRequests)
+					{
+						jobName = "Rendering tile " + requestObj.requestedTileIndex + " for layer: " + name
+						// this already cancel previou job for current tile
+						m_jobs.addNewTileJobRequest(requestObj.requestedTileIndex.mi_tileCol, requestObj.requestedTileIndex.mi_tileRow, dataLoader, requestObj.request);
+						
+						var assocData: Object = {
 							requestedCRS: requestObj.requestedCRS,
 							requestedTileIndex:  requestObj.requestedTileIndex,
 							tiledArea: requestObj.requestedTiledArea,
 							viewPart: requestObj.requestedViewPart
+						};
+							
+						var item: QTTTileRequest = new QTTTileRequest();
+						item.associatedData = assocData;
+						item.jobName = jobName;
+						item.crs = requestObj.requestedCRS;
+						item.tileIndex = requestObj.requestedTileIndex;
+						item.request = requestObj.request;
+						data.push(item);
+						
+	//					loadData(requestObj.request, assocData, jobName);
 					}
-					loadData(requestObj.request, assocData, jobName);
+					
+					tilesProvider.getTiles(data, onTileLoaded, onTileLoadFailed);
+				} else {
+					Alert.show("Tiles Provider is not defined", "Tiles problem", Alert.OK);
 				}
 			} else {
 				// all tiles were cached, draw them
 				draw(graphics);
 				
-				dispatchEvent(new Event(ALL_TILES_LOADED));
+				dispatchEvent(new InteractiveLayerQTTEvent(InteractiveLayerQTTEvent.TILES_LOADED_FINISHED, true));
 			}
+		}
+		
+		public function onTileLoadFailed(tileIndex: TileIndex, associatedData: Object): void
+		{
+			trace("\t onTileLoadFailed : " + tileIndex);
+		}
+		public function onTileLoaded(tileIndex: TileIndex, associatedData: Object): void
+		{
+			trace("onTileLoaded : " + tileIndex);
+		}
+		
+		
+		/**
+		 * Instead of call updateData, call invalidateData() function. It works exactly as invalidateProperties, invalidateSize or invalidateDisplayList.
+		 * You can call as many times as you want invalidateData function and updateData will be called just once each frame (if neeeded) 
+		 * @param b_forceUpdate
+		 * 
+		 */
+		override protected function updateData(b_forceUpdate: Boolean): void
+		{
+			super.updateData(b_forceUpdate);
+			
+			if (_avoidTiling)
+			{
+				//tiling for this layer is for now avoided, do not update data
+				return;
+			}
+			
+			if(mi_zoom < 0)
+			{
+				// wrong zoom, do not continue
+				return;
+			}
+			var s_crs: String = container.crs;
+			
+			var currentViewBBox: BBox = container.getViewBBox();
+			
+			var tiledAreas: Array = [];
+			var _tiledArea: TiledArea;
+			mi_totalVisibleTiles =  0;
+			
+			//update CRS and extent BBox
+			m_tilingUtils.onAreaChanged(s_crs, getGTileBBoxForWholeCRS(s_crs));
+			
+			
+			/** 
+			 * request all tiled areas for which we need update data. if projection does not allow wrap across dateline, there will be always 1 tiled area
+			 */
+			tiledAreas = getNeededTiledAreas();
+			
+			
+			if (tiledAreas.length == 0)
+				return;
+			
+			var tiledCache: WMSTileCache = m_cache as WMSTileCache;
+			var tileIndex: TileIndex = new TileIndex(mi_zoom);
+			
+			ma_currentTilesRequests = [];
+			
+			var loadRequests: Array;
+			
+			if (baseURLPattern)
+			{
+				
+				loadRequests = prepareData(tiledAreas);
+				
+			} else {
+				trace("baseURLpattern is NULL");
+			}
+			
+			loadAllData(loadRequests);
 		}
 		
 		private function updateDataPart(): void
@@ -473,7 +544,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			findZoom();
 			super.refresh(b_force);
-			updateData(b_force);
+			invalidateData(b_force);
 		}
 		
 		override public function draw(graphics: Graphics): void
@@ -826,7 +897,7 @@ package com.iblsoft.flexiweather.ogc
 				{
 					m_cache.invalidate(newCRS, viewBBox);
 				}
-				updateData(false);
+				invalidateData(false);
 			}
 			else
 				invalidateDynamicPart();
@@ -836,7 +907,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			if(mi_tilesCurrentlyLoading == 0)
 			{
-				dispatchEvent(new Event(ALL_TILES_LOADED));
+				dispatchEvent(new InteractiveLayerQTTEvent(InteractiveLayerQTTEvent.TILES_LOADED_FINISHED, true));
 			}
 		}
 		
@@ -953,6 +1024,13 @@ package com.iblsoft.flexiweather.ogc
 		{
 			return "InteractiveLayerQTTMS " + name  ;
 		}
+		
+		public function getTiles(tilesIndices:Array):void
+		{
+			// TODO Auto Generated method stub
+			
+		}
+		
 	}
 }
 import com.iblsoft.flexiweather.ogc.BBox;

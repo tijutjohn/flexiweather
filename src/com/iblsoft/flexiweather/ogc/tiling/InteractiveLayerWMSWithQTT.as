@@ -60,6 +60,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 			m_tiledLayer = new InteractiveLayerQTTMS(container, tiledLayerConfig,
 					'', null, null, cfg.minimumZoomLevel, cfg.maximumZoomLevel);
 			
+			//setup new tiles provider for InteractiveLayerQTTMS layet
+			m_tiledLayer.tilesProvider = new QTTTilesProvider();
+			
 			m_tiledLayer.addEventListener(InteractiveLayerQTTMS.UPDATE_TILING_PATTERN, onUpdateTilingPattern);
 			addChild(m_tiledLayer);
 			
@@ -204,14 +207,16 @@ package com.iblsoft.flexiweather.ogc.tiling
 			}
 		}
 		
-		override public function updateData(b_forceUpdate:Boolean):void
+		override protected function updateData(b_forceUpdate:Boolean):void
 		{
+			super.updateData(b_forceUpdate);
+			
 //			trace("WMSWithQTT updateData ["+name+"]");
 			var gr: Graphics = graphics;
 			if (isTileable)
 			{
 				updateTiledLayerURLBase();
-				m_tiledLayer.updateData(b_forceUpdate);
+				m_tiledLayer.invalidateData(b_forceUpdate);
 				changeTiledLayerVisibility(true);
 			} else {
 				changeTiledLayerVisibility(false);

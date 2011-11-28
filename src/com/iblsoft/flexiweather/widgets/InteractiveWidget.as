@@ -21,6 +21,8 @@ package com.iblsoft.flexiweather.widgets
 	
 	import mx.core.Container;
 	import mx.events.ResizeEvent;
+	
+	import spark.components.Group;
 
 	[Event (name="viewBBoxChanged", type="flash.events.Event")]
 	public class InteractiveWidget extends Container
@@ -76,7 +78,7 @@ package com.iblsoft.flexiweather.widgets
 			
 			if (mb_autoLayoutChanged)
 			{
-				var widgetParent: Container = parent as Container;
+				var widgetParent: Group = parent as Group;
 				if (widgetParent)
 				{
 					if (mb_autoLayout)
@@ -718,7 +720,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			trace("autoLayoutViewBBox: " + bbox.toBBOXString() + " b_finalChange: " + b_finalChange);
 			//auto layout in widget parent
-				var widgetParent: Container = parent as Container; 
+				var widgetParent: Group = parent as Group; 
 				if (widgetParent)
 				{
 				var f_bboxApect: Number = bbox.width / bbox.height;
@@ -848,33 +850,34 @@ package com.iblsoft.flexiweather.widgets
 	public function set srs(s_crs: String): void
 	{ return setCRS(s_crs, true); }
 		
-		public function set backgroundChessBoard(b: Boolean): void
-		{
-			mb_backgroundChessBoard = b;
-			invalidateDisplayList();			
-		}
+	public function set backgroundChessBoard(b: Boolean): void
+	{
+		mb_backgroundChessBoard = b;
+		invalidateDisplayList();			
+	}
 
-		public function get layerContainer(): Container
-		{
-			return m_layerContainer;
-		}
-		
-		public function get labelLayout(): AnticollisionLayout
-		{ return m_labelLayout; }
+	public function get layerContainer(): Container
+	{
+		return m_layerContainer;
+	}
+	
+	public function get labelLayout(): AnticollisionLayout
+	{ return m_labelLayout; }
 
-		override public function toString(): String
-		{
-			return "InteractiveWidget ";
-		}
-private var mb_autoLayoutChanged: Boolean;
-public function set autoLayoutInParent(value: Boolean): void
-		{ 
-			mb_autoLayout = value; 
-			mb_autoLayoutChanged = true;
-			commitProperties();
-		}
-		
-		public function get autoLayoutInParent(): Boolean
-		{ return mb_autoLayout; }
+	override public function toString(): String
+	{
+		return "InteractiveWidget ";
+	}
+	
+	private var mb_autoLayoutChanged: Boolean;
+	public function set autoLayoutInParent(value: Boolean): void
+	{ 
+		mb_autoLayout = value; 
+		mb_autoLayoutChanged = true;
+		invalidateProperties();
+	}
+	
+	public function get autoLayoutInParent(): Boolean
+	{ return mb_autoLayout; }
 	}
 }
