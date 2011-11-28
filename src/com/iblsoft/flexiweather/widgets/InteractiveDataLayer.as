@@ -186,7 +186,7 @@ package com.iblsoft.flexiweather.widgets
 		
 		protected function onDataProgress(event: ProgressEvent): void
 		{
-			trace(this + " onDataProgress: " + event.bytesLoaded + " / " + event.bytesTotal);
+//			trace(this + " onDataProgress: " + event.bytesLoaded + " / " + event.bytesTotal);
 		}
 		
 		// Event handlers

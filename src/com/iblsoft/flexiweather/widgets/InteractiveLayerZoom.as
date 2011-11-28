@@ -2,6 +2,7 @@ package com.iblsoft.flexiweather.widgets
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.proj.Coord;
+	import com.iblsoft.flexiweather.proj.Projection;
 	
 	import flash.display.Graphics;
 	import flash.display.Sprite;
@@ -147,7 +148,9 @@ package com.iblsoft.flexiweather.widgets
 					r.height = bH / h * m_areaZoomingRectangle.height;
 					r.x = r.x + m_areaZoomingRectangle.x / w * bW;
 					r.y = r.y + (h - m_areaZoomingRectangle.bottom) / h * bH;
-					container.setViewBBox(BBox.fromRectangle(r), true);
+					
+//					container.setViewBBox(BBox.fromRectangle(r), true);
+					setViewBBoxFromRectangle(BBox.fromRectangle(r), true);
 				}			
 				m_areaZoomingRectangle = null;
 				invalidateDynamicPart();
@@ -225,11 +228,14 @@ package com.iblsoft.flexiweather.widgets
 				m_wheelZoomTimer.reset();
 				m_wheelZoomTimer.start();
 				// do only non-final area change
-				container.setViewBBox(BBox.fromRectangle(new Rectangle(
-						f_bboxCenterX - f_width / 2.0,
-						f_bboxCenterY - f_height / 2.0,
-						f_width,
-						f_height)), false);
+				
+				var r: Rectangle = new Rectangle(
+					f_bboxCenterX - f_width / 2.0,
+					f_bboxCenterY - f_height / 2.0,
+					f_width,
+					f_height);
+				setViewBBoxFromRectangle(BBox.fromRectangle(r), false);
+//				container.setViewBBox(BBox.fromRectangle(r), false);
 				invalidateDynamicPart();
 				
 				// but start timer to defer final zoom change, but only if final change
@@ -243,7 +249,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if(!mb_finalChangeOccuredAfterWheelZoom) {
 				// noone else commited a final area change, so let's do it 
-				container.setViewBBox(container.getViewBBox(), true);
+				setViewBBoxFromRectangle(container.getViewBBox(), true);
 			}
 		}
 		
@@ -285,7 +291,8 @@ package com.iblsoft.flexiweather.widgets
 			newViewBBox.width = oldViewBBox.width / f_aspectedScale;
 			newViewBBox.height = oldViewBBox.height / f_aspectedScale;
 			
-			container.setViewBBox(BBox.fromRectangle(newViewBBox), b_finalChange);
+			setViewBBoxFromRectangle(BBox.fromRectangle(newViewBBox), b_finalChange);
+//			container.setViewBBox(BBox.fromRectangle(newViewBBox), b_finalChange);
 			
 			invalidateDynamicPart();
 		}
@@ -309,6 +316,55 @@ package com.iblsoft.flexiweather.widgets
 				graphics.drawRect(m_areaZoomingRectangle.x, m_areaZoomingRectangle.y, m_areaZoomingRectangle.width, m_areaZoomingRectangle.height);
 				graphics.endFill();
 			}
+		}
+		
+		/**
+		 * One common function for setting viewBBox from Rectangle with check for projection which allows horizontal wrap to do not allow zoom outside extent. 
+		 * @param r
+		 * @param b_finalChange
+		 * 
+		 */		
+		private function setViewBBoxFromRectangle(viewBBox: BBox, b_finalChange: Boolean): void
+		{
+			var extentBBox: BBox = container.getExtentBBox();
+			var allowHorizontalWrap: Boolean = allowWrapHorizontally();
+			
+			if (!allowHorizontalWrap)
+			{
+				var scale:  Number = 1;
+				if (viewBBox.width > extentBBox.width)
+				{
+					scale = extentBBox.width / viewBBox.width
+					viewBBox = viewBBox.scaled(scale, scale);
+				}
+				if (viewBBox.height > extentBBox.height)
+				{
+					scale = extentBBox.height / viewBBox.height;
+					viewBBox = viewBBox.scaled(scale, scale);
+				}
+			}
+			
+			container.setViewBBox(viewBBox, b_finalChange);
+		}
+		
+		private function extentRatio(): Number
+		{
+			var projection: Projection = container.getCRSProjection();
+			var viewBBox: BBox = container.getExtentBBox();
+			
+			var extentRatio: Number = 100 * viewBBox.width / projection.extentBBox.width;
+			
+			return extentRatio;
+		}
+		private function allowWrapHorizontally(): Boolean
+		{
+			var projection: Projection = container.getCRSProjection();
+			var extentRatio: Number = extentRatio();
+			
+			var percentageTreshold: Number = 1;
+			var withinTreshold: Boolean = Math.abs(100 - extentRatio) < percentageTreshold;
+			
+			return projection.wrapsHorizontally && withinTreshold;
 		}
 		
 		// getters & setters

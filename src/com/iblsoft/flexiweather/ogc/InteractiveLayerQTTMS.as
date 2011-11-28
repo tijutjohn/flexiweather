@@ -318,9 +318,6 @@ package com.iblsoft.flexiweather.ogc
 			
 			var loadRequests: Array = new Array();
 			
-//			var rowMax: int = m_tiledArea.bottomRow;
-//			var colMax: int = m_tiledArea.rightCol;
-			
 			var i_width: int = int(container.width);
 			var i_height: int = int(container.height);
 			

@@ -15,6 +15,9 @@ package com.iblsoft.flexiweather.widgets
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.utils.Timer;
+	import flash.utils.clearTimeout;
+	import flash.utils.getTimer;
+	import flash.utils.setTimeout;
 	
 	import mx.core.Container;
 	import mx.events.ResizeEvent;
@@ -30,6 +33,8 @@ package com.iblsoft.flexiweather.widgets
         private var m_extentBBox: BBox = new BBox(-180, -90, 180, 90);
         private var mb_orderingLayers: Boolean = false;
 
+		private var mb_autoLayout: Boolean = false;
+
 		private var mb_backgroundChessBoard: Boolean = false;
 
 		private var m_resizeTimer: Timer;
@@ -37,6 +42,8 @@ package com.iblsoft.flexiweather.widgets
 		private var m_layerContainer: Container = new Container();
 
 		private var m_labelLayout: AnticollisionLayout = new AnticollisionLayout();
+		
+		private var m_lastResizeTime: Number;
 		
 		public function InteractiveWidget() {
 			super();
@@ -59,6 +66,51 @@ package com.iblsoft.flexiweather.widgets
 			addEventListener(MouseEvent.ROLL_OVER, onMouseRollOver);
 			addEventListener(MouseEvent.ROLL_OUT, onMouseRollOut);
 			addEventListener(ResizeEvent.RESIZE, onResized);
+			
+			m_lastResizeTime = getTimer();
+		}
+		
+		override protected function commitProperties():void
+		{
+			super.commitProperties();
+			
+			if (mb_autoLayoutChanged)
+			{
+				var widgetParent: Container = parent as Container;
+				if (widgetParent)
+				{
+					if (mb_autoLayout)
+					{
+						widgetParent.addEventListener(ResizeEvent.RESIZE, onParentResize);
+					} else {
+						widgetParent.removeEventListener(ResizeEvent.RESIZE, onParentResize);
+					}
+				}
+			}
+		}
+			
+		private var _resizeInterval: Number;
+		private function onParentResize(event: ResizeEvent): void
+		{
+			clearTimeout(_resizeInterval);
+			
+			//wait 1 second before resing (if there is another resize event)
+			var resizeMinimumTime: Number = 1000; //1000ms
+			
+			var currTime: Number = getTimer();
+			
+			if ((currTime - m_lastResizeTime) >= resizeMinimumTime)
+			{
+				trace("go autolayout: time diff: "+(currTime - m_lastResizeTime) +" ms");
+				m_lastResizeTime = currTime;
+				autoLayoutViewBBox(m_viewBBox, true, true);
+			} else {
+				trace("on parent resize: wait at least "+(currTime - m_lastResizeTime) +" ms");
+				//uto layout but do not load layers (finalUpdate = false)
+				autoLayoutViewBBox(m_viewBBox, false, true);
+				
+				_resizeInterval = setTimeout(autoLayoutViewBBox, (currTime - m_lastResizeTime), m_viewBBox, true, true);
+			}
 		}
 		
 		public override function addChild(child: DisplayObject): DisplayObject
@@ -587,6 +639,9 @@ package com.iblsoft.flexiweather.widgets
         	var f_newBBoxWidth: Number;
         	var f_newBBoxHeight: Number;
         	
+			if (!mb_autoLayout)
+			{
+	        	
         	if(f_bboxApect < f_extentAspect) {
         		// extent looks wider 
         		f_newBBoxWidth = f_componentAspect * f_extentAspect * bbox.height;
@@ -646,7 +701,70 @@ package com.iblsoft.flexiweather.widgets
 			else
 				setViewBBoxAfterNegotiation(newBBox, b_finalChange);
 
+				
+				
+			} else {
+				//auto layout in widget parent
+				autoLayoutViewBBox(bbox, b_finalChange, true);
+			}
+			
+
         }
+		
+		private var _oldWidgetWidth: Number = 0;
+		private var _oldWidgetHeight: Number = 0;
+		
+		private function autoLayoutViewBBox(bbox: BBox, b_finalChange:Boolean, b_setViewBBox: Boolean = false): void
+		{
+			trace("autoLayoutViewBBox: " + bbox.toBBOXString() + " b_finalChange: " + b_finalChange);
+			//auto layout in widget parent
+				var widgetParent: Container = parent as Container; 
+				if (widgetParent)
+				{
+				var f_bboxApect: Number = bbox.width / bbox.height;
+				
+					var parentWidth: Number = widgetParent.width;
+					var parentHeight: Number = widgetParent.height;
+					var f_parentAspect: Number = parentWidth / parentHeight;
+					
+					var widgetXPosition: Number = 0;
+					var widgetYPosition: Number = 0;
+					var widgetWidth: Number = parentWidth;
+					var widgetHeight: Number = parentHeight;
+					
+					if(f_bboxApect < f_parentAspect) {
+						// extent looks wider 
+						widgetWidth = widgetHeight * f_bboxApect;
+						widgetXPosition = (parentWidth - widgetWidth) / 2;
+					}
+					else {
+						// extent looks higher
+						widgetHeight = widgetWidth / f_bboxApect;
+						widgetYPosition = (parentHeight - widgetHeight) / 2;
+					}
+					
+				//check if change in width and height is higher than 1px
+				var widthDiff: Number = Math.abs(_oldWidgetWidth - widgetWidth);
+				var heightDiff: Number = Math.abs(_oldWidgetHeight - widgetHeight);
+				
+				if (widgetWidth > 1 || widgetHeight > 1)
+				{
+					this.width = widgetWidth;
+					this.height = widgetHeight;
+					this.x = widgetXPosition;
+					this.y = widgetYPosition;
+					
+					_oldWidgetWidth = widgetWidth;
+					_oldWidgetHeight = widgetHeight;
+					
+					if (b_setViewBBox)
+					setViewBBoxAfterNegotiation(bbox, b_finalChange);
+				} else {
+					trace("InteractiveWidget setViewBBox is too small: " + widthDiff + " , " + heightDiff);
+				}
+			}
+        }
+		
 		
 		private function negotiateBBox(newBBox: BBox, b_finalChange: Boolean, b_changeZoom: Boolean = true): void
 		{
@@ -677,6 +795,7 @@ package com.iblsoft.flexiweather.widgets
 			setViewBBoxAfterNegotiation(newBBox, b_finalChange);
 //			trace("*****************************************************************************\n");
 		}
+		
 		
 		private function setViewBBoxAfterNegotiation(newBBox: BBox, b_finalChange: Boolean): void
 		{
@@ -747,5 +866,15 @@ package com.iblsoft.flexiweather.widgets
 		{
 			return "InteractiveWidget ";
 		}
+private var mb_autoLayoutChanged: Boolean;
+public function set autoLayoutInParent(value: Boolean): void
+		{ 
+			mb_autoLayout = value; 
+			mb_autoLayoutChanged = true;
+			commitProperties();
+		}
+		
+		public function get autoLayoutInParent(): Boolean
+		{ return mb_autoLayout; }
 	}
 }
