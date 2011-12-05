@@ -3,6 +3,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import com.iblsoft.flexiweather.utils.UniURLLoader;
 	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
 	
+	import flash.display.Bitmap;
 	import flash.events.ProgressEvent;
 
 	public class QTTTilesProvider implements ITilesProvider
@@ -49,15 +50,15 @@ package com.iblsoft.flexiweather.ogc.tiling
 		protected function onDataLoaded(event: UniURLLoaderEvent): void
 		{
 			var tileAssociatedData: Object = event.associatedData.associatedData;
-			var tileRequested: QTTTileRequest = event.associatedData.tileReqest as QTTTileRequest;
+			var tileRequested: QTTTileRequest = event.associatedData.tileRequest as QTTTileRequest;
 			
-			_callbackTileLoaded(tileRequested.tileIndex, tileAssociatedData);
+			_callbackTileLoaded(Bitmap(event.result), tileRequested, tileRequested.tileIndex, tileAssociatedData);
 		}
 		
 		protected function onDataLoadFailed(event: UniURLLoaderEvent): void
 		{
 			var tileAssociatedData: Object = event.associatedData.associatedData;
-			var tileRequested: QTTTileRequest = event.associatedData.tileReqest as QTTTileRequest;
+			var tileRequested: QTTTileRequest = event.associatedData.tileRequest as QTTTileRequest;
 			
 			_callbackTileLoadFailed(tileRequested.tileIndex, tileAssociatedData);
 		}

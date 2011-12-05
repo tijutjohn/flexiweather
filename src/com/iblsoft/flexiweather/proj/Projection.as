@@ -43,17 +43,48 @@ package com.iblsoft.flexiweather.proj
 			mb_wrapsHorizontally = b_wrapsHorizontally;
 		}
 		
+		public static function isValidProjection(projection: Projection): Boolean
+		{
+//			trace("\n isValidProjection" + projection.crs + " valid");
+			if (projection)
+			{
+				if (projection.extentBBox && projection.extentBBox.center)
+				{
+					if (isNaN(projection.extentBBox.width) || isNaN(projection.extentBBox.height))
+						return false;
+					if (isNaN(projection.extentBBox.center.x) || isNaN(projection.extentBBox.center.y))
+						return false;
+					
+//					trace("\t isValidProjection" + projection.crs + " valid");
+					return true;
+				}
+			}
+			return false;
+		}
+		
 		public static function getByCRS(s_crs: String): Projection
 		{
+			var prj: Projection;
+//			trace("\n getByCRS" + s_crs);
 			if(s_crs in m_cache)
-				return m_cache[s_crs];
+			{
+//				trace("\tgetByCRS" + s_crs + " is in cache");
+				prj = m_cache[s_crs];
+				if (isValidProjection(prj))
+					return prj;
+//				else {
+//				trace("\tgetByCRS" + s_crs + " not valid");
+//					
+//				}
+				
+			}
 			var extentBBox: BBox = null;
 			var b_wrapsHorizontally: Boolean = false;
 			if(s_crs in md_crsToDetails) {
 				extentBBox = md_crsToDetails[s_crs].extentBBox;
 				b_wrapsHorizontally = md_crsToDetails[s_crs].b_wrapsHorizontally;
 			}
-			var prj: Projection = new Projection(s_crs, extentBBox, b_wrapsHorizontally);
+			prj = new Projection(s_crs, extentBBox, b_wrapsHorizontally);
 			m_cache[s_crs] = prj;
 			return prj;
 		}

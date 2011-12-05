@@ -138,7 +138,6 @@ package com.iblsoft.flexiweather.ogc
 			var projection: Projection = Projection.getByCRS(s_currentCRS);
 			var parts: Array = container.mapBBoxToViewParts(currentViewBBox);
 //			var parts: Array = container.mapBBoxToViewParts(projection.extentBBox);
-			trace("WMS parts: " + parts);
 			
 			for each(var partBBoxToUpdate: BBox in parts) {
 				updateDataPart(

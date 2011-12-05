@@ -264,47 +264,29 @@ package com.iblsoft.flexiweather.ogc
 			var s_crs: String = container.crs;
 			
 			var projection: Projection = Projection.getByCRS(s_crs);
-			var projectionParts: Array = container.mapBBoxToViewParts(projection.extentBBox);
-			if (projectionParts.length > 0)
+			
+			//FIXME instead of projection.extentBBox use tiling extent
+			var partReflections: Array = container.mapBBoxToViewReflections(projection.extentBBox, true)
+			for each (var partReflection: BBox in partReflections)
 			{
-				for each (var part: BBox in projectionParts)
+				//find suitable visible parts for current reflection
+				var reflectionVisibleParts: Array = container.mapBBoxToViewParts(partReflection);
+				
+				for each (var reflectionVisiblePart: BBox in reflectionVisibleParts)
 				{
-					var partReflections: Array = container.mapBBoxToViewReflections(part, true)
-					for each (var partReflection: BBox in partReflections)
+					_tiledArea = m_tilingUtils.getTiledArea(reflectionVisiblePart, mi_zoom);
+					if (_tiledArea)
 					{
-						//find suitable visible parts for current reflection
-						var reflectionVisibleParts: Array = container.mapBBoxToViewParts(partReflection);
-						
-						for each (var reflectionVisiblePart: BBox in reflectionVisibleParts)
-						{
-							_tiledArea = m_tilingUtils.getTiledArea(reflectionVisiblePart, mi_zoom);
-							if (_tiledArea)
-							{
-								tiledAreas.push({tiledArea: _tiledArea, viewPart: reflectionVisiblePart});
-								mi_totalVisibleTiles += _tiledArea.totalVisibleTilesCount;
-							}
-						}
+						tiledAreas.push({tiledArea: _tiledArea, viewPart: reflectionVisiblePart});
+						mi_totalVisibleTiles += _tiledArea.totalVisibleTilesCount;
 					}
 				}
 			}
-			
 			return tiledAreas;
 		}
 		
 		protected function prepareData(tiledAreas: Array): Array
 		{
-			/*
-			var i_width: int = int(container.width);
-			var i_height: int = int(container.height);
-			
-			if (forcedLayerWidth > 0)
-				i_width = forcedLayerWidth;
-			if (forcedLayerHeight > 0)
-				i_height = forcedLayerHeight;
-			
-			var f_horizontalPixelSize: Number = currentViewBBox.width / i_width;
-			var f_verticalPixelSize: Number = currentViewBBox.height / i_height;
-			*/
 			var loadRequests: Array = new Array();
 			
 			var tiledCache: WMSTileCache = m_cache as WMSTileCache;
@@ -312,6 +294,9 @@ package com.iblsoft.flexiweather.ogc
 			var tileIndex: TileIndex;
 			var request: URLRequest;
 			var s_crs: String = container.crs;
+			
+			//initialize tile indices mapper each frame
+			_tileIndicesMapper.removeAll();
 			
 			for each (var partObject: Object in tiledAreas)
 			{
@@ -403,14 +388,7 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 		
-		public function onTileLoadFailed(tileIndex: TileIndex, associatedData: Object): void
-		{
-			trace("\t onTileLoadFailed : " + tileIndex);
-		}
-		public function onTileLoaded(tileIndex: TileIndex, associatedData: Object): void
-		{
-			trace("onTileLoaded : " + tileIndex);
-		}
+		
 		
 		
 		/**
@@ -592,9 +570,12 @@ package com.iblsoft.flexiweather.ogc
 				tileIndex = t_tile.tileIndex;
 				viewPart = _tileIndicesMapper.getTileIndexViewPart(tileIndex);
 				
-				_debugDrawInfoArray.push(tileIndex);
-				
-				drawTile(tileIndex, s_crs, t_tile.image.bitmapData, redrawBorder);
+				if (tileIndex)
+				{
+					_debugDrawInfoArray.push(tileIndex);
+					
+					drawTile(tileIndex, s_crs, t_tile.image.bitmapData, redrawBorder);
+				}
 			}
 			
 //			if (_console)
@@ -911,25 +892,30 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 		
-		override protected function onDataLoaded(event: UniURLLoaderEvent): void
+		
+		public function onTileLoaded(result: Bitmap, tileRequest: QTTTileRequest, tileIndex: TileIndex, associatedData: Object): void
+		{
+			tileLoaded(result, tileRequest.request, tileRequest.associatedData);
+		}
+		
+		private function tileLoaded(result: Bitmap, request: URLRequest, associatedData: Object): void
 		{
 			mi_tilesCurrentlyLoading--;
 			checkIfAllTilesAreLoaded();
 			
-			var result: * = event.result;
 			var wmsTileCache: WMSTileCache = m_cache as WMSTileCache;
 			
-			onJobFinished(event.associatedData.job);
+			onJobFinished(associatedData.job);
 			
 			if(result is Bitmap) {
 				wmsTileCache.addTile(
 					Bitmap(result),
-					event.associatedData.requestedCRS,
-					event.associatedData.requestedTileIndex,
-					event.request,
+					associatedData.requestedCRS,
+					associatedData.requestedTileIndex,
+					request,
 					ma_specialCacheStrings, 
-					event.associatedData.tiledArea,
-					event.associatedData.viewPart
+					associatedData.tiledArea,
+					associatedData.viewPart
 					);
 				draw(graphics);
 				return;
@@ -938,11 +924,28 @@ package com.iblsoft.flexiweather.ogc
 
 			onDataLoadFailed(null);
 		}
+		override protected function onDataLoaded(event: UniURLLoaderEvent): void
+		{
+			var result: * = event.result;
+			tileLoaded(result as Bitmap, event.request, event.associatedData);
+			
+		}
 		
-		override protected function onDataLoadFailed(event: UniURLLoaderEvent): void
+		public function onTileLoadFailed(tileIndex: TileIndex, associatedData: Object): void
+		{
+			trace("\t onTileLoadFailed : " + tileIndex);
+			tileLoadFailed();
+		}
+		
+		private function tileLoadFailed(): void
 		{
 			mi_tilesCurrentlyLoading--;
 			checkIfAllTilesAreLoaded();
+			
+		}
+		override protected function onDataLoadFailed(event: UniURLLoaderEvent): void
+		{
+			tileLoadFailed();
 		}
 		
 
@@ -1102,9 +1105,9 @@ class TileIndicesMapper
 {
 	private var _tileIndices: Dictionary = new Dictionary();
 	
-	public function TileMapper()
+	public function TileIndicesMapper()
 	{
-		
+		trace("create new tile indices mapper");
 	}
 	
 	private function getMapperKey(tileIndex: TileIndex): String
@@ -1116,9 +1119,17 @@ class TileIndicesMapper
 		return _tileIndices[getMapperKey(tileIndex)];
 	}
 	
+	public function removeAll(): void
+	{
+		_tileIndices = new Dictionary();
+	}
 	public function getTileIndexViewPart(tileIndex: TileIndex): BBox
 	{
-		return getMapperItem(tileIndex).viewPart;
+		var object: Object = getMapperItem(tileIndex);
+		if (object)
+			return object.viewPart;
+		
+		return null;
 	}
 	
 	public function setTileIndexViewPart(tileIndex: TileIndex, viewPart: BBox): void
