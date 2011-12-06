@@ -665,8 +665,9 @@ package com.iblsoft.flexiweather.widgets
         		f_newBBoxHeight = bbox.width / f_extentAspect / f_componentAspect;
         	}
         	
-			if (!isCRSWrappingOverXAxis())
-			{
+			// uncomment this if statement, if you want enable unzoom to see more reflections
+//			if (!isCRSWrappingOverXAxis())
+//			{
 	        	if(f_newBBoxHeight > m_extentBBox.height) {
 	        		f_newBBoxHeight = m_extentBBox.height;
 	        		f_newBBoxWidth = f_componentAspect * f_extentAspect * f_newBBoxHeight;
@@ -675,7 +676,7 @@ package com.iblsoft.flexiweather.widgets
 	        		f_newBBoxWidth = m_extentBBox.width;
 	        		f_newBBoxHeight = f_newBBoxWidth / f_componentAspect / f_extentAspect;
 	        	}
-			}
+//			}
 			if (isNaN(f_newBBoxHeight))
 			{
 				trace("stop f_newBBoxHeight is NaN");
@@ -686,6 +687,7 @@ package com.iblsoft.flexiweather.widgets
 	        		f_newBBoxWidth,
 	        		f_newBBoxHeight);
 			
+			//check if view BBox is not outside extent BBox
 	        if(viewBBox.y < m_extentBBox.yMin)
 	        	viewBBox.offset(0, -viewBBox.y + m_extentBBox.yMin);
 	        if(viewBBox.bottom > m_extentBBox.yMax)
