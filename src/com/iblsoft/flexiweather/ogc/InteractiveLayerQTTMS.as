@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.events.InteractiveLayerProgressEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerQTTEvent;
 	import com.iblsoft.flexiweather.ogc.cache.WMSTileCache;
 	import com.iblsoft.flexiweather.ogc.tiling.ITilesProvider;
@@ -94,7 +95,9 @@ package com.iblsoft.flexiweather.ogc
 		public var tileScaleY: Number;
 		private var ma_currentTilesRequests: Array = [];
 		private var mi_totalVisibleTiles: int;
+		
 		private var mi_tilesCurrentlyLoading: int;
+		private var mi_tilesLoadingTotal: int;
 		
 		public var tilesProvider: ITilesProvider;
 		
@@ -105,6 +108,8 @@ package com.iblsoft.flexiweather.ogc
 				minimumZoomLevel: uint = 0, maximumZoomLevel: uint = 10)
 		{
 			super(container);
+			
+			mi_tilesLoadingTotal = 0;
 			
 			var tilingInfo: QTTilingInfo
 			if(cfg == null) {
@@ -350,6 +355,7 @@ package com.iblsoft.flexiweather.ogc
 					var bkJobManager: BackgroundJobManager = BackgroundJobManager.getInstance();
 					var jobName: String;
 					mi_tilesCurrentlyLoading = loadRequests.length;
+					mi_tilesLoadingTotal += loadRequests.length;
 					
 					var data: Array = [];
 					for each(var requestObj: Object in loadRequests)
@@ -888,20 +894,27 @@ package com.iblsoft.flexiweather.ogc
 		{
 			if(mi_tilesCurrentlyLoading == 0)
 			{
+				mi_tilesLoadingTotal = 0;
 				dispatchEvent(new InteractiveLayerQTTEvent(InteractiveLayerQTTEvent.TILES_LOADED_FINISHED, true));
 			}
 		}
 		
+		override protected function onDataLoaded(event: UniURLLoaderEvent): void
+		{
+			var result: * = event.result;
+			tileLoaded(result as Bitmap, event.request, event.associatedData);
+			
+		}
 		
 		public function onTileLoaded(result: Bitmap, tileRequest: QTTTileRequest, tileIndex: TileIndex, associatedData: Object): void
 		{
 			tileLoaded(result, tileRequest.request, tileRequest.associatedData);
 		}
 		
+		
 		private function tileLoaded(result: Bitmap, request: URLRequest, associatedData: Object): void
 		{
-			mi_tilesCurrentlyLoading--;
-			checkIfAllTilesAreLoaded();
+			tileLoadFinished();
 			
 			var wmsTileCache: WMSTileCache = m_cache as WMSTileCache;
 			
@@ -924,11 +937,14 @@ package com.iblsoft.flexiweather.ogc
 
 			onDataLoadFailed(null);
 		}
-		override protected function onDataLoaded(event: UniURLLoaderEvent): void
+		
+		private function tileLoadFinished(): void
 		{
-			var result: * = event.result;
-			tileLoaded(result as Bitmap, event.request, event.associatedData);
+			mi_tilesCurrentlyLoading--;
 			
+			notifyProgress(mi_tilesLoadingTotal - mi_tilesCurrentlyLoading, mi_tilesLoadingTotal, InteractiveLayerProgressEvent.UNIT_TILES);
+			
+			checkIfAllTilesAreLoaded();
 		}
 		
 		public function onTileLoadFailed(tileIndex: TileIndex, associatedData: Object): void
@@ -939,10 +955,10 @@ package com.iblsoft.flexiweather.ogc
 		
 		private function tileLoadFailed(): void
 		{
-			mi_tilesCurrentlyLoading--;
-			checkIfAllTilesAreLoaded();
-			
+			tileLoadFinished();
 		}
+		
+			
 		override protected function onDataLoadFailed(event: UniURLLoaderEvent): void
 		{
 			tileLoadFailed();

@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.widgets
 {
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
+	import com.iblsoft.flexiweather.events.InteractiveLayerProgressEvent;
 	import com.iblsoft.flexiweather.ogc.ExceptionUtils;
 	import com.iblsoft.flexiweather.utils.UniURLLoader;
 	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
@@ -213,10 +214,14 @@ package com.iblsoft.flexiweather.widgets
 		 * If you need to dispatch more properties inside event, override this method in your class. 
 		 * 
 		 */		
-		protected function notifyProgress(): void
+		protected function notifyProgress(loaded: int, total: int, units: String): void
 		{
-			var event: InteractiveLayerEvent = new InteractiveLayerEvent(PROGRESS, true);
+			var event: InteractiveLayerProgressEvent = new InteractiveLayerProgressEvent(PROGRESS, true);
 			event.interactiveLayer = this;
+			event.loaded = loaded;
+			event.total = total;
+			event.units = units;
+			event.progress = 100 * loaded / total;
 			dispatchEvent(event);
 			
 		}
