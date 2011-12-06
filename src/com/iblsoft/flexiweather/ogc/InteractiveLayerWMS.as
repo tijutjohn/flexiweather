@@ -136,7 +136,7 @@ package com.iblsoft.flexiweather.ogc
 			var f_verticalPixelSize: Number = currentViewBBox.height / i_height;
 
 			var projection: Projection = Projection.getByCRS(s_currentCRS);
-			var parts: Array = container.mapBBoxToViewParts(currentViewBBox);
+			var parts: Array = container.mapBBoxToProjectionExtentParts(currentViewBBox);
 //			var parts: Array = container.mapBBoxToViewParts(projection.extentBBox);
 			
 			for each(var partBBoxToUpdate: BBox in parts) {

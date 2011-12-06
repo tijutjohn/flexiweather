@@ -270,7 +270,7 @@ package com.iblsoft.flexiweather.ogc
 			for each (var partReflection: BBox in partReflections)
 			{
 				//find suitable visible parts for current reflection
-				var reflectionVisibleParts: Array = container.mapBBoxToViewParts(partReflection);
+				var reflectionVisibleParts: Array = container.mapBBoxToProjectionExtentParts(partReflection);
 				
 				for each (var reflectionVisiblePart: BBox in reflectionVisibleParts)
 				{
@@ -712,7 +712,7 @@ package com.iblsoft.flexiweather.ogc
 			var currentBBox: BBox = container.getViewBBox();
 			
 			var a1: Array = container.mapBBoxToViewReflections(currentBBox);
-			var a2: Array = container.mapBBoxToViewParts(currentBBox);
+			var a2: Array = container.mapBBoxToProjectionExtentParts(currentBBox);
 			var bbox: BBox
 			var bbox2: BBox
 			if (a1.length > 1)
@@ -728,7 +728,7 @@ package com.iblsoft.flexiweather.ogc
 				{
 					console.print('\t part: ' + bbox, 'Info', 'Wrap Info');
 					
-					var a3: Array = container.mapBBoxToViewParts(bbox);
+					var a3: Array = container.mapBBoxToProjectionExtentParts(bbox);
 					if (a3.length > 0)
 					{
 						for each(bbox2 in a3)

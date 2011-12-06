@@ -357,7 +357,7 @@ package com.iblsoft.flexiweather.widgets
 		 * one to the left (east hemisphere) and on the righ (west hemisphere). If the view is zoomed
 		 * out enough even multiple reflection of the part can be seen.
 		 **/
-		public function mapBBoxToViewParts(currentViewBBox: BBox): Array
+		public function mapBBoxToProjectionExtentParts(bbox: BBox): Array
 		{
 			var a: Array = [];
 			if(m_crsProjection.wrapsHorizontally) {
@@ -366,7 +366,7 @@ package com.iblsoft.flexiweather.widgets
 				for(var i: int = 0; i < 10; i++) {
 					var i_delta: int = (i & 1 ? 1 : -1) * ((i + 1) >> 1); // generates sequence 0, 1, -1, 2, -2, ..., 5, -5
 //					trace("\t mapBBoxToViewParts delta: " + i_delta);
-					var reflectedBBox: BBox = currentViewBBox.translated(f_crsExtentBBoxWidth * i_delta, 0)
+					var reflectedBBox: BBox = bbox.translated(f_crsExtentBBoxWidth * i_delta, 0)
 					var intersectionOfReflectedBBoxWithCRSExtentBBox: BBox =
 							reflectedBBox.intersected(m_crsProjection.extentBBox);
 					
@@ -389,10 +389,10 @@ package com.iblsoft.flexiweather.widgets
 				}
 			}
 			if(a.length == 0) {
-				var primaryPartBBox: BBox = currentViewBBox;
+				var primaryPartBBox: BBox = bbox;
 				primaryPartBBox = primaryPartBBox.intersected(m_crsProjection.extentBBox);
 				if(primaryPartBBox == null) // no intersection!
-					primaryPartBBox = currentViewBBox; // just keep the current view BBox and let's see what server returns
+					primaryPartBBox = bbox; // just keep the current view BBox and let's see what server returns
 				a.push(primaryPartBBox);
 //				trace("InteractiveWidget.mapBBoxToViewParts(): primary part only " + primaryPartBBox.toString());
 			}
