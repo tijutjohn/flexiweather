@@ -22,6 +22,8 @@ package com.iblsoft.flexiweather.widgets
 	
 	public class InteractiveLayerZoom extends InteractiveLayer
 	{
+		public static const ZOOM: String = 'zoom';
+		
 		protected var mb_requireCtrlKey: Boolean = true;
 
 		protected var m_areaZoomingRectangle: Rectangle;
@@ -35,12 +37,46 @@ package com.iblsoft.flexiweather.widgets
 
 		private var m_previousGestureZoomMidPoint: Coord = null;
 
+		private var m_delayBeforeLoad: int
+		private var m_delayBeforeLoadChanged: Boolean;
+		
+		/**
+		 * Delay before load when user zoom in/out. Loading wait to do not halt server from loading data when user intensively zoon in/out. 
+		 * @return 
+		 * 
+		 */		
+		public function get delayBeforeLoad(): int
+		{
+			return m_delayBeforeLoad;
+		}
+		public function set delayBeforeLoad(value: int): void
+		{
+			m_delayBeforeLoad = value;
+			m_delayBeforeLoadChanged = true;
+			invalidateProperties();
+		}
+		
 		public function InteractiveLayerZoom(container: InteractiveWidget = null)
 		{
 			super(container);
+			
+			_type = ZOOM;
+			
 			m_wheelZoomTimer.stop();
 			m_wheelZoomTimer.addEventListener(TimerEvent.TIMER_COMPLETE, onMouseWheelTimer);
 			waitForContainer();
+		}
+		
+		override protected function commitProperties():void
+		{
+			super.commitProperties();
+			
+			if (m_delayBeforeLoadChanged)
+			{
+				m_wheelZoomTimer.delay = m_delayBeforeLoad;
+				m_delayBeforeLoadChanged = false;
+			}
+				
 		}
 
 		private function waitForContainer(): void
