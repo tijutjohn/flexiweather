@@ -1,5 +1,7 @@
 package com.iblsoft.flexiweather.plugins
 {
+	import flash.utils.Dictionary;
+	
 	import mx.controls.Image;
 	
 	public class PluginAbility
@@ -153,6 +155,18 @@ package com.iblsoft.flexiweather.plugins
 				return IAbility(m_classOrInstance);
 		}
 		
+		public function removeMetadata(s_key: String): void
+		{
+			if(s_key in m_metadata)
+				delete m_metadata[s_key];
+			
+		}
+		public function updateMetadata(s_key: String, newValue: Object): void
+		{
+			if(s_key in m_metadata)
+				m_metadata[s_key] = newValue;
+			
+		}
 		public function getMetadata(s_key: String, defaultValue: Object = null): Object
 		{
 			if(s_key in m_metadata)
@@ -164,10 +178,15 @@ package com.iblsoft.flexiweather.plugins
 		// getters and setters
 		public function get id(): String
 		{ return ms_id; }
+		
 		public function get pluginId(): String
 		{ return ms_plugin_id; }
 
 		public function get abilityType(): String
 		{ return ms_abilityType; }
+		
+		public function get metadata(): Object
+		{ return m_metadata; }
+		
 	}
 }
