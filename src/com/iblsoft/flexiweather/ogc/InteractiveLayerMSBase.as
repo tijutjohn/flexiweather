@@ -196,6 +196,11 @@ package com.iblsoft.flexiweather.ogc
 			return s_url;
 		}
 		
+		public function debugCache(): String
+		{
+			return toString() + "\n" + m_cache.debugCache();
+		}
+		
 		public function setAnimationModeEnable(value: Boolean): void
 		{
 			m_cache.setAnimationModeEnable(value);	

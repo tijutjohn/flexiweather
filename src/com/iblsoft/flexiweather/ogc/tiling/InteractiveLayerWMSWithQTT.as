@@ -285,5 +285,14 @@ package com.iblsoft.flexiweather.ogc.tiling
 			}
 			return retStr;
 		}
+		
+		override public function debugCache(): String
+		{
+			if (isTileable)
+			{
+				return toString + '\n' + m_tiledLayer.debugCache();
+			}
+			return toString() + "\n" + m_cache.debugCache();
+		}
 	}
 }

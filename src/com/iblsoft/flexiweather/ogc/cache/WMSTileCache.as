@@ -16,10 +16,15 @@ package com.iblsoft.flexiweather.ogc.cache
 		public var maxCachedItems: int = 300;
 		
 		/**
-		 * Expiration time in seconds 
+		 * Expiration check interval. How ofter will be expiration checked 
 		 */		
-		private var _checkExpirationTime: int = 10 * 1000; 
-		private var _expirationTime: int = 60; 
+		private var _checkExpirationTime: int = 10 * 1000;
+		
+		/**
+		 * Expiration time. How long will tile be valid (in seconds). 
+		 * Value "0" means no expiration will be done.
+		 */		
+		private var _expirationTime: int = 0; 
 		private var _expirationTimer: Timer;
 		
 		private var _animationModeEnabled: Boolean;
@@ -35,11 +40,34 @@ package com.iblsoft.flexiweather.ogc.cache
 		
 		public function WMSTileCache()
 		{
-			_expirationTimer = new Timer(_checkExpirationTime);
-			_expirationTimer.addEventListener(TimerEvent.TIMER, onExpiration);
-			_expirationTimer.start();
+			startExpirationTimer();
 		}
 		
+		private function startExpirationTimer(): void
+		{
+			if (_expirationTime > 0)
+			{
+				_expirationTimer = new Timer(_checkExpirationTime);
+				_expirationTimer.addEventListener(TimerEvent.TIMER, onExpiration);
+				_expirationTimer.start();
+			}
+			
+		}
+		
+		public function debugCache(): String
+		{
+			var str: String = 'WMSTileCache';
+			str += '\t cache items count: ' + _itemCount;
+			
+			var cnt: int = 0;
+			for(var s_key: String in md_cache) 
+			{
+				cnt++;
+			}
+			str += '\t cache items count [dictionary]: ' + cnt;
+			
+			return str;
+		}
 		public function setAnimationModeEnable(value: Boolean): void
 		{
 			if (_animationModeEnabled != value)
@@ -50,9 +78,9 @@ package com.iblsoft.flexiweather.ogc.cache
 		
 		private function onExpiration(event: TimerEvent): void
 		{
-			if (_animationModeEnabled)
+			if (_animationModeEnabled || _expirationTime == 0)
 			{
-				//do not remove any cached data, animation is running
+				//do not remove any cached data, animation is running or expirationTime is set to 0
 				return;
 			}
 			var currTime: Date = new Date();

@@ -11,11 +11,16 @@ package com.iblsoft.flexiweather.ogc.cache
 	public class WMSCache implements ICache
 	{
 		public var name: String;
+		
 		/**
-		 * Expiration time in seconds 
+		 * Expiration check interval. How ofter will be expiration checked 
 		 */		
 		private var mf_expirationCheckTime: int = 10 * 1000; 
-		private var mf_expirationTime: int = 5;
+		/**
+		 * Expiration time. How long will tile be valid (in seconds). 
+		 * Value "0" means no expiration will be done.
+		 */	
+		private var mf_expirationTime: int = 0;
 		private var m_expirationTimer: Timer;
 		
 		private var _animationModeEnabled: Boolean;
@@ -26,9 +31,17 @@ package com.iblsoft.flexiweather.ogc.cache
 		
 		public function WMSCache()
 		{
-			m_expirationTimer = new Timer(mf_expirationCheckTime);
-			m_expirationTimer.addEventListener(TimerEvent.TIMER, onExpiration);
-			m_expirationTimer.start();
+			startExpirationTimer();
+		}
+		
+		private function startExpirationTimer(): void
+		{
+			if (mf_expirationTime > 0)
+			{
+				m_expirationTimer = new Timer(mf_expirationCheckTime);
+				m_expirationTimer.addEventListener(TimerEvent.TIMER, onExpiration);
+				m_expirationTimer.start();
+			}
 		}
 		
 		public function setAnimationModeEnable(value: Boolean): void
@@ -40,9 +53,9 @@ package com.iblsoft.flexiweather.ogc.cache
 		}
 		private function onExpiration(event: TimerEvent): void
 		{
-			if (_animationModeEnabled)
+			if (_animationModeEnabled || mf_expirationTime == 0)
 			{
-				//do not remove any cached data, animation is running
+				//do not remove any cached data, animation is running or expirationTime is set to 0
 				return;
 			}
 			var currTime: Date = new Date();
@@ -71,14 +84,21 @@ package com.iblsoft.flexiweather.ogc.cache
 			debugCache();
 		}
 		
-		private function deleteCacheItem(s_key: String): void
+		/**
+		 * Delete cached item 
+		 * @param s_key Item key
+		 * @param b_disposeDisplayed dispose item even if it is displayed. Default value is false, because we do not want dispose displayed items, but you can force it by setting this property to true (e.g. receiving data for same CRS and BBox)
+		 * @return true if item was deleted, false if it was not
+		 * 
+		 */		
+		private function deleteCacheItem(s_key: String, b_disposeDisplayed: Boolean = false): Boolean
 		{
 //			return;
 
 			var cacheItem: CacheItem = md_cache[s_key] as CacheItem;
 			
 			// dispose bitmap data, just for bitmaps which are not currently displayed
-			if (!cacheItem.displayed)
+			if (cacheItem && (!cacheItem.displayed || (cacheItem.displayed && b_disposeDisplayed) ))
 			{
 //				debug("\t deleteCacheItem " + cacheItem);
 				var bmp: Bitmap = cacheItem.image;
@@ -86,9 +106,11 @@ package com.iblsoft.flexiweather.ogc.cache
 				bmp.bitmapData.dispose();
 				mi_cacheItemCount--;
 				delete md_cache[s_key];
+				return true;
 			} else {
 //				debug("\t deleteCacheItem: DO NOT DELETE IT " + cacheItem);
 			}
+			return false;
 		}
 		private function getKey(s_crs: String, bbox: BBox, url: URLRequest): String
 		{
@@ -135,6 +157,8 @@ package com.iblsoft.flexiweather.ogc.cache
 			var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url);
 			var s_key: String = getKey(s_crs, bbox, url);
 			
+			var b_deleted: Boolean = deleteCacheItem(s_key, true);
+			
 			var item: CacheItem = new CacheItem();
 			item.cacheKey = ck;
 			item.displayed = true;
@@ -148,9 +172,19 @@ package com.iblsoft.flexiweather.ogc.cache
 			delete md_cacheLoading[s_key];
 		}
 		
-		private function debugCache(): void
+		public function debugCache(): String
 		{
-//			debug("WMSCache ["+name+"] items: " + md_cache_length);
+			var str: String = 'WMSCache';
+			str += '\t cache items count: ' + mi_cacheItemCount;
+			
+			var cnt: int = 0;
+			for(var s_key: String in md_cache) 
+			{
+				cnt++;
+			}
+			str += '\t cache items count [dictionary]: ' + cnt;
+			
+			return str;
 		}
 
 		public function removeFromScreen(): void

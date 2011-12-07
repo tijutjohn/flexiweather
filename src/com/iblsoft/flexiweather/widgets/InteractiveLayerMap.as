@@ -824,6 +824,21 @@ package com.iblsoft.flexiweather.widgets
 			return map;
 		}
 		
+		public function getLayersInfo(functionName: String): String
+		{
+			var retStr: String =  "InteractiveLayerMap getLayersInfo: " + functionName ;
+			for each (var l: InteractiveLayer in layers)
+			{
+				try {
+					var str: String = l[functionName]();
+					retStr += "\n\t"+str;
+				} catch (error: Error) {
+					
+				}
+			}
+			return retStr;
+			
+		}
 		override public function toString(): String
 		{
 			var retStr: String =  "InteractiveLayerMap " ;

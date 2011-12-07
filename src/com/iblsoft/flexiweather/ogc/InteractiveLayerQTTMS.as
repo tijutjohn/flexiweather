@@ -192,6 +192,7 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 		
+		
 		private function notifyTilingPatternUpdate(): void
 		{
 			dispatchEvent(new Event(UPDATE_TILING_PATTERN));
@@ -1050,6 +1051,10 @@ package com.iblsoft.flexiweather.ogc
 			
 		}
 		
+		public function debugCache(): String
+		{
+			return toString() + "\n" + m_cache.debugCache();
+		}
 	}
 }
 import com.iblsoft.flexiweather.ogc.BBox;
@@ -1202,4 +1207,5 @@ class ViewPartReflectionsHelper
 			return addViewPartReflections(viewPart);
 		}
 	}
+	
 }
