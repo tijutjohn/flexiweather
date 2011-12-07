@@ -706,9 +706,6 @@ package com.iblsoft.flexiweather.widgets
 		
 		private function setViewBBoxAfterNegotiation(newBBox: BBox, b_finalChange: Boolean): void
 		{
-//			trace("\t IWidget setViewBBoxAfterNegotiation newBBox :" + newBBox.toLaLoString(ms_crs));
-//			trace("\t IWidget setViewBBoxAfterNegotiation newBBox :" + newBBox);
-
 			//dispath view bbox changed event to notify about change
 			m_viewBBox = newBBox;
 			
@@ -717,8 +714,6 @@ package com.iblsoft.flexiweather.widgets
 			signalAreaChanged(b_finalChange);
 		}
 		
-
-
 
         public function setExtentBBOX(bbox: BBox, b_finalChange: Boolean = true): void
         {
@@ -736,6 +731,11 @@ package com.iblsoft.flexiweather.widgets
         	setViewBBox(m_extentBBox, true);
         }
 
+	public function getExtentBBox(): BBox
+	{
+		return m_extentBBox;
+	}
+	
         public function getViewBBox(): BBox
         { return m_viewBBox; }
         
@@ -767,6 +767,10 @@ package com.iblsoft.flexiweather.widgets
 		public function get labelLayout(): AnticollisionLayout
 		{ return m_labelLayout; }
 		
+		override public function toString(): String
+		{
+			return "InteractiveWidget ";
+		}
 		private var mb_autoLayoutChanged: Boolean;
 		public function set autoLayoutInParent(value: Boolean): void
 		{ 
@@ -777,6 +781,5 @@ package com.iblsoft.flexiweather.widgets
 		
 		public function get autoLayoutInParent(): Boolean
 		{ return mb_autoLayout; }
-		
 	}
 }
