@@ -4,6 +4,8 @@ package com.iblsoft.flexiweather.utils.loaders
 	
 	import flash.utils.ByteArray;
 	
+	import json.JParser;
+	
 	public class JSONLoader extends UniURLLoader
 	{
 		public function JSONLoader()
@@ -14,7 +16,23 @@ package com.iblsoft.flexiweather.utils.loaders
 		
 		override protected function isResultContentCorrect(s_format: String, data: Object): Boolean
 		{
-			return true;
+			return JSONLoader.isValidJSon(data);
+		}
+		
+		static public function isValidJSon(data: Object): Boolean
+		{
+			if (data is String)
+			{
+				try {
+					var json: Object = JParser.decode(data as String);
+					if (json)
+						return true;
+				} catch (error: Error) {
+					return false;
+				}
+					
+			}
+			return false;
 		}
 	}
 }

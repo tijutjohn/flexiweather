@@ -11,6 +11,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.widgets.BackgroundJob;
 	import com.iblsoft.flexiweather.widgets.BackgroundJobManager;
 	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
+	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
@@ -23,6 +24,7 @@ package com.iblsoft.flexiweather.ogc
 	import flash.utils.Timer;
 	
 	import mx.collections.ArrayCollection;
+	import mx.events.DynamicEvent;
 	import mx.logging.Log;
 	
 	[Event(name="wmsStyleChanged", type="flash.events.Event")]
@@ -105,6 +107,33 @@ package com.iblsoft.flexiweather.ogc
 				m_autoRefreshTimer.delay = m_cfg.mi_autoRefreshPeriod * 1000.0;
 		}
 
+		/**
+		 * Received when m_loader receive XML instead of image. You can override this function and for instance check if ServiceException xml is not received. 
+		 * @param event
+		 * 
+		 */		
+		override protected function onXMLReceived(event: DynamicEvent): void
+		{
+			var xmlSource: String = event['xml'] as String;
+			var xml: XML = new XML(xmlSource);
+			var topName: String = xml.name().localName;
+			var children: XMLList = xml.children();
+			if (children)
+			{
+				var child: XML = children[0] as XML;
+				var childName: String = (child.name() as QName).localName;
+				if (child.hasOwnProperty('@code'))
+				{
+					var codeName: String = child.@code;
+					
+					if (topName == 'ServiceExceptionReport' && childName == 'ServiceException' && codeName == 'OperationNotSupported')
+					{
+						notifyOperationNotSupported();
+					}
+				}
+			}
+		}
+		
 		override protected function updateData(b_forceUpdate: Boolean): void
 		{
 			super.updateData(b_forceUpdate);
@@ -275,6 +304,12 @@ package com.iblsoft.flexiweather.ogc
 		
 		override public function renderPreview(graphics: Graphics, f_width: Number, f_height: Number): void
 		{
+			if (status == InteractiveDataLayer.STATE_DATA_LOADED_WITH_ERRORS)
+			{
+				drawNoDataPreview(graphics, f_width, f_height);
+				return;
+			}
+			
 			var imagePart: ImagePart;
 			if(ma_imageParts.length > 0) {
 				var matrix: Matrix = new Matrix();
@@ -295,12 +330,18 @@ package com.iblsoft.flexiweather.ogc
 				}
 			}
 			if(!b_allImagesOK) {
-				graphics.lineStyle(2, 0xcc0000, 0.7, true);
-				graphics.moveTo(0, 0);
-				graphics.lineTo(f_width - 1, f_height - 1);
-				graphics.moveTo(0, f_height - 1);
-				graphics.lineTo(f_width - 1, 0);
+				drawNoDataPreview(graphics, f_width, f_height);
 			}
+		}
+		
+		private function drawNoDataPreview(graphics: Graphics, f_width: Number, f_height: Number): void
+		{
+			graphics.lineStyle(2, 0xcc0000, 0.7, true);
+			graphics.moveTo(0, 0);
+			graphics.lineTo(f_width - 1, f_height - 1);
+			graphics.moveTo(0, f_height - 1);
+			graphics.lineTo(f_width - 1, 0);
+			
 		}
 		
 		// Event handlers

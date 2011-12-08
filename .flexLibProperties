@@ -200,6 +200,12 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.InteractiveLayerGoogleMaps"/>
     <classEntry path="com.iblsoft.flexiweather.skins.CheckBoxLabelLeftSkin"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveDataLayer"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.tiling.ITilesProvider"/>
+    <classEntry path="com.iblsoft.flexiweather.events.InteractiveLayerQTTEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.tiling.QTTTilesProvider"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.tiling.QTTTileRequest"/>
+    <classEntry path="com.iblsoft.flexiweather.events.InteractiveLayerProgressEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.loaders.ImageAndXMLLoader"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

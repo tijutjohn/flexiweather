@@ -1101,7 +1101,12 @@ package com.iblsoft.flexiweather.ogc
 		}
 		
 		override public function get name(): String
-		{ return m_cfg.label; }
+		{
+			if (m_cfg)
+				return m_cfg.label; 
+			
+			return '';
+		}
 		
 		override public function set visible(b_visible: Boolean): void
 		{

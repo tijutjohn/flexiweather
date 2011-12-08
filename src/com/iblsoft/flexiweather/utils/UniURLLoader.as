@@ -39,6 +39,7 @@ package com.iblsoft.flexiweather.utils
 	import mx.messaging.AbstractConsumer;
 	import mx.rpc.Fault;
 	import mx.utils.Base64Encoder;
+	import mx.utils.ObjectUtil;
 	import mx.utils.URLUtil;
 	
 	import spark.components.TitleWindow;
@@ -815,7 +816,11 @@ package com.iblsoft.flexiweather.utils
 			rawData.position = 0;
 			
 			var s_data: String;
+			trace(rawData.length);
 			
+			var test: ByteArray = ObjectUtil.copy( rawData ) as ByteArray;
+			s_data = test.readUTFBytes(test.length);
+			trace(rawData.length);
 			for each (var currFormat: String in allowedFormats)
 			{
 				switch (currFormat)
@@ -828,31 +833,34 @@ package com.iblsoft.flexiweather.utils
 						return;
 						break;
 					case IMAGE_FORMAT:
-						var isPNG: Boolean = b0 == 0x89 && b1 == 0x50 && b2 == 0x4E && b3 == 0x47;
-						var isJPG: Boolean = b0 == 0xff && b1 == 0xd8 && b2 == 0xff && b3 == 0xe0;
+//						var isJPG: Boolean = b0 == 0xff && b1 == 0xd8 && b2 == 0xff && b3 == 0xe0;
+//						var isPNG: Boolean = b0 == 0x89 && b1 == 0x50 && b2 == 0x4E && b3 == 0x47;
 						 
-						// 0x89 P N G
-						if(isPNG || isJPG) {
+						if(isResultContentCorrect(IMAGE_FORMAT, rawData))
+						{
 							var imageLoader: LoaderWithAssociatedData = new LoaderWithAssociatedData();
 							imageLoader.associatedData = urlLoader.associatedData;
 							md_imageLoaderToRequestMap[imageLoader] = urlRequest;
 							imageLoader.contentLoaderInfo.addEventListener(Event.COMPLETE, onImageLoaded);
 				            imageLoader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, onImageLoadingIOError);
-							imageLoader.loadBytes(rawData);
+							trace(rawData.length);
+							imageLoader.loadBytes(ObjectUtil.copy( rawData ) as ByteArray);
 							return;
 						}
 						break;
 						
 					case JSON_FORMAT:
-						dispatchResult(rawData, urlRequest, urlLoader.associatedData);
-						return;
+						if(isResultContentCorrect(JSON_FORMAT, s_data))
+						{
+							dispatchResult(rawData, urlRequest, urlLoader.associatedData);
+							return;
+						}
 						break;
 					case XML_FORMAT:
 						// < - this is quite a weak heuristics
 						if(b0 == 0x3C) {
-							s_data = rawData.readUTFBytes(rawData.length);
+//							s_data = rawData.readUTFBytes(rawData.length);
 							try {
-								var x: XML = new XML(s_data);
 								
 								//FAST check 401 - Unauthorized
 								if (HTMLUtils.isHTMLFormat(s_data) && HTMLUtils.isHTML401Unauthorized(s_data))
@@ -861,11 +869,14 @@ package com.iblsoft.flexiweather.utils
 									return;
 								}
 								
-								if(isResultContentCorrect(XML_FORMAT, x))
+								if(isResultContentCorrect(XML_FORMAT, s_data)) 
+								{
+									var x: XML = new XML(s_data);
 									dispatchResult(x, urlRequest, urlLoader.associatedData);
-								else
-									dispatchFault(urlRequest, urlLoader.associatedData, ERROR_INVALID_CONTENT, 'Invalid XML content');
-								return;
+//								} else {
+//									dispatchFault(urlRequest, urlLoader.associatedData, ERROR_INVALID_CONTENT, 'Invalid XML content');
+									return;
+								}
 							}
 							catch(e: Error) {
 								// if XML parsing fails, just continue with other formats
@@ -874,17 +885,21 @@ package com.iblsoft.flexiweather.utils
 						break;
 					case TEXT_FORMAT:
 						// < - this is quite a weak heuristics
-						s_data = rawData.readUTFBytes(rawData.length);
+//						s_data = rawData.readUTFBytes(rawData.length);
 						if(isResultContentCorrect(TEXT_FORMAT, s_data))
+						{
 							dispatchResult(x, urlRequest, urlLoader.associatedData);
-						else
-							dispatchFault(urlRequest, urlLoader.associatedData, ERROR_INVALID_CONTENT, 'Invalid TEXT content');
-						return;
+							return;
+						}
+//						else
+//							dispatchFault(urlRequest, urlLoader.associatedData, ERROR_INVALID_CONTENT, 'Invalid TEXT content');
 						break;
 				}
 			}
 //			
-				dispatchResult(rawData, urlRequest, urlLoader.associatedData);
+			//we should probably dispatch fault, if any other format has not dispatched result
+//			dispatchResult(rawData, urlRequest, urlLoader.associatedData);
+			dispatchFault(urlRequest, urlLoader.associatedData, ERROR_INVALID_CONTENT, 'Invalid content');
 		}
 
 		protected function onDataIOError(event: IOErrorEvent): void

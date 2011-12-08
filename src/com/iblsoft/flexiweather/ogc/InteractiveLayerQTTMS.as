@@ -36,6 +36,7 @@ package com.iblsoft.flexiweather.ogc
 	import flash.utils.Timer;
 	
 	import mx.controls.Alert;
+	import mx.events.DynamicEvent;
 	
 	import spark.primitives.Graphic;
 	
@@ -254,6 +255,33 @@ package com.iblsoft.flexiweather.ogc
 		{
 			var url: String = urlRequest.url;
 			dataLoader.load(urlRequest, associatedData, s_backgroundJobName);
+		}
+		
+		/**
+		 * Received when m_loader receive XML instead of image. You can override this function and for instance check if ServiceException xml is not received. 
+		 * @param event
+		 * 
+		 */		
+		override protected function onXMLReceived(event: DynamicEvent): void
+		{
+			var xmlSource: String = event['xml'] as String;
+			var xml: XML = new XML(xmlSource);
+			var topName: String = xml.name().localName;
+			var children: XMLList = xml.children();
+			if (children)
+			{
+				var child: XML = children[0] as XML;
+				var childName: String = (child.name() as QName).localName;
+				if (child.hasOwnProperty('@code'))
+				{
+					var codeName: String = child.@code;
+					
+					if (topName == 'ServiceExceptionReport' && childName == 'ServiceException' && codeName == 'OperationNotSupported')
+					{
+						notifyOperationNotSupported();
+					}
+				}
+			}
 		}
 		
 		/**
@@ -755,6 +783,11 @@ package com.iblsoft.flexiweather.ogc
 			if(!width || !height)
 				return;
 
+			if (status == InteractiveDataLayer.STATE_DATA_LOADED_WITH_ERRORS)
+			{
+				drawNoDataPreview(graphics, f_width, f_height);
+				return;
+			}
 			
 			var newCRS: String = container.crs;
 			var tilingInfo: QTTilingInfo = m_cfg.getQTTilingInfoForCRS(newCRS);
@@ -783,6 +816,16 @@ package com.iblsoft.flexiweather.ogc
 			graphics.beginBitmapFill(bd, matrix, false, true);
 			graphics.drawRect(0, 0, f_width, f_height);
 			graphics.endFill();
+		}
+		
+		private function drawNoDataPreview(graphics: Graphics, f_width: Number, f_height: Number): void
+		{
+			graphics.lineStyle(2, 0xcc0000, 0.7, true);
+			graphics.moveTo(0, 0);
+			graphics.lineTo(f_width - 1, f_height - 1);
+			graphics.moveTo(0, f_height - 1);
+			graphics.lineTo(f_width - 1, 0);
+			
 		}
 		
 		private var _tf:TextField = new TextField();

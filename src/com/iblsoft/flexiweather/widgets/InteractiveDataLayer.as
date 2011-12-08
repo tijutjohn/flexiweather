@@ -5,13 +5,27 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.ExceptionUtils;
 	import com.iblsoft.flexiweather.utils.UniURLLoader;
 	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
+	import com.iblsoft.flexiweather.utils.loaders.ImageAndXMLLoader;
 	
 	import flash.events.Event;
 	import flash.events.ProgressEvent;
+	
+	import mx.events.DynamicEvent;
 
 	[Event (name="statusChanged", type="flash.events.Event")]
 	public class InteractiveDataLayer extends InteractiveLayer
 	{
+		/**
+		 *
+		 *  @eventType operationNotSupported
+		 *  
+		 *  @langversion 3.0
+		 *  @playerversion Flash 9
+		 *  @playerversion AIR 1.1
+		 *  @productversion Flex 3
+		 */
+		public static const OPERATION_NOT_SUPPORTED: String = 'operationNotSupported';
+		
 		/**
 		 *
 		 *  @eventType progress
@@ -112,7 +126,7 @@ package com.iblsoft.flexiweather.widgets
 			return _status;
 		}
 		
-		protected var m_loader: UniURLLoader = new UniURLLoader();
+		protected var m_loader: ImageAndXMLLoader = new ImageAndXMLLoader();
 		
 		public function InteractiveDataLayer(container:InteractiveWidget)
 		{
@@ -120,6 +134,7 @@ package com.iblsoft.flexiweather.widgets
 			
 			setStatus(STATE_EMPTY);
 			
+			m_loader.addEventListener(ImageAndXMLLoader.XML_RECEIVED, onXMLReceived);
 			m_loader.addEventListener(UniURLLoader.DATA_LOADED, onDataLoaded);
 			m_loader.addEventListener(ProgressEvent.PROGRESS, onDataProgress);
 			m_loader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onDataLoadFailed);
@@ -141,7 +156,15 @@ package com.iblsoft.flexiweather.widgets
 			invalidateProperties();
 		}
 		
-		
+		/**
+		 * Received when m_loader receive XML instead of image. You can override this function and for instance check if ServiceException xml is not received. 
+		 * @param event
+		 * 
+		 */		
+		protected function onXMLReceived(event: DynamicEvent): void
+		{
+			
+		}
 		protected function updateData(b_forceUpdate: Boolean): void
 		{
 		}
@@ -166,8 +189,12 @@ package com.iblsoft.flexiweather.widgets
 		 ****************************************************************************************************************/
 		protected function setStatus(newStatus: String): void
 		{
+			
+			trace("SET STATUS: " + newStatus + " for " + this.name);
 			_status = newStatus;
 			dispatchEvent(new Event("statusChanged"));
+			
+			
 		}
 		
 		/**
@@ -189,7 +216,8 @@ package com.iblsoft.flexiweather.widgets
 		 */		
 		protected function notifyLoadingFinished(): void
 		{
-			setStatus(STATE_DATA_LOADED);
+			if (_status != STATE_DATA_LOADED_WITH_ERRORS)
+				setStatus(STATE_DATA_LOADED);
 			
 			var event: InteractiveLayerEvent = new InteractiveLayerEvent(LOADING_FINISHED, true);
 			event.interactiveLayer = this;
@@ -249,7 +277,22 @@ package com.iblsoft.flexiweather.widgets
 			notifyLoadingError();
 		}
 		
-		public function get dataLoader(): UniURLLoader
+		
+		/**
+		 * Dispatch <code>InteractiveDataLayer.OPERATION_NOT_SUPPORTED</code> event. 
+		 * 
+		 */		
+		protected function notifyOperationNotSupported(): void
+		{
+			setStatus(STATE_DATA_LOADED_WITH_ERRORS);
+			
+			var event: InteractiveLayerEvent = new InteractiveLayerEvent(OPERATION_NOT_SUPPORTED, true)
+			event.interactiveLayer = this;
+			dispatchEvent(event);
+			
+		}
+		
+		public function get dataLoader(): ImageAndXMLLoader
 		{ return m_loader; } 
 	}
 }
