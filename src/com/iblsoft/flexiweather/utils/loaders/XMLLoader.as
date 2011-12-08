@@ -28,9 +28,13 @@ package com.iblsoft.flexiweather.utils.loaders
 			
 			if (data is String)
 			{
-				var xml: XML = new XML(data);
-				if (xml)
-					return true;
+				try {
+					var xml: XML = new XML(data);
+					if (xml)
+						return true;
+				} catch (error: Error) {
+					return false;
+				}
 			}
 			
 			return false

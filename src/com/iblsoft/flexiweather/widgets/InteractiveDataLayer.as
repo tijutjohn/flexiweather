@@ -5,7 +5,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.ExceptionUtils;
 	import com.iblsoft.flexiweather.utils.UniURLLoader;
 	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
-	import com.iblsoft.flexiweather.utils.loaders.ImageAndXMLLoader;
+	import com.iblsoft.flexiweather.utils.loaders.WMSImageLoader;
 	
 	import flash.events.Event;
 	import flash.events.ProgressEvent;
@@ -98,12 +98,8 @@ package com.iblsoft.flexiweather.widgets
 		public static const STATE_DATA_LOADED: String = 'data loaded';
 
 		/**
-		 * Data error layer state. It is set when IOError occurs.
-		 */		
-		public static const STATE_DATA_ERROR: String = 'data error';
-		
-		/**
 		 * Layer state where some of data are loaded, but some data are not loaded because of error. E.g. Loading 50 tiles, but some tiles are not loaded (no returned from server).
+		 * Also IOErrors belong here.
 		 * You need to dispatch this state in your custom class which extends <code>InteractiveDataLayer</code>
 		 */		
 		public static const STATE_DATA_LOADED_WITH_ERRORS: String = 'data loaded with errors';
@@ -126,7 +122,7 @@ package com.iblsoft.flexiweather.widgets
 			return _status;
 		}
 		
-		protected var m_loader: ImageAndXMLLoader = new ImageAndXMLLoader();
+		protected var m_loader: WMSImageLoader = new WMSImageLoader();
 		
 		public function InteractiveDataLayer(container:InteractiveWidget)
 		{
@@ -134,7 +130,6 @@ package com.iblsoft.flexiweather.widgets
 			
 			setStatus(STATE_EMPTY);
 			
-			m_loader.addEventListener(ImageAndXMLLoader.XML_RECEIVED, onXMLReceived);
 			m_loader.addEventListener(UniURLLoader.DATA_LOADED, onDataLoaded);
 			m_loader.addEventListener(ProgressEvent.PROGRESS, onDataProgress);
 			m_loader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onDataLoadFailed);
@@ -156,15 +151,6 @@ package com.iblsoft.flexiweather.widgets
 			invalidateProperties();
 		}
 		
-		/**
-		 * Received when m_loader receive XML instead of image. You can override this function and for instance check if ServiceException xml is not received. 
-		 * @param event
-		 * 
-		 */		
-		protected function onXMLReceived(event: DynamicEvent): void
-		{
-			
-		}
 		protected function updateData(b_forceUpdate: Boolean): void
 		{
 		}
@@ -230,7 +216,7 @@ package com.iblsoft.flexiweather.widgets
 		 */		
 		protected function notifyLoadingError(): void
 		{
-			setStatus(STATE_DATA_ERROR);
+			setStatus(STATE_DATA_LOADED_WITH_ERRORS);
 			
 			var event: InteractiveLayerEvent = new InteractiveLayerEvent(LOADING_ERROR, true);
 			event.interactiveLayer = this;
@@ -292,7 +278,7 @@ package com.iblsoft.flexiweather.widgets
 			
 		}
 		
-		public function get dataLoader(): ImageAndXMLLoader
+		public function get dataLoader(): WMSImageLoader
 		{ return m_loader; } 
 	}
 }

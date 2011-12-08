@@ -55,8 +55,6 @@ package com.iblsoft.flexiweather.ogc
 		public static var drawBorders: Boolean = false;
 		public static var drawDebugText: Boolean = false;
 		
-//		protected var m_loader: UniURLLoader = new UniURLLoader();
-		
 		private var _tileIndicesMapper: TileIndicesMapper;
 		private var _viewPartsReflections: ViewPartReflectionsHelper;
 		
@@ -255,33 +253,6 @@ package com.iblsoft.flexiweather.ogc
 		{
 			var url: String = urlRequest.url;
 			dataLoader.load(urlRequest, associatedData, s_backgroundJobName);
-		}
-		
-		/**
-		 * Received when m_loader receive XML instead of image. You can override this function and for instance check if ServiceException xml is not received. 
-		 * @param event
-		 * 
-		 */		
-		override protected function onXMLReceived(event: DynamicEvent): void
-		{
-			var xmlSource: String = event['xml'] as String;
-			var xml: XML = new XML(xmlSource);
-			var topName: String = xml.name().localName;
-			var children: XMLList = xml.children();
-			if (children)
-			{
-				var child: XML = children[0] as XML;
-				var childName: String = (child.name() as QName).localName;
-				if (child.hasOwnProperty('@code'))
-				{
-					var codeName: String = child.@code;
-					
-					if (topName == 'ServiceExceptionReport' && childName == 'ServiceException' && codeName == 'OperationNotSupported')
-					{
-						notifyOperationNotSupported();
-					}
-				}
-			}
 		}
 		
 		/**

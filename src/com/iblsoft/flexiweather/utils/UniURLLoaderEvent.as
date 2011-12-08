@@ -8,7 +8,7 @@ package com.iblsoft.flexiweather.utils
 	{
 		protected var m_result: Object;
 		protected var m_request: URLRequest;
-		protected var m_loader: URLLoader
+		protected var m_loader: URLLoader;
 		protected var m_associatedData: Object;
 
 		public function UniURLLoaderEvent(

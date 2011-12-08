@@ -17,7 +17,6 @@ package com.iblsoft.flexiweather.ogc
 
 	public class InteractiveLayerWFS extends InteractiveDataLayer
 	{
-//		private var m_loader: UniURLLoader = new UniURLLoader();
 		private var ma_features: ArrayCollection = new ArrayCollection();
 		private var m_featuresContainer: Sprite = new Sprite();
 		private var ma_queryFeatures: ArrayCollection = new ArrayCollection();
@@ -34,8 +33,6 @@ package com.iblsoft.flexiweather.ogc
 				version: Version)
 		{
 			super(container);
-			
-//			m_loader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onDataLoadFailed);
 			
 			m_version = version;
 			m_featuresContainer.mouseEnabled = false;

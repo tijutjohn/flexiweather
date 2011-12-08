@@ -66,6 +66,7 @@ package com.iblsoft.flexiweather.utils
 		public static const JSON_FORMAT: String = 'json';
 		public static const TEXT_FORMAT: String = 'text';
 		public static const XML_FORMAT: String = 'xml';
+		public static const HTML_FORMAT: String = 'html';
 		
 		public static var debugConsole: IConsole;
 		
@@ -883,12 +884,18 @@ package com.iblsoft.flexiweather.utils
 							}
 						}
 						break;
+					case HTML_FORMAT:
+						if(isResultContentCorrect(HTML_FORMAT, s_data))
+						{
+							dispatchResult(s_data, urlRequest, urlLoader.associatedData);
+							return;
+						}
+						break;
 					case TEXT_FORMAT:
 						// < - this is quite a weak heuristics
-//						s_data = rawData.readUTFBytes(rawData.length);
 						if(isResultContentCorrect(TEXT_FORMAT, s_data))
 						{
-							dispatchResult(x, urlRequest, urlLoader.associatedData);
+							dispatchResult(s_data, urlRequest, urlLoader.associatedData);
 							return;
 						}
 //						else

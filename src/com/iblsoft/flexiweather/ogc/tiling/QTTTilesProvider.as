@@ -2,6 +2,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 {
 	import com.iblsoft.flexiweather.utils.UniURLLoader;
 	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
+	import com.iblsoft.flexiweather.utils.loaders.WMSImageLoader;
 	
 	import flash.display.Bitmap;
 	import flash.events.ProgressEvent;
@@ -33,7 +34,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 				for each (var data: QTTTileRequest in tilesIndices)
 				{
 					var customAssociatedData: Object = {associatedData: data.associatedData, tileRequest: data};
-					var m_loader: UniURLLoader = new UniURLLoader();
+					var m_loader: WMSImageLoader = new WMSImageLoader();
 					m_loader.addEventListener(UniURLLoader.DATA_LOADED, onDataLoaded);
 					m_loader.addEventListener(ProgressEvent.PROGRESS, onDataProgress);
 					m_loader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onDataLoadFailed);						

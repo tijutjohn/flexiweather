@@ -9,6 +9,8 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.utils.ISO8601Parser;
 	import com.iblsoft.flexiweather.utils.UniURLLoader;
 	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
+	import com.iblsoft.flexiweather.utils.loaders.WMSFeatureInfoLoader;
+	import com.iblsoft.flexiweather.utils.loaders.WMSImageLoader;
 	import com.iblsoft.flexiweather.widgets.BackgroundJob;
 	import com.iblsoft.flexiweather.widgets.GlowLabel;
 	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
@@ -43,7 +45,7 @@ package com.iblsoft.flexiweather.ogc
 	public class InteractiveLayerMSBase extends InteractiveDataLayer
 			implements ISynchronisedObject, IConfigurableLayer
 	{
-		protected var m_featureInfoLoader: UniURLLoader = new UniURLLoader();
+		protected var m_featureInfoLoader: WMSFeatureInfoLoader = new WMSFeatureInfoLoader();
 
 		/**
 		 * Bitmap image holder for legend 
@@ -346,7 +348,7 @@ package com.iblsoft.flexiweather.ogc
 				
 				var associatedData: Object = {canvas: canvas, labelAlign: labelAlign, callback: callback, useCache: useCache, legendScaleX: legendScaleX, legendScaleY: legendScaleY, width: w, height: h};
 				
-				var legendLoader: UniURLLoader = new UniURLLoader();
+				var legendLoader: WMSImageLoader = new WMSImageLoader();
 				legendLoader.addEventListener(UniURLLoader.DATA_LOADED, onLegendLoaded);
 				legendLoader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onLegendLoadFailed);
 			
@@ -417,7 +419,7 @@ package com.iblsoft.flexiweather.ogc
         	}
         }
         
-        private function removeLegendListeners(legendLoader: UniURLLoader): void
+        private function removeLegendListeners(legendLoader: WMSImageLoader): void
         {
         	legendLoader.removeEventListener(UniURLLoader.DATA_LOADED, onLegendLoaded);
 			legendLoader.removeEventListener(UniURLLoader.DATA_LOAD_FAILED, onLegendLoadFailed);
@@ -440,7 +442,7 @@ package com.iblsoft.flexiweather.ogc
 					m_legendImage = result;
 				createLegend(result, event.associatedData.canvas, event.associatedData.labelAlign, event.associatedData.callback, legendScaleX, legendScaleY, event.associatedData.width, event.associatedData.height);
 			}
-			removeLegendListeners(event.target as UniURLLoader);
+			removeLegendListeners(event.target as WMSImageLoader);
 		}
 		
 		
@@ -527,7 +529,7 @@ package com.iblsoft.flexiweather.ogc
 		protected function onLegendLoadFailed(event: UniURLLoaderEvent): void
 		{
 			debug("onLegendLoadFailed");
-			removeLegendListeners(event.target as UniURLLoader);
+			removeLegendListeners(event.target as WMSImageLoader);
 		}
         
         
