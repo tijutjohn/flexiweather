@@ -817,11 +817,9 @@ package com.iblsoft.flexiweather.utils
 			rawData.position = 0;
 			
 			var s_data: String;
-			trace(rawData.length);
 			
 			var test: ByteArray = ObjectUtil.copy( rawData ) as ByteArray;
 			s_data = test.readUTFBytes(test.length);
-			trace(rawData.length);
 			for each (var currFormat: String in allowedFormats)
 			{
 				switch (currFormat)
@@ -829,8 +827,6 @@ package com.iblsoft.flexiweather.utils
 					case BINARY_FORMAT:
 						if(isResultContentCorrect(BINARY_FORMAT, rawData))
 							dispatchResult(rawData, urlRequest, urlLoader.associatedData);
-//						else
-//							dispatchFault(urlRequest, urlLoader.associatedData);
 						return;
 						break;
 					case IMAGE_FORMAT:
@@ -844,7 +840,6 @@ package com.iblsoft.flexiweather.utils
 							md_imageLoaderToRequestMap[imageLoader] = urlRequest;
 							imageLoader.contentLoaderInfo.addEventListener(Event.COMPLETE, onImageLoaded);
 				            imageLoader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, onImageLoadingIOError);
-							trace(rawData.length);
 							imageLoader.loadBytes(ObjectUtil.copy( rawData ) as ByteArray);
 							return;
 						}
@@ -860,7 +855,6 @@ package com.iblsoft.flexiweather.utils
 					case XML_FORMAT:
 						// < - this is quite a weak heuristics
 						if(b0 == 0x3C) {
-//							s_data = rawData.readUTFBytes(rawData.length);
 							try {
 								
 								//FAST check 401 - Unauthorized
@@ -874,8 +868,6 @@ package com.iblsoft.flexiweather.utils
 								{
 									var x: XML = new XML(s_data);
 									dispatchResult(x, urlRequest, urlLoader.associatedData);
-//								} else {
-//									dispatchFault(urlRequest, urlLoader.associatedData, ERROR_INVALID_CONTENT, 'Invalid XML content');
 									return;
 								}
 							}
@@ -898,14 +890,11 @@ package com.iblsoft.flexiweather.utils
 							dispatchResult(s_data, urlRequest, urlLoader.associatedData);
 							return;
 						}
-//						else
-//							dispatchFault(urlRequest, urlLoader.associatedData, ERROR_INVALID_CONTENT, 'Invalid TEXT content');
 						break;
 				}
 			}
 //			
-			//we should probably dispatch fault, if any other format has not dispatched result
-//			dispatchResult(rawData, urlRequest, urlLoader.associatedData);
+			//dispatch fault, if any other format has not dispatched result
 			dispatchFault(urlRequest, urlLoader.associatedData, ERROR_INVALID_CONTENT, 'Invalid content');
 		}
 

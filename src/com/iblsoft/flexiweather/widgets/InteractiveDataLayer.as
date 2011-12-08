@@ -175,12 +175,8 @@ package com.iblsoft.flexiweather.widgets
 		 ****************************************************************************************************************/
 		protected function setStatus(newStatus: String): void
 		{
-			
-			trace("SET STATUS: " + newStatus + " for " + this.name);
 			_status = newStatus;
 			dispatchEvent(new Event("statusChanged"));
-			
-			
 		}
 		
 		/**

@@ -362,6 +362,11 @@ package com.iblsoft.flexiweather.widgets
 		 */		
 		private function setViewBBoxFromRectangle(viewBBox: BBox, b_finalChange: Boolean): void
 		{
+			
+			//check max distance of viewBBox
+			var maxDistance: Number = viewBBox.getBBoxMaximumDistance(container.getCRS());
+			trace("Layer zoom: " + maxDistance);
+			
 			var extentBBox: BBox = container.getExtentBBox();
 			var allowHorizontalWrap: Boolean = allowWrapHorizontally();
 			

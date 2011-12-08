@@ -68,6 +68,17 @@ package com.iblsoft.flexiweather.ogc
 			var bbox: BBox = new BBox(minLalo.x, minLalo.y, maxLalo.x, maxLalo.y);
 			return bbox;
 		}
+		
+		public function getBBoxMaximumDistance(crs: String): Number
+		{
+			var prj: Projection = Projection.getByCRS(crs);
+			if(prj == null)
+				return Number.MAX_VALUE;
+			var minLalo: Coord = prj.prjXYToLaLoCoord(mf_xMin, mf_yMin);
+			var maxLalo: Coord = prj.prjXYToLaLoCoord(mf_xMax, mf_yMax);
+			
+			return minLalo.distanceTo(maxLalo);
+		}
 
 
 		public function toBBOXString(): String

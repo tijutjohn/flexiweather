@@ -8,10 +8,40 @@ package com.iblsoft.flexiweather.proj
 	{
 		public var crs: String;
 		
+		private var toRadConst: Number = Math.PI / 180;
+		
 		public function Coord(s_crs: String, f_x: Number, f_y: Number)
 		{
 			super(f_x, f_y);
 			crs = s_crs;
+		}
+		
+		private function toRad(degree: Number): Number
+		{
+			return degree * toRadConst;
+		}
+		/**
+		 * Returns distance between 2 coordinates on Earth. 
+		 * @param c
+		 * @return 
+		 * 
+		 */		
+		public function distanceTo(c: Coord): Number
+		{
+			var r: Number = 6371; // km
+			
+			//be sure coords are in LatLong
+			var dLat: Number = toRad(c.y - y);
+			var dLon: Number = toRad(c.x - x);
+			var lat1: Number = toRad(y);
+			var lat2: Number = toRad(c.y);
+			
+			var a: Number = Math.sin(dLat/2) * Math.sin(dLat/2) +
+				Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2); 
+			var c2: Number = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+			var d: Number = r * c2;
+			
+			return d;
 		}
 		
 		public function equalsCoord(c: Coord): Boolean
