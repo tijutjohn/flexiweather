@@ -21,7 +21,7 @@
 				</s:dataProvider>
 			</s:ButtonBar>
 		</s:HGroup>
-		<s:Label text="ViewBBox: {viewBBox}"/>
+		<!--s:Label text="ViewBBox: {viewBBox}"/>
 		<s:Label text="Negotiated BBoxes (latest first)" fontWeight="bold"/>
 		<s:List dataProvider="{negotiatedBBoxes}" width="100%" borderVisible="false">
 			<s:itemRenderer>
@@ -42,7 +42,7 @@
 			<s:layout>
 				<s:VerticalLayout requestedRowCount="{negotiatedBBoxes.length}"/>
 			</s:layout>
-		</s:List>
+		</s:List-->
 	</s:VGroup>  
 	
 	<fx:Script>
