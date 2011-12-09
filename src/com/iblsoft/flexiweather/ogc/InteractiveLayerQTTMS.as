@@ -5,6 +5,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.ogc.cache.WMSTileCache;
 	import com.iblsoft.flexiweather.ogc.tiling.ITilesProvider;
 	import com.iblsoft.flexiweather.ogc.tiling.QTTTileRequest;
+	import com.iblsoft.flexiweather.ogc.tiling.QTTTilesProvider;
 	import com.iblsoft.flexiweather.ogc.tiling.TileIndex;
 	import com.iblsoft.flexiweather.ogc.tiling.TiledArea;
 	import com.iblsoft.flexiweather.ogc.tiling.TilingUtils;
@@ -59,6 +60,18 @@ package com.iblsoft.flexiweather.ogc
 		private var _viewPartsReflections: ViewPartReflectionsHelper;
 		
 		private var _avoidTiling: Boolean;
+
+
+		public function get tilesProvider():ITilesProvider
+		{
+			return _tilesProvider;
+		}
+
+		public function set tilesProvider(value:ITilesProvider):void
+		{
+			_tilesProvider = value;
+		}
+
 		public function set avoidTiling(value:Boolean):void
 		{
 			_avoidTiling = value;
@@ -73,8 +86,6 @@ package com.iblsoft.flexiweather.ogc
 		private var ma_specialCacheStrings: Array;
 		
 		protected var m_timer: Timer = new Timer(10000);
-		
-		
 		
 		protected var m_cfg: QTTMSLayerConfiguration;
 		public function get configuration():ILayerConfiguration
@@ -98,7 +109,7 @@ package com.iblsoft.flexiweather.ogc
 		private var mi_tilesCurrentlyLoading: int;
 		private var mi_tilesLoadingTotal: int;
 		
-		public var tilesProvider: ITilesProvider;
+		private var _tilesProvider: ITilesProvider;
 		
 		public function InteractiveLayerQTTMS(
 				container: InteractiveWidget,
@@ -138,6 +149,8 @@ package com.iblsoft.flexiweather.ogc
 			m_tilingUtils.maximumZoom = maximumZoomLevel;
 			
 			m_jobs = new TileJobs();
+			
+			tilesProvider = new QTTTilesProvider();
 		}
 
 		public function serialize(storage: Storage): void
@@ -448,7 +461,6 @@ package com.iblsoft.flexiweather.ogc
 			
 			if (baseURLPattern)
 			{
-				
 				loadRequests = prepareData(tiledAreas);
 				
 			} else {

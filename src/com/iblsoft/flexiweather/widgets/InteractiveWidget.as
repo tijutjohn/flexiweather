@@ -14,6 +14,7 @@ package com.iblsoft.flexiweather.widgets
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
+	import flash.system.Capabilities;
 	import flash.utils.Timer;
 	import flash.utils.clearTimeout;
 	import flash.utils.getTimer;
@@ -610,6 +611,27 @@ package com.iblsoft.flexiweather.widgets
 			return m_crsProjection.wrapsHorizontally; 
 		}
 
+		public function getMapScale(): Number
+		{
+			var w: int = width;
+			var h: int = height;
+			var bbox: BBox = m_viewBBox;
+			var prj: Projection = m_crsProjection;
+			
+			var dpi: int = Capabilities.screenDPI;
+			var maxDistanceOnEarthInKm: Number = bbox.getBBoxMaximumDistance(crs);
+			var screenDistanceInPixels: Number = Math.sqrt(w * w + h * h);
+			var screenDistanceInInches: Number = screenDistanceInPixels / dpi;
+			
+			var screenDistanceInKm: Number = screenDistanceInInches * 2.54 * 0.00001;
+			
+			var scale: Number = screenDistanceInKm / maxDistanceOnEarthInKm;
+				
+			trace("distanceInKm: " + screenDistanceInKm + " scale: " + scale);
+			
+			return scale
+			
+		}
 		/**
 		 * Set View bounding box for all layers
 		 *  

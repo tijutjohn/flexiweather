@@ -365,6 +365,13 @@ package com.iblsoft.flexiweather.widgets
 			
 			//check max distance of viewBBox
 			var maxDistance: Number = viewBBox.getBBoxMaximumDistance(container.getCRS());
+			var mapScale: Number = container.getMapScale();
+			if (mapScale > 1)
+			{
+				//do not support map scale more than 1:1
+				trace("do not support map scale more than 1:1");
+				return;
+			}
 			trace("Layer zoom: " + maxDistance);
 			
 			var extentBBox: BBox = container.getExtentBBox();

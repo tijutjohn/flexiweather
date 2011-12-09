@@ -2,6 +2,7 @@ package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.ogc.editable.IInteractiveLayerProvider;
 	import com.iblsoft.flexiweather.ogc.tiling.InteractiveLayerWMSWithQTT;
+	import com.iblsoft.flexiweather.ogc.tiling.QTTTilesProvider;
 	import com.iblsoft.flexiweather.ogc.tiling.TileIndex;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.utils.UniURLLoader;
@@ -67,6 +68,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			trace("create new QTT layer: " + this);
 			var l: InteractiveLayerQTTMS = new InteractiveLayerQTTMS(iw, this);
+			l.tilesProvider = new QTTTilesProvider();
 			l.name = label;
 			l.layerName = label;
 			return l;
