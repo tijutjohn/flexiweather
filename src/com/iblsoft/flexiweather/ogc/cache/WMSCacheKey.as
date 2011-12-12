@@ -4,17 +4,13 @@ package com.iblsoft.flexiweather.ogc.cache
 	
 	import flash.net.URLRequest;
 	
-	public class WMSCacheKey
+	public class WMSCacheKey extends CacheKey
 	{
-		internal var ms_key: String;
-		internal var ms_crs: String;
-		internal var m_bbox: BBox;
-		
 		public function WMSCacheKey(s_crs: String, bbox: BBox, url: URLRequest)
 		{
-			ms_crs = s_crs;
-			m_bbox = bbox;
-			ms_key = s_crs + "|" + bbox.toBBOXString();
+			super(s_crs, bbox, url);
+			
+			key = s_crs + "|" + bbox.toBBOXString();
 			var a: Array = [];
 			var getVars: Array;
 			var s: String;
@@ -47,16 +43,13 @@ package com.iblsoft.flexiweather.ogc.cache
 					s = obj.name;
 					
 					if (type == 'data')
-						ms_key += "|" + s + "=" + url.data[s]; 
+						key += "|" + s + "=" + url.data[s]; 
 					if (type == 'get')
-						ms_key += "|" + s + "=" + getURLParameterValue(obj.string);
+						key += "|" + s + "=" + getURLParameterValue(obj.string);
 				}
 			} 
 			
 		}
-		
-		public function toString(): String
-		{ return ms_key; }
 		
 		
 		private function getURLParameterName(str: String): String

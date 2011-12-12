@@ -1,0 +1,30 @@
+package com.iblsoft.flexiweather.ogc.cache
+{
+	import com.iblsoft.flexiweather.ogc.BBox;
+	
+	import flash.net.URLRequest;
+
+	public dynamic class CacheItemMetadata
+	{
+		public var crs: String;
+		public var bbox: BBox;
+		public var url: URLRequest;
+			
+		public function CacheItemMetadata()
+		{
+			super();
+		}
+		
+		/*
+		static public function createFromObject(object: Object): CacheItemMetadata
+		{
+			var metadata: CacheItemMetadata = new CacheItemMetadata();
+			for (var name: String in object)
+			{
+				var obj: * = object[name];
+				metadata[name] = object;
+			}
+			return metadata;
+		}*/
+	}
+}

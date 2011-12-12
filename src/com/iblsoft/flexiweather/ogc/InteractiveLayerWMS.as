@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
+	import com.iblsoft.flexiweather.ogc.cache.CacheItemMetadata;
 	import com.iblsoft.flexiweather.ogc.cache.WMSCache;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
@@ -168,8 +169,13 @@ package com.iblsoft.flexiweather.ogc
 			var wmsCache: WMSCache = m_cache as WMSCache;
 			if(!b_forceUpdate)
 			{
-				var isCached: Boolean = wmsCache.isImageCached(s_currentCRS, currentViewBBox, request)
-				var imgTest: Bitmap = wmsCache.getImage(s_currentCRS, currentViewBBox, request);
+				var itemMetadata: CacheItemMetadata = new CacheItemMetadata();
+				itemMetadata.crs = s_currentCRS;
+				itemMetadata.bbox = currentViewBBox;
+				itemMetadata.url = request;
+				
+				var isCached: Boolean = wmsCache.isItemCached(itemMetadata)
+				var imgTest: Bitmap = wmsCache.getCacheItemBitmap(itemMetadata);
 				if (isCached && imgTest != null) {
 					img = imgTest;
 				}
@@ -353,11 +359,18 @@ package com.iblsoft.flexiweather.ogc
 						++i;
 				}
 				ma_imageParts.addItem(imagePart);
-				wmsCache.addImage(
-						imagePart.m_image,
-						imagePart.ms_imageCRS,
-						imagePart.m_imageBBox,
-						event.request);
+				var metadata: CacheItemMetadata = new CacheItemMetadata();
+				metadata.crs = imagePart.ms_imageCRS;
+				metadata.bbox = imagePart.m_imageBBox;
+				metadata.url = event.request;
+
+				wmsCache.addCacheItem( imagePart.m_image, metadata);
+				
+//				wmsCache.addCacheItem(
+//						imagePart.m_image,
+//						imagePart.ms_imageCRS,
+//						imagePart.m_imageBBox,
+//						event.request);
 				invalidateDynamicPart();
 			}
 			else {

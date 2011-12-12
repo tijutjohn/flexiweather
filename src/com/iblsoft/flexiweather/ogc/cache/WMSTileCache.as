@@ -11,7 +11,7 @@ package com.iblsoft.flexiweather.ogc.cache
 	import flash.utils.Dictionary;
 	import flash.utils.Timer;
 	
-	public class WMSTileCache implements ICache
+	public class WMSTileCache extends WMSCache
 	{
 		public var maxCachedItems: int = 300;
 		
@@ -29,7 +29,7 @@ package com.iblsoft.flexiweather.ogc.cache
 		
 		private var _animationModeEnabled: Boolean;
 		
-		protected var md_cache: Dictionary = new Dictionary();
+//		protected var md_cache: Dictionary = new Dictionary();
 		private var _itemCount: int = 0;
 		private var _items: Array = [];
 		
@@ -54,7 +54,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			
 		}
 		
-		public function debugCache(): String
+		override public function debugCache(): String
 		{
 			var str: String = 'WMSTileCache';
 			str += '\t cache items count: ' + _itemCount;
@@ -68,13 +68,6 @@ package com.iblsoft.flexiweather.ogc.cache
 			
 			return str;
 		}
-		public function setAnimationModeEnable(value: Boolean): void
-		{
-			if (_animationModeEnabled != value)
-			{
-				_animationModeEnabled = value;
-			}
-		}
 		
 		private function onExpiration(event: TimerEvent): void
 		{
@@ -86,7 +79,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			var currTime: Date = new Date();
 			for (var s_key: String in md_cache)
 			{
-				var obj: Object  = md_cache[s_key];
+				var obj: CacheItem  = md_cache[s_key] as CacheItem;
 				
 				var lastUsed: Date = obj.lastUsed as Date;
 				if (lastUsed)
@@ -94,35 +87,40 @@ package com.iblsoft.flexiweather.ogc.cache
 					var diff: Number = currTime.time - lastUsed.time;
 					if (diff > (_expirationTime * 1000))
 					{
-//						debug("TILE from cache is expired, will be removed");
+						debug("TILE from cache is expired, will be removed");
 						if (!isTileOnDisplayList(s_key))
 						{
-							deleteTile(s_key);
-//						} else {
-//							debug("TILE IS DISPLAY LIST, DO NOT DELETE IT");
+							deleteCacheItemByKey(s_key);
+						} else {
+							debug("TILE IS DISPLAY LIST, DO NOT DELETE IT");
 						}
 					}
-//					debug("diff: " + diff);
+					debug("diff: " + diff);
 				}
 			}
 		}
 		
 		private function isTileOnDisplayList(s_key: String): Boolean
 		{
-			var object: Object = md_cache[s_key];
-			var bitmap: Bitmap = object.image as Bitmap;
+			var item: CacheItem = md_cache[s_key] as CacheItem;
+			var bitmap: Bitmap = item.image as Bitmap;
 			
 			return (bitmap.parent != null);
 		}
 		
-		public function getTile(request: URLRequest, specialStrings: Array): Object
+//		public function getTile(request: URLRequest, time: Date, specialStrings: Array): CacheItem
+		override public function getCacheItem(metadata: CacheItemMetadata): CacheItem
 		{
+			var request: URLRequest = metadata.url;
+			var time: Date = metadata.time as Date;
+			var specialStrings: Array = metadata.specialStrings as Array;
+			
 			var s_crs: String = request.data.CRS;
 			var tileIndex: TileIndex = new TileIndex(request.data.TILEZOOM, request.data.TILEROW, request.data.TILECOL);
 			
-			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, null, tileIndex, request, specialStrings);
+			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, null, tileIndex, request, time, specialStrings);
 			var s_key: String = ck.toString(); 
-			return md_cache[s_key];
+			return md_cache[s_key] as CacheItem;
 		}
 		
 		/**
@@ -136,12 +134,12 @@ package com.iblsoft.flexiweather.ogc.cache
 		public function getTiles(s_crs: String, i_tileZoom: uint, specialStrings: Array): Array
 		{
 			var a: Array = [];
-			for each(var cacheRecord: Object in md_cache) 
+			for each(var cacheRecord: CacheItem in md_cache) 
 			{
-				var cacheKey: WMSTileCacheKey = cacheRecord.cacheKey;
+				var cacheKey: WMSTileCacheKey = cacheRecord.cacheKey as WMSTileCacheKey;
 				if(cacheKey.m_tileIndex == null)
 					continue;
-				if(cacheKey.ms_crs != s_crs)
+				if(cacheKey.crs != s_crs)
 					continue;
 				if(cacheKey.m_tileIndex.mi_tileZoom != i_tileZoom)
 					continue;
@@ -176,7 +174,7 @@ package com.iblsoft.flexiweather.ogc.cache
 						specialStringsFound++;
 					}
 					
-//					debug("specialStringsFound: " + specialStringsFound + " specialStringsLength: " + specialStringsLength);
+					debug("getTiles specialStringsFound: " + specialStringsFound + " specialStringsLength: " + specialStringsLength);
 					if (specialStringsFound != specialStringsLength)
 					{
 						//not all special strings were inside
@@ -192,29 +190,52 @@ package com.iblsoft.flexiweather.ogc.cache
 					image: cacheRecord.image
 				});
 			}
-//			debug("GET TILES: " + a.length);
+			debug("GET TILES: " + a.length);
 			return a;
 		}
 	
 		
-		public function isTileCached(s_crs: String, tileIndex: TileIndex, url: URLRequest, specialStrings: Array): Boolean
+//		public function isTileCached(s_crs: String, tileIndex: TileIndex, url: URLRequest, time: Date, specialStrings: Array): Boolean
+		override public function isItemCached(metadata: CacheItemMetadata): Boolean
 		{
-			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, null, tileIndex, url, specialStrings);
+			var s_crs: String = metadata.crs as String;
+			var tileIndex: TileIndex = metadata.tileIndex as TileIndex;
+			var time: Date = metadata.time as Date;
+			var specialStrings: Array = metadata.specialStrings as Array;
+			var url: URLRequest = metadata.url;
+			
+			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, null, tileIndex, url, time, specialStrings);
 			var s_key: String = ck.toString(); 
-			var data: Object =  md_cache[s_key]; 
-//			debug("isTileCached check for undefined: " + (data != undefined) + " for null: " + (data != null) + " KEY: " + s_key);
-			return data != null;			
+			var item: CacheItem =  md_cache[s_key] as CacheItem; 
+			debug("isTileCached check for undefined: " + (item != undefined) + " for null: " + (item != null) + " KEY: " + s_key);
+			return item != null;			
 		}
-		public function addTile(img: Bitmap, s_crs: String, tileIndex: TileIndex, url: URLRequest, specialStrings: Array, tiledArea: TiledArea, viewPart: BBox): void
+		
+//		public function addTile(img: Bitmap, s_crs: String, tileIndex: TileIndex, url: URLRequest, specialStrings: Array, tiledArea: TiledArea, viewPart: BBox, time: Date): void
+//		override public function addCacheItem(img: Bitmap, s_crs: String, bbox: BBox, url: URLRequest, associatedCacheData: Object = null): void
+		override public function addCacheItem(img: Bitmap, metadata: CacheItemMetadata): void
 		{
-			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, null, tileIndex, url, specialStrings);
+			var s_crs: String = metadata.crs as String;
+			var  bbox: BBox = metadata.bbox as BBox;
+			var  url: URLRequest = metadata.url;
+		
+			var tileIndex: TileIndex = metadata.tileIndex;
+			var specialStrings: Array = metadata.specialStrings;
+			var tiledArea: TiledArea = metadata.tiledArea;
+			var viewPart: BBox = metadata.viewPart;
+			var time: Date = metadata.time;
+			
+			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, null, tileIndex, url, time, specialStrings);
 			var s_key: String = decodeURI(ck.toString()); 
-//			debug("WMSTileCache addTile: " + s_key);
-			md_cache[s_key] = {
-				cacheKey: ck,
-				lastUsed: new Date(),
-				image: img
-			};
+			debug("addCacheItem: " + s_key);
+			
+			var item: CacheItem = new CacheItem();
+			item.cacheKey = ck as CacheKey;
+			item.displayed = true;
+			item.lastUsed = new Date();
+			item.image = img;
+			
+			md_cache[s_key] = item;
 			
 			_items.push(s_key);
 			
@@ -222,18 +243,28 @@ package com.iblsoft.flexiweather.ogc.cache
 			{
 				s_key = getCachedTileKeyOutsideTiledArea(tiledArea);
 				
-//				debug("REMOVE TILE : " +s_key);
+				debug("REMOVE TILE : " +s_key);
 				
-				deleteTile(s_key);
+				deleteCacheItemByKey(s_key);
 			}
-//			debug("cache item removed: " + _items.length);
+			debug("cache item removed: " + _items.length);
 		}
 		
-		public function deleteTile(s_key: String): void
+		override public function deleteCacheItemByKey(s_key: String, b_disposeDisplayed: Boolean = false): Boolean
 		{
-//			debug("deleteTile: " + s_key);
-			disposeTileBitmap(s_key);
-			delete md_cache[s_key];
+			debug("deleteCacheItemByKey: " + s_key);
+			
+			var cacheItem: CacheItem = md_cache[s_key] as CacheItem;
+			
+			// dispose bitmap data, just for bitmaps which are not currently displayed
+			if (cacheItem && (!cacheItem.displayed || (cacheItem.displayed && b_disposeDisplayed) ))
+			{
+				disposeTileBitmap(s_key);
+				delete md_cache[s_key];
+				return true;
+			}
+			
+			return false;
 		}
 			
 		
@@ -292,21 +323,21 @@ package com.iblsoft.flexiweather.ogc.cache
 		
 		private function disposeTileBitmap(s_key: String): void
 		{
-			var data: Object = md_cache[s_key];
-			if (data)
+			var item: CacheItem = md_cache[s_key] as CacheItem;
+			if (item)
 			{
-				var img:  Bitmap = data.image;
+				var img:  Bitmap = item.image;
 				img.bitmapData.dispose();
 			}
 		}
 	
-		public function invalidate(s_crs: String, bbox: BBox): void
+		override public function invalidate(s_crs: String, bbox: BBox): void
 		{
 			var a: Array = [];
 			for(var s_key: String in md_cache) {
-				var ck: WMSTileCacheKey = md_cache[s_key].cacheKey; 
+				var ck: WMSTileCacheKey = (md_cache[s_key] as CacheItem).cacheKey as WMSTileCacheKey; 
 //				if(ck.ms_crs == s_crs && ck.m_bbox.equals(bbox))
-				if(ck.ms_key == s_key && !isTileOnDisplayList(s_key))
+				if(ck.key == s_key && !isTileOnDisplayList(s_key))
 					a.push(s_key);
 			}
 			for each(s_key in a) {
@@ -315,12 +346,12 @@ package com.iblsoft.flexiweather.ogc.cache
 				{
 					_items.splice(id, 1);
 				}
-//				debug("WMSCache.invalidate(): removing image with key: " + md_cache[s_key].toString());
-//				debug("WMSCache.invalidate(): removing image with key: " + s_key + " cache tiles count: " + cachedTilesCount);
-				deleteTile(s_key);
+				debug("WMSCache.invalidate(): removing image with key: " + md_cache[s_key].toString());
+				debug("WMSCache.invalidate(): removing image with key: " + s_key + " cache tiles count: " + cachedTilesCount);
+				deleteCacheItemByKey(s_key);
 			}
 			
-//			debug("\n invalidate cache tiles count: " + cachedTilesCount);
+			debug("\n invalidate cache tiles count: " + cachedTilesCount);
 		
 		}
 

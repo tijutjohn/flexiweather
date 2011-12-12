@@ -2,6 +2,7 @@ package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.events.InteractiveLayerProgressEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerQTTEvent;
+	import com.iblsoft.flexiweather.ogc.cache.CacheItemMetadata;
 	import com.iblsoft.flexiweather.ogc.cache.WMSTileCache;
 	import com.iblsoft.flexiweather.ogc.tiling.ITilesProvider;
 	import com.iblsoft.flexiweather.ogc.tiling.QTTTileRequest;
@@ -312,6 +313,7 @@ package com.iblsoft.flexiweather.ogc
 			var tileIndex: TileIndex;
 			var request: URLRequest;
 			var s_crs: String = container.crs;
+			var m_time: Date; //container.time;
 			
 			//initialize tile indices mapper each frame
 			_tileIndicesMapper.removeAll();
@@ -336,7 +338,15 @@ package com.iblsoft.flexiweather.ogc
 							request.url = UniURLLoader.fromBaseURL(request.url);
 							
 							
-							if(!tiledCache.isTileCached(s_crs, tileIndex, request, ma_specialCacheStrings))
+							var itemMetadata: CacheItemMetadata = new CacheItemMetadata();
+							itemMetadata.crs = s_crs;
+							itemMetadata.tileIndex = tileIndex;
+							itemMetadata.url = request;
+							itemMetadata.time = m_time;
+							itemMetadata.specialStrings = ma_specialCacheStrings;
+							
+//							if(!tiledCache.isTileCached(s_crs, tileIndex, request, m_time, ma_specialCacheStrings))
+							if(!tiledCache.isItemCached(itemMetadata))
 							{	
 								ma_currentTilesRequests.push(request);
 								loadRequests.push({
@@ -508,11 +518,17 @@ package com.iblsoft.flexiweather.ogc
 			return topLeftPoint;
 		}
 		
-		public function getTileFromCache(request: URLRequest): Object
+		public function getTileFromCache(request: URLRequest, time: Date): Object
 		{
 			var tiledCache: WMSTileCache = m_cache as WMSTileCache;
 			
-			return tiledCache.getTile(request, ma_specialCacheStrings); 
+			var metadata: CacheItemMetadata = new CacheItemMetadata();
+			metadata.url = request;
+			metadata.time = time;
+			metadata.specialStrings = ma_specialCacheStrings;
+			
+//			return tiledCache.getCacheItem(request, time, ma_specialCacheStrings); 
+			return tiledCache.getCacheItem(metadata); 
 		}
 		
 		private function findZoom(): void
@@ -947,16 +963,27 @@ package com.iblsoft.flexiweather.ogc
 			
 			onJobFinished(associatedData.job);
 			
-			if(result is Bitmap) {
-				wmsTileCache.addTile(
-					Bitmap(result),
-					associatedData.requestedCRS,
+			if(result is Bitmap) 
+			{
+//				var itemMetadata: CacheItemMetadata = CacheItemMetadata.createFromObject(associatedData);
+				var itemMetadata: CacheItemMetadata = new CacheItemMetadata();
+				itemMetadata.crs = associatedData.requestedCRS;
+				itemMetadata.tileIndex = associatedData.requestedTileIndex;
+				itemMetadata.tiledArea = associatedData.tiledArea;
+				itemMetadata.viewPart = associatedData.viewPart;
+				itemMetadata.time = associatedData.time;
+				
+				itemMetadata.specialStrings = ma_specialCacheStrings;
+				itemMetadata.url = request;
+				
+				wmsTileCache.addCacheItem(Bitmap(result), itemMetadata);
+				/*
 					associatedData.requestedTileIndex,
-					request,
 					ma_specialCacheStrings, 
 					associatedData.tiledArea,
-					associatedData.viewPart
-					);
+					associatedData.viewPart,
+					associatedData.time
+				*/
 				draw(graphics);
 				return;
 

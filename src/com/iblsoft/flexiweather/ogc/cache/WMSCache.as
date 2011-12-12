@@ -72,7 +72,7 @@ package com.iblsoft.flexiweather.ogc.cache
 //						debug("WMSCache.onExpiration(): Image from cache is expired, will be removed");
 						if (!cacheItem.isImageOnDisplayList())
 						{
-							deleteCacheItem(s_key);
+							deleteCacheItemByKey(s_key);
 						}
 //						else {
 //							debug("WMSCache.onExpiration(): image is on displalist");
@@ -84,6 +84,16 @@ package com.iblsoft.flexiweather.ogc.cache
 			debugCache();
 		}
 		
+		
+		public function deleteCacheItem(cacheItem: CacheItem, b_disposeDisplayed: Boolean = false): Boolean
+		{
+			if (cacheItem && cacheItem.cacheKey)
+			{
+				return deleteCacheItemByKey(cacheItem.cacheKey.key, b_disposeDisplayed);
+			}
+			return false;
+		}
+		
 		/**
 		 * Delete cached item 
 		 * @param s_key Item key
@@ -91,7 +101,7 @@ package com.iblsoft.flexiweather.ogc.cache
 		 * @return true if item was deleted, false if it was not
 		 * 
 		 */		
-		private function deleteCacheItem(s_key: String, b_disposeDisplayed: Boolean = false): Boolean
+		public function deleteCacheItemByKey(s_key: String, b_disposeDisplayed: Boolean = false): Boolean
 		{
 //			return;
 
@@ -112,6 +122,22 @@ package com.iblsoft.flexiweather.ogc.cache
 			}
 			return false;
 		}
+		
+		public function getCacheItemsCount(): int
+		{
+			return mi_cacheItemCount;
+		}
+		
+		public function getCacheItems(): Array
+		{
+			var arr: Array = [];
+			for each (var cacheItem: CacheItem in md_cache)
+			{
+				arr.push(cacheItem);
+			}
+			return arr;
+		}
+		
 		private function getKey(s_crs: String, bbox: BBox, url: URLRequest): String
 		{
 			var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url);
@@ -119,21 +145,40 @@ package com.iblsoft.flexiweather.ogc.cache
 			return s_key;			
 		}
 		
-		public function isImageCached(s_crs: String, bbox: BBox, url: URLRequest): Boolean
+//		public function isImageCached(metadata: CacheItemMetadata): Boolean
+		public function isItemCached(metadata: CacheItemMetadata): Boolean
 		{
+			var s_crs: String = metadata.crs as String;
+			var  bbox: BBox = metadata.bbox as BBox;
+			var  url: URLRequest = metadata.url;
+			
 			var s_key: String = getKey(s_crs, bbox, url);
 			return md_cache[s_key] || md_cacheLoading[s_key];
 		}
 		
-		public function getImage(s_crs: String, bbox: BBox, url: URLRequest): Bitmap
+//		public function getCacheItem(s_crs: String, bbox: BBox, url: URLRequest): CacheItem
+		public function getCacheItem(metadata: CacheItemMetadata): CacheItem
 		{
+			var s_crs: String = metadata.crs as String;
+			var  bbox: BBox = metadata.bbox as BBox;
+			var  url: URLRequest = metadata.url;
+			
 			var s_key: String = getKey(s_crs, bbox, url);
 			if(s_key in md_cache) {
 				var item: CacheItem = md_cache[s_key] as CacheItem; 
 				item.lastUsed = new Date();
 				item.displayed = true;
-				return item.image;
+				return item;
 			}
+			return null;
+			
+		}
+//		public function getCacheItemBitmap(s_crs: String, bbox: BBox, url: URLRequest): Bitmap
+		public function getCacheItemBitmap(metadata: CacheItemMetadata): Bitmap
+		{
+			var item: CacheItem = getCacheItem(metadata);
+			if (item)
+				return item.image;
 			return null;
 		}
 	
@@ -152,12 +197,17 @@ package com.iblsoft.flexiweather.ogc.cache
 			md_cacheLoading[s_key] = true;
 		}
 		
-		public function addImage(img: Bitmap, s_crs: String, bbox: BBox, url: URLRequest): void
+//		public function addCacheItem(img: Bitmap, s_crs: String, bbox: BBox, url: URLRequest, associatedCacheData: Object = null): void
+		public function addCacheItem(img: Bitmap, metadata: CacheItemMetadata): void
 		{
+			var s_crs: String = metadata.crs as String;
+			var  bbox: BBox = metadata.bbox as BBox;
+			var  url: URLRequest = metadata.url;
+			
 			var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url);
 			var s_key: String = getKey(s_crs, bbox, url);
 			
-			var b_deleted: Boolean = deleteCacheItem(s_key, true);
+			var b_deleted: Boolean = deleteCacheItemByKey(s_key, true);
 			
 			var item: CacheItem = new CacheItem();
 			item.cacheKey = ck;
@@ -214,9 +264,9 @@ package com.iblsoft.flexiweather.ogc.cache
 				var item: CacheItem = md_cache[s_key] as CacheItem; 
 				if (!item.isImageOnDisplayList())
 				{
-					var ck: WMSCacheKey = item.cacheKey; 
+					var ck: WMSCacheKey = item.cacheKey as WMSCacheKey; 
 					item.displayed = false;
-					if(ck.ms_crs == s_crs && ck.m_bbox.equals(bbox))
+					if(ck.crs == s_crs && ck.bbox.equals(bbox))
 						a.push(s_key);
 				} else {
 					debug("WMSCache.invalidate(): ATTENTION iamge is on displayList");
@@ -224,7 +274,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			}
 			for each(s_key in a) {
 //				debug("WMSCache.invalidate(): removing image with key: " + md_cache[s_key].toString());
-				deleteCacheItem(s_key);
+				deleteCacheItemByKey(s_key);
 			}
 			debugCache();
 		}
@@ -234,56 +284,5 @@ package com.iblsoft.flexiweather.ogc.cache
 			return;
 			trace(str);
 		}
-	}
-}
-import com.iblsoft.flexiweather.ogc.cache.WMSCacheKey;
-
-import flash.display.Bitmap;
-
-import mx.messaging.AbstractConsumer;
-
-class CacheItem
-{
-	public static var CID: int = 0;
-	
-	private var _id: int;
-	
-	public var cacheKey: WMSCacheKey;
-	public var lastUsed: Date;
-	public var image: Bitmap;
-	
-	private var _displayed: Boolean;
-	public function get displayed():Boolean 
-	{
-//		trace(this + " GET displayed = " + _displayed);
-		return _displayed;
-	}
-	
-	public function isImageOnDisplayList(): Boolean
-	{
-		if (image)
-			return image.parent != null;
-		return false;
-	}
-	public function set displayed(value:Boolean):void 
-	{
-//		if (!value)
-//		{
-//			trace("WMSCHace displayed = " + value);
-//		}
-		_displayed = value;
-//		trace(this + " SET displayed = " + _displayed);
-	}
-	
-	public function CacheItem()
-	{
-		CID++;
-		_id = CID;
-//		trace("New " + this);
-	}
-	
-	public function toString(): String
-	{
-		return "CacheItem " + _id;
 	}
 }
