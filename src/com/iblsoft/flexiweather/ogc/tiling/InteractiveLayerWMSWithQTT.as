@@ -9,6 +9,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import com.iblsoft.flexiweather.ogc.WMSLayer;
 	import com.iblsoft.flexiweather.ogc.WMSLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.WMSWithQTTLayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.cache.ICache;
+	import com.iblsoft.flexiweather.ogc.cache.ICachedLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.display.BitmapData;
@@ -21,7 +23,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	/**
 	 * Extension of InteractiveLayerWMS which uses IBL's GetGTile request is possible.
 	 **/
-	public class InteractiveLayerWMSWithQTT extends InteractiveLayerWMS
+	public class InteractiveLayerWMSWithQTT extends InteractiveLayerWMS implements ICachedLayer, ITiledLayer
 	{
 		public static const WMS_TILING_URL_PATTERN: String = '&TILEZOOM=%ZOOM%&TILECOL=%COL%&TILEROW=%ROW%';
 		
@@ -276,6 +278,24 @@ package com.iblsoft.flexiweather.ogc.tiling
 			return b;
 		}
 		
+		override public function setWMSDimensionValue(s_dimName: String, s_value: String): void
+		{
+			super.setWMSDimensionValue(s_dimName, s_value);
+		
+		}
+		
+		private var _currentValidityTime: Date;
+		public function setValidityTime(validity:Date):void
+		{
+			// TODO Auto Generated method stub
+			_currentValidityTime = validity;
+			if (m_tiledLayer)
+			{
+				m_tiledLayer.setValidityTime(validity);
+			}
+		}
+		
+		
 		override public function toString(): String
 		{
 			var retStr: String = "InteractiveLayerWMSWithQTT " + name + " isTileable: " + isTileable ;
@@ -294,5 +314,25 @@ package com.iblsoft.flexiweather.ogc.tiling
 			}
 			return toString() + "\n" + m_cache.debugCache();
 		}
+		
+		override public function getCache():ICache
+		{
+			if (isTileable)
+			{
+				return m_tiledLayer.cache;
+			}
+			return m_cache;
+		}
+		
+		public function getTiledLayer():InteractiveLayerQTTMS
+		{
+			if (isTileable)
+			{
+				return m_tiledLayer;
+			}
+			return null;
+		}
+		
+		
 	}
 }

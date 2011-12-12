@@ -2,8 +2,12 @@ package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.events.InteractiveLayerProgressEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerQTTEvent;
+	import com.iblsoft.flexiweather.ogc.cache.CacheItem;
 	import com.iblsoft.flexiweather.ogc.cache.CacheItemMetadata;
+	import com.iblsoft.flexiweather.ogc.cache.ICache;
+	import com.iblsoft.flexiweather.ogc.cache.ICachedLayer;
 	import com.iblsoft.flexiweather.ogc.cache.WMSTileCache;
+	import com.iblsoft.flexiweather.ogc.tiling.ITiledLayer;
 	import com.iblsoft.flexiweather.ogc.tiling.ITilesProvider;
 	import com.iblsoft.flexiweather.ogc.tiling.QTTTileRequest;
 	import com.iblsoft.flexiweather.ogc.tiling.QTTTilesProvider;
@@ -47,7 +51,7 @@ package com.iblsoft.flexiweather.ogc
 	/**
 	 * Generic Quad Tree (like Google Maps) tiling layer
 	 **/
-	public class InteractiveLayerQTTMS extends InteractiveDataLayer implements IConfigurableLayer, Serializable
+	public class InteractiveLayerQTTMS extends InteractiveDataLayer implements IConfigurableLayer, ICachedLayer, ITiledLayer, Serializable
 	{
 		public static const UPDATE_TILING_PATTERN: String = 'updateTilingPattern';
 		
@@ -342,8 +346,10 @@ package com.iblsoft.flexiweather.ogc
 							itemMetadata.crs = s_crs;
 							itemMetadata.tileIndex = tileIndex;
 							itemMetadata.url = request;
-							itemMetadata.time = m_time;
+							itemMetadata.validity = _currentValidityTime;
 							itemMetadata.specialStrings = ma_specialCacheStrings;
+							
+							trace("prepareData for " + _currentValidityTime);
 							
 //							if(!tiledCache.isTileCached(s_crs, tileIndex, request, m_time, ma_specialCacheStrings))
 							if(!tiledCache.isItemCached(itemMetadata))
@@ -391,7 +397,8 @@ package com.iblsoft.flexiweather.ogc
 							requestedCRS: requestObj.requestedCRS,
 							requestedTileIndex:  requestObj.requestedTileIndex,
 							tiledArea: requestObj.requestedTiledArea,
-							viewPart: requestObj.requestedViewPart
+							viewPart: requestObj.requestedViewPart,
+							validity: _currentValidityTime
 						};
 							
 						var item: QTTTileRequest = new QTTTileRequest();
@@ -518,13 +525,47 @@ package com.iblsoft.flexiweather.ogc
 			return topLeftPoint;
 		}
 		
-		public function getTileFromCache(request: URLRequest, time: Date): Object
+		/**
+		 * Removed all cached tiles except tiles valid for specified time 
+		 * @param validity
+		 * 
+		 */		
+		public function removeAllCachedTilesExceptTime(validity: Date, b_disposeDisplayed: Boolean = false): void
+		{
+			var tiles: Array = cache.getCacheItems();
+			for each (var item: CacheItem in tiles)
+			{
+				if (item.metadata.validity.time != validity.time)
+				{
+					cache.deleteCacheItem(item, b_disposeDisplayed)
+				}
+			}
+		}
+		
+		/**
+		 * Removed cached tiles for specified validity time 
+		 * @param validity
+		 * 
+		 */		
+		public function removeCachedTiles(validity: Date, b_disposeDisplayed: Boolean = false): void
+		{
+			var tiles: Array = cache.getCacheItems();
+			for each (var item: CacheItem in tiles)
+			{
+				if (item.metadata && item.metadata.validity && item.metadata.validity.time == validity.time)
+				{
+					cache.deleteCacheItem(item, b_disposeDisplayed)
+				}
+			}
+		}
+		
+		public function getTileFromCache(request: URLRequest, validity: Date): Object
 		{
 			var tiledCache: WMSTileCache = m_cache as WMSTileCache;
 			
 			var metadata: CacheItemMetadata = new CacheItemMetadata();
 			metadata.url = request;
-			metadata.time = time;
+			metadata.validity = validity;
 			metadata.specialStrings = ma_specialCacheStrings;
 			
 //			return tiledCache.getCacheItem(request, time, ma_specialCacheStrings); 
@@ -971,7 +1012,9 @@ package com.iblsoft.flexiweather.ogc
 				itemMetadata.tileIndex = associatedData.requestedTileIndex;
 				itemMetadata.tiledArea = associatedData.tiledArea;
 				itemMetadata.viewPart = associatedData.viewPart;
-				itemMetadata.time = associatedData.time;
+				itemMetadata.validity = associatedData.validity;
+				
+				trace("tileLoaded validity:  " + itemMetadata.validity);
 				
 				itemMetadata.specialStrings = ma_specialCacheStrings;
 				itemMetadata.url = request;
@@ -1107,6 +1150,24 @@ package com.iblsoft.flexiweather.ogc
 		public function debugCache(): String
 		{
 			return toString() + "\n" + m_cache.debugCache();
+		}
+		
+		public function getCache():ICache
+		{
+			// TODO Auto Generated method stub
+			return m_cache;
+		}
+		
+		public function getTiledLayer():InteractiveLayerQTTMS
+		{
+			return this;
+		}
+		
+		private var _currentValidityTime: Date;
+		public function setValidityTime(validity:Date):void
+		{
+			// TODO Auto Generated method stub
+			_currentValidityTime = validity;
 		}
 	}
 }
@@ -1260,5 +1321,6 @@ class ViewPartReflectionsHelper
 			return addViewPartReflections(viewPart);
 		}
 	}
+	
 	
 }

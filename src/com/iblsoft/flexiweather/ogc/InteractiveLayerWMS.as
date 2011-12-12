@@ -2,6 +2,8 @@ package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.ogc.cache.CacheItemMetadata;
+	import com.iblsoft.flexiweather.ogc.cache.ICache;
+	import com.iblsoft.flexiweather.ogc.cache.ICachedLayer;
 	import com.iblsoft.flexiweather.ogc.cache.WMSCache;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
@@ -31,7 +33,7 @@ package com.iblsoft.flexiweather.ogc
 	[Event(name="wmsStyleChanged", type="flash.events.Event")]
 	
 	public class InteractiveLayerWMS extends InteractiveLayerMSBase
-			implements ISynchronisedObject, Serializable, IConfigurableLayer
+			implements ISynchronisedObject, Serializable, IConfigurableLayer, ICachedLayer
 	{
 		public static const WMS_STYLE_CHANGED: String = 'wmsStyleChanged';
 		
@@ -470,6 +472,13 @@ package com.iblsoft.flexiweather.ogc
 		{
 			return "InteractiveLayerWMS " + name  ;
 		}
+		
+		public function getCache():ICache
+		{
+			// TODO Auto Generated method stub
+			return m_cache;
+		}
+		
 	}
 }
 

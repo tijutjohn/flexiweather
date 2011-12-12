@@ -6,9 +6,9 @@ package com.iblsoft.flexiweather.ogc.cache
 	
 	public class WMSCacheKey extends CacheKey
 	{
-		public function WMSCacheKey(s_crs: String, bbox: BBox, url: URLRequest)
+		public function WMSCacheKey(s_crs: String, bbox: BBox, url: URLRequest, validity: Date = null)
 		{
-			super(s_crs, bbox, url);
+			super(s_crs, bbox, url, validity);
 			
 			key = s_crs + "|" + bbox.toBBOXString();
 			var a: Array = [];

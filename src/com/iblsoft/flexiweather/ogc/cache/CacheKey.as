@@ -20,12 +20,14 @@ package com.iblsoft.flexiweather.ogc.cache
 		public var url: URLRequest;
 		public var crs: String;
 		public var bbox: BBox;
+		public var validity: Date;
 		
-		public function CacheKey(s_crs: String, bbox: BBox, url: URLRequest)
+		public function CacheKey(s_crs: String, bbox: BBox, url: URLRequest, validity: Date = null)
 		{
 			crs = s_crs;
 			bbox = bbox;
 			this.url = url;
+			this.validity = validity;
 		}
 		
 		public function toString(): String

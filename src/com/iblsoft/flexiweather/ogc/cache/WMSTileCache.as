@@ -112,7 +112,7 @@ package com.iblsoft.flexiweather.ogc.cache
 		override public function getCacheItem(metadata: CacheItemMetadata): CacheItem
 		{
 			var request: URLRequest = metadata.url;
-			var time: Date = metadata.time as Date;
+			var time: Date = metadata.validity;
 			var specialStrings: Array = metadata.specialStrings as Array;
 			
 			var s_crs: String = request.data.CRS;
@@ -200,19 +200,20 @@ package com.iblsoft.flexiweather.ogc.cache
 		{
 			var s_crs: String = metadata.crs as String;
 			var tileIndex: TileIndex = metadata.tileIndex as TileIndex;
-			var time: Date = metadata.time as Date;
+			var time: Date = metadata.validity;
 			var specialStrings: Array = metadata.specialStrings as Array;
 			var url: URLRequest = metadata.url;
 			
 			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, null, tileIndex, url, time, specialStrings);
 			var s_key: String = ck.toString(); 
 			var item: CacheItem =  md_cache[s_key] as CacheItem; 
-			debug("isTileCached check for undefined: " + (item != undefined) + " for null: " + (item != null) + " KEY: " + s_key);
+			debug("isTileCached check  for null: " + (item != null) + " KEY: " + s_key);
 			return item != null;			
 		}
 		
 //		public function addTile(img: Bitmap, s_crs: String, tileIndex: TileIndex, url: URLRequest, specialStrings: Array, tiledArea: TiledArea, viewPart: BBox, time: Date): void
 //		override public function addCacheItem(img: Bitmap, s_crs: String, bbox: BBox, url: URLRequest, associatedCacheData: Object = null): void
+		
 		override public function addCacheItem(img: Bitmap, metadata: CacheItemMetadata): void
 		{
 			var s_crs: String = metadata.crs as String;
@@ -223,7 +224,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			var specialStrings: Array = metadata.specialStrings;
 			var tiledArea: TiledArea = metadata.tiledArea;
 			var viewPart: BBox = metadata.viewPart;
-			var time: Date = metadata.time;
+			var time: Date = metadata.validity;
 			
 			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, null, tileIndex, url, time, specialStrings);
 			var s_key: String = decodeURI(ck.toString()); 
@@ -234,6 +235,11 @@ package com.iblsoft.flexiweather.ogc.cache
 			item.displayed = true;
 			item.lastUsed = new Date();
 			item.image = img;
+			
+			/**
+			 * we need to delete cache item with same "key" before we add new item.
+			*/
+			deleteCacheItemByKey(s_key);
 			
 			md_cache[s_key] = item;
 			
@@ -331,13 +337,19 @@ package com.iblsoft.flexiweather.ogc.cache
 			}
 		}
 	
-		override public function invalidate(s_crs: String, bbox: BBox): void
+		override public function invalidate(s_crs: String, bbox: BBox, validity: Date = null): void
 		{
 			var a: Array = [];
 			for(var s_key: String in md_cache) {
 				var ck: WMSTileCacheKey = (md_cache[s_key] as CacheItem).cacheKey as WMSTileCacheKey; 
 //				if(ck.ms_crs == s_crs && ck.m_bbox.equals(bbox))
-				if(ck.key == s_key && !isTileOnDisplayList(s_key))
+				var needToRemoveItem: Boolean = ck.crs == s_crs && ck.bbox == bbox;
+				if (validity)
+					needToRemoveItem = needToRemoveItem && validity == ck.validity;
+				
+				needToRemoveItem = needToRemoveItem && isTileOnDisplayList(s_key);
+				
+				if(needToRemoveItem)
 					a.push(s_key);
 			}
 			for each(s_key in a) {

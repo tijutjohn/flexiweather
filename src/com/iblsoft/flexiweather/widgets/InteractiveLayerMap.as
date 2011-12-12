@@ -5,9 +5,13 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.events.InteractiveLayerMapEvent;
 	import com.iblsoft.flexiweather.ogc.ISynchronisedObject;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
+	import com.iblsoft.flexiweather.ogc.InteractiveLayerQTTMS;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
 	import com.iblsoft.flexiweather.ogc.SynchronisationRole;
 	import com.iblsoft.flexiweather.ogc.SynchronisedVariableChangeEvent;
+	import com.iblsoft.flexiweather.ogc.cache.ICache;
+	import com.iblsoft.flexiweather.ogc.cache.ICachedLayer;
+	import com.iblsoft.flexiweather.ogc.tiling.ITiledLayer;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.utils.DateUtils;
@@ -698,7 +702,15 @@ package com.iblsoft.flexiweather.widgets
             	if(so.getSynchronisedVariableValue("frame") == null)
             		continue;
           		if(so.synchroniseWith("frame", newFrame))
+				{
+					if (l is ITiledLayer)
+					{
+						var tiledLayer: InteractiveLayerQTTMS = (l as ITiledLayer).getTiledLayer();
+						var time: Date = newFrame;
+						tiledLayer.setValidityTime(time);
+					}
           			l.refresh(false);
+				}
           	}
           	return true;
 		}

@@ -10,6 +10,11 @@ package com.iblsoft.flexiweather.ogc.cache
 		public var bbox: BBox;
 		public var url: URLRequest;
 			
+		/**
+		 * time in which image is valid 
+		 */		
+		public var validity: Date;
+		
 		public function CacheItemMetadata()
 		{
 			super();

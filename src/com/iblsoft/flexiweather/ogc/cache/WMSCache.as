@@ -138,9 +138,9 @@ package com.iblsoft.flexiweather.ogc.cache
 			return arr;
 		}
 		
-		private function getKey(s_crs: String, bbox: BBox, url: URLRequest): String
+		private function getKey(s_crs: String, bbox: BBox, url: URLRequest, validity: Date = null): String
 		{
-			var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url);
+			var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url, validity);
 			var s_key: String = ck.toString(); 
 			return s_key;			
 		}
@@ -152,7 +152,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			var  bbox: BBox = metadata.bbox as BBox;
 			var  url: URLRequest = metadata.url;
 			
-			var s_key: String = getKey(s_crs, bbox, url);
+			var s_key: String = getKey(s_crs, bbox, url, metadata.validity);
 			return md_cache[s_key] || md_cacheLoading[s_key];
 		}
 		
@@ -163,7 +163,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			var  bbox: BBox = metadata.bbox as BBox;
 			var  url: URLRequest = metadata.url;
 			
-			var s_key: String = getKey(s_crs, bbox, url);
+			var s_key: String = getKey(s_crs, bbox, url, metadata.validity);
 			if(s_key in md_cache) {
 				var item: CacheItem = md_cache[s_key] as CacheItem; 
 				item.lastUsed = new Date();
@@ -190,9 +190,9 @@ package com.iblsoft.flexiweather.ogc.cache
 		 * @param url
 		 * 
 		 */		
-		public function startImageLoading(s_crs: String, bbox: BBox, url: URLRequest): void
+		public function startImageLoading(s_crs: String, bbox: BBox, url: URLRequest, validity: Date = null): void
 		{
-			var s_key: String = getKey(s_crs, bbox, url);
+			var s_key: String = getKey(s_crs, bbox, url, validity);
 			
 			md_cacheLoading[s_key] = true;
 		}
@@ -203,9 +203,10 @@ package com.iblsoft.flexiweather.ogc.cache
 			var s_crs: String = metadata.crs as String;
 			var  bbox: BBox = metadata.bbox as BBox;
 			var  url: URLRequest = metadata.url;
+			var  validity: Date = metadata.validity;
 			
-			var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url);
-			var s_key: String = getKey(s_crs, bbox, url);
+			var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url, validity);
+			var s_key: String = getKey(s_crs, bbox, url, validity);
 			
 			var b_deleted: Boolean = deleteCacheItemByKey(s_key, true);
 			
@@ -254,7 +255,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			}
 		}
 		
-		public function invalidate(s_crs: String, bbox: BBox): void
+		public function invalidate(s_crs: String, bbox: BBox, validity: Date = null): void
 		{
 			debug("WMSCache.invalidate(): WMS CACHE invalidate s_crs: " + s_crs + " bbox : " + bbox);
 			
