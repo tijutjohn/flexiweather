@@ -66,6 +66,8 @@ package com.iblsoft.flexiweather.ogc
 		
 		private var _avoidTiling: Boolean;
 
+		private var _currentValidityTime: Date;
+		private var mi_updateCycleAge: uint = 0;
 
 		public function get tilesProvider():ITilesProvider
 		{
@@ -308,7 +310,7 @@ package com.iblsoft.flexiweather.ogc
 			return tiledAreas;
 		}
 		
-		protected function prepareData(tiledAreas: Array): Array
+		protected function prepareData(tiledAreas: Array, b_forceUpdate: Boolean): Array
 		{
 			var loadRequests: Array = new Array();
 			
@@ -348,11 +350,12 @@ package com.iblsoft.flexiweather.ogc
 							itemMetadata.url = request;
 							itemMetadata.validity = _currentValidityTime;
 							itemMetadata.specialStrings = ma_specialCacheStrings;
+							itemMetadata.updateCycleAge = mi_updateCycleAge;
 							
 							trace("prepareData for " + _currentValidityTime);
 							
 //							if(!tiledCache.isTileCached(s_crs, tileIndex, request, m_time, ma_specialCacheStrings))
-							if(!tiledCache.isItemCached(itemMetadata))
+							if(!tiledCache.isItemCached(itemMetadata) || b_forceUpdate)
 							{	
 								ma_currentTilesRequests.push(request);
 								loadRequests.push({
@@ -398,7 +401,8 @@ package com.iblsoft.flexiweather.ogc
 							requestedTileIndex:  requestObj.requestedTileIndex,
 							tiledArea: requestObj.requestedTiledArea,
 							viewPart: requestObj.requestedViewPart,
-							validity: _currentValidityTime
+							validity: _currentValidityTime,
+							updateCycleAge: mi_updateCycleAge
 						};
 							
 						var item: QTTTileRequest = new QTTTileRequest();
@@ -469,6 +473,8 @@ package com.iblsoft.flexiweather.ogc
 			if (tiledAreas.length == 0)
 				return;
 			
+			mi_updateCycleAge++;
+			
 			var tiledCache: WMSTileCache = m_cache as WMSTileCache;
 			var tileIndex: TileIndex = new TileIndex(mi_zoom);
 			
@@ -478,7 +484,7 @@ package com.iblsoft.flexiweather.ogc
 			
 			if (baseURLPattern)
 			{
-				loadRequests = prepareData(tiledAreas);
+				loadRequests = prepareData(tiledAreas, b_forceUpdate);
 				
 			} else {
 				trace("baseURLpattern is NULL");
@@ -530,12 +536,12 @@ package com.iblsoft.flexiweather.ogc
 		 * @param validity
 		 * 
 		 */		
-		public function removeAllCachedTilesExceptTime(validity: Date, b_disposeDisplayed: Boolean = false): void
+		public function removeAllCachedTilesExceptTime(validity: Date, updateCycleAge: uint, b_disposeDisplayed: Boolean = false): void
 		{
 			var tiles: Array = cache.getCacheItems();
 			for each (var item: CacheItem in tiles)
 			{
-				if (item.metadata.validity.time != validity.time)
+				if (item.metadata.validity.time != validity.time && item.metadata.updateCycleAge != updateCycleAge)
 				{
 					cache.deleteCacheItem(item, b_disposeDisplayed)
 				}
@@ -547,12 +553,12 @@ package com.iblsoft.flexiweather.ogc
 		 * @param validity
 		 * 
 		 */		
-		public function removeCachedTiles(validity: Date, b_disposeDisplayed: Boolean = false): void
+		public function removeCachedTiles(validity: Date, updateCycleAge: uint, b_disposeDisplayed: Boolean = false): void
 		{
 			var tiles: Array = cache.getCacheItems();
 			for each (var item: CacheItem in tiles)
 			{
-				if (item.metadata && item.metadata.validity && item.metadata.validity.time == validity.time)
+				if (item.metadata && item.metadata.validity && item.metadata.validity.time == validity.time && item.metadata.updateCycleAge && item.metadata.updateCycleAge == updateCycleAge)
 				{
 					cache.deleteCacheItem(item, b_disposeDisplayed)
 				}
@@ -980,6 +986,7 @@ package com.iblsoft.flexiweather.ogc
 			{
 				mi_tilesLoadingTotal = 0;
 				dispatchEvent(new InteractiveLayerQTTEvent(InteractiveLayerQTTEvent.TILES_LOADED_FINISHED, true));
+				notifyLoadingFinished();
 			}
 		}
 		
@@ -1006,27 +1013,22 @@ package com.iblsoft.flexiweather.ogc
 			
 			if(result is Bitmap) 
 			{
-//				var itemMetadata: CacheItemMetadata = CacheItemMetadata.createFromObject(associatedData);
 				var itemMetadata: CacheItemMetadata = new CacheItemMetadata();
 				itemMetadata.crs = associatedData.requestedCRS;
 				itemMetadata.tileIndex = associatedData.requestedTileIndex;
 				itemMetadata.tiledArea = associatedData.tiledArea;
 				itemMetadata.viewPart = associatedData.viewPart;
 				itemMetadata.validity = associatedData.validity;
+				itemMetadata.updateCycleAge = associatedData.updateCycleAge;
 				
 				trace("tileLoaded validity:  " + itemMetadata.validity);
 				
 				itemMetadata.specialStrings = ma_specialCacheStrings;
 				itemMetadata.url = request;
 				
+				removeCachedTiles(itemMetadata.validity, itemMetadata.updateCycleAge, true);
+				
 				wmsTileCache.addCacheItem(Bitmap(result), itemMetadata);
-				/*
-					associatedData.requestedTileIndex,
-					ma_specialCacheStrings, 
-					associatedData.tiledArea,
-					associatedData.viewPart,
-					associatedData.time
-				*/
 				draw(graphics);
 				return;
 
@@ -1163,12 +1165,11 @@ package com.iblsoft.flexiweather.ogc
 			return this;
 		}
 		
-		private var _currentValidityTime: Date;
-		public function setValidityTime(validity:Date):void
+		public function setValidityTime(validity: Date): void
 		{
-			// TODO Auto Generated method stub
 			_currentValidityTime = validity;
 		}
+		
 	}
 }
 import com.iblsoft.flexiweather.ogc.BBox;

@@ -703,12 +703,6 @@ package com.iblsoft.flexiweather.widgets
             		continue;
           		if(so.synchroniseWith("frame", newFrame))
 				{
-					if (l is ITiledLayer)
-					{
-						var tiledLayer: InteractiveLayerQTTMS = (l as ITiledLayer).getTiledLayer();
-						var time: Date = newFrame;
-						tiledLayer.setValidityTime(time);
-					}
           			l.refresh(false);
 				}
           	}

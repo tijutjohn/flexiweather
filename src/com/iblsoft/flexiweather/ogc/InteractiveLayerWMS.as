@@ -49,7 +49,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			super(container, cfg);
 			
-			m_autoRefreshTimer.addEventListener(TimerEvent.TIMER_COMPLETE, onAutoRefreshTimerComplete)
+			m_autoRefreshTimer.addEventListener(TimerEvent.TIMER_COMPLETE, autoRefreshTimerCompleted)
 			m_autoRefreshTimer.repeatCount = 1;
 			
 			m_cache = new WMSCache();
@@ -416,19 +416,23 @@ package com.iblsoft.flexiweather.ogc
 						++i;
 				}
 				// finished loading of all requests
+				
 				// restartautorefresh timer
-				if(m_cfg.mi_autoRefreshPeriod > 0) {
-					m_autoRefreshTimer.reset();
-					m_autoRefreshTimer.delay = m_cfg.mi_autoRefreshPeriod * 1000.0;
-					m_autoRefreshTimer.start();
-				}
-//				var ile: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.LAYER_LOADED, true);
-//				ile.interactiveLayer = this;
-//				dispatchEvent(ile);
+				restartAutoRefreshTimer();
+				
 			}
 		}
 		
-		protected function onAutoRefreshTimerComplete(event: TimerEvent): void
+		protected function restartAutoRefreshTimer(): void
+		{
+			if(m_cfg.mi_autoRefreshPeriod > 0) {
+				m_autoRefreshTimer.reset();
+				m_autoRefreshTimer.delay = m_cfg.mi_autoRefreshPeriod * 1000.0;
+				m_autoRefreshTimer.start();
+			}
+		}
+		
+		protected function autoRefreshTimerCompleted(event: TimerEvent): void
 		{
 			invalidateData(true);
 		}

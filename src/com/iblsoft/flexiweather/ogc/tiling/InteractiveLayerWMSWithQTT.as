@@ -1,5 +1,7 @@
 package com.iblsoft.flexiweather.ogc.tiling
 {
+	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
+	import com.iblsoft.flexiweather.events.InteractiveLayerQTTEvent;
 	import com.iblsoft.flexiweather.ogc.CRSWithBBox;
 	import com.iblsoft.flexiweather.ogc.CRSWithBBoxAndTilingInfo;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerQTTMS;
@@ -11,14 +13,17 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import com.iblsoft.flexiweather.ogc.WMSWithQTTLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.cache.ICache;
 	import com.iblsoft.flexiweather.ogc.cache.ICachedLayer;
+	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.display.BitmapData;
 	import flash.display.Graphics;
 	import flash.events.DataEvent;
 	import flash.events.Event;
+	import flash.events.TimerEvent;
 	import flash.geom.Matrix;
 	import flash.net.URLRequest;
+	import flash.utils.Timer;
 
 	/**
 	 * Extension of InteractiveLayerWMS which uses IBL's GetGTile request is possible.
@@ -28,6 +33,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 		public static const WMS_TILING_URL_PATTERN: String = '&TILEZOOM=%ZOOM%&TILECOL=%COL%&TILEROW=%ROW%';
 		
 		public static var avoidTilingForAllLayers: Boolean = false;
+		
+		private var _currentValidityTime: Date;
+		
 		
 		private var ma_specialCacheStrings: Array;
 		private var m_tiledLayer: InteractiveLayerQTTMS;
@@ -66,10 +74,12 @@ package com.iblsoft.flexiweather.ogc.tiling
 			m_tiledLayer.tilesProvider = new QTTTilesProvider();
 			
 			m_tiledLayer.addEventListener(InteractiveLayerQTTMS.UPDATE_TILING_PATTERN, onUpdateTilingPattern);
+			m_tiledLayer.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onAllTilesLoaded);
 			addChild(m_tiledLayer);
 			
 			changeTiledLayerVisibility(false);
 			updateTiledLayerCRSs();
+			
 		}
 		
 		override protected function createChildren():void
@@ -217,14 +227,23 @@ package com.iblsoft.flexiweather.ogc.tiling
 			var gr: Graphics = graphics;
 			if (isTileable)
 			{
+				if(!visible) {
+					m_autoRefreshTimer.reset();
+					return;
+				}
+				
 				updateTiledLayerURLBase();
 				m_tiledLayer.invalidateData(b_forceUpdate);
 				changeTiledLayerVisibility(true);
+				
+				m_autoRefreshTimer.reset();
+				
 			} else {
 				changeTiledLayerVisibility(false);
 				super.updateData(b_forceUpdate);
 			}
 		}
+		
 		
 		override public function renderPreview(graphics: Graphics, f_width: Number, f_height: Number): void
 		{
@@ -281,20 +300,51 @@ package com.iblsoft.flexiweather.ogc.tiling
 		override public function setWMSDimensionValue(s_dimName: String, s_value: String): void
 		{
 			super.setWMSDimensionValue(s_dimName, s_value);
-		
-		}
-		
-		private var _currentValidityTime: Date;
-		public function setValidityTime(validity:Date):void
-		{
-			// TODO Auto Generated method stub
-			_currentValidityTime = validity;
-			if (m_tiledLayer)
+			
+			// if "run" changed, then even time axis changes
+			var b_frameChanged: Boolean = false;
+			if(m_cfg.ms_dimensionRunName != null && s_dimName == m_cfg.ms_dimensionRunName) {
+				b_frameChanged = true;
+			}
+			//if "forecast" changed, we need to update timeline, so we need to dispatch event
+			if(m_cfg.ms_dimensionForecastName != null && s_dimName == m_cfg.ms_dimensionForecastName) {
+				b_frameChanged = true;
+			}
+			//if "time" changed, we need to update timeline, so we need to dispatch event
+			if(m_cfg.ms_dimensionTimeName != null && s_dimName == m_cfg.ms_dimensionTimeName) {
+				b_frameChanged = true;
+			}
+			
+			if (b_frameChanged)
 			{
-				m_tiledLayer.setValidityTime(validity);
+				_currentValidityTime = getSynchronisedVariableValue("frame") as Date;
+				trace("setWMSDimensionValue _currentValidityTime : " + _currentValidityTime );
+				if (m_tiledLayer)
+				{
+					m_tiledLayer.setValidityTime(_currentValidityTime);
+				}
 			}
 		}
 		
+		private function onAllTilesLoaded(event: InteractiveLayerEvent): void
+		{
+			// restartautorefresh timer
+			restartAutoRefreshTimer();
+		}
+		
+		override protected function autoRefreshTimerCompleted(event: TimerEvent): void
+		{
+			if (isTileable)
+			{
+				if (m_tiledLayer)
+				{
+					m_tiledLayer.invalidateData(true);
+				}
+			} else {
+				super.autoRefreshTimerCompleted(event);
+			}
+			
+		}
 		
 		override public function toString(): String
 		{

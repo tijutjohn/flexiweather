@@ -15,6 +15,8 @@ package com.iblsoft.flexiweather.ogc.cache
 		 */		
 		public var validity: Date;
 		
+		public var updateCycleAge: uint;
+		
 		public function CacheItemMetadata()
 		{
 			super();
