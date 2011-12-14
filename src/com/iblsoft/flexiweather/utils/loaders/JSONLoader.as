@@ -23,6 +23,8 @@ package com.iblsoft.flexiweather.utils.loaders
 		{
 			if (data is String)
 			{
+				if (data == "")
+					return true;
 				try {
 					var json: Object = JParser.decode(data as String);
 					if (json)
