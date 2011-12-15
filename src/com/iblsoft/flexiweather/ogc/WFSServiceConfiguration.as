@@ -1,8 +1,10 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.net.events.UniURLLoaderErrorEvent;
+	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
+	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
+	import com.iblsoft.flexiweather.net.loaders.XMLLoader;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
-	import com.iblsoft.flexiweather.utils.UniURLLoader;
-	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.widgets.BackgroundJob;
 	import com.iblsoft.flexiweather.widgets.BackgroundJobManager;
 	
@@ -15,8 +17,8 @@ package com.iblsoft.flexiweather.ogc
 	
 	public class WFSServiceConfiguration extends OGCServiceConfiguration
 	{
-		private var m_capabilitiesLoader: UniURLLoader = new UniURLLoader();
-		private var m_featureTypesLoader: UniURLLoader = new UniURLLoader();
+		private var m_capabilitiesLoader: XMLLoader = new XMLLoader();
+		private var m_featureTypesLoader: XMLLoader = new XMLLoader();
 		private var m_capabilities: XML = null;
 		private var m_capabilitiesLoadJob: BackgroundJob = null;
 		private var m_featureTypesLoadJob: BackgroundJob = null;
@@ -35,11 +37,11 @@ package com.iblsoft.flexiweather.ogc
 			
 			m_schemaParser = new SchemaParser();
 			
-			m_capabilitiesLoader.addEventListener(UniURLLoader.DATA_LOADED, onCapabilitiesLoaded);
-			m_capabilitiesLoader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onCapabilitiesLoadFailed);
+			m_capabilitiesLoader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onCapabilitiesLoaded);
+			m_capabilitiesLoader.addEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onCapabilitiesLoadFailed);
 			
-			m_featureTypesLoader.addEventListener(UniURLLoader.DATA_LOADED, onFeatureTypesLoaded);
-			m_featureTypesLoader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onFeatureTypesLoadFailed);
+			m_featureTypesLoader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onFeatureTypesLoaded);
+			m_featureTypesLoader.addEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onFeatureTypesLoadFailed);
 		}
 		
 		public function getFeatureTypeByName(s_name: String): WFSFeatureType
@@ -193,7 +195,7 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 
-		protected function onCapabilitiesLoadFailed(event: UniURLLoaderEvent): void
+		protected function onCapabilitiesLoadFailed(event: UniURLLoaderErrorEvent): void
 		{
 			m_capabilitiesLoadJob.finish();
 			m_capabilitiesLoadJob = null;
@@ -232,7 +234,7 @@ package com.iblsoft.flexiweather.ogc
 		/**
 		 * 
 		 */
-		protected function onFeatureTypesLoadFailed(event: UniURLLoaderEvent): void
+		protected function onFeatureTypesLoadFailed(event: UniURLLoaderErrorEvent): void
 		{
 			m_featureTypesLoadJob.finish();
 			m_featureTypesLoadJob = null;

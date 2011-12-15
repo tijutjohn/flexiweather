@@ -1,11 +1,20 @@
-package com.iblsoft.flexiweather.utils
+package com.iblsoft.flexiweather.net.events
 {
 	import flash.events.Event;
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
 
+	[Event(name = DATA_LOADED, type = "com.iblsoft.flexiweather.net.events.UniURLLoaderEvent")]
 	public class UniURLLoaderEvent extends Event
 	{
+		public static const RUN_STOPPED_REQUEST: String = "runStoppedRequest";
+		public static const STOP_REQUEST: String = "stopRequest";
+		
+		public static const LOAD_STARTED: String = "loadStarted";
+		
+		public static const DATA_LOADED: String = "dataLoaded";
+		
+		
 		protected var m_result: Object;
 		protected var m_request: URLRequest;
 		protected var m_loader: URLLoader;

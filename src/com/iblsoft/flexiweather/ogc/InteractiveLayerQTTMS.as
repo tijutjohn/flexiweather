@@ -2,6 +2,10 @@ package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.events.InteractiveLayerProgressEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerQTTEvent;
+	import com.iblsoft.flexiweather.net.events.UniURLLoaderErrorEvent;
+	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
+	import com.iblsoft.flexiweather.net.loaders.AbstractURLLoader;
+	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
 	import com.iblsoft.flexiweather.ogc.cache.CacheItem;
 	import com.iblsoft.flexiweather.ogc.cache.CacheItemMetadata;
 	import com.iblsoft.flexiweather.ogc.cache.ICache;
@@ -19,8 +23,6 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
-	import com.iblsoft.flexiweather.utils.UniURLLoader;
-	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.widgets.BackgroundJob;
 	import com.iblsoft.flexiweather.widgets.BackgroundJobManager;
 	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
@@ -341,7 +343,7 @@ package com.iblsoft.flexiweather.ogc
 							
 							request = new URLRequest(getExpandedURL(tileIndex));
 							// need to convert ${BASE_URL} because it's used in cachKey
-							request.url = UniURLLoader.fromBaseURL(request.url);
+							request.url = AbstractURLLoader.fromBaseURL(request.url);
 							
 							
 							var itemMetadata: CacheItemMetadata = new CacheItemMetadata();
@@ -1058,7 +1060,7 @@ package com.iblsoft.flexiweather.ogc
 		}
 		
 			
-		override protected function onDataLoadFailed(event: UniURLLoaderEvent): void
+		override protected function onDataLoadFailed(event: UniURLLoaderErrorEvent): void
 		{
 			tileLoadFailed();
 		}
@@ -1174,7 +1176,8 @@ package com.iblsoft.flexiweather.ogc
 }
 import com.iblsoft.flexiweather.ogc.BBox;
 import com.iblsoft.flexiweather.ogc.tiling.TileIndex;
-import com.iblsoft.flexiweather.utils.UniURLLoader;
+import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
+import com.iblsoft.flexiweather.ogc.net.loaders.WMSImageLoader;
 import com.iblsoft.flexiweather.widgets.BackgroundJob;
 import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 
@@ -1191,7 +1194,7 @@ class TileJobs
 	{
 		m_jobs = new Dictionary();	
 	}
-	public function addNewTileJobRequest(x: int, y: int, urlLoader: UniURLLoader, urlRequest: URLRequest): void
+	public function addNewTileJobRequest(x: int, y: int, urlLoader: WMSImageLoader, urlRequest: URLRequest): void
 	{
 		var _existingJob: TileJob = m_jobs[x+"_"+y] as TileJob;
 		if (_existingJob)
@@ -1211,19 +1214,19 @@ class TileJob
 	private var mi_x: int;
 	private var mi_y: int;
 	private var m_urlRequest: URLRequest;
-	private var m_urlLoader: UniURLLoader;
+	private var m_urlLoader: WMSImageLoader;
 
-	public function set urlRequest(value:URLRequest):void
+	public function set urlRequest(value: URLRequest):void
 	{
 		m_urlRequest = value;
 	}
 
-	public function set urlLoader(value:UniURLLoader):void
+	public function set urlLoader(value: WMSImageLoader):void
 	{
 		m_urlLoader = value;
 	}
 	
-	public function TileJob(x: int, y: int, request: URLRequest, loader: UniURLLoader)
+	public function TileJob(x: int, y: int, request: URLRequest, loader: WMSImageLoader)
 	{
 		mi_x = x;
 		mi_y = y;

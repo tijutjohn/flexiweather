@@ -1,10 +1,10 @@
 package com.iblsoft.flexiweather.net.managers
 {
 	import com.iblsoft.flexiweather.net.data.UniURLLoaderData;
+	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
+	import com.iblsoft.flexiweather.net.loaders.AbstractURLLoader;
 	import com.iblsoft.flexiweather.utils.SharedObjectStorage;
 	import com.iblsoft.flexiweather.utils.Storage;
-	import com.iblsoft.flexiweather.utils.UniURLLoader;
-	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.widgets.basicauth.data.BasicAuthAccount;
 	
 	import flash.events.EventDispatcher;
@@ -289,7 +289,7 @@ package com.iblsoft.flexiweather.net.managers
 		 * 
 		 */		
 		public function createRequest(request: URLRequest, 
-										  loader: UniURLLoader, 
+										  loader: AbstractURLLoader, 
 										  associatedData: Object = null,
 										  backgroundJobName: String = null): UniURLLoaderData
 		{
@@ -308,7 +308,7 @@ package com.iblsoft.flexiweather.net.managers
 		 * 
 		 */		
 		public function addRequest(request: URLRequest, 
-										  loader: UniURLLoader, 
+										  loader: AbstractURLLoader, 
 										  associatedData: Object = null,
 										  backgroundJobName: String = null): UniURLLoaderData
 		{
@@ -344,7 +344,7 @@ package com.iblsoft.flexiweather.net.managers
 					
 					var requestObject: UniURLLoaderData = domainRequests[pos] as UniURLLoaderData;
 					
-					var loader: UniURLLoader = requestObject.loader;
+					var loader: AbstractURLLoader = requestObject.loader;
 					var request: URLRequest = requestObject.request;
 					var associatedData: Object = requestObject.associatedData;
 					var s_backgroundJobName: String = requestObject.backgroundJobName;
@@ -381,7 +381,7 @@ package com.iblsoft.flexiweather.net.managers
 				{
 					var requestObject: UniURLLoaderData = domainRequests[pos] as UniURLLoaderData;
 					
-					var loader: UniURLLoader = requestObject.loader;
+					var loader: AbstractURLLoader = requestObject.loader;
 					var request: URLRequest = requestObject.request;
 					var s_backgroundJobName: String = requestObject.backgroundJobName;
 					var associatedData: Object = requestObject.associatedData;
@@ -393,7 +393,7 @@ package com.iblsoft.flexiweather.net.managers
 						{
 							domainRequests.splice(pos, 1);
 							
-							var rn: UniURLLoaderEvent = new UniURLLoaderEvent(UniURLLoader.RUN_STOPPED_REQUEST, null, request, associatedData);
+							var rn: UniURLLoaderEvent = new UniURLLoaderEvent(UniURLLoaderEvent.RUN_STOPPED_REQUEST, null, request, associatedData);
 							loader.dispatchEvent(rn);
 							loader.load(request, associatedData, s_backgroundJobName, true, loggedBasicAccount);
 							
@@ -401,7 +401,7 @@ package com.iblsoft.flexiweather.net.managers
 					} else {
 						domainRequests.splice(pos, 1);
 						
-						var rn2: UniURLLoaderEvent = new UniURLLoaderEvent(UniURLLoader.RUN_STOPPED_REQUEST, null, request, associatedData);
+						var rn2: UniURLLoaderEvent = new UniURLLoaderEvent(UniURLLoaderEvent.RUN_STOPPED_REQUEST, null, request, associatedData);
 						loader.dispatchEvent(rn2);
 						loader.load(request, associatedData, s_backgroundJobName, true, loggedBasicAccount);
 					}

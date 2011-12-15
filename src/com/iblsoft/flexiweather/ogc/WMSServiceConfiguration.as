@@ -1,7 +1,9 @@
 package com.iblsoft.flexiweather.ogc
 {
-	import com.iblsoft.flexiweather.utils.UniURLLoader;
-	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
+	import com.iblsoft.flexiweather.net.events.UniURLLoaderErrorEvent;
+	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
+	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
+	import com.iblsoft.flexiweather.net.loaders.XMLLoader;
 	import com.iblsoft.flexiweather.widgets.BackgroundJob;
 	import com.iblsoft.flexiweather.widgets.BackgroundJobManager;
 	
@@ -12,7 +14,7 @@ package com.iblsoft.flexiweather.ogc
 	
 	public class WMSServiceConfiguration extends OGCServiceConfiguration
 	{
-		private var m_capabilitiesLoader: UniURLLoader = new UniURLLoader();
+		private var m_capabilitiesLoader: XMLLoader = new XMLLoader();
 		private var m_capabilities: XML = null;
 		private var m_capabilitiesLoadJob: BackgroundJob = null;
 		
@@ -30,8 +32,8 @@ package com.iblsoft.flexiweather.ogc
 		public function WMSServiceConfiguration(s_url: String = null, version: Version = null)
 		{
 			super(s_url, "wms", version);
-			m_capabilitiesLoader.addEventListener(UniURLLoader.DATA_LOADED, onCapabilitiesLoaded);
-			m_capabilitiesLoader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onCapabilitiesLoadFailed);
+			m_capabilitiesLoader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onCapabilitiesLoaded);
+			m_capabilitiesLoader.addEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onCapabilitiesLoadFailed);
 		}
 		
 		public function getLayerByName(s_name: String): WMSLayer
@@ -157,7 +159,7 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 
-		protected function onCapabilitiesLoadFailed(event: UniURLLoaderEvent): void
+		protected function onCapabilitiesLoadFailed(event: UniURLLoaderErrorEvent): void
 		{
 			if (m_capabilitiesLoadJob)
 			{

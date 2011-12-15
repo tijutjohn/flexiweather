@@ -1,8 +1,9 @@
 package com.iblsoft.flexiweather.ogc.tiling
 {
-	import com.iblsoft.flexiweather.utils.UniURLLoader;
-	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
-	import com.iblsoft.flexiweather.utils.loaders.WMSImageLoader;
+	import com.iblsoft.flexiweather.net.events.UniURLLoaderErrorEvent;
+	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
+	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
+	import com.iblsoft.flexiweather.ogc.net.loaders.WMSImageLoader;
 	
 	import flash.display.Bitmap;
 	import flash.events.ProgressEvent;
@@ -35,9 +36,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 				{
 					var customAssociatedData: Object = {associatedData: data.associatedData, tileRequest: data};
 					var m_loader: WMSImageLoader = new WMSImageLoader();
-					m_loader.addEventListener(UniURLLoader.DATA_LOADED, onDataLoaded);
+					m_loader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onDataLoaded);
 					m_loader.addEventListener(ProgressEvent.PROGRESS, onDataProgress);
-					m_loader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onDataLoadFailed);						
+					m_loader.addEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onDataLoadFailed);						
 					m_loader.load(data.request, customAssociatedData, data.jobName);
 				}
 			}
@@ -56,7 +57,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			_callbackTileLoaded(Bitmap(event.result), tileRequested, tileRequested.tileIndex, tileAssociatedData);
 		}
 		
-		protected function onDataLoadFailed(event: UniURLLoaderEvent): void
+		protected function onDataLoadFailed(event: UniURLLoaderErrorEvent): void
 		{
 			var tileAssociatedData: Object = event.associatedData.associatedData;
 			var tileRequested: QTTTileRequest = event.associatedData.tileRequest as QTTTileRequest;

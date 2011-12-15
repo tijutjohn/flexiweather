@@ -1,6 +1,6 @@
 package com.iblsoft.flexiweather.net.interfaces
 {
-	import com.iblsoft.flexiweather.utils.UniURLLoader;
+	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
 	
 	import flash.events.IEventDispatcher;
 

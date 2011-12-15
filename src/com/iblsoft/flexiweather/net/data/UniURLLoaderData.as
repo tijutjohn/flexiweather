@@ -1,16 +1,17 @@
 package com.iblsoft.flexiweather.net.data
 {
+	import com.iblsoft.flexiweather.net.loaders.AbstractURLLoader;
+	
 	import flash.net.URLRequest;
-	import com.iblsoft.flexiweather.utils.UniURLLoader;
 
 	public class UniURLLoaderData
 	{
 		public var request: URLRequest;
-		public var loader: UniURLLoader;
+		public var loader: AbstractURLLoader;
 		public var associatedData: Object;
 		public var backgroundJobName: String;
 		
-		public function UniURLLoaderData(request: URLRequest, loader: UniURLLoader, associatedData: Object, backgroundJobName: String)
+		public function UniURLLoaderData(request: URLRequest, loader: AbstractURLLoader, associatedData: Object, backgroundJobName: String)
 		{
 			this.request = request;
 			this.loader = loader;

@@ -1,16 +1,17 @@
 package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
+	import com.iblsoft.flexiweather.net.events.UniURLLoaderErrorEvent;
+	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
+	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
 	import com.iblsoft.flexiweather.ogc.cache.ICache;
 	import com.iblsoft.flexiweather.ogc.events.GetCapabilitiesEvent;
+	import com.iblsoft.flexiweather.ogc.net.loaders.WMSFeatureInfoLoader;
+	import com.iblsoft.flexiweather.ogc.net.loaders.WMSImageLoader;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.utils.Duration;
 	import com.iblsoft.flexiweather.utils.ISO8601Parser;
-	import com.iblsoft.flexiweather.utils.UniURLLoader;
-	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
-	import com.iblsoft.flexiweather.utils.loaders.WMSFeatureInfoLoader;
-	import com.iblsoft.flexiweather.utils.loaders.WMSImageLoader;
 	import com.iblsoft.flexiweather.widgets.BackgroundJob;
 	import com.iblsoft.flexiweather.widgets.GlowLabel;
 	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
@@ -67,8 +68,8 @@ package com.iblsoft.flexiweather.ogc
 		{
 			super(container);
 			
-			m_featureInfoLoader.addEventListener(UniURLLoader.DATA_LOADED, onFeatureInfoLoaded);
-			m_featureInfoLoader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onFeatureInfoLoadFailed);
+			m_featureInfoLoader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onFeatureInfoLoaded);
+			m_featureInfoLoader.addEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onFeatureInfoLoadFailed);
 			
 			m_synchronisationRole = new SynchronisationRole();
 			
@@ -349,8 +350,8 @@ package com.iblsoft.flexiweather.ogc
 				var associatedData: Object = {canvas: canvas, labelAlign: labelAlign, callback: callback, useCache: useCache, legendScaleX: legendScaleX, legendScaleY: legendScaleY, width: w, height: h};
 				
 				var legendLoader: WMSImageLoader = new WMSImageLoader();
-				legendLoader.addEventListener(UniURLLoader.DATA_LOADED, onLegendLoaded);
-				legendLoader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onLegendLoadFailed);
+				legendLoader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onLegendLoaded);
+				legendLoader.addEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onLegendLoadFailed);
 			
 	        	legendLoader.load(url, associatedData);
 	        	
@@ -421,8 +422,8 @@ package com.iblsoft.flexiweather.ogc
         
         private function removeLegendListeners(legendLoader: WMSImageLoader): void
         {
-        	legendLoader.removeEventListener(UniURLLoader.DATA_LOADED, onLegendLoaded);
-			legendLoader.removeEventListener(UniURLLoader.DATA_LOAD_FAILED, onLegendLoadFailed);
+        	legendLoader.removeEventListener(UniURLLoaderEvent.DATA_LOADED, onLegendLoaded);
+			legendLoader.removeEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onLegendLoadFailed);
         }
         /**
          * Function which handle legend load 
@@ -526,7 +527,7 @@ package com.iblsoft.flexiweather.ogc
 				callback.apply(null, [cnv]);
 			}
 		}
-		protected function onLegendLoadFailed(event: UniURLLoaderEvent): void
+		protected function onLegendLoadFailed(event: UniURLLoaderErrorEvent): void
 		{
 			debug("onLegendLoadFailed");
 			removeLegendListeners(event.target as WMSImageLoader);
@@ -1067,7 +1068,7 @@ package com.iblsoft.flexiweather.ogc
 		}
 		
 
-		override protected function onDataLoadFailed(event: UniURLLoaderEvent): void
+		override protected function onDataLoadFailed(event: UniURLLoaderErrorEvent): void
 		{
 			super.onDataLoadFailed(event);
 			
@@ -1096,7 +1097,7 @@ package com.iblsoft.flexiweather.ogc
 			m_featureInfoCallBack = null;
 		}
 		
-		protected function onFeatureInfoLoadFailed(event: UniURLLoaderEvent): void
+		protected function onFeatureInfoLoadFailed(event: UniURLLoaderErrorEvent): void
 		{
 			m_featureInfoCallBack.call(null, String(event.result), this);
 			m_featureInfoCallBack = null;

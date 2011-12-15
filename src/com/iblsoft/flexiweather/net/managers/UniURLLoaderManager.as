@@ -2,7 +2,7 @@ package com.iblsoft.flexiweather.net.managers
 {
 	import flash.events.EventDispatcher;
 	import flash.net.URLRequest;
-	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
+	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
 
 	public class UniURLLoaderManager extends EventDispatcher
 	{

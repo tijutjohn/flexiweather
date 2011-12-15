@@ -1,9 +1,10 @@
 package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
+	import com.iblsoft.flexiweather.net.events.UniURLLoaderErrorEvent;
+	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
+	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
-	import com.iblsoft.flexiweather.utils.UniURLLoader;
-	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
@@ -44,7 +45,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			var url: URLRequest = new URLRequest(serviceURL);
 			
-			dataLoader.addEventListener(UniURLLoader.DATA_LOADED, onImportLoaded);
+			dataLoader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onImportLoaded);
 			
 			if(url.data == null)
 				url.data = new URLVariables();
@@ -74,10 +75,10 @@ package com.iblsoft.flexiweather.ogc
 			switch (type)
 			{
 				case 'load':
-					dataLoader.addEventListener(UniURLLoader.DATA_LOADED, onDataLoaded);
+					dataLoader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onDataLoaded);
 					break;
 				case 'refresh':
-					dataLoader.addEventListener(UniURLLoader.DATA_LOADED, onRefreshDataLoaded);
+					dataLoader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onRefreshDataLoaded);
 					break;
 				
 			}
@@ -280,7 +281,7 @@ package com.iblsoft.flexiweather.ogc
 		// event handlers
 		public function onImportLoaded(event: UniURLLoaderEvent): void
 		{
-			dataLoader.removeEventListener(UniURLLoader.DATA_LOADED, onImportLoaded);
+			dataLoader.removeEventListener(UniURLLoaderEvent.DATA_LOADED, onImportLoaded);
 			
 			var xml: XML = event.result as XML;
 			if(xml == null)
@@ -298,7 +299,7 @@ package com.iblsoft.flexiweather.ogc
 		// event handlers
 		protected function onRefreshDataLoaded(event: UniURLLoaderEvent): void
 		{
-			dataLoader.removeEventListener(UniURLLoader.DATA_LOADED, onRefreshDataLoaded);
+			dataLoader.removeEventListener(UniURLLoaderEvent.DATA_LOADED, onRefreshDataLoaded);
 			
 			var xml: XML = event.result as XML;
 			if(xml == null)
@@ -314,7 +315,7 @@ package com.iblsoft.flexiweather.ogc
 		
 		override protected function onDataLoaded(event: UniURLLoaderEvent): void
 		{
-			dataLoader.removeEventListener(UniURLLoader.DATA_LOADED, onDataLoaded);
+			dataLoader.removeEventListener(UniURLLoaderEvent.DATA_LOADED, onDataLoaded);
 			
 			var xml: XML = event.result as XML;
 			if(xml == null)
@@ -561,7 +562,7 @@ package com.iblsoft.flexiweather.ogc
 		
 		
 		
-		override protected function onDataLoadFailed(event: UniURLLoaderEvent): void
+		override protected function onDataLoadFailed(event: UniURLLoaderErrorEvent): void
 		{
 		}
 

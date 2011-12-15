@@ -1,6 +1,6 @@
 package com.iblsoft.flexiweather.ogc
 {
-	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
+	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
 	
 	import mx.logging.ILogger;
 	import mx.rpc.Fault;

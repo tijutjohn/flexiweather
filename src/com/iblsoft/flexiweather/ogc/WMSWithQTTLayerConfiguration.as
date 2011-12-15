@@ -1,8 +1,9 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.net.loaders.AbstractURLLoader;
+	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
 	import com.iblsoft.flexiweather.ogc.tiling.InteractiveLayerWMSWithQTT;
 	import com.iblsoft.flexiweather.utils.Storage;
-	import com.iblsoft.flexiweather.utils.UniURLLoader;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
@@ -70,7 +71,7 @@ package com.iblsoft.flexiweather.ogc
 				if(ms_previewURL == "<internal>") {
 					s_url = service.fullURL;
 					//check if there is ${BASE_URL} in fullURL and convert it
-					s_url = UniURLLoader.fromBaseURL(s_url);
+					s_url = AbstractURLLoader.fromBaseURL(s_url);
 					s_url = s_url.replace(/.*\//, "").replace(/\?.*/, "");
 					s_url = s_url.replace("/", "-");
 					s_url += "-" + ma_layerNames.join("_").replace(" ", "-").toLowerCase();

@@ -1,8 +1,9 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.net.loaders.AbstractURLLoader;
+	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
-	import com.iblsoft.flexiweather.utils.UniURLLoader;
 	
 	import flash.geom.Rectangle;
 	import flash.net.URLRequest;
@@ -65,7 +66,7 @@ package com.iblsoft.flexiweather.ogc
 			else
 				url += "&BBOX="+_thumbBBox.toBBOXString();
 			url += "&WIDTH=" + w + "&HEIGHT=" + h + "&FORMAT=image/png&TRANSPARENT=TRUE";
-			url = UniURLLoader.fromBaseURL(url);
+			url = AbstractURLLoader.fromBaseURL(url);
 			
 //			trace("AreaConfiguration icon ["+w+","+h+"] url : " + url);
 			return url;

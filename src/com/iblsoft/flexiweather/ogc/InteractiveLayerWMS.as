@@ -1,6 +1,8 @@
 package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
+	import com.iblsoft.flexiweather.net.events.UniURLLoaderErrorEvent;
+	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.ogc.cache.CacheItemMetadata;
 	import com.iblsoft.flexiweather.ogc.cache.ICache;
 	import com.iblsoft.flexiweather.ogc.cache.ICachedLayer;
@@ -10,7 +12,6 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
-	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.widgets.BackgroundJob;
 	import com.iblsoft.flexiweather.widgets.BackgroundJobManager;
 	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
@@ -383,7 +384,7 @@ package com.iblsoft.flexiweather.ogc
 			onFinishedRequest(event.request);
 		}
 		
-		override protected function onDataLoadFailed(event: UniURLLoaderEvent): void
+		override protected function onDataLoadFailed(event: UniURLLoaderErrorEvent): void
 		{
 			// event is null if this method was called internally by this class
 			super.onDataLoadFailed(event);

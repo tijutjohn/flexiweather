@@ -1,5 +1,8 @@
 package com.iblsoft.flexiweather.utils
 {
+	import com.iblsoft.flexiweather.net.loaders.AbstractURLLoader;
+	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
+	
 	import flash.net.URLRequest;
 	import flash.net.URLVariables;
 	
@@ -27,7 +30,7 @@ package com.iblsoft.flexiweather.utils
 		public static function debugURLString(url: String, debugString: String = null): void
 		{
 			trace("\n debug URL");
-			url = UniURLLoader.fromBaseURL(url);
+			url = AbstractURLLoader.fromBaseURL(url);
 			trace("URL: " + url);
 			var arr: Array = url.split('&');
 			var arr2: Array;

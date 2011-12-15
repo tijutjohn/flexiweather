@@ -2,10 +2,11 @@ package com.iblsoft.flexiweather.widgets
 {
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerProgressEvent;
+	import com.iblsoft.flexiweather.net.events.UniURLLoaderErrorEvent;
+	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
+	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
 	import com.iblsoft.flexiweather.ogc.ExceptionUtils;
-	import com.iblsoft.flexiweather.utils.UniURLLoader;
-	import com.iblsoft.flexiweather.utils.UniURLLoaderEvent;
-	import com.iblsoft.flexiweather.utils.loaders.WMSImageLoader;
+	import com.iblsoft.flexiweather.ogc.net.loaders.WMSImageLoader;
 	
 	import flash.events.Event;
 	import flash.events.ProgressEvent;
@@ -130,9 +131,9 @@ package com.iblsoft.flexiweather.widgets
 			
 			setStatus(STATE_EMPTY);
 			
-			m_loader.addEventListener(UniURLLoader.DATA_LOADED, onDataLoaded);
+			m_loader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onDataLoaded);
 			m_loader.addEventListener(ProgressEvent.PROGRESS, onDataProgress);
-			m_loader.addEventListener(UniURLLoader.DATA_LOAD_FAILED, onDataLoadFailed);
+			m_loader.addEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onDataLoadFailed);
 		}
 		
 		private var _invalidateDataFlag: Boolean;
@@ -248,17 +249,12 @@ package com.iblsoft.flexiweather.widgets
 		protected function onDataLoaded(event: UniURLLoaderEvent): void
 		{
 			notifyLoadingFinished();
-			
-//			var ile: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.LAYER_LOADED, true);
-//			ile.interactiveLayer = this;
-//			dispatchEvent(ile);
 		}
 		
-		protected function onDataLoadFailed(event: UniURLLoaderEvent): void
+		protected function onDataLoadFailed(event: UniURLLoaderErrorEvent): void
 		{
 			notifyLoadingError();
 		}
-		
 		
 		/**
 		 * Dispatch <code>InteractiveDataLayer.OPERATION_NOT_SUPPORTED</code> event. 

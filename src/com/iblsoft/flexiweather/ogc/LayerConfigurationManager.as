@@ -1,8 +1,9 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.net.loaders.AbstractURLLoader;
+	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
-	import com.iblsoft.flexiweather.utils.UniURLLoader;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.events.Event;
@@ -163,7 +164,7 @@ package com.iblsoft.flexiweather.ogc
 					
 					if (icon)
 					{
-						icon = UniURLLoader.fromBaseURL(icon);
+						icon = AbstractURLLoader.fromBaseURL(icon);
 					}
 					var layerData: String = "layer."+layerConfig.label;
 					var layerXML: XML = <menuitem label={lbl} data={layerData} icon={icon} compatibleWithCRS={compatibleWithCRS} type={layerType}/>
