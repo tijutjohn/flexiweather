@@ -44,7 +44,7 @@ package com.iblsoft.flexiweather.net.loaders
 			{
 				try {
 					var json: Object = JParser.decode(data as String);
-					if (json)
+					if (json != null)
 						return json;
 				} catch (error: Error) {
 					return null;
