@@ -844,7 +844,7 @@ package com.iblsoft.flexiweather.net.loaders
 			dispatchEvent(e);  
 		}
 		
-		protected function dispatchFault(errorString: String, rawData: ByteArray,
+		protected function dispatchFault(errorString: String, rawData: Object,
 										 urlRequest: URLRequest, associatedData: Object
 		): void
 		{
