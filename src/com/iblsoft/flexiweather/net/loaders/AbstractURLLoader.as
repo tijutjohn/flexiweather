@@ -130,14 +130,88 @@ package com.iblsoft.flexiweather.net.loaders
 		}
 		
 		/**
+		 * Function will check request data and will fix them if there is need for it. There are 4 different cases
 		 * 
+		 * 1) all parameters are in URL
+		 * 2) all parameters are in URLVariables
+		 * 3) some parameters are in URL some in URLVariables
+		 * 
+		 * Cases 1) and 2) will not touch request at all.
+		 * 
+		 * Case 3) will modify request and add URLVariables after URL parameters in alphabetical order (URL parameters will not be changed)
 		 * @param urlRequest
 		 * 
 		 */		
+		public function checkRequestData(urlRequest: URLRequest): void
+		{
+			var url: String = decodeURIComponent(urlRequest.url);
+			var urlArr: Array = url.split('?');
+			//check if there are get parameters divide by "?" character
+			
+			var urlParamsExists: Boolean = (urlArr.length == 2);
+			
+			if (!urlParamsExists)
+			{
+				//don't do anything, there are not url params
+				return;
+			}
+			var urlVariablesParamsExists: Boolean = false;
+			
+			var vars: URLVariables; 
+			
+			var urlParams: String = url;
+			
+			if (urlRequest.data)
+			{
+				vars = urlRequest.data as URLVariables;
+				if (vars)
+					urlVariablesParamsExists = true;
+			}
+			
+			if (vars)
+			{
+				if (!urlParamsExists)
+					urlParams += "?";
+				else
+					urlParams += "&";
+			
+				var item: String;
+				
+				//now we have all datas in variables, move it to url
+				//sort it alfabetically
+				var test: Array = [];
+				for (item in urlRequest.data)
+				{
+					test.push({item: item , value: urlRequest.data[item]});
+				}
+				test.sort(sortVariables);
+				
+				for each (var obj: Object in test)
+				{
+					urlParams += obj.item + "=" + obj.value + "&";
+				}
+				urlParams = urlParams.substr(0, urlParams.length-1);
+				urlRequest.data = null;
+				
+			}
+			urlRequest.data = null;
+			urlRequest.url = urlParams;
+		}
+		
+		public function sortVariables(var1: Object, var2: Object): int
+		{
+			if (var1.item < var2.item) 
+				return -1;
+			if (var1.item > var2.item) 
+				return 1;
+			return 0;
+		}
+		/*
 		private function checkRequestData(urlRequest: URLRequest): void
 		{
 			var url: String = decodeURIComponent(urlRequest.url);
 			var urlArr: Array = url.split('?');
+			//check if there are get parameters divide by "?" character	
 			if (urlArr.length == 2)
 			{
 				urlRequest.url = urlArr[0];
@@ -179,7 +253,7 @@ package com.iblsoft.flexiweather.net.loaders
 				//				urlRequest.data = null;
 			}
 		}
-		
+		*/
 		
 		private function removeBasicAuthPopupListeners(popup: IBasicAuthCredentialsPopup): void
 		{
