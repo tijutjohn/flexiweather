@@ -174,7 +174,7 @@ package com.iblsoft.flexiweather.ogc.cache
 						specialStringsFound++;
 					}
 					
-					debug("getTiles specialStringsFound: " + specialStringsFound + " specialStringsLength: " + specialStringsLength);
+//					debug("getTiles specialStringsFound: " + specialStringsFound + " specialStringsLength: " + specialStringsLength);
 					if (specialStringsFound != specialStringsLength)
 					{
 						//not all special strings were inside
@@ -190,7 +190,7 @@ package com.iblsoft.flexiweather.ogc.cache
 					image: cacheRecord.image
 				});
 			}
-			debug("GET TILES: " + a.length);
+//			debug("GET TILES: " + a.length);
 			return a;
 		}
 	

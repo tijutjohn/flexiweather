@@ -113,16 +113,21 @@ package com.iblsoft.flexiweather.widgets
 
 		override public function onMouseRollOver(event:MouseEvent): Boolean
 		{
-			container.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
-			container.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
-			
+			if (container && container.stage)
+			{
+				container.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+				container.stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUp);
+			}
 			return true;
 		}
 
 		override public function onMouseRollOut(event:MouseEvent):Boolean
 		{
-			container.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
-			container.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyUp);
+			if (container && container.stage)
+			{
+				container.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+				container.stage.removeEventListener(KeyboardEvent.KEY_UP, onKeyUp);
+			}
 			return true;
 		}
 
