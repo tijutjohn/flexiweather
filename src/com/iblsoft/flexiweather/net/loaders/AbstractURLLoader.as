@@ -31,6 +31,7 @@ package com.iblsoft.flexiweather.net.loaders
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
 	import flash.net.URLRequestHeader;
+	import flash.net.URLRequestMethod;
 	import flash.net.URLVariables;
 	import flash.utils.ByteArray;
 	import flash.utils.Dictionary;
@@ -168,7 +169,7 @@ package com.iblsoft.flexiweather.net.loaders
 					urlVariablesParamsExists = true;
 			}
 			
-			if (vars)
+			if (vars && urlRequest.method == URLRequestMethod.GET)
 			{
 				if (!urlParamsExists)
 					urlParams += "?";
