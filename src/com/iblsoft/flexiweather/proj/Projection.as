@@ -46,7 +46,7 @@ package com.iblsoft.flexiweather.proj
 		public static function isValidProjection(projection: Projection): Boolean
 		{
 //			trace("\n isValidProjection" + projection.crs + " valid");
-			if (projection)
+			if (projection && projection.m_proj)
 			{
 				if (projection.extentBBox && projection.extentBBox.center)
 				{
@@ -144,7 +144,10 @@ package com.iblsoft.flexiweather.proj
 		public function prjXYToLaLoCoord(f_prjY: Number, f_prjX: Number): Coord
 		{
 			var laLoPt: Point = prjXYToLaLoPt(f_prjY, f_prjX);
-			return new Coord(Projection.CRS_GEOGRAPHIC, laLoPt.x * 180.0 / Math.PI, laLoPt.y * 180.0 / Math.PI);
+			if (laLoPt)
+				return new Coord(Projection.CRS_GEOGRAPHIC, laLoPt.x * 180.0 / Math.PI, laLoPt.y * 180.0 / Math.PI);
+			
+			return null;
 		}
 		
 		/**
