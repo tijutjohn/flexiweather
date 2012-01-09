@@ -29,6 +29,15 @@ package com.iblsoft.flexiweather.ogc.cache
 		protected var md_cache: Dictionary = new Dictionary();
 		protected var md_cacheLoading: Dictionary = new Dictionary();
 		
+		public function clearCache():void
+		{
+			for each (var cacheItem: CacheItem in md_cache)
+			{
+				deleteCacheItem(cacheItem, true);
+			}
+		}
+		
+		
 		public function WMSCache()
 		{
 			startExpirationTimer();
@@ -96,6 +105,7 @@ package com.iblsoft.flexiweather.ogc.cache
 		
 		/**
 		 * Delete cached item 
+		 * 
 		 * @param s_key Item key
 		 * @param b_disposeDisplayed dispose item even if it is displayed. Default value is false, because we do not want dispose displayed items, but you can force it by setting this property to true (e.g. receiving data for same CRS and BBox)
 		 * @return true if item was deleted, false if it was not
@@ -138,32 +148,32 @@ package com.iblsoft.flexiweather.ogc.cache
 			return arr;
 		}
 		
-		private function getKey(s_crs: String, bbox: BBox, url: URLRequest, validity: Date = null): String
+		private function getKey(s_crs: String, bbox: BBox, url: URLRequest, dimensions: Array, validity: Date = null): String
 		{
-			var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url, validity);
+			var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url, dimensions, validity);
 			var s_key: String = ck.toString(); 
 			return s_key;			
 		}
 		
-//		public function isImageCached(metadata: CacheItemMetadata): Boolean
 		public function isItemCached(metadata: CacheItemMetadata): Boolean
 		{
 			var s_crs: String = metadata.crs as String;
-			var  bbox: BBox = metadata.bbox as BBox;
-			var  url: URLRequest = metadata.url;
+			var bbox: BBox = metadata.bbox as BBox;
+			var url: URLRequest = metadata.url;
+			var dimensions: Array = metadata.dimensions;
 			
-			var s_key: String = getKey(s_crs, bbox, url, metadata.validity);
+			var s_key: String = getKey(s_crs, bbox, url, dimensions, metadata.validity);
 			return md_cache[s_key] || md_cacheLoading[s_key];
 		}
 		
-//		public function getCacheItem(s_crs: String, bbox: BBox, url: URLRequest): CacheItem
 		public function getCacheItem(metadata: CacheItemMetadata): CacheItem
 		{
 			var s_crs: String = metadata.crs as String;
 			var  bbox: BBox = metadata.bbox as BBox;
 			var  url: URLRequest = metadata.url;
+			var dimensions: Array = metadata.dimensions;
 			
-			var s_key: String = getKey(s_crs, bbox, url, metadata.validity);
+			var s_key: String = getKey(s_crs, bbox, url, dimensions, metadata.validity);
 			if(s_key in md_cache) {
 				var item: CacheItem = md_cache[s_key] as CacheItem; 
 				item.lastUsed = new Date();
@@ -173,7 +183,6 @@ package com.iblsoft.flexiweather.ogc.cache
 			return null;
 			
 		}
-//		public function getCacheItemBitmap(s_crs: String, bbox: BBox, url: URLRequest): Bitmap
 		public function getCacheItemBitmap(metadata: CacheItemMetadata): Bitmap
 		{
 			var item: CacheItem = getCacheItem(metadata);
@@ -190,25 +199,29 @@ package com.iblsoft.flexiweather.ogc.cache
 		 * @param url
 		 * 
 		 */		
-		public function startImageLoading(s_crs: String, bbox: BBox, url: URLRequest, validity: Date = null): void
+		public function startImageLoading(s_crs: String, bbox: BBox, url: URLRequest, dimensions: Array, validity: Date = null): void
 		{
-			var s_key: String = getKey(s_crs, bbox, url, validity);
+			var s_key: String = getKey(s_crs, bbox, url, dimensions, validity);
 			
 			md_cacheLoading[s_key] = true;
+			
+			debug("startImageLoading ["+s_crs+","+bbox.toBBOXString()+","+url.url+"]");
 		}
 		
-//		public function addCacheItem(img: Bitmap, s_crs: String, bbox: BBox, url: URLRequest, associatedCacheData: Object = null): void
 		public function addCacheItem(img: Bitmap, metadata: CacheItemMetadata): void
 		{
 			var s_crs: String = metadata.crs as String;
-			var  bbox: BBox = metadata.bbox as BBox;
-			var  url: URLRequest = metadata.url;
-			var  validity: Date = metadata.validity;
+			var bbox: BBox = metadata.bbox as BBox;
+			var url: URLRequest = metadata.url;
+			var dimensions: Array = metadata.dimensions;
+			var validity: Date = metadata.validity;
 			
-			var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url, validity);
-			var s_key: String = getKey(s_crs, bbox, url, validity);
+			var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url, dimensions, validity);
+			var s_key: String = getKey(s_crs, bbox, url, dimensions, validity);
 			
 			var b_deleted: Boolean = deleteCacheItemByKey(s_key, true);
+			
+			debug("addCacheItem ["+s_crs+","+bbox.toBBOXString()+","+url.url+"]");
 			
 			var item: CacheItem = new CacheItem();
 			item.cacheKey = ck;
@@ -255,6 +268,14 @@ package com.iblsoft.flexiweather.ogc.cache
 			}
 		}
 		
+		/**
+		 * Remove cache items with same CRS and BBox
+		 *  
+		 * @param s_crs
+		 * @param bbox
+		 * @param validity
+		 * 
+		 */		
 		public function invalidate(s_crs: String, bbox: BBox, validity: Date = null): void
 		{
 			debug("WMSCache.invalidate(): WMS CACHE invalidate s_crs: " + s_crs + " bbox : " + bbox);
@@ -282,8 +303,8 @@ package com.iblsoft.flexiweather.ogc.cache
 
 		private function debug(str: String): void
 		{
-			return;
-			trace(str);
+//			return;
+			trace("WMSCache ["+name+"]: " + str);
 		}
 	}
 }

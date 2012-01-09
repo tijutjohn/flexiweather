@@ -1172,12 +1172,19 @@ package com.iblsoft.flexiweather.ogc
 			_currentValidityTime = validity;
 		}
 		
+		public function clearCache():void
+		{
+			if (m_cache)
+				m_cache.clearCache();
+			
+		}
+		
 	}
 }
-import com.iblsoft.flexiweather.ogc.BBox;
-import com.iblsoft.flexiweather.ogc.tiling.TileIndex;
 import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
+import com.iblsoft.flexiweather.ogc.BBox;
 import com.iblsoft.flexiweather.ogc.net.loaders.WMSImageLoader;
+import com.iblsoft.flexiweather.ogc.tiling.TileIndex;
 import com.iblsoft.flexiweather.widgets.BackgroundJob;
 import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 

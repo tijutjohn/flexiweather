@@ -15,6 +15,11 @@ package com.iblsoft.flexiweather.ogc.cache
 		 */		
 		public var validity: Date;
 		
+		/**
+		 * Dimensions, which will be part of Cache key 
+		 */		
+		public var dimensions: Array;
+		
 		public var updateCycleAge: uint;
 		
 		public function CacheItemMetadata()

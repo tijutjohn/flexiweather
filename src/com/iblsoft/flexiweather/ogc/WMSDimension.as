@@ -7,10 +7,10 @@ package com.iblsoft.flexiweather.ogc
 	
 	public class WMSDimension
 	{
-		internal var ms_name: String;
+		private var ms_name: String;
 		private var ma_values: Array;
-		internal var ms_units: String;
-		internal var ms_default: String;
+		private var ms_units: String;
+		private var ms_default: String;
 
 		/**
 		 * String representing values of dimensions as found in the GetCapabilities document.
@@ -190,5 +190,15 @@ package com.iblsoft.flexiweather.ogc
 				parseData();
 			return ma_values;
 		}
+		
+		public function get units(): String
+		{
+			return ms_units;
+		}
+		public function get defaultValue(): String
+		{
+			return ms_default;
+		}
+
 	}
 }

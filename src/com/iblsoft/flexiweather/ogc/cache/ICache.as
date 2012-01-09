@@ -14,10 +14,15 @@ package com.iblsoft.flexiweather.ogc.cache
 		 */		
 		function debugCache(): String;
 		
+		/**
+		 * Clear whole cache 
+		 * 
+		 */		
+		function clearCache(): void;
+		
 		function setAnimationModeEnable(value: Boolean): void;
 		function invalidate(s_crs: String, bbox: BBox, validity: Date = null): void;
 		
-//		function addCacheItem(img: Bitmap, s_crs: String, bbox: BBox, url: URLRequest, associatedCacheData: Object = null): void
 		function addCacheItem(img: Bitmap, metadata: CacheItemMetadata): void
 
 		function deleteCacheItem(cacheItem: CacheItem, b_disposeDisplayed: Boolean = false): Boolean

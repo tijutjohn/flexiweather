@@ -19,6 +19,12 @@ package com.iblsoft.flexiweather.ogc
 			ms_variableId = s_variableId;
 		}
 		
+		override public function clone(): Event
+		{
+			var svce: SynchronisedVariableChangeEvent = new SynchronisedVariableChangeEvent(type, variableId);
+			return svce;
+		}
+		
 		public function get variableId(): String
 		{ return ms_variableId; }
 	}
