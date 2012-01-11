@@ -2,6 +2,7 @@ package com.iblsoft.flexiweather.utils
 {
 	import flash.display.DisplayObject;
 	import flash.display.Sprite;
+	import flash.display.Stage;
 	import flash.filters.BitmapFilter;
 	import flash.geom.Point;
 	
@@ -10,6 +11,24 @@ package com.iblsoft.flexiweather.utils
 	
 	public class ScreenUtils
 	{
+		public static var stage: Stage;
+		
+		public static function get stageWidth(): int
+		{
+			if (stage)
+			{
+				return stage.stageWidth;
+			}
+			return 0;
+		}
+		public static function get stageHeight(): int
+		{
+			if (stage)
+			{
+				return stage.stageHeight;
+			}
+			return 0;
+		}
 		public static function moveSpriteToButKeepFullyOnScreen(c: Sprite, pt: Point): void
 		{
 			var f_sw: Number = Application.application.screen.width;

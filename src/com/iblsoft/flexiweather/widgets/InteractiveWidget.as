@@ -523,6 +523,7 @@ package com.iblsoft.flexiweather.widgets
 		 */		
         public function setViewBBox(bbox: BBox, b_finalChange: Boolean, b_negotiateBBox: Boolean = true): void
         {
+			trace("WDIGET setViewBBox("+bbox.toBBOXString()+")");
 			var b_changeZoom: Boolean = true;
 			var oldBox: BBox = getViewBBox();
 			
@@ -717,6 +718,7 @@ package com.iblsoft.flexiweather.widgets
 
         public function setExtentBBOX(bbox: BBox, b_finalChange: Boolean = true): void
         {
+			trace("WDIGET setExtentBBOX("+bbox.toBBOXString()+")");
         	m_extentBBox = bbox;
         	setViewBBox(m_extentBBox, b_finalChange); // this calls signalAreaChanged()
         }
@@ -731,10 +733,10 @@ package com.iblsoft.flexiweather.widgets
         	setViewBBox(m_extentBBox, true);
         }
 
-	public function getExtentBBox(): BBox
-	{
-		return m_extentBBox;
-	}
+		public function getExtentBBox(): BBox
+		{
+			return m_extentBBox;
+		}
 	
         public function getViewBBox(): BBox
         { return m_viewBBox; }

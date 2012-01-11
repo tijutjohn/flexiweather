@@ -227,7 +227,7 @@ package com.iblsoft.flexiweather.utils
 //				trace("send headers: " + rhArray[0]);
 			}
 				
-//			trace("UNIURLLoader load " + urlRequest.url + " " + urlRequest.data);
+			trace("UNIURLLoader load " + urlRequest.url + " " + urlRequest.data);
 			var urlLoader: URLLoaderWithAssociatedData = new URLLoaderWithAssociatedData();
 			urlLoader.associatedData = associatedData;
 			urlLoader.dataFormat = URLLoaderDataFormat.BINARY;
