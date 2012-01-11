@@ -284,7 +284,8 @@ package com.iblsoft.flexiweather.ogc
 			if (m_currentWMSViewProperties)
 			{
 				m_currentWMSViewProperties.setConfiguration(cfg);
-				m_currentWMSViewProperties.name = name;
+				if (name)
+					m_currentWMSViewProperties.name = name;
 			}
 				
 		}
