@@ -12,6 +12,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.widgets.BackgroundJob;
 	import com.iblsoft.flexiweather.widgets.GlowLabel;
 	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
+	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
@@ -39,10 +40,15 @@ package com.iblsoft.flexiweather.ogc
 	
 	[Event(name="wmsStyleChanged", type="flash.events.Event")]
 	
-	public class InteractiveLayerMSBase extends InteractiveLayer
+	/**
+	 * Common base class for WMS type layers
+	 *  
+	 * @author fkormanak
+	 * 
+	 */	
+	public class InteractiveLayerMSBase extends InteractiveDataLayer
 			implements ISynchronisedObject, IConfigurableLayer
 	{
-		protected var m_loader: UniURLLoader = new UniURLLoader();
 		protected var m_featureInfoLoader: UniURLLoader = new UniURLLoader();
 		protected var m_image: Bitmap = null;
 		protected var mb_imageOK: Boolean = true;
@@ -156,7 +162,7 @@ package com.iblsoft.flexiweather.ogc
 			
 			m_cfg.addEventListener(WMSLayerConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
 			m_cfg.addEventListener(WMSLayerConfiguration.CAPABILITIES_RECEIVED, onCapabilitiesReceived);
-//			updateData(true);
+
 		}
 		
 		/**
@@ -222,17 +228,14 @@ package com.iblsoft.flexiweather.ogc
 			m_cache.setAnimationModeEnable(value);	
 		}
 		
-		public function updateData(b_forceUpdate: Boolean): void
+		override protected function updateData(b_forceUpdate: Boolean): void
 		{
+			super.updateData(b_forceUpdate);
+
 			//do not clear job and request here. We have now cache which knows, that layer is already loading
 			if(m_job != null)
 				m_job.cancel();
 			m_job = null;
-			/*
-			if(m_request != null)
-				m_loader.cancel(m_request);
-			m_request = null;
-			*/
 			
 			if(!visible) {
 				mb_updateAfterMakingVisible = true;
@@ -258,13 +261,13 @@ package com.iblsoft.flexiweather.ogc
 		override public function onContainerSizeChanged(): void
 		{
 			super.onContainerSizeChanged();
-			updateData(false);
+			invalidateData(false);
 		}
 		
         override public function refresh(b_force: Boolean): void
         {
         	super.refresh(b_force);
-        	updateData(b_force);
+			invalidateData(b_force);
         	//rerender legend
         }
 
@@ -1106,8 +1109,10 @@ package com.iblsoft.flexiweather.ogc
 		
 		
 		// Event handlers
-		protected function onDataLoaded(event: UniURLLoaderEvent): void
+		override protected function onDataLoaded(event: UniURLLoaderEvent): void
 		{
+			super.onDataLoaded(event);
+			
 			var ile: InteractiveLayerEvent = new InteractiveLayerEvent( InteractiveLayerEvent.LAYER_LOADED, true );
 			ile.interactiveLayer = this;
 			dispatchEvent(ile);
@@ -1120,8 +1125,10 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 
-		protected function onDataLoadFailed(event: UniURLLoaderEvent): void
+		override protected function onDataLoadFailed(event: UniURLLoaderEvent): void
 		{
+			super.onDataLoadFailed(event);
+			
 			debug("MSBase onDataLoadFailed");
 			m_request = null;
 			if(m_cfg.mi_autoRefreshPeriod > 0) {
@@ -1217,16 +1224,12 @@ package com.iblsoft.flexiweather.ogc
 			
 		}
 
-		private function debug(str: String): void
+		protected function debug(str: String): void
 		{
-			return;
-			trace(str);
+			trace("InteractiveLayerMSBase: " + str);
 		}
 		public function get configuration(): ILayerConfiguration
 		{ return m_cfg; }
-
-		public function get dataLoader(): UniURLLoader
-		{ return m_loader; } 
 
 		public function get synchronisationRole(): SynchronisationRole
 		{ return m_synchronisationRole; }

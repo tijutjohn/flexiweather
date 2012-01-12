@@ -86,7 +86,6 @@ package com.iblsoft.flexiweather.ogc
 			ms_default_area = storage.serializeBool(
 					"default", ms_default_area, false);
 					
-//			projection.crs = storage.serializeString("crs", projection.crs, null);
 			var _crs: String = storage.serializeString("crs", projection.crs, null);
 			
 			var xMin: Number = storage.serializeNumber("min-x", projection.bbox.xMin, 0);
@@ -95,16 +94,10 @@ package com.iblsoft.flexiweather.ogc
 			var yMax: Number = storage.serializeNumber("max-y", projection.bbox.yMax, 0);
 			
 			var newProjectionBBox: BBox = new BBox(xMin, yMin, xMax, yMax);
-			//projection.bbox = newProjectionBBox;
 			if(storage.isLoading())
 			{
 				projection = new ProjectionConfiguration(_crs, newProjectionBBox);
 			}
-			
-//			projection.bbox.mf_xMin = storage.serializeInt("min-x", projection.bbox.mf_xMin, 0);
-//			projection.bbox.mf_xMax = storage.serializeInt("max-x", projection.bbox.mf_xMax, 0);
-//			projection.bbox.mf_yMin = storage.serializeInt("min-y", projection.bbox.mf_yMin, 0);
-//			projection.bbox.mf_yMax = storage.serializeInt("max-y", projection.bbox.mf_yMax, 0);
 			
 			createThumbnailBBox();
 		}

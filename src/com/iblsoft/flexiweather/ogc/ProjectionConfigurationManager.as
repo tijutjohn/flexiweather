@@ -48,15 +48,33 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function addParsedProjectionByCRS(projection: ProjectionConfiguration): void
 		{
-//			trace("ProjectionConfigurationManager addParsedAreaByCRS: " + crs.crs);
+			trace("ProjectionConfigurationManager addParsedAreaByCRS: " + projection.crs);
+			//check if this is valid projection
+			if (projection.crs.indexOf("AUTO") >= 0)
+			{
+				trace("AUTO projection, stop");
+			}
+			var proj: Projection = Projection.getByCRS(projection.crs);
+			if (!proj || (proj && !Projection.isValidProjection(proj)))
+			{
+				//not valid projection, do not add it to parsed projections
+				trace("not valid projection, do not add it to parsed projections");
+				return;
+			}
+			
+			if (!projection.bbox || (projection.bbox && (projection.bbox.width == 0 || projection.bbox.width == 0)))
+			{
+				trace("Projection " + projection.crs + " will not be added, problem with bbox");
+			}
+				
 			ma_parsedProjectionsDictionary[projection.crs] = projection;
 			addProj4Projection(projection);
-			
 		}
+
 		private function addProj4Projection(projection: ProjectionConfiguration): void
 		{
 			if (projection && projection.crs && projection.proj4String)
-		 		Projection.addCRSByProj4(projection.crs, projection.proj4String);
+		 		Projection.addCRSByProj4(projection.crs, projection.proj4String, projection.bbox, projection.wrapsHorizontally);
 		}
 		
 		public function getMaxExtentForProjection(projection: ProjectionConfiguration): BBox

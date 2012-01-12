@@ -10,11 +10,20 @@ package com.iblsoft.flexiweather.widgets
 	
 	import mx.containers.Canvas;
 	import mx.core.UIComponent;
-	import mx.logging.ILogger;
-	import mx.logging.Log;
 	
 	public class InteractiveLayer extends UIComponent
 	{
+		protected var _type: String;
+		
+		/**
+		 * Layer type. String representation of layer type. Useful when user wants to get layer from InteractiveWidget or InteractiveLayerComposer 
+		 * and wants just compare type by string. (e.g type == 'pan'). 
+		 */		
+		public function get type(): String
+		{
+			return _type;
+		}
+		
 		public var container: InteractiveWidget;
 		private var mb_dynamicPartInvalid: Boolean = false;
 		private var mi_zOrder: int = 0;
@@ -168,10 +177,10 @@ package com.iblsoft.flexiweather.widgets
         { return false; }
 		
         public function invalidateLegend(): void
-        { }
+        {}
         
         public function removeLegend(canvas: Canvas): void
-        {  }
+        {}
 
         public function renderLegend(canvas: Canvas, callback: Function, legendScaleX: Number, legendScaleY: Number, labelAlign: String = 'left', useCache: Boolean = false , hintSize: Rectangle = null): Rectangle
         {	return new Rectangle(); }
@@ -207,6 +216,7 @@ package com.iblsoft.flexiweather.widgets
 		
 		public function getFullURL(): String
 		{	return ''; }
+
 		/**
 		 * Clone interactiveLayer 
 		 * 
@@ -214,6 +224,11 @@ package com.iblsoft.flexiweather.widgets
 		public function clone(): InteractiveLayer
 		{
 			return new InteractiveLayer(container);	
+		}
+		
+		override public function toString(): String
+		{
+			return "InteractiveLayer " + name;
 		}
 	}
 }

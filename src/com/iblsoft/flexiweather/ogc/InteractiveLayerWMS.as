@@ -80,7 +80,7 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 		
-		override public function updateData(b_forceUpdate: Boolean): void
+		override protected function updateData(b_forceUpdate: Boolean): void
 		{
 			super.updateData(b_forceUpdate);
 			

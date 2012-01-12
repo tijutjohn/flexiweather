@@ -190,7 +190,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			}
 		}
 		
-		override public function updateData(b_forceUpdate:Boolean):void
+		override protected function updateData(b_forceUpdate:Boolean):void
 		{
 //			trace("WMSWithQTT updateData ["+name+"]");
 			var gr: Graphics = graphics;
