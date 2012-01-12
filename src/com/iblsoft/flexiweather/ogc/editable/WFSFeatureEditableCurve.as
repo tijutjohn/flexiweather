@@ -192,11 +192,14 @@ package com.iblsoft.flexiweather.ogc.editable
 					// add point at one of curve's ends
 					// check end point first, to prefer adding at the end point being added is
 					// the second point of the curve
-					var f_distanceToLast: Number = pt.subtract(a[a.length - 1]).length;
-					if(i_best == -1 || f_distanceToLast < f_bestDistance) {
-						i_best = a.length;
-						f_bestDistance = f_distanceToLast;
-						b_keepDrag = false;
+					if (a.length > 0)
+					{
+						var f_distanceToLast: Number = pt.subtract(a[a.length - 1]).length;
+						if(i_best == -1 || f_distanceToLast < f_bestDistance) {
+							i_best = a.length;
+							f_bestDistance = f_distanceToLast;
+							b_keepDrag = false;
+						}
 					}
 					/*var f_distanceToFirst: Number = pt.subtract(a[0]).length;
 					if(i_best == -1 || f_distanceToFirst < f_bestDistance) {
