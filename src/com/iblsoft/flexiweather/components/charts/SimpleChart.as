@@ -34,8 +34,27 @@ package com.iblsoft.flexiweather.components.charts
 		private var _xLabelsList: TextFieldList;
 		private var _yLabelsList: TextFieldList;
 		
+		private var _usedLabels: Array;
+		private var _unusedLabels: Array;
+		
+		public function get labelFunction():Function
+		{
+			return _labelFunction;
+		}
+
+		public function set labelFunction(value:Function):void
+		{
+			_labelFunction = value;
+			refresh();
+		}
+
+		private var _labelFunction: Function;
+		
 		public function SimpleChart()
 		{
+			_unusedLabels = [];
+			_usedLabels = [];
+			
 			_gridSprite = new Sprite();
 			_axisSprite = new Sprite();
 			_labelsSprite = new Sprite();
@@ -64,6 +83,7 @@ package com.iblsoft.flexiweather.components.charts
 
 		public function refresh(): void
 		{
+			trace(this + "refresh " + _chartWidth + " , " + _chartHeight);
 			if (!_axisDrawn)
 				draw(_chartWidth, _chartHeight);
 			else
@@ -96,7 +116,7 @@ package com.iblsoft.flexiweather.components.charts
 				var item: Object;
 				for each (var currItem: Object in data)
 				{
-					if (currItem.hasOwnProperty(xField))
+					if (currItem && currItem.hasOwnProperty(xField))
 					{
 						values.push(currItem[xField]);
 					}
@@ -113,7 +133,7 @@ package com.iblsoft.flexiweather.components.charts
 				var item: Object;
 				for each (var currItem: Object in data)
 				{
-					if (currItem.hasOwnProperty(yField))
+					if (currItem && currItem.hasOwnProperty(yField))
 					{
 						values.push(currItem[yField]);
 					}
@@ -139,10 +159,14 @@ package com.iblsoft.flexiweather.components.charts
 			_chartWidth = w;
 			_chartHeight = h;
 			
+			
+			trace(this + "draw " + _chartWidth + " , " + _chartHeight);
+			
 			drawBackround(w,h);
 			
 			if (data)
 			{
+				invalidateLabels();
 				drawAxis(w,h);
 				drawValues(w,h);
 				_axisDrawn = true;
@@ -188,10 +212,13 @@ package com.iblsoft.flexiweather.components.charts
 		
 		private function drawAxis(w: int, h: int): void
 		{
+			trace(this + "DRAW AXIS: " + w + " , " + h);
+			
 			_xAxisLabelsHeight = 0;
 			_yAxisLabelsWidth = 0;
 			
 			var gr: Graphics = _gridSprite.graphics;
+			gr.clear();
 			var i: int;
 			
 			var xValues: Array = getXFieldValues();
@@ -205,29 +232,52 @@ package com.iblsoft.flexiweather.components.charts
 			
 			gr.lineStyle(1, 0x333333);
 			
-			var xDiff: int = w / (totalX - 1);
-			var yDiff: int = h / (totalY - 1);
 			
 			var tf: TextField;
 			var format: TextFormat;
+
 			var xLabel: String;
+			var xValue: Number;
+			var xPos: Number;
 			
-			var max: Number = getMaximumYValue();
-			var steps: int = 10;
 			var yLabel: String;
 			var yValue: Number;
 			var yPos: Number;
 			
+			var maxY: Number = getMaximumYValue();
+			
+			var stepsX: int = Math.min(10, totalX);
+			var stepsY: int = Math.min(10, totalY);
+			
+			var xDiff: int = w / (stepsX - 1);
+			var yDiff: int = h / (stepsY - 1);
+			
+			if (w > 0 && h > 0)
+				trace("stop");
+			else
+				return;
+			
 			//1st pass will find out X labels height 
-			for (i = 0; i < totalX; i++)
+			for (i = 0; i < stepsX; i++)
 			{
-				var valueObj: Object = xValues[i];
+				if (i == 0)
+					xValue = 0;
+				else
+					xValue = int(totalX * i / stepsX);
+				
+				xPos = w - (w * xValue / totalX);
+				
+				var valueObj: Object = xValues[xValue];
+				
+				if (_labelFunction != null)
+					valueObj = _labelFunction(valueObj);
+				
 				if (valueObj is String)
 					xLabel = valueObj as String;
 				if (valueObj is Number)
 					xLabel = (valueObj as int).toString();
 				
-				tf = createLabel();
+				tf = getLabel();
 				tf.text = xLabel;
 				format = tf.getTextFormat();
 				format.color = 0xaaaaaa;
@@ -243,16 +293,16 @@ package com.iblsoft.flexiweather.components.charts
 			}
 			
 			//1st pass will find out Y labels width
-			for (i = 0; i <= steps; i++)
+			for (i = 0; i <= stepsY; i++)
 			{
 				if (i == 0)
 					yValue = 0;
 				else
-					yValue = max * i / steps;
+					yValue = maxY * i / stepsY;
 				
-				yPos = h - (h * yValue / max);
+				yPos = h - (h * yValue / maxY);
 				
-				tf = createLabel();
+				tf = getLabel();
 				tf.text = int(yValue).toString();
 				format = tf.getTextFormat();
 				format.color = 0xaaaaaa;
@@ -262,7 +312,6 @@ package com.iblsoft.flexiweather.components.charts
 				
 				tf.x = tf.textWidth - tf.width;
 				tf.y = yPos - tf.textHeight / 2;
-				trace("tf width: " + tf.width + " , " + tf.textWidth);
 				
 				_yLabelsList.addTextField(tf);
 				
@@ -272,29 +321,42 @@ package com.iblsoft.flexiweather.components.charts
 			var chartW: int = w - _yAxisLabelsWidth;
 			var chartH: int = h - _xAxisLabelsHeight;
 			
-			xDiff = chartW / (totalX - 1);
-			yDiff = chartH / (totalY - 1);
+			xDiff = chartW / (stepsX - 1);
+			yDiff = chartH / (stepsY - 1);
 			
 			//2nd pass will draw X axis grid
-			for (i = 0; i < totalX; i++)
+			for (i = 0; i < stepsX; i++)
 			{
-				gr.moveTo(_yAxisLabelsWidth + xDiff * i, 0);
-				gr.lineTo(_yAxisLabelsWidth + xDiff * i, chartH);
 				
-				tf = _xLabelsList.getTextField(i);
-				tf.x = (_yAxisLabelsWidth + xDiff * i) - tf.textWidth / 2;
-				tf.y = h - tf.textHeight - 1;
+				if (i == 0)
+					xValue = 0;
+				else
+					xValue = int(totalX * i / stepsX);
+				
+				xPos = w - (w * xValue / totalX);
+				
+				valueObj = xValues[xValue];
+				
+				gr.moveTo(xPos, 0);
+				gr.lineTo(xPos, chartH);
+				
+				tf = _xLabelsList.getTextField(xValue);
+				if (tf)
+				{
+					tf.x = (xPos) - tf.textWidth / 2;
+					tf.y = h - tf.textHeight - 1;
+				}
 			}
 			
 			//2nd pass will draw Y axis grid
-			for (i = 0; i <= steps; i++)
+			for (i = 0; i <= stepsY; i++)
 			{
 				if (i == 0)
 					yValue = 0;
 				else
-					yValue = max * i / steps;
+					yValue = maxY * i / stepsY;
 				
-				yPos = chartH - (chartH * yValue / max);
+				yPos = chartH - (chartH * yValue / maxY);
 				
 				gr.moveTo(_yAxisLabelsWidth, yPos);
 				gr.lineTo(w, yPos);
@@ -307,6 +369,7 @@ package com.iblsoft.flexiweather.components.charts
 			
 			//main axis
 			var gr2: Graphics = _axisSprite.graphics;
+			gr2.clear();
 			
 			gr2.lineStyle(1,0xaaaaaa);
 			gr2.moveTo(_yAxisLabelsWidth,0);
@@ -314,10 +377,35 @@ package com.iblsoft.flexiweather.components.charts
 			gr2.lineTo(w, chartH);
 		}
 		
+		private function getLabel(): TextField
+		{
+			var tf: TextField;
+			if (_unusedLabels.length > 0)
+			{
+				tf = _unusedLabels.shift() as TextField;
+				
+				_usedLabels.push(tf);
+				_labelsSprite.addChild(tf);
+			} else {
+				tf = createLabel();
+			}
+			return tf;
+		}
+		
+		private function invalidateLabels(): void
+		{
+			for each (var tf: TextField in _usedLabels)
+			{
+				if (tf.parent == _labelsSprite)
+					_labelsSprite.removeChild(tf);
+				_unusedLabels.push(tf);
+			}
+		}
 		private function createLabel(): TextField
 		{
 			var tf: TextField = new TextField();
 			
+			_usedLabels.push(tf);
 			_labelsSprite.addChild(tf);
 			return tf;
 		}
@@ -325,10 +413,16 @@ package com.iblsoft.flexiweather.components.charts
 		{
 			var gr: Graphics = graphics;
 			
+			gr.clear();
 			gr.beginFill(0x000000);
 			gr.drawRect(0,0,w,h);
 			gr.endFill();
 			
+		}
+		
+		override public function toString(): String
+		{
+			return "SimpleChart ["+name+"] ";
 		}
 	}
 }

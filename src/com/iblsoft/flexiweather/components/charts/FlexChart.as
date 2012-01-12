@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.components.charts
 {
 	import flash.display.Graphics;
+	import flash.events.Event;
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.UIComponent;
@@ -14,8 +15,59 @@ package com.iblsoft.flexiweather.components.charts
 	 */	
 	public class FlexChart extends UIComponent
 	{
+		override public function set name(value:String):void
+		{
+			super.name = value;
+			if (simpleChart)
+				simpleChart.name = value;
+		}
 		private var _dataProvider: ArrayCollection;
 		private var _dataProviderChanged: Boolean;
+		
+
+		private var _xField: String;
+		private var _yField: String;
+		
+		public function get xField():String
+		{
+			return _xField;
+		}
+
+		public function set xField(value:String):void
+		{
+			_xField = value;
+			if (simpleChart)
+				simpleChart.xField = _xField;
+		}
+
+		public function get yField():String
+		{
+			return _yField;
+		}
+
+		public function set yField(value:String):void
+		{
+			_yField = value;
+			if (simpleChart)
+				simpleChart.yField = _yField;
+		}
+
+		[Bindable (event="labelFunctionChanged")]
+		public function get labelFunction():Function
+		{
+			return _labelFunction;
+		}
+		
+		public function set labelFunction(value:Function):void
+		{
+			_labelFunction = value;
+			_labelFunctionChanged = true;
+			invalidateProperties();
+			dispatchEvent(new Event("labelFunctionChanged"));
+		}
+		
+		private var _labelFunction: Function;
+		private var _labelFunctionChanged: Boolean;
 		
 		[Bindable]
 		public function get dataProvider():ArrayCollection
@@ -23,6 +75,7 @@ package com.iblsoft.flexiweather.components.charts
 			return _dataProvider;
 		}
 
+		
 		public function set dataProvider(value:ArrayCollection):void
 		{
 			if (_dataProvider)
@@ -57,6 +110,12 @@ package com.iblsoft.flexiweather.components.charts
 		{
 			super.commitProperties();
 			
+			if (_labelFunctionChanged && simpleChart)
+			{
+				simpleChart.labelFunction = _labelFunction;
+				_labelFunctionChanged = false;
+			}
+			
 			if (_dataProviderChanged)
 			{
 				if (dataProvider)
@@ -67,6 +126,9 @@ package com.iblsoft.flexiweather.components.charts
 				_dataProviderChanged = false;
 				simpleChart.refresh();
 			}
+			
+			if (simpleChart)
+				simpleChart.name = name;
 		}
 		override protected function createChildren():void
 		{
@@ -74,8 +136,8 @@ package com.iblsoft.flexiweather.components.charts
 			
 			simpleChart = new SimpleChart();
 			addChild(simpleChart);
-			simpleChart.xField = 'Month';
-			simpleChart.yField = 'Profit';
+			simpleChart.xField = xField;
+			simpleChart.yField = yField;
 			
 			
 			simpleChart.x = 0;
