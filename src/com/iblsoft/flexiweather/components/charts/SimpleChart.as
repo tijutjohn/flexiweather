@@ -87,7 +87,7 @@ package com.iblsoft.flexiweather.components.charts
 			if (!_axisDrawn)
 				draw(_chartWidth, _chartHeight);
 			else
-				drawValues(_chartWidth, _chartHeight);
+				drawSeries(_chartWidth, _chartHeight);
 		}
 		
 		public function getValue(xValue: Object): Number
@@ -168,13 +168,15 @@ package com.iblsoft.flexiweather.components.charts
 			{
 				invalidateLabels();
 				drawAxis(w,h);
-				drawValues(w,h);
+				drawSeries(w,h);
 				_axisDrawn = true;
 			}
 		}
 		
-		private function drawValues(w: int, h: int): void
+		private function drawSeries(w: int, h: int): void
 		{
+			trace(this + " drawSeries: " + w + " , " + h + " labels: " + _yAxisLabelsWidth + " , " + _xAxisLabelsHeight);
+			
 			var gr: Graphics = _dataSprite.graphics;
 			gr.clear();
 			var i: int;
@@ -188,13 +190,14 @@ package com.iblsoft.flexiweather.components.charts
 			var totalX: int = xValues.length;
 			var totalY: int = yValues.length;
 			
-			var xDiff: int = chartW / (totalX - 1);
+			var xDiff: Number = chartW / (totalX - 1);
 			
 			var max: Number = getMaximumYValue();
 			
 			gr.lineStyle(1, 0xff0000);
 			
-			for (i = 0; i < totalY; i++)
+			trace("xDiff: " + xDiff + " totalX " + totalX + " chartW: " + chartW);
+			for (i = 0; i < totalX; i++)
 			{
 				var yValue: Number = yValues[i] as Number;
 				var xPos: int = _yAxisLabelsWidth + xDiff * i;
