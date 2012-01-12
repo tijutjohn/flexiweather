@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.proj
 {
+	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.ProjectionConfiguration;
 	
 	import flash.geom.Point;
@@ -16,24 +17,74 @@ package com.iblsoft.flexiweather.proj
 		public static const CRS_EPSG_GEOGRAPHIC: String = "EPSG:4326";
 		
 		protected var m_proj: ProjProjection;
+		protected var m_extentBBox: BBox;
+		protected var mb_wrapsHorizontally: Boolean;
 
 		protected static var m_cache: Dictionary = new Dictionary();
+		protected static var md_crsToDetails: Dictionary = new Dictionary();
 		
-		Projection.addCRSByProj4("CRS:84", "+title=Geographic WGS84 +proj=longlat +ellps=WGS84 +datum=WGS84 +units=degrees");
+		Projection.addCRSByProj4(
+				"CRS:84",
+				"+title=Geographic WGS84 +proj=longlat +ellps=WGS84 +datum=WGS84 +units=degrees",
+				new BBox(-180, -90, 180, 90), true);
+		Projection.setCRSExtentBBox(
+				'EPSG:900913',
+				new BBox(-20037508.34, -20037508.34, 20037508.34, 20037508.34), true);
 
-		public function Projection(s_crs: String): void
+		public function Projection(s_crs: String, extentBBox: BBox, b_wrapsHorizontally: Boolean): void
 		{
 			// internally the proj4as creates a dictionary cache of CRS -> ProjProjection pairs
 			m_proj = ProjProjection.getProjProjection(s_crs);
 			if(m_proj == null)
 				Log.getLogger("Projection").error("Unknown CRS '" + s_crs + "'");
+			if(extentBBox == null)
+				extentBBox = new BBox(-NaN, -NaN, NaN, NaN);
+			m_extentBBox = extentBBox;
+			mb_wrapsHorizontally = b_wrapsHorizontally;
+		}
+		
+		public static function isValidProjection(projection: Projection): Boolean
+		{
+//			trace("\n isValidProjection" + projection.crs + " valid");
+			if (projection && projection.m_proj)
+			{
+				if (projection.extentBBox && projection.extentBBox.center)
+				{
+					if (isNaN(projection.extentBBox.width) || isNaN(projection.extentBBox.height))
+						return false;
+					if (isNaN(projection.extentBBox.center.x) || isNaN(projection.extentBBox.center.y))
+						return false;
+					
+//					trace("\t isValidProjection" + projection.crs + " valid");
+					return true;
+				}
+			}
+			return false;
 		}
 		
 		public static function getByCRS(s_crs: String): Projection
 		{
+			var prj: Projection;
+//			trace("\n getByCRS" + s_crs);
 			if(s_crs in m_cache)
-				return m_cache[s_crs];
-			var prj: Projection = new Projection(s_crs);
+			{
+//				trace("\tgetByCRS" + s_crs + " is in cache");
+				prj = m_cache[s_crs];
+				if (isValidProjection(prj))
+					return prj;
+//				else {
+//				trace("\tgetByCRS" + s_crs + " not valid");
+//					
+//				}
+				
+			}
+			var extentBBox: BBox = null;
+			var b_wrapsHorizontally: Boolean = false;
+			if(s_crs in md_crsToDetails) {
+				extentBBox = md_crsToDetails[s_crs].extentBBox;
+				b_wrapsHorizontally = md_crsToDetails[s_crs].b_wrapsHorizontally;
+			}
+			prj = new Projection(s_crs, extentBBox, b_wrapsHorizontally);
 			m_cache[s_crs] = prj;
 			return prj;
 		}
@@ -43,11 +94,26 @@ package com.iblsoft.flexiweather.proj
 			return getByCRS(cfg.crs);
 		}
 		
-		public static function addCRSByProj4(s_crs: String, s_proj4String: String): void
+		public static function addCRSByProj4(
+				s_crs: String, s_proj4String: String,
+				crsExtentBBox: BBox = null, b_crsWrapsHorizontally: Boolean = false): void
 		{
 			ProjProjection.defs[s_crs] = s_proj4String;
+			md_crsToDetails[s_crs] = {
+				extentBBox: crsExtentBBox,
+				b_wrapsHorizontally: b_crsWrapsHorizontally
+			};
 		}
-		
+
+		public static function setCRSExtentBBox(
+				s_crs: String, crsExtentBBox: BBox, b_crsWrapsHorizontally: Boolean = false): void
+		{
+			if(!(s_crs in md_crsToDetails))
+				md_crsToDetails[s_crs] = {};
+			md_crsToDetails[s_crs].extentBBox = crsExtentBBox;
+			md_crsToDetails[s_crs].b_wrapsHorizontally = b_crsWrapsHorizontally;
+		}
+
 		/**
 		 * Converts [x,y] coordinates in this projections into to LaLo cordinates in radians.
 		 **/
@@ -78,7 +144,10 @@ package com.iblsoft.flexiweather.proj
 		public function prjXYToLaLoCoord(f_prjY: Number, f_prjX: Number): Coord
 		{
 			var laLoPt: Point = prjXYToLaLoPt(f_prjY, f_prjX);
-			return new Coord(Projection.CRS_GEOGRAPHIC, laLoPt.x * 180.0 / Math.PI, laLoPt.y * 180.0 / Math.PI);
+			if (laLoPt)
+				return new Coord(Projection.CRS_GEOGRAPHIC, laLoPt.x * 180.0 / Math.PI, laLoPt.y * 180.0 / Math.PI);
+			
+			return null;
 		}
 		
 		/**
@@ -124,12 +193,20 @@ package com.iblsoft.flexiweather.proj
 			return s_crs1 == s_crs2;
 		}
 		
+		// getters and setters
+		
 		public function get crs(): String
 		{
 			if(m_proj == null)
 				return "?";
 			return m_proj.srsCode;
 		}
+		
+		public function get extentBBox(): BBox
+		{ return m_extentBBox; }
+
+		public function get wrapsHorizontally(): Boolean
+		{ return mb_wrapsHorizontally; }
 
 		public function get name(): String
 		{
@@ -143,6 +220,11 @@ package com.iblsoft.flexiweather.proj
 			if(m_proj == null)
 				return "?";
 			return m_proj.projParams.units;
+		}
+		
+		public function toString(): String
+		{
+			return "Projection " + name + " units: " + units + " crs: " + crs + " extentBBox: " + extentBBox + " wrap horizontally: " + wrapsHorizontally
 		}
 	}
 }
