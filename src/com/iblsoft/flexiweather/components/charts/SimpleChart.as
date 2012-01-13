@@ -2,9 +2,12 @@ package com.iblsoft.flexiweather.components.charts
 {
 	import flash.display.Graphics;
 	import flash.display.Sprite;
+	import flash.events.Event;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
 	import flash.text.TextFormatAlign;
+	
+	import mx.charts.chartClasses.ChartLabel;
 	
 	/**
 	 * Simple chart is class for display simple line chart. It can be used in pure AS3 project
@@ -31,11 +34,172 @@ package com.iblsoft.flexiweather.components.charts
 		public var xField: String;
 		public var yField: String;
 		
-		private var _xLabelsList: TextFieldList;
-		private var _yLabelsList: TextFieldList;
+		private var _xLabelsList: ChartLabelList;
+		private var _yLabelsList: ChartLabelList;
 		
 		private var _usedLabels: Array;
 		private var _unusedLabels: Array;
+		
+		private var _styleChanged: Boolean;
+
+
+
+		private var _backgroundColor: uint;
+		
+		private var _axisColor: uint;
+		private var _axisWidth: int;
+		
+		private var _gridColor: uint;
+		private var _gridAlpha: Number;
+		
+		private var _labelsColor: uint;
+		private var _xLabelsRotation: Number;
+		private var _yLabelsRotation: Number;
+		
+		private var _serieColor: uint;
+		private var _serieWidth: int;
+		
+
+
+		public function get backgroundColor():uint
+		{
+			return _backgroundColor;
+		}
+
+		public function set backgroundColor(value:uint):void
+		{
+			if (_backgroundColor != value)
+			{
+				_backgroundColor = value;
+				invalidateStyle();
+			}
+		}
+
+		public function get axisColor():uint
+		{
+			return _axisColor;
+		}
+
+		public function set axisColor(value:uint):void
+		{
+			if (_axisColor != value)
+			{
+				_axisColor = value;
+				invalidateStyle();
+			}
+		}
+
+		public function get axisWidth():int
+		{
+			return _axisWidth;
+		}
+		
+		public function set axisWidth(value:int):void
+		{
+			if (_axisWidth != value)
+			{
+				_axisWidth = value;
+				invalidateStyle();
+			}
+		}
+		
+		public function get gridColor():uint
+		{
+			return _gridColor;
+		}
+
+		public function set gridColor(value:uint):void
+		{
+			if (_gridColor != value)
+			{
+				_gridColor = value;
+				invalidateStyle();
+			}
+		}
+		
+		public function get gridAlpha():Number
+		{
+			return _gridAlpha;
+		}
+		
+		public function set gridAlpha(value:Number):void
+		{
+			if (_gridAlpha != value)
+			{
+				_gridAlpha = value;
+				invalidateStyle();
+			}
+		}
+
+		public function get labelsColor():uint
+		{
+			return _labelsColor;
+		}
+
+		public function set labelsColor(value:uint):void
+		{
+			if (_labelsColor != value)
+			{
+				_labelsColor = value;
+				invalidateStyle();
+			}
+		}
+		
+		public function get xLabelsRotation():Number
+		{
+			return _xLabelsRotation;
+		}
+		
+		public function set xLabelsRotation(value:Number):void
+		{
+			if (_xLabelsRotation != value)
+			{
+				_xLabelsRotation = value;
+				invalidateStyle();
+			}
+		}
+		public function get yLabelsRotation():Number
+		{
+			return _yLabelsRotation;
+		}
+		
+		public function set yLabelsRotation(value:Number):void
+		{
+			if (_yLabelsRotation != value)
+			{
+				_yLabelsRotation = value;
+				invalidateStyle();
+			}
+		}
+
+		public function get serieColor():uint
+		{
+			return _serieColor;
+		}
+
+		public function set serieColor(value:uint):void
+		{
+			if (_serieColor != value)
+			{
+				_serieColor = value;
+				invalidateStyle();
+			}
+		}
+		
+		public function get serieWidth():int
+		{
+			return _serieWidth;
+		}
+		
+		public function set serieWidth(value:int):void
+		{
+			if (_serieWidth != value)
+			{
+				_serieWidth = value;
+				invalidateStyle();
+			}
+		}
+
 		
 		public function get labelFunction():Function
 		{
@@ -65,8 +229,17 @@ package com.iblsoft.flexiweather.components.charts
 			addChild(_labelsSprite);
 			addChild(_dataSprite);
 			
-			_xLabelsList = new TextFieldList();
-			_yLabelsList = new TextFieldList();
+			_xLabelsList = new ChartLabelList();
+			_yLabelsList = new ChartLabelList();
+			
+			_backgroundColor = 0x000000;
+			_axisColor = 0xcccccc;
+			_axisWidth = 2;
+			_gridColor = 0x333333;
+			_gridAlpha = 1;
+			_labelsColor = 0xffffff;
+			_serieColor = 0xaa0000;
+			_serieWidth = 2;
 		}
 		
 
@@ -81,13 +254,34 @@ package com.iblsoft.flexiweather.components.charts
 //			draw();
 		}
 
-		public function refresh(): void
+		private var _enterFrameRunning: Boolean;
+		private function invalidateStyle(): void
+		{
+			_styleChanged = true;
+			if (!_enterFrameRunning)
+			{
+				addEventListener(Event.ENTER_FRAME, commitStyles);
+				_enterFrameRunning = true;
+			}
+		}
+		private function commitStyles(event: Event): void
+		{
+			removeEventListener(Event.ENTER_FRAME, commitStyles);
+			
+			_enterFrameRunning = false;
+			_styleChanged = false;
+			
+			refresh(true);
+		}
+		
+		public function refresh(b_redrawAll: Boolean = false): void
 		{
 			trace(this + "refresh " + _chartWidth + " , " + _chartHeight);
-			if (!_axisDrawn)
+			if (!_axisDrawn || b_redrawAll)
 				draw(_chartWidth, _chartHeight);
-			else
+			else {
 				drawSeries(_chartWidth, _chartHeight);
+			}
 		}
 		
 		public function getValue(xValue: Object): Number
@@ -167,6 +361,8 @@ package com.iblsoft.flexiweather.components.charts
 			if (data)
 			{
 				invalidateLabels();
+				//labels needs to be drawn before axis to find out what space are reserved for labels
+				drawLabels(w,h);
 				drawAxis(w,h);
 				drawSeries(w,h);
 				_axisDrawn = true;
@@ -194,7 +390,7 @@ package com.iblsoft.flexiweather.components.charts
 			
 			var max: Number = getMaximumYValue();
 			
-			gr.lineStyle(1, 0xff0000);
+			gr.lineStyle(_serieWidth, _serieColor);
 			
 			trace("xDiff: " + xDiff + " totalX " + totalX + " chartW: " + chartW);
 			for (i = 0; i < totalX; i++)
@@ -213,12 +409,10 @@ package com.iblsoft.flexiweather.components.charts
 			
 		}
 		
+		
 		private function drawAxis(w: int, h: int): void
 		{
 			trace(this + "DRAW AXIS: " + w + " , " + h);
-			
-			_xAxisLabelsHeight = 0;
-			_yAxisLabelsWidth = 0;
 			
 			var gr: Graphics = _gridSprite.graphics;
 			gr.clear();
@@ -233,12 +427,145 @@ package com.iblsoft.flexiweather.components.charts
 			var totalX: int = xValues.length;
 			var totalY: int = yValues.length;
 			
-			gr.lineStyle(1, 0x333333);
 			
+			
+			var xLabel: String;
+			var xValue: Number;
+			var xPos: Number;
+			
+			var yLabel: String;
+			var yValue: Number;
+			var yPos: Number;
+			
+			var maxY: Number = getMaximumYValue();
+			
+			var stepsX: int = Math.min(10, totalX);
+			var stepsY: int = Math.min(10, totalY);
+			
+			var xDiff: int = w / (stepsX - 1);
+			var yDiff: int = h / (stepsY - 1);
+			
+			if (w > 0 && h > 0)
+				trace("stop");
+			else
+				return;
+			
+			var chartW: int = w - _yAxisLabelsWidth;
+			var chartH: int = h - _xAxisLabelsHeight;
+			
+			xDiff = chartW / (stepsX - 1);
+			yDiff = chartH / (stepsY - 1);
+			
+			gr.lineStyle(1, _gridColor, _gridAlpha);
+			
+			//draw X axis grid
+			for (i = 0; i < stepsX; i++)
+			{
+				if (i == 0)
+					xValue = 0;
+				else
+					xValue = int(totalX * i / stepsX);
+				
+				xPos = w - (w * xValue / totalX);
+				
+				gr.moveTo(xPos, 0);
+				gr.lineTo(xPos, chartH);
+			}
+			
+			//draw Y axis grid
+			for (i = 0; i <= stepsY; i++)
+			{
+				if (i == 0)
+					yValue = 0;
+				else
+					yValue = maxY * i / stepsY;
+				
+				yPos = chartH - (chartH * yValue / maxY);
+				
+				gr.moveTo(_yAxisLabelsWidth, yPos);
+				gr.lineTo(w, yPos);
+				
+			}
+			
+			//main axis
+			var gr2: Graphics = _axisSprite.graphics;
+			gr2.clear();
+			
+			gr2.lineStyle(_axisWidth, _axisColor);
+			gr2.moveTo(_yAxisLabelsWidth,0);
+			gr2.lineTo(_yAxisLabelsWidth, chartH);
+			gr2.lineTo(w, chartH);
+		}
+		
+		private function getLabel(rotation: Number): ChartLabel
+		{
+			var tf: ChartLabel;
+			if (_unusedLabels.length > 0)
+			{
+				tf = _unusedLabels.shift() as ChartLabel;
+				
+				_usedLabels.push(tf);
+				_labelsSprite.addChild(tf);
+			} else {
+				tf = createLabel();
+			}
+			tf.rotation = rotation;
+			return tf;
+		}
+		
+		private function invalidateLabels(): void
+		{
+			for each (var tf: ChartLabel in _usedLabels)
+			{
+				if (tf.parent == _labelsSprite)
+					_labelsSprite.removeChild(tf);
+				_unusedLabels.push(tf);
+			}
+		}
+		private function createLabel(): ChartLabel
+		{
+			var tf: ChartLabel = new ChartLabel();
+			
+			_usedLabels.push(tf);
+			_labelsSprite.addChild(tf);
+			
+			return tf;
+		}
+		private function drawBackround(w: int, h: int): void
+		{
+			var gr: Graphics = graphics;
+			
+			gr.clear();
+			gr.beginFill(0x000000);
+			gr.drawRect(0,0,w,h);
+			gr.endFill();
+			
+		}
+		
+		private function drawLabels(w: int, h: int): void
+		{
+			trace(this + "DRAW LABELS: " + w + " , " + h);
+			
+			_labelsSprite.graphics.clear();
+			
+			_xAxisLabelsHeight = 0;
+			_yAxisLabelsWidth = 0;
+			
+			var i: int;
+			
+			var xValues: Array = getXFieldValues();
+			var yValues: Array = getYFieldValues();
+			
+			if (!xValues || !yValues)
+				return;
+			
+			var totalX: int = xValues.length;
+			var totalY: int = yValues.length;
 			
 			var tf: TextField;
+			var chartLabel: ChartLabel;
 			var format: TextFormat;
-
+			
 			var xLabel: String;
 			var xValue: Number;
 			var xPos: Number;
@@ -280,18 +607,23 @@ package com.iblsoft.flexiweather.components.charts
 				if (valueObj is Number)
 					xLabel = (valueObj as int).toString();
 				
-				tf = getLabel();
+				chartLabel = getLabel(_xLabelsRotation);
+				tf = chartLabel.textField;
 				tf.text = xLabel;
 				format = tf.getTextFormat();
-				format.color = 0xaaaaaa;
+				format.color = _labelsColor;
+				format.align = 'left';
+				format.font = 'defaultFontMX';
+				tf.embedFonts = true;
 				tf.setTextFormat(format);
+				chartLabel.updatePosition();
 				
-				tf.x = xDiff * i - tf.textWidth / 2;
-				tf.y = h - 3 - tf.textHeight;
+//				chartLabel.x = xDiff * i - chartLabel.rotatedWidth / 2;
+//				chartLabel.y = h - 3 - chartLabel.rotatedHeight;
 				
-				_xLabelsList.addTextField(tf);
+				_xLabelsList.addChartLabel(chartLabel);
 				
-				_xAxisLabelsHeight = Math.max(_xAxisLabelsHeight, tf.textHeight + 3);
+				_xAxisLabelsHeight = Math.max(_xAxisLabelsHeight, chartLabel.rotatedHeight + 6 + _axisWidth);
 				
 			}
 			
@@ -305,20 +637,23 @@ package com.iblsoft.flexiweather.components.charts
 				
 				yPos = h - (h * yValue / maxY);
 				
-				tf = getLabel();
+				chartLabel = getLabel(_yLabelsRotation);
+				tf = chartLabel.textField;
 				tf.text = int(yValue).toString();
 				format = tf.getTextFormat();
-				format.color = 0xaaaaaa;
-				format.align = TextFormatAlign.RIGHT;
-				
+				format.color = _labelsColor;
+				format.align = 'left';
+				format.font = 'defaultFontMX';
+				tf.embedFonts = true;
 				tf.setTextFormat(format);
+				chartLabel.updatePosition();
 				
-				tf.x = tf.textWidth - tf.width;
-				tf.y = yPos - tf.textHeight / 2;
+//				chartLabel.x = tf.textWidth - tf.width;
+//				chartLabel.y = yPos - tf.textHeight / 2;
 				
-				_yLabelsList.addTextField(tf);
+				_yLabelsList.addChartLabel(chartLabel);
 				
-				_yAxisLabelsWidth = Math.max(_yAxisLabelsWidth, tf.textWidth + 5);
+				_yAxisLabelsWidth = Math.max(_yAxisLabelsWidth, chartLabel.rotatedWidth + 5 + _axisWidth);
 			}
 			
 			var chartW: int = w - _yAxisLabelsWidth;
@@ -340,14 +675,17 @@ package com.iblsoft.flexiweather.components.charts
 				
 				valueObj = xValues[xValue];
 				
-				gr.moveTo(xPos, 0);
-				gr.lineTo(xPos, chartH);
-				
-				tf = _xLabelsList.getTextField(xValue);
-				if (tf)
+				chartLabel = _xLabelsList.getChartLabel(xValue);
+				if (chartLabel)
 				{
-					tf.x = (xPos) - tf.textWidth / 2;
-					tf.y = h - tf.textHeight - 1;
+					tf = chartLabel.textField;
+					chartLabel.x = (xPos) - chartLabel.rotatedWidth / 2;
+					chartLabel.y = h - chartLabel.rotatedHeight/2 + 1;
+					
+					trace("X Label [" + tf.text + "] pos: " + chartLabel.x + " , " + chartLabel.y);
+					drawTextfieldBound(chartLabel);
+				} else {
+					trace("can not find label: " + xValue);
 				}
 			}
 			
@@ -361,94 +699,138 @@ package com.iblsoft.flexiweather.components.charts
 				
 				yPos = chartH - (chartH * yValue / maxY);
 				
-				gr.moveTo(_yAxisLabelsWidth, yPos);
-				gr.lineTo(w, yPos);
-				
-				tf = _yLabelsList.getTextField(i);
-				
-				tf.x = tf.textWidth - tf.width;
-				tf.y = yPos - tf.textHeight / 2;
-			}
-			
-			//main axis
-			var gr2: Graphics = _axisSprite.graphics;
-			gr2.clear();
-			
-			gr2.lineStyle(1,0xaaaaaa);
-			gr2.moveTo(_yAxisLabelsWidth,0);
-			gr2.lineTo(_yAxisLabelsWidth, chartH);
-			gr2.lineTo(w, chartH);
-		}
-		
-		private function getLabel(): TextField
-		{
-			var tf: TextField;
-			if (_unusedLabels.length > 0)
-			{
-				tf = _unusedLabels.shift() as TextField;
-				
-				_usedLabels.push(tf);
-				_labelsSprite.addChild(tf);
-			} else {
-				tf = createLabel();
-			}
-			return tf;
-		}
-		
-		private function invalidateLabels(): void
-		{
-			for each (var tf: TextField in _usedLabels)
-			{
-				if (tf.parent == _labelsSprite)
-					_labelsSprite.removeChild(tf);
-				_unusedLabels.push(tf);
+				chartLabel = _yLabelsList.getChartLabel(i);
+				if (chartLabel)
+				{
+					tf = chartLabel.textField;
+					
+					chartLabel.x = _yAxisLabelsWidth - chartLabel.rotatedWidth/2 - 5;
+					chartLabel.y = yPos - chartLabel.rotatedHeight / 2;
+					
+					drawTextfieldBound(chartLabel);
+				}
 			}
 		}
-		private function createLabel(): TextField
-		{
-			var tf: TextField = new TextField();
-			
-			_usedLabels.push(tf);
-			_labelsSprite.addChild(tf);
-			return tf;
-		}
-		private function drawBackround(w: int, h: int): void
-		{
-			var gr: Graphics = graphics;
-			
-			gr.clear();
-			gr.beginFill(0x000000);
-			gr.drawRect(0,0,w,h);
-			gr.endFill();
-			
-		}
 		
+		private function drawTextfieldBound(chartLabel: ChartLabel): void
+		{
+			return;
+			var gr: Graphics = _labelsSprite.graphics;
+			var sx: int = chartLabel.x;
+			var sy: int = chartLabel.y;
+			
+			var left: int = sx - chartLabel.rotatedWidth / 2;
+			var top: int = sy - chartLabel.rotatedHeight / 2;
+			gr.lineStyle(1, 0x444444);
+			gr.drawRect(left, top , chartLabel.rotatedWidth, chartLabel.rotatedHeight);
+		}
 		override public function toString(): String
 		{
 			return "SimpleChart ["+name+"] ";
 		}
 	}
 }
+import flash.display.Graphics;
+import flash.display.Sprite;
+import flash.geom.Rectangle;
 import flash.text.TextField;
 
-class TextFieldList
+class ChartLabel extends Sprite
+{
+	private var _tf: TextField;
+	
+	public function get textField(): TextField
+	{
+		return _tf;
+	}
+	
+	public function ChartLabel()
+	{
+		_tf = new TextField();	
+		addChild(_tf);
+	}
+	
+	public function updatePosition(): void
+	{
+		_tf.x = -1 * _tf.textWidth/2;
+		_tf.y = -1 * _tf.textHeight/2;
+//		_tf.width = _tf.textWidth;
+//		_tf.height = _tf.textHeight;
+		
+		/*
+		var gr: Graphics = graphics;
+		gr.beginFill(0x222222);
+		gr.drawRect(0,0, _tf.textWidth, _tf.textHeight);
+		*/
+	}
+	
+	public function get rotatedWidth(): Number
+	{
+		var r: Rectangle = fitRect(_tf.textWidth, _tf.textHeight, Math.PI / 180 * rotation);
+		if (isNaN(r.width))
+			return 0;
+			
+		return r.width;
+	}
+	
+	public function get rotatedHeight(): Number
+	{
+		var r: Rectangle = fitRect(_tf.textWidth, _tf.textHeight, Math.PI / 180 * rotation);
+		if (isNaN(r.height))
+			return 0;
+		return r.height;
+		
+	}
+	
+	
+	private function fitRect(rw: int,rh: int ,angle: Number ): Rectangle
+	{
+		var x1: Number = -rw/2;
+		var x2: Number = rw/2;
+		var x3: Number = rw/2;
+		var x4: Number = -rw/2;
+		var y1: Number = rh/2;
+		var y2: Number = rh/2;
+		var y3: Number = -rh/2;
+		var y4: Number = -rh/2;
+		
+		var x11: Number = x1 * Math.cos(angle) + y1 * Math.sin(angle);
+		var y11: Number = -x1 * Math.sin(angle) + y1 * Math.cos(angle);
+		var x21: Number = x2 * Math.cos(angle) + y2 * Math.sin(angle);
+		var y21: Number = -x2 * Math.sin(angle) + y2 * Math.cos(angle); 
+		var x31: Number = x3 * Math.cos(angle) + y3 * Math.sin(angle);
+		var y31: Number = -x3 * Math.sin(angle) + y3 * Math.cos(angle);
+		var x41: Number = x4 * Math.cos(angle) + y4 * Math.sin(angle);
+		var y41: Number = -x4 * Math.sin(angle) + y4 * Math.cos(angle);
+		
+		var x_min: Number = Math.min(x11,x21,x31,x41);
+		var x_max: Number = Math.max(x11,x21,x31,x41);
+		
+		var y_min: Number = Math.min(y11,y21,y31,y41);
+		var y_max: Number = Math.max(y11,y21,y31,y41);
+		
+		return new Rectangle(0,0,x_max-x_min,y_max-y_min);
+	}
+}
+
+class ChartLabelList
 {
 	private var _list: Array;
 	
-	public function TextFieldList()
+	public function ChartLabelList()
 	{
 		_list = new Array();	
 	}
 	
-	public function getTextField(nr: int): TextField
+	public function getChartLabel(nr: int): ChartLabel
 	{
 		if (_list && _list.length > nr)
 		{
-			return _list[nr] as TextField;
+			return _list[nr] as ChartLabel;
 		}
 		return null
 	}
-	public function addTextField(tf: TextField): void
+	public function addChartLabel(tf: ChartLabel): void
 	{
 		_list.push(tf);
 	}
