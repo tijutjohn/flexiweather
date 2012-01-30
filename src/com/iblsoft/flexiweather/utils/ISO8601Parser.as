@@ -93,7 +93,7 @@ package com.iblsoft.flexiweather.utils {
 
 		public function parseDuration(s: String): Duration
 		{
-			if(s == null)
+			if(s == null || s == '')
 				return null;
 			//throw new Error("invalid format, must be in ISO8601 duration form PddDThhHmmMssS");
 			
