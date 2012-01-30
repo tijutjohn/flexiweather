@@ -8,6 +8,7 @@ package com.iblsoft.flexiweather.plugins
 	{
 		public static const ACTION: String = "action";
 		public static const DOCKLET: String = "docklet";
+		public static const STORAGE: String = "storage";
 		public static const CONSOLE: String = "console";
 		public static const CHAT: String = "chat";
 		public static const POPUP: String = "popup";
@@ -126,6 +127,13 @@ package com.iblsoft.flexiweather.plugins
 			return ability;
 		}
 
+		public static function storage(classOrInstance: Object,
+									   s_id: String, s_plugin_id: String = null): PluginAbility
+		{
+			return new PluginAbility(PluginAbility.STORAGE, s_id, s_plugin_id, classOrInstance);
+//			.withMetadata("name", s_name);
+		}
+		
 		public static function console(classOrInstance: Object,
 									   s_id: String, s_plugin_id: String = null): PluginAbility
 		{
