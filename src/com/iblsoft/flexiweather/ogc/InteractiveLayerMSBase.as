@@ -4,6 +4,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderErrorEvent;
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
+	import com.iblsoft.flexiweather.ogc.cache.CacheItemMetadata;
 	import com.iblsoft.flexiweather.ogc.cache.ICache;
 	import com.iblsoft.flexiweather.ogc.data.WMSViewProperties;
 	import com.iblsoft.flexiweather.ogc.events.GetCapabilitiesEvent;
@@ -200,12 +201,34 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function isPreloaded(wmsViewProperties: WMSViewProperties): Boolean
 		{
+			/*
+				// jozef does not want to check currently loading view properties, just those, which are already cached
 			for each (var currWmsViewProperties: WMSViewProperties in ma_preloadedWMSViewProperties)
 			{
 				//for now just check if preloading has started
 				if (currWmsViewProperties.equals(wmsViewProperties))
 					return true;
 			}
+			*/
+			 
+			
+			//check cache
+			wmsViewProperties.cache = m_cache;
+			wmsViewProperties.isCached();
+			/*
+			var itemMetadata: CacheItemMetadata = new CacheItemMetadata();
+			itemMetadata.crs = wmsViewProperties. s_currentCRS;
+			itemMetadata.bbox = currentViewBBox;
+			itemMetadata.url = request;
+			itemMetadata.dimensions = dimensions;
+			
+			var isCached: Boolean = m_cache.isItemCached(itemMetadata)
+			var imgTest: Bitmap = m_cache.getCacheItemBitmap(itemMetadata);
+			if (isCached && imgTest != null) {
+				img = imgTest;
+				
+			var isCached: Boolean = m_cache.isItemCached();
+			*/
 			return false;
 		}
 		

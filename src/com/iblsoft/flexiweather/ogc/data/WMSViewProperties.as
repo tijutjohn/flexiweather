@@ -150,12 +150,36 @@ package com.iblsoft.flexiweather.ogc.data
 			return true;
 		}
 		
+		private function getDimensionForCache(): Array
+		{
+			var dimNames: Array = getWMSDimensionsNames();
+			if (dimNames && dimNames.length > 0)
+			{
+				var ret: Array = [];
+				for each (var dimName: String in dimNames)
+				{
+					var value: Object = getWMSDimensionValue(dimName);
+					if (value)
+						ret.push({name: dimName, value: value});
+					else 
+						ret.push({name: dimName, value: null});
+				}
+				return ret;
+			}
+			return null;
+		}
+		
+		/**
+		 * Check if WMS data are cached (only if b_forceUpdate is true) and load any data parts which are missing.
+		 * 
+		 *  
+		 * @param b_forceUpdate if TRUE, data is forced to load even if they are cached
+		 * 
+		 */		
 		public function updateWMSData(b_forceUpdate: Boolean): void
 		{
 			
 			//check if data are not already cached
-			
-			
 			
 //			super.updateData(b_forceUpdate);
 			++mi_updateCycleAge;
@@ -196,25 +220,108 @@ package com.iblsoft.flexiweather.ogc.data
 			}
 		}
 		
-		private function getDimensionForCache(): Array
+		/**
+		 * Function similar to updateWMSData, only difference is that funciton isCached does not load any data 
+		 * @return 
+		 * 
+		 */		
+		public function isCached(): Boolean
 		{
-			var dimNames: Array = getWMSDimensionsNames();
-			if (dimNames && dimNames.length > 0)
-			{
-				var ret: Array = [];
-				for each (var dimName: String in dimNames)
-				{
-					var value: Object = getWMSDimensionValue(dimName);
-					if (value)
-						ret.push({name: dimName, value: value});
-					else 
-						ret.push({name: dimName, value: null});
-				}
-				return ret;
+			var i_width: int = int(container.width);
+			var i_height: int = int(container.height);
+			
+			if (forcedLayerWidth > 0)
+				i_width = forcedLayerWidth;
+			if (forcedLayerHeight > 0)
+				i_height = forcedLayerHeight;
+			
+			var s_currentCRS: String = container.getCRS();
+			var currentViewBBox: BBox = container.getViewBBox();
+			
+			var f_horizontalPixelSize: Number = currentViewBBox.width / i_width;
+			var f_verticalPixelSize: Number = currentViewBBox.height / i_height;
+			
+			var projection: Projection = Projection.getByCRS(s_currentCRS);
+			var parts: Array = container.mapBBoxToProjectionExtentParts(currentViewBBox);
+			//			var parts: Array = container.mapBBoxToViewParts(projection.extentBBox);
+			var dimensions: Array = getDimensionForCache();
+			
+			for each(var partBBoxToUpdate: BBox in parts) {
+				isPartCached(
+					s_currentCRS, partBBoxToUpdate,
+					dimensions,
+					uint(Math.round(partBBoxToUpdate.width / f_horizontalPixelSize)),
+					uint(Math.round(partBBoxToUpdate.height / f_verticalPixelSize)),
+					);
 			}
-			return null;
+			
+			
 		}
 		
+		/**
+		 * Function checks if part is cached already. Function similar to udpateDataPart.
+		 * Only difference is, that isPartCached does not load data if part is not cached.
+		 *  
+		 * @param s_currentCRS
+		 * @param currentViewBBox
+		 * @param dimensions
+		 * @param i_width
+		 * @param i_height
+		 * @return 
+		 * 
+		 */		
+		private function isPartCached(s_currentCRS: String, currentViewBBox: BBox, dimensions: Array, i_width: uint, i_height: uint): Boolean
+		{
+			/**
+			 * this is how you can find properties for cache metadata
+			 * 
+			 * var s_currentCRS: String = container.getCRS();
+			 * var currentViewBBox: BBox = container.getViewBBox();
+			 * var dimensions: Array = getDimensionForCache();
+			 */
+			
+			var request: URLRequest = m_cfg.toGetMapRequest(
+				s_currentCRS, currentViewBBox.toBBOXString(),
+				i_width, i_height,
+				getWMSStyleListString());
+			
+			if (!request)
+				return;
+			
+			updateDimensionsInURLRequest(request);
+			updateCustomParametersInURLRequest(request);
+			
+			var wmsCache: WMSCache = cache as WMSCache;
+			
+			var img: Bitmap = null;
+			
+			var itemMetadata: CacheItemMetadata = new CacheItemMetadata();
+			itemMetadata.crs = s_currentCRS;
+			itemMetadata.bbox = currentViewBBox;
+			itemMetadata.url = request;
+			itemMetadata.dimensions = dimensions;
+			
+			var isCached: Boolean = wmsCache.isItemCached(itemMetadata)
+			var imgTest: Bitmap = wmsCache.getCacheItemBitmap(itemMetadata);
+			if (isCached && imgTest != null) {
+				return true;
+			}
+			
+			return false;
+		}
+		
+		/**
+		 * Function checks if part is cached already (if b_forceUpdate is true). If part is not cache, function will load view part.
+		 * Function is similar to isPartCached, only difference is, that updateDataPart load data if part is not cached.
+		 * 
+		 * @param s_currentCRS
+		 * @param currentViewBBox
+		 * @param dimensions
+		 * @param i_width
+		 * @param i_height
+		 * @param b_forceUpdate if TRUE, data is forced to load even if they are cached
+		 * 
+		 */		
 		private function updateDataPart(s_currentCRS: String, currentViewBBox: BBox, dimensions: Array, i_width: uint, i_height: uint, b_forceUpdate: Boolean): void
 		{
 			var request: URLRequest = m_cfg.toGetMapRequest(
@@ -1226,18 +1333,18 @@ package com.iblsoft.flexiweather.ogc.data
 			ptImageEndPoint.x += 1;
 			ptImageEndPoint.y += 1;
 			
-			trace("InteractiveLayerWMS.draw(): image-w=" + image.width + " image-h=" + image.height);
+//			trace("InteractiveLayerWMS.draw(): image-w=" + image.width + " image-h=" + image.height);
 			var ptImageSize: Point = ptImageEndPoint.subtract(ptImageStartPoint);
 			ptImageSize.x = int(Math.round(ptImageSize.x));
 			ptImageSize.y = int(Math.round(ptImageSize.y));
 			
 			var matrix: Matrix = new Matrix();
 			matrix.scale(ptImageSize.x / image.width, ptImageSize.y / image.height);
-			trace("InteractiveLayerWMS.draw(): scale-x=" + matrix.a + " scale-y=" + matrix.d);
+//			trace("InteractiveLayerWMS.draw(): scale-x=" + matrix.a + " scale-y=" + matrix.d);
 			
 			matrix.translate(ptImageStartPoint.x, ptImageStartPoint.y);
 			graphics.beginBitmapFill(image.bitmapData, matrix, true, true);
-			trace("InteractiveLayerWMS.draw(): x=" + ptImageStartPoint.x + " y=" + ptImageStartPoint.y + " w=" + ptImageSize.x + " h=" + ptImageSize.y);
+//			trace("InteractiveLayerWMS.draw(): x=" + ptImageStartPoint.x + " y=" + ptImageStartPoint.y + " w=" + ptImageSize.x + " h=" + ptImageSize.y);
 			graphics.drawRect(ptImageStartPoint.x, ptImageStartPoint.y, ptImageSize.x, ptImageSize.y);
 			graphics.endFill();
 		}
@@ -1255,7 +1362,7 @@ package com.iblsoft.flexiweather.ogc.data
 			
 			var styleName: String = getWMSStyleName(0)
 			newViewProperties.setWMSStyleName(0, styleName);
-			debug("\n\n CLONE InteractiveLayerWMS ["+newViewProperties.name+"] alpha: " + newViewProperties.alpha + " zOrder: " +  newViewProperties.zOrder);
+//			debug("\n\n CLONE InteractiveLayerWMS ["+newViewProperties.name+"] alpha: " + newViewProperties.alpha + " zOrder: " +  newViewProperties.zOrder);
 			
 			//clone all dimensions
 			var dimNames: Array = getWMSDimensionsNames();
@@ -1264,7 +1371,7 @@ package com.iblsoft.flexiweather.ogc.data
 				var value : String = getWMSDimensionValue(dimName);
 				newViewProperties.setWMSDimensionValue(dimName, value);
 			}
-			debug("OLD: " + name + " label: " + id);
+//			debug("OLD: " + name + " label: " + id);
 			return newViewProperties;
 			
 		}
