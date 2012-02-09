@@ -247,15 +247,14 @@ package com.iblsoft.flexiweather.ogc.data
 			var dimensions: Array = getDimensionForCache();
 			
 			for each(var partBBoxToUpdate: BBox in parts) {
-				isPartCached(
-					s_currentCRS, partBBoxToUpdate,
-					dimensions,
-					uint(Math.round(partBBoxToUpdate.width / f_horizontalPixelSize)),
-					uint(Math.round(partBBoxToUpdate.height / f_verticalPixelSize)),
-					);
+				if(!isPartCached(
+						s_currentCRS, partBBoxToUpdate,
+						dimensions,
+						uint(Math.round(partBBoxToUpdate.width / f_horizontalPixelSize)),
+						uint(Math.round(partBBoxToUpdate.height / f_verticalPixelSize))))
+					return false;
 			}
-			
-			
+			return true;
 		}
 		
 		/**
@@ -286,7 +285,7 @@ package com.iblsoft.flexiweather.ogc.data
 				getWMSStyleListString());
 			
 			if (!request)
-				return;
+				return false;
 			
 			updateDimensionsInURLRequest(request);
 			updateCustomParametersInURLRequest(request);
@@ -306,7 +305,6 @@ package com.iblsoft.flexiweather.ogc.data
 			if (isCached && imgTest != null) {
 				return true;
 			}
-			
 			return false;
 		}
 		
