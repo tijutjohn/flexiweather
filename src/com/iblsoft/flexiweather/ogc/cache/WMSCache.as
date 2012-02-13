@@ -303,7 +303,7 @@ package com.iblsoft.flexiweather.ogc.cache
 
 		private function debug(str: String): void
 		{
-//			return;
+			return;
 			trace("WMSCache ["+name+"]: " + str);
 		}
 	}

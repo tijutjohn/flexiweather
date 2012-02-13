@@ -246,14 +246,19 @@ package com.iblsoft.flexiweather.ogc.data
 			//			var parts: Array = container.mapBBoxToViewParts(projection.extentBBox);
 			var dimensions: Array = getDimensionForCache();
 			
+			var isCached: Boolean = true;
 			for each(var partBBoxToUpdate: BBox in parts) {
-				if(!isPartCached(
-						s_currentCRS, partBBoxToUpdate,
-						dimensions,
-						uint(Math.round(partBBoxToUpdate.width / f_horizontalPixelSize)),
-						uint(Math.round(partBBoxToUpdate.height / f_verticalPixelSize))))
+				var isPartCached: Boolean = isPartCached(
+									s_currentCRS, partBBoxToUpdate,
+									dimensions,
+									uint(Math.round(partBBoxToUpdate.width / f_horizontalPixelSize)),
+									uint(Math.round(partBBoxToUpdate.height / f_verticalPixelSize))
+								);
+				if (!isPartCached)
 					return false;
 			}
+			
+			//all parts are cached, so all WMS view properties are cached
 			return true;
 		}
 		
@@ -383,10 +388,10 @@ package com.iblsoft.flexiweather.ogc.data
 				imagePart.mb_imageOK = true;
 				for(var i: int = 0; i < ma_imageParts.length; ) {
 					if(imagePart.intersectsOrHasDifferentCRS(ma_imageParts[i])) {
-						trace("InteractiveLayerWMS.updateDataPart(): removing old " + i + " part "
-							+ ImagePart(ma_imageParts[i]).ms_imageCRS + ": "
-							+ ImagePart(ma_imageParts[i]).m_imageBBox.toString()
-							+ " will remain " + (ma_imageParts.length - 1) + " part(s)");
+//						trace("InteractiveLayerWMS.updateDataPart(): removing old " + i + " part "
+//							+ ImagePart(ma_imageParts[i]).ms_imageCRS + ": "
+//							+ ImagePart(ma_imageParts[i]).m_imageBBox.toString()
+//							+ " will remain " + (ma_imageParts.length - 1) + " part(s)");
 						ma_imageParts.removeItemAt(i);
 					}
 					else

@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
+	import com.iblsoft.flexiweather.events.InteractiveLayerProgressEvent;
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderErrorEvent;
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
@@ -99,6 +100,7 @@ package com.iblsoft.flexiweather.ogc
 			
 			m_currentWMSViewProperties = new WMSViewProperties(container);
 			m_currentWMSViewProperties.addEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
+			m_currentWMSViewProperties.addEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
 			m_currentWMSViewProperties.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
 			m_currentWMSViewProperties.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onCurrentWMSDataSynchronisedVariableChanged);
 			m_currentWMSViewProperties.addEventListener("invalidateDynamicPart", onCurrentWMSDataInvalidateDynamicPart);
@@ -201,49 +203,27 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function isPreloaded(wmsViewProperties: WMSViewProperties): Boolean
 		{
-			/*
-				// jozef does not want to check currently loading view properties, just those, which are already cached
-			for each (var currWmsViewProperties: WMSViewProperties in ma_preloadedWMSViewProperties)
-			{
-				//for now just check if preloading has started
-				if (currWmsViewProperties.equals(wmsViewProperties))
-					return true;
-			}
-			*/
-			 
-			
+		
 			//check cache
 			wmsViewProperties.cache = m_cache;
-			wmsViewProperties.isCached();
-			/*
-			var itemMetadata: CacheItemMetadata = new CacheItemMetadata();
-			itemMetadata.crs = wmsViewProperties. s_currentCRS;
-			itemMetadata.bbox = currentViewBBox;
-			itemMetadata.url = request;
-			itemMetadata.dimensions = dimensions;
-			
-			var isCached: Boolean = m_cache.isItemCached(itemMetadata)
-			var imgTest: Bitmap = m_cache.getCacheItemBitmap(itemMetadata);
-			if (isCached && imgTest != null) {
-				img = imgTest;
-				
-			var isCached: Boolean = m_cache.isItemCached();
-			*/
-			return false;
+			var isCached: Boolean = wmsViewProperties.isCached();
+
+			return isCached;
 		}
 		
 		protected function onPreloadingWMSDataLoadingStarted(event: InteractiveLayerEvent): void
 		{
 			var wmsViewProperties: WMSViewProperties = event.target as WMSViewProperties;
 			wmsViewProperties.removeEventListener(InteractiveDataLayer.LOADING_STARTED, onPreloadingWMSDataLoadingStarted);
-			debug("onPreloadingWMSDataLoadingStarted wmsData: " + wmsViewProperties);
+//			debug("onPreloadingWMSDataLoadingStarted wmsData: " + wmsViewProperties);
 			
 		}
 		protected function onPreloadingWMSDataLoadingFinished(event: InteractiveLayerEvent): void
 		{
 			var wmsViewProperties: WMSViewProperties = event.target as WMSViewProperties;
 			wmsViewProperties.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
-			debug("onPreloadingWMSDataLoadingFinished wmsData: " + wmsViewProperties);
+//			debug("onPreloadingWMSDataLoadingFinished wmsData: " + wmsViewProperties);
+//			debug("onPreloadingWMSDataLoadingFinished PRELOADED: " + ma_preloadedWMSViewProperties.length + " , PRELAODING: " + ma_preloadingWMSViewProperties.length);
 			
 			//remove wmsViewProperties from array of currently preloading wms view properties
 			var total: int = ma_preloadingWMSViewProperties.length;
@@ -286,11 +266,18 @@ package com.iblsoft.flexiweather.ogc
 		}
 		protected function onCurrentWMSDataLoadingStarted(event: InteractiveLayerEvent): void
 		{
+			notifyLoadingStart();
+		}
+		
+		protected function onCurrentWMSDataProgress(event: InteractiveLayerProgressEvent): void
+		{
+			notifyProgress(event.loaded, event.total, event.units);
 			
 		}
+		
 		protected function onCurrentWMSDataLoadingFinished(event: InteractiveLayerEvent): void
 		{
-			
+			notifyLoadingFinished();	
 		}
 		
 		public function setConfiguration(cfg: WMSLayerConfiguration): void

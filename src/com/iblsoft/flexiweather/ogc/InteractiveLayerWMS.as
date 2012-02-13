@@ -117,7 +117,7 @@ package com.iblsoft.flexiweather.ogc
 			
 			m_autoRefreshTimer.reset();
 			
-			debug("onCurrentWMSDataLoadingStarted");
+//			debug("onCurrentWMSDataLoadingStarted");
 		}
 		override protected function onCurrentWMSDataLoadingFinished(event: InteractiveLayerEvent): void
 		{
@@ -125,7 +125,7 @@ package com.iblsoft.flexiweather.ogc
 			
 			// restartautorefresh timer
 			restartAutoRefreshTimer();
-			debug("onCurrentWMSDataLoadingFinished");
+//			debug("onCurrentWMSDataLoadingFinished");
 		}
 		
 		override protected function updateData(b_forceUpdate: Boolean): void
