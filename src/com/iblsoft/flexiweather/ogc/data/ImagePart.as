@@ -3,15 +3,28 @@ package com.iblsoft.flexiweather.ogc.data
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.proj.Projection;
 	
+	import flash.display.AVM1Movie;
 	import flash.display.Bitmap;
+	import flash.display.DisplayObject;
 
 	public class ImagePart
 	{
 		public var mi_updateCycleAge: uint;
-		public var m_image: Bitmap = null;
+//		public var m_image: Bitmap = null;
+		public var m_image: DisplayObject = null;
 		public var mb_imageOK: Boolean = false;
 		public var ms_imageCRS: String = null;
 		public var m_imageBBox: BBox = null;
+		
+		public function get isBitmap(): Boolean
+		{
+			return m_image is Bitmap;
+		}
+		
+		public function get isFlash(): Boolean
+		{
+			return m_image is AVM1Movie;
+		}
 		
 		public function intersectsOrHasDifferentCRS(other: ImagePart): Boolean
 		{

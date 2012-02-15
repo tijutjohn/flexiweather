@@ -3,6 +3,7 @@ package com.iblsoft.flexiweather.ogc.cache
 	import com.iblsoft.flexiweather.ogc.BBox;
 	
 	import flash.display.Bitmap;
+	import flash.display.DisplayObject;
 	import flash.events.TimerEvent;
 	import flash.net.URLRequest;
 	import flash.utils.Dictionary;
@@ -120,10 +121,15 @@ package com.iblsoft.flexiweather.ogc.cache
 			// dispose bitmap data, just for bitmaps which are not currently displayed
 			if (cacheItem && (!cacheItem.displayed || (cacheItem.displayed && b_disposeDisplayed) ))
 			{
+				if (cacheItem.image is Bitmap)
+				{
 //				debug("\t deleteCacheItem " + cacheItem);
-				var bmp: Bitmap = cacheItem.image;
-			
-				bmp.bitmapData.dispose();
+					var bmp: Bitmap = cacheItem.image as Bitmap;
+					bmp.bitmapData.dispose();
+				} else {
+					//FIXME deleteCacheItemByKey - delete tile if it's not bitmap (e.g. AVM1Movie)
+				}
+				
 				mi_cacheItemCount--;
 				delete md_cache[s_key];
 				return true;
@@ -183,7 +189,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			return null;
 			
 		}
-		public function getCacheItemBitmap(metadata: CacheItemMetadata): Bitmap
+		public function getCacheItemBitmap(metadata: CacheItemMetadata): DisplayObject
 		{
 			var item: CacheItem = getCacheItem(metadata);
 			if (item)
@@ -208,7 +214,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			debug("startImageLoading ["+s_crs+","+bbox.toBBOXString()+","+url.url+"]");
 		}
 		
-		public function addCacheItem(img: Bitmap, metadata: CacheItemMetadata): void
+		public function addCacheItem(img: DisplayObject, metadata: CacheItemMetadata): void
 		{
 			var s_crs: String = metadata.crs as String;
 			var bbox: BBox = metadata.bbox as BBox;

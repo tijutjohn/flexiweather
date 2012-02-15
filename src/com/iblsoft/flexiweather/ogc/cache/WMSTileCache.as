@@ -5,6 +5,7 @@ package com.iblsoft.flexiweather.ogc.cache
 	import com.iblsoft.flexiweather.ogc.tiling.TiledArea;
 	
 	import flash.display.Bitmap;
+	import flash.display.DisplayObject;
 	import flash.events.TimerEvent;
 	import flash.geom.Point;
 	import flash.net.URLRequest;
@@ -214,7 +215,7 @@ package com.iblsoft.flexiweather.ogc.cache
 //		public function addTile(img: Bitmap, s_crs: String, tileIndex: TileIndex, url: URLRequest, specialStrings: Array, tiledArea: TiledArea, viewPart: BBox, time: Date): void
 //		override public function addCacheItem(img: Bitmap, s_crs: String, bbox: BBox, url: URLRequest, associatedCacheData: Object = null): void
 		
-		override public function addCacheItem(img: Bitmap, metadata: CacheItemMetadata): void
+		override public function addCacheItem(img: DisplayObject, metadata: CacheItemMetadata): void
 		{
 			var s_crs: String = metadata.crs as String;
 			var  bbox: BBox = metadata.bbox as BBox;
@@ -332,8 +333,13 @@ package com.iblsoft.flexiweather.ogc.cache
 			var item: CacheItem = md_cache[s_key] as CacheItem;
 			if (item)
 			{
-				var img:  Bitmap = item.image;
-				img.bitmapData.dispose();
+				if (item.image is Bitmap)
+				{
+					var img:  Bitmap = item.image as Bitmap;
+					img.bitmapData.dispose();
+				} else {
+					//FIXME dispose tile if it's not bitmap (e.g. AVM1Movie)
+				}
 			}
 		}
 	
@@ -369,6 +375,7 @@ package com.iblsoft.flexiweather.ogc.cache
 
 		private function debug(str: String): void
 		{
+			return;
 			trace("WMSTileCache: " + str)
 		}
 	}

@@ -26,7 +26,9 @@ package com.iblsoft.flexiweather.ogc.data
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
+	import flash.display.AVM1Movie;
 	import flash.display.Bitmap;
+	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
 	import flash.display.Graphics;
 	import flash.events.Event;
@@ -297,7 +299,7 @@ package com.iblsoft.flexiweather.ogc.data
 			
 			var wmsCache: WMSCache = cache as WMSCache;
 			
-			var img: Bitmap = null;
+//			var img: Bitmap = null;
 			
 			var itemMetadata: CacheItemMetadata = new CacheItemMetadata();
 			itemMetadata.crs = s_currentCRS;
@@ -306,7 +308,7 @@ package com.iblsoft.flexiweather.ogc.data
 			itemMetadata.dimensions = dimensions;
 			
 			var isCached: Boolean = wmsCache.isItemCached(itemMetadata)
-			var imgTest: Bitmap = wmsCache.getCacheItemBitmap(itemMetadata);
+			var imgTest: DisplayObject = wmsCache.getCacheItemBitmap(itemMetadata);
 			if (isCached && imgTest != null) {
 				return true;
 			}
@@ -338,7 +340,7 @@ package com.iblsoft.flexiweather.ogc.data
 			updateDimensionsInURLRequest(request);
 			updateCustomParametersInURLRequest(request);
 			
-			var img: Bitmap = null;
+			var img: DisplayObject = null;
 			
 			var wmsCache: WMSCache = cache as WMSCache;
 			if(!b_forceUpdate)
@@ -350,7 +352,7 @@ package com.iblsoft.flexiweather.ogc.data
 				itemMetadata.dimensions = dimensions;
 				
 				var isCached: Boolean = wmsCache.isItemCached(itemMetadata)
-				var imgTest: Bitmap = wmsCache.getCacheItemBitmap(itemMetadata);
+				var imgTest: DisplayObject = wmsCache.getCacheItemBitmap(itemMetadata);
 				if (isCached && imgTest != null) {
 					img = imgTest;
 				}
@@ -430,7 +432,7 @@ package com.iblsoft.flexiweather.ogc.data
 			*/
 			
 			var result: * = event.result;
-			if(result is Bitmap) {
+			if(result is DisplayObject) {
 				imagePart.m_image = result;
 				imagePart.mb_imageOK = true;
 				imagePart.mi_updateCycleAge = mi_updateCycleAge;
@@ -1275,11 +1277,20 @@ package com.iblsoft.flexiweather.ogc.data
 			if(ma_imageParts.length > 0) {
 				var matrix: Matrix = new Matrix();
 				imagePart = ImagePart(ma_imageParts[0]);
+				
+				if (imagePart.isBitmap)
+					var bitmap: Bitmap = imagePart.m_image as Bitmap;
+				else {
+					trace("ATTENTION: renderPreviewWMSData image is not bitmap");
+					return;
+				}
+				
+				
 				matrix.translate(-f_width / 3, -f_width / 3);
 				matrix.scale(3, 3);
 				matrix.translate(imagePart.m_image.width / 3, imagePart.m_image.height / 3);
 				matrix.invert();
-				graphics.beginBitmapFill(imagePart.m_image.bitmapData, matrix, false, true);
+				graphics.beginBitmapFill(bitmap.bitmapData, matrix, false, true);
 				graphics.drawRect(0, 0, f_width, f_height);
 				graphics.endFill();
 			}
@@ -1327,7 +1338,29 @@ package com.iblsoft.flexiweather.ogc.data
 			}
 		}
 		
-		private function drawImagePart(graphics: Graphics, image: Bitmap, s_imageCRS: String, imageBBox: BBox): void
+		private function drawImagePart(graphics: Graphics, image: DisplayObject, s_imageCRS: String, imageBBox: BBox): void
+		{
+			if (image is Bitmap)
+			{
+				drawImagePartAsBitmap(graphics, image as Bitmap, s_imageCRS, imageBBox);
+			}
+			if (image is AVM1Movie)
+			{
+//				drawImagePartAsSWF(image as Bitmap, s_imageCRS, imageBBox);
+				
+				//TODO we can get bitmap from avm1movie
+				var bd: BitmapData = new BitmapData(image.width, image.height, true, 0x00ff0000);
+				bd.draw(image);
+				
+				drawImagePartAsBitmap(graphics, new Bitmap(bd), s_imageCRS, imageBBox);
+			}
+		}
+		private function drawImagePartAsSWF(image: Bitmap, s_imageCRS: String, imageBBox: BBox): void
+		{
+			
+		}
+		
+		private function drawImagePartAsBitmap(graphics: Graphics, image: Bitmap, s_imageCRS: String, imageBBox: BBox): void
 		{
 			var ptImageStartPoint: Point =
 				container.coordToPoint(new Coord(s_imageCRS, imageBBox.xMin, imageBBox.yMax));

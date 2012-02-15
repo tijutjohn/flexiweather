@@ -3,6 +3,7 @@ package com.iblsoft.flexiweather.ogc.cache
 	import com.iblsoft.flexiweather.ogc.BBox;
 	
 	import flash.display.Bitmap;
+	import flash.display.DisplayObject;
 	import flash.net.URLRequest;
 	
 	public interface ICache
@@ -23,7 +24,7 @@ package com.iblsoft.flexiweather.ogc.cache
 		function setAnimationModeEnable(value: Boolean): void;
 		function invalidate(s_crs: String, bbox: BBox, validity: Date = null): void;
 		
-		function addCacheItem(img: Bitmap, metadata: CacheItemMetadata): void
+		function addCacheItem(img: DisplayObject, metadata: CacheItemMetadata): void
 
 		function deleteCacheItem(cacheItem: CacheItem, b_disposeDisplayed: Boolean = false): Boolean
 		function deleteCacheItemByKey(s_key: String, b_disposeDisplayed: Boolean = false): Boolean
@@ -34,6 +35,6 @@ package com.iblsoft.flexiweather.ogc.cache
 		function getCacheItems(): Array;
 		
 		function getCacheItem(metadata: CacheItemMetadata): CacheItem;
-		function getCacheItemBitmap(metadata: CacheItemMetadata): Bitmap;
+		function getCacheItemBitmap(metadata: CacheItemMetadata): DisplayObject;
 	}
 }

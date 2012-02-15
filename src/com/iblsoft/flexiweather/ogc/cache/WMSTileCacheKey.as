@@ -23,9 +23,9 @@ package com.iblsoft.flexiweather.ogc.cache
 				key +=  "|" + tileIndex.toString();
 			if(m_validity != null)
 				key +=  "|validity:" + m_validity.toString();
-			else {
-				trace("WMSTileCacheKey validity is null");
-			}
+//			else {
+//				trace("WMSTileCacheKey validity is null");
+//			}
 			var a: Array = []
 //			if(url.url != null) {
 //				key += url.url;

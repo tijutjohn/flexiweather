@@ -354,8 +354,6 @@ package com.iblsoft.flexiweather.ogc
 							itemMetadata.specialStrings = ma_specialCacheStrings;
 							itemMetadata.updateCycleAge = mi_updateCycleAge;
 							
-							trace("prepareData for " + _currentValidityTime);
-							
 //							if(!tiledCache.isTileCached(s_crs, tileIndex, request, m_time, ma_specialCacheStrings))
 							if(!tiledCache.isItemCached(itemMetadata) || b_forceUpdate)
 							{	
@@ -1022,8 +1020,6 @@ package com.iblsoft.flexiweather.ogc
 				itemMetadata.viewPart = associatedData.viewPart;
 				itemMetadata.validity = associatedData.validity;
 				itemMetadata.updateCycleAge = associatedData.updateCycleAge;
-				
-				trace("tileLoaded validity:  " + itemMetadata.validity);
 				
 				itemMetadata.specialStrings = ma_specialCacheStrings;
 				itemMetadata.url = request;
