@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc.editable
 {
+	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWFS;
 	import com.iblsoft.flexiweather.ogc.WFSFeatureBase;
 	
@@ -37,7 +38,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			editableSpriteVisible(false);
 		}
 		
-		override public function setMaster(master: InteractiveLayerWFS): void
+		override public function setMaster(master: InteractiveLayerFeatureBase): void
 		{
 			super.setMaster(master);
 			var masterEditable: InteractiveLayerWFSEditable = master as InteractiveLayerWFSEditable;

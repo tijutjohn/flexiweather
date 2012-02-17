@@ -1249,7 +1249,6 @@ class TileIndicesMapper
 	
 	public function TileIndicesMapper()
 	{
-		trace("create new tile indices mapper");
 	}
 	
 	private function getMapperKey(tileIndex: TileIndex): String

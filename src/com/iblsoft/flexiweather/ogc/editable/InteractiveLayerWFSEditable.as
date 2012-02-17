@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc.editable
 {
+	import com.iblsoft.flexiweather.ogc.FeatureBase;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWFS;
 	import com.iblsoft.flexiweather.ogc.Version;
 	import com.iblsoft.flexiweather.ogc.WFSFeatureBase;
@@ -156,7 +157,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			container.labelLayout.update();
 		}
 
-		override protected function onFeatureAdded(feature: WFSFeatureBase): void
+		override protected function onFeatureAdded(feature: FeatureBase): void
 		{
 			super.onFeatureAdded(feature);
 			var item: IEditableItem = feature as IEditableItem;
@@ -165,7 +166,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			}
 		}
 
-		override protected function onFeatureRemoved(feature: WFSFeatureBase): void
+		override protected function onFeatureRemoved(feature: FeatureBase): void
 		{
 			super.onFeatureRemoved(feature);
 			var item: IEditableItem = feature as IEditableItem;

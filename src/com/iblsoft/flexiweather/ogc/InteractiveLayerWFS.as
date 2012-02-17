@@ -16,31 +16,27 @@ package com.iblsoft.flexiweather.ogc
 	
 	import mx.collections.ArrayCollection;
 
-	public class InteractiveLayerWFS extends InteractiveDataLayer
+	public class InteractiveLayerWFS extends InteractiveLayerFeatureBase
 	{
-		private var ma_features: ArrayCollection = new ArrayCollection();
-		private var m_featuresContainer: Sprite = new Sprite();
 		private var ma_queryFeatures: ArrayCollection = new ArrayCollection();
 		private var md_queryParametersGET: Array = new Array();
-		
-		protected var ms_serviceURL: String = null;
-		protected var m_version: Version;
-
-		protected var mb_useMonochrome: Boolean = false;
-		protected var mi_monochromeColor: uint = 0x333333;
 		
 		public function InteractiveLayerWFS(
 				container: InteractiveWidget,
 				version: Version)
 		{
-			super(container);
+			super(container, version);
 			
-			m_version = version;
-			m_featuresContainer.mouseEnabled = false;
-			m_featuresContainer.mouseChildren = false;
-			addChild(m_featuresContainer);
 		}
 
+		/**
+		 * Import WFS layer data
+		 *  
+		 * @param serviceURL
+		 * @param run
+		 * @param validity
+		 * 
+		 */		
 		public function importData(serviceURL: String, run: String, validity: String) : void
 		{
 			var url: URLRequest = new URLRequest(serviceURL);
@@ -100,21 +96,13 @@ package com.iblsoft.flexiweather.ogc
 			dataLoader.load(url, null, "Loading features");
 		}
 		
-		public function addFeature(feature: WFSFeatureBase): void
-		{
-			feature.setMaster(this);
-			feature.update();
-			m_featuresContainer.addChild(feature);
-			ma_features.addItem(feature);
-			onFeatureAdded(feature);
-		}
 		
 		private function addFeatureAfterLoad(feature: WFSFeatureBase, a_features: ArrayCollection = null): void
 		{
 			if(feature != null) {
 				feature.setMaster(this);
 				feature.update();
-				m_featuresContainer.addChild(feature);
+				featuresContainer.addChild(feature);
 				if(a_features)
 					a_features.addItem(feature);
 				onFeatureAdded(feature);
@@ -125,19 +113,19 @@ package com.iblsoft.flexiweather.ogc
 		{
 			var s_internalId: String = feature.internalFeatureId;
 			
-			var i: int = ma_features.getItemIndex(feature);
+			var i: int = features.getItemIndex(feature);
 			if(i >= 0)
-				ma_features.removeItemAt(i);
+				features.removeItemAt(i);
 				
 			if(s_internalId)
 			{
-				var total: int = m_featuresContainer.numChildren;
+				var total: int = featuresContainer.numChildren;
 				for(i = 0; i < total; i++)
 				{
-					var currFeature: WFSFeatureBase = m_featuresContainer.getChildAt(i) as WFSFeatureBase;
+					var currFeature: WFSFeatureBase = featuresContainer.getChildAt(i) as WFSFeatureBase;
 					if(currFeature.internalFeatureId == s_internalId)
 					{
-						m_featuresContainer.removeChildAt(i);
+						featuresContainer.removeChildAt(i);
 						break;
 					} 
 				}
@@ -149,23 +137,23 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function removeAllFeatures(): void
 		{
-			var i_count: int = m_featuresContainer.numChildren;
+			var i_count: int = featuresContainer.numChildren;
 			for(var i: int = i_count - 1; i >= 0; --i)
 			{
-				var feature: WFSFeatureBase = m_featuresContainer.getChildAt(i) as WFSFeatureBase;
-				var id: int = ma_features.getItemIndex(feature);
+				var feature: WFSFeatureBase = featuresContainer.getChildAt(i) as WFSFeatureBase;
+				var id: int = features.getItemIndex(feature);
 				if (id >= 0)
 				{
-					ma_features.removeItemAt(id);
+					features.removeItemAt(id);
 				}
 				onFeatureRemoved(feature);
 				feature.cleanup();
-				m_featuresContainer.removeChildAt(i);
+				featuresContainer.removeChildAt(i);
 			}
-			if (ma_features.length > 0)
+			if (features.length > 0)
 			{
-				trace("after removing alll features, there are still features in ma_features: " + ma_features.length + " ["+this+"]")
-				ma_features.removeAll();
+				trace("after removing alll features, there are still features in features: " + features.length + " ["+this+"]")
+				features.removeAll();
 			}
 		}
 
@@ -203,10 +191,10 @@ package com.iblsoft.flexiweather.ogc
 		
 		private function getFeatureByID(id: String, idType: String): WFSFeatureBase
 		{
-			var i_count: int = m_featuresContainer.numChildren;
+			var i_count: int = featuresContainer.numChildren;
 			for(var i:int = 0; i < i_count; i++)
 			{
-				var currFeature: WFSFeatureBase = m_featuresContainer.getChildAt(i) as WFSFeatureBase;
+				var currFeature: WFSFeatureBase = featuresContainer.getChildAt(i) as WFSFeatureBase;
 				if(currFeature && currFeature[idType] == id)
 				{
 					return currFeature;	
@@ -233,12 +221,12 @@ package com.iblsoft.flexiweather.ogc
 
 		public function removeFeature(feature: WFSFeatureBase): void
 		{
-			if (feature.parent == m_featuresContainer)
+			if (feature.parent == featuresContainer)
 			{
-				m_featuresContainer.removeChild(feature);
-				var i: int = ma_features.getItemIndex(feature);
+				featuresContainer.removeChild(feature);
+				var i: int = features.getItemIndex(feature);
 				if(i >= 0)
-					ma_features.removeItemAt(i);
+					features.removeItemAt(i);
 				onFeatureRemoved(feature);
 				feature.cleanup();
 			}
@@ -266,7 +254,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			//FIXME this should not be called if panning or zooming is still in progress
 			
-			for each(var f: WFSFeatureBase in ma_features) {
+			for each(var f: WFSFeatureBase in features) {
 				//trace("onAreaChanged ["+this+"] feature: " + f);
 				f.invalidatePoints();
 				f.update();
@@ -287,11 +275,11 @@ package com.iblsoft.flexiweather.ogc
 			if(xml == null)
 				return; // TODO: do some error handling
 				
-			var lenBefore: int = ma_features.length
+			var lenBefore: int = features.length
 			var newFeatures: ArrayCollection = importFeaturesFromXML( xml );
 			
 			var importEvent: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.FEATURES_IMPORTED);
-			importEvent.newFeaturesCount = ma_features.length - lenBefore;
+			importEvent.newFeaturesCount = features.length - lenBefore;
 			importEvent.newFeatures = newFeatures;
 			dispatchEvent(importEvent);
 		}
@@ -340,7 +328,7 @@ package com.iblsoft.flexiweather.ogc
 		 * @param bRemoveOld Boolean flag if old features must be removed (Load = true, Import = false)
 		 * 
 		 */		
-		public function createFeaturesFromXML( xml: XML, bIsImport: Boolean = false): ArrayCollection
+		override public function createFeaturesFromXML( xml: XML, bIsImport: Boolean = false): ArrayCollection
 		{
 			var bRemoveOld: Boolean = true;
 			if (bIsImport)
@@ -366,13 +354,13 @@ package com.iblsoft.flexiweather.ogc
 			
 			if (bRemoveOld)
 			{
-				for each(var oldFeature: WFSFeatureBase in ma_features) {
-					m_featuresContainer.removeChild(oldFeature);
+				for each(var oldFeature: WFSFeatureBase in features) {
+					featuresContainer.removeChild(oldFeature);
 					onFeatureRemoved(oldFeature);
 				}
-	 			ma_features = a_features;
+	 			features = a_features;
 			} else {
-				ma_features.addAll(a_features);
+				features.addAll(a_features);
 			}
 			invalidateDynamicPart();
 			
@@ -387,7 +375,7 @@ package com.iblsoft.flexiweather.ogc
 		protected function getFeatureDatabaseFeatures(): ArrayCollection
 		{
 			var arr: ArrayCollection = new ArrayCollection();
-			for each (var feature: WFSFeatureBase in ma_features)
+			for each (var feature: WFSFeatureBase in features)
 			{
 				if (feature.featureId)
 				{
@@ -477,9 +465,9 @@ package com.iblsoft.flexiweather.ogc
 						} else {
 							//replace new feature with old one
 							//TODO remove existing feature first
-							if (existingFeature.parent == m_featuresContainer)
+							if (existingFeature.parent == featuresContainer)
 							{
-								m_featuresContainer.removeChild(existingFeature);
+								featuresContainer.removeChild(existingFeature);
 								onFeatureRemoved(existingFeature);
 							}
 					
@@ -513,9 +501,9 @@ package com.iblsoft.flexiweather.ogc
 						_removedFeatures.addItem(existingFeature);
 					} else {
 						//just remove it, because it was removed from server
-						if (existingFeature.parent == m_featuresContainer)
+						if (existingFeature.parent == featuresContainer)
 						{
-							m_featuresContainer.removeChild(existingFeature);
+							featuresContainer.removeChild(existingFeature);
 							onFeatureRemoved(existingFeature);
 						}
 					}
@@ -527,7 +515,7 @@ package com.iblsoft.flexiweather.ogc
 			returnObject.modifiedFeaturesCount = _modifiedFeaturesCount;
 			returnObject.removedFeatures = _removedFeatures;
 			
-			ma_features = _features;
+			features = _features;
 			
 			return returnObject;
 		}
@@ -535,9 +523,9 @@ package com.iblsoft.flexiweather.ogc
 		public function removeDeletedFeatures(deletedFeatures: ArrayCollection): void
 		{
 			for each(var oldFeature: WFSFeatureBase in deletedFeatures) {
-				if (oldFeature.parent == m_featuresContainer)
+				if (oldFeature.parent == featuresContainer)
 				{
-					m_featuresContainer.removeChild(oldFeature);
+					featuresContainer.removeChild(oldFeature);
 					onFeatureRemoved(oldFeature);
 				} 
 			}
@@ -545,9 +533,9 @@ package com.iblsoft.flexiweather.ogc
 		public function updateModifiedFeatures(oldFeatures: ArrayCollection, newFeatures: ArrayCollection): void
 		{
 			for each(var oldFeature: WFSFeatureBase in oldFeatures) {
-				if (oldFeature.parent == m_featuresContainer)
+				if (oldFeature.parent == featuresContainer)
 				{
-					m_featuresContainer.removeChild(oldFeature);
+					featuresContainer.removeChild(oldFeature);
 					onFeatureRemoved(oldFeature);
 				} else {
 					//feature, which was removed by user, do it's not needed to remove it right now
@@ -556,7 +544,7 @@ package com.iblsoft.flexiweather.ogc
 			}
 			
 			for each(var newFeature: WFSFeatureBase in newFeatures) {
-				addFeatureAfterLoad(newFeature, ma_features);
+				addFeatureAfterLoad(newFeature, features);
 			}
 		}
 		
@@ -566,15 +554,6 @@ package com.iblsoft.flexiweather.ogc
 		{
 		}
 
-		protected function onFeatureAdded(feature: WFSFeatureBase): void
-		{
-			invalidateDynamicPart();
-		}
-
-		protected function onFeatureRemoved(feature: WFSFeatureBase): void
-		{
-			invalidateDynamicPart();
-		}
 
 		public function addQueryFeature(s_featureId: String): void
 		{ ma_queryFeatures.addItem(s_featureId); }
@@ -588,57 +567,6 @@ package com.iblsoft.flexiweather.ogc
 		public function clearAllQueryParametersGET(s_parameter: String): void
 		{ md_queryParametersGET = new Array(); }
 
-		// getters & setters		
-		public function get features(): ArrayCollection
-		{ return ma_features; }
 		
-		public function get serviceURL(): String
-		{ return ms_serviceURL; }
-
-		public function set serviceURL(s_serviceURL: String): void
-		{ ms_serviceURL = s_serviceURL; }
-		
-		public function set useMonochrome(val: Boolean): void
-		{
-			var b_needUpdate: Boolean = false;
-			if(mb_useMonochrome != val)
-				b_needUpdate = true;
-			
-			mb_useMonochrome = val;
-			
-			if(b_needUpdate) {
-				for(var i: int = 0; i < m_featuresContainer.numChildren; i++){
-					if(m_featuresContainer.getChildAt(i) is WFSFeatureEditable){
-						WFSFeatureEditable(m_featuresContainer.getChildAt(i)).update();
-					}
-				}
-			}
-		}
-		
-		public function get useMonochrome(): Boolean
-		{ return mb_useMonochrome; }
-		
-		public function set monochromeColor(i_color: uint): void
-		{
-			var b_needUpdate: Boolean = false;
-			if(mi_monochromeColor != i_color)
-				b_needUpdate = true;
-			
-			mi_monochromeColor = i_color;
-			
-			if(b_needUpdate) {
-				for(var i: int = 0; i < m_featuresContainer.numChildren; i++) {
-					if(m_featuresContainer.getChildAt(i) is WFSFeatureEditable) {
-						WFSFeatureEditable(m_featuresContainer.getChildAt(i)).update();
-					}
-				}
-			}
-		}
-		
-		public function get monochromeColor(): uint
-		{ return mi_monochromeColor; }
-		
-		public function get featuresContainer(): Sprite
-		{ return m_featuresContainer; }
 	}
 }
