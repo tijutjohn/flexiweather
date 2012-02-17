@@ -20,10 +20,6 @@ package com.iblsoft.flexiweather.events
 		public  static const LEGENDS_AREA_UPDATED: String = 'legendsAreaUpdated';
 		public  static const AREA_CHANGED: String = 'areaChangeds';
 		
-//		public  static const LAYER_LOADING_START: String = 'layerLoadingStart';
-//		public  static const LAYER_LOADED: String = 'layerLoaded';
-		public  static const ALL_LAYERS_LOADED: String = 'allLayersLoaded';
-		
 		public var text: String;
 		public var interactiveLayer: InteractiveLayer;
 		public var point: Point;

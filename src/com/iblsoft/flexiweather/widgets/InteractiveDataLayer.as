@@ -184,11 +184,11 @@ package com.iblsoft.flexiweather.widgets
 		 * Dispatch <code>InteractiveDataLayer.LOADING_START</code> event. If you need to dispatch more properties inside event, override this method in your class. 
 		 * 
 		 */		
-		protected function notifyLoadingStart(): void
+		protected function notifyLoadingStart(bubbles: Boolean = true): void
 		{
 			setStatus(STATE_LOADING_DATA);
 			
-			var event: InteractiveLayerEvent = new InteractiveLayerEvent(LOADING_STARTED, true);
+			var event: InteractiveLayerEvent = new InteractiveLayerEvent(LOADING_STARTED, bubbles);
 			event.interactiveLayer = this;
 			dispatchEvent(event);
 		}
@@ -197,12 +197,12 @@ package com.iblsoft.flexiweather.widgets
 		 * Dispatch <code>InteractiveDataLayer.LOADING_FINISHED</code> event. If you need to dispatch more properties inside event, override this method in your class. 
 		 * 
 		 */		
-		protected function notifyLoadingFinished(): void
+		protected function notifyLoadingFinished(bubbles: Boolean = true): void
 		{
 			if (_status != STATE_DATA_LOADED_WITH_ERRORS)
 				setStatus(STATE_DATA_LOADED);
 			
-			var event: InteractiveLayerEvent = new InteractiveLayerEvent(LOADING_FINISHED, true);
+			var event: InteractiveLayerEvent = new InteractiveLayerEvent(LOADING_FINISHED, bubbles);
 			event.interactiveLayer = this;
 			dispatchEvent(event);
 		}

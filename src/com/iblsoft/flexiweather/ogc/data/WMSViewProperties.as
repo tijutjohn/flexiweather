@@ -180,7 +180,6 @@ package com.iblsoft.flexiweather.ogc.data
 		 */		
 		public function updateWMSData(b_forceUpdate: Boolean): void
 		{
-			
 			//check if data are not already cached
 			
 //			super.updateData(b_forceUpdate);
@@ -373,7 +372,7 @@ package com.iblsoft.flexiweather.ogc.data
 					//TODO move to InteractiveLayerWMS (listen for loading start)
 //					m_autoRefreshTimer.reset();
 					
-					notifyLoadingStart();
+					notifyLoadingStart(false);
 				}
 				
 				m_loader.load(request,

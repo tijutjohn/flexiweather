@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.widgets
 {
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
+	import com.iblsoft.flexiweather.events.InteractiveWidgetEvent;
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
@@ -26,6 +27,14 @@ package com.iblsoft.flexiweather.widgets
 	import spark.components.Group;
 
 	[Event (name="viewBBoxChanged", type="flash.events.Event")]
+	
+	/**
+	 * Dispatched, when all layers which were loaded at once are loaded. 
+	 */	
+	[Event (name="allDataLayersLoaded", type="com.iblsoft.flexiweather.events.InteractiveWidgetEvent")]
+	[Event (name="dataLayerLoadingStarted", type="com.iblsoft.flexiweather.events.InteractiveWidgetEvent")]
+	[Event (name="dataLayerLoadingFinished", type="com.iblsoft.flexiweather.events.InteractiveWidgetEvent")]
+	
 	public class InteractiveWidget extends Container
 	{
 		public static const VIEW_BBOX_CHANGED: String = 'viewBBoxChanged';
@@ -151,17 +160,27 @@ package com.iblsoft.flexiweather.widgets
 		private var m_layersLoading: int = 0;
 		private function onLayerLoadingStart( event: InteractiveLayerEvent): void
 		{
-//			trace("onLayerLoadingStart " + event.interactiveLayer.name);
 			m_layersLoading++;
+			
+			var ile: InteractiveWidgetEvent = new InteractiveWidgetEvent(InteractiveWidgetEvent.DATA_LAYER_LOADING_STARTED);
+			ile.layersLoading = m_layersLoading;
+			dispatchEvent(ile);
+			
+			trace("IW onLayerLoadingStart " + event.interactiveLayer.name + " m_layersLoading: " + m_layersLoading);
 		}
 		private function onLayerLoaded( event: InteractiveLayerEvent): void
 		{
 			m_layersLoading--;
-//			trace("onLayerLoaded " + event.interactiveLayer.name + " layers currently loading: " + m_layersLoading);
+			trace("IW onLayerLoaded " + event.interactiveLayer.name + " layers currently loading: " + m_layersLoading);
+			
+			var ile: InteractiveWidgetEvent = new InteractiveWidgetEvent(InteractiveWidgetEvent.DATA_LAYER_LOADING_FINISHED);
+			ile.layersLoading = m_layersLoading;
+			dispatchEvent(ile);
+			
 			if (m_layersLoading <= 0)
 			{
-//				trace("ALL layers are loaded");
-				var ile: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.ALL_LAYERS_LOADED);
+				trace("\t IW ALL layers are loaded");
+				var ile: InteractiveWidgetEvent = new InteractiveWidgetEvent(InteractiveWidgetEvent.ALL_DATA_LAYERS_LOADED);
 				dispatchEvent(ile);
 			}
 		}

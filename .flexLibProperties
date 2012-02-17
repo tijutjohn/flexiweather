@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="1">
+<flexLibProperties includeAllClasses="false" useMultiPlatformConfig="false" version="1">
   <includeClasses>
     <classEntry path="com.iblsoft.flexiweather.components.ResizableDropDownList"/>
+    <classEntry path="com.iblsoft.flexiweather.components.charts.FlexChart"/>
+    <classEntry path="com.iblsoft.flexiweather.components.charts.SimpleChart"/>
     <classEntry path="com.iblsoft.flexiweather.events.BackgroundJobEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.GetFeatureInfoEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.InteractiveLayerEvent"/>
@@ -44,6 +46,7 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.IOGCServicesConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.ISynchronisedObject"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.IWFSFeatureWithAnnotation"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.InteractiveLayerQTTMS"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.InteractiveLayerWFS"/>
@@ -88,6 +91,8 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.cache.WMSCacheKey"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.cache.WMSTileCache"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.cache.WMSTileCacheKey"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.data.ImagePart"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.data.WMSViewProperties"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.IClosableCurve"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.IEditableItem"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.IEditableItemManager"/>
@@ -235,6 +240,11 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.GoogleMapLayerConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.GoogleMapsLayerOption"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.InteractiveLayerGoogleMaps"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.FeatureBase"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.KMLFeature"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.InteractiveLayerKML"/>
+    <classEntry path="com.iblsoft.flexiweather.syndication.Namespaces"/>
+    <classEntry path="com.iblsoft.flexiweather.events.InteractiveWidgetEvent"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
