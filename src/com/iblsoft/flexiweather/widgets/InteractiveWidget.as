@@ -21,7 +21,7 @@ package com.iblsoft.flexiweather.widgets
 	import flash.utils.getTimer;
 	import flash.utils.setTimeout;
 	
-	import mx.core.Container;
+	import mx.core.IVisualElement;
 	import mx.events.ResizeEvent;
 	
 	import spark.components.Group;
@@ -35,7 +35,7 @@ package com.iblsoft.flexiweather.widgets
 	[Event (name="dataLayerLoadingStarted", type="com.iblsoft.flexiweather.events.InteractiveWidgetEvent")]
 	[Event (name="dataLayerLoadingFinished", type="com.iblsoft.flexiweather.events.InteractiveWidgetEvent")]
 	
-	public class InteractiveWidget extends Container
+	public class InteractiveWidget extends Group
 	{
 		public static const VIEW_BBOX_CHANGED: String = 'viewBBoxChanged';
 		
@@ -51,7 +51,7 @@ package com.iblsoft.flexiweather.widgets
 
 		private var m_resizeTimer: Timer;
 		
-		private var m_layerContainer: Container = new Container();
+		private var m_layerContainer: Group = new Group();
 
 		private var m_labelLayout: AnticollisionLayout = new AnticollisionLayout();
 		
@@ -64,11 +64,14 @@ package com.iblsoft.flexiweather.widgets
 			mouseFocusEnabled = true;
 			doubleClickEnabled = true;
 
-			addChild(m_layerContainer);
-			m_layerContainer.x = m_layerContainer.y = 0;
+			addElement(m_layerContainer);
+			
+			/*
 			rawChildren.addChild(m_labelLayout);
 			clipContent = true;
+			*/
 
+			m_layerContainer.x = m_layerContainer.y = 0;
 			addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
 			addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
 			addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
@@ -125,36 +128,37 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 		
-		public override function addChild(child: DisplayObject): DisplayObject
+				
+		public override function addElement(element:IVisualElement):IVisualElement
 		{
-			if(child is InteractiveLayer) {
+			if(element is InteractiveLayer) {
 				// InteractiveLayer based child are added to m_layerContainer
-				InteractiveLayer(child).container = this; // this also ensures that child is InteractiveLayer
-				child.width = width;
-				child.height = height;
-				var o: DisplayObject = m_layerContainer.addChild(child);
+				InteractiveLayer(element).container = this; // this also ensures that child is InteractiveLayer
+				element.width = width;
+				element.height = height;
+				var o: IVisualElement = m_layerContainer.addElement(element);
 				orderLayers();
 				return o;
 			}
 			else
-				return super.addChild(child);
+				return super.addElement(element);
 		}
 		
-		public override function addChildAt(child: DisplayObject, index: int): DisplayObject
+		public override function addElementAt(element:IVisualElement, index:int):IVisualElement
 		{
-			if(child is InteractiveLayer) {
+			if(element is InteractiveLayer) {
 				// InteractiveLayer based child are added to m_layerContainer
-				InteractiveLayer(child).container = this; // this also ensures that child is InteractiveLayer
-				child.x = x;
-				child.y = y;
-				child.width = width;
-				child.height = height;
-				var o: DisplayObject = m_layerContainer.addChildAt(child, index);
+				InteractiveLayer(element).container = this; // this also ensures that element is InteractiveLayer
+				element.x = x;
+				element.y = y;
+				element.width = width;
+				element.height = height;
+				var o: IVisualElement = m_layerContainer.addElementAt(element, index);
 				orderLayers();
 				return o;
 			}
 			else
-				return super.addChildAt(child, index);
+				return super.addElementAt(element, index);
 		}
 
 		private var m_layersLoading: int = 0;
@@ -173,14 +177,15 @@ package com.iblsoft.flexiweather.widgets
 			m_layersLoading--;
 			trace("IW onLayerLoaded " + event.interactiveLayer.name + " layers currently loading: " + m_layersLoading);
 			
-			var ile: InteractiveWidgetEvent = new InteractiveWidgetEvent(InteractiveWidgetEvent.DATA_LAYER_LOADING_FINISHED);
+			var ile: InteractiveWidgetEvent
+			ile = new InteractiveWidgetEvent(InteractiveWidgetEvent.DATA_LAYER_LOADING_FINISHED);
 			ile.layersLoading = m_layersLoading;
 			dispatchEvent(ile);
 			
 			if (m_layersLoading <= 0)
 			{
 				trace("\t IW ALL layers are loaded");
-				var ile: InteractiveWidgetEvent = new InteractiveWidgetEvent(InteractiveWidgetEvent.ALL_DATA_LAYERS_LOADED);
+				ile = new InteractiveWidgetEvent(InteractiveWidgetEvent.ALL_DATA_LAYERS_LOADED);
 				dispatchEvent(ile);
 			}
 		}
@@ -191,9 +196,9 @@ package com.iblsoft.flexiweather.widgets
 			l.addEventListener(InteractiveDataLayer.LOADING_STARTED, onLayerLoadingStart);
 			
 			if (index >= 0)
-				addChildAt(l, index);
+				addElementAt(l, index);
 			else
-				addChild(l);
+				addElement(l);
 			
 			//when new layer is added to container, call onAreaChange to notify layer, that layer is already added to container, so it can render itself
 			l.onAreaChanged(true);
@@ -221,34 +226,46 @@ package com.iblsoft.flexiweather.widgets
 		
 		public function debugLayers(): void
 		{
-			var total: int = m_layerContainer.numChildren;
+			var total: int = m_layerContainer.numElements;
 			for (var i: int = 0; i < total; i++)
 			{
-				var layer: InteractiveLayer = InteractiveLayer(m_layerContainer.getChildAt(i)); 
-				trace("Widget debugLayers: " + i + ": " + layer.name);
+				var layer: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i)); 
+//				trace("\t Widget debugLayers: " + i + ": " + layer.name + " parent: " + layer.parent);
 			}
 		}
 		
 		public function orderLayers(): void
 		{
+			trace("Widget orderLayers");
+//			debugLayers();
 			if(mb_orderingLayers)
 				return;
 			mb_orderingLayers = true;
 			try {
 				// stable-sort interactive layers in ma_layers according to their zOrder property
-				for(var i: int = 0; i < m_layerContainer.numChildren; ++i) {
-					var ilI: InteractiveLayer = InteractiveLayer(m_layerContainer.getChildAt(i)); 
+				var displayObject: DisplayObject;
+				
+				for(var i: int = 0; i < m_layerContainer.numElements; ++i) {
+					displayObject = m_layerContainer.getElementAt(i) as DisplayObject;
+					var ilI: InteractiveLayer = InteractiveLayer(displayObject); 
+//					trace("\t I zOrder: ["+ilI.zOrder+"] ["+displayObject+"] ilI ["+ilI+"] contains: " + m_layerContainer.contains(ilI));
 					for(var j: int = i + 1; j < m_layerContainer.numChildren; ++j) {
-						var ilJ: InteractiveLayer = InteractiveLayer(m_layerContainer.getChildAt(j));
+						displayObject = m_layerContainer.getElementAt(j) as DisplayObject;
+						var ilJ: InteractiveLayer = InteractiveLayer(displayObject);
+//						trace("\t\t I zOrder: ["+ilJ.zOrder+"] ["+displayObject+"] ilI ["+ilJ+"] contains: " + m_layerContainer.contains(ilJ));
 						if(ilJ.zOrder < ilI.zOrder) {
 							// swap Ith and Jth layer, we know that J > I
-//							trace('[InteractiveWidget.orderLayers] ... swapping ' + ilJ.name + ' with ' + ilI.name);
-							m_layerContainer.swapChildren(ilJ, ilI);
+//							trace('\t\t\t[IW.orderLayers] ... swapping ' + ilJ.name + ' with ' + ilI.name);
+							m_layerContainer.swapElements(ilJ, ilI);
+//							trace('\t\t\t[IW.orderLayers] swap is OK');
 						}
 					}
 				}
+			} catch (error: Error) {
+				trace("IW.orderLayer catch: " + error.message);
 			}
 			finally {
+//				debugLayers();
 				mb_orderingLayers = false;
 			}
 		}
@@ -362,11 +379,19 @@ package com.iblsoft.flexiweather.widgets
 					trace("InteractiveWidget.coordToPoint(): Unknown projection for CRS=" + c.crs);
 					return null;
 				}
-				ptInOurCRS = m_crsProjection.laLoPtToPrjPt(sourceProjection.prjXYToLaLoPt(c.x, c.y));
+				var laLoPtRad: Point = sourceProjection.prjXYToLaLoPt(c.x, c.y);
+				if (laLoPtRad)
+					ptInOurCRS = m_crsProjection.laLoPtToPrjPt(laLoPtRad);
+				else
+					trace("InteractiveWidget.coordToPoint(): laLoPtRad is null");
 			}
-			return new Point(
+			if (ptInOurCRS && m_viewBBox)
+			{
+				return new Point(
 					(ptInOurCRS.x - m_viewBBox.xMin) * (width - 1) / m_viewBBox.width,
 					height - 1 - (ptInOurCRS.y - m_viewBBox.yMin) * (height - 1) / m_viewBBox.height);
+			}
+			return null;
         }
 		
 		/**
@@ -909,7 +934,8 @@ package com.iblsoft.flexiweather.widgets
 		invalidateDisplayList();			
 	}
 
-	public function get layerContainer(): Container
+//	public function get layerContainer(): Container
+	public function get layerContainer(): Group
 	{
 		return m_layerContainer;
 	}
