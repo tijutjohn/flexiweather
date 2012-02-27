@@ -864,6 +864,7 @@ package com.iblsoft.flexiweather.ogc
 			graphics.endFill();
 		}
 		
+		/*
 		private function drawNoDataPreview(graphics: Graphics, f_width: Number, f_height: Number): void
 		{
 			graphics.lineStyle(2, 0xcc0000, 0.7, true);
@@ -873,6 +874,7 @@ package com.iblsoft.flexiweather.ogc
 			graphics.lineTo(f_width - 1, 0);
 			
 		}
+		*/
 		
 		private var _tf:TextField = new TextField();
 		private var _tfBD:BitmapData;

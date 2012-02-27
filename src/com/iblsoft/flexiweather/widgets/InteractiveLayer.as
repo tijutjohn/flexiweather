@@ -98,6 +98,16 @@ package com.iblsoft.flexiweather.widgets
 			mb_dynamicPartInvalid = false;
 		}
 		
+		protected function drawNoDataPreview(graphics: Graphics, f_width: Number, f_height: Number): void
+		{
+			graphics.lineStyle(2, 0xcc0000, 0.7, true);
+			graphics.moveTo(0, 0);
+			graphics.lineTo(f_width - 1, f_height - 1);
+			graphics.moveTo(0, f_height - 1);
+			graphics.lineTo(f_width - 1, 0);
+			
+		}
+		
 		override protected function updateDisplayList(unscaledWidth: Number, unscaledHeight: Number): void
 		{
 //			Log.getLogger("InteractiveLayer").info("updateDisplayList unscaledWidth: " + unscaledWidth + " unscaledHeight: " + unscaledHeight);

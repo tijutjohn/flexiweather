@@ -22,10 +22,12 @@ package com.iblsoft.flexiweather.widgets
 	import flash.utils.setTimeout;
 	
 	import mx.core.IVisualElement;
+	import mx.events.FlexEvent;
 	import mx.events.ResizeEvent;
 	
 	import spark.components.Group;
 	import spark.components.SkinnableContainer;
+	import spark.events.ElementExistenceEvent;
 
 	[Event (name="viewBBoxChanged", type="flash.events.Event")]
 	
@@ -83,6 +85,8 @@ package com.iblsoft.flexiweather.widgets
 			addEventListener(MouseEvent.ROLL_OUT, onMouseRollOut);
 			addEventListener(ResizeEvent.RESIZE, onResized);
 			
+			addEventListener(ElementExistenceEvent.ELEMENT_ADD, onElementAdd);
+			addEventListener(FlexEvent.CREATION_COMPLETE, onWidgetCreationComplete);
 			m_lastResizeTime = getTimer();
 		}
 		
@@ -129,7 +133,44 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 		
-				
+		/**
+		 * All elements, which are InteractiveLayer, added before CREATION_COMPLETE (check @onElementAdd function) are stored 
+		 * and in this function are added as new layer. 
+		 * This fix added InteractiveLayer through MXML. (like InteractiveLayerZoom and InteractiveLayerPan and similar interactice layers)
+		 * 
+		 * @param event
+		 * 
+		 */		
+		private function onWidgetCreationComplete(event: FlexEvent): void
+		{
+//			trace("InteractiveWdiget was fully created. Default mxmlContent layers: " + _mxmlContentElements.length);
+			for each (var layer: InteractiveLayer in _mxmlContentElements)
+			{
+				addLayer(layer);
+			}
+		}
+		
+		private var _mxmlContentElements: Array = [];
+		
+		/**
+		 * This function is called when new element is added to widget. All elements, which are InteractiveLayer, 
+		 * added before CREATION_COMPLETE are stored and in function onWidgetCreationComplete are added as new layer. 
+		 * This fix added InteractiveLayer through MXML. (like InteractiveLayerZoom and InteractiveLayerPan and similar interactice layers)
+		 * 
+		 * @param event
+		 * 
+		 */		
+		private function onElementAdd(event: ElementExistenceEvent): void
+		{
+//			trace("onElementAdd");
+			
+			if (event.element is InteractiveLayer)
+			{
+				_mxmlContentElements.push(event.element as InteractiveLayer);
+//				addLayer(event.element as InteractiveLayer);
+			}
+		}
+		
 		public override function addElement(element:IVisualElement):IVisualElement
 		{
 			if(element is InteractiveLayer) {
