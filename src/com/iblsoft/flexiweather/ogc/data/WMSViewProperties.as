@@ -1305,6 +1305,7 @@ package com.iblsoft.flexiweather.ogc.data
 			}
 		}
 		
+		/*
 		private function drawNoDataPreview(graphics: Graphics, f_width: Number, f_height: Number): void
 		{
 			graphics.lineStyle(2, 0xcc0000, 0.7, true);
@@ -1314,6 +1315,7 @@ package com.iblsoft.flexiweather.ogc.data
 			graphics.lineTo(f_width - 1, 0);
 			
 		}
+		*/
 		
 		public function drawWMSData(graphics: Graphics): void
 		{
