@@ -67,6 +67,7 @@ package com.iblsoft.flexiweather.widgets
 			mouseFocusEnabled = true;
 			doubleClickEnabled = true;
 
+			clipAndEnableScrolling = true;
 			addElement(m_layerContainer);
 			
 			/*
@@ -274,10 +275,10 @@ package com.iblsoft.flexiweather.widgets
 				var layer: InteractiveLayer = InteractiveLayer(m_layerContainer.getChildAt(i)); 
 				trace("\t Widget debugLayers child: " + i + ": " + layer.name + " parent: " + layer.parent);
 			}
-			var total: int = m_layerContainer.numElements;
-			for (var i: int = 0; i < total; i++)
+			total = m_layerContainer.numElements;
+			for (i = 0; i < total; i++)
 			{
-				var layer: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i)); 
+				layer = InteractiveLayer(m_layerContainer.getElementAt(i)); 
 				trace("\t Widget debugLayers element: " + i + ": " + layer.name + " parent: " + layer.parent);
 			}
 		}
