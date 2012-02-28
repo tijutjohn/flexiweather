@@ -725,6 +725,36 @@ package com.iblsoft.flexiweather.widgets
 			return scale
 			
 		}
+		
+		/**
+		 * Set center fo ViewBBox without changing zoom 
+		 * @param coord
+		 * 
+		 */		
+		public function setCenter(coord: Coord): void
+		{
+			var newViewBBox: BBox;
+			
+			var b_changeZoom: Boolean = false;
+			var oldBox: BBox = getViewBBox();
+			
+			var ptInOurCRS: Point;
+			if(!Projection.equalCRSs(coord.crs, ms_crs)) {
+				//need to convert coord to current interactive widget coordinate
+				var sourceProjection: Projection = Projection.getByCRS(coord.crs);
+				var laLoPtRad: Point = sourceProjection.prjXYToLaLoPt(coord.x, coord.y);
+				if (laLoPtRad)
+					ptInOurCRS = m_crsProjection.laLoPtToPrjPt(laLoPtRad);
+			} else {
+				ptInOurCRS = new Point(coord.x, coord.y);
+			}
+			//clone olf bbox, because size of new box will be same, just center will be moved
+			newViewBBox = oldBox.clone();
+			var oldCenter: Point = newViewBBox.center;
+			newViewBBox = newViewBBox.translated(ptInOurCRS.x - oldCenter.x, ptInOurCRS.y - oldCenter.y)
+			
+			setViewBBox(newViewBBox, true);
+		}
 		/**
 		 * Set View bounding box for all layers
 		 *  
@@ -932,6 +962,7 @@ package com.iblsoft.flexiweather.widgets
 			
 			m_viewBBox = newBBox;
 			
+			trace("IW setViewBBoxAfterNegotiation: " + m_viewBBox);
 			dispatchEvent(new Event(VIEW_BBOX_CHANGED));
 			
 			signalAreaChanged(b_finalChange);
