@@ -296,6 +296,9 @@ package com.iblsoft.flexiweather.widgets
 		
 		private function onGestureZoom(event: TransformGestureEvent): void
 		{
+			if (!enabled)
+				return;
+			
 			var b_finalChange: Boolean = event.phase == GesturePhase.END;
 			if(event.phase == GesturePhase.BEGIN)
 				m_previousGestureZoomMidPoint = null;
