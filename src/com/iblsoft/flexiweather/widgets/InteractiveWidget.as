@@ -22,6 +22,7 @@ package com.iblsoft.flexiweather.widgets
 	import flash.utils.setTimeout;
 	
 	import mx.core.IVisualElement;
+	import mx.core.UIComponent;
 	import mx.events.FlexEvent;
 	import mx.events.ResizeEvent;
 	
@@ -56,6 +57,7 @@ package com.iblsoft.flexiweather.widgets
 		
 		private var m_layerContainer: Group = new Group();
 
+		private var m_layerLayoutParent: UIComponent;
 		private var m_labelLayout: AnticollisionLayout = new AnticollisionLayout();
 		
 		private var m_lastResizeTime: Number;
@@ -72,7 +74,6 @@ package com.iblsoft.flexiweather.widgets
 			
 			/*
 			rawChildren.addChild(m_labelLayout);
-			clipContent = true;
 			*/
 
 			m_layerContainer.x = m_layerContainer.y = 0;
@@ -89,6 +90,20 @@ package com.iblsoft.flexiweather.widgets
 			addEventListener(ElementExistenceEvent.ELEMENT_ADD, onElementAdd);
 			addEventListener(FlexEvent.CREATION_COMPLETE, onWidgetCreationComplete);
 			m_lastResizeTime = getTimer();
+		}
+		
+		override protected function createChildren():void
+		{
+			super.createChildren();
+			
+			m_layerLayoutParent = new UIComponent();
+		}
+		override protected function childrenCreated():void
+		{
+			super.childrenCreated();
+			
+			addElement(m_layerLayoutParent);
+			m_layerLayoutParent.addChild(m_labelLayout);
 		}
 		
 		override protected function commitProperties():void
