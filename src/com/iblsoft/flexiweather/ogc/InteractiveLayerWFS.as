@@ -134,34 +134,6 @@ package com.iblsoft.flexiweather.ogc
 			onFeatureRemoved(feature);
 			feature.cleanup();
 		}
-		
-		public function removeAllFeatures(): void
-		{
-			var i_count: int = featuresContainer.numChildren;
-			for(var i: int = i_count - 1; i >= 0; --i)
-			{
-				var feature: WFSFeatureBase = featuresContainer.getChildAt(i) as WFSFeatureBase;
-				var id: int = features.getItemIndex(feature);
-				if (id >= 0)
-				{
-					features.removeItemAt(id);
-				}
-				onFeatureRemoved(feature);
-				feature.cleanup();
-				featuresContainer.removeChildAt(i);
-			}
-			if (features.length > 0)
-			{
-				trace("after removing alll features, there are still features in features: " + features.length + " ["+this+"]")
-				features.removeAll();
-			}
-		}
-
-		public override function destroy(): void
-		{
-			removeAllFeatures();
-			super.destroy();
-		}
 
 		/**
 		 * Get Feature by featureID. If feature has featureID, it means it was saved into feature database already. 
@@ -219,18 +191,6 @@ package com.iblsoft.flexiweather.ogc
 			return null;
 		}
 
-		public function removeFeature(feature: WFSFeatureBase): void
-		{
-			if (feature.parent == featuresContainer)
-			{
-				featuresContainer.removeChild(feature);
-				var i: int = features.getItemIndex(feature);
-				if(i >= 0)
-					features.removeItemAt(i);
-				onFeatureRemoved(feature);
-				feature.cleanup();
-			}
-		}
 		
         override public function refresh(b_force: Boolean): void
         {

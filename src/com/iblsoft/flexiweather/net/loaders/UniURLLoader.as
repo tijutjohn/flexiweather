@@ -49,7 +49,7 @@ package com.iblsoft.flexiweather.net.loaders
 		
 		override protected function decodeResult(rawData: ByteArray, urlLoader: URLLoaderWithAssociatedData, urlRequest: URLRequest, resultCallback: Function, errorCallback: Function): void
 		{
-			
+			debug("decodeResult");
 			var test: ByteArray = ObjectUtil.copy( rawData ) as ByteArray;
 			var s_data: String = test.readUTFBytes(test.length);
 			
@@ -113,6 +113,7 @@ package com.iblsoft.flexiweather.net.loaders
 					}
 			}
 			
+			debug("decodeResult validFormats: " + validFormats);
 			//check how many valid formats were detected except BINARY and TEXT (they are always valid)
 			if (validFormats == 0)
 			{
@@ -206,6 +207,9 @@ package com.iblsoft.flexiweather.net.loaders
 					}
 				}
 			}
+			
+			debug("decodeResult Invalid content: " + validFormats);
+			
 			//			
 			//dispatch fault, if any other format has not dispatched result
 			dispatchFault('UniURLLoader: Invalid content. Any of allowed formats was found.', rawData, urlRequest, urlLoader.associatedData);

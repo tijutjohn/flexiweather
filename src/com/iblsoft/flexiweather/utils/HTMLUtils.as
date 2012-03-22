@@ -1,9 +1,17 @@
 package com.iblsoft.flexiweather.utils
 {
+	import flashx.textLayout.conversion.TextConverter;
+	import flashx.textLayout.elements.TextFlow;
+
 	public class HTMLUtils
 	{
 		public function HTMLUtils()
 		{
+		}
+		
+		public static function createHTMLTextFlow(txt: String): TextFlow
+		{
+			return TextConverter.importToFlow(txt, TextConverter.TEXT_FIELD_HTML_FORMAT);
 		}
 		
 		public static function isHTMLFormat(s_data: String): Boolean

@@ -10,6 +10,7 @@
     <classEntry path="com.iblsoft.flexiweather.events.InteractiveLayerMapEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.InteractiveLayerProgressEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.InteractiveLayerQTTEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.events.InteractiveWidgetEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.WFSCursorManagerEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.WFSCursorManagerTypes"/>
     <classEntry path="com.iblsoft.flexiweather.events.WFSEvent"/>
@@ -40,6 +41,7 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.CRSWithBBox"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.CRSWithBBoxAndTilingInfo"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.ExceptionUtils"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.FeatureBase"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.GMLUtils"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.IBehaviouralObject"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.ILayerConfiguration"/>
@@ -108,6 +110,21 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableCurve"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableMode"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.events.GetCapabilitiesEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.InteractiveLayerKML"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.configuration.KMLLayerConfiguration"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.events.KMLFeatureEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.KML"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.KMLFeature"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.KMLLabel"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.LookAt"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.styles.ColorStyle"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.styles.HotSpot"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.styles.IconStyle"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.styles.LabelStyle"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.styles.Style"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.styles.StyleSelector"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.renderer.DefaultKMLRenderer"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.renderer.IKMLRenderer"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.net.loaders.WMSFeatureInfoLoader"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.net.loaders.WMSGetCapabilitiesLoader"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.net.loaders.WMSImageLoader"/>
@@ -163,6 +180,7 @@
     <classEntry path="com.iblsoft.flexiweather.symbology.JetStreamCurveRenderer"/>
     <classEntry path="com.iblsoft.flexiweather.symbology.StyledLineCurveRenderer"/>
     <classEntry path="com.iblsoft.flexiweather.symbology.TurbulenceCurveRenderer"/>
+    <classEntry path="com.iblsoft.flexiweather.syndication.Namespaces"/>
     <classEntry path="com.iblsoft.flexiweather.utils.AnnotationBox"/>
     <classEntry path="com.iblsoft.flexiweather.utils.AnnotationTextBox"/>
     <classEntry path="com.iblsoft.flexiweather.utils.AnticollisionLayout"/>
@@ -240,11 +258,20 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.GoogleMapLayerConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.GoogleMapsLayerOption"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.InteractiveLayerGoogleMaps"/>
-    <classEntry path="com.iblsoft.flexiweather.ogc.FeatureBase"/>
-    <classEntry path="com.iblsoft.flexiweather.ogc.kml.KMLFeature"/>
-    <classEntry path="com.iblsoft.flexiweather.ogc.kml.InteractiveLayerKML"/>
-    <classEntry path="com.iblsoft.flexiweather.syndication.Namespaces"/>
-    <classEntry path="com.iblsoft.flexiweather.events.InteractiveWidgetEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.interfaces.IKMLLabeledFeature"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.KMLIcon"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.interfaces.IKMLIconFeature"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.controls.KMLInfoWindowBase"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.controls.KMLInfoWindow"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.controls.skins.KMLInfoWindowSkin"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.managers.KMLPopupManager"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.data.KMZFile"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.ScreenOverlay"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.KMLVec2"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.events.KMLBitmapEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.controls.KMLBitmapLoader"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.managers.KMLResourceManager"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.data.KMLResourceKey"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

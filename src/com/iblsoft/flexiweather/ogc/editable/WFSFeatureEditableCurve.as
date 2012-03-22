@@ -48,6 +48,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		}
 		
 		/** Returns curve approximation using line segments in "coordinates" space */
+		/*
 		public function getLineSegmentApproximation(): Array
 		{
 			// assume we use smooth curve be default
@@ -99,10 +100,10 @@ package com.iblsoft.flexiweather.ogc.editable
 					b_closed);*/
 			
 			//return segmentRenderer.segments;
-			
+/*			
 			return newSegmentRenderer.segments;
 		}
-
+*/
 		// IMouseEditableItem implementation
 		public function onMouseMove(pt: Point): Boolean
 		{

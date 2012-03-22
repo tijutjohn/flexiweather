@@ -38,6 +38,7 @@ package com.iblsoft.flexiweather.widgets
 	[Event (name="allDataLayersLoaded", type="com.iblsoft.flexiweather.events.InteractiveWidgetEvent")]
 	[Event (name="dataLayerLoadingStarted", type="com.iblsoft.flexiweather.events.InteractiveWidgetEvent")]
 	[Event (name="dataLayerLoadingFinished", type="com.iblsoft.flexiweather.events.InteractiveWidgetEvent")]
+	[Event (name="anticollisionUpdated", type="flash.events.Event")]
 	
 	public class InteractiveWidget extends Group
 	{
@@ -58,9 +59,24 @@ package com.iblsoft.flexiweather.widgets
 		private var m_layerContainer: Group = new Group();
 
 		private var m_layerLayoutParent: UIComponent;
-		private var m_labelLayout: AnticollisionLayout = new AnticollisionLayout();
 		
 		private var m_lastResizeTime: Number;
+		
+		
+		/**
+		 * anticollision layout for Labels
+		 */
+		private var m_labelLayout: AnticollisionLayout = new AnticollisionLayout();
+		
+		/**
+		 * anticollision layout for Labels
+		 */
+		private var m_objectLayout: AnticollisionLayout = new AnticollisionLayout();
+		
+		/**
+		 * Set it to true when you want suspend anticaollision processing (e.g. user is dragging map) 
+		 */		
+		private var m_suspendAnticollisionProcessing: Boolean;
 		
 		public function InteractiveWidget() {
 			super();
@@ -70,12 +86,7 @@ package com.iblsoft.flexiweather.widgets
 			doubleClickEnabled = true;
 
 			clipAndEnableScrolling = true;
-			addElement(m_layerContainer);
 			
-			/*
-			rawChildren.addChild(m_labelLayout);
-			*/
-
 			m_layerContainer.x = m_layerContainer.y = 0;
 			addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
 			addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
@@ -92,6 +103,7 @@ package com.iblsoft.flexiweather.widgets
 			m_lastResizeTime = getTimer();
 		}
 		
+
 		override protected function createChildren():void
 		{
 			super.createChildren();
@@ -102,8 +114,12 @@ package com.iblsoft.flexiweather.widgets
 		{
 			super.childrenCreated();
 			
+			addElement(m_layerContainer);
 			addElement(m_layerLayoutParent);
 			m_layerLayoutParent.addChild(m_labelLayout);
+			
+			debugWidget();
+			debugLayers();
 		}
 		
 		override protected function commitProperties():void
@@ -282,26 +298,56 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 		
+		public function debugWidget(): void
+		{
+			var total: int = numChildren;
+			for (var i: int = 0; i < total; i++)
+			{
+				var child: DisplayObject = getChildAt(i);
+				trace("\t Widget debugWidget child DO: " + i + ": " + child.name + " parent: " + child.parent);
+					
+			}
+			total = numElements;
+			for (i = 0; i < total; i++)
+			{
+				var childVE: IVisualElement = getElementAt(i);
+				trace("\t Widget debugWidget element DO: " + i + " parent: " + childVE.parent);
+			}
+		}
 		public function debugLayers(): void
 		{
 			var total: int = m_layerContainer.numChildren;
 			for (var i: int = 0; i < total; i++)
 			{
-				var layer: InteractiveLayer = InteractiveLayer(m_layerContainer.getChildAt(i)); 
-				trace("\t Widget debugLayers child: " + i + ": " + layer.name + " parent: " + layer.parent);
+				var child: DisplayObject = m_layerContainer.getChildAt(i);
+				if (child is InteractiveLayer)
+				{
+					var layer: InteractiveLayer = InteractiveLayer(child); 
+					trace("\t Widget debugLayers child layer: " + i + ": " + layer.name + " parent: " + layer.parent);
+				} else {
+					trace("\t Widget debugLayers child DO: " + i + ": " + child.name + " parent: " + child.parent);
+					
+				}
 			}
 			total = m_layerContainer.numElements;
 			for (i = 0; i < total; i++)
 			{
-				layer = InteractiveLayer(m_layerContainer.getElementAt(i)); 
-				trace("\t Widget debugLayers element: " + i + ": " + layer.name + " parent: " + layer.parent);
+				var childVE: IVisualElement = m_layerContainer.getElementAt(i);
+				if (childVE is InteractiveLayer)
+				{
+					layer = InteractiveLayer(childVE); 
+					trace("\t Widget debugLayers element layer: " + i + ": " + layer.name + " parent: " + layer.parent);
+				} else {
+					trace("\t Widget debugLayers element DO: " + i + " parent: " + childVE.parent);
+				}
 			}
 		}
 		
 		public function orderLayers(): void
 		{
-			trace("Widget orderLayers");
-			debugLayers();
+//			trace("Widget orderLayers");
+//			debugWidget();
+//			debugLayers();
 			if(mb_orderingLayers)
 				return;
 			mb_orderingLayers = true;
@@ -348,8 +394,8 @@ package com.iblsoft.flexiweather.widgets
 			
 			if(m_labelLayout.m_placementBitmap == null)
 				m_labelLayout.setBoundary(new Rectangle(0, 0, width, height)); 
-			if(m_labelLayout.needsUpdate())
-				m_labelLayout.update();
+			
+			anticollisionUpdate();
 
 			graphics.clear();
 
@@ -375,9 +421,9 @@ package com.iblsoft.flexiweather.widgets
 			}
 
 			// DEBUG: display label layout placement bitmap
-			//graphics.beginBitmapFill(m_labelLayout.m_placementBitmap);
-			//graphics.drawRect(0, 0, m_labelLayout.m_placementBitmap.width, m_labelLayout.m_placementBitmap.height);
-			//graphics.endFill();
+			graphics.beginBitmapFill(m_labelLayout.m_placementBitmap);
+			graphics.drawRect(0, 0, m_labelLayout.m_placementBitmap.width, m_labelLayout.m_placementBitmap.height);
+			graphics.endFill();
 
             super.updateDisplayList(unscaledWidth, unscaledHeight);
         }
@@ -686,8 +732,8 @@ package com.iblsoft.flexiweather.widgets
 				if(l.isDynamicPartInvalid())
 					l.validateNow();
 			}
-			if(m_labelLayout.needsUpdate())
-				m_labelLayout.update();
+			
+			anticollisionUpdate();
 		}
 		
 		// Getters & setters
@@ -977,81 +1023,168 @@ package com.iblsoft.flexiweather.widgets
 			
 			m_viewBBox = newBBox;
 			
-			trace("IW setViewBBoxAfterNegotiation: " + m_viewBBox);
+//			trace("IW setViewBBoxAfterNegotiation: " + m_viewBBox);
 			dispatchEvent(new Event(VIEW_BBOX_CHANGED));
 			
 			signalAreaChanged(b_finalChange);
 		}
 		
 
-	public function setExtentBBOX(bbox: BBox, b_finalChange: Boolean = true): void
-	{
-		m_extentBBox = bbox;
-		setViewBBox(m_extentBBox, b_finalChange); // this calls signalAreaChanged()
-	}
-	
-	public function setExtentBBOXRaw(xmin: Number, ymin: Number, xmax: Number, ymax: Number, b_finalChange: Boolean = true): void
-	{
-		setExtentBBOX(new BBox(xmin, ymin, xmax, ymax), b_finalChange);
-	}
-	
-	public function setViewFullExtent(): void
-	{
-		setViewBBox(m_extentBBox, true);
-	}
-	
-	public function getExtentBBox(): BBox
-	{
-		return m_extentBBox;
-	}
-	
-	public function getViewBBox(): BBox
-	{ return m_viewBBox; }
-	
-	public function invalidate(): void
-	{
-		signalAreaChanged(true);
-	}
-
-	// getters & setters
-	
-	[Bindable(event = "crsChanged")]
-	public function get crs(): String
-	{ return getCRS(); }
-	
-	[Bindable(event = "crsChanged")]
-	public function set srs(s_crs: String): void
-	{ return setCRS(s_crs, true); }
+		public function setExtentBBOX(bbox: BBox, b_finalChange: Boolean = true): void
+		{
+			m_extentBBox = bbox;
+			setViewBBox(m_extentBBox, b_finalChange); // this calls signalAreaChanged()
+		}
 		
-	public function set backgroundChessBoard(b: Boolean): void
-	{
-		mb_backgroundChessBoard = b;
-		invalidateDisplayList();			
-	}
+		public function setExtentBBOXRaw(xmin: Number, ymin: Number, xmax: Number, ymax: Number, b_finalChange: Boolean = true): void
+		{
+			setExtentBBOX(new BBox(xmin, ymin, xmax, ymax), b_finalChange);
+		}
+		
+		public function setViewFullExtent(): void
+		{
+			setViewBBox(m_extentBBox, true);
+		}
+		
+		public function getExtentBBox(): BBox
+		{
+			return m_extentBBox;
+		}
+		
+		public function getViewBBox(): BBox
+		{ return m_viewBBox; }
+		
+		public function invalidate(): void
+		{
+			signalAreaChanged(true);
+		}
 
-//	public function get layerContainer(): Container
-	public function get layerContainer(): Group
-	{
-		return m_layerContainer;
-	}
-	
-	public function get labelLayout(): AnticollisionLayout
-	{ return m_labelLayout; }
+		//*****************************************************************************************
+		//		AntiCollision functionality
+		//*****************************************************************************************
+		public function moveAnticollisionLayoutToTop(): void
+		{
+			trace("moveAnticollisionLayoutToTop");
+			trace("widget");
+			debugWidget();
+			trace("layers");
+			debugLayers();
+			
+			removeElement(m_layerLayoutParent);
+			addElement(m_layerLayoutParent);
+			
+			trace("layers");
+			debugLayers();
+			trace("widget");
+			debugWidget();
+			
+			trace("anti: " + m_layerLayoutParent.parent);
+		}
+		/*
+		public function addAnticollisionObstacle(object: DisplayObject): void
+		{
+			labelLayout.addObstacle(object);	
+		}
+		
+		public function addAnticollisionObject(
+							object: DisplayObject,
+							a_anchors: Array = null,
+							i_displacementMode: uint = AnticollisionLayout.DISPLACE_AUTOMATIC,
+							b_addAsChild: Boolean = true): void
+		{
+			labelLayout.addObject(object, a_anchors, i_displacementMode, b_addAsChild);
+		}
+		
+		public function updateAnticollisionObjectReferenceLocation(object: DisplayObject): Boolean
+		{
+			return labelLayout.updateObjectReferenceLocation(object);
+		}
+		public function removeAnticollisionObject(object: DisplayObject): Boolean
+		{
+			return labelLayout.removeObject(object);
+		}
+		*/
+		private function anticollisionUpdate(): void
+		{
+			if (!m_suspendAnticollisionProcessing)
+			{
+				if(m_labelLayout.needsUpdate())
+				{
+					notifyAnticollisionUpdate();
+					m_labelLayout.update();
+				}
+				if(m_objectLayout.needsUpdate())
+				{
+					notifyAnticollisionUpdate();
+					m_objectLayout.update();
+				}
+			}
+			
+		}
+		
+		private function notifyAnticollisionUpdate(): void
+		{
+			dispatchEvent(new Event(AnticollisionLayout.ANTICOLLISTION_UPDATED));
+		}
+		
+		public function get suspendAnticollisionProcessing():Boolean
+		{ return m_suspendAnticollisionProcessing; }
+		
+		public function set suspendAnticollisionProcessing(value:Boolean):void
+		{ 
+			m_suspendAnticollisionProcessing = value; 
+			if (m_labelLayout)
+			{
+				// set suspendAnticollisionProcessing to AnticollisionLayout as well (there is timer for auto update, which needs to be suspended)
+				m_labelLayout.suspendAnticollisionProcessing = value;
+			}
+			anticollisionUpdate();
+		}
+		//*****************************************************************************************
+		//		End of AntiCollision functionality
+		//*****************************************************************************************
+		// getters & setters
+		
+		[Bindable(event = "crsChanged")]
+		public function get crs(): String
+		{ return getCRS(); }
+		
+		[Bindable(event = "crsChanged")]
+		public function set srs(s_crs: String): void
+		{ return setCRS(s_crs, true); }
+			
+		public function set backgroundChessBoard(b: Boolean): void
+		{
+			mb_backgroundChessBoard = b;
+			invalidateDisplayList();			
+		}
 
-	override public function toString(): String
-	{
-		return "InteractiveWidget ";
-	}
+		public function get layerContainer(): Group
+		{
+			return m_layerContainer;
+		}
+		
+		public function get labelLayout(): AnticollisionLayout
+		{ return m_labelLayout; }
+		
+		public function get objectLayout(): AnticollisionLayout
+		{ return m_objectLayout; }
 	
-	private var mb_autoLayoutChanged: Boolean;
-	public function set autoLayoutInParent(value: Boolean): void
-	{ 
-		mb_autoLayout = value; 
-		mb_autoLayoutChanged = true;
-		invalidateProperties();
-	}
-	
-	public function get autoLayoutInParent(): Boolean
-	{ return mb_autoLayout; }
+		override public function toString(): String
+		{
+			return "InteractiveWidget ";
+		}
+		
+		private var mb_autoLayoutChanged: Boolean;
+		public function set autoLayoutInParent(value: Boolean): void
+		{ 
+			mb_autoLayout = value; 
+			mb_autoLayoutChanged = true;
+			invalidateProperties();
+		}
+		
+		public function get autoLayoutInParent(): Boolean
+		{ return mb_autoLayout; }
+		
 	}
 }

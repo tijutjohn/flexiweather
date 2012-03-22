@@ -1,6 +1,12 @@
 package com.iblsoft.flexiweather.utils
 {
+	import com.iblsoft.flexiweather.ogc.FeatureBase;
 	import com.iblsoft.flexiweather.ogc.IWFSFeatureWithAnnotation;
+	import com.iblsoft.flexiweather.ogc.kml.features.LineString;
+	import com.iblsoft.flexiweather.ogc.kml.features.LinearRing;
+	import com.iblsoft.flexiweather.ogc.kml.features.Placemark;
+	import com.iblsoft.flexiweather.ogc.kml.features.Polygon;
+	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.geometry.ILineSegmentApproximableBounds;
 	import com.iblsoft.flexiweather.utils.geometry.LineSegment;
 	
@@ -37,6 +43,8 @@ package com.iblsoft.flexiweather.utils
 	 **/
 	public class AnticollisionLayout extends Sprite
 	{
+		public static const ANTICOLLISTION_UPDATED: String = 'anticollisionUpdated';
+		
 		protected var m_boundaryRect: Rectangle;
 		public var m_placementBitmap: BitmapData; // HACK: change back to protected
 
@@ -48,10 +56,21 @@ package com.iblsoft.flexiweather.utils
 		
 		public static const DISPLACE_NOT_ALLOWED: uint = 0;
 		public static const DISPLACE_AUTOMATIC: uint = 1;
+		public static const DISPLACE_AUTOMATIC_SIMPLE: uint = 2;
+		public static const DISPLACE_HIDE: uint = 3;
 
+		/**
+		 * Set it to true when you want suspend anticaollision processing (e.g. user is dragging map) 
+		 */		
+		private var m_suspendAnticollisionProcessing: Boolean;
+		private var m_drawAnnotationAnchor: Boolean;
+		
 		public function AnticollisionLayout()
 		{
 			super();
+			
+			m_drawAnnotationAnchor = true;
+			
 			addEventListener(Event.RENDER, onRender, false, 0, true); 
 			addChild(m_anchorsLayer);
 		}
@@ -64,7 +83,7 @@ package com.iblsoft.flexiweather.utils
 		public function addObstacle(object: DisplayObject): void
 		{
 			setDirty();
-			var lo: LayoutObject = new LayoutObject(object, false, DISPLACE_NOT_ALLOWED);
+			var lo: AnticollisionLayoutObject = new AnticollisionLayoutObject(object, false, DISPLACE_NOT_ALLOWED);
 			ma_layoutObjects.addItem(lo);
 		}
 
@@ -76,24 +95,29 @@ package com.iblsoft.flexiweather.utils
 				object: DisplayObject,
 				a_anchors: Array = null,
 				i_displacementMode: uint = DISPLACE_AUTOMATIC,
-				b_addAsChild: Boolean = true): void
+				b_addAsChild: Boolean = true): AnticollisionLayoutObject
 		{
 			setDirty();
 			if(b_addAsChild)
 				addChild(object);
-			var lo: LayoutObject = new LayoutObject(object, b_addAsChild, i_displacementMode);
-			lo.ma_objectsToAnchor = a_anchors;
-			lo.mb_manageVisibilityWithAnchors = a_anchors != null;
+			var lo: AnticollisionLayoutObject = new AnticollisionLayoutObject(object, b_addAsChild, i_displacementMode);
+			lo.objectsToAnchor = a_anchors;
+			lo.manageVisibilityWithAnchors = a_anchors != null;
 			ma_layoutObjects.addItem(lo);
+			
+			return lo;
 		}
 		
 		public function removeObject(object: DisplayObject): Boolean
 		{
 			for(var i: int = 0; i < ma_layoutObjects.length; ++i) {
-				var lo: LayoutObject = ma_layoutObjects[i]; 
-				if(lo.m_object === object) {
-					if(lo.mb_managedChild)
-						removeChild(lo.m_object);
+				var lo: AnticollisionLayoutObject = ma_layoutObjects[i]; 
+				if(lo.object === object) {
+					if(lo.managedChild)
+					{
+						if (lo.object && lo.object.parent == this)
+							removeChild(lo.object);
+					}
 					ma_layoutObjects.removeItemAt(i);
 					setDirty();
 					return true;
@@ -104,29 +128,33 @@ package com.iblsoft.flexiweather.utils
 
 		public function getObjectReferenceLocation(object: DisplayObject): Point
 		{
-			var lo: LayoutObject = getLayoutObjectFor(object);
+			var lo: AnticollisionLayoutObject = getAnticollisionLayoutObjectFor(object);
 			if(lo == null)
 				return null;
-			return lo.m_referenceLocation;
+			return lo.referenceLocation;
 		}
 
 		public function updateObjectReferenceLocation(object: DisplayObject): Boolean
 		{
-			var lo: LayoutObject = getLayoutObjectFor(object);
+			var lo: AnticollisionLayoutObject = getAnticollisionLayoutObjectFor(object);
+			
 			if(lo == null)
 				return false;
-			if(lo.m_referenceLocation.x != object.x
-					|| lo.m_referenceLocation.y != object.y) { 
+			if(lo.referenceLocation.x != object.x || lo.referenceLocation.y != object.y) 
+			{ 
 				setDirty();
-				lo.m_referenceLocation = new Point(object.x, object.y);
+				lo.referenceLocation = new Point(object.x, object.y);
+				
+//				trace("\n\t m_referenceLocation: " + lo.referenceLocation + " object: " + object.x + " , " + object.y);
 			}
+			
 			return true;
 		}
 		
 		public function reset(): void
 		{
-			for each(var lo: LayoutObject in ma_layoutObjects) {
-				removeChild(lo.m_object);
+			for each(var lo: AnticollisionLayoutObject in ma_layoutObjects) {
+				removeChild(lo.object);
 			}
 			ma_layoutObjects.removeAll();
 			setDirty();
@@ -140,174 +168,235 @@ package com.iblsoft.flexiweather.utils
 		
 		public function update(): void
 		{
-			mb_dirty = false;
-			mi_lastUpdate = getTimer();
-
-			var i_roundedWidth: uint = Math.round(m_boundaryRect.width + 0.9999999999);
-			var i_roundedHeight: uint = Math.round(m_boundaryRect.height + 0.9999999999);
-
-			// ensure we have a white 
-			if(m_placementBitmap == null
-					|| m_placementBitmap.width != i_roundedWidth
-					|| m_placementBitmap.height != i_roundedHeight) {
-				m_placementBitmap = new BitmapData(i_roundedWidth, i_roundedHeight, true, 0x00FFFFFF);
-			}
-			else {
-				m_placementBitmap.fillRect(new Rectangle(0, 0, i_roundedWidth, i_roundedHeight), 0x00FFFFFF);
-			}
-			
-			var lo: LayoutObject;
-			var loAnchored: LayoutObject;
-			var objectToAnchor: DisplayObject;
-			
-			// first pass - analyse current absolute visibility of objects
-			for each(lo in ma_layoutObjects) {
-				if(lo.mb_manageVisibilityWithAnchors)
-					lo.mb_visible = true;
-				else
-					lo.mb_visible = getAbsoluteVisibility(lo.m_object);
+			if (!m_suspendAnticollisionProcessing)
+			{
+//				trace("Anti layout ma_layoutObjects: " + ma_layoutObjects.length);
+				if (!m_boundaryRect)
+					return;
 				
-			}
-			
-			var b_change: Boolean = true;
-			while(b_change) {
-				b_change = false;
+				mb_dirty = false;
+				mi_lastUpdate = getTimer();
+	
+				var i_roundedWidth: uint = Math.round(m_boundaryRect.width + 0.9999999999);
+				var i_roundedHeight: uint = Math.round(m_boundaryRect.height + 0.9999999999);
+	
+				// ensure we have a white 
+				if(m_placementBitmap == null
+						|| m_placementBitmap.width != i_roundedWidth
+						|| m_placementBitmap.height != i_roundedHeight) {
+					m_placementBitmap = new BitmapData(i_roundedWidth, i_roundedHeight, true, 0x00FFFFFF);
+				}
+				else {
+					m_placementBitmap.fillRect(new Rectangle(0, 0, i_roundedWidth, i_roundedHeight), 0x00FFFFFF);
+				}
+				
+				var lo: AnticollisionLayoutObject;
+				var loAnchored: AnticollisionLayoutObject;
+				var objectToAnchor: DisplayObject;
+				
+				// first pass - analyse current absolute visibility of objects
 				for each(lo in ma_layoutObjects) {
-					if(lo.ma_objectsToAnchor != null && lo.ma_objectsToAnchor.length > 0) {
-						for each(objectToAnchor in lo.ma_objectsToAnchor) {
-							loAnchored = getLayoutObjectFor(objectToAnchor);
-							if(loAnchored == null)
+					if(lo.manageVisibilityWithAnchors)
+						lo.visible = true;
+					else
+						lo.visible = getAbsoluteVisibility(lo.object);
+					
+				}
+				
+				var b_change: Boolean = true;
+				while(b_change) {
+					b_change = false;
+					for each(lo in ma_layoutObjects) {
+						if(lo.objectsToAnchor != null && lo.objectsToAnchor.length > 0) {
+							for each(objectToAnchor in lo.objectsToAnchor) {
+								loAnchored = getAnticollisionLayoutObjectFor(objectToAnchor);
+								if(loAnchored == null)
+									continue;
+								if(!loAnchored.visible) {
+									if(lo.visible) {
+										lo.visible = false;
+										b_change = true;
+									}
+								}
+							}
+						}
+					}
+				} // while(b_change)
+				
+				// second pass - render nonmoveable objects
+				for each(lo in ma_layoutObjects) {
+					if(!lo.visible)
+						continue;
+					if(lo.displacementMode == DISPLACE_NOT_ALLOWED) {
+						drawObjectPlacement(lo, 0, 0);
+					}
+				}
+	
+				// third pass - displace & render other object
+				
+				
+				for each(lo in ma_layoutObjects) {
+					if(!lo.visible)
+						continue;
+					if(lo.displacementMode == DISPLACE_AUTOMATIC || lo.displacementMode == DISPLACE_AUTOMATIC_SIMPLE|| lo.displacementMode == DISPLACE_HIDE) {
+						if(lo.visible != lo.object.visible)
+							lo.object.visible = lo.visible; 
+						var f_dx: Number = 0;
+						var f_dy: Number = 0;
+						// get the bounds of object at it's reference (== original location)
+						var bounds: Rectangle = lo.object.getBounds(null);
+						
+//						trace("\n\t update m_referenceLocation: " + lo.referenceLocation + " object: " + lo.object);
+						
+						bounds.x = lo.referenceLocation.x;
+						bounds.y = lo.referenceLocation.y;
+						var b_foundPlace: Boolean = false;
+						
+						// first try the reference point
+						if(checkObjectPlacement(lo, bounds)) {
+							b_foundPlace = true;
+						}
+						else {
+							if (lo.displacementMode == DISPLACE_HIDE)
+							{
+								// do not continue if object has no placement and displacement mode is DISPLACE_HIDE
+								lo.visible = false;
+								lo.object.visible = false;
 								continue;
-							if(!loAnchored.mb_visible) {
-								if(lo.mb_visible) {
-									lo.mb_visible = false;
-									b_change = true;
-								}
 							}
-						}
-					}
-				}
-			} // while(b_change)
-			
-			// second pass - render nonmoveable objects
-			for each(lo in ma_layoutObjects) {
-				if(!lo.mb_visible)
-					continue;
-				if(lo.mi_displacementMode == DISPLACE_NOT_ALLOWED) {
-					drawObjectPlacement(lo, 0, 0);
-				}
-			}
-
-			// third pass - displace & render other object
-			for each(lo in ma_layoutObjects) {
-				if(!lo.mb_visible)
-					continue;
-				if(lo.mi_displacementMode == DISPLACE_AUTOMATIC) {
-					if(lo.mb_visible != lo.m_object.visible)
-						lo.m_object.visible = lo.mb_visible; 
-					var f_dx: Number = 0;
-					var f_dy: Number = 0;
-					// get the bounds of object at it's reference (== original location)
-					var bounds: Rectangle = lo.m_object.getBounds(null);
-					bounds.x = lo.m_referenceLocation.x;
-					bounds.y = lo.m_referenceLocation.y;
-					var b_foundPlace: Boolean = false;
-					// first try the reference point
-					if(checkObjectPlacement(lo, bounds)) {
-						b_foundPlace = true;
-					}
-					else {
-						// if not available, try the surrounding point
-						var f_pi2: Number = 2 * Math.PI;
-						outterCycle:
-						for(var i_displace: int = 1; i_displace < 20; ++i_displace) {
-							var i_angleSteps: uint = (i_displace / i_displace + 3) / 4 * 4;
-							var f_angleStep: Number = f_pi2 / i_angleSteps;
-							for(var f_angle: Number = 0; f_angle < f_pi2; f_angle += f_angleStep) {
-								f_dx = int(Math.round(Math.cos(f_angle) * i_displace * 10));
-								f_dy = int(Math.round(Math.sin(f_angle) * i_displace * 10));
-								var boundsDisplaced: Rectangle = new Rectangle(
+							// if not available, try the surrounding point
+							var f_pi2: Number = 2 * Math.PI;
+							
+							if (lo.displacementMode == DISPLACE_AUTOMATIC)
+							{
+								trace("\n DISPLACE_AUTOMATIC");
+								outterCycle:
+								for(var i_displace: int = 1; i_displace < 20; ++i_displace) {
+									var i_angleSteps: uint = (i_displace / i_displace + 3) / 4 * 4;
+									var f_angleStep: Number = f_pi2 / i_angleSteps;
+									for(var f_angle: Number = 0; f_angle < f_pi2; f_angle += f_angleStep) {
+										f_dx = int(Math.round(Math.cos(f_angle) * i_displace * 10));
+										f_dy = int(Math.round(Math.sin(f_angle) * i_displace * 10));
+										
+										trace("displace: ["+i_displace+"] angle: ["+f_angle+"] dx: " + f_dx + " dy: " + f_dy);
+										var boundsDisplaced: Rectangle = new Rectangle(
+												bounds.x + f_dx, bounds.y + f_dy, bounds.width, bounds.height);
+										// quick check if resulting boundary is within the m_boundaryRect 
+										if(checkObjectPlacement(lo, boundsDisplaced)) {
+											b_foundPlace = true;
+											break outterCycle;
+										}
+									}
+								}
+								trace("END OF DISPLACE_AUTOMATIC \n");
+							} else if (lo.displacementMode == DISPLACE_AUTOMATIC_SIMPLE) {
+								
+								var dist: int = 100;
+								var possiblePositions: Array = [new Point(dist,0), new Point(0,dist), new Point(0,-1*dist), new Point(-1*dist,0)]
+									
+								for each (var possiblePosition: Point in possiblePositions)
+								{
+									f_dx = possiblePosition.x;
+									f_dy = possiblePosition.y;
+									
+									var boundsDisplaced: Rectangle = new Rectangle(
 										bounds.x + f_dx, bounds.y + f_dy, bounds.width, bounds.height);
-								// quick check if resulting boundary is within the m_boundaryRect 
-								if(checkObjectPlacement(lo, boundsDisplaced)) {
-									b_foundPlace = true;
-									break outterCycle;
+									// quick check if resulting boundary is within the m_boundaryRect 
+									if(checkObjectPlacement(lo, boundsDisplaced)) {
+										b_foundPlace = true;
+										break;
+									}
 								}
 							}
 						}
+						if(!b_foundPlace) {
+							f_dx = f_dy = 0;
+							lo.visible = false;
+							lo.object.visible = false;
+						}
+						lo.object.x = lo.referenceLocation.x + f_dx;
+						lo.object.y = lo.referenceLocation.y + f_dy;
+//						trace("\t\t update set object pos: object: " + lo.object.x + " , " + lo.object.y);
+						drawObjectPlacement(lo, f_dx, f_dy);
 					}
-					if(!b_foundPlace) {
-						f_dx = f_dy = 0;
-					}
-					lo.m_object.x = lo.m_referenceLocation.x + f_dx;
-					lo.m_object.y = lo.m_referenceLocation.y + f_dy;
-					drawObjectPlacement(lo, f_dx, f_dy);
 				}
-			}
-			
-			// now we can assume that all objects are laid out
-			
-			// draw anchors between 
-			var g: Graphics = m_anchorsLayer.graphics;
-			g.clear();
-			for each(lo in ma_layoutObjects) {
-				if(lo.ma_objectsToAnchor == null || lo.ma_objectsToAnchor.length == 0)
-					continue;
-
-				if(lo.mb_manageVisibilityWithAnchors)
-					lo.m_object.visible = lo.mb_visible;
-
-				if(!lo.mb_visible)
-					continue;
-
-				//if(lo.mi_displacementMode != DISPLACE_AUTOMATIC)
-				//	continue;
-				for each(objectToAnchor in lo.ma_objectsToAnchor) {
-					loAnchored = getLayoutObjectFor(objectToAnchor);
-					if(loAnchored == null)
+				
+				// now we can assume that all objects are laid out
+				
+				// draw anchors between 
+				var g: Graphics = m_anchorsLayer.graphics;
+				g.clear();
+				for each(lo in ma_layoutObjects) {
+					if(lo.objectsToAnchor == null || lo.objectsToAnchor.length == 0)
 						continue;
-					if(!loAnchored.mb_visible)
+	
+					if(lo.manageVisibilityWithAnchors)
+						lo.object.visible = lo.visible;
+	
+					if(!lo.visible)
 						continue;
-					var boundsFrom: Rectangle = lo.m_object.getBounds(this);
-					var boundsTo: Rectangle = objectToAnchor.getBounds(this);
-
-					var a_boundingLineSegmentsFrom: Array = getLineSegmentApproximation(lo.m_object);
-					var a_boundingLineSegmentsTo: Array = getLineSegmentApproximation(objectToAnchor);
-
-					var bestPointTo: Point = boundsTo.bottomRight;
-					var bestPointFrom: Point = boundsFrom.topLeft;
-					var f_bestDistance: Number = 123e45;
-					
-					for each(var lineSegmentFrom: LineSegment in a_boundingLineSegmentsFrom) {
-						for each(var lineSegmentTo: LineSegment in a_boundingLineSegmentsTo) {
-							// approach: overall 2 closest points
-							/*
-							var connection: LineSegment = lineSegmentFrom.shortestConnectionToLineSegment(lineSegmentTo);
-							var f_distance: Number = connection.length;
-							if(f_distance < f_bestDistance) {
-								bestPointFrom = connection.startPoint; 
-								bestPointTo = connection.endPoint;
-								f_bestDistance = f_distance;
-							}
-							*/
-							// approach: mid-points of 2 closest line segments
-							var f_distance: Number = lineSegmentFrom.minimumDistanceToLineSegment(lineSegmentTo);
-							if(f_distance < f_bestDistance) {
-								bestPointFrom = lineSegmentFrom.midPoint; 
-								bestPointTo = lineSegmentTo.midPoint;
-								f_bestDistance = f_distance;
+	
+					//if(lo.displacementMode != DISPLACE_AUTOMATIC)
+					//	continue;
+					for each(objectToAnchor in lo.objectsToAnchor) {
+						loAnchored = getAnticollisionLayoutObjectFor(objectToAnchor);
+						if(loAnchored == null)
+							continue;
+						if(!loAnchored.visible)
+							continue;
+						var boundsFrom: Rectangle = lo.object.getBounds(this);
+						var boundsTo: Rectangle = objectToAnchor.getBounds(this);
+	
+						if (boundsFrom.width < 10 && boundsFrom.height < 10)
+						{
+							//object is too small, do not do anticollision for it
+							trace("object is too small, do not do anticollision for it");
+							continue;
+						}
+						var a_boundingLineSegmentsFrom: Array = getLineSegmentApproximation(lo.object);
+						var a_boundingLineSegmentsTo: Array = getLineSegmentApproximation(objectToAnchor);
+	
+						//debug
+//						drawApproximationFunction(g, a_boundingLineSegmentsFrom, 0xff0000, 3);
+//						drawApproximationFunction(g, a_boundingLineSegmentsTo, 0x00ff00, 1);
+						
+						var bestPointTo: Point = boundsTo.bottomRight;
+						var bestPointFrom: Point = boundsFrom.topLeft;
+						var f_bestDistance: Number = 123e45;
+						
+						for each(var lineSegmentFrom: LineSegment in a_boundingLineSegmentsFrom) {
+							for each(var lineSegmentTo: LineSegment in a_boundingLineSegmentsTo) {
+								// approach: overall 2 closest points
+								/*
+								var connection: LineSegment = lineSegmentFrom.shortestConnectionToLineSegment(lineSegmentTo);
+								var f_distance: Number = connection.length;
+								if(f_distance < f_bestDistance) {
+									bestPointFrom = connection.startPoint; 
+									bestPointTo = connection.endPoint;
+									f_bestDistance = f_distance;
+								}
+								*/
+								// approach: mid-points of 2 closest line segments
+								var f_distance: Number = lineSegmentFrom.minimumDistanceToLineSegment(lineSegmentTo);
+								if(f_distance < f_bestDistance) {
+									bestPointFrom = lineSegmentFrom.midPoint; 
+									bestPointTo = lineSegmentTo.midPoint;
+									f_bestDistance = f_distance;
+								}
 							}
 						}
+						
+						var clr: uint = lo.anchorColor;
+						var anchorAlpha: Number = lo.anchorAlpha;
+						if (objectToAnchor is IWFSFeatureWithAnnotation)
+						{
+							clr = (objectToAnchor as IWFSFeatureWithAnnotation).annotation.color;
+							anchorAlpha = 1;
+						}
+						drawAnnotationAnchorFunction(g, lo.drawAnchorArrow,
+								bestPointFrom.x, bestPointFrom.y,
+								bestPointTo.x, bestPointTo.y, clr, anchorAlpha);
 					}
-					
-					var clr: uint = 0;
-					if (objectToAnchor is IWFSFeatureWithAnnotation)
-					{
-						clr = (objectToAnchor as IWFSFeatureWithAnnotation).annotation.color;
-					}
-					drawAnnotationAnchor(g,
-							bestPointFrom.x, bestPointFrom.y,
-							bestPointTo.x, bestPointTo.y, clr);
 				}
 			}
 		}
@@ -346,15 +435,54 @@ package com.iblsoft.flexiweather.utils
 			return true;
 		}
 		
-		protected static function drawAnnotationAnchor(
-				graphics: Graphics,
-				f_x1: Number, f_y1: Number, f_x2: Number, f_y2: Number, color: uint): void
+		protected function drawApproximationFunction(graphics: Graphics, approx: Array, clr: int,thickness: int = 1): void
 		{
-			var f_xc: Number = (f_x1 + f_x2) / 2;
-			var f_yc: Number = (f_y1 + f_y2) / 2;
-			graphics.lineStyle(2, color, 1);
-			graphics.moveTo(f_x1, f_y1);
-			graphics.lineTo(f_x2, f_y2);
+			if (approx && approx.length > 0)
+			{
+				graphics.clear();
+				graphics.lineStyle(thickness,clr);
+				var cnt: int = 0;
+				for each (var point: LineSegment in approx)
+				{
+					graphics.moveTo(point.x1, point.y1);
+					graphics.lineTo(point.x2, point.y2);
+					cnt++;
+				}
+			}
+		}
+		protected function drawAnnotationAnchorFunction(
+				graphics: Graphics, b_drawArrow: Boolean,
+				f_x1: Number, f_y1: Number, f_x2: Number, f_y2: Number, color: uint, alpha: Number): void
+		{
+			if (m_drawAnnotationAnchor)
+			{
+				var f_xc: Number = (f_x1 + f_x2) / 2;
+				var f_yc: Number = (f_y1 + f_y2) / 2;
+				
+				graphics.lineStyle(2, color, alpha);
+				graphics.moveTo(f_x1, f_y1);
+				graphics.lineTo(f_x2, f_y2);
+				
+				//draw arrow
+				var w: int = f_x1 - f_x2;
+				var h: int = f_y1 - f_y2;
+				var angle: Number = Math.atan2(h , w);
+				var arrowSize: int = 10;
+				
+				var angle1: Number = (angle * 180 / Math.PI - 10) * Math.PI / 180;
+				var angle2: Number = (angle * 180 / Math.PI + 10) * Math.PI / 180;
+				var x1: int = f_x2 + arrowSize * Math.cos(angle1);
+				var y1: int = f_y2 + arrowSize * Math.sin(angle1);
+				var x2: int = f_x2 + arrowSize * Math.cos(angle2);
+				var y2: int = f_y2 + arrowSize * Math.sin(angle2);
+				
+				graphics.beginFill(color, alpha);
+				graphics.moveTo(f_x2, f_y2);
+				graphics.lineTo(x1, y1);
+				graphics.lineTo(x2, y2);
+				graphics.lineTo(f_x2, f_y2);
+				graphics.endFill();
+			}
 		}
 		
 		private function getLineSegmentApproximation(object: DisplayObject): Array
@@ -363,7 +491,9 @@ package com.iblsoft.flexiweather.utils
 			var a: Array;
 			if(lsab != null)
 				a = lsab.getLineSegmentApproximationOfBounds();
-			else {
+			
+			if (lsab == null || (lsab != null && a == null))
+			{
 				a = [];
 				var bounds: Rectangle = object.getBounds(this);
 				a.push(new LineSegment(bounds.left, bounds.top, bounds.right, bounds.top));
@@ -383,10 +513,10 @@ package com.iblsoft.flexiweather.utils
 			*/
 		}
 		
-		private function getLayoutObjectFor(object: DisplayObject): LayoutObject
+		private function getAnticollisionLayoutObjectFor(object: DisplayObject): AnticollisionLayoutObject
 		{
-			for each(var lo: LayoutObject in ma_layoutObjects) {
-				if(lo.m_object === object) {
+			for each(var lo: AnticollisionLayoutObject in ma_layoutObjects) {
+				if(lo.object === object) {
 					return lo;
 				}
 			}
@@ -395,19 +525,19 @@ package com.iblsoft.flexiweather.utils
 
 		private var m_makeRed: ColorTransform = new ColorTransform(1, 1, 1, 1, 255, -255, -255, 255);
 
-		private function drawObjectPlacement(layoutObject: LayoutObject, f_dx: Number, f_dy: Number): void
+		private function drawObjectPlacement(layoutObject: AnticollisionLayoutObject, f_dx: Number, f_dy: Number): void
 		{
 			var matrix: Matrix = new Matrix();
 			matrix.translate(-m_boundaryRect.x, -m_boundaryRect.y);
-			layoutObject.m_object.x = layoutObject.m_referenceLocation.x + f_dx;
-			layoutObject.m_object.y = layoutObject.m_referenceLocation.y + f_dy;
-			matrix.translate(layoutObject.m_object.x, layoutObject.m_object.y);
-			if(layoutObject.m_object is UIComponent)
-				UIComponent(layoutObject.m_object).validateNow();
-			m_placementBitmap.draw(layoutObject.m_object, matrix, m_makeRed);
+			layoutObject.object.x = layoutObject.referenceLocation.x + f_dx;
+			layoutObject.object.y = layoutObject.referenceLocation.y + f_dy;
+			matrix.translate(layoutObject.object.x, layoutObject.object.y);
+			if(layoutObject.object is UIComponent)
+				UIComponent(layoutObject.object).validateNow();
+			m_placementBitmap.draw(layoutObject.object, matrix, m_makeRed);
 		}
 
-		private function checkObjectPlacement(layoutObject: LayoutObject, bounds: Rectangle): Boolean
+		private function checkObjectPlacement(layoutObject: AnticollisionLayoutObject, bounds: Rectangle): Boolean
 		{
 			if(bounds.left < m_boundaryRect.left)
 				return false;
@@ -435,32 +565,26 @@ package com.iblsoft.flexiweather.utils
 				}
 			}
 		}
-	}
-}
+		
+		public function get suspendAnticollisionProcessing():Boolean
+		{ return m_suspendAnticollisionProcessing; }
+		
+		public function set suspendAnticollisionProcessing(value:Boolean):void
+		{ 
+			m_suspendAnticollisionProcessing = value; 
+			update();
+		}
 
-import flash.display.DisplayObject;
-import flash.geom.Point;
 
-class LayoutObject
-{
-	internal var m_object: DisplayObject;
-	internal var mb_managedChild: Boolean;
-	internal var mi_displacementMode: uint;
-	internal var m_referenceLocation: Point;
+		public function get drawAnnotationAnchor():Boolean
+		{
+			return m_drawAnnotationAnchor;
+		}
 
-	internal var ma_objectsToAnchor: Array;
-	internal var mb_manageVisibilityWithAnchors: Boolean
-	internal var mb_visible: Boolean;
-	
-	function LayoutObject(
-			object: DisplayObject,
-			b_managedChild: Boolean,
-			i_displacementMode: uint)
-	{
-		m_object = object;
-		mb_managedChild = b_managedChild;
-		mi_displacementMode = i_displacementMode;
-		m_referenceLocation = new Point(object.x, object.y);
-		mb_manageVisibilityWithAnchors = false;
+		public function set drawAnnotationAnchor(value:Boolean):void
+		{
+			m_drawAnnotationAnchor = value;
+		}
+
 	}
 }

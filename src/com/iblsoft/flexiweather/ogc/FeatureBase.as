@@ -1,6 +1,10 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.ogc.editable.IClosableCurve;
 	import com.iblsoft.flexiweather.proj.Coord;
+	import com.iblsoft.flexiweather.utils.CubicBezier;
+	import com.iblsoft.flexiweather.utils.CurveLineSegment;
+	import com.iblsoft.flexiweather.utils.CurveLineSegmentRenderer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.display.Sprite;
@@ -83,6 +87,105 @@ package com.iblsoft.flexiweather.ogc
 		{ mb_pointsDirty = true; }
 		
 		// helpers methods
+		
+		private function getArea(b_useCoordinates: Boolean = true): Number
+		{
+			var area: Number=0;
+			var a_coordinates: Array = b_useCoordinates ? coordinates : getPoints().toArray(); 
+			var total: int = a_coordinates.length;
+			var j: int = total - 1;
+			var p1: Point;
+			var p2: Point;
+			
+			for (var i: int =0;i < total; j=i++) {
+				p1= a_coordinates[i]; 
+				p2 = a_coordinates[j];
+				area += p1.x*p2.y;
+				area -= p1.y*p2.x;
+			}
+			area /= 2;
+			return area;
+		}
+			
+		public function getCenter(b_useCoordinates: Boolean = true): Point
+		{
+			var a_coordinates: Array = b_useCoordinates ? coordinates : getPoints().toArray(); 
+			var total: int = a_coordinates.length;
+			var x: Number = 0; 
+			var y: Number = 0; 
+			var f: Number; 
+			var j: int = total - 1;
+			var p1: Point;
+			var p2: Point;
+			
+			for (var i:int=0;i<total;j=i++) 
+			{
+				p1 = a_coordinates[i]; 
+				p2 = a_coordinates[j];
+				f=p1.x*p2.y-p2.x*p1.y;
+				x+=(p1.x+p2.x)*f;
+				y+=(p1.y+p2.y)*f;
+			}
+			
+			f = getArea()*6;
+			return new Point(x/f,y/f);
+		}
+		/** Returns curve approximation using line segments in "coordinates" space */
+		public function getLineSegmentApproximation(): Array
+		{
+			// assume we use smooth curve be default
+			return createSmoothLineSegmentApproximation();
+		}
+		
+		public function createStraightLineSegmentApproximation(b_useCoordinates: Boolean = true): Array
+		{
+			var l: Array = [];
+			var i_segment: uint = 0;
+			var b_closed: Boolean = (this is IClosableCurve) && IClosableCurve(this).isCurveClosed();
+			
+			var cPrev: Point = null;
+			var cFirst: Point = null;
+			// we use here, that Coord is derived from Point, and Coord.crs is not used
+			var a_coordinates: Array = b_useCoordinates ? coordinates : getPoints().toArray(); 
+			for each(var c: Point in a_coordinates) {
+				if(cPrev != null) {
+					l.push(new CurveLineSegment(i_segment,
+						cPrev.x, cPrev.y, c.x, c.y));
+					++i_segment;
+				}
+				else
+					cFirst = c;
+				cPrev = c;
+			} 
+			if(b_closed && cPrev != null) {
+				l.push(new CurveLineSegment(i_segment,
+					cPrev.x, cPrev.y, cFirst.x, cFirst.y));
+			}
+			return l;
+		}
+		
+		public function createSmoothLineSegmentApproximation(b_useCoordinates: Boolean = true): Array
+		{
+			var segmentRenderer: CurveLineSegmentRenderer = new CurveLineSegmentRenderer();
+			var b_closed: Boolean = (this is IClosableCurve) && IClosableCurve(this).isCurveClosed();
+			
+			var newSegmentRenderer: CurveLineSegmentRenderer = new CurveLineSegmentRenderer();
+			
+			CubicBezier.drawHermitSpline(
+				newSegmentRenderer,
+				b_useCoordinates ? coordinates : getPoints().toArray(),
+				b_closed, false, 0.005, true);
+			
+			/*CubicBezier.curveThroughPoints(
+			segmentRenderer,
+			b_useCoordinates ? coordinates : getPoints().toArray(),
+			b_closed);*/
+			
+			//return segmentRenderer.segments;
+			
+			return newSegmentRenderer.segments;
+		}
+		
 		
 		// event handlers
 		

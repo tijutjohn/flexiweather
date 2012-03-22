@@ -2,6 +2,7 @@ package com.iblsoft.flexiweather.widgets
 {
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.ogc.kml.data.KMZFile;
 	import com.iblsoft.flexiweather.proj.Coord;
 	
 	import flash.display.Graphics;
@@ -13,6 +14,11 @@ package com.iblsoft.flexiweather.widgets
 	
 	public class InteractiveLayer extends UIComponent
 	{
+		/**
+		 * Just for test 
+		 */		
+		public var kmzFile: KMZFile;
+		
 		protected var _type: String;
 		
 		/**

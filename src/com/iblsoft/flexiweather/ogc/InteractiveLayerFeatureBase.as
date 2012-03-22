@@ -61,6 +61,48 @@ package com.iblsoft.flexiweather.ogc
 			invalidateDynamicPart();
 		}
 		
+		public function removeAllFeatures(): void
+		{
+			var i_count: int = featuresContainer.numChildren;
+			for(var i: int = i_count - 1; i >= 0; --i)
+			{
+//				var feature: WFSFeatureBase = featuresContainer.getChildAt(i) as WFSFeatureBase;
+				var feature: FeatureBase = featuresContainer.getChildAt(i) as FeatureBase;
+				var id: int = features.getItemIndex(feature);
+				if (id >= 0)
+				{
+					features.removeItemAt(id);
+				}
+				onFeatureRemoved(feature);
+				feature.cleanup();
+				featuresContainer.removeChildAt(i);
+			}
+			if (features.length > 0)
+			{
+				trace("after removing alll features, there are still features in features: " + features.length + " ["+this+"]")
+				features.removeAll();
+			}
+		}
+		
+		public function removeFeature(feature: FeatureBase): void
+		{
+			if (feature.parent == featuresContainer)
+			{
+				featuresContainer.removeChild(feature);
+				var i: int = features.getItemIndex(feature);
+				if(i >= 0)
+					features.removeItemAt(i);
+				onFeatureRemoved(feature);
+				feature.cleanup();
+			}
+		}
+		
+		public override function destroy(): void
+		{
+			removeAllFeatures();
+			super.destroy();
+		}
+		
 		public function set useMonochrome(val: Boolean): void
 		{
 			var b_needUpdate: Boolean = false;

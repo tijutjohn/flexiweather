@@ -21,9 +21,13 @@ package com.iblsoft.flexiweather.widgets
 	import mx.events.TweenEvent;
 	import mx.messaging.AbstractConsumer;
 	
+	[Event(name="startPanning", type="flash.events.Event")]
+	[Event(name="stopPanning", type="flash.events.Event")]
 	public class InteractiveLayerPan extends InteractiveLayer
 	{
 		public static const PAN: String = 'pan';
+		public static const START_PANNING: String = 'startPanning';
+		public static const STOP_PANNING: String = 'stopPanning';
 		
 		public var supportsPanAnimation: Boolean;
 		
@@ -118,6 +122,8 @@ package com.iblsoft.flexiweather.widgets
 			_oldPoint = _p;
 			_oldStartPoint = _p;
 			_moveIntervalPoint = _p;
+			
+			dispatchEvent(new Event(InteractiveLayerPan.START_PANNING, true));
 			return true;
 		}
 
@@ -192,6 +198,9 @@ package com.iblsoft.flexiweather.widgets
 				_p = null;
 			}
 			_oldStartPoint = null;
+			
+			dispatchEvent(new Event(InteractiveLayerPan.STOP_PANNING, true));
+				
 			return true;
 		}
 		

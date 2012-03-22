@@ -509,10 +509,8 @@ package com.iblsoft.flexiweather.net.loaders
 			//			Log.getLogger('UniURLLoader').info("load " + urlRequest.url + " data:" + urlRequest.data);
 			urlLoader.load(urlRequest);
 			
-			if (debugConsole)
-			{
-				debugConsole.print("Load URL: " + urlRequest.url, 'Info', 'UniURLLoader');
-			}
+			debug("Load URL: " + urlRequest.url);
+			
 			var backgroundJob: BackgroundJob = null;
 			if(s_backgroundJobName != null)
 				backgroundJob = BackgroundJobManager.getInstance().startJob(s_backgroundJobName);
@@ -525,6 +523,8 @@ package com.iblsoft.flexiweather.net.loaders
 			var e: UniURLLoaderEvent = new UniURLLoaderEvent(UniURLLoaderEvent.LOAD_STARTED, null, urlRequest, associatedData);
 			dispatchEvent(e);
 		}
+		
+		
 		
 		public function setResponseHeaders(headers: Array, responseURL: String, status: int, loader: Object): void
 		{
@@ -769,6 +769,7 @@ package com.iblsoft.flexiweather.net.loaders
 		
 		protected function onDataProgress(event: ProgressEvent): void
 		{
+			debug("onDataProgress " + event.bytesLoaded + " / " + event.bytesTotal);
 			dispatchEvent(event);	
 		}
 		
@@ -826,6 +827,8 @@ package com.iblsoft.flexiweather.net.loaders
 		
 		protected function onDataIOError(event: IOErrorEvent): void
 		{
+			debug("onDataIOError ");
+			
 			var urlLoader: URLLoaderWithAssociatedData = URLLoaderWithAssociatedData(event.target);
 			var urlRequest: URLRequest = disconnectURLLoader(urlLoader);
 			if(urlRequest == null)
@@ -837,6 +840,8 @@ package com.iblsoft.flexiweather.net.loaders
 		
 		protected function onSecurityError(event: SecurityErrorEvent): void
 		{
+			debug("onSecurityError ");
+			
 			var urlLoader: URLLoaderWithAssociatedData = URLLoaderWithAssociatedData(event.target);
 			var urlRequest: URLRequest;
 			
@@ -980,6 +985,14 @@ package com.iblsoft.flexiweather.net.loaders
 		{
 			var clonedBA: ByteArray = ObjectUtil.clone(ba as Object) as ByteArray;
 			return clonedBA.readUTFBytes(clonedBA.length);
+		}
+		
+		protected function debug(txt: String): void
+		{
+			if (debugConsole)
+			{
+				debugConsole.print("UniURLLoader: " + txt,'Info','UniURLLoader');
+			}
 		}
 		
 		override public function toString(): String

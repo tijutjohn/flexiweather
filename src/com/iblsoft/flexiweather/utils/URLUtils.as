@@ -8,6 +8,13 @@ package com.iblsoft.flexiweather.utils
 		{
 		}
 		
+		static public function isAbsolutePath(url: String): Boolean
+		{
+			if (url.indexOf('http') == 0)
+				return true;
+			
+			return false;
+		}
 		/**
 		 * URL params which have get parameters in different param orders will be returned sorted byt param name, so it will be always same if there is same parameters and same parameters values 
 		 * @param url

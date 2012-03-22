@@ -129,13 +129,15 @@ package com.iblsoft.flexiweather.net.loaders
 				var b3: int = data.length > 3 ? data.readUnsignedByte() : -1;
 				
 				var isPNG: Boolean = b0 == 0x89 && b1 == 0x50 && b2 == 0x4E && b3 == 0x47;
+				var isGIF: Boolean = b0 == 0x47 && b1 == 0x49 && b2 == 0x46;
 				var isJPG: Boolean = b0 == 0xff && b1 == 0xd8 && b2 == 0xff && b3 == 0xe0;
+				var isJPG2: Boolean = b0 == 0xff && b1 == 0xd8 && b2 == 0xff && b3 == 0xe1;
 				//SWT format
 				var isSWF: Boolean = b0 == 0x46 && b1 == 0x57 && b2 == 0x53;
 				//compressed SWF format
 				var isCWF: Boolean = b0 == 0x43 && b1 == 0x57 && b2 == 0x53;
 				
-				if (isPNG || isJPG || isSWF || isCWF)
+				if (isPNG || isJPG || isJPG2 || isGIF || isSWF || isCWF)
 					return true;
 			}
 			
