@@ -32,14 +32,19 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				var str: String = stringSplit[i] as String;
 				if (str && str.length > 0)
 				{
+					var coordinate:Object = new Object();
 					var coordString: Array = stringSplit[i].split(",");
 					if (coordString.length == 3)
 					{
-						var coordinate:Object = new Object();
 						coordinate.lon = coordString[0];
 						coordinate.lat = coordString[1];
 						coordinate.alt = coordString[2];
 						_coordsList.push(coordinate);
+					} else if (coordString.length == 2) {
+						coordinate.lon = coordString[0];
+						coordinate.lat = coordString[1];
+						_coordsList.push(coordinate);
+						
 					}
 				}
 			}

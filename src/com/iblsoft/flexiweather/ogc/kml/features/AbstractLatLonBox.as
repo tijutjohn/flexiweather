@@ -39,33 +39,21 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			this._west = ParsingTools.nanCheck(this.xml.kml::west);
 		}
 	 	
-		/**
-		*	A String that contains the title for the entry.
-		*/	
 		public function get north():Number
 		{
 			return this._north;
 	 	}
 	 	
-	 	/**
-		*	A String that contains the title for the entry.
-		*/	
 		public function get south():Number
 		{
 			return this._south;
 	 	}
 	 	
-	 	/**
-		*	A String that contains the title for the entry.
-		*/	
 		public function get east():Number
 		{
 			return this._east;
 	 	}
 	 	
-	 	/**
-		*	A String that contains the title for the entry.
-		*/	
 		public function get west():Number
 		{
 			return this._west;

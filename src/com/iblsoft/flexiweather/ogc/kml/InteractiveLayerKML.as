@@ -110,7 +110,16 @@ package com.iblsoft.flexiweather.ogc.kml
 			kmlObj.name = rootFeature.name;
 			
 			if (!canContainFeatures(rootFeature)) 
+			{
+				//add root feature to layer
+				var feature: KMLFeature = rootFeature as KMLFeature;
+				if (feature.kmlVisibility)
+					addFeature(feature);
+				feature.update();
+				
+				kmlParsingFinished();
 				return;
+			}
 			
 			// its a container, lets look for children features
 			kmlObj.children = getChildrenFeatures(Container(rootFeature));

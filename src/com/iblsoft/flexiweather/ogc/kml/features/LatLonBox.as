@@ -35,9 +35,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		}
 	 	
 	 	
-	 	/**
-		*	A String that contains the title for the entry.
-		*/	
 		public function get rotation():Number
 		{
 			return this._rotation;

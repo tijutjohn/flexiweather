@@ -80,13 +80,19 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 			
 			var loader: XMLLoader = new XMLLoader();
 			loader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onKMLLoaded);
+			loader.addEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onKMLLoadFailed);
 			loader.load(new URLRequest(_kmlPath));
 		}
 		
+		private function onKMLLoadFailed(event: UniURLLoaderErrorEvent): void
+		{
+			trace("load failed");
+		}
 		private function onKMLLoaded(event: UniURLLoaderEvent): void
 		{
 			var xml: XML = event.result as XML;
-			addKMLSource(xml.toXMLString(), _kmlPath);
+//			addKMLSource(xml.toXMLString(), _kmlPath);
+			addKMLSource(xml.toXMLString(), _kmlBaseURLPath);
 			
 			dispatchEvent(new Event(KML_FILE_LOADED));
 		}
@@ -100,7 +106,8 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 		 */		
 		public function addKMZSource(kmz: KMZFile, urlPath: String): void
 		{
-			_kml = new KML22(kmz.kmlSource, urlPath);
+//			_kml = new KML22(kmz.kmlSource, urlPath);
+			_kml = new KML22(kmz.kmlSource, '');
 			_kml.parse(kmz);
 			
 			_kmzFile = kmz;

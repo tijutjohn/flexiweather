@@ -26,8 +26,19 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 		private var _cache: ResourceCache;
 		private var _kmzFiles: Dictionary;
 		
-		public function KMLResourceManager()
+		private var _basePath: String;
+		
+		public function get basePath(): String
 		{
+			return _basePath;
+		}
+		
+		public function KMLResourceManager(basePath: String)
+		{
+			if (!basePath)
+				basePath = '';
+			
+			_basePath = basePath;
 			_cache = new ResourceCache();
 			_kmzFiles = new Dictionary();
 		}
@@ -123,6 +134,7 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 			var bd: BitmapData
 			if (!URLUtils.isAbsolutePath(key.href))
 			{
+				key.baseURL = _basePath;
 				if (_cache.resourceExists(key))
 				{
 					resource = _cache.getResource(key);

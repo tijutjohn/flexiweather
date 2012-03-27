@@ -56,6 +56,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			}
 		}
 		
+		
 		private var _xmlList:XMLList;
 		
 		public var _name:String;
@@ -78,6 +79,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		
 		private var _kmlIcon: KMLIcon;
 		private var _kmlLabel: KMLLabel;
+		private var _region: Region;
 		
 		public function get kmlIcon(): KMLIcon
 		{
@@ -121,6 +123,33 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			mouseChildren = true;
 			doubleClickEnabled = true;
 			addEventListener(MouseEvent.CLICK, onKMLFeatureClick);
+		}
+		
+		/**
+		 * Returns "active" flag for Feature. If there is no Region and LOD present, it will return always true. Otherwise it will return correct value dependent on size of  
+		 * @return 
+		 * 
+		 */		
+		public function isActive(w: int, h: int): Boolean
+		{
+			return true;
+			
+			if (!_region)
+				return true;
+		
+			if (_region.lod)
+			{
+				var minLodPixels: Number = _region.lod.minLodPixels;
+				var maxLodPixels: Number = _region.lod.maxLodPixels;
+			
+				if (w >= minLodPixels  && w <= maxLodPixels && h >= minLodPixels && h <= maxLodPixels)
+				{
+					return true;
+				} else {
+					return false;
+				}
+			}
+			return true;
 		}
 		
 		protected function createIcon(): void
@@ -170,6 +199,9 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			}
 			if (ParsingTools.nullCheck(this.xml.kmlns::LookAt)) {
 				this._lookAt = new LookAt(ms_namespace, this.xml.kmlns::LookAt);
+			}
+			if (ParsingTools.nullCheck(this.xml.kmlns::Region)) {
+				this._region = new Region(ms_namespace, this.xml.kmlns::Region);
 			}
 			
 			trace("Feature name: " + _name + " ID: " + _id);
@@ -352,6 +384,11 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		public function get kmlVisibility():Boolean
 		{
 			return getKMLVisibility();
+		}
+		
+		public function get region(): Region
+		{
+			return this._region;
 		}
 		
 		/**

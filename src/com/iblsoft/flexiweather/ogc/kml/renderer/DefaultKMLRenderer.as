@@ -134,7 +134,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 				var icon: Icon = overlay.icon;
 				
 				var resourceManager: KMLResourceManager = overlay.kml.resourceManager;
-				var imageKey: KMLResourceKey = new KMLResourceKey(icon.href, null, KMLResourceManager.RESOURCE_TYPE_IMAGE);
+				var imageKey: KMLResourceKey = new KMLResourceKey(icon.href, resourceManager.basePath, KMLResourceManager.RESOURCE_TYPE_IMAGE);
 				if (!resourceManager.isResourceLoaded(imageKey))
 				{
 					if (!resourceManager.isResourceLoading(imageKey))
@@ -189,55 +189,68 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 					heightOnMap *= sy;
 			}
 				
-			//render ground overlay image
-			var m: Matrix = new Matrix();
 			sx = widthOnMap / icon.width;
 			sy = heightOnMap / icon.height;
 			
-			//				m.translate(xDiff, yDiff);
 			
-			xDiff = 0;//-0.5 * icon.width * sx;
-			yDiff = 0;//-0.5 * icon.height * sy;
+			var w: int = icon.width * sx;
+			var h: int = icon.height * sy;
+			
+			if (overlay.isActive(w, h))
+			{
 				
-			if (overlay.screenXY.xunits == 'fraction')
-				xDiff = _container.width * overlay.screenXY.x;
-			if (overlay.screenXY.xunits == 'pixels')
-				xDiff = overlay.screenXY.x;
+				//render ground overlay image
+				var m: Matrix = new Matrix();
+				//				m.translate(xDiff, yDiff);
+				
+				xDiff = 0;//-0.5 * icon.width * sx;
+				yDiff = 0;//-0.5 * icon.height * sy;
+					
+				if (overlay.screenXY.xunits == 'fraction')
+					xDiff = _container.width * overlay.screenXY.x;
+				if (overlay.screenXY.xunits == 'pixels')
+					xDiff = overlay.screenXY.x;
+				
+				if (overlay.screenXY.yunits == 'fraction')
+					yDiff = _container.height * (1 - overlay.screenXY.y)
+				if (overlay.screenXY.yunits == 'pixels')
+					yDiff = _container.height - overlay.screenXY.y;
+				
+				//need to find correct difference between overlay point and point on screen
+				var overlayPoint: Point = new Point(0,0);
+				if (overlay.overlayXY)
+				{
+					if (overlay.overlayXY.xunits == 'fraction')
+						overlayPoint.x = icon.width * overlay.overlayXY.x;
+					if (overlay.overlayXY.xunits == 'pixels')
+						overlayPoint.x = overlay.overlayXY.x;
+					
+					if (overlay.overlayXY.yunits == 'fraction')
+						overlayPoint.y = icon.height * (1 - overlay.overlayXY.y)
+					if (overlay.overlayXY.yunits == 'pixels')
+						overlayPoint.y = icon.height - overlay.overlayXY.y;
+				}
+				
+				trace("ScreenOverlay image scale: " + sx + " , " + sy);
+				trace("ScreenOverlay image pos: " + xDiff + " , " + yDiff);
+				trace("ScreenOverlay image overlayPoint: " + overlayPoint);
+				trace("ScreenOverlay size: " + overlay.size);
+				trace("ScreenOverlay overlay: " + overlay.overlayXY);
+				trace("ScreenOverlay screen: " + overlay.screenXY);
+				
+				xDiff -= overlayPoint.x;
+				yDiff -= overlayPoint.y;
+				
+				m.scale(sx, sy); 
+				m.translate(xDiff, yDiff);
 			
-			if (overlay.screenXY.yunits == 'fraction')
-				yDiff = _container.height * (1 - overlay.screenXY.y)
-			if (overlay.screenXY.yunits == 'pixels')
-				yDiff = _container.height - overlay.screenXY.y;
-			
-			//need to find correct difference between overlay point and point on screen
-			var overlayPoint: Point = new Point(0,0);
-			if (overlay.overlayXY.xunits == 'fraction')
-				overlayPoint.x = icon.width * overlay.overlayXY.x;
-			if (overlay.overlayXY.xunits == 'pixels')
-				overlayPoint.x = overlay.overlayXY.x;
-			
-			if (overlay.overlayXY.yunits == 'fraction')
-				overlayPoint.y = icon.height * (1 - overlay.overlayXY.y)
-			if (overlay.overlayXY.yunits == 'pixels')
-				overlayPoint.y = icon.height - overlay.overlayXY.y;
-			
-			trace("ScreenOverlay image scale: " + sx + " , " + sy);
-			trace("ScreenOverlay image pos: " + xDiff + " , " + yDiff);
-			trace("ScreenOverlay image overlayPoint: " + overlayPoint);
-			trace("ScreenOverlay size: " + overlay.size);
-			trace("ScreenOverlay overlay: " + overlay.overlayXY);
-			trace("ScreenOverlay screen: " + overlay.screenXY);
-			
-			xDiff -= overlayPoint.x;
-			yDiff -= overlayPoint.y;
-			
-			m.scale(sx, sy); 
-			m.translate(xDiff, yDiff);
-			
-			gr.beginBitmapFill(icon, m);
-			//			gr.drawRect(0,0, icon.width, icon.height);`
-			gr.drawRect(xDiff, yDiff, icon.width * sx, icon.height * sy);
-			gr.endFill();
+				gr.beginBitmapFill(icon, m);
+				//			gr.drawRect(0,0, icon.width, icon.height);`
+				gr.drawRect(xDiff, yDiff, w, h);
+				gr.endFill();
+			} else {
+				//screen overlay is not active, do not display it
+			}
 		}
 		
 		/*********************************************************************************************
@@ -280,7 +293,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 				}
 				
 				var resourceManager: KMLResourceManager = overlay.kml.resourceManager;
-				var imageKey: KMLResourceKey = new KMLResourceKey(icon.href, null, KMLResourceManager.RESOURCE_TYPE_IMAGE);
+				var imageKey: KMLResourceKey = new KMLResourceKey(icon.href, resourceManager.basePath, KMLResourceManager.RESOURCE_TYPE_IMAGE);
 				if (!resourceManager.isResourceLoaded(imageKey))
 				{
 					if (!resourceManager.isResourceLoading(imageKey))
@@ -337,21 +350,27 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 				var heightOnMap: int = se.y - ne.y;
 				
 				//render ground overlay image
-				var m: Matrix = new Matrix();
 				var sx: Number = widthOnMap / icon.width;
 				var sy: Number = heightOnMap / icon.height;
 				
-				trace("GroundOverlay image scale: " + sx + " , " + sy);
-				m.scale(sx, sy); 
-//				m.translate(xDiff, yDiff);
+				var w: int = icon.width * sx;
+				var h: int = icon.height * sy;
 				
-				xDiff = 0;//-0.5 * icon.width * sx;
-				yDiff = 0;//-0.5 * icon.height * sy;
-				
-				gr.beginBitmapFill(icon, m);
-				//			gr.drawRect(0,0, icon.width, icon.height);`
-				gr.drawRect(xDiff, yDiff, icon.width * sx, icon.height * sy);
-				gr.endFill();
+				if (overlay.isActive(w, h))
+				{
+					trace("GroundOverlay image scale: " + sx + " , " + sy);
+					var m: Matrix = new Matrix();
+					m.scale(sx, sy); 
+					
+					xDiff = 0;//-0.5 * icon.width * sx;
+					yDiff = 0;//-0.5 * icon.height * sy;
+					
+					gr.beginBitmapFill(icon, m);
+					gr.drawRect(xDiff, yDiff, w, h);
+					gr.endFill();
+				} else {
+					trace("Groundoverlay is not active");
+				}
 			}
 			
 		}

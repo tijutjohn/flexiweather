@@ -769,7 +769,7 @@ package com.iblsoft.flexiweather.net.loaders
 		
 		protected function onDataProgress(event: ProgressEvent): void
 		{
-			debug("onDataProgress " + event.bytesLoaded + " / " + event.bytesTotal);
+//			debug("onDataProgress " + event.bytesLoaded + " / " + event.bytesTotal);
 			dispatchEvent(event);	
 		}
 		
