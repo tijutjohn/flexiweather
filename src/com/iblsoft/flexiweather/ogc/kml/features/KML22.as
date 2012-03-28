@@ -24,9 +24,9 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		*	@playerversion Flash 8.5
 		*	@tiptext
 		*/	
-		public function KML22(xmlStr:String, baseUrlPath: String)
+		public function KML22(xmlStr:String, urlPath: String, baseUrlPath: String)
 		{
-			super(xmlStr, baseUrlPath);
+			super(xmlStr, urlPath, baseUrlPath);
 			
 
 			
@@ -56,7 +56,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			}
 			if (ParsingTools.nullCheck(this.xml.kmlns::Document)) {
 				this._document = new Document(this, _kmlNamespace, this.xml.kmlns::Document);
-				this._document.baseUrlPath = _kmlURLPath;
+				this._document.baseUrlPath = _kmlBaseURLPath;
 				this._feature = document;
 			}
 			

@@ -12,6 +12,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	public class KML extends XmlParser
 	{
 		protected var _kmlURLPath: String;
+		protected var _kmlBaseURLPath: String;
 		
 		protected var _kmlNamespace: String;
 		protected var _kmlSource: String;
@@ -21,20 +22,21 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		
 		protected var _resourceManager: KMLResourceManager;
 		
-		public function KML(xmlStr:String, baseUrlPath: String, resourceManager: KMLResourceManager = null)
+		public function KML(xmlStr:String, urlPath: String, baseUrlPath: String, resourceManager: KMLResourceManager = null)
 		{
 			super();
 			
 			_kmlSource = xmlStr;
 			_kmlNamespace = getKMLNamespace(xmlStr);
 			
-			_kmlURLPath = baseUrlPath;
+			_kmlURLPath = urlPath;
+			_kmlBaseURLPath = baseUrlPath;
 			
 			_resourceManager = resourceManager;
 			
 			if (!_resourceManager)
 			{
-				_resourceManager = new KMLResourceManager(_kmlURLPath);
+				_resourceManager = new KMLResourceManager(_kmlBaseURLPath);
 			}
 			
 		}
