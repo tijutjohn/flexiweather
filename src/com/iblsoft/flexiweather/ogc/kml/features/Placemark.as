@@ -1,8 +1,12 @@
 package com.iblsoft.flexiweather.ogc.kml.features
 {
+	import com.google.maps.geom.Point3D;
+	import com.iblsoft.flexiweather.ogc.FeatureUpdateChange;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
+	import com.iblsoft.flexiweather.ogc.kml.InteractiveLayerKML;
 	import com.iblsoft.flexiweather.ogc.kml.interfaces.IKMLIconFeature;
 	import com.iblsoft.flexiweather.ogc.kml.interfaces.IKMLLabeledFeature;
+	import com.iblsoft.flexiweather.ogc.kml.renderer.IKMLRenderer;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.syndication.ParsingTools;
 	import com.iblsoft.flexiweather.utils.AnticollisionLayout;
@@ -12,6 +16,8 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.geom.Point;
+	
+	import mx.collections.ArrayCollection;
 
 	/**
 	*	Class that represents an Entry element within an Atom feed
@@ -75,9 +81,12 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		}
 		
 		/** Called after the feature is added to master or after any change (e.g. area change). */
-		override public function update(): void
+		override public function update(changeFlag: FeatureUpdateChange): void
 		{
 			kmlLabel.text = name;
+			
+			if (changeFlag.anyChange)
+				mb_pointsDirty = true;
 			
 			if(mb_pointsDirty) 
 			{
@@ -110,8 +119,45 @@ package com.iblsoft.flexiweather.ogc.kml.features
 					}
 				}
 			}
-			super.update();
 			
+			super.update(changeFlag);
+			
+			var renderer: IKMLRenderer = (master as InteractiveLayerKML).itemRendererInstance;
+			if (changeFlag.fullUpdateNeeded)
+			{
+				renderer.render(this, master.container);
+			} else {
+				if (changeFlag.viewBBoxSizeChanged)
+				{
+					if (drawingFeature)
+					{
+						renderer.render(this, master.container);
+					}
+				}
+			}
+			
+			if (_geometry)
+			{
+					var points: ArrayCollection = getPoints();
+					if (points && points.length > 0)
+					{
+						var point: flash.geom.Point = points.getItemAt(0) as flash.geom.Point;
+						
+						x = point.x;
+						y = point.y;
+						//_container.labelLayout.updateObjectReferenceLocation(placemark);
+					}
+			}
+			
+		}
+		
+		public function get drawingFeature(): Boolean
+		{
+			return (_geometry is LineString || _geometry is LinearRing || _geometry is Polygon);
+		}
+		public function get iconFeature(): Boolean
+		{
+			return (_geometry is com.iblsoft.flexiweather.ogc.kml.features.Point);
 		}
 		
 		private function updateCoordinates(geometry: Geometry, convertToPoint: Boolean = false): Array

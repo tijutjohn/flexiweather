@@ -1,7 +1,10 @@
 package com.iblsoft.flexiweather.ogc.kml.features
 {
+	import com.iblsoft.flexiweather.ogc.FeatureUpdateChange;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
+	import com.iblsoft.flexiweather.ogc.kml.InteractiveLayerKML;
 	import com.iblsoft.flexiweather.ogc.kml.interfaces.IKMLIconFeature;
+	import com.iblsoft.flexiweather.ogc.kml.renderer.IKMLRenderer;
 	
 	public class ScreenOverlay extends Overlay implements IKMLIconFeature
 	{
@@ -30,7 +33,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		}
 		
 		/** Called after the feature is added to master or after any change (e.g. area change). */
-		override public function update(): void
+		override public function update(changeFlag: FeatureUpdateChange): void
 		{
 			kmlLabel.text = name;
 			
@@ -59,7 +62,14 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				coordinates = coordsArray;
 			}
 			*/
-			super.update();
+			
+			var renderer: IKMLRenderer = (master as InteractiveLayerKML).itemRendererInstance;
+			if (changeFlag.fullUpdateNeeded)
+			{
+				renderer.render(this, master.container);
+			}
+			
+			super.update(changeFlag);
 			
 		}
 		

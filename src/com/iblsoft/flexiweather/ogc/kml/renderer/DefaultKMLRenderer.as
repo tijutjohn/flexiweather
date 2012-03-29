@@ -649,6 +649,11 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 			gr.lineStyle(lineWidth, lineColor);
 			if (points && points.length > 1)
 			{
+				//we are drawing whole line string relatively to first point to be able move whole sprite when drawing is not needed
+				var p0: Point = points.getItemAt(0) as Point;
+				var sx: int = p0.x;
+				var sy: int = p0.y;
+				
 				var total: int = points.length;
 				var cnt: int = 0;
 				for (var i: int = 0; i < total; i++)
@@ -658,9 +663,9 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 					{
 						if (cnt == 0)
 						{
-							gr.moveTo(point.x, point.y);
+							gr.moveTo(point.x - sx, point.y - sy);
 						} else {
-							gr.lineTo(point.x, point.y);
+							gr.lineTo(point.x - sx, point.y - sy);
 						}
 						cnt++;
 					}
@@ -719,6 +724,10 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 			gr.lineStyle(lineWidth, lineColor);
 			if (points && points.length > 1)
 			{
+				var p0: Point = points.getItemAt(0) as Point;
+				var sx: int = p0.x;
+				var sy: int = p0.y;
+				
 				var total: int = points.length;
 				var cnt: int = 0;
 				for (var i: int = 0; i < total; i++)
@@ -728,9 +737,9 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 					{
 						if (cnt == 0)
 						{
-							gr.moveTo(point.x, point.y);
+							gr.moveTo(point.x - sx, point.y - sy);
 						} else {
-							gr.lineTo(point.x, point.y);
+							gr.lineTo(point.x - sx, point.y - sy);
 						}
 						cnt++;
 					}

@@ -114,7 +114,6 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 		
 		private function onBitmapLoaded(event: UniURLLoaderEvent): void
 		{
-			trace("onIconLoaded");
 			_iconBitmapData = (event.result as Bitmap).bitmapData;
 			notifyAllListeners();
 			if (console)

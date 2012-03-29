@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc.editable
 {
+	import com.iblsoft.flexiweather.ogc.FeatureUpdateChange;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWFS;
 	import com.iblsoft.flexiweather.ogc.WFSFeatureBase;
@@ -46,9 +47,9 @@ package com.iblsoft.flexiweather.ogc.editable
 				masterEditable.editingComponentsContainer.addChild(m_editableSprite);
 		}
 		
-		override public function update(): void
+		override public function update(changeFlag: FeatureUpdateChange): void
 		{
-			super.update();
+			super.update(changeFlag);
 			var eim: IEditableItemManager = master as IEditableItemManager; 
 
 			var mp: MoveablePoint;
@@ -184,7 +185,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			m_points[i_pointIndex] = pt;
 			m_coordinates[i_pointIndex] = m_master.container.pointToCoord(pt.x, pt.y);
-			update();
+			update(FeatureUpdateChange.fullUpdate());
 			modified = true;
 		}
 		
@@ -219,7 +220,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			m_points.addItemAt(pt, i_pointIndex);
 			m_coordinates.addItemAt(m_master.container.pointToCoord(pt.x, pt.y), i_pointIndex);
-			update();
+			update(FeatureUpdateChange.fullUpdate());
 			modified = true;
 		}
 		
@@ -227,7 +228,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			m_points.removeItemAt(i_pointIndex);
 			m_coordinates.removeItemAt(i_pointIndex);
-			update();
+			update(FeatureUpdateChange.fullUpdate());
 		}
 
 		public function deselect(): void
@@ -311,7 +312,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				if (mb_selected && (mi_actSelectedMoveablePointIndex > -1) && (m_points.length > 1) && (mi_actSelectedMoveablePointIndex < m_points.length)){
 					m_points.removeItemAt(mi_actSelectedMoveablePointIndex);
 					
-					update();
+					update(FeatureUpdateChange.fullUpdate());
 					
 					if ((mi_actSelectedMoveablePointIndex >= 0) && (mi_actSelectedMoveablePointIndex < m_points.length)){
 						selectMoveablePoint(mi_actSelectedMoveablePointIndex);
@@ -388,7 +389,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			mb_useMonochrome = val;
 			
 			if(b_needUpdate)
-				update();
+				update(FeatureUpdateChange.fullUpdate());
 		}
 		
 		public function get useMonochrome(): Boolean
@@ -403,7 +404,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			mi_monochromeColor = i_color;
 			
 			if (b_needUpdate)
-				update();
+				update(FeatureUpdateChange.fullUpdate());
 		}
 		
 		public function get monochromeColor(): uint

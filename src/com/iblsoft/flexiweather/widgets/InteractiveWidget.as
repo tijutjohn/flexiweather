@@ -421,9 +421,9 @@ package com.iblsoft.flexiweather.widgets
 			}
 
 			// DEBUG: display label layout placement bitmap
-			graphics.beginBitmapFill(m_labelLayout.m_placementBitmap);
-			graphics.drawRect(0, 0, m_labelLayout.m_placementBitmap.width, m_labelLayout.m_placementBitmap.height);
-			graphics.endFill();
+//			graphics.beginBitmapFill(m_labelLayout.m_placementBitmap);
+//			graphics.drawRect(0, 0, m_labelLayout.m_placementBitmap.width, m_labelLayout.m_placementBitmap.height);
+//			graphics.endFill();
 
             super.updateDisplayList(unscaledWidth, unscaledHeight);
         }

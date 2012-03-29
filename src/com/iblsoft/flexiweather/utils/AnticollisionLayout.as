@@ -168,6 +168,8 @@ package com.iblsoft.flexiweather.utils
 		
 		public function update(): void
 		{
+			return;
+			
 			if (!m_suspendAnticollisionProcessing)
 			{
 //				trace("Anti layout ma_layoutObjects: " + ma_layoutObjects.length);

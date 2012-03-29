@@ -1,10 +1,17 @@
 package com.iblsoft.flexiweather.ogc.kml.features
 {
+	import com.iblsoft.flexiweather.ogc.FeatureUpdateChange;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
+	import com.iblsoft.flexiweather.ogc.kml.InteractiveLayerKML;
 	import com.iblsoft.flexiweather.ogc.kml.interfaces.IKMLIconFeature;
 	import com.iblsoft.flexiweather.ogc.kml.interfaces.IKMLLabeledFeature;
+	import com.iblsoft.flexiweather.ogc.kml.renderer.IKMLRenderer;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	
+	import flash.geom.Point;
+	
+	import mx.collections.ArrayCollection;
 
 
 	/**
@@ -41,10 +48,13 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		}	
 		
 		/** Called after the feature is added to master or after any change (e.g. area change). */
-		override public function update(): void
+		override public function update(changeFlag: FeatureUpdateChange): void
 		{
 			
 			kmlLabel.text = name;
+			
+			if (changeFlag.anyChange)
+				mb_pointsDirty = true;
 			
 			if(mb_pointsDirty) 
 			{
@@ -69,7 +79,34 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				
 				coordinates = coordsArray;
 			}
-			super.update();
+			
+			var renderer: IKMLRenderer = (master as InteractiveLayerKML).itemRendererInstance;
+			if (changeFlag.fullUpdateNeeded)
+			{
+				renderer.render(this, master.container);
+			} else {
+				if (changeFlag.significantlyChanged || changeFlag.viewBBoxSizeChanged)
+				{
+					renderer.render(this, master.container);
+				}
+			}
+			
+			var points: ArrayCollection = getPoints();
+			if (points.length != 4)
+			{
+				trace("we expect 4 points in GroundLevel");
+			} else {
+				var nwp: flash.geom.Point = points.getItemAt(0) as flash.geom.Point;
+				var nep: flash.geom.Point = points.getItemAt(1) as flash.geom.Point;
+//				var sep: flash.geom.Point = points.getItemAt(2) as flash.geom.Point;
+//				var swp: flash.geom.Point = points.getItemAt(3) as flash.geom.Point;
+				
+				x = nwp.x;// + (ne.x - nw.x) / 2;
+				y = nep.y;// + (se.y - ne.y) / 2;
+				trace("roundOverlay update pos: ["+x+","+y+"]")
+//					_container.labelLayout.updateObjectReferenceLocation(this);
+			}
+			super.update(changeFlag);
 			
 		}
 		

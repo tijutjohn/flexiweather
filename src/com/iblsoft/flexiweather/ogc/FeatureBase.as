@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.ogc.editable.IClosableCurve;
+	import com.iblsoft.flexiweather.ogc.kml.renderer.IKMLRenderer;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.utils.CubicBezier;
 	import com.iblsoft.flexiweather.utils.CurveLineSegment;
@@ -44,14 +45,15 @@ package com.iblsoft.flexiweather.ogc
 		}
 		
 		/** Called after the feature is added to master or after any change (e.g. area change). */
-		public function update(): void
+		public function update(changeFlag: FeatureUpdateChange): void
 		{
 			if(mb_pointsDirty) {
 				mb_pointsDirty = false;
 				m_points = new ArrayCollection();
 				if(m_coordinates.length) {
 					var iw: InteractiveWidget = m_master.container;
-					for(var i: uint = 0; i < m_coordinates.length; ++i) {
+					var total: int = m_coordinates.length;
+					for(var i: uint = 0; i < total; ++i) {
 						var c: Coord = m_coordinates[i];
 						var pt: Point = iw.coordToPoint(c);
 						m_points.addItem(pt);

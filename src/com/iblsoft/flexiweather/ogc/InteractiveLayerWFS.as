@@ -101,7 +101,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			if(feature != null) {
 				feature.setMaster(this);
-				feature.update();
+				feature.update(FeatureUpdateChange.fullUpdate());
 				featuresContainer.addChild(feature);
 				if(a_features)
 					a_features.addItem(feature);
@@ -213,11 +213,11 @@ package com.iblsoft.flexiweather.ogc
 		override public function onAreaChanged(b_finalChange: Boolean): void
 		{
 			//FIXME this should not be called if panning or zooming is still in progress
-			
+			//TODO should be check what was change and send correct FeatureUpdateChange, for now we're sending full update
 			for each(var f: WFSFeatureBase in features) {
 				//trace("onAreaChanged ["+this+"] feature: " + f);
 				f.invalidatePoints();
-				f.update();
+				f.update(FeatureUpdateChange.fullUpdate());
 			}
 		}
 

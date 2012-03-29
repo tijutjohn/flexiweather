@@ -45,7 +45,7 @@ package com.iblsoft.flexiweather.ogc
 		public function addFeature(feature: FeatureBase): void
 		{
 			feature.setMaster(this);
-			feature.update();
+			feature.update(new FeatureUpdateChange(FeatureUpdateChange.FULL_UPDATE));
 			m_featuresContainer.addChild(feature);
 			ma_features.addItem(feature);
 			onFeatureAdded(feature);
@@ -114,7 +114,7 @@ package com.iblsoft.flexiweather.ogc
 			if(b_needUpdate) {
 				for(var i: int = 0; i < m_featuresContainer.numChildren; i++){
 					if(m_featuresContainer.getChildAt(i) is WFSFeatureEditable){
-						WFSFeatureEditable(m_featuresContainer.getChildAt(i)).update();
+						WFSFeatureEditable(m_featuresContainer.getChildAt(i)).update(FeatureUpdateChange.fullUpdate());
 					}
 				}
 			}
@@ -134,7 +134,7 @@ package com.iblsoft.flexiweather.ogc
 			if(b_needUpdate) {
 				for(var i: int = 0; i < m_featuresContainer.numChildren; i++) {
 					if(m_featuresContainer.getChildAt(i) is WFSFeatureEditable) {
-						WFSFeatureEditable(m_featuresContainer.getChildAt(i)).update();
+						WFSFeatureEditable(m_featuresContainer.getChildAt(i)).update(FeatureUpdateChange.fullUpdate());
 					}
 				}
 			}

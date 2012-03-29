@@ -1,5 +1,7 @@
 package com.iblsoft.flexiweather.ogc.kml
 {
+	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.ogc.FeatureUpdateChange;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
 	import com.iblsoft.flexiweather.ogc.Version;
 	import com.iblsoft.flexiweather.ogc.kml.controls.KMLInfoWindow;
@@ -22,6 +24,8 @@ package com.iblsoft.flexiweather.ogc.kml
 	import com.iblsoft.flexiweather.ogc.kml.managers.KMLResourceManager;
 	import com.iblsoft.flexiweather.ogc.kml.renderer.DefaultKMLRenderer;
 	import com.iblsoft.flexiweather.ogc.kml.renderer.IKMLRenderer;
+	import com.iblsoft.flexiweather.utils.AsyncManager;
+	import com.iblsoft.flexiweather.utils.DebugUtils;
 	import com.iblsoft.flexiweather.utils.ScreenUtils;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
@@ -51,7 +55,27 @@ package com.iblsoft.flexiweather.ogc.kml
 	public class InteractiveLayerKML extends InteractiveLayerFeatureBase
 	{
 		public var itemRenderer: Class;
-		private var itemRendererInstance: IKMLRenderer;
+		private var _itemRendererInstance: IKMLRenderer;
+		public function get itemRendererInstance(): IKMLRenderer
+		{
+			if (!itemRenderer)
+				itemRenderer = DefaultKMLRenderer;
+			
+			if (!_itemRendererInstance)
+			{
+				var newClass: ClassFactory = new ClassFactory(itemRenderer);
+				_itemRendererInstance = newClass.newInstance();
+				
+				if (_itemRendererInstance is EventDispatcher)
+				{
+					(_itemRendererInstance as EventDispatcher).addEventListener(KMLBitmapEvent.BITMAP_LOADED, onRendererBitmapLoaded);
+					(_itemRendererInstance as EventDispatcher).addEventListener(KMLBitmapEvent.BITMAP_LOAD_ERROR, onRendererBitmapLoadError);
+					(_itemRendererInstance as EventDispatcher).addEventListener(KMLResourceManager.ALL_RESOURCES_LOADED, onAllRendererResourcesLoaded);
+				}
+			}
+			
+			return _itemRendererInstance;
+		}
 		
 		private var _kml: KML;
 		
@@ -61,6 +85,8 @@ package com.iblsoft.flexiweather.ogc.kml
 			return _kml;
 		}
 		private var m_boundaryRect: Rectangle;
+		
+		private var _syncManager: AsyncManager;
 		
 		public function InteractiveLayerKML(container:InteractiveWidget, kml: KML, version:Version)
 		{
@@ -73,6 +99,20 @@ package com.iblsoft.flexiweather.ogc.kml
 			addEventListener(KMLFeatureEvent.KML_FEATURE_CLICK, onKMLFeatureClick, false, EventPriority.DEFAULT_HANDLER, true);
 		}
 		
+		override protected function createChildren():void
+		{
+			super.createChildren();
+			
+			_syncManager = new AsyncManager();
+			
+		}
+		
+		override protected function childrenCreated():void
+		{
+			super.childrenCreated();
+			
+			addChild(_syncManager);
+		}
 		/**
 		 * this function must be called, when layer is destroying to remove all dependencies and unload or destroy features. 
 		 * 
@@ -115,7 +155,9 @@ package com.iblsoft.flexiweather.ogc.kml
 				var feature: KMLFeature = rootFeature as KMLFeature;
 				if (feature.kmlVisibility)
 					addFeature(feature);
-				feature.update();
+				
+				//make full update
+//				feature.update(true);
 				
 				kmlParsingFinished();
 				return;
@@ -125,13 +167,13 @@ package com.iblsoft.flexiweather.ogc.kml
 			kmlObj.children = getChildrenFeatures(Container(rootFeature));
 			
 			callLater(kmlParsingFinished);
+			callLater(update, [FeatureUpdateChange.fullUpdate()]);
 		}
 		
 		private function kmlParsingFinished(): void
 		{
 			container.labelLayout.update();
 			container.objectLayout.update();
-			invalidateDynamicPart();
 		}
 		public function canContainFeatures(feature: KMLFeature):Boolean 
 		{
@@ -152,19 +194,13 @@ package com.iblsoft.flexiweather.ogc.kml
 				
 				var childObj:Object = new Object();
 				childObj.name = feature.name;
-				if (childObj.name == null) 
-				{
-					trace("childObj.name = getAlternateName(feature);");
-				}
 				if (canContainFeatures(feature)) 
 				{
 					childObj.children = getChildrenFeatures(Container(feature));
-				} else {
-					trace("associateWithMapObject(childObj, feature);");
 				}
 				childrenFeatures.push(childObj);
 				
-				feature.update();
+				feature.update(FeatureUpdateChange.fullUpdate());
 			}
 			return childrenFeatures;
 		}
@@ -279,42 +315,41 @@ package com.iblsoft.flexiweather.ogc.kml
 			}
 		}
 		
-		override public function draw(graphics: Graphics): void
+		public function update(changeFlag: FeatureUpdateChange): void
 		{
-			super.draw(graphics);
-		
-			if (!itemRenderer)
-				itemRenderer = DefaultKMLRenderer;
-			
-			if (!itemRendererInstance)
-			{
-				var newClass: ClassFactory = new ClassFactory(itemRenderer);
-				itemRendererInstance = newClass.newInstance();
-				
-				if (itemRendererInstance is EventDispatcher)
-				{
-					(itemRendererInstance as EventDispatcher).addEventListener(KMLBitmapEvent.BITMAP_LOADED, onRendererBitmapLoaded);
-					(itemRendererInstance as EventDispatcher).addEventListener(KMLBitmapEvent.BITMAP_LOAD_ERROR, onRendererBitmapLoadError);
-					(itemRendererInstance as EventDispatcher).addEventListener(KMLResourceManager.ALL_RESOURCES_LOADED, onAllRendererResourcesLoaded);
-				}
-			}
 			trace("KML layer draw: " + features.length);
-			
 			
 			m_boundaryRect = new Rectangle(0,0,width, height);
 //			m_boundaryRect = container.getBounds(this.stage);
-			for each (var feature: KMLFeature in features)
+			
+			if (_syncManager)
 			{
-				feature.invalidatePoints();
-				feature.update();
-				feature.visible = true; //getAbsoluteVisibility(feature);
-				itemRendererInstance.render(feature, container);
+				for each (var feature: KMLFeature in features)
+				{
+					_syncManager.addCall(feature, updateFeature, [feature, changeFlag]);
+//					updateFeature(feature, itemRendererInstance, fullUpdate);	
+				}
+				_syncManager.start();
 			}
 		}
+		
+		private function updateFeature(feature:  KMLFeature, changeFlag: FeatureUpdateChange): void
+		{
+//			if (fullUpdate)
+//				feature.invalidatePoints();
+			
+			feature.update(changeFlag);
+			feature.visible = true; //getAbsoluteVisibility(feature);
+			
+//			if (fullUpdate)
+//				itemRendererInstance.render(feature, container);
+		}
+		
 		
 		protected function onAllRendererResourcesLoaded(event: Event): void
 		{
 			kmlParsingFinished();
+			update(FeatureUpdateChange.fullUpdate());
 		}
 		protected function onRendererBitmapLoaded(event: KMLBitmapEvent): void
 		{
@@ -364,9 +399,46 @@ package com.iblsoft.flexiweather.ogc.kml
 			
 			//FIXME this should not be called if panning or zooming is still in progress
 			
-			invalidateDynamicPart();
-			
+			//invalidateDynamicPart();
+			callLater(isUpdateNeeded);	
 		}
+		
+		private function isUpdateNeeded(): void
+		{
+			var crs: String = container.getCRS();
+			var viewBBox: BBox = container.getViewBBox();
+			
+			var flag: uint = 0;
+			if (crs != m_oldCRS)
+			{
+				flag |= FeatureUpdateChange.CRS_CHANGED;
+			}
+			if (!m_oldViewBBox)
+			{
+				flag |= FeatureUpdateChange.VIEW_BBOX_MOVED;
+				flag |= FeatureUpdateChange.VIEW_BBOX_SIZE_CHANGED;
+			} else {
+				if (!viewBBox.equals(m_oldViewBBox))
+				{
+					if (m_oldViewBBox.width == viewBBox.width && m_oldViewBBox.height == viewBBox.height)
+						flag |= FeatureUpdateChange.VIEW_BBOX_MOVED;
+					else
+						flag |= FeatureUpdateChange.VIEW_BBOX_SIZE_CHANGED;
+				}
+			}
+			var updateFlag: FeatureUpdateChange = new FeatureUpdateChange(flag);
+			
+			//TODO: check visible parts change as well
+		
+			update(updateFlag);
+			
+			m_oldCRS = crs;	
+			m_oldViewBBox = viewBBox;
+		}
+		
+		private var m_oldCRS: String;
+		private var m_oldViewBBox: BBox;
+		
 		override public function onContainerSizeChanged(): void
 		{
 			super.onContainerSizeChanged();

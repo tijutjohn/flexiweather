@@ -4,11 +4,13 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
 	import com.iblsoft.flexiweather.ogc.FeatureBase;
+	import com.iblsoft.flexiweather.ogc.FeatureUpdateChange;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
 	import com.iblsoft.flexiweather.ogc.kml.events.KMLFeatureEvent;
 	import com.iblsoft.flexiweather.ogc.kml.features.styles.Style;
 	import com.iblsoft.flexiweather.ogc.kml.features.styles.StyleMap;
 	import com.iblsoft.flexiweather.ogc.kml.features.styles.StyleSelector;
+	import com.iblsoft.flexiweather.ogc.kml.renderer.IKMLRenderer;
 	import com.iblsoft.flexiweather.syndication.ParsingTools;
 	import com.iblsoft.flexiweather.utils.AnticollisionLayout;
 	import com.iblsoft.flexiweather.utils.AnticollisionLayoutObject;
@@ -235,22 +237,27 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			}
 		}
 		
-		/** Called after the feature is added to master or after any change (e.g. area change). */
-		override public function update(): void
+		private var _itemRendererInstance: IKMLRenderer;
+		public function setItemRenderer(itemRendererInstance: IKMLRenderer): void
 		{
-			super.update();
-			if (m_points && m_points.length > 0)
-			{
-				if (m_points.length > 1)
-				{
-					trace("Attention: KML Feature has more than 1 point");
-				}
-				var pos: flash.geom.Point = m_points.getItemAt(0) as flash.geom.Point;
+			_itemRendererInstance = itemRendererInstance;
+		}
+		/** Called after the feature is added to master or after any change (e.g. area change). */
+		override public function update(changeFlag: FeatureUpdateChange): void
+		{
+			super.update(changeFlag);
+//			if (m_points && m_points.length > 0)
+//			{
+//				if (m_points.length > 1)
+//				{
+//					trace("Attention: KML Feature has more than 1 point");
+//				}
+//				var pos: flash.geom.Point = m_points.getItemAt(0) as flash.geom.Point;
 //				this.x = pos.x;
 //				this.y = pos.y;
 				
 //				trace("change position to ["+this.x+","+this.y+"] for KML feature : " + this);
-			}
+//			}
 		}
 		
 		private function getKMLVisibility(): Boolean
