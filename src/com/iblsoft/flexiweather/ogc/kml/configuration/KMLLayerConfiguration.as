@@ -3,6 +3,8 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderErrorEvent;
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.net.loaders.BinaryLoader;
+	import com.iblsoft.flexiweather.net.loaders.KMLLoader;
+	import com.iblsoft.flexiweather.net.loaders.KMZLoader;
 	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
 	import com.iblsoft.flexiweather.net.loaders.XMLLoader;
 	import com.iblsoft.flexiweather.ogc.LayerConfiguration;
@@ -54,7 +56,7 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 		{
 			kmlPath =  kmzURLPath;
 			
-			var loader: BinaryLoader = new BinaryLoader();
+			var loader: KMZLoader = new KMZLoader();
 			loader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onKMZLoaded);
 			loader.load(new URLRequest(kmlPath));
 		}
@@ -102,7 +104,7 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 			_kmlBaseURLPath = baseURLPath;
 			kmlPath =  kmlURLPath;
 			
-			var loader: XMLLoader = new XMLLoader();
+			var loader: KMLLoader = new KMLLoader();
 			loader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onKMLLoaded);
 			loader.addEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onKMLLoadFailed);
 			loader.load(new URLRequest(kmlPath));
