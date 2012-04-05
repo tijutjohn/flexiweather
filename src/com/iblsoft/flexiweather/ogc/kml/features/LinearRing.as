@@ -50,7 +50,12 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	 	}
 	 	
 		public function get coordinatesPoints(): Array
-		{ return _coordinatesPoints.toArray(); }  		
+		{ 
+			if (_coordinatesPoints)
+				return _coordinatesPoints.toArray();
+			
+			return [];
+		}  		
 		
 		public function set coordinatesPoints(a: Array): void
 		{

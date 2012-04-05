@@ -1,6 +1,6 @@
 package com.iblsoft.flexiweather.ogc
 {
-	public class FeatureUpdateChange
+	public class FeatureUpdateContext
 	{
 		public static var FULL_UPDATE: int = 7;
 		
@@ -22,7 +22,7 @@ package com.iblsoft.flexiweather.ogc
 		public function get fullUpdateNeeded(): Boolean
 		{
 			var test: int = (_flag & FULL_UPDATE);
-			return test == 7;
+			return test == FULL_UPDATE;
 		}
 		
 		public function get significantlyChanged(): Boolean
@@ -50,14 +50,19 @@ package com.iblsoft.flexiweather.ogc
 			return (_flag & PARTS_CHANGED) == PARTS_CHANGED;
 		}
 		
-		public function FeatureUpdateChange(statusFlag: uint)
+		public function FeatureUpdateContext(statusFlag: uint)
 		{
 			_flag = statusFlag;	
 		}
 		
-		public static function fullUpdate(): FeatureUpdateChange
+		public static function fullUpdate(): FeatureUpdateContext
 		{
-			return new FeatureUpdateChange(FULL_UPDATE);
+			return new FeatureUpdateContext(FULL_UPDATE);
+		}
+		
+		public function toString(): String
+		{
+			return "FeatureUpdateContext ["+_flag+"] crs: " + crsChanged + " viewbbox size: " + viewBBoxSizeChanged + " move: " + viewBBoxMoved;
 		}
 	}
 }

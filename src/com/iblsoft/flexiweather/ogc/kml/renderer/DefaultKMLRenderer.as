@@ -2,6 +2,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 {
 	import com.iblsoft.flexiweather.ogc.kml.data.KMLResourceKey;
 	import com.iblsoft.flexiweather.ogc.kml.events.KMLBitmapEvent;
+	import com.iblsoft.flexiweather.ogc.kml.features.Geometry;
 	import com.iblsoft.flexiweather.ogc.kml.features.GroundOverlay;
 	import com.iblsoft.flexiweather.ogc.kml.features.Icon;
 	import com.iblsoft.flexiweather.ogc.kml.features.KML;
@@ -9,6 +10,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 	import com.iblsoft.flexiweather.ogc.kml.features.KMLLabel;
 	import com.iblsoft.flexiweather.ogc.kml.features.LineString;
 	import com.iblsoft.flexiweather.ogc.kml.features.LinearRing;
+	import com.iblsoft.flexiweather.ogc.kml.features.MultiGeometry;
 	import com.iblsoft.flexiweather.ogc.kml.features.Placemark;
 	import com.iblsoft.flexiweather.ogc.kml.features.Polygon;
 	import com.iblsoft.flexiweather.ogc.kml.features.ScreenOverlay;
@@ -31,6 +33,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.utils.Dictionary;
+	import flash.utils.getTimer;
 	
 	import mx.collections.ArrayCollection;
 
@@ -128,6 +131,8 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 		
 		protected function renderScreenOverlay(feature: KMLFeature): void
 		{
+			var time: int = startProfileTimer();
+			
 			var overlay: ScreenOverlay = feature as ScreenOverlay;	
 			if (overlay)
 			{
@@ -148,6 +153,8 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 					renderScreenOverlayImage(overlay, resourceManager.getBitmapData(imageKey));
 				}
 			}
+			
+//			debug("Render screen overlay time: " + stopProfileTimer(time));
 		}
 		
 		protected function onScreenOverlayIconLoaded(event: KMLBitmapEvent): void
@@ -268,6 +275,8 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 		
 		protected function renderGroundOverlay(feature: KMLFeature): void
 		{
+			var time: int = startProfileTimer();
+			
 			var overlay: GroundOverlay = feature as GroundOverlay;	
 			if (overlay)
 			{
@@ -310,6 +319,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 				
 			}
 			
+//			debug("Render ground overlay time: " + stopProfileTimer(time));
 		}
 		
 		protected function onGroundOverlayIconLoaded(event: KMLBitmapEvent): void
@@ -387,7 +397,21 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 		 * 		End of GroundOverlay section
 		 * 
 		 *********************************************************************************************/
-		
+		private function startProfileTimer(): int
+		{
+			return getTimer();
+		}
+		/**
+		 * Return time interval in seconds 
+		 * @param startTime
+		 * @return 
+		 * 
+		 */		
+		private function stopProfileTimer(startTime): Number
+		{
+			var diff: int = getTimer() - startTime;
+			return diff / 1000;
+		}
 		
 		/*********************************************************************************************
 		 * 
@@ -396,38 +420,54 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 		 *********************************************************************************************/
 		protected function renderPlacemark(feature: KMLFeature): void
 		{
+			
 			var placemark: Placemark = feature as Placemark;
-			if (placemark.geometry != null) 
+			renderPlacemarkGeometry(placemark, placemark.geometry);
+		}
+		
+		protected function renderPlacemarkGeometry(placemark: Placemark, geometry: Geometry): void
+		{
+			var time: int = startProfileTimer();
+			if (geometry != null) 
 			{
 				var placemarkStyles: ObjectStyles = new ObjectStyles(placemark); 
 				
-				if (placemark.geometry is com.iblsoft.flexiweather.ogc.kml.features.Point) 
+				if (geometry is com.iblsoft.flexiweather.ogc.kml.features.Point) 
 				{
 					
 					renderPoint(placemark, placemarkStyles.normalStyle, placemarkStyles.highlightStyle);
 					
 				} else { 
-					if (placemark.geometry is LineString) 
+					if (geometry is LineString) 
 					{
 //						trace("draw LineString");
-						renderLineString(placemark, placemarkStyles.normalStyle);
+						renderLineString(placemark.graphics, placemark.getPoints(), placemark.kmlLabel, placemarkStyles.normalStyle);
 						
 					} else {
-						if (placemark.geometry is LinearRing) 
+						if (geometry is LinearRing) 
 						{
 							trace("draw LinearRing");
-							renderLinearRing(placemark, placemark.geometry as LinearRing, placemarkStyles.normalStyle);
+							renderLinearRing(placemark.graphics, geometry as LinearRing, placemark.kmlLabel, placemarkStyles.normalStyle);
 							
 						}  else {
-							if (placemark.geometry is Polygon) 
+							if (geometry is Polygon) 
 							{
 								trace("draw Polygon");
-								renderPolygon(placemark, placemarkStyles.normalStyle);
+								renderPolygon(placemark.graphics, geometry as Polygon, placemark.kmlLabel, placemarkStyles.normalStyle);
+							} else {
+								
+								if (geometry is MultiGeometry) 
+								{
+									trace("draw MultiGeomtre");
+									renderMultiGeometry(placemark, geometry as MultiGeometry);
+								}
 							}
 						}
 					}
 				} 
 			}
+			
+			debug("Render placemark time: " + stopProfileTimer(time));
 		}
 		
 		
@@ -503,7 +543,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 					yDiff = scaleY * icon.height * (pixelsFraction - 1);
 				}
 			} else {
-				trace("no hotspot");
+//				trace("no hotspot");
 				xDiff = scaleX * icon.width * -1;
 				yDiff = scaleY * icon.height * -1;
 			}
@@ -511,9 +551,9 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 			m.scale(scaleX, scaleY);
 			m.translate(xDiff, yDiff);
 			
-			debug("render placemark icon: ["+placemark.x + " , " + placemark.y + "] scale ["+scaleX+","+scaleY+"]  translate: ["+xDiff+","+yDiff+"]");
-			debug("render placemark icon2: ["+icon.width + " , " + icon.height + "]");
-			debug("render placemark kmlIcon: ["+placemark.kmlIcon.x + " , " + placemark.kmlIcon.y + "] placemark.visible ["+placemark.visible+"]  placemark.kmlIcon.visible: ["+placemark.kmlIcon.visible+"]");
+//			debug("render placemark icon: ["+placemark.x + " , " + placemark.y + "] scale ["+scaleX+","+scaleY+"]  translate: ["+xDiff+","+yDiff+"]");
+//			debug("render placemark icon2: ["+icon.width + " , " + icon.height + "]");
+//			debug("render placemark kmlIcon: ["+placemark.kmlIcon.x + " , " + placemark.kmlIcon.y + "] placemark.visible ["+placemark.visible+"]  placemark.kmlIcon.visible: ["+placemark.kmlIcon.visible+"]");
 			gr.clear();
 			gr.beginBitmapFill(icon, m);
 			//			gr.drawRect(0,0, icon.width, icon.height);`
@@ -524,7 +564,21 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 		}
 		
 		
-//		protected function renderPoint(placemark: Placemark, style: Style, highlightStyle: Style, hotSpot: HotSpot): void
+		/**
+		 * Render MultiGeometry
+		 *  
+		 * @param placemark
+		 * @param multigeometry
+		 * 
+		 */		
+		protected function renderMultiGeometry(placemark: Placemark, multigeometry: MultiGeometry): void
+		{
+			for each (var geometry: Geometry in multigeometry.geometries)
+			{
+				renderPlacemarkGeometry(placemark, geometry);
+			}
+		}
+		
 		protected function renderPoint(placemark: Placemark, style: Style, highlightStyle: Style): void
 		{
 			var iconStyle: IconStyle;
@@ -634,7 +688,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 			}
 		}
 		
-		protected function renderLineString(placemark: Placemark, style: Style): void
+		protected function renderLineString(gr: Graphics, points: ArrayCollection, kmlLabel: KMLLabel, style: Style): void
 		{
 			var lineWidth: int = 3;
 			var lineColor: int = 0x000000;
@@ -643,9 +697,8 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 				lineWidth = style.lineStyle.width;
 				lineColor = style.lineStyle.color;
 			}
-			var gr: Graphics = placemark.graphics;
+			
 			gr.clear();
-			var points: ArrayCollection = placemark.getPoints();
 			gr.lineStyle(lineWidth, lineColor);
 			if (points && points.length > 1)
 			{
@@ -673,12 +726,11 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 			}
 			
 			if (point)
-				updateLabelPosition(placemark.kmlLabel, point.x, point.y); 
+				updateLabelPosition(kmlLabel, point.x, point.y); 
 		}
 		
-		protected function renderLinearRing(placemark: Placemark, linearRing: LinearRing, style: Style): void
+		protected function renderLinearRing(gr: Graphics, linearRing: LinearRing, kmlLabel: KMLLabel, style: Style): void
 		{
-			var gr: Graphics = placemark.graphics;
 			gr.clear();
 			
 			var lineWidth: int = 3;
@@ -750,14 +802,13 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 				gr.endFill();
 			
 			if (point)
-				updateLabelPosition(placemark.kmlLabel, point.x, point.y); 
+				updateLabelPosition(kmlLabel, point.x, point.y); 
 		}
-		protected function renderPolygon(feature: Placemark, style: Style): void
+		protected function renderPolygon(gr: Graphics, polygon: Polygon, kmlLabel: KMLLabel, style: Style): void
 		{
 			//render outerBoundary
-			var linearRing: LinearRing = (feature.geometry as Polygon).outerBoundaryIs.linearRing;
-		
-			renderLinearRing(feature, linearRing, style);
+			var linearRing: LinearRing = polygon.outerBoundaryIs.linearRing;
+			renderLinearRing(gr, linearRing, kmlLabel, style);
 		}
 		
 		/*********************************************************************************************

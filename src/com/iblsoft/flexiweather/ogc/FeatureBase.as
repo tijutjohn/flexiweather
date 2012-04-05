@@ -15,6 +15,28 @@ package com.iblsoft.flexiweather.ogc
 	
 	public class FeatureBase extends Sprite
 	{
+		private var _next: FeatureBase;
+		private var _previous: FeatureBase;
+		
+		public function set next(node: FeatureBase) : void
+		{
+			_next = node;		
+		}
+		public function get next(): FeatureBase
+		{
+			return _next;	
+		}
+		public function set previous(node: FeatureBase) : void
+		{
+			_previous = node;
+		}
+		
+		public function get previous(): FeatureBase
+		{
+			return _previous;	
+		}
+		
+		
 		protected var m_master: InteractiveLayerFeatureBase;
 		
 		protected var ms_namespace: String;
@@ -45,7 +67,7 @@ package com.iblsoft.flexiweather.ogc
 		}
 		
 		/** Called after the feature is added to master or after any change (e.g. area change). */
-		public function update(changeFlag: FeatureUpdateChange): void
+		public function update(changeFlag: FeatureUpdateContext): void
 		{
 			if(mb_pointsDirty) {
 				mb_pointsDirty = false;
@@ -120,6 +142,10 @@ package com.iblsoft.flexiweather.ogc
 			var p1: Point;
 			var p2: Point;
 			
+			if (total == 1)
+			{
+				return new Point(a_coordinates[0].x, a_coordinates[0].y)
+			}
 			for (var i:int=0;i<total;j=i++) 
 			{
 				p1 = a_coordinates[i]; 

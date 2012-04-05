@@ -163,8 +163,8 @@ package com.iblsoft.flexiweather.widgets
 			
 			if (_invalidateDataFlag)
 			{
-				updateData(_invalidateDataForceUpdateFlag);
 				_invalidateDataFlag = false;
+				updateData(_invalidateDataForceUpdateFlag);
 			}
 			_invalidateDataForceUpdateFlag = false;
 		}

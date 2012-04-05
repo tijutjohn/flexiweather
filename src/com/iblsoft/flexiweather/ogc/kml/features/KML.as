@@ -1,6 +1,8 @@
 package com.iblsoft.flexiweather.ogc.kml.features
 {
 	import com.iblsoft.flexiweather.ogc.kml.data.KMZFile;
+	import com.iblsoft.flexiweather.ogc.kml.events.KMLEvent;
+	import com.iblsoft.flexiweather.ogc.kml.managers.KMLParserManager;
 	import com.iblsoft.flexiweather.ogc.kml.managers.KMLResourceManager;
 	import com.iblsoft.flexiweather.syndication.XmlParser;
 	
@@ -21,6 +23,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		protected var _document: Document;
 		
 		protected var _resourceManager: KMLResourceManager;
+		protected var _kmlParserManager: KMLParserManager;
 		
 		public function KML(xmlStr:String, urlPath: String, baseUrlPath: String, resourceManager: KMLResourceManager = null)
 		{
@@ -33,6 +36,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			_kmlBaseURLPath = baseUrlPath;
 			
 			_resourceManager = resourceManager;
+			_kmlParserManager = new KMLParserManager();
 			
 			if (!_resourceManager)
 			{
@@ -49,6 +53,11 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				_resourceManager.addKMZFile(kmzFile);
 			
 			
+		}
+		
+		protected function notifyParsingFinished(): void
+		{
+			dispatchEvent(new KMLEvent(KMLEvent.PARSING_FINISHED));
 		}
 		
 		protected function getKMLNamespace(source: String): String

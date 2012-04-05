@@ -1,6 +1,8 @@
 package com.iblsoft.flexiweather.ogc.kml.features
 {
+	import com.iblsoft.flexiweather.ogc.kml.managers.KMLParserManager;
 	import com.iblsoft.flexiweather.syndication.Namespaces;
+	import com.iblsoft.flexiweather.utils.DebugUtils;
 
 	/**
 	*	Class that represents an Entry element within an Atom feed
@@ -32,10 +34,15 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		{
 			super(kml, s_namespace, x);
 			
-			var kmlns:Namespace = new Namespace(s_namespace);
 
+		}
+		
+		override protected function parseKML(s_namespace: String, kmlParserManager: KMLParserManager): void
+		{
 			// Features are: Placemark, GroundOverlay, ScreenOverlay, PhotoOverlay, NetworkLink, Folder, Document
 			// We'll only support Placemark, GroundOverlay, Folder, and Document
+			
+			var time: int = startProfileTimer();
 			
 			this._features = new Array();
 		 	
@@ -43,28 +50,48 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			var folder: Folder;
 			var document: Document;
 			
+			var kmlns:Namespace = new Namespace(s_namespace);
+			
+			for each (i in this.xml.kmlns::NetworkLink) {
+				var networkLink: NetworkLink = new NetworkLink(kml, s_namespace, XMLList(i));
+				kmlParserManager.addCall(networkLink, networkLink.parse, [s_namespace, kmlParserManager]);
+				kmlParserManager.addCall(networkLink, addFeature, [networkLink]);
+			}
 			for each (i in this.xml.kmlns::Placemark) {
-				var placemark: Placemark = new Placemark(kml, s_namespace, XMLList(i)) 
-				addFeature(placemark);
+				var placemark: Placemark = new Placemark(kml, s_namespace, XMLList(i));
+//				addFeature(placemark);
+				kmlParserManager.addCall(placemark, placemark.parse, [s_namespace, kmlParserManager]);
+				kmlParserManager.addCall(placemark, addFeature, [placemark]);
 			}
 			for each (i in this.xml.kmlns::GroundOverlay) {
 				var groundOverlay: GroundOverlay = new GroundOverlay(kml, s_namespace, XMLList(i))
-				addFeature(groundOverlay);
+//				addFeature(groundOverlay);
+				kmlParserManager.addCall(groundOverlay, groundOverlay.parse, [s_namespace, kmlParserManager]);
+				kmlParserManager.addCall(groundOverlay, addFeature, [groundOverlay]);
 			}
 			for each (i in this.xml.kmlns::ScreenOverlay) {
 				var screenOverlay: ScreenOverlay = new ScreenOverlay(kml, s_namespace, XMLList(i))
-				addFeature(screenOverlay);
+//				addFeature(screenOverlay);
+				kmlParserManager.addCall(screenOverlay, screenOverlay.parse, [s_namespace, kmlParserManager]);
+				kmlParserManager.addCall(screenOverlay, addFeature, [screenOverlay]);
 			}
 			for each (i in this.xml.kmlns::Folder) {
 				folder = new Folder(kml, s_namespace, XMLList(i));
-				addFeature(folder);
+//				addFeature(folder);
+				kmlParserManager.addCall(folder, folder.parse, [s_namespace, kmlParserManager]);
+				kmlParserManager.addCall(folder, addFeature, [folder]);
 			}
 			for each (i in this.xml.kmlns::Document) {
 				trace("\n\n Document node: " + i.toXMLString() + "\n\n");
 //				folder = new Folder(XMLList(i));
 				document = new Document(kml, s_namespace, XMLList(i));
-				addFeature(document);
+//				addFeature(document);
+				kmlParserManager.addCall(document, document.parse, [s_namespace, kmlParserManager]);
+				kmlParserManager.addCall(document, addFeature, [document]);
 			}
+			
+			debug("Container parseKML: " + (stopProfileTimer(time)) + "ms");
+			
 		}
 
 		override public function set parentDocument(value: Document): void
@@ -77,6 +104,12 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			}
 		}
 		
+		private var _oldFeature: KMLFeature;
+		private var _firstFeature: KMLFeature;
+		public function get firstFeature(): KMLFeature
+		{
+			return _firstFeature;
+		}
 		/**
 		 * Add feature to feature container
 		 *  
@@ -105,6 +138,16 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			}
 			
 			_features.push(feature);
+			
+			if (_oldFeature)
+			{
+				_oldFeature.next = feature;
+				feature.previous = _oldFeature;
+			} else {
+				_firstFeature = feature;
+			}
+			
+			_oldFeature = feature;
 		}
 		
 		/**

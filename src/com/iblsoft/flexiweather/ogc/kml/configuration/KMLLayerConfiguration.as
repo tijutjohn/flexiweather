@@ -9,6 +9,7 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 	import com.iblsoft.flexiweather.ogc.Version;
 	import com.iblsoft.flexiweather.ogc.kml.InteractiveLayerKML;
 	import com.iblsoft.flexiweather.ogc.kml.data.KMZFile;
+	import com.iblsoft.flexiweather.ogc.kml.events.KMLEvent;
 	import com.iblsoft.flexiweather.ogc.kml.features.Document;
 	import com.iblsoft.flexiweather.ogc.kml.features.KML22;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
@@ -57,24 +58,43 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 			loader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onKMZLoaded);
 			loader.load(new URLRequest(kmlPath));
 		}
+		
+		/**
+		 * KMZ file is loaded and can be un packed 
+		 * @param event
+		 * 
+		 */		
 		private function onKMZLoaded(event: UniURLLoaderEvent): void
 		{
 			var ba: ByteArray = event.result as ByteArray;
+			addKMZByteArray(kmlPath, ba);
+		}
+		
+		public function addKMZByteArray(kmlPath: String, ba: ByteArray): void
+		{
+			notifyKMZUnpackingStarted();
+			
 			var kmz: KMZFile = new KMZFile(kmlPath);
 			kmz.addEventListener(KMZFile.KMZ_FILE_READY, onKMZFileReady);
 			kmz.createFromByteArray(ba);
-//			addKMLSource(xml.toXMLString(), kmlPath);
 			
 		}
+		
+		/**
+		 * KMZ file is unpacked and parsing process can be started 
+		 * @param event
+		 * 
+		 */		
 		private function onKMZFileReady(event: Event): void
 		{
+			notifyKMZUnpackingFinished();
+			notifyKMLParsingStarted();
+			
 			var kmzFile: KMZFile = event.target as KMZFile;
 			var kmzURL: String = kmzFile.kmzURL; 
 			
 			addKMZSource(kmzFile, kmzURL);
 			
-			dispatchEvent(new Event(KMZ_FILE_LOADED));
-			//and create KML layer now
 		}
 		
 		public function loadKML(kmlURLPath: String, baseURLPath: String): void
@@ -94,12 +114,32 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 		}
 		private function onKMLLoaded(event: UniURLLoaderEvent): void
 		{
+			notifyKMLParsingStarted();
+			
 			var xml: XML = event.result as XML;
 			addKMLSource(xml.toXMLString(), kmlPath, _kmlBaseURLPath);
 			
-			dispatchEvent(new Event(KML_FILE_LOADED));
 		}
 		
+		
+		private function notifyKMZUnpackingStarted(): void
+		{
+			dispatchEvent(new KMLEvent(KMLEvent.UNPACKING_STARTED));
+			
+		}
+		private function notifyKMZUnpackingFinished(): void
+		{
+			dispatchEvent(new KMLEvent(KMLEvent.UNPACKING_FINISHED));
+		}
+		private function notifyKMLParsingStarted(): void
+		{
+			dispatchEvent(new KMLEvent(KMLEvent.PARSING_STARTED));
+		}
+		private function notifyKMLParsingFinished(): void
+		{
+			dispatchEvent(new KMLEvent(KMLEvent.PARSING_FINISHED));
+			
+		}
 		/**
 		 * Add KMZ file. It will unzip .kmz file parse main .kml file and set bitmaps to styles to be able to display images from .kmz file
 		 *  
@@ -110,6 +150,7 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 		public function addKMZSource(kmz: KMZFile, urlPath: String): void
 		{
 			_kml = new KML22(kmz.kmlSource, urlPath, '');
+			_kml.addEventListener(KMLEvent.PARSING_FINISHED, onKMZParsingFinished);
 			_kml.parse(kmz);
 			
 			_kmzFile = kmz;
@@ -133,9 +174,41 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 		public function addKMLSource(kmlString: String, urlPath: String, baseUrlPath: String): void
 		{
 			_kml = new KML22(kmlString, urlPath, baseUrlPath);
+			_kml.addEventListener(KMLEvent.PARSING_FINISHED, onKMLParsingFinished);
 			_kml.parse();
 			
 			kmlPath = urlPath;
+		}
+		
+		/**
+		 * KML parsing finished
+		 *  
+		 * @param event
+		 * 
+		 */		
+		private function onKMLParsingFinished(event: KMLEvent): void
+		{
+			var kml: KML22 = event.target as KML22;
+			kml.removeEventListener(KMLEvent.PARSING_FINISHED, onKMLParsingFinished);
+			
+			notifyKMLParsingFinished();
+			
+			dispatchEvent(new Event(KML_FILE_LOADED));
+		}
+		
+		/**
+		 * KMZ parsing finished 
+		 * @param event
+		 * 
+		 */		
+		private function onKMZParsingFinished(event: KMLEvent): void
+		{
+			var kml: KML22 = event.target as KML22;
+			kml.removeEventListener(KMLEvent.PARSING_FINISHED, onKMZParsingFinished);
+			
+			notifyKMLParsingFinished();
+			
+			dispatchEvent(new Event(KMZ_FILE_LOADED));
 		}
 		
 		override public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer

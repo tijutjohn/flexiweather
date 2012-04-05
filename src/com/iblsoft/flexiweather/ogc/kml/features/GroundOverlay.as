@@ -1,6 +1,6 @@
 package com.iblsoft.flexiweather.ogc.kml.features
 {
-	import com.iblsoft.flexiweather.ogc.FeatureUpdateChange;
+	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
 	import com.iblsoft.flexiweather.ogc.kml.InteractiveLayerKML;
 	import com.iblsoft.flexiweather.ogc.kml.interfaces.IKMLIconFeature;
@@ -47,11 +47,22 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			this._latLonBox = new LatLonBox(s_namespace, this.xml.kmlns::LatLonBox);
 		}	
 		
+//		override public function getCenter(): Coord
+//		{
+//			var coord: Coord;
+//			var lat: Number = latLonBox.north + (latLonBox.south - latLonBox.north)/2 
+//			var lon: Number = latLonBox.west + (latLonBox.east - latLonBox.west)/2 
+//			
+//			coord = new Coord('CRS:84', lat, lon);
+//			
+//			return coord;
+//		}
+		
 		/** Called after the feature is added to master or after any change (e.g. area change). */
-		override public function update(changeFlag: FeatureUpdateChange): void
+		override public function update(changeFlag: FeatureUpdateContext): void
 		{
-			
-			kmlLabel.text = name;
+			if (kmlLabel)
+				kmlLabel.text = name;
 			
 			if (changeFlag.anyChange)
 				mb_pointsDirty = true;

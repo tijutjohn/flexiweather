@@ -3,6 +3,9 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import com.iblsoft.flexiweather.ogc.kml.data.KMZFile;
 	import com.iblsoft.flexiweather.syndication.ParsingTools;
 	import com.iblsoft.flexiweather.syndication.XmlParser;
+	import com.iblsoft.flexiweather.utils.AsyncManager;
+	
+	import flash.events.Event;
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.UIComponent;
@@ -59,9 +62,22 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				this._document.baseUrlPath = _kmlBaseURLPath;
 				this._feature = document;
 			}
+			if (ParsingTools.nullCheck(this.xml.kmlns::NetworkLink)) {
+				this._feature = new NetworkLink(this, _kmlNamespace, this.xml.kmlns::NetworkLink);
+			}
+			_feature.parse(_kmlNamespace, _kmlParserManager);
+			_kmlParserManager.addEventListener(AsyncManager.EMPTY, onKMLParserFinished);
+			_kmlParserManager.maxCallsPerTick = 150;
+			_kmlParserManager.start();
 			
 		}
 
+		private function onKMLParserFinished(event: Event): void
+		{
+			trace("kml parser finished");	
+			notifyParsingFinished();
+		}
+		
 		private function debug(): void
 		{
 			if (_feature)

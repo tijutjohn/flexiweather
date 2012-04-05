@@ -101,7 +101,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			if(feature != null) {
 				feature.setMaster(this);
-				feature.update(FeatureUpdateChange.fullUpdate());
+				feature.update(FeatureUpdateContext.fullUpdate());
 				featuresContainer.addChild(feature);
 				if(a_features)
 					a_features.addItem(feature);
@@ -217,7 +217,7 @@ package com.iblsoft.flexiweather.ogc
 			for each(var f: WFSFeatureBase in features) {
 				//trace("onAreaChanged ["+this+"] feature: " + f);
 				f.invalidatePoints();
-				f.update(FeatureUpdateChange.fullUpdate());
+				f.update(FeatureUpdateContext.fullUpdate());
 			}
 		}
 

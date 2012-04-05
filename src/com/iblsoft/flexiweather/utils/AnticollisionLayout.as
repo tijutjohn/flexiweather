@@ -6,6 +6,7 @@ package com.iblsoft.flexiweather.utils
 	import com.iblsoft.flexiweather.ogc.kml.features.LinearRing;
 	import com.iblsoft.flexiweather.ogc.kml.features.Placemark;
 	import com.iblsoft.flexiweather.ogc.kml.features.Polygon;
+	import com.iblsoft.flexiweather.plugins.IConsole;
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.geometry.ILineSegmentApproximableBounds;
 	import com.iblsoft.flexiweather.utils.geometry.LineSegment;
@@ -64,6 +65,8 @@ package com.iblsoft.flexiweather.utils
 		 */		
 		private var m_suspendAnticollisionProcessing: Boolean;
 		private var m_drawAnnotationAnchor: Boolean;
+		
+		private var m_updateInterval: int = 500;
 		
 		public function AnticollisionLayout()
 		{
@@ -168,7 +171,9 @@ package com.iblsoft.flexiweather.utils
 		
 		public function update(): void
 		{
-			return;
+//			return;
+			
+			var time: int = ProfilerUtils.startProfileTimer();
 			
 			if (!m_suspendAnticollisionProcessing)
 			{
@@ -273,16 +278,19 @@ package com.iblsoft.flexiweather.utils
 							{
 								trace("\n DISPLACE_AUTOMATIC");
 								outterCycle:
-								for(var i_displace: int = 1; i_displace < 20; ++i_displace) {
+								for(var i_displace: int = 1; i_displace < 20; ++i_displace) 
+								{
 									var i_angleSteps: uint = (i_displace / i_displace + 3) / 4 * 4;
 									var f_angleStep: Number = f_pi2 / i_angleSteps;
-									for(var f_angle: Number = 0; f_angle < f_pi2; f_angle += f_angleStep) {
-										f_dx = int(Math.round(Math.cos(f_angle) * i_displace * 10));
-										f_dy = int(Math.round(Math.sin(f_angle) * i_displace * 10));
+									var i_disp10: int = i_displace * 10;
+									for(var f_angle: Number = 0; f_angle < f_pi2; f_angle += f_angleStep) 
+									{
+										f_dx = int(Math.round(Math.cos(f_angle) * i_disp10));
+										f_dy = int(Math.round(Math.sin(f_angle) * i_disp10));
 										
-										trace("displace: ["+i_displace+"] angle: ["+f_angle+"] dx: " + f_dx + " dy: " + f_dy);
-										var boundsDisplaced: Rectangle = new Rectangle(
-												bounds.x + f_dx, bounds.y + f_dy, bounds.width, bounds.height);
+//										trace("displace: ["+i_displace+"] angle: ["+f_angle+"] dx: " + f_dx + " dy: " + f_dy);
+										var boundsDisplaced: Rectangle = new Rectangle(bounds.x + f_dx, bounds.y + f_dy, bounds.width, bounds.height);
+										
 										// quick check if resulting boundary is within the m_boundaryRect 
 										if(checkObjectPlacement(lo, boundsDisplaced)) {
 											b_foundPlace = true;
@@ -401,6 +409,8 @@ package com.iblsoft.flexiweather.utils
 					}
 				}
 			}
+			
+			debug("update time: " + ProfilerUtils.stopProfileTimer(time) + "ms   ma_layoutObjects items: " + ma_layoutObjects.length);
 		}
 		
 		public function needsUpdate(): Boolean
@@ -562,7 +572,7 @@ package com.iblsoft.flexiweather.utils
 		protected function onRender(event: Event): void
 		{
 			if(mb_dirty) {
-				if(getTimer() - mi_lastUpdate > 100) {
+				if(getTimer() - mi_lastUpdate > m_updateInterval) {
 					update();
 				}
 			}
@@ -573,6 +583,7 @@ package com.iblsoft.flexiweather.utils
 		
 		public function set suspendAnticollisionProcessing(value:Boolean):void
 		{ 
+			debug("suspendAnticollisionProcessing = " + value);
 			m_suspendAnticollisionProcessing = value; 
 			update();
 		}
@@ -587,6 +598,33 @@ package com.iblsoft.flexiweather.utils
 		{
 			m_drawAnnotationAnchor = value;
 		}
+		
+		public function get updateInterval():int
+		{
+			return m_updateInterval;
+		}
+		
+		public function set updateInterval(value:int):void
+		{
+			m_updateInterval = value;
+		}
+		
+		/**
+		 *  Debug functions
+		 * 
+		 */
+		
+		public static var debugConsole: IConsole;
+		protected function debug(txt: String): void
+		{
+			if (debugConsole)
+			{
+				debugConsole.print("AnticollisionLayout: " + txt,'Info','AnticollisionLayout');
+			}
+		}
+
+
+
 
 	}
 }

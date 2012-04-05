@@ -1,6 +1,6 @@
 package com.iblsoft.flexiweather.ogc.kml.features
 {
-	import com.iblsoft.flexiweather.ogc.FeatureUpdateChange;
+	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
 	import com.iblsoft.flexiweather.ogc.kml.InteractiveLayerKML;
 	import com.iblsoft.flexiweather.ogc.kml.interfaces.IKMLIconFeature;
@@ -33,9 +33,10 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		}
 		
 		/** Called after the feature is added to master or after any change (e.g. area change). */
-		override public function update(changeFlag: FeatureUpdateChange): void
+		override public function update(changeFlag: FeatureUpdateContext): void
 		{
-			kmlLabel.text = name;
+			if (kmlLabel)
+				kmlLabel.text = name;
 			
 			/*
 			if(mb_pointsDirty) 

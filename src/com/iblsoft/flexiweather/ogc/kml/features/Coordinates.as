@@ -48,8 +48,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 					}
 				}
 			}
-			
-			trace("Coordinates created: " + _coordsList.length);
 		}
 	 	
 	 	

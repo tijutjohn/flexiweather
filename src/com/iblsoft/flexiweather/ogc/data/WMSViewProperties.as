@@ -367,10 +367,8 @@ package com.iblsoft.flexiweather.ogc.data
 			
 			if(img == null) {
 				ma_requests.addItem(request);
+				
 				if(ma_requests.length == 1) {
-					
-					//TODO move to InteractiveLayerWMS (listen for loading start)
-//					m_autoRefreshTimer.reset();
 					
 					notifyLoadingStart(false);
 				}

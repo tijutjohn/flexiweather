@@ -203,6 +203,22 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 		
+		public function get numLayers(): int
+		{
+			if (m_layerContainer)
+			{
+				return m_layerContainer.numElements;
+			}
+			return 0;
+		}
+		public function getLayerAt(position: int): InteractiveLayer
+		{
+			if (position < m_layerContainer.numElements)
+			{
+				return m_layerContainer.getElementAt(position) as InteractiveLayer;
+			}
+			return null;
+		}
 		public override function addElement(element:IVisualElement):IVisualElement
 		{
 			if(element is InteractiveLayer) {

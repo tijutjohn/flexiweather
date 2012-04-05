@@ -1,7 +1,7 @@
 package com.iblsoft.flexiweather.ogc.kml
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
-	import com.iblsoft.flexiweather.ogc.FeatureUpdateChange;
+	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
 	import com.iblsoft.flexiweather.ogc.Version;
 	import com.iblsoft.flexiweather.ogc.kml.controls.KMLInfoWindow;
@@ -26,9 +26,11 @@ package com.iblsoft.flexiweather.ogc.kml
 	import com.iblsoft.flexiweather.ogc.kml.renderer.IKMLRenderer;
 	import com.iblsoft.flexiweather.utils.AsyncManager;
 	import com.iblsoft.flexiweather.utils.DebugUtils;
+	import com.iblsoft.flexiweather.utils.ProfilerUtils;
 	import com.iblsoft.flexiweather.utils.ScreenUtils;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
+	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
 	import flash.display.Graphics;
@@ -39,6 +41,7 @@ package com.iblsoft.flexiweather.ogc.kml
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	
+	import mx.controls.Alert;
 	import mx.core.ClassFactory;
 	import mx.core.EventPriority;
 	import mx.core.FlexGlobals;
@@ -87,6 +90,8 @@ package com.iblsoft.flexiweather.ogc.kml
 		private var m_boundaryRect: Rectangle;
 		
 		private var _syncManager: AsyncManager;
+		private var _syncManagerFullUpdate: AsyncManager;
+		
 		
 		public function InteractiveLayerKML(container:InteractiveWidget, kml: KML, version:Version)
 		{
@@ -94,16 +99,23 @@ package com.iblsoft.flexiweather.ogc.kml
 			
 			_kml = kml;
 			
-			parseKML();
 			
+//			addEventListener(Event.ENTER_FRAME, onEnterFrame);
 			addEventListener(KMLFeatureEvent.KML_FEATURE_CLICK, onKMLFeatureClick, false, EventPriority.DEFAULT_HANDLER, true);
 		}
 		
+		private function onEnterFrame(event: Event): void
+		{
+			trace("ILKML tick");
+		}
 		override protected function createChildren():void
 		{
 			super.createChildren();
 			
-			_syncManager = new AsyncManager();
+			if (!_syncManager)
+				_syncManager = new AsyncManager();
+			if (!_syncManagerFullUpdate)
+				_syncManagerFullUpdate = new AsyncManager();
 			
 		}
 		
@@ -111,7 +123,17 @@ package com.iblsoft.flexiweather.ogc.kml
 		{
 			super.childrenCreated();
 			
-			addChild(_syncManager);
+			if (!_syncManager.parent)
+			{
+				addChild(_syncManager);
+				addChild(_screenshot);
+				
+				parseKML();
+			}
+			if (!_syncManagerFullUpdate.parent)
+			{
+				addChild(_syncManagerFullUpdate);
+			}
 		}
 		/**
 		 * this function must be called, when layer is destroying to remove all dependencies and unload or destroy features. 
@@ -160,15 +182,19 @@ package com.iblsoft.flexiweather.ogc.kml
 //				feature.update(true);
 				
 				kmlParsingFinished();
+				callLater(update, [FeatureUpdateContext.fullUpdate()]);
 				return;
 			}
+			_syncManager.data = kmlObj;
 			
 			// its a container, lets look for children features
-			kmlObj.children = getChildrenFeatures(Container(rootFeature));
+			getChildrenFeatures(Container(rootFeature));
 			
-			callLater(kmlParsingFinished);
-			callLater(update, [FeatureUpdateChange.fullUpdate()]);
+			_syncManager.addEventListener(AsyncManager.EMPTY, onKMLChildrenFeaturesAdded);
+			_syncManager.maxCallsPerTick = 45;
+			_syncManager.start();
 		}
+		
 		
 		private function kmlParsingFinished(): void
 		{
@@ -180,29 +206,63 @@ package com.iblsoft.flexiweather.ogc.kml
 			return (feature is Container);
 		}
 		
-		private function getChildrenFeatures(kmlContainer:Container):Array 
+		private function onKMLChildrenFeaturesAdded(event: Event): void
 		{
-			var childrenFeatures:Array = new Array();
-			for (var i:Number = 0; i < kmlContainer.features.length; i++) 
+			_syncManager.removeEventListener(AsyncManager.EMPTY, onKMLChildrenFeaturesAdded);
+		
+			_syncManager.maxCallsPerTick = 50;
+			
+			var kmlObj: Object = _syncManager.data;
+			
+			kmlObj.children = _childrenFeatures;
+			
+			callLater(kmlParsingFinished);
+			callLater(update, [FeatureUpdateContext.fullUpdate()]);
+		}
+		
+		private var _childrenFeatures:Array;
+		private function getChildrenFeatures(kmlContainer:Container): void 
+		{
+			_childrenFeatures = new Array();
+//			var total: int = kmlContainer.features.length;
+			var feature: KMLFeature = kmlContainer.firstFeature as KMLFeature;
+//			for (var i:Number = 0; i < total; i++)
+			while ( feature )
 			{
-				var feature: KMLFeature = kmlContainer.features[i] as KMLFeature;
-				
-				if (feature.kmlVisibility)
-					addFeature(feature);
-				else
-					trace("Feature is not KML visible, do not add it to features");
-				
+//				var feature: KMLFeature = kmlContainer.features[i] as KMLFeature;
 				var childObj:Object = new Object();
 				childObj.name = feature.name;
+				
 				if (canContainFeatures(feature)) 
 				{
 					childObj.children = getChildrenFeatures(Container(feature));
 				}
-				childrenFeatures.push(childObj);
+				_childrenFeatures.push(childObj);
 				
-				feature.update(FeatureUpdateChange.fullUpdate());
+				_syncManager.addCall(feature, getChildrenFeatureUpdate, [kmlContainer, feature]);
+				
+				feature = feature.next as KMLFeature;
 			}
-			return childrenFeatures;
+		}
+		
+		private function getChildrenFeature(kmlContainer:Container, feature: KMLFeature): void
+		{
+			var childObj:Object = new Object();
+			childObj.name = feature.name;
+			if (canContainFeatures(feature)) 
+			{
+				childObj.children = getChildrenFeatures(Container(feature));
+			}
+			_childrenFeatures.push(childObj);
+			
+		}
+		private function getChildrenFeatureUpdate(kmlContainer:Container, feature: KMLFeature): void
+		{
+			if (feature.kmlVisibility)
+				addFeature(feature, false);
+			else
+				trace("Feature is not KML visible, do not add it to features");
+//			feature.update(FeatureUpdateChange.fullUpdate());
 		}
 		
 		override public function onMouseRollOver(event:MouseEvent):Boolean
@@ -215,7 +275,10 @@ package com.iblsoft.flexiweather.ogc.kml
 		}
 		override public function onMouseMove(event: MouseEvent): Boolean
 		{
-			for each (var feature: KMLFeature in features)
+			var feature: KMLFeature = firstFeature as KMLFeature;
+			//			for (var i:Number = 0; i < total; i++)
+//			for each (var feature: KMLFeature in features)
+			while ( feature )
 			{
 				if (feature is IKMLIconFeature)
 				{
@@ -225,6 +288,7 @@ package com.iblsoft.flexiweather.ogc.kml
 						return true;
 					}
 				}
+				feature = feature.next as KMLFeature;
 			}
 			highlightFeature(null);
 			return false;
@@ -260,6 +324,10 @@ package com.iblsoft.flexiweather.ogc.kml
 		
 		override public function onMouseClick(event: MouseEvent): Boolean
 		{
+			//do not open dialog if shift or ctrl key is pressed
+			if (event.shiftKey || event.ctrlKey)
+				return false;
+			
 			var featureClicked: KMLFeature = checkKMLFeatureMouseEvent(event, KMLFeatureEvent.KML_FEATURE_CLICK, false);
 			
 			if (featureClicked)
@@ -282,7 +350,11 @@ package com.iblsoft.flexiweather.ogc.kml
 		
 		private function checkKMLFeatureMouseEvent(event:MouseEvent, dispatchType: String, bDispatchEvent: Boolean = true): KMLFeature
 		{
-			for each (var feature: KMLFeature in features)
+			var feature: KMLFeature = firstFeature as KMLFeature;
+			//			for (var i:Number = 0; i < total; i++)
+			//			for each (var feature: KMLFeature in features)
+//			for each (var feature: KMLFeature in features)
+			while ( feature )
 			{
 				
 				if(feature is IKMLIconFeature && feature.kmlIcon.hitTestPoint(event.stageX, event.stageY, false))
@@ -295,6 +367,7 @@ package com.iblsoft.flexiweather.ogc.kml
 					}
 					return feature;
 				}
+				feature = feature.next as KMLFeature;
 			}
 			return null;
 			
@@ -315,25 +388,77 @@ package com.iblsoft.flexiweather.ogc.kml
 			}
 		}
 		
-		public function update(changeFlag: FeatureUpdateChange): void
+		public function update(changeFlag: FeatureUpdateContext): void
 		{
-			trace("KML layer draw: " + features.length);
+//			trace("KML layer draw: " + features.length);
 			
 			m_boundaryRect = new Rectangle(0,0,width, height);
 //			m_boundaryRect = container.getBounds(this.stage);
 			
-			if (_syncManager)
+			var time: int;
+			
+			if (_screenshotMode)
 			{
-				for each (var feature: KMLFeature in features)
+				
+			}
+			if (changeFlag.fullUpdateNeeded && _syncManagerFullUpdate)
+			{
+				_syncManagerFullUpdate.removeEventListener(AsyncManager.EMPTY, onFullUpdateFinished);
+				_syncManagerFullUpdate.maxCallsPerTick = 30;
+				trace("FULL UPDATE");
+				time = ProfilerUtils.startProfileTimer();
+				var feature: KMLFeature;
+//				for each (feature in features)
+//				{
+//					_syncManagerFullUpdate.addCall(feature, updateFeature, [feature, changeFlag]);
+//				}
+				
+				feature = firstFeature as KMLFeature;
+				while (feature)
 				{
-					_syncManager.addCall(feature, updateFeature, [feature, changeFlag]);
-//					updateFeature(feature, itemRendererInstance, fullUpdate);	
+					_syncManagerFullUpdate.addCall(feature, updateFeature, [feature, changeFlag]);
+					feature = feature.next as KMLFeature;
 				}
-				_syncManager.start();
+				
+
+				if (firstFeature)
+					(firstFeature as KMLFeature).debug("ILKML full update add calls: " + ProfilerUtils.stopProfileTimer(time) + " ms");
+				_syncManagerFullUpdate.start();
+				
+			} else {
+				if (_syncManager)
+				{
+					time = ProfilerUtils.startProfileTimer();
+//					for each (feature in features)
+//					{
+//						_syncManager.addCall(feature, updateFeature, [feature, changeFlag]);
+//					}
+					
+					feature = firstFeature as KMLFeature;
+					var cnt: int = 0;
+					_syncManager.maxCallsPerTick = 1000;
+					while (feature)
+					{
+						_syncManager.addCall(feature, updateFeature, [feature, changeFlag]);
+						feature = feature.next as KMLFeature;
+						cnt++;
+					}
+					
+					if (firstFeature)
+						(firstFeature as KMLFeature).debug("ILKML update add calls: " + ProfilerUtils.stopProfileTimer(time) + " ms. Length: " + cnt);
+					_syncManager.start();
+				}
+				
 			}
 		}
 		
-		private function updateFeature(feature:  KMLFeature, changeFlag: FeatureUpdateChange): void
+		private function onFullUpdateFinished(event: Event): void
+		{
+			trace("onFullUpdateFinished");
+//			hideLoadingPopup();
+		}
+		
+		private function updateFeature(feature:  KMLFeature, changeFlag: FeatureUpdateContext): void
 		{
 //			if (fullUpdate)
 //				feature.invalidatePoints();
@@ -349,7 +474,7 @@ package com.iblsoft.flexiweather.ogc.kml
 		protected function onAllRendererResourcesLoaded(event: Event): void
 		{
 			kmlParsingFinished();
-			update(FeatureUpdateChange.fullUpdate());
+			update(FeatureUpdateContext.fullUpdate());
 		}
 		protected function onRendererBitmapLoaded(event: KMLBitmapEvent): void
 		{
@@ -411,26 +536,30 @@ package com.iblsoft.flexiweather.ogc.kml
 			var flag: uint = 0;
 			if (crs != m_oldCRS)
 			{
-				flag |= FeatureUpdateChange.CRS_CHANGED;
+				flag |= FeatureUpdateContext.CRS_CHANGED;
 			}
 			if (!m_oldViewBBox)
 			{
-				flag |= FeatureUpdateChange.VIEW_BBOX_MOVED;
-				flag |= FeatureUpdateChange.VIEW_BBOX_SIZE_CHANGED;
+				flag |= FeatureUpdateContext.VIEW_BBOX_MOVED;
+				flag |= FeatureUpdateContext.VIEW_BBOX_SIZE_CHANGED;
 			} else {
 				if (!viewBBox.equals(m_oldViewBBox))
 				{
 					if (m_oldViewBBox.width == viewBBox.width && m_oldViewBBox.height == viewBBox.height)
-						flag |= FeatureUpdateChange.VIEW_BBOX_MOVED;
+						flag |= FeatureUpdateContext.VIEW_BBOX_MOVED;
 					else
-						flag |= FeatureUpdateChange.VIEW_BBOX_SIZE_CHANGED;
+						flag |= FeatureUpdateContext.VIEW_BBOX_SIZE_CHANGED;
 				}
 			}
-			var updateFlag: FeatureUpdateChange = new FeatureUpdateChange(flag);
+			var updateFlag: FeatureUpdateContext = new FeatureUpdateContext(flag);
 			
 			//TODO: check visible parts change as well
 		
-			update(updateFlag);
+			if (updateFlag.anyChange)
+			{
+				update(updateFlag);
+				trace("ILKML isUpdateNeeded: " + updateFlag.toString());
+			}
 			
 			m_oldCRS = crs;	
 			m_oldViewBBox = viewBBox;
@@ -480,5 +609,6 @@ package com.iblsoft.flexiweather.ogc.kml
 			graphics.drawRect(0, 0, f_width, f_height);
 			graphics.endFill();
 		}
+		
 	}
 }

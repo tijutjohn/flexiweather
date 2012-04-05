@@ -11,16 +11,32 @@ package com.iblsoft.flexiweather.utils
 
 	public class AsyncManager extends UIComponent
 	{
+		public static const EMPTY: String = 'empty';
+		
 		private static var _counter: int = 0;
 		
 		private var _uid: int;
 		
 		private var _timer: Timer;
-		private var _stack: Array;
-		private var _presence: Dictionary;
+		protected var _stack: Array;
+		protected var _presence: Dictionary;
 		
 		private var _maxCallsPerTick: int;
+
+		public function get maxCallsPerTick():int
+		{
+			return _maxCallsPerTick;
+		}
 		
+		public function set maxCallsPerTick(value:int):void
+		{
+			_maxCallsPerTick = value;
+		}
+		
+		/**
+		 * You can store here any data, which you want to have after all task are done 
+		 */		
+		public var data: Object;
 		
 		public function AsyncManager()
 		{
@@ -28,7 +44,7 @@ package com.iblsoft.flexiweather.utils
 			
 			init();
 		}
-		
+
 		private function init(): void
 		{
 			_stack = new Array();
@@ -64,11 +80,18 @@ package com.iblsoft.flexiweather.utils
 			tick();
 		}
 		
+		private function notifyEmpty(): void
+		{
+			dispatchEvent(new Event(EMPTY));
+		}
+		
 		protected function tick(): void
 		{
+			trace("AsuncManager ["+_uid+"] tick "  + _stack.length);
 			if (_stack.length == 0)
 			{
 				stop();
+				notifyEmpty();
 				return;
 			}
 			
@@ -91,6 +114,9 @@ package com.iblsoft.flexiweather.utils
 			{
 				_presence[obj] = true;
 				_stack.push({obj: obj, callback: callback, arguments: arguments});
+//				trace("AsuncManager ["+_uid+"] addCall "  + _stack.length);
+			} else {
+//				trace("AsyncManager ["+_uid+"] item was not added");
 			}
 		}
 	}

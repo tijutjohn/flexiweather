@@ -4,16 +4,20 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
 	import com.iblsoft.flexiweather.ogc.FeatureBase;
-	import com.iblsoft.flexiweather.ogc.FeatureUpdateChange;
+	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
 	import com.iblsoft.flexiweather.ogc.kml.events.KMLFeatureEvent;
 	import com.iblsoft.flexiweather.ogc.kml.features.styles.Style;
 	import com.iblsoft.flexiweather.ogc.kml.features.styles.StyleMap;
 	import com.iblsoft.flexiweather.ogc.kml.features.styles.StyleSelector;
+	import com.iblsoft.flexiweather.ogc.kml.managers.KMLParserManager;
 	import com.iblsoft.flexiweather.ogc.kml.renderer.IKMLRenderer;
+	import com.iblsoft.flexiweather.plugins.IConsole;
+	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.syndication.ParsingTools;
 	import com.iblsoft.flexiweather.utils.AnticollisionLayout;
 	import com.iblsoft.flexiweather.utils.AnticollisionLayoutObject;
+	import com.iblsoft.flexiweather.utils.ProfilerUtils;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.display.Bitmap;
@@ -23,6 +27,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	import flash.net.URLRequest;
+	import flash.utils.getTimer;
 	
 	import mx.states.OverrideBase;
 	import mx.utils.object_proxy;
@@ -35,6 +40,9 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	 */	
 	public class KMLFeature extends FeatureBase
 	{
+		public static const VISIBILITY_CHANGE: String = 'visibilityChange';
+		
+		
 		override public function set x(value:Number):void
 		{
 			super.x = value;
@@ -114,12 +122,16 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		
 			_kml = kml;
 			
-			_kmlns = new Namespace(s_namespace);
-			
-			createKMLLabel();
 			
 			_xmlList = s_xml;
-			parse();
+			
+			init();
+			
+		}
+		
+		public function init(): void
+		{
+			//createKMLLabel();
 			
 			mouseEnabled = true;
 			mouseChildren = true;
@@ -181,10 +193,18 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			kfe.kmlFeature = this;
 			dispatchEvent(kfe);
 		}
-		protected function parse(): void
+		
+		public function parse(s_namespace: String, kmlParserManager: KMLParserManager): void
+		{
+			parseKML(s_namespace, kmlParserManager);
+		}
+		
+		protected function parseKML(s_namespace: String, kmlParserManager: KMLParserManager): void
 		{
 			if (!_xmlList)
 				return;
+			
+			_kmlns = new Namespace(s_namespace);
 			
 			this._id = ParsingTools.nullCheck(_xmlList.@id);
 			this._name = ParsingTools.nullCheck(_xmlList.kmlns::name);
@@ -206,9 +226,9 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				this._region = new Region(ms_namespace, this.xml.kmlns::Region);
 			}
 			
-			trace("Feature name: " + _name + " ID: " + _id);
-			trace("\t description: " + _description);
-			trace("\t snippet: " + _snippet);
+//			trace("Feature name: " + _name + " ID: " + _id);
+//			trace("\t description: " + _description);
+//			trace("\t snippet: " + _snippet);
 			
 			dispatchEvent(new Event("nameChanged"));
 			
@@ -243,7 +263,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			_itemRendererInstance = itemRendererInstance;
 		}
 		/** Called after the feature is added to master or after any change (e.g. area change). */
-		override public function update(changeFlag: FeatureUpdateChange): void
+		override public function update(changeFlag: FeatureUpdateContext): void
 		{
 			super.update(changeFlag);
 //			if (m_points && m_points.length > 0)
@@ -374,16 +394,15 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		}
 		*/
 		
-		/**
-		 *	A String that uniquely identifies the Entry.
-		 *
-		 *	This property conveys a permanent, universally unique identifier for
-		 *	an entry or feed.
-		 *
-		 * 	@langversion ActionScript 3.0
-		 *	@playerversion Flash 8.5
-		 *	@tiptext
-		 */	
+		public function changeVisibility(value: Boolean): void
+		{
+			if (this._visibility != value)
+			{
+				this._visibility = value;
+				dispatchEvent(new Event(VISIBILITY_CHANGE));
+			}
+		}
+		
 		public function get visibility():Boolean
 		{
 			return this._visibility;
@@ -470,6 +489,35 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				"snippet: " + snippet +
 				"description: " + description +
 				"\n";
+		}
+		
+		/**
+		 *  Debug functions
+		 * 
+		 */
+		
+		protected function startProfileTimer(): int
+		{
+			return ProfilerUtils.startProfileTimer();
+		}
+		/**
+		 * Return time interval in seconds 
+		 * @param startTime
+		 * @return 
+		 * 
+		 */		
+		protected function stopProfileTimer(startTime: int): Number
+		{
+			return ProfilerUtils.stopProfileTimer(startTime);
+		}
+		
+		public static var debugConsole: IConsole;
+		public function debug(txt: String): void
+		{
+			if (debugConsole)
+			{
+				debugConsole.print("KMLFeature: " + txt,'Info','KMLFeature');
+			}
 		}
 	}
 }

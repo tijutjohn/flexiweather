@@ -1,16 +1,18 @@
 package com.iblsoft.flexiweather.ogc.kml.features
 {
 	import com.google.maps.geom.Point3D;
-	import com.iblsoft.flexiweather.ogc.FeatureUpdateChange;
+	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
 	import com.iblsoft.flexiweather.ogc.kml.InteractiveLayerKML;
 	import com.iblsoft.flexiweather.ogc.kml.interfaces.IKMLIconFeature;
 	import com.iblsoft.flexiweather.ogc.kml.interfaces.IKMLLabeledFeature;
+	import com.iblsoft.flexiweather.ogc.kml.managers.KMLParserManager;
 	import com.iblsoft.flexiweather.ogc.kml.renderer.IKMLRenderer;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.syndication.ParsingTools;
 	import com.iblsoft.flexiweather.utils.AnticollisionLayout;
 	import com.iblsoft.flexiweather.utils.AnticollisionLayoutObject;
+	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.utils.geometry.ILineSegmentApproximableBounds;
 	import com.iblsoft.flexiweather.utils.geometry.LineSegment;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
@@ -47,9 +49,23 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		{
 			super(kml, s_namespace, x);
 			
-			var kmlns:Namespace = new Namespace(s_namespace);
 
+		}
+		
+		override protected function parseKML(s_namespace: String, kmlParserManager: KMLParserManager): void
+		{
+			super.parseKML(s_namespace, kmlParserManager);
+			
+			var time: int = startProfileTimer();
+			
+			if (name && name.length > 0)
+			{
+//				createKMLLabel();
+			}
+			
 			createIcon();
+			
+			var kmlns:Namespace = new Namespace(s_namespace);
 			
 			// Features are: <Point>, <LineString>, <LinearRing>, <Polygon>, <MultiGeometry>, <Model>
 			// We'll only support <Point>, <LineString>, <LinearRing>, <Polygon>
@@ -65,25 +81,83 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			if (ParsingTools.nullCheck(this.xml.kmlns::Polygon)) {
 				this._geometry = new Polygon(s_namespace, this.xml.kmlns::Polygon);
 			}
+			if (ParsingTools.nullCheck(this.xml.kmlns::MultiGeometry)) {
+				this._geometry = new MultiGeometry(s_namespace, this.xml.kmlns::MultiGeometry);
+			}
+			
+			debug("Placemark parseKML: " + (stopProfileTimer(time)) + "ms");
 		}
 		
 		public override function setMaster(master: InteractiveLayerFeatureBase): void
 		{
 			super.setMaster(master);
 			
+//			master.container.labelLayout.addObstacle(this);
+//			var lo: AnticollisionLayoutObject = master.container.labelLayout.addObject(kmlLabel, [this], AnticollisionLayout.DISPLACE_HIDE);
+//			lo.anchorColor = 0x888888;
+//			lo.anchorAlpha = 0.5;
+//			lo.displacementMode = AnticollisionLayout.DISPLACE_AUTOMATIC_SIMPLE;
+//			
+//			master.container.objectLayout.addObject(this);
+			/*
 			master.container.labelLayout.addObstacle(this);
-			var lo: AnticollisionLayoutObject = master.container.labelLayout.addObject(kmlLabel, [this], AnticollisionLayout.DISPLACE_HIDE);
-			lo.anchorColor = 0x888888;
-			lo.anchorAlpha = 0.5;
-			lo.displacementMode = AnticollisionLayout.DISPLACE_AUTOMATIC_SIMPLE;
-			
-			master.container.objectLayout.addObject(this);
+			if (kmlLabel)
+			{
+				var lo: AnticollisionLayoutObject = master.container.labelLayout.addObject(kmlLabel, [this], AnticollisionLayout.DISPLACE_HIDE);
+				lo.anchorColor = 0x888888;
+				lo.anchorAlpha = 0.5;
+				lo.displacementMode = AnticollisionLayout.DISPLACE_AUTOMATIC_SIMPLE;
+			}
+			*/
+//			master.container.objectLayout.addObject(this);
 		}
 		
-		/** Called after the feature is added to master or after any change (e.g. area change). */
-		override public function update(changeFlag: FeatureUpdateChange): void
+		protected function updateGeometryCoordinates(currGeometry: Geometry): void
 		{
-			kmlLabel.text = name;
+			var arr: Array;
+			var origCoords: Array;
+			if (currGeometry is com.iblsoft.flexiweather.ogc.kml.features.Point)
+			{
+				origCoords = coordinates;
+				arr = updateCoordinates(currGeometry as com.iblsoft.flexiweather.ogc.kml.features.Point);
+				ArrayUtils.unionArrays(origCoords, arr);
+				coordinates = origCoords;
+			}
+			if (currGeometry is LineString)
+			{
+				origCoords = coordinates;
+				arr = updateCoordinates(currGeometry as LineString);
+				ArrayUtils.unionArrays(origCoords, arr);
+				coordinates = origCoords;
+			}
+			if (currGeometry is LinearRing)
+			{
+				origCoords = coordinates;
+				arr = updateCoordinates(currGeometry as LinearRing);
+				ArrayUtils.unionArrays(origCoords, arr);
+				coordinates = origCoords;
+			}
+			if (currGeometry is Polygon)
+			{
+				var linearRing: LinearRing = (currGeometry as Polygon).outerBoundaryIs.linearRing;
+				linearRing.coordinatesPoints = updateCoordinates(linearRing, true);
+			}
+			if (currGeometry is MultiGeometry)
+			{
+				//TODO update coordinates in MultiGeometry items
+				trace("TODO update coordinates in MultiGeometry items");
+				var multigeometry: MultiGeometry = currGeometry as MultiGeometry;
+				for each (var geometryItem: Geometry in multigeometry.geometries)
+				{
+					updateGeometryCoordinates(geometryItem)
+				}
+			}
+		}
+		/** Called after the feature is added to master or after any change (e.g. area change). */
+		override public function update(changeFlag: FeatureUpdateContext): void
+		{
+			if (kmlLabel)
+				kmlLabel.text = name;
 			
 			if (changeFlag.anyChange)
 				mb_pointsDirty = true;
@@ -100,23 +174,8 @@ package com.iblsoft.flexiweather.ogc.kml.features
 					//TODO need to find better solutions for all classes which have coordinates
 					
 					var coordsArray: Array = [];//coordinates;
-					if (_geometry is com.iblsoft.flexiweather.ogc.kml.features.Point)
-					{
-						coordinates = updateCoordinates(_geometry as com.iblsoft.flexiweather.ogc.kml.features.Point);
-					}
-					if (_geometry is LineString)
-					{
-						coordinates = updateCoordinates(_geometry as LineString);
-					}
-					if (_geometry is LinearRing)
-					{
-						coordinates = updateCoordinates(_geometry as LinearRing);
-					}
-					if (_geometry is Polygon)
-					{
-						var linearRing: LinearRing = (_geometry as Polygon).outerBoundaryIs.linearRing;
-						linearRing.coordinatesPoints = updateCoordinates(linearRing, true);
-					}
+					coordinates = [];
+					updateGeometryCoordinates(_geometry);
 				}
 			}
 			

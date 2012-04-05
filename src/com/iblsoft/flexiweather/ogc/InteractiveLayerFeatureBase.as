@@ -1,16 +1,27 @@
 package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
+	import com.iblsoft.flexiweather.ogc.kml.features.KMLFeature;
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
+	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
+	import com.iblsoft.flexiweather.widgets.InteractiveLayerPan;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
+	import flash.display.DisplayObject;
 	import flash.display.Sprite;
+	import flash.events.Event;
 	
 	import mx.collections.ArrayCollection;
 	
 	public class InteractiveLayerFeatureBase extends InteractiveDataLayer
 	{
+		private var m_firstFeature: FeatureBase;
+		public function get firstFeature(): FeatureBase
+		{
+			return m_firstFeature;
+		}
 		private var ma_features: ArrayCollection = new ArrayCollection();
+		
 		private var m_featuresContainer: Sprite = new Sprite();
 		
 		protected var ms_serviceURL: String = null;
@@ -18,6 +29,8 @@ package com.iblsoft.flexiweather.ogc
 		
 		protected var mb_useMonochrome: Boolean = false;
 		protected var mi_monochromeColor: uint = 0x333333;
+		
+		protected var _screenshot: Screenshot;
 		
 		public function InteractiveLayerFeatureBase(container: InteractiveWidget,
 													version: Version)
@@ -28,6 +41,25 @@ package com.iblsoft.flexiweather.ogc
 			m_featuresContainer.mouseEnabled = false;
 			m_featuresContainer.mouseChildren = false;
 			addChild(m_featuresContainer);
+			
+			addScreenshotModeListeners();
+		}
+		
+		
+		override protected function createChildren():void
+		{
+			super.createChildren();
+			
+			if (!_screenshot)
+				_screenshot = new Screenshot();
+		}
+		
+		override protected function childrenCreated():void
+		{
+			super.childrenCreated();
+			
+			if (!_screenshot.parent)
+				addChild(_screenshot);
 		}
 		
 		/**
@@ -41,13 +73,34 @@ package com.iblsoft.flexiweather.ogc
 			return null;
 		}
 		
+		private var _oldFeature: FeatureBase;
 		
-		public function addFeature(feature: FeatureBase): void
+		public function addFeature(feature: FeatureBase, bDoUpdate: Boolean = true): void
 		{
 			feature.setMaster(this);
-			feature.update(new FeatureUpdateChange(FeatureUpdateChange.FULL_UPDATE));
+			
+			if (bDoUpdate)
+				feature.update(new FeatureUpdateContext(FeatureUpdateContext.FULL_UPDATE));
+			
 			m_featuresContainer.addChild(feature);
+			if (!m_firstFeature)
+			{
+				m_firstFeature = feature;
+			}
+			
+			if (_oldFeature)
+			{
+				_oldFeature.next = feature;
+				feature.previous = _oldFeature;
+			} else {
+				m_firstFeature = feature;
+			}
+			
+			_oldFeature = feature;
+			
+			
 			ma_features.addItem(feature);
+			
 			onFeatureAdded(feature);
 		}
 		
@@ -103,6 +156,69 @@ package com.iblsoft.flexiweather.ogc
 			super.destroy();
 		}
 		
+		
+		/**
+		 * Screenshot functionality
+		 */
+		
+		protected var _screenshotMode: Boolean;
+		
+		private function addScreenshotModeListeners(): void
+		{
+			//for now we are not using screenshot functionality
+			return;
+			
+			//need to find out pan layer first
+			
+			var panLayer: InteractiveLayerPan;
+			
+			var total: int = container.numLayers;
+			for (var i: int = 0; i < total; i++)
+			{
+				var layer: InteractiveLayer = container.getLayerAt(i);
+				
+				if (layer is InteractiveLayerPan)
+				{
+					panLayer = layer as InteractiveLayerPan;
+					break;
+				}
+			}
+			
+			if (panLayer)
+			{
+				panLayer.addEventListener(InteractiveLayerPan.START_PANNING, onPanningStarted);
+				panLayer.addEventListener(InteractiveLayerPan.STOP_PANNING, onPanningFinished);
+				panLayer.addEventListener(InteractiveLayerPan.PAN, onPanning);
+			}
+		}
+		
+		private function onPanning(event: Event): void
+		{
+			changeToScreenshotMode();
+		}
+		private function onPanningStarted(event: Event): void
+		{
+			changeToScreenshotMode();
+		}
+		private function onPanningFinished(event: Event): void
+		{
+			changeBackFromScreenshotMode();
+		}
+		public function changeToScreenshotMode(): void
+		{
+			_screenshot.create(this, width, height);
+			_screenshot.visible = true;
+			_screenshotMode = true;
+			m_featuresContainer.visible = false;
+		}
+		public function changeBackFromScreenshotMode(): void
+		{
+			_screenshot.visible = false;
+			_screenshotMode = false;
+			m_featuresContainer.visible = true;
+		}
+		
+		
 		public function set useMonochrome(val: Boolean): void
 		{
 			var b_needUpdate: Boolean = false;
@@ -114,7 +230,7 @@ package com.iblsoft.flexiweather.ogc
 			if(b_needUpdate) {
 				for(var i: int = 0; i < m_featuresContainer.numChildren; i++){
 					if(m_featuresContainer.getChildAt(i) is WFSFeatureEditable){
-						WFSFeatureEditable(m_featuresContainer.getChildAt(i)).update(FeatureUpdateChange.fullUpdate());
+						WFSFeatureEditable(m_featuresContainer.getChildAt(i)).update(FeatureUpdateContext.fullUpdate());
 					}
 				}
 			}
@@ -134,7 +250,7 @@ package com.iblsoft.flexiweather.ogc
 			if(b_needUpdate) {
 				for(var i: int = 0; i < m_featuresContainer.numChildren; i++) {
 					if(m_featuresContainer.getChildAt(i) is WFSFeatureEditable) {
-						WFSFeatureEditable(m_featuresContainer.getChildAt(i)).update(FeatureUpdateChange.fullUpdate());
+						WFSFeatureEditable(m_featuresContainer.getChildAt(i)).update(FeatureUpdateContext.fullUpdate());
 					}
 				}
 			}
@@ -160,4 +276,54 @@ package com.iblsoft.flexiweather.ogc
 		public function set serviceURL(s_serviceURL: String): void
 		{ ms_serviceURL = s_serviceURL; }
 	}
+}
+
+
+import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
+
+import flash.display.Bitmap;
+import flash.display.BitmapData;
+import flash.display.Graphics;
+import flash.geom.ColorTransform;
+
+import mx.core.UIComponent;
+
+class Screenshot extends UIComponent
+{
+	/**
+	 * Bitmap stores screenshot of current layer features. It's used for moving 1 bitmap instead of many features when panning 
+	 */		
+	private var _featuresBitmap: Bitmap;
+	private var _bd: BitmapData;
+	
+	private var _changed: Boolean;
+	
+	public function Screenshot()
+	{
+		
+	}
+	
+	public function invalidate(): void
+	{
+		_changed = true;	
+	}
+	
+	public function create(layer: InteractiveLayerFeatureBase, w: int, h: int): void
+	{
+		trace("createScreenshot " + w + " , " + h);
+		_bd = new BitmapData(w, h, true, 0x00000000);
+		var clrTransform: ColorTransform = new ColorTransform(1,0,0);
+		_bd.draw(layer, null, clrTransform);
+		
+		if (!_featuresBitmap)
+			_featuresBitmap = new Bitmap(_bd);
+		else {
+			_featuresBitmap.bitmapData.dispose();
+			_featuresBitmap.bitmapData = _bd;
+		}
+		if (!_featuresBitmap.parent)
+			addChild(_featuresBitmap);
+			
+	}
+	
 }
