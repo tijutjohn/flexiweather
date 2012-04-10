@@ -64,6 +64,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			}
 			if (ParsingTools.nullCheck(this.xml.kmlns::NetworkLink)) {
 				this._feature = new NetworkLink(this, _kmlNamespace, this.xml.kmlns::NetworkLink);
+				_networkLinkManager.addNetworkLink(_feature as NetworkLink, true);
 			}
 			_feature.parse(_kmlNamespace, _kmlParserManager);
 			_kmlParserManager.addEventListener(AsyncManager.EMPTY, onKMLParserFinished);

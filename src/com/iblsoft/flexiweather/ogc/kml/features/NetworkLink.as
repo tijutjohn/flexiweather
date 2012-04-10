@@ -21,6 +21,28 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			}
 		}
 		
+		public function addLoadedKML(kml: KML): void
+		{
+			if (kml is KML22)
+			{
+				var kml22: KML22 = kml as KML22;
+				
+			}
+		}
+		
+		public function get refreshVisibility(): int
+		{
+			return _refreshVisibility;
+		}
+		public function get flyToView(): int
+		{
+			return _flyToView;
+		}
+		public function get link(): Link
+		{
+			return _link;
+		}
+		
 		
 	}
 }

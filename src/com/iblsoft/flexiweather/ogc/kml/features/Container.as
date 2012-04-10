@@ -56,6 +56,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				var networkLink: NetworkLink = new NetworkLink(kml, s_namespace, XMLList(i));
 				kmlParserManager.addCall(networkLink, networkLink.parse, [s_namespace, kmlParserManager]);
 				kmlParserManager.addCall(networkLink, addFeature, [networkLink]);
+				
 			}
 			for each (i in this.xml.kmlns::Placemark) {
 				var placemark: Placemark = new Placemark(kml, s_namespace, XMLList(i));
@@ -148,6 +149,12 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			}
 			
 			_oldFeature = feature;
+			
+			
+			if (feature is NetworkLink)
+			{
+				kml.networkLinkManager.addNetworkLink(feature as NetworkLink, true)
+			}
 		}
 		
 		/**

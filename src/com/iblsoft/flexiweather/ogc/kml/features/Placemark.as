@@ -162,10 +162,13 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			if (changeFlag.anyChange)
 				mb_pointsDirty = true;
 			
+			trace("Placemark update: changeFlag: " + changeFlag.toString());
 			if(mb_pointsDirty) 
 			{
 				if (_geometry)
 				{
+					trace("Placemark update: geometry: " + _geometry);
+				
 					var iw: InteractiveWidget = m_master.container;
 					var c: Coord;
 					var coord: Object;
@@ -212,7 +215,17 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		
 		public function get drawingFeature(): Boolean
 		{
-			return (_geometry is LineString || _geometry is LinearRing || _geometry is Polygon);
+			var simpleDrawing: Boolean = (_geometry is LineString || _geometry is LinearRing || _geometry is Polygon);
+			
+			if (_geometry is MultiGeometry)
+			{
+				var multiGeometry: MultiGeometry = _geometry as MultiGeometry;
+				for each (var geometry: Geometry in multiGeometry.geometries)
+				{
+					simpleDrawing = simpleDrawing || (geometry is LineString || geometry is LinearRing || geometry is Polygon);
+				}
+			}
+			return simpleDrawing;
 		}
 		public function get iconFeature(): Boolean
 		{

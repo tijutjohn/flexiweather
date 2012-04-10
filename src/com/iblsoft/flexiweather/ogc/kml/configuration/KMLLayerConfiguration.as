@@ -23,8 +23,6 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 	
 	public class KMLLayerConfiguration extends LayerConfiguration
 	{
-		public static const KML_FILE_LOADED: String = 'kmlFileLoaded';
-		public static const KMZ_FILE_LOADED: String = 'kmzFileLoaded';
 		
 		/**
 		 * Storage for kmzFile with all assets stored inside; 
@@ -32,7 +30,10 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 		private var _kmzFile: KMZFile;
 		
 		private var _kml: KML22;
-		
+		public function get kml(): KML22
+		{
+			return _kml;
+		}
 		/**
 		 * Path which will be added to icon URL (if they are relative) 
 		 */		
@@ -195,7 +196,9 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 			
 			notifyKMLParsingFinished();
 			
-			dispatchEvent(new Event(KML_FILE_LOADED));
+			var ke: KMLEvent = new KMLEvent(KMLEvent.KML_FILE_LOADED);
+			ke.kmlLayerConfiguration = this;
+			dispatchEvent(ke);
 		}
 		
 		/**
@@ -210,7 +213,9 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 			
 			notifyKMLParsingFinished();
 			
-			dispatchEvent(new Event(KMZ_FILE_LOADED));
+			var ke: KMLEvent = new KMLEvent(KMLEvent.KMZ_FILE_LOADED);
+			ke.kmlLayerConfiguration = this;
+			dispatchEvent(ke);
 		}
 		
 		override public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer

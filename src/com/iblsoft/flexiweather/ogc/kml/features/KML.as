@@ -4,6 +4,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import com.iblsoft.flexiweather.ogc.kml.events.KMLEvent;
 	import com.iblsoft.flexiweather.ogc.kml.managers.KMLParserManager;
 	import com.iblsoft.flexiweather.ogc.kml.managers.KMLResourceManager;
+	import com.iblsoft.flexiweather.ogc.kml.managers.NetworkLinkManager;
 	import com.iblsoft.flexiweather.syndication.XmlParser;
 	
 	import flash.events.Event;
@@ -24,6 +25,12 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		
 		protected var _resourceManager: KMLResourceManager;
 		protected var _kmlParserManager: KMLParserManager;
+		protected var _networkLinkManager: NetworkLinkManager;
+		
+		public function get networkLinkManager(): NetworkLinkManager
+		{
+			return _networkLinkManager;
+		}
 		
 		public function KML(xmlStr:String, urlPath: String, baseUrlPath: String, resourceManager: KMLResourceManager = null)
 		{
@@ -37,6 +44,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			
 			_resourceManager = resourceManager;
 			_kmlParserManager = new KMLParserManager();
+			_networkLinkManager = new NetworkLinkManager();
 			
 			if (!_resourceManager)
 			{
