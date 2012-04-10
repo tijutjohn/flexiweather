@@ -42,11 +42,13 @@ package com.iblsoft.flexiweather.ogc.data
 	import flash.utils.Timer;
 	
 	import mx.collections.ArrayCollection;
-	import mx.containers.Canvas;
 	import mx.controls.Image;
+	import mx.core.IVisualElement;
 	import mx.core.UIComponent;
 	import mx.events.DynamicEvent;
 	import mx.logging.Log;
+	
+	import spark.components.Group;
 
 	public class WMSViewProperties extends InteractiveDataLayer implements Serializable
 	{
@@ -984,20 +986,18 @@ package com.iblsoft.flexiweather.ogc.data
 		}
 		
 		
-		override public function removeLegend(canvas: Canvas): void
+		override public function removeLegend(group: Group): void
 		{
-//			super.removeLegend(canvas);
-			
-			if (canvas)
+			if (group)
 			{
-				while (canvas.numChildren > 0)
+				while (group.numElements > 0)
 				{
-					var disp: UIComponent = canvas.getChildAt(0) as UIComponent;
+					var disp: UIComponent = group.getElementAt(0) as UIComponent;
 					if (disp is Image)
 					{
 						((disp as Image).source as Bitmap).bitmapData.dispose();
 					}
-					canvas.removeChildAt(0);
+					group.removeElementAt(0);
 					disp = null;
 				}	
 			}
@@ -1009,17 +1009,15 @@ package com.iblsoft.flexiweather.ogc.data
 		}
 		/**
 		 * Render legend. If legend is not cached, it needs to be loaded. 
-		 * @param canvas
+		 * @param group
 		 * @param callback
 		 * @param labelAlign
 		 * @param hintSize
 		 * @return 
 		 * 
 		 */		
-		override public function renderLegend(canvas: Canvas, callback: Function, legendScaleX: Number, legendScaleY: Number, labelAlign: String = 'left', useCache: Boolean = false, hintSize: Rectangle = null): Rectangle
+		override public function renderLegend(group: Group, callback: Function, legendScaleX: Number, legendScaleY: Number, labelAlign: String = 'left', useCache: Boolean = false, hintSize: Rectangle = null): Rectangle
 		{
-//			super.renderLegend(canvas, callback, legendScaleX, legendScaleY, labelAlign, useCache, hintSize);
-			
 			var styleName: String = getWMSStyleName(0);
 			if (!styleName)
 				styleName = '';
@@ -1036,10 +1034,6 @@ package com.iblsoft.flexiweather.ogc.data
 				w = hintSize.width;
 				h = hintSize.height;
 			}
-			
-			//			m_legendCanvas = canvas;
-			//			m_legendLabelAlign = labelAlign;
-			//        	m_legendCallBack = callback;
 			
 			debug("renderLegend url: " + legendObject.url + " scale ["+legendScaleX+","+legendScaleY+"]");
 			if (!useCache || (useCache && !isLegendCachedBySize(w, h)))
@@ -1065,7 +1059,7 @@ package com.iblsoft.flexiweather.ogc.data
 				if (isNaN(legendScaleY))
 					legendScaleY = 1;
 				
-				var associatedData: Object = {canvas: canvas, labelAlign: labelAlign, callback: callback, useCache: useCache, legendScaleX: legendScaleX, legendScaleY: legendScaleY, width: w, height: h};
+				var associatedData: Object = {group: group, labelAlign: labelAlign, callback: callback, useCache: useCache, legendScaleX: legendScaleX, legendScaleY: legendScaleY, width: w, height: h};
 				
 				var legendLoader: WMSImageLoader = new WMSImageLoader();
 				legendLoader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onLegendLoaded);
@@ -1074,7 +1068,7 @@ package com.iblsoft.flexiweather.ogc.data
 				legendLoader.load(url, associatedData);
 				
 			} else {
-				createLegend(m_legendImage, canvas, labelAlign, callback, legendScaleX, legendScaleY, w, h);
+				createLegend(m_legendImage, group, labelAlign, callback, legendScaleX, legendScaleY, w, h);
 			}
 			
 			var gap: int = 2;
@@ -1127,12 +1121,12 @@ package com.iblsoft.flexiweather.ogc.data
 			return false;
 		}
 		
-		public function getLegendFromCanvas(cnv: Canvas): Image
+		public function getLegendFromGroup(group: Group): Image
 		{
 			var image: Image;
-			if (cnv.numChildren > 1)
+			if (group.numElements > 1)
 			{
-				var imageTest: DisplayObject = cnv.getChildAt(cnv.numChildren - 1);
+				var imageTest: IVisualElement = group.getElementAt(group.numElements - 1);
 				if (imageTest is Image)
 				{
 					image = imageTest as Image;
@@ -1142,9 +1136,9 @@ package com.iblsoft.flexiweather.ogc.data
 			return image;
 		}
 		
-		public function isLegendCached(cnv: Canvas): Boolean
+		public function isLegendCached(group: Group): Boolean
 		{
-			var image: Image = getLegendFromCanvas(cnv);
+			var image: Image = getLegendFromGroup(group);
 			return (image != null);
 		}
 		
@@ -1170,7 +1164,7 @@ package com.iblsoft.flexiweather.ogc.data
 				var legendScaleY: Number = event.associatedData.legendScaleY;
 				if (useCache)
 					m_legendImage = result;
-				createLegend(result, event.associatedData.canvas, event.associatedData.labelAlign, event.associatedData.callback, legendScaleX, legendScaleY, event.associatedData.width, event.associatedData.height);
+				createLegend(result, event.associatedData.group, event.associatedData.labelAlign, event.associatedData.callback, legendScaleX, legendScaleY, event.associatedData.width, event.associatedData.height);
 			}
 			removeLegendListeners(event.target as WMSImageLoader);
 		}
@@ -1185,16 +1179,16 @@ package com.iblsoft.flexiweather.ogc.data
 		 * @param useCache
 		 * 
 		 */		
-		private function createLegend(bitmap: Bitmap, cnv: Canvas, labelAlign: String, callback: Function, legendScaleX: Number, legendScaleY: Number, origWidth: int, origHeight: int): void
+		private function createLegend(bitmap: Bitmap, group: Group, labelAlign: String, callback: Function, legendScaleX: Number, legendScaleY: Number, origWidth: int, origHeight: int): void
 		{
 			var gap: int = 2;
 			var labelHeight: int = 12;
 			
 			//add legend label (name of the layer)
 			var label: GlowLabel;
-			if (cnv.numChildren > 0)
+			if (group.numElements > 0)
 			{
-				var labelTest: DisplayObject = cnv.getChildAt(0);
+				var labelTest: DisplayObject = group.getElementAt(0) as DisplayObject;
 				if (labelTest is GlowLabel && labelTest.name != 'styleLabel')
 				{
 					label = labelTest as GlowLabel;
@@ -1203,7 +1197,7 @@ package com.iblsoft.flexiweather.ogc.data
 			if (!label)
 			{
 				label = new GlowLabel();
-				cnv.addChild(label);
+				group.addElement(label);
 			}
 			
 			
@@ -1213,15 +1207,15 @@ package com.iblsoft.flexiweather.ogc.data
 			label.validateNow();
 			
 			//FIXME FIX for legends text height
-			labelHeight = label.height;
+			labelHeight = label.measuredHeight;
 			
 			label.setStyle('textAlign', labelAlign);
 			
 			//add legend image
 			var image: Image;
-			if (cnv.numChildren > 1)
+			if (group.numElements > 1)
 			{
-				var imageTest: DisplayObject = cnv.getChildAt(cnv.numChildren - 1);
+				var imageTest: IVisualElement = group.getElementAt(group.numElements - 1);
 				if (imageTest is Image)
 				{
 					image = imageTest as Image;
@@ -1233,7 +1227,7 @@ package com.iblsoft.flexiweather.ogc.data
 			if (!image)
 			{
 				image = new Image();
-				cnv.addChild(image);
+				group.addElement(image);
 			}
 			
 			image.source = bitmap;
@@ -1248,12 +1242,12 @@ package com.iblsoft.flexiweather.ogc.data
 			debug("\n\t createLegend legendScaleX: " + legendScaleX + " legendScaleY: " + legendScaleY);
 			debug("t createLegend image: " + image.width + " , " + image.height);
 			debug("t createLegend image scale: " + image.scaleX + " , " + image.scaleY);
-			cnv.width = image.width;
-			cnv.height = image.height + labelHeight + gap;
+			group.width = image.width;
+			group.height = image.height + labelHeight + gap;
 			
 			
 			if(callback != null) {
-				callback.apply(null, [cnv]);
+				callback.apply(null, [group]);
 			}
 		}
 		protected function onLegendLoadFailed(event: UniURLLoaderErrorEvent): void

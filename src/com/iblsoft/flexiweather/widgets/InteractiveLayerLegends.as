@@ -13,9 +13,10 @@ package com.iblsoft.flexiweather.widgets
 	import flash.utils.setTimeout;
 	
 	import mx.collections.ArrayCollection;
-	import mx.containers.Canvas;
 	import mx.logging.ILogger;
 	import mx.logging.Log;
+	
+	import spark.components.Group;
 	
 	[Style(name="horizontalGap", type="Number", format="Length", inherit="no")]
 	
@@ -175,8 +176,8 @@ package com.iblsoft.flexiweather.widgets
 //				unbindSubLayer(l);
 				l.removeEventListener(InteractiveLayerEvent.VISIBILITY_EFFECT_FINISHED, onLayerVisibilityChanged);
 				m_layers.removeItemAt(i);
-				l.removeLegend(getCanvasFromDictionary(l));
-				delete m_canvasDictionary[l];
+				l.removeLegend(getGroupFromDictionary(l));
+				delete m_groupDictionary[l];
 			}
 		}
 		
@@ -230,22 +231,22 @@ package com.iblsoft.flexiweather.widgets
 			dispatchEvent(ile);
 		}
 		
-		private var m_canvasDictionary: Dictionary = new Dictionary();
+		private var m_groupDictionary: Dictionary = new Dictionary();
 		private var _legends: Array = new Array();
 		
 		public function clearCanvasDictionary(): void
 		{
-			m_canvasDictionary = new Dictionary();
+			m_groupDictionary = new Dictionary();
 			_legends = new Array();
 		}
-		private function addCanvasToDictionary(cnv: Canvas, layer: InteractiveLayer): void
+		private function addCanvasToDictionary(group: Group, layer: InteractiveLayer): void
 		{
-			if (!cnv)
+			if (!group)
 			{
 				debug("addCanvasToDictionary cnv IS NULL ");
 			}
-			debug("\t\t InteractiveLayerLegends addCanvasToDictionary ["+layer.name+"/"+layer+"]: " + cnv);
-			m_canvasDictionary[layer] = cnv;
+			debug("\t\t InteractiveLayerLegends addCanvasToDictionary ["+layer.name+"/"+layer+"]: " + group);
+			m_groupDictionary[layer] = group;
 //			_legends[layer] = new Rectangle(cnv.x, cnv.y, cnv.width, cnv.height);
 		}
 		
@@ -254,7 +255,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (layer && layer.hasLegend() && layer.visible)
 			{
-				var cnv: Canvas = getCanvasFromDictionary(layer);
+				var cnv: Group = getGroupFromDictionary(layer);
 				
 				var oldScaleX: Number = 1;
 				var oldScaleY: Number = 1;
@@ -275,11 +276,10 @@ package com.iblsoft.flexiweather.widgets
 			} 
 			return null;
 		}
-		private function getCanvasFromDictionary(layer: InteractiveLayer): Canvas
+		private function getGroupFromDictionary(layer: InteractiveLayer): Group
 		{
-			var cnv: Canvas = m_canvasDictionary[layer];
-//			debug("\t\t InteractiveLayerLegends getCanvasFromDictionary ["+layer.name+"/"+layer+"]: " + cnv);
-			return cnv;
+			var grp: Group = m_groupDictionary[layer];
+			return grp;
 		}
 		public function clear(): void
 		{
@@ -302,7 +302,7 @@ package com.iblsoft.flexiweather.widgets
 			
 			var l: InteractiveLayer;
 			
-			var canvas: Canvas;
+			var group: Group;
 			
 			//find total count of layers for which legend should be rendered
 			var _tempCanvases: Array = [];
@@ -311,12 +311,12 @@ package com.iblsoft.flexiweather.widgets
 				
 				if (l.hasLegend() && l.visible)
 				{
-					canvas = getCanvasFromDictionary(l);
+					group = getGroupFromDictionary(l);
 							
-					if (canvas)
+					if (group)
 					{
 						_tmpExistedCanvases++;
-						_tempCanvases.push(canvas);
+						_tempCanvases.push(group);
 					} else {
 						_tmpLegendsToBeLoaded++;
 					}
@@ -354,8 +354,8 @@ package com.iblsoft.flexiweather.widgets
 			{
 				if (l.hasLegend() && l.visible)
 				{
-					canvas = getCanvasFromDictionary(l);
-					if (!canvas)
+					group = getGroupFromDictionary(l);
+					if (!group)
 					{
 						if (!_legendsAreLoading)
 						{
@@ -363,14 +363,14 @@ package com.iblsoft.flexiweather.widgets
 							notify(LEGENDS_LOADING_STARTED);
 						}
 						
-						canvas = new Canvas();
-						addChild(canvas);
-						canvas.visible = false;
+						group = new Group();
+						addChild(group);
+						group.visible = false;
 						
-						addCanvasToDictionary(canvas, l);
+						addCanvasToDictionary(group, l);
 						
 						debug("InteractieLayerLegends loadLegends renderLegend => LOAD");
-						l.renderLegend(canvas, onLegendRendered, legendScaleX, legendScaleY, getStyle('labelAlign'));
+						l.renderLegend(group, onLegendRendered, legendScaleX, legendScaleY, getStyle('labelAlign'));
 					} else {
 						//already rendered
 //						_tmpLegendsToBeRendered--;
@@ -388,15 +388,15 @@ package com.iblsoft.flexiweather.widgets
 			var needLoading: Boolean;
 			
 			var l: InteractiveLayer;
-			var canvas: Canvas;
+			var group: Group;
 			
 			for each (l in m_layers)
 			{
 				debug("LEGENDS checkIfAllLegendsAreLoaded l: " + l.name);
 				if (l.hasLegend() && l.visible)
 				{
-					canvas = getCanvasFromDictionary(l);
-					if (!canvas)
+					group = getGroupFromDictionary(l);
+					if (!group)
 					{
 						debug("\t LEGENDS checkIfAllLegendsAreLoaded NEEDS LOADING l: " + l.name);
 						//it needs to be loaded
@@ -709,7 +709,7 @@ package com.iblsoft.flexiweather.widgets
 			
 			_topArea = _currentArea;
 			
-			var cnv: Canvas = getCanvasFromDictionary(l);
+			var cnv: Group = getGroupFromDictionary(l);
 			var rect: Rectangle = getRectangleFromLayer(l);
 			if (rect)
 			{
@@ -746,7 +746,7 @@ package com.iblsoft.flexiweather.widgets
 			{
 				if (l.hasLegend())
 				{
-					var canvas: Canvas = getCanvasFromDictionary(l);
+					var canvas: Group = getGroupFromDictionary(l);
 					if (canvas)
 					{
 						canvas.visible = l.visible;
@@ -830,7 +830,7 @@ package com.iblsoft.flexiweather.widgets
 //			if (true)
 			if (l.hasLegend())
 			{
-				var canvas: Canvas = getCanvasFromDictionary(l);
+				var canvas: Group = getGroupFromDictionary(l);
 				if (canvas)
 				{
 					canvas.visible = l.visible;
@@ -1030,7 +1030,7 @@ package com.iblsoft.flexiweather.widgets
 			{
 				if (l.hasLegend())
 				{
-					var canvas: Canvas = getCanvasFromDictionary(l);
+					var canvas: Group = getGroupFromDictionary(l);
 					if (canvas)
 						canvas.visible = l.visible;
 					else
@@ -1195,7 +1195,7 @@ package com.iblsoft.flexiweather.widgets
 //				debug("drawLegendsBackground "+(rect.x - bkgPadding)+", "+(rect.y - bkgPadding)+", "+(rect.width + bkgPadding)+", "+(rect.height + bkgPadding));
 			}
 		}
-		private function onLegendRendered(cnv: Canvas): void
+		private function onLegendRendered(cnv: Group): void
 		{
 			legendsLoadingCount--;
 			

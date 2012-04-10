@@ -9,8 +9,9 @@ package com.iblsoft.flexiweather.widgets
 	import flash.events.MouseEvent;
 	import flash.geom.Rectangle;
 	
-	import mx.containers.Canvas;
 	import mx.core.UIComponent;
+	
+	import spark.components.Group;
 	
 	public class InteractiveLayer extends UIComponent
 	{
@@ -35,7 +36,7 @@ package com.iblsoft.flexiweather.widgets
 		private var mi_zOrder: int = 0;
 		
 		protected var m_legendCallBack: Function;
-		protected var m_legendCanvas: Canvas;
+		protected var m_legendGroup: Group;
 		protected var m_legendLabelAlign: String;
 		
 		[Bindable]
@@ -64,9 +65,9 @@ package com.iblsoft.flexiweather.widgets
 			_forcedLayerHeight = value;
 		}
 		
-		public function get legendCanvas(): Canvas
+		public function get legendGroup(): Group
 		{
-			return m_legendCanvas;
+			return m_legendGroup;
 		}
 		
 		public static var ID: int = 0;
@@ -195,10 +196,10 @@ package com.iblsoft.flexiweather.widgets
         public function invalidateLegend(): void
         {}
         
-        public function removeLegend(canvas: Canvas): void
+        public function removeLegend(group: Group): void
         {}
 
-        public function renderLegend(canvas: Canvas, callback: Function, legendScaleX: Number, legendScaleY: Number, labelAlign: String = 'left', useCache: Boolean = false , hintSize: Rectangle = null): Rectangle
+        public function renderLegend(group: Group, callback: Function, legendScaleX: Number, legendScaleY: Number, labelAlign: String = 'left', useCache: Boolean = false , hintSize: Rectangle = null): Rectangle
         { return new Rectangle(); }
         
         // extent access

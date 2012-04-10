@@ -21,7 +21,7 @@ package com.iblsoft.flexiweather.proj
 			return degree * toRadConst;
 		}
 		/**
-		 * Returns distance between 2 coordinates on Earth. 
+		 * Returns distance between 2 coordinates on Earth in kilometres. 
 		 * @param c
 		 * @return 
 		 * 

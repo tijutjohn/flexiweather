@@ -38,13 +38,14 @@ package com.iblsoft.flexiweather.ogc
 	import flash.utils.Timer;
 	
 	import mx.binding.utils.BindingUtils;
-	import mx.containers.Canvas;
 	import mx.controls.Image;
 	import mx.core.UIComponent;
 	import mx.effects.Fade;
 	import mx.events.DynamicEvent;
 	import mx.events.EffectEvent;
 	import mx.logging.Log;
+	
+	import spark.components.Group;
 	
 	[Event(name="wmsStyleChanged", type="flash.events.Event")]
 	
@@ -417,12 +418,12 @@ package com.iblsoft.flexiweather.ogc
        	}
 
 		
-		 override public function removeLegend(canvas: Canvas): void
+		 override public function removeLegend(group: Group): void
 		 {
-		 	super.removeLegend(canvas);
+		 	super.removeLegend(group);
 		 	
 			if (m_currentWMSViewProperties)
-				return m_currentWMSViewProperties.removeLegend(canvas);
+				return m_currentWMSViewProperties.removeLegend(group);
 		 }
 		 
 		 override public function invalidateLegend():void
@@ -432,35 +433,35 @@ package com.iblsoft.flexiweather.ogc
 		 }
         /**
          * Render legend. If legend is not cached, it needs to be loaded. 
-         * @param canvas
+         * @param group
          * @param callback
          * @param labelAlign
          * @param hintSize
          * @return 
          * 
          */		
-        override public function renderLegend(canvas: Canvas, callback: Function, legendScaleX: Number, legendScaleY: Number, labelAlign: String = 'left', useCache: Boolean = false, hintSize: Rectangle = null): Rectangle
+        override public function renderLegend(group: Group, callback: Function, legendScaleX: Number, legendScaleY: Number, labelAlign: String = 'left', useCache: Boolean = false, hintSize: Rectangle = null): Rectangle
         {
-        	super.renderLegend(canvas, callback, legendScaleX, legendScaleY, labelAlign, useCache, hintSize);
+        	super.renderLegend(group, callback, legendScaleX, legendScaleY, labelAlign, useCache, hintSize);
         	
 			if (m_currentWMSViewProperties)
-        		return m_currentWMSViewProperties.renderLegend(canvas, callback, legendScaleX, legendScaleY, labelAlign, useCache, hintSize);
+        		return m_currentWMSViewProperties.renderLegend(group, callback, legendScaleX, legendScaleY, labelAlign, useCache, hintSize);
 					
 			return null;
         }
         
-        public function getLegendFromCanvas(cnv: Canvas): Image
+        public function getLegendFromGroup(group: Group): Image
         {
 			if (m_currentWMSViewProperties)
-				return m_currentWMSViewProperties.getLegendFromCanvas(cnv);
+				return m_currentWMSViewProperties.getLegendFromGroup(group);
 			
 			return null;
         }
         
-        public function isLegendCached(cnv: Canvas): Boolean
+        public function isLegendCached(group: Group): Boolean
         {
 			if (m_currentWMSViewProperties)
-				return m_currentWMSViewProperties.isLegendCached(cnv);
+				return m_currentWMSViewProperties.isLegendCached(group);
 			
 			return false;
         }
