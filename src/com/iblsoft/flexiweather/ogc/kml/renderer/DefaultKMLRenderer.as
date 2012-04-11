@@ -407,7 +407,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 		 * @return 
 		 * 
 		 */		
-		private function stopProfileTimer(startTime): Number
+		private function stopProfileTimer(startTime: int): Number
 		{
 			var diff: int = getTimer() - startTime;
 			return diff / 1000;

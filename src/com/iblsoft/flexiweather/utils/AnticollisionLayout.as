@@ -309,10 +309,10 @@ package com.iblsoft.flexiweather.utils
 									f_dx = possiblePosition.x;
 									f_dy = possiblePosition.y;
 									
-									var boundsDisplaced: Rectangle = new Rectangle(
+									var boundsDisplacedSimple: Rectangle = new Rectangle(
 										bounds.x + f_dx, bounds.y + f_dy, bounds.width, bounds.height);
 									// quick check if resulting boundary is within the m_boundaryRect 
-									if(checkObjectPlacement(lo, boundsDisplaced)) {
+									if(checkObjectPlacement(lo, boundsDisplacedSimple)) {
 										b_foundPlace = true;
 										break;
 									}
