@@ -272,6 +272,21 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.GoogleMapLayerConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.GoogleMapsLayerOption"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.InteractiveLayerGoogleMaps"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.Region"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.LatLonAltBox"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.Lod"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.AsyncManager"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.FeatureUpdateContext"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.MultiGeometry"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.managers.KMLParserManager"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.events.KMLEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.ProfilerUtils"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.NetworkLink"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.managers.NetworkLinkManager"/>
+    <classEntry path="com.iblsoft.flexiweather.net.loaders.KMLLoader"/>
+    <classEntry path="com.iblsoft.flexiweather.net.loaders.KMZLoader"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.managers.KMLLoaderManager"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerNorthIndicator"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
