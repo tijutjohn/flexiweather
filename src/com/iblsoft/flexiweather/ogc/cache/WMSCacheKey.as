@@ -53,6 +53,8 @@ package com.iblsoft.flexiweather.ogc.cache
 				}
 			} 
 			
+			sortCacheKeyString();
+			
 		}
 		
 		

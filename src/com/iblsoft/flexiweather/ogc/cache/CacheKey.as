@@ -30,6 +30,24 @@ package com.iblsoft.flexiweather.ogc.cache
 			this.validity = validity;
 		}
 		
+		protected function sortCacheKeyString(): void
+		{
+			if (ms_key)
+			{
+				var arr: Array = ms_key.split('|');
+				if (arr.length > 2)
+				{
+					var newString: String = arr.shift() + "|" + arr.shift();
+					
+					if (arr.length > 0)
+					{
+						arr.sort();
+						ms_key = newString + "|" + arr.join('|');
+					}
+				}
+			}
+		}
+		
 		public function toString(): String
 		{ return ms_key; }
 	}
