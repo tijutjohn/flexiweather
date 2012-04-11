@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc.data
 {
+	import com.iblsoft.flexiweather.events.WMSViewPropertiesEvent;
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderErrorEvent;
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.ogc.BBox;
@@ -514,6 +515,11 @@ package com.iblsoft.flexiweather.ogc.data
 				md_dimensionValues[s_dimName] = s_value;
 			else
 				delete md_dimensionValues[s_dimName];
+			
+			var wvpe: WMSViewPropertiesEvent = new WMSViewPropertiesEvent(WMSViewPropertiesEvent.WMS_DIMENSION_VALUE_SET);
+			wvpe.dimension = s_dimName;
+			wvpe.value = s_value;
+			notifyEvent(wvpe);
 
 		}
 		
@@ -1409,6 +1415,11 @@ package com.iblsoft.flexiweather.ogc.data
 		{
 			return;
 			trace(str);
+		}
+		
+		private function notifyEvent(event: Event): void
+		{
+			dispatchEvent(event);
 		}
 	}
 }

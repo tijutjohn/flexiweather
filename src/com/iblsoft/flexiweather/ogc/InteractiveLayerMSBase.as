@@ -2,6 +2,7 @@ package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerProgressEvent;
+	import com.iblsoft.flexiweather.events.WMSViewPropertiesEvent;
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderErrorEvent;
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
@@ -105,6 +106,7 @@ package com.iblsoft.flexiweather.ogc
 			m_currentWMSViewProperties.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
 			m_currentWMSViewProperties.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onCurrentWMSDataSynchronisedVariableChanged);
 			m_currentWMSViewProperties.addEventListener("invalidateDynamicPart", onCurrentWMSDataInvalidateDynamicPart);
+			m_currentWMSViewProperties.addEventListener(WMSViewPropertiesEvent.WMS_DIMENSION_VALUE_SET, onWMSDimensionValueSet);
 			
 			m_featureInfoLoader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onFeatureInfoLoaded);
 			m_featureInfoLoader.addEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onFeatureInfoLoadFailed);
@@ -585,24 +587,13 @@ package com.iblsoft.flexiweather.ogc
 			return new Date();
 		}
 		
-		/**
-		 * Change WMS Dimension value and invalidate cache (if b_invalidateCache == true)
-		 *  
-		 * @param s_dimName Dimension name (RUN, FORECAST, etc.)
-		 * @param s_value Dimension value
-		 * @param b_invalidateCache Invalidate cache
-		 * 
-		 */		
-        public function setWMSDimensionValue(s_dimName: String, s_value: String): void
-        {
-			//TODO check if bitmap for dimension is value
-			
-			
-			if (m_currentWMSViewProperties)
-				m_currentWMSViewProperties.setWMSDimensionValue(s_dimName, s_value);
-			
-			
-			
+		private function onWMSDimensionValueSet(event: WMSViewPropertiesEvent): void
+		{
+			afterWMSDimensionValueIsSet(event.dimension, event.value);
+		}
+		
+		protected function afterWMSDimensionValueIsSet(s_dimName: String, s_value: String): void
+		{
 			// if "run" changed, then even time axis changes
 			if(m_cfg.ms_dimensionRunName != null && s_dimName == m_cfg.ms_dimensionRunName) {
 				dispatchEvent(new SynchronisedVariableChangeEvent(
@@ -618,6 +609,21 @@ package com.iblsoft.flexiweather.ogc
 				dispatchEvent(new SynchronisedVariableChangeEvent(
 					SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, "frame"));
 			}
+		}
+		/**
+		 * Change WMS Dimension value and invalidate cache (if b_invalidateCache == true)
+		 *  
+		 * @param s_dimName Dimension name (RUN, FORECAST, etc.)
+		 * @param s_value Dimension value
+		 * @param b_invalidateCache Invalidate cache
+		 * 
+		 */		
+        public function setWMSDimensionValue(s_dimName: String, s_value: String): void
+        {
+			//TODO check if bitmap for dimension is value
+			if (m_currentWMSViewProperties)
+				m_currentWMSViewProperties.setWMSDimensionValue(s_dimName, s_value);
+			
         }
 
         public function getWMSDimensionValue(s_dimName: String,

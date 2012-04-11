@@ -3,17 +3,23 @@ package com.iblsoft.flexiweather.ogc.cache
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.tiling.TileIndex;
 	import com.iblsoft.flexiweather.ogc.tiling.TiledArea;
+	import com.iblsoft.flexiweather.plugins.IConsole;
 	
 	import flash.display.Bitmap;
 	import flash.display.DisplayObject;
 	import flash.events.TimerEvent;
+	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.net.URLRequest;
+	import flash.text.TextField;
+	import flash.text.TextFormat;
 	import flash.utils.Dictionary;
 	import flash.utils.Timer;
 	
 	public class WMSTileCache extends WMSCache
 	{
+		public static var debugConsole: IConsole;
+		
 		public var maxCachedItems: int = 300;
 		
 		/**
@@ -132,7 +138,7 @@ package com.iblsoft.flexiweather.ogc.cache
 		 * @return 
 		 * 
 		 */		
-		public function getTiles(s_crs: String, i_tileZoom: uint, specialStrings: Array): Array
+		public function getTiles(s_crs: String, i_tileZoom: uint, specialStrings: Array, validity: Date): Array
 		{
 			var a: Array = [];
 			for each(var cacheRecord: CacheItem in md_cache) 
@@ -141,6 +147,8 @@ package com.iblsoft.flexiweather.ogc.cache
 				if(cacheKey.m_tileIndex == null)
 					continue;
 				if(cacheKey.crs != s_crs)
+					continue;
+				if(cacheKey.validity && cacheKey.validity.time != validity.time)
 					continue;
 				if(cacheKey.m_tileIndex.mi_tileZoom != i_tileZoom)
 					continue;
@@ -185,13 +193,15 @@ package com.iblsoft.flexiweather.ogc.cache
 					if (!specialStringInside)
 						continue;
 				}
+				if (cacheKey.validity)
+					debug("add tile: ["+cacheKey.m_tileIndex.toString()+"] " + cacheKey.validity.time + " last time usedL : " + cacheRecord.lastUsed)
 				cacheRecord.lastUsed = new Date();
 				a.push({
 					tileIndex: cacheKey.m_tileIndex,
 					image: cacheRecord.image
 				});
 			}
-//			debug("GET TILES: " + a.length);
+			debug("GET TILES: " + a.length);
 			return a;
 		}
 	
@@ -235,6 +245,11 @@ package com.iblsoft.flexiweather.ogc.cache
 			item.cacheKey = ck as CacheKey;
 			item.displayed = true;
 			item.lastUsed = new Date();
+			
+			
+			updateImage(img as Bitmap, metadata.validity, 0x000000, 20,20);
+			updateImage(img as Bitmap, metadata.validity, 0xffffff, 21,21);
+			
 			item.image = img;
 			
 			/**
@@ -257,6 +272,27 @@ package com.iblsoft.flexiweather.ogc.cache
 			debug("cache item removed: " + _items.length);
 		}
 		
+		private function updateImage(img: Bitmap, validity: Date, clr: uint, x: int, y: int): void
+		{
+			//debug
+			var txt: TextField = new TextField();
+			if (validity)
+			{
+				txt.text = validity.getHours() + ":"+validity.getMinutes();
+			} else {
+				txt.text = 'no validity';
+			}
+			var frm: TextFormat = txt.getTextFormat();
+			frm.size = 20;
+			frm.color = clr;
+			txt.setTextFormat(frm);
+			if (img is  Bitmap)
+			{
+				var m: Matrix = new Matrix();
+				m.translate(x,y);
+				(img as Bitmap).bitmapData.draw(txt, m);
+			}
+		}
 		override public function deleteCacheItemByKey(s_key: String, b_disposeDisplayed: Boolean = false): Boolean
 		{
 			debug("deleteCacheItemByKey: " + s_key);
@@ -373,10 +409,12 @@ package com.iblsoft.flexiweather.ogc.cache
 		
 		}
 
-		private function debug(str: String): void
+		protected function debug(txt: String): void
 		{
-			return;
-			trace("WMSTileCache: " + str)
+			if (debugConsole)
+			{
+				debugConsole.print("WMSTileCache: " + txt,'Info','WMSTileCache');
+			}
 		}
 	}
 }

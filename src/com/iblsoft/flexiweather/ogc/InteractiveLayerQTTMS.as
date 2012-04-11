@@ -634,7 +634,7 @@ package com.iblsoft.flexiweather.ogc
 			var wmsTileCache: WMSTileCache = m_cache as WMSTileCache;
 			
 			//get cache tiles
- 			var a_tiles: Array = wmsTileCache.getTiles(container.crs, mi_zoom, ma_specialCacheStrings);
+ 			var a_tiles: Array = wmsTileCache.getTiles(container.crs, mi_zoom, ma_specialCacheStrings, _currentValidityTime);
 			var allTiles: Array = a_tiles.reverse();
 			
 			graphics.clear();
