@@ -1050,7 +1050,7 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function onTileLoadFailed(tileIndex: TileIndex, associatedData: Object): void
 		{
-			trace("\t onTileLoadFailed : " + tileIndex);
+//			trace("\t onTileLoadFailed : " + tileIndex);
 			tileLoadFailed();
 		}
 		

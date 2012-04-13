@@ -380,7 +380,6 @@ package com.iblsoft.flexiweather.widgets
 				trace("do not support map scale more than 1:1");
 				return;
 			}
-			trace("Layer zoom: " + maxDistance);
 			
 			var extentBBox: BBox = container.getExtentBBox();
 			var allowHorizontalWrap: Boolean = allowWrapHorizontally();

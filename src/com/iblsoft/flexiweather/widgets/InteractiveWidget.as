@@ -260,12 +260,12 @@ package com.iblsoft.flexiweather.widgets
 			ile.layersLoading = m_layersLoading;
 			dispatchEvent(ile);
 			
-			trace("IW onLayerLoadingStart " + event.interactiveLayer.name + " m_layersLoading: " + m_layersLoading);
+//			trace("IW onLayerLoadingStart " + event.interactiveLayer.name + " m_layersLoading: " + m_layersLoading);
 		}
 		private function onLayerLoaded( event: InteractiveLayerEvent): void
 		{
 			m_layersLoading--;
-			trace("IW onLayerLoaded " + event.interactiveLayer.name + " layers currently loading: " + m_layersLoading);
+//			trace("IW onLayerLoaded " + event.interactiveLayer.name + " layers currently loading: " + m_layersLoading);
 			
 			var ile: InteractiveWidgetEvent
 			ile = new InteractiveWidgetEvent(InteractiveWidgetEvent.DATA_LAYER_LOADING_FINISHED);
@@ -274,7 +274,7 @@ package com.iblsoft.flexiweather.widgets
 			
 			if (m_layersLoading <= 0)
 			{
-				trace("\t IW ALL layers are loaded");
+//				trace("\t IW ALL layers are loaded");
 				ile = new InteractiveWidgetEvent(InteractiveWidgetEvent.ALL_DATA_LAYERS_LOADED);
 				dispatchEvent(ile);
 			}
@@ -488,7 +488,7 @@ package com.iblsoft.flexiweather.widgets
 	        		(height - 1 - y) * m_viewBBox.height / (height - 1) + m_viewBBox.yMin)
         }
 
-		/** Converts screen point (pixels) into Coord with current CRS. */ 
+		/** Converts Coord into screen point (pixels) with current CRS. */ 
         public function coordToPoint(c: Coord): Point
         {
 			var ptInOurCRS: Point;
@@ -797,9 +797,7 @@ package com.iblsoft.flexiweather.widgets
 			
 			var scale: Number = screenDistanceInKm / maxDistanceOnEarthInKm;
 				
-			trace("distanceInKm: " + screenDistanceInKm + " scale: " + scale);
-			
-			return scale
+			return scale;
 			
 		}
 		

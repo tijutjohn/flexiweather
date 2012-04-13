@@ -60,7 +60,7 @@ package com.iblsoft.flexiweather.ogc
 			
 			if (!projection.bbox || (projection.bbox && (projection.bbox.width == 0 || projection.bbox.width == 0)))
 			{
-				trace("Projection " + projection.crs + " will not be added, problem with bbox");
+//				trace("Projection " + projection.crs + " will not be added, problem with bbox");
 				return;
 			}
 				

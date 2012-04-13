@@ -519,7 +519,7 @@ package com.iblsoft.flexiweather.plugins.data
 					temp.push(moduleInfo);
 				}	
 			}
-			trace("notifyAllInfoPluginsAreLoaded OLD _pluginsInfo: " + _pluginsInfo.length + " new: " + temp.length);
+//			trace("notifyAllInfoPluginsAreLoaded OLD _pluginsInfo: " + _pluginsInfo.length + " new: " + temp.length);
 			if (_pluginsInfo.length != temp.length)
 				trace("_pluginsInfo items are not equal");
 			

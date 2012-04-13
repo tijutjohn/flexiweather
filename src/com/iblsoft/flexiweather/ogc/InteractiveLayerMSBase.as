@@ -339,10 +339,6 @@ package com.iblsoft.flexiweather.ogc
 			if (!request)
 				return null;
 			
-			if (request.url.indexOf('${BASE_URL}') == -1)
-			{
-				debug("stop");
-			}
 			updateDimensionsInURLRequest(request);
 			updateCustomParametersInURLRequest(request);
 			updateRequestData(request);
@@ -887,8 +883,6 @@ package com.iblsoft.flexiweather.ogc
 					
 			var styleName: String = getWMSStyleName(0)
 			newLayer.setWMSStyleName(0, styleName);
-			debug("\n\n CLONE InteractiveLayerWMS ["+newLayer.name+"] alpha: " + newLayer.alpha + " zOrder: " +  newLayer.zOrder);
-			
 			//clone all dimensions
 			var dimNames: Array = getWMSDimensionsNames();
 			for each (var dimName: String in dimNames)
@@ -896,7 +890,6 @@ package com.iblsoft.flexiweather.ogc
 				var value : String = getWMSDimensionValue(dimName);
 				newLayer.setWMSDimensionValue(dimName, value);
 			}
-			debug("OLD: " + name + " label: " + id);
 			return newLayer;
 			
 		}

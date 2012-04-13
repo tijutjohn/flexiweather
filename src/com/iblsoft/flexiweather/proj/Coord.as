@@ -10,6 +10,13 @@ package com.iblsoft.flexiweather.proj
 		
 		private var toRadConst: Number = Math.PI / 180;
 		
+		/**
+		 * 
+		 * @param s_crs
+		 * @param f_x - longitude
+		 * @param f_y - latitude
+		 * 
+		 */		
 		public function Coord(s_crs: String, f_x: Number, f_y: Number)
 		{
 			super(f_x, f_y);
