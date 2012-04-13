@@ -413,7 +413,6 @@ package com.iblsoft.flexiweather.ogc
 						item.request = requestObj.request;
 						data.push(item);
 						
-	//					loadData(requestObj.request, assocData, jobName);
 					}
 					
 					tilesProvider.getTiles(data, onTileLoaded, onTileLoadFailed);
@@ -658,11 +657,6 @@ package com.iblsoft.flexiweather.ogc
 					drawTile(tileIndex, s_crs, t_tile.image.bitmapData, redrawBorder);
 				}
 			}
-			
-//			if (_console)
-//			{
-//				_console.print("\tCUSTOM DRAW SUMMARY: " + _debugDrawInfoArray+"\nEND", "Info", "Tilling"); 
-//			}
 			
 			//FIXME change this, now there can be more tiledArea
 //			m_cache.sortCache(m_tiledArea);
@@ -992,6 +986,14 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 		
+		override protected function notifyLoadingFinished(bubbles: Boolean = true): void
+		{
+			super.notifyLoadingFinished(bubbles);
+			
+			//draw all tiles when all tiles are loaded
+			draw(graphics);
+		}
+		
 		override protected function onDataLoaded(event: UniURLLoaderEvent): void
 		{
 			var result: * = event.result;
@@ -1118,9 +1120,7 @@ package com.iblsoft.flexiweather.ogc
 			if(ms_explicitBaseURLPattern == null)
 			{
 				var tilingInfo: QTTilingInfo;
-				//TODO get current CRS 
 				var crs: String = container.getCRS();
-//				var tilingInfo: QTTilingInfo = m_cfg.getQTTilingInfoForCRS(crs);
 				if (m_cfg.tilingCRSsAndExtents && m_cfg.tilingCRSsAndExtents.length > 0)
 					tilingInfo = m_cfg.getQTTilingInfoForCRS(crs);
 				
@@ -1129,11 +1129,6 @@ package com.iblsoft.flexiweather.ogc
 			}
 			return ms_explicitBaseURLPattern;
 		}
-		
-		/*
-		public function set baseURLPattern(s_baseURL: String): void
-		{ ms_explicitBaseURLPattern = s_baseURL; }
-		*/
 		
 		public function get zoomLevel(): int
 		{ return mi_zoom; }
@@ -1145,7 +1140,6 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function getTiles(tilesIndices:Array):void
 		{
-			// TODO Auto Generated method stub
 			
 		}
 		
@@ -1156,7 +1150,6 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function getCache():ICache
 		{
-			// TODO Auto Generated method stub
 			return m_cache;
 		}
 		

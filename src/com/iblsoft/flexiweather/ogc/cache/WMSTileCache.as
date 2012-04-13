@@ -150,6 +150,8 @@ package com.iblsoft.flexiweather.ogc.cache
 					continue;
 				if(cacheKey.validity && cacheKey.validity.time != validity.time)
 					continue;
+				if(!cacheKey.validity && validity)
+					continue;
 				if(cacheKey.m_tileIndex.mi_tileZoom != i_tileZoom)
 					continue;
 				if (specialStrings && specialStrings.length > 0)
@@ -239,23 +241,26 @@ package com.iblsoft.flexiweather.ogc.cache
 			
 			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, null, tileIndex, url, time, specialStrings);
 			var s_key: String = decodeURI(ck.toString()); 
-			debug("addCacheItem: " + s_key);
+			
 			
 			var item: CacheItem = new CacheItem();
 			item.cacheKey = ck as CacheKey;
 			item.displayed = true;
 			item.lastUsed = new Date();
 			
-			
-			updateImage(img as Bitmap, metadata.validity, 0x000000, 20,20);
-			updateImage(img as Bitmap, metadata.validity, 0xffffff, 21,21);
+			/**
+			 * if you want add DEbug information about validity of cached bitmap uncomment next 2 lines
+			 */
+			//updateImage(img as Bitmap, metadata.validity, 0x000000, 20,20);
+			//updateImage(img as Bitmap, metadata.validity, 0xffffff, 21,21);
 			
 			item.image = img;
 			
 			/**
 			 * we need to delete cache item with same "key" before we add new item.
 			*/
-			deleteCacheItemByKey(s_key);
+			var bWasDeleted: Boolean = deleteCacheItemByKey(s_key);
+//			debug("addCacheItem: " + s_key + " item was deleted: " + bWasDeleted);
 			
 			md_cache[s_key] = item;
 			
@@ -265,11 +270,11 @@ package com.iblsoft.flexiweather.ogc.cache
 			{
 				s_key = getCachedTileKeyOutsideTiledArea(tiledArea);
 				
-				debug("REMOVE TILE : " +s_key);
 				
-				deleteCacheItemByKey(s_key);
+				bWasDeleted = deleteCacheItemByKey(s_key);
+//				debug("addCacheItem: REMOVE TILE : " +s_key + " item was deleted: " + bWasDeleted);
+//				debug("addCacheItem: cache item removed: " + _items.length);
 			}
-			debug("cache item removed: " + _items.length);
 		}
 		
 		private function updateImage(img: Bitmap, validity: Date, clr: uint, x: int, y: int): void

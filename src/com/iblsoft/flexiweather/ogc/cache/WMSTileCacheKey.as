@@ -23,52 +23,10 @@ package com.iblsoft.flexiweather.ogc.cache
 				key +=  "|" + tileIndex.toString();
 			if(m_validity != null)
 				key +=  "|validity:" + m_validity.toString();
-//			else {
-//				trace("WMSTileCacheKey validity is null");
-//			}
 			var a: Array = []
 //			if(url.url != null) {
 //				key += url.url;
 //			} 
-			
-				/*
-			var getVars: Array;
-			var s: String;
-			var obj: Object;
-			
-			if(url != null) 
-			{
-				for(s in url.data) {
-					a.push({type:'data',name:s});
-				}
-				if (url.url.indexOf('?'))
-				{
-					var paramsArray: Array = url.url.split('?');
-					if (paramsArray.length > 1)
-					{
-						getVars = (paramsArray[1] as String).split('&');
-						for each (s in getVars) {
-							if (s.length > 0)
-							{
-								a.push({type:'get',name:getURLParameterName(s), string: s});
-							}
-						}	
-					}
-				}
-				a.sort();
-				var type: String;
-				for each(obj in a) 
-				{
-					type = obj.type as String;
-					s = obj.name;
-					
-					if (type == 'data')
-						key += "|" + s + "=" + url.data[s]; 
-					if (type == 'get')
-						key += "|" + s + "=" + getURLParameterValue(obj.string);
-				}
-			} 
-			*/
 				
 			if (specialStrings && specialStrings.length > 0)
 			{
@@ -78,11 +36,8 @@ package com.iblsoft.flexiweather.ogc.cache
 					key +=  "|" + str;
 				}
 			}
-			trace("new WMSTileCacheKey before : " + key);
-			
 			sortCacheKeyString();
 				
-			trace("new WMSTileCacheKey after  : " + key);
 		}
 		
 		private function getURLParameterName(str: String): String
