@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<flexLibProperties includeAllClasses="false" useMultiPlatformConfig="false" version="1">
+<flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="1">
   <includeClasses>
     <classEntry path="com.iblsoft.flexiweather.components.ResizableDropDownList"/>
     <classEntry path="com.iblsoft.flexiweather.components.charts.FlexChart"/>
@@ -26,7 +26,10 @@
     <classEntry path="com.iblsoft.flexiweather.net.loaders.HTMLLoader"/>
     <classEntry path="com.iblsoft.flexiweather.net.loaders.ImageLoader"/>
     <classEntry path="com.iblsoft.flexiweather.net.loaders.JSONLoader"/>
+    <classEntry path="com.iblsoft.flexiweather.net.loaders.JSONRPCCaller"/>
     <classEntry path="com.iblsoft.flexiweather.net.loaders.JSONRPCLoader"/>
+    <classEntry path="com.iblsoft.flexiweather.net.loaders.KMLLoader"/>
+    <classEntry path="com.iblsoft.flexiweather.net.loaders.KMZLoader"/>
     <classEntry path="com.iblsoft.flexiweather.net.loaders.LoaderWithAssociatedData"/>
     <classEntry path="com.iblsoft.flexiweather.net.loaders.TextLoader"/>
     <classEntry path="com.iblsoft.flexiweather.net.loaders.URLLoaderWithAssociatedData"/>
@@ -42,6 +45,7 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.CRSWithBBoxAndTilingInfo"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.ExceptionUtils"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.FeatureBase"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.FeatureUpdateContext"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.GMLUtils"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.IBehaviouralObject"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.ILayerConfiguration"/>
@@ -119,13 +123,19 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.data.KMLResourceKey"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.data.KMZFile"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.events.KMLBitmapEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.events.KMLEvent"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.events.KMLFeatureEvent"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.KML"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.KMLFeature"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.KMLIcon"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.KMLLabel"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.KMLVec2"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.LatLonAltBox"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.Lod"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.LookAt"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.MultiGeometry"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.NetworkLink"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.Region"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.ScreenOverlay"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.styles.ColorStyle"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.styles.HotSpot"/>
@@ -135,8 +145,11 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.styles.StyleSelector"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.interfaces.IKMLIconFeature"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.interfaces.IKMLLabeledFeature"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.managers.KMLLoaderManager"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.managers.KMLParserManager"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.managers.KMLPopupManager"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.managers.KMLResourceManager"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.managers.NetworkLinkManager"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.renderer.DefaultKMLRenderer"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.renderer.IKMLRenderer"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.net.loaders.WMSFeatureInfoLoader"/>
@@ -200,6 +213,7 @@
     <classEntry path="com.iblsoft.flexiweather.utils.AnticollisionLayout"/>
     <classEntry path="com.iblsoft.flexiweather.utils.ArrayLogTarget"/>
     <classEntry path="com.iblsoft.flexiweather.utils.ArrayUtils"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.AsyncManager"/>
     <classEntry path="com.iblsoft.flexiweather.utils.BitmapFilterUtils"/>
     <classEntry path="com.iblsoft.flexiweather.utils.CubicBezier"/>
     <classEntry path="com.iblsoft.flexiweather.utils.CurveLineSegment"/>
@@ -217,6 +231,7 @@
     <classEntry path="com.iblsoft.flexiweather.utils.NumberUtils"/>
     <classEntry path="com.iblsoft.flexiweather.utils.ObjectPool"/>
     <classEntry path="com.iblsoft.flexiweather.utils.Operators"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.ProfilerUtils"/>
     <classEntry path="com.iblsoft.flexiweather.utils.ScreenUtils"/>
     <classEntry path="com.iblsoft.flexiweather.utils.Serializable"/>
     <classEntry path="com.iblsoft.flexiweather.utils.SharedObjectStorage"/>
@@ -246,6 +261,7 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerCoordinate"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerLegends"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerMap"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerNorthIndicator"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerPan"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerPlace"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerPlaces"/>
@@ -272,22 +288,6 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.GoogleMapLayerConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.GoogleMapsLayerOption"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.InteractiveLayerGoogleMaps"/>
-    <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.Region"/>
-    <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.LatLonAltBox"/>
-    <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.Lod"/>
-    <classEntry path="com.iblsoft.flexiweather.utils.AsyncManager"/>
-    <classEntry path="com.iblsoft.flexiweather.ogc.FeatureUpdateContext"/>
-    <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.MultiGeometry"/>
-    <classEntry path="com.iblsoft.flexiweather.ogc.kml.managers.KMLParserManager"/>
-    <classEntry path="com.iblsoft.flexiweather.ogc.kml.events.KMLEvent"/>
-    <classEntry path="com.iblsoft.flexiweather.utils.ProfilerUtils"/>
-    <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.NetworkLink"/>
-    <classEntry path="com.iblsoft.flexiweather.ogc.kml.managers.NetworkLinkManager"/>
-    <classEntry path="com.iblsoft.flexiweather.net.loaders.KMLLoader"/>
-    <classEntry path="com.iblsoft.flexiweather.net.loaders.KMZLoader"/>
-    <classEntry path="com.iblsoft.flexiweather.ogc.kml.managers.KMLLoaderManager"/>
-    <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerNorthIndicator"/>
-    <classEntry path="com.iblsoft.flexiweather.net.loaders.JSONRPCCaller"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
