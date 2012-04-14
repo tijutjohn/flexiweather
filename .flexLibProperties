@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="1">
+<flexLibProperties includeAllClasses="false" useMultiPlatformConfig="false" version="1">
   <includeClasses>
     <classEntry path="com.iblsoft.flexiweather.components.ResizableDropDownList"/>
     <classEntry path="com.iblsoft.flexiweather.components.charts.FlexChart"/>
@@ -287,6 +287,7 @@
     <classEntry path="com.iblsoft.flexiweather.net.loaders.KMZLoader"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.managers.KMLLoaderManager"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerNorthIndicator"/>
+    <classEntry path="com.iblsoft.flexiweather.net.loaders.JSONRPCCaller"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
