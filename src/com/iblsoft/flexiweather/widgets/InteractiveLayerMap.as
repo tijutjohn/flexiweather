@@ -792,14 +792,14 @@ package com.iblsoft.flexiweather.widgets
 			if (parsingCorrect)
 			{
 				var info: String = infoXML.text();
-	        	_featureTooltipString += '<p><b><font color="#6EC1FF">'+layer.name+'</font></b>';
+	        	_featureTooltipString += '<p><b><font color="#3080c0">'+layer.name+'</font></b>';
 				_featureTooltipString += s+'</p>';
 	        	
 				
 				trace("InteractiveLayerMap onFeatureInfoAvailable _featureTooltipCallsRunning: " + _featureTooltipCallsRunning);
 				
 			} else {
-				_featureTooltipString += '<p><b><font color="#6EC1FF">'+layer.name+'</font></b>';
+				_featureTooltipString += '<p><b><font color="#3080c0">'+layer.name+'</font></b>';
 				_featureTooltipString += 'parsing problem</p>'
 					
 			}
