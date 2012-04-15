@@ -21,9 +21,9 @@ package com.iblsoft.flexiweather.widgets
 		public var timeFormat: String = '%HZ';
 		
 		public var duration: int = 1000;
-		public var durationStep: int = 1000;
-		public var minDuration: int = 1000;
-		public var maxDuration: int = 10000;
+		public var durationStep: int = 100;
+		public var minDuration: int = 100;
+		public var maxDuration: int = 5000;
 		
 		public var animationExtent: String;
 		public var animationType: String;
@@ -46,9 +46,9 @@ package com.iblsoft.flexiweather.widgets
 			dateFormat = storage.serializeString("date-format", dateFormat, '%d-%m');
 			dateFormat = storage.serializeString("time-format", dateFormat, '%HZ');
 			duration = storage.serializeInt("duration", duration, 1000);
-			durationStep = storage.serializeInt("duration-step", durationStep, 1000);
-			minDuration = storage.serializeInt("min-duration", minDuration, 1000);
-			maxDuration = storage.serializeInt("max-duration", maxDuration, 1000);
+			durationStep = storage.serializeInt("duration-step", durationStep, 100);
+			minDuration = storage.serializeInt("min-duration", minDuration, 100);
+			maxDuration = storage.serializeInt("max-duration", maxDuration, 5000);
 			animationExtent = storage.serializeString("animation-extent", animationExtent, null);
 			animationType = storage.serializeString("animation-type", animationType, null);
 			mapVisibleUnderTimeline = storage.serializeBool("map-visible-under-timeline", mapVisibleUnderTimeline, true);
