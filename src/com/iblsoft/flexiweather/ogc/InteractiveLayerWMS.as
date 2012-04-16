@@ -77,7 +77,7 @@ package com.iblsoft.flexiweather.ogc
 					alpha = newAlpha;
 				}
 				
-				visible = storage.serializeBool("visible", visible);
+				visible = storage.serializeBool("visible", visible, true);
 				
 //				for each(s_dimName in getWMSDimensionsNames()) {
 //					var level: String = storage.serializeString(s_dimName, null, null);
