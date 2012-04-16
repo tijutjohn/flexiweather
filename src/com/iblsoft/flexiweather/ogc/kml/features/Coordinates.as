@@ -24,6 +24,8 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		*/	
 		public function Coordinates(string:String)
 		{
+			string = fixCoordinatesString(string);
+			
 			var stringSplit:Array = string.split(" ");
 			
 			_coordsList = new Array();
@@ -48,6 +50,31 @@ package com.iblsoft.flexiweather.ogc.kml.features
 					}
 				}
 			}
+		}
+		
+		private function fixCoordinatesString(string:String): String
+		{
+			var changes: Boolean = false;
+			var stringSplit:Array 
+			
+			do {
+				changes = false;
+				
+				stringSplit = string.split(", ");
+				if (stringSplit.length > 1)
+					changes = true;
+				
+				string = stringSplit.join(',');
+				
+				stringSplit = string.split(" ,");
+				if (stringSplit.length > 1)
+					changes = true;
+				
+				string = stringSplit.join(',');
+				
+			} while (changes)
+				
+			return string;
 		}
 	 	
 	 	

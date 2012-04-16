@@ -34,6 +34,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		{
 			super(kml, s_namespace, x);
 			
+			this._features = new Array();
 
 		}
 		
@@ -41,10 +42,9 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		{
 			// Features are: Placemark, GroundOverlay, ScreenOverlay, PhotoOverlay, NetworkLink, Folder, Document
 			// We'll only support Placemark, GroundOverlay, Folder, and Document
-			
 			var time: int = startProfileTimer();
 			
-			this._features = new Array();
+			super.parseKML(s_namespace, kmlParserManager);
 		 	
 			var i:XML;
 			var folder: Folder;

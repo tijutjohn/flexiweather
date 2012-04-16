@@ -9,6 +9,8 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 	import flash.utils.ByteArray;
 	import flash.utils.Dictionary;
 
+	[Event(name="kmlFileLoaded", type="com.iblsoft.flexiweather.ogc.kml.events.KMLEvent")]
+	[Event(name="parsingFinished", type="com.iblsoft.flexiweather.ogc.kml.events.KMLEvent")]
 	public class KMLLoaderManager extends EventDispatcher
 	{
 		private var _kmlLayerDictionary: Dictionary;

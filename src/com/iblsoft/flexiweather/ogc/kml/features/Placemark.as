@@ -35,6 +35,33 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		private var _geometry:Geometry;
 		private var _multigeometry:Geometry;
 		
+		override public function getPoints(): ArrayCollection
+		{ 
+			if (_geometry is Polygon)
+			{
+				var linearRing: LinearRing = (_geometry as Polygon).outerBoundaryIs.linearRing;
+				
+				return new ArrayCollection(linearRing.coordinatesPoints);
+			}
+			return m_points; 
+		}
+		
+		override public function get coordinates(): Array
+		{ 
+			if (_geometry is Polygon)
+			{
+				trace("get Placemark Polygon coordinates");
+			}
+			return m_coordinates.toArray(); 
+		}  		
+		
+		override public function set x(value:Number):void
+		{
+			super.x = value;
+			
+			trace("Placemark.x = " + value);
+		}
+		
 		/**
 		*	Constructor for class.
 		* 
@@ -200,15 +227,38 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			
 			if (_geometry)
 			{
-					var points: ArrayCollection = getPoints();
+				var points: ArrayCollection;
+				var point: flash.geom.Point;
+				if (_geometry is MultiGeometry)
+				{
+					var multigeometry: MultiGeometry = _geometry as MultiGeometry;
+					for each (var geometryItem: Geometry in multigeometry.geometries)
+					{
+						points = getPoints();
+						if (points && points.length > 0)
+						{
+							point = points.getItemAt(0) as flash.geom.Point;
+							
+							x = point.x;
+							y = point.y;
+							//_container.labelLayout.updateObjectReferenceLocation(placemark);
+						}
+					}
+				} else  {
+					points = getPoints();
 					if (points && points.length > 0)
 					{
-						var point: flash.geom.Point = points.getItemAt(0) as flash.geom.Point;
+						point = points.getItemAt(0) as flash.geom.Point;
 						
+						if (point is Coord)
+						{
+							point = iw.coordToPoint(point as Coord);
+						}
 						x = point.x;
 						y = point.y;
 						//_container.labelLayout.updateObjectReferenceLocation(placemark);
 					}
+				}
 			}
 			
 		}

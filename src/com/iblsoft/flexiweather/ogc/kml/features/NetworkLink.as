@@ -7,12 +7,15 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		private var _refreshVisibility: int;
 		private var _flyToView: int;
 		private var _link: Link;
+		private var _container: Container;
 		
 		public function NetworkLink(kml:KML, s_namespace:String, s_xml:XMLList)
 		{
 			super(kml, s_namespace, s_xml);
 			
 			var kmlns:Namespace = new Namespace(s_namespace);
+			
+			_container = new Container(null, s_namespace, null);
 			
 			this._refreshVisibility = ParsingTools.nanCheck(this.xml.kmlns::refreshVisibility);
 			this._flyToView = ParsingTools.nanCheck(this.xml.kmlns::flyToView);
@@ -26,8 +29,13 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			if (kml is KML22)
 			{
 				var kml22: KML22 = kml as KML22;
-				
+				_container.addFeature(kml22.feature);
 			}
+		}
+		
+		public function get container(): Container
+		{
+			return _container;
 		}
 		
 		public function get refreshVisibility(): int

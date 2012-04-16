@@ -120,6 +120,10 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 			notifyKMLParsingStarted();
 			
 			var xml: XML = event.result as XML;
+			
+			trace("\nKMLLayerConfiguration onKMLLoaded");
+			trace(xml.toXMLString());
+			
 			addKMLSource(xml.toXMLString(), kmlPath, _kmlBaseURLPath);
 			
 		}

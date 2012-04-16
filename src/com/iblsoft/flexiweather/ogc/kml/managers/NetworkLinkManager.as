@@ -37,7 +37,6 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 		
 		override protected function onKMLFileLoaded(event: KMLEvent): void
 		{
-			super.onKMLFileLoaded(event);
 			
 			var kmlConfig: KMLLayerConfiguration = event.currentTarget as KMLLayerConfiguration;
 			var kmlURL: String = kmlConfig.kmlPath;
@@ -48,12 +47,9 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 			delete _linksDictionary[kmlURL];
 			
 			link.addLoadedKML(kmlConfig.kml);
-//			
-//			event.data = _kmlLayerDictionary[kmlURL];
-//			//notify
-//			dispatchEvent(event);
-//			
-//			kmlLoadingAndParsingFinished();
+
+			super.onKMLFileLoaded(event);
 		}
+		
 	}
 }

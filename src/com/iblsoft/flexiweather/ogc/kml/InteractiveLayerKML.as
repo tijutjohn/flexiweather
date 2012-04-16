@@ -6,12 +6,14 @@ package com.iblsoft.flexiweather.ogc.kml
 	import com.iblsoft.flexiweather.ogc.Version;
 	import com.iblsoft.flexiweather.ogc.kml.controls.KMLInfoWindow;
 	import com.iblsoft.flexiweather.ogc.kml.events.KMLBitmapEvent;
+	import com.iblsoft.flexiweather.ogc.kml.events.KMLEvent;
 	import com.iblsoft.flexiweather.ogc.kml.events.KMLFeatureEvent;
 	import com.iblsoft.flexiweather.ogc.kml.features.Container;
 	import com.iblsoft.flexiweather.ogc.kml.features.Document;
 	import com.iblsoft.flexiweather.ogc.kml.features.Folder;
 	import com.iblsoft.flexiweather.ogc.kml.features.GroundOverlay;
 	import com.iblsoft.flexiweather.ogc.kml.features.KML;
+	import com.iblsoft.flexiweather.ogc.kml.features.KML22;
 	import com.iblsoft.flexiweather.ogc.kml.features.KMLFeature;
 	import com.iblsoft.flexiweather.ogc.kml.features.KMLLabel;
 	import com.iblsoft.flexiweather.ogc.kml.features.LineString;
@@ -98,7 +100,7 @@ package com.iblsoft.flexiweather.ogc.kml
 			super(container, version);
 			
 			_kml = kml;
-			
+			_kml.networkLinkManager.addEventListener(KMLEvent.KML_FILE_LOADED, onNetworkLinkLoadedAndParsed)
 			
 //			addEventListener(Event.ENTER_FRAME, onEnterFrame);
 			addEventListener(KMLFeatureEvent.KML_FEATURE_CLICK, onKMLFeatureClick, false, EventPriority.DEFAULT_HANDLER, true);
@@ -128,7 +130,7 @@ package com.iblsoft.flexiweather.ogc.kml
 				addChild(_syncManager);
 				addChild(_screenshot);
 				
-				parseKML();
+				parseKML(_kml);
 			}
 			if (!_syncManagerFullUpdate.parent)
 			{
@@ -158,9 +160,15 @@ package com.iblsoft.flexiweather.ogc.kml
 			//FIXME implement InteractiveLayerKML destroy function	
 		}
 		
-		private function parseKML(): void
+		private function onNetworkLinkLoadedAndParsed(event: KMLEvent): void
 		{
-			var rootFeature: KMLFeature = _kml.feature;
+			trace("	onNetworkLinkLoadedAndParsed ");
+			parseKML(event.kmlLayerConfiguration.kml as KML);
+		}
+		
+		private function parseKML(kml: KML): void
+		{
+			var rootFeature: KMLFeature = kml.feature;
 			
 			if (!rootFeature)
 			{

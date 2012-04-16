@@ -46,6 +46,8 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			_kmlParserManager = new KMLParserManager();
 			_networkLinkManager = new NetworkLinkManager();
 			
+			_networkLinkManager.addEventListener(KMLEvent.KML_FILE_LOADED, onNetworkLinkLoaded);
+			
 			if (!_resourceManager)
 			{
 				_resourceManager = new KMLResourceManager(_kmlBaseURLPath);
@@ -79,16 +81,22 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		private function createDataProvider(): ArrayCollection
 		{
 			var ac: ArrayCollection = new ArrayCollection();
-			if (_feature)
+			var currFeature: KMLFeature = _feature;
+			if (currFeature)
 			{
-				var name: String = getKMLFeatureName(_feature);
-				if (feature is Container)
+				var name: String = getKMLFeatureName(currFeature);
+				if (_feature is NetworkLink)
 				{
-					var objContainer: Object = {label: name, data: _feature, children: []};
-					addFeaturesToDataProvider(feature as Container, objContainer);
+					currFeature = (_feature as NetworkLink).container;
+				}
+				
+				if (currFeature is Container)
+				{
+					var objContainer: Object = {label: name, data: currFeature, children: []};
+					addFeaturesToDataProvider(currFeature as Container, objContainer);
 					ac.addItem(objContainer);	
 				} else {
-					var obj: Object = {label: name, data: _feature};
+					var obj: Object = {label: name, data: currFeature};
 					ac.addItem(obj);	
 				}
 			}
@@ -118,26 +126,58 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			{
 				for each (var feature: KMLFeature in container.features)
 				{
+					if (feature is NetworkLink)
+					{
+						feature = (feature as NetworkLink).container;
+					}
 					var name: String = getKMLFeatureName(feature);
 					var obj: Object = {label: name, data: feature};
-					if (feature is Folder)
-					{
-						trace("stop");
-					}
+					trace("\n\t CREATE "  + obj.label);
 					if (feature is Container)
 					{
 						if (!obj.hasOwnProperty("children"))
 						{
 							obj['children'] = new Array();
 						}
-						(obj['children'] as Array).push(addFeaturesToDataProvider(feature as Container, obj));
+						var newObj: Object = addFeaturesToDataProvider(feature as Container, obj);
+						if (!isParentObjectInside((obj['children'] as Array), newObj))
+						{
+							trace("\t\t ADD["+obj.label+"] " + newObj.label);
+							(obj['children'] as Array).push(newObj);
+							trace("\t\t ADD["+obj.label+"] len: " + (obj['children'] as Array).length);
+						} else {
+							trace("\t\t ADD " + newObj.label + " IS ALREADY THERE ");
+						}
 					}
-					(parentObject['children'] as Array).push(obj);
+					if (!isParentObjectInside((parentObject['children'] as Array), obj))
+					{
+						trace("\t\t\t add to PARENT["+parentObject.label+"]: " + obj.label);
+						(parentObject['children'] as Array).push(obj);
+						trace("\t\t\t add to PARENT["+parentObject.label+"] len: " + (parentObject['children'] as Array).length);
+					} else {
+						trace("\t\t\t add to PARENT: " + obj.label + " IS ALREADY THERE ");
+					}
 				}
 
 			}
 			
 			return obj;
+		}
+		
+		private function isParentObjectInside(parentArray: Array, child: Object): Boolean
+		{
+			for each (var currChild: Object in parentArray)
+			{
+				if (currChild == child)
+					return true;
+			}
+			return false;
+		}
+		
+		private function onNetworkLinkLoaded(event: KMLEvent): void
+		{
+			//kml data provider must be updated, because NetworkLink's KML was loaded and parsed
+			notifyKmlDataProviderChange();
 		}
 		
 		protected function notifyKmlDataProviderChange(): void
