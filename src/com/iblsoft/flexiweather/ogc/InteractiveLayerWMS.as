@@ -76,6 +76,9 @@ package com.iblsoft.flexiweather.ogc
 				if (newAlpha < 1) {
 					alpha = newAlpha;
 				}
+				
+				visible = storage.serializeBool("visible", visible);
+				
 //				for each(s_dimName in getWMSDimensionsNames()) {
 //					var level: String = storage.serializeString(s_dimName, null, null);
 //					if (level)
@@ -93,6 +96,8 @@ package com.iblsoft.flexiweather.ogc
 //				}
 				if (alpha < 1)
 					storage.serializeNumber("transparency", alpha);
+					
+				storage.serializeBool("visible", visible);
 				
 				if (isPrimaryLayer())
 					storage.serializeBool("primary-layer", true);

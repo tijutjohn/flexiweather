@@ -20,7 +20,7 @@ package com.iblsoft.flexiweather.widgets
 			onIndicatorPositionChanged();
 		}
 		
-		public function InteractiveLayerNorthIndicator(container:InteractiveWidget)
+		public function InteractiveLayerNorthIndicator(container:InteractiveWidget = null)
 		{
 			super(container);
 			
@@ -75,6 +75,9 @@ package com.iblsoft.flexiweather.widgets
 		private function findDirection(): void
 		{
 			var startCoord: Coord = container.pointToCoord(_indicatorPosition.x, _indicatorPosition.y);
+			if (!startCoord)
+				return;
+			
 			startCoord = startCoord.toLaLoCoord();
 			
 			var endCoord: Coord;
@@ -121,6 +124,7 @@ package com.iblsoft.flexiweather.widgets
 
 
 import flash.display.Graphics;
+import flash.filters.GlowFilter;
 import flash.geom.Point;
 import flash.text.TextField;
 import flash.text.TextFieldAutoSize;
@@ -136,6 +140,9 @@ class NorthIndicator extends UIComponent {
 	
 	private var _text: String;
 	private var _textChanged: Boolean;
+	
+	private var _glow: GlowFilter;
+	
 	public function set text(value: String): void
 	{
 		_text = value;
@@ -162,6 +169,8 @@ class NorthIndicator extends UIComponent {
 		
 		_tfParent = new UIComponent();
 		_textfield = new TextField();
+		
+		_glow = new GlowFilter(0xffffff,0.7);
 	}
 	
 	override protected function childrenCreated():void
@@ -172,6 +181,7 @@ class NorthIndicator extends UIComponent {
 		addChild(_tfParent);
 		_tfParent.addChild(_textfield);
 		
+		filters = [_glow];
 		draw();
 	}
 	
