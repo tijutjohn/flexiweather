@@ -16,6 +16,8 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 	import com.iblsoft.flexiweather.ogc.kml.features.ScreenOverlay;
 	import com.iblsoft.flexiweather.ogc.kml.features.styles.HotSpot;
 	import com.iblsoft.flexiweather.ogc.kml.features.styles.IconStyle;
+	import com.iblsoft.flexiweather.ogc.kml.features.styles.LineStyle;
+	import com.iblsoft.flexiweather.ogc.kml.features.styles.PolyStyle;
 	import com.iblsoft.flexiweather.ogc.kml.features.styles.Style;
 	import com.iblsoft.flexiweather.ogc.kml.features.styles.StyleMap;
 	import com.iblsoft.flexiweather.ogc.kml.features.styles.StyleSelector;
@@ -51,6 +53,28 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 		}
 		
 		
+		public function dispose(feature: KMLFeature): void
+		{
+			if (_styleDictionary)
+			{
+				var dict: Dictionary = _styleDictionary.dictionary;
+				for each (var resource: StyleResource in dict)
+				{
+					if (resource.feature == feature)
+					{
+						//remove
+						_styleDictionary.removeStyleFromDictionary(resource);
+						
+						resource.key = null;
+						resource.feature = null;
+						resource.style = null;
+						
+						resource = null;
+					}
+				}
+			}
+		}
+		
 		public function render(feature: KMLFeature, container: InteractiveWidget): void
 		{
 			_container = container;
@@ -66,8 +90,6 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 				renderGroundOverlay(feature);
 			} else if (feature is ScreenOverlay) {
 				renderScreenOverlay(feature);
-			} else {
-				trace("render feature: " + feature);
 			}
 		}
 		
@@ -99,10 +121,16 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 			var resource: StyleResource = _styleDictionary.getResource(event.key) as StyleResource
 			if (resource.feature is Placemark)
 			{
+				if (resource.feature.kmlIcon)
+					resource.feature.kmlIcon.setNormalBitmapResourceKey(event.key);
 				onPlacemarkIconLoaded(event);
 			} else if (resource.feature is GroundOverlay) {
+				if (resource.feature.kmlIcon)
+					resource.feature.kmlIcon.setNormalBitmapResourceKey(event.key);
 				onGroundOverlayIconLoaded(event);
 			} else if (resource.feature is ScreenOverlay) {
+				if (resource.feature.kmlIcon)
+					resource.feature.kmlIcon.setNormalBitmapResourceKey(event.key);
 				onScreenOverlayIconLoaded(event);
 			}
 			
@@ -173,6 +201,9 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 		
 		protected function renderScreenOverlayImage(overlay: ScreenOverlay, icon: BitmapData): void
 		{
+			if (!overlay || !overlay.kmlIcon)
+				return;
+			
 			var gr: Graphics = overlay.kmlIcon.graphics;
 			gr.clear();
 			
@@ -238,12 +269,12 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 						overlayPoint.y = icon.height - overlay.overlayXY.y;
 				}
 				
-				trace("ScreenOverlay image scale: " + sx + " , " + sy);
-				trace("ScreenOverlay image pos: " + xDiff + " , " + yDiff);
-				trace("ScreenOverlay image overlayPoint: " + overlayPoint);
-				trace("ScreenOverlay size: " + overlay.size);
-				trace("ScreenOverlay overlay: " + overlay.overlayXY);
-				trace("ScreenOverlay screen: " + overlay.screenXY);
+//				trace("ScreenOverlay image scale: " + sx + " , " + sy);
+//				trace("ScreenOverlay image pos: " + xDiff + " , " + yDiff);
+//				trace("ScreenOverlay image overlayPoint: " + overlayPoint);
+//				trace("ScreenOverlay size: " + overlay.size);
+//				trace("ScreenOverlay overlay: " + overlay.overlayXY);
+//				trace("ScreenOverlay screen: " + overlay.screenXY);
 				
 				xDiff -= overlayPoint.x;
 				yDiff -= overlayPoint.y;
@@ -255,6 +286,8 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 				//			gr.drawRect(0,0, icon.width, icon.height);`
 				gr.drawRect(xDiff, yDiff, w, h);
 				gr.endFill();
+				
+//				icon.dispose();
 			} else {
 				//screen overlay is not active, do not display it
 			}
@@ -297,7 +330,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 					
 					feature.x = nw.x;// + (ne.x - nw.x) / 2;
 					feature.y = ne.y;// + (se.y - ne.y) / 2;
-					trace("renderGroundOverlay overlay pos: ["+feature.x+","+feature.y+"]")
+//					trace("renderGroundOverlay overlay pos: ["+feature.x+","+feature.y+"]")
 					_container.labelLayout.updateObjectReferenceLocation(feature);
 				}
 				
@@ -334,6 +367,9 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 		
 		protected function renderGroundOverlayImage(overlay: GroundOverlay, icon: BitmapData): void
 		{
+			if (!overlay || !overlay.kmlIcon)
+				return;
+			
 			var gr: Graphics = overlay.kmlIcon.graphics;
 			gr.clear();
 			
@@ -368,7 +404,6 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 				
 				if (overlay.isActive(w, h))
 				{
-					trace("GroundOverlay image scale: " + sx + " , " + sy);
 					var m: Matrix = new Matrix();
 					m.scale(sx, sy); 
 					
@@ -382,6 +417,8 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 					trace("Groundoverlay is not active");
 				}
 			}
+			
+//			icon.dispose();
 			
 		}
 		
@@ -440,25 +477,21 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 				} else { 
 					if (geometry is LineString) 
 					{
-//						trace("draw LineString");
 						renderLineString(placemark.graphics, placemark.getPoints(), placemark.kmlLabel, placemarkStyles.normalStyle);
 						
 					} else {
 						if (geometry is LinearRing) 
 						{
-							trace("draw LinearRing");
 							renderLinearRing(placemark.graphics, geometry as LinearRing, placemark.kmlLabel, placemarkStyles.normalStyle);
 							
 						}  else {
 							if (geometry is Polygon) 
 							{
-								trace("draw Polygon");
 								renderPolygon(placemark.graphics, geometry as Polygon, placemark.kmlLabel, placemarkStyles.normalStyle);
 							} else {
 								
 								if (geometry is MultiGeometry) 
 								{
-									trace("draw MultiGeomtre");
 									renderMultiGeometry(placemark, geometry as MultiGeometry);
 								}
 							}
@@ -467,7 +500,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 				} 
 			}
 			
-			debug("Render placemark time: " + stopProfileTimer(time));
+//			debug("Render placemark time: " + stopProfileTimer(time));
 		}
 		
 		
@@ -477,7 +510,6 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 			var resource: StyleResource = _styleDictionary.getResource(event.key) as StyleResource
 			if (resource)
 			{
-				trace("onPlacemarkIconLoaded  resource found: " + event.key.href)
 				var placemark: Placemark = resource.feature as Placemark;
 				
 				_styleDictionary.removeStyleFromDictionary(resource);
@@ -559,6 +591,8 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 			//			gr.drawRect(0,0, icon.width, icon.height);`
 			gr.drawRect(xDiff, yDiff, icon.width * scaleX, icon.height * scaleY);
 			gr.endFill();
+			
+//			icon.dispose();
 			
 			updateLabelPosition(placemark.kmlLabel, placemark.x + xDiff, placemark.y + yDiff);
 		}
@@ -692,10 +726,21 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 		{
 			var lineWidth: int = 3;
 			var lineColor: int = 0x000000;
-			if (style && style.lineStyle)
+			var useOutline: Boolean = true;
+			
+			if (style)
 			{
-				lineWidth = style.lineStyle.width;
-				lineColor = style.lineStyle.color;
+				var ls: LineStyle = style.lineStyle;
+				var ps: PolyStyle = style.polyStyle;
+				if (ls)
+				{
+					lineWidth = ls.width;
+					lineColor = ls.color;
+				}
+				if (ps)
+				{
+					useOutline = ps.outline;
+				}
 			}
 			
 			gr.clear();
@@ -739,27 +784,28 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 			var fillExists: Boolean;
 			var outlineExists: Boolean;
 			
-			if (style && style.lineStyle)
+			if (style)
 			{
-				lineWidth = style.lineStyle.width;
-				lineColor = style.lineStyle.color;
-			}
-			
-			if (style && style.polyStyle)
-			{
-				if (style.polyStyle.outline)
+				var ls: LineStyle = style.lineStyle;
+				var ps: PolyStyle = style.polyStyle;
+				if (ls)
 				{
-					outlineExists = true;
+					lineWidth = ls.width;
+					lineColor = ls.color;
 				}
-				
-				if (style.polyStyle.fill)
+				if (ps)
+				{
+					outlineExists = ps.outline;
+				}
+				if (ps.fill)
 				{
 					fillExists = true;
-					var fillColor: uint = style.polyStyle.color;
+					var fillColor: uint = ps.color;
 					var fillAlpha: Number = 0.5;
 					gr.beginFill(fillColor, fillAlpha);
 				}
 			}
+			
 			
 			
 			
@@ -773,7 +819,9 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 				points.addItem(pt);
 			}
 			
-			gr.lineStyle(lineWidth, lineColor);
+			if (outlineExists)
+				gr.lineStyle(lineWidth, lineColor);
+			
 			if (points && points.length > 1)
 			{
 				var p0: Point = points.getItemAt(0) as Point;
@@ -911,18 +959,16 @@ class ObjectStyles
 					
 					if (!normalStyle)
 					{
-						trace("renderPlacemark styleSelector defined in way => StyleMap with styleUrl");
+//						trace("renderPlacemark styleSelector defined in way => StyleMap with styleUrl");
 						normalStyle = _placemark.parentDocument.getStyleByID(styleURL);
 					}
 					if (!highlightStyle)
 					{
-						trace("renderPlacemark highlight styleSelector defined in way => StyleMap with styleUrl");
+//						trace("renderPlacemark highlight styleSelector defined in way => StyleMap with styleUrl");
 						highlightStyle = _placemark.parentDocument.getStyleByID(highlightStyleURL);
 					}
 				}
 			}
-			
-			//					trace("check placemark style");
 		} else {
 			trace("placemark has no style");
 		}
@@ -934,7 +980,10 @@ class ObjectStyles
 class StylesDictionary
 {
 	private var _dictionary: Dictionary;
-	
+	public function get dictionary(): Dictionary
+	{
+		return _dictionary;
+	}
 	public function StylesDictionary(): void
 	{
 		_dictionary = new Dictionary();		

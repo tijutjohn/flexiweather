@@ -21,6 +21,8 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
 	
+	import mx.controls.Alert;
+	
 	public class KMLLayerConfiguration extends LayerConfiguration
 	{
 		
@@ -113,6 +115,7 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 		
 		private function onKMLLoadFailed(event: UniURLLoaderErrorEvent): void
 		{
+			Alert.show("KMLLayerConfiguration: Loading of KML failed","Loading failed", Alert.OK);
 			trace("load failed");
 		}
 		private function onKMLLoaded(event: UniURLLoaderEvent): void
@@ -120,9 +123,6 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 			notifyKMLParsingStarted();
 			
 			var xml: XML = event.result as XML;
-			
-			trace("\nKMLLayerConfiguration onKMLLoaded");
-			trace(xml.toXMLString());
 			
 			addKMLSource(xml.toXMLString(), kmlPath, _kmlBaseURLPath);
 			

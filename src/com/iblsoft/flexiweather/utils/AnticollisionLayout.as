@@ -171,8 +171,6 @@ package com.iblsoft.flexiweather.utils
 		
 		public function update(): void
 		{
-//			return;
-			
 			var time: int = ProfilerUtils.startProfileTimer();
 			
 			if (!m_suspendAnticollisionProcessing)
@@ -410,7 +408,7 @@ package com.iblsoft.flexiweather.utils
 				}
 			}
 			
-			debug("update time: " + ProfilerUtils.stopProfileTimer(time) + "ms   ma_layoutObjects items: " + ma_layoutObjects.length);
+//			debug("update time: " + ProfilerUtils.stopProfileTimer(time) + "ms   ma_layoutObjects items: " + ma_layoutObjects.length);
 		}
 		
 		public function needsUpdate(): Boolean

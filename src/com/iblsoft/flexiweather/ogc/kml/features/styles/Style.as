@@ -33,6 +33,32 @@ package com.iblsoft.flexiweather.ogc.kml.features.styles
 			}
 		}
 		
+		override public function cleanupKML(): void
+		{
+			super.cleanupKML();
+			
+			if (_iconStyle)
+			{
+				_iconStyle.cleanupKML();
+				_iconStyle = null;
+			}
+			if (_labelStyle)
+			{
+				_labelStyle.cleanupKML();
+				_labelStyle = null;
+			}
+			if (_lineStyle)
+			{
+				_lineStyle.cleanupKML();
+				_lineStyle = null;
+			}
+			if (_polyStyle)
+			{
+				_polyStyle.cleanupKML();
+				_polyStyle = null;
+			}
+		}
+		
 		public function get iconStyle(): IconStyle
 		{
 			return this._iconStyle;

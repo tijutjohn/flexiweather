@@ -43,11 +43,34 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 			_kmzFiles = new Dictionary();
 		}
 		
+		
+		public function disposeResource(key: KMLResourceKey): void
+		{
+			if (!key)
+				return;
+			
+			var resource: Resource;
+			if (_cache.resourceExists(key))
+			{
+				resource = _cache.getResource(key);
+				resource.dispose();
+				_cache.deleteResource(key);
+				key = null;
+				resource = null;
+			}
+		}
+
+		public function debugCache(txt: String): void
+		{
+			debug("cache items: ["+txt+"] " + _cache.getAllResources().length);
+		}
 		private function debug(txt: String): void
 		{
+			return;
 			if (debugConsole)
 			{
 				debugConsole.print("KMLResourceManager: " + txt,'Info','KMLResourceManager');
+				trace("KMLResourceManager: " + txt);
 			}
 		}
 		public function isResourceLoading(key: KMLResourceKey): Boolean
@@ -270,6 +293,15 @@ class ResourceCache
 		}
 		return resources;
 	}
+	public function deleteResource(key: KMLResourceKey): void
+	{
+		if (_dictionary)
+		{
+			var id: String = key.toString();
+			delete _dictionary[id];
+		}
+		
+	}
 	public function getResource(key: KMLResourceKey): Resource
 	{
 		if (_dictionary)
@@ -315,6 +347,16 @@ class Resource extends EventDispatcher
 		_loadingFinished = true;	
 	}
 	
+	public function dispose(): void
+	{
+		if (_loader && _loader.bitmapData)
+		{
+			removeLoaderListeners();
+			_loader.unload();
+			_loader = null;
+		}
+	}
+	
 	public function setBitmapData(bitmapData: BitmapData): void
 	{
 		if (!_loader)
@@ -335,8 +377,15 @@ class Resource extends EventDispatcher
 		_loader.loadBitmap(key.href);
 	}
 	
+	private function removeLoaderListeners(): void
+	{
+		_loader.removeEventListener(KMLBitmapEvent.BITMAP_LOADED, onBitmapLoaded);
+		_loader.removeEventListener(KMLBitmapEvent.BITMAP_LOADED, onBitmapLoadError);
+	}
 	private function onBitmapLoaded(event: KMLBitmapEvent): void
 	{
+		removeLoaderListeners();
+		
 		_loadingFinished = true;
 		
 		_loader.setBitmapData(fixBitmapData(bitmapData, key.type));
@@ -348,6 +397,8 @@ class Resource extends EventDispatcher
 	
 	private function onBitmapLoadError(event: KMLBitmapEvent): void
 	{
+		removeLoaderListeners();
+		
 		_loadingFinished = true;
 		
 		event.key = key;

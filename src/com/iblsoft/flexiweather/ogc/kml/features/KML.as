@@ -23,6 +23,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		
 		protected var _document: Document;
 		
+		protected var _localResourceManager: Boolean;
 		protected var _resourceManager: KMLResourceManager;
 		protected var _kmlParserManager: KMLParserManager;
 		protected var _networkLinkManager: NetworkLinkManager;
@@ -51,10 +52,58 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			if (!_resourceManager)
 			{
 				_resourceManager = new KMLResourceManager(_kmlBaseURLPath);
+				_localResourceManager = true;
 			}
 			
 		}
 		
+		override public function cleanup(): void
+		{
+			super.cleanup();
+			
+			if (_feature)
+			{
+				_feature.cleanup();
+				_feature = null;
+//				cleanupFeature(_feature);
+			}
+			if (_kmlParserManager)
+			{
+				_kmlParserManager.cleanup();
+			}
+			if (_networkLinkManager)
+			{
+				_networkLinkManager.removeEventListener(KMLEvent.KML_FILE_LOADED, onNetworkLinkLoaded);
+//				_networkLinkManager.cleanup();
+			}
+			if (_localResourceManager && _resourceManager)
+			{
+//				_resourceManager.cleanup();
+			}
+		}
+		/*
+		private function cleanupFeature(feature: KMLFeature): void
+		{
+			var features: Array;
+			
+			if (feature is Container || feature is NetworkLink)
+			{
+				if (feature is NetworkLink)
+				{
+					features = (feature as NetworkLink).container.features
+				} else {
+					var container: Container = feature as Container;
+					features = container.features;
+				}
+				for each (var currFeature: KMLFeature in features)
+				{
+					cleanupFeature(currFeature);
+				}
+			}
+			feature.cleanup();
+//			feature = null;
+		}
+		*/
 		public function parse(kmzFile: KMZFile = null): void
 		{
 			parseSource(_kmlSource);
@@ -132,7 +181,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 					}
 					var name: String = getKMLFeatureName(feature);
 					var obj: Object = {label: name, data: feature};
-					trace("\n\t CREATE "  + obj.label);
+//					trace("\n\t CREATE "  + obj.label);
 					if (feature is Container)
 					{
 						if (!obj.hasOwnProperty("children"))
@@ -142,20 +191,20 @@ package com.iblsoft.flexiweather.ogc.kml.features
 						var newObj: Object = addFeaturesToDataProvider(feature as Container, obj);
 						if (!isParentObjectInside((obj['children'] as Array), newObj))
 						{
-							trace("\t\t ADD["+obj.label+"] " + newObj.label);
+//							trace("\t\t ADD["+obj.label+"] " + newObj.label);
 							(obj['children'] as Array).push(newObj);
-							trace("\t\t ADD["+obj.label+"] len: " + (obj['children'] as Array).length);
-						} else {
-							trace("\t\t ADD " + newObj.label + " IS ALREADY THERE ");
+//							trace("\t\t ADD["+obj.label+"] len: " + (obj['children'] as Array).length);
+//						} else {
+//							trace("\t\t ADD " + newObj.label + " IS ALREADY THERE ");
 						}
 					}
 					if (!isParentObjectInside((parentObject['children'] as Array), obj))
 					{
-						trace("\t\t\t add to PARENT["+parentObject.label+"]: " + obj.label);
+//						trace("\t\t\t add to PARENT["+parentObject.label+"]: " + obj.label);
 						(parentObject['children'] as Array).push(obj);
-						trace("\t\t\t add to PARENT["+parentObject.label+"] len: " + (parentObject['children'] as Array).length);
-					} else {
-						trace("\t\t\t add to PARENT: " + obj.label + " IS ALREADY THERE ");
+//						trace("\t\t\t add to PARENT["+parentObject.label+"] len: " + (parentObject['children'] as Array).length);
+//					} else {
+//						trace("\t\t\t add to PARENT: " + obj.label + " IS ALREADY THERE ");
 					}
 				}
 

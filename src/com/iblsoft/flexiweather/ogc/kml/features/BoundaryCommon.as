@@ -29,6 +29,16 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			this._linearRing = new LinearRing(s_namespace, this.xml.kml::LinearRing);
 		}
 
+		override public function cleanupKML(): void
+		{
+			super.cleanupKML();
+			
+			if (_linearRing)
+			{
+				_linearRing.cleanupKML();
+				_linearRing = null;
+			}
+		}
 		/**
 		*	A String that contains the title for the entry.
 		*/	

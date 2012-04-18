@@ -30,6 +30,12 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			createLabel();
 		}
 		
+		public function cleanup(): void
+		{
+			removeChild(_txt);
+			_txt = null;
+		}
+		
 		private function updateLabel(): void
 		{
 			if (!_txt)

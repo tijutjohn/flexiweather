@@ -30,6 +30,14 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 			_baseURLPath = baseURLPath;
 		}
 		
+		public function unload(): void
+		{
+			if (_iconBitmapData)
+			{
+				_iconBitmapData.dispose();
+			}
+			console = null;
+		}
 		/**
 		 * You can set bitmapData directly, e.g. for KMZ assets 
 		 * @param bd

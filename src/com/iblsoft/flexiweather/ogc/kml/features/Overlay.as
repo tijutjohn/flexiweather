@@ -50,6 +50,16 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			}
 		}
 
+		public override function cleanup():void
+		{
+			super.cleanup();
+			
+			if (_icon) {
+				_icon.cleanupKML();
+				_icon = null;
+			}
+			
+		}
 		/**
 		*	A String that contains the title for the entry.
 		*

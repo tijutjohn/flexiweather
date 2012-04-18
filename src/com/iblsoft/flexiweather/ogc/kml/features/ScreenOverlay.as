@@ -32,6 +32,18 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			if (sizeXml) this._size = new KMLVec2(sizeXml);
 		}
 		
+		public override function cleanup():void
+		{
+			super.cleanup();
+			
+			trace("ScreenOverlay cleanup");
+			if (_overlayXY)		_overlayXY = null;
+			if (_screenXY)		_screenXY = null;
+			if (_rotationXY)	_rotationXY = null;
+			if (_size)			_size = null;
+		}
+		
+		
 		/** Called after the feature is added to master or after any change (e.g. area change). */
 		override public function update(changeFlag: FeatureUpdateContext): void
 		{
@@ -64,10 +76,13 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			}
 			*/
 			
-			var renderer: IKMLRenderer = (master as InteractiveLayerKML).itemRendererInstance;
-			if (changeFlag.fullUpdateNeeded)
+			if (master)
 			{
-				renderer.render(this, master.container);
+				var renderer: IKMLRenderer = (master as InteractiveLayerKML).itemRendererInstance;
+				if (changeFlag.fullUpdateNeeded)
+				{
+					renderer.render(this, master.container);
+				}
 			}
 			
 			super.update(changeFlag);

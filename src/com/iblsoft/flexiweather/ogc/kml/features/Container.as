@@ -38,6 +38,16 @@ package com.iblsoft.flexiweather.ogc.kml.features
 
 		}
 		
+		override public function cleanup(): void
+		{
+			for each (var feature: KMLFeature in features)
+			{
+				feature.cleanup();
+			}
+			
+			super.cleanup();
+		}
+		
 		override protected function parseKML(s_namespace: String, kmlParserManager: KMLParserManager): void
 		{
 			// Features are: Placemark, GroundOverlay, ScreenOverlay, PhotoOverlay, NetworkLink, Folder, Document
@@ -111,6 +121,43 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		{
 			return _firstFeature;
 		}
+		
+		public function removeFeature(feature: KMLFeature): void
+		{
+			if (feature)
+			{
+				feature.parentFeature = null;
+			}
+			if (this is Document)
+			{
+				feature.parentDocument = null;
+			} else if (parentDocument) {
+				feature.parentDocument = null;	
+			}
+			
+			var len: int = _features.length;
+			for (var i: int = 0; i < len; i++)
+			{
+				var currFeature: KMLFeature = _features[i] as KMLFeature;  
+				if (currFeature == feature)
+				{
+					_features.splice(i, 1);
+					
+					if (currFeature.previous)
+						currFeature.previous.next = currFeature.previous;
+					
+					if (currFeature.next)
+						currFeature.next.previous = currFeature.previous;
+					
+					if (_firstFeature == currFeature)
+					{
+						_firstFeature = currFeature.next as KMLFeature;
+					}
+					break;
+				}
+			}
+		}
+			
 		/**
 		 * Add feature to feature container
 		 *  
@@ -153,7 +200,8 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			
 			if (feature is NetworkLink)
 			{
-				kml.networkLinkManager.addNetworkLink(feature as NetworkLink, true)
+				var nLink: NetworkLink = feature as NetworkLink;
+				kml.networkLinkManager.addNetworkLink(nLink, nLink.refreshInterval, true)
 			}
 		}
 		

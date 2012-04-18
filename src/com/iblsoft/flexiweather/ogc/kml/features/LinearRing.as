@@ -41,6 +41,23 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			}
 		}
 	 	
+		override public function cleanupKML(): void
+		{
+			super.cleanupKML();
+			
+			if (_coordinates)
+			{
+				_coordinates.cleanupKML();
+				_coordinates = null;
+			}
+			
+			if (_coordinatesPoints)
+			{
+				_coordinatesPoints.removeAll();
+				_coordinatesPoints = null;
+			}
+		}
+		
 		/**
 		*	A String that contains the title for the entry.
 		*/	

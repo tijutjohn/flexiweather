@@ -28,7 +28,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		}
 		
 		public override function toString():String {
-//			return "Folder: " + super.toString();
 			return "Folder: ";
 		}
 	}

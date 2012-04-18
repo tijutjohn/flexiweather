@@ -31,6 +31,10 @@ package com.iblsoft.flexiweather.syndication
 			this.populate(new XML(xmlStr));
 		}
 
+		public function cleanup(): void
+		{
+			xml = null;
+		}
 		/**
 		 * Populates the subclassing parser.
 		 * 

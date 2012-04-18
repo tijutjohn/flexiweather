@@ -42,6 +42,23 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			
 		}
 		
+		override public function cleanupKML(): void
+		{
+			super.cleanupKML();
+			
+			if (_geometries)
+			{
+				while (_geometries.length > 0)
+				{
+					var geometry: Geometry = _geometries.shift();
+					geometry.cleanupKML();
+					geometry = null;
+				}
+				_geometries = null;
+			}
+		}
+		
+		
 		private function addGeometry(geometry: Geometry): void
 		{
 			_geometries.push(geometry);

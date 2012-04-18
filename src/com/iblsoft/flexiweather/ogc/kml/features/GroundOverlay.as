@@ -47,6 +47,18 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			this._latLonBox = new LatLonBox(s_namespace, this.xml.kmlns::LatLonBox);
 		}	
 		
+		public override function cleanup():void
+		{
+			super.cleanup();
+			
+			trace("GroundOverlay cleanup");
+			if (_latLonBox)
+			{
+				_latLonBox.cleanupKML();
+				_latLonBox = null;
+			}
+		}
+		
 //		override public function getCenter(): Coord
 //		{
 //			var coord: Coord;

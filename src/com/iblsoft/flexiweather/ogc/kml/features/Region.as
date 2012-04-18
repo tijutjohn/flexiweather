@@ -21,6 +21,22 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			}
 		}
 		
+		override public function cleanupKML(): void
+		{
+			super.cleanupKML();
+			
+			if (_latLongAltBox)
+			{
+				_latLongAltBox.cleanupKML();
+				_latLongAltBox = null;
+			}
+			if (_lod)
+			{
+				_lod.cleanupKML();
+				_lod = null;
+			}
+		}
+		
 		public function get lod(): Lod
 		{
 			return this._lod;

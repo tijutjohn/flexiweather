@@ -2,7 +2,9 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 {
 	import com.iblsoft.flexiweather.ogc.kml.InteractiveLayerKML;
 	import com.iblsoft.flexiweather.ogc.kml.configuration.KMLLayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.kml.data.KMLLoaderObject;
 	import com.iblsoft.flexiweather.ogc.kml.events.KMLEvent;
+	import com.iblsoft.flexiweather.ogc.kml.features.KML;
 	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
@@ -15,17 +17,17 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 	{
 		private var _kmlLayerDictionary: Dictionary;
 		
-		private var _urls: Array;
+//		private var _urls: Array;
 		
 		public function KMLLoaderManager()
 		{
-			_urls = [];
+//			_urls = [];
 			_kmlLayerDictionary = new Dictionary();
 		}
 		
 		public function addKMLLink(url: String, kmlContent: ByteArray = null, bLoad: Boolean = true): void
 		{
-			_urls.push(url);
+//			_urls.push(url);
 			
 			if (bLoad || kmlContent)
 			{
@@ -43,16 +45,25 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 			if (urlArr)
 				extension = urlArr[urlArr.length - 1];
 			//				toggleButton.enabled = false;
-			var kmlConfig: KMLLayerConfiguration = new KMLLayerConfiguration();
+			
+			var kmlConfig: KMLLayerConfiguration;
+			var kmlDictObject: KMLLoaderObject
 			
 			if (extension == 'kml')
 			{
-				_kmlLayerDictionary[kmlURL] = {url: kmlURL, type: "kmz", configuration: kmlConfig};
+				if (_kmlLayerDictionary[kmlURL])
+				{
+					kmlDictObject = _kmlLayerDictionary[kmlURL] as KMLLoaderObject;
+					kmlConfig = kmlDictObject.configuration;
+				} else {
+					kmlConfig = new KMLLayerConfiguration();
+					kmlConfig.addEventListener(KMLEvent.PARSING_STARTED, onKMLParsingStarted);
+					kmlConfig.addEventListener(KMLEvent.PARSING_FINISHED, onKMLParsingFinished);
+					kmlConfig.addEventListener(KMLEvent.KML_FILE_LOADED, onKMLFileLoaded);
+				}
+				_kmlLayerDictionary[kmlURL] = new KMLLoaderObject( kmlURL, "kmz", kmlConfig);
 				
 				//kml layer does not exist yet create it
-				kmlConfig.addEventListener(KMLEvent.PARSING_STARTED, onKMLParsingStarted);
-				kmlConfig.addEventListener(KMLEvent.PARSING_FINISHED, onKMLParsingFinished);
-				kmlConfig.addEventListener(KMLEvent.KML_FILE_LOADED, onKMLFileLoaded);
 				
 				if (kmlContent)
 				{
@@ -63,13 +74,22 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 				}
 				
 			} else if (extension == 'kmz') {
-				_kmlLayerDictionary[kmlURL] = {url: kmlURL, type: "kmz", configuration: kmlConfig};
 				
-				kmlConfig.addEventListener(KMLEvent.UNPACKING_STARTED, onKMZUnpackingStarted);
-				kmlConfig.addEventListener(KMLEvent.UNPACKING_FINISHED, onKMZUnpackingFinished);
-				kmlConfig.addEventListener(KMLEvent.PARSING_STARTED, onKMLParsingStarted);
-				kmlConfig.addEventListener(KMLEvent.PARSING_FINISHED, onKMLParsingFinished);
-				kmlConfig.addEventListener(KMLEvent.KMZ_FILE_LOADED, onKMZFileLoaded);
+				if (_kmlLayerDictionary[kmlURL])
+				{
+					kmlDictObject = _kmlLayerDictionary[kmlURL] as KMLLoaderObject;
+					kmlConfig = kmlDictObject.configuration;
+				} else {
+					kmlConfig = new KMLLayerConfiguration();
+				
+					kmlConfig.addEventListener(KMLEvent.UNPACKING_STARTED, onKMZUnpackingStarted);
+					kmlConfig.addEventListener(KMLEvent.UNPACKING_FINISHED, onKMZUnpackingFinished);
+					kmlConfig.addEventListener(KMLEvent.PARSING_STARTED, onKMLParsingStarted);
+					kmlConfig.addEventListener(KMLEvent.PARSING_FINISHED, onKMLParsingFinished);
+					kmlConfig.addEventListener(KMLEvent.KMZ_FILE_LOADED, onKMZFileLoaded);
+				}
+				
+				_kmlLayerDictionary[kmlURL] = new KMLLoaderObject(kmlURL, "kmz", kmlConfig);
 				if (kmlContent)
 				{
 					kmlConfig.addKMZByteArray(kmlURL, kmlContent);
@@ -106,7 +126,7 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 			var kmlConfig: KMLLayerConfiguration = event.currentTarget as KMLLayerConfiguration;
 			var kmlURL: String = kmlConfig.kmlPath;
 			
-			event.data = _kmlLayerDictionary[kmlURL];
+			event.data = _kmlLayerDictionary[kmlURL] as KMLLoaderObject;
 			//notify
 			dispatchEvent(event);
 			
@@ -118,7 +138,7 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 			var kmlConfig: KMLLayerConfiguration = event.currentTarget as KMLLayerConfiguration;
 			var kmlURL: String = kmlConfig.kmlPath;
 			
-			event.data = _kmlLayerDictionary[kmlURL];
+			event.data = _kmlLayerDictionary[kmlURL] as KMLLoaderObject;
 			
 			//notify
 			dispatchEvent(event);

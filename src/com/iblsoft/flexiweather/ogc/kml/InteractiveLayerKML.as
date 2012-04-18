@@ -8,6 +8,7 @@ package com.iblsoft.flexiweather.ogc.kml
 	import com.iblsoft.flexiweather.ogc.kml.events.KMLBitmapEvent;
 	import com.iblsoft.flexiweather.ogc.kml.events.KMLEvent;
 	import com.iblsoft.flexiweather.ogc.kml.events.KMLFeatureEvent;
+	import com.iblsoft.flexiweather.ogc.kml.events.NetworkLinkEvent;
 	import com.iblsoft.flexiweather.ogc.kml.features.Container;
 	import com.iblsoft.flexiweather.ogc.kml.features.Document;
 	import com.iblsoft.flexiweather.ogc.kml.features.Folder;
@@ -18,6 +19,7 @@ package com.iblsoft.flexiweather.ogc.kml
 	import com.iblsoft.flexiweather.ogc.kml.features.KMLLabel;
 	import com.iblsoft.flexiweather.ogc.kml.features.LineString;
 	import com.iblsoft.flexiweather.ogc.kml.features.LinearRing;
+	import com.iblsoft.flexiweather.ogc.kml.features.NetworkLink;
 	import com.iblsoft.flexiweather.ogc.kml.features.Placemark;
 	import com.iblsoft.flexiweather.ogc.kml.features.Polygon;
 	import com.iblsoft.flexiweather.ogc.kml.interfaces.IKMLIconFeature;
@@ -101,6 +103,7 @@ package com.iblsoft.flexiweather.ogc.kml
 			
 			_kml = kml;
 			_kml.networkLinkManager.addEventListener(KMLEvent.KML_FILE_LOADED, onNetworkLinkLoadedAndParsed)
+			_kml.networkLinkManager.addEventListener(NetworkLinkEvent.NETWORK_LINK_REFRESH, onNetworkLinkRefresh)
 			
 //			addEventListener(Event.ENTER_FRAME, onEnterFrame);
 			addEventListener(KMLFeatureEvent.KML_FEATURE_CLICK, onKMLFeatureClick, false, EventPriority.DEFAULT_HANDLER, true);
@@ -143,27 +146,99 @@ package com.iblsoft.flexiweather.ogc.kml
 		 */		
 		override public function destroy(): void
 		{
-			for each (var feature: KMLFeature in features)
+			if (features)
 			{
-				if (feature is IKMLLabeledFeature)
-				{
-					//check if info window is not opened
-					var window: IFlexDisplayObject = KMLPopupManager.getInstance().getPopUpForFeature(feature);
-					if (window)
-					{
-						KMLPopupManager.getInstance().removePopUp(window);
-					}
-				}
-				removeFeature(feature);
+				unloadFeatures(features.source)
+				features = null;
 			}
-			super.destroy();
-			//FIXME implement InteractiveLayerKML destroy function	
+//			super.destroy();
+		}
+		
+		private function unloadFeatures(featuresForUnloading: Array): void
+		{
+			while (featuresForUnloading.length > 0)
+			{
+				var currFeature: KMLFeature = featuresForUnloading.shift() as KMLFeature; 
+				var window: IFlexDisplayObject = KMLPopupManager.getInstance().getPopUpForFeature(currFeature);
+				if (window)
+				{
+					KMLPopupManager.getInstance().removePopUp(window);
+				}
+				
+				if (canContainFeatures(currFeature))
+				{
+					unloadContainerFeature(currFeature as Container);
+				} else {
+					unloadFeature(currFeature);
+				}
+			}
+		}
+		
+		private function onNetworkLinkRefresh(event: NetworkLinkEvent): void
+		{
+			unloadNetworkLinkFeatures(event.networkLink);
 		}
 		
 		private function onNetworkLinkLoadedAndParsed(event: KMLEvent): void
 		{
 			trace("	onNetworkLinkLoadedAndParsed ");
-			parseKML(event.kmlLayerConfiguration.kml as KML);
+			var kml: KML = event.kmlLayerConfiguration.kml as KML
+			parseKML(kml);
+		}
+		
+		private function unloadNetworkLinkFeatures(networkLink: NetworkLink): void
+		{
+			if (networkLink && networkLink.container && networkLink.container.features && networkLink.container.features.length > 0)
+			{
+				var featuresArray: Array = networkLink.container.features;
+				unloadFeatures( featuresArray );
+				
+				trace("ILKML unloadNetworkLinkFeatures features: " + networkLink.container.features.length);
+//				kmlParsingFinished();
+				callLater(update, [FeatureUpdateContext.fullUpdate()]);
+			}
+		}
+		
+		private function unloadFeature(currFeature: KMLFeature): void
+		{
+			if (currFeature is NetworkLink)
+			{
+				currFeature.kml.networkLinkManager.stopWaitForRefresh(currFeature as NetworkLink);
+			}
+			itemRendererInstance.dispose(currFeature);
+				
+			removeFeature(currFeature);
+			
+			_syncManager.removeCall(currFeature);
+			_syncManagerFullUpdate.removeCall(currFeature);
+			
+			currFeature.next = null;
+			currFeature.previous = null;
+			currFeature.parentFeature = null;
+			currFeature.parentDocument = null;
+			currFeature = null;
+		}
+		
+		private function unloadContainerFeature(kmlContainer:Container): void 
+		{
+			var feature: KMLFeature = kmlContainer.firstFeature as KMLFeature;
+			
+			var oldFeature: KMLFeature;
+			
+			while (kmlContainer.features.length > 0)
+			{
+			
+				var currFeature: KMLFeature = kmlContainer.features.shift() as KMLFeature;
+				
+				var isContainer: Boolean = canContainFeatures(currFeature);
+				trace("unloadNetworkLinkFeature " + currFeature.name + " isContainer: " + isContainer);
+				if (isContainer) 
+				{
+					unloadContainerFeature(currFeature as Container)
+				}
+				
+				unloadFeature(currFeature);
+			}
 		}
 		
 		private function parseKML(kml: KML): void
@@ -223,6 +298,8 @@ package com.iblsoft.flexiweather.ogc.kml
 			var kmlObj: Object = _syncManager.data;
 			
 			kmlObj.children = _childrenFeatures;
+			
+			kml.resourceManager.debugCache("after children features are added");
 			
 			callLater(kmlParsingFinished);
 			callLater(update, [FeatureUpdateContext.fullUpdate()]);
@@ -290,7 +367,7 @@ package com.iblsoft.flexiweather.ogc.kml
 			{
 				if (feature is IKMLIconFeature)
 				{
-					if(feature.kmlIcon.hitTestPoint(event.stageX, event.stageY, true))
+					if(feature.kmlIcon && feature.kmlIcon.hitTestPoint(event.stageX, event.stageY, true))
 					{
 						highlightFeature(feature);
 						return true;
@@ -300,7 +377,7 @@ package com.iblsoft.flexiweather.ogc.kml
 			}
 			highlightFeature(null);
 			return false;
-		}
+		} 	
 		
 		private var m_highlightedFeature: KMLFeature;
 		public function highlightFeature(feature: KMLFeature): void
@@ -314,7 +391,9 @@ package com.iblsoft.flexiweather.ogc.kml
 						//unhighlight previously highlighted feature
 						m_highlightedFeature.kmlIcon.showNormal();
 					}
-					feature.kmlIcon.showHighlight();
+					
+					if (feature.kmlIcon)
+						feature.kmlIcon.showHighlight();
 					m_highlightedFeature = feature;
 					//update graphics
 					invalidateDynamicPart();
@@ -322,7 +401,8 @@ package com.iblsoft.flexiweather.ogc.kml
 			} else {
 				if (m_highlightedFeature)
 				{
-					m_highlightedFeature.kmlIcon.showNormal();
+					if (m_highlightedFeature.kmlIcon)
+						m_highlightedFeature.kmlIcon.showNormal();
 					m_highlightedFeature = null;
 					//update graphics
 					invalidateDynamicPart();
@@ -365,7 +445,7 @@ package com.iblsoft.flexiweather.ogc.kml
 			while ( feature )
 			{
 				
-				if(feature is IKMLIconFeature && feature.kmlIcon.hitTestPoint(event.stageX, event.stageY, false))
+				if(feature is IKMLIconFeature && feature.kmlIcon && feature.kmlIcon.hitTestPoint(event.stageX, event.stageY, false))
 				{
 					if (bDispatchEvent)
 					{
@@ -401,14 +481,9 @@ package com.iblsoft.flexiweather.ogc.kml
 //			trace("KML layer draw: " + features.length);
 			
 			m_boundaryRect = new Rectangle(0,0,width, height);
-//			m_boundaryRect = container.getBounds(this.stage);
 			
 			var time: int;
 			
-			if (_screenshotMode)
-			{
-				
-			}
 			if (changeFlag.fullUpdateNeeded && _syncManagerFullUpdate)
 			{
 				_syncManagerFullUpdate.removeEventListener(AsyncManager.EMPTY, onFullUpdateFinished);
@@ -416,22 +491,23 @@ package com.iblsoft.flexiweather.ogc.kml
 				trace("FULL UPDATE");
 				time = ProfilerUtils.startProfileTimer();
 				var feature: KMLFeature;
-//				for each (feature in features)
-//				{
-//					_syncManagerFullUpdate.addCall(feature, updateFeature, [feature, changeFlag]);
-//				}
 				
 				feature = firstFeature as KMLFeature;
 				while (feature)
 				{
-					_syncManagerFullUpdate.addCall(feature, updateFeature, [feature, changeFlag]);
+					if (feature.parent)
+						_syncManagerFullUpdate.addCall(feature, updateFeature, [feature, changeFlag]);
+					else
+						trace("ILKML update -> feature is not on displaylist, do not do updateFeature");
 					feature = feature.next as KMLFeature;
 				}
 				
 
 				if (firstFeature)
 					(firstFeature as KMLFeature).debug("ILKML full update add calls: " + ProfilerUtils.stopProfileTimer(time) + " ms");
-				_syncManagerFullUpdate.start();
+				
+				if (_syncManagerFullUpdate.notEmpty)
+					_syncManagerFullUpdate.start();
 				
 			} else {
 				if (_syncManager)

@@ -44,6 +44,16 @@ package com.iblsoft.flexiweather.ogc.kml.features.styles
 			}
 		}
 		
+		override public function cleanupKML(): void
+		{
+			super.cleanupKML();
+			
+			if (_hotspot)
+				_hotspot = null;
+			if (_icon)
+				_icon = null;
+		}
+		
 		public function get scale(): Number
 		{
 			if (isNaN(this._scale))

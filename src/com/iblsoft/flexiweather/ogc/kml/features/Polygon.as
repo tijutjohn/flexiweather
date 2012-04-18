@@ -60,6 +60,17 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			this._outerBoundaryIs = new OuterBoundaryIs(s_namespace, this.xml.kml::outerBoundaryIs);
 		}
 		
+		override public function cleanupKML(): void
+		{
+			super.cleanupKML();
+			
+			if (_outerBoundaryIs)
+			{
+				_outerBoundaryIs.cleanupKML();
+				_outerBoundaryIs = null;
+			}
+		}
+		
 		public function get outerBoundaryIs():OuterBoundaryIs {
 			return this._outerBoundaryIs;
 		}

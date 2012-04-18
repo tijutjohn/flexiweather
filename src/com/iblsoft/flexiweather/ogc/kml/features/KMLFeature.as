@@ -27,6 +27,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	import flash.net.URLRequest;
+	import flash.utils.Dictionary;
 	import flash.utils.getTimer;
 	
 	import mx.states.OverrideBase;
@@ -114,10 +115,8 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			
 			return _kmlns;
 		}
-//		public function KMLFeature(s_xml: XMLList, s_namespace:String, s_typeName:String, s_featureId:String)
 		public function KMLFeature(kml: KML, s_namespace: String, s_xml: XMLList)
 		{
-//			super(s_namespace, s_typeName, s_featureId);
 			super(s_namespace, null, null);
 		
 			_kml = kml;
@@ -166,23 +165,84 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			return true;
 		}
 		
+		protected function cleanupIcon(): void
+		{
+			if (_kmlIcon)
+			{
+				removeChild(_kmlIcon);
+				_kmlIcon.cleanup();
+				
+				_kmlIcon = null;
+			}
+		}
+		
+		
 		protected function createIcon(): void
 		{
 			_kmlIcon = new KMLIcon(this);
 			addChild(_kmlIcon);
 		}
+		
+		protected function cleanupKMLLabel(): void
+		{
+			if (_kmlLabel && _kmlLabel.parent)
+			{
+				_kmlLabel.parent.removeChild(_kmlLabel);
+				_kmlLabel.cleanup();
+				_kmlLabel = null;
+			}
+		}
+		
 		protected function createKMLLabel(): void
 		{
 			_kmlLabel = new KMLLabel();
 //			addChild(_kmlLabel);
 		}
 		
+		/*
+		private var _listenersArray: Dictionary = new Dictionary();
+		
+		public override function addEventListener(type:String, listener:Function, useCapture:Boolean=false, priority:int=0, useWeakReference:Boolean=false):void
+		{
+			super.addEventListener(type, listener, useCapture, priority, useWeakReference);
+			
+			if (!_listenersArray[type]) {
+				_listenersArray[type] = 1;
+			} else {
+				_listenersArray[type] = int(_listenersArray[type]) + 1;
+			}
+			trace("KMLFeature addEventListener ["+type+"]: " + _listenersArray[type]);
+		}
+		
+		public override function removeEventListener(type:String, listener:Function, useCapture:Boolean=false):void
+		{
+			super.removeEventListener(type, listener, useCapture);
+			
+			trace("KMLFeature removeEventListener ["+type+"]: " + _listenersArray[type]);
+			delete _listenersArray[type];
+		}
+		*/
+		
 		public override function cleanup(): void
 		{
-			master.container.labelLayout.removeObject(this);
-			master.container.labelLayout.removeObject(_kmlLabel);
+			removeEventListener(MouseEvent.CLICK, onKMLFeatureClick);
 			
-			master.container.objectLayout.removeObject(this);
+			if (master && master.container)
+			{
+				master.container.labelLayout.removeObject(this);
+				master.container.labelLayout.removeObject(_kmlLabel);
+				
+				master.container.objectLayout.removeObject(this);
+			}
+			
+			_itemRendererInstance = null;
+			
+			previous = null;
+			next = null;
+			cleanupIcon();
+			cleanupKMLLabel();
+			
+			cleanupKML();
 			
 			super.cleanup();
 		}
@@ -197,6 +257,28 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		public function parse(s_namespace: String, kmlParserManager: KMLParserManager): void
 		{
 			parseKML(s_namespace, kmlParserManager);
+		}
+		
+		public function cleanupKML(): void
+		{
+			_kml = null;
+			_xmlList = null;
+			
+			if (_styleSelector)
+			{
+				_styleSelector.cleanupKML();
+				_styleSelector = null;
+			}
+			if (_lookAt)
+			{
+				_lookAt.cleanupKML();
+				_lookAt = null;
+			}
+			if (_region)
+			{
+				_region.cleanupKML();
+				_region = null;
+			}
 		}
 		
 		protected function parseKML(s_namespace: String, kmlParserManager: KMLParserManager): void
@@ -261,23 +343,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		public function setItemRenderer(itemRendererInstance: IKMLRenderer): void
 		{
 			_itemRendererInstance = itemRendererInstance;
-		}
-		/** Called after the feature is added to master or after any change (e.g. area change). */
-		override public function update(changeFlag: FeatureUpdateContext): void
-		{
-			super.update(changeFlag);
-//			if (m_points && m_points.length > 0)
-//			{
-//				if (m_points.length > 1)
-//				{
-//					trace("Attention: KML Feature has more than 1 point");
-//				}
-//				var pos: flash.geom.Point = m_points.getItemAt(0) as flash.geom.Point;
-//				this.x = pos.x;
-//				this.y = pos.y;
-				
-//				trace("change position to ["+this.x+","+this.y+"] for KML feature : " + this);
-//			}
 		}
 		
 		private function getKMLVisibility(): Boolean

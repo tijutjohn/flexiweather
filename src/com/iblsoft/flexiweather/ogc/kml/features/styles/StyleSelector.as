@@ -19,13 +19,13 @@ package com.iblsoft.flexiweather.ogc.kml.features.styles
 	public class StyleSelector extends XmlElement
 	{
 		private var _id:String;
-		private var _iconCallbacks: Array;
+//		private var _iconCallbacks: Array;
 		
-		private var _iconSucessfulCallbacks: Array;
-		private var _iconUnsucessfulCallback: Array;
+//		private var _iconSucessfulCallbacks: Array;
+//		private var _iconUnsucessfulCallback: Array;
 		
 		private var _document: Document;
-		private var _loader: KMLBitmapLoader;
+//		private var _loader: KMLBitmapLoader;
 		private var _href: String;
 		
 		private var _kml: KML
@@ -44,6 +44,15 @@ package com.iblsoft.flexiweather.ogc.kml.features.styles
 			this._id = ParsingTools.nullCheck(this.xml.@id);
 		}
 		
+		override public function cleanupKML(): void
+		{
+			super.cleanupKML();
+			
+			_kml = null;
+			_document = null;
+		}
+		
+		/*
 		public function getClonedBitmap(): Bitmap
 		{
 			if (_loader && _loader.bitmapData)
@@ -66,7 +75,7 @@ package com.iblsoft.flexiweather.ogc.kml.features.styles
 				return (_loader.bitmapData != null);
 			
 			return false;
-		}
+		}*/
 		
 		public function href(): String
 		{

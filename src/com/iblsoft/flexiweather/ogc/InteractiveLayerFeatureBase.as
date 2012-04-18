@@ -15,7 +15,7 @@ package com.iblsoft.flexiweather.ogc
 	
 	public class InteractiveLayerFeatureBase extends InteractiveDataLayer
 	{
-		private var m_firstFeature: FeatureBase;
+		protected var m_firstFeature: FeatureBase;
 		public function get firstFeature(): FeatureBase
 		{
 			return m_firstFeature;
@@ -119,7 +119,6 @@ package com.iblsoft.flexiweather.ogc
 			var i_count: int = featuresContainer.numChildren;
 			for(var i: int = i_count - 1; i >= 0; --i)
 			{
-//				var feature: WFSFeatureBase = featuresContainer.getChildAt(i) as WFSFeatureBase;
 				var feature: FeatureBase = featuresContainer.getChildAt(i) as FeatureBase;
 				var id: int = features.getItemIndex(feature);
 				if (id >= 0)
@@ -130,7 +129,7 @@ package com.iblsoft.flexiweather.ogc
 				feature.cleanup();
 				featuresContainer.removeChildAt(i);
 			}
-			if (features.length > 0)
+			if (features && features.length > 0)
 			{
 				trace("after removing alll features, there are still features in features: " + features.length + " ["+this+"]")
 				features.removeAll();

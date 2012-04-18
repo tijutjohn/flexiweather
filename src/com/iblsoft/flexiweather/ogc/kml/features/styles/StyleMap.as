@@ -25,6 +25,20 @@ package com.iblsoft.flexiweather.ogc.kml.features.styles
 			}
 		}
 		
+		override public function cleanupKML(): void
+		{
+			super.cleanupKML();
+			
+			for each (var pair: Pair in _pairs)
+			{
+				pair.cleanupKML();
+				delete _pairs[pair.key];
+				pair = null;
+					
+			}
+			_pairs = null;
+		}
+		
 		public function get styleUrl(): String
 		{
 			return getStyleUrlByKey('normal');
@@ -94,6 +108,17 @@ class Pair extends XmlElement
 		}
 		this._key = ParsingTools.nullCheck(this.xml.kmlns::key);
 		this._styleUrl = ParsingTools.nullCheck(this.xml.kmlns::styleUrl);
+	}
+	
+	override public function cleanupKML(): void
+	{
+		super.cleanupKML();
+		
+		if (_style)
+		{
+			_style.cleanupKML();
+			_style = null;
+		}
 	}
 	
 	public function get key(): String

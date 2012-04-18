@@ -21,6 +21,15 @@ package com.iblsoft.flexiweather.utils
 		protected var _stack: Array;
 		protected var _presence: Dictionary;
 		
+		public function get notEmpty(): Boolean
+		{
+			if (_stack)
+			{
+				return _stack.length > 0;
+			}
+			return false;
+		}
+		
 		private var _maxCallsPerTick: int;
 
 		public function get maxCallsPerTick():int
@@ -45,6 +54,29 @@ package com.iblsoft.flexiweather.utils
 			init();
 		}
 
+		public function cleanup(): void
+		{
+			stop();
+			if (_stack && _stack.length > 0)
+			{
+				while (_stack.length > 0)
+				{
+					var obj: Object = _stack.shift();
+					delete _presence[obj.obj];
+					obj = null;
+				}
+			}
+			_stack = null;
+			
+			if (_presence)
+			{
+				for (var str: String in _presence)
+				{
+					delete _presence[str];
+				}
+				_presence = null;
+			}
+		}
 		private function init(): void
 		{
 			_stack = new Array();
@@ -87,7 +119,7 @@ package com.iblsoft.flexiweather.utils
 		
 		protected function tick(): void
 		{
-			trace("AsuncManager ["+_uid+"] tick "  + _stack.length);
+//			trace("AsuncManager ["+_uid+"] tick "  + _stack.length);
 			if (_stack.length == 0)
 			{
 				stop();
@@ -96,7 +128,7 @@ package com.iblsoft.flexiweather.utils
 			}
 			
 			var total: int = Math.min(_stack.length, _maxCallsPerTick);
-			trace("AsyncManager ["+_uid+"] onTimerEvent total: " + total + " / " + _stack.length);
+//			trace("AsyncManager ["+_uid+"] onTimerEvent total: " + total + " / " + _stack.length);
 			if (total > 0)
 			{
 				for (var i: int = 0; i < total; i++)
@@ -107,6 +139,24 @@ package com.iblsoft.flexiweather.utils
 				}
 			}
 		}
+		public function removeCall(obj: Object): void
+		{
+			if (_presence[obj])
+			{
+				var total: int = _stack.length;
+				for (var i: int = 0; i < total; i++)
+				{
+					var stackObj: Object = _stack[i];
+					if (stackObj.obj == obj)
+					{
+						_stack.splice(1, 0);
+						delete _presence[obj];
+						return;
+					}
+				}
+			}
+		}
+		
 		public function addCall(obj: Object, callback: Function, arguments: Array): void
 		{
 			//TODO this is jut for testing, we need to be sure, that callback and arguments are always same

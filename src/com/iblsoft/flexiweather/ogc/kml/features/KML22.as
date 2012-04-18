@@ -35,9 +35,17 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			
 		}
 		
+		override public function cleanup(): void
+		{
+			super.cleanup();
+			
+			if (_kmlParserManager)
+				_kmlParserManager.removeEventListener(AsyncManager.EMPTY, onKMLParserFinished);
+		}
+		
 		override public function parse(kmzFile: KMZFile = null): void
 		{
-			trace("KML 2.2");
+//			trace("KML 2.2");
 			super.parse(kmzFile);
 			
 			var kmlns:Namespace = new Namespace(_kmlNamespace);
@@ -64,7 +72,9 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			}
 			if (ParsingTools.nullCheck(this.xml.kmlns::NetworkLink)) {
 				this._feature = new NetworkLink(this, _kmlNamespace, this.xml.kmlns::NetworkLink);
-				_networkLinkManager.addNetworkLink(_feature as NetworkLink, true);
+				
+				var nLink: NetworkLink = _feature as NetworkLink;
+				_networkLinkManager.addNetworkLink(nLink, nLink.refreshInterval, true);
 			}
 			_feature.parse(_kmlNamespace, _kmlParserManager);
 			_kmlParserManager.addEventListener(AsyncManager.EMPTY, onKMLParserFinished);
@@ -75,12 +85,13 @@ package com.iblsoft.flexiweather.ogc.kml.features
 
 		private function onKMLParserFinished(event: Event): void
 		{
-			trace("kml parser finished");	
+//			trace("kml parser finished");	
 			notifyParsingFinished();
 		}
 		
 		private function debug(): void
 		{
+			return;
 			if (_feature)
 			{
 				var txt: String = debugFeature(_feature, 1);

@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc.kml.features
 {
+	import com.iblsoft.flexiweather.ogc.kml.features.constants.LinkRefreshMode;
 	import com.iblsoft.flexiweather.syndication.ParsingTools;
 
 	public class NetworkLink extends KMLFeature
@@ -8,6 +9,8 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		private var _flyToView: int;
 		private var _link: Link;
 		private var _container: Container;
+		
+		private var _contentKML: KML;
 		
 		public function NetworkLink(kml:KML, s_namespace:String, s_xml:XMLList)
 		{
@@ -24,20 +27,63 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			}
 		}
 		
-		public function addLoadedKML(kml: KML): void
+		public override function cleanup():void
 		{
-			if (kml is KML22)
+			super.cleanup();
+			
+			trace("NetworkLink cleanup");
+			
+			if (_link)
 			{
-				var kml22: KML22 = kml as KML22;
-				_container.addFeature(kml22.feature);
+				_link.cleanupKML();
+				_link = null;
+			}
+			if (_container)
+			{
+				_container.cleanup();
+				_container = null;
 			}
 		}
 		
+		public function addLoadedKML(kml: KML): void
+		{
+			_contentKML = kml;
+			if (kml is KML22)
+			{
+				//unload old feature;
+				if (_container.features && _container.features.length > 0)
+				{
+					for each (var currFeature: KMLFeature in _container.features)
+					{
+						_container.removeFeature(currFeature);
+					}
+				}
+				var kml22: KML22 = kml as KML22;
+				_container.addFeature(kml22.feature);
+			}
+			kml.resourceManager.debugCache("AFter NetworkLink add loaded KML");
+		}
+		
+		public function get contentKML(): KML
+		{
+			return _contentKML;
+		}
 		public function get container(): Container
 		{
 			return _container;
 		}
 		
+		public function get refreshInterval(): int
+		{
+			if (_link && _link.refreshMode == LinkRefreshMode.ON_INTERVAL)
+			{
+				//TODO this is debug for testing refreshing each 10 seconds;
+//				return 10;
+				return _link.refreshInterval;
+			}
+			
+			return 0;
+		}
 		public function get refreshVisibility(): int
 		{
 			return _refreshVisibility;

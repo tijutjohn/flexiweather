@@ -17,8 +17,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	*/
 	public class Icon extends AbstractLink
 	{
-//		private var _iconBitmapData: BitmapData;
-		
 		/**
 		*	Constructor for class.
 		* 

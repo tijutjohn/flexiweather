@@ -52,7 +52,21 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				this._styles.push(style);
 			}
 		}
-		
+		override public function cleanup():void
+		{
+			super.cleanup();
+			
+			if (_styles && _styles.length > 0)
+			{
+				while ( _styles.length > 1)
+				{
+					var style: StyleSelector = _styles.shift() as StyleSelector;
+					style.cleanupKML();
+					style = null;
+				}
+				_styles = null;
+			}
+		}
 		public function setBitmapsInSharedStylesFromKMZ(kmzFile: KMZFile): void
 		{
 			for each (var style: StyleSelector in _styles)
@@ -75,7 +89,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			{
 				for each (var style: StyleSelector in _styles)
 				{
-//					trace("\t\t Document getStyleByID ["+id+"] checking: " + style.id);
 					if (style.id == id)
 						return style;
 				}
@@ -91,7 +104,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				{
 					if (style is Style)
 					{
-//						trace("\t\t Document getStyleByID ["+id+"] checking: " + style.id);
 						if (style.id == id)
 							return style as Style;
 					}
@@ -102,7 +114,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		
 		
 		public override function toString():String {
-//			return "Document: " + super.toString() + " styles: " + _styles.length;
 			return "Document: styles: " + _styles.length;
 		}
 	}

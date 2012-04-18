@@ -55,13 +55,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			return m_coordinates.toArray(); 
 		}  		
 		
-		override public function set x(value:Number):void
-		{
-			super.x = value;
-			
-			trace("Placemark.x = " + value);
-		}
-		
 		/**
 		*	Constructor for class.
 		* 
@@ -78,7 +71,24 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			
 
 		}
-		
+		public override function cleanup():void
+		{
+			super.cleanup();
+			
+			trace("Placemark cleanup");
+			
+			if (_geometry)
+			{
+				_geometry.cleanupKML();
+				_geometry = null;
+			}
+			if (_multigeometry)
+			{
+				_multigeometry.cleanupKML();
+				_multigeometry = null;
+			}
+			
+		}
 		override protected function parseKML(s_namespace: String, kmlParserManager: KMLParserManager): void
 		{
 			super.parseKML(s_namespace, kmlParserManager);
@@ -112,7 +122,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				this._geometry = new MultiGeometry(s_namespace, this.xml.kmlns::MultiGeometry);
 			}
 			
-			debug("Placemark parseKML: " + (stopProfileTimer(time)) + "ms");
+//			debug("Placemark parseKML: " + (stopProfileTimer(time)) + "ms");
 		}
 		
 		public override function setMaster(master: InteractiveLayerFeatureBase): void
@@ -183,19 +193,19 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		/** Called after the feature is added to master or after any change (e.g. area change). */
 		override public function update(changeFlag: FeatureUpdateContext): void
 		{
+			if (!m_master)
+				return;
+			
 			if (kmlLabel)
 				kmlLabel.text = name;
 			
 			if (changeFlag.anyChange)
 				mb_pointsDirty = true;
 			
-			trace("Placemark update: changeFlag: " + changeFlag.toString());
 			if(mb_pointsDirty) 
 			{
 				if (_geometry)
 				{
-					trace("Placemark update: geometry: " + _geometry);
-				
 					var iw: InteractiveWidget = m_master.container;
 					var c: Coord;
 					var coord: Object;
@@ -322,6 +332,9 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			if (geometry is com.iblsoft.flexiweather.ogc.kml.features.Point)
 			{
 				var point: com.iblsoft.flexiweather.ogc.kml.features.Point = geometry as com.iblsoft.flexiweather.ogc.kml.features.Point;
+				
+				if (!m_master)
+					return null;
 				
 				var iw: InteractiveWidget = m_master.container;
 				

@@ -30,6 +30,11 @@ package com.iblsoft.flexiweather.syndication
 			this.xmlSource = x;
 			this.namespace = s_namespace;
 		}
+		
+		public function cleanupKML(): void
+		{
+			xmlSource = null;
+		}
 
 		/**
 		 * Get the XML used to populate the NewsFeedElement.

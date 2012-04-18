@@ -52,6 +52,19 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			}
 		}
 		
+		public function cleanupKML(): void
+		{
+			if (_coordsList && _coordsList.length > 0)
+			{
+				while (_coordsList.length > 1)
+				{
+					var coordinate: Object = _coordsList.shift();
+					coordinate = null;
+				}
+				_coordsList = null;
+			}
+		}
+		
 		private function fixCoordinatesString(string:String): String
 		{
 			var changes: Boolean = false;

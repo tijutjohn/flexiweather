@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.ogc.kml.events
 {
 	import com.iblsoft.flexiweather.ogc.kml.configuration.KMLLayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.kml.data.KMLLoaderObject;
 	
 	import flash.events.Event;
 	
@@ -15,7 +16,7 @@ package com.iblsoft.flexiweather.ogc.kml.events
 		public static const PARSING_STARTED: String = 'parsingStarted';
 		public static const PARSING_FINISHED: String = 'parsingFinished';
 		
-		public var data: Object;
+		public var data: KMLLoaderObject;
 		public var kmlLayerConfiguration: KMLLayerConfiguration;
 		
 		public function KMLEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false)

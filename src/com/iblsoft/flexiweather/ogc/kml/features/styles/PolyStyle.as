@@ -35,7 +35,7 @@ package com.iblsoft.flexiweather.ogc.kml.features.styles
 			else
 				this._fill = (fill == 1);
 			
-			var outline:Number = ParsingTools.nanCheck(this.xml.kmlns::fill);
+			var outline:Number = ParsingTools.nanCheck(this.xml.kmlns::outline);
 			
 			if (isNaN(outline))
 				this._outline = true;
