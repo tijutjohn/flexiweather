@@ -37,13 +37,15 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			this._features = new Array();
 
 		}
-		
+
 		override public function cleanup(): void
 		{
 			for each (var feature: KMLFeature in features)
 			{
 				feature.cleanup();
 			}
+			
+			firstFeature = null;
 			
 			super.cleanup();
 		}
@@ -122,6 +124,11 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			return _firstFeature;
 		}
 		
+		public function set firstFeature(value:KMLFeature):void
+		{
+			_firstFeature = value;
+		}
+		
 		public function removeFeature(feature: KMLFeature): void
 		{
 			if (feature)
@@ -151,7 +158,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 					
 					if (_firstFeature == currFeature)
 					{
-						_firstFeature = currFeature.next as KMLFeature;
+						firstFeature = currFeature.next as KMLFeature;
 					}
 					break;
 				}
@@ -192,7 +199,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				_oldFeature.next = feature;
 				feature.previous = _oldFeature;
 			} else {
-				_firstFeature = feature;
+				firstFeature = feature;
 			}
 			
 			_oldFeature = feature;

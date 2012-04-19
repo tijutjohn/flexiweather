@@ -85,6 +85,8 @@ package com.iblsoft.flexiweather.ogc.kml.features
 
 		private function onKMLParserFinished(event: Event): void
 		{
+			_kmlParserManager.removeEventListener(AsyncManager.EMPTY, onKMLParserFinished);
+			_kmlParserManager.stop();
 //			trace("kml parser finished");	
 			notifyParsingFinished();
 		}

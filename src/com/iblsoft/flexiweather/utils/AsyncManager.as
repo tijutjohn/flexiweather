@@ -85,22 +85,12 @@ package com.iblsoft.flexiweather.utils
 		}
 		public function start(): void
 		{
-			addEventListener(Event.ENTER_FRAME, onEnterFrame);
-//			if (!_timer)
-//			{
-//				_timer = new Timer(70);
-//				_timer.addEventListener(TimerEvent.TIMER, onTimerEvent);
-//			}
-//			if (!_timer.running)
-//				_timer.start();
+			if (!hasEventListener(Event.ENTER_FRAME))
+				addEventListener(Event.ENTER_FRAME, onEnterFrame);
 		}
 		public function stop(): void
 		{
 			removeEventListener(Event.ENTER_FRAME, onEnterFrame);
-//			if (!_timer)
-//			{
-//				_timer.stop();
-//			}
 		}
 		
 		private function onEnterFrame(event: Event): void

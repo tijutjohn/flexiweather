@@ -8,7 +8,9 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.display.DisplayObject;
+	import flash.display.DisplayObjectContainer;
 	import flash.display.Sprite;
+	import flash.display.Stage;
 	import flash.events.Event;
 	
 	import mx.collections.ArrayCollection;
@@ -19,6 +21,10 @@ package com.iblsoft.flexiweather.ogc
 		public function get firstFeature(): FeatureBase
 		{
 			return m_firstFeature;
+		}
+		public function set firstFeature(value:FeatureBase):void
+		{
+			m_firstFeature = value;
 		}
 		private var ma_features: ArrayCollection = new ArrayCollection();
 		
@@ -85,15 +91,18 @@ package com.iblsoft.flexiweather.ogc
 			m_featuresContainer.addChild(feature);
 			if (!m_firstFeature)
 			{
-				m_firstFeature = feature;
+				firstFeature = feature;
 			}
 			
 			if (_oldFeature)
 			{
-				_oldFeature.next = feature;
-				feature.previous = _oldFeature;
+				if ((_oldFeature as KMLFeature).parentFeature == (feature as KMLFeature).parentFeature)
+				{
+					_oldFeature.next = feature;
+					feature.previous = _oldFeature;
+				}
 			} else {
-				m_firstFeature = feature;
+				firstFeature = feature;
 			}
 			
 			_oldFeature = feature;

@@ -292,7 +292,7 @@ package com.iblsoft.flexiweather.ogc.kml
 		private function onKMLChildrenFeaturesAdded(event: Event): void
 		{
 			_syncManager.removeEventListener(AsyncManager.EMPTY, onKMLChildrenFeaturesAdded);
-		
+			_syncManager.stop();
 			_syncManager.maxCallsPerTick = 50;
 			
 			var kmlObj: Object = _syncManager.data;
@@ -300,21 +300,43 @@ package com.iblsoft.flexiweather.ogc.kml
 			kmlObj.children = _childrenFeatures;
 			
 			kml.resourceManager.debugCache("after children features are added");
+		
+			if (kml.feature is NetworkLink)
+			{
+				var nl: NetworkLink = kml.feature as NetworkLink;
+				for each (var f: KMLFeature in nl.container.features)
+				{
+					debugFeature(f);
+				}
+			} else {
+				debugFeature(kml.feature);
+			}
 			
 			callLater(kmlParsingFinished);
 			callLater(update, [FeatureUpdateContext.fullUpdate()]);
+		}
+		
+		private function debugFeature(feature: KMLFeature): void
+		{
+			return;
+			
+			while ( feature )
+			{
+				if (feature is Container)
+				{
+					debugFeature((feature as Container).firstFeature);
+				}
+				feature = feature.next as KMLFeature;
+			}
 		}
 		
 		private var _childrenFeatures:Array;
 		private function getChildrenFeatures(kmlContainer:Container): void 
 		{
 			_childrenFeatures = new Array();
-//			var total: int = kmlContainer.features.length;
 			var feature: KMLFeature = kmlContainer.firstFeature as KMLFeature;
-//			for (var i:Number = 0; i < total; i++)
 			while ( feature )
 			{
-//				var feature: KMLFeature = kmlContainer.features[i] as KMLFeature;
 				var childObj:Object = new Object();
 				childObj.name = feature.name;
 				
@@ -476,6 +498,73 @@ package com.iblsoft.flexiweather.ogc.kml
 			}
 		}
 		
+		private function updateForFeature(feature: KMLFeature, changeFlag: FeatureUpdateContext, asyncManager: AsyncManager): void
+		{
+			var startFeature: KMLFeature = feature
+			var nl: NetworkLink;
+			trace("START OF updateForFeature: " + startFeature);
+			while (feature)
+			{
+				trace("updateForFeature: " + feature);
+//				if (feature is NetworkLink)
+//				{
+//					nl = feature as NetworkLink;
+//					feature = nl.container.features[0] as KMLFeature
+//					if (!feature)
+//						continue;
+//					trace("\t NL.parent + " + nl.parent + " container.parent: " +  nl.container.parent);
+//				}
+//				if (feature.parent) {
+//					trace("HAS PARENT: " + feature.name);
+				if (feature is Folder)
+				{
+					trace("stop");
+				}
+				asyncManager.addCall(feature, updateFeature, [feature, changeFlag, asyncManager]);
+//				} else {
+//					trace("ILKML update -> feature is not on displaylist, do not do updateFeature");
+//				}
+				if (feature is NetworkLink)
+				{
+					updateForFeature((feature as NetworkLink).container.firstFeature, changeFlag, asyncManager);
+				}
+				if (feature is Container)
+				{
+					updateForFeature((feature as Container).firstFeature, changeFlag, asyncManager);
+				}
+				if (feature.next is Folder)
+				{
+					trace("stop");
+				}
+				feature = feature.next as KMLFeature;
+			}
+			trace("END OF updateForFeature:  " + startFeature);
+		}
+		
+		/*
+		private function semiUpdateForFeature(feature: KMLFeature, changeFlag: FeatureUpdateContext): void
+		{
+			var nl: NetworkLink;
+			
+			var cnt: int = 0;
+			while (feature)
+			{
+//				if (feature is NetworkLink)
+//				{
+//					nl = feature as NetworkLink;
+//					feature = nl.container.features[0] as KMLFeature
+//					
+//					if (!feature)
+//						continue;
+//					trace("\t NL.parent + " + nl.parent + " container.parent: " +  nl.container.parent);
+//				}
+				
+				asyncManager.addCall(feature, updateFeature, [feature, changeFlag]);
+				feature = feature.next as KMLFeature;
+				cnt++;
+			}
+		}
+		*/
 		public function update(changeFlag: FeatureUpdateContext): void
 		{
 //			trace("KML layer draw: " + features.length);
@@ -484,52 +573,34 @@ package com.iblsoft.flexiweather.ogc.kml
 			
 			var time: int;
 			
+			
 			if (changeFlag.fullUpdateNeeded && _syncManagerFullUpdate)
 			{
 				_syncManagerFullUpdate.removeEventListener(AsyncManager.EMPTY, onFullUpdateFinished);
+				_syncManagerFullUpdate.stop();
 				_syncManagerFullUpdate.maxCallsPerTick = 30;
 				trace("FULL UPDATE");
 				time = ProfilerUtils.startProfileTimer();
-				var feature: KMLFeature;
 				
-				feature = firstFeature as KMLFeature;
-				while (feature)
-				{
-					if (feature.parent)
-						_syncManagerFullUpdate.addCall(feature, updateFeature, [feature, changeFlag]);
-					else
-						trace("ILKML update -> feature is not on displaylist, do not do updateFeature");
-					feature = feature.next as KMLFeature;
-				}
+				updateForFeature(firstFeature as KMLFeature, changeFlag, _syncManagerFullUpdate);
 				
-
 				if (firstFeature)
 					(firstFeature as KMLFeature).debug("ILKML full update add calls: " + ProfilerUtils.stopProfileTimer(time) + " ms");
 				
 				if (_syncManagerFullUpdate.notEmpty)
 					_syncManagerFullUpdate.start();
 				
+				
 			} else {
 				if (_syncManager)
 				{
 					time = ProfilerUtils.startProfileTimer();
-//					for each (feature in features)
-//					{
-//						_syncManager.addCall(feature, updateFeature, [feature, changeFlag]);
-//					}
-					
-					feature = firstFeature as KMLFeature;
-					var cnt: int = 0;
 					_syncManager.maxCallsPerTick = 1000;
-					while (feature)
-					{
-						_syncManager.addCall(feature, updateFeature, [feature, changeFlag]);
-						feature = feature.next as KMLFeature;
-						cnt++;
-					}
+					
+					updateForFeature(firstFeature as KMLFeature, changeFlag, _syncManager);
 					
 					if (firstFeature)
-						(firstFeature as KMLFeature).debug("ILKML update add calls: " + ProfilerUtils.stopProfileTimer(time) + " ms. Length: " + cnt);
+						(firstFeature as KMLFeature).debug("ILKML update add calls: " + ProfilerUtils.stopProfileTimer(time) + " ms ");
 					_syncManager.start();
 				}
 				
@@ -542,16 +613,17 @@ package com.iblsoft.flexiweather.ogc.kml
 //			hideLoadingPopup();
 		}
 		
-		private function updateFeature(feature:  KMLFeature, changeFlag: FeatureUpdateContext): void
+		private function updateFeature(feature:  KMLFeature, changeFlag: FeatureUpdateContext, asyncManager: AsyncManager): void
 		{
-//			if (fullUpdate)
-//				feature.invalidatePoints();
-			
+			trace("updateFeature: " + feature);
 			feature.update(changeFlag);
 			feature.visible = true; //getAbsoluteVisibility(feature);
 			
-//			if (fullUpdate)
-//				itemRendererInstance.render(feature, container);
+			if (feature is Container)
+			{
+				trace("\t updateFeature call updateForFeature: " + (feature as Container).firstFeature);
+//				updateForFeature((feature as Container).firstFeature, changeFlag, asyncManager);
+			}
 		}
 		
 		
