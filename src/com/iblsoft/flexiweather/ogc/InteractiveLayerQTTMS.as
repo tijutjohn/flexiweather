@@ -191,6 +191,7 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 		
+		
 		public override function validateSize(b_recursive: Boolean = false): void
 		{
 			super.validateSize(b_recursive);
@@ -204,6 +205,9 @@ package com.iblsoft.flexiweather.ogc
 			}
 			if (i_oldZoom != mi_zoom)
 			{
+				
+				notifyZoomLevelChange(mi_zoom);
+				
 				/**
 				 * check if tiling pattern has been update with all data needed 
 				 * (default pattern is just InteractiveLayerWMSWithQTT.WMS_TILING_URL_PATTERN ('&TILEZOOM=%ZOOM%&TILECOL=%COL%&TILEROW=%ROW%') without any WMS data)
@@ -380,6 +384,7 @@ package com.iblsoft.flexiweather.ogc
 			{
 				if (tilesProvider)
 				{
+					notifyLoadingStart();
 					dispatchEvent(new InteractiveLayerQTTEvent(InteractiveLayerQTTEvent.TILES_LOADING_STARTED, true));
 					
 					loadRequests.sort(sortTiles);
@@ -940,6 +945,14 @@ package com.iblsoft.flexiweather.ogc
 			return true;
 			
 		}
+		
+		private function notifyZoomLevelChange(zoomLevel: int): void
+		{
+			var ilqe: InteractiveLayerQTTEvent = new InteractiveLayerQTTEvent(InteractiveLayerQTTEvent.ZOOM_LEVEL_CHANGED, true);
+			ilqe.zoomLevel = zoomLevel;
+			dispatchEvent(ilqe);			
+		}
+		
 		override public function onAreaChanged(b_finalChange: Boolean): void
 		{
 			super.onAreaChanged(b_finalChange);
@@ -968,6 +981,7 @@ package com.iblsoft.flexiweather.ogc
 					
 				if(mi_zoom != i_oldZoom)
 				{
+					notifyZoomLevelChange(mi_zoom);
 					m_cache.invalidate(newCRS, viewBBox);
 				}
 				invalidateData(false);

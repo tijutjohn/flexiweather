@@ -39,6 +39,7 @@ package com.iblsoft.flexiweather.widgets
 	[Event (name="dataLayerLoadingStarted", type="com.iblsoft.flexiweather.events.InteractiveWidgetEvent")]
 	[Event (name="dataLayerLoadingFinished", type="com.iblsoft.flexiweather.events.InteractiveWidgetEvent")]
 	[Event (name="anticollisionUpdated", type="flash.events.Event")]
+	[Event (name="zoomLevelChanged", type="com.iblsoft.flexiweather.events.InteractiveLayerQTTEvent")]
 	
 	public class InteractiveWidget extends Group
 	{
@@ -260,12 +261,12 @@ package com.iblsoft.flexiweather.widgets
 			ile.layersLoading = m_layersLoading;
 			dispatchEvent(ile);
 			
-//			trace("IW onLayerLoadingStart " + event.interactiveLayer.name + " m_layersLoading: " + m_layersLoading);
+			trace("IW onLayerLoadingStart " + event.interactiveLayer.name + " m_layersLoading: " + m_layersLoading);
 		}
 		private function onLayerLoaded( event: InteractiveLayerEvent): void
 		{
 			m_layersLoading--;
-//			trace("IW onLayerLoaded " + event.interactiveLayer.name + " layers currently loading: " + m_layersLoading);
+			trace("IW onLayerLoaded " + event.interactiveLayer.name + " layers currently loading: " + m_layersLoading);
 			
 			var ile: InteractiveWidgetEvent
 			ile = new InteractiveWidgetEvent(InteractiveWidgetEvent.DATA_LAYER_LOADING_FINISHED);
@@ -298,6 +299,9 @@ package com.iblsoft.flexiweather.widgets
 		
 		public function removeLayer(l: InteractiveLayer, b_destroy: Boolean = false): void
 		{
+			l.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onLayerLoaded);
+			l.removeEventListener(InteractiveDataLayer.LOADING_STARTED, onLayerLoadingStart);
+			
 			if(l.parent == m_layerContainer) {
 				l.destroy();
 				m_layerContainer.removeElement(l);
@@ -309,6 +313,8 @@ package com.iblsoft.flexiweather.widgets
 			while(m_layerContainer.numElements) {
 				var i: int = m_layerContainer.numElements - 1;
 				var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
+				l.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onLayerLoaded);
+				l.removeEventListener(InteractiveDataLayer.LOADING_STARTED, onLayerLoadingStart);
 				l.destroy();
 				m_layerContainer.removeElementAt(i);
 			}
