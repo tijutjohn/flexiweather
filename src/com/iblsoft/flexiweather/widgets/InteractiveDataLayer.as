@@ -49,6 +49,7 @@ package com.iblsoft.flexiweather.widgets
 		 */
 		public static const LOADING_STARTED: String = 'loadingStarted';
 		
+		
 		/**
 		 *
 		 *  @eventType loadingFinished
@@ -71,6 +72,28 @@ package com.iblsoft.flexiweather.widgets
 		 */
 		public static const LOADING_ERROR: String = 'loadingError';
 		
+		
+		/**
+		 *
+		 *  @eventType preloadingStarted
+		 *  
+		 *  @langversion 3.0
+		 *  @playerversion Flash 9
+		 *  @playerversion AIR 1.1
+		 *  @productversion Flex 3
+		 */
+		public static const PRELOADING_STARTED: String = 'preloadingStarted';
+
+		/**
+		 *
+		 *  @eventType preloadingFinished
+		 *  
+		 *  @langversion 3.0
+		 *  @playerversion Flash 9
+		 *  @playerversion AIR 1.1
+		 *  @productversion Flex 3
+		 */
+		public static const PRELOADING_FINISHED: String = 'preloadingFinished';
 		
 		/**
 		 *
@@ -111,6 +134,9 @@ package com.iblsoft.flexiweather.widgets
 		public var errorText: String;		
 		private var _status: String;
 		
+
+		
+
 		/**
 		 * Status of InteractiveDataLayer. This layer except dispatching events also set current status of layer. 
 		 * You can check status anytime and find out, what is the current state of layers. 
@@ -137,6 +163,11 @@ package com.iblsoft.flexiweather.widgets
 		}
 		
 		private var _invalidateDataFlag: Boolean;
+		public function set invalidateDataFlag(value:Boolean):void
+		{
+			_invalidateDataFlag = value;
+		}
+		
 		private var _invalidateDataForceUpdateFlag: Boolean;
 		
 		/**
@@ -147,7 +178,7 @@ package com.iblsoft.flexiweather.widgets
 		 */
 		public function invalidateData(b_forceUpdate: Boolean): void
 		{
-			_invalidateDataFlag = true;
+			invalidateDataFlag = true;
 			_invalidateDataForceUpdateFlag = _invalidateDataForceUpdateFlag || b_forceUpdate;
 			invalidateProperties();
 		}
@@ -163,8 +194,8 @@ package com.iblsoft.flexiweather.widgets
 			
 			if (_invalidateDataFlag)
 			{
-				_invalidateDataFlag = false;
 				updateData(_invalidateDataForceUpdateFlag);
+				invalidateDataFlag = false;
 			}
 			_invalidateDataForceUpdateFlag = false;
 		}

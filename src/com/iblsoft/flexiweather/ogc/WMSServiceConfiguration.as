@@ -124,9 +124,12 @@ package com.iblsoft.flexiweather.ogc
 				getGetMapImageFormats(capability);
 				
 				if(capability != null) {
-					var layer: XML = capability.wms::Layer[0];
-					m_layers = new WMSLayerGroup(null, layer, wms, version);
-	
+					try {
+						var layer: XML = capability.wms::Layer[0];
+						m_layers = new WMSLayerGroup(null, layer, wms, version);
+					} catch (e: Error) {
+						trace("WMSServiceConfiguration error: " + e.message);
+					}
 					m_capabilities = xml;
 					dispatchEvent(new DataEvent(CAPABILITIES_UPDATED));
 				}

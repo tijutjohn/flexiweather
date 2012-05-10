@@ -6,6 +6,9 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.AnticollisionLayout;
+	import com.iblsoft.flexiweather.utils.CubicBezier;
+	import com.iblsoft.flexiweather.utils.ICurveRenderer;
+	import com.iblsoft.flexiweather.utils.wfs.FeatureSplitter;
 	
 	import flash.display.DisplayObject;
 	import flash.display.GradientType;
@@ -38,6 +41,7 @@ package com.iblsoft.flexiweather.widgets
 	[Event (name="allDataLayersLoaded", type="com.iblsoft.flexiweather.events.InteractiveWidgetEvent")]
 	[Event (name="dataLayerLoadingStarted", type="com.iblsoft.flexiweather.events.InteractiveWidgetEvent")]
 	[Event (name="dataLayerLoadingFinished", type="com.iblsoft.flexiweather.events.InteractiveWidgetEvent")]
+	[Event (name="areaChanged", type="com.iblsoft.flexiweather.events.InteractiveWidgetEvent")]
 	[Event (name="anticollisionUpdated", type="flash.events.Event")]
 	[Event (name="zoomLevelChanged", type="com.iblsoft.flexiweather.events.InteractiveLayerQTTEvent")]
 	
@@ -110,7 +114,10 @@ package com.iblsoft.flexiweather.widgets
 			super.createChildren();
 			
 			m_layerLayoutParent = new UIComponent();
+			
+			m_featureSplitter = new FeatureSplitter(this);
 		}
+		
 		override protected function childrenCreated():void
 		{
 			super.childrenCreated();
@@ -261,12 +268,12 @@ package com.iblsoft.flexiweather.widgets
 			ile.layersLoading = m_layersLoading;
 			dispatchEvent(ile);
 			
-			trace("IW onLayerLoadingStart " + event.interactiveLayer.name + " m_layersLoading: " + m_layersLoading);
+//			trace("IW onLayerLoadingStart " + event.interactiveLayer.name + " m_layersLoading: " + m_layersLoading);
 		}
 		private function onLayerLoaded( event: InteractiveLayerEvent): void
 		{
 			m_layersLoading--;
-			trace("IW onLayerLoaded " + event.interactiveLayer.name + " layers currently loading: " + m_layersLoading);
+//			trace("IW onLayerLoaded " + event.interactiveLayer.name + " layers currently loading: " + m_layersLoading);
 			
 			var ile: InteractiveWidgetEvent
 			ile = new InteractiveWidgetEvent(InteractiveWidgetEvent.DATA_LAYER_LOADING_FINISHED);
@@ -478,6 +485,9 @@ package com.iblsoft.flexiweather.widgets
 			m_labelLayout.setDirty();
 			
 			_oldViewBBox = m_viewBBox.clone();
+			
+			//dispatch area change event
+			dispatchEvent(new InteractiveWidgetEvent(InteractiveWidgetEvent.AREA_CHANGED));
         }
 		
 		internal function onLayerVisibilityChanged(layer: InteractiveLayer): void
@@ -519,9 +529,10 @@ package com.iblsoft.flexiweather.widgets
 			}
 			if (ptInOurCRS && m_viewBBox)
 			{
-				return new Point(
-					(ptInOurCRS.x - m_viewBBox.xMin) * (width - 1) / m_viewBBox.width,
-					height - 1 - (ptInOurCRS.y - m_viewBBox.yMin) * (height - 1) / m_viewBBox.height);
+				var pX: Number = (ptInOurCRS.x - m_viewBBox.xMin) * (width - 1) / m_viewBBox.width;
+				var pY: Number = height - 1 - (ptInOurCRS.y - m_viewBBox.yMin) * (height - 1) / m_viewBBox.height;
+				
+				return new Point(pX, pY);
 			}
 			return null;
         }
@@ -574,6 +585,32 @@ package com.iblsoft.flexiweather.widgets
 //				trace("InteractiveWidget.mapBBoxToViewParts(): primary part only " + primaryPartBBox.toString());
 			}
 			return a;
+		}
+
+		/**
+		 * Returns array of object pairs {point: reflected point, reflection: reflection delta} 
+		 * @param point
+		 * @return 
+		 * 
+		 */		
+		public function mapCoordInCRSToViewReflections(point: Point): Array
+		{
+			if (!point)
+				return [];
+			
+			if(m_crsProjection.wrapsHorizontally) {
+				var f_crsExtentBBoxWidth: Number = m_crsProjection.extentBBox.width;
+				
+				var a: Array = [];
+				for(var i: int = 0; i < 5; i++) {
+					var i_delta: int = (i & 1 ? 1 : -1) * ((i + 1) >> 1); // generates sequence 0, 1, -1, 2, -2, ..., 5, -5
+					var p: Point = new Point(point.x + f_crsExtentBBoxWidth * i_delta, point.y)
+					a.push({point: p, reflection: i_delta});				
+				}
+				return a;
+			}
+			
+			return [point];
 		}
 
 		/**
@@ -1079,6 +1116,90 @@ package com.iblsoft.flexiweather.widgets
 			signalAreaChanged(true);
 		}
 
+		//*****************************************************************************************
+		//		Drawing splitted features
+		//*****************************************************************************************
+		private var m_featureSplitter: FeatureSplitter;
+		
+		/**
+		 * Draw polyline with given curve renderer 
+		 * @param g
+		 * @param coords
+		 * @return 
+		 * 
+		 */		
+		public function drawPolyline(g: ICurveRenderer,  coords: Array, b_closed: Boolean = false): Array
+		{
+			var features: Array = m_featureSplitter.splitCoordPolyLineToArrayOfPointPolyLines(coords, b_closed);
+			
+//			trace("\n\n IW drawPolyline features: " + features.length);
+			var p: Point;
+			
+			for each (var mPoints: Array in features)
+			{
+				var total: int = mPoints.length;
+				if (total > 0)
+				{
+					p = mPoints[0] as Point;
+					
+//					trace("\t drawPolyline start ["+p.x+","+p.y+"]");
+					g.start(p.x, p.y);
+					g.moveTo(p.x, p.y);
+					
+					for (var i: int = 1; i < mPoints.length; i++){
+						p = mPoints[i] as Point;
+						g.lineTo(p.x, p.y);
+//						trace("\t drawPolyline lineTo ["+p.x+","+p.y+"]");
+					}
+					
+					g.finish(p.x, p.y);
+//					trace("\t drawPolyline finish ["+p.x+","+p.y+"]");
+				}
+			}
+			
+//			trace("END OF drawPolyline\n\n");
+			
+			return features;
+		}
+		
+		public function drawHermitSpline(g: ICurveRenderer, 
+										 _coords: Array, 
+										 _closed: Boolean = false, 
+										 _drawHiddenHitMask: Boolean = false,  // PREPARED PARAMETER FOR DRAWING HIT MASK AREA
+										 _step: Number = 0.01): Array
+		{
+			var features: Array = m_featureSplitter.splitCoordHermitSplineToArrayOfPointPolyLines(_coords, _closed);
+			
+			//			trace("\n\n IW drawPolyline features: " + features.length);
+			var p: Point;
+			
+			for each (var mPoints: Array in features)
+			{
+				var total: int = mPoints.length;
+				if (total > 0)
+				{
+					p = mPoints[0] as Point;
+					
+					//					trace("\t drawPolyline start ["+p.x+","+p.y+"]");
+					g.start(p.x, p.y);
+					g.moveTo(p.x, p.y);
+					
+					for (var i: int = 1; i < mPoints.length; i++){
+						p = mPoints[i] as Point;
+						g.lineTo(p.x, p.y);
+						//						trace("\t drawPolyline lineTo ["+p.x+","+p.y+"]");
+					}
+					
+					g.finish(p.x, p.y);
+					//					trace("\t drawPolyline finish ["+p.x+","+p.y+"]");
+				}
+			}
+			
+			//			trace("END OF drawPolyline\n\n");
+			
+			return features;
+		}
+		
 		//*****************************************************************************************
 		//		AntiCollision functionality
 		//*****************************************************************************************

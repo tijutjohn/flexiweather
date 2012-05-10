@@ -135,19 +135,20 @@ package com.iblsoft.flexiweather.ogc
 		
 		override protected function updateData(b_forceUpdate: Boolean): void
 		{
-			super.updateData(b_forceUpdate);
-			
-			if(!visible) {
-				m_autoRefreshTimer.reset();
-				return;
+			if (!_currentWMSDataLoadingStarted)
+			{
+				super.updateData(b_forceUpdate);
+				
+				if(!visible) {
+					m_autoRefreshTimer.reset();
+					return;
+				}
+				
+				if (m_currentWMSViewProperties)
+					m_currentWMSViewProperties.updateWMSData(b_forceUpdate);
 			}
 			
-			if (m_currentWMSViewProperties)
-				m_currentWMSViewProperties.updateWMSData(b_forceUpdate);
-			
 		}
-		
-		
 
 		public override function draw(graphics: Graphics): void
 		{

@@ -163,6 +163,11 @@ package com.iblsoft.flexiweather.ogc
 			wmsViewProperties.setConfiguration(m_cfg);
 			wmsViewProperties.cache = m_cache;
 			
+			if (ma_preloadingWMSViewProperties.length == 0)
+			{
+				dispatchEvent(new InteractiveLayerEvent(InteractiveDataLayer.PRELOADING_STARTED, true));
+			}
+			
 			ma_preloadingWMSViewProperties.push(wmsViewProperties);
 			
 			wmsViewProperties.addEventListener(InteractiveDataLayer.LOADING_STARTED, onPreloadingWMSDataLoadingStarted);
@@ -218,7 +223,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			var wmsViewProperties: WMSViewProperties = event.target as WMSViewProperties;
 			wmsViewProperties.removeEventListener(InteractiveDataLayer.LOADING_STARTED, onPreloadingWMSDataLoadingStarted);
-//			debug("onPreloadingWMSDataLoadingStarted wmsData: " + wmsViewProperties);
+//			trace("\t onPreloadingWMSDataLoadingStarted wmsData: " + wmsViewProperties);
 			
 		}
 		protected function onPreloadingWMSDataLoadingFinished(event: InteractiveLayerEvent): void
@@ -226,7 +231,7 @@ package com.iblsoft.flexiweather.ogc
 			var wmsViewProperties: WMSViewProperties = event.target as WMSViewProperties;
 			wmsViewProperties.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
 //			debug("onPreloadingWMSDataLoadingFinished wmsData: " + wmsViewProperties);
-//			debug("onPreloadingWMSDataLoadingFinished PRELOADED: " + ma_preloadedWMSViewProperties.length + " , PRELAODING: " + ma_preloadingWMSViewProperties.length);
+//			trace("\t onPreloadingWMSDataLoadingFinished PRELOADED: " + ma_preloadedWMSViewProperties.length + " , PRELAODING: " + ma_preloadingWMSViewProperties.length);
 			
 			//remove wmsViewProperties from array of currently preloading wms view properties
 			var total: int = ma_preloadingWMSViewProperties.length;
@@ -254,6 +259,9 @@ package com.iblsoft.flexiweather.ogc
 //					delete currWMSViewProperties;
 //				}
 				ma_preloadedWMSViewProperties = [];
+				
+				//dispatch preloading finished to notify all about all WMSViewProperties are preloaded
+				dispatchEvent(new InteractiveLayerEvent(InteractiveDataLayer.PRELOADING_FINISHED, true));
 			}
 		}
 		
@@ -267,9 +275,14 @@ package com.iblsoft.flexiweather.ogc
 		{
 			invalidateDynamicPart(event['invalid']);
 		}
+		
+		protected var _currentWMSDataLoadingStarted: Boolean;
+		
 		protected function onCurrentWMSDataLoadingStarted(event: InteractiveLayerEvent): void
 		{
-			notifyLoadingStart();
+//			trace("\t onCurrentWMSDataLoadingStarted ["+name+"]");
+			_currentWMSDataLoadingStarted = true;
+			notifyLoadingStart(false);
 		}
 		
 		protected function onCurrentWMSDataProgress(event: InteractiveLayerProgressEvent): void
@@ -280,7 +293,9 @@ package com.iblsoft.flexiweather.ogc
 		
 		protected function onCurrentWMSDataLoadingFinished(event: InteractiveLayerEvent): void
 		{
+//			trace("\t onCurrentWMSDataLoadingFinished ["+name+"]");
 			notifyLoadingFinished();	
+			_currentWMSDataLoadingStarted = false;
 		}
 		
 		public function setConfiguration(cfg: WMSLayerConfiguration): void

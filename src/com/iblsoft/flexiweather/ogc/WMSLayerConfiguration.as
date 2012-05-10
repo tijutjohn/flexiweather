@@ -214,7 +214,8 @@ package com.iblsoft.flexiweather.ogc
 				var l: WMSLayer = null;
 				if(m_service != null)
 					l = service.getLayerByName(ma_layerNames[i]);
-				a_layers.addItem(l);
+				if (l)
+					a_layers.addItem(l);
 			}
 			var b_changed: Boolean = false;
 			if(ma_layerConfigurations == null)
@@ -223,6 +224,9 @@ package com.iblsoft.flexiweather.ogc
 				for(i = 0; i < a_layers.length; ++i) 
 				{
 					layer = a_layers[i] as WMSLayer;
+					
+					updateDimensions(layer);
+					
 					layerConf = ma_layerConfigurations[i] as WMSLayer
 					if(layer == null) 
 					{
@@ -247,6 +251,28 @@ package com.iblsoft.flexiweather.ogc
 			dispatchEvent(new DataEvent(CAPABILITIES_RECEIVED));
 		}
 
+		private function updateDimensions(layer: WMSLayer): void
+		{
+			for each (var dimension: WMSDimension in layer.dimensions)
+			{
+				trace("dimension: " + dimension.name);
+				switch(dimension.name)
+				{
+					case "RUN":
+						dimensionRunName = dimension.name;
+						break;
+					case "FORECAST":
+						dimensionForecastName = dimension.name;
+						break;
+					case "TIME":
+						dimensionTimeName = dimension.name;
+						break;
+					case "ELEVATION":
+						dimensionVerticalLevelName = dimension.name;
+						break;
+				}
+			}
+		}
 		public function isTileableForCRS(crs: String): Boolean
 		{
 			if (ma_layerConfigurations && ma_layerConfigurations.length > 0)
@@ -358,19 +384,25 @@ package com.iblsoft.flexiweather.ogc
 		{ return ma_behaviours; }
 
 		public function set dimensionTimeName(s: String): void
-		{ ms_dimensionTimeName = s; }
+		{ 
+			ms_dimensionTimeName = s; 
+		}
 
 		public function get dimensionTimeName(): String
 		{ return ms_dimensionTimeName; }
 
 		public function set dimensionRunName(s: String): void
-		{ ms_dimensionRunName = s; }
+		{ 
+			ms_dimensionRunName = s; 
+		}
 
 		public function get dimensionRunName(): String
 		{ return ms_dimensionRunName; }
 
 		public function set dimensionForecastName(s: String): void
-		{ ms_dimensionForecastName = s; }
+		{ 
+			ms_dimensionForecastName = s; 
+		}
 
 		public function get dimensionForecastName(): String
 		{ return ms_dimensionForecastName; }
