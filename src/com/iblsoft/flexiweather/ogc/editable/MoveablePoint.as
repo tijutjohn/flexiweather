@@ -15,6 +15,9 @@ package com.iblsoft.flexiweather.ogc.editable
 		protected var m_feature: WFSFeatureEditable;
 		protected var mi_pointIndex: uint;
 	
+		protected var mi_reflection: uint;
+		protected var mi_reflectionDelta: int;
+		
 		protected var m_pt: Point;
 		
 		protected var mb_highlighted: Boolean = false;
@@ -22,10 +25,11 @@ package com.iblsoft.flexiweather.ogc.editable
 		
 		protected var m_editableItemManager: IEditableItemManager;
 		protected var mb_dragging: Boolean = false;
+		
 	
 		public var m_pointCursor: int = WFSCursorManagerTypes.CURSOR_ADD_POINT;
 	
-		public function MoveablePoint(feature: WFSFeatureEditable, i_pointIndex: uint)
+		public function MoveablePoint(feature: WFSFeatureEditable, i_pointIndex: uint, i_reflection: uint, i_reflectionDelta: int)
 		{
 			super();
 	
@@ -33,6 +37,8 @@ package com.iblsoft.flexiweather.ogc.editable
 
 			m_feature = feature;
 			mi_pointIndex = i_pointIndex;
+			mi_reflection = i_reflection; 
+			mi_reflectionDelta = i_reflectionDelta; 
 			m_pt = feature.getPoint(i_pointIndex);
 			
 			//addEventListener(MouseEvent.MOUSE_OVER, onMouseOver);
@@ -104,7 +110,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				return false;
 			m_pt = pt;
 			update();
-			m_feature.setPoint(mi_pointIndex, m_pt);
+			m_feature.setPoint(mi_pointIndex, m_pt, mi_reflectionDelta);
 			return true;
 		}
 	
@@ -129,7 +135,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			m_editableItemManager.setMouseMoveCapture(this);
 			m_editableItemManager.setMouseClickCapture(this);
 			
-			m_feature.selectMoveablePoint(mi_pointIndex);
+			m_feature.selectMoveablePoint(mi_pointIndex, mi_reflection);
 			
 			mb_dragging = true;
 			return true;

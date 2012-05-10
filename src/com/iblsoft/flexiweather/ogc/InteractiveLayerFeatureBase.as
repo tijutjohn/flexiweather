@@ -96,7 +96,7 @@ package com.iblsoft.flexiweather.ogc
 			
 			if (_oldFeature)
 			{
-				if ((_oldFeature as KMLFeature).parentFeature == (feature as KMLFeature).parentFeature)
+				if (_oldFeature.parentFeature == feature.parentFeature)
 				{
 					_oldFeature.next = feature;
 					feature.previous = _oldFeature;

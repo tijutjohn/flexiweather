@@ -137,6 +137,21 @@ package com.iblsoft.flexiweather.utils
 			return lo.referenceLocation;
 		}
 
+		public function updateObjectReferenceLocationWithCustomPosition(object: DisplayObject, rlX: Number, rlY: Number): Boolean
+		{
+			
+			var lo: AnticollisionLayoutObject = getAnticollisionLayoutObjectFor(object);
+			
+			if(lo == null)
+				return false;
+			if(lo.referenceLocation.x != rlX || lo.referenceLocation.y != rlY) 
+			{ 
+				setDirty();
+				lo.referenceLocation = new Point(rlX, rlY);
+			}
+			
+			return true;
+		}
 		public function updateObjectReferenceLocation(object: DisplayObject): Boolean
 		{
 			var lo: AnticollisionLayoutObject = getAnticollisionLayoutObjectFor(object);
@@ -147,8 +162,6 @@ package com.iblsoft.flexiweather.utils
 			{ 
 				setDirty();
 				lo.referenceLocation = new Point(object.x, object.y);
-				
-//				trace("\n\t m_referenceLocation: " + lo.referenceLocation + " object: " + object.x + " , " + object.y);
 			}
 			
 			return true;
@@ -365,8 +378,8 @@ package com.iblsoft.flexiweather.utils
 						var a_boundingLineSegmentsTo: Array = getLineSegmentApproximation(objectToAnchor);
 	
 						//debug
-//						drawApproximationFunction(g, a_boundingLineSegmentsFrom, 0xff0000, 3);
-//						drawApproximationFunction(g, a_boundingLineSegmentsTo, 0x00ff00, 1);
+						drawApproximationFunction(g, a_boundingLineSegmentsFrom, 0xff0000, 3);
+						drawApproximationFunction(g, a_boundingLineSegmentsTo, 0x00ff00, 1);
 						
 						var bestPointTo: Point = boundsTo.bottomRight;
 						var bestPointFrom: Point = boundsFrom.topLeft;
@@ -398,7 +411,9 @@ package com.iblsoft.flexiweather.utils
 						var anchorAlpha: Number = lo.anchorAlpha;
 						if (objectToAnchor is IWFSFeatureWithAnnotation)
 						{
-							clr = (objectToAnchor as IWFSFeatureWithAnnotation).annotation.color;
+							var annotation: AnnotationBox = (objectToAnchor as IWFSFeatureWithAnnotation).annotation;
+							if (annotation)
+								clr = annotation.color;
 							anchorAlpha = 1;
 						}
 						drawAnnotationAnchorFunction(g, lo.drawAnchorArrow,
@@ -539,8 +554,10 @@ package com.iblsoft.flexiweather.utils
 		{
 			var matrix: Matrix = new Matrix();
 			matrix.translate(-m_boundaryRect.x, -m_boundaryRect.y);
+			
 			layoutObject.object.x = layoutObject.referenceLocation.x + f_dx;
 			layoutObject.object.y = layoutObject.referenceLocation.y + f_dy;
+			
 			matrix.translate(layoutObject.object.x, layoutObject.object.y);
 			if(layoutObject.object is UIComponent)
 				UIComponent(layoutObject.object).validateNow();

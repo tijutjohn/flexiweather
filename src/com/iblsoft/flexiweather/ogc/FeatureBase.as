@@ -37,6 +37,16 @@ package com.iblsoft.flexiweather.ogc
 		}
 		
 		
+		private var _parentFeature: FeatureBase;
+		public function get parentFeature(): FeatureBase
+		{
+			return _parentFeature;
+		}
+		public function set parentFeature(value: FeatureBase): void
+		{
+			_parentFeature = value;
+		}
+		
 		protected var m_master: InteractiveLayerFeatureBase;
 		
 		protected var ms_namespace: String;
@@ -199,10 +209,16 @@ package com.iblsoft.flexiweather.ogc
 			
 			var newSegmentRenderer: CurveLineSegmentRenderer = new CurveLineSegmentRenderer();
 			
-			CubicBezier.drawHermitSpline(
+			master.container.drawHermitSpline(
 				newSegmentRenderer,
 				b_useCoordinates ? coordinates : getPoints().toArray(),
-				b_closed, false, 0.005, true);
+				b_closed, false, 0.005);
+			
+			//TODO remove this and draw it with InteractiveWidget.drawHermitSpline
+//			CubicBezier.drawHermitSpline(
+//				newSegmentRenderer,
+//				b_useCoordinates ? coordinates : getPoints().toArray(),
+//				b_closed, false, 0.005, true);
 			
 			/*CubicBezier.curveThroughPoints(
 			segmentRenderer,

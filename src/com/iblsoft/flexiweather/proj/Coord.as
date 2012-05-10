@@ -101,6 +101,32 @@ package com.iblsoft.flexiweather.proj
 			return crs + ": [" + nf.format(x) + ", " + nf.format(y) + "]";
 		}
 		
+		public function convertToProjection(projection: Projection): Coord
+		{
+			if (crs == projection.crs)
+			{
+				return this;
+			}
+			
+			if (crs != 'CRS:84')
+			{
+				var proj1: Projection = Projection.getByCRS(crs);
+				
+				var laLoPtRad: Point = proj1.prjXYToLaLoPt(x, y);
+				if (laLoPtRad)
+				{
+					var proj1Point: Point = projection.laLoPtToPrjPt(laLoPtRad);
+					return new Coord(projection.crs, proj1Point.x, proj1Point.y);
+				}
+				
+				return null;
+			}
+			
+			
+			var p: Point = projection.laLoToPrjPt(x, y);
+			return new Coord(projection.crs, p.x, p.y);
+		}
+		
 		override public function toString(): String
 		{
 			return crs + "[" + x + ";" + y + "]";			

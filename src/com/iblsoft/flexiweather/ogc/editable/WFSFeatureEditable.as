@@ -4,12 +4,16 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWFS;
 	import com.iblsoft.flexiweather.ogc.WFSFeatureBase;
+	import com.iblsoft.flexiweather.ogc.data.MoveablePointsDictionary;
+	import com.iblsoft.flexiweather.ogc.data.ReflectionData;
+	import com.iblsoft.flexiweather.proj.Coord;
 	
 	import flash.display.Sprite;
 	import flash.events.KeyboardEvent;
 	import flash.filters.GlowFilter;
 	import flash.geom.Point;
 	import flash.ui.Keyboard;
+	import flash.utils.Dictionary;
 	
 	public class WFSFeatureEditable extends WFSFeatureBase
 			implements IEditableItem, IHighlightableItem, ISelectableItem
@@ -18,7 +22,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		protected var mb_highlighted: Boolean;
 		protected var mb_modified: Boolean = false;
 		protected var m_editableSprite: Sprite = new Sprite();
-		protected var ml_movablePoints: Array = [];
+		protected var ml_movablePoints: MoveablePointsDictionary;
 		protected var mi_editMode: int = WFSFeatureEditableMode.ADD_POINTS_WITH_MOVE_POINTS;
 		protected var mn_justSelectable: Boolean;
 		
@@ -30,23 +34,55 @@ package com.iblsoft.flexiweather.ogc.editable
 		protected var m_editableItemManager: IEditableItemManager;
 
 		protected var mi_actSelectedMoveablePointIndex: int = -1;
+		protected var mi_actSelectedMoveablePointReflectionIndex: int = -1;
 
 		protected var m_firstInit: Boolean = true;
 
 		public function WFSFeatureEditable(s_namespace: String, s_typeName: String, s_featureId: String)
 		{
 			super(s_namespace, s_typeName, s_featureId);
+			
 			editableSpriteVisible(false);
 		}
 		
 		override public function setMaster(master: InteractiveLayerFeatureBase): void
 		{
 			super.setMaster(master);
+			
+			ml_movablePoints = new MoveablePointsDictionary(master.container);
+			
 			var masterEditable: InteractiveLayerWFSEditable = master as InteractiveLayerWFSEditable;
 			if(masterEditable != null)
 				masterEditable.editingComponentsContainer.addChild(m_editableSprite);
 		}
 		
+		private function updateCoordsReflections(): void
+		{
+//			var reflections: Dictionary = new Dictionary();
+			
+			ml_movablePoints.cleanup();
+			
+			var total: int = coordinates.length;
+			var crs: String = master.container.getCRS();
+			for (var i: int = 0; i < total; i++)
+			{
+				var coord: Coord = coordinates[i] as Coord;
+				if (coord.crs != crs)
+				{
+					trace("Problem with Coord... not same as InteractiveWidget coord");
+				}
+				var pointReflections: Array = master.container.mapCoordInCRSToViewReflections(new Point(coord.x, coord.y));
+				var reflectionsCount: int = pointReflections.length;
+				
+				for (var j: int = 0; j < reflectionsCount; j++)
+				{
+					var pointReflectedObject: Object = pointReflections[j];
+					var pointReflected: Point = pointReflectedObject.point;
+					var coordReflected: Coord = new Coord(crs, pointReflected.x, pointReflected.y);
+					ml_movablePoints.addReflectedCoord(coordReflected, j, pointReflectedObject.reflection);
+				}
+			}
+		}
 		override public function update(changeFlag: FeatureUpdateContext): void
 		{
 			super.update(changeFlag);
@@ -54,35 +90,58 @@ package com.iblsoft.flexiweather.ogc.editable
 
 			var mp: MoveablePoint;
 			var i: uint;
-			for(i = 0; i < m_points.length; ++i) {
-				if(i >= ml_movablePoints.length) {
-					mp = new MoveablePoint(this, i);
-					ml_movablePoints.push(mp);
-					m_editableSprite.addChild(mp);
-					if(eim != null)
-						eim.addEditableItem(mp);
-					continue;
+			
+			//m_points is Array of Screen coordinates in pixels
+			
+			updateCoordsReflections();
+			var reflectionsTotal: int = ml_movablePoints.totalReflections;
+			
+			for (var r: int = 0; r < reflectionsTotal; r++)
+			{
+				var reflection: ReflectionData = ml_movablePoints.getReflection(r);
+				var pTotal: int = reflection.points.length;
+				
+				for(i = 0; i < pTotal; ++i) {
+					
+					var pt: Point = reflection.points[i] as Point;
+					
+					if(i >= reflection.moveablePoints.length) {
+						//add new MovablePoint (new point was added, so we need to create Movable point for it
+						mp = new MoveablePoint(this, i, r, reflection.reflectionDelta);
+						reflection.addMoveablePoint(mp, i);
+//						ml_movablePoints.push(mp);
+						m_editableSprite.addChild(mp);
+						if(eim != null)
+							eim.addEditableItem(mp);
+						continue;
+					}
+					
+//					mp = ml_movablePoints[i];
+					mp = reflection.moveablePoints[i] as MoveablePoint;
+					
+//					var pt: Point = getPoint(i);
+					if(pt == null)
+						continue;  // TODO: check for CRS
+					if(!mp.getPoint().equals(pt)) {
+						// reuse MoveablePoint instance, just change it's location 
+						mp.setPoint(pt);
+					}
 				}
-				mp = ml_movablePoints[i];
-				var pt: Point = getPoint(i);
-				if(pt == null)
-					continue;  // TODO: check for CRS
-				if(!mp.getPoint().equals(pt)) {
-					// reuse MoveablePoint instance, just change it's location 
-					mp.setPoint(pt);
+				//remove all unused  MoveablePoints (because coordinates was removed from feature)
+				for(; i < reflection.moveablePoints.length; ++i) {
+					mp = reflection.moveablePoints[i] as MoveablePoint;
+					if(eim != null) {
+						eim.removeEditableItem(mp);
+						// ADD CHECK ABOUT SELECTED MOVEABLE POINT
+					}
+					m_editableSprite.removeChild(mp);
 				}
-			}
-			for(; i < ml_movablePoints.length; ++i) {
-				mp = ml_movablePoints[i];
-				if(eim != null) {
-					eim.removeEditableItem(mp);
-					// ADD CHECK ABOUT SELECTED MOVEABLE POINT
+				while(reflection.points.length < reflection.moveablePoints.length) {
+					reflection.moveablePoints.pop();
 				}
-				m_editableSprite.removeChild(mp);
+			
 			}
-			while(m_points.length < ml_movablePoints.length) {
-				ml_movablePoints.pop();
-			}
+			
 			editableSpriteVisible(mb_selected);
 			
 				
@@ -103,9 +162,15 @@ package com.iblsoft.flexiweather.ogc.editable
 			if(masterEditable != null)
 				masterEditable.editingComponentsContainer.removeChild(m_editableSprite);
 
-			for each(var mp: MoveablePoint in ml_movablePoints)
-				m_editableSprite.removeChild(mp);
-			ml_movablePoints = [];
+			var reflectionsTotal: int = ml_movablePoints.totalReflections;
+			for (var i:int  = 0; i < reflectionsTotal; i++)
+			{
+				var reflection: ReflectionData = ml_movablePoints.getReflection(i);
+				for each(var mp: MoveablePoint in reflection.moveablePoints)
+					m_editableSprite.removeChild(mp);
+			}
+			
+			ml_movablePoints.cleanup();
 		}
 		
 		public function renderFallbackGraphics(i_preferredColor: uint = 0x5A90B1): void {
@@ -181,10 +246,25 @@ package com.iblsoft.flexiweather.ogc.editable
 
 		// point/location manipulation helpers
 
-		public function setPoint(i_pointIndex: uint, pt: Point): void
+		public function setPoint(i_pointIndex: uint, pt: Point, i_reflectionDelta: int): void
 		{
-			m_points[i_pointIndex] = pt;
-			m_coordinates[i_pointIndex] = m_master.container.pointToCoord(pt.x, pt.y);
+			var reflectionWidth: Number = 0;
+			if (i_reflectionDelta != 0)
+			{
+				reflectionWidth = master.container.getExtentBBox().width * i_reflectionDelta;
+			}
+			
+			
+			var c: Coord = m_master.container.pointToCoord(pt.x, pt.y);
+			//need to move coord to 0 reflection
+			c.x -= reflectionWidth;
+			
+			//and cound correct point position for 0 reflection
+			m_points[i_pointIndex] = m_master.container.coordToPoint(c);
+			m_coordinates[i_pointIndex] = c;
+			
+			trace("setPoint delta["+i_reflectionDelta+"] point: " + pt + " 0coord: " + c + " 0pos: " + m_points[i_pointIndex]);
+			
 			update(FeatureUpdateContext.fullUpdate());
 			modified = true;
 		}
@@ -192,27 +272,43 @@ package com.iblsoft.flexiweather.ogc.editable
 		/**
 		 * 
 		 */
-		public function selectMoveablePoint(i_pointIndex: int): void
+		public function selectMoveablePoint(i_pointIndex: int, i_reflection: int): void
 		{
 			var actSelPoint: MoveablePoint;
 			
 			// DESELECT ALL POINT
-			for (var i: uint = 0; i < ml_movablePoints.length; i++){
-				MoveablePoint(ml_movablePoints[i]).selected = false;
+			var reflectionsTotal: int = ml_movablePoints.totalReflections;
+			var i:int;
+			var reflection: ReflectionData;
+			for (i  = 0; i < reflectionsTotal; i++)
+			{
+				reflection = ml_movablePoints.getReflection(i);
+				for each(var mp: MoveablePoint in reflection.moveablePoints)
+					mp.selected = false;
 			}
 			
 			if ((i_pointIndex >= 0) && (i_pointIndex < m_points.length)){ // IF SELECTED POINT IS IN m_points RANGE
-				// SELECT NEW
-				var selPoint: MoveablePoint = ml_movablePoints[i_pointIndex];
 				
-				if (selPoint){
-					selPoint.selected = true;
-					mi_actSelectedMoveablePointIndex = i_pointIndex;
-				} else {
-					mi_actSelectedMoveablePointIndex = -1;
+//				for (i  = 0; i < reflectionsTotal; i++)
+//				{
+					reflection = ml_movablePoints.getReflection(i_reflection);
+					// SELECT NEW
+//					var selPoint: MoveablePoint = ml_movablePoints[i_pointIndex];
+					var selPoint: MoveablePoint = reflection.moveablePoints[i_pointIndex];
+						
+					if (selPoint){
+						selPoint.selected = true;
+						mi_actSelectedMoveablePointIndex = i_pointIndex;
+						mi_actSelectedMoveablePointReflectionIndex = i_reflection;
+					} else {
+						mi_actSelectedMoveablePointIndex = -1;
+						mi_actSelectedMoveablePointReflectionIndex = -1;
+//				}
+				
 				}
 			} else {
 				mi_actSelectedMoveablePointIndex = -1;
+				mi_actSelectedMoveablePointReflectionIndex = -1;
 			}
 		}
 		
@@ -256,14 +352,26 @@ package com.iblsoft.flexiweather.ogc.editable
 		public function onRegisteredAsEditableItem(eim: IEditableItemManager): void
 		{
 			m_editableItemManager = eim;
-			for each(var mp: MoveablePoint in ml_movablePoints)
-				m_editableItemManager.addEditableItem(mp);
+			
+			var reflectionsTotal: int = ml_movablePoints.totalReflections;
+			for (var i:int  = 0; i < reflectionsTotal; i++)
+			{
+				var reflection: ReflectionData = ml_movablePoints.getReflection(i);
+				for each(var mp: MoveablePoint in reflection.moveablePoints)
+					m_editableItemManager.addEditableItem(mp);
+			}
+			
 		}
 	
 		public function onUnregisteredAsEditableItem(eim: IEditableItemManager): void
 		{
-			for each(var mp: MoveablePoint in ml_movablePoints)
-				eim.removeEditableItem(mp);
+			var reflectionsTotal: int = ml_movablePoints.totalReflections;
+			for (var i:int  = 0; i < reflectionsTotal; i++)
+			{
+				var reflection: ReflectionData = ml_movablePoints.getReflection(i);
+				for each(var mp: MoveablePoint in reflection.moveablePoints)
+					eim.removeEditableItem(mp);
+			}
 		}
 	
 		public function get editPriority(): int
@@ -315,11 +423,11 @@ package com.iblsoft.flexiweather.ogc.editable
 					update(FeatureUpdateContext.fullUpdate());
 					
 					if ((mi_actSelectedMoveablePointIndex >= 0) && (mi_actSelectedMoveablePointIndex < m_points.length)){
-						selectMoveablePoint(mi_actSelectedMoveablePointIndex);
+						selectMoveablePoint(mi_actSelectedMoveablePointIndex, mi_actSelectedMoveablePointReflectionIndex);
 					} else if (mi_actSelectedMoveablePointIndex >= m_points.length){
-						selectMoveablePoint(m_points.length - 1);
+						selectMoveablePoint(m_points.length - 1, mi_actSelectedMoveablePointReflectionIndex);
 					} else {
-						selectMoveablePoint(-1);
+						selectMoveablePoint(-1, -1);
 					}
 					
 					return true;

@@ -86,7 +86,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		public var _description:String;
 		
 		private var _parentDocument: Document;
-		private var _parentFeature: KMLFeature;
 		
 		private var _kmlIcon: KMLIcon;
 		private var _kmlLabel: KMLLabel;
@@ -351,8 +350,8 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			{
 				return false;
 			} else {
-				if (parentFeature)
-					return parentFeature.visibility;
+				if (parentFeature && parentFeature is KMLFeature)
+					return (parentFeature as KMLFeature).visibility;
 			}
 			return true;
 		}
@@ -383,14 +382,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			_parentDocument = value;
 		}
 		
-		public function get parentFeature(): KMLFeature
-		{
-			return _parentFeature;
-		}
-		public function set parentFeature(value: KMLFeature): void
-		{
-			_parentFeature = value;
-		}
 		/**
 		 * Get the XML used to populate the NewsFeedElement.
 		 *

@@ -1,5 +1,8 @@
 package com.iblsoft.flexiweather.utils
 {	
+	import com.iblsoft.flexiweather.utils.wfs.FeatureSplitter;
+	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	
 	import flash.geom.Point;
 	
 	public class CubicBezier
@@ -520,7 +523,9 @@ package com.iblsoft.flexiweather.utils
 		 * 
 		 * @return;
 		 * Returns array of MPoints
+		 * 
 		 */
+		
 		public static function drawHermitSpline(
 				g: ICurveRenderer, 
 				_points: Array, 
@@ -544,7 +549,7 @@ package com.iblsoft.flexiweather.utils
 					g.start(mPoints[i].x, mPoints[i].y);
 					g.moveTo(mPoints[i].x, mPoints[i].y);
 					actSegment = SPoint(mPoints[i]).segmentIndex;
-					trace(SPoint(mPoints[i]).segmentIndex);
+//					trace(SPoint(mPoints[i]).segmentIndex);
 				}
 			}
 			
@@ -559,14 +564,18 @@ package com.iblsoft.flexiweather.utils
 		 * @return;
 		 * Returns array of MPoints
 		 */
-		public static function calculateHermitSpline(_points: Array, _closed: Boolean, _step: Number = 0.005): Array
+//		public static function calculateHermitSpline(_points: Array, _closed: Boolean, _step: Number = 0.005): Array
+		public static function calculateHermitSpline(_points: Array, _closed: Boolean, _step: Number = 0.05): Array
 		{
 			var retPoints: Array = new Array();
 			var usePoints: Array = new Array();
 			
+			var p: Point;
 			var nMPoint: MPoint;
 			for (var i: int = 0; i < _points.length; i++){
-				nMPoint = new MPoint(Point(_points[i]).clone());
+//				nMPoint = new MPoint(Point(_points[i]).clone());
+				p = Point(_points[i]);
+				nMPoint = new MPoint(p.x, p.y);
 				nMPoint.segmentIndex = i;
 				
 				usePoints.push(nMPoint);
@@ -575,7 +584,8 @@ package com.iblsoft.flexiweather.utils
 			}
 			
 			if (_closed){
-				nMPoint = new MPoint(Point(_points[0]).clone());
+				p = Point(_points[0]);
+				nMPoint = new MPoint(p.x,p.y);
 				nMPoint.segmentIndex = _points.length;
 				
 				usePoints.push(nMPoint);
@@ -584,17 +594,18 @@ package com.iblsoft.flexiweather.utils
 			// CALCULATE DISTANCES
 			if (_closed){
 				var nextIndex: int;
-				MPoint(usePoints[0]).dist = new Point(MPoint(usePoints[0]).point.x - MPoint(usePoints[usePoints.length - 2]).point.x, MPoint(usePoints[0]).point.y - MPoint(usePoints[usePoints.length - 2]).point.y).length;
+//				MPoint(usePoints[0]).dist = new Point(MPoint(usePoints[0]).point.x - MPoint(usePoints[usePoints.length - 2]).point.x, MPoint(usePoints[0]).point.y - MPoint(usePoints[usePoints.length - 2]).point.y).length;
+				MPoint(usePoints[0]).dist = new Point(MPoint(usePoints[0]).x - MPoint(usePoints[usePoints.length - 2]).x, MPoint(usePoints[0]).y - MPoint(usePoints[usePoints.length - 2]).y).length;
 				for (i = 1; i < usePoints.length - 1; i++){
 					nextIndex = (i + 1) % usePoints.length;
-					MPoint(usePoints[i]).dist = new Point(MPoint(usePoints[nextIndex]).point.x - MPoint(usePoints[i % usePoints.length]).point.x, MPoint(usePoints[nextIndex]).point.y - MPoint(usePoints[i % usePoints.length]).point.y).length;
+					MPoint(usePoints[i]).dist = new Point(MPoint(usePoints[nextIndex]).x - MPoint(usePoints[i % usePoints.length]).x, MPoint(usePoints[nextIndex]).y - MPoint(usePoints[i % usePoints.length]).y).length;
 				}
-				MPoint(usePoints[usePoints.length - 1]).dist = new Point(MPoint(usePoints[0]).point.x - MPoint(usePoints[usePoints.length - 2]).point.x, MPoint(usePoints[0]).point.y - MPoint(usePoints[usePoints.length - 2]).point.y).length;
+				MPoint(usePoints[usePoints.length - 1]).dist = new Point(MPoint(usePoints[0]).x - MPoint(usePoints[usePoints.length - 2]).x, MPoint(usePoints[0]).y - MPoint(usePoints[usePoints.length - 2]).y).length;
 			} else {
 				//MPoint(usePoints[0]).dist = 0;
 				for (i = 0; i < usePoints.length - 1; i++){
 					nextIndex = (i + 1); // % retPoints.length;
-					MPoint(usePoints[i]).dist = new Point(MPoint(usePoints[nextIndex]).point.x - MPoint(usePoints[i]).point.x, MPoint(usePoints[nextIndex]).point.y - MPoint(usePoints[i]).point.y).length;
+					MPoint(usePoints[i]).dist = new Point(MPoint(usePoints[nextIndex]).x - MPoint(usePoints[i]).x, MPoint(usePoints[nextIndex]).y - MPoint(usePoints[i]).y).length;
 				}
 			}
 			
@@ -611,7 +622,7 @@ package com.iblsoft.flexiweather.utils
 			var x0: Number;
 			var y0: Number;
 			
-			var tmpRetPoint: SPoint = new SPoint(MPoint(usePoints[0]).point.x, MPoint(usePoints[0]).point.y);
+			var tmpRetPoint: SPoint = new SPoint(MPoint(usePoints[0]).x, MPoint(usePoints[0]).y);
 			
 			//retPoints.push(MPoint(usePoints[0]).point.clone());
 			retPoints.push(tmpRetPoint.clone());
@@ -628,10 +639,8 @@ package com.iblsoft.flexiweather.utils
 					point1 = MPoint(usePoints[i + 1]);
 				}
 				
-				x0 = point0.point.x;
-				y0 = point0.point.y;
-				
-				//var nStep: Number = 
+				x0 = point0.x;
+				y0 = point0.y;
 				
 				var tDist: Number = 0;
 				for (var t: Number = 0; t <= 1.0; t = t + _step) {
@@ -693,9 +702,9 @@ package com.iblsoft.flexiweather.utils
 				}
 			}
 			
-			return(CubicBezier.calcDerivation(MPoint(_mpoints[i_prev]).point,
-									MPoint(_mpoints[pointIndex]).point,
-									MPoint(_mpoints[i_next]).point,
+			return(CubicBezier.calcDerivation(MPoint(_mpoints[i_prev]),
+									MPoint(_mpoints[pointIndex]),
+									MPoint(_mpoints[i_next]),
 									MPoint(_mpoints[i_prev]).dist,
 									MPoint(_mpoints[pointIndex]).dist,
 									MPoint(_mpoints[i_next]).dist));
@@ -749,9 +758,9 @@ package com.iblsoft.flexiweather.utils
 		public static function hermiteCurveEvaluate(p0: MPoint, p1: MPoint, t: Number): Point
 		{
 			// a3 = 2*(P0-P1) + d0 + d1;
-			var a3: Point = p0.point.clone();
-			a3.x -= p1.point.x;
-			a3.y -= p1.point.y;
+			var a3: Point = p0.clone();
+			a3.x -= p1.x;
+			a3.y -= p1.y;
 			
 			a3.x += a3.x;
 			a3.y += a3.y;
@@ -765,9 +774,9 @@ package com.iblsoft.flexiweather.utils
 			//a3 += d1;
 		
 			// a2 = 3*(P1-P0) - 2*d0 - d1;
-			var a2: Point = p1.point.clone();
-			a2.x -= p0.point.x;
-			a2.y -= p0.point.y;
+			var a2: Point = p1.clone();
+			a2.x -= p0.x;
+			a2.y -= p0.y;
 				
 			a2.x *= 3;
 			a2.y *= 3;
@@ -803,8 +812,8 @@ package com.iblsoft.flexiweather.utils
 			P.x *= t;
 			P.y *= t;
 				
-			P.x += p0.point.x;
-			P.y += p0.point.y;
+			P.x += p0.x;
+			P.y += p0.y;
 				
 			//gpoint P = a3;
 			//P *= t;
@@ -864,20 +873,21 @@ class ControlPointsDescriptor
 	}
 }
 
-class MPoint
+class MPoint extends Point
 {
-	public var point: Point = new Point();
+//	public var point: Point = new Point();
 	public var deriv: Point = new Point();
 	
 	public var dist: Number = 0;
 	
 	public var segmentIndex: int = 0;
 	
-	public function MPoint(_point: Point = null, _deriv: Point = null)
+	public function MPoint(x: Number = 0, y: Number = 0, _deriv: Point = null)
 	{
-		if (_point != null){
-			point = _point.clone();
-		}
+		super(x, y);
+//		if (_point != null){
+//			point = _point.clone();
+//		}
 			
 		if (_deriv != null){
 			deriv = _deriv.clone();
