@@ -13,6 +13,7 @@ package com.iblsoft.flexiweather.ogc.data
 		{
 			_coords = [];
 			_points = [];
+			_annotations = [];
 			_moveablePoints = [];
 			
 			_iw = iw;
