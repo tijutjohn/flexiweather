@@ -2,8 +2,10 @@ package com.iblsoft.flexiweather.ogc.tiling
 {
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerQTTEvent;
+	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.CRSWithBBox;
 	import com.iblsoft.flexiweather.ogc.CRSWithBBoxAndTilingInfo;
+	import com.iblsoft.flexiweather.ogc.ILayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerQTTMS;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
 	import com.iblsoft.flexiweather.ogc.QTTMSLayerConfiguration;
@@ -13,6 +15,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import com.iblsoft.flexiweather.ogc.WMSWithQTTLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.cache.ICache;
 	import com.iblsoft.flexiweather.ogc.cache.ICachedLayer;
+	import com.iblsoft.flexiweather.ogc.data.WMSViewProperties;
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
@@ -57,7 +60,13 @@ package com.iblsoft.flexiweather.ogc.tiling
 				
 			m_tiledLayer.avoidTiling = false;
 			var s_crs: String = container.getCRS();
-			return m_tiledLayer.getGTileBBoxForWholeCRS(s_crs) || m_cfg.isTileableForCRS(s_crs);
+			
+			var gtileBBoxForWholeCRS: BBox = m_tiledLayer.getGTileBBoxForWholeCRS(s_crs);
+			var isTileableForCRS: Boolean =  m_cfg.isTileableForCRS(s_crs);
+			
+			trace("WMSWithQTT isTileable isTileableForCRS: " + isTileableForCRS + " gtileBBoxForWholeCRS: " + gtileBBoxForWholeCRS);
+			
+			return gtileBBoxForWholeCRS || isTileableForCRS;
 		}
 
 		public function InteractiveLayerWMSWithQTT(
@@ -109,11 +118,12 @@ package com.iblsoft.flexiweather.ogc.tiling
 			}
 		}
 		
-		override protected function onCapabilitiesUpdated(event: DataEvent): void
+		override protected function onCapabilitiesUpdated(event: DataEvent = null): void
 		{
-			super.onCapabilitiesUpdated(event);
-			
+		
 			updateTiledLayerCRSs();
+			
+			super.onCapabilitiesUpdated(event);
 		}
 		
 		private function changeTiledLayerVisibility(visible: Boolean): void
@@ -174,6 +184,16 @@ package com.iblsoft.flexiweather.ogc.tiling
 			
 		}
 		
+		override protected function updateWMSViewPropertiesConfiguration(wmsViewProperties: WMSViewProperties, configuration: ILayerConfiguration, cache: ICache): void
+		{
+			if (isTileable)
+			{
+				super.updateWMSViewPropertiesConfiguration(wmsViewProperties, m_tiledLayer.configuration, m_tiledLayer.cache);
+				return;
+			}
+			super.updateWMSViewPropertiesConfiguration(wmsViewProperties, configuration, cache);
+		}
+		
 		private function onUpdateTilingPattern(event: Event): void
 		{
 			updateTiledLayerURLBase();
@@ -221,7 +241,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 		
 		override protected function updateData(b_forceUpdate:Boolean):void
 		{
-			super.updateData(b_forceUpdate);
 			
 //			trace("WMSWithQTT updateData ["+name+"]");
 			var gr: Graphics = graphics;
@@ -240,6 +259,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 				
 			} else {
 				changeTiledLayerVisibility(false);
+				//we call super.updateData only in case of non tile
 				super.updateData(b_forceUpdate);
 			}
 		}
@@ -307,15 +327,15 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			// if "run" changed, then even time axis changes
 			var b_frameChanged: Boolean = false;
-			if(m_cfg.ms_dimensionRunName != null && s_dimName == m_cfg.ms_dimensionRunName) {
+			if(m_cfg.dimensionRunName != null && s_dimName == m_cfg.dimensionRunName) {
 				b_frameChanged = true;
 			}
 			//if "forecast" changed, we need to update timeline, so we need to dispatch event
-			if(m_cfg.ms_dimensionForecastName != null && s_dimName == m_cfg.ms_dimensionForecastName) {
+			if(m_cfg.dimensionForecastName != null && s_dimName == m_cfg.dimensionForecastName) {
 				b_frameChanged = true;
 			}
 			//if "time" changed, we need to update timeline, so we need to dispatch event
-			if(m_cfg.ms_dimensionTimeName != null && s_dimName == m_cfg.ms_dimensionTimeName) {
+			if(m_cfg.dimensionTimeName != null && s_dimName == m_cfg.dimensionTimeName) {
 				b_frameChanged = true;
 			}
 			

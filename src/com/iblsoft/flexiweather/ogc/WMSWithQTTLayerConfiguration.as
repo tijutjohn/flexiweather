@@ -9,7 +9,7 @@ package com.iblsoft.flexiweather.ogc
 	
 	public class WMSWithQTTLayerConfiguration extends WMSLayerConfiguration implements IBehaviouralObject
 	{
-		public var avoidTiling:Boolean;
+		private var _avoidTiling:Boolean;
 		
 		public var minimumZoomLevel: uint = 1;
 		public var maximumZoomLevel: uint = 12;
@@ -19,6 +19,17 @@ package com.iblsoft.flexiweather.ogc
 			super(service, a_layerNames);
 		}
 		
+
+		public function get avoidTiling():Boolean
+		{
+			return _avoidTiling;
+		}
+
+		public function set avoidTiling(value:Boolean):void
+		{
+			_avoidTiling = value;
+		}
+
 		override public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer
 		{
 			var l: InteractiveLayerWMSWithQTT = new InteractiveLayerWMSWithQTT(iw, this);
@@ -74,7 +85,7 @@ package com.iblsoft.flexiweather.ogc
 					s_url = AbstractURLLoader.fromBaseURL(s_url);
 					s_url = s_url.replace(/.*\//, "").replace(/\?.*/, "");
 					s_url = s_url.replace("/", "-");
-					s_url += "-" + ma_layerNames.join("_").replace(" ", "-").toLowerCase();
+					s_url += "-" + layerNames.join("_").replace(" ", "-").toLowerCase();
 					s_url = "assets/layer-previews/" + s_url + ".png";
 				}
 			}	

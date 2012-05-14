@@ -4,6 +4,8 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
+	import flash.net.URLRequest;
+	
 	import spark.components.Group;
 
 	public interface ILayerConfiguration

@@ -7,6 +7,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.ogc.cache.ICache;
 	import com.iblsoft.flexiweather.ogc.cache.ICachedLayer;
 	import com.iblsoft.flexiweather.ogc.cache.WMSCache;
+	import com.iblsoft.flexiweather.ogc.data.IWMSViewPropertiesLoader;
 	import com.iblsoft.flexiweather.ogc.data.ImagePart;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
@@ -51,7 +52,7 @@ package com.iblsoft.flexiweather.ogc
 			m_cache = new WMSCache();
 			(m_cache as WMSCache).name = cfg.label + " cache";
 			
-			m_currentWMSViewProperties.cache = m_cache;
+//			m_currentWMSViewProperties.cache = m_cache;
 		}
 		
 		public function serialize(storage: Storage): void
@@ -112,8 +113,8 @@ package com.iblsoft.flexiweather.ogc
 			super.setConfiguration(cfg);
 			
 			m_autoRefreshTimer.stop();
-			if(m_cfg.mi_autoRefreshPeriod > 0)
-				m_autoRefreshTimer.delay = m_cfg.mi_autoRefreshPeriod * 1000.0;
+			if(m_cfg.autoRefreshPeriod > 0)
+				m_autoRefreshTimer.delay = m_cfg.autoRefreshPeriod * 1000.0;
 		}
 
 		override protected function onCurrentWMSDataLoadingStarted(event: InteractiveLayerEvent): void
@@ -144,12 +145,14 @@ package com.iblsoft.flexiweather.ogc
 					return;
 				}
 				
-				if (m_currentWMSViewProperties)
-					m_currentWMSViewProperties.updateWMSData(b_forceUpdate);
+				
+//				if (m_currentWMSViewProperties)
+//					m_currentWMSViewProperties.updateWMSData(b_forceUpdate);
 			}
 			
 		}
 
+		/*
 		public override function draw(graphics: Graphics): void
 		{
 			super.draw(graphics);
@@ -161,22 +164,65 @@ package com.iblsoft.flexiweather.ogc
 			if (m_currentWMSViewProperties)
 				m_currentWMSViewProperties.drawWMSData(graphics);
 		}
-		
+		*/
 		
 		override public function hasPreview(): Boolean
 		{ return true; }
 		
 		override public function renderPreview(graphics: Graphics, f_width: Number, f_height: Number): void
 		{
-			if (m_currentWMSViewProperties)
-				m_currentWMSViewProperties.renderPreviewWMSData(graphics, f_width, f_height);
+//			if (m_currentWMSViewProperties)
+//				m_currentWMSViewProperties.renderPreviewWMSData(graphics, f_width, f_height);
+			if (status == InteractiveDataLayer.STATE_DATA_LOADED_WITH_ERRORS)
+			{
+				drawNoDataPreview(graphics, f_width, f_height);
+				return;
+			}
+			
+			var imageParts: ArrayCollection = currentWMSViewProperties.imageParts;
+			
+			var imagePart: ImagePart;
+			if(imageParts.length > 0) {
+				var matrix: Matrix = new Matrix();
+				imagePart = ImagePart(imageParts[0]);
+				
+				if (imagePart.isBitmap)
+					var bitmap: Bitmap = imagePart.m_image as Bitmap;
+				else {
+					trace("ATTENTION: renderPreviewWMSData image is not bitmap");
+					return;
+				}
+				
+				
+				matrix.translate(-f_width / 3, -f_width / 3);
+				matrix.scale(3, 3);
+				matrix.translate(imagePart.m_image.width / 3, imagePart.m_image.height / 3);
+				matrix.invert();
+				graphics.beginBitmapFill(bitmap.bitmapData, matrix, false, true);
+				graphics.drawRect(0, 0, f_width, f_height);
+				graphics.endFill();
+			}
+			
+			var b_allImagesOK: Boolean = true;
+			for each(imagePart in imageParts) 
+			{
+				if(!imagePart.mb_imageOK) 
+				{
+					b_allImagesOK = false;
+					break;
+				}
+			}
+			if(!b_allImagesOK) 
+			{
+				drawNoDataPreview(graphics, f_width, f_height);
+			}
 		}
 		
 		protected function restartAutoRefreshTimer(): void
 		{
-			if(m_cfg.mi_autoRefreshPeriod > 0) {
+			if(m_cfg.autoRefreshPeriod > 0) {
 				m_autoRefreshTimer.reset();
-				m_autoRefreshTimer.delay = m_cfg.mi_autoRefreshPeriod * 1000.0;
+				m_autoRefreshTimer.delay = m_cfg.autoRefreshPeriod * 1000.0;
 				m_autoRefreshTimer.start();
 			}
 		}
@@ -224,18 +270,6 @@ package com.iblsoft.flexiweather.ogc
 		override public function toString(): String
 		{
 			return "InteractiveLayerWMS " + name  ;
-		}
-		
-		public function getCache():ICache
-		{
-			return m_cache;
-		}
-		
-		public function clearCache():void
-		{
-			if (m_cache)
-				m_cache.clearCache();
-			
 		}
 		
 	}

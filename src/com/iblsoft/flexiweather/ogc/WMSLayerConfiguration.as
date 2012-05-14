@@ -14,26 +14,27 @@ package com.iblsoft.flexiweather.ogc
 	import mx.collections.ArrayCollection;
 	
 	public class WMSLayerConfiguration extends OGCLayerConfiguration
-			implements IBehaviouralObject, IInteractiveLayerProvider, ILayerConfiguration
+			implements IBehaviouralObject, IInteractiveLayerProvider, IWMSLayerConfiguration
 	{
-		public var ma_layerNames: Array = [];
-		public var ma_styleNames: Array = [];
 
-		public var ma_behaviours: Array = [];
-		public var ma_availableImageFormats: Array = [];
+		private var ma_layerNames: Array = [];
+		private var ma_styleNames: Array = [];
+		private var ma_behaviours: Array = [];
+		private var ma_availableImageFormats: Array = [];
+		private var ms_dimensionTimeName: String = null;
+		private var ms_dimensionRunName: String = null;
+		private var ms_dimensionForecastName: String = null;
+		private var ms_dimensionVerticalLevelName: String = null;
+		private var _ms_imageFormat: String = null;
+		private var mb_legendIsDimensionDependant: Boolean;
+		private var mi_autoRefreshPeriod: uint = 0;
 		
-
-		public var ms_dimensionTimeName: String = null;
-		public var ms_dimensionRunName: String = null;
-		public var ms_dimensionForecastName: String = null;
-		public var ms_dimensionVerticalLevelName: String = null;
-		public var ms_imageFormat: String = null;
-		public var mb_legendIsDimensionDependant: Boolean;
-		public var mi_autoRefreshPeriod: uint = 0;
+		private var mb_capabilitiesUpdated: Boolean;
 		
 		// runtime variables
-		public var ma_layerConfigurations: Array;
-
+		private var _layerConfigurations: Array;
+		
+		
 		public static const CAPABILITIES_UPDATED: String = "capabilitiesUpdated";
 		public static const CAPABILITIES_RECEIVED: String = "capabilitiesReceived";
 		
@@ -50,6 +51,17 @@ package com.iblsoft.flexiweather.ogc
 			onCapabilitiesUpdated(null);
 		}
 		
+
+		public function get ms_imageFormat():String
+		{
+			return _ms_imageFormat;
+		}
+
+		public function set ms_imageFormat(value:String):void
+		{
+			_ms_imageFormat = value;
+		}
+
 		override public function serialize(storage: Storage): void
 		{
 			if(storage.isLoading() && m_service != null)
@@ -218,7 +230,7 @@ package com.iblsoft.flexiweather.ogc
 					a_layers.addItem(l);
 			}
 			var b_changed: Boolean = false;
-			if(ma_layerConfigurations == null)
+			if(_layerConfigurations == null)
 				b_changed = true;
 			else {
 				for(i = 0; i < a_layers.length; ++i) 
@@ -227,7 +239,7 @@ package com.iblsoft.flexiweather.ogc
 					
 					updateDimensions(layer);
 					
-					layerConf = ma_layerConfigurations[i] as WMSLayer
+					layerConf = _layerConfigurations[i] as WMSLayer
 					if(layer == null) 
 					{
 						if(layerConf == null)
@@ -244,8 +256,10 @@ package com.iblsoft.flexiweather.ogc
 					} 
 				}
 			}
+			
+			mb_capabilitiesUpdated = true;
 			if(b_changed) {
-				ma_layerConfigurations = a_layers.toArray();
+				_layerConfigurations = a_layers.toArray();
 				dispatchEvent(new DataEvent(CAPABILITIES_UPDATED));
 			}
 			dispatchEvent(new DataEvent(CAPABILITIES_RECEIVED));
@@ -275,9 +289,9 @@ package com.iblsoft.flexiweather.ogc
 		}
 		public function isTileableForCRS(crs: String): Boolean
 		{
-			if (ma_layerConfigurations && ma_layerConfigurations.length > 0)
+			if (_layerConfigurations && _layerConfigurations.length > 0)
 			{
-				for each (var layer: WMSLayer in ma_layerConfigurations)
+				for each (var layer: WMSLayer in _layerConfigurations)
 				{
 					//if (!layer)
 					//	trace("WMSLayerConfiguration.isTileableForCRS(): layer is NULL")
@@ -292,9 +306,9 @@ package com.iblsoft.flexiweather.ogc
 
 		override public function isCompatibleWithCRS(crs: String): Boolean
 		{
-			if (ma_layerConfigurations && ma_layerConfigurations.length > 0)
+			if (_layerConfigurations && _layerConfigurations.length > 0)
 			{
-				for each (var layer: WMSLayer in ma_layerConfigurations)
+				for each (var layer: WMSLayer in _layerConfigurations)
 				{
 					if (layer && layer.isCompatibleWithCRS(crs))
 						return true;
@@ -422,5 +436,57 @@ package com.iblsoft.flexiweather.ogc
 			return null;
 		}
 		
+		public function get layerConfigurations(): Array
+		{
+			return _layerConfigurations;
+		}
+		public function set layerConfigurations(value: Array): void
+		{
+			_layerConfigurations = value;
+		}
+		
+		public function get styleNames():Array
+		{
+			return ma_styleNames;
+		}
+		
+		public function set styleNames(value:Array):void
+		{
+			ma_styleNames = value;
+		}
+		
+		public function get autoRefreshPeriod():uint
+		{
+			return mi_autoRefreshPeriod;
+		}
+		
+		public function set autoRefreshPeriod(value:uint):void
+		{
+			mi_autoRefreshPeriod = value;
+		}
+		
+		public function get layerNames(): Array
+		{
+			return ma_layerNames;
+		}
+		public function set layerNames(value: Array): void
+		{
+			ma_layerNames = value;
+		}
+
+		public function get imageFormat():String
+		{
+			return ms_imageFormat;
+		}
+		
+		public function set imageFormat(value:String):void
+		{
+			ms_imageFormat = value;
+		}
+		
+		public function get capabilitiesUpdated(): Boolean
+		{
+			return mb_capabilitiesUpdated;
+		}
 	}
 }

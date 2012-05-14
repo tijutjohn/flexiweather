@@ -32,6 +32,8 @@ package com.iblsoft.flexiweather.events
 		
 		public var refreshFeaturesObject: Object;
 		
+		public var data: Object;
+		
 		public function InteractiveLayerEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false)
 		{
 			super(type, bubbles, cancelable);
