@@ -610,7 +610,7 @@ package com.iblsoft.flexiweather.widgets
 				return a;
 			}
 			
-			return [point];
+			return [{point: point}];
 		}
 
 		/**
