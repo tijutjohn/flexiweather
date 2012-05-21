@@ -6,16 +6,17 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderErrorEvent;
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
-	import com.iblsoft.flexiweather.ogc.cache.CacheItemMetadata;
 	import com.iblsoft.flexiweather.ogc.cache.ICache;
 	import com.iblsoft.flexiweather.ogc.cache.ICachedLayer;
 	import com.iblsoft.flexiweather.ogc.cache.WMSCache;
+	import com.iblsoft.flexiweather.ogc.data.IViewProperties;
 	import com.iblsoft.flexiweather.ogc.data.IWMSViewPropertiesLoader;
 	import com.iblsoft.flexiweather.ogc.data.ImagePart;
 	import com.iblsoft.flexiweather.ogc.data.WMSViewProperties;
 	import com.iblsoft.flexiweather.ogc.events.GetCapabilitiesEvent;
 	import com.iblsoft.flexiweather.ogc.net.loaders.WMSFeatureInfoLoader;
 	import com.iblsoft.flexiweather.ogc.net.loaders.WMSImageLoader;
+	import com.iblsoft.flexiweather.ogc.preload.IPreloadableLayer;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
@@ -66,7 +67,7 @@ package com.iblsoft.flexiweather.ogc
 	 * 
 	 */	
 	public class InteractiveLayerMSBase extends InteractiveDataLayer
-			implements ISynchronisedObject, IConfigurableLayer, ICachedLayer
+			implements ISynchronisedObject, IConfigurableLayer, ICachedLayer, IPreloadableLayer
 	{
 		protected var m_featureInfoLoader: WMSFeatureInfoLoader = new WMSFeatureInfoLoader();
 
@@ -74,7 +75,7 @@ package com.iblsoft.flexiweather.ogc
 		protected var mb_updateAfterMakingVisible: Boolean = false;
 		
 		protected var m_cfg: WMSLayerConfiguration;
-		protected var md_dimensionValues: Dictionary = new Dictionary(); 
+//		protected var md_dimensionValues: Dictionary = new Dictionary(); 
 		protected var md_customParameters: Dictionary = new Dictionary(); 
 		protected var ma_subLayerStyleNames: Array = [];
 		
@@ -87,7 +88,7 @@ package com.iblsoft.flexiweather.ogc
 		 */		
 		protected var m_currentWMSViewProperties: WMSViewProperties;
 		
-		public function get currentWMSViewProperties(): WMSViewProperties
+		public function get currentViewProperties(): IViewProperties
 		{
 			return m_currentWMSViewProperties;
 		}
@@ -120,6 +121,8 @@ package com.iblsoft.flexiweather.ogc
 			ma_preloadedWMSViewProperties = [];
 			
 			m_currentWMSViewProperties = new WMSViewProperties();
+			m_currentWMSViewProperties.crs = container.crs;
+			m_currentWMSViewProperties.setViewBBox(container.getViewBBox());
 			m_currentWMSViewProperties.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onCurrentWMSDataSynchronisedVariableChanged);
 			m_currentWMSViewProperties.addEventListener(WMSViewPropertiesEvent.WMS_DIMENSION_VALUE_SET, onWMSDimensionValueSet);
 			
@@ -144,11 +147,11 @@ package com.iblsoft.flexiweather.ogc
 		public var alphaBackup: Number = 1;
 		
 		
-		public function changeWMSViewProperties(wmsViewProperties: WMSViewProperties): void
+		public function changeViewProperties(viewProperties: IViewProperties): void
 		{
 			m_currentWMSViewProperties.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onCurrentWMSDataSynchronisedVariableChanged);
 			
-			m_currentWMSViewProperties = wmsViewProperties;
+			m_currentWMSViewProperties = viewProperties as WMSViewProperties;
 			
 			m_currentWMSViewProperties.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onCurrentWMSDataSynchronisedVariableChanged);
 		}
@@ -159,9 +162,9 @@ package com.iblsoft.flexiweather.ogc
 		 * @param wmsViewPropertiesArray - input array
 		 * 
 		 */		
-		public function preloadMultiple(wmsViewPropertiesArray: Array): void
+		public function preloadMultiple(viewPropertiesArray: Array): void
 		{
-			for each (var wmsViewProperties: WMSViewProperties in wmsViewPropertiesArray)
+			for each (var wmsViewProperties: WMSViewProperties in viewPropertiesArray)
 			{
 				preload(wmsViewProperties);
 			}
@@ -183,16 +186,34 @@ package com.iblsoft.flexiweather.ogc
 //			wmsViewProperties.cache = m_cache;
 		}
 		
+		protected function destroyWMSViewPropertiesLoader(loader: IWMSViewPropertiesLoader): void
+		{
+			loader.removeEventListener("invalidateDynamicPart", onWMSViewPropertiesDataInvalidateDynamicPart);
+			loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
+			
+			loader.destroy();
+		}
+		
 		protected function getWMSViewPropertiesLoader(): IWMSViewPropertiesLoader
 		{
 			return new MSBaseLoader(this);
 		}
 		
-		public function preload(wmsViewProperties: WMSViewProperties): void
+		public function preload(viewProperties: IViewProperties): void
 		{
+			var wmsViewProperties: WMSViewProperties = viewProperties as WMSViewProperties;
+			if (!wmsViewProperties)
+				return;
+			
 			wmsViewProperties.name = name;
 			
 			updateWMSViewPropertiesConfiguration(wmsViewProperties, m_cfg, m_cache);
+			
+			//TODO should we check if CRS abd ViewBBOx is null and set it automatically to InteractiveWidget CRS and ViewBBox
+			if (!wmsViewProperties.crs)
+				wmsViewProperties.crs = container.getCRS();
+			if (!wmsViewProperties.getViewBBox())
+				wmsViewProperties.setViewBBox(container.getViewBBox());
 			
 			if (ma_preloadingWMSViewProperties.length == 0)
 			{
@@ -201,6 +222,7 @@ package com.iblsoft.flexiweather.ogc
 			
 			ma_preloadingWMSViewProperties.push(wmsViewProperties);
 			
+			//FIXME loader needs to be destroyed, when data are loaded
 			var loader: IWMSViewPropertiesLoader = getWMSViewPropertiesLoader();
 			
 //			loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onPreloadingWMSDataLoadingStarted);
@@ -212,11 +234,11 @@ package com.iblsoft.flexiweather.ogc
 			loader.updateWMSData(true, wmsViewProperties, forcedLayerWidth, forcedLayerHeight);
 		}
 		
-		public function isPreloadedMultiple(wmsViewPropertiesArray: Array): Boolean
+		public function isPreloadedMultiple(viewPropertiesArray: Array): Boolean
 		{
 			var isAllPreloaded: Boolean = true;
 			
-			for each (var wmsViewProperties: WMSViewProperties in wmsViewPropertiesArray)
+			for each (var wmsViewProperties: WMSViewProperties in viewPropertiesArray)
 			{
 				isAllPreloaded = isAllPreloaded && isPreloaded(wmsViewProperties);
 			}
@@ -245,16 +267,12 @@ package com.iblsoft.flexiweather.ogc
 			return false;	
 		}
 		
-		public function isPreloaded(wmsViewProperties: WMSViewProperties): Boolean
+		public function isPreloaded(viewProperties: IViewProperties): Boolean
 		{
+			var wmsViewProperties: WMSViewProperties = viewProperties as WMSViewProperties;
+			if (!wmsViewProperties)
+				return false;
 		
-			//check cache
-//			wmsViewProperties.cache = m_cache;
-//			var isCached: Boolean = wmsViewProperties.isCached();
-//
-//			return isCached;
-			
-			
 			var i_width: int = int(container.width);
 			var i_height: int = int(container.height);
 			
@@ -263,8 +281,8 @@ package com.iblsoft.flexiweather.ogc
 			if (forcedLayerHeight > 0)
 				i_height = forcedLayerHeight;
 			
-			var s_currentCRS: String = container.getCRS();
-			var currentViewBBox: BBox = container.getViewBBox();
+			var s_currentCRS: String = wmsViewProperties.crs;
+			var currentViewBBox: BBox = wmsViewProperties.getViewBBox();
 			
 			var f_horizontalPixelSize: Number = currentViewBBox.width / i_width;
 			var f_verticalPixelSize: Number = currentViewBBox.height / i_height;
@@ -272,14 +290,13 @@ package com.iblsoft.flexiweather.ogc
 			var projection: Projection = Projection.getByCRS(s_currentCRS);
 			var parts: Array = container.mapBBoxToProjectionExtentParts(currentViewBBox);
 			//			var parts: Array = container.mapBBoxToViewParts(projection.extentBBox);
-			var dimensions: Array = getDimensionForCache(wmsViewProperties);
+//			var dimensions: Array = getDimensionForCache(wmsViewProperties);
 			
 			var isCached: Boolean = true;
 			for each(var partBBoxToUpdate: BBox in parts) {
 				var isPartCached: Boolean = isPartCached(
 					wmsViewProperties,
-					s_currentCRS, partBBoxToUpdate,
-					dimensions,
+					partBBoxToUpdate,
 					uint(Math.round(partBBoxToUpdate.width / f_horizontalPixelSize)),
 					uint(Math.round(partBBoxToUpdate.height / f_verticalPixelSize))
 				);
@@ -303,7 +320,7 @@ package com.iblsoft.flexiweather.ogc
 		 * @return 
 		 * 
 		 */		
-		private function isPartCached(wmsViewProperties: WMSViewProperties, s_currentCRS: String, currentViewBBox: BBox, dimensions: Array, i_width: uint, i_height: uint): Boolean
+		private function isPartCached(wmsViewProperties: WMSViewProperties, currentViewBBox: BBox, i_width: uint, i_height: uint): Boolean
 		{
 			/**
 			 * this is how you can find properties for cache metadata
@@ -314,7 +331,7 @@ package com.iblsoft.flexiweather.ogc
 			 */
 			
 			var request: URLRequest = m_cfg.toGetMapRequest(
-				s_currentCRS, currentViewBBox.toBBOXString(),
+				wmsViewProperties.crs, currentViewBBox.toBBOXString(),
 				i_width, i_height,
 				getWMSStyleListString());
 			
@@ -328,14 +345,16 @@ package com.iblsoft.flexiweather.ogc
 			
 			//			var img: Bitmap = null;
 			
-			var itemMetadata: CacheItemMetadata = new CacheItemMetadata();
-			itemMetadata.crs = s_currentCRS;
-			itemMetadata.bbox = currentViewBBox;
-			itemMetadata.url = request;
-			itemMetadata.dimensions = dimensions;
+//			var itemMetadata: CacheItemMetadata = new CacheItemMetadata();
+//			itemMetadata.crs = s_currentCRS;
+//			itemMetadata.bbox = currentViewBBox;
+//			itemMetadata.url = request;
+//			itemMetadata.dimensions = dimensions;
 			
-			var isCached: Boolean = wmsCache.isItemCached(itemMetadata)
-			var imgTest: DisplayObject = wmsCache.getCacheItemBitmap(itemMetadata);
+			wmsViewProperties.url = request;
+			
+			var isCached: Boolean = wmsCache.isItemCached(wmsViewProperties)
+			var imgTest: DisplayObject = wmsCache.getCacheItemBitmap(wmsViewProperties);
 			if (isCached && imgTest != null) {
 				return true;
 			}
@@ -370,6 +389,9 @@ package com.iblsoft.flexiweather.ogc
 		}
 		protected function onPreloadingWMSDataLoadingFinished(event: InteractiveLayerEvent): void
 		{
+			var loader: IWMSViewPropertiesLoader = event.target as IWMSViewPropertiesLoader;
+			destroyWMSViewPropertiesLoader(loader);
+			
 			var wmsViewProperties: WMSViewProperties = event.data.wmsViewProperties as WMSViewProperties;
 			wmsViewProperties.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
 //			debug("onPreloadingWMSDataLoadingFinished wmsData: " + wmsViewProperties);
@@ -415,7 +437,7 @@ package com.iblsoft.flexiweather.ogc
 		
 		protected function onWMSViewPropertiesDataInvalidateDynamicPart(event: DynamicEvent): void
 		{
-			trace("invalidateDynamicPart for wmsViewProperties");	
+			trace("onWMSViewPropertiesDataInvalidateDynamicPart");	
 		}
 		
 		protected function onCurrentWMSDataInvalidateDynamicPart(event: DynamicEvent): void
@@ -532,16 +554,22 @@ package com.iblsoft.flexiweather.ogc
 			m_cache.setAnimationModeEnable(value);	
 		}
 		
+		protected function waitForCapabilities(): void
+		{
+			_updateDataWaiting = true;
+		}
 		override protected function updateData(b_forceUpdate: Boolean): void
 		{
 			//we need to postpone updateData if capabilities was not received, otherwise we do not know, if layes is tileable or not
 			if (!capabilitiesReady)
 			{
-				_updateDataWaiting = true;
+				waitForCapabilities();
 				return;
 			}
 			
 			super.updateData(b_forceUpdate);
+			
+			updateCurrentWMSViewProperties();
 			
 			var loader: IWMSViewPropertiesLoader = getWMSViewPropertiesLoader();
 			
@@ -562,14 +590,14 @@ package com.iblsoft.flexiweather.ogc
 		{
 			super.draw(graphics);
 			
-			var imageParts: ArrayCollection = currentWMSViewProperties.imageParts;
+			var imageParts: ArrayCollection = m_currentWMSViewProperties.imageParts;
 			
 			if(container.height <= 0)
 				return;
 			if(container.width <= 0)
 				return;
 			
-			var s_currentCRS: String = container.getCRS();
+			var s_currentCRS: String = m_currentWMSViewProperties.crs;
 			//			trace("InteractiveLayerWMS.draw(): currentViewBBox=" + container.getViewBBox().toString());
 			for each(var imagePart: ImagePart in imageParts) {
 				// Check if CRS of the image part == current CRS of the container
@@ -631,10 +659,19 @@ package com.iblsoft.flexiweather.ogc
 			graphics.endFill();
 		}
 		
-		
+		private function updateCurrentWMSViewProperties(): void
+		{
+			if (currentViewProperties && container)
+			{
+				m_currentWMSViewProperties.crs = container.crs;
+				m_currentWMSViewProperties.setViewBBox(container.getViewBBox());
+			}
+			
+		}
 		override public function onAreaChanged(b_finalChange: Boolean): void
 		{
 			super.onAreaChanged(b_finalChange);
+			updateCurrentWMSViewProperties();
 		}
 		
 		override public function onContainerSizeChanged(): void
@@ -658,10 +695,10 @@ package com.iblsoft.flexiweather.ogc
         override public function hasLegend(): Boolean
         { 
 			//check if layer has legend	
-			var styleName: String = currentWMSViewProperties.getWMSStyleName(0);
+			var styleName: String = m_currentWMSViewProperties.getWMSStyleName(0);
 			if (!styleName)
 				styleName = '';
-			var style: Object = currentWMSViewProperties.getWMSStyleObject(0, styleName);
+			var style: Object = m_currentWMSViewProperties.getWMSStyleObject(0, styleName);
 			
 			if (style)
 			{
@@ -779,12 +816,12 @@ package com.iblsoft.flexiweather.ogc
 
 				
 				var legendLoader: MSBaseLoader = new MSBaseLoader(this);
-				var associatedData: Object = {wmsViewProperties: currentWMSViewProperties, group: group, labelAlign: labelAlign, callback: callback, useCache: useCache, legendScaleX: legendScaleX, legendScaleY: legendScaleY, width: w, height: h};
+				var associatedData: Object = {wmsViewProperties: currentViewProperties, group: group, labelAlign: labelAlign, callback: callback, useCache: useCache, legendScaleX: legendScaleX, legendScaleY: legendScaleY, width: w, height: h};
 				legendLoader.addEventListener(MSBaseLoaderEvent.LEGEND_LOADED, onLegendLoaded);
 				legendLoader.loadLegend(url, associatedData);
 				
 			} else {
-				createLegend(currentWMSViewProperties.legendImage, group, labelAlign, callback, legendScaleX, legendScaleY, w, h);
+				createLegend(m_currentWMSViewProperties.legendImage, group, labelAlign, callback, legendScaleX, legendScaleY, w, h);
 			}
 			
 			var gap: int = 2;
@@ -887,7 +924,7 @@ package com.iblsoft.flexiweather.ogc
         
 		private function clearLegendCache(): void
 		{
-			var legendImage: Bitmap = currentWMSViewProperties.legendImage;
+			var legendImage: Bitmap = m_currentWMSViewProperties.legendImage;
 			if (legendImage)
 			{
 				if (legendImage.width > 0 && legendImage.height > 0)
@@ -906,7 +943,7 @@ package com.iblsoft.flexiweather.ogc
 		 */        
 		private function isLegendCachedBySize(newWidth: int, newHeight: int): Boolean
 		{
-			var legendImage: Bitmap = currentWMSViewProperties.legendImage;
+			var legendImage: Bitmap = m_currentWMSViewProperties.legendImage;
 			if (legendImage)
 			{
 				var oldWidth: int = (legendImage.width / legendImage.scaleX);
@@ -1433,6 +1470,7 @@ import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 import com.iblsoft.flexiweather.ogc.cache.CacheItemMetadata;
 import com.iblsoft.flexiweather.ogc.cache.ICache;
 import com.iblsoft.flexiweather.ogc.cache.WMSCache;
+import com.iblsoft.flexiweather.ogc.data.IViewProperties;
 import com.iblsoft.flexiweather.ogc.data.IWMSViewPropertiesLoader;
 import com.iblsoft.flexiweather.ogc.data.ImagePart;
 import com.iblsoft.flexiweather.ogc.data.WMSViewProperties;
@@ -1483,6 +1521,16 @@ class MSBaseLoader extends EventDispatcher implements IWMSViewPropertiesLoader
 		m_loader.addEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onDataLoadFailed);
 	}
 
+	public function destroy(): void
+	{
+		m_loader.removeEventListener(UniURLLoaderEvent.DATA_LOADED, onDataLoaded);
+		m_loader.removeEventListener(ProgressEvent.PROGRESS, onDataProgress);
+		m_loader.removeEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onDataLoadFailed);
+		
+		m_loader = null;
+		
+	}
+	
 	/**
 	 * Check if WMS data are cached (only if b_forceUpdate is true) and load any data parts which are missing.
 	 * 
@@ -1490,8 +1538,10 @@ class MSBaseLoader extends EventDispatcher implements IWMSViewPropertiesLoader
 	 * @param b_forceUpdate if TRUE, data is forced to load even if they are cached
 	 * 
 	 */		
-	public function updateWMSData(b_forceUpdate: Boolean, wmsViewProperties: WMSViewProperties, forcedLayerWidth: Number, forcedLayerHeight: Number): void
+	public function updateWMSData(b_forceUpdate: Boolean, viewProperties: IViewProperties, forcedLayerWidth: Number, forcedLayerHeight: Number): void
 	{
+		var wmsViewProperties: WMSViewProperties = viewProperties as WMSViewProperties;
+		
 		//check if data are not already cached
 		
 		//			super.updateData(b_forceUpdate);
@@ -1512,8 +1562,9 @@ class MSBaseLoader extends EventDispatcher implements IWMSViewPropertiesLoader
 		if (forcedLayerHeight > 0)
 			i_height = forcedLayerHeight;
 		
-		var s_currentCRS: String = m_layer.container.getCRS();
-		var currentViewBBox: BBox = m_layer.container.getViewBBox();
+		//TODO do we want support custom CRS and ViewBBox, which should be stored in WMSViewProperties or we can take it from InteractiveWidget
+		var s_currentCRS: String = wmsViewProperties.crs;
+		var currentViewBBox: BBox = wmsViewProperties.getViewBBox();
 		
 		var f_horizontalPixelSize: Number = currentViewBBox.width / i_width;
 		var f_verticalPixelSize: Number = currentViewBBox.height / i_height;
@@ -1521,15 +1572,14 @@ class MSBaseLoader extends EventDispatcher implements IWMSViewPropertiesLoader
 		var projection: Projection = Projection.getByCRS(s_currentCRS);
 		var parts: Array = m_layer.container.mapBBoxToProjectionExtentParts(currentViewBBox);
 		//			var parts: Array = container.mapBBoxToViewParts(projection.extentBBox);
-		var dimensions: Array = m_layer.getDimensionForCache(wmsViewProperties);
+//		var dimensions: Array = m_layer.getDimensionForCache(wmsViewProperties);
 		
 		for each(var partBBoxToUpdate: BBox in parts) {
 			updateDataPart(wmsViewProperties,
-				s_currentCRS, partBBoxToUpdate,
-				dimensions,
-				uint(Math.round(partBBoxToUpdate.width / f_horizontalPixelSize)),
-				uint(Math.round(partBBoxToUpdate.height / f_verticalPixelSize)),
-				b_forceUpdate);
+						partBBoxToUpdate,
+						uint(Math.round(partBBoxToUpdate.width / f_horizontalPixelSize)),
+						uint(Math.round(partBBoxToUpdate.height / f_verticalPixelSize)),
+						b_forceUpdate);
 		}
 	}
 	
@@ -1545,10 +1595,10 @@ class MSBaseLoader extends EventDispatcher implements IWMSViewPropertiesLoader
 	 * @param b_forceUpdate if TRUE, data is forced to load even if they are cached
 	 * 
 	 */		
-	private function updateDataPart(wmsViewProperties: WMSViewProperties, s_currentCRS: String, currentViewBBox: BBox, dimensions: Array, i_width: uint, i_height: uint, b_forceUpdate: Boolean): void
+	private function updateDataPart(wmsViewProperties: WMSViewProperties, currentViewBBox: BBox, i_width: uint, i_height: uint, b_forceUpdate: Boolean): void
 	{
 		var request: URLRequest = (m_layer.configuration as IWMSLayerConfiguration).toGetMapRequest(
-			s_currentCRS, currentViewBBox.toBBOXString(),
+			wmsViewProperties.crs, currentViewBBox.toBBOXString(),
 			i_width, i_height,
 			m_layer.getWMSStyleListString());
 		
@@ -1563,14 +1613,14 @@ class MSBaseLoader extends EventDispatcher implements IWMSViewPropertiesLoader
 		var wmsCache: WMSCache = m_layer.getCache() as WMSCache;
 		if(!b_forceUpdate)
 		{
-			var itemMetadata: CacheItemMetadata = new CacheItemMetadata();
-			itemMetadata.crs = s_currentCRS;
-			itemMetadata.bbox = currentViewBBox;
-			itemMetadata.url = request;
-			itemMetadata.dimensions = dimensions;
+//			var itemMetadata: CacheItemMetadata = new CacheItemMetadata();
+//			itemMetadata.crs = s_currentCRS;
+//			itemMetadata.bbox = currentViewBBox;
+//			itemMetadata.url = request;
+//			itemMetadata.dimensions = dimensions;
 			
-			var isCached: Boolean = wmsCache.isItemCached(itemMetadata)
-			var imgTest: DisplayObject = wmsCache.getCacheItemBitmap(itemMetadata);
+			var isCached: Boolean = wmsCache.isItemCached(wmsViewProperties)
+			var imgTest: DisplayObject = wmsCache.getCacheItemBitmap(wmsViewProperties);
 			if (isCached && imgTest != null) {
 				img = imgTest;
 			}
@@ -1581,12 +1631,13 @@ class MSBaseLoader extends EventDispatcher implements IWMSViewPropertiesLoader
 		
 		var imagePart: ImagePart = new ImagePart();
 		imagePart.mi_updateCycleAge = mi_updateCycleAge;
-		imagePart.ms_imageCRS = s_currentCRS;
+		imagePart.ms_imageCRS = wmsViewProperties.crs;
 		imagePart.m_imageBBox = currentViewBBox;
 		
 		if(img == null) {
 			
 			//image is not cached
+			wmsViewProperties.url = request;
 			
 			ma_requests.addItem(request);
 
@@ -1596,12 +1647,13 @@ class MSBaseLoader extends EventDispatcher implements IWMSViewPropertiesLoader
 //			}
 			
 			m_loader.load(request,
-				{ requestedImagePart: imagePart, wmsViewProperties: wmsViewProperties, dimensions: dimensions },
+				{ requestedImagePart: imagePart, wmsViewProperties: wmsViewProperties },
 				"Rendering " + (m_layer.configuration as IWMSLayerConfiguration).layerNames.join("+"));
 			
 			invalidateDynamicPart();
 			
-			wmsCache.startImageLoading(s_currentCRS, currentViewBBox, request, dimensions);
+//			wmsCache.startImageLoading(s_currentCRS, currentViewBBox, request, dimensions);
+			wmsCache.startImageLoading(wmsViewProperties);
 		}
 		else {
 			
@@ -1705,19 +1757,22 @@ class MSBaseLoader extends EventDispatcher implements IWMSViewPropertiesLoader
 			addImagePart(wmsViewProperties, imagePart, result);
 			
 			
-			var metadata: CacheItemMetadata = new CacheItemMetadata();
-			metadata.crs = imagePart.ms_imageCRS;
-			metadata.bbox = imagePart.m_imageBBox;
-			metadata.url = event.request;
-			metadata.dimensions = event.associatedData.dimensions;
+//			var metadata: CacheItemMetadata = new CacheItemMetadata();
+//			metadata.crs = imagePart.ms_imageCRS;
+//			metadata.bbox = imagePart.m_imageBBox;
+//			metadata.url = event.request;
+//			metadata.dimensions = event.associatedData.dimensions;
 			
-			wmsCache.addCacheItem( imagePart.m_image, metadata);
+//				wmsCache.addCacheItem(
+//						imagePart.m_image,
+//						imagePart.ms_imageCRS,
+//						imagePart.m_imageBBox,
+//						event.request);
 			
-			//				wmsCache.addCacheItem(
-			//						imagePart.m_image,
-			//						imagePart.ms_imageCRS,
-			//						imagePart.m_imageBBox,
-			//						event.request);
+			wmsViewProperties.url = event.request;
+				
+			wmsCache.addCacheItem( imagePart.m_image, wmsViewProperties);
+			
 			invalidateDynamicPart();
 		}
 		else {

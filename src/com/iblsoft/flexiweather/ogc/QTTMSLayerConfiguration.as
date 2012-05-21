@@ -68,7 +68,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			trace("create new QTT layer: " + this);
 			var l: InteractiveLayerQTTMS = new InteractiveLayerQTTMS(iw, this);
-			l.tilesProvider = new QTTTilesProvider();
+//			l.tilesProvider = new QTTTilesProvider();
 			l.name = label;
 			l.layerName = label;
 			return l;

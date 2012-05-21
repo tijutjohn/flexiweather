@@ -9,6 +9,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.ogc.cache.WMSCache;
 	import com.iblsoft.flexiweather.ogc.data.IWMSViewPropertiesLoader;
 	import com.iblsoft.flexiweather.ogc.data.ImagePart;
+	import com.iblsoft.flexiweather.ogc.data.WMSViewProperties;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
@@ -179,7 +180,7 @@ package com.iblsoft.flexiweather.ogc
 				return;
 			}
 			
-			var imageParts: ArrayCollection = currentWMSViewProperties.imageParts;
+			var imageParts: ArrayCollection = (currentViewProperties as WMSViewProperties).imageParts;
 			
 			var imagePart: ImagePart;
 			if(imageParts.length > 0) {

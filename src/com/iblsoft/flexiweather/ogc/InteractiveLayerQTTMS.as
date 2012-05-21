@@ -1,7 +1,9 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerProgressEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerQTTEvent;
+	import com.iblsoft.flexiweather.events.WMSViewPropertiesEvent;
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderErrorEvent;
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.net.loaders.AbstractURLLoader;
@@ -11,9 +13,15 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.ogc.cache.ICache;
 	import com.iblsoft.flexiweather.ogc.cache.ICachedLayer;
 	import com.iblsoft.flexiweather.ogc.cache.WMSTileCache;
+	import com.iblsoft.flexiweather.ogc.data.IViewProperties;
+	import com.iblsoft.flexiweather.ogc.data.IWMSViewPropertiesLoader;
+	import com.iblsoft.flexiweather.ogc.data.QTTViewProperties;
+	import com.iblsoft.flexiweather.ogc.preload.IPreloadableLayer;
 	import com.iblsoft.flexiweather.ogc.tiling.ITiledLayer;
 	import com.iblsoft.flexiweather.ogc.tiling.ITilesProvider;
+	import com.iblsoft.flexiweather.ogc.tiling.QTTLoader;
 	import com.iblsoft.flexiweather.ogc.tiling.QTTTileRequest;
+	import com.iblsoft.flexiweather.ogc.tiling.QTTTileViewProperties;
 	import com.iblsoft.flexiweather.ogc.tiling.QTTTilesProvider;
 	import com.iblsoft.flexiweather.ogc.tiling.TileIndex;
 	import com.iblsoft.flexiweather.ogc.tiling.TiledArea;
@@ -32,6 +40,7 @@ package com.iblsoft.flexiweather.ogc
 	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
+	import flash.display.DisplayObject;
 	import flash.display.Graphics;
 	import flash.events.Event;
 	import flash.filters.GlowFilter;
@@ -42,6 +51,7 @@ package com.iblsoft.flexiweather.ogc
 	import flash.text.TextFormat;
 	import flash.utils.Dictionary;
 	import flash.utils.Timer;
+	import flash.utils.setTimeout;
 	
 	import mx.controls.Alert;
 	import mx.events.DynamicEvent;
@@ -53,7 +63,8 @@ package com.iblsoft.flexiweather.ogc
 	/**
 	 * Generic Quad Tree (like Google Maps) tiling layer
 	 **/
-	public class InteractiveLayerQTTMS extends InteractiveDataLayer implements IConfigurableLayer, ICachedLayer, ITiledLayer, Serializable
+	public class InteractiveLayerQTTMS extends InteractiveDataLayer 
+					implements IConfigurableLayer, ICachedLayer, ITiledLayer, IPreloadableLayer, Serializable
 	{
 		public static const UPDATE_TILING_PATTERN: String = 'updateTilingPattern';
 		
@@ -63,23 +74,11 @@ package com.iblsoft.flexiweather.ogc
 		public static var drawBorders: Boolean = false;
 		public static var drawDebugText: Boolean = false;
 		
-		private var _tileIndicesMapper: TileIndicesMapper;
-		private var _viewPartsReflections: ViewPartReflectionsHelper;
+//		private var _viewPartsReflections: ViewPartReflectionsHelper;
 		
 		private var _avoidTiling: Boolean;
 
-		private var _currentValidityTime: Date;
 		private var mi_updateCycleAge: uint = 0;
-
-		public function get tilesProvider():ITilesProvider
-		{
-			return _tilesProvider;
-		}
-
-		public function set tilesProvider(value:ITilesProvider):void
-		{
-			_tilesProvider = value;
-		}
 
 		public function set avoidTiling(value:Boolean):void
 		{
@@ -92,7 +91,7 @@ package com.iblsoft.flexiweather.ogc
 			return m_cache;
 		}
 		
-		private var ma_specialCacheStrings: Array;
+		private var m_tilingUtils: TilingUtils;
 		
 		protected var m_timer: Timer = new Timer(10000);
 		
@@ -107,18 +106,35 @@ package com.iblsoft.flexiweather.ogc
 		
 		
 		private var ms_oldCRS: String;
-		private var m_tilingUtils: TilingUtils;
-		private var m_jobs: TileJobs;
-		private var mi_zoom: int = -1;
+		private var mi_zoom: int = 1;
 		public var tileScaleX: Number;
 		public var tileScaleY: Number;
-		private var ma_currentTilesRequests: Array = [];
-		private var mi_totalVisibleTiles: int;
 		
-		private var mi_tilesCurrentlyLoading: int;
-		private var mi_tilesLoadingTotal: int;
+		/**
+		 * Currently displayed wms data 
+		 */		
+		protected var m_currentQTTViewProperties: QTTViewProperties;
 		
-		private var _tilesProvider: ITilesProvider;
+		public function get currentViewProperties(): IViewProperties
+		{
+			return currentQTTViewProperties;
+		}
+		
+		public function get currentQTTViewProperties(): QTTViewProperties
+		{
+			return m_currentQTTViewProperties;
+		}
+		
+		/**
+		 * wms data which are currently preloading 
+		 */		
+		protected var ma_preloadingQTTViewProperties: Array;
+		
+		/**
+		 * wms data which are already preloaded 
+		 */		
+		protected var ma_preloadedQTTViewProperties: Array;
+		
 		
 		public function InteractiveLayerQTTMS(
 				container: InteractiveWidget,
@@ -128,7 +144,6 @@ package com.iblsoft.flexiweather.ogc
 		{
 			super(container);
 			
-			mi_tilesLoadingTotal = 0;
 			
 			var tilingInfo: QTTilingInfo
 			if(cfg == null) {
@@ -143,23 +158,22 @@ package com.iblsoft.flexiweather.ogc
 			}
 			m_cfg = cfg;
 			
-			/*
-			for each(var crsWithBBox: CRSWithBBox in cfg.tilingCRSsAndExtents) {
-				md_crsToTilingExtent[crsWithBBox.crs] = crsWithBBox.bbox;
-			}
-			*/
-			
-			_tileIndicesMapper = new TileIndicesMapper();
-			_viewPartsReflections = new ViewPartReflectionsHelper(container);
-			
-			m_cache = new WMSTileCache();
 			m_tilingUtils = new TilingUtils();
 			m_tilingUtils.minimumZoom = minimumZoomLevel;
 			m_tilingUtils.maximumZoom = maximumZoomLevel;
 			
-			m_jobs = new TileJobs();
+			ma_preloadingQTTViewProperties = [];
+			ma_preloadedQTTViewProperties = [];
 			
-			tilesProvider = new QTTTilesProvider();
+			m_currentQTTViewProperties = new QTTViewProperties();
+			updateCurrentWMSViewProperties();
+			
+//			m_currentWMSViewProperties.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onCurrentWMSDataSynchronisedVariableChanged);
+//			m_currentWMSViewProperties.addEventListener(WMSViewPropertiesEvent.WMS_DIMENSION_VALUE_SET, onWMSDimensionValueSet);
+			
+			
+			m_cache = new WMSTileCache();
+//			_viewPartsReflections = new ViewPartReflectionsHelper(container);
 		}
 
 		public function serialize(storage: Storage): void
@@ -196,7 +210,11 @@ package com.iblsoft.flexiweather.ogc
 		{
 			super.validateSize(b_recursive);
 			
-			
+			checkZoom();
+		}
+		
+		public function checkZoom(): void
+		{
 			var i_oldZoom: int = mi_zoom;
 			findZoom();
 			if (mi_zoom == 0)
@@ -236,10 +254,6 @@ package com.iblsoft.flexiweather.ogc
 			return s_url;
 		}
 
-		private function getExpandedURL(tileIndex: TileIndex): String
-		{
-			return expandURLPattern(baseURLPattern, tileIndex);
-		}
 
 		public function invalidateCache(): void
 		{
@@ -262,7 +276,215 @@ package com.iblsoft.flexiweather.ogc
 			
 			//md_crsToTilingExtent[s_tilingCRS] = crsTilingExtent;
 		}
+		
+		public function changeViewProperties(viewProperties: IViewProperties): void
+		{
+//			m_currentQTTViewProperties.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onCurrentWMSDataSynchronisedVariableChanged);
+			
+			m_currentQTTViewProperties = viewProperties as QTTViewProperties;
+			
+			trace("ILQTT changeViewProperties: " + m_currentQTTViewProperties);
+//			m_currentQTTViewProperties.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onCurrentWMSDataSynchronisedVariableChanged);
+		}
+		
+		/**
+		 * This function is used in preload function to set (share) configuration and cache for all preloaded wmsViewProperties items.
+		 * It has to be separate function, because WMSViewProperties class supports tiled and non tiled layers and there is different configuration and cache
+		 * for both types of layer. This function must be overriden for tiled layers (see InteractiveLayerWMSWithQTT.updateWMSViewPropertiesConfiguration)
+		 *  
+		 * @param wmsViewProperties
+		 * @param configuration
+		 * @param cache
+		 * 
+		 */		
+		protected function updateWMSViewPropertiesConfiguration(qttViewProperties: QTTViewProperties, configuration: ILayerConfiguration, cache: ICache): void
+		{
+			qttViewProperties.setConfiguration(m_cfg);
+			//			wmsViewProperties.cache = m_cache;
+		}
+		
+		protected function destroyWMSViewPropertiesLoader(loader: IWMSViewPropertiesLoader): void
+		{
+			loader.removeEventListener("invalidateDynamicPart", onQTTViewPropertiesDataInvalidateDynamicPart);
+			loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
+			
+			loader.destroy();
+		}
 
+		protected function getWMSViewPropertiesLoader(): IWMSViewPropertiesLoader
+		{
+			return new QTTLoader(this, zoomLevel);
+		}
+		
+		public function preload(viewProperties: IViewProperties): void
+		{
+			var qttViewProperties: QTTViewProperties = viewProperties as QTTViewProperties;
+			if (!qttViewProperties)
+				return;
+			
+			qttViewProperties.name = name;
+			
+			updateWMSViewPropertiesConfiguration(qttViewProperties, m_cfg, m_cache);
+			
+			if (ma_preloadingQTTViewProperties.length == 0)
+			{
+				dispatchEvent(new InteractiveLayerEvent(InteractiveDataLayer.PRELOADING_STARTED, true));
+			}
+			
+			ma_preloadingQTTViewProperties.push(qttViewProperties);
+			
+			//FIXME loader needs to be destroyed, when data are loaded
+			var loader: IWMSViewPropertiesLoader = getWMSViewPropertiesLoader();
+			
+			//			loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onPreloadingWMSDataLoadingStarted);
+			//			loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
+			//			loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onPreloadingWMSDataLoadingStarted);
+			loader.addEventListener("invalidateDynamicPart", onQTTViewPropertiesDataInvalidateDynamicPart);
+			loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
+			
+			loader.updateWMSData(true, qttViewProperties, forcedLayerWidth, forcedLayerHeight);
+		}
+		
+		/**
+		 * Preload all frames from input array
+		 *  
+		 * @param wmsViewPropertiesArray - input array
+		 * 
+		 */		
+		public function preloadMultiple(viewPropertiesArray: Array): void
+		{
+			for each (var qttViewProperties: QTTViewProperties in viewPropertiesArray)
+			{
+				preload(qttViewProperties);
+			}
+		}
+		
+		public function isPreloadedMultiple(viewPropertiesArray: Array): Boolean
+		{
+			var isAllPreloaded: Boolean = true;
+			
+			for each (var qttViewProperties: QTTViewProperties in viewPropertiesArray)
+			{
+				isAllPreloaded = isAllPreloaded && isPreloaded(qttViewProperties);
+			}
+			return isAllPreloaded;
+		}
+		
+		public function isPreloaded(viewProperties: IViewProperties): Boolean
+		{
+			var qttViewProperties: QTTViewProperties = viewProperties as QTTViewProperties;
+			if (!qttViewProperties)
+				return false;
+			
+			return qttViewProperties.isPreloaded(m_cache);
+		}
+		
+		/**
+		 * Function checks if part is cached already. Function similar to udpateDataPart.
+		 * Only difference is, that isPartCached does not load data if part is not cached.
+		 *  
+		 * @param s_currentCRS
+		 * @param currentViewBBox
+		 * @param dimensions
+		 * @param i_width
+		 * @param i_height
+		 * @return 
+		 * 
+		 */		
+		private function isPartCached(qttViewProperties: QTTViewProperties, s_currentCRS: String, currentViewBBox: BBox, i_width: uint, i_height: uint): Boolean
+		{
+			/**
+			 * this is how you can find properties for cache metadata
+			 * 
+			 * var s_currentCRS: String = container.getCRS();
+			 * var currentViewBBox: BBox = container.getViewBBox();
+			 * var dimensions: Array = getDimensionForCache();
+			 */
+			/*
+			var request: URLRequest = m_cfg.toGetMapRequest(
+				s_currentCRS, currentViewBBox.toBBOXString(),
+				i_width, i_height,
+				getWMSStyleListString());
+			
+			if (!request)
+				return false;
+			
+			qttViewProperties.updateDimensionsInURLRequest(request);
+			qttViewProperties.updateCustomParametersInURLRequest(request);
+			
+			var wmsCache: WMSTileCache = getCache() as WMSTileCache;
+			
+			//			var img: Bitmap = null;
+			
+			
+			
+			var isCached: Boolean = getTileFromCache(qttViewProperties, request);
+			var imgTest: DisplayObject = wmsCache.getCacheItemBitmap(itemMetadata);
+			if (isCached && imgTest != null) {
+				return true;
+			}
+			*/
+			return false;
+		}
+		
+		
+		protected function onQTTViewPropertiesDataInvalidateDynamicPart(event: DynamicEvent): void
+		{
+//			trace("onQTTViewPropertiesDataInvalidateDynamicPart");	
+		}
+		
+		protected function onPreloadingWMSDataLoadingStarted(event: InteractiveLayerEvent): void
+		{
+			//			var wmsViewProperties: WMSViewProperties = event.target as WMSViewProperties;
+			//			wmsViewProperties.removeEventListener(InteractiveDataLayer.LOADING_STARTED, onPreloadingWMSDataLoadingStarted);
+			//			trace("\t onPreloadingWMSDataLoadingStarted wmsData: " + wmsViewProperties);
+			
+		}
+		protected function onPreloadingWMSDataLoadingFinished(event: InteractiveLayerEvent): void
+		{
+			var loader: IWMSViewPropertiesLoader = event.target as IWMSViewPropertiesLoader;
+			destroyWMSViewPropertiesLoader(loader);
+			
+			var qttViewProperties: QTTViewProperties = event.data as QTTViewProperties;
+			if (qttViewProperties)
+			{
+				qttViewProperties.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
+				//			debug("onPreloadingWMSDataLoadingFinished wmsData: " + wmsViewProperties);
+				//			trace("\t onPreloadingWMSDataLoadingFinished PRELOADED: " + ma_preloadedWMSViewProperties.length + " , PRELAODING: " + ma_preloadingWMSViewProperties.length);
+				
+				//remove wmsViewProperties from array of currently preloading wms view properties
+				var total: int = ma_preloadingQTTViewProperties.length;
+				for (var i: int = 0; i < total; i++)
+				{
+					var currQTTViewProperties: QTTViewProperties = ma_preloadingQTTViewProperties[i] as QTTViewProperties;
+					if (currQTTViewProperties && currQTTViewProperties.equals(qttViewProperties))
+					{
+						ma_preloadingQTTViewProperties.splice(i, 1);
+						break;
+					}
+				}
+				//add wmsViewProperties to array of already preloaded wms view properties
+				ma_preloadedQTTViewProperties.push(qttViewProperties);
+			
+				notifyProgress(ma_preloadedQTTViewProperties.length, ma_preloadingQTTViewProperties.length + ma_preloadedQTTViewProperties.length, 'frames');
+			
+				if (ma_preloadingQTTViewProperties.length == 0)
+				{
+					//all wms view properties are preloaded, delete preloaded wms properties, bitmaps are stored in cache
+					//				total = ma_preloadedWMSViewProperties.length;
+					//				for (i = 0; i < total; i++)
+					//				{
+					//					currWMSViewProperties = ma_preloadedWMSViewProperties[i] as WMSViewProperties
+					//					delete currWMSViewProperties;
+					//				}
+					ma_preloadedQTTViewProperties = [];
+					
+					//dispatch preloading finished to notify all about all WMSViewProperties are preloaded
+					dispatchEvent(new InteractiveLayerEvent(InteractiveDataLayer.PRELOADING_FINISHED, true));
+				}
+			}
+		}
+		
 		/**
 		 * Function which loadData. It's good habit to call this function when you want to load your data to have one channel for loading data.
 		 * It's easier to testing and it's one place for checking requests
@@ -281,156 +503,7 @@ package com.iblsoft.flexiweather.ogc
 			dataLoader.load(urlRequest, associatedData, s_backgroundJobName);
 		}
 		
-		/**
-		 * Request all tiled areas for which we need update data.
-		 * If projection does not allow wrap across dateline, there will be always 1 tiled area.
-		 * @return 
-		 * If wrap across dateline is allowed, there can be more tiled areas returned
-		 * 
-		 */		
-		protected function getNeededTiledAreas(): Array
-		{
-			var tiledAreas: Array = [];
-			var _tiledArea: TiledArea;
-			var s_crs: String = container.crs;
-			
-			var projection: Projection = Projection.getByCRS(s_crs);
-			
-			//FIXME instead of projection.extentBBox use tiling extent
-			var partReflections: Array = container.mapBBoxToViewReflections(projection.extentBBox, true)
-			for each (var partReflection: BBox in partReflections)
-			{
-				//find suitable visible parts for current reflection
-				var reflectionVisibleParts: Array = container.mapBBoxToProjectionExtentParts(partReflection);
-				
-				for each (var reflectionVisiblePart: BBox in reflectionVisibleParts)
-				{
-					_tiledArea = m_tilingUtils.getTiledArea(reflectionVisiblePart, mi_zoom);
-					if (_tiledArea)
-					{
-						tiledAreas.push({tiledArea: _tiledArea, viewPart: reflectionVisiblePart});
-						mi_totalVisibleTiles += _tiledArea.totalVisibleTilesCount;
-					}
-				}
-			}
-			return tiledAreas;
-		}
 		
-		protected function prepareData(tiledAreas: Array, b_forceUpdate: Boolean): Array
-		{
-			var loadRequests: Array = new Array();
-			
-			var tiledCache: WMSTileCache = m_cache as WMSTileCache;
-			
-			var tileIndex: TileIndex;
-			var request: URLRequest;
-			var s_crs: String = container.crs;
-			var m_time: Date; //container.time;
-			
-			//initialize tile indices mapper each frame
-			_tileIndicesMapper.removeAll();
-			
-			for each (var partObject: Object in tiledAreas)
-			{
-				var tiledArea: TiledArea = partObject.tiledArea as TiledArea;
-				var viewPart: BBox = partObject.viewPart as BBox;
-				
-				for(var i_row: uint = tiledArea.topRow; i_row <= tiledArea.bottomRow; ++i_row) 
-				{
-					for(var i_col: uint = tiledArea.leftCol; i_col <= tiledArea.rightCol; ++i_col) 
-					{
-						tileIndex = new TileIndex(mi_zoom, i_row, i_col);
-						//check if tileIndex is already created from other tiledArea part
-						if (!_tileIndicesMapper.tileIndexInside(tileIndex))
-						{
-							_tileIndicesMapper.addTileIndex(tileIndex, viewPart);
-							
-							request = new URLRequest(getExpandedURL(tileIndex));
-							// need to convert ${BASE_URL} because it's used in cachKey
-							request.url = AbstractURLLoader.fromBaseURL(request.url);
-							
-							
-							var itemMetadata: CacheItemMetadata = new CacheItemMetadata();
-							itemMetadata.crs = s_crs;
-							itemMetadata.tileIndex = tileIndex;
-							itemMetadata.url = request;
-							itemMetadata.validity = _currentValidityTime;
-							itemMetadata.specialStrings = ma_specialCacheStrings;
-							itemMetadata.updateCycleAge = mi_updateCycleAge;
-							
-//							if(!tiledCache.isTileCached(s_crs, tileIndex, request, m_time, ma_specialCacheStrings))
-							if(!tiledCache.isItemCached(itemMetadata) || b_forceUpdate)
-							{	
-								ma_currentTilesRequests.push(request);
-								loadRequests.push({
-									request: request,
-									requestedCRS: s_crs,
-									requestedTileIndex: tileIndex,
-									requestedTiledArea: tiledArea,
-									requestedViewPart: viewPart
-								});
-							}
-						}
-					}
-				}
-			}
-			
-			return loadRequests;
-		}
-		
-		protected function loadAllData(loadRequests: Array): void
-		{
-			if(loadRequests.length > 0)
-			{
-				if (tilesProvider)
-				{
-					notifyLoadingStart();
-					dispatchEvent(new InteractiveLayerQTTEvent(InteractiveLayerQTTEvent.TILES_LOADING_STARTED, true));
-					
-					loadRequests.sort(sortTiles);
-					
-					var bkJobManager: BackgroundJobManager = BackgroundJobManager.getInstance();
-					var jobName: String;
-					mi_tilesCurrentlyLoading = loadRequests.length;
-					mi_tilesLoadingTotal += loadRequests.length;
-					
-					var data: Array = [];
-					for each(var requestObj: Object in loadRequests)
-					{
-						jobName = "Rendering tile " + requestObj.requestedTileIndex + " for layer: " + name
-						// this already cancel previou job for current tile
-						m_jobs.addNewTileJobRequest(requestObj.requestedTileIndex.mi_tileCol, requestObj.requestedTileIndex.mi_tileRow, dataLoader, requestObj.request);
-						
-						var assocData: Object = {
-							requestedCRS: requestObj.requestedCRS,
-							requestedTileIndex:  requestObj.requestedTileIndex,
-							tiledArea: requestObj.requestedTiledArea,
-							viewPart: requestObj.requestedViewPart,
-							validity: _currentValidityTime,
-							updateCycleAge: mi_updateCycleAge
-						};
-							
-						var item: QTTTileRequest = new QTTTileRequest();
-						item.associatedData = assocData;
-						item.jobName = jobName;
-						item.crs = requestObj.requestedCRS;
-						item.tileIndex = requestObj.requestedTileIndex;
-						item.request = requestObj.request;
-						data.push(item);
-						
-					}
-					
-					tilesProvider.getTiles(data, onTileLoaded, onTileLoadFailed);
-				} else {
-					Alert.show("Tiles Provider is not defined", "Tiles problem", Alert.OK);
-				}
-			} else {
-				// all tiles were cached, draw them
-				draw(graphics);
-				
-				dispatchEvent(new InteractiveLayerQTTEvent(InteractiveLayerQTTEvent.TILES_LOADED_FINISHED, true));
-			}
-		}
 		
 		
 		
@@ -456,84 +529,64 @@ package com.iblsoft.flexiweather.ogc
 				// wrong zoom, do not continue
 				return;
 			}
-			var s_crs: String = container.crs;
-			
-			var currentViewBBox: BBox = container.getViewBBox();
-			
-			var tiledAreas: Array = [];
-			var _tiledArea: TiledArea;
-			mi_totalVisibleTiles =  0;
-			
-			//update CRS and extent BBox
-			m_tilingUtils.onAreaChanged(s_crs, getGTileBBoxForWholeCRS(s_crs));
 			
 			
-			/** 
-			 * request all tiled areas for which we need update data. if projection does not allow wrap across dateline, there will be always 1 tiled area
-			 */
-			tiledAreas = getNeededTiledAreas();
+			var loader: IWMSViewPropertiesLoader = getWMSViewPropertiesLoader();
 			
+			loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
+			loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
+			loader.addEventListener("invalidateDynamicPart", onCurrentWMSDataInvalidateDynamicPart);
 			
-			if (tiledAreas.length == 0)
-				return;
-			
-			mi_updateCycleAge++;
-			
-			var tiledCache: WMSTileCache = m_cache as WMSTileCache;
-			var tileIndex: TileIndex = new TileIndex(mi_zoom);
-			
-			ma_currentTilesRequests = [];
-			
-			var loadRequests: Array;
-			
-			if (baseURLPattern)
-			{
-				loadRequests = prepareData(tiledAreas, b_forceUpdate);
-				
-			} else {
-				trace("baseURLpattern is NULL");
-			}
-			
-			loadAllData(loadRequests);
-		}
-		
-		private function updateDataPart(): void
-		{
+			loader.updateWMSData(b_forceUpdate, m_currentQTTViewProperties, forcedLayerWidth, forcedLayerHeight);
 			
 		}
 		
-		private function sortTiles(reqObject1: Object, reqObject2: Object): int
+		
+		private function updateCurrentWMSViewProperties(): void
 		{
-			var tileIndex1: TileIndex = reqObject1.requestedTileIndex;
-			var tileIndex2: TileIndex = reqObject2.requestedTileIndex;
-			
-			var layerCenter: Point = new Point(width / 2, height / 2);//container.getViewBBox().center;
-			
-			var tileCenter1: Point = getTilePosition(reqObject1.requestedCRS, tileIndex1);
-			var tileCenter2: Point = getTilePosition(reqObject2.requestedCRS, tileIndex2);
-			
-			var dist1: int = Point.distance(layerCenter, tileCenter1);
-			var dist2: int = Point.distance(layerCenter, tileCenter2);
-			
-			if(dist1 > dist2)
+			if (currentQTTViewProperties && container)
 			{
-				return 1;
-			} else {
-				if(dist1 < dist2)
-					return -1;
+				currentQTTViewProperties.crs = container.crs;
+				currentQTTViewProperties.setViewBBox(container.getViewBBox());
+				currentQTTViewProperties.zoom = zoomLevel;
 			}
-			return 0;
-		} 
-		private function getTilePosition(crs: String, tileIndex: TileIndex): Point
-		{
-			var tileBBox: BBox = getGTileBBox(crs, tileIndex);
-			var topLeftPoint: Point = container.coordToPoint(new Coord(crs, tileBBox.xMin, tileBBox.yMax));
 			
-			topLeftPoint.x = Math.floor(topLeftPoint.x);
-			topLeftPoint.y = Math.floor(topLeftPoint.y);
-			
-			return topLeftPoint;
 		}
+		
+		protected var _currentQTTDataLoadingStarted: Boolean;
+		
+		protected function onCurrentWMSDataLoadingStarted(event: InteractiveLayerEvent): void
+		{
+			//			trace("\t onCurrentWMSDataLoadingStarted ["+name+"]");
+			_currentQTTDataLoadingStarted = true;
+			notifyLoadingStart(false);
+		}
+		
+		protected function onCurrentWMSDataProgress(event: InteractiveLayerProgressEvent): void
+		{
+			notifyProgress(event.loaded, event.total, event.units);
+			
+		}
+		
+		protected function onCurrentWMSDataLoadingFinished(event: InteractiveLayerEvent): void
+		{
+			//			trace("\t onCurrentWMSDataLoadingFinished ["+name+"]");
+			notifyLoadingFinished();	
+			_currentQTTDataLoadingStarted = false;
+			
+			invalidateDynamicPart(true);
+		}
+		
+		protected function onCurrentWMSDataInvalidateDynamicPart(event: DynamicEvent): void
+		{
+			invalidateDynamicPart(event['invalid']);
+		}
+		
+//		private function updateDataPart(): void
+//		{
+//			
+//		}
+		
 		
 		/**
 		 * Removed all cached tiles except tiles valid for specified time 
@@ -545,41 +598,37 @@ package com.iblsoft.flexiweather.ogc
 			var tiles: Array = cache.getCacheItems();
 			for each (var item: CacheItem in tiles)
 			{
-				if (item.metadata.validity.time != validity.time && item.metadata.updateCycleAge != updateCycleAge)
+				var qttTileViewProperties: QTTTileViewProperties = item.viewProperties as QTTTileViewProperties;
+				var qttViewProperties: QTTViewProperties = qttTileViewProperties as QTTViewProperties;
+				
+				if (qttViewProperties.validity.time != validity.time && qttTileViewProperties.updateCycleAge != updateCycleAge)
 				{
 					cache.deleteCacheItem(item, b_disposeDisplayed)
 				}
 			}
 		}
 		
-		/**
-		 * Removed cached tiles for specified validity time 
-		 * @param validity
-		 * 
-		 */		
-		public function removeCachedTiles(validity: Date, updateCycleAge: uint, b_disposeDisplayed: Boolean = false): void
-		{
-			var tiles: Array = cache.getCacheItems();
-			for each (var item: CacheItem in tiles)
-			{
-				if (item.metadata && item.metadata.validity && item.metadata.validity.time == validity.time && item.metadata.updateCycleAge && item.metadata.updateCycleAge == updateCycleAge)
-				{
-					cache.deleteCacheItem(item, b_disposeDisplayed)
-				}
-			}
-		}
 		
-		public function getTileFromCache(request: URLRequest, validity: Date): Object
+		public function getTileFromCache(qttTileViewProperties: QTTTileViewProperties, request: URLRequest): Object
 		{
 			var tiledCache: WMSTileCache = m_cache as WMSTileCache;
+		
 			
-			var metadata: CacheItemMetadata = new CacheItemMetadata();
-			metadata.url = request;
-			metadata.validity = validity;
-			metadata.specialStrings = ma_specialCacheStrings;
+			/*
+			var s_crs: String = metadata.crs as String;
+			var tileIndex: TileIndex = metadata.tileIndex as TileIndex;
+			var time: Date = metadata.validity;
+			var specialStrings: Array = metadata.specialStrings as Array;
+			var url: URLRequest = metadata.url;
+			*/
 			
-//			return tiledCache.getCacheItem(request, time, ma_specialCacheStrings); 
-			return tiledCache.getCacheItem(metadata); 
+//			var metadata: CacheItemMetadata = new CacheItemMetadata();
+//			metadata.crs = qttTileViewProperties.crs;
+//			metadata.url = request;
+//			metadata.validity = validity;
+//			metadata.specialStrings = qttTileViewProperties.specialCacheStrings;
+			
+			return tiledCache.getCacheItem(qttTileViewProperties); 
 		}
 		
 		private function findZoom(): void
@@ -588,19 +637,16 @@ package com.iblsoft.flexiweather.ogc
 			m_tilingUtils.onAreaChanged(container.crs, tilingExtent);
 			var viewBBox: BBox = container.getViewBBox();
 			
-			//new Jozef tiling zoom equation
 			var newZoomLevel2: Number = 1;
 			if (tilingExtent)
 			{
 				var test: Number = (tilingExtent.width * width) / (viewBBox.width * 256);
 				newZoomLevel2 = Math.log(test) * Math.LOG2E;
-//				trace("New Jozef' zoom:  " + newZoomLevel2);
 				//zoom level must be alway 0 or more
 				newZoomLevel2 = Math.max(0, newZoomLevel2);
 			}
 			
 			mi_zoom = Math.round(newZoomLevel2);
-			//mi_zoom = m_tilingUtils.getZoom(viewBBox, new Point(width, height));
 		}
 		
 		override public function refresh(b_force: Boolean): void
@@ -613,11 +659,14 @@ package com.iblsoft.flexiweather.ogc
 		override public function draw(graphics: Graphics): void
 		{
 			super.draw(graphics);
-			customDraw(graphics);
+			
+//			graphics.clear();
+//			setTimeout(customDraw, 500, m_currentQTTViewProperties, graphics);
+			customDraw(m_currentQTTViewProperties, graphics);
 		}
 		
 		private var _debugDrawInfoArray: Array;
-		private function customDraw(graphics: Graphics, redrawBorder: Boolean = false): void
+		private function customDraw(qttViewProperties: QTTViewProperties, graphics: Graphics, redrawBorder: Boolean = false): void
 		{
 			if(mi_zoom == -1)
 			{
@@ -627,18 +676,24 @@ package com.iblsoft.flexiweather.ogc
 
 			_debugDrawInfoArray = [];
 			
-			var s_crs: String = container.crs;
-			var currentBBox: BBox = container.getViewBBox();
+			var s_crs: String = qttViewProperties.crs; //container.crs;
+			var currentBBox: BBox = qttViewProperties.getViewBBox();  //container.getViewBBox();
 			var tilingBBox: BBox = getGTileBBoxForWholeCRS(s_crs); // extent of tile z=0/r=0/c=0
 			if(tilingBBox == null) {
 				trace("InteractiveLayerQTTMS.customDraw(): No tiling extent for CRS " + container.crs);
 				return;
 			}
 
+			if (qttViewProperties.specialCacheStrings)
+				trace("ILQTTMS customDraw " + qttViewProperties.toString() + " dim: " + qttViewProperties.specialCacheStrings[0]);
+			
 			var wmsTileCache: WMSTileCache = m_cache as WMSTileCache;
 			
+			var _specialCacheStrings: Array = qttViewProperties.specialCacheStrings;
+			var _currentValidityTime: Date = qttViewProperties.validity;
+			
 			//get cache tiles
- 			var a_tiles: Array = wmsTileCache.getTiles(container.crs, mi_zoom, ma_specialCacheStrings, _currentValidityTime);
+ 			var a_tiles: Array = wmsTileCache.getTiles(s_crs, mi_zoom, _specialCacheStrings, _currentValidityTime);
 			var allTiles: Array = a_tiles.reverse();
 			
 			graphics.clear();
@@ -646,14 +701,13 @@ package com.iblsoft.flexiweather.ogc
 			
 			var t_tile: Object;
 			var tileIndex: TileIndex;
-				
 			var cnt: int = 0;
 			var viewPart: BBox;
 			
 			for each(t_tile in allTiles) {
 				
 				tileIndex = t_tile.tileIndex;
-				viewPart = _tileIndicesMapper.getTileIndexViewPart(tileIndex);
+				viewPart = qttViewProperties.tileIndicesMapper.getTileIndexViewPart(tileIndex);
 				
 				if (tileIndex)
 				{
@@ -967,6 +1021,8 @@ package com.iblsoft.flexiweather.ogc
 			var newBBox: BBox = getGTileBBoxForWholeCRS(newCRS);
 			var viewBBox: BBox = container.getViewBBox();
 			
+			updateCurrentWMSViewProperties();
+			
 //			trace("onAreaChanged newBBox: " + newBBox);
 //			trace("onAreaChanged viewBBox: " + viewBBox);
 			
@@ -990,15 +1046,6 @@ package com.iblsoft.flexiweather.ogc
 				invalidateDynamicPart();
 		}
 		
-		private function checkIfAllTilesAreLoaded(): void
-		{
-			if(mi_tilesCurrentlyLoading == 0)
-			{
-				mi_tilesLoadingTotal = 0;
-				dispatchEvent(new InteractiveLayerQTTEvent(InteractiveLayerQTTEvent.TILES_LOADED_FINISHED, true));
-				notifyLoadingFinished();
-			}
-		}
 		
 		override protected function notifyLoadingFinished(bubbles: Boolean = true): void
 		{
@@ -1008,76 +1055,6 @@ package com.iblsoft.flexiweather.ogc
 			draw(graphics);
 		}
 		
-		override protected function onDataLoaded(event: UniURLLoaderEvent): void
-		{
-			var result: * = event.result;
-			tileLoaded(result as Bitmap, event.request, event.associatedData);
-			
-		}
-		
-		public function onTileLoaded(result: Bitmap, tileRequest: QTTTileRequest, tileIndex: TileIndex, associatedData: Object): void
-		{
-			tileLoaded(result, tileRequest.request, tileRequest.associatedData);
-		}
-		
-		
-		private function tileLoaded(result: Bitmap, request: URLRequest, associatedData: Object): void
-		{
-			tileLoadFinished();
-			
-			var wmsTileCache: WMSTileCache = m_cache as WMSTileCache;
-			
-			onJobFinished(associatedData.job);
-			
-			if(result is Bitmap) 
-			{
-				var itemMetadata: CacheItemMetadata = new CacheItemMetadata();
-				itemMetadata.crs = associatedData.requestedCRS;
-				itemMetadata.tileIndex = associatedData.requestedTileIndex;
-				itemMetadata.tiledArea = associatedData.tiledArea;
-				itemMetadata.viewPart = associatedData.viewPart;
-				itemMetadata.validity = associatedData.validity;
-				itemMetadata.updateCycleAge = associatedData.updateCycleAge;
-				
-				itemMetadata.specialStrings = ma_specialCacheStrings;
-				itemMetadata.url = request;
-				
-				removeCachedTiles(itemMetadata.validity, itemMetadata.updateCycleAge, true);
-				
-				wmsTileCache.addCacheItem(Bitmap(result), itemMetadata);
-				draw(graphics);
-				return;
-
-			}
-
-			onDataLoadFailed(null);
-		}
-		
-		private function tileLoadFinished(): void
-		{
-			mi_tilesCurrentlyLoading--;
-			
-			notifyProgress(mi_tilesLoadingTotal - mi_tilesCurrentlyLoading, mi_tilesLoadingTotal, InteractiveLayerProgressEvent.UNIT_TILES);
-			
-			checkIfAllTilesAreLoaded();
-		}
-		
-		public function onTileLoadFailed(tileIndex: TileIndex, associatedData: Object): void
-		{
-//			trace("\t onTileLoadFailed : " + tileIndex);
-			tileLoadFailed();
-		}
-		
-		private function tileLoadFailed(): void
-		{
-			tileLoadFinished();
-		}
-		
-			
-		override protected function onDataLoadFailed(event: UniURLLoaderErrorEvent): void
-		{
-			tileLoadFailed();
-		}
 		
 
 		public function getGTileBBox(s_crs: String, tileIndex: TileIndex): BBox
@@ -1115,26 +1092,13 @@ package com.iblsoft.flexiweather.ogc
 			return newLayer;
 		}
 		
-		protected function onJobFinished(job: BackgroundJob): void
-		{
-			if(job != null) {
-				job.finish();
-				job = null;
-			}
-			invalidateDynamicPart();
-		}
 		
-		public function setSpecialCacheStrings(arr: Array): void
-		{
-			ma_specialCacheStrings = arr;
-		}
 
-		public function get baseURLPattern(): String
+		public function baseURLPatternForCRS(crs: String): String
 		{
 			if(ms_explicitBaseURLPattern == null)
 			{
 				var tilingInfo: QTTilingInfo;
-				var crs: String = container.getCRS();
 				if (m_cfg.tilingCRSsAndExtents && m_cfg.tilingCRSsAndExtents.length > 0)
 					tilingInfo = m_cfg.getQTTilingInfoForCRS(crs);
 				
@@ -1142,6 +1106,11 @@ package com.iblsoft.flexiweather.ogc
 					return tilingInfo.urlPattern;
 			}
 			return ms_explicitBaseURLPattern;
+			
+		}
+		public function get baseURLPattern(): String
+		{
+			return baseURLPatternForCRS(container.getCRS());
 		}
 		
 		public function get zoomLevel(): int
@@ -1172,11 +1141,6 @@ package com.iblsoft.flexiweather.ogc
 			return this;
 		}
 		
-		public function setValidityTime(validity: Date): void
-		{
-			_currentValidityTime = validity;
-		}
-		
 		public function clearCache():void
 		{
 			if (m_cache)
@@ -1184,6 +1148,15 @@ package com.iblsoft.flexiweather.ogc
 			
 		}
 		
+		public function setSpecialCacheStrings(arr: Array): void
+		{
+			m_currentQTTViewProperties.setSpecialCacheStrings(arr);
+		}
+		
+		public function setValidityTime(validity: Date): void
+		{
+			m_currentQTTViewProperties.setValidityTime(validity);
+		}
 	}
 }
 import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
@@ -1198,111 +1171,6 @@ import flash.utils.Dictionary;
 
 import mx.messaging.AbstractConsumer;
 
-class TileJobs
-{
-	private var m_jobs: Dictionary;
-	
-	public function TileJobs()
-	{
-		m_jobs = new Dictionary();	
-	}
-	public function addNewTileJobRequest(x: int, y: int, urlLoader: WMSImageLoader, urlRequest: URLRequest): void
-	{
-		var _existingJob: TileJob = m_jobs[x+"_"+y] as TileJob;
-		if (_existingJob)
-		{
-			_existingJob.cancelRequests();
-			_existingJob.urlLoader = urlLoader;
-			_existingJob.urlRequest = urlRequest;
-		} else {
-			m_jobs[x+"_"+y] = new TileJob(x,y,urlRequest, urlLoader);
-		}
-		
-	}
-}
-
-class TileJob
-{
-	private var mi_x: int;
-	private var mi_y: int;
-	private var m_urlRequest: URLRequest;
-	private var m_urlLoader: WMSImageLoader;
-
-	public function set urlRequest(value: URLRequest):void
-	{
-		m_urlRequest = value;
-	}
-
-	public function set urlLoader(value: WMSImageLoader):void
-	{
-		m_urlLoader = value;
-	}
-	
-	public function TileJob(x: int, y: int, request: URLRequest, loader: WMSImageLoader)
-	{
-		mi_x = x;
-		mi_y = y;
-		m_urlRequest = request;
-		m_urlLoader = loader;
-	}
-
-	public function cancelRequests(): void
-	{
-		m_urlLoader.cancel(m_urlRequest);
-	}
-}
-
-class TileIndicesMapper
-{
-	private var _tileIndices: Dictionary = new Dictionary();
-	
-	public function TileIndicesMapper()
-	{
-	}
-	
-	private function getMapperKey(tileIndex: TileIndex): String
-	{
-		return tileIndex.mi_tileCol + "_" + tileIndex.mi_tileRow + "_" + tileIndex.mi_tileZoom;
-	}
-	private function getMapperItem(tileIndex: TileIndex): Object
-	{
-		return _tileIndices[getMapperKey(tileIndex)];
-	}
-	
-	public function removeAll(): void
-	{
-		_tileIndices = new Dictionary();
-	}
-	public function getTileIndexViewPart(tileIndex: TileIndex): BBox
-	{
-		var object: Object = getMapperItem(tileIndex);
-		if (object)
-			return object.viewPart;
-		
-		return null;
-	}
-	
-	public function setTileIndexViewPart(tileIndex: TileIndex, viewPart: BBox): void
-	{
-		addTileIndex(tileIndex, viewPart);
-	}
-	
-	public function addTileIndex(tileIndex: TileIndex, viewPart: BBox): void
-	{
-		_tileIndices[getMapperKey(tileIndex)] = {tileIndex: tileIndex, viewPart: viewPart};
-	}
-	
-	public function removeTileIndex(tileIndex: TileIndex, viewPart: BBox): void
-	{
-		delete _tileIndices[getMapperKey(tileIndex)]
-	}
-	
-	public function tileIndexInside(tileIndex: TileIndex): Boolean
-	{
-		return getMapperItem(tileIndex) != null;
-		
-	}
-}
 
 
 class ViewPartReflectionsHelper

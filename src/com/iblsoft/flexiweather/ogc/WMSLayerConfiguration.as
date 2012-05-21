@@ -257,7 +257,9 @@ package com.iblsoft.flexiweather.ogc
 				}
 			}
 			
-			mb_capabilitiesUpdated = true;
+			if (event)
+				mb_capabilitiesUpdated = true;
+			
 			if(b_changed) {
 				_layerConfigurations = a_layers.toArray();
 				dispatchEvent(new DataEvent(CAPABILITIES_UPDATED));

@@ -1,5 +1,7 @@
 package com.iblsoft.flexiweather.ogc.cache
 {
+	import com.iblsoft.flexiweather.ogc.data.IViewProperties;
+	
 	import flash.display.Bitmap;
 	import flash.display.DisplayObject;
 
@@ -12,7 +14,7 @@ package com.iblsoft.flexiweather.ogc.cache
 		
 		public var cacheKey: CacheKey;
 		public var lastUsed: Date;
-		public var metadata: CacheItemMetadata;
+		public var viewProperties: IViewProperties;
 		public var image: DisplayObject;
 		
 		private var _displayed: Boolean;

@@ -1,6 +1,8 @@
 package com.iblsoft.flexiweather.ogc.cache
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.ogc.data.IViewProperties;
+	import com.iblsoft.flexiweather.ogc.data.WMSViewProperties;
 	
 	import flash.display.Bitmap;
 	import flash.display.DisplayObject;
@@ -161,25 +163,33 @@ package com.iblsoft.flexiweather.ogc.cache
 			return s_key;			
 		}
 		
-		public function isItemCached(metadata: CacheItemMetadata): Boolean
+		public function isItemCached(viewProperties: IViewProperties): Boolean
 		{
-			var s_crs: String = metadata.crs as String;
-			var bbox: BBox = metadata.bbox as BBox;
-			var url: URLRequest = metadata.url;
-			var dimensions: Array = metadata.dimensions;
+			var wmsViewProperties: WMSViewProperties = viewProperties as WMSViewProperties;
+			if (!wmsViewProperties)
+				return false;
 			
-			var s_key: String = getKey(s_crs, bbox, url, dimensions, metadata.validity);
+			var s_crs: String = wmsViewProperties.crs as String;
+			var bbox: BBox = wmsViewProperties.getViewBBox() as BBox;
+			var url: URLRequest = wmsViewProperties.url;  //metadata.url
+			var dimensions: Array = wmsViewProperties.dimensions; //metadata.dimensions;
+			
+			var s_key: String = getKey(s_crs, bbox, url, dimensions, wmsViewProperties.validity);
 			return md_cache[s_key] || md_cacheLoading[s_key];
 		}
 		
-		public function getCacheItem(metadata: CacheItemMetadata): CacheItem
+		public function getCacheItem(viewProperties: IViewProperties): CacheItem
 		{
-			var s_crs: String = metadata.crs as String;
-			var  bbox: BBox = metadata.bbox as BBox;
-			var  url: URLRequest = metadata.url;
-			var dimensions: Array = metadata.dimensions;
+			var wmsViewProperties: WMSViewProperties = viewProperties as WMSViewProperties;
+			if (!wmsViewProperties)
+				return null;
 			
-			var s_key: String = getKey(s_crs, bbox, url, dimensions, metadata.validity);
+			var s_crs: String = wmsViewProperties.crs as String;
+			var bbox: BBox = wmsViewProperties.getViewBBox() as BBox;
+			var url: URLRequest = wmsViewProperties.url;
+			var dimensions: Array = wmsViewProperties.dimensions;
+			
+			var s_key: String = getKey(s_crs, bbox, url, dimensions, wmsViewProperties.validity);
 			if(s_key in md_cache) {
 				var item: CacheItem = md_cache[s_key] as CacheItem; 
 				item.lastUsed = new Date();
@@ -189,9 +199,9 @@ package com.iblsoft.flexiweather.ogc.cache
 			return null;
 			
 		}
-		public function getCacheItemBitmap(metadata: CacheItemMetadata): DisplayObject
+		public function getCacheItemBitmap(viewProperties: IViewProperties): DisplayObject
 		{
-			var item: CacheItem = getCacheItem(metadata);
+			var item: CacheItem = getCacheItem(viewProperties);
 			if (item)
 				return item.image;
 			return null;
@@ -205,22 +215,35 @@ package com.iblsoft.flexiweather.ogc.cache
 		 * @param url
 		 * 
 		 */		
-		public function startImageLoading(s_crs: String, bbox: BBox, url: URLRequest, dimensions: Array, validity: Date = null): void
+//		public function startImageLoading(s_crs: String, bbox: BBox, url: URLRequest, dimensions: Array, validity: Date = null): void
+		public function startImageLoading(viewProperties: IViewProperties): void
 		{
-			var s_key: String = getKey(s_crs, bbox, url, dimensions, validity);
+			var wmsViewProperties: WMSViewProperties = viewProperties as WMSViewProperties;
+			if (!wmsViewProperties)
+				return;
+			
+			var s_crs: String = wmsViewProperties.crs;
+			var bbox: BBox = wmsViewProperties.getViewBBox();
+			var url: URLRequest = wmsViewProperties.url;
+			
+			var s_key: String = getKey(s_crs, bbox, url, wmsViewProperties.dimensions, wmsViewProperties.validity);
 			
 			md_cacheLoading[s_key] = true;
 			
 			debug("startImageLoading ["+s_crs+","+bbox.toBBOXString()+","+url.url+"]");
 		}
 		
-		public function addCacheItem(img: DisplayObject, metadata: CacheItemMetadata): void
+		public function addCacheItem(img: DisplayObject, viewProperties: IViewProperties): void
 		{
-			var s_crs: String = metadata.crs as String;
-			var bbox: BBox = metadata.bbox as BBox;
-			var url: URLRequest = metadata.url;
-			var dimensions: Array = metadata.dimensions;
-			var validity: Date = metadata.validity;
+			var wmsViewProperties: WMSViewProperties = viewProperties as WMSViewProperties;
+			if (!wmsViewProperties)
+				return;
+			
+			var s_crs: String = wmsViewProperties.crs as String;
+			var bbox: BBox = wmsViewProperties.getViewBBox() as BBox;
+			var url: URLRequest = wmsViewProperties.url;
+			var dimensions: Array = wmsViewProperties.dimensions;
+			var validity: Date = wmsViewProperties.validity;
 			
 			var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url, dimensions, validity);
 			var s_key: String = getKey(s_crs, bbox, url, dimensions, validity);

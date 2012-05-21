@@ -22,27 +22,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 		}
 		
-
-		public function get minimumZoom():int
-		{
-			return _minimumZoom;
-		}
-
-		public function set minimumZoom(value:int):void
-		{
-			_minimumZoom = value;
-		}
-
-		public function get maximumZoom():int
-		{
-			return _maximumZoom;
-		}
-
-		public function set maximumZoom(value:int):void
-		{
-			_maximumZoom = value;
-		}
-
 		public function onAreaChanged(s_crs: String, extent: BBox): void
 		{
 			ms_crs = s_crs;
@@ -70,84 +49,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 			
 		}
 		
-		/**
-		 * For now this method is deprecated, we have new equation for counting tile zoom level in InteractiveLayerQTTMS.findZoom 
-		 * @param viewBBox
-		 * @param viewSize
-		 * @return 
-		 * 
-		 */		
-		/*
-		public function getZoom(viewBBox: BBox, viewSize: Point): int
-		{
-			if (viewSize.x == 0 || viewSize.y == 0 || !m_extent)
-			{
-				//can not get zoom for area with no size
-				return -1;
-			}
-			var newZoomLevel: int = minimumZoom;
-			var bestZoomLevel: int = minimumZoom;
-			var bestDist: int = int.MAX_VALUE;
-			var bestScale: Point;
-			var bestArea: TiledArea;
-			
-			var scale: Point;
-			var tilesInViewBBox: Point;
-			var area: TiledArea;
-			var tileWidth: int;
-			var tileHeight: int;
-			
-			tileWidth = 256;
-			tileHeight = 256;
-			var zoomFound: Boolean = false;
-			var arr: Array = [];
-			
-			
-			while (!zoomFound)
-			{
-				area = getTiledArea(viewBBox, newZoomLevel);
-//				scale = new Point( viewSize.x / ((area.colTilesCount - 1) * tileWidth) ,  viewSize.y / ((area.rowTilesCount - 1) * tileHeight));
-				scale = new Point( viewSize.x / ((area.colTilesCount ) * tileWidth) ,  viewSize.y / ((area.rowTilesCount) * tileHeight));
-				
-				if ((viewSize.x <= (area.colTilesCount * 256)) && (viewSize.y <= (area.rowTilesCount * 256)))
-				{
-					
-					
-					var scaleOK: Boolean = false;
-					if (checkColumnScale)
-					{
-						//trace("For zoom: " + newZoomLevel + " scale must be: " + scale + " view: " + viewSize + " tiledAreaSize: " + (area.colTilesCount * 256)+"," +(area.rowTilesCount * 256));
-						
-						var dist: Number = Math.sqrt((columnScaleMax - scale.x) * (columnScaleMax - scale.x)  + (rowScaleMax - scale.y) * (rowScaleMax - scale.y) );
-						var dist2: Number = Math.abs(columnScaleMax - scale.x) + Math.abs(rowScaleMax - scale.y);
-						
-						if (dist < bestDist)
-						{
-							bestDist = dist;
-							bestScale = scale;
-							bestArea = area;
-							bestZoomLevel = newZoomLevel;
-						}
-						arr.push({zoom: newZoomLevel, dist: dist, dist2: dist2, scale: scale});
-					}
-						
-				}
-				if (scaleOK)
-				{
-					zoomFound = true;
-					trace("TilingUtils scale: " + scale.x + " , " + scale.y);
-				} else {
-					newZoomLevel++;
-					
-					if (newZoomLevel > maximumZoom)
-						zoomFound = true;
-				}
-			}
-			//trace("\nTilingUtils getZoom for viewBBox: " + viewBBox.toString() + " size: " + viewSize + " LEVEL FOUND: " + bestZoomLevel);
-			return bestZoomLevel;
-		}
-		*/
-		
 		private function debugZoomLevels(arr: Array): void
 		{
 			return;
@@ -161,17 +62,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 				}
 			}
 		}
-		/*
-		public function getViewTilesInExtent(zoomLevel: int, viewBBox: BBox): Point
-		{
-			var maxColTiles: int = getColTiles(zoomLevel);
-			var maxRowTiles: int = getRowTiles(zoomLevel);
-			
-			var tileBBox: Point = new Point(m_extent.width / maxColTiles, m_extent.height / maxRowTiles);
-			var viewTiles: Point = new Point( Math.ceil(viewBBox.width / tileBBox.x), Math.ceil(viewBBox.height / tileBBox.y));
-			return viewTiles;
-		}*/
-		
 		
 		public function getTiles(zoomLevel: int): int
 		{
@@ -180,12 +70,10 @@ package com.iblsoft.flexiweather.ogc.tiling
 		public function getColTiles(zoomLevel: int): int
 		{
 			var _maxTileID: int = (1 << (zoomLevel + 1) - 1) - 1;
-//			return Math.pow(2, zoomLevel);	
 			return (1 << (zoomLevel + 1) - 1);	
 		}
 		public function getRowTiles(zoomLevel: int): int
 		{
-//			return Math.pow(2, zoomLevel);	
 			return (1 << (zoomLevel + 1) - 1);	
 		}
 		
@@ -201,7 +89,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 				var tileHeight: int = getTileHeight(zoomLevel);
 				
 				var tileXPos: int = Math.floor( ( x - xMin ) / tileWidth );
-//				var tileYPos: int = Math.floor( ( yPosition - yMin ) / tileHeight );
 				var tileYPos: int = Math.floor( ( yMax - y ) / tileHeight );
 				
 				return new TileIndex( zoomLevel, tileXPos, tileYPos);
@@ -232,5 +119,16 @@ package com.iblsoft.flexiweather.ogc.tiling
 			return 0;
 		}
 		
+		public function get minimumZoom():int
+		{	return _minimumZoom;  }
+		
+		public function set minimumZoom(value:int):void
+		{	_minimumZoom = value;  }
+		
+		public function get maximumZoom():int
+		{	return _maximumZoom; }
+		
+		public function set maximumZoom(value:int):void
+		{  _maximumZoom = value;  }
 	}
 }

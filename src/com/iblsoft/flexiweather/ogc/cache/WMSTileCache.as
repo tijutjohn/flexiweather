@@ -1,6 +1,9 @@
 package com.iblsoft.flexiweather.ogc.cache
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.ogc.data.IViewProperties;
+	import com.iblsoft.flexiweather.ogc.data.QTTViewProperties;
+	import com.iblsoft.flexiweather.ogc.tiling.QTTTileViewProperties;
 	import com.iblsoft.flexiweather.ogc.tiling.TileIndex;
 	import com.iblsoft.flexiweather.ogc.tiling.TiledArea;
 	import com.iblsoft.flexiweather.plugins.IConsole;
@@ -115,15 +118,24 @@ package com.iblsoft.flexiweather.ogc.cache
 			return (bitmap.parent != null);
 		}
 		
-//		public function getTile(request: URLRequest, time: Date, specialStrings: Array): CacheItem
-		override public function getCacheItem(metadata: CacheItemMetadata): CacheItem
+		override public function getCacheItem(viewProperties: IViewProperties): CacheItem
 		{
-			var request: URLRequest = metadata.url;
-			var time: Date = metadata.validity;
-			var specialStrings: Array = metadata.specialStrings as Array;
+			var qttTileViewProperties: QTTTileViewProperties = viewProperties as QTTTileViewProperties;
+			if (!qttTileViewProperties)
+				return null;
 			
-			var s_crs: String = request.data.CRS;
-			var tileIndex: TileIndex = new TileIndex(request.data.TILEZOOM, request.data.TILEROW, request.data.TILECOL);
+			var parentQTT: QTTViewProperties = qttTileViewProperties.qttViewProperties;
+			
+			var s_crs: String = parentQTT.crs as String;
+			var bbox: BBox = parentQTT.getViewBBox() as BBox;
+			var time: Date = parentQTT.validity;
+			
+			var request: URLRequest = qttTileViewProperties.url;
+			var specialStrings: Array = parentQTT.specialCacheStrings as Array;
+			
+//			var s_crs: String = request.data.CRS;
+//			var tileIndex: TileIndex = new TileIndex(request.data.TILEZOOM, request.data.TILEROW, request.data.TILECOL);
+			var tileIndex: TileIndex = qttTileViewProperties.tileIndex;
 			
 			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, null, tileIndex, request, time, specialStrings);
 			var s_key: String = ck.toString(); 
@@ -209,13 +221,20 @@ package com.iblsoft.flexiweather.ogc.cache
 	
 		
 //		public function isTileCached(s_crs: String, tileIndex: TileIndex, url: URLRequest, time: Date, specialStrings: Array): Boolean
-		override public function isItemCached(metadata: CacheItemMetadata): Boolean
+		override public function isItemCached(viewProperties: IViewProperties): Boolean
 		{
-			var s_crs: String = metadata.crs as String;
-			var tileIndex: TileIndex = metadata.tileIndex as TileIndex;
-			var time: Date = metadata.validity;
-			var specialStrings: Array = metadata.specialStrings as Array;
-			var url: URLRequest = metadata.url;
+			var qttTileViewProperties: QTTTileViewProperties = viewProperties as QTTTileViewProperties;
+			if (!qttTileViewProperties)
+				return false;
+			
+			var parentQTT: QTTViewProperties = qttTileViewProperties.qttViewProperties;
+			
+			var s_crs: String = parentQTT.crs as String;
+			var time: Date = parentQTT.validity;
+			
+			var tileIndex: TileIndex = qttTileViewProperties.tileIndex as TileIndex;
+			var specialStrings: Array = parentQTT.specialCacheStrings as Array;
+			var url: URLRequest = qttTileViewProperties.url;
 			
 			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, null, tileIndex, url, time, specialStrings);
 			var s_key: String = ck.toString(); 
@@ -227,23 +246,31 @@ package com.iblsoft.flexiweather.ogc.cache
 //		public function addTile(img: Bitmap, s_crs: String, tileIndex: TileIndex, url: URLRequest, specialStrings: Array, tiledArea: TiledArea, viewPart: BBox, time: Date): void
 //		override public function addCacheItem(img: Bitmap, s_crs: String, bbox: BBox, url: URLRequest, associatedCacheData: Object = null): void
 		
-		override public function addCacheItem(img: DisplayObject, metadata: CacheItemMetadata): void
+		override public function addCacheItem(img: DisplayObject, viewProperties: IViewProperties): void
 		{
-			var s_crs: String = metadata.crs as String;
-			var  bbox: BBox = metadata.bbox as BBox;
-			var  url: URLRequest = metadata.url;
+			var qttTileViewProperties: QTTTileViewProperties = viewProperties as QTTTileViewProperties;
+			if (!qttTileViewProperties)
+				return;
+			
+			var parentQTT: QTTViewProperties = qttTileViewProperties.qttViewProperties;
+			
+			var s_crs: String = parentQTT.crs as String;
+			var bbox: BBox = parentQTT.getViewBBox() as BBox;
+			var time: Date = parentQTT.validity;
+			var tiledAreas: Array = parentQTT.tiledAreas;
+			
+			var url: URLRequest = qttTileViewProperties.url;
 		
-			var tileIndex: TileIndex = metadata.tileIndex;
-			var specialStrings: Array = metadata.specialStrings;
-			var tiledArea: TiledArea = metadata.tiledArea;
-			var viewPart: BBox = metadata.viewPart;
-			var time: Date = metadata.validity;
+			var tileIndex: TileIndex = qttTileViewProperties.tileIndex;
+			var specialStrings: Array = parentQTT.specialCacheStrings;
+//			var viewPart: BBox = QTTTileViewProperties.viewPart;
 			
 			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, null, tileIndex, url, time, specialStrings);
 			var s_key: String = decodeURI(ck.toString()); 
 			
 			
 			var item: CacheItem = new CacheItem();
+			item.viewProperties = qttTileViewProperties;
 			item.cacheKey = ck as CacheKey;
 			item.displayed = true;
 			item.lastUsed = new Date();
@@ -268,7 +295,11 @@ package com.iblsoft.flexiweather.ogc.cache
 			
 			if (_items.length > maxCachedItems)
 			{
-				s_key = getCachedTileKeyOutsideTiledArea(tiledArea);
+				for each (var tiledAreaObj: Object in tiledAreas)
+				{
+					var tiledArea: TiledArea = tiledAreaObj.tiledArea as TiledArea;
+					s_key = getCachedTileKeyOutsideTiledArea(tiledArea);
+				}
 				
 				
 				bWasDeleted = deleteCacheItemByKey(s_key);

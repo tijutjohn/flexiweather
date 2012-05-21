@@ -4,22 +4,33 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 	public class QTTTileRequest
 	{
-		public var tileIndex: TileIndex;
-		public var crs: String;
-		public var associatedData: Object;
+//		public var tileIndex: TileIndex;
+//		public var crs: String;
+//		public var associatedData: Object;
 		
 		/**
 		 * Optional parameter. Job name for backroundJobManager 
 		 */		
-		public var jobName: String;
+		private var _jobName: String;
+		private var _qttTileViewProperties: QTTTileViewProperties;
 		
-		/**
-		 * Optional parameter. Request is done in InteractiveLayerQTTMS, but tileProvider can make its own request. 
-		 */		
-		public var request: URLRequest;
-		
-		public function QTTTileRequest()
+		public function get jobName():String
 		{
+			return _jobName;
 		}
+
+		public function get qttTileViewProperties():QTTTileViewProperties
+		{
+			return _qttTileViewProperties;
+		}
+		
+		public function QTTTileRequest(qttTileViewProperties: QTTTileViewProperties, jobName: String)
+		{
+			_qttTileViewProperties = qttTileViewProperties;
+			_jobName = jobName;
+		}
+
+
+
 	}
 }

@@ -5,6 +5,7 @@ package com.iblsoft.flexiweather.ogc.data
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.ExceptionUtils;
+	import com.iblsoft.flexiweather.ogc.ILayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.IWMSLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
 	import com.iblsoft.flexiweather.ogc.SynchronisationRole;
@@ -52,7 +53,7 @@ package com.iblsoft.flexiweather.ogc.data
 	
 	import spark.components.Group;
 
-	public class WMSViewProperties extends EventDispatcher implements Serializable
+	public class WMSViewProperties extends EventDispatcher implements IViewProperties, Serializable
 	{
 //		public var cache: ICache;
 //		
@@ -70,6 +71,7 @@ package com.iblsoft.flexiweather.ogc.data
 		{
 			return ma_imageParts;
 		}
+
 		
 		/**
 		 * Bitmap image holder for legend 
@@ -84,17 +86,65 @@ package com.iblsoft.flexiweather.ogc.data
 			return m_legendImage;
 		}
 		
-//		public function WMSViewProperties(container:InteractiveWidget)
-//		{
-//			super(container);
-//		}
+		public var crs: String;
+		
+		private var _viewBBox: BBox;
+		public function getViewBBox(): BBox
+		{
+			return _viewBBox
+		}
+		public function setViewBBox(bbox: BBox): void
+		{
+			_viewBBox = bbox;
+		}
+		
+		private var m_url: URLRequest;
+		public function get url(): URLRequest
+		{
+			return m_url
+		}
+		public function set url(value: URLRequest): void
+		{
+			m_url = value;	
+		}
+		
+		private var _validity: Date;
+		public function get validity():Date
+		{
+			return _validity;
+		}
+		public function setValidityTime(validity: Date): void
+		{
+			_validity = validity;
+		}
+		
+		public function get dimensions(): Array
+		{
+			var dimNames: Array = getWMSDimensionsNames();
+			if (dimNames && dimNames.length > 0)
+			{
+				var ret: Array = [];
+				for each (var dimName: String in dimNames)
+				{
+					var value: Object = getWMSDimensionValue(dimName);
+					if (value)
+						ret.push({name: dimName, value: value});
+					else 
+						ret.push({name: dimName, value: null});
+				}
+				return ret;
+			}
+			return null;
+		}
+		
 		public function WMSViewProperties()
 		{
 		}
 		
-		public function setConfiguration(cfg: IWMSLayerConfiguration): void
+		public function setConfiguration(cfg: ILayerConfiguration): void
 		{
-			m_cfg = cfg;
+			if (cfg is IWMSLayerConfiguration)
+				m_cfg = cfg as IWMSLayerConfiguration;
 		}
 		
 		
@@ -166,60 +216,6 @@ package com.iblsoft.flexiweather.ogc.data
 			
 			return true;
 		}
-		
-		
-		
-		/**
-		 * Function similar to updateWMSData, only difference is that funciton isCached does not load any data 
-		 * @return 
-		 * 
-		 */		
-		/*
-		public function isCached(): Boolean
-		{
-			var i_width: int = int(container.width);
-			var i_height: int = int(container.height);
-			
-			if (forcedLayerWidth > 0)
-				i_width = forcedLayerWidth;
-			if (forcedLayerHeight > 0)
-				i_height = forcedLayerHeight;
-			
-			var s_currentCRS: String = container.getCRS();
-			var currentViewBBox: BBox = container.getViewBBox();
-			
-			var f_horizontalPixelSize: Number = currentViewBBox.width / i_width;
-			var f_verticalPixelSize: Number = currentViewBBox.height / i_height;
-			
-			var projection: Projection = Projection.getByCRS(s_currentCRS);
-			var parts: Array = container.mapBBoxToProjectionExtentParts(currentViewBBox);
-			//			var parts: Array = container.mapBBoxToViewParts(projection.extentBBox);
-			var dimensions: Array = getDimensionForCache();
-			
-			var isCached: Boolean = true;
-			for each(var partBBoxToUpdate: BBox in parts) {
-				var isPartCached: Boolean = isPartCached(
-									s_currentCRS, partBBoxToUpdate,
-									dimensions,
-									uint(Math.round(partBBoxToUpdate.width / f_horizontalPixelSize)),
-									uint(Math.round(partBBoxToUpdate.height / f_verticalPixelSize))
-								);
-				if (!isPartCached)
-					return false;
-			}
-			
-			//all parts are cached, so all WMS view properties are cached
-			return true;
-		}*/
-		
-		/*
-		public function invalidateDynamicPart(b_invalid: Boolean = true): void
-		{
-			var de: DynamicEvent = new DynamicEvent("invalidateDynamicPart");
-			de["invalid"] = b_invalid;
-			dispatchEvent(de);
-		}
-		*/
 		
 		public function setWMSDimensionValue(s_dimName: String, s_value: String): void
 		{
@@ -484,6 +480,7 @@ package com.iblsoft.flexiweather.ogc.data
 					url.data = new URLVariables();
 				url.data[m_cfg.dimensionToParameterName(s_dimName)] = md_dimensionValues[s_dimName];
 			}
+			
 		}
 		
 		/**
@@ -678,16 +675,13 @@ package com.iblsoft.flexiweather.ogc.data
 		 * 
 		 ******************************************************************************************/
 
-		public function clone(): WMSViewProperties
+		public function clone(): IViewProperties
 		{
-//			var newViewProperties: WMSViewProperties = new WMSViewProperties(container);
 			var newViewProperties: WMSViewProperties = new WMSViewProperties();
 			newViewProperties.setConfiguration(m_cfg);
 			
-//			newViewProperties.id = id;
-//			newViewProperties.alpha = alpha;
-//			newViewProperties.zOrder = zOrder;
-//			newViewProperties.visible = visible;
+			newViewProperties.crs = crs;
+			newViewProperties.setViewBBox(_viewBBox);
 			
 			var styleName: String = getWMSStyleName(0)
 			newViewProperties.setWMSStyleName(0, styleName);

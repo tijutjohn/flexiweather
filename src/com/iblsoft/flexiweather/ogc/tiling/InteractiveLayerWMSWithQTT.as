@@ -15,8 +15,13 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import com.iblsoft.flexiweather.ogc.WMSWithQTTLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.cache.ICache;
 	import com.iblsoft.flexiweather.ogc.cache.ICachedLayer;
+	import com.iblsoft.flexiweather.ogc.data.IViewProperties;
+	import com.iblsoft.flexiweather.ogc.data.IWMSViewPropertiesLoader;
+	import com.iblsoft.flexiweather.ogc.data.QTTViewProperties;
 	import com.iblsoft.flexiweather.ogc.data.WMSViewProperties;
+	import com.iblsoft.flexiweather.ogc.preload.IPreloadableLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
+	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.display.BitmapData;
@@ -26,6 +31,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import flash.events.TimerEvent;
 	import flash.geom.Matrix;
 	import flash.net.URLRequest;
+	import flash.utils.Dictionary;
 	import flash.utils.Timer;
 
 	/**
@@ -64,11 +70,13 @@ package com.iblsoft.flexiweather.ogc.tiling
 			var gtileBBoxForWholeCRS: BBox = m_tiledLayer.getGTileBBoxForWholeCRS(s_crs);
 			var isTileableForCRS: Boolean =  m_cfg.isTileableForCRS(s_crs);
 			
-			trace("WMSWithQTT isTileable isTileableForCRS: " + isTileableForCRS + " gtileBBoxForWholeCRS: " + gtileBBoxForWholeCRS);
+//			trace("WMSWithQTT isTileable isTileableForCRS: " + isTileableForCRS + " gtileBBoxForWholeCRS: " + gtileBBoxForWholeCRS);
 			
 			return gtileBBoxForWholeCRS || isTileableForCRS;
 		}
 
+		
+		
 		public function InteractiveLayerWMSWithQTT(
 				container: InteractiveWidget,
 				cfg: WMSWithQTTLayerConfiguration): void
@@ -80,7 +88,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 					'', null, null, cfg.minimumZoomLevel, cfg.maximumZoomLevel);
 			
 			//setup new tiles provider for InteractiveLayerQTTMS layet
-			m_tiledLayer.tilesProvider = new QTTTilesProvider();
+//			m_tiledLayer.tilesProvider = new QTTTilesProvider();
 			
 			m_tiledLayer.addEventListener(InteractiveLayerQTTMS.UPDATE_TILING_PATTERN, onUpdateTilingPattern);
 			m_tiledLayer.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onAllTilesLoaded);
@@ -123,6 +131,11 @@ package com.iblsoft.flexiweather.ogc.tiling
 		
 			updateTiledLayerCRSs();
 			
+			if (m_tiledLayer)
+			{
+				m_tiledLayer.checkZoom();
+			}
+			
 			super.onCapabilitiesUpdated(event);
 		}
 		
@@ -148,9 +161,12 @@ package com.iblsoft.flexiweather.ogc.tiling
 			
 			ma_specialCacheStrings = [];
 			
-			for(var s_dimName: String in md_dimensionValues) {
+			var currWMSViewProperties: WMSViewProperties = currentViewProperties as WMSViewProperties; 
+			var dimNames: Array = currWMSViewProperties.getWMSDimensionsNames();
+			
+			for(var s_dimName: String in dimNames) {
 				var str: String = "SPECIAL_" + m_cfg.dimensionToParameterName(s_dimName) + "="
-						+ md_dimensionValues[s_dimName];
+						+ currWMSViewProperties.getWMSDimensionValue(s_dimName);
 				ma_specialCacheStrings.push(str);
 			}
 		}
@@ -211,11 +227,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			} else {
 				tilingInfo.urlPattern = getFullURL() + WMS_TILING_URL_PATTERN;
 			}
-			/*
-			//update QTT Layer URL parts
-			m_tiledLayer.baseURLPattern = getFullURL() + WMS_TILING_URL_PATTERN;
-			*/
-			m_tiledLayer.setSpecialCacheStrings(ma_specialCacheStrings);
+//			qttViewProperties.setSpecialCacheStrings(ma_specialCacheStrings);
 		}
 		
 		
@@ -239,8 +251,37 @@ package com.iblsoft.flexiweather.ogc.tiling
 			}
 		}
 		
+		override protected function destroyWMSViewPropertiesLoader(loader: IWMSViewPropertiesLoader): void
+		{
+			if (loader is QTTLoader)
+			{
+				loader.removeEventListener("invalidateDynamicPart", onWMSViewPropertiesDataInvalidateDynamicPart);
+				loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
+			
+				loader.destroy();
+			} else {
+				super.destroyWMSViewPropertiesLoader(loader);
+			}
+		}
+		
+		override protected function getWMSViewPropertiesLoader(): IWMSViewPropertiesLoader
+		{
+			if (isTileable)
+			{
+				return new QTTLoader(m_tiledLayer, m_tiledLayer.zoomLevel);
+			}
+			return super.getWMSViewPropertiesLoader();
+		}
+		
 		override protected function updateData(b_forceUpdate:Boolean):void
 		{
+			
+			//we need to postpone updateData if capabilities was not received, otherwise we do not know, if layes is tileable or not
+			if (!capabilitiesReady)
+			{
+				waitForCapabilities();
+				return;
+			}
 			
 //			trace("WMSWithQTT updateData ["+name+"]");
 			var gr: Graphics = graphics;
@@ -251,7 +292,15 @@ package com.iblsoft.flexiweather.ogc.tiling
 					return;
 				}
 				
+				//FIXME needs to move to QTTLoader
 				updateTiledLayerURLBase();
+				
+				if (m_tiledLayer.currentQTTViewProperties)
+				{
+					m_tiledLayer.currentQTTViewProperties.crs = container.getCRS();
+					m_tiledLayer.currentQTTViewProperties.setViewBBox(container.getViewBBox());
+					
+				}
 				m_tiledLayer.invalidateData(b_forceUpdate);
 				changeTiledLayerVisibility(true);
 				
@@ -407,7 +456,123 @@ package com.iblsoft.flexiweather.ogc.tiling
 			}
 			return null;
 		}
+
+		/*********************************************************************************************
+		 * 
+		 *					 			Preloading functions
+		 * 
+		 *********************************************************************************************/
+		private function getPreloadableInteractiveLayerBaseOnIsTileable(): IPreloadableLayer
+		{
+			if (isTileable && m_tiledLayer)
+				return m_tiledLayer;
+			
+			return this;
+		}
 		
+		private function getViewPropertiesBasedOnIsTileable(viewProperties: IViewProperties): IViewProperties
+		{
+			if (isTileable && m_tiledLayer)
+			{
+				//we need to return QTTViewProperties
+				if (viewProperties is QTTViewProperties)
+					return viewProperties;
+				
+				//convert it to QTTViewProperties
+				return convertWMSViewPropertiesToQTTViewProperties(viewProperties as WMSViewProperties);
+			}
+			
+			if (viewProperties is WMSViewProperties)
+				return viewProperties;
 		
+			//TODO do we support convertin QTTViewProperties to WMSViewProperties, I don't think so
+			return viewProperties;
+		}
+		
+		public function convertViewPropertiesArray(viewPropertiesArray:Array): Array
+		{
+			var arr: Array = [];
+			for each (var viewProperties: IViewProperties in viewPropertiesArray)
+			{
+				arr.push(getViewPropertiesBasedOnIsTileable(viewProperties));
+			}
+			return arr;
+		}
+		
+		private var _qttViewPropertiesDictionary: Dictionary = new Dictionary
+		
+		public function convertWMSViewPropertiesToQTTViewProperties(wmsViewProperties: WMSViewProperties): QTTViewProperties
+		{
+			if (!_qttViewPropertiesDictionary[wmsViewProperties])
+			{
+				_qttViewPropertiesDictionary[wmsViewProperties] = new QTTViewProperties();
+			}
+			
+			var qttViewProperties: QTTViewProperties = _qttViewPropertiesDictionary[wmsViewProperties];
+			
+			qttViewProperties.crs = wmsViewProperties.crs;
+			qttViewProperties.setViewBBox(wmsViewProperties.getViewBBox());
+			
+			
+			var specialStringArr: Array = [];
+			var dimNames: Array = wmsViewProperties.getWMSDimensionsNames();
+			
+			for each(var s_dimName: String in dimNames) {
+				var value: String = wmsViewProperties.getWMSDimensionValue(s_dimName);
+				if (value)
+				{
+					var str: String = "SPECIAL_" + m_cfg.dimensionToParameterName(s_dimName) + "=" + value;
+					specialStringArr.push(str);
+				}
+			}
+			
+//			trace("convertWMSViewPropertiesToQTTViewProperties " + str);
+			qttViewProperties.setSpecialCacheStrings(specialStringArr);
+			return qttViewProperties;
+			
+		}
+		
+		override public function get currentViewProperties(): IViewProperties
+		{
+			return super.currentViewProperties;
+		}
+		
+		override public function changeViewProperties(viewProperties: IViewProperties): void
+		{
+			var layer: IPreloadableLayer = getPreloadableInteractiveLayerBaseOnIsTileable();
+			layer.changeViewProperties(getViewPropertiesBasedOnIsTileable(viewProperties));
+		}
+		override public function preload(viewProperties: IViewProperties): void
+		{
+			var layer: IPreloadableLayer = getPreloadableInteractiveLayerBaseOnIsTileable();
+			layer.preload(getViewPropertiesBasedOnIsTileable(viewProperties));
+		}
+		override public function preloadMultiple(viewPropertiesArray:Array):void
+		{
+			var layer: IPreloadableLayer = getPreloadableInteractiveLayerBaseOnIsTileable();
+			layer.preloadMultiple(convertViewPropertiesArray(viewPropertiesArray));
+		}
+		override public function isPreloaded(viewProperties:IViewProperties):Boolean
+		{
+			var layer: IPreloadableLayer = getPreloadableInteractiveLayerBaseOnIsTileable();
+			return layer.isPreloaded(getViewPropertiesBasedOnIsTileable(viewProperties));
+		}
+		override public function isPreloadedMultiple(viewPropertiesArray:Array):Boolean
+		{
+			var layer: IPreloadableLayer = getPreloadableInteractiveLayerBaseOnIsTileable();
+			return layer.isPreloadedMultiple(convertViewPropertiesArray(viewPropertiesArray));
+		}
+		
+		override public function clearCache():void
+		{
+			var layer: IPreloadableLayer = getPreloadableInteractiveLayerBaseOnIsTileable();
+			if (layer is ICachedLayer)
+			{
+				var cachedLayer: ICachedLayer = layer as ICachedLayer;
+				var cache: ICache = cachedLayer.getCache();
+				if (cache)
+					cache.clearCache();
+			}
+		}
 	}
 }

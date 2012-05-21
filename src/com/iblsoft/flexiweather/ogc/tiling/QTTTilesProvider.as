@@ -7,6 +7,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	
 	import flash.display.Bitmap;
 	import flash.events.ProgressEvent;
+	import flash.net.URLRequest;
 
 	public class QTTTilesProvider implements ITilesProvider
 	{
@@ -34,12 +35,13 @@ package com.iblsoft.flexiweather.ogc.tiling
 				
 				for each (var data: QTTTileRequest in tilesIndices)
 				{
-					var customAssociatedData: Object = {associatedData: data.associatedData, tileRequest: data};
+					var customAssociatedData: Object = {tileRequest: data};
+					var request: URLRequest = data.qttTileViewProperties.url;
 					var m_loader: WMSImageLoader = new WMSImageLoader();
 					m_loader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onDataLoaded);
 					m_loader.addEventListener(ProgressEvent.PROGRESS, onDataProgress);
 					m_loader.addEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onDataLoadFailed);						
-					m_loader.load(data.request, customAssociatedData, data.jobName);
+					m_loader.load(request, customAssociatedData, data.jobName);
 				}
 			}
 		}
@@ -51,10 +53,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 		
 		protected function onDataLoaded(event: UniURLLoaderEvent): void
 		{
-			var tileAssociatedData: Object = event.associatedData.associatedData;
 			var tileRequested: QTTTileRequest = event.associatedData.tileRequest as QTTTileRequest;
 			
-			_callbackTileLoaded(Bitmap(event.result), tileRequested, tileRequested.tileIndex, tileAssociatedData);
+			_callbackTileLoaded(Bitmap(event.result), tileRequested, tileRequested.qttTileViewProperties.tileIndex);
 		}
 		
 		protected function onDataLoadFailed(event: UniURLLoaderErrorEvent): void
@@ -62,7 +63,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			var tileAssociatedData: Object = event.associatedData.associatedData;
 			var tileRequested: QTTTileRequest = event.associatedData.tileRequest as QTTTileRequest;
 			
-			_callbackTileLoadFailed(tileRequested.tileIndex, tileAssociatedData);
+			_callbackTileLoadFailed(tileRequested.qttTileViewProperties.tileIndex, tileAssociatedData);
 		}
 	}
 }
