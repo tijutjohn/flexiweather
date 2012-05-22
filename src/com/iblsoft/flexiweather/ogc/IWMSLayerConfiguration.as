@@ -29,8 +29,6 @@ package com.iblsoft.flexiweather.ogc
 		function get imageFormat():String
 		function set imageFormat(value:String):void
 			
-		function get capabilitiesUpdated():Boolean;
-			
 		function dimensionToParameterName(s_dim: String): String;
 		
 	}

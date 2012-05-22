@@ -29,8 +29,6 @@ package com.iblsoft.flexiweather.ogc
 		private var mb_legendIsDimensionDependant: Boolean;
 		private var mi_autoRefreshPeriod: uint = 0;
 		
-		private var mb_capabilitiesUpdated: Boolean;
-		
 		// runtime variables
 		private var _layerConfigurations: Array;
 		
@@ -256,9 +254,6 @@ package com.iblsoft.flexiweather.ogc
 					} 
 				}
 			}
-			
-			if (event)
-				mb_capabilitiesUpdated = true;
 			
 			if(b_changed) {
 				_layerConfigurations = a_layers.toArray();
@@ -486,9 +481,5 @@ package com.iblsoft.flexiweather.ogc
 			ms_imageFormat = value;
 		}
 		
-		public function get capabilitiesUpdated(): Boolean
-		{
-			return mb_capabilitiesUpdated;
-		}
 	}
 }

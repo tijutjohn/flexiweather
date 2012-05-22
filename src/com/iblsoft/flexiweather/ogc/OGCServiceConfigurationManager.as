@@ -18,7 +18,7 @@ package com.iblsoft.flexiweather.ogc
 
 		internal var ma_services: ArrayCollection = new ArrayCollection();
 		
-		internal var m_timer: Timer = new Timer(0.5);
+		internal var m_timer: Timer = new Timer(500);
 		
 		public function OGCServiceConfigurationManager()
 		{

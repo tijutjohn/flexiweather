@@ -534,6 +534,7 @@ package com.iblsoft.flexiweather.ogc
 			var loader: IWMSViewPropertiesLoader = getWMSViewPropertiesLoader();
 			
 			loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
+			loader.addEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
 			loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
 			loader.addEventListener("invalidateDynamicPart", onCurrentWMSDataInvalidateDynamicPart);
 			

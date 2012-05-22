@@ -18,6 +18,12 @@ package com.iblsoft.flexiweather.ogc
 		private var m_capabilities: XML = null;
 		private var m_capabilitiesLoadJob: BackgroundJob = null;
 		
+		private var mb_capabilitiesUpdated: Boolean;
+		public function get capabilitiesUpdated(): Boolean
+		{
+			return mb_capabilitiesUpdated;
+		}
+		
 		private var m_layers: WMSLayerGroup = null;
 		private var _imageFormats: Array = [];
 		public function get imageFormats(): Array
@@ -110,6 +116,9 @@ package com.iblsoft.flexiweather.ogc
 				trace("ERROR m_capabilitiesLoadJob IS null")
 				return;
 			}
+			
+			mb_capabilitiesUpdated = true;
+			
 //			trace("onCapabilitiesLoaded: " + event.request.url);
 			m_capabilitiesLoadJob.finish();
 			m_capabilitiesLoadJob = null;
@@ -131,7 +140,7 @@ package com.iblsoft.flexiweather.ogc
 						trace("WMSServiceConfiguration error: " + e.message);
 					}
 					m_capabilities = xml;
-					dispatchEvent(new DataEvent(CAPABILITIES_UPDATED));
+					dispatchEvent(new DataEvent(CAPABILITIES_UPDATED, true));
 				}
 			}
 			
