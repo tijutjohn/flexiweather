@@ -135,6 +135,18 @@ package com.iblsoft.flexiweather.ogc
 		 */		
 		protected var ma_preloadedQTTViewProperties: Array;
 		
+		protected var mb_updateAfterMakingVisible: Boolean = false;
+		
+		override public function set visible(b_visible: Boolean): void
+		{
+			var b_visiblePrev: Boolean = super.visible;
+			super.visible = b_visible;
+			
+			if(!b_visiblePrev && b_visible && mb_updateAfterMakingVisible) {
+				mb_updateAfterMakingVisible = false;
+				invalidateData(true);
+			}
+		}
 		
 		public function InteractiveLayerQTTMS(
 				container: InteractiveWidget,
@@ -527,6 +539,11 @@ package com.iblsoft.flexiweather.ogc
 			if(mi_zoom < 0)
 			{
 				// wrong zoom, do not continue
+				return;
+			}
+			
+			if(!visible) {
+				mb_updateAfterMakingVisible = true;
 				return;
 			}
 			

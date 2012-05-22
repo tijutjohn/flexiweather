@@ -569,6 +569,11 @@ package com.iblsoft.flexiweather.ogc
 			
 			super.updateData(b_forceUpdate);
 			
+			if(!visible) {
+				mb_updateAfterMakingVisible = true;
+				return;
+			}
+			
 			updateCurrentWMSViewProperties();
 			
 			var loader: IWMSViewPropertiesLoader = getWMSViewPropertiesLoader();
@@ -581,10 +586,6 @@ package com.iblsoft.flexiweather.ogc
 			loader.updateWMSData(b_forceUpdate, m_currentWMSViewProperties, forcedLayerWidth, forcedLayerHeight);
 			
 			
-			if(!visible) {
-				mb_updateAfterMakingVisible = true;
-				return;
-			}
 		}
 
 		public override function draw(graphics: Graphics): void

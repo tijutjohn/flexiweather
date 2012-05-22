@@ -75,7 +75,13 @@ package com.iblsoft.flexiweather.ogc.tiling
 			return gtileBBoxForWholeCRS || isTileableForCRS;
 		}
 
-		
+		override public function set visible(b_visible: Boolean): void
+		{
+			super.visible = b_visible;
+			
+			if (m_tiledLayer)
+				m_tiledLayer.visible = b_visible;
+		}
 		
 		public function InteractiveLayerWMSWithQTT(
 				container: InteractiveWidget,
@@ -280,6 +286,11 @@ package com.iblsoft.flexiweather.ogc.tiling
 			if (!capabilitiesReady)
 			{
 				waitForCapabilities();
+				return;
+			}
+			
+			if(!visible) {
+				mb_updateAfterMakingVisible = true;
 				return;
 			}
 			
