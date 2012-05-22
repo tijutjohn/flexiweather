@@ -21,6 +21,7 @@ package com.iblsoft.flexiweather.ogc.cache
 	
 	public class WMSTileCache extends WMSCache
 	{
+		private static var _uid: int = 0;
 		public static var debugConsole: IConsole;
 		
 		public var maxCachedItems: int = 300;
@@ -48,8 +49,11 @@ package com.iblsoft.flexiweather.ogc.cache
 			return _items.length;
 		}
 		
+		private var _id: int;
 		public function WMSTileCache()
 		{
+			_uid++;
+			_id = _uid;
 			startExpirationTimer();
 		}
 		
@@ -66,13 +70,14 @@ package com.iblsoft.flexiweather.ogc.cache
 		
 		override public function debugCache(): String
 		{
-			var str: String = 'WMSTileCache';
+			var str: String = 'WMSTileCache ['+_id+']';
 			str += '\t cache items count: ' + _itemCount;
 			
 			var cnt: int = 0;
 			for(var s_key: String in md_cache) 
 			{
 				cnt++;
+				str += '\t\t cache key: ' + s_key;
 			}
 			str += '\t cache items count [dictionary]: ' + cnt;
 			
@@ -265,6 +270,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			var specialStrings: Array = parentQTT.specialCacheStrings;
 //			var viewPart: BBox = QTTTileViewProperties.viewPart;
 			
+			trace("WMSTileCache addCacheItem tileIndex: " + tileIndex.toString());
 			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, null, tileIndex, url, time, specialStrings);
 			var s_key: String = decodeURI(ck.toString()); 
 			
@@ -293,6 +299,8 @@ package com.iblsoft.flexiweather.ogc.cache
 			
 			_items.push(s_key);
 			
+			trace("addCacheItem: debugCache: " + debugCache());
+			
 			if (_items.length > maxCachedItems)
 			{
 				for each (var tiledAreaObj: Object in tiledAreas)
@@ -303,8 +311,8 @@ package com.iblsoft.flexiweather.ogc.cache
 				
 				
 				bWasDeleted = deleteCacheItemByKey(s_key);
-//				debug("addCacheItem: REMOVE TILE : " +s_key + " item was deleted: " + bWasDeleted);
-//				debug("addCacheItem: cache item removed: " + _items.length);
+				debug("addCacheItem: REMOVE TILE : " +s_key + " item was deleted: " + bWasDeleted);
+				debug("addCacheItem: cache item removed: " + _items.length);
 			}
 		}
 		
@@ -332,6 +340,7 @@ package com.iblsoft.flexiweather.ogc.cache
 		override public function deleteCacheItemByKey(s_key: String, b_disposeDisplayed: Boolean = false): Boolean
 		{
 			debug("deleteCacheItemByKey: " + s_key);
+			trace("WMSTileCache deleteCacheItemByKey s_key: " +s_key);
 			
 			var cacheItem: CacheItem = md_cache[s_key] as CacheItem;
 			

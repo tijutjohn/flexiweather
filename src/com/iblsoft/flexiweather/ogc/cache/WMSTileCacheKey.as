@@ -2,6 +2,7 @@ package com.iblsoft.flexiweather.ogc.cache
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.tiling.TileIndex;
+	import com.iblsoft.flexiweather.utils.ISO8601Parser;
 	
 	import flash.net.URLRequest;
 	
@@ -22,7 +23,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			if(tileIndex != null)
 				key +=  "|" + tileIndex.toString();
 			if(m_validity != null)
-				key +=  "|validity:" + m_validity.toString();
+				key +=  "|validity:" + ISO8601Parser.dateToString(m_validity);
 			var a: Array = []
 //			if(url.url != null) {
 //				key += url.url;

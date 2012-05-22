@@ -132,6 +132,8 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 			wmsViewProperties.updateDimensionsInURLRequest(request);
 			wmsViewProperties.updateCustomParametersInURLRequest(request);
 			
+			wmsViewProperties.url = request;
+			
 			var img: DisplayObject = null;
 			
 			var wmsCache: WMSCache = m_layer.getCache() as WMSCache;

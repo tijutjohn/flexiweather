@@ -266,7 +266,6 @@ package com.iblsoft.flexiweather.ogc
 		{
 			for each (var dimension: WMSDimension in layer.dimensions)
 			{
-				trace("dimension: " + dimension.name);
 				switch(dimension.name)
 				{
 					case "RUN":

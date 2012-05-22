@@ -15,6 +15,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import com.iblsoft.flexiweather.ogc.data.QTTViewProperties;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
+	import com.iblsoft.flexiweather.utils.ISO8601Parser;
 	import com.iblsoft.flexiweather.widgets.BackgroundJob;
 	import com.iblsoft.flexiweather.widgets.BackgroundJobManager;
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
@@ -272,6 +273,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 //						};
 						
 						var qttTileViewProperties: QTTTileViewProperties = requestObj.qttTileViewProperties;
+						qttTileViewProperties.updateCycleAge = mi_updateCycleAge;
+						
 						var item: QTTTileRequest = new QTTTileRequest(qttTileViewProperties, jobName);
 						data.push(item);
 						
@@ -336,7 +339,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 				qttTileViewProperties.bitmap = result as Bitmap;
 //				qttTileViewProperties.bitmap.bitmapData.draw(tf, m);
 				
-				removeCachedTiles(qttTileViewProperties, true);
+				//FIXME why this is deleted here
+//				removeCachedTiles(qttTileViewProperties, true);
 				
 				if (qttTileViewProperties.qttViewProperties.specialCacheStrings)
 					trace("QTTLoader tileLaoded: " + qttTileViewProperties.qttViewProperties.specialCacheStrings[0] + "  tileIndex: " + qttTileViewProperties.tileIndex.toString());
@@ -353,7 +357,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 		}
 		
 		/**
-		 * Removed cached tiles for specified validity time 
+		 * Removed cached tiles for specified validity time and updateCycleAge
 		 * @param validity
 		 * 
 		 */		
@@ -363,17 +367,22 @@ package com.iblsoft.flexiweather.ogc.tiling
 			var tiles: Array = cache.getCacheItems();
 			
 			
-			var validity: Date;
-			var updateCycleAge: uint;
+			var validity: Date = qttTileViewProperties.qttViewProperties.validity;
+			var updateCycleAge: uint = qttTileViewProperties.updateCycleAge;
 			
 			for each (var item: CacheItem in tiles)
 			{
 				var currQTTTileViewProperties: QTTTileViewProperties = item.viewProperties as QTTTileViewProperties;
 				var currParentQTT: QTTViewProperties = currQTTTileViewProperties.qttViewProperties;
+			
 				
-				if (currQTTTileViewProperties && currParentQTT && currParentQTT.validity && currParentQTT.validity.time == validity.time && currQTTTileViewProperties.updateCycleAge && currQTTTileViewProperties.updateCycleAge == updateCycleAge)
+				if (currQTTTileViewProperties && currParentQTT)
 				{
-					cache.deleteCacheItem(item, b_disposeDisplayed)
+					if (currParentQTT.validity && ISO8601Parser.dateToString(currParentQTT.validity) == ISO8601Parser.dateToString(validity) && currQTTTileViewProperties.updateCycleAge && currQTTTileViewProperties.updateCycleAge == updateCycleAge)
+					{
+						if (currQTTTileViewProperties.tileIndex.toString() == qttTileViewProperties.tileIndex.toString())
+							cache.deleteCacheItem(item, b_disposeDisplayed)
+					}
 				}
 			}
 		}
