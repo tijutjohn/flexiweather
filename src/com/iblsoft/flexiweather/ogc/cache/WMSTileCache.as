@@ -270,7 +270,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			var specialStrings: Array = parentQTT.specialCacheStrings;
 //			var viewPart: BBox = QTTTileViewProperties.viewPart;
 			
-			trace("WMSTileCache addCacheItem tileIndex: " + tileIndex.toString());
+//			trace("WMSTileCache addCacheItem tileIndex: " + tileIndex.toString());
 			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, null, tileIndex, url, time, specialStrings);
 			var s_key: String = decodeURI(ck.toString()); 
 			
@@ -286,6 +286,8 @@ package com.iblsoft.flexiweather.ogc.cache
 			 */
 			//updateImage(img as Bitmap, metadata.validity, 0x000000, 20,20);
 			//updateImage(img as Bitmap, metadata.validity, 0xffffff, 21,21);
+			//updateImage(img as Bitmap, tileIndex.toString(), 0x000000, 20,20);
+			//updateImage(img as Bitmap ,tileIndex.toString(), 0xffffff, 21,21);
 			
 			item.image = img;
 			
@@ -299,7 +301,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			
 			_items.push(s_key);
 			
-			trace("addCacheItem: debugCache: " + debugCache());
+//			trace("addCacheItem: debugCache: " + debugCache());
 			
 			if (_items.length > maxCachedItems)
 			{
@@ -316,16 +318,20 @@ package com.iblsoft.flexiweather.ogc.cache
 			}
 		}
 		
-		private function updateImage(img: Bitmap, validity: Date, clr: uint, x: int, y: int): void
+		/**
+		 * This debug function for adding text to tiles for debugging purposes 
+		 * @param img
+		 * @param text
+		 * @param clr
+		 * @param x
+		 * @param y
+		 * 
+		 */		
+		private function updateImage(img: Bitmap, text: String, clr: uint, x: int, y: int): void
 		{
 			//debug
 			var txt: TextField = new TextField();
-			if (validity)
-			{
-				txt.text = validity.getHours() + ":"+validity.getMinutes();
-			} else {
-				txt.text = 'no validity';
-			}
+			txt.text = text;
 			var frm: TextFormat = txt.getTextFormat();
 			frm.size = 20;
 			frm.color = clr;
@@ -340,7 +346,7 @@ package com.iblsoft.flexiweather.ogc.cache
 		override public function deleteCacheItemByKey(s_key: String, b_disposeDisplayed: Boolean = false): Boolean
 		{
 			debug("deleteCacheItemByKey: " + s_key);
-			trace("WMSTileCache deleteCacheItemByKey s_key: " +s_key);
+//			trace("WMSTileCache deleteCacheItemByKey s_key: " +s_key);
 			
 			var cacheItem: CacheItem = md_cache[s_key] as CacheItem;
 			

@@ -38,7 +38,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			var tileBBox: Point = new Point(m_extent.width / maxColTiles, m_extent.height / maxRowTiles);
 			var viewTiles: Point = new Point((viewBBox.width / tileBBox.x), (viewBBox.height / tileBBox.y));
 			
-			var leftCol: int = Math.floor((viewBBox.xMin - m_extent.xMin) / tileBBox.x);
+			var leftCol: int = Math.max(0, Math.floor((viewBBox.xMin - m_extent.xMin) / tileBBox.x));
 			var topRow: int = Math.floor((m_extent.yMax - viewBBox.yMax) / tileBBox.y);
 			
 			var _maxTileID: int = (1 << (zoomLevel + 1) - 1) - 1;

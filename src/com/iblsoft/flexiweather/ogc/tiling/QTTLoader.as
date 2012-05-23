@@ -342,8 +342,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 				//FIXME why this is deleted here
 //				removeCachedTiles(qttTileViewProperties, true);
 				
-				if (qttTileViewProperties.qttViewProperties.specialCacheStrings)
-					trace("QTTLoader tileLaoded: " + qttTileViewProperties.qttViewProperties.specialCacheStrings[0] + "  tileIndex: " + qttTileViewProperties.tileIndex.toString());
+//				if (qttTileViewProperties.qttViewProperties.specialCacheStrings)
+//					trace("QTTLoader tileLaoded: " + qttTileViewProperties.qttViewProperties.specialCacheStrings[0] + "  tileIndex: " + qttTileViewProperties.tileIndex.toString());
 				
 				wmsTileCache.addCacheItem(Bitmap(result), qttTileViewProperties);
 				
