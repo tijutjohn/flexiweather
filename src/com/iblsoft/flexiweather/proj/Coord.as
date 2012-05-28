@@ -123,9 +123,10 @@ package com.iblsoft.flexiweather.proj
 			}
 			
 			
-			var p: Point = projection.laLoToPrjPt(x, y);
+			var p: Point = projection.laLoToPrjPt(toRad(x), toRad(y));
 			return new Coord(projection.crs, p.x, p.y);
 		}
+		
 		
 		override public function toString(): String
 		{

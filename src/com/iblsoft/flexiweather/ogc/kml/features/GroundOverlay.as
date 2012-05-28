@@ -3,6 +3,8 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
 	import com.iblsoft.flexiweather.ogc.kml.InteractiveLayerKML;
+	import com.iblsoft.flexiweather.ogc.kml.data.KMLFeaturesReflectionDictionary;
+	import com.iblsoft.flexiweather.ogc.kml.data.KMLReflectionData;
 	import com.iblsoft.flexiweather.ogc.kml.interfaces.IKMLIconFeature;
 	import com.iblsoft.flexiweather.ogc.kml.interfaces.IKMLLabeledFeature;
 	import com.iblsoft.flexiweather.ogc.kml.renderer.IKMLRenderer;
@@ -103,7 +105,15 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				coordinates = coordsArray;
 			}
 			
+			updateCoordsReflections();
+			_kmlReflectionDictionary.updateKMLFeature(this);
+			var reflection: KMLReflectionData = _kmlReflectionDictionary.getReflection(0) as KMLReflectionData;
+			
 			var renderer: IKMLRenderer = (master as InteractiveLayerKML).itemRendererInstance;
+			
+			
+			renderer.render(this, master.container);
+			/*
 			if (changeFlag.fullUpdateNeeded)
 			{
 				renderer.render(this, master.container);
@@ -119,18 +129,63 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			{
 				trace("we expect 4 points in GroundLevel");
 			} else {
-				var nwp: flash.geom.Point = points.getItemAt(0) as flash.geom.Point;
-				var nep: flash.geom.Point = points.getItemAt(1) as flash.geom.Point;
-//				var sep: flash.geom.Point = points.getItemAt(2) as flash.geom.Point;
-//				var swp: flash.geom.Point = points.getItemAt(3) as flash.geom.Point;
 				
-				x = nwp.x;// + (ne.x - nw.x) / 2;
-				y = nep.y;// + (se.y - ne.y) / 2;
+				var totalReflections: int = kmlReflectionDictionary.totalReflections;
+				
+//				var nwp: flash.geom.Point = points.getItemAt(0) as flash.geom.Point;
+//				var nep: flash.geom.Point = points.getItemAt(1) as flash.geom.Point;
+//				var nwpCoord: Coord = coordinates[0] as Coord;
+//				var nepCoord: Coord = coordinates[1] as Coord;
+//				
+//				var nwpReflections: Array = master.container.mapCoordInCRSToViewReflections(new flash.geom.Point(nwpCoord.x, nwpCoord.y));
+//				var nepReflections: Array = master.container.mapCoordInCRSToViewReflections(new flash.geom.Point(nepCoord.x, nepCoord.y));
+				
+				for (var i: int = 0; i < totalReflections; i++)
+				{
+					var kmlReflection: KMLReflectionData = kmlReflectionDictionary.getReflection(i) as KMLReflectionData;
+					if (kmlReflection.points && kmlReflection.points.length > 0)
+					{
+						var nwPoint: flash.geom.Point = kmlReflection.points[0] as flash.geom.Point;
+						var nePoint: flash.geom.Point = kmlReflection.points[1] as flash.geom.Point;
+						
+						if (kmlReflection.displaySprite)
+						{
+							kmlReflection.displaySprite.visible = true;
+							kmlReflection.displaySprite.x = nwPoint.x;
+							kmlReflection.displaySprite.y = nePoint.y;
+							trace("GroundOverlay updated position ["+kmlReflection.displaySprite.x+","+kmlReflection.displaySprite.y+"]");
+						}
+					} else {
+						if (kmlReflection.displaySprite)
+							kmlReflection.displaySprite.visible = false;
+					}
+					
+				}
+				
+				
+//				x = nwp.x;
+//				y = nep.y;
 				trace("roundOverlay update pos: ["+x+","+y+"]")
 //					_container.labelLayout.updateObjectReferenceLocation(this);
 			}
+			*/
+			
+//			var points: ArrayCollection = getPoints();
+//			if (points.length >= 2)
+//			{
+//				var nwp: flash.geom.Point = points.getItemAt(0) as flash.geom.Point;
+//				var nep: flash.geom.Point = points.getItemAt(1) as flash.geom.Point;
+//				x = nwp.x;
+//				y = nep.y;
+//			}
 			super.update(changeFlag);
 			
+		}
+		
+		override public function set x(value:Number):void
+		{
+			super.x = value;
+			trace("groundOverlay: x: " + x);
 		}
 		
 		public function get latLonBox():LatLonBox {

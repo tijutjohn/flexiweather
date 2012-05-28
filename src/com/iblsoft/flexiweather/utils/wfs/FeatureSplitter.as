@@ -175,9 +175,16 @@ package com.iblsoft.flexiweather.utils.wfs
 			}
 			
 //			var resultArr: Array = [];
-			var resultArr: Array = [convertToScreenPoints(points)];
-			resultArr.push(convertToScreenPoints(shiftCoords(points, 1)));
-			resultArr.push(convertToScreenPoints(shiftCoords(points, -1)));
+			
+			var resultArr: Array = [];
+			for(var i: int = 0; i < 5; i++) {
+				var i_delta: int = (i & 1 ? 1 : -1) * ((i + 1) >> 1); // generates sequence 0, 1, -1, 2, -2, ..., 5, -5
+				resultArr.push(convertToScreenPoints(shiftCoords(points, i_delta)));
+			}
+			
+//			var resultArr: Array = [convertToScreenPoints(points)];
+//			resultArr.push(convertToScreenPoints(shiftCoords(points, 1)));
+//			resultArr.push(convertToScreenPoints(shiftCoords(points, -1)));
 			
 			return resultArr;
 		}

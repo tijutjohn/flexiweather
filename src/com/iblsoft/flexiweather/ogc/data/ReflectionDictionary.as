@@ -1,33 +1,31 @@
 package com.iblsoft.flexiweather.ogc.data
 {
-	import com.iblsoft.flexiweather.ogc.editable.MoveablePoint;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.utils.Dictionary;
 
-	public class MoveablePointsDictionary
+	public class ReflectionDictionary
 	{
-		private var _dictionary: Dictionary;
-		private var _iw: InteractiveWidget;
-		private var _totalReflections: int;
-		public function get totalMoveablePoints(): int
-		{
-			if (_dictionary && _dictionary[0])
-				return (_dictionary[0] as ReflectionData).moveablePoints.length;
-			
-			return 0;
-		}
+		protected var _dictionary: Dictionary;
+		protected var _iw: InteractiveWidget;
+		protected var _totalReflections: int;
+		
 		public function get totalReflections(): int
 		{
 			return _totalReflections;
 		}
 		
-		public function MoveablePointsDictionary(iw: InteractiveWidget) 
+		public function ReflectionDictionary(iw: InteractiveWidget): void
 		{
-			_dictionary = new Dictionary();
 			_iw = iw;
+			_dictionary = new Dictionary();
 			_totalReflections = 0;
+		}
+		
+		protected function createNewReflectionData(): ReflectionData
+		{
+			return new ReflectionData(_iw);
 		}
 		
 		public function cleanup(): void
@@ -36,6 +34,12 @@ package com.iblsoft.flexiweather.ogc.data
 			{
 				reflection.cleanup();
 			}
+		}
+		
+		public function removeReflectionItemAt(reflections: int, position: int): void
+		{
+			var reflection: ReflectionData = getReflection(reflections);
+			reflection.removeItemAt(position);
 		}
 		
 		public function removeReflection(reflections: int): void
@@ -49,20 +53,16 @@ package com.iblsoft.flexiweather.ogc.data
 			return _dictionary[reflections] as ReflectionData;
 		}
 		
-		public function addMoveablePoint(mp: MoveablePoint, reflections: int, pointer: int): void
-		{
-			(_dictionary[reflections] as ReflectionData).addMoveablePoint(mp, pointer);
-		}
-		
 		public function addReflectedCoord(coord: Coord, reflections: int, reflectionDelta: int): void
 		{
 			if (!_dictionary[reflections])
 			{
-				_dictionary[reflections] = new ReflectionData(_iw);
+				_dictionary[reflections] = createNewReflectionData();
 				_totalReflections = Math.max(_totalReflections, reflections);
 			}
-			(_dictionary[reflections] as ReflectionData).reflectionDelta = reflectionDelta;
-			(_dictionary[reflections] as ReflectionData).addCoord(coord);
+			var reflection: ReflectionData = getReflection(reflections);
+			reflection.reflectionDelta = reflectionDelta;
+			reflection.addCoord(coord);
 		}
 	}
 }

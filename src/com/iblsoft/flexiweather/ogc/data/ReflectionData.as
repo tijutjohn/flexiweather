@@ -9,47 +9,32 @@ package com.iblsoft.flexiweather.ogc.data
 
 	public class ReflectionData
 	{
-		public function ReflectionData(iw: InteractiveWidget): void
-		{
-			_coords = [];
-			_points = [];
-			_annotations = [];
-			_moveablePoints = [];
-			
-			_iw = iw;
-		}
-		
 		public var displaySprite: Sprite;
 		
 		public var reflectionDelta: int;
 		
-		private var _coords: Array;
-		private var _points: Array;
-		private var _moveablePoints: Array;
-		private var _annotations: Array;
+		protected var _coords: Array;
+		protected var _points: Array;
 		
 		private var _iw: InteractiveWidget;
 		
-		public function get moveablePoints(): Array
+		public function ReflectionData(iw: InteractiveWidget): void
 		{
-			return _moveablePoints;
+			_iw = iw;
+			_coords = [];
+			_points = [];
+			
 		}
 		
 		public function get points(): Array
 		{
 			return _points;
 		}
-		public function get annotations(): Array
-		{
-			return _annotations;
-		}
 		
 		public function remove(): void
 		{
 			_coords = null;
 			_points = null;
-			_moveablePoints = null;
-			_annotations = null;
 		}
 		public function cleanup(): void
 		{
@@ -57,14 +42,10 @@ package com.iblsoft.flexiweather.ogc.data
 			_points = [];	
 		}
 		
-		public function addMoveablePoint(mp: MoveablePoint, pointer: int): void
+		public function removeItemAt(pointer: int): void
 		{
-			_moveablePoints[pointer] = mp;	
-		}
-		
-		public function addAnnotation(annotation: AnnotationBox, pointer: int): void
-		{
-			_annotations[pointer] = annotation;	
+			_points.splice(pointer, 1);
+			_coords.splice(pointer, 1);
 		}
 		
 		public function addCoord(coord: Coord): void

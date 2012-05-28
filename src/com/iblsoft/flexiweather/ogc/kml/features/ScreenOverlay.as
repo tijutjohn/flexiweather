@@ -3,6 +3,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
 	import com.iblsoft.flexiweather.ogc.kml.InteractiveLayerKML;
+	import com.iblsoft.flexiweather.ogc.kml.data.KMLReflectionData;
 	import com.iblsoft.flexiweather.ogc.kml.interfaces.IKMLIconFeature;
 	import com.iblsoft.flexiweather.ogc.kml.renderer.IKMLRenderer;
 	
@@ -75,6 +76,11 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				coordinates = coordsArray;
 			}
 			*/
+			
+			updateCoordsReflections();
+			_kmlReflectionDictionary.updateKMLFeature(this);
+			var reflection: KMLReflectionData = _kmlReflectionDictionary.getReflection(0) as KMLReflectionData;
+			
 			
 			if (master)
 			{

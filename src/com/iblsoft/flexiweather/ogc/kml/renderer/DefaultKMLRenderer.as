@@ -1,11 +1,12 @@
 package com.iblsoft.flexiweather.ogc.kml.renderer
 {
+	import com.iblsoft.flexiweather.ogc.kml.data.KMLFeaturesReflectionDictionary;
+	import com.iblsoft.flexiweather.ogc.kml.data.KMLReflectionData;
 	import com.iblsoft.flexiweather.ogc.kml.data.KMLResourceKey;
 	import com.iblsoft.flexiweather.ogc.kml.events.KMLBitmapEvent;
 	import com.iblsoft.flexiweather.ogc.kml.features.Geometry;
 	import com.iblsoft.flexiweather.ogc.kml.features.GroundOverlay;
 	import com.iblsoft.flexiweather.ogc.kml.features.Icon;
-	import com.iblsoft.flexiweather.ogc.kml.features.KML;
 	import com.iblsoft.flexiweather.ogc.kml.features.KMLFeature;
 	import com.iblsoft.flexiweather.ogc.kml.features.KMLLabel;
 	import com.iblsoft.flexiweather.ogc.kml.features.LineString;
@@ -21,15 +22,16 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 	import com.iblsoft.flexiweather.ogc.kml.features.styles.Style;
 	import com.iblsoft.flexiweather.ogc.kml.features.styles.StyleMap;
 	import com.iblsoft.flexiweather.ogc.kml.features.styles.StyleSelector;
-	import com.iblsoft.flexiweather.ogc.kml.interfaces.IKMLIconFeature;
 	import com.iblsoft.flexiweather.ogc.kml.managers.KMLResourceManager;
 	import com.iblsoft.flexiweather.plugins.IConsole;
 	import com.iblsoft.flexiweather.proj.Coord;
+	import com.iblsoft.flexiweather.utils.GraphicsCurveRenderer;
+	import com.iblsoft.flexiweather.utils.wfs.FeatureSplitter;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
-	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.Graphics;
+	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.geom.Matrix;
@@ -39,6 +41,12 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 	
 	import mx.collections.ArrayCollection;
 
+	/**
+	 * Renderer is used for rendering all KML features for single layer, not one renderer for one KML feature
+	 *  
+	 * @author fkormanak
+	 * 
+	 */	
 	public class DefaultKMLRenderer extends EventDispatcher implements IKMLRenderer
 	{
 		public static var debugConsole: IConsole;
@@ -75,9 +83,28 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 			}
 		}
 		
+		/*
+		protected function getFeatureFromReflectionDirectory(kmlReflectionDictionary: KMLFeaturesReflectionDictionary): KMLFeature
+		{
+			if (kmlReflectionDictionary.totalReflections > 0)
+			{
+				var kmlReflection: KMLReflectionData = kmlReflectionDictionary.getReflection(0) as KMLReflectionData;
+				return kmlReflection.feature;
+			}
+			return null;
+		}
+		*/
+		
+		private var m_featureSplitter: FeatureSplitter;
+		
 		public function render(feature: KMLFeature, container: InteractiveWidget): void
 		{
 			_container = container;
+			
+			if (!m_featureSplitter)
+			{
+				m_featureSplitter = new FeatureSplitter(_container);
+			}
 		
 			if (feature.kml && feature.kml.resourceManager)
 			{
@@ -199,7 +226,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 		{
 		}
 		
-		protected function renderScreenOverlayImage(overlay: ScreenOverlay, icon: BitmapData): void
+		protected function renderScreenOverlayImage( overlay: ScreenOverlay, icon: BitmapData): void
 		{
 			if (!overlay || !overlay.kmlIcon)
 				return;
@@ -279,13 +306,14 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 				xDiff -= overlayPoint.x;
 				yDiff -= overlayPoint.y;
 				
+				
 				m.scale(sx, sy); 
 				m.translate(xDiff, yDiff);
-			
+				
 				gr.beginBitmapFill(icon, m);
-				//			gr.drawRect(0,0, icon.width, icon.height);`
 				gr.drawRect(xDiff, yDiff, w, h);
 				gr.endFill();
+					
 				
 //				icon.dispose();
 			} else {
@@ -328,8 +356,8 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 					var se: Point = points.getItemAt(2) as Point;
 					var sw: Point = points.getItemAt(3) as Point;
 					
-					feature.x = nw.x;// + (ne.x - nw.x) / 2;
-					feature.y = ne.y;// + (se.y - ne.y) / 2;
+//					feature.x = nw.x;
+//					feature.y = ne.y;
 //					trace("renderGroundOverlay overlay pos: ["+feature.x+","+feature.y+"]")
 					_container.labelLayout.updateObjectReferenceLocation(feature);
 				}
@@ -365,7 +393,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 			renderGroundOverlayImage(overlay, event.bitmapData);
 		}
 		
-		protected function renderGroundOverlayImage(overlay: GroundOverlay, icon: BitmapData): void
+		protected function renderGroundOverlayImage( overlay: GroundOverlay, icon: BitmapData): void
 		{
 			if (!overlay || !overlay.kmlIcon)
 				return;
@@ -392,30 +420,98 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 //				
 //				trace("renderGroundOverlayImage overlay pos: ["+overlay.x+","+overlay.y+"]")
 				
-				var widthOnMap: int = ne.x - nw.x;
-				var heightOnMap: int = se.y - ne.y;
 				
-				//render ground overlay image
-				var sx: Number = widthOnMap / icon.width;
-				var sy: Number = heightOnMap / icon.height;
+//				var widthOnMap: int = ne.x - nw.x;
+//				var heightOnMap: int = se.y - ne.y;
+//				
+//				//render ground overlay image
+//				var sx: Number = widthOnMap / icon.width;
+//				var sy: Number = heightOnMap / icon.height;
+//				
+//				var w: int = icon.width * sx;
+//				var h: int = icon.height * sy;
+//				
+//				
+//				if (overlay.isActive(w, h))
+//				{
+//					var m: Matrix = new Matrix();
+//					m.scale(sx, sy); 
+////					var px: int = overlay.x;
+////					var py: int = overlay.y;
+////					overlay.x = overlay.y = 0;
+////					m.translate(px, py);
+//					
+//					xDiff = 0;//-0.5 * icon.width * sx;
+//					yDiff = 0;//-0.5 * icon.height * sy;
+//					
+//					trace("Ground overlay: scale ["+sx+","+sy+"] size ["+w+","+h+"]");
+//					
+//					gr.beginBitmapFill(icon, m);
+//					gr.drawRect(xDiff, yDiff, w, h);
+////					gr.drawRect(0,0 , w, h);
+//					gr.endFill();
+//				}
 				
-				var w: int = icon.width * sx;
-				var h: int = icon.height * sy;
+				var kmlReflectionDictionary: KMLFeaturesReflectionDictionary = overlay.kmlReflectionDictionary;
+				var totalReflections: int = kmlReflectionDictionary.totalReflections;
 				
-				if (overlay.isActive(w, h))
+				trace("renderScreenOverlayImage feature position: [" + overlay.x + " , " + overlay.y + "]");
+				for (var i: int = 0; i < totalReflections; i++)
 				{
-					var m: Matrix = new Matrix();
-					m.scale(sx, sy); 
+					var kmlReflection: KMLReflectionData = kmlReflectionDictionary.getReflection(i) as KMLReflectionData;
+					if (kmlReflection.points && kmlReflection.points.length > 0)
+					{
+						var nwPoint: flash.geom.Point = kmlReflection.points[0] as flash.geom.Point;
+						var nePoint: flash.geom.Point = kmlReflection.points[1] as flash.geom.Point;
+						var sePoint: flash.geom.Point = kmlReflection.points[2] as flash.geom.Point;
+						var swPoint: flash.geom.Point = kmlReflection.points[3] as flash.geom.Point;
+						
+						var widthOnMap: int = nePoint.x - nwPoint.x;
+						var heightOnMap: int = sePoint.y - nePoint.y;
+						
+						//render ground overlay image
+						var sx: Number = widthOnMap / icon.width;
+						var sy: Number = heightOnMap / icon.height;
+						
+						var w: int = icon.width * sx;
+						var h: int = icon.height * sy;
+						
+						if (!kmlReflection.displaySprite)
+						{
+							kmlReflection.displaySprite = new Sprite();
+							overlay.addChild(kmlReflection.displaySprite);
+						}
+						
+						kmlReflection.displaySprite.visible = true;
+						gr = kmlReflection.displaySprite.graphics;
+						gr.clear();
+						kmlReflection.displaySprite.x = nwPoint.x;
+						kmlReflection.displaySprite.y = nePoint.y;
+						
+						if (overlay.isActive(w, h))
+						{
+							var m: Matrix = new Matrix();
+							m.scale(sx, sy); 
+							
+							xDiff = 0;//-0.5 * icon.width * sx;
+							yDiff = 0;//-0.5 * icon.height * sy;
+							
+							trace("Ground overlay: scale ["+sx+","+sy+"] size ["+w+","+h+"]");
+							
+							gr.beginBitmapFill(icon, m);
+							gr.drawRect(xDiff, yDiff, w, h);
+							gr.endFill();
+						} else {
+							trace("Groundoverlay is not active");
+						}
+					} else {
+						if (kmlReflection.displaySprite)
+							kmlReflection.displaySprite.visible = false;
+					}
 					
-					xDiff = 0;//-0.5 * icon.width * sx;
-					yDiff = 0;//-0.5 * icon.height * sy;
 					
-					gr.beginBitmapFill(icon, m);
-					gr.drawRect(xDiff, yDiff, w, h);
-					gr.endFill();
-				} else {
-					trace("Groundoverlay is not active");
 				}
+				
 			}
 			
 //			icon.dispose();
@@ -457,7 +553,6 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 		 *********************************************************************************************/
 		protected function renderPlacemark(feature: KMLFeature): void
 		{
-			
 			var placemark: Placemark = feature as Placemark;
 			renderPlacemarkGeometry(placemark, placemark.geometry);
 		}
@@ -477,17 +572,19 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 				} else { 
 					if (geometry is LineString) 
 					{
-						renderLineString(placemark.graphics, placemark.getPoints(), placemark.kmlLabel, placemarkStyles.normalStyle);
+//						renderLineString(placemark.graphics, placemark.getPoints(), placemark.kmlLabel, placemarkStyles.normalStyle);
+//						renderLineString(placemark.graphics, placemark.coordinates, placemark.kmlLabel, placemarkStyles.normalStyle);
+						renderLineString(placemark, placemarkStyles.normalStyle);
 						
 					} else {
 						if (geometry is LinearRing) 
 						{
-							renderLinearRing(placemark.graphics, geometry as LinearRing, placemark.kmlLabel, placemarkStyles.normalStyle);
+							renderLinearRing(placemark, placemark.graphics, geometry as LinearRing, placemark.kmlLabel, placemarkStyles.normalStyle);
 							
 						}  else {
 							if (geometry is Polygon) 
 							{
-								renderPolygon(placemark.graphics, geometry as Polygon, placemark.kmlLabel, placemarkStyles.normalStyle);
+								renderPolygon(placemark, placemark.graphics, geometry as Polygon, placemark.kmlLabel, placemarkStyles.normalStyle);
 							} else {
 								
 								if (geometry is MultiGeometry) 
@@ -541,7 +638,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 			
 		}
 		
-		private function renderPlacemarkIcon(placemark: Placemark, gr: Graphics, icon: BitmapData, hotSpot: HotSpot, scale: Number): void
+		private function renderPlacemarkIcon( placemark: Placemark, gr: Graphics, icon: BitmapData, hotSpot: HotSpot, scale: Number): void
 		{
 			if (isNaN(scale))
 				scale = 1;
@@ -579,19 +676,45 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 				xDiff = scaleX * icon.width * -1;
 				yDiff = scaleY * icon.height * -1;
 			}
-			var m: Matrix = new Matrix();
-			m.scale(scaleX, scaleY);
-			m.translate(xDiff, yDiff);
 			
-//			debug("render placemark icon: ["+placemark.x + " , " + placemark.y + "] scale ["+scaleX+","+scaleY+"]  translate: ["+xDiff+","+yDiff+"]");
-//			debug("render placemark icon2: ["+icon.width + " , " + icon.height + "]");
-//			debug("render placemark kmlIcon: ["+placemark.kmlIcon.x + " , " + placemark.kmlIcon.y + "] placemark.visible ["+placemark.visible+"]  placemark.kmlIcon.visible: ["+placemark.kmlIcon.visible+"]");
-			gr.clear();
-			gr.beginBitmapFill(icon, m);
-			//			gr.drawRect(0,0, icon.width, icon.height);`
-			gr.drawRect(xDiff, yDiff, icon.width * scaleX, icon.height * scaleY);
-			gr.endFill();
+			var kmlReflectionDictionary: KMLFeaturesReflectionDictionary = placemark.kmlReflectionDictionary;
+			var totalReflections: int = kmlReflectionDictionary.totalReflections;
 			
+			trace("renderPlacemarkIcon feature position: [" + placemark.x + " , " + placemark.y + "]");
+			for (var i: int = 0; i < totalReflections; i++)
+			{
+				var kmlReflection: KMLReflectionData = kmlReflectionDictionary.getReflection(i) as KMLReflectionData;
+				if (kmlReflection.points && kmlReflection.points.length > 0)
+				{
+					var iconPoint: Point = kmlReflection.points[0] as Point;
+				
+					if (!kmlReflection.displaySprite)
+					{
+						kmlReflection.displaySprite = new Sprite();
+						placemark.addChild(kmlReflection.displaySprite);
+					}
+					
+					var gr: Graphics = kmlReflection.displaySprite.graphics;
+					kmlReflection.displaySprite.visible = true;
+					kmlReflection.displaySprite.x = iconPoint.x;
+					kmlReflection.displaySprite.y = iconPoint.y;
+						
+					trace("PlaceMarkIcon ["+placemark.x+","+placemark.y+"] iconPoint: ["+iconPoint.x+","+iconPoint.y+"]"); 
+				
+					var m: Matrix = new Matrix();
+					m.scale(scaleX, scaleY);
+					m.translate(xDiff, yDiff);
+				
+					gr.clear();
+					gr.beginBitmapFill(icon, m);
+					gr.drawRect(xDiff, yDiff, icon.width * scaleX, icon.height * scaleY);
+					gr.endFill();
+				} else {
+					if (kmlReflection.displaySprite)
+						kmlReflection.displaySprite.visible = false;
+				}
+			
+			}
 //			icon.dispose();
 			
 			updateLabelPosition(placemark.kmlLabel, placemark.x + xDiff, placemark.y + yDiff);
@@ -605,7 +728,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 		 * @param multigeometry
 		 * 
 		 */		
-		protected function renderMultiGeometry(placemark: Placemark, multigeometry: MultiGeometry): void
+		protected function renderMultiGeometry( placemark: Placemark, multigeometry: MultiGeometry): void
 		{
 			for each (var geometry: Geometry in multigeometry.geometries)
 			{
@@ -613,7 +736,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 			}
 		}
 		
-		protected function renderPoint(placemark: Placemark, style: Style, highlightStyle: Style): void
+		protected function renderPoint( placemark: Placemark, style: Style, highlightStyle: Style): void
 		{
 			var iconStyle: IconStyle;
 			
@@ -702,15 +825,38 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 				
 				if (!iconStyle)
 				{
-					//if there is no Icon defined, just draw default circle placemark
-					gr.beginFill(0xaa0000, 0.3);
-					gr.lineStyle(1,0);
-					gr.drawCircle(0,0,7);
-					gr.endFill();
+					var kmlReflectionDictionary: KMLFeaturesReflectionDictionary = placemark.kmlReflectionDictionary;
+					var totalReflections: int = kmlReflectionDictionary.totalReflections;
+					
+					for (var i: int = 0; i < totalReflections; i++)
+					{
+						var kmlReflection: KMLReflectionData = kmlReflectionDictionary.getReflection(i) as KMLReflectionData;
+						var iconPoint: Point = kmlReflection.points[0] as Point;
+						
+						trace("PlaceMarkIcon ["+placemark.x+","+placemark.y+"] iconPoint: ["+iconPoint.x+","+iconPoint.y+"]"); 
+						if (!kmlReflection.displaySprite)
+						{
+							kmlReflection.displaySprite = new Sprite();
+							placemark.addChild(kmlReflection.displaySprite);
+						}
+						
+						kmlReflection.displaySprite.x = iconPoint.x;
+						kmlReflection.displaySprite.y = iconPoint.y;
+						
+						gr = kmlReflection.displaySprite.graphics;
+						gr.clear();
+						
+						//if there is no Icon defined, just draw default circle placemark
+						gr.beginFill(0xaa0000, 0.3);
+						gr.lineStyle(1,0);
+						gr.drawCircle(0,0,7);
+						gr.endFill();
+					}
 				}
 				updateLabelPosition(placemark.kmlLabel, placemark.x + 12, placemark.y + 12);
 			}
 			
+			/*
 			var points: ArrayCollection = placemark.getPoints();
 			if (points && points.length > 0)
 			{
@@ -720,10 +866,19 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 				placemark.y = point.y;
 				_container.labelLayout.updateObjectReferenceLocation(placemark);
 			}
+			*/
 		}
 		
-		protected function renderLineString(gr: Graphics, points: ArrayCollection, kmlLabel: KMLLabel, style: Style): void
+//		protected function renderLineString( gr: Graphics, points: ArrayCollection, kmlLabel: KMLLabel, style: Style): void
+//		protected function renderLineString( gr: Graphics, coords: Array, kmlLabel: KMLLabel, style: Style): void
+		protected function renderLineString(placemark: Placemark, style: Style): void
 		{
+//			renderLineString(placemark.graphics, placemark.coordinates, placemark.kmlLabel, placemarkStyles.normalStyle);
+			
+			var gr: Graphics =  placemark.graphics;
+			var coords: Array = placemark.coordinates;
+			var kmlLabel: KMLLabel = placemark.kmlLabel;
+			
 			var lineWidth: int = 3;
 			var lineColor: int = 0x000000;
 			var useOutline: Boolean = true;
@@ -745,36 +900,96 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 			
 			gr.clear();
 			gr.lineStyle(lineWidth, lineColor);
-			if (points && points.length > 1)
+			if (coords && coords.length > 1)
 			{
-				//we are drawing whole line string relatively to first point to be able move whole sprite when drawing is not needed
-				var p0: Point = points.getItemAt(0) as Point;
-				var sx: int = p0.x;
-				var sy: int = p0.y;
 				
-				var total: int = points.length;
-				var cnt: int = 0;
-				for (var i: int = 0; i < total; i++)
+				var g: GraphicsCurveRenderer = new GraphicsCurveRenderer(gr);
+				
+				var features: Array = m_featureSplitter.splitCoordPolyLineToArrayOfPointPolyLines(coords, false);
+				
+				var kmlReflectionDictionary: KMLFeaturesReflectionDictionary = placemark.kmlReflectionDictionary;
+				var totalReflections: int = kmlReflectionDictionary.totalReflections;
+				
+				for (var i: int = 0; i < totalReflections; i++)
 				{
-					var point: Point = points.getItemAt(i) as Point
-					if (point)
+					var kmlReflection: KMLReflectionData = kmlReflectionDictionary.getReflection(i) as KMLReflectionData;
+					
+					if (!kmlReflection.displaySprite)
 					{
-						if (cnt == 0)
+						kmlReflection.displaySprite = new Sprite();
+						placemark.addChild(kmlReflection.displaySprite);
+					}
+					
+					gr = kmlReflection.displaySprite.graphics;
+					gr.clear();
+					gr.lineStyle(lineWidth, lineColor);
+					var p: Point;
+					
+					if (features.length != totalReflections)
+					{
+						trace("there is problem with rendering: renderLineString");
+					}
+					
+					if (i < features.length)
+					{
+						var mPoints: Array = features[i] as Array;
+						
+						var g: GraphicsCurveRenderer = new GraphicsCurveRenderer(gr);
+						
+						var total: int = mPoints.length;
+						if (total > 0)
 						{
-							gr.moveTo(point.x - sx, point.y - sy);
-						} else {
-							gr.lineTo(point.x - sx, point.y - sy);
+							p = mPoints[0] as Point;
+							var sx: int = p.x;
+							var sy: int = p.y;
+							
+							//					trace("\t drawPolyline start ["+p.x+","+p.y+"]");
+							g.start(p.x - sx, p.y - sy);
+							g.moveTo(p.x - sx, p.y - sy);
+							
+							for (var pi: int = 1; pi < mPoints.length; pi++){
+								p = mPoints[pi] as Point;
+								g.lineTo(p.x - sx, p.y - sy);
+								//						trace("\t drawPolyline lineTo ["+p.x+","+p.y+"]");
+							}
+							
+							g.finish(p.x - sx, p.y - sy);
+							//					trace("\t drawPolyline finish ["+p.x+","+p.y+"]");
 						}
-						cnt++;
 					}
 				}
+				
+				
+				//			trace("\n\n IW drawPolyline features: " + features.length);
+				
+				//we are drawing whole line string relatively to first point to be able move whole sprite when drawing is not needed
+//				var p0: Point = points.getItemAt(0) as Point;
+//				var sx: int = p0.x;
+//				var sy: int = p0.y;
+//				
+//				var total: int = points.length;
+//				var cnt: int = 0;
+//				for (var i: int = 0; i < total; i++)
+//				{
+//					var point: Point = points.getItemAt(i) as Point
+//					if (point)
+//					{
+//						if (cnt == 0)
+//						{
+//							gr.moveTo(point.x - sx, point.y - sy);
+//						} else {
+//							gr.lineTo(point.x - sx, point.y - sy);
+//						}
+//						cnt++;
+//					}
+//				}
 			}
 			
-			if (point)
-				updateLabelPosition(kmlLabel, point.x, point.y); 
+//			if (point)
+//				updateLabelPosition(kmlLabel, point.x, point.y); 
 		}
 		
-		protected function renderLinearRing(gr: Graphics, linearRing: LinearRing, kmlLabel: KMLLabel, style: Style): void
+		protected function renderLinearRing(placemark: Placemark, gr: Graphics, linearRing: LinearRing, kmlLabel: KMLLabel, style: Style): void
 		{
 			gr.clear();
 			
@@ -802,13 +1017,9 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 					fillExists = true;
 					var fillColor: uint = ps.color;
 					var fillAlpha: Number = 0.5;
-					gr.beginFill(fillColor, fillAlpha);
+					
 				}
 			}
-			
-			
-			
-			
 			
 			var coords: Array = linearRing.coordinatesPoints;
 			var points: ArrayCollection = new ArrayCollection();
@@ -819,9 +1030,87 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 				points.addItem(pt);
 			}
 			
-			if (outlineExists)
-				gr.lineStyle(lineWidth, lineColor);
 			
+			if (coords && coords.length > 1)
+			{
+//				_container.drawPolyline(new GraphicsCurveRenderer(gr), coords);
+				
+				var g: GraphicsCurveRenderer = new GraphicsCurveRenderer(gr);
+				
+				var features: Array = m_featureSplitter.splitCoordPolyLineToArrayOfPointPolyLines(coords, false);
+				
+				var kmlReflectionDictionary: KMLFeaturesReflectionDictionary = placemark.kmlReflectionDictionary;
+				var totalReflections: int = kmlReflectionDictionary.totalReflections;
+				
+				for (var i: int = 0; i < totalReflections; i++)
+				{
+					var kmlReflection: KMLReflectionData = kmlReflectionDictionary.getReflection(i) as KMLReflectionData;
+					
+					if (!kmlReflection.displaySprite)
+					{
+						kmlReflection.displaySprite = new Sprite();
+						placemark.addChild(kmlReflection.displaySprite);
+					}
+					
+					gr = kmlReflection.displaySprite.graphics;
+					gr.clear();
+					
+					if (outlineExists)
+						gr.lineStyle(lineWidth, lineColor);
+					
+					if (fillExists)
+						gr.beginFill(fillColor, fillAlpha);
+					
+					var p: Point;
+					
+					if (features.length != totalReflections)
+					{
+						trace("there is problem with rendering: renderLineString");
+					}
+					
+					if (i < features.length)
+					{
+						var mPoints: Array = features[i] as Array;
+						
+						var g: GraphicsCurveRenderer = new GraphicsCurveRenderer(gr);
+						
+						var total: int = mPoints.length;
+						if (total > 0)
+						{
+							p = mPoints[0] as Point;
+							var sx: int = p.x;
+							var sy: int = p.y;
+							
+							var cnt: int = 0;
+							
+							g.start(p.x - sx, p.y - sy);
+							
+							for (var pi: int = 1; pi < mPoints.length; pi++){
+								p = mPoints[pi] as Point;
+								if (p)
+								{
+									if (cnt == 0)
+									{
+										gr.moveTo(p.x - sx, p.y - sy);
+									} else {
+										gr.lineTo(p.x - sx, p.y - sy);
+									}
+									cnt++;
+								}
+							}
+							
+							g.finish(p.x - sx, p.y - sy);
+							//					trace("\t drawPolyline finish ["+p.x+","+p.y+"]");
+						}
+					}
+					
+					if (fillExists)
+						gr.endFill();
+				}
+			}
+				
+				
+			/*
 			if (points && points.length > 1)
 			{
 				var p0: Point = points.getItemAt(0) as Point;
@@ -844,19 +1133,18 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 						cnt++;
 					}
 				}
-			}	
+			}
+			*/
 			
-			if (fillExists)
-				gr.endFill();
 			
-			if (point)
-				updateLabelPosition(kmlLabel, point.x, point.y); 
+//			if (point)
+//				updateLabelPosition(kmlLabel, point.x, point.y); 
 		}
-		protected function renderPolygon(gr: Graphics, polygon: Polygon, kmlLabel: KMLLabel, style: Style): void
+		protected function renderPolygon(placemark: Placemark, gr: Graphics, polygon: Polygon, kmlLabel: KMLLabel, style: Style): void
 		{
 			//render outerBoundary
 			var linearRing: LinearRing = polygon.outerBoundaryIs.linearRing;
-			renderLinearRing(gr, linearRing, kmlLabel, style);
+			renderLinearRing(placemark, gr, linearRing, kmlLabel, style);
 		}
 		
 		/*********************************************************************************************

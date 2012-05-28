@@ -6,6 +6,8 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import com.iblsoft.flexiweather.ogc.FeatureBase;
 	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
+	import com.iblsoft.flexiweather.ogc.kml.data.KMLFeaturesReflectionDictionary;
+	import com.iblsoft.flexiweather.ogc.kml.data.KMLReflectionData;
 	import com.iblsoft.flexiweather.ogc.kml.events.KMLFeatureEvent;
 	import com.iblsoft.flexiweather.ogc.kml.features.styles.Style;
 	import com.iblsoft.flexiweather.ogc.kml.features.styles.StyleMap;
@@ -14,6 +16,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import com.iblsoft.flexiweather.ogc.kml.renderer.IKMLRenderer;
 	import com.iblsoft.flexiweather.plugins.IConsole;
 	import com.iblsoft.flexiweather.proj.Coord;
+	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.syndication.ParsingTools;
 	import com.iblsoft.flexiweather.utils.AnticollisionLayout;
 	import com.iblsoft.flexiweather.utils.AnticollisionLayoutObject;
@@ -106,6 +109,13 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			return _kml;
 		}
 		
+		
+		protected var _kmlReflectionDictionary: KMLFeaturesReflectionDictionary;
+		public function get kmlReflectionDictionary(): KMLFeaturesReflectionDictionary
+		{
+			return _kmlReflectionDictionary
+		}
+		
 		private var _kmlns: Namespace;
 		public function get kmlns(): Namespace
 		{
@@ -135,6 +145,55 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			mouseChildren = true;
 			doubleClickEnabled = true;
 			addEventListener(MouseEvent.CLICK, onKMLFeatureClick);
+		}
+		
+		override public function setMaster(master:InteractiveLayerFeatureBase):void
+		{
+			super.setMaster(master);
+			
+			_kmlReflectionDictionary = new KMLFeaturesReflectionDictionary(master.container);
+		}
+		
+		protected function get currentCoordinates(): Array
+		{
+			return coordinates;
+		}
+		
+		protected function  updateCoordsReflections(): void
+		{
+			
+			//FIXME need to chack correct coordinate e.g. for Placemark Polygon
+			_kmlReflectionDictionary.cleanup();
+			
+			var crs: String = master.container.getCRS();
+			var projection: Projection = master.container.getCRSProjection();
+			
+			var currCoordinates: Array = currentCoordinates;
+			var total: int = currentCoordinates.length;
+			for (var i: int = 0; i < total; i++)
+			{
+				var coord: Coord = currCoordinates[i] as Coord;
+				var coordPointForReflection: flash.geom.Point = new flash.geom.Point;
+				if (coord.crs != crs)
+				{
+					trace("Problem with Coord... not same as InteractiveWidget coord");
+					//conver to InteractiveWidget CRS
+					coordPointForReflection = coord.convertToProjection(projection);
+					
+				} else {
+					coordPointForReflection = new flash.geom.Point(coord.x, coord.y);
+				}
+				var pointReflections: Array = master.container.mapCoordInCRSToViewReflections(coordPointForReflection);
+				var reflectionsCount: int = pointReflections.length;
+				
+				for (var j: int = 0; j < reflectionsCount; j++)
+				{
+					var pointReflectedObject: Object = pointReflections[j];
+					var pointReflected: flash.geom.Point = pointReflectedObject.point as flash.geom.Point;
+					var coordReflected: Coord = new Coord(crs, pointReflected.x, pointReflected.y);
+					_kmlReflectionDictionary.addReflectedCoord(coordReflected, j, pointReflectedObject.reflection);
+				}
+			}
 		}
 		
 		/**

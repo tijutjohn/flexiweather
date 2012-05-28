@@ -4,6 +4,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
 	import com.iblsoft.flexiweather.ogc.kml.InteractiveLayerKML;
+	import com.iblsoft.flexiweather.ogc.kml.data.KMLReflectionData;
 	import com.iblsoft.flexiweather.ogc.kml.interfaces.IKMLIconFeature;
 	import com.iblsoft.flexiweather.ogc.kml.interfaces.IKMLLabeledFeature;
 	import com.iblsoft.flexiweather.ogc.kml.managers.KMLParserManager;
@@ -149,6 +150,21 @@ package com.iblsoft.flexiweather.ogc.kml.features
 //			master.container.objectLayout.addObject(this);
 		}
 		
+		override protected function get currentCoordinates(): Array
+		{
+			if (geometry is Polygon)
+			{
+				var linearRing: LinearRing = (geometry as Polygon).outerBoundaryIs.linearRing;
+				return linearRing.coordinatesPoints;
+			}
+			
+			if (geometry is MultiGeometry)
+			{
+				trace("what should be returned for multigeometry???");
+			}
+			return coordinates;
+		}
+		
 		protected function updateGeometryCoordinates(currGeometry: Geometry): void
 		{
 			var arr: Array;
@@ -221,7 +237,14 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			
 			super.update(changeFlag);
 			
+			
+			updateCoordsReflections();
+			_kmlReflectionDictionary.updateKMLFeature(this);
+			
+			var reflection: KMLReflectionData = _kmlReflectionDictionary.getReflection(0) as KMLReflectionData;
+			
 			var renderer: IKMLRenderer = (master as InteractiveLayerKML).itemRendererInstance;
+			
 			if (changeFlag.fullUpdateNeeded)
 			{
 				renderer.render(this, master.container);
@@ -234,11 +257,35 @@ package com.iblsoft.flexiweather.ogc.kml.features
 					}
 				}
 			}
-			
 			if (_geometry)
 			{
 				var points: ArrayCollection;
 				var point: flash.geom.Point;
+				
+				
+				var totalReflections: int = kmlReflectionDictionary.totalReflections;
+				
+				for (var i: int = 0; i < totalReflections; i++)
+				{
+					var kmlReflection: KMLReflectionData = kmlReflectionDictionary.getReflection(i) as KMLReflectionData;
+					if (kmlReflection.points && kmlReflection.points.length > 0)
+					{
+						var iconPoint:  flash.geom.Point = kmlReflection.points[0] as flash.geom.Point;
+						
+						if (kmlReflection.displaySprite && iconPoint)
+						{
+						
+							kmlReflection.displaySprite.visible = true;
+							kmlReflection.displaySprite.x = iconPoint.x;
+							kmlReflection.displaySprite.y = iconPoint.y;
+						}
+					} else {
+						if (kmlReflection.displaySprite)
+							kmlReflection.displaySprite.visible = false;
+					}
+				}
+				
+				/*
 				if (_geometry is MultiGeometry)
 				{
 					var multigeometry: MultiGeometry = _geometry as MultiGeometry;
@@ -266,9 +313,12 @@ package com.iblsoft.flexiweather.ogc.kml.features
 						}
 						x = point.x;
 						y = point.y;
+						
+						
 						//_container.labelLayout.updateObjectReferenceLocation(placemark);
 					}
 				}
+					*/
 			}
 			
 		}

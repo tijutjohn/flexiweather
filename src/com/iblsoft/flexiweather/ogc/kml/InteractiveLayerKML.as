@@ -502,10 +502,10 @@ package com.iblsoft.flexiweather.ogc.kml
 		{
 			var startFeature: KMLFeature = feature
 			var nl: NetworkLink;
-			trace("START OF updateForFeature: " + startFeature);
+//			trace("START OF updateForFeature: " + startFeature);
 			while (feature)
 			{
-				trace("updateForFeature: " + feature);
+//				trace("updateForFeature: " + feature);
 //				if (feature is NetworkLink)
 //				{
 //					nl = feature as NetworkLink;
@@ -516,10 +516,10 @@ package com.iblsoft.flexiweather.ogc.kml
 //				}
 //				if (feature.parent) {
 //					trace("HAS PARENT: " + feature.name);
-				if (feature is Folder)
-				{
-					trace("stop");
-				}
+//				if (feature is Folder)
+//				{
+//					trace("stop");
+//				}
 				asyncManager.addCall(feature, updateFeature, [feature, changeFlag, asyncManager]);
 //				} else {
 //					trace("ILKML update -> feature is not on displaylist, do not do updateFeature");
@@ -532,13 +532,13 @@ package com.iblsoft.flexiweather.ogc.kml
 				{
 					updateForFeature((feature as Container).firstFeature, changeFlag, asyncManager);
 				}
-				if (feature.next is Folder)
-				{
-					trace("stop");
-				}
+//				if (feature.next is Folder)
+//				{
+//					trace("stop");
+//				}
 				feature = feature.next as KMLFeature;
 			}
-			trace("END OF updateForFeature:  " + startFeature);
+//			trace("END OF updateForFeature:  " + startFeature);
 		}
 		
 		/*
@@ -609,21 +609,20 @@ package com.iblsoft.flexiweather.ogc.kml
 		
 		private function onFullUpdateFinished(event: Event): void
 		{
-			trace("onFullUpdateFinished");
+//			trace("onFullUpdateFinished");
 //			hideLoadingPopup();
 		}
 		
 		private function updateFeature(feature:  KMLFeature, changeFlag: FeatureUpdateContext, asyncManager: AsyncManager): void
 		{
-			trace("updateFeature: " + feature);
+//			trace("updateFeature: " + feature);
 			feature.update(changeFlag);
 			feature.visible = true; //getAbsoluteVisibility(feature);
 			
-			if (feature is Container)
-			{
-				trace("\t updateFeature call updateForFeature: " + (feature as Container).firstFeature);
-//				updateForFeature((feature as Container).firstFeature, changeFlag, asyncManager);
-			}
+//			if (feature is Container)
+//			{
+//				trace("\t updateFeature call updateForFeature: " + (feature as Container).firstFeature);
+//			}
 		}
 		
 		
@@ -714,7 +713,7 @@ package com.iblsoft.flexiweather.ogc.kml
 			if (updateFlag.anyChange)
 			{
 				update(updateFlag);
-				trace("ILKML isUpdateNeeded: " + updateFlag.toString());
+//				trace("ILKML isUpdateNeeded: " + updateFlag.toString());
 			}
 			
 			m_oldCRS = crs;	

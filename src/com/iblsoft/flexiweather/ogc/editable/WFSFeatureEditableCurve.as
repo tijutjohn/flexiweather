@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.ogc.editable
 {
 	import com.iblsoft.flexiweather.ogc.GMLUtils;
+	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
 	import com.iblsoft.flexiweather.utils.CubicBezier;
 	import com.iblsoft.flexiweather.utils.CurveLineSegment;
 	import com.iblsoft.flexiweather.utils.CurveLineSegmentRenderer;
@@ -166,7 +167,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				// don't do anything if this click is on MoveablePoint belonging to this curve
 				
 				//FIXME fix snap for reflection from which point is dragged
-				var moveablePoints: Array = ml_movablePoints.getReflection(0).moveablePoints;
+				var moveablePoints: Array = (ml_movablePoints.getReflection(0) as WFSEditableReflectionData).moveablePoints;
 				
 				for each(var mp: MoveablePoint in moveablePoints) {
 					if(mp.hitTestPoint(stagePt.x, stagePt.y, true))
@@ -228,7 +229,7 @@ package com.iblsoft.flexiweather.ogc.editable
 					{
 						//FIXME... question is if this needs to be done for 1 reflection or for all reflections
 						
-						newPoint = ml_movablePoints.getReflection(0).moveablePoints[i_best] as MoveablePoint;
+						newPoint = (ml_movablePoints.getReflection(0) as WFSEditableReflectionData).moveablePoints[i_best] as MoveablePoint;
 						newPoint.onMouseDown(pt);
 						if(!b_keepDrag) {
 							newPoint.onMouseUp(pt);
