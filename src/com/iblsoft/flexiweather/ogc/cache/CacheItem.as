@@ -51,5 +51,14 @@ package com.iblsoft.flexiweather.ogc.cache
 		{
 			return "CacheItem " + _id;
 		}
+		
+		public function destroy(): void
+		{
+			cacheKey.destroy();
+			cacheKey = null;
+			lastUsed = null;
+			viewProperties = null
+			image = null;
+		}
 	}
 }

@@ -152,10 +152,12 @@ package com.iblsoft.flexiweather.ogc
 		public function changeViewProperties(viewProperties: IViewProperties): void
 		{
 			m_currentWMSViewProperties.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onCurrentWMSDataSynchronisedVariableChanged);
+			m_currentWMSViewProperties.removeEventListener(WMSViewPropertiesEvent.WMS_DIMENSION_VALUE_SET, onWMSDimensionValueSet);
 			
 			m_currentWMSViewProperties = viewProperties as WMSViewProperties;
 			
 			m_currentWMSViewProperties.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onCurrentWMSDataSynchronisedVariableChanged);
+			m_currentWMSViewProperties.addEventListener(WMSViewPropertiesEvent.WMS_DIMENSION_VALUE_SET, onWMSDimensionValueSet);
 		}
 		
 		/**
@@ -188,7 +190,7 @@ package com.iblsoft.flexiweather.ogc
 //			wmsViewProperties.cache = m_cache;
 		}
 		
-		protected function destroyWMSViewPropertiesLoader(loader: IWMSViewPropertiesLoader): void
+		protected function destroyWMSViewPropertiesPreloader(loader: IWMSViewPropertiesLoader): void
 		{
 			loader.removeEventListener("invalidateDynamicPart", onWMSViewPropertiesDataInvalidateDynamicPart);
 			loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
@@ -390,7 +392,7 @@ package com.iblsoft.flexiweather.ogc
 		protected function onPreloadingWMSDataLoadingFinished(event: InteractiveLayerEvent): void
 		{
 			var loader: IWMSViewPropertiesLoader = event.target as IWMSViewPropertiesLoader;
-			destroyWMSViewPropertiesLoader(loader);
+			destroyWMSViewPropertiesPreloader(loader);
 			
 			var wmsViewProperties: WMSViewProperties = event.data.wmsViewProperties as WMSViewProperties;
 			wmsViewProperties.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
@@ -462,7 +464,12 @@ package com.iblsoft.flexiweather.ogc
 		
 		protected function onCurrentWMSDataLoadingFinished(event: InteractiveLayerEvent): void
 		{
-//			trace("\t onCurrentWMSDataLoadingFinished ["+name+"]");
+			var loader: MSBaseLoader = event.target as MSBaseLoader;
+			loader.removeEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
+			loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
+			loader.removeEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
+			loader.removeEventListener("invalidateDynamicPart", onCurrentWMSDataInvalidateDynamicPart);
+			
 			notifyLoadingFinished();	
 			_currentWMSDataLoadingStarted = false;
 		}
@@ -588,6 +595,66 @@ package com.iblsoft.flexiweather.ogc
 			
 		}
 
+		override public function destroy():void
+		{
+			super.destroy();
+			
+			
+			var wmsViewProperties: WMSViewProperties;
+			if (ma_preloadingWMSViewProperties)
+			{
+				for each (wmsViewProperties in ma_preloadingWMSViewProperties)
+				{
+					wmsViewProperties.destroy();
+				}
+			}
+			if (ma_preloadedWMSViewProperties)
+			{
+				for each (wmsViewProperties in ma_preloadedWMSViewProperties)
+				{
+					wmsViewProperties.destroy();
+				}
+			}
+			
+			ma_preloadingWMSViewProperties = null;
+			ma_preloadedWMSViewProperties = null;
+			
+			if (md_customParameters)
+			{
+				md_customParameters = null;
+			}
+			if (ma_subLayerStyleNames)
+			{
+				ma_subLayerStyleNames = null;
+			}
+			
+			if (m_currentWMSViewProperties)
+			{
+				m_currentWMSViewProperties.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onCurrentWMSDataSynchronisedVariableChanged);
+				m_currentWMSViewProperties.removeEventListener(WMSViewPropertiesEvent.WMS_DIMENSION_VALUE_SET, onWMSDimensionValueSet);
+				m_currentWMSViewProperties.destroy();
+				m_currentWMSViewProperties = null;
+			}
+			
+			if (m_featureInfoLoader)
+			{
+				m_featureInfoLoader.removeEventListener(UniURLLoaderEvent.DATA_LOADED, onFeatureInfoLoaded);
+				m_featureInfoLoader.removeEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onFeatureInfoLoadFailed);
+				m_featureInfoLoader = null;
+			}
+			
+			if (m_cfg)
+			{
+				m_cfg.removeEventListener(WMSLayerConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
+				m_cfg.removeEventListener(WMSLayerConfiguration.CAPABILITIES_RECEIVED, onCapabilitiesReceived);
+				m_cfg = null;
+			}
+			
+			destroyCache();
+				
+		}
+		
+		
 		public override function draw(graphics: Graphics): void
 		{
 			super.draw(graphics);
@@ -1362,10 +1429,10 @@ package com.iblsoft.flexiweather.ogc
 			BindingUtils.bindProperty(fadeOut, 'alphaFrom', this, "alpha");
 			fadeOut.duration = 300;
 			
-			fadeIn.addEventListener(EffectEvent.EFFECT_END, onEffectEnd);
+			fadeIn.addEventListener(EffectEvent.EFFECT_END, onFadeInEnd);
 			fadeIn.addEventListener(EffectEvent.EFFECT_START, onEffectFadeInStart);
 			fadeOut.addEventListener(EffectEvent.EFFECT_START, onEffectFadeOutStart);
-			fadeOut.addEventListener(EffectEvent.EFFECT_END, onEffectEnd);
+			fadeOut.addEventListener(EffectEvent.EFFECT_END, onFadeOutEnd);
 			
 		}
 		
@@ -1380,6 +1447,20 @@ package com.iblsoft.flexiweather.ogc
 		}
 		private function onEffectEnd(event: EffectEvent): void
 		{
+			callLater(delayedEffectEnd);
+		}
+		private function onFadeInEnd(event: EffectEvent): void
+		{
+			fadeIn.removeEventListener(EffectEvent.EFFECT_END, onFadeInEnd);
+			fadeIn.removeEventListener(EffectEvent.EFFECT_START, onEffectFadeInStart);
+			fadeIn = null;
+			callLater(delayedEffectEnd);
+		}
+		private function onFadeOutEnd(event: EffectEvent): void
+		{
+			fadeOut.removeEventListener(EffectEvent.EFFECT_START, onEffectFadeOutStart);
+			fadeOut.removeEventListener(EffectEvent.EFFECT_END, onFadeOutEnd);
+			fadeOut = null;
 			callLater(delayedEffectEnd);
 		}
 		private function delayedEffectEnd(): void
@@ -1446,6 +1527,13 @@ package com.iblsoft.flexiweather.ogc
 		override public function toString(): String
 		{
 			return "InteractiveLayerMSBase " + name;
+		}
+		
+		private function destroyCache():void
+		{
+			if (m_cache)
+				m_cache.destroyCache();
+			
 		}
 		
 		public function clearCache():void

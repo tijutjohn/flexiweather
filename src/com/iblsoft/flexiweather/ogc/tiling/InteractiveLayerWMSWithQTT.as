@@ -257,7 +257,16 @@ package com.iblsoft.flexiweather.ogc.tiling
 			}
 		}
 		
-		override protected function destroyWMSViewPropertiesLoader(loader: IWMSViewPropertiesLoader): void
+		override public function destroy():void
+		{
+			super.destroy();
+			
+			if (m_tiledLayer)
+			{
+				m_tiledLayer.destroy();
+			}
+		}
+		override protected function destroyWMSViewPropertiesPreloader(loader: IWMSViewPropertiesLoader): void
 		{
 			if (loader is QTTLoader)
 			{
@@ -266,7 +275,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			
 				loader.destroy();
 			} else {
-				super.destroyWMSViewPropertiesLoader(loader);
+				super.destroyWMSViewPropertiesPreloader(loader);
 			}
 		}
 		

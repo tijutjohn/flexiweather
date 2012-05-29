@@ -56,6 +56,16 @@ package com.iblsoft.flexiweather.ogc
 //			m_currentWMSViewProperties.cache = m_cache;
 		}
 		
+		override public function destroy():void
+		{
+			super.destroy();
+			
+			if (m_autoRefreshTimer)
+			{
+				m_autoRefreshTimer.stop();
+				m_autoRefreshTimer.removeEventListener(TimerEvent.TIMER_COMPLETE, autoRefreshTimerCompleted)
+			}
+		}
 		public function serialize(storage: Storage): void
 		{
 			//super.serialize(storage);

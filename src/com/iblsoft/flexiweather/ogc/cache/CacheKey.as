@@ -48,6 +48,15 @@ package com.iblsoft.flexiweather.ogc.cache
 			}
 		}
 		
+		public function destroy(): void
+		{
+			url = null;
+			crs = null;
+			bbox = null;
+			validity = null;
+			ms_key = null;
+		}
+		
 		public function toString(): String
 		{ return ms_key; }
 	}

@@ -53,11 +53,12 @@ package com.iblsoft.flexiweather.net.loaders
 		{
 			var imageLoader: LoaderWithAssociatedData = LoaderWithAssociatedData(event.target.loader);
 			var urlRequest: URLRequest = disconnectImageLoader(imageLoader);
+			var callbackObject: Object = md_imageLoaders[imageLoader];
+			delete md_imageLoaders[imageLoader];
+			
 			if(urlRequest == null)
 				return;
 			
-			var callbackObject: Object = md_imageLoaders[imageLoader];
-			delete md_imageLoaders[imageLoader];
 			
 			callbackObject.result(imageLoader.content, urlRequest, imageLoader.associatedData);
 		}
@@ -66,11 +67,13 @@ package com.iblsoft.flexiweather.net.loaders
 		{
 			var imageLoader: LoaderWithAssociatedData = LoaderWithAssociatedData(event.target.loader);
 			var urlRequest: URLRequest = disconnectImageLoader(imageLoader);
-			if(urlRequest == null)
-				return;
 			
 			var callbackObject: Object = md_imageLoaders[imageLoader];
 			delete md_imageLoaders[imageLoader];
+			
+			if(urlRequest == null)
+				return;
+			
 			
 			callbackObject.error('Image Loader Error: IO Error loading image: ' + event.text, null,  imageLoader.content, urlRequest, imageLoader.associatedData);
 			
@@ -109,9 +112,11 @@ package com.iblsoft.flexiweather.net.loaders
 			imageLoader.contentLoaderInfo.removeEventListener(Event.COMPLETE, onImageLoaded);
 			imageLoader.contentLoaderInfo.removeEventListener(IOErrorEvent.IO_ERROR, onImageLoadingIOError);
 			var urlRequest: URLRequest = md_imageLoaderToRequestMap[imageLoader]; 
+			
+			delete md_imageLoaderToRequestMap[imageLoader];
+			
 			if(!imageLoader in md_imageLoaderToRequestMap)
 				return null;
-			delete md_imageLoaderToRequestMap[imageLoader];
 			return urlRequest;
 		}
 

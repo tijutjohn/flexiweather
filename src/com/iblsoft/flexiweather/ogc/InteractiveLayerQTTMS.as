@@ -93,8 +93,6 @@ package com.iblsoft.flexiweather.ogc
 		
 		private var m_tilingUtils: TilingUtils;
 		
-		protected var m_timer: Timer = new Timer(10000);
-		
 		protected var m_cfg: QTTMSLayerConfiguration;
 		public function get configuration():ILayerConfiguration
 		{
@@ -315,7 +313,64 @@ package com.iblsoft.flexiweather.ogc
 			//			wmsViewProperties.cache = m_cache;
 		}
 		
+		override public function destroy(): void
+		{
+			super.destroy();
+			
+			var qttViewProperties: QTTViewProperties;
+			if (ma_preloadingQTTViewProperties)
+			{
+				for each (qttViewProperties in ma_preloadingQTTViewProperties)
+				{
+					qttViewProperties.destroy();
+				}
+			}
+			if (ma_preloadedQTTViewProperties)
+			{
+				for each (qttViewProperties in ma_preloadedQTTViewProperties)
+				{
+					qttViewProperties.destroy();
+				}
+			}
+			
+			ma_preloadingQTTViewProperties = null;
+			ma_preloadedQTTViewProperties = null;
+			
+			if (m_currentQTTViewProperties)
+			{
+				m_currentQTTViewProperties.destroy();
+				m_currentQTTViewProperties = null;
+			}
+			
+			destroyCache();
+			
+			m_cfg = null;
+			m_cache = null;
+			m_tilingUtils = null;
+			_tf = null;
+			
+			if (_debugDrawInfoArray && _debugDrawInfoArray.length > 0)
+			{
+				while (_debugDrawInfoArray.length > 0)
+				{
+					var tileIndex: TileIndex = _debugDrawInfoArray.shift();
+					tileIndex = null;
+				}
+				_debugDrawInfoArray = null;
+			}
+		}
+		
 		protected function destroyWMSViewPropertiesLoader(loader: IWMSViewPropertiesLoader): void
+		{
+			loader.removeEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
+			loader.removeEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
+			loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
+			loader.removeEventListener("invalidateDynamicPart", onCurrentWMSDataInvalidateDynamicPart);
+			
+			loader.destroy();
+		}
+		
+		protected function destroyWMSViewPropertiesPreloader(loader: IWMSViewPropertiesLoader): void
 		{
 			loader.removeEventListener("invalidateDynamicPart", onQTTViewPropertiesDataInvalidateDynamicPart);
 			loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
@@ -455,7 +510,7 @@ package com.iblsoft.flexiweather.ogc
 		protected function onPreloadingWMSDataLoadingFinished(event: InteractiveLayerEvent): void
 		{
 			var loader: IWMSViewPropertiesLoader = event.target as IWMSViewPropertiesLoader;
-			destroyWMSViewPropertiesLoader(loader);
+			destroyWMSViewPropertiesPreloader(loader);
 			
 			var qttViewProperties: QTTViewProperties = event.data as QTTViewProperties;
 			if (qttViewProperties)
@@ -588,7 +643,11 @@ package com.iblsoft.flexiweather.ogc
 		
 		protected function onCurrentWMSDataLoadingFinished(event: InteractiveLayerEvent): void
 		{
-			//			trace("\t onCurrentWMSDataLoadingFinished ["+name+"]");
+			
+			var loader: IWMSViewPropertiesLoader = event.target as IWMSViewPropertiesLoader;
+			
+			destroyWMSViewPropertiesLoader(loader);
+			
 			notifyLoadingFinished();	
 			_currentQTTDataLoadingStarted = false;
 			
@@ -1159,6 +1218,12 @@ package com.iblsoft.flexiweather.ogc
 			return this;
 		}
 		
+		private function destroyCache():void
+		{
+			if (m_cache)
+				m_cache.destroyCache();
+			
+		}
 		public function clearCache():void
 		{
 			if (m_cache)

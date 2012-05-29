@@ -15,6 +15,11 @@ package com.iblsoft.flexiweather.ogc.tiling
 			_center = new Point(leftCol + colTilesCount / 2, topRow + rowTilesCount / 2);
 		}
 		
+		public function destroy(): void
+		{
+			topLeftTileIndex = null;
+			bottomRightTileIndex = null;
+		}
 		private var _center: Point;
 		
 		public function get center(): Point

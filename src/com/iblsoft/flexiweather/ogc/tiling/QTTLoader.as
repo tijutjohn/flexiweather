@@ -8,6 +8,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import com.iblsoft.flexiweather.net.loaders.AbstractURLLoader;
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerQTTMS;
+	import com.iblsoft.flexiweather.ogc.QTTilingInfo;
 	import com.iblsoft.flexiweather.ogc.cache.CacheItem;
 	import com.iblsoft.flexiweather.ogc.cache.WMSTileCache;
 	import com.iblsoft.flexiweather.ogc.data.IViewProperties;
@@ -30,6 +31,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import flash.text.TextField;
 	import flash.text.TextFormat;
 	
+	import mx.containers.Tile;
 	import mx.controls.Alert;
 	import mx.events.DynamicEvent;
 	
@@ -76,6 +78,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 		
 		public function destroy():void
 		{
+			_tilesProvider.destroy();
 		}
 		
 		public function updateWMSData(b_forceUpdate:Boolean, viewProperties: IViewProperties, forcedLayerWidth:Number, forcedLayerHeight:Number):void
@@ -206,25 +209,11 @@ package com.iblsoft.flexiweather.ogc.tiling
 							qttTile.tileIndex = tileIndex;
 							qttTile.updateCycleAge = mi_updateCycleAge;
 							
-							
-//							var itemMetadata: CacheItemMetadata = new CacheItemMetadata();
-//							itemMetadata.crs = s_crs;
-//							itemMetadata.tileIndex = tileIndex;
-//							itemMetadata.url = request;
-//							itemMetadata.validity = qttViewProperties.validity;
-//							itemMetadata.specialStrings = qttViewProperties.specialCacheStrings;
-//							itemMetadata.updateCycleAge = mi_updateCycleAge;
-							
-//							if(!tiledCache.isTileCached(s_crs, tileIndex, request, m_time, ma_specialCacheStrings))
 							if(!tiledCache.isItemCached(qttTile) || b_forceUpdate)
 							{	
 								qttViewProperties.addTileProperties(qttTile);
-//								ma_currentTilesRequests.push(request);
 								loadRequests.push({
 									qttTileViewProperties: qttTile,
-//									request: request,
-//									requestedCRS: s_crs,
-//									requestedTileIndex: tileIndex,
 									requestedTiledArea: tiledArea,
 									requestedViewPart: viewPart
 								});
@@ -414,10 +403,45 @@ package com.iblsoft.flexiweather.ogc.tiling
 			checkIfAllTilesAreLoaded();
 		}
 		
-		public function onTileLoadFailed(tileIndex: TileIndex, associatedData: Object): void
+		public function onTileLoadFailed(tileRequest: QTTTileRequest, associatedData: Object): void
 		{
 			//			trace("\t onTileLoadFailed : " + tileIndex);
 			tileLoadFailed();
+			
+			//FIXME check if this is ServiceException "InvalidDimensionValue" and add information to cachec "somehow" to do not load it when looping animation
+			/**
+			*
+			* <ServiceExceptionReport version="1.3.0">
+			* 	<ServiceException code="InvalidDimensionValue">
+			* 		Failed to apply value '2012-05-29T00:00:00Z' to dimension 'time'
+			*	 </ServiceException>
+			* </ServiceExceptionReport>
+			*
+			*/
+			
+			
+			if (associatedData.errorResult)
+			{
+				var xml: XML = associatedData.errorResult;
+				if (xml.localName() == "ServiceExceptionReport")
+				{
+					var serviceException: XML = xml.children()[0] as XML;
+					if (serviceException.localName() == "ServiceException" && serviceException.hasOwnProperty("@code") && serviceException.@code == "InvalidDimensionValue")
+					{
+						var exceptionText: String = serviceException.text();
+						if (exceptionText.indexOf('Failed to apply value') == 0)
+						{
+							var arr: Array = exceptionText.split("'");
+							var timeString: String =  arr[1];
+							var dimension: String = arr[3];
+							
+							m_layer.getCache().addCacheNoDataItem(tileRequest.qttTileViewProperties);
+						}
+					}
+					
+				}
+				
+			}
 		}
 		
 		private function tileLoadFailed(): void

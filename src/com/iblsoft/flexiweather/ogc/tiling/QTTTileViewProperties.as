@@ -36,6 +36,21 @@ package com.iblsoft.flexiweather.ogc.tiling
 			m_qttViewProperties = qttViewProperties;
 		}
 		
+		public function destroy(): void
+		{
+			if (bitmap)
+			{
+				if (bitmap.bitmapData)
+				{
+					bitmap.bitmapData.dispose();
+					bitmap = null;
+				}
+				tileIndex = null;
+				m_qttViewProperties = null;
+				m_url = null;
+			}
+		}
+		
 		public function setConfiguration(cfg:ILayerConfiguration):void
 		{
 		}

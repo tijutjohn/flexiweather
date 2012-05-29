@@ -342,6 +342,8 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 			//		super.onDataLoadFailed(event);
 			var wmsViewProperties: WMSViewProperties = event.associatedData.wmsViewProperties;
 			
+			m_layer.getCache().addCacheNoDataItem(wmsViewProperties);
+			
 			var imagePart: ImagePart = event.associatedData.requestedImagePart;
 			imagePart.m_image = null;
 			imagePart.mb_imageOK = false;

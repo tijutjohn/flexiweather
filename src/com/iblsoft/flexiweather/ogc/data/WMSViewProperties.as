@@ -141,6 +141,24 @@ package com.iblsoft.flexiweather.ogc.data
 		{
 		}
 		
+		public function destroy(): void
+		{
+			m_cfg = null;
+			md_dimensionValues = null;
+			md_customParameters = null;
+			ma_subLayerStyleNames = null;
+			ma_imageParts = null;
+			if (m_legendImage && m_legendImage.bitmapData)
+			{
+				m_legendImage.bitmapData.dispose();
+			}
+			m_legendImage = null;
+			_viewBBox = null;
+			m_url = null;
+			_validity = null;
+			
+		}
+		
 		public function setConfiguration(cfg: ILayerConfiguration): void
 		{
 			if (cfg is IWMSLayerConfiguration)

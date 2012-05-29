@@ -162,6 +162,18 @@ package com.iblsoft.flexiweather.widgets
 			m_loader.addEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onDataLoadFailed);
 		}
 		
+		override public function destroy():void
+		{
+			super.destroy();
+			
+			m_loader.removeEventListener(UniURLLoaderEvent.DATA_LOADED, onDataLoaded);
+			m_loader.removeEventListener(ProgressEvent.PROGRESS, onDataProgress);
+			m_loader.removeEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onDataLoadFailed);
+			
+			m_loader = null;
+			
+		}
+		
 		private var _invalidateDataFlag: Boolean;
 		public function set invalidateDataFlag(value:Boolean):void
 		{

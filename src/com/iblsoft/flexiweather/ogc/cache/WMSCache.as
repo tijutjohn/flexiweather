@@ -30,6 +30,7 @@ package com.iblsoft.flexiweather.ogc.cache
 		
 		private var mi_cacheItemCount: int = 0;
 		protected var md_cache: Dictionary = new Dictionary();
+		protected var md_noDataCache: Dictionary = new Dictionary();
 		protected var md_cacheLoading: Dictionary = new Dictionary();
 		
 		public function clearCache():void
@@ -38,12 +39,44 @@ package com.iblsoft.flexiweather.ogc.cache
 			{
 				deleteCacheItem(cacheItem, true);
 			}
+			for (var s_key: String in md_cache)
+			{
+				delete md_noDataCache[s_key];
+			}
 		}
 		
 		
 		public function WMSCache()
 		{
 			startExpirationTimer();
+		}
+		
+		public function destroyCache(): void
+		{
+			if (m_expirationTimer)
+			{
+				m_expirationTimer.stop();
+				m_expirationTimer.removeEventListener(TimerEvent.TIMER, onExpiration);
+				m_expirationTimer = null;
+			}
+			clearCache();
+			
+			var cnt: int = 0;
+			var obj: Object
+			for each (obj in md_cache)
+				cnt++;
+			for each (obj in md_noDataCache)
+				cnt++;
+			for each (obj in md_cacheLoading)
+				cnt++;
+				
+			if (cnt > 0)
+			{
+				trace("WMSCache there are some cached items");
+			}
+			md_cache = null;
+			md_noDataCache = null;
+			md_cacheLoading = null;
 		}
 		
 		private function startExpirationTimer(): void
@@ -133,6 +166,9 @@ package com.iblsoft.flexiweather.ogc.cache
 				}
 				
 				mi_cacheItemCount--;
+				
+				cacheItem.destroy();
+				
 				delete md_cache[s_key];
 				return true;
 			} else {
@@ -163,18 +199,38 @@ package com.iblsoft.flexiweather.ogc.cache
 			return s_key;			
 		}
 		
-		public function isItemCached(viewProperties: IViewProperties): Boolean
+		private function qetWMSViewCacheKey(wmsViewProperties: WMSViewProperties): String
+		{
+			var s_crs: String = wmsViewProperties.crs as String;
+			var bbox: BBox = wmsViewProperties.getViewBBox() as BBox;
+			var url: URLRequest = wmsViewProperties.url;
+			var dimensions: Array = wmsViewProperties.dimensions;
+			var validity: Date = wmsViewProperties.validity;
+			
+			var s_key: String = getKey(s_crs, bbox, url, dimensions, validity);
+			
+			
+			return s_key;
+		}
+		public function isNoDataItemCached(viewProperties: IViewProperties): Boolean
 		{
 			var wmsViewProperties: WMSViewProperties = viewProperties as WMSViewProperties;
 			if (!wmsViewProperties)
 				return false;
 			
-			var s_crs: String = wmsViewProperties.crs as String;
-			var bbox: BBox = wmsViewProperties.getViewBBox() as BBox;
-			var url: URLRequest = wmsViewProperties.url;  //metadata.url
-			var dimensions: Array = wmsViewProperties.dimensions; //metadata.dimensions;
+			var s_key: String = qetWMSViewCacheKey(wmsViewProperties);
 			
-			var s_key: String = getKey(s_crs, bbox, url, dimensions, wmsViewProperties.validity);
+			return (md_noDataCache[s_key] == true);
+		}
+		
+		public function isItemCached(viewProperties: IViewProperties, b_checkNoDataCache: Boolean = false): Boolean
+		{
+			var wmsViewProperties: WMSViewProperties = viewProperties as WMSViewProperties;
+			if (!wmsViewProperties)
+				return false;
+			
+			var s_key: String = qetWMSViewCacheKey(wmsViewProperties);
+			
 			return md_cache[s_key] || md_cacheLoading[s_key];
 		}
 		
@@ -184,12 +240,8 @@ package com.iblsoft.flexiweather.ogc.cache
 			if (!wmsViewProperties)
 				return null;
 			
-			var s_crs: String = wmsViewProperties.crs as String;
-			var bbox: BBox = wmsViewProperties.getViewBBox() as BBox;
-			var url: URLRequest = wmsViewProperties.url;
-			var dimensions: Array = wmsViewProperties.dimensions;
+			var s_key: String = qetWMSViewCacheKey(wmsViewProperties);
 			
-			var s_key: String = getKey(s_crs, bbox, url, dimensions, wmsViewProperties.validity);
 			if(s_key in md_cache) {
 				var item: CacheItem = md_cache[s_key] as CacheItem; 
 				item.lastUsed = new Date();
@@ -215,22 +267,27 @@ package com.iblsoft.flexiweather.ogc.cache
 		 * @param url
 		 * 
 		 */		
-//		public function startImageLoading(s_crs: String, bbox: BBox, url: URLRequest, dimensions: Array, validity: Date = null): void
 		public function startImageLoading(viewProperties: IViewProperties): void
 		{
 			var wmsViewProperties: WMSViewProperties = viewProperties as WMSViewProperties;
 			if (!wmsViewProperties)
 				return;
 			
-			var s_crs: String = wmsViewProperties.crs;
-			var bbox: BBox = wmsViewProperties.getViewBBox();
-			var url: URLRequest = wmsViewProperties.url;
-			
-			var s_key: String = getKey(s_crs, bbox, url, wmsViewProperties.dimensions, wmsViewProperties.validity);
+			var s_key: String = qetWMSViewCacheKey(wmsViewProperties);
 			
 			md_cacheLoading[s_key] = true;
 			
-			debug("startImageLoading ["+s_crs+","+bbox.toBBOXString()+","+url.url+"]");
+		}
+		
+		public function addCacheNoDataItem(viewProperties: IViewProperties): void
+		{
+			var wmsViewProperties: WMSViewProperties = viewProperties as WMSViewProperties;
+			if (!wmsViewProperties)
+				return;
+			
+			var s_key: String = qetWMSViewCacheKey(wmsViewProperties);
+			
+			md_noDataCache[s_key] = true;
 		}
 		
 		public function addCacheItem(img: DisplayObject, viewProperties: IViewProperties): void
@@ -246,11 +303,10 @@ package com.iblsoft.flexiweather.ogc.cache
 			var validity: Date = wmsViewProperties.validity;
 			
 			var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url, dimensions, validity);
-			var s_key: String = getKey(s_crs, bbox, url, dimensions, validity);
+			
+			var s_key: String = qetWMSViewCacheKey(wmsViewProperties);
 			
 			var b_deleted: Boolean = deleteCacheItemByKey(s_key, true);
-			
-			debug("addCacheItem ["+s_crs+","+bbox.toBBOXString()+","+url.url+"]");
 			
 			var item: CacheItem = new CacheItem();
 			item.cacheKey = ck;

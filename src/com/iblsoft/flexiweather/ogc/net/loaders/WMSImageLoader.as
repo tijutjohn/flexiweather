@@ -33,7 +33,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 			{
 //				resultCallback(new XML(cloneByteArrayToString(rawData)), urlRequest, urlLoader.associatedData);
 				//xml in WMS means error
-				errorCallback("WMS Image Loader error: XML is recived", new XML(cloneByteArrayToString(rawData)), urlRequest, urlLoader.associatedData);
+				errorCallback("WMS Image Loader error: XML is received", new XML(cloneByteArrayToString(rawData)), urlRequest, urlLoader.associatedData);
 				return;
 			}
 			errorCallback("WMS Image Loader error: Expected Image or XML", rawData, urlRequest, urlLoader.associatedData);

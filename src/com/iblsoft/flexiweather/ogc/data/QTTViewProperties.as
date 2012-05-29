@@ -67,6 +67,29 @@ package com.iblsoft.flexiweather.ogc.data
 			ma_qttTiles = [];
 		}
 		
+		public function destroy(): void
+		{
+			m_cfg = null;
+			_validity = null;
+			ma_specialCacheStrings = null;
+			_tileIndicesMapper.destroy();
+			_tileIndicesMapper = null;
+			
+			for each (var qttTile: QTTTileViewProperties in ma_qttTiles)
+			{
+				qttTile.destroy();
+			}
+			ma_qttTiles = null;
+			for each (var obj: Object in tiledAreas)
+			{
+				(obj.tiledArea as TiledArea).destroy();
+				obj.tiledArea = null;
+				obj.viewPart  = null;
+			}
+			tiledAreas = null;
+			_viewBBox = null;
+		}
+		
 		public function clearTileProperties(qttTileViewProperties: QTTTileViewProperties): void
 		{
 			ma_qttTiles = [];

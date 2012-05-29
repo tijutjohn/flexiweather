@@ -18,6 +18,11 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 		}
 		
+		public function destroy(): void
+		{
+			
+		}
+		
 		/**
 		 * Function is responsible for loading tiles and call callback function on tile load finish.
 		 *  
@@ -46,6 +51,14 @@ package com.iblsoft.flexiweather.ogc.tiling
 			}
 		}
 		
+		private function removeEventListeners( m_loader: WMSImageLoader ): void
+		{
+			
+			m_loader.removeEventListener(UniURLLoaderEvent.DATA_LOADED, onDataLoaded);
+			m_loader.removeEventListener(ProgressEvent.PROGRESS, onDataProgress);
+			m_loader.removeEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onDataLoadFailed);						
+		}
+		
 		protected function onDataProgress(event: ProgressEvent): void
 		{
 			//			trace(this + " onDataProgress: " + event.bytesLoaded + " / " + event.bytesTotal);
@@ -53,6 +66,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 		
 		protected function onDataLoaded(event: UniURLLoaderEvent): void
 		{
+			var m_loader: WMSImageLoader = event.target as WMSImageLoader;
+			removeEventListeners(m_loader);
+			
 			var tileRequested: QTTTileRequest = event.associatedData.tileRequest as QTTTileRequest;
 			
 			_callbackTileLoaded(Bitmap(event.result), tileRequested, tileRequested.qttTileViewProperties.tileIndex);
@@ -60,10 +76,18 @@ package com.iblsoft.flexiweather.ogc.tiling
 		
 		protected function onDataLoadFailed(event: UniURLLoaderErrorEvent): void
 		{
+			var m_loader: WMSImageLoader = event.target as WMSImageLoader;
+			removeEventListeners(m_loader);
+			
 			var tileAssociatedData: Object = event.associatedData.associatedData;
 			var tileRequested: QTTTileRequest = event.associatedData.tileRequest as QTTTileRequest;
 			
-			_callbackTileLoadFailed(tileRequested.qttTileViewProperties.tileIndex, tileAssociatedData);
+			if (tileAssociatedData)
+				tileAssociatedData.errorResult = event.result;
+			else 
+				tileAssociatedData = {errorResult: event.result};
+			
+			_callbackTileLoadFailed(tileRequested, tileAssociatedData);
 		}
 	}
 }

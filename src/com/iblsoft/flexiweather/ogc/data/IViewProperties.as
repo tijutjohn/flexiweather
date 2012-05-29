@@ -5,6 +5,7 @@ package com.iblsoft.flexiweather.ogc.data
 	public interface IViewProperties
 	{
 		function setConfiguration(cfg: ILayerConfiguration): void;
+		function destroy(): void;
 		function clone(): IViewProperties;
 	}
 }

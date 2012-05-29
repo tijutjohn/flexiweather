@@ -16,6 +16,7 @@ package com.iblsoft.flexiweather.ogc.cache
 		 */		
 		function debugCache(): String;
 		
+		function destroyCache(): void;
 		/**
 		 * Clear whole cache 
 		 * 
@@ -24,13 +25,14 @@ package com.iblsoft.flexiweather.ogc.cache
 		
 		function setAnimationModeEnable(value: Boolean): void;
 		function invalidate(s_crs: String, bbox: BBox, validity: Date = null): void;
-		
+
+		function addCacheNoDataItem(viewProperties: IViewProperties): void
 		function addCacheItem(img: DisplayObject, viewProperties: IViewProperties): void
 
 		function deleteCacheItem(cacheItem: CacheItem, b_disposeDisplayed: Boolean = false): Boolean
 		function deleteCacheItemByKey(s_key: String, b_disposeDisplayed: Boolean = false): Boolean
 			
-		function isItemCached(viewProperties: IViewProperties): Boolean;
+		function isItemCached(viewProperties: IViewProperties, b_checkNoDataCache: Boolean = false): Boolean;
 		
 		function getCacheItemsCount(): int;
 		function getCacheItems(): Array;

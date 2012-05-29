@@ -12,6 +12,18 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 		}
 		
+		public function destroy(): void
+		{
+			for each(var obj: Object in _tileIndices)
+			{
+				obj.tileIndex = null;
+				obj.viewPart = null;
+			}
+			for (var id: String in _tileIndices)
+				delete _tileIndices[id];
+			
+			_tileIndices = null;
+		}
 		private function getMapperKey(tileIndex: TileIndex): String
 		{
 			return tileIndex.mi_tileCol + "_" + tileIndex.mi_tileRow + "_" + tileIndex.mi_tileZoom;
@@ -23,6 +35,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 		
 		public function removeAll(): void
 		{
+			destroy();
 			_tileIndices = new Dictionary();
 		}
 		public function getTileIndexViewPart(tileIndex: TileIndex): BBox

@@ -54,6 +54,14 @@ package com.iblsoft.flexiweather.ogc.cache
 			var value: String = arr.pop();
 			return value;
 		}
+		
+		override public function destroy():void
+		{
+			super.destroy();
+			
+			m_tileIndex = null;
+			m_validity = null;
+		}
 	
 	}
 }
