@@ -221,94 +221,103 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 			//image is cached
 			var imageParts: ArrayCollection = wmsViewProperties.imageParts;
 			
-			// found in the cache
-			imagePart.m_image = img;
-			imagePart.mb_imageOK = true;
-			
-			var total: int = imageParts.length;
-			
-			if (total > 0)
+			if (imageParts)
 			{
-				for(var i: int = 0; i < total; ) 
+				// found in the cache
+				imagePart.m_image = img;
+				imagePart.mb_imageOK = true;
+				
+				var total: int = imageParts.length;
+				
+				if (total > 0)
 				{
-					var currImagePart: ImagePart = imageParts.getItemAt(i) as ImagePart;
-					
-					if(imagePart.intersectsOrHasDifferentCRS(currImagePart)) {
-						//						trace("InteractiveLayerWMS.updateDataPart(): removing old " + i + " part "
-						//							+ ImagePart(ma_imageParts[i]).ms_imageCRS + ": "
-						//							+ ImagePart(ma_imageParts[i]).m_imageBBox.toString()
-						//							+ " will remain " + (ma_imageParts.length - 1) + " part(s)");
-						imageParts.removeItemAt(i);
-						total--;
+					for(var i: int = 0; i < total; ) 
+					{
+						var currImagePart: ImagePart = imageParts.getItemAt(i) as ImagePart;
+						
+						if(imagePart.intersectsOrHasDifferentCRS(currImagePart)) {
+							//						trace("InteractiveLayerWMS.updateDataPart(): removing old " + i + " part "
+							//							+ ImagePart(ma_imageParts[i]).ms_imageCRS + ": "
+							//							+ ImagePart(ma_imageParts[i]).m_imageBBox.toString()
+							//							+ " will remain " + (ma_imageParts.length - 1) + " part(s)");
+							imageParts.removeItemAt(i);
+							total--;
+						}
+						else
+							++i;
 					}
-					else
-						++i;
 				}
+				imageParts.addItem(imagePart);
 			}
-			imageParts.addItem(imagePart);
 		}
 		
 		// Event handlers
 		private function onDataProgress(event: ProgressEvent): void
 		{
-			notifyProgress(event.bytesLoaded, event.bytesTotal, InteractiveLayerProgressEvent.UNIT_BYTES);
+			if (!m_layer.layerWasDestroyed)
+			{
+				notifyProgress(event.bytesLoaded, event.bytesTotal, InteractiveLayerProgressEvent.UNIT_BYTES);
+			}
 		}
 		
 		private function onDataLoaded(event: UniURLLoaderEvent): void
 		{
-			//		super.onDataLoaded(event);
-			var wmsViewProperties: WMSViewProperties = event.associatedData.wmsViewProperties as WMSViewProperties;
-			var imagePart: ImagePart = event.associatedData.requestedImagePart;
-			
-			//			trace("InteractiveLayerWMS.onDataLoaded(): received part "
-			//					+ imagePart.ms_imageCRS + ": "
-			//					+ imagePart.m_imageBBox.toString());
-			
-			var wmsCache: WMSCache = m_layer.getCache() as WMSCache;
-			/* FIXME:
-			if (_invalidateCacheAfterImageLoad)
+			if (!m_layer.layerWasDestroyed)
 			{
-			wmsCache.invalidate(ms_imageCRS, m_imageBBox);
-			_invalidateCacheAfterImageLoad = false;
+				//		super.onDataLoaded(event);
+				var wmsViewProperties: WMSViewProperties = event.associatedData.wmsViewProperties as WMSViewProperties;
+				var imagePart: ImagePart = event.associatedData.requestedImagePart;
+				
+				//			trace("InteractiveLayerWMS.onDataLoaded(): received part "
+				//					+ imagePart.ms_imageCRS + ": "
+				//					+ imagePart.m_imageBBox.toString());
+				
+				var wmsCache: WMSCache = m_layer.getCache() as WMSCache;
+				/* FIXME:
+				if (_invalidateCacheAfterImageLoad)
+				{
+				wmsCache.invalidate(ms_imageCRS, m_imageBBox);
+				_invalidateCacheAfterImageLoad = false;
+				}
+				*/
+				
+				var result: * = event.result;
+				event.associatedData.result = result;
+				
+				if(result is DisplayObject) 
+				{
+					imagePart.mi_updateCycleAge = mi_updateCycleAge;
+					addImagePart(wmsViewProperties, imagePart, result);
+					
+					
+					//			var metadata: CacheItemMetadata = new CacheItemMetadata();
+					//			metadata.crs = imagePart.ms_imageCRS;
+					//			metadata.bbox = imagePart.m_imageBBox;
+					//			metadata.url = event.request;
+					//			metadata.dimensions = event.associatedData.dimensions;
+					
+					//				wmsCache.addCacheItem(
+					//						imagePart.m_image,
+					//						imagePart.ms_imageCRS,
+					//						imagePart.m_imageBBox,
+					//						event.request);
+					
+					wmsViewProperties.url = event.request;
+					
+					wmsCache.addCacheItem( imagePart.m_image, wmsViewProperties);
+					
+					invalidateDynamicPart();
+				}
+				else {
+					ExceptionUtils.logError(Log.getLogger("WMS"), result,
+						"Error accessing layer(s) '" + (m_layer.configuration as IWMSLayerConfiguration).layerNames.join(",") + "' - unexpected response type")
+				}
+				//notify layer that data was loaded
+				notifyLoadingFinished(event.associatedData);		
+				
+				onFinishedRequest(wmsViewProperties, event.request);
 			}
-			*/
 			
-			var result: * = event.result;
-			event.associatedData.result = result;
-			
-			if(result is DisplayObject) 
-			{
-				imagePart.mi_updateCycleAge = mi_updateCycleAge;
-				addImagePart(wmsViewProperties, imagePart, result);
-				
-				
-				//			var metadata: CacheItemMetadata = new CacheItemMetadata();
-				//			metadata.crs = imagePart.ms_imageCRS;
-				//			metadata.bbox = imagePart.m_imageBBox;
-				//			metadata.url = event.request;
-				//			metadata.dimensions = event.associatedData.dimensions;
-				
-				//				wmsCache.addCacheItem(
-				//						imagePart.m_image,
-				//						imagePart.ms_imageCRS,
-				//						imagePart.m_imageBBox,
-				//						event.request);
-				
-				wmsViewProperties.url = event.request;
-				
-				wmsCache.addCacheItem( imagePart.m_image, wmsViewProperties);
-				
-				invalidateDynamicPart();
-			}
-			else {
-				ExceptionUtils.logError(Log.getLogger("WMS"), result,
-					"Error accessing layer(s) '" + (m_layer.configuration as IWMSLayerConfiguration).layerNames.join(",") + "' - unexpected response type")
-			}
-			
-			//notify layer that data was loaded
-			notifyLoadingFinished(event.associatedData);		
-			
-			onFinishedRequest(wmsViewProperties, event.request);
 		}
 		
 		private function onFinishedRequest(wmsViewProperties: WMSViewProperties, request: URLRequest): void
@@ -338,17 +347,20 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 		
 		private function onDataLoadFailed(event: UniURLLoaderErrorEvent): void
 		{
-			// event is null if this method was called internally by this class
-			//		super.onDataLoadFailed(event);
-			var wmsViewProperties: WMSViewProperties = event.associatedData.wmsViewProperties;
-			
-			m_layer.getCache().addCacheNoDataItem(wmsViewProperties);
-			
-			var imagePart: ImagePart = event.associatedData.requestedImagePart;
-			imagePart.m_image = null;
-			imagePart.mb_imageOK = false;
-			invalidateDynamicPart();
-			onFinishedRequest(wmsViewProperties, event.request);
+			if (!m_layer.layerWasDestroyed)
+			{
+				// event is null if this method was called internally by this class
+				//		super.onDataLoadFailed(event);
+				var wmsViewProperties: WMSViewProperties = event.associatedData.wmsViewProperties;
+				
+				m_layer.getCache().addCacheNoDataItem(wmsViewProperties);
+				
+				var imagePart: ImagePart = event.associatedData.requestedImagePart;
+				imagePart.m_image = null;
+				imagePart.mb_imageOK = false;
+				invalidateDynamicPart();
+				onFinishedRequest(wmsViewProperties, event.request);
+			}
 		}
 		
 		private function invalidateDynamicPart(b_invalid: Boolean = true): void

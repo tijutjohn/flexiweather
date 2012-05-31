@@ -19,6 +19,17 @@ package com.iblsoft.flexiweather.net.data
 			this.backgroundJobName = backgroundJobName;
 		}
 		
+		public function destroy(): void
+		{
+			request = null;
+			if (loader)
+			{
+				loader.destroy();
+				loader = null;
+			}
+			associatedData = null;
+		}
+		
 		public function toString(): String
 		{
 			var str: String =  "UniURLLoaderData: ";

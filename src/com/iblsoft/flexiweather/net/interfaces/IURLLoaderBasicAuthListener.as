@@ -10,5 +10,6 @@ package com.iblsoft.flexiweather.net.interfaces
 		function addBasicAuthListeners(basicAuthLoader: IURLLoaderBasicAuth, urlLoader: URLLoader, data: UniURLLoaderData):void;
 		function removeBasicAuthListeners(): void;
 		function getData(): UniURLLoaderData;
+		function destroy(): void;
 	}
 }

@@ -15,10 +15,8 @@ package com.iblsoft.flexiweather.widgets
 	
 	public class InteractiveLayer extends UIComponent
 	{
-		/**
-		 * Just for test 
-		 */		
-		public var kmzFile: KMZFile;
+		
+		protected var m_layerWasDestroyed: Boolean;
 		
 		protected var _type: String;
 		
@@ -128,6 +126,10 @@ package com.iblsoft.flexiweather.widgets
 			invalidateDisplayList();
 		}
 		
+		public function get layerWasDestroyed(): Boolean
+		{
+			return m_layerWasDestroyed;
+		}
 		/**
 		 * Called by InteractiveWidget when layer is removed from it.
 		 * This method should implement cleanup of any side effects of the layer out of the
@@ -135,6 +137,7 @@ package com.iblsoft.flexiweather.widgets
 		 **/ 
 		public function destroy(): void
 		{
+			m_layerWasDestroyed = true;
 		}
 
 		public function isDynamicPartInvalid(): Boolean

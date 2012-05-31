@@ -33,6 +33,15 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 		
+		override public function destroy():void
+		{
+			super.destroy();
+			
+			if (ma_styles)
+				ma_styles.removeAll();
+			ma_styles = null;
+		}
+		
 		override public function equals(other: WMSLayer): Boolean
 		{
 			if(!super.equals(other))

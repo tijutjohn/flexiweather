@@ -33,5 +33,23 @@ package com.iblsoft.flexiweather.ogc.data
 			var intersection: BBox = m_imageBBox.intersected(other.m_imageBBox);
 			return intersection && intersection.width > 1e-6 && intersection.height > 1e-6;
 		}
+		
+		public function destroy(): void
+		{
+			m_imageBBox = null;
+			if (m_image)
+			{
+				if (m_image is Bitmap)
+				{
+					var bmp: Bitmap = m_image as Bitmap;
+					if (bmp.bitmapData)
+						bmp.bitmapData.dispose();
+				}
+				
+				//FIXME how to unload AVM1Movie
+				
+				m_image = null;
+			}
+		}
 	}
 }

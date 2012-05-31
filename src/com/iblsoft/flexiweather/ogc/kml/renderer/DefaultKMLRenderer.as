@@ -874,6 +874,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 		protected function renderLineString(placemark: Placemark, style: Style): void
 		{
 //			renderLineString(placemark.graphics, placemark.coordinates, placemark.kmlLabel, placemarkStyles.normalStyle);
+			var g: GraphicsCurveRenderer;
 			
 			var gr: Graphics =  placemark.graphics;
 			var coords: Array = placemark.coordinates;
@@ -903,7 +904,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 			if (coords && coords.length > 1)
 			{
 				
-				var g: GraphicsCurveRenderer = new GraphicsCurveRenderer(gr);
+				g = new GraphicsCurveRenderer(gr);
 				
 				var features: Array = m_featureSplitter.splitCoordPolyLineToArrayOfPointPolyLines(coords, false);
 				
@@ -934,7 +935,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 					{
 						var mPoints: Array = features[i] as Array;
 						
-						var g: GraphicsCurveRenderer = new GraphicsCurveRenderer(gr);
+						g = new GraphicsCurveRenderer(gr);
 						
 						var total: int = mPoints.length;
 						if (total > 0)
@@ -1035,7 +1036,8 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 			{
 //				_container.drawPolyline(new GraphicsCurveRenderer(gr), coords);
 				
-				var g: GraphicsCurveRenderer = new GraphicsCurveRenderer(gr);
+				var g: GraphicsCurveRenderer;
+				g = new GraphicsCurveRenderer(gr);
 				
 				var features: Array = m_featureSplitter.splitCoordPolyLineToArrayOfPointPolyLines(coords, false);
 				
@@ -1072,7 +1074,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 					{
 						var mPoints: Array = features[i] as Array;
 						
-						var g: GraphicsCurveRenderer = new GraphicsCurveRenderer(gr);
+						g = new GraphicsCurveRenderer(gr);
 						
 						var total: int = mPoints.length;
 						if (total > 0)

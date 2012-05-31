@@ -50,6 +50,29 @@ package com.iblsoft.flexiweather.ogc
 		}
 		
 
+		override public function destroy(): void
+		{
+			
+			if(m_service != null)
+				m_service.removeEventListener(WMSServiceConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
+					
+			ma_layerNames = null;
+			debugArray(ma_styleNames);
+			debugArray(ma_behaviours);
+			debugArray(ma_availableImageFormats);
+			if (_layerConfigurations && _layerConfigurations.length > 0)
+			{
+//				debugArray(_layerConfigurations); //WMSLayer
+				for each (var wmsLayer: WMSLayerBase in _layerConfigurations)
+				{
+					wmsLayer.destroy();
+					wmsLayer = null;
+				}
+				_layerConfigurations = null;
+			}
+			
+			super.destroy();
+		}
 		public function get ms_imageFormat():String
 		{
 			return _ms_imageFormat;
@@ -220,12 +243,15 @@ package com.iblsoft.flexiweather.ogc
 			var layerConf: WMSLayer
 			
 			var a_layers: ArrayCollection = new ArrayCollection();
-			for(var i: int = 0; i < ma_layerNames.length; ++i) {
-				var l: WMSLayer = null;
-				if(m_service != null)
-					l = service.getLayerByName(ma_layerNames[i]);
-				if (l)
-					a_layers.addItem(l);
+			if (ma_layerNames)
+			{
+				for(var i: int = 0; i < ma_layerNames.length; ++i) {
+					var l: WMSLayer = null;
+					if(m_service != null)
+						l = service.getLayerByName(ma_layerNames[i]);
+					if (l)
+						a_layers.addItem(l);
+				}
 			}
 			var b_changed: Boolean = false;
 			if(_layerConfigurations == null)
@@ -341,13 +367,16 @@ package com.iblsoft.flexiweather.ogc
 			} else {
 			
 				if(ms_previewURL == "<internal>") {
-					s_url = service.fullURL;
-					//check if there is ${BASE_URL} in fullURL and convert it
-					s_url = AbstractURLLoader.fromBaseURL(s_url);
-					s_url = s_url.replace(/.*\//, "").replace(/\?.*/, "");
-					s_url = s_url.replace("/", "-");
-					s_url += "-" + ma_layerNames.join("_").replace(" ", "-").toLowerCase();
-					s_url = "assets/layer-previews/" + s_url + ".png";
+					if (service && ma_layerNames)
+					{
+						s_url = service.fullURL;
+						//check if there is ${BASE_URL} in fullURL and convert it
+						s_url = AbstractURLLoader.fromBaseURL(s_url);
+						s_url = s_url.replace(/.*\//, "").replace(/\?.*/, "");
+						s_url = s_url.replace("/", "-");
+						s_url += "-" + ma_layerNames.join("_").replace(" ", "-").toLowerCase();
+						s_url = "assets/layer-previews/" + s_url + ".png";
+					}
 				}
 			}	
 			

@@ -108,7 +108,8 @@ package com.iblsoft.flexiweather.widgets
 
 		override public function destroy(): void
 		{
-			removeChild(m_slideZoomSprite);
+			if (m_slideZoomSprite && m_slideZoomSprite.parent == this)
+				removeChild(m_slideZoomSprite);
 		}
 
 		override public function onMouseRollOver(event:MouseEvent): Boolean

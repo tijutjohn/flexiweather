@@ -42,6 +42,23 @@ package com.iblsoft.flexiweather.ogc
 			m_capabilitiesLoader.addEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onCapabilitiesLoadFailed);
 		}
 		
+		override public function destroy(): void
+		{
+			super.destroy();
+			
+			if (m_capabilitiesLoader)
+				m_capabilitiesLoader.destroy();
+			
+			m_capabilitiesLoader = null;
+			
+			if (m_layers)
+				m_layers.destroy();
+			m_layers = null;
+			_imageFormats = null;
+			m_capabilitiesLoadJob = null;
+				
+			
+		}
 		public function getLayerByName(s_name: String): WMSLayer
 		{
 			if(m_layers == null)
@@ -59,8 +76,10 @@ package com.iblsoft.flexiweather.ogc
 		{
 			var r: URLRequest = toGetCapabilitiesRequest();
 			m_capabilitiesLoader.load(r);
+			
 			if(m_capabilitiesLoadJob != null)
 				m_capabilitiesLoadJob.finish();
+			
 			m_capabilitiesLoadJob = BackgroundJobManager.getInstance().startJob(
 					"Getting WMS capabilities for " + baseURL);
 		}

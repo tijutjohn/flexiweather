@@ -13,6 +13,13 @@ package com.iblsoft.flexiweather.ogc
 			m_service = service;
 		}
 
+		override public function destroy(): void
+		{
+			super.destroy();	
+			
+			m_service = null;
+		}
+		
 		override public function serialize(storage: Storage): void
 		{
 			super.serialize(storage);

@@ -108,6 +108,32 @@ package com.iblsoft.flexiweather.widgets
 			m_lastResizeTime = getTimer();
 		}
 		
+		public function destroy(): void
+		{
+			removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+			removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+			removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
+			removeEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
+			removeEventListener(MouseEvent.CLICK, onMouseClick);
+			removeEventListener(MouseEvent.DOUBLE_CLICK, onMouseDoubleClick);
+			removeEventListener(MouseEvent.ROLL_OVER, onMouseRollOver);
+			removeEventListener(MouseEvent.ROLL_OUT, onMouseRollOut);
+			removeEventListener(ResizeEvent.RESIZE, onResized);
+			
+			removeEventListener(ElementExistenceEvent.ELEMENT_ADD, onElementAdd);
+			removeEventListener(FlexEvent.CREATION_COMPLETE, onWidgetCreationComplete);
+			
+			m_labelLayout.destroy();
+			m_objectLayout.destroy();
+			
+			if(m_resizeTimer)
+			{
+				m_resizeTimer.stop();
+				m_resizeTimer.removeEventListener(TimerEvent.TIMER_COMPLETE, afterDelayedResize);
+			}
+			
+			m_featureSplitter.destroy();
+		}
 
 		override protected function createChildren():void
 		{
@@ -310,8 +336,8 @@ package com.iblsoft.flexiweather.widgets
 			l.removeEventListener(InteractiveDataLayer.LOADING_STARTED, onLayerLoadingStart);
 			
 			if(l.parent == m_layerContainer) {
-				l.destroy();
 				m_layerContainer.removeElement(l);
+				l.destroy();
 			}
 		}
 		

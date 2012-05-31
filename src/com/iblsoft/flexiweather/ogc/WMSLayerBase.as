@@ -13,6 +13,35 @@ package com.iblsoft.flexiweather.ogc
 		internal  var ma_crsWithBBoxes: ArrayCollection = new ArrayCollection();
 		internal var ma_dimensions: ArrayCollection = new ArrayCollection();
 
+		public function destroy(): void
+		{
+			if (ma_crsWithBBoxes && ma_crsWithBBoxes.length > 0)
+			{
+				for each (var crsWithBBox: CRSWithBBox in ma_crsWithBBoxes)
+				{
+					crsWithBBox.destroy();
+				}
+				ma_crsWithBBoxes.removeAll();
+			}
+			ma_crsWithBBoxes = null;
+			
+			if (ma_dimensions && ma_dimensions.length > 0)
+			{
+				for each (var wmsDimension: WMSDimension in ma_dimensions)
+				{
+					wmsDimension.destroy();
+				}
+				ma_dimensions.removeAll();
+			}
+			ma_dimensions = null;
+			
+			if (m_parent)
+			{
+				m_parent.destroy();
+			}
+		}
+		
+		
 		public function WMSLayerBase(parent: WMSLayerGroup, xml: XML, wms: Namespace, version: Version)
 		{
 			ms_name = String(xml.wms::Name);
@@ -165,6 +194,7 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 
+		
 		private function getCRSWithBBox(crs: String): CRSWithBBox
 		{
 			for each (var crsWithBBox: CRSWithBBox in ma_crsWithBBoxes)
@@ -185,7 +215,7 @@ package com.iblsoft.flexiweather.ogc
 				return false;
 			if(ms_title != other.ms_title)
 				return false;
-			if(ma_crsWithBBoxes.length != other.ma_crsWithBBoxes.length)
+			if(!ma_crsWithBBoxes || !other.ma_crsWithBBoxes ||  ma_crsWithBBoxes.length != other.ma_crsWithBBoxes.length)
 				return false;
 			for(var i: int = 0; i < ma_crsWithBBoxes.length; ++i) {
 				var cb: CRSWithBBox = ma_crsWithBBoxes[i] as CRSWithBBox; 

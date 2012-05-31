@@ -315,8 +315,8 @@ package com.iblsoft.flexiweather.ogc
 		
 		override public function destroy(): void
 		{
-			super.destroy();
 			
+			super.destroy();
 			var qttViewProperties: QTTViewProperties;
 			if (ma_preloadingQTTViewProperties)
 			{
@@ -343,6 +343,9 @@ package com.iblsoft.flexiweather.ogc
 			}
 			
 			destroyCache();
+			
+//			if (m_cfg)
+//				m_cfg.destroy();
 			
 			m_cfg = null;
 			m_cache = null;
@@ -583,34 +586,37 @@ package com.iblsoft.flexiweather.ogc
 		 */
 		override protected function updateData(b_forceUpdate: Boolean): void
 		{
-			super.updateData(b_forceUpdate);
-			
-			if (_avoidTiling)
+			if (!layerWasDestroyed)
 			{
-				//tiling for this layer is for now avoided, do not update data
-				return;
+				super.updateData(b_forceUpdate);
+				
+				if (_avoidTiling)
+				{
+					//tiling for this layer is for now avoided, do not update data
+					return;
+				}
+				
+				if(mi_zoom < 0)
+				{
+					// wrong zoom, do not continue
+					return;
+				}
+				
+				if(!visible) {
+					mb_updateAfterMakingVisible = true;
+					return;
+				}
+				
+				
+				var loader: IWMSViewPropertiesLoader = getWMSViewPropertiesLoader();
+				
+				loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
+				loader.addEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
+				loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
+				loader.addEventListener("invalidateDynamicPart", onCurrentWMSDataInvalidateDynamicPart);
+				
+				loader.updateWMSData(b_forceUpdate, m_currentQTTViewProperties, forcedLayerWidth, forcedLayerHeight);
 			}
-			
-			if(mi_zoom < 0)
-			{
-				// wrong zoom, do not continue
-				return;
-			}
-			
-			if(!visible) {
-				mb_updateAfterMakingVisible = true;
-				return;
-			}
-			
-			
-			var loader: IWMSViewPropertiesLoader = getWMSViewPropertiesLoader();
-			
-			loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
-			loader.addEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
-			loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
-			loader.addEventListener("invalidateDynamicPart", onCurrentWMSDataInvalidateDynamicPart);
-			
-			loader.updateWMSData(b_forceUpdate, m_currentQTTViewProperties, forcedLayerWidth, forcedLayerHeight);
 			
 		}
 		
@@ -745,59 +751,62 @@ package com.iblsoft.flexiweather.ogc
 		private var _debugDrawInfoArray: Array;
 		private function customDraw(qttViewProperties: QTTViewProperties, graphics: Graphics, redrawBorder: Boolean = false): void
 		{
-			if(mi_zoom == -1)
+			if (!layerWasDestroyed)
 			{
-				trace("InteractiveLayerQTTMS.customDraw(): Isomething is wrong, tile zoom is -1");
-				return;
-			}
-
-			_debugDrawInfoArray = [];
-			
-			var s_crs: String = qttViewProperties.crs; //container.crs;
-			var currentBBox: BBox = qttViewProperties.getViewBBox();  //container.getViewBBox();
-			var tilingBBox: BBox = getGTileBBoxForWholeCRS(s_crs); // extent of tile z=0/r=0/c=0
-			if(tilingBBox == null) {
-				trace("InteractiveLayerQTTMS.customDraw(): No tiling extent for CRS " + container.crs);
-				return;
-			}
-
-			if (qttViewProperties.specialCacheStrings)
-				trace("ILQTTMS customDraw " + qttViewProperties.toString() + " dim: " + qttViewProperties.specialCacheStrings[0]);
-			
-			var wmsTileCache: WMSTileCache = m_cache as WMSTileCache;
-			
-			var _specialCacheStrings: Array = qttViewProperties.specialCacheStrings;
-			var _currentValidityTime: Date = qttViewProperties.validity;
-			
-			//get cache tiles
- 			var a_tiles: Array = wmsTileCache.getTiles(s_crs, mi_zoom, _specialCacheStrings, _currentValidityTime);
-			var allTiles: Array = a_tiles.reverse();
-			
-			graphics.clear();
-			graphics.lineStyle(0,0,0);
-			
-			var t_tile: Object;
-			var tileIndex: TileIndex;
-			var cnt: int = 0;
-			var viewPart: BBox;
-			
-			for each(t_tile in allTiles) {
-				
-				tileIndex = t_tile.tileIndex;
-				viewPart = qttViewProperties.tileIndicesMapper.getTileIndexViewPart(tileIndex);
-				
-				if (tileIndex)
+				if(mi_zoom == -1)
 				{
-					_debugDrawInfoArray.push(tileIndex);
-					
-					drawTile(tileIndex, s_crs, t_tile.image.bitmapData, redrawBorder);
+					trace("InteractiveLayerQTTMS.customDraw(): Isomething is wrong, tile zoom is -1");
+					return;
 				}
+	
+				_debugDrawInfoArray = [];
+				
+				var s_crs: String = qttViewProperties.crs; //container.crs;
+				var currentBBox: BBox = qttViewProperties.getViewBBox();  //container.getViewBBox();
+				var tilingBBox: BBox = getGTileBBoxForWholeCRS(s_crs); // extent of tile z=0/r=0/c=0
+				if(tilingBBox == null) {
+					trace("InteractiveLayerQTTMS.customDraw(): No tiling extent for CRS " + container.crs);
+					return;
+				}
+	
+				if (qttViewProperties.specialCacheStrings)
+					trace("ILQTTMS customDraw " + qttViewProperties.toString() + " dim: " + qttViewProperties.specialCacheStrings[0]);
+				
+				var wmsTileCache: WMSTileCache = m_cache as WMSTileCache;
+				
+				var _specialCacheStrings: Array = qttViewProperties.specialCacheStrings;
+				var _currentValidityTime: Date = qttViewProperties.validity;
+				
+				//get cache tiles
+	 			var a_tiles: Array = wmsTileCache.getTiles(s_crs, mi_zoom, _specialCacheStrings, _currentValidityTime);
+				var allTiles: Array = a_tiles.reverse();
+				
+				graphics.clear();
+				graphics.lineStyle(0,0,0);
+				
+				var t_tile: Object;
+				var tileIndex: TileIndex;
+				var cnt: int = 0;
+				var viewPart: BBox;
+				
+				for each(t_tile in allTiles) {
+					
+					tileIndex = t_tile.tileIndex;
+					viewPart = qttViewProperties.tileIndicesMapper.getTileIndexViewPart(tileIndex);
+					
+					if (tileIndex)
+					{
+						_debugDrawInfoArray.push(tileIndex);
+						
+						drawTile(tileIndex, s_crs, t_tile.image.bitmapData, redrawBorder);
+					}
+				}
+				
+				//FIXME change this, now there can be more tiledArea
+	//			m_cache.sortCache(m_tiledArea);
+				
+				dispatchEvent(new Event(DRAW_TILES));
 			}
-			
-			//FIXME change this, now there can be more tiledArea
-//			m_cache.sortCache(m_tiledArea);
-			
-			dispatchEvent(new Event(DRAW_TILES));
 		}
 		
 		private function drawTile(tileIndex: TileIndex, s_crs: String, bitmapData: BitmapData, redrawBorder: Boolean = false): void
@@ -1210,6 +1219,10 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function getCache():ICache
 		{
+			if (!m_cache)
+			{
+				trace("no tiled cache");
+			}
 			return m_cache;
 		}
 		

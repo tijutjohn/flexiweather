@@ -147,6 +147,11 @@ package com.iblsoft.flexiweather.ogc.data
 			md_dimensionValues = null;
 			md_customParameters = null;
 			ma_subLayerStyleNames = null;
+			if (ma_imageParts && ma_imageParts.length > 0)
+			{
+				for each (var imagePart: ImagePart in ma_imageParts)
+					imagePart.destroy(); 
+			}
 			ma_imageParts = null;
 			if (m_legendImage && m_legendImage.bitmapData)
 			{
@@ -440,15 +445,18 @@ package com.iblsoft.flexiweather.ogc.data
 		
 		public function getWMSStyleObject(i_subLayer: uint, s_styleName: String = ''): Object
 		{
-			var layer:WMSLayer = m_cfg.layerConfigurations[i_subLayer] as WMSLayer;
-			if (layer && layer.styles && layer.styles.length > 0) {
-				if (s_styleName == '')
-					return layer.styles[0];
-				else {
-					for each (var styleObj: Object in layer.styles)
-					{
-						if (styleObj.name == s_styleName)
-							return styleObj;
+			if (m_cfg && m_cfg.layerConfigurations)
+			{
+				var layer:WMSLayer = m_cfg.layerConfigurations[i_subLayer] as WMSLayer;
+				if (layer && layer.styles && layer.styles.length > 0) {
+					if (s_styleName == '')
+						return layer.styles[0];
+					else {
+						for each (var styleObj: Object in layer.styles)
+						{
+							if (styleObj.name == s_styleName)
+								return styleObj;
+						}
 					}
 				}
 			}

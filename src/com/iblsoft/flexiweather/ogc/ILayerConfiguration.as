@@ -13,6 +13,8 @@ package com.iblsoft.flexiweather.ogc
 		function get label(): String;
 		function set label(s: String): void;
 		
+		function destroy(): void;
+		
 		function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer;
 		function isCompatibleWithCRS(crs: String): Boolean;
 		function hasPreview(): Boolean;

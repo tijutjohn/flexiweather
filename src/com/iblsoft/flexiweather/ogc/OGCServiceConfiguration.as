@@ -30,6 +30,12 @@ package com.iblsoft.flexiweather.ogc
 			m_version = version;
 		}
 		
+		public function destroy(): void
+		{
+			m_version = null;
+			m_data = null;
+		}
+		
 		public function serialize(storage: Storage): void
 		{
 			ms_service = storage.serializeString("service-type", ms_service);

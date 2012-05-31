@@ -5,6 +5,7 @@ package com.iblsoft.flexiweather.ogc.kml
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
 	import com.iblsoft.flexiweather.ogc.Version;
 	import com.iblsoft.flexiweather.ogc.kml.controls.KMLInfoWindow;
+	import com.iblsoft.flexiweather.ogc.kml.data.KMZFile;
 	import com.iblsoft.flexiweather.ogc.kml.events.KMLBitmapEvent;
 	import com.iblsoft.flexiweather.ogc.kml.events.KMLEvent;
 	import com.iblsoft.flexiweather.ogc.kml.events.KMLFeatureEvent;
@@ -61,6 +62,8 @@ package com.iblsoft.flexiweather.ogc.kml
 	 */	
 	public class InteractiveLayerKML extends InteractiveLayerFeatureBase
 	{
+		public var kmzFile: KMZFile;
+		
 		public var itemRenderer: Class;
 		private var _itemRendererInstance: IKMLRenderer;
 		public function get itemRendererInstance(): IKMLRenderer
@@ -146,6 +149,7 @@ package com.iblsoft.flexiweather.ogc.kml
 		 */		
 		override public function destroy(): void
 		{
+			
 			if (features)
 			{
 				unloadFeatures(features.source)

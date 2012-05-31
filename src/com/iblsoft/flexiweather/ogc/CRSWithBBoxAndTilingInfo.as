@@ -17,6 +17,12 @@ package com.iblsoft.flexiweather.ogc
 			mi_tileHeight = tileHeight;
 		}
 		
+		override public function destroy():void
+		{
+			super.destroy();
+			
+			m_tilingExtent = null;
+		}
 		public function get tileWidth(): int
 		{
 			return mi_tileWidth;

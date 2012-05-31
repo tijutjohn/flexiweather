@@ -17,6 +17,20 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 
+		override public function destroy():void
+		{
+			
+			if (ma_layers && ma_layers.length > 0)
+			{
+				for each(var l: WMSLayerBase in ma_layers) 
+				{
+					l.destroy();
+				}
+				ma_layers.removeAll();
+				ma_layers = null;
+			}
+			super.destroy();
+		}
 		public function getLayerByName(s_name: String): WMSLayer
 		{
 			for each(var l: WMSLayerBase in ma_layers) {

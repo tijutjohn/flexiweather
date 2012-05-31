@@ -120,6 +120,24 @@ package com.iblsoft.flexiweather.net.loaders
 			return s_url;
 		}
 		
+		public function destroy(): void
+		{
+			var id: String;
+			var obj: Object;
+			if (md_urlLoaderToRequestMap)
+			{
+				for (id in md_urlLoaderToRequestMap)
+				{
+					obj = md_urlLoaderToRequestMap[id];
+					trace(obj);
+				}
+			}
+			if (_baLoader)
+			{
+				_baLoader.destroy();
+			}
+		}
+		
 		private function checkRequestBaseURL(urlRequest: URLRequest): void
 		{
 			urlRequest.url = convertBaseURL(urlRequest.url);
@@ -374,7 +392,6 @@ package com.iblsoft.flexiweather.net.loaders
 			if (!already_authenticated && waitForBasicAuthCredentials && !basicAuthCredentialsReady)
 			{
 				UniURLLoaderBasicAuthManager.instance.addRequest(urlRequest, this, associatedData, s_backgroundJobName);
-				//				basicAuthManager.addEventListener(UniURLLoader.RUN_STOPPED_REQUEST, onRunStoppedRequest);
 				var ae: UniURLLoaderEvent = new UniURLLoaderEvent(UniURLLoaderEvent.STOP_REQUEST, null, urlRequest, associatedData);
 				dispatchEvent(ae);
 				return true;
@@ -947,6 +964,7 @@ package com.iblsoft.flexiweather.net.loaders
 			}
 			
 			urlLoader.removeEventListener(Event.COMPLETE, onDataComplete);
+			urlLoader.removeEventListener(ProgressEvent.PROGRESS, onDataProgress);
 			urlLoader.removeEventListener(IOErrorEvent.IO_ERROR, onDataIOError);
 			urlLoader.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, onSecurityError);
 			if(!urlLoader in md_urlLoaderToRequestMap)

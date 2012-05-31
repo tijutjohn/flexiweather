@@ -574,24 +574,27 @@ package com.iblsoft.flexiweather.ogc
 				return;
 			}
 			
-			super.updateData(b_forceUpdate);
+			if (!layerWasDestroyed)
+			{
 			
-			if(!visible) {
-				mb_updateAfterMakingVisible = true;
-				return;
+				super.updateData(b_forceUpdate);
+				
+				if(!visible) {
+					mb_updateAfterMakingVisible = true;
+					return;
+				}
+				
+				updateCurrentWMSViewProperties();
+				
+				var loader: IWMSViewPropertiesLoader = getWMSViewPropertiesLoader();
+				
+				loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
+				loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
+				loader.addEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
+				loader.addEventListener("invalidateDynamicPart", onCurrentWMSDataInvalidateDynamicPart);
+			
+				loader.updateWMSData(b_forceUpdate, m_currentWMSViewProperties, forcedLayerWidth, forcedLayerHeight);
 			}
-			
-			updateCurrentWMSViewProperties();
-			
-			var loader: IWMSViewPropertiesLoader = getWMSViewPropertiesLoader();
-			
-			loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
-			loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
-			loader.addEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
-			loader.addEventListener("invalidateDynamicPart", onCurrentWMSDataInvalidateDynamicPart);
-		
-			loader.updateWMSData(b_forceUpdate, m_currentWMSViewProperties, forcedLayerWidth, forcedLayerHeight);
-			
 			
 		}
 
@@ -645,11 +648,17 @@ package com.iblsoft.flexiweather.ogc
 			
 			if (m_cfg)
 			{
+				//FIXME we neeed to check, if it's ok to destroy configuration (it should be done in LayerConfigurationManager on removeLayer action)
+//				m_cfg.destroy();
 				m_cfg.removeEventListener(WMSLayerConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
 				m_cfg.removeEventListener(WMSLayerConfiguration.CAPABILITIES_RECEIVED, onCapabilitiesReceived);
 				m_cfg = null;
 			}
 			
+			container = null;
+			fadeIn = null;
+			fadeOut = null;
+			m_synchronisationRole = null;
 			destroyCache();
 				
 		}
@@ -657,26 +666,29 @@ package com.iblsoft.flexiweather.ogc
 		
 		public override function draw(graphics: Graphics): void
 		{
-			super.draw(graphics);
-			
-			var imageParts: ArrayCollection = m_currentWMSViewProperties.imageParts;
-			
-			if(container.height <= 0)
-				return;
-			if(container.width <= 0)
-				return;
-			
-			var s_currentCRS: String = m_currentWMSViewProperties.crs;
-			//			trace("InteractiveLayerWMS.draw(): currentViewBBox=" + container.getViewBBox().toString());
-			for each(var imagePart: ImagePart in imageParts) {
-				// Check if CRS of the image part == current CRS of the container
-				if(s_currentCRS != imagePart.ms_imageCRS)
-					continue; // otherwise we cannot draw it
+			if (!layerWasDestroyed)
+			{
+				super.draw(graphics);
 				
-				var reflectedBBoxes:Array = container.mapBBoxToViewReflections(imagePart.m_imageBBox);
-				for each(var reflectedBBox: BBox in reflectedBBoxes) {
-					//					trace("\t InteractiveLayerWMS.draw(): drawing reflection " + reflectedBBox.toString());
-					drawImagePart(graphics, imagePart.m_image, imagePart.ms_imageCRS, reflectedBBox);
+				var imageParts: ArrayCollection = m_currentWMSViewProperties.imageParts;
+				
+				if(container.height <= 0)
+					return;
+				if(container.width <= 0)
+					return;
+				
+				var s_currentCRS: String = m_currentWMSViewProperties.crs;
+				//			trace("InteractiveLayerWMS.draw(): currentViewBBox=" + container.getViewBBox().toString());
+				for each(var imagePart: ImagePart in imageParts) {
+					// Check if CRS of the image part == current CRS of the container
+					if(s_currentCRS != imagePart.ms_imageCRS)
+						continue; // otherwise we cannot draw it
+					
+					var reflectedBBoxes:Array = container.mapBBoxToViewReflections(imagePart.m_imageBBox);
+					for each(var reflectedBBox: BBox in reflectedBBoxes) {
+						//					trace("\t InteractiveLayerWMS.draw(): drawing reflection " + reflectedBBox.toString());
+						drawImagePart(graphics, imagePart.m_image, imagePart.ms_imageCRS, reflectedBBox);
+					}
 				}
 			}
 		}
@@ -1533,6 +1545,8 @@ package com.iblsoft.flexiweather.ogc
 		{
 			if (m_cache)
 				m_cache.destroyCache();
+			
+			m_cache = null;
 			
 		}
 		

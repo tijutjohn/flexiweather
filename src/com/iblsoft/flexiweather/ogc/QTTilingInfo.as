@@ -53,6 +53,13 @@ package com.iblsoft.flexiweather.ogc
 			_crsWithBBox = crsWithBBox;
 		}
 		
+		public function destroy(): void
+		{
+			if (_crsWithBBox)
+				_crsWithBBox.destroy();
+			
+			_crsWithBBox = null;
+		}
 		public function updateCRSWithBBox(value: CRSWithBBox): void
 		{
 			_crsWithBBox = value;

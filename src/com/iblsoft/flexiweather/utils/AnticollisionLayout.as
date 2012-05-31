@@ -78,6 +78,24 @@ package com.iblsoft.flexiweather.utils
 			addChild(m_anchorsLayer);
 		}
 		
+		public function destroy(): void
+		{
+			removeEventListener(Event.RENDER, onRender);
+			removeChild(m_anchorsLayer);
+			if (m_placementBitmap)
+			{
+				m_placementBitmap.dispose();
+				m_placementBitmap = null;	
+			}
+			if (ma_layoutObjects && ma_layoutObjects.length > 0)
+			{
+				for each (var obj: Object in ma_layoutObjects)
+				{
+					trace(obj);
+				}
+			}
+		}
+		
 		/**
 		 * Adds externally managed DisplayObject which must not be displaced to the layout
 		 * Basically this means that all other objects will be displaced so that they don't
@@ -378,8 +396,8 @@ package com.iblsoft.flexiweather.utils
 						var a_boundingLineSegmentsTo: Array = getLineSegmentApproximation(objectToAnchor);
 	
 						//debug
-						drawApproximationFunction(g, a_boundingLineSegmentsFrom, 0xff0000, 3);
-						drawApproximationFunction(g, a_boundingLineSegmentsTo, 0x00ff00, 1);
+//						drawApproximationFunction(g, a_boundingLineSegmentsFrom, 0xff0000, 3);
+//						drawApproximationFunction(g, a_boundingLineSegmentsTo, 0x00ff00, 1);
 						
 						var bestPointTo: Point = boundsTo.bottomRight;
 						var bestPointFrom: Point = boundsFrom.topLeft;

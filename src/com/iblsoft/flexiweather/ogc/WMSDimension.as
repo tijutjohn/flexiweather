@@ -29,6 +29,15 @@ package com.iblsoft.flexiweather.ogc
 			if(!version.isLessThan(1, 3, 0))
 				loadExtent(xml, wms, version);
 		}
+
+		public function destroy(): void
+		{
+			if (ma_values && ma_values.length > 0)
+			{
+				ma_values = null;
+			}
+//			sm_dateTimeParser = null;
+		}
 		
 		public function equals(other: WMSDimension): Boolean
 		{

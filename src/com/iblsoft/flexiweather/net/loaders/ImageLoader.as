@@ -20,6 +20,29 @@ package com.iblsoft.flexiweather.net.loaders
 //			allowedFormats = [UniURLLoader.IMAGE_FORMAT];
 		}
 		
+		override public function destroy(): void
+		{
+			super.destroy();
+			
+			var id: String;
+			var obj: Object;
+			if (md_imageLoaders)
+			{
+				for (id in md_imageLoaders)
+				{
+					obj = md_imageLoaders[id];
+					trace(obj);
+				}
+			}
+			if (md_imageLoaderToRequestMap)
+			{
+				for (id in md_imageLoaderToRequestMap)
+				{
+					obj = md_imageLoaderToRequestMap[id];
+					trace(obj);
+				}
+			}
+		}
 		override protected function decodeResult(rawData: ByteArray, urlLoader: URLLoaderWithAssociatedData, urlRequest: URLRequest, resultCallback: Function, errorCallback: Function): void
 		{
 			var isValid: Boolean = ImageLoader.isValidImage(rawData);

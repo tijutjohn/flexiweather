@@ -1,11 +1,11 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
 	import com.iblsoft.flexiweather.ogc.editable.IInteractiveLayerProvider;
 	import com.iblsoft.flexiweather.ogc.tiling.InteractiveLayerWMSWithQTT;
 	import com.iblsoft.flexiweather.ogc.tiling.QTTTilesProvider;
 	import com.iblsoft.flexiweather.ogc.tiling.TileIndex;
 	import com.iblsoft.flexiweather.utils.Storage;
-	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
 	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
@@ -22,6 +22,22 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function QTTMSLayerConfiguration()
 		{
+		}
+		
+		override public function destroy():void
+		{
+			
+			if (tilingCRSsAndExtents && tilingCRSsAndExtents.length > 0)
+			{
+				for each (var qttilingInfo: QTTilingInfo in tilingCRSsAndExtents)
+				{
+					qttilingInfo.destroy();
+				}
+			}
+			
+			ma_behaviours = null;
+			
+			super.destroy();
 		}
 		
 		public function removeAllTilingInfo(): void

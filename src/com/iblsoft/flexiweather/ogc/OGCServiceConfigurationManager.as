@@ -47,6 +47,25 @@ package com.iblsoft.flexiweather.ogc
 		
 		}
 		
+		public function destroy(): void
+		{
+			trace("OGCServiceConfigurationManager");
+			if (m_timer)
+			{
+				m_timer.stop();
+				m_timer.removeEventListener(TimerEvent.TIMER, onTimer);
+				m_timer = null;
+			}
+			
+			_runningServices = null;
+			_currentServices = null;
+			for each (var osc: OGCServiceConfiguration in ma_services)
+			{
+				osc.destroy();
+			}
+			ma_services.removeAll();
+			ma_services = null;
+		}
 		/**
 		 * Will return array of all services baseURLs (prviously IDs) to be able to pair services with layers 
 		 * @return 

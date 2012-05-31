@@ -56,6 +56,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 		
 		public function get isTileable(): Boolean
 		{
+			if (!m_cfg)
+				return false;
 			var configAvoidTiling: Boolean = (m_cfg as WMSWithQTTLayerConfiguration).avoidTiling;
 			
 			if ((m_cfg as WMSWithQTTLayerConfiguration).avoidTiling || avoidTilingForAllLayers)
@@ -259,12 +261,12 @@ package com.iblsoft.flexiweather.ogc.tiling
 		
 		override public function destroy():void
 		{
-			super.destroy();
 			
 			if (m_tiledLayer)
 			{
 				m_tiledLayer.destroy();
 			}
+			super.destroy();
 		}
 		override protected function destroyWMSViewPropertiesPreloader(loader: IWMSViewPropertiesLoader): void
 		{
@@ -422,8 +424,14 @@ package com.iblsoft.flexiweather.ogc.tiling
 		
 		private function onAllTilesLoaded(event: InteractiveLayerEvent): void
 		{
-			// restartautorefresh timer
-			restartAutoRefreshTimer();
+			if (!layerWasDestroyed)
+			{
+				// restartautorefresh timer
+				restartAutoRefreshTimer();
+			} else {
+				//destroy new loaded tiles
+				destroy();
+			}
 		}
 		
 		override protected function autoRefreshTimerCompleted(event: TimerEvent): void

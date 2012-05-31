@@ -292,57 +292,62 @@ package com.iblsoft.flexiweather.ogc.tiling
 		
 		public function onTileLoaded(result: Bitmap, tileRequest: QTTTileRequest, tileIndex: TileIndex): void
 		{
-			tileLoaded(result, tileRequest);
+			if (!m_layer.layerWasDestroyed)
+				tileLoaded(result, tileRequest);
 		}
 		
 		
 		private function tileLoaded(result: Bitmap, tileRequest: QTTTileRequest): void
 		{
-			tileLoadFinished();
-			
-			var wmsTileCache: WMSTileCache = m_layer.getCache() as WMSTileCache;
-			
-//			onJobFinished(tileRequest.jobName);
-			
-			if(result is Bitmap) 
+			if (!m_layer.layerWasDestroyed)
 			{
-				var qttTileViewProperties: QTTTileViewProperties = tileRequest.qttTileViewProperties;
-				
-				//debug text;
-//				var tf: TextField = new TextField();
-////				tf.text = qttTileViewProperties.tileIndex.toString();
-//				if (qttTileViewProperties.qttViewProperties.specialCacheStrings)
-//				{
-//					var arr: Array = String(qttTileViewProperties.qttViewProperties.specialCacheStrings[0]).split('='); 
-//					tf.text = arr[1];
-//				}
-//				
-//				var format: TextFormat = tf.getTextFormat();
-//				format.color = 0xffffff;
-//				format.size = 9;
-//				tf.setTextFormat(format);
-//				
-//				var m: Matrix = new Matrix();
-//				m.translate(10,10);
-				
-				qttTileViewProperties.bitmap = result as Bitmap;
-//				qttTileViewProperties.bitmap.bitmapData.draw(tf, m);
-				
-				//FIXME why this is deleted here
-//				removeCachedTiles(qttTileViewProperties, true);
-				
-//				if (qttTileViewProperties.qttViewProperties.specialCacheStrings)
-//					trace("QTTLoader tileLaoded: " + qttTileViewProperties.qttViewProperties.specialCacheStrings[0] + "  tileIndex: " + qttTileViewProperties.tileIndex.toString());
-				
-				wmsTileCache.addCacheItem(Bitmap(result), qttTileViewProperties);
-				
-				invalidateDynamicPart();
-				
-				return;
-				
-			}
+				tileLoadFinished();
 			
-			onDataLoadFailed(null);
+				var wmsTileCache: WMSTileCache = m_layer.getCache() as WMSTileCache;
+			
+//				onJobFinished(tileRequest.jobName);
+			
+				if(result is Bitmap) 
+				{
+					var qttTileViewProperties: QTTTileViewProperties = tileRequest.qttTileViewProperties;
+					
+					//debug text;
+	//				var tf: TextField = new TextField();
+	////				tf.text = qttTileViewProperties.tileIndex.toString();
+	//				if (qttTileViewProperties.qttViewProperties.specialCacheStrings)
+	//				{
+	//					var arr: Array = String(qttTileViewProperties.qttViewProperties.specialCacheStrings[0]).split('='); 
+	//					tf.text = arr[1];
+	//				}
+	//				
+	//				var format: TextFormat = tf.getTextFormat();
+	//				format.color = 0xffffff;
+	//				format.size = 9;
+	//				tf.setTextFormat(format);
+	//				
+	//				var m: Matrix = new Matrix();
+	//				m.translate(10,10);
+					
+					qttTileViewProperties.bitmap = result as Bitmap;
+	//				qttTileViewProperties.bitmap.bitmapData.draw(tf, m);
+					
+					//FIXME why this is deleted here
+	//				removeCachedTiles(qttTileViewProperties, true);
+					
+	//				if (qttTileViewProperties.qttViewProperties.specialCacheStrings)
+	//					trace("QTTLoader tileLaoded: " + qttTileViewProperties.qttViewProperties.specialCacheStrings[0] + "  tileIndex: " + qttTileViewProperties.tileIndex.toString());
+					
+					if (wmsTileCache)
+						wmsTileCache.addCacheItem(Bitmap(result), qttTileViewProperties);
+					
+					invalidateDynamicPart();
+					
+					return;
+					
+				}
+				
+				onDataLoadFailed(null);
+			}
 		}
 		
 		/**
@@ -452,7 +457,10 @@ package com.iblsoft.flexiweather.ogc.tiling
 		
 		protected function onDataLoadFailed(event: UniURLLoaderErrorEvent): void
 		{
-			tileLoadFailed();
+			if (!m_layer.layerWasDestroyed)
+			{
+				tileLoadFailed();
+			}
 		}
 		
 		private function checkIfAllTilesAreLoaded(): void

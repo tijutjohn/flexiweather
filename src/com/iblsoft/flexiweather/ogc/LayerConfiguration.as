@@ -20,6 +20,17 @@ package com.iblsoft.flexiweather.ogc
 		{
 		}
 
+		protected function debugArray(arr: Array): void
+		{
+			if (arr && arr.length > 0)
+			{
+				for each (var obj: Object in arr)
+				{
+					trace("WMSLayerConfig arr obj: " + obj);
+				}
+			}
+		}
+		
 		public function serialize(storage: Storage): void
 		{
 			ms_label = storage.serializeString("label", ms_label);
@@ -33,6 +44,11 @@ package com.iblsoft.flexiweather.ogc
 		{ 
 			ms_label = s;
 			dispatchEvent(new Event('labelChanged')); 
+		}
+		
+		public function destroy(): void
+		{
+			
 		}
 		
 		public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer

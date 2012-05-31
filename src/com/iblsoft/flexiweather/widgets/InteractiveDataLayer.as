@@ -166,10 +166,13 @@ package com.iblsoft.flexiweather.widgets
 		{
 			super.destroy();
 			
-			m_loader.removeEventListener(UniURLLoaderEvent.DATA_LOADED, onDataLoaded);
-			m_loader.removeEventListener(ProgressEvent.PROGRESS, onDataProgress);
-			m_loader.removeEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onDataLoadFailed);
-			
+			if (m_loader)
+			{
+				m_loader.destroy();
+				m_loader.removeEventListener(UniURLLoaderEvent.DATA_LOADED, onDataLoaded);
+				m_loader.removeEventListener(ProgressEvent.PROGRESS, onDataProgress);
+				m_loader.removeEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onDataLoadFailed);
+			}			
 			m_loader = null;
 			
 		}

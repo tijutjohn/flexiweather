@@ -46,6 +46,11 @@ package com.iblsoft.flexiweather.net.loaders
 		}
 		
 		
+		override public function destroy(): void
+		{
+			super.destroy();
+			allowedFormats = null;
+		}
 		
 		override protected function decodeResult(rawData: ByteArray, urlLoader: URLLoaderWithAssociatedData, urlRequest: URLRequest, resultCallback: Function, errorCallback: Function): void
 		{

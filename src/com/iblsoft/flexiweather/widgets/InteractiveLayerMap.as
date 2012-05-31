@@ -309,7 +309,7 @@ package com.iblsoft.flexiweather.widgets
 			dynamicEvent['layer'] = l;
 			dispatchEvent(dynamicEvent);
 			
-			l.destroy();
+//			l.destroy();
 		}
 		
 		private function getSynchronizedFrameValue(): Date

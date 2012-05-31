@@ -36,6 +36,10 @@ package com.iblsoft.flexiweather.ogc
 			m_bbox = bbox;
 		}
 		
+		public function destroy(): void
+		{
+			m_bbox = null;
+		}
 		public function equals(other: CRSWithBBox): Boolean
 		{
 			if(other == null)

@@ -80,13 +80,16 @@ package com.iblsoft.flexiweather.ogc
 			} 
 			else {
 				if(ms_previewURL == "<internal>") {
-					s_url = service.fullURL;
-					//check if there is ${BASE_URL} in fullURL and convert it
-					s_url = AbstractURLLoader.fromBaseURL(s_url);
-					s_url = s_url.replace(/.*\//, "").replace(/\?.*/, "");
-					s_url = s_url.replace("/", "-");
-					s_url += "-" + layerNames.join("_").replace(" ", "-").toLowerCase();
-					s_url = "assets/layer-previews/" + s_url + ".png";
+					if (service && layerNames)
+					{
+						s_url = service.fullURL;
+						//check if there is ${BASE_URL} in fullURL and convert it
+						s_url = AbstractURLLoader.fromBaseURL(s_url);
+						s_url = s_url.replace(/.*\//, "").replace(/\?.*/, "");
+						s_url = s_url.replace("/", "-");
+						s_url += "-" + layerNames.join("_").replace(" ", "-").toLowerCase();
+						s_url = "assets/layer-previews/" + s_url + ".png";
+					}
 				}
 			}	
 			
