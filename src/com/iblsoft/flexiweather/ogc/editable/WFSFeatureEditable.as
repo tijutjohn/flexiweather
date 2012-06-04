@@ -1,9 +1,10 @@
 package com.iblsoft.flexiweather.ogc.editable
 {
 	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
+	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithReflection;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWFS;
-	import com.iblsoft.flexiweather.ogc.WFSFeatureBase;
+	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureBase;
 	import com.iblsoft.flexiweather.ogc.data.ReflectionData;
 	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
 	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionDictionary;
@@ -17,7 +18,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	import flash.utils.Dictionary;
 	
 	public class WFSFeatureEditable extends WFSFeatureBase
-			implements IEditableItem, IHighlightableItem, ISelectableItem
+			implements IEditableItem, IHighlightableItem, ISelectableItem, IWFSFeatureWithReflection
 	{
 		protected var mb_selected: Boolean;
 		protected var mb_highlighted: Boolean;
@@ -524,5 +525,22 @@ package com.iblsoft.flexiweather.ogc.editable
 		
 		public function get firstInit(): Boolean
 		{ return m_firstInit; }
+		
+		public function getReflection(id:int):WFSEditableReflectionData
+		{
+			if (ml_movablePoints)
+				return ml_movablePoints.getReflection(id) as WFSEditableReflectionData;
+			
+			return null;
+		}
+		
+		public function get totalReflections():int
+		{
+			if (ml_movablePoints)
+				return ml_movablePoints.totalReflections;
+			
+			return 0;
+		}
+		
 	}
 }

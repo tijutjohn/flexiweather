@@ -1,4 +1,4 @@
-package com.iblsoft.flexiweather.ogc
+package com.iblsoft.flexiweather.ogc.wfs
 {
 	import com.iblsoft.flexiweather.utils.AnnotationBox;
 

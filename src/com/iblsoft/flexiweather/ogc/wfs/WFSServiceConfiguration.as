@@ -1,4 +1,4 @@
-package com.iblsoft.flexiweather.ogc
+package com.iblsoft.flexiweather.ogc.wfs
 {
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderErrorEvent;
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
@@ -14,6 +14,9 @@ package com.iblsoft.flexiweather.ogc
 	import flash.net.URLVariables;
 	
 	import mx.collections.ArrayCollection;
+	import com.iblsoft.flexiweather.ogc.OGCServiceConfiguration;
+	import com.iblsoft.flexiweather.ogc.SchemaParser;
+	import com.iblsoft.flexiweather.ogc.Version;
 	
 	public class WFSServiceConfiguration extends OGCServiceConfiguration
 	{

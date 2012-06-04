@@ -1,11 +1,12 @@
 package com.iblsoft.flexiweather.utils
 {
+	import com.iblsoft.flexiweather.constants.AnticollisionDisplacementMode;
 	import com.iblsoft.flexiweather.ogc.FeatureBase;
-	import com.iblsoft.flexiweather.ogc.IWFSFeatureWithAnnotation;
 	import com.iblsoft.flexiweather.ogc.kml.features.LineString;
 	import com.iblsoft.flexiweather.ogc.kml.features.LinearRing;
 	import com.iblsoft.flexiweather.ogc.kml.features.Placemark;
 	import com.iblsoft.flexiweather.ogc.kml.features.Polygon;
+	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithAnnotation;
 	import com.iblsoft.flexiweather.plugins.IConsole;
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.geometry.ILineSegmentApproximableBounds;
@@ -55,10 +56,6 @@ package com.iblsoft.flexiweather.utils
 		protected var ma_layoutObjects: ArrayCollection = new ArrayCollection();
 		protected var m_anchorsLayer: Sprite = new Sprite();
 		
-		public static const DISPLACE_NOT_ALLOWED: uint = 0;
-		public static const DISPLACE_AUTOMATIC: uint = 1;
-		public static const DISPLACE_AUTOMATIC_SIMPLE: uint = 2;
-		public static const DISPLACE_HIDE: uint = 3;
 
 		/**
 		 * Set it to true when you want suspend anticaollision processing (e.g. user is dragging map) 
@@ -104,7 +101,8 @@ package com.iblsoft.flexiweather.utils
 		public function addObstacle(object: DisplayObject): void
 		{
 			setDirty();
-			var lo: AnticollisionLayoutObject = new AnticollisionLayoutObject(object, false, DISPLACE_NOT_ALLOWED);
+			var lo: AnticollisionLayoutObject = new AnticollisionLayoutObject(object, false, AnticollisionDisplacementMode.DISPLACE_NOT_ALLOWED);
+			lo.name = "Obstacle";
 			ma_layoutObjects.addItem(lo);
 		}
 
@@ -115,14 +113,19 @@ package com.iblsoft.flexiweather.utils
 		public function addObject(
 				object: DisplayObject,
 				a_anchors: Array = null,
-				i_displacementMode: uint = DISPLACE_AUTOMATIC,
+				i_reflection: int = 0,
+				i_displacementMode: String = AnticollisionDisplacementMode.DISPLACE_AUTOMATIC,
 				b_addAsChild: Boolean = true): AnticollisionLayoutObject
 		{
 			setDirty();
 			if(b_addAsChild)
 				addChild(object);
 			var lo: AnticollisionLayoutObject = new AnticollisionLayoutObject(object, b_addAsChild, i_displacementMode);
+			
+			lo.name = "Object"+i_reflection;
+			
 			lo.objectsToAnchor = a_anchors;
+			lo.reflectionID = i_reflection;
 			lo.manageVisibilityWithAnchors = a_anchors != null;
 			ma_layoutObjects.addItem(lo);
 			
@@ -263,7 +266,7 @@ package com.iblsoft.flexiweather.utils
 				for each(lo in ma_layoutObjects) {
 					if(!lo.visible)
 						continue;
-					if(lo.displacementMode == DISPLACE_NOT_ALLOWED) {
+					if(lo.displacementMode == AnticollisionDisplacementMode.DISPLACE_NOT_ALLOWED) {
 						drawObjectPlacement(lo, 0, 0);
 					}
 				}
@@ -274,7 +277,7 @@ package com.iblsoft.flexiweather.utils
 				for each(lo in ma_layoutObjects) {
 					if(!lo.visible)
 						continue;
-					if(lo.displacementMode == DISPLACE_AUTOMATIC || lo.displacementMode == DISPLACE_AUTOMATIC_SIMPLE|| lo.displacementMode == DISPLACE_HIDE) {
+					if(lo.displacementMode == AnticollisionDisplacementMode.DISPLACE_AUTOMATIC || lo.displacementMode == AnticollisionDisplacementMode.DISPLACE_AUTOMATIC_SIMPLE|| lo.displacementMode == AnticollisionDisplacementMode.DISPLACE_HIDE) {
 						if(lo.visible != lo.object.visible)
 							lo.object.visible = lo.visible; 
 						var f_dx: Number = 0;
@@ -293,7 +296,7 @@ package com.iblsoft.flexiweather.utils
 							b_foundPlace = true;
 						}
 						else {
-							if (lo.displacementMode == DISPLACE_HIDE)
+							if (lo.displacementMode == AnticollisionDisplacementMode.DISPLACE_HIDE)
 							{
 								// do not continue if object has no placement and displacement mode is DISPLACE_HIDE
 								lo.visible = false;
@@ -303,7 +306,7 @@ package com.iblsoft.flexiweather.utils
 							// if not available, try the surrounding point
 							var f_pi2: Number = 2 * Math.PI;
 							
-							if (lo.displacementMode == DISPLACE_AUTOMATIC)
+							if (lo.displacementMode == AnticollisionDisplacementMode.DISPLACE_AUTOMATIC)
 							{
 								trace("\n DISPLACE_AUTOMATIC");
 								outterCycle:
@@ -328,7 +331,7 @@ package com.iblsoft.flexiweather.utils
 									}
 								}
 								trace("END OF DISPLACE_AUTOMATIC \n");
-							} else if (lo.displacementMode == DISPLACE_AUTOMATIC_SIMPLE) {
+							} else if (lo.displacementMode == AnticollisionDisplacementMode.DISPLACE_AUTOMATIC_SIMPLE) {
 								
 								var dist: int = 100;
 								var possiblePositions: Array = [new Point(dist,0), new Point(0,dist), new Point(0,-1*dist), new Point(-1*dist,0)]
@@ -364,8 +367,11 @@ package com.iblsoft.flexiweather.utils
 				
 				// draw anchors between 
 				var g: Graphics = m_anchorsLayer.graphics;
+				
+				trace("\n\nAnticollisionLayout");
 				g.clear();
 				for each(lo in ma_layoutObjects) {
+					trace("\t lo: " + lo);
 					if(lo.objectsToAnchor == null || lo.objectsToAnchor.length == 0)
 						continue;
 	
@@ -378,7 +384,9 @@ package com.iblsoft.flexiweather.utils
 					//if(lo.displacementMode != DISPLACE_AUTOMATIC)
 					//	continue;
 					for each(objectToAnchor in lo.objectsToAnchor) {
-						loAnchored = getAnticollisionLayoutObjectFor(objectToAnchor);
+						loAnchored = getAnticollisionLayoutObjectForAnchor(objectToAnchor);
+						
+						trace("\t\t objectToAnchor: " + objectToAnchor + " loAnchored: " + loAnchored);
 						if(loAnchored == null)
 							continue;
 						if(!loAnchored.visible)
@@ -386,6 +394,7 @@ package com.iblsoft.flexiweather.utils
 						var boundsFrom: Rectangle = lo.object.getBounds(this);
 						var boundsTo: Rectangle = objectToAnchor.getBounds(this);
 	
+						trace("\t\t boundsFrom: " + boundsFrom + " boundsTo: " + boundsTo);
 						if (boundsFrom.width < 10 && boundsFrom.height < 10)
 						{
 							//object is too small, do not do anticollision for it
@@ -393,6 +402,8 @@ package com.iblsoft.flexiweather.utils
 							continue;
 						}
 						var a_boundingLineSegmentsFrom: Array = getLineSegmentApproximation(lo.object);
+						
+						//FIXME this have to work with reflections
 						var a_boundingLineSegmentsTo: Array = getLineSegmentApproximation(objectToAnchor);
 	
 						//debug
@@ -434,6 +445,8 @@ package com.iblsoft.flexiweather.utils
 								clr = annotation.color;
 							anchorAlpha = 1;
 						}
+						
+						//FIXME draw to correct reflection not to original object
 						drawAnnotationAnchorFunction(g, lo.drawAnchorArrow,
 								bestPointFrom.x, bestPointFrom.y,
 								bestPointTo.x, bestPointTo.y, clr, anchorAlpha);
@@ -478,6 +491,15 @@ package com.iblsoft.flexiweather.utils
 			return true;
 		}
 		
+		/**
+		 * This is debug draw function
+		 *  
+		 * @param graphics
+		 * @param approx
+		 * @param clr
+		 * @param thickness
+		 * 
+		 */		
 		protected function drawApproximationFunction(graphics: Graphics, approx: Array, clr: int,thickness: int = 1): void
 		{
 			if (approx && approx.length > 0)
@@ -561,6 +583,22 @@ package com.iblsoft.flexiweather.utils
 			for each(var lo: AnticollisionLayoutObject in ma_layoutObjects) {
 				if(lo.object === object) {
 					return lo;
+				}
+			}
+			return null;
+		}
+		private function getAnticollisionLayoutObjectForAnchor(anchor: DisplayObject): AnticollisionLayoutObject
+		{
+			for each(var lo: AnticollisionLayoutObject in ma_layoutObjects) {
+				if (lo.objectsToAnchor)
+				{
+					var arr: Array = lo.objectsToAnchor;
+					for each (var obj: DisplayObject in arr)
+					{
+						if(obj === anchor) {
+							return lo;
+						}
+					}
 				}
 			}
 			return null;

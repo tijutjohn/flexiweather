@@ -15,6 +15,7 @@ package com.iblsoft.flexiweather.ogc
 	import flash.net.URLVariables;
 	
 	import mx.collections.ArrayCollection;
+	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureBase;
 
 	public class InteractiveLayerWFS extends InteractiveLayerFeatureBase
 	{

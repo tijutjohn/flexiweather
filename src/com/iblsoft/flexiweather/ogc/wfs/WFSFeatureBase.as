@@ -1,4 +1,4 @@
-package com.iblsoft.flexiweather.ogc
+package com.iblsoft.flexiweather.ogc.wfs
 {
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
@@ -7,6 +7,7 @@ package com.iblsoft.flexiweather.ogc
 	import flash.geom.Point;
 	
 	import mx.collections.ArrayCollection;
+	import com.iblsoft.flexiweather.ogc.FeatureBase;
 	
 	public class WFSFeatureBase extends FeatureBase
 	{

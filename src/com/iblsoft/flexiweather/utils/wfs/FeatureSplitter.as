@@ -61,7 +61,9 @@ package com.iblsoft.flexiweather.utils.wfs
 		public function splitCoordHermitSplineToArrayOfPointPolyLines(coords: Array, b_closed: Boolean): Array
 		{
 			// let's draw Hermit Spline in CRS:84
-			return [];
+//			return [];
+			
+			return splitCoordPolyLineToArrayOfPointPolyLines(coords, b_closed);
 		}
 		
 		

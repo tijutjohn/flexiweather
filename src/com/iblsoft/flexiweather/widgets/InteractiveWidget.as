@@ -1147,8 +1147,29 @@ package com.iblsoft.flexiweather.widgets
 		//*****************************************************************************************
 		private var m_featureSplitter: FeatureSplitter;
 		
+		public function getSplineReflections( coords: Array, b_closed: Boolean = false): Array
+		{
+			var features: Array = m_featureSplitter.splitCoordHermitSplineToArrayOfPointPolyLines(coords, b_closed);
+			
+			return features;
+		}
+
 		/**
-		 * Draw polyline with given curve renderer 
+		 * Get reflections of polyline. If you want to draw all polyline reflections with sa ICurveRenderers, use  drawPolyline function instead
+		 * 
+		 * @param coords
+		 * @param b_closed
+		 * @return 
+		 * 
+		 */		
+		public function getPolylineReflections( coords: Array, b_closed: Boolean = false): Array
+		{
+			var features: Array = m_featureSplitter.splitCoordPolyLineToArrayOfPointPolyLines(coords, b_closed);
+			
+			return features;
+		}
+		/**
+		 * Draw polyline with given curve renderer. If you just want all polyline reflections without drawing it, use getPolylineReflections function instead
 		 * @param g
 		 * @param coords
 		 * @return 
@@ -1247,30 +1268,7 @@ package com.iblsoft.flexiweather.widgets
 			
 			trace("anti: " + m_layerLayoutParent.parent);
 		}
-		/*
-		public function addAnticollisionObstacle(object: DisplayObject): void
-		{
-			labelLayout.addObstacle(object);	
-		}
-		
-		public function addAnticollisionObject(
-							object: DisplayObject,
-							a_anchors: Array = null,
-							i_displacementMode: uint = AnticollisionLayout.DISPLACE_AUTOMATIC,
-							b_addAsChild: Boolean = true): void
-		{
-			labelLayout.addObject(object, a_anchors, i_displacementMode, b_addAsChild);
-		}
-		
-		public function updateAnticollisionObjectReferenceLocation(object: DisplayObject): Boolean
-		{
-			return labelLayout.updateObjectReferenceLocation(object);
-		}
-		public function removeAnticollisionObject(object: DisplayObject): Boolean
-		{
-			return labelLayout.removeObject(object);
-		}
-		*/
+
 		private function anticollisionUpdate(): void
 		{
 			if (!m_suspendAnticollisionProcessing)

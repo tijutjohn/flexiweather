@@ -1,4 +1,4 @@
-package com.iblsoft.flexiweather.ogc
+package com.iblsoft.flexiweather.ogc.wfs
 {
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
@@ -7,6 +7,8 @@ package com.iblsoft.flexiweather.ogc
 	import flash.events.EventDispatcher;
 	
 	import mx.collections.ArrayCollection;
+	import com.iblsoft.flexiweather.ogc.SchemaParserDataItem;
+	import com.iblsoft.flexiweather.ogc.Version;
 	
 	public class WFSFeatureType extends EventDispatcher
 	{

@@ -1,6 +1,6 @@
 package com.iblsoft.flexiweather.widgets
 {
-	import com.iblsoft.flexiweather.ogc.WFSFeature;
+	import com.iblsoft.flexiweather.ogc.wfs.WFSFeature;
 	import com.iblsoft.flexiweather.proj.Coord;
 	
 	import flash.display.DisplayObjectContainer;
