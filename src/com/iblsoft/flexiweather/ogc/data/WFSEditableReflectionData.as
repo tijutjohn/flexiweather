@@ -46,7 +46,6 @@ package com.iblsoft.flexiweather.ogc.data
 			_moveablePoints[pointer] = mp;	
 		}
 		
-//		public function addAnnotation(annotation: AnnotationBox, pointer: int): void
 		public function addAnnotation(annotation: AnnotationBox): void
 		{
 			_annotation = annotation;

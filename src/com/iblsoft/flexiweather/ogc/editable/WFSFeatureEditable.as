@@ -1,13 +1,13 @@
 package com.iblsoft.flexiweather.ogc.editable
 {
 	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
-	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithReflection;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWFS;
-	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureBase;
 	import com.iblsoft.flexiweather.ogc.data.ReflectionData;
 	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
 	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionDictionary;
+	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithReflection;
+	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureBase;
 	import com.iblsoft.flexiweather.proj.Coord;
 	
 	import flash.display.Sprite;
@@ -62,7 +62,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 //			var reflections: Dictionary = new Dictionary();
 			
-			ml_movablePoints.cleanup();
+//			ml_movablePoints.cleanup();
 			
 			var total: int = coordinates.length;
 			var crs: String = master.container.getCRS();
@@ -81,7 +81,7 @@ package com.iblsoft.flexiweather.ogc.editable
 					var pointReflectedObject: Object = pointReflections[j];
 					var pointReflected: Point = pointReflectedObject.point;
 					var coordReflected: Coord = new Coord(crs, pointReflected.x, pointReflected.y);
-					ml_movablePoints.addReflectedCoord(coordReflected, j, pointReflectedObject.reflection);
+					ml_movablePoints.addReflectedCoordAt(coordReflected, i, j, pointReflectedObject.reflection);
 				}
 			}
 		}
@@ -94,7 +94,6 @@ package com.iblsoft.flexiweather.ogc.editable
 			var i: uint;
 			
 			//m_points is Array of Screen coordinates in pixels
-			
 			updateCoordsReflections();
 			var reflectionsTotal: int = ml_movablePoints.totalReflections;
 			
@@ -528,18 +527,23 @@ package com.iblsoft.flexiweather.ogc.editable
 		
 		public function getReflection(id:int):WFSEditableReflectionData
 		{
-			if (ml_movablePoints)
-				return ml_movablePoints.getReflection(id) as WFSEditableReflectionData;
+			if (reflectionDictionary)
+				return reflectionDictionary.getReflection(id) as WFSEditableReflectionData;
 			
 			return null;
 		}
 		
 		public function get totalReflections():int
 		{
-			if (ml_movablePoints)
-				return ml_movablePoints.totalReflections;
+			if (reflectionDictionary)
+				return reflectionDictionary.totalReflections;
 			
 			return 0;
+		}
+		
+		public function get reflectionDictionary():WFSEditableReflectionDictionary
+		{
+			return ml_movablePoints;
 		}
 		
 	}

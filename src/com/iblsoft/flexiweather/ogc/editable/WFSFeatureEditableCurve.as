@@ -167,7 +167,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				// don't do anything if this click is on MoveablePoint belonging to this curve
 				
 				//FIXME fix snap for reflection from which point is dragged
-				var moveablePoints: Array = (ml_movablePoints.getReflection(0) as WFSEditableReflectionData).moveablePoints;
+				var moveablePoints: Array = (reflectionDictionary.getReflection(0) as WFSEditableReflectionData).moveablePoints;
 				
 				for each(var mp: MoveablePoint in moveablePoints) {
 					if(mp.hitTestPoint(stagePt.x, stagePt.y, true))
@@ -216,20 +216,20 @@ package com.iblsoft.flexiweather.ogc.editable
 				if(i_best != -1) {
 					insertPointBefore(i_best, pt);
 					var newPoint: MoveablePoint;
-//					if (i_best < ml_movablePoints.length)
+//					if (i_best < reflectionDictionary.length)
 //					{
-//						newPoint = MoveablePoint(ml_movablePoints[i_best]);
+//						newPoint = MoveablePoint(reflectionDictionary[i_best]);
 //						newPoint.onMouseDown(pt);
 //						if(!b_keepDrag) {
 //							newPoint.onMouseUp(pt);
 //							newPoint.onMouseClick(pt);
 //						}
 //					}
-					if (i_best < ml_movablePoints.totalMoveablePoints)
+					if (i_best < reflectionDictionary.totalMoveablePoints)
 					{
 						//FIXME... question is if this needs to be done for 1 reflection or for all reflections
 						
-						newPoint = (ml_movablePoints.getReflection(0) as WFSEditableReflectionData).moveablePoints[i_best] as MoveablePoint;
+						newPoint = (reflectionDictionary.getReflection(0) as WFSEditableReflectionData).moveablePoints[i_best] as MoveablePoint;
 						newPoint.onMouseDown(pt);
 						if(!b_keepDrag) {
 							newPoint.onMouseUp(pt);

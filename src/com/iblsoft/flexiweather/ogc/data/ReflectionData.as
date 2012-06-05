@@ -18,6 +18,15 @@ package com.iblsoft.flexiweather.ogc.data
 		
 		private var _iw: InteractiveWidget;
 		
+		public function get length(): int
+		{
+			if (_coords)
+			{
+				_coords.length;
+			}
+			return 0;
+		}
+		
 		public function ReflectionData(iw: InteractiveWidget): void
 		{
 			_iw = iw;
@@ -48,10 +57,17 @@ package com.iblsoft.flexiweather.ogc.data
 			_coords.splice(pointer, 1);
 		}
 		
+		public function addCoordAt(coord: Coord, position: int): void
+		{
+			_coords[position] = coord;
+			_points[position] = _iw.coordToPoint(coord);
+		}
+		
 		public function addCoord(coord: Coord): void
 		{
-			_coords.push(coord);
-			_points.push(_iw.coordToPoint(coord));
+			addCoordAt(coord, _coords.length);
+//			_coords.push(coord);
+//			_points.push(_iw.coordToPoint(coord));
 		}
 	}
 }
