@@ -368,7 +368,7 @@ package com.iblsoft.flexiweather.utils
 				// draw anchors between 
 				var g: Graphics = m_anchorsLayer.graphics;
 				
-				trace("\n\nAnticollisionLayout");
+//				trace("\n\nAnticollisionLayout");
 				g.clear();
 				for each(lo in ma_layoutObjects) {
 					trace("\t lo: " + lo);

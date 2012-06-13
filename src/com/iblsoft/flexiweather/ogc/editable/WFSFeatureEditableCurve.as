@@ -6,6 +6,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.utils.CurveLineSegment;
 	import com.iblsoft.flexiweather.utils.CurveLineSegmentRenderer;
 	
+	import flash.display.Sprite;
 	import flash.geom.Point;
 	
 	import mx.collections.ArrayCollection;
@@ -169,8 +170,8 @@ package com.iblsoft.flexiweather.ogc.editable
 				//FIXME fix snap for reflection from which point is dragged
 				var moveablePoints: Array = (reflectionDictionary.getReflection(0) as WFSEditableReflectionData).moveablePoints;
 				
-				for each(var mp: MoveablePoint in moveablePoints) {
-					if(mp.hitTestPoint(stagePt.x, stagePt.y, true))
+				for each(var mpSprite: Sprite in moveablePoints) {
+					if(mpSprite.hitTestPoint(stagePt.x, stagePt.y, true))
 						return false;
 				}
 			}
@@ -215,7 +216,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				
 				if(i_best != -1) {
 					insertPointBefore(i_best, pt);
-					var newPoint: MoveablePoint;
+					var newPoint: IMouseEditableItem;
 //					if (i_best < reflectionDictionary.length)
 //					{
 //						newPoint = MoveablePoint(reflectionDictionary[i_best]);
@@ -229,11 +230,14 @@ package com.iblsoft.flexiweather.ogc.editable
 					{
 						//FIXME... question is if this needs to be done for 1 reflection or for all reflections
 						
-						newPoint = (reflectionDictionary.getReflection(0) as WFSEditableReflectionData).moveablePoints[i_best] as MoveablePoint;
-						newPoint.onMouseDown(pt);
-						if(!b_keepDrag) {
-							newPoint.onMouseUp(pt);
-							newPoint.onMouseClick(pt);
+						newPoint = (reflectionDictionary.getReflection(0) as WFSEditableReflectionData).moveablePoints[i_best] as IMouseEditableItem;
+						if (newPoint)
+						{
+							newPoint.onMouseDown(pt);
+							if(!b_keepDrag) {
+								newPoint.onMouseUp(pt);
+								newPoint.onMouseClick(pt);
+							}
 						}
 					}
 				}
