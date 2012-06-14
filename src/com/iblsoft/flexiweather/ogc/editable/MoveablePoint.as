@@ -50,8 +50,11 @@ package com.iblsoft.flexiweather.ogc.editable
 		
 		public function update(): void
 		{
-			this.x = m_pt.x;
-			this.y = m_pt.y;
+			if (m_pt)
+			{
+				this.x = m_pt.x;
+				this.y = m_pt.y;
+			}
 			
 			/*graphics.clear();
 
