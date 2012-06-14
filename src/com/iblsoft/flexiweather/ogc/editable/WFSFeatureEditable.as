@@ -150,7 +150,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				
 		}
 		
-		private function editableSpriteVisible(bool: Boolean): void
+		protected function editableSpriteVisible(bool: Boolean): void
 		{
 			m_editableSprite.visible = bool;
 			if (justSelectable)
@@ -407,7 +407,34 @@ package com.iblsoft.flexiweather.ogc.editable
 				i_innerGlowColor = 0xffffff;
 			if(mb_selected)
 				i_outterGlowColor = 0xffff00;
-			filters = [ new GlowFilter(i_innerGlowColor, 1, 6, 6, 2), new GlowFilter(i_outterGlowColor, 1, 8, 8, 4) ];
+			
+			setGlowFilter(i_innerGlowColor, i_outterGlowColor);
+		}
+		
+		/**
+		 * Set glow filter to the feature, if you need to set glow to any other display objects override this function.
+		 *  
+		 * @param i_innerGlowColor
+		 * @param i_outterGlowColor
+		 * 
+		 */		
+		protected function setGlowFilter(i_innerGlowColor: uint, i_outterGlowColor: uint): void
+		{
+			var reflectionsTotal: int = reflectionDictionary.totalReflections;
+			
+			var filterArray: Array = [ new GlowFilter(i_innerGlowColor, 1, 6, 6, 2), new GlowFilter(i_outterGlowColor, 1, 8, 8, 4) ];
+			
+			for (var r: int = 0; r < reflectionsTotal; r++)
+			{
+				var reflection: WFSEditableReflectionData = reflectionDictionary.getReflection(r) as WFSEditableReflectionData;
+				if (reflection && reflection.displaySprite)
+				{
+					reflection.displaySprite.filters = filterArray;
+					filters = null;
+				} else {
+					filters = filterArray
+				}
+			}
 		}
 		
 		/**
