@@ -371,7 +371,7 @@ package com.iblsoft.flexiweather.utils
 //				trace("\n\nAnticollisionLayout");
 				g.clear();
 				for each(lo in ma_layoutObjects) {
-					trace("\t lo: " + lo);
+//					trace("\t lo: " + lo);
 					if(lo.objectsToAnchor == null || lo.objectsToAnchor.length == 0)
 						continue;
 	
@@ -386,7 +386,7 @@ package com.iblsoft.flexiweather.utils
 					for each(objectToAnchor in lo.objectsToAnchor) {
 						loAnchored = getAnticollisionLayoutObjectForAnchor(objectToAnchor);
 						
-						trace("\t\t objectToAnchor: " + objectToAnchor + " loAnchored: " + loAnchored);
+//						trace("\t\t objectToAnchor: " + objectToAnchor + " loAnchored: " + loAnchored);
 						if(loAnchored == null)
 							continue;
 						if(!loAnchored.visible)
@@ -394,7 +394,7 @@ package com.iblsoft.flexiweather.utils
 						var boundsFrom: Rectangle = lo.object.getBounds(this);
 						var boundsTo: Rectangle = objectToAnchor.getBounds(this);
 	
-						trace("\t\t boundsFrom: " + boundsFrom + " boundsTo: " + boundsTo);
+//						trace("\t\t boundsFrom: " + boundsFrom + " boundsTo: " + boundsTo);
 						if (boundsFrom.width < 10 && boundsFrom.height < 10)
 						{
 							//object is too small, do not do anticollision for it

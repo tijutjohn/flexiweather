@@ -266,7 +266,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			m_points[i_pointIndex] = m_master.container.coordToPoint(c);
 			m_coordinates[i_pointIndex] = c;
 			
-			trace("setPoint delta["+i_reflectionDelta+"] point: " + pt + " 0coord: " + c + " 0pos: " + m_points[i_pointIndex]);
+//			trace("setPoint delta["+i_reflectionDelta+"] point: " + pt + " 0coord: " + c + " 0pos: " + m_points[i_pointIndex]);
 			
 			update(FeatureUpdateContext.fullUpdate());
 			modified = true;
@@ -397,7 +397,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				editableSpriteVisible(mb_selected);
 			}
 			if(!mb_highlighted && !mb_selected) {
-				filters = null; // [ new GlowFilter(0xff0000, 1, 8, 8, 4) ];
+				removeGlowFilter();
 				return;
 			}
 
@@ -411,6 +411,17 @@ package com.iblsoft.flexiweather.ogc.editable
 			setGlowFilter(i_innerGlowColor, i_outterGlowColor);
 		}
 		
+		protected function removeGlowFilter(): void
+		{
+			filters = null;
+			var reflectionsTotal: int = reflectionDictionary.totalReflections;
+			for (var r: int = 0; r < reflectionsTotal; r++)
+			{
+				var reflection: WFSEditableReflectionData = reflectionDictionary.getReflection(r) as WFSEditableReflectionData;
+				if (reflection && reflection.displaySprite)
+					reflection.displaySprite.filters = null;
+			}
+		}
 		/**
 		 * Set glow filter to the feature, if you need to set glow to any other display objects override this function.
 		 *  
