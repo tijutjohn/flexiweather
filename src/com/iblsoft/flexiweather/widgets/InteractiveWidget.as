@@ -615,11 +615,13 @@ package com.iblsoft.flexiweather.widgets
 
 		/**
 		 * Returns array of object pairs {point: reflected point, reflection: reflection delta} 
+		 * Input point is x,y coordinate and not pixel position.
 		 * @param point
+		 * @param startDelta if you want generate reflections delta from different delta than 0, set startDelta to you start delta. E.g if startDelta = 5, generated deltas will be 5,6,-6,7,-7...
 		 * @return 
 		 * 
 		 */		
-		public function mapCoordInCRSToViewReflections(point: Point): Array
+		public function mapCoordInCRSToViewReflections(point: Point,  startDelta: int = 0): Array
 		{
 			if (!point)
 				return [];
@@ -629,14 +631,41 @@ package com.iblsoft.flexiweather.widgets
 				
 				var a: Array = [];
 				for(var i: int = 0; i < 5; i++) {
-					var i_delta: int = (i & 1 ? 1 : -1) * ((i + 1) >> 1); // generates sequence 0, 1, -1, 2, -2, ..., 5, -5
+					var i_delta: int = startDelta + (i & 1 ? 1 : -1) * ((i + 1) >> 1); // generates sequence 0, 1, -1, 2, -2, ..., 5, -5
 					var p: Point = new Point(point.x + f_crsExtentBBoxWidth * i_delta, point.y)
 					a.push({point: p, reflection: i_delta});				
 				}
 				return a;
 			}
 			
-			return [{point: point}];
+			return [{point: point, reflection: 0}];
+		}
+		
+		/**
+		 * Similar function to function mapCoordInCRSToViewReflections, but you can set deltas manually
+		 * 
+		 * @param point
+		 * @param deltas
+		 * @return 
+		 * 
+		 */		
+		public function mapCoordInCRSToViewReflectionsForDeltas(point: Point,  deltas: Array): Array
+		{
+			if (!point)
+				return [];
+			
+			if(m_crsProjection.wrapsHorizontally) {
+				var f_crsExtentBBoxWidth: Number = m_crsProjection.extentBBox.width;
+				
+				var a: Array = [];
+				for each(var i_delta: int in deltas) {
+					var p: Point = new Point(point.x + f_crsExtentBBoxWidth * i_delta, point.y)
+					a.push({point: p, reflection: i_delta});				
+				}
+				return a;
+			}
+			
+			return [{point: point, reflection: 0}];
 		}
 
 		/**
