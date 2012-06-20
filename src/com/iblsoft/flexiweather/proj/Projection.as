@@ -62,20 +62,21 @@ package com.iblsoft.flexiweather.proj
 			return false;
 		}
 		
+		/**
+		 * Return Projection defined by CRS String
+		 *  
+		 * @param s_crs
+		 * @return 
+		 * 
+		 */		
 		public static function getByCRS(s_crs: String): Projection
 		{
 			var prj: Projection;
-//			trace("\n getByCRS" + s_crs);
 			if(s_crs in m_cache)
 			{
-//				trace("\tgetByCRS" + s_crs + " is in cache");
 				prj = m_cache[s_crs];
 				if (isValidProjection(prj))
 					return prj;
-//				else {
-//				trace("\tgetByCRS" + s_crs + " not valid");
-//					
-//				}
 				
 			}
 			var extentBBox: BBox = null;
@@ -89,11 +90,25 @@ package com.iblsoft.flexiweather.proj
 			return prj;
 		}
 		
+		/**
+		 * Return projection defined by Projection configuration
+		 *  
+		 * @param cfg
+		 * @return 
+		 * 
+		 */		
 		public static function getByCfg(cfg: ProjectionConfiguration): Projection
 		{
 			return getByCRS(cfg.crs);
 		}
 		
+		/**
+		 * @param s_crs
+		 * @param s_proj4String
+		 * @param crsExtentBBox
+		 * @param b_crsWrapsHorizontally
+		 * 
+		 */		
 		public static function addCRSByProj4(
 				s_crs: String, s_proj4String: String,
 				crsExtentBBox: BBox = null, b_crsWrapsHorizontally: Boolean = false): void
@@ -114,6 +129,15 @@ package com.iblsoft.flexiweather.proj
 			md_crsToDetails[s_crs].b_wrapsHorizontally = b_crsWrapsHorizontally;
 		}
 
+		
+		
+		/** Converts Coord into screen point (pixels) with current CRS. */ 
+		public function prjXYToOtherPrjPt(f_prjX: Number, f_prjY: Number, other: Projection): Point
+		{
+			var ptInLaLo: Point = prjXYToLaLoPt(f_prjX, f_prjY);
+			return other.laLoPtToPrjPt(ptInLaLo);
+		}
+		
 		/**
 		 * Converts [x,y] coordinates in this projections into to LaLo cordinates in radians.
 		 **/

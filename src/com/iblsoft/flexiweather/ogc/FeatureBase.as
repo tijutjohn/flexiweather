@@ -141,6 +141,55 @@ package com.iblsoft.flexiweather.ogc
 			return area;
 		}
 			
+		public function getExtent(): CRSWithBBox
+		{
+			var a_coordinates: Array = coordinates;
+			if (a_coordinates && a_coordinates.length == 1)
+			{
+				//point has no bounding box
+				return null;
+			}
+			
+			return getExtentFromCoordinates(a_coordinates);
+		}
+		
+		protected function getExtentFromCoordinates(a_coordinates: Array): CRSWithBBox
+		{
+			trace("\n getExtentFromCoordinates");
+			var north: Number = Number.NEGATIVE_INFINITY;
+			var south: Number = Number.POSITIVE_INFINITY;
+			var east: Number = Number.NEGATIVE_INFINITY;
+			var west: Number = Number.POSITIVE_INFINITY;
+			
+			for each (var coord: Coord in a_coordinates)
+			{
+				north = Math.max(coord.y, north);
+				south = Math.min(coord.y, south);
+				east = Math.max(coord.x, east);
+				west = Math.min(coord.x, west);
+				
+				trace("\nFeatureBase coord: " + coord.toNiceString()); 
+				trace("FeatureBase WE: " + west + " / " + east + " NS: " + north + " / " + south); 
+			}
+			
+			var bbox2: BBox = new BBox(west, south, east, north);
+			
+			//add 20% as padding
+			var ewPadding: Number = (east - west) * 1.2;
+			var nsPadding: Number = (north - south) * 1.2;
+			west -= ewPadding;
+			east += ewPadding;
+			north += nsPadding;
+			south -= nsPadding;
+			
+			var bbox: BBox = new BBox(west, south, east, north);
+			
+			trace("FeatureBase Before padding: " + bbox2.toBBOXString());
+			trace("FeatureBase  After padding: " + bbox.toBBOXString());
+			
+			return new CRSWithBBox('CRS:84', bbox);
+		}
+		
 		public function getCenter(b_useCoordinates: Boolean = true): Point
 		{
 			var a_coordinates: Array = b_useCoordinates ? coordinates : getPoints().toArray(); 

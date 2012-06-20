@@ -22,7 +22,7 @@ package com.iblsoft.flexiweather.ogc.data
 		{
 			if (_coords)
 			{
-				_coords.length;
+				return _coords.length;
 			}
 			return 0;
 		}

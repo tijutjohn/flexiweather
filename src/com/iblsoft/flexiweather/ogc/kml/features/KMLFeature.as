@@ -3,6 +3,8 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderErrorEvent;
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
+	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.ogc.CRSWithBBox;
 	import com.iblsoft.flexiweather.ogc.FeatureBase;
 	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
@@ -157,6 +159,19 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		protected function get currentCoordinates(): Array
 		{
 			return coordinates;
+		}
+		
+		override public function getExtent(): CRSWithBBox
+		{
+			var a_coordinates: Array = currentCoordinates;
+			if (a_coordinates && a_coordinates.length == 1)
+			{
+				//point has no bounding box
+				return null;
+			}
+		
+			return getExtentFromCoordinates(a_coordinates);
+			
 		}
 		
 		protected function  updateCoordsReflections(): void

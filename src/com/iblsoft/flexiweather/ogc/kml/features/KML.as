@@ -11,6 +11,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import flash.utils.getTimer;
 	
 	import mx.collections.ArrayCollection;
+	import mx.utils.StringUtil;
 	
 	public class KML extends XmlParser
 	{
@@ -37,8 +38,19 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		{
 			super();
 			
-			_kmlSource = xmlStr;
-			_kmlNamespace = getKMLNamespace(xmlStr);
+			//SPECIAL FIX for trimming ZERO WIDTH SPACE html character which can be at the end of KML String copied from web browser
+			
+			var endIndex:int = xmlStr.length - 1;
+			while (isZeroWidthSpaceChar(xmlStr.charCodeAt(endIndex)))
+				--endIndex;
+			
+			if (endIndex >= 0)
+				xmlStr = xmlStr.slice(0, endIndex + 1);
+			else
+				xmlStr = "";
+				
+			_kmlSource = StringUtil.trim(xmlStr);
+			_kmlNamespace = getKMLNamespace(_kmlSource);
 			
 			_kmlURLPath = urlPath;
 			_kmlBaseURLPath = baseUrlPath;
@@ -55,6 +67,12 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				_localResourceManager = true;
 			}
 			
+		}
+		
+		private function isZeroWidthSpaceChar(charCode: int): Boolean
+		{
+			return (charCode == 8203);
+				
 		}
 		
 		override public function cleanup(): void
