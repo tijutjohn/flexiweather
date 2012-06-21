@@ -7,6 +7,7 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 	
 	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
+	import flash.display.Sprite;
 	import flash.display.Stage;
 	import flash.geom.Point;
 	import flash.utils.Dictionary;
@@ -38,19 +39,32 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 		public function centerPopUpOnFeature(popUp: IFlexDisplayObject):void
 		{
 			var feature: KMLFeature = getFeatureForPopUp(popUp);
+			var displaySprite: Sprite = feature.visibleDisplaySprite;
+			
+			if (!displaySprite)
+			{
+				popUp.visible = false;				
+				return;
+			}
+			popUp.visible = true;				
+			
 			var featureParent: DisplayObjectContainer = feature.parent;
 			var stage: Stage = feature.stage;
 			
 			if (stage)
 			{
 				var xDiff: int = -1 * popUp.width / 2;
-				var yDiff: int = -1 * (popUp.height + feature.kmlIcon.height);
+//				var yDiff: int = -1 * (popUp.height + feature.kmlIcon.height);
+				var yDiff: int = -1 * (popUp.height + displaySprite.height);
 				if (popUp is KMLInfoWindow)
 				{
 					xDiff = -1 * (popUp as KMLInfoWindow).arrowPointerX
 				}
-				var position: Point = new Point(feature.x + xDiff, feature.y + yDiff);
+//				var position: Point = new Point(feature.x + xDiff, feature.y + yDiff);
+				var position: Point = new Point(displaySprite.x + xDiff, displaySprite.y + yDiff);
 				var stagePosition: Point = stage.globalToLocal(featureParent.localToGlobal(position));
+				
+				trace("KMLPopupManager stagePosition: " + stagePosition);
 				ScreenUtils.moveSpriteToButHideWhenNotFullOnScreen(popUp as DisplayObject, stagePosition);
 //				ScreenUtils.moveSpriteToButKeepFullyOnScreen(popUp as DisplayObject, stagePosition);
 			}
@@ -66,6 +80,7 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 			}
 			PopUpManager.addPopUp(popUp, parent);
 			
+			trace("\n AddPopup for feature: " + feature);
 			feature.addEventListener(KMLFeatureEvent.KML_FEATURE_POSITION_CHANGE, onKMLFeaturePositionChange);
 			feature.addEventListener(KMLFeatureEvent.KML_FEATURE_VISIBILITY_CHANGE, onKMLFeatureVisibilityChange);
 			popUp.addEventListener(CloseEvent.CLOSE, onInfoWindowClose);

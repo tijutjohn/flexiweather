@@ -17,7 +17,17 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 		
 		private var _feature: KMLFeature;
 		
-
+		override public function set y(value:Number):void
+		{
+			super.y = value;
+			trace("KMLInfoWindow y: " + value);
+		}
+		override public function set visible(value:Boolean):void
+		{
+			super.visible = value;
+			trace("KMLInfoWindow visible: " + value);
+		}
+		
 		[Bindable]
 		public function get feature():KMLFeature
 		{

@@ -478,7 +478,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 						
 						if (!kmlReflection.displaySprite)
 						{
-							kmlReflection.displaySprite = new Sprite();
+							kmlReflection.displaySprite = new KMLSprite(overlay);
 							overlay.addChild(kmlReflection.displaySprite);
 						}
 						
@@ -690,7 +690,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 				
 					if (!kmlReflection.displaySprite)
 					{
-						kmlReflection.displaySprite = new Sprite();
+						kmlReflection.displaySprite = new KMLSprite(placemark);
 						placemark.addChild(kmlReflection.displaySprite);
 					}
 					
@@ -836,12 +836,15 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 						trace("PlaceMarkIcon ["+placemark.x+","+placemark.y+"] iconPoint: ["+iconPoint.x+","+iconPoint.y+"]"); 
 						if (!kmlReflection.displaySprite)
 						{
-							kmlReflection.displaySprite = new Sprite();
+							kmlReflection.displaySprite = new KMLSprite(placemark);
 							placemark.addChild(kmlReflection.displaySprite);
+							
+							placemark.addDisplaySprite(kmlReflection.displaySprite);
 						}
 						
 						kmlReflection.displaySprite.x = iconPoint.x;
 						kmlReflection.displaySprite.y = iconPoint.y;
+						
 						
 						gr = kmlReflection.displaySprite.graphics;
 						gr.clear();
@@ -917,7 +920,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 					
 					if (!kmlReflection.displaySprite)
 					{
-						kmlReflection.displaySprite = new Sprite();
+						kmlReflection.displaySprite = new KMLSprite(placemark);
 						placemark.addChild(kmlReflection.displaySprite);
 					}
 					
@@ -1050,7 +1053,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 					
 					if (!kmlReflection.displaySprite)
 					{
-						kmlReflection.displaySprite = new Sprite();
+						kmlReflection.displaySprite = new KMLSprite(placemark);
 						placemark.addChild(kmlReflection.displaySprite);
 					}
 					
@@ -1208,6 +1211,7 @@ import com.iblsoft.flexiweather.ogc.kml.features.styles.Style;
 import com.iblsoft.flexiweather.ogc.kml.features.styles.StyleMap;
 import com.iblsoft.flexiweather.ogc.kml.features.styles.StyleSelector;
 
+import flash.display.Sprite;
 import flash.utils.Dictionary;
 
 class ObjectStyles
@@ -1324,4 +1328,30 @@ class StyleResource
 	
 	
 	
+}
+
+class KMLSprite extends Sprite
+{
+	
+	private var _feature: KMLFeature;
+	
+	override public function set x(value:Number):void
+	{
+		super.x = value;
+		_feature.notifyPositionChange();
+		trace("KMLSprite.x = " + value);
+	}
+	override public function set y(value:Number):void
+	{
+		super.y = value;
+		_feature.notifyPositionChange();
+		trace("KMLSprite.y = " + value);
+	}
+	public function KMLSprite(feature: KMLFeature)
+	{
+		super();
+		trace("New KMLSprite");
+		
+		_feature = feature
+	}
 }

@@ -27,6 +27,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
+	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
 	import flash.events.MouseEvent;
@@ -48,6 +49,21 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	{
 		public static const VISIBILITY_CHANGE: String = 'visibilityChange';
 		
+		private var _displaySprites: Array = [];
+		public function addDisplaySprite(sprite: Sprite): void
+		{
+			_displaySprites.push(sprite);
+		}
+		public function get visibleDisplaySprite(): Sprite
+		{
+			var containerWidth: int = master.container.width;
+			for each (var sprite: Sprite in _displaySprites)
+			{
+				if (sprite.x > 0 && sprite.x < containerWidth)
+					return sprite;
+			}
+			return null;
+		}
 		
 		override public function set x(value:Number):void
 		{
@@ -191,7 +207,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				var coordPointForReflection: flash.geom.Point = new flash.geom.Point;
 				if (coord.crs != crs)
 				{
-					trace("Problem with Coord... not same as InteractiveWidget coord");
+					trace("KMLFeature Problem with Coord... not same as InteractiveWidget coord");
 					//conver to InteractiveWidget CRS
 					coordPointForReflection = coord.convertToProjection(projection);
 					
@@ -429,15 +445,16 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			}
 			return true;
 		}
-		private function notifyVisibilityChange(): void
+		public function notifyVisibilityChange(): void
 		{
 			var kfe: KMLFeatureEvent = new KMLFeatureEvent(KMLFeatureEvent.KML_FEATURE_VISIBILITY_CHANGE, true);
 			kfe.kmlFeature = this;
 			dispatchEvent(kfe);
 		}
 		
-		private function notifyPositionChange(): void
+		public function notifyPositionChange(): void
 		{
+			trace("notifyPositionChange " + this);
 			var kfe: KMLFeatureEvent = new KMLFeatureEvent(KMLFeatureEvent.KML_FEATURE_POSITION_CHANGE, true);
 			kfe.kmlFeature = this;
 			dispatchEvent(kfe);

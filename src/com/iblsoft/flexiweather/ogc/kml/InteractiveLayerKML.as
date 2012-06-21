@@ -471,7 +471,8 @@ package com.iblsoft.flexiweather.ogc.kml
 			while ( feature )
 			{
 				
-				if(feature is IKMLIconFeature && feature.kmlIcon && feature.kmlIcon.hitTestPoint(event.stageX, event.stageY, false))
+//				if(feature is IKMLIconFeature && feature.kmlIcon && feature.kmlIcon.hitTestPoint(event.stageX, event.stageY, false))
+				if(feature is IKMLIconFeature  && feature.hitTestPoint(event.stageX, event.stageY, false))
 				{
 					if (bDispatchEvent)
 					{
@@ -495,11 +496,10 @@ package com.iblsoft.flexiweather.ogc.kml
 			if (!infoWindow)
 			{
 				infoWindow = new KMLInfoWindow();
-				
 				infoWindow.feature = feature;
 				infoWindow = kmlPM.addPopUp(infoWindow, FlexGlobals.topLevelApplication as DisplayObject, feature) as KMLInfoWindow;
-				kmlPM.centerPopUpOnFeature(infoWindow);
 			}
+			kmlPM.centerPopUpOnFeature(infoWindow);
 		}
 		
 		private function updateForFeature(feature: KMLFeature, changeFlag: FeatureUpdateContext, asyncManager: AsyncManager): void
