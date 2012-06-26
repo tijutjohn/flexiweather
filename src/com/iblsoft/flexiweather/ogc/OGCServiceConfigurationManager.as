@@ -14,11 +14,11 @@ package com.iblsoft.flexiweather.ogc
 
 	public class OGCServiceConfigurationManager extends EventDispatcher implements Serializable
 	{
-		internal static var sm_instance: OGCServiceConfigurationManager;
+		private static var sm_instance: OGCServiceConfigurationManager;
 
-		internal var ma_services: ArrayCollection = new ArrayCollection();
+		private var ma_services: ArrayCollection = new ArrayCollection();
 		
-		internal var m_timer: Timer = new Timer(500);
+		private var m_timer: Timer = new Timer(500);
 		
 		public function OGCServiceConfigurationManager()
 		{
