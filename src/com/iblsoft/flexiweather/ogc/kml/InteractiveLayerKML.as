@@ -17,13 +17,12 @@ package com.iblsoft.flexiweather.ogc.kml
 	import com.iblsoft.flexiweather.ogc.kml.features.KML;
 	import com.iblsoft.flexiweather.ogc.kml.features.KML22;
 	import com.iblsoft.flexiweather.ogc.kml.features.KMLFeature;
-	import com.iblsoft.flexiweather.ogc.kml.features.KMLLabel;
+	import com.iblsoft.flexiweather.ogc.kml.controls.KMLLabel;
 	import com.iblsoft.flexiweather.ogc.kml.features.LineString;
 	import com.iblsoft.flexiweather.ogc.kml.features.LinearRing;
 	import com.iblsoft.flexiweather.ogc.kml.features.NetworkLink;
 	import com.iblsoft.flexiweather.ogc.kml.features.Placemark;
 	import com.iblsoft.flexiweather.ogc.kml.features.Polygon;
-	import com.iblsoft.flexiweather.ogc.kml.interfaces.IKMLIconFeature;
 	import com.iblsoft.flexiweather.ogc.kml.interfaces.IKMLLabeledFeature;
 	import com.iblsoft.flexiweather.ogc.kml.managers.KMLPopupManager;
 	import com.iblsoft.flexiweather.ogc.kml.managers.KMLResourceManager;
@@ -387,17 +386,12 @@ package com.iblsoft.flexiweather.ogc.kml
 		override public function onMouseMove(event: MouseEvent): Boolean
 		{
 			var feature: KMLFeature = firstFeature as KMLFeature;
-			//			for (var i:Number = 0; i < total; i++)
-//			for each (var feature: KMLFeature in features)
 			while ( feature )
 			{
-				if (feature is IKMLIconFeature)
+				if(feature.hitTestPoint(event.stageX, event.stageY, true))
 				{
-					if(feature.kmlIcon && feature.kmlIcon.hitTestPoint(event.stageX, event.stageY, true))
-					{
-						highlightFeature(feature);
-						return true;
-					}
+					highlightFeature(feature);
+					return true;
 				}
 				feature = feature.next as KMLFeature;
 			}
@@ -415,11 +409,10 @@ package com.iblsoft.flexiweather.ogc.kml
 					if (m_highlightedFeature)
 					{
 						//unhighlight previously highlighted feature
-						m_highlightedFeature.kmlIcon.showNormal();
+						m_highlightedFeature.showNormal();
 					}
 					
-					if (feature.kmlIcon)
-						feature.kmlIcon.showHighlight();
+					feature.showHighlight();
 					m_highlightedFeature = feature;
 					//update graphics
 					invalidateDynamicPart();
@@ -427,8 +420,7 @@ package com.iblsoft.flexiweather.ogc.kml
 			} else {
 				if (m_highlightedFeature)
 				{
-					if (m_highlightedFeature.kmlIcon)
-						m_highlightedFeature.kmlIcon.showNormal();
+					m_highlightedFeature.showNormal();
 					m_highlightedFeature = null;
 					//update graphics
 					invalidateDynamicPart();
@@ -471,8 +463,7 @@ package com.iblsoft.flexiweather.ogc.kml
 			while ( feature )
 			{
 				
-//				if(feature is IKMLIconFeature && feature.kmlIcon && feature.kmlIcon.hitTestPoint(event.stageX, event.stageY, false))
-				if(feature is IKMLIconFeature  && feature.hitTestPoint(event.stageX, event.stageY, false))
+				if(feature.hitTestPoint(event.stageX, event.stageY, false))
 				{
 					if (bDispatchEvent)
 					{
@@ -652,11 +643,6 @@ package com.iblsoft.flexiweather.ogc.kml
 				return false;
 			// check if at least part of object is within m_boundaryRect
 			var bounds: Rectangle = object.getBounds(this);
-			if (object is IKMLIconFeature)
-				var bounds1: Rectangle = object.kmlIcon.getBounds(this);
-			
-			var bounds2: Rectangle = object.getBounds(this.stage);
-			var bounds3: Rectangle = object.getBounds(this.container);
 			
 			if(bounds.right < m_boundaryRect.left)
 				return false;

@@ -8,13 +8,17 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import com.iblsoft.flexiweather.ogc.FeatureBase;
 	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
+	import com.iblsoft.flexiweather.ogc.kml.controls.KMLLabel;
+	import com.iblsoft.flexiweather.ogc.kml.controls.KMLSprite;
 	import com.iblsoft.flexiweather.ogc.kml.data.KMLFeaturesReflectionDictionary;
 	import com.iblsoft.flexiweather.ogc.kml.data.KMLReflectionData;
+	import com.iblsoft.flexiweather.ogc.kml.data.KMLResourceKey;
 	import com.iblsoft.flexiweather.ogc.kml.events.KMLFeatureEvent;
 	import com.iblsoft.flexiweather.ogc.kml.features.styles.Style;
 	import com.iblsoft.flexiweather.ogc.kml.features.styles.StyleMap;
 	import com.iblsoft.flexiweather.ogc.kml.features.styles.StyleSelector;
 	import com.iblsoft.flexiweather.ogc.kml.managers.KMLParserManager;
+	import com.iblsoft.flexiweather.ogc.kml.managers.KMLResourceManager;
 	import com.iblsoft.flexiweather.ogc.kml.renderer.IKMLRenderer;
 	import com.iblsoft.flexiweather.plugins.IConsole;
 	import com.iblsoft.flexiweather.proj.Coord;
@@ -48,6 +52,9 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	public class KMLFeature extends FeatureBase
 	{
 		public static const VISIBILITY_CHANGE: String = 'visibilityChange';
+		
+		public static const ICON_TYPE_NORMAL: String = 'normal';
+		public static const ICON_TYPE_HIGHLIGHTED: String = 'highlighted';
 		
 		private var _displaySprites: Array = [];
 		public function addDisplaySprite(sprite: Sprite): void
@@ -108,14 +115,14 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		
 		private var _parentDocument: Document;
 		
-		private var _kmlIcon: KMLIcon;
+//		private var _kmlIcon: KMLIcon;
 		private var _kmlLabel: KMLLabel;
 		private var _region: Region;
 		
-		public function get kmlIcon(): KMLIcon
-		{
-			return _kmlIcon;
-		}
+//		public function get kmlIcon(): KMLIcon
+//		{
+//			return _kmlIcon;
+//		}
 		public function get kmlLabel(): KMLLabel 
 		{
 			return _kmlLabel;
@@ -155,9 +162,76 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			
 		}
 		
+		private var _iconState: String;
+		private function set iconState(value: String): void
+		{
+			_iconState = value;
+			trace("KMLFeature iconState = " + value);
+		}
+		public function get state(): String
+		{
+			return _iconState;
+		}
+		public function get isHighlighted(): Boolean
+		{
+			return _iconState == ICON_TYPE_HIGHLIGHTED;
+		}
+		
+		public function showNormal(): void
+		{
+			iconState = ICON_TYPE_NORMAL;
+			
+			update(FeatureUpdateContext.fullUpdate());
+		}
+		public function showHighlight(): void
+		{
+			iconState = ICON_TYPE_HIGHLIGHTED;
+			
+			update(FeatureUpdateContext.fullUpdate());
+		}
+		
+		private var _normalStyle: StyleSelector;
+		private var _highlightStyle: StyleSelector;
+		public function get normalStyle():StyleSelector
+		{
+			return _normalStyle;
+		}
+		
+		public function set normalStyle(value:StyleSelector):void
+		{
+			_normalStyle = value;
+			
+			update(FeatureUpdateContext.fullUpdate());
+		}
+		
+		public function get highlightStyle():StyleSelector
+		{
+			return _highlightStyle;
+		}
+		
+		public function set highlightStyle(value:StyleSelector):void
+		{
+			_highlightStyle = value;
+		}
+		
+		
+		
+		private var _normalResourceKey: KMLResourceKey;
+		private var _highlightResourceKey: KMLResourceKey;
+		
+		public function setNormalBitmapResourceKey(key: KMLResourceKey): void
+		{
+			_normalResourceKey = key;
+		}
+		public function setHighlightBitmapResourceKey(key: KMLResourceKey): void
+		{
+			_highlightResourceKey = key;
+		}
+		
+		
 		public function init(): void
 		{
-			//createKMLLabel();
+			showNormal();
 			
 			mouseEnabled = true;
 			mouseChildren = true;
@@ -207,7 +281,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				var coordPointForReflection: flash.geom.Point = new flash.geom.Point;
 				if (coord.crs != crs)
 				{
-					trace("KMLFeature Problem with Coord... not same as InteractiveWidget coord");
+//					trace("KMLFeature Problem with Coord... not same as InteractiveWidget coord");
 					//conver to InteractiveWidget CRS
 					coordPointForReflection = coord.convertToProjection(projection);
 					
@@ -256,20 +330,27 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		
 		protected function cleanupIcon(): void
 		{
-			if (_kmlIcon)
-			{
-				removeChild(_kmlIcon);
-				_kmlIcon.cleanup();
-				
-				_kmlIcon = null;
-			}
+//			if (_kmlIcon)
+//			{
+//				removeChild(_kmlIcon);
+//				_kmlIcon.cleanup();
+//				
+//				_kmlIcon = null;
+//			}
+			
+			var resourceManager: KMLResourceManager = kml.resourceManager;
+			resourceManager.disposeResource(_normalResourceKey);
+			resourceManager.disposeResource(_highlightResourceKey);
+			
+			_normalResourceKey = null;
+			_highlightResourceKey = null;
 		}
 		
 		
 		protected function createIcon(): void
 		{
-			_kmlIcon = new KMLIcon(this);
-			addChild(_kmlIcon);
+//			_kmlIcon = new KMLIcon(this);
+//			addChild(_kmlIcon);
 		}
 		
 		protected function cleanupKMLLabel(): void
@@ -282,10 +363,13 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			}
 		}
 		
-		protected function createKMLLabel(): void
+		protected function createKMLLabel(parent: Sprite): KMLLabel
 		{
 			_kmlLabel = new KMLLabel();
-//			addChild(_kmlLabel);
+			_kmlLabel.reflection = (parent as KMLSprite).reflection;
+//			parent.addChild(_kmlLabel);
+			
+			return _kmlLabel
 		}
 		
 		/*
@@ -318,8 +402,22 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			
 			if (master && master.container)
 			{
-				master.container.labelLayout.removeObject(this);
-				master.container.labelLayout.removeObject(_kmlLabel);
+				var kmlSprite: KMLSprite;
+				var kmlLabel: KMLLabel;
+				var reflection: KMLReflectionData;
+				
+				var totalReflections: int = kmlReflectionDictionary.totalReflections;
+				for (var i: int = 0; i < totalReflections; i++)
+				{
+					reflection = kmlReflectionDictionary.getReflection(i) as KMLReflectionData;
+					kmlSprite = reflection.displaySprite as KMLSprite;
+					kmlLabel = kmlSprite.kmlLabel;
+					master.container.labelLayout.removeObject(reflection.displaySprite);
+					master.container.labelLayout.removeObject(kmlLabel);
+				}
+				
+//				master.container.labelLayout.removeObject(this);
+//				master.container.labelLayout.removeObject(_kmlLabel);
 				
 				master.container.objectLayout.removeObject(this);
 			}
@@ -454,7 +552,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		
 		public function notifyPositionChange(): void
 		{
-			trace("notifyPositionChange " + this);
 			var kfe: KMLFeatureEvent = new KMLFeatureEvent(KMLFeatureEvent.KML_FEATURE_POSITION_CHANGE, true);
 			kfe.kmlFeature = this;
 			dispatchEvent(kfe);

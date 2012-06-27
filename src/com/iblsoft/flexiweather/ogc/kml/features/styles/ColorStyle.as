@@ -8,6 +8,7 @@ package com.iblsoft.flexiweather.ogc.kml.features.styles
 	public class ColorStyle extends Style
 	{
 		private var _color: uint;		
+		private var _alpha: Number;		
 		/**
 		 * Allowed values are: "normal" or "random" 
 		 */		
@@ -26,6 +27,10 @@ package com.iblsoft.flexiweather.ogc.kml.features.styles
 				{
 					colorStr = colorStr.substring(1, colorStr.length);
 				}
+				
+				_alpha = parseInt("0x"+colorStr.substr(0,2));
+				_alpha = _alpha / 255;
+				
 				//color is stored as  aabbggrr
 				colorStr = colorStr.substr(0,2)+colorStr.substr(6,2)+colorStr.substr(4,2)+colorStr.substr(2,2);
 				this._color  = parseInt("0x"+colorStr);
@@ -33,6 +38,10 @@ package com.iblsoft.flexiweather.ogc.kml.features.styles
 			this._colorMode  = ParsingTools.nullCheck(this.xml.kmlns::colorMode);
 		}
 		
+		public function get alpha(): Number
+		{
+			return this._alpha;
+		}
 		public function get color(): uint
 		{
 			return this._color;
@@ -43,7 +52,7 @@ package com.iblsoft.flexiweather.ogc.kml.features.styles
 		}
 		
 		public override function toString():String {
-			return "ColorStyle: " + super.toString() + " color: " + this._color + " mode: " + this._colorMode;
+			return "ColorStyle: [" + super.toString() + "] color: " + this._color + " alpha" + alpha + " mode: " + this._colorMode;
 		}
 	}
 }

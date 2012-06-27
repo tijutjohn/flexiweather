@@ -22,5 +22,9 @@ package com.iblsoft.flexiweather.ogc.kml.features.styles
 		{
 			return this._scale;
 		}
+		
+		public override function toString():String {
+			return "LabelStyle: [" + super.toString() + "] _scale: " + _scale;
+		}
 	}
 }
