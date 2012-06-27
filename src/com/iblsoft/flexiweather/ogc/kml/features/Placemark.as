@@ -1,11 +1,13 @@
 package com.iblsoft.flexiweather.ogc.kml.features
 {
 	import com.google.maps.geom.Point3D;
+	import com.iblsoft.flexiweather.constants.AnticollisionDisplacementMode;
 	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
 	import com.iblsoft.flexiweather.ogc.kml.InteractiveLayerKML;
+	import com.iblsoft.flexiweather.ogc.kml.controls.KMLLabel;
+	import com.iblsoft.flexiweather.ogc.kml.controls.KMLSprite;
 	import com.iblsoft.flexiweather.ogc.kml.data.KMLReflectionData;
-	import com.iblsoft.flexiweather.ogc.kml.interfaces.IKMLIconFeature;
 	import com.iblsoft.flexiweather.ogc.kml.interfaces.IKMLLabeledFeature;
 	import com.iblsoft.flexiweather.ogc.kml.managers.KMLParserManager;
 	import com.iblsoft.flexiweather.ogc.kml.renderer.IKMLRenderer;
@@ -18,9 +20,11 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import com.iblsoft.flexiweather.utils.geometry.LineSegment;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
+	import flash.display.Sprite;
 	import flash.geom.Point;
 	
 	import mx.collections.ArrayCollection;
+	import mx.states.OverrideBase;
 
 	/**
 	*	Class that represents an Entry element within an Atom feed
@@ -31,7 +35,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	* 
 	* 	@see http://www.atomenabled.org/developers/syndication/atom-format-spec.php#rfc.section.4.1.2
 	*/
-	public class Placemark extends KMLFeature implements IKMLLabeledFeature, IKMLIconFeature, ILineSegmentApproximableBounds
+	public class Placemark extends KMLFeature implements IKMLLabeledFeature, ILineSegmentApproximableBounds
 	{
 		private var _geometry:Geometry;
 		private var _multigeometry:Geometry;
@@ -55,6 +59,8 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			}
 			return m_coordinates.toArray(); 
 		}  		
+		
+		private var _spritesAddedToLabelLayout: Boolean;
 		
 		/**
 		*	Constructor for class.
@@ -206,9 +212,24 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				}
 			}
 		}
+		
+		override protected function createKMLLabel(parent: Sprite): KMLLabel
+		{
+			var kmlSprite: KMLSprite = parent as KMLSprite;
+			
+			if (kmlSprite && !kmlSprite.kmlLabel)
+			{
+				kmlSprite.kmlLabel = super.createKMLLabel(kmlSprite);
+			}
+			
+			return kmlSprite.kmlLabel;
+			
+		}
 		/** Called after the feature is added to master or after any change (e.g. area change). */
 		override public function update(changeFlag: FeatureUpdateContext): void
 		{
+			trace("Placemark update: " + master);
+			
 			if (!m_master)
 				return;
 			
@@ -238,6 +259,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			super.update(changeFlag);
 			
 			
+			
 			updateCoordsReflections();
 			_kmlReflectionDictionary.updateKMLFeature(this);
 			
@@ -261,9 +283,13 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			{
 				var points: ArrayCollection;
 				var point: flash.geom.Point;
-				
+				var _addToLabelLayout: Boolean;
 				
 				var totalReflections: int = kmlReflectionDictionary.totalReflections;
+				
+				var labelLayout: AnticollisionLayout = master.container.labelLayout;
+				
+				var labelsCreation: Boolean;
 				
 				for (var i: int = 0; i < totalReflections; i++)
 				{
@@ -275,15 +301,57 @@ package com.iblsoft.flexiweather.ogc.kml.features
 						if (kmlReflection.displaySprite && iconPoint)
 						{
 						
-							kmlReflection.displaySprite.visible = true;
-							kmlReflection.displaySprite.x = iconPoint.x;
-							kmlReflection.displaySprite.y = iconPoint.y;
+							var kmlSprite: KMLSprite = kmlReflection.displaySprite as KMLSprite; 
+							
+							kmlSprite.visible = true;
+							kmlSprite.x = iconPoint.x;
+							kmlSprite.y = iconPoint.y;
+							
+							if (name && name.length > 0)
+							{
+								createKMLLabel(kmlSprite);
+							
+								kmlSprite.kmlLabel.text = name;
+								labelsCreation = true;	
+							}
+							if (!_spritesAddedToLabelLayout && master)
+							{
+								labelLayout.addObstacle(kmlSprite);
+								if (kmlSprite.kmlLabel)
+								{
+									//FIXME for now, we are not doing any displacement of labels, because it consumes too much CPU, need to create better optimizations
+									//e.g has maximum of vi sible labels defined, or so
+//									labelLayout.addObject(kmlSprite.kmlLabel, [kmlSprite], i, AnticollisionDisplacementMode.DISPLACE_NOT_ALLOWED);
+									labelLayout.addObject(kmlSprite.kmlLabel, [kmlSprite], i);
+								} else {
+									trace("There is no label, so do not add label as Object");
+								}
+								
+								_addToLabelLayout = true;
+							}
+							
+							labelLayout.updateObjectReferenceLocation(kmlSprite);
+							
 						}
 					} else {
 						if (kmlReflection.displaySprite)
+						{
 							kmlReflection.displaySprite.visible = false;
+							createKMLLabel(kmlSprite);
+							labelsCreation = true;
+						}
 					}
 				}
+				
+				
+				if (labelsCreation)
+				{
+					//we need to render placemark if labels was created, to apply correct styles on labels
+					renderer.render(this, master.container);
+				}
+				
+				if (!_spritesAddedToLabelLayout && _addToLabelLayout)
+					_spritesAddedToLabelLayout = true;
 				
 				/*
 				if (_geometry is MultiGeometry)

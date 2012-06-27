@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc.kml.features
 {
+	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
 	import com.iblsoft.flexiweather.ogc.kml.managers.KMLParserManager;
 	import com.iblsoft.flexiweather.syndication.Namespaces;
 	import com.iblsoft.flexiweather.utils.DebugUtils;
@@ -38,6 +39,16 @@ package com.iblsoft.flexiweather.ogc.kml.features
 
 		}
 
+		override public function update(changeFlag:FeatureUpdateContext):void
+		{
+			for each (var feature: KMLFeature in features)
+			{
+				feature.update(changeFlag);
+			}
+			
+			super.update(changeFlag);
+			
+		}
 		override public function cleanup(): void
 		{
 			for each (var feature: KMLFeature in features)

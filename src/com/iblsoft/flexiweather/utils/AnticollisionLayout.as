@@ -2,6 +2,8 @@ package com.iblsoft.flexiweather.utils
 {
 	import com.iblsoft.flexiweather.constants.AnticollisionDisplacementMode;
 	import com.iblsoft.flexiweather.ogc.FeatureBase;
+	import com.iblsoft.flexiweather.ogc.kml.controls.KMLLabel;
+	import com.iblsoft.flexiweather.ogc.kml.controls.KMLSprite;
 	import com.iblsoft.flexiweather.ogc.kml.features.LineString;
 	import com.iblsoft.flexiweather.ogc.kml.features.LinearRing;
 	import com.iblsoft.flexiweather.ogc.kml.features.Placemark;
@@ -28,6 +30,7 @@ package com.iblsoft.flexiweather.utils
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.UIComponent;
+	import mx.utils.object_proxy;
 
 	/**
 	 * Special helper class for layout of DisplayObject's so that they don't overlap.
@@ -176,13 +179,27 @@ package com.iblsoft.flexiweather.utils
 		public function updateObjectReferenceLocation(object: DisplayObject): Boolean
 		{
 			var lo: AnticollisionLayoutObject = getAnticollisionLayoutObjectFor(object);
+			var loAnchor: AnticollisionLayoutObject = getAnticollisionLayoutObjectForAnchor(object);
 			
+//			if (object is KMLSprite)
+//			{
+//				var lbl: KMLLabel = (object as KMLSprite).kmlLabel;
+//				if (lbl)
+//					trace("ANTILayout " + lbl + " size: ["+lbl.width+","+lbl.height+"]")
+//			}
 			if(lo == null)
 				return false;
 			if(lo.referenceLocation.x != object.x || lo.referenceLocation.y != object.y) 
 			{ 
 				setDirty();
 				lo.referenceLocation = new Point(object.x, object.y);
+			}
+			if(loAnchor == null)
+				return false;
+			if(loAnchor.referenceLocation.x != object.x || loAnchor.referenceLocation.y != object.y) 
+			{ 
+				setDirty();
+				loAnchor.referenceLocation = new Point(object.x, object.y);
 			}
 			
 			return true;

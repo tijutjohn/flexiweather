@@ -64,10 +64,14 @@ package com.iblsoft.flexiweather.utils
 		
 		public function set referenceLocation(value:Point):void
 		{
+//			if (value.x == 0  && value.y == 0)
+//			{
+//				trace("referenceLocation is set to 0");
+//			}
 			m_referenceLocation.x = value.x;
 			m_referenceLocation.y = value.y;
 			
-			//		trace("LayoutObject m_referenceLocation " + value);
+//			trace("LayoutObject m_referenceLocation " + value);
 		}
 	}
 }

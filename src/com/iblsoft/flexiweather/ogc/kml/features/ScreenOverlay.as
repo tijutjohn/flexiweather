@@ -4,10 +4,9 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
 	import com.iblsoft.flexiweather.ogc.kml.InteractiveLayerKML;
 	import com.iblsoft.flexiweather.ogc.kml.data.KMLReflectionData;
-	import com.iblsoft.flexiweather.ogc.kml.interfaces.IKMLIconFeature;
 	import com.iblsoft.flexiweather.ogc.kml.renderer.IKMLRenderer;
 	
-	public class ScreenOverlay extends Overlay implements IKMLIconFeature
+	public class ScreenOverlay extends Overlay
 	{
 		private var _overlayXY: KMLVec2;
 		private var _screenXY: KMLVec2;

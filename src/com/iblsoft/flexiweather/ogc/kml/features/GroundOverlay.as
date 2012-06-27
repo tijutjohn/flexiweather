@@ -5,7 +5,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import com.iblsoft.flexiweather.ogc.kml.InteractiveLayerKML;
 	import com.iblsoft.flexiweather.ogc.kml.data.KMLFeaturesReflectionDictionary;
 	import com.iblsoft.flexiweather.ogc.kml.data.KMLReflectionData;
-	import com.iblsoft.flexiweather.ogc.kml.interfaces.IKMLIconFeature;
 	import com.iblsoft.flexiweather.ogc.kml.interfaces.IKMLLabeledFeature;
 	import com.iblsoft.flexiweather.ogc.kml.renderer.IKMLRenderer;
 	import com.iblsoft.flexiweather.proj.Coord;
@@ -25,7 +24,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	* 
 	* 	@see http://www.atomenabled.org/developers/syndication/atom-format-spec.php#rfc.section.4.1.2
 	*/
-	public class GroundOverlay extends Overlay implements IKMLLabeledFeature, IKMLIconFeature
+	public class GroundOverlay extends Overlay implements IKMLLabeledFeature
 	{
 		private var _latLonBox:LatLonBox;
 		/**
