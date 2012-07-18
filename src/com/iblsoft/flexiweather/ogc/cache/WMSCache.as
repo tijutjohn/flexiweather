@@ -283,7 +283,7 @@ package com.iblsoft.flexiweather.ogc.cache
 		
 		public function addCacheNoDataItem(viewProperties: IViewProperties): void
 		{
-			if (!)
+			if (!supportCaching)
 				return;
 			
 			var wmsViewProperties: WMSViewProperties = viewProperties as WMSViewProperties;
