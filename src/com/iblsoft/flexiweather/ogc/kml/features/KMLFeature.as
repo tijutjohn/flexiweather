@@ -8,6 +8,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import com.iblsoft.flexiweather.ogc.FeatureBase;
 	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
+	import com.iblsoft.flexiweather.ogc.events.ReflectionEvent;
 	import com.iblsoft.flexiweather.ogc.kml.controls.KMLLabel;
 	import com.iblsoft.flexiweather.ogc.kml.controls.KMLSprite;
 	import com.iblsoft.flexiweather.ogc.kml.data.KMLFeaturesReflectionDictionary;
@@ -24,9 +25,9 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.syndication.ParsingTools;
-	import com.iblsoft.flexiweather.utils.AnticollisionLayout;
-	import com.iblsoft.flexiweather.utils.AnticollisionLayoutObject;
 	import com.iblsoft.flexiweather.utils.ProfilerUtils;
+	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayout;
+	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayoutObject;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.display.Bitmap;
@@ -57,6 +58,21 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		public static const ICON_TYPE_HIGHLIGHTED: String = 'highlighted';
 		
 		private var _displaySprites: Array = [];
+		
+		public var featureScale: Number = 1;
+		
+		public function removeDisplaySprite(sprite: Sprite): void
+		{
+			var total: int = _displaySprites.length;
+			for (var i: int = 0; i < total; i++)
+			{
+				if (_displaySprites[i] == sprite)
+				{
+					_displaySprites.splice(i, 1);
+					return;
+				}
+			}
+		}
 		public function addDisplaySprite(sprite: Sprite): void
 		{
 			_displaySprites.push(sprite);
@@ -133,7 +149,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		{
 			return _kml;
 		}
-		
 		
 		protected var _kmlReflectionDictionary: KMLFeaturesReflectionDictionary;
 		public function get kmlReflectionDictionary(): KMLFeaturesReflectionDictionary
@@ -244,6 +259,8 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			super.setMaster(master);
 			
 			_kmlReflectionDictionary = new KMLFeaturesReflectionDictionary(master.container);
+			_kmlReflectionDictionary.addEventListener(ReflectionEvent.ADD_REFLECTION, onKMLAddReflection);
+			_kmlReflectionDictionary.addEventListener(ReflectionEvent.REMOVE_REFLECTION, onKMLRemoveReflection);
 		}
 		
 		protected function get currentCoordinates(): Array
@@ -264,14 +281,54 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			
 		}
 		
+		protected function addLabelToAnticollisionLayout(kmlLabel: KMLLabel): void
+		{
+			
+		}
+		protected function removeLabelFromAnticollisionLayout(kmlLabel: KMLLabel): void
+		{
+			
+		}
+		protected function removeReflection(reflection: KMLReflectionData): void
+		{
+			var kmlSprite: KMLSprite = reflection.displaySprite as KMLSprite;
+			removeLabelFromAnticollisionLayout(kmlSprite.kmlLabel);
+			
+			removeChild(kmlSprite);
+			removeDisplaySprite(kmlSprite);
+			
+			kmlSprite.kmlLabel = null;
+			kmlLabel.cleanup();
+			
+		}
+		protected function onKMLRemoveReflection(event: ReflectionEvent): void
+		{
+			//remove whole reflection
+			var reflection: KMLReflectionData = event.reflection as KMLReflectionData;
+			removeReflection(reflection);			
+		}
+		
+		protected function onKMLAddReflection(event: ReflectionEvent): void
+		{
+			update(FeatureUpdateContext.fullUpdate());
+//			updateCoordsReflections();
+		}
+		
 		protected function  updateCoordsReflections(): void
 		{
+			
+			
 			
 			//FIXME need to chack correct coordinate e.g. for Placemark Polygon
 			_kmlReflectionDictionary.cleanup();
 			
-			var crs: String = master.container.getCRS();
-			var projection: Projection = master.container.getCRSProjection();
+			var reflectionIDs: Array = _kmlReflectionDictionary.reflectionIDs;
+			
+			var iw: InteractiveWidget = master.container;
+			
+			var crs: String = iw.getCRS();
+			var projection: Projection = iw.getCRSProjection();
+			var viewBBox: BBox = iw.getViewBBox();
 			
 			var currCoordinates: Array = currentCoordinates;
 			var total: int = currentCoordinates.length;
@@ -288,7 +345,9 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				} else {
 					coordPointForReflection = new flash.geom.Point(coord.x, coord.y);
 				}
-				var pointReflections: Array = master.container.mapCoordInCRSToViewReflections(coordPointForReflection);
+				
+				
+				var pointReflections: Array = iw.mapCoordInCRSToViewReflections(coordPointForReflection);
 				var reflectionsCount: int = pointReflections.length;
 				
 				for (var j: int = 0; j < reflectionsCount; j++)
@@ -296,6 +355,8 @@ package com.iblsoft.flexiweather.ogc.kml.features
 					var pointReflectedObject: Object = pointReflections[j];
 					var pointReflected: flash.geom.Point = pointReflectedObject.point as flash.geom.Point;
 					var coordReflected: Coord = new Coord(crs, pointReflected.x, pointReflected.y);
+					if (!viewBBox.coordInside(coordReflected))
+						continue;
 					_kmlReflectionDictionary.addReflectedCoord(coordReflected, j, pointReflectedObject.reflection);
 				}
 			}
@@ -365,7 +426,12 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		
 		protected function createKMLLabel(parent: Sprite): KMLLabel
 		{
-			_kmlLabel = new KMLLabel();
+			//reuse KMLLabels
+			_kmlLabel = kml.resourceManager.getKMLLabel();
+			_kmlLabel.visible = true;
+			
+			trace("KMLFeature createKMLLabel: " + _kmlLabel.text);
+			
 			_kmlLabel.reflection = (parent as KMLSprite).reflection;
 //			parent.addChild(_kmlLabel);
 			

@@ -1,5 +1,8 @@
 package com.iblsoft.flexiweather.ogc.kml.controls
 {
+	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayoutObject;
+	import com.iblsoft.flexiweather.utils.anticollision.IAnticollisionLayoutObject;
+	
 	import flash.display.Sprite;
 	import flash.filters.GlowFilter;
 	import flash.text.TextField;
@@ -7,12 +10,28 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 	import flash.text.TextFormat;
 	
 	
-	public class KMLLabel extends Sprite
+	public class KMLLabel extends Sprite implements IAnticollisionLayoutObject
 	{
+		public static var labelFont: String = 'defaultFontMX';
+		
 		public static var allowLabelGlow: Boolean = true;
 		public static var glow: GlowFilter;
 		
+		public var tempPosition: Number;
+		
 		public var reflection: uint;
+		
+		private var _anticollisionLayoutObject: AnticollisionLayoutObject;
+		
+		public function set anticollisionLayoutObject(object:AnticollisionLayoutObject):void
+		{
+			_anticollisionLayoutObject = object;			
+		}
+		
+		public function get anticollisionLayoutObject():AnticollisionLayoutObject
+		{
+			return _anticollisionLayoutObject;
+		}
 		
 		override public function set visible(value:Boolean):void
 		{
@@ -125,6 +144,8 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 				format.color = _color;
 				format.size = int (14 * _scale)
 				format.bold = true;
+				format.font = labelFont;
+				_txt.embedFonts = true;
 				_txt.setTextFormat(format);
 			}
 			

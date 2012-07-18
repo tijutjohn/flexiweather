@@ -126,8 +126,14 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				i_width, i_height,
 				m_layer.getWMSStyleListString());
 			
+			
 			if (!request)
+			{
+//				trace("\tMSBaseLoader updateDataPart: request == null");
 				return;
+			}
+			
+//			trace("\tMSBaseLoader updateDataPart: " + request.url);
 			
 			wmsViewProperties.updateDimensionsInURLRequest(request);
 			wmsViewProperties.updateCustomParametersInURLRequest(request);

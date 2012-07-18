@@ -5,13 +5,15 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
-	import com.iblsoft.flexiweather.utils.AnticollisionLayout;
 	import com.iblsoft.flexiweather.utils.CubicBezier;
 	import com.iblsoft.flexiweather.utils.ICurveRenderer;
+	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayout;
 	import com.iblsoft.flexiweather.utils.wfs.FeatureSplitter;
 	
 	import flash.display.DisplayObject;
 	import flash.display.GradientType;
+	import flash.display.Graphics;
+	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
@@ -24,8 +26,10 @@ package com.iblsoft.flexiweather.widgets
 	import flash.utils.getTimer;
 	import flash.utils.setTimeout;
 	
+	import mx.containers.Canvas;
 	import mx.core.IVisualElement;
 	import mx.core.UIComponent;
+	import mx.core.mx_internal;
 	import mx.events.FlexEvent;
 	import mx.events.ResizeEvent;
 	
@@ -61,22 +65,21 @@ package com.iblsoft.flexiweather.widgets
 
 		private var m_resizeTimer: Timer;
 		
+		private var m_layerBackground: UIComponent;
 		private var m_layerContainer: Group = new Group();
-
 		private var m_layerLayoutParent: UIComponent;
 		
 		private var m_lastResizeTime: Number;
 		
+		/**
+		 * anticollision layout for Labels
+		 */
+		private var m_labelLayout: AnticollisionLayout = new AnticollisionLayout('Label Layout');
 		
 		/**
 		 * anticollision layout for Labels
 		 */
-		private var m_labelLayout: AnticollisionLayout = new AnticollisionLayout();
-		
-		/**
-		 * anticollision layout for Labels
-		 */
-		private var m_objectLayout: AnticollisionLayout = new AnticollisionLayout();
+		private var m_objectLayout: AnticollisionLayout = new AnticollisionLayout('Object Layout');
 		
 		/**
 		 * Set it to true when you want suspend anticaollision processing (e.g. user is dragging map) 
@@ -139,6 +142,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			super.createChildren();
 			
+			m_layerBackground = new UIComponent();
 			m_layerLayoutParent = new UIComponent();
 			
 			m_featureSplitter = new FeatureSplitter(this);
@@ -148,10 +152,11 @@ package com.iblsoft.flexiweather.widgets
 		{
 			super.childrenCreated();
 			
+			addElement(m_layerBackground);
 			addElement(m_layerContainer);
 			addElement(m_layerLayoutParent);
 			m_layerLayoutParent.addChild(m_labelLayout);
-			
+
 			debugWidget();
 			debugLayers();
 		}
@@ -452,7 +457,8 @@ package com.iblsoft.flexiweather.widgets
 			
 			anticollisionUpdate();
 
-			graphics.clear();
+			var g: Graphics = m_layerBackground.graphics; 
+			g.clear();
 
 			if(mb_backgroundChessBoard) {
 				var i_squareSize: uint = 10;
@@ -460,9 +466,9 @@ package com.iblsoft.flexiweather.widgets
 				for(var y: uint = 0; y < height; y += i_squareSize, ++i_row) {
 					var b_flag: Boolean = (i_row & 1) != 0;
 					for(var x: uint = 0; x < width; x += i_squareSize) {
-						graphics.beginFill(b_flag ? 0xc0c0c0 : 0x808080);
-						graphics.drawRect(x, y, i_squareSize, i_squareSize);
-						graphics.endFill();
+						g.beginFill(b_flag ? 0xc0c0c0 : 0x808080);
+						g.drawRect(x, y, i_squareSize, i_squareSize);
+						g.endFill();
 						b_flag = !b_flag;
 					}
 				}
@@ -470,15 +476,26 @@ package com.iblsoft.flexiweather.widgets
 			else {
 				var matrix: Matrix = new Matrix();
 				matrix.rotate(90);
-				graphics.beginGradientFill(GradientType.LINEAR, [0xAAAAAA, 0xFFFFFF], [1, 1], [0, 255], matrix);
-				graphics.drawRect(0, 0, width, height);
-				graphics.endFill();
+				g.beginGradientFill(GradientType.LINEAR, [0xAAAAAA, 0xFFFFFF], [1, 1], [0, 255], matrix);
+				g.drawRect(0, 0, width, height);
+				g.endFill();
 			}
 
-			// DEBUG: display label layout placement bitmap
-//			graphics.beginBitmapFill(m_labelLayout.m_placementBitmap);
-//			graphics.drawRect(0, 0, m_labelLayout.m_placementBitmap.width, m_labelLayout.m_placementBitmap.height);
-//			graphics.endFill();
+			//TODO: uncomment next if statement if you want display label layout placement bitmap
+			/*
+			if (m_labelLayout.m_placementBitmap)
+			{
+				g.beginBitmapFill(m_labelLayout.m_placementBitmap);
+				g.drawRect(0, 0, m_labelLayout.m_placementBitmap.width, m_labelLayout.m_placementBitmap.height);
+				g.endFill();
+			}
+			*/
+			
+			/*if(m_objectLayout.m_placementBitmap) {
+				g.beginBitmapFill(m_objectLayout.m_placementBitmap);
+				g.drawRect(0, 0, m_objectLayout.m_placementBitmap.width, m_objectLayout.m_placementBitmap.height);
+				g.endFill();
+			}*/
 
             super.updateDisplayList(unscaledWidth, unscaledHeight);
         }
@@ -508,17 +525,27 @@ package com.iblsoft.flexiweather.widgets
             	if(!l.isDynamicPartInvalid())
             		l.invalidateDynamicPart();
             }
-			m_labelLayout.setDirty();
+			
+			setAnticollisionLayoutsDirty();
 			
 			_oldViewBBox = m_viewBBox.clone();
 			
 			//dispatch area change event
 			dispatchEvent(new InteractiveWidgetEvent(InteractiveWidgetEvent.AREA_CHANGED));
         }
-		
+
+		private function setAnticollisionLayoutsDirty(): void
+		{
+			m_objectLayout.areaChanged(m_viewBBox);
+			m_objectLayout.setDirty();
+			
+			m_labelLayout.areaChanged(m_viewBBox);
+			m_labelLayout.setDirty();
+			
+		}
 		internal function onLayerVisibilityChanged(layer: InteractiveLayer): void
 		{
-			m_labelLayout.setDirty();
+			setAnticollisionLayoutsDirty();
 		}
         
 		/** Converts screen point (pixels) into Coord with current CRS. */ 
@@ -530,6 +557,16 @@ package com.iblsoft.flexiweather.widgets
 	        		(height - 1 - y) * m_viewBBox.height / (height - 1) + m_viewBBox.yMin)
         }
 
+        public function coordInside(c: Coord): Boolean
+		{
+			if(!Projection.equalCRSs(c.crs, ms_crs)) {
+				//same projectsion
+				c = c.convertToProjection(m_crsProjection);
+			}
+			
+			return m_viewBBox.coordInside(c);
+			
+		}
 		/** Converts Coord into screen point (pixels) with current CRS. */ 
         public function coordToPoint(c: Coord): Point
         {
@@ -571,13 +608,22 @@ package com.iblsoft.flexiweather.widgets
 		 * one to the left (east hemisphere) and on the righ (west hemisphere). If the view is zoomed
 		 * out enough even multiple reflection of the part can be seen.
 		 **/
-		public function mapBBoxToProjectionExtentParts(bbox: BBox): Array
+		public function mapBBoxToProjectionExtentParts(bbox: BBox,  vBBox: BBox = null): Array
 		{
+			
+			if (!vBBox)
+			{
+				vBBox = m_crsProjection.extentBBox;
+			}
+			
 			var a: Array = [];
-			if(m_crsProjection.wrapsHorizontally) {
-				var testExtentBBox: BBox = m_crsProjection.extentBBox;
+			if(m_crsProjection.wrapsHorizontally) 
+			{
 				var f_crsExtentBBoxWidth: Number = m_crsProjection.extentBBox.width;
-				for(var i: int = 0; i < 10; i++) {
+				/*
+				var testExtentBBox: BBox = m_crsProjection.extentBBox;
+				for(var i: int = 0; i < 10; i++) 
+				{
 					var i_delta: int = (i & 1 ? 1 : -1) * ((i + 1) >> 1); // generates sequence 0, 1, -1, 2, -2, ..., 5, -5
 //					trace("\t mapBBoxToViewParts delta: " + i_delta);
 					var reflectedBBox: BBox = bbox.translated(f_crsExtentBBoxWidth * i_delta, 0)
@@ -601,6 +647,76 @@ package com.iblsoft.flexiweather.widgets
 						} 
 					}
 				}
+				*/
+				
+				//NEW SOLUTION
+				var extentBBoxWest: Number = vBBox.xMin;
+				var extentBBoxEast: Number = vBBox.xMax;
+				
+				var bboxWest: Number = bbox.xMin;
+				var bboxEast: Number = bbox.xMax;
+				var bboxNorth: Number = Math.min(vBBox.yMax, bbox.yMax);
+				var bboxSouth: Number = Math.max(vBBox.yMin, bbox.yMin);
+				
+				var aNew: Array = [];
+				
+				var partWidth: Number;
+				
+				var bSearching: Boolean = true;
+				
+				while (bSearching)
+				{
+				
+					if ((bboxEast - bboxWest) > f_crsExtentBBoxWidth)
+					{
+						// BBox is wider than Extent
+						aNew.push(new BBox(extentBBoxWest, bboxSouth, extentBBoxEast, bboxNorth));
+						bSearching = false;
+					
+					} else if (bboxWest >= extentBBoxWest && bboxEast <= extentBBoxEast) {
+						
+						//BBox is narrower than Extent
+						aNew.push(new BBox(bboxWest, bboxSouth, bboxEast, bboxNorth));
+						bSearching = false;
+					
+					} else  if (bboxWest < extentBBoxWest && bboxEast <= extentBBoxEast  && bboxEast >= extentBBoxWest) {
+						
+						//BBox is partlt in Extent, west side is outside of Extent
+						aNew.push(new BBox(extentBBoxWest, bboxSouth, bboxEast, bboxNorth));
+						
+						partWidth = extentBBoxWest - bboxWest;
+						aNew.push(new BBox(extentBBoxEast - partWidth , bboxSouth, extentBBoxEast, bboxNorth));
+						bSearching = false;
+						
+					} else if (bboxWest > extentBBoxWest && bboxWest <= extentBBoxEast  && bboxEast > extentBBoxEast) {
+						
+						//BBox is partlt in Extent, east side is outside of Extent
+						aNew.push(new BBox(bboxWest, bboxSouth, extentBBoxEast, bboxNorth));
+						
+						partWidth = bboxEast - extentBBoxEast;
+						aNew.push(new BBox(extentBBoxWest , bboxSouth, extentBBoxWest + partWidth, bboxNorth));
+						bSearching = false;
+						
+					} else {
+		
+						var delta: int;
+						if (bboxWest > extentBBoxEast)
+						{
+							//BBOx is outsite extent at right side
+							delta = Math.ceil((bboxWest - extentBBoxEast) / f_crsExtentBBoxWidth);
+							bboxWest -= delta * f_crsExtentBBoxWidth;
+							bboxEast -= delta * f_crsExtentBBoxWidth;
+						} else {
+							//BBOx is outsite extent at left side
+							delta = Math.ceil((extentBBoxWest - bboxEast) / f_crsExtentBBoxWidth);
+							bboxWest += delta * f_crsExtentBBoxWidth;
+							bboxEast += delta * f_crsExtentBBoxWidth;
+						}
+						
+						
+					}
+				}
+				
 			}
 			if(a.length == 0) {
 				var primaryPartBBox: BBox = bbox;
@@ -610,8 +726,180 @@ package com.iblsoft.flexiweather.widgets
 				a.push(primaryPartBBox);
 //				trace("InteractiveWidget.mapBBoxToViewParts(): primary part only " + primaryPartBBox.toString());
 			}
-			return a;
+			
+//			var currBBox: BBox;
+//			for each (currBBox in aNew)
+//			trace("\t\tmapBBoxToProjectionExtentParts New " + currBBox.toBBOXString());
+//			for each (currBBox in a)
+//			trace("\t\tmapBBoxToProjectionExtentParts Old " + currBBox.toBBOXString());
+			
+			return aNew;
 		}
+		
+		
+		/**
+		 * Converts coordinates of BBox (in the currently used CRS) into its visual reflections
+		 * if the IW's View BBox is bigger than extent BBox of the Projection.
+		 * Then at certain zoom-out distance the same BBox may appear multiple times withing the View.
+		 * Visualy this looks like multiple reflection of the same BBox in the View.   
+		 **/
+		public function mapBBoxToViewReflections(bbox: BBox, returnIntersectedBBox: Boolean = false, vBBox: BBox = null): Array
+		{
+			var f_crsExtentBBoxWidth: Number = m_crsProjection.extentBBox.width;
+			var intersectedBBox: BBox;
+			
+			if (!vBBox)
+			{
+				vBBox = m_viewBBox;
+			}
+			
+			if(!m_crsProjection.wrapsHorizontally) {
+				//trace("InteractiveWidget.mapBBoxToViewReflections(): mapping to primary part "
+				//		+ bbox.toString());
+				if (!returnIntersectedBBox)
+					return [bbox];
+				else {
+					intersectedBBox = bbox.intersected(vBBox);
+					if(intersectedBBox == null)
+						return [];
+					else
+						return [intersectedBBox];
+				}
+			}
+			else {
+				var a: Array = [];
+				
+				//NEW SOLUTION
+				var aNew: Array = [];
+				
+				var viewBBoxWest: Number = vBBox.xMin;
+				var viewBBoxEast: Number = vBBox.xMax;
+				
+				var bboxWest: Number = bbox.xMin;
+				var bboxEast: Number = bbox.xMax;
+				var bboxNorth: Number = bbox.yMax;
+				var bboxSouth: Number = bbox.yMin;
+				
+				if (returnIntersectedBBox)
+				{
+					bboxNorth = Math.min(vBBox.yMax, bbox.yMax);
+					bboxSouth = Math.max(vBBox.yMin, bbox.yMin);
+				}
+				
+				var westPoint: Point = new Point(bboxWest, 0);
+				var eastPoint: Point = new Point(bboxEast, 0);
+				var westReflections: Array = mapCoordInCRSToViewReflections(westPoint, vBBox); 
+				var eastReflections: Array = mapCoordInCRSToViewReflections(eastPoint, vBBox); 
+				
+				var p: Number = 0;
+				var px: Number;
+				var nextX: Number;
+				var currWest: Number = viewBBoxWest;
+				var lastEast: Number = viewBBoxEast;
+				var reflectionObject: Object;
+				
+				if (westReflections && westReflections.length > 0)
+				{
+					p = westReflections[0].point.x;
+					
+					if (p != bboxWest)
+					{
+						bboxWest = p;
+						bboxEast = bboxWest + bbox.width;
+					}
+				}
+				if (eastReflections && eastReflections.length > 0)
+				{
+					p = eastReflections[0].point.x;
+					
+					if (p != bboxEast)
+					{
+						bboxEast = p;
+						bboxWest = bboxEast - bbox.width;
+					}
+				}
+				
+				var bSearching: Boolean = true;
+				
+				while (bSearching)
+				{
+				
+					if ((bboxEast - bboxWest) > f_crsExtentBBoxWidth)
+					{
+						// BBox is wider than Extent
+//						trace("\t\t BBox wider");
+						if (returnIntersectedBBox)
+							aNew.push(new BBox(Math.max(viewBBoxWest, bboxWest), bboxSouth, Math.min(viewBBoxEast, bboxEast), bboxNorth));
+						else
+							aNew.push(new BBox(bboxWest, bboxSouth, bboxEast, bboxNorth));
+						
+					} else if (bboxWest >= viewBBoxWest && bboxEast <= viewBBoxEast) {
+						
+//						trace("\t\t BBox narrow");
+						//BBox is narrower than Extent
+						aNew.push(new BBox(bboxWest, bboxSouth, bboxEast, bboxNorth));
+						
+					} else  if (bboxWest < viewBBoxWest && bboxEast <= viewBBoxEast  && bboxEast >= viewBBoxWest) {
+						
+//						trace("\t\t BBox partly outside WEST");
+//						BBox is partlt in Extent, west side is outside of Extent
+						if (returnIntersectedBBox)
+							aNew.push(new BBox(viewBBoxWest, bboxSouth, bboxEast, bboxNorth));
+						else
+							aNew.push(new BBox(bboxWest, bboxSouth, bboxEast, bboxNorth));
+						
+					} else if (bboxWest > viewBBoxWest && bboxWest <= viewBBoxEast  && bboxEast > viewBBoxEast) {
+						
+//						trace("\t\t BBox partly outside EAST");
+						//BBox is partlt in Extent, east side is outside of Extent
+						if (returnIntersectedBBox)
+							aNew.push(new BBox(bboxWest, bboxSouth, viewBBoxEast, bboxNorth));
+						else
+							aNew.push(new BBox(bboxWest, bboxSouth, bboxEast, bboxNorth));
+						
+					} else {
+						
+						trace("Check this");
+					}
+					
+					bboxWest += f_crsExtentBBoxWidth;
+					bboxEast += f_crsExtentBBoxWidth;
+					
+					if (bboxWest > viewBBoxEast)
+						bSearching = false;
+				}
+				
+				
+				//OLD SOLUTION
+				for(var i: int = 0; i < 11; i++) {
+					var i_delta: int = (i & 1 ? 1 : -1) * ((i + 1) >> 1); // generates sequence 0, 1, -1, 2, -2, ..., 5, -5
+					var reflectedBBox: BBox = bbox.translated(f_crsExtentBBoxWidth * i_delta, 0)
+					
+					intersectedBBox = reflectedBBox.intersected(vBBox); 
+					if (intersectedBBox && intersectedBBox.surface == 0)
+						intersectedBBox = null;
+					if(intersectedBBox) {
+						//						trace("InteractiveWidget.mapBBoxToViewReflections(): mapping to reflection "
+						//							+ i_delta + " into " + reflectedBBox.toString());
+						
+						if (!returnIntersectedBBox)
+							a.push(reflectedBBox);
+						else
+							a.push(intersectedBBox);
+					}
+				}
+				
+//				trace("\n bbox: " + bbox.toBBOXString() + " vBBox: " + vBBox.toBBOXString());
+//				
+//				var currBBox: BBox;
+//				for each (currBBox in aNew)
+//				trace("mapBBoxToViewReflections New " + currBBox.toBBOXString());
+//				for each (currBBox in a)
+//				trace("mapBBoxToViewReflections Old " + currBBox.toBBOXString());
+				return a;
+//				return aNew;
+			}
+		}	
 
 		/**
 		 * Returns array of object pairs {point: reflected point, reflection: reflection delta} 
@@ -621,20 +909,56 @@ package com.iblsoft.flexiweather.widgets
 		 * @return 
 		 * 
 		 */		
-		public function mapCoordInCRSToViewReflections(point: Point,  startDelta: int = 0): Array
+		public function mapCoordInCRSToViewReflections(point: Point,  vBBox: BBox = null): Array
 		{
 			if (!point)
 				return [];
 			
 			if(m_crsProjection.wrapsHorizontally) {
+				var extentBox: BBox =  m_crsProjection.extentBBox;
+				
 				var f_crsExtentBBoxWidth: Number = m_crsProjection.extentBBox.width;
 				
-				var a: Array = [];
-				for(var i: int = 0; i < 5; i++) {
-					var i_delta: int = startDelta + (i & 1 ? 1 : -1) * ((i + 1) >> 1); // generates sequence 0, 1, -1, 2, -2, ..., 5, -5
-					var p: Point = new Point(point.x + f_crsExtentBBoxWidth * i_delta, point.y)
-					a.push({point: p, reflection: i_delta});				
+				if (!vBBox)
+					vBBox = m_viewBBox;
+				
+//				var viewBBoxWest: Number = m_viewBBox.xMin;
+//				var viewBBoxEast: Number = m_viewBBox.xMax;
+				var viewBBoxWest: Number = vBBox.xMin;
+				var viewBBoxEast: Number = vBBox.xMax;
+				var extentBBoxWest: Number = extentBox.xMin;
+				var  extentBBoxEast: Number = extentBox.xMax;
+				
+				var px: Number = point.x;
+				var py: Number = point.y;
+				
+				var refCount: int;
+				var reflectionX: Number;
+				
+				if (px >= viewBBoxWest)
+				{
+				 	refCount = int((px - viewBBoxWest) / f_crsExtentBBoxWidth);
+					reflectionX  = px - refCount * f_crsExtentBBoxWidth;
+				} else {
+				 	refCount = Math.ceil(Math.abs((px - viewBBoxWest) / f_crsExtentBBoxWidth));
+					reflectionX  = px + refCount * f_crsExtentBBoxWidth;
 				}
+				
+				
+				var i_delta: int = int((reflectionX - extentBBoxWest) / f_crsExtentBBoxWidth);
+				
+				
+				var a: Array = [];
+				while (reflectionX <= viewBBoxEast && reflectionX >= viewBBoxWest)
+				{
+					var p: Point = new Point(reflectionX, py);
+//					trace("mapCoordInCRSToViewReflections ADD POINT ["+p+"]");
+					a.push({point: p, reflection: i_delta});	
+					
+					reflectionX += f_crsExtentBBoxWidth;
+					i_delta++;
+				}
+//				trace("mapCoordInCRSToViewReflections ["+a.length+"] = " + a);
 				return a;
 			}
 			
@@ -657,9 +981,13 @@ package com.iblsoft.flexiweather.widgets
 			if(m_crsProjection.wrapsHorizontally) {
 				var f_crsExtentBBoxWidth: Number = m_crsProjection.extentBBox.width;
 				
+				
+				var reflections: Array = mapCoordInCRSToViewReflections(point, m_crsProjection.extentBBox);
+				var pX0: Number = reflections[0].point.x;
+				
 				var a: Array = [];
 				for each(var i_delta: int in deltas) {
-					var p: Point = new Point(point.x + f_crsExtentBBoxWidth * i_delta, point.y)
+					var p: Point = new Point(pX0 + f_crsExtentBBoxWidth * i_delta, point.y)
 					a.push({point: p, reflection: i_delta});				
 				}
 				return a;
@@ -668,50 +996,7 @@ package com.iblsoft.flexiweather.widgets
 			return [{point: point, reflection: 0}];
 		}
 
-		/**
-		 * Converts coordinates of BBox (in the currently used CRS) into its visual reflections
-		 * if the IW's View BBox is bigger than extent BBox of the Projection.
-		 * Then at certain zoom-out distance the same BBox may appear multiple times withing the View.
-		 * Visualy this looks like multiple reflection of the same BBox in the View.   
-		 **/
-		public function mapBBoxToViewReflections(bbox: BBox, returnIntersectedBBox: Boolean = false): Array
-		{
-			var f_crsExtentBBoxWidth: Number = m_crsProjection.extentBBox.width;
-			var intersectedBBox: BBox;
-			
-			if(!m_crsProjection.wrapsHorizontally) {
-				//trace("InteractiveWidget.mapBBoxToViewReflections(): mapping to primary part "
-				//		+ bbox.toString());
-				if (!returnIntersectedBBox)
-					return [bbox];
-				else {
-					intersectedBBox = bbox.intersected(m_viewBBox);
-					if(intersectedBBox == null)
-						return [];
-					else
-						return [intersectedBBox];
-				}
-			}
-			else {
-				var a: Array = [];
-				for(var i: int = 0; i < 11; i++) {
-					var i_delta: int = (i & 1 ? 1 : -1) * ((i + 1) >> 1); // generates sequence 0, 1, -1, 2, -2, ..., 5, -5
-					var reflectedBBox: BBox = bbox.translated(f_crsExtentBBoxWidth * i_delta, 0)
-						
-					intersectedBBox = reflectedBBox.intersected(m_viewBBox); 
-					if(intersectedBBox) {
-//						trace("InteractiveWidget.mapBBoxToViewReflections(): mapping to reflection "
-//							+ i_delta + " into " + reflectedBBox.toString());
-						
-						if (!returnIntersectedBBox)
-							a.push(reflectedBBox);
-						else
-							a.push(intersectedBBox);
-					}
-				}
-				return a;
-			}
-		}			
+				
 
         // Mouse events handling
 
@@ -1326,13 +1611,21 @@ package com.iblsoft.flexiweather.widgets
 		
 		public function set suspendAnticollisionProcessing(value:Boolean):void
 		{ 
-			m_suspendAnticollisionProcessing = value; 
-			if (m_labelLayout)
+			if (m_suspendAnticollisionProcessing != value)
 			{
-				// set suspendAnticollisionProcessing to AnticollisionLayout as well (there is timer for auto update, which needs to be suspended)
-				m_labelLayout.suspendAnticollisionProcessing = value;
+				m_suspendAnticollisionProcessing = value; 
+				if (m_objectLayout)
+				{
+					// set suspendAnticollisionProcessing to AnticollisionLayout as well (there is timer for auto update, which needs to be suspended)
+					m_objectLayout.suspendAnticollisionProcessing = value;
+				}
+				if (m_labelLayout)
+				{
+					// set suspendAnticollisionProcessing to AnticollisionLayout as well (there is timer for auto update, which needs to be suspended)
+					m_labelLayout.suspendAnticollisionProcessing = value;
+				}
+				anticollisionUpdate();
 			}
-			anticollisionUpdate();
 		}
 		//*****************************************************************************************
 		//		End of AntiCollision functionality

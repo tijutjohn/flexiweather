@@ -5,6 +5,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 
 	public interface IKMLRenderer
 	{
+		function set featureScale(scale: Number): void;
 		function dispose(feature: KMLFeature): void;
 		function render(feature: KMLFeature, container: InteractiveWidget): void;
 	}

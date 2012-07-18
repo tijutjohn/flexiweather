@@ -1,8 +1,11 @@
 package com.iblsoft.flexiweather.ogc.kml.managers
 {
+	import com.iblsoft.flexiweather.ogc.kml.controls.KMLLabel;
 	import com.iblsoft.flexiweather.ogc.kml.data.KMLResourceKey;
 	import com.iblsoft.flexiweather.ogc.kml.data.KMZFile;
 	import com.iblsoft.flexiweather.ogc.kml.events.KMLBitmapEvent;
+	import com.iblsoft.flexiweather.ogc.kml.features.constants.KMLIconPins;
+	import com.iblsoft.flexiweather.ogc.kml.features.styles.HotSpot;
 	import com.iblsoft.flexiweather.plugins.IConsole;
 	import com.iblsoft.flexiweather.plugins.IConsoleManager;
 	import com.iblsoft.flexiweather.utils.URLUtils;
@@ -28,6 +31,8 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 		
 		private var _basePath: String;
 		
+		private var _icons: KMLIconPins;
+		
 		public function get basePath(): String
 		{
 			return _basePath;
@@ -41,6 +46,8 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 			_basePath = basePath;
 			_cache = new ResourceCache();
 			_kmzFiles = new Dictionary();
+			
+			_icons = new KMLIconPins();
 		}
 		
 		
@@ -103,6 +110,17 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 			}
 			return bitmapDatas;
 		}
+		
+		public function getPinHotSpot(color: String): HotSpot
+		{
+			return _icons.getPinHotSpot(color);
+			
+		}
+		public function getPinBitmapData(color: String): BitmapData
+		{
+			return _icons.getPinBitmapData(color);
+		}
+		
 		public function getBitmapData(key: KMLResourceKey): BitmapData
 		{
 			var resource: Resource;
@@ -256,6 +274,31 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 			}
 			notifyAllResourcesLoaded();
 		}
+		
+		private var _kmlLabels: Array = [];
+		public function pushKMLLabel(label: KMLLabel): void
+		{
+			_kmlLabels.push(label);	
+		}
+		
+		public function getKMLLabel(): KMLLabel
+		{
+			var label: KMLLabel = popKMLLabel();
+			if (!label)
+				label = new KMLLabel();
+			
+			return label;
+		}
+		
+		public function popKMLLabel(): KMLLabel
+		{
+			if (_kmlLabels && _kmlLabels.length > 0)
+				return _kmlLabels.pop();	
+			
+			return null;
+		}
+		
+		
 	}
 }
 import com.iblsoft.flexiweather.ogc.kml.controls.KMLBitmapLoader;

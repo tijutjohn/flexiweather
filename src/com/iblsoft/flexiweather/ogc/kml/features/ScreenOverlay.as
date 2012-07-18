@@ -47,6 +47,11 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		/** Called after the feature is added to master or after any change (e.g. area change). */
 		override public function update(changeFlag: FeatureUpdateContext): void
 		{
+			// FIXME  update should be done after dictionary will be created
+			if (!_kmlReflectionDictionary)
+				return;
+			
+			
 			if (kmlLabel)
 				kmlLabel.text = name;
 			

@@ -8,6 +8,7 @@ package com.iblsoft.flexiweather.ogc
 		public static var VIEW_BBOX_MOVED: int = 2;
 		public static var VIEW_BBOX_SIZE_CHANGED: int = 4;
 		public static var PARTS_CHANGED: int = 8;
+		public static var FEATURE_SCALE_CHANGED: int = 16;
 		
 		private var _flag: uint;
 		

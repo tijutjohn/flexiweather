@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.ogc.editable.IClosableCurve;
+	import com.iblsoft.flexiweather.ogc.events.FeatureEvent;
 	import com.iblsoft.flexiweather.ogc.kml.renderer.IKMLRenderer;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.utils.CubicBezier;
@@ -85,14 +86,39 @@ package com.iblsoft.flexiweather.ogc
 				if(m_coordinates.length) {
 					var iw: InteractiveWidget = m_master.container;
 					var total: int = m_coordinates.length;
+					
+					var featureIsInside: Boolean = false;
 					for(var i: uint = 0; i < total; ++i) {
 						var c: Coord = m_coordinates[i];
+						
+						if (iw.coordInside(c))
+						{
+//							trace("Coord is cinside");
+							featureIsInside = true;
+						} else {
+							
+//							trace("Coord is not inside");
+						}
+						
 						var pt: Point = iw.coordToPoint(c);
 						m_points.addItem(pt);
+						
 					}
+					
+					if (featureIsInViewBBox != featureIsInside)
+					{
+						var event: FeatureEvent = new FeatureEvent(FeatureEvent.PRESENCE_IN_VIEW_BBOX_CHANGED, true);
+						event.insideViewBBox = featureIsInside;
+						dispatchEvent(event);
+					}
+					
+					featureIsInViewBBox = featureIsInside;
+					
 				}
 			}
 		}
+		
+		public var featureIsInViewBBox: Boolean;
 		
 		/** Called internally before the feature is removed from the master. */ 
 		public function cleanup(): void

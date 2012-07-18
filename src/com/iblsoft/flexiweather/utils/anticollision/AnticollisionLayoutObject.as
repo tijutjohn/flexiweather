@@ -1,4 +1,4 @@
-package com.iblsoft.flexiweather.utils
+package com.iblsoft.flexiweather.utils.anticollision
 {
 	import flash.display.DisplayObject;
 	import flash.geom.Point;
@@ -6,7 +6,18 @@ package com.iblsoft.flexiweather.utils
 	public class AnticollisionLayoutObject
 	{
 		public var name: String;
-		private var _object: DisplayObject;
+		public var object: DisplayObject;
+//		private var _object: DisplayObject;
+//		public function get object():DisplayObject
+//		{
+//			return _object;
+//		}
+//		
+//		public function set object(value:DisplayObject):void
+//		{
+//			_object = value;
+//		}
+		
 		public var managedChild: Boolean;
 		public var displacementMode: String;
 		private var m_referenceLocation: Point;
@@ -38,24 +49,18 @@ package com.iblsoft.flexiweather.utils
 												  b_managedChild: Boolean,
 												  i_displacementMode: String)
 		{
-			_object = object;
 			managedChild = b_managedChild;
 			displacementMode = i_displacementMode;
-			m_referenceLocation = new Point(_object.x, _object.y)
+//			_object = object;
+//			m_referenceLocation = new Point(_object.x, _object.y)
+			this.object = object;
+			m_referenceLocation = new Point(object.x, object.y)
 			
 			manageVisibilityWithAnchors = false;
 		}
 		
 
-		public function get object():DisplayObject
-		{
-			return _object;
-		}
-
-		public function set object(value:DisplayObject):void
-		{
-			_object = value;
-		}
+		
 
 		public function get referenceLocation():Point
 		{

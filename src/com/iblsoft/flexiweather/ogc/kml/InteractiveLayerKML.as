@@ -5,6 +5,7 @@ package com.iblsoft.flexiweather.ogc.kml
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
 	import com.iblsoft.flexiweather.ogc.Version;
 	import com.iblsoft.flexiweather.ogc.kml.controls.KMLInfoWindow;
+	import com.iblsoft.flexiweather.ogc.kml.controls.KMLLabel;
 	import com.iblsoft.flexiweather.ogc.kml.data.KMZFile;
 	import com.iblsoft.flexiweather.ogc.kml.events.KMLBitmapEvent;
 	import com.iblsoft.flexiweather.ogc.kml.events.KMLEvent;
@@ -17,7 +18,6 @@ package com.iblsoft.flexiweather.ogc.kml
 	import com.iblsoft.flexiweather.ogc.kml.features.KML;
 	import com.iblsoft.flexiweather.ogc.kml.features.KML22;
 	import com.iblsoft.flexiweather.ogc.kml.features.KMLFeature;
-	import com.iblsoft.flexiweather.ogc.kml.controls.KMLLabel;
 	import com.iblsoft.flexiweather.ogc.kml.features.LineString;
 	import com.iblsoft.flexiweather.ogc.kml.features.LinearRing;
 	import com.iblsoft.flexiweather.ogc.kml.features.NetworkLink;
@@ -74,6 +74,8 @@ package com.iblsoft.flexiweather.ogc.kml
 			{
 				var newClass: ClassFactory = new ClassFactory(itemRenderer);
 				_itemRendererInstance = newClass.newInstance();
+				
+				_itemRendererInstance.featureScale = kmlFeatureScaleX;
 				
 				if (_itemRendererInstance is EventDispatcher)
 				{
@@ -574,7 +576,7 @@ package com.iblsoft.flexiweather.ogc.kml
 				_syncManagerFullUpdate.removeEventListener(AsyncManager.EMPTY, onFullUpdateFinished);
 				_syncManagerFullUpdate.stop();
 				_syncManagerFullUpdate.maxCallsPerTick = 30;
-				trace("FULL UPDATE");
+//				trace("FULL UPDATE");
 				time = ProfilerUtils.startProfileTimer();
 				
 				updateForFeature(firstFeature as KMLFeature, changeFlag, _syncManagerFullUpdate);
@@ -611,6 +613,15 @@ package com.iblsoft.flexiweather.ogc.kml
 		private function updateFeature(feature:  KMLFeature, changeFlag: FeatureUpdateContext, asyncManager: AsyncManager): void
 		{
 //			trace("updateFeature: " + feature);
+			
+			var viewBBox: BBox = container.getViewBBox();
+//			if (viewBBox.pointInside(feature.x, feature.y))
+//			{
+//				
+//			} else {
+//				
+//			}
+			feature.featureScale = kmlFeatureScaleX;
 			feature.update(changeFlag);
 			feature.visible = true; //getAbsoluteVisibility(feature);
 			
@@ -673,12 +684,48 @@ package com.iblsoft.flexiweather.ogc.kml
 			callLater(isUpdateNeeded);	
 		}
 		
+		public var kmlFeatureScaleX: Number = 1;
+		
+		private function countKMLFeaturesZoomBasedOnViewBBox(viewBBox: BBox): Boolean
+		{
+//			var viewBBox: BBox = container.getViewBBox();
+			var extentBBox: BBox = container.getExtentBBox();
+			
+			var widthPercentage: Number = viewBBox.width / extentBBox.width;
+			var heightPercentage: Number = viewBBox.height / extentBBox.height;
+			
+			var newScale: Number
+			if (widthPercentage < 0.2)
+				newScale = 1;
+			else if (widthPercentage > 0.8)
+				newScale = 0;
+			else
+				newScale = (0.8 - widthPercentage) * 1.667;
+			
+			var changed: Boolean = (newScale != kmlFeatureScaleX);
+			
+			kmlFeatureScaleX = newScale;
+			
+//			trace("countKMLFeaturesZoomBasedOnViewBBox widthPercentage: " + widthPercentage + " kmlFeatureScaleX: " + kmlFeatureScaleX);
+			
+			return changed;
+		}
+		
 		private function isUpdateNeeded(): void
 		{
 			var crs: String = container.getCRS();
 			var viewBBox: BBox = container.getViewBBox();
 			
+			var scaleChanged: Boolean = countKMLFeaturesZoomBasedOnViewBBox(viewBBox);
+			
+			if (_itemRendererInstance)
+				_itemRendererInstance.featureScale = kmlFeatureScaleX;
+			
 			var flag: uint = 0;
+			if (scaleChanged)
+			{
+				flag |= FeatureUpdateContext.FEATURE_SCALE_CHANGED;
+			}
 			if (crs != m_oldCRS)
 			{
 				flag |= FeatureUpdateContext.CRS_CHANGED;

@@ -6,13 +6,15 @@ package com.iblsoft.flexiweather.ogc.wfs
 	import com.iblsoft.flexiweather.utils.CubicBezier;
 	import com.iblsoft.flexiweather.utils.CurveLineSegment;
 	import com.iblsoft.flexiweather.utils.CurveLineSegmentRenderer;
+	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayoutObject;
+	import com.iblsoft.flexiweather.utils.anticollision.IAnticollisionLayoutObject;
 	import com.iblsoft.flexiweather.utils.geometry.ILineSegmentApproximableBounds;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.display.Sprite;
 	import flash.geom.Point;
 
-	public class WFSFeatureEditableSprite extends Sprite implements ILineSegmentApproximableBounds
+	public class WFSFeatureEditableSprite extends Sprite implements ILineSegmentApproximableBounds, IAnticollisionLayoutObject
 	{
 		public var points: Array;
 		
@@ -122,5 +124,17 @@ package com.iblsoft.flexiweather.ogc.wfs
 //			
 //			return newSegmentRenderer.segments;
 		}
+		
+		private var _anticollisionLayoutObject: AnticollisionLayoutObject;
+		public function set anticollisionLayoutObject(object:AnticollisionLayoutObject):void
+		{
+			_anticollisionLayoutObject = object;			
+		}
+		
+		public function get anticollisionLayoutObject():AnticollisionLayoutObject
+		{
+			return _anticollisionLayoutObject;
+		}
+		
 	}
 }

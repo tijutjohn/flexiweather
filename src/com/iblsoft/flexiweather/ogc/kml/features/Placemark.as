@@ -1,26 +1,29 @@
 package com.iblsoft.flexiweather.ogc.kml.features
 {
 	import com.google.maps.geom.Point3D;
-	import com.iblsoft.flexiweather.constants.AnticollisionDisplacementMode;
+	import com.iblsoft.flexiweather.constants.AnticollisionDisplayMode;
 	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
+	import com.iblsoft.flexiweather.ogc.events.FeatureEvent;
 	import com.iblsoft.flexiweather.ogc.kml.InteractiveLayerKML;
 	import com.iblsoft.flexiweather.ogc.kml.controls.KMLLabel;
 	import com.iblsoft.flexiweather.ogc.kml.controls.KMLSprite;
 	import com.iblsoft.flexiweather.ogc.kml.data.KMLReflectionData;
 	import com.iblsoft.flexiweather.ogc.kml.interfaces.IKMLLabeledFeature;
 	import com.iblsoft.flexiweather.ogc.kml.managers.KMLParserManager;
+	import com.iblsoft.flexiweather.ogc.kml.managers.KMLResourceManager;
 	import com.iblsoft.flexiweather.ogc.kml.renderer.IKMLRenderer;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.syndication.ParsingTools;
-	import com.iblsoft.flexiweather.utils.AnticollisionLayout;
-	import com.iblsoft.flexiweather.utils.AnticollisionLayoutObject;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
+	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayout;
+	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayoutObject;
 	import com.iblsoft.flexiweather.utils.geometry.ILineSegmentApproximableBounds;
 	import com.iblsoft.flexiweather.utils.geometry.LineSegment;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.display.Sprite;
+	import flash.events.Event;
 	import flash.geom.Point;
 	
 	import mx.collections.ArrayCollection;
@@ -60,7 +63,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			return m_coordinates.toArray(); 
 		}  		
 		
-		private var _spritesAddedToLabelLayout: Boolean;
+//		private var _spritesAddedToLabelLayout: Boolean;
 		
 		/**
 		*	Constructor for class.
@@ -76,8 +79,24 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		{
 			super(kml, s_namespace, x);
 			
+			addEventListener(FeatureEvent.PRESENCE_IN_VIEW_BBOX_CHANGED, onPresenceInViewBBoxChanged);
+			
 
 		}
+		
+		private function onPresenceInViewBBoxChanged(event:FeatureEvent):void
+		{
+			trace(this + " presence changed: " + event.insideViewBBox);
+			
+			var labelLayout: AnticollisionLayout = master.container.labelLayout;
+//			if (event.insideViewBBox)
+//			{
+//				labelLayout.addObject(
+//			} else {
+//				labelLayout.removeObject();
+//			}
+		}
+		
 		public override function cleanup():void
 		{
 			super.cleanup();
@@ -228,7 +247,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		/** Called after the feature is added to master or after any change (e.g. area change). */
 		override public function update(changeFlag: FeatureUpdateContext): void
 		{
-			trace("Placemark update: " + master);
+//			trace("Placemark update: " + master);
 			
 			if (!m_master)
 				return;
@@ -290,18 +309,21 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				var labelLayout: AnticollisionLayout = master.container.labelLayout;
 				
 				var labelsCreation: Boolean;
+				var kmlSprite: KMLSprite;
 				
 				for (var i: int = 0; i < totalReflections; i++)
 				{
+					var removeLabel: Boolean = false;
+					
 					var kmlReflection: KMLReflectionData = kmlReflectionDictionary.getReflection(i) as KMLReflectionData;
 					if (kmlReflection.points && kmlReflection.points.length > 0)
 					{
 						var iconPoint:  flash.geom.Point = kmlReflection.points[0] as flash.geom.Point;
 						
-						if (kmlReflection.displaySprite && iconPoint)
+						if (kmlReflection.displaySprite && iconPoint && featureScale > 0)
 						{
 						
-							var kmlSprite: KMLSprite = kmlReflection.displaySprite as KMLSprite; 
+							kmlSprite = kmlReflection.displaySprite as KMLSprite; 
 							
 							kmlSprite.visible = true;
 							kmlSprite.x = iconPoint.x;
@@ -314,81 +336,70 @@ package com.iblsoft.flexiweather.ogc.kml.features
 								kmlSprite.kmlLabel.text = name;
 								labelsCreation = true;	
 							}
-							if (!_spritesAddedToLabelLayout && master)
+							
+							trace("Placemark ["+i+"/"+name+"] label: " + kmlSprite.kmlLabel.text + " position: " + iconPoint);
+							
+							if (master && kmlSprite.kmlLabel && !kmlSprite.kmlLabel.anticollisionLayoutObject)
 							{
-								labelLayout.addObstacle(kmlSprite);
-								if (kmlSprite.kmlLabel)
-								{
-									//FIXME for now, we are not doing any displacement of labels, because it consumes too much CPU, need to create better optimizations
-									//e.g has maximum of vi sible labels defined, or so
-//									labelLayout.addObject(kmlSprite.kmlLabel, [kmlSprite], i, AnticollisionDisplacementMode.DISPLACE_NOT_ALLOWED);
-									labelLayout.addObject(kmlSprite.kmlLabel, [kmlSprite], i);
-								} else {
-									trace("There is no label, so do not add label as Object");
-								}
+								addLabelToAnticollisionLayout (kmlSprite.kmlLabel);
 								
 								_addToLabelLayout = true;
 							}
 							
 							labelLayout.updateObjectReferenceLocation(kmlSprite);
 							
+						} else {
+							removeLabel = true;
 						}
+							
 					} else {
-						if (kmlReflection.displaySprite)
+						removeLabel = true;
+					}
+				}
+
+				if (removeLabel)
+				{
+					if (kmlReflection.displaySprite)
+					{
+						kmlSprite = kmlReflection.displaySprite as KMLSprite;
+						kmlSprite.visible = false;
+						
+						if (kmlSprite.kmlLabel)
 						{
-							kmlReflection.displaySprite.visible = false;
-							createKMLLabel(kmlSprite);
-							labelsCreation = true;
+							//remove label
+							labelLayout.removeObject(kmlSprite.kmlLabel);
+						
+							kml.resourceManager.pushKMLLabel(kmlSprite.kmlLabel);
+							kmlSprite.kmlLabel = null;
 						}
 					}
 				}
-				
-				
+			
 				if (labelsCreation)
 				{
 					//we need to render placemark if labels was created, to apply correct styles on labels
 					renderer.render(this, master.container);
 				}
 				
-				if (!_spritesAddedToLabelLayout && _addToLabelLayout)
-					_spritesAddedToLabelLayout = true;
+//				if (!_spritesAddedToLabelLayout && _addToLabelLayout)
+//					_spritesAddedToLabelLayout = true;
 				
-				/*
-				if (_geometry is MultiGeometry)
-				{
-					var multigeometry: MultiGeometry = _geometry as MultiGeometry;
-					for each (var geometryItem: Geometry in multigeometry.geometries)
-					{
-						points = getPoints();
-						if (points && points.length > 0)
-						{
-							point = points.getItemAt(0) as flash.geom.Point;
-							
-							x = point.x;
-							y = point.y;
-							//_container.labelLayout.updateObjectReferenceLocation(placemark);
-						}
-					}
-				} else  {
-					points = getPoints();
-					if (points && points.length > 0)
-					{
-						point = points.getItemAt(0) as flash.geom.Point;
-						
-						if (point is Coord)
-						{
-							point = iw.coordToPoint(point as Coord);
-						}
-						x = point.x;
-						y = point.y;
-						
-						
-						//_container.labelLayout.updateObjectReferenceLocation(placemark);
-					}
-				}
-					*/
 			}
 			
+		}
+		
+		override protected function addLabelToAnticollisionLayout(kmlLabel: KMLLabel): void
+		{
+			super.addLabelToAnticollisionLayout(kmlLabel);
+			
+			var labelLayout: AnticollisionLayout = master.container.labelLayout;
+			
+//			var anticollisionLayoutObject: AnticollisionLayoutObject = labelLayout.addObject(kmlSprite.kmlLabel, [], i, AnticollisionDisplayMode.HIDE_IF_OCCUPIED);
+			var anticollisionLayoutObject: AnticollisionLayoutObject = labelLayout.addObject(kmlLabel, [], 0, AnticollisionDisplayMode.HIDE_IF_OCCUPIED);
+			
+//			kmlSprite.anticollisionLayoutObject = anticollisionLayoutObject;
+//			kmlSprite.kmlLabel.anticollisionLayoutObject = anticollisionLayoutObject;
+			kmlLabel.anticollisionLayoutObject = anticollisionLayoutObject;
 		}
 		
 		public function get drawingFeature(): Boolean

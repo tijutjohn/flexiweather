@@ -57,6 +57,8 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 		
 		private var _styleDictionary: StylesDictionary;
 		
+		private var _featureScale: Number = 1;
+		
 		public function DefaultKMLRenderer()
 		{
 			_styleDictionary = new StylesDictionary();
@@ -85,6 +87,13 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 			}
 		}
 		
+		public function set featureScale(scale: Number): void
+		{
+			if (_featureScale != scale)
+			{
+				_featureScale = scale;
+			}
+		}
 		/*
 		protected function getFeatureFromReflectionDirectory(kmlReflectionDictionary: KMLFeaturesReflectionDictionary): KMLFeature
 		{
@@ -231,7 +240,8 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 			if (!overlay)
 				return;
 			
-			var gr: Graphics;
+			//screen overlay has no reflection, draw it directly to overlay
+			var gr: Graphics = overlay.graphics;
 			
 			var xDiff: Number = 0;
 			var yDiff: Number = 0;
@@ -509,8 +519,6 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 						if (kmlReflection.displaySprite)
 							kmlReflection.displaySprite.visible = false;
 					}
-					
-					
 				}
 				
 			}
@@ -574,7 +582,6 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 					style = featureStyles.highlightStyle;
 				}
 				
-				trace("renderLabbel: " + state + " style; " + style);
 				if (!style)
 					return;
 				
@@ -596,6 +603,8 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 							var scale: Number = style.labelStyle.scale;
 							if (isNaN(scale))
 								scale = 1;
+							
+							scale *= _featureScale;
 							
 							if (label)
 							{
@@ -730,7 +739,8 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 				if (hotSpot.xunits == 'pixels')
 				{
 					pixelsFraction = hotSpot.x / icon.width;
-					xDiff = scaleX * icon.width * (pixelsFraction - 1);
+//					xDiff = scaleX * icon.width * (pixelsFraction - 1);
+					xDiff = scaleX * icon.width * (-1 * pixelsFraction);
 				}
 				if (hotSpot.yunits == 'pixels')
 				{
@@ -743,10 +753,11 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 				yDiff = scaleY * icon.height * -1;
 			}
 			
+//			trace("renderPlacemarkIcon diff ["+xDiff+","+yDiff+" ]");
 			var kmlReflectionDictionary: KMLFeaturesReflectionDictionary = placemark.kmlReflectionDictionary;
 			var totalReflections: int = kmlReflectionDictionary.totalReflections;
 			
-			trace("renderPlacemarkIcon feature position: [" + placemark.x + " , " + placemark.y + "]");
+//			trace("renderPlacemarkIcon feature position: [" + placemark.x + " , " + placemark.y + "]");
 			for (var i: int = 0; i < totalReflections; i++)
 			{
 				var kmlReflection: KMLReflectionData = kmlReflectionDictionary.getReflection(i) as KMLReflectionData;
@@ -784,7 +795,8 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 //			icon.dispose();
 			
 //			updateLabelPosition(placemark.kmlLabel, placemark.x + xDiff, placemark.y + yDiff);
-			updateLabelPosition(placemark.kmlLabel, kmlReflection.displaySprite.x + xDiff, kmlReflection.displaySprite.y + yDiff);
+			if (placemark.kmlLabel)
+				updateLabelPosition(placemark.kmlLabel, kmlReflection.displaySprite.x + xDiff +icon.width * scaleX, kmlReflection.displaySprite.y + yDiff);
 		}
 		
 		
@@ -870,12 +882,12 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 				}
 			}
 			var gr: Graphics;
+			var icon: BitmapData;
+			var scale: Number = 1;
 			
 			if (isStyleIconLoaded)
 			{
-				var icon: BitmapData;
-				var scale: Number = 1;
-				
+			
 				if (placemark.isHighlighted && isHighlightStyleIconLoaded)
 				{
 					icon = kmlResourceManager.getBitmapData(highlightIconKey);
@@ -885,12 +897,23 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 					scale = iconScale;
 				}
 				
+				scale *= _featureScale;
+				
 				renderPlacemarkIcon(placemark, icon, hotSpot, scale);
 				
 			} else {
 				
 				if (!iconStyle)
 				{
+					kmlResourceManager = placemark.kml.resourceManager;
+					if (kmlResourceManager)
+					{
+						icon = kmlResourceManager.getPinBitmapData('yellow');
+						hotSpot = kmlResourceManager.getPinHotSpot('yellow');
+						scale = 32 / icon.width * _featureScale;
+						renderPlacemarkIcon(placemark, icon, hotSpot, scale);
+					}
+					/*
 					var kmlReflectionDictionary: KMLFeaturesReflectionDictionary = placemark.kmlReflectionDictionary;
 					var totalReflections: int = kmlReflectionDictionary.totalReflections;
 					
@@ -908,8 +931,11 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 							placemark.addDisplaySprite(kmlReflection.displaySprite);
 						}
 						
-						kmlReflection.displaySprite.x = iconPoint.x;
-						kmlReflection.displaySprite.y = iconPoint.y;
+						if (iconPoint)
+						{
+							kmlReflection.displaySprite.x = iconPoint.x;
+							kmlReflection.displaySprite.y = iconPoint.y;
+						}
 						
 						
 						gr = kmlReflection.displaySprite.graphics;
@@ -918,13 +944,14 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 						//if there is no Icon defined, just draw default circle placemark
 						gr.beginFill(0xaa0000, 0.3);
 						gr.lineStyle(1,0);
-						gr.drawCircle(0,0,7);
+						gr.drawCircle(0,0,7 * _featureScale);
 						gr.endFill();
 					}
+					*/
 				}
 //				updateLabelPosition(placemark.kmlLabel, placemark.x + 12, placemark.y + 12);
-				if (kmlReflection)
-					updateLabelPosition(placemark.kmlLabel, kmlReflection.displaySprite.x + 12, kmlReflection.displaySprite.y + 12);
+//				if (kmlReflection)
+//					updateLabelPosition(placemark.kmlLabel, kmlReflection.displaySprite.x + 12 * _featureScale, kmlReflection.displaySprite.y + 12 * _featureScale);
 			}
 			
 			/*
@@ -1331,8 +1358,8 @@ class ObjectStyles
 					}
 				}
 			}
-		} else {
-			trace("feature has no style");
+//		} else {
+//			trace("feature has no style");
 		}
 	}
 }

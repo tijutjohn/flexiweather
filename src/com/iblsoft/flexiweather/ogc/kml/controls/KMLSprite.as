@@ -1,16 +1,19 @@
 package com.iblsoft.flexiweather.ogc.kml.controls
 {
 	import com.iblsoft.flexiweather.ogc.kml.features.KMLFeature;
+	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayoutObject;
+	import com.iblsoft.flexiweather.utils.anticollision.IAnticollisionLayoutObject;
 	
 	import flash.display.Sprite;
 
-	public class KMLSprite extends Sprite
+	public class KMLSprite extends Sprite implements IAnticollisionLayoutObject
 	{
 		public var reflection: uint;
 		private var _kmlLabel: KMLLabel;
 		
 		private var _feature: KMLFeature;
 		
+		private var _anticollisionLayoutObject: AnticollisionLayoutObject;
 
 		public function get kmlLabel():KMLLabel
 		{
@@ -48,5 +51,16 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 			reflection = forReflection;
 			_feature = feature
 		}
+		
+		public function set anticollisionLayoutObject(object:AnticollisionLayoutObject):void
+		{
+			_anticollisionLayoutObject = object;			
+		}
+		
+		public function get anticollisionLayoutObject():AnticollisionLayoutObject
+		{
+			return _anticollisionLayoutObject;
+		}
+		
 	}
 }

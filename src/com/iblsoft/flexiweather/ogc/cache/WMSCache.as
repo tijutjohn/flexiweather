@@ -13,6 +13,8 @@ package com.iblsoft.flexiweather.ogc.cache
 	
 	public class WMSCache implements ICache
 	{
+		public static var supportCaching: Boolean = true;
+		
 		public var name: String;
 		
 		/**
@@ -281,6 +283,9 @@ package com.iblsoft.flexiweather.ogc.cache
 		
 		public function addCacheNoDataItem(viewProperties: IViewProperties): void
 		{
+			if (!)
+				return;
+			
 			var wmsViewProperties: WMSViewProperties = viewProperties as WMSViewProperties;
 			if (!wmsViewProperties)
 				return;
@@ -292,6 +297,9 @@ package com.iblsoft.flexiweather.ogc.cache
 		
 		public function addCacheItem(img: DisplayObject, viewProperties: IViewProperties): void
 		{
+			if (!supportCaching)
+				return;
+			
 			var wmsViewProperties: WMSViewProperties = viewProperties as WMSViewProperties;
 			if (!wmsViewProperties)
 				return;

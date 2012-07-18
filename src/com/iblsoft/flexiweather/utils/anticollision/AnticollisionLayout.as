@@ -1,6 +1,7 @@
-package com.iblsoft.flexiweather.utils
+package com.iblsoft.flexiweather.utils.anticollision
 {
-	import com.iblsoft.flexiweather.constants.AnticollisionDisplacementMode;
+	import com.iblsoft.flexiweather.constants.AnticollisionDisplayMode;
+	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.FeatureBase;
 	import com.iblsoft.flexiweather.ogc.kml.controls.KMLLabel;
 	import com.iblsoft.flexiweather.ogc.kml.controls.KMLSprite;
@@ -11,6 +12,8 @@ package com.iblsoft.flexiweather.utils
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithAnnotation;
 	import com.iblsoft.flexiweather.plugins.IConsole;
 	import com.iblsoft.flexiweather.proj.Projection;
+	import com.iblsoft.flexiweather.utils.AnnotationBox;
+	import com.iblsoft.flexiweather.utils.ProfilerUtils;
 	import com.iblsoft.flexiweather.utils.geometry.ILineSegmentApproximableBounds;
 	import com.iblsoft.flexiweather.utils.geometry.LineSegment;
 	
@@ -50,6 +53,11 @@ package com.iblsoft.flexiweather.utils
 	{
 		public static const ANTICOLLISTION_UPDATED: String = 'anticollisionUpdated';
 		
+		/**
+		 * Debug variable to test how many objects needs to be layouted 
+		 */		
+		public var layoutObjectsLength: int;
+		
 		protected var m_boundaryRect: Rectangle;
 		public var m_placementBitmap: BitmapData; // HACK: change back to protected
 
@@ -57,6 +65,7 @@ package com.iblsoft.flexiweather.utils
 		protected var mb_dirty: Boolean = false;
 		
 		protected var ma_layoutObjects: ArrayCollection = new ArrayCollection();
+		protected var ma_currentLayoutObjects: Array = new Array();
 		protected var m_anchorsLayer: Sprite = new Sprite();
 		
 
@@ -67,15 +76,26 @@ package com.iblsoft.flexiweather.utils
 		private var m_drawAnnotationAnchor: Boolean;
 		
 		private var m_updateInterval: int = 500;
+		private var m_areaChangedUpdateTime: Number;
 		
-		public function AnticollisionLayout()
+		private var _layoutName: String;
+		private var _updateLocationDictionary: UpdateLocationDictionary;
+		
+		public function AnticollisionLayout(layoutName: String)
 		{
 			super();
+			
+			
+			_layoutName = layoutName;
+			
+			_updateLocationDictionary = new UpdateLocationDictionary(this);
 			
 			m_drawAnnotationAnchor = true;
 			
 			addEventListener(Event.RENDER, onRender, false, 0, true); 
 			addChild(m_anchorsLayer);
+			
+			m_areaChangedUpdateTime = getTimer();
 		}
 		
 		public function destroy(): void
@@ -96,6 +116,62 @@ package com.iblsoft.flexiweather.utils
 			}
 		}
 		
+		private var _areaChangedScheduled: Boolean;
+		private var _areaChangedScheduledBBox: BBox;
+		
+		/**
+		 * Visible area is changed. This function needs to be called when viewBBox is changed for increasing AnticollisionLayout performance. 
+		 * @param bbox
+		 * 
+		 */		
+		public function areaChanged(bbox: BBox): void
+		{
+			/*
+			var diffTime: Number = (getTimer() - m_areaChangedUpdateTime); 
+			if (diffTime > 3000 && !suspendAnticollisionProcessing)
+			{
+				
+				var time: int = ProfilerUtils.startProfileTimer();
+				
+				ma_currentLayoutObjects = [];
+				
+				//we are working with screen position, which much faster then checking coords convert them CRS: 84 (if needed) and check if it is inside BBox
+				for each (var obj: AnticollisionLayoutObject in ma_layoutObjects)
+				{
+					var object: DisplayObject = obj.object;
+					
+//					if (!object.visible)
+//						continue;
+					
+					if (object.x < 0 || object.y < 0)
+					{
+						object.visible = false;
+						continue;
+					}
+					
+					if (object.x > 1000 || object.y > 600)
+					{
+						object.visible = false;
+						continue;
+					}
+					
+					
+					object.visible = true;
+					ma_currentLayoutObjects.push(obj);
+				}
+				
+				trace("AnticollisionLayout areaChanged: [diffTime: " + diffTime + " total: " +  ma_layoutObjects.length + " selected: " + ma_currentLayoutObjects.length + " total time: " + ProfilerUtils.stopProfileTimer(time));
+				m_areaChangedUpdateTime = getTimer();
+				
+				_areaChangedScheduled = false;
+				
+			} else {
+				_areaChangedScheduledBBox = bbox;
+				_areaChangedScheduled = true;
+			}
+			*/
+		}
+		
 		/**
 		 * Adds externally managed DisplayObject which must not be displaced to the layout
 		 * Basically this means that all other objects will be displaced so that they don't
@@ -104,9 +180,10 @@ package com.iblsoft.flexiweather.utils
 		public function addObstacle(object: DisplayObject): void
 		{
 			setDirty();
-			var lo: AnticollisionLayoutObject = new AnticollisionLayoutObject(object, false, AnticollisionDisplacementMode.DISPLACE_NOT_ALLOWED);
+			var lo: AnticollisionLayoutObject = new AnticollisionLayoutObject(object, false, AnticollisionDisplayMode.FIXED);
 			lo.name = "Obstacle";
 			ma_layoutObjects.addItem(lo);
+			updateLayoutObjectsLength();
 		}
 
 		/**
@@ -117,9 +194,14 @@ package com.iblsoft.flexiweather.utils
 				object: DisplayObject,
 				a_anchors: Array = null,
 				i_reflection: int = 0,
-				i_displacementMode: String = AnticollisionDisplacementMode.DISPLACE_AUTOMATIC,
+				i_displacementMode: String = AnticollisionDisplayMode.DISPLACE_AROUND,
 				b_addAsChild: Boolean = true): AnticollisionLayoutObject
 		{
+			if (!(object is KMLLabel))
+			{
+				trace("no KMLLabel");
+			}
+				
 			setDirty();
 			if(b_addAsChild)
 				addChild(object);
@@ -129,23 +211,42 @@ package com.iblsoft.flexiweather.utils
 			
 			lo.objectsToAnchor = a_anchors;
 			lo.reflectionID = i_reflection;
-			lo.manageVisibilityWithAnchors = a_anchors != null;
+			lo.manageVisibilityWithAnchors = (a_anchors != null && a_anchors.length > 0);
 			ma_layoutObjects.addItem(lo);
+			updateLayoutObjectsLength();
 			
+			trace(this + " addObject => length: " + ma_layoutObjects.length);
+			
+			if (object is IAnticollisionLayoutObject)
+			{
+				(object as IAnticollisionLayoutObject).anticollisionLayoutObject = lo;
+			}
 			return lo;
+		}
+		
+		private function updateLayoutObjectsLength(): void
+		{
+			if (ma_layoutObjects)
+				layoutObjectsLength = ma_layoutObjects.length;
+			else
+				layoutObjectsLength = 0;
 		}
 		
 		public function removeObject(object: DisplayObject): Boolean
 		{
+			if (object is IAnticollisionLayoutObject)
+				(object as IAnticollisionLayoutObject).anticollisionLayoutObject = null;
 			for(var i: int = 0; i < ma_layoutObjects.length; ++i) {
 				var lo: AnticollisionLayoutObject = ma_layoutObjects[i]; 
 				if(lo.object === object) {
+					
 					if(lo.managedChild)
 					{
 						if (lo.object && lo.object.parent == this)
 							removeChild(lo.object);
 					}
 					ma_layoutObjects.removeItemAt(i);
+					updateLayoutObjectsLength();
 					setDirty();
 					return true;
 				}
@@ -153,7 +254,7 @@ package com.iblsoft.flexiweather.utils
 			return false;
 		}
 
-		public function getObjectReferenceLocation(object: DisplayObject): Point
+		public function getObjectReferenceLocation(object: IAnticollisionLayoutObject): Point
 		{
 			var lo: AnticollisionLayoutObject = getAnticollisionLayoutObjectFor(object);
 			if(lo == null)
@@ -161,49 +262,7 @@ package com.iblsoft.flexiweather.utils
 			return lo.referenceLocation;
 		}
 
-		public function updateObjectReferenceLocationWithCustomPosition(object: DisplayObject, rlX: Number, rlY: Number): Boolean
-		{
-			
-			var lo: AnticollisionLayoutObject = getAnticollisionLayoutObjectFor(object);
-			
-			if(lo == null)
-				return false;
-			if(lo.referenceLocation.x != rlX || lo.referenceLocation.y != rlY) 
-			{ 
-				setDirty();
-				lo.referenceLocation = new Point(rlX, rlY);
-			}
-			
-			return true;
-		}
-		public function updateObjectReferenceLocation(object: DisplayObject): Boolean
-		{
-			var lo: AnticollisionLayoutObject = getAnticollisionLayoutObjectFor(object);
-			var loAnchor: AnticollisionLayoutObject = getAnticollisionLayoutObjectForAnchor(object);
-			
-//			if (object is KMLSprite)
-//			{
-//				var lbl: KMLLabel = (object as KMLSprite).kmlLabel;
-//				if (lbl)
-//					trace("ANTILayout " + lbl + " size: ["+lbl.width+","+lbl.height+"]")
-//			}
-			if(lo == null)
-				return false;
-			if(lo.referenceLocation.x != object.x || lo.referenceLocation.y != object.y) 
-			{ 
-				setDirty();
-				lo.referenceLocation = new Point(object.x, object.y);
-			}
-			if(loAnchor == null)
-				return false;
-			if(loAnchor.referenceLocation.x != object.x || loAnchor.referenceLocation.y != object.y) 
-			{ 
-				setDirty();
-				loAnchor.referenceLocation = new Point(object.x, object.y);
-			}
-			
-			return true;
-		}
+		
 		
 		public function reset(): void
 		{
@@ -212,6 +271,7 @@ package com.iblsoft.flexiweather.utils
 			}
 			ma_layoutObjects.removeAll();
 			setDirty();
+			updateLayoutObjectsLength();
 		}
 
 		public function setBoundary(boundary: Rectangle): void
@@ -220,18 +280,39 @@ package com.iblsoft.flexiweather.utils
 			setDirty();
 		}
 		
+		private var _updateLocked: Boolean;
+		
 		public function update(): void
 		{
-			var time: int = ProfilerUtils.startProfileTimer();
 			
-			if (!m_suspendAnticollisionProcessing)
+			if (!m_suspendAnticollisionProcessing && !_updateLocked)
 			{
-//				trace("Anti layout ma_layoutObjects: " + ma_layoutObjects.length);
+				var time: int = ProfilerUtils.startProfileTimer();
+				var pass: int = 0;
+				
+				var diffTime: Number = getTimer() - mi_lastUpdate;
+				
+				if (diffTime < 500)
+					return;
+				
+				if (ma_layoutObjects.length > 0)
+				trace("\n ACL update");
+//				trace("\n"+this+" update diffTime: " + diffTime);
+//				if (ma_layoutObjects.length > 0)
+//					trace("\n"+this+" ma_layoutObjects: " + ma_layoutObjects.length);
+				
+				var currObjects: Array = ma_layoutObjects.source;
+//				var currObjects: Array = ma_currentLayoutObjects;
+				
 				if (!m_boundaryRect)
 					return;
 				
+				_updateLocked = true;
+				
 				mb_dirty = false;
 				mi_lastUpdate = getTimer();
+				
+//				trace("\t"+this+" update mi_lastUpdate: " + mi_lastUpdate);
 	
 				var i_roundedWidth: uint = Math.round(m_boundaryRect.width + 0.9999999999);
 				var i_roundedHeight: uint = Math.round(m_boundaryRect.height + 0.9999999999);
@@ -250,22 +331,30 @@ package com.iblsoft.flexiweather.utils
 				var loAnchored: AnticollisionLayoutObject;
 				var objectToAnchor: DisplayObject;
 				
+				var currTime: int;
+				
 				// first pass - analyse current absolute visibility of objects
-				for each(lo in ma_layoutObjects) {
+				currTime = ProfilerUtils.startProfileTimer();
+				for each(lo in currObjects) {
+					pass++;
 					if(lo.manageVisibilityWithAnchors)
 						lo.visible = true;
 					else
 						lo.visible = getAbsoluteVisibility(lo.object);
 					
 				}
+//				trace("ANTICOLLISION 1. time: " + ProfilerUtils.stopProfileTimer(currTime));
+//				currTime = ProfilerUtils.startProfileTimer();
 				
 				var b_change: Boolean = true;
 				while(b_change) {
 					b_change = false;
-					for each(lo in ma_layoutObjects) {
+					for each(lo in currObjects) {
+						pass++;
 						if(lo.objectsToAnchor != null && lo.objectsToAnchor.length > 0) {
 							for each(objectToAnchor in lo.objectsToAnchor) {
-								loAnchored = getAnticollisionLayoutObjectFor(objectToAnchor);
+								pass++;
+								loAnchored = getAnticollisionLayoutObjectFor(objectToAnchor as IAnticollisionLayoutObject);
 								if(loAnchored == null)
 									continue;
 								if(!loAnchored.visible) {
@@ -279,22 +368,29 @@ package com.iblsoft.flexiweather.utils
 					}
 				} // while(b_change)
 				
+//				trace("ANTICOLLISION 2. time: " + ProfilerUtils.stopProfileTimer(currTime));
+//				currTime = ProfilerUtils.startProfileTimer();
+				
 				// second pass - render nonmoveable objects
-				for each(lo in ma_layoutObjects) {
+				for each(lo in currObjects) {
+					pass++;
 					if(!lo.visible)
 						continue;
-					if(lo.displacementMode == AnticollisionDisplacementMode.DISPLACE_NOT_ALLOWED) {
+					if(lo.displacementMode == AnticollisionDisplayMode.FIXED) {
 						drawObjectPlacement(lo, 0, 0);
 					}
 				}
 	
+//				trace("ANTICOLLISION 3. time: " + ProfilerUtils.stopProfileTimer(currTime));
+//				currTime = ProfilerUtils.startProfileTimer();
+				
 				// third pass - displace & render other object
-				
-				
-				for each(lo in ma_layoutObjects) {
+				for each(lo in currObjects) {
+					pass++;
 					if(!lo.visible)
 						continue;
-					if(lo.displacementMode == AnticollisionDisplacementMode.DISPLACE_AUTOMATIC || lo.displacementMode == AnticollisionDisplacementMode.DISPLACE_AUTOMATIC_SIMPLE|| lo.displacementMode == AnticollisionDisplacementMode.DISPLACE_HIDE) {
+					if(lo.displacementMode == AnticollisionDisplayMode.DISPLACE_AROUND || lo.displacementMode == AnticollisionDisplayMode.HIDE_IF_OCCUPIED) 
+					{
 						if(lo.visible != lo.object.visible)
 							lo.object.visible = lo.visible; 
 						var f_dx: Number = 0;
@@ -304,8 +400,16 @@ package com.iblsoft.flexiweather.utils
 						
 //						trace("\n\t update m_referenceLocation: " + lo.referenceLocation + " object: " + lo.object);
 						
-						bounds.x = lo.referenceLocation.x;
-						bounds.y = lo.referenceLocation.y;
+						var loRefx: Number = lo.referenceLocation.x;
+						var loRefy: Number = lo.referenceLocation.y;
+						
+						if (loRefx == 0 && loRefy == 0)
+							continue;
+//						else {
+//							trace("obj ref pos: " + loRefx + " , " + loRefy);
+//						}
+						bounds.x = loRefx;
+						bounds.y = loRefy;
 						var b_foundPlace: Boolean = false;
 						
 						// first try the reference point
@@ -313,7 +417,7 @@ package com.iblsoft.flexiweather.utils
 							b_foundPlace = true;
 						}
 						else {
-							if (lo.displacementMode == AnticollisionDisplacementMode.DISPLACE_HIDE)
+							if (lo.displacementMode == AnticollisionDisplayMode.HIDE_IF_OCCUPIED)
 							{
 								// do not continue if object has no placement and displacement mode is DISPLACE_HIDE
 								lo.visible = false;
@@ -323,21 +427,32 @@ package com.iblsoft.flexiweather.utils
 							// if not available, try the surrounding point
 							var f_pi2: Number = 2 * Math.PI;
 							
-							if (lo.displacementMode == AnticollisionDisplacementMode.DISPLACE_AUTOMATIC)
+							if (lo.displacementMode == AnticollisionDisplayMode.DISPLACE_AROUND)
 							{
-								trace("\n DISPLACE_AUTOMATIC");
+//								trace("\nDISPLACE_AUTOMATIC");
+								var outterCycle: int = ProfilerUtils.startProfileTimer();
 								outterCycle:
 								for(var i_displace: int = 1; i_displace < 20; ++i_displace) 
 								{
-									var i_angleSteps: uint = (i_displace / i_displace + 3) / 4 * 4;
+									pass++;
+									var i_angleSteps: Number = (i_displace / i_displace + 3) / 4 * 4;
+									var i_angleSteps2: Number = (i_displace / (i_displace + 3)) / 4 * 4;
+									
 									var f_angleStep: Number = f_pi2 / i_angleSteps;
+									var f_angleStep2: Number = f_pi2 / i_angleSteps2;
 									var i_disp10: int = i_displace * 10;
+									
+//									trace("\ti_displace: " + i_displace + " i_angleSteps: " + i_angleSteps + " i_angleSteps2: " + i_angleSteps2);
+//									trace("\ti_displace: " + i_displace + " f_angleStep: " + f_angleStep + " f_angleStep2: " + f_angleStep2);
+									
+									var innerCycle: int = ProfilerUtils.startProfileTimer();
 									for(var f_angle: Number = 0; f_angle < f_pi2; f_angle += f_angleStep) 
 									{
+										pass++;
 										f_dx = int(Math.round(Math.cos(f_angle) * i_disp10));
 										f_dy = int(Math.round(Math.sin(f_angle) * i_disp10));
 										
-//										trace("displace: ["+i_displace+"] angle: ["+f_angle+"] dx: " + f_dx + " dy: " + f_dy);
+//										trace("\t\tdisplace: ["+i_displace+"] angle: ["+f_angle+"] dx: " + f_dx + " dy: " + f_dy);
 										var boundsDisplaced: Rectangle = new Rectangle(bounds.x + f_dx, bounds.y + f_dy, bounds.width, bounds.height);
 										
 										// quick check if resulting boundary is within the m_boundaryRect 
@@ -346,15 +461,26 @@ package com.iblsoft.flexiweather.utils
 											break outterCycle;
 										}
 									}
+//									var innerCycleTime: int = ProfilerUtils.stopProfileTimer(innerCycle);
+//									if (innerCycleTime > 0)
+//										trace("ANTICOLLISION 4.2 time: " + innerCycleTime);
+//									innerCycle = ProfilerUtils.startProfileTimer();
+									
 								}
-								trace("END OF DISPLACE_AUTOMATIC \n");
-							} else if (lo.displacementMode == AnticollisionDisplacementMode.DISPLACE_AUTOMATIC_SIMPLE) {
+//								var outterCycleTime: int = ProfilerUtils.stopProfileTimer(outterCycle);
+//								if (outterCycleTime)
+//									trace("ANTICOLLISION 4.1 time: " + outterCycleTime);
+//								outterCycle = ProfilerUtils.startProfileTimer();
+//								trace("END OF DISPLACE_AUTOMATIC \n");
+					/*
+							} else if (lo.displacementMode == AnticollisionDisplayMode.DISPLACE_AUTOMATIC_SIMPLE) {
 								
 								var dist: int = 100;
 								var possiblePositions: Array = [new Point(dist,0), new Point(0,dist), new Point(0,-1*dist), new Point(-1*dist,0)]
 									
 								for each (var possiblePosition: Point in possiblePositions)
 								{
+									pass++;
 									f_dx = possiblePosition.x;
 									f_dy = possiblePosition.y;
 									
@@ -366,6 +492,7 @@ package com.iblsoft.flexiweather.utils
 										break;
 									}
 								}
+					*/								
 							}
 						}
 						if(!b_foundPlace) {
@@ -375,10 +502,13 @@ package com.iblsoft.flexiweather.utils
 						}
 						lo.object.x = lo.referenceLocation.x + f_dx;
 						lo.object.y = lo.referenceLocation.y + f_dy;
-//						trace("\t\t update set object pos: object: " + lo.object.x + " , " + lo.object.y);
+//						trace("\t\t update set object pos: object: [" + lo.object.x + " , " + lo.object.y+"]  reference [" + lo.referenceLocation.x + " , " + lo.referenceLocation.y+"] ");
 						drawObjectPlacement(lo, f_dx, f_dy);
 					}
 				}
+				
+//				trace(""+this+" 4. time: " + ProfilerUtils.stopProfileTimer(currTime));
+				currTime = ProfilerUtils.startProfileTimer();
 				
 				// now we can assume that all objects are laid out
 				
@@ -387,7 +517,8 @@ package com.iblsoft.flexiweather.utils
 				
 //				trace("\n\nAnticollisionLayout");
 				g.clear();
-				for each(lo in ma_layoutObjects) {
+				for each(lo in currObjects) {
+					pass++;
 //					trace("\t lo: " + lo);
 					if(lo.objectsToAnchor == null || lo.objectsToAnchor.length == 0)
 						continue;
@@ -401,7 +532,8 @@ package com.iblsoft.flexiweather.utils
 					//if(lo.displacementMode != DISPLACE_AUTOMATIC)
 					//	continue;
 					for each(objectToAnchor in lo.objectsToAnchor) {
-						loAnchored = getAnticollisionLayoutObjectForAnchor(objectToAnchor);
+						pass++;
+						loAnchored = getAnticollisionLayoutObjectForAnchor(objectToAnchor as IAnticollisionLayoutObject);
 						
 //						trace("\t\t objectToAnchor: " + objectToAnchor + " loAnchored: " + loAnchored);
 						if(loAnchored == null)
@@ -415,7 +547,7 @@ package com.iblsoft.flexiweather.utils
 						if (boundsFrom.width < 10 && boundsFrom.height < 10)
 						{
 							//object is too small, do not do anticollision for it
-							trace("object is too small, do not do anticollision for it");
+							trace(""+this+" object is too small, do not do anticollision for it");
 							continue;
 						}
 						var a_boundingLineSegmentsFrom: Array = getLineSegmentApproximation(lo.object);
@@ -431,18 +563,11 @@ package com.iblsoft.flexiweather.utils
 						var bestPointFrom: Point = boundsFrom.topLeft;
 						var f_bestDistance: Number = 123e45;
 						
+						
 						for each(var lineSegmentFrom: LineSegment in a_boundingLineSegmentsFrom) {
+							pass++;
 							for each(var lineSegmentTo: LineSegment in a_boundingLineSegmentsTo) {
-								// approach: overall 2 closest points
-								/*
-								var connection: LineSegment = lineSegmentFrom.shortestConnectionToLineSegment(lineSegmentTo);
-								var f_distance: Number = connection.length;
-								if(f_distance < f_bestDistance) {
-									bestPointFrom = connection.startPoint; 
-									bestPointTo = connection.endPoint;
-									f_bestDistance = f_distance;
-								}
-								*/
+								pass++;
 								// approach: mid-points of 2 closest line segments
 								var f_distance: Number = lineSegmentFrom.minimumDistanceToLineSegment(lineSegmentTo);
 								if(f_distance < f_bestDistance) {
@@ -469,9 +594,16 @@ package com.iblsoft.flexiweather.utils
 								bestPointTo.x, bestPointTo.y, clr, anchorAlpha);
 					}
 				}
+//				trace(""+this+" 5. time: " + ProfilerUtils.stopProfileTimer(currTime));
+				currTime = ProfilerUtils.startProfileTimer();
+				
+//				if (currObjects)
+//					trace(""+this+" update time: " + ProfilerUtils.stopProfileTimer(time) + "ms   currObjects items: " + currObjects.length + " passes: " + pass);
+				
+				_updateLocked = false;
 			}
 			
-//			debug("update time: " + ProfilerUtils.stopProfileTimer(time) + "ms   ma_layoutObjects items: " + ma_layoutObjects.length);
+			
 		}
 		
 		public function needsUpdate(): Boolean
@@ -501,7 +633,7 @@ package com.iblsoft.flexiweather.utils
 				return false;
 			// analyse chain of visibility flags
 			while(object != null) {
-				if(!object.visible)
+				if(!object.visible && object != this)
 					return false;
 				object = object.parent;
 			}
@@ -595,36 +727,13 @@ package com.iblsoft.flexiweather.utils
 			*/
 		}
 		
-		private function getAnticollisionLayoutObjectFor(object: DisplayObject): AnticollisionLayoutObject
-		{
-			for each(var lo: AnticollisionLayoutObject in ma_layoutObjects) {
-				if(lo.object === object) {
-					return lo;
-				}
-			}
-			return null;
-		}
-		private function getAnticollisionLayoutObjectForAnchor(anchor: DisplayObject): AnticollisionLayoutObject
-		{
-			for each(var lo: AnticollisionLayoutObject in ma_layoutObjects) {
-				if (lo.objectsToAnchor)
-				{
-					var arr: Array = lo.objectsToAnchor;
-					for each (var obj: DisplayObject in arr)
-					{
-						if(obj === anchor) {
-							return lo;
-						}
-					}
-				}
-			}
-			return null;
-		}
 
 		private var m_makeRed: ColorTransform = new ColorTransform(1, 1, 1, 1, 255, -255, -255, 255);
 
 		private function drawObjectPlacement(layoutObject: AnticollisionLayoutObject, f_dx: Number, f_dy: Number): void
 		{
+			var time: int = ProfilerUtils.startProfileTimer();
+			
 			var matrix: Matrix = new Matrix();
 			matrix.translate(-m_boundaryRect.x, -m_boundaryRect.y);
 			
@@ -635,6 +744,7 @@ package com.iblsoft.flexiweather.utils
 			if(layoutObject.object is UIComponent)
 				UIComponent(layoutObject.object).validateNow();
 			m_placementBitmap.draw(layoutObject.object, matrix, m_makeRed);
+//			trace("drawObjectPlacement : " + ProfilerUtils.stopProfileTimer(time));
 		}
 
 		private function checkObjectPlacement(layoutObject: AnticollisionLayoutObject, bounds: Rectangle): Boolean
@@ -673,6 +783,10 @@ package com.iblsoft.flexiweather.utils
 		{ 
 			debug("suspendAnticollisionProcessing = " + value);
 			m_suspendAnticollisionProcessing = value; 
+			
+			if (_areaChangedScheduled)
+				areaChanged(_areaChangedScheduledBBox);
+			
 			update();
 		}
 
@@ -710,9 +824,382 @@ package com.iblsoft.flexiweather.utils
 				debugConsole.print("AnticollisionLayout: " + txt,'Info','AnticollisionLayout');
 			}
 		}
+		
+		
+		override public function toString(): String
+		{
+			return "AnticollistionLayout ["+_layoutName+"]";
+		}
+		
+		
+		private function getAnticollisionLayoutObjectFor(object: IAnticollisionLayoutObject): AnticollisionLayoutObject
+		{
+			if (!object || (!object is IAnticollisionLayoutObject))
+			{
+				trace("getAnticollisionLayoutObjectFor PROBLEM");
+			}
+			
+			return object.anticollisionLayoutObject;
+			
+			//			for each(var lo: AnticollisionLayoutObject in ma_layoutObjects) {
+			/*
+			for each(var lo: AnticollisionLayoutObject in ma_currentLayoutObjects) {
+				if(lo.object === object) {
+					return lo;
+				}
+			}
+			return null;
+			*/
+			
+		}
+		
+		private function getAnticollisionLayoutObjectForAnchor(anchor: IAnticollisionLayoutObject): AnticollisionLayoutObject
+		{
+			
+			if (!anchor || (!anchor is IAnticollisionLayoutObject))
+			{
+				trace("getAnticollisionLayoutObjectForAnchor PROBLEM");
+			}
+			
 
+			return anchor.anticollisionLayoutObject;
+			
+			
+			//			for each(var lo: AnticollisionLayoutObject in ma_layoutObjects) {
+			/*
+			for each(var lo: AnticollisionLayoutObject in ma_currentLayoutObjects) {
+				if (lo.objectsToAnchor)
+				{
+					var arr: Array = lo.objectsToAnchor;
+					for each (var obj: DisplayObject in arr)
+					{
+						if(obj === anchor) {
+							return lo;
+						}
+					}
+				}
+			}
+			return null;
+			*/
+		}
 
+		public function updateObjectReferenceLocationWithCustomPosition(object: DisplayObject, rlX: Number, rlY: Number): Boolean
+		{
+			
+			var lo: AnticollisionLayoutObject = getAnticollisionLayoutObjectFor(object as IAnticollisionLayoutObject);
+			
+			if(lo == null)
+				return false;
+			if(lo.referenceLocation.x != rlX || lo.referenceLocation.y != rlY) 
+			{ 
+				setDirty();
+				lo.referenceLocation = new Point(rlX, rlY);
+			}
+			
+			return true;
+		}
+		
+		
+		public function updateObjectReferenceLocation(object: DisplayObject, bForceUpdate: Boolean = false): Boolean
+		{
+			
+			bForceUpdate = true;
+			
+			if (!bForceUpdate)
+			{
+				var canUpdate: Boolean = _updateLocationDictionary.updateLocation(object);
+			}
+			if (bForceUpdate || (!bForceUpdate && canUpdate))
+			{
+				
+				var lo: AnticollisionLayoutObject = getAnticollisionLayoutObjectFor(object as IAnticollisionLayoutObject);
+				var loAnchor: AnticollisionLayoutObject = getAnticollisionLayoutObjectForAnchor(object as IAnticollisionLayoutObject);
+				
+				//			if (object is KMLSprite)
+				//			{
+				//				var lbl: KMLLabel = (object as KMLSprite).kmlLabel;
+				//				if (lbl)
+				//					trace("ANTILayout " + lbl + " size: ["+lbl.width+","+lbl.height+"]")
+				//			}
+				if(lo == null)
+					return false;
+				
+				var refLocation: Point = lo.referenceLocation;
+				var objX: Number = object.x;
+				var objY: Number = object.y;
+				
+				if(refLocation.x != objX || refLocation.y != objY) 
+				{ 
+					setDirty();
+					lo.referenceLocation = new Point(objX, objY);
+				}
+				if(loAnchor == null)
+					return false;
+				
+				
+				var refAnchorLocation: Point = loAnchor.referenceLocation;
+				if(refAnchorLocation.x != objX || refAnchorLocation.y != objY) 
+				{ 
+					setDirty();
+					loAnchor.referenceLocation = new Point(objX, objY);
+				}
+				
+				return true;
+//			} else {
+//				trace(this + " updateObjectReferenceLocation scheduled");
+			}
+			 
+			return false;
+		}
 
 
 	}
+}
+import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayout;
+
+import flash.display.DisplayObject;
+import flash.events.TimerEvent;
+import flash.utils.Dictionary;
+import flash.utils.Timer;
+import flash.utils.getTimer;
+
+import mx.utils.object_proxy;
+
+class UpdateLocationDictionary
+{
+	private var _maxObjectsUpdatePerTick: int = 50;
+	private var _len: int = 0;
+	
+	private var _dictionary: Dictionary;
+	private var _firstItem: UpdateLocationDictionaryItem;
+	private var _lastItem: UpdateLocationDictionaryItem;
+	
+	private var _running: Boolean;
+	private var _timer: Timer;
+	
+	private var _layout: AnticollisionLayout;
+	
+	public function UpdateLocationDictionary(layout: AnticollisionLayout)
+	{
+		_layout = layout;
+		
+		_dictionary = new Dictionary();
+		_timer = new Timer(50);
+		_timer.addEventListener(TimerEvent.TIMER, onTimer);
+	}
+	
+	public function updateLocation(object: DisplayObject): Boolean
+	{
+		var item: UpdateLocationDictionaryItem;
+		
+		if (!_dictionary[object])
+		{
+			item = new UpdateLocationDictionaryItem(object);
+		} else {
+			item = _dictionary[object] as UpdateLocationDictionaryItem;
+		}
+		
+		var canUpdate: Boolean = item.canUpdate();
+		
+		if (!canUpdate)
+		{
+			if (!_dictionary[object])
+			{
+				_dictionary[object] = item;
+				_len++;
+			}
+					
+			
+			addItemOnWaitingList(item);
+		}
+		return canUpdate;
+	}
+	
+	private function itemExists(item: UpdateLocationDictionaryItem): Boolean
+	{
+		var currItem: UpdateLocationDictionaryItem = _firstItem;
+		if (!currItem)
+			return false;
+		
+		while (currItem)
+		{
+			if (currItem == item)
+				return true;
+			
+			if (currItem.nextItem == currItem)
+				currItem = null
+			else
+				currItem = currItem.nextItem;
+		}
+		
+		return false;
+		
+	}
+	private function addItemOnWaitingList(item: UpdateLocationDictionaryItem): void
+	{
+		if (itemExists(item))
+		{
+			return;
+		}
+		
+//		trace("addItemOnWaitingList: " + item.id);
+		if (!_firstItem)
+		{
+			_firstItem = item;
+			_lastItem = item;
+			item.previousItem = null;
+			item.nextItem = null;
+		} else {
+			_lastItem.nextItem = item;
+			item.previousItem = _lastItem;
+			
+			_lastItem = item;
+		}
+		
+		if (!_timer.running)
+		{
+			_timer.start();
+		}
+	}
+	
+	private function updateItem(item: UpdateLocationDictionaryItem): void
+	{
+		//remove object from dictionary
+		delete _dictionary[item.displayObject];
+		_len--;
+		
+		//force update object reference location
+		_layout.updateObjectReferenceLocation(item.displayObject, true);
+	}
+	
+	private function debugDictionary(): void
+	{
+		return;
+		
+//		trace("debugDictionary start");
+		/*
+		var ids: String = '';
+		if (_firstItem)
+			ids += 'first: ' + _firstItem.id + " > ";
+		
+		var item: UpdateLocationDictionaryItem = _firstItem;
+		if (!item)
+			return;
+		
+		while (item)
+		{
+			ids += item.id + ", ";
+			item = item.nextItem;
+		}
+		
+		if (_lastItem)
+			ids += " < Last: " + _lastItem.id;
+		*/
+//		trace("debugDictionary end: " + ids);
+	}
+	private function onTimer(event: TimerEvent): void
+	{
+		var ok: Boolean = true;
+		var item: UpdateLocationDictionaryItem = _firstItem;
+		var oldItem: UpdateLocationDictionaryItem = oldItem;
+		
+		if (!item)
+		{
+			ok = false;
+			_timer.stop();
+			return;
+		}
+		
+		var cnt: int = 0;
+		
+		debugDictionary();
+		while(ok)
+		{
+			if (item)
+			{
+				if (item.canUpdate())
+				{
+					updateItem(item);
+					
+					cnt++;
+					if (item.previousItem)
+					{
+						item.previousItem.nextItem = item.nextItem;
+						if (!item.previousItem.nextItem)
+							_lastItem = item.previousItem;
+					}
+					if (item.nextItem)
+					{
+						item.nextItem.previousItem = item.previousItem;
+						if (!item.previousItem)
+							_firstItem = item.nextItem;
+					}
+					
+					if (!item.previousItem && !item.nextItem)
+					{
+						_firstItem = _lastItem = null;
+					}
+					
+				}
+				oldItem = item;
+				item = item.nextItem;
+			}
+			
+			debugDictionary();
+			
+			if (!item)
+			{
+				ok = false;
+				if (_firstItem)
+					_lastItem = oldItem;
+			}
+			
+			if (cnt >= _maxObjectsUpdatePerTick)
+			{
+				ok = false;
+			}
+		}
+	}
+}
+
+class UpdateLocationDictionaryItem
+{
+	public static var uid: int = 0;
+	
+	public var previousItem: UpdateLocationDictionaryItem;
+	public var nextItem: UpdateLocationDictionaryItem;
+	
+	
+	public var displayObject: DisplayObject;
+	
+	private var _lastUpdate: Number;
+	private var _minWaitingTime: int = 500;
+	
+	public var id: int;
+	
+	public function UpdateLocationDictionaryItem(object: DisplayObject)
+	{
+		uid++;
+		
+		id =  uid;
+		
+		displayObject = object;
+		_lastUpdate = getTimer();
+	}
+	public function canUpdate(): Boolean
+	{
+		var bool: Boolean = (timeFromLastUpdate() >= _minWaitingTime);
+		
+		if (bool)
+			_lastUpdate = getTimer();
+		
+		return bool;
+			
+	}
+	private function timeFromLastUpdate(): Number
+	{
+		return getTimer() - _lastUpdate;
+	}
+	
+	
 }
