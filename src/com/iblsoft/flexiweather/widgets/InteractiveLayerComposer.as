@@ -167,8 +167,13 @@ package com.iblsoft.flexiweather.widgets
 		{
 			for each(var l: InteractiveLayer in m_layers) {
             	
-            	var fnc: Function = l[functionName] as Function;
-            	fnc.apply(l, params);
+				if (l.hasOwnProperty(functionName))
+				{
+	        		var fnc: Function = l[functionName] as Function;
+	            	fnc.apply(l, params);
+				} else {
+					trace("Layer " + l + " has not function called " + functionName);
+				}
 			}
 		}
 		

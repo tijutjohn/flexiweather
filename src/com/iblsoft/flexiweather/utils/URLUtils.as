@@ -40,6 +40,26 @@ package com.iblsoft.flexiweather.utils
 		}
 		
 		/**
+		 * Function will join path parts. Check if there is "/" between and add it if it's missing
+		 *  
+		 * @param url
+		 * @return 
+		 * 
+		 */		
+		public static function pathJoiner(path1: String, path2: String): String
+		{
+			var last1: String = path1.substr(path1.length - 1, 1);
+			var first2: String = path2.substr(0, 1);
+			if (last1 != '/' && first2 != '/')
+			{
+				return path1 + "/" + path2;
+			} else if (last1 == '/' && first2 == '/') {
+				return path1.substr(0, path1.length - 1) + path2;
+			}
+			
+			return path1 + path2;
+		}
+		/**
 		 * Function will check URL for //, which can be created by replacing tag ${BASE_URL}
 		 *  
 		 * @param url

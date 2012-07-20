@@ -904,8 +904,8 @@ package com.iblsoft.flexiweather.widgets
 		/**
 		 * Returns array of object pairs {point: reflected point, reflection: reflection delta} 
 		 * Input point is x,y coordinate and not pixel position.
-		 * @param point
-		 * @param startDelta if you want generate reflections delta from different delta than 0, set startDelta to you start delta. E.g if startDelta = 5, generated deltas will be 5,6,-6,7,-7...
+		 * @param point Point which will be reflected
+		 * @param vBBox if you want to return reflections for different view BBox than InteractiveWidget.viewBBox
 		 * @return 
 		 * 
 		 */		
