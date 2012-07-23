@@ -444,6 +444,7 @@ package com.iblsoft.flexiweather.ogc
 		
 		protected function onCurrentWMSDataInvalidateDynamicPart(event: DynamicEvent): void
 		{
+//			trace("\t onCurrentWMSDataInvalidateDynamicPart ["+name+"]");
 			invalidateDynamicPart(event['invalid']);
 		}
 		
@@ -458,12 +459,14 @@ package com.iblsoft.flexiweather.ogc
 		
 		protected function onCurrentWMSDataProgress(event: InteractiveLayerProgressEvent): void
 		{
+//			trace("\t onCurrentWMSDataProgress ["+name+"]");
 			notifyProgress(event.loaded, event.total, event.units);
 			
 		}
 		
 		protected function onCurrentWMSDataLoadingFinished(event: InteractiveLayerEvent): void
 		{
+//			trace("\t onCurrentWMSDataLoadingFinished ["+name+"]");
 			var loader: MSBaseLoader = event.target as MSBaseLoader;
 			loader.removeEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
 			loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
@@ -568,6 +571,7 @@ package com.iblsoft.flexiweather.ogc
 		override protected function updateData(b_forceUpdate: Boolean): void
 		{
 			//we need to postpone updateData if capabilities was not received, otherwise we do not know, if layes is tileable or not
+//			trace("MSBase updateData capabilitiesReady: " + capabilitiesReady + " layerWasDestroyed: " + layerWasDestroyed);
 			if (!capabilitiesReady)
 			{
 				waitForCapabilities();
@@ -682,11 +686,12 @@ package com.iblsoft.flexiweather.ogc
 				for each(var imagePart: ImagePart in imageParts) {
 					// Check if CRS of the image part == current CRS of the container
 					if(s_currentCRS != imagePart.ms_imageCRS)
+					{
 						continue; // otherwise we cannot draw it
+					}
 					
 					var reflectedBBoxes:Array = container.mapBBoxToViewReflections(imagePart.m_imageBBox);
 					for each(var reflectedBBox: BBox in reflectedBBoxes) {
-						//					trace("\t InteractiveLayerWMS.draw(): drawing reflection " + reflectedBBox.toString());
 						drawImagePart(graphics, imagePart.m_image, imagePart.ms_imageCRS, reflectedBBox);
 					}
 				}

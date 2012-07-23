@@ -29,6 +29,9 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 
 	public class MSBaseLoader extends EventDispatcher implements IWMSViewPropertiesLoader
 	{
+		private static var uid: int = 0;
+		public var id: int;
+		
 		private var ma_requests: ArrayCollection = new ArrayCollection(); // of URLRequest
 		private var mi_updateCycleAge: uint = 0;
 		private var m_layer: InteractiveLayerMSBase;
@@ -37,12 +40,20 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 		
 		public function MSBaseLoader(layer: InteractiveLayerMSBase)
 		{
+			uid++;
+			id = uid;
+			
 			m_layer = layer;
 			
 			m_loader = new WMSImageLoader();
 			m_loader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onDataLoaded);
 			m_loader.addEventListener(ProgressEvent.PROGRESS, onDataProgress);
 			m_loader.addEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onDataLoadFailed);
+		}
+		
+		override public function toString(): String
+		{
+			return "MSBaseLoader ["+id+"]";
 		}
 		
 		public function destroy(): void
@@ -73,7 +84,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 			
 			if(ma_requests.length > 0) {
 				for each(var request: URLRequest in ma_requests)
-				m_loader.cancel(request);
+					m_loader.cancel(request);
 				ma_requests.removeAll();
 			}
 			
@@ -289,19 +300,6 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 					imagePart.mi_updateCycleAge = mi_updateCycleAge;
 					addImagePart(wmsViewProperties, imagePart, result);
 					
-					
-					//			var metadata: CacheItemMetadata = new CacheItemMetadata();
-					//			metadata.crs = imagePart.ms_imageCRS;
-					//			metadata.bbox = imagePart.m_imageBBox;
-					//			metadata.url = event.request;
-					//			metadata.dimensions = event.associatedData.dimensions;
-					
-					//				wmsCache.addCacheItem(
-					//						imagePart.m_image,
-					//						imagePart.ms_imageCRS,
-					//						imagePart.m_imageBBox,
-					//						event.request);
-					
 					wmsViewProperties.url = event.request;
 					
 					wmsCache.addCacheItem( imagePart.m_image, wmsViewProperties);
@@ -312,15 +310,18 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 					ExceptionUtils.logError(Log.getLogger("WMS"), result,
 						"Error accessing layer(s) '" + (m_layer.configuration as IWMSLayerConfiguration).layerNames.join(",") + "' - unexpected response type")
 				}
-				//notify layer that data was loaded
-				notifyLoadingFinished(event.associatedData);		
 				
-				onFinishedRequest(wmsViewProperties, event.request);
+				var bFinishedAll: Boolean = onFinishedRequest(wmsViewProperties, event.request);
+				if (bFinishedAll)
+				{
+					//notify layer that data was loaded
+					notifyLoadingFinished(event.associatedData);	
+				}
 			}
 			
 		}
 		
-		private function onFinishedRequest(wmsViewProperties: WMSViewProperties, request: URLRequest): void
+		private function onFinishedRequest(wmsViewProperties: WMSViewProperties, request: URLRequest): Boolean
 		{
 			if(request)
 			{
@@ -342,7 +343,10 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 						++i;
 				}
 				// finished loading of all requests
+				return true;
 			}
+			return false;
+			
 		}
 		
 		private function onDataLoadFailed(event: UniURLLoaderErrorEvent): void
@@ -422,9 +426,9 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				var e: MSBaseLoaderEvent = new MSBaseLoaderEvent(MSBaseLoaderEvent.LEGEND_LOADED);
 				e.data = {result: result, associatedData: event.associatedData };
 				dispatchEvent(e);
-				//			if (useCache)
-				//				m_legendImage = result;
-				//			createLegend(result, event.associatedData.group, event.associatedData.labelAlign, event.associatedData.callback, legendScaleX, legendScaleY, event.associatedData.width, event.associatedData.height);
+	//			if (useCache)
+	//				m_legendImage = result;
+	//			createLegend(result, event.associatedData.group, event.associatedData.labelAlign, event.associatedData.callback, legendScaleX, legendScaleY, event.associatedData.width, event.associatedData.height);
 			}
 			removeLegendListeners(event.target as WMSImageLoader);
 		}

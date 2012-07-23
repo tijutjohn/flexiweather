@@ -41,7 +41,7 @@ package com.iblsoft.flexiweather.ogc
 	{
 		public static const WMS_STYLE_CHANGED: String = 'wmsStyleChanged';
 		
-		protected var m_autoRefreshTimer: Timer = new Timer(10000);
+		protected var m_autoRefreshTimer: Timer = new Timer(5000);
 		
 		public function InteractiveLayerWMS(container: InteractiveWidget, cfg: WMSLayerConfiguration)
 		{
