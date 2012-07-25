@@ -968,7 +968,7 @@ package com.iblsoft.flexiweather.ogc
 			if(!width || !height)
 				return;
 
-			if (status == InteractiveDataLayer.STATE_DATA_LOADED_WITH_ERRORS)
+			if (status == InteractiveDataLayer.STATE_DATA_LOADED_WITH_ERRORS || status == InteractiveDataLayer.STATE_NO_DATA_AVAILABLE)
 			{
 				drawNoDataPreview(graphics, f_width, f_height);
 				return;

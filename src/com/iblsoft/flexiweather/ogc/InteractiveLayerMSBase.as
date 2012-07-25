@@ -1348,17 +1348,35 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function synchroniseWith(s_variableId: String, s_value: Object): Boolean
 		{
-			//TODO check if there is cached view properties
+			
+			var bIsSyncronized: Boolean;
+			
 			if (isPreloadedWMSDimensionValue(s_variableId, s_value))
 			{
 				var viewProperties: WMSViewProperties = getPreloadedWMSDimensionValue(s_variableId, s_value);
 				if (viewProperties)
 				{
-					return viewProperties.synchroniseWith(s_variableId, s_value);
+					bIsSyncronized = viewProperties.synchroniseWith(s_variableId, s_value);
+					if (!bIsSyncronized)
+					{
+						setStatus(InteractiveDataLayer.STATE_NO_DATA_AVAILABLE);
+					} else {
+						setStatus(InteractiveDataLayer.STATE_DATA_LOADED);
+					}
+					return bIsSyncronized;
 				}
 			}
 			if (m_currentWMSViewProperties)
-				return m_currentWMSViewProperties.synchroniseWith(s_variableId, s_value);
+			{
+				bIsSyncronized = m_currentWMSViewProperties.synchroniseWith(s_variableId, s_value);
+				if (!bIsSyncronized)
+				{
+					setStatus(InteractiveDataLayer.STATE_NO_DATA_AVAILABLE);
+				} else {
+					setStatus(InteractiveDataLayer.STATE_DATA_LOADED);
+				}
+				return bIsSyncronized;
+			}
 			
 			return false;
 		}

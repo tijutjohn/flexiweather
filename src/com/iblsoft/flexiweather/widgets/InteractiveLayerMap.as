@@ -324,7 +324,7 @@ package com.iblsoft.flexiweather.widgets
           	for each(so in l_syncLayers) 
           	{
           		var frame: Date = so.getSynchronisedVariableValue("frame") as Date;
-//          		trace("getSynchronizedFrameValue frame: " + frame);
+          		trace("InteractiveLayerMap getSynchronizedFrameValue frame: " + frame);
           	}
 
 			return frame;
@@ -699,10 +699,14 @@ package com.iblsoft.flexiweather.widgets
             	if(so == null)
             		continue;
             	if(so.getSynchronisedVariableValue("frame") == null)
-            		continue;
-          		if(so.synchroniseWith("frame", newFrame))
+					continue;
+				
+				var bSynchronized: Boolean = so.synchroniseWith("frame", newFrame);
+          		if(bSynchronized)
 				{
           			l.refresh(false);
+				} else {
+					trace("InteractiveLayerMap setFrame ["+newFrame.toTimeString()+"] FRAME NOT FOUND for "+l.name);
 				}
           	}
           	return true;

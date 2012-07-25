@@ -176,7 +176,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 //			if (m_currentWMSViewProperties)
 //				m_currentWMSViewProperties.renderPreviewWMSData(graphics, f_width, f_height);
-			if (status == InteractiveDataLayer.STATE_DATA_LOADED_WITH_ERRORS)
+			if (status == InteractiveDataLayer.STATE_DATA_LOADED_WITH_ERRORS || status == InteractiveDataLayer.STATE_NO_DATA_AVAILABLE)
 			{
 				drawNoDataPreview(graphics, f_width, f_height);
 				return;

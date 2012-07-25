@@ -615,31 +615,131 @@ package com.iblsoft.flexiweather.ogc.data
 				return null;
 		}
 		
-		public function synchroniseWith(s_variableId: String, value: Object): Boolean
+		private function findNearestForecastValue(run: Date, forecast: Duration, forecasts: Array, maxLeftDifference: Number = 10800000, maxRightDifference: Number = 10800000): Object
+		{
+			var valueTime: Number = forecast.secondsTotal;
+			
+			var nearestValue: Object;
+			var maxDifference: Number = Number.MAX_VALUE;
+			var canCheck: Boolean;
+			
+			
+			for each (var currValue: Object in forecasts)
+			{
+				var currTime: Number = Math.abs(Duration(currValue.data).secondsTotal);
+				
+				canCheck = true;
+				
+				var absDiffTime: Number = Math.abs((valueTime - currTime));
+				if (currTime >= valueTime)
+				{
+					if (absDiffTime > maxRightDifference)
+						continue;
+					
+				} else {
+					
+					if (absDiffTime > maxLeftDifference)
+						continue;
+				}
+				if (canCheck && absDiffTime < maxDifference)
+				{
+					maxDifference = absDiffTime;
+					nearestValue = currValue;
+					if (absDiffTime == 0)
+						return nearestValue;
+				}
+			}
+			
+			if (!nearestValue)
+				return null;
+			
+			trace("findNearestForecastValue searching for: " + forecast.secondsTotal + " found: " + (nearestValue.data as Duration).secondsTotal + " diff: " + maxDifference / (1000 * 60 * 60));
+			return nearestValue;
+		}
+		private function findNearestTimeValue(value: Object, values: Array, maxLeftDifference: Number = 10800000, maxRightDifference: Number = 10800000): Object
+		{
+			var valueDate: Date = value as Date;
+			var valueTime: Number = valueDate.time;
+			
+			var nearestValue: Object;
+			var maxDifference: Number = Number.MAX_VALUE;
+			var canCheck: Boolean;
+			for each (var currValue: Object in values)
+			{
+				var currTime: Number = (currValue.data as Date).time;
+				canCheck = true;
+				
+				var absDiffTime: Number = Math.abs(valueTime - currTime);
+				if (currTime >= valueTime)
+				{
+					if (absDiffTime > maxRightDifference)
+						continue;
+						
+				} else {
+					
+					if (absDiffTime > maxLeftDifference)
+						continue;
+				}
+				if (canCheck && absDiffTime < maxDifference)
+				{
+					maxDifference = absDiffTime;
+					nearestValue = currValue;
+					if (absDiffTime == 0)
+						return nearestValue;
+				}
+			}
+			
+			if (!nearestValue)
+				return null;
+			
+			trace("findNearestTimeValue searching for: " + valueDate.toTimeString() + " found: " + (nearestValue.data as Date).toTimeString() + " diff: " + maxDifference / (1000 * 60 * 60));
+			return nearestValue;
+		}
+		
+		
+		public function synchroniseWith(s_variableId: String, value: Object, maxLeftDifference: Number = 10800000, maxRightDifference: Number = 10800000): Boolean
 		{
 			if(s_variableId == "frame") {
 				if(m_cfg.dimensionTimeName != null) {
-					var frame: Date = value as Date;
+					
 					// TODO: interpolation vs. find nearest value?
-					setWMSDimensionValue(m_cfg.dimensionTimeName, ISO8601Parser.dateToString(frame));
-					dispatchSynchronizedVariableChangeEvent(new SynchronisedVariableChangeEvent(
-						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, "frame"));
-					return true;
+					var possibleValues: Array = getWMSDimensionsValues(m_cfg.dimensionTimeName)
+					var nearest: Object = findNearestTimeValue(value, possibleValues);
+					
+					if (nearest != null)
+					{					
+						var frame2: Date = value as Date;
+						var frame: Date = nearest.data as Date;
+					
+						if (frame.time != frame2.time)
+						{
+							trace("WMSViewProperties synchroniseWith: this was change")
+						}
+						setWMSDimensionValue(m_cfg.dimensionTimeName, ISO8601Parser.dateToString(frame));
+						dispatchSynchronizedVariableChangeEvent(new SynchronisedVariableChangeEvent(
+							SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, "frame"));
+						return true;
+					}
 				}
 				else if(m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null) {
-					var run: Date = ISO8601Parser.stringToDate(
-						getWMSDimensionValue(m_cfg.dimensionRunName, true));
+					
+					var run: Date = ISO8601Parser.stringToDate(getWMSDimensionValue(m_cfg.dimensionRunName, true));
 					var forecast: Duration = new Duration(((value as Date).time - run.time) / 1000.0);
+					
 					var l_forecasts: Array = getWMSDimensionsValues(m_cfg.dimensionForecastName);
 					// TODO: interpolation vs. find nearest value?
-					var ofNearest: Object = null;
-					for each(var of: Object in l_forecasts) {
-						if(ofNearest == null ||
-							Math.abs(Duration(of.data).secondsTotal - forecast.secondsTotal)
-							< Math.abs(Duration(ofNearest.data).secondsTotal - forecast.secondsTotal)) {
-							ofNearest = of;
-						}
-					}
+					var ofNearest: Object = findNearestForecastValue(run, forecast, l_forecasts, maxLeftDifference / 1000, maxRightDifference / 1000);
+//					var ofNearest: Object = null;
+//					for each(var of: Object in l_forecasts) {
+//						
+//						
+//						var currDiff: Number = Math.abs(Duration(of.data).secondsTotal - forecast.secondsTotal);
+//						var nearestDiff: Number = Math.abs(Duration(ofNearest.data).secondsTotal - forecast.secondsTotal)
+//						
+//						if(ofNearest == null || currDiff < nearestDiff) {
+//							ofNearest = of;
+//						}
+//					}
 					if(ofNearest != null) {
 						setWMSDimensionValue(m_cfg.dimensionForecastName, ofNearest.value);
 						dispatchSynchronizedVariableChangeEvent(new SynchronisedVariableChangeEvent(
