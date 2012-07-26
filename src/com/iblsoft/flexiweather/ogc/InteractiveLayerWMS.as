@@ -174,13 +174,14 @@ package com.iblsoft.flexiweather.ogc
 		
 		override public function renderPreview(graphics: Graphics, f_width: Number, f_height: Number): void
 		{
-//			if (m_currentWMSViewProperties)
-//				m_currentWMSViewProperties.renderPreviewWMSData(graphics, f_width, f_height);
 			if (status == InteractiveDataLayer.STATE_DATA_LOADED_WITH_ERRORS || status == InteractiveDataLayer.STATE_NO_DATA_AVAILABLE)
 			{
 				drawNoDataPreview(graphics, f_width, f_height);
 				return;
 			}
+			
+			if (!currentViewProperties)
+				return;
 			
 			var imageParts: ArrayCollection = (currentViewProperties as WMSViewProperties).imageParts;
 			

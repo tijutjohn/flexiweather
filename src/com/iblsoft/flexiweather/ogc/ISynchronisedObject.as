@@ -8,8 +8,8 @@ package com.iblsoft.flexiweather.ogc
 		 */
 		function getSynchronisedVariables(): Array;
 
-		/** Checks whether variable s_variableId can be synchronised have value s_value. */
-		function canSynchronisedVariableWith(s_variableId: String, value: Object): Boolean;
+		/** Checks whether object can be synchronised with variable s_variableId. */
+		function hasSynchronisedVariable(s_variableId: String): Boolean;
 
 		/**
 		 * Returns value of synchronised variable s_variableId.

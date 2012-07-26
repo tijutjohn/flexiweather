@@ -98,6 +98,21 @@ package com.iblsoft.flexiweather.widgets
 			this.container = container;
 		}
 		
+		/**
+		 * Call this function if you want clear layer graphics 
+		 * @param graphics
+		 * 
+		 */		
+		public function clear(graphics: Graphics): void
+		{
+			
+		}
+		
+		/**
+		 * Main draw function. Draw layer data here 
+		 * @param graphics
+		 * 
+		 */		
 		public function draw(graphics: Graphics): void
 		{
 			mb_dynamicPartInvalid = false;

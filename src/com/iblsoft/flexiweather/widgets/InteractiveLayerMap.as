@@ -698,7 +698,7 @@ package com.iblsoft.flexiweather.widgets
             	var so: ISynchronisedObject = l as ISynchronisedObject;
             	if(so == null)
             		continue;
-            	if(so.getSynchronisedVariableValue("frame") == null)
+            	if(!so.hasSynchronisedVariable("frame"))
 					continue;
 				
 				var bSynchronized: Boolean = so.synchroniseWith("frame", newFrame);
