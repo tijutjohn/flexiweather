@@ -641,10 +641,13 @@ package com.iblsoft.flexiweather.ogc.data
 							break;
 						}
 					}
-					setWMSDimensionValue(m_cfg.dimensionTimeName, ISO8601Parser.dateToString(frame));
-					dispatchSynchronizedVariableChangeEvent(new SynchronisedVariableChangeEvent(
-						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, "frame"));
-					return true;
+					if (ofExactForecast != null)
+					{
+						setWMSDimensionValue(m_cfg.dimensionTimeName, ISO8601Parser.dateToString(ofExactForecast.data as Date));
+						dispatchSynchronizedVariableChangeEvent(new SynchronisedVariableChangeEvent(
+							SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, "frame"));
+						return true;
+					}
 				}
 				else if(m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null) {
 					var run: Date = ISO8601Parser.stringToDate(
