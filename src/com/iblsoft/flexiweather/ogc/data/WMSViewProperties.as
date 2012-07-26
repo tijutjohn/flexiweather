@@ -548,7 +548,7 @@ package com.iblsoft.flexiweather.ogc.data
 					return true;
 				}
 			}
-			return null;
+			return false;
 		}
 		
 		public function getSynchronisedVariableValue(s_variableId: String): Object
@@ -680,9 +680,14 @@ package com.iblsoft.flexiweather.ogc.data
 					var a: Array = getSynchronisedVariableValuesList(s_variableId);
 					var best: Date = null;
 					var required: Date = value as Date;
+					var requiredTime: Number = required.time;
+					
+					var leftDist: Number = 1000 * 60 * 60 * 3;
+					var rightDist: Number = 1000 * 60 * 60 * 3;
+					
 					for each(var i: Date in a) {
-						if(i.time >= required.time - 3600000 && i.time <= required.time + 3600000) {   
-							if(best == null || Math.abs(best.time - required.time) > Math.abs(i.time - required.time))
+						if(i.time >= requiredTime - leftDist && i.time <= requiredTime + rightDist) {   
+							if(best == null || Math.abs(best.time - requiredTime) > Math.abs(i.time - requiredTime))
 								best = i;
 						}
 					}
