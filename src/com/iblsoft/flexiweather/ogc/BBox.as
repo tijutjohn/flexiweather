@@ -79,6 +79,14 @@ package com.iblsoft.flexiweather.ogc
 			
 			return minLalo.distanceTo(maxLalo);
 		}
+		
+		public function coordInside(coord: Coord): Boolean
+		{
+			if (coord.x >= mf_xMin && coord.x <= mf_xMax && coord.y >= mf_yMin && coord.y <= mf_yMax)
+				return true;
+			
+			return false;
+		}
 
 
 		public function toBBOXString(): String

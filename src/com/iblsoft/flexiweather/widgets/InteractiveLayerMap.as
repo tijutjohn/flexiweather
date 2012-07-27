@@ -324,7 +324,7 @@ package com.iblsoft.flexiweather.widgets
           	for each(so in l_syncLayers) 
           	{
           		var frame: Date = so.getSynchronisedVariableValue("frame") as Date;
-          		trace("InteractiveLayerMap getSynchronizedFrameValue frame: " + frame);
+//          		trace("getSynchronizedFrameValue frame: " + frame);
           	}
 
 			return frame;

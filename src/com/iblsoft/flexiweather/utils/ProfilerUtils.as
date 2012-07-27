@@ -4,7 +4,7 @@ package com.iblsoft.flexiweather.utils
 
 	public class ProfilerUtils
 	{
-		static public function startProfileTimer(): int
+		static public function startProfileTimer(): Number
 		{
 			return getTimer();
 		}
@@ -14,9 +14,9 @@ package com.iblsoft.flexiweather.utils
 		 * @return 
 		 * 
 		 */		
-		static public function stopProfileTimer(startTime: int): Number
+		static public function stopProfileTimer(startTime: Number): Number
 		{
-			var diff: int = getTimer() - startTime;
+			var diff: Number = getTimer() - startTime;
 			return diff;
 		}
 	}

@@ -76,6 +76,15 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 		
+		public function coordInside(coord: Coord): Boolean
+		{
+			if (coord.crs == ms_crs)
+			{
+				return m_bbox.coordInside(coord);
+			}
+			return false;
+		}
+		
 		public function bboxInCRS(crs: String): BBox
 		{
 			if (ms_crs != crs)

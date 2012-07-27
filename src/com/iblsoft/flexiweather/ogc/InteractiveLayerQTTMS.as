@@ -849,6 +849,9 @@ package com.iblsoft.flexiweather.ogc
 			topRightPoint = container.coordToPoint(new Coord(s_crs, tileBBox.xMax, tileBBox.yMax));
 			bottomLeftPoint = container.coordToPoint(new Coord(s_crs, tileBBox.xMin, tileBBox.yMin));
 			
+			if (!topRightPoint || !topLeftPoint)
+				return;
+			
 			var origNewWidth: Number = topRightPoint.x - topLeftPoint.x;
 			var origNewHeight: Number = bottomLeftPoint.y - topLeftPoint.y;
 			
