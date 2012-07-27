@@ -667,6 +667,20 @@ package com.iblsoft.flexiweather.ogc
 				
 		}
 		
+		/**
+		 * Call this function if you want clear layer graphics 
+		 * @param graphics
+		 * 
+		 */		
+		public override function clear(graphics: Graphics): void
+		{
+			if (!layerWasDestroyed)
+			{
+				super.draw(graphics);
+				
+				graphics.clear();
+			}
+		}
 		
 		public override function draw(graphics: Graphics): void
 		{
@@ -1321,16 +1335,19 @@ package com.iblsoft.flexiweather.ogc
 			return null;
 		}
 
-		public function canSynchronisedVariableWith(s_variable: String, s_value: Object): Boolean
+		public function hasSynchronisedVariable(s_variableId: String): Boolean
 		{
 			if (m_currentWMSViewProperties)
-				return m_currentWMSViewProperties.canSynchronisedVariableWith(s_variable, s_value);
+				return m_currentWMSViewProperties.hasSynchronisedVariable(s_variableId);
 			
 			return false;
 		}
 
 		public function getSynchronisedVariableValue(s_variableId: String): Object
 		{
+			if (status == InteractiveDataLayer.STATE_DATA_LOADED_WITH_ERRORS || status == InteractiveDataLayer.STATE_NO_DATA_AVAILABLE)
+				return null;
+			
 			if (m_currentWMSViewProperties)
 				return m_currentWMSViewProperties.getSynchronisedVariableValue(s_variableId);
 			
@@ -1348,17 +1365,37 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function synchroniseWith(s_variableId: String, s_value: Object): Boolean
 		{
-			//TODO check if there is cached view properties
+			
+			var bIsSyncronized: Boolean;
+			
 			if (isPreloadedWMSDimensionValue(s_variableId, s_value))
 			{
 				var viewProperties: WMSViewProperties = getPreloadedWMSDimensionValue(s_variableId, s_value);
 				if (viewProperties)
 				{
-					return viewProperties.synchroniseWith(s_variableId, s_value);
+					bIsSyncronized = viewProperties.synchroniseWith(s_variableId, s_value);
+					if (!bIsSyncronized)
+					{
+						setStatus(InteractiveDataLayer.STATE_NO_DATA_AVAILABLE);
+						clear(graphics);
+					} else {
+						setStatus(InteractiveDataLayer.STATE_DATA_LOADED);
+					}
+					return bIsSyncronized;
 				}
 			}
 			if (m_currentWMSViewProperties)
-				return m_currentWMSViewProperties.synchroniseWith(s_variableId, s_value);
+			{
+				bIsSyncronized = m_currentWMSViewProperties.synchroniseWith(s_variableId, s_value);
+				if (!bIsSyncronized)
+				{
+					setStatus(InteractiveDataLayer.STATE_NO_DATA_AVAILABLE);
+					clear(graphics);
+				} else {
+					setStatus(InteractiveDataLayer.STATE_DATA_LOADED);
+				}
+				return bIsSyncronized;
+			}
 			
 			return false;
 		}

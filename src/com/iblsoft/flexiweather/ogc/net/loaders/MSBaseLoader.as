@@ -156,8 +156,15 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				//			itemMetadata.url = request;
 				//			itemMetadata.dimensions = dimensions;
 				
-				var isCached: Boolean = wmsCache.isItemCached(wmsViewProperties)
+				var isCached: Boolean = wmsCache.isItemCached(wmsViewProperties, true);
+				
 				var imgTest: DisplayObject = wmsCache.getCacheItemBitmap(wmsViewProperties);
+				if (isCached && imgTest == null) {
+					//is cached, but no data, do not load anything (it's data which was loaded before, but exception was returned, so we cached this info
+					// invalidate property "displayed" for cached items		
+					wmsCache.removeFromScreen();
+					return;
+				}
 				if (isCached && imgTest != null) {
 					img = imgTest;
 				}
@@ -357,7 +364,43 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				//		super.onDataLoadFailed(event);
 				var wmsViewProperties: WMSViewProperties = event.associatedData.wmsViewProperties;
 				
-				m_layer.getCache().addCacheNoDataItem(wmsViewProperties);
+				
+				//FIXME check if this is ServiceException "InvalidDimensionValue" and add information to cachec "somehow" to do not load it when looping animation
+				/**
+				 *
+				 * <ServiceExceptionReport version="1.3.0">
+				 * 	<ServiceException code="InvalidDimensionValue">
+				 * 		Failed to apply value '2012-05-29T00:00:00Z' to dimension 'time'
+				 *	 </ServiceException>
+				 * </ServiceExceptionReport>
+				 *
+				 */
+				
+				var associatedData: Object = event.associatedData;
+				
+				if (associatedData.errorResult)
+				{
+					var xml: XML = associatedData.errorResult;
+					if (xml.localName() == "ServiceExceptionReport")
+					{
+						var serviceException: XML = xml.children()[0] as XML;
+						if (serviceException.localName() == "ServiceException" && serviceException.hasOwnProperty("@code") && serviceException.@code == "InvalidDimensionValue")
+						{
+							var exceptionText: String = serviceException.text();
+							if (exceptionText.indexOf('Failed to apply value') == 0)
+							{
+								var arr: Array = exceptionText.split("'");
+								var timeString: String =  arr[1];
+								var dimension: String = arr[3];
+								
+								m_layer.getCache().addCacheNoDataItem(wmsViewProperties);
+							}
+						}
+						
+					}
+					
+				}
+				
 				
 				var imagePart: ImagePart = event.associatedData.requestedImagePart;
 				imagePart.m_image = null;

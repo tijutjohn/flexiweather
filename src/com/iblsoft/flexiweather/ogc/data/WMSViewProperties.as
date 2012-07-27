@@ -538,8 +538,16 @@ package com.iblsoft.flexiweather.ogc.data
 			return a;
 		}
 		
-		public function canSynchronisedVariableWith(s_variable: String, value: Object): Boolean
+		public function hasSynchronisedVariable(s_variableId: String): Boolean
 		{
+			if(s_variableId == "frame") {
+				if(m_cfg.dimensionTimeName != null) {
+					return true;
+				}
+				else if(m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null) {
+					return true;
+				}
+			}
 			return false;
 		}
 		
@@ -614,34 +622,48 @@ package com.iblsoft.flexiweather.ogc.data
 			else
 				return null;
 		}
-		
-		public function synchroniseWith(s_variableId: String, value: Object): Boolean
+	
+		public function exactlySynchroniseWith(s_variableId: String, value: Object): Boolean
 		{
 			if(s_variableId == "frame") {
+				
+				var ofExactForecast: Object = null;
+				var of: Object;
+				
 				if(m_cfg.dimensionTimeName != null) {
 					var frame: Date = value as Date;
 					// TODO: interpolation vs. find nearest value?
-					setWMSDimensionValue(m_cfg.dimensionTimeName, ISO8601Parser.dateToString(frame));
-					dispatchSynchronizedVariableChangeEvent(new SynchronisedVariableChangeEvent(
-						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, "frame"));
-					return true;
+					var l_times: Array = getWMSDimensionsValues(m_cfg.dimensionTimeName);
+					ofExactForecast = null;
+					for each(of in l_times) {
+						if((of.data as Date).time == frame.time) {
+							ofExactForecast = of;
+							break;
+						}
+					}
+					if (ofExactForecast != null)
+					{
+						setWMSDimensionValue(m_cfg.dimensionTimeName, ISO8601Parser.dateToString(ofExactForecast.data as Date));
+						dispatchSynchronizedVariableChangeEvent(new SynchronisedVariableChangeEvent(
+							SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, "frame"));
+						return true;
+					}
 				}
 				else if(m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null) {
 					var run: Date = ISO8601Parser.stringToDate(
 						getWMSDimensionValue(m_cfg.dimensionRunName, true));
 					var forecast: Duration = new Duration(((value as Date).time - run.time) / 1000.0);
 					var l_forecasts: Array = getWMSDimensionsValues(m_cfg.dimensionForecastName);
-					// TODO: interpolation vs. find nearest value?
-					var ofNearest: Object = null;
-					for each(var of: Object in l_forecasts) {
-						if(ofNearest == null ||
-							Math.abs(Duration(of.data).secondsTotal - forecast.secondsTotal)
-							< Math.abs(Duration(ofNearest.data).secondsTotal - forecast.secondsTotal)) {
-							ofNearest = of;
+					ofExactForecast = null;
+					
+					for each(of in l_forecasts) {
+						if(Duration(of.data).secondsTotal == forecast.secondsTotal) {
+							ofExactForecast = of;
+							break; 
 						}
 					}
-					if(ofNearest != null) {
-						setWMSDimensionValue(m_cfg.dimensionForecastName, ofNearest.value);
+					if(ofExactForecast != null) {
+						setWMSDimensionValue(m_cfg.dimensionForecastName, ofExactForecast.value);
 						dispatchSynchronizedVariableChangeEvent(new SynchronisedVariableChangeEvent(
 							SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, "frame"));
 						return true;
@@ -649,6 +671,32 @@ package com.iblsoft.flexiweather.ogc.data
 				}
 			}
 			return false;
+		}
+
+		public function synchroniseWith(s_variableId: String, value: Object): Boolean
+		{
+			if(s_variableId == "frame") {
+				if(!exactlySynchroniseWith(s_variableId, value)) {
+					var a: Array = getSynchronisedVariableValuesList(s_variableId);
+					var best: Date = null;
+					var required: Date = value as Date;
+					var requiredTime: Number = required.time;
+					
+					var leftDist: Number = 1000 * 60 * 60 * 3;
+					var rightDist: Number = 1000 * 60 * 60 * 3;
+					
+					for each(var i: Date in a) {
+						if(i.time >= requiredTime - leftDist && i.time <= requiredTime + rightDist) {   
+							if(best == null || Math.abs(best.time - requiredTime) > Math.abs(i.time - requiredTime))
+								best = i;
+						}
+					}
+					if(best == null)
+						return false;
+					return exactlySynchroniseWith(s_variableId, best);
+				}
+			}
+			return exactlySynchroniseWith(s_variableId, value);
 		}
 		
 		private function dispatchSynchronizedVariableChangeEvent(event: SynchronisedVariableChangeEvent): void

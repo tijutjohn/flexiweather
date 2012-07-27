@@ -281,8 +281,11 @@ package com.iblsoft.flexiweather.widgets
 			var grp: Group = m_groupDictionary[layer];
 			return grp;
 		}
-		public function clear(): void
+		
+		public override function clear(graphics:Graphics):void
 		{
+			super.clear(graphics);
+			
 			graphics.clear();
 		}
 		

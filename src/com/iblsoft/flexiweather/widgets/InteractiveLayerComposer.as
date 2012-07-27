@@ -44,8 +44,6 @@ package com.iblsoft.flexiweather.widgets
 
 		private function notifyLayersChanged(layer: InteractiveLayer = null): void
 		{
-			//TODO remove return from notifyLayersChanged
-//			return;
 			if (layer)
 			{
 				m_layers.itemUpdated(layer);	

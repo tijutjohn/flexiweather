@@ -112,14 +112,19 @@ package com.iblsoft.flexiweather.widgets
 		public static const STATE_EMPTY: String = 'empty';
 		
 		/**
-		 * Loading data layer state. It is set on LOADING_STARTED event.
+		 * STATE_LOADING_DATA
 		 */		
 		public static const STATE_LOADING_DATA: String = 'loading data';
 		
 		/**
-		 * Loading data layer state. It is set on LOADING_FINISHED event.
+		 * STATE_DATA_LOADED.
 		 */		
 		public static const STATE_DATA_LOADED: String = 'data loaded';
+		
+		/**
+		 * STATE_NO_DATA_AVAILABLE.
+		 */		
+		public static const STATE_NO_DATA_AVAILABLE: String = 'no data available';
 
 		/**
 		 * Layer state where some of data are loaded, but some data are not loaded because of error. E.g. Loading 50 tiles, but some tiles are not loaded (no returned from server).
@@ -223,7 +228,7 @@ package com.iblsoft.flexiweather.widgets
 		protected function setStatus(newStatus: String): void
 		{
 			_status = newStatus;
-			dispatchEvent(new Event("statusChanged"));
+			dispatchEvent(new Event(STATUS_CHANGED));
 		}
 		
 		/**

@@ -233,6 +233,13 @@ package com.iblsoft.flexiweather.ogc.cache
 			
 			var s_key: String = qetWMSViewCacheKey(wmsViewProperties);
 			
+			if (b_checkNoDataCache)
+			{
+				if (md_noDataCache[s_key])
+				{
+					return true;
+				}
+			}
 			return md_cache[s_key] || md_cacheLoading[s_key];
 		}
 		

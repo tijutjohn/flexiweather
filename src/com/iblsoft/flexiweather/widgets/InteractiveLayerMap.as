@@ -615,6 +615,26 @@ package com.iblsoft.flexiweather.widgets
           	return nowFrame;
 		}
 		
+		public function get  canAnimate(): Boolean
+		{
+			var l_syncLayers: Array = [];
+			var l_timeAxis: Array = enumTimeAxis(l_syncLayers);
+			if(l_timeAxis == null) // no time axis
+				return false;
+			
+			var i: int;
+			var so: ISynchronisedObject;
+			
+			var i_currentIndex: int = -1; 
+			for each(so in l_syncLayers) 
+			{
+				var status: String = InteractiveDataLayer(so).status;
+				if (status == InteractiveDataLayer.STATE_LOADING_DATA)
+					return false;
+			}
+			return true;
+		}
+		
 		public function moveFrame(i_offset: int): Boolean
 		{
 			var l_syncLayers: Array = [];
@@ -624,11 +644,6 @@ package com.iblsoft.flexiweather.widgets
 
 			var i: int;
 			var so: ISynchronisedObject;
-
-			/*trace("InteractiveLayerComposer.moveFrame(): Overall timeaxis:");
-       		for(i = 0; i < l_timeAxis.length; ++i) {
-       			trace("  " + ISO8601Parser.dateToString(l_timeAxis[i]));
-       		}*/
 
 			var i_currentIndex: int = -1; 
           	for each(so in l_syncLayers) {
@@ -698,11 +713,15 @@ package com.iblsoft.flexiweather.widgets
             	var so: ISynchronisedObject = l as ISynchronisedObject;
             	if(so == null)
             		continue;
-            	if(so.getSynchronisedVariableValue("frame") == null)
-            		continue;
-          		if(so.synchroniseWith("frame", newFrame))
+            	if(!so.hasSynchronisedVariable("frame"))
+					continue;
+				
+				var bSynchronized: Boolean = so.synchroniseWith("frame", newFrame);
+          		if(bSynchronized)
 				{
           			l.refresh(false);
+				} else {
+					trace("InteractiveLayerMap setFrame ["+newFrame.toTimeString()+"] FRAME NOT FOUND for "+l.name);
 				}
           	}
           	return true;
