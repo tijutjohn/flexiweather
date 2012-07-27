@@ -991,10 +991,26 @@ package com.iblsoft.flexiweather.ogc
 			
 			
 			var matrix: Matrix  = new Matrix();
-			matrix.translate(-f_width / 3, -f_width / 3);
-			matrix.scale(3, 3);
-			matrix.translate(width / 3, height / 3);
-			matrix.invert();
+//			matrix.translate(-f_width / 3, -f_width / 3);
+//			matrix.scale(3, 3);
+//			matrix.translate(width / 3, height / 3);
+//			matrix.invert();
+			
+			
+			var scaleW: Number = f_width / width;
+			var scaleH: Number = f_height / height;
+			var scale: Number = Math.max(scaleW, scaleH);
+			
+			scale = Math.min(scale * 2, 1);
+			
+			var nw: Number = width * scale;
+			var nh: Number = height * scale;
+			var xDiff: Number = (nw - f_width) / 2;
+			var yDiff: Number = (nh - f_height) / 2;
+			
+			matrix.scale(scale, scale);
+			matrix.translate(-xDiff, -yDiff);
+			
 			var bd: BitmapData = new BitmapData(width, height, true, 0x00000000);
 			bd.draw(this);
 			

@@ -23,6 +23,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.display.Bitmap;
+	import flash.display.BitmapData;
 	import flash.display.Graphics;
 	import flash.events.TimerEvent;
 	import flash.geom.Matrix;
@@ -172,8 +173,21 @@ package com.iblsoft.flexiweather.ogc
 		override public function hasPreview(): Boolean
 		{ return true; }
 		
+		public override function invalidateSize(): void
+		{
+			super.invalidateSize();
+			if (container != null)
+			{
+				width = container.width;
+				height = container.height;
+			}
+		}
+		
 		override public function renderPreview(graphics: Graphics, f_width: Number, f_height: Number): void
 		{
+			if(!width || !height)
+				return;
+			
 			if (status == InteractiveDataLayer.STATE_DATA_LOADED_WITH_ERRORS || status == InteractiveDataLayer.STATE_NO_DATA_AVAILABLE)
 			{
 				drawNoDataPreview(graphics, f_width, f_height);
@@ -186,6 +200,7 @@ package com.iblsoft.flexiweather.ogc
 			var imageParts: ArrayCollection = (currentViewProperties as WMSViewProperties).imageParts;
 			
 			var imagePart: ImagePart;
+			
 			if(imageParts.length > 0) {
 				var matrix: Matrix = new Matrix();
 				imagePart = ImagePart(imageParts[0]);
@@ -198,13 +213,35 @@ package com.iblsoft.flexiweather.ogc
 				}
 				
 				
-				matrix.translate(-f_width / 3, -f_width / 3);
-				matrix.scale(3, 3);
-				matrix.translate(imagePart.m_image.width / 3, imagePart.m_image.height / 3);
-				matrix.invert();
-				graphics.beginBitmapFill(bitmap.bitmapData, matrix, false, true);
-				graphics.drawRect(0, 0, f_width, f_height);
+//				matrix.translate(-f_width / 3, -f_width / 3);
+//				matrix.scale(3, 3);
+//				matrix.translate(imagePart.m_image.width / 3, imagePart.m_image.height / 3);
+//				matrix.invert();
+				
+				var scaleW: Number = f_width / width;
+				var scaleH: Number = f_height / height;
+				var scale: Number = Math.max(scaleW, scaleH);
+				
+				scale = Math.min(scale * 2, 1);
+				
+				var nw: Number = width * scale;
+				var nh: Number = height * scale;
+				var xDiff: Number = (nw - f_width) / 2;
+				var yDiff: Number = (nh - f_height) / 2;
+				
+				matrix.scale(scale, scale);
+				matrix.translate(-xDiff, -yDiff);
+				
+				var bd: BitmapData = new BitmapData(width, height, true, 0x00000000);
+				bd.draw(this);
+				
+				graphics.beginBitmapFill(bd, matrix, false, true);
+				graphics.drawRect(0,0, f_width, f_height);
 				graphics.endFill();
+				
+//				graphics.beginBitmapFill(bitmap.bitmapData, matrix, false, true);
+//				graphics.drawRect(0, 0, f_width, f_height);
+//				graphics.endFill();
 			}
 			
 			var b_allImagesOK: Boolean = true;
