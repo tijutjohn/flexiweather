@@ -4,9 +4,9 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 	
 	public class KMLParserManager extends AsyncManager
 	{
-		public function KMLParserManager()
+		public function KMLParserManager(name: String = '')
 		{
-			super();
+			super(name);
 		}
 		
 		override public function addCall(obj: Object, callback: Function, arguments: Array): void

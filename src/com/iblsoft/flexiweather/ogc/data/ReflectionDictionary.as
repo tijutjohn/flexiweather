@@ -42,6 +42,13 @@ package com.iblsoft.flexiweather.ogc.data
 			return new ReflectionData(_iw);
 		}
 		
+		public function destroy(): void
+		{
+			for each (var reflection: ReflectionData in _dictionary)
+			{
+				reflection.remove();
+			}
+		}
 		public function cleanup(): void
 		{
 			for each (var reflection: ReflectionData in _dictionary)

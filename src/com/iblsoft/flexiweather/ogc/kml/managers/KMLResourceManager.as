@@ -26,6 +26,8 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 		
 		public static var debugConsole: IConsole;
 		
+		public static var reuseKMLLabels: Boolean = false;
+		
 		private var _cache: ResourceCache;
 		private var _kmzFiles: Dictionary;
 		
@@ -278,12 +280,25 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 		private var _kmlLabels: Array = [];
 		public function pushKMLLabel(label: KMLLabel): void
 		{
-			_kmlLabels.push(label);	
+			if (!reuseKMLLabels)
+			{
+				label.cleanup();
+				label = null;
+			} else {		
+				label.invalidate();
+				_kmlLabels.push(label);
+			}
 		}
 		
 		public function getKMLLabel(): KMLLabel
 		{
-			var label: KMLLabel = popKMLLabel();
+			var label: KMLLabel;
+			
+			if (reuseKMLLabels)
+			{
+				label = popKMLLabel();
+			}
+			
 			if (!label)
 				label = new KMLLabel();
 			

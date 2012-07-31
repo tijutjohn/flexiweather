@@ -47,9 +47,11 @@ package com.iblsoft.flexiweather.utils
 		 */		
 		public var data: Object;
 		
-		public function AsyncManager()
+		public function AsyncManager(name: String)
 		{
 			_uid = _counter++;
+			
+			this.name = name;
 			
 			init();
 		}

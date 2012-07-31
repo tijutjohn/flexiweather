@@ -44,6 +44,7 @@ package com.iblsoft.flexiweather.ogc.data
 		{
 			_coords = null;
 			_points = null;
+			displaySprite = null;
 		}
 		public function cleanup(): void
 		{

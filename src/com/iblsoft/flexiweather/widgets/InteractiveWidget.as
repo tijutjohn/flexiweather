@@ -482,21 +482,13 @@ package com.iblsoft.flexiweather.widgets
 			}
 
 			//TODO: uncomment next if statement if you want display label layout placement bitmap
-			/*
-			if (m_labelLayout.m_placementBitmap)
-			{
-				g.beginBitmapFill(m_labelLayout.m_placementBitmap);
-				g.drawRect(0, 0, m_labelLayout.m_placementBitmap.width, m_labelLayout.m_placementBitmap.height);
-				g.endFill();
-			}
-			*/
-			
-			/*if(m_objectLayout.m_placementBitmap) {
-				g.beginBitmapFill(m_objectLayout.m_placementBitmap);
-				g.drawRect(0, 0, m_objectLayout.m_placementBitmap.width, m_objectLayout.m_placementBitmap.height);
-				g.endFill();
-			}*/
 
+			if (m_labelLayout.m_placementBitmap)
+				m_labelLayout.drawDebugPlacementBitmap(g);
+			if(m_objectLayout.m_placementBitmap)
+				m_objectLayout.drawDebugPlacementBitmap(g);
+
+			
             super.updateDisplayList(unscaledWidth, unscaledHeight);
         }
 

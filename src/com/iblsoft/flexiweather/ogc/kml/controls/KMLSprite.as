@@ -23,6 +23,11 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 		public function set kmlLabel(value:KMLLabel):void
 		{
 			_kmlLabel = value;
+			
+//			if (value)
+//				trace("KMLSprite ["+_id+"] new label " + value.id + " text: " + value.text);
+//			else
+//				trace("KMLSprite ["+_id+"] NO label ");
 		}
 
 		override public function set visible(value:Boolean):void
@@ -45,11 +50,30 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 //				trace("KMLSprite.y = " + value);
 			_feature.notifyPositionChange();
 		}
+		
+		
+		private static var uid: int =  0;
+		private var  _id: int;
+		public function get id(): int
+		{
+			return _id;
+		}
+		
 		public function KMLSprite(feature: KMLFeature, forReflection: uint = 0)
 		{
 			super();
 			reflection = forReflection;
 			_feature = feature
+				
+			_id = ++uid;
+		}
+		
+		public function cleanup(): void
+		{
+			_kmlLabel = null;
+			_feature = null
+			_anticollisionLayoutObject = null;
+			
 		}
 		
 		public function set anticollisionLayoutObject(object:AnticollisionLayoutObject):void

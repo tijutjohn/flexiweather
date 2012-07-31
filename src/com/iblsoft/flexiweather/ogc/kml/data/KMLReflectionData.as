@@ -13,5 +13,11 @@
 			super(iw);
 		}
 		
+		override public function remove():void
+		{
+			super.remove();	
+			feature = null;
+		}
+		
 	}
 }

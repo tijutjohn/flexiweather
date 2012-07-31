@@ -43,7 +43,7 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 		{
 			super.x = value;
 //			if (reflection == 0)
-//				trace("KMLLabel["+_id+"].x = " + value);
+//				trace("KMLLabel["+_id+"].x = " + value + " _text: " + _text);
 		}
 		override public function set y(value:Number):void
 		{
@@ -58,6 +58,10 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 		private var _txt: TextField;
 		
 		private var _text: String;
+		public function get textfield(): TextField
+		{
+			return _txt;
+		}
 		public function get text():String
 		{
 			return _text;
@@ -71,6 +75,10 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 		
 		private static var uid: int =  0;
 		private var  _id: int;
+		public function get id(): int
+		{
+			return _id;
+		}
 		public function KMLLabel()
 		{
 			super();
@@ -88,10 +96,22 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 		
 		public function cleanup(): void
 		{
-			removeChild(_txt);
-			_txt = null;
+			if (_txt)
+			{
+				removeChild(_txt);
+				_txt = null;
+			}
 		}
 		
+		public function invalidate(): void
+		{
+			_text = '';
+			if (_txt)
+			{
+				_txt.text = '';
+			}
+			updateTextFormat();	
+		}
 		private function updateLabel(): void
 		{
 			if (!_txt)
@@ -144,8 +164,8 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 				format.color = _color;
 				format.size = int (14 * _scale)
 				format.bold = true;
-				format.font = labelFont;
-				_txt.embedFonts = true;
+//				format.font = labelFont;
+//				_txt.embedFonts = true;
 				_txt.setTextFormat(format);
 			}
 			

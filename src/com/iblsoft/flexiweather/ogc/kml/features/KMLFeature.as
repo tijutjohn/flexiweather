@@ -416,9 +416,10 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		
 		protected function cleanupKMLLabel(): void
 		{
-			if (_kmlLabel && _kmlLabel.parent)
+			if (_kmlLabel)
 			{
-				_kmlLabel.parent.removeChild(_kmlLabel);
+				if (_kmlLabel.parent)
+					_kmlLabel.parent.removeChild(_kmlLabel);
 				_kmlLabel.cleanup();
 				_kmlLabel = null;
 			}
@@ -430,7 +431,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			_kmlLabel = kml.resourceManager.getKMLLabel();
 			_kmlLabel.visible = true;
 			
-			trace("KMLFeature createKMLLabel: " + _kmlLabel.text);
+			trace("\t KMLFeature createKMLLabel ["+_kmlLabel.id+"]: " + _kmlLabel.text);
 			
 			_kmlLabel.reflection = (parent as KMLSprite).reflection;
 //			parent.addChild(_kmlLabel);
@@ -477,15 +478,24 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				{
 					reflection = kmlReflectionDictionary.getReflection(i) as KMLReflectionData;
 					kmlSprite = reflection.displaySprite as KMLSprite;
-					kmlLabel = kmlSprite.kmlLabel;
-					master.container.labelLayout.removeObject(reflection.displaySprite);
-					master.container.labelLayout.removeObject(kmlLabel);
+					if (kmlSprite)
+					{
+						kmlLabel = kmlSprite.kmlLabel;
+						master.container.labelLayout.removeObject(reflection.displaySprite);
+						master.container.labelLayout.removeObject(kmlLabel);
+						
+						if (kmlSprite.parent)
+						{
+							kmlSprite.parent.removeChild(kmlSprite); 
+						}
+					}
 				}
 				
 //				master.container.labelLayout.removeObject(this);
 //				master.container.labelLayout.removeObject(_kmlLabel);
 				
 				master.container.objectLayout.removeObject(this);
+				
 			}
 			
 			_itemRendererInstance = null;

@@ -122,9 +122,9 @@ package com.iblsoft.flexiweather.ogc.kml
 			super.createChildren();
 			
 			if (!_syncManager)
-				_syncManager = new AsyncManager();
+				_syncManager = new AsyncManager('syncManager');
 			if (!_syncManagerFullUpdate)
-				_syncManagerFullUpdate = new AsyncManager();
+				_syncManagerFullUpdate = new AsyncManager('fullSyncManager');
 			
 		}
 		
@@ -499,28 +499,11 @@ package com.iblsoft.flexiweather.ogc.kml
 		{
 			var startFeature: KMLFeature = feature
 			var nl: NetworkLink;
-//			trace("START OF updateForFeature: " + startFeature);
+			
+			trace("updateForFeature asyncManager: " + asyncManager.name + " fncName: updateFeature changeFlag: " + changeFlag.fullUpdateNeeded);
 			while (feature)
 			{
-//				trace("updateForFeature: " + feature);
-//				if (feature is NetworkLink)
-//				{
-//					nl = feature as NetworkLink;
-//					feature = nl.container.features[0] as KMLFeature
-//					if (!feature)
-//						continue;
-//					trace("\t NL.parent + " + nl.parent + " container.parent: " +  nl.container.parent);
-//				}
-//				if (feature.parent) {
-//					trace("HAS PARENT: " + feature.name);
-//				if (feature is Folder)
-//				{
-//					trace("stop");
-//				}
 				asyncManager.addCall(feature, updateFeature, [feature, changeFlag, asyncManager]);
-//				} else {
-//					trace("ILKML update -> feature is not on displaylist, do not do updateFeature");
-//				}
 				if (feature is NetworkLink)
 				{
 					updateForFeature((feature as NetworkLink).container.firstFeature, changeFlag, asyncManager);
@@ -529,43 +512,12 @@ package com.iblsoft.flexiweather.ogc.kml
 				{
 					updateForFeature((feature as Container).firstFeature, changeFlag, asyncManager);
 				}
-//				if (feature.next is Folder)
-//				{
-//					trace("stop");
-//				}
 				feature = feature.next as KMLFeature;
 			}
-//			trace("END OF updateForFeature:  " + startFeature);
 		}
 		
-		/*
-		private function semiUpdateForFeature(feature: KMLFeature, changeFlag: FeatureUpdateContext): void
-		{
-			var nl: NetworkLink;
-			
-			var cnt: int = 0;
-			while (feature)
-			{
-//				if (feature is NetworkLink)
-//				{
-//					nl = feature as NetworkLink;
-//					feature = nl.container.features[0] as KMLFeature
-//					
-//					if (!feature)
-//						continue;
-//					trace("\t NL.parent + " + nl.parent + " container.parent: " +  nl.container.parent);
-//				}
-				
-				asyncManager.addCall(feature, updateFeature, [feature, changeFlag]);
-				feature = feature.next as KMLFeature;
-				cnt++;
-			}
-		}
-		*/
 		public function update(changeFlag: FeatureUpdateContext): void
 		{
-//			trace("KML layer draw: " + features.length);
-			
 			m_boundaryRect = new Rectangle(0,0,width, height);
 			
 			var time: int;
@@ -576,7 +528,6 @@ package com.iblsoft.flexiweather.ogc.kml
 				_syncManagerFullUpdate.removeEventListener(AsyncManager.EMPTY, onFullUpdateFinished);
 				_syncManagerFullUpdate.stop();
 				_syncManagerFullUpdate.maxCallsPerTick = 30;
-//				trace("FULL UPDATE");
 				time = ProfilerUtils.startProfileTimer();
 				
 				updateForFeature(firstFeature as KMLFeature, changeFlag, _syncManagerFullUpdate);
@@ -612,7 +563,7 @@ package com.iblsoft.flexiweather.ogc.kml
 		
 		private function updateFeature(feature:  KMLFeature, changeFlag: FeatureUpdateContext, asyncManager: AsyncManager): void
 		{
-//			trace("updateFeature: " + feature);
+			trace("updateFeature: " + feature.name + " isFullUpdate: " + changeFlag.fullUpdateNeeded);
 			
 			var viewBBox: BBox = container.getViewBBox();
 //			if (viewBBox.pointInside(feature.x, feature.y))
@@ -681,7 +632,13 @@ package com.iblsoft.flexiweather.ogc.kml
 			//FIXME this should not be called if panning or zooming is still in progress
 			
 			//invalidateDynamicPart();
-			callLater(isUpdateNeeded);	
+			if (features && features.length > 0)
+			{
+				callLater(isUpdateNeeded);
+//				callLater(update, [new FeatureUpdateContext(FeatureUpdateContext.FULL_UPDATE)]);
+			} else {
+				callLater(isUpdateNeeded);
+			}
 		}
 		
 		public var kmlFeatureScaleX: Number = 1;

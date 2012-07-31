@@ -53,6 +53,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 	{
 		public static const ANTICOLLISTION_UPDATED: String = 'anticollisionUpdated';
 		
+		public static var drawDebugMap: Boolean = false;
 		/**
 		 * Debug variable to test how many objects needs to be layouted 
 		 */		
@@ -187,6 +188,21 @@ package com.iblsoft.flexiweather.utils.anticollision
 		}
 
 		/**
+		 * This is just debug function 
+		 * @param object
+		 * @return 
+		 * 
+		 */		
+		public function isObjectInside(object: DisplayObject): Boolean
+		{
+			for each (var lo:AnticollisionLayoutObject in ma_layoutObjects)
+			{
+				if (lo.object == object)
+					return true;
+			}
+			return false;
+		}
+		/**
 		 * Add a displaceble object to the layout. By default any displace is allowed
 		 * and object is added as the child to the layout.
 		 **/
@@ -215,7 +231,14 @@ package com.iblsoft.flexiweather.utils.anticollision
 			ma_layoutObjects.addItem(lo);
 			updateLayoutObjectsLength();
 			
-			trace(this + " addObject => length: " + ma_layoutObjects.length);
+			var objName: String = '';
+			var instanceName: String = '';
+			if (object is KMLLabel)
+			{
+				objName = (object as KMLLabel).text;
+				instanceName = (object as KMLLabel).name;
+			}
+			trace(this + " addObject ["+instanceName+"/"+objName+"] => length: " + ma_layoutObjects.length);
 			
 			if (object is IAnticollisionLayoutObject)
 			{
@@ -248,6 +271,18 @@ package com.iblsoft.flexiweather.utils.anticollision
 					ma_layoutObjects.removeItemAt(i);
 					updateLayoutObjectsLength();
 					setDirty();
+					
+					//FIXME remove this part of codem it's just debug code
+					var objName: String = '';
+					var instanceName: String = '';
+					if (object is KMLLabel)
+					{
+						objName = (object as KMLLabel).text;
+						instanceName = (object as KMLLabel).name;
+					}
+					trace(this + " removeObject ["+instanceName+"/"+objName+"] => length: " + ma_layoutObjects.length);
+					
+					
 					return true;
 				}
 			}
@@ -952,7 +987,15 @@ package com.iblsoft.flexiweather.utils.anticollision
 			return false;
 		}
 
-
+		public function drawDebugPlacementBitmap(g: Graphics): void
+		{
+			if (drawDebugMap)
+			{
+				g.beginBitmapFill(m_placementBitmap);
+				g.drawRect(0, 0, m_placementBitmap.width, m_placementBitmap.height);
+				g.endFill();
+			}
+		}
 	}
 }
 import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayout;

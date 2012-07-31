@@ -103,6 +103,36 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			
 			trace("Placemark cleanup");
 			
+			
+			var totalReflections: int = kmlReflectionDictionary.totalReflections;
+			var kmlSprite: KMLSprite;
+			
+			for (var i: int = 0; i < totalReflections; i++)
+			{
+				var kmlReflection: KMLReflectionData = kmlReflectionDictionary.getReflection(i) as KMLReflectionData;
+				if (kmlReflection)
+				{
+					kmlSprite = kmlReflection.displaySprite as KMLSprite; 
+						
+					if (kmlSprite)
+					{
+						if (kmlSprite.kmlLabel)
+						{
+							if ( kmlSprite.kmlLabel.anticollisionLayoutObject)
+								removeLabelFromAnticollisionLayout(kmlSprite.kmlLabel);
+							
+							kmlSprite.kmlLabel.cleanup();
+						}
+						kmlSprite.cleanup();
+					}
+					
+					kmlReflection.remove();
+				}
+			}
+			
+			kmlReflectionDictionary.destroy();
+			_kmlReflectionDictionary = null;
+			
 			if (_geometry)
 			{
 				_geometry.cleanupKML();
@@ -113,6 +143,9 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				_multigeometry.cleanupKML();
 				_multigeometry = null;
 			}
+			
+			
+			
 			
 		}
 		override protected function parseKML(s_namespace: String, kmlParserManager: KMLParserManager): void
@@ -240,6 +273,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			{
 				kmlSprite.kmlLabel = super.createKMLLabel(kmlSprite);
 			}
+//			trace("\t Placemark createKMLLabel ["+kmlSprite.kmlLabel.id+"]: " + kmlSprite.kmlLabel.text);
 			
 			return kmlSprite.kmlLabel;
 			
@@ -334,11 +368,22 @@ package com.iblsoft.flexiweather.ogc.kml.features
 								createKMLLabel(kmlSprite);
 							
 								kmlSprite.kmlLabel.text = name;
+								
+//								trace("\t Placemark createKMLLabel and change name ["+kmlSprite.kmlLabel.id+"]: " + kmlSprite.kmlLabel.text);
+								
 								labelsCreation = true;	
 							}
 							
-							trace("Placemark ["+i+"/"+name+"] label: " + kmlSprite.kmlLabel.text + " position: " + iconPoint);
+//							trace("Placemark ["+i+"/"+name+"] label: " + kmlSprite.kmlLabel.text + " position: " + iconPoint);
+//							trace("\tPlacemark ["+i+"/"+name+"] ["+kmlSprite.x + "/"+kmlSprite.y+"] kmlSprite.kmlLabel.anticollisionLayoutObject: " + (kmlSprite.kmlLabel.anticollisionLayoutObject != null) + " isInside: " + labelLayout.isObjectInside(kmlSprite.kmlLabel) + " visible: " + kmlSprite.kmlLabel.visible);
 							
+//							if (kmlSprite.kmlLabel.textfield)
+//								trace("text: " + kmlSprite.kmlLabel.text + " tf: " + kmlSprite.kmlLabel.textfield.text);
+							
+							if (!kmlSprite.kmlLabel.visible)
+							{
+								kmlSprite.kmlLabel.visible = true;
+							}
 							if (master && kmlSprite.kmlLabel && !kmlSprite.kmlLabel.anticollisionLayoutObject)
 							{
 								addLabelToAnticollisionLayout (kmlSprite.kmlLabel);
