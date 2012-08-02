@@ -500,7 +500,7 @@ package com.iblsoft.flexiweather.ogc.kml
 			var startFeature: KMLFeature = feature
 			var nl: NetworkLink;
 			
-			trace("updateForFeature asyncManager: " + asyncManager.name + " fncName: updateFeature changeFlag: " + changeFlag.fullUpdateNeeded);
+//			trace("updateForFeature asyncManager: " + asyncManager.name + " fncName: updateFeature changeFlag: " + changeFlag.fullUpdateNeeded);
 			while (feature)
 			{
 				asyncManager.addCall(feature, updateFeature, [feature, changeFlag, asyncManager]);
@@ -563,7 +563,7 @@ package com.iblsoft.flexiweather.ogc.kml
 		
 		private function updateFeature(feature:  KMLFeature, changeFlag: FeatureUpdateContext, asyncManager: AsyncManager): void
 		{
-			trace("updateFeature: " + feature.name + " isFullUpdate: " + changeFlag.fullUpdateNeeded);
+//			trace("updateFeature: " + feature.name + " isFullUpdate: " + changeFlag.fullUpdateNeeded);
 			
 			var viewBBox: BBox = container.getViewBBox();
 //			if (viewBBox.pointInside(feature.x, feature.y))

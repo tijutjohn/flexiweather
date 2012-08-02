@@ -32,7 +32,12 @@ package com.iblsoft.flexiweather.ogc.kml.features.styles
 				_alpha = _alpha / 255;
 				
 				//color is stored as  aabbggrr
-				colorStr = colorStr.substr(0,2)+colorStr.substr(6,2)+colorStr.substr(4,2)+colorStr.substr(2,2);
+				if (colorStr.substr(6,2) != '00' && colorStr.substr(4,2) == '00' && colorStr.substr(2,2) == '00')
+				{
+					trace("RED COLOR");
+				}
+//				colorStr = colorStr.substr(0,2)+colorStr.substr(6,2)+colorStr.substr(4,2)+colorStr.substr(2,2);
+				colorStr = colorStr.substr(6,2)+colorStr.substr(4,2)+colorStr.substr(2,2);
 				this._color  = parseInt("0x"+colorStr);
 			}
 			this._colorMode  = ParsingTools.nullCheck(this.xml.kmlns::colorMode);

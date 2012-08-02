@@ -43,6 +43,22 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		private var _geometry:Geometry;
 		private var _multigeometry:Geometry;
 		
+		override public function set x(value:Number):void
+		{
+			super.x = value;
+			trace("Placemark : " + name + " X pos ["+x+","+y+"]");
+		}
+		override public function set y(value:Number):void
+		{
+			super.y = value;
+			trace("Placemark : " + name + " Y  pos ["+x+","+y+"]");
+		}
+		override public function set visible(value:Boolean):void
+		{
+			super.visible = value;
+//			trace("Placemark : " + name + " visible = " + value);
+		}
+		
 		override public function getPoints(): ArrayCollection
 		{ 
 			if (_geometry is Polygon)
@@ -157,6 +173,9 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			if (name && name.length > 0)
 			{
 //				createKMLLabel();
+				
+				if (name == '4808A')
+					trace("Placemark stop");
 			}
 			
 			createIcon();
@@ -281,8 +300,11 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		/** Called after the feature is added to master or after any change (e.g. area change). */
 		override public function update(changeFlag: FeatureUpdateContext): void
 		{
-//			trace("Placemark update: " + master);
-			
+//			trace("Placemark update: " + name);
+//			if (name)
+//			{
+//				trace("Placemark with name: " + name);
+//			}
 			if (!m_master)
 				return;
 			
@@ -311,8 +333,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			
 			super.update(changeFlag);
 			
-			
-			
 			updateCoordsReflections();
 			_kmlReflectionDictionary.updateKMLFeature(this);
 			
@@ -326,10 +346,11 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			} else {
 				if (changeFlag.viewBBoxSizeChanged)
 				{
-					if (drawingFeature)
-					{
+//					if (drawingFeature)
+//					{
 						renderer.render(this, master.container);
-					}
+//					}
+					
 				}
 			}
 			if (_geometry)
@@ -380,7 +401,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 //							if (kmlSprite.kmlLabel.textfield)
 //								trace("text: " + kmlSprite.kmlLabel.text + " tf: " + kmlSprite.kmlLabel.textfield.text);
 							
-							if (!kmlSprite.kmlLabel.visible)
+							if (kmlSprite.kmlLabel && !kmlSprite.kmlLabel.visible)
 							{
 								kmlSprite.kmlLabel.visible = true;
 							}

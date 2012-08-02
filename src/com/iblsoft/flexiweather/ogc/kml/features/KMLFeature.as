@@ -181,7 +181,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		private function set iconState(value: String): void
 		{
 			_iconState = value;
-			trace("KMLFeature iconState = " + value);
 		}
 		public function get state(): String
 		{
@@ -314,38 +313,66 @@ package com.iblsoft.flexiweather.ogc.kml.features
 //			updateCoordsReflections();
 		}
 		
-		protected function  updateCoordsReflections(): void
+		protected function updateCoordsReflections(): void
 		{
-			
-			
 			
 			//FIXME need to chack correct coordinate e.g. for Placemark Polygon
 			_kmlReflectionDictionary.cleanup();
 			
 			var reflectionIDs: Array = _kmlReflectionDictionary.reflectionIDs;
 			
-			var iw: InteractiveWidget = master.container;
+			var currCoordinates: Array = currentCoordinates;
+			var total: int = currentCoordinates.length;
 			
+			
+			
+			var coordsPosition: Array = [];
+			for (var i: int = 0; i < total; i++)
+			{
+				coordsPosition.push(i);
+			}
+			
+			var invisibleCoordsPositions: Array = updateCoordsReflectionsForSpecifiedCoordinates(coordsPosition, true);
+			
+			if (invisibleCoordsPositions.length > 0 && invisibleCoordsPositions.length < total)
+			{
+				/**
+				 * feature is partly visible, add all coordinates, otherwise there can be problem with rendering KML 
+				 * e.g. position of each KMLFeature is taken from first coordinates and if it is not present in returned points, KML feature will be renderer on wrong position
+				 */
+				invisibleCoordsPositions = updateCoordsReflectionsForSpecifiedCoordinates(invisibleCoordsPositions, false);
+				if (invisibleCoordsPositions.length > 0)
+				{
+					trace("invisibleCoordsPositions should be empty now");
+				}
+//			} else {
+//				trace("updateCoordsReflectionsForSpecifiedCoordinates correct, nothing needs to be added");
+			}
+		}
+		
+		private function updateCoordsReflectionsForSpecifiedCoordinates(coords: Array, bCheckCoordIsInside: Boolean): Array
+		{
+			var iw: InteractiveWidget = master.container;
 			var crs: String = iw.getCRS();
 			var projection: Projection = iw.getCRSProjection();
 			var viewBBox: BBox = iw.getViewBBox();
-			
 			var currCoordinates: Array = currentCoordinates;
-			var total: int = currentCoordinates.length;
-			for (var i: int = 0; i < total; i++)
+			
+//			var visibleCoords: int = 0;
+			var invisibleCoords: Array = [];
+			
+			for each (var i: int in coords)
 			{
 				var coord: Coord = currCoordinates[i] as Coord;
 				var coordPointForReflection: flash.geom.Point = new flash.geom.Point;
 				if (coord.crs != crs)
 				{
-//					trace("KMLFeature Problem with Coord... not same as InteractiveWidget coord");
 					//conver to InteractiveWidget CRS
 					coordPointForReflection = coord.convertToProjection(projection);
 					
 				} else {
 					coordPointForReflection = new flash.geom.Point(coord.x, coord.y);
 				}
-				
 				
 				var pointReflections: Array = iw.mapCoordInCRSToViewReflections(coordPointForReflection);
 				var reflectionsCount: int = pointReflections.length;
@@ -355,13 +382,18 @@ package com.iblsoft.flexiweather.ogc.kml.features
 					var pointReflectedObject: Object = pointReflections[j];
 					var pointReflected: flash.geom.Point = pointReflectedObject.point as flash.geom.Point;
 					var coordReflected: Coord = new Coord(crs, pointReflected.x, pointReflected.y);
-					if (!viewBBox.coordInside(coordReflected))
+					if (bCheckCoordIsInside && !viewBBox.coordInside(coordReflected))
+					{
+						invisibleCoords.push(i);
 						continue;
-					_kmlReflectionDictionary.addReflectedCoord(coordReflected, j, pointReflectedObject.reflection);
+					}
+//					visibleCoords++;
+					_kmlReflectionDictionary.addReflectedCoordAt(coordReflected, i, j, pointReflectedObject.reflection);
 				}
 			}
+			
+			return invisibleCoords;
 		}
-		
 		/**
 		 * Returns "active" flag for Feature. If there is no Region and LOD present, it will return always true. Otherwise it will return correct value dependent on size of  
 		 * @return 

@@ -162,10 +162,10 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 				_txt.border = false;
 				var format: TextFormat = _txt.getTextFormat();
 				format.color = _color;
-				format.size = int (14 * _scale)
+				format.size = int (20 * _scale)
 				format.bold = true;
-//				format.font = labelFont;
-//				_txt.embedFonts = true;
+				format.font = labelFont;
+				_txt.embedFonts = true;
 				_txt.setTextFormat(format);
 			}
 			

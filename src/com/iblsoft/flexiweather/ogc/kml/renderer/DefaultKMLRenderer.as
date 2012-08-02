@@ -824,6 +824,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 			
 			// FIXME how to find out base url of placemark
 			var pointBaseURL: String = null;
+			var drawIcon: Boolean = true;
 			
 			if (style && style.iconStyle)
 			{
@@ -879,6 +880,8 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 							}
 						}
 					} 
+				} else {
+					drawIcon = false;
 				}
 			}
 			var gr: Graphics;
@@ -913,7 +916,8 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 						scale = 32 / icon.width * _featureScale;
 						renderPlacemarkIcon(placemark, icon, hotSpot, scale);
 					}
-					/*
+				} else {
+					
 					var kmlReflectionDictionary: KMLFeaturesReflectionDictionary = placemark.kmlReflectionDictionary;
 					var totalReflections: int = kmlReflectionDictionary.totalReflections;
 					
@@ -938,20 +942,25 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 						}
 						
 						
-						gr = kmlReflection.displaySprite.graphics;
-						gr.clear();
-						
-						//if there is no Icon defined, just draw default circle placemark
-						gr.beginFill(0xaa0000, 0.3);
-						gr.lineStyle(1,0);
-						gr.drawCircle(0,0,7 * _featureScale);
-						gr.endFill();
+						if (drawIcon)
+						{
+							gr = kmlReflection.displaySprite.graphics;
+							gr.clear();
+							
+							//if there is no Icon defined, just draw default circle placemark
+							gr.beginFill(0xaa0000, 0.3);
+							gr.lineStyle(1,0);
+							gr.drawCircle(0,0,7 * _featureScale);
+							gr.endFill();
+//						} else {
+//							trace("Not drawing Placemark Icon, it has Icon defined but empty");
+						}
 					}
-					*/
+					
 				}
-//				updateLabelPosition(placemark.kmlLabel, placemark.x + 12, placemark.y + 12);
-//				if (kmlReflection)
-//					updateLabelPosition(placemark.kmlLabel, kmlReflection.displaySprite.x + 12 * _featureScale, kmlReflection.displaySprite.y + 12 * _featureScale);
+				updateLabelPosition(placemark.kmlLabel, placemark.x + 12, placemark.y + 12);
+				if (kmlReflection)
+					updateLabelPosition(placemark.kmlLabel, kmlReflection.displaySprite.x + 12 * _featureScale, kmlReflection.displaySprite.y + 12 * _featureScale);
 			}
 			
 			/*
@@ -972,6 +981,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 		protected function renderLineString(placemark: Placemark, style: Style): void
 		{
 //			renderLineString(placemark.graphics, placemark.coordinates, placemark.kmlLabel, placemarkStyles.normalStyle);
+			
 			var g: GraphicsCurveRenderer;
 			
 			var gr: Graphics =  placemark.graphics;
@@ -1024,11 +1034,6 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 					gr.lineStyle(lineWidth, lineColor);
 					var p: Point;
 					
-					if (features.length != totalReflections)
-					{
-						trace("there is problem with rendering: renderLineString");
-					}
-					
 					if (i < features.length)
 					{
 						var mPoints: Array = features[i] as Array;
@@ -1039,6 +1044,9 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 						if (total > 0)
 						{
 							p = mPoints[0] as Point;
+							
+							var p0: Point = p.clone();
+							
 							var sx: int = p.x;
 							var sy: int = p.y;
 							
@@ -1052,40 +1060,13 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 								//						trace("\t drawPolyline lineTo ["+p.x+","+p.y+"]");
 							}
 							
-							g.finish(p.x - sx, p.y - sy);
+							g.lineTo(p0.x - sx, p0.y - sy);
+							g.finish(p0.x - sx, p0.y - sy);
 							//					trace("\t drawPolyline finish ["+p.x+","+p.y+"]");
 						}
 					}
 				}
-				
-				
-				//			trace("\n\n IW drawPolyline features: " + features.length);
-				
-				//we are drawing whole line string relatively to first point to be able move whole sprite when drawing is not needed
-//				var p0: Point = points.getItemAt(0) as Point;
-//				var sx: int = p0.x;
-//				var sy: int = p0.y;
-//				
-//				var total: int = points.length;
-//				var cnt: int = 0;
-//				for (var i: int = 0; i < total; i++)
-//				{
-//					var point: Point = points.getItemAt(i) as Point
-//					if (point)
-//					{
-//						if (cnt == 0)
-//						{
-//							gr.moveTo(point.x - sx, point.y - sy);
-//						} else {
-//							gr.lineTo(point.x - sx, point.y - sy);
-//						}
-//						cnt++;
-//					}
-//				}
 			}
-			
-//			if (point)
-//				updateLabelPosition(kmlLabel, point.x, point.y); 
 		}
 		
 		protected function renderLinearRing(placemark: Placemark, gr: Graphics, linearRing: LinearRing, kmlLabel: KMLLabel, style: Style): void
@@ -1115,7 +1096,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 				{
 					fillExists = true;
 					var fillColor: uint = ps.color;
-					var fillAlpha: Number = 0.5;
+					var fillAlpha: Number = ps.alpha;
 					
 				}
 			}
@@ -1132,8 +1113,6 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 			
 			if (coords && coords.length > 1)
 			{
-//				_container.drawPolyline(new GraphicsCurveRenderer(gr), coords);
-				
 				var g: GraphicsCurveRenderer;
 				g = new GraphicsCurveRenderer(gr);
 				
@@ -1163,11 +1142,6 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 					
 					var p: Point;
 					
-					if (features.length != totalReflections)
-					{
-						trace("there is problem with rendering: renderLineString");
-					}
-					
 					if (i < features.length)
 					{
 						var mPoints: Array = features[i] as Array;
@@ -1178,29 +1152,23 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 						if (total > 0)
 						{
 							p = mPoints[0] as Point;
+							var p0: Point = p.clone();
+							
 							var sx: int = p.x;
 							var sy: int = p.y;
 							
 							var cnt: int = 0;
 							
 							g.start(p.x - sx, p.y - sy);
+							g.moveTo(p.x - sx, p.y - sy);
 							
 							for (var pi: int = 1; pi < mPoints.length; pi++){
 								p = mPoints[pi] as Point;
-								if (p)
-								{
-									if (cnt == 0)
-									{
-										gr.moveTo(p.x - sx, p.y - sy);
-									} else {
-										gr.lineTo(p.x - sx, p.y - sy);
-									}
-									cnt++;
-								}
+								g.lineTo(p.x - sx, p.y - sy);
 							}
 							
-							g.finish(p.x - sx, p.y - sy);
-							//					trace("\t drawPolyline finish ["+p.x+","+p.y+"]");
+							g.lineTo(p0.x - sx, p0.y - sy);
+							g.finish(p0.x - sx, p0.y - sy);
 						}
 					}
 					
@@ -1209,36 +1177,6 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 				}
 			}
 				
-				
-			/*
-			if (points && points.length > 1)
-			{
-				var p0: Point = points.getItemAt(0) as Point;
-				var sx: int = p0.x;
-				var sy: int = p0.y;
-				
-				var total: int = points.length;
-				var cnt: int = 0;
-				for (var i: int = 0; i < total; i++)
-				{
-					var point: Point = points.getItemAt(i) as Point
-					if (point)
-					{
-						if (cnt == 0)
-						{
-							gr.moveTo(point.x - sx, point.y - sy);
-						} else {
-							gr.lineTo(point.x - sx, point.y - sy);
-						}
-						cnt++;
-					}
-				}
-			}
-			*/
-			
-			
-//			if (point)
-//				updateLabelPosition(kmlLabel, point.x, point.y); 
 		}
 		protected function renderPolygon(placemark: Placemark, gr: Graphics, polygon: Polygon, kmlLabel: KMLLabel, style: Style): void
 		{
