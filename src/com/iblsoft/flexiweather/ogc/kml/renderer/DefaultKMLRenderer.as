@@ -53,6 +53,8 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 	{
 		public static var debugConsole: IConsole;
 		
+		public static var defaultLabelColor: uint = 0xffffff;
+		
 		private var _container: InteractiveWidget;
 		
 		private var _styleDictionary: StylesDictionary;
@@ -582,8 +584,8 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 					style = featureStyles.highlightStyle;
 				}
 				
-				if (!style)
-					return;
+//				if (!style)
+//					return;
 				
 				var kmlReflectionDictionary: KMLFeaturesReflectionDictionary = feature.kmlReflectionDictionary;
 				var totalReflections: int = kmlReflectionDictionary.totalReflections;
@@ -609,6 +611,12 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 							if (label)
 							{
 								updateLabelFormat(label, clr, alpha, scale);
+							}
+						} else {
+							trace("there is no Label Style defined");
+							if (label)
+							{
+								updateLabelFormat(label, defaultLabelColor, 1, _featureScale);
 							}
 						}
 						
@@ -958,7 +966,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 					}
 					
 				}
-				updateLabelPosition(placemark.kmlLabel, placemark.x + 12, placemark.y + 12);
+//				updateLabelPosition(placemark.kmlLabel, placemark.x + 12, placemark.y + 12);
 				if (kmlReflection)
 					updateLabelPosition(placemark.kmlLabel, kmlReflection.displaySprite.x + 12 * _featureScale, kmlReflection.displaySprite.y + 12 * _featureScale);
 			}
@@ -1169,6 +1177,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 							
 							g.lineTo(p0.x - sx, p0.y - sy);
 							g.finish(p0.x - sx, p0.y - sy);
+//							trace("\t renderLinearRing drawPolyline finish ["+p0.x+","+p0.y+"]");
 						}
 					}
 					

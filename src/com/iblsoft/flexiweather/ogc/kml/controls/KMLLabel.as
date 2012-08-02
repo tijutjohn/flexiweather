@@ -43,7 +43,7 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 		{
 			super.x = value;
 //			if (reflection == 0)
-//				trace("KMLLabel["+_id+"].x = " + value + " _text: " + _text);
+				trace("KMLLabel["+_id+"].x = " + value + " _text: " + _text);
 		}
 		override public function set y(value:Number):void
 		{
