@@ -6,6 +6,7 @@ package com.iblsoft.flexiweather.utils.wfs
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.geom.Point;
+	import flash.utils.Dictionary;
 
 	public class FeatureSplitter
 	{
@@ -74,9 +75,9 @@ package com.iblsoft.flexiweather.utils.wfs
 		{
 			var total: int = coords.length;
 			
-			var projection: Projection = m_iw.getCRSProjection(); //Projection.getByCRS((coords[0] as Coord).crs);
+			var projection: Projection = m_iw.getCRSProjection()
 			
-			m_projectionWidth = projection.extentBBox.width// getProjectionWidthInPixels(projection);
+			m_projectionWidth = projection.extentBBox.width;
 			m_projectionWidthHalf = m_projectionWidth / 2;
 			
 			var points: Array = [];
@@ -145,77 +146,59 @@ package com.iblsoft.flexiweather.utils.wfs
 				currPoint = nextPoint;
 				currPos++;
 				
-				
-//				c1 = convertToProjection(c1, projection);
-//				c2 = convertToProjection(c2, projection);
-				
-				/*
-				var ps: Array = computeLinePointsFromCoords(c1.x, c1.y, c2.x, c2.y);
-				
-				var p1: Point = ps[0] as Point;
-				var p2: Point = ps[1] as Point;
-				var directionChanged: Boolean = ps[2] as Boolean;
-
-				if (i == 0)
-				{
-					movePointsToScreen(p1,p2, projectionWidthInPixels);
-					points.push(p1);
-					points.push(p2);
-				} else {
-					
-					var same: Boolean;
-					if (Math.abs(lastPoint.x - p2.x) > projectionHalfWidthInPixels)
-					{
-						movePointsToCorrectReflection(lastPoint, p2, p1, projectionWidthInPixels);
-					}
-					same = pointsAreSame(lastPoint, p1);
-					if (same)
-					{
-						points.push(p2);
-					} else {
-						trace("problem => lastPoint is not same as new first point");
-					}
-				}
-				
-				lastPoint = p2.clone();
-				lastCoord = c2.cloneCoord();
-				*/
 			}
-			
-//			var resultArr: Array = [];
 			
 			var resultArr: Array = [];
-			for(i = 0; i < 5; i++) {
-				var i_delta: int = (i & 1 ? 1 : -1) * ((i + 1) >> 1); // generates sequence 0, 1, -1, 2, -2, ..., 5, -5
-				resultArr.push(convertToScreenPoints(shiftCoords(points, i_delta)));
+			
+			//get reflected features
+			
+			var polygonsDict: Dictionary = new Dictionary();
+			
+			for each (var coordPointForReflection: Point in points)
+			{
+				
+				var pointReflections: Array = m_iw.mapCoordInCRSToViewReflections(coordPointForReflection);
+				var reflectionsCount: int = pointReflections.length;
+				
+				var arr: Array = [];
+				
+				for (var j: int = 0; j < reflectionsCount; j++)
+				{
+					var pointReflectedObject: Object = pointReflections[j];
+					
+					var reflection: int = pointReflectedObject.reflection;
+					if (!polygonsDict[reflection])
+					{
+						polygonsDict[reflection] = [];
+					}
+						
+					var pointReflected: flash.geom.Point = pointReflectedObject.point as flash.geom.Point;
+					var coordReflected: Coord = new Coord(crs, pointReflected.x, pointReflected.y);
+					polygonsDict[reflection].push(m_iw.coordToPoint(coordReflected));
+//					if (!currentViewBBox.coordInside(coordReflected))
+//					{
+//						//there is at least 
+//						break;
+//					}
+				}
 			}
 			
-//			var resultArr: Array = [convertToScreenPoints(points)];
-//			resultArr.push(convertToScreenPoints(shiftCoords(points, 1)));
-//			resultArr.push(convertToScreenPoints(shiftCoords(points, -1)));
-			
+			for each (var arr: Array in polygonsDict)
+			{
+				resultArr.push(arr);
+			}
+//			var resultArr: Array = [];
+//			for(i = 0; i < 5; i++) {
+//				var i_delta: int = (i & 1 ? 1 : -1) * ((i + 1) >> 1); // generates sequence 0, 1, -1, 2, -2, ..., 5, -5
+//				var reflectedPolylinePoints: Array = convertToScreenPoints(shiftCoords(points, i_delta), currentViewBBox);
+//				if (reflectedPolylinePoints)
+//					resultArr.push();
+//				else
+//					trace("Reflected polyline is out of screen");
+//			}
 			return resultArr;
 		}
 		
-		/*
-		private function distanceTo(p1: Point, p2: Point): Number
-		{
-			var r: Number = 6371; // km
-			
-			//be sure coords are in LatLong
-			var dLat: Number = toRad(c.y - y);
-			var dLon: Number = toRad(c.x - x);
-			var lat1: Number = toRad(y);
-			var lat2: Number = toRad(c.y);
-			
-			var a: Number = Math.sin(dLat/2) * Math.sin(dLat/2) +
-				Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2); 
-			var c2: Number = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-			var d: Number = r * c2;
-			
-			return d;
-		}
-		*/
 		
 		/**
 		 * Convert arrray of coordinates to screen points 
@@ -224,7 +207,7 @@ package com.iblsoft.flexiweather.utils.wfs
 		 * @return 
 		 * 
 		 */		
-		private function convertToScreenPoints(coords: Array): Array
+		private function convertToScreenPoints(coords: Array, currentViewBBox: BBox): Array
 		{
 			var arr: Array = [];
 			
@@ -233,7 +216,13 @@ package com.iblsoft.flexiweather.utils.wfs
 			for (var i: int = 0; i < total; i++)
 			{
 				var p: Point = coords[i] as Point;
-				arr.push(m_iw.coordToPoint(new Coord(crs, p.x, p.y)));
+				var c: Coord = new Coord(crs, p.x, p.y);
+				if (currentViewBBox.coordInside(c))
+				{
+					arr.push(m_iw.coordToPoint(c));
+				} else {
+					return null;
+				}
 			}
 			return arr;
 		}
