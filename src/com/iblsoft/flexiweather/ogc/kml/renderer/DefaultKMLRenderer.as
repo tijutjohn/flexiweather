@@ -777,6 +777,8 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 					{
 						kmlReflection.displaySprite = new KMLSprite(placemark, i);
 						placemark.addChild(kmlReflection.displaySprite);
+						
+						placemark.addDisplaySprite(kmlReflection.displaySprite);
 					}
 					
 					var gr: Graphics = kmlReflection.displaySprite.graphics;
@@ -922,6 +924,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 						icon = kmlResourceManager.getPinBitmapData('yellow');
 						hotSpot = kmlResourceManager.getPinHotSpot('yellow');
 						scale = 32 / icon.width * _featureScale;
+						
 						renderPlacemarkIcon(placemark, icon, hotSpot, scale);
 					}
 				} else {

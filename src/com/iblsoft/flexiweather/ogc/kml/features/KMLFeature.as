@@ -73,6 +73,13 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				}
 			}
 		}
+		public function get displaySpritesLength(): int
+		{
+			if (_displaySprites)
+				return _displaySprites.length;
+			
+			return 0;
+		}
 		public function addDisplaySprite(sprite: Sprite): void
 		{
 			_displaySprites.push(sprite);
