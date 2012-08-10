@@ -13,7 +13,7 @@
 	</controls:layout>
 	
 	<s:Label text="{feature.name}" width="100%"/>
-	<s:TextArea id="textArea" width="100%" enabled="false"
+	<s:TextArea id="textArea" width="100%" enabled="true" editable="false"
 				borderAlpha="0"/>
 	<s:HGroup width="100%" horizontalAlign="right">
 		<s:Button label="Close" click="close()"/>
