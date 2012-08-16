@@ -1,57 +1,27 @@
 package com.iblsoft.flexiweather.ogc.data
 {
 	import com.iblsoft.flexiweather.events.WMSViewPropertiesEvent;
-	import com.iblsoft.flexiweather.net.events.UniURLLoaderErrorEvent;
-	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.ogc.BBox;
-	import com.iblsoft.flexiweather.ogc.ExceptionUtils;
 	import com.iblsoft.flexiweather.ogc.ILayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.IWMSLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
-	import com.iblsoft.flexiweather.ogc.SynchronisationRole;
 	import com.iblsoft.flexiweather.ogc.SynchronisedVariableChangeEvent;
 	import com.iblsoft.flexiweather.ogc.WMSDimension;
 	import com.iblsoft.flexiweather.ogc.WMSLayer;
-	import com.iblsoft.flexiweather.ogc.WMSLayerConfiguration;
-	import com.iblsoft.flexiweather.ogc.cache.CacheItemMetadata;
-	import com.iblsoft.flexiweather.ogc.cache.ICache;
-	import com.iblsoft.flexiweather.ogc.cache.WMSCache;
-	import com.iblsoft.flexiweather.ogc.net.loaders.WMSImageLoader;
-	import com.iblsoft.flexiweather.proj.Coord;
-	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.utils.Duration;
 	import com.iblsoft.flexiweather.utils.ISO8601Parser;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
-	import com.iblsoft.flexiweather.widgets.GlowLabel;
-	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
-	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
-	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
-	import flash.display.AVM1Movie;
 	import flash.display.Bitmap;
-	import flash.display.BitmapData;
-	import flash.display.DisplayObject;
-	import flash.display.Graphics;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
-	import flash.geom.Matrix;
-	import flash.geom.Point;
-	import flash.geom.Rectangle;
 	import flash.net.URLRequest;
 	import flash.net.URLVariables;
 	import flash.utils.Dictionary;
-	import flash.utils.Timer;
 	
 	import mx.collections.ArrayCollection;
-	import mx.controls.Image;
-	import mx.core.IVisualElement;
-	import mx.core.UIComponent;
-	import mx.events.DynamicEvent;
-	import mx.logging.Log;
-	
-	import spark.components.Group;
 
 	public class WMSViewProperties extends EventDispatcher implements IViewProperties, Serializable
 	{
@@ -548,6 +518,11 @@ package com.iblsoft.flexiweather.ogc.data
 					return true;
 				}
 			}
+			if(s_variableId == "level") {
+				if(m_cfg.dimensionVerticalLevelName != null) {
+					return true;
+				}
+			}
 			return false;
 		}
 		
@@ -568,12 +543,25 @@ package com.iblsoft.flexiweather.ogc.data
 					return null;
 				}
 			}
+			if(s_variableId == "level") {
+				if(m_cfg.dimensionVerticalLevelName != null) {
+					return (getWMSDimensionValue(m_cfg.dimensionVerticalLevelName, true));
+				}
+			}
 			return null;
 		}
 		
 		public function getSynchronisedVariableValuesList(s_variableId: String): Array
 		{
-			if(s_variableId == "frame") {
+			if(s_variableId == "level") {
+				if(m_cfg.dimensionVerticalLevelName != null) {
+					
+					var l_levels: Array = getWMSDimensionsValues(m_cfg.dimensionVerticalLevelName);
+					
+					return l_levels;
+				}
+				
+			} else if(s_variableId == "frame") {
 				if(m_cfg.dimensionTimeName != null) {
 					var l_times: Array = getWMSDimensionsValues(m_cfg.dimensionTimeName);
 					var l_resultTimes: Array = [];
@@ -619,16 +607,39 @@ package com.iblsoft.flexiweather.ogc.data
 				else
 					return [];
 			}
-			else
-				return null;
+				
+			return null;
 		}
 	
 		public function exactlySynchroniseWith(s_variableId: String, value: Object): Boolean
 		{
+			var of: Object;
+			var ofExactForecast: Object = null;
+			if(s_variableId == "level") {
+				
+				if(m_cfg.dimensionVerticalLevelName != null) {
+					var level: String = value as String;
+					var l_levels: Array = getWMSDimensionsValues(m_cfg.dimensionVerticalLevelName);
+					ofExactForecast = null;
+					for each(of in l_levels) {
+						if((of.data as String) == level) {
+							ofExactForecast = of;
+							break;
+						}
+					}
+					if (ofExactForecast != null)
+					{
+						setWMSDimensionValue(m_cfg.dimensionVerticalLevelName, ofExactForecast.data as String);
+						dispatchSynchronizedVariableChangeEvent(new SynchronisedVariableChangeEvent(
+							SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, "level"));
+						return true;
+					}
+				}
+				
+			}
+			
 			if(s_variableId == "frame") {
 				
-				var ofExactForecast: Object = null;
-				var of: Object;
 				
 				if(m_cfg.dimensionTimeName != null) {
 					var frame: Date = value as Date;
@@ -675,9 +686,34 @@ package com.iblsoft.flexiweather.ogc.data
 
 		public function synchroniseWith(s_variableId: String, value: Object): Boolean
 		{
+			var a: Array
+			if(s_variableId == "level") {
+				
+				if(!exactlySynchroniseWith(s_variableId, value)) {
+					
+					a = getSynchronisedVariableValuesList(s_variableId);
+					var bestLevel: String;
+					var requiredLevel: String = value as String;
+					
+//					var leftDist: Number = 1000 * 60 * 60 * 3;
+//					var rightDist: Number = 1000 * 60 * 60 * 3;
+					
+					for each(var level: Object in a) {
+						if(level.data == requiredLevel) {   
+							bestLevel = level.data as String;
+						}
+					}
+					if(!bestLevel)
+						return false;
+					
+					return exactlySynchroniseWith(s_variableId, bestLevel);
+				}
+				
+			}
+			
 			if(s_variableId == "frame") {
 				if(!exactlySynchroniseWith(s_variableId, value)) {
-					var a: Array = getSynchronisedVariableValuesList(s_variableId);
+					a = getSynchronisedVariableValuesList(s_variableId);
 					var best: Date = null;
 					var required: Date = value as Date;
 					var requiredTime: Number = required.time;

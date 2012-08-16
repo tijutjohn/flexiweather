@@ -23,6 +23,12 @@ package com.iblsoft.flexiweather.events
 		
 		
 		/**
+		 * Dispatch event in InteractiveWidget when user clicks inside InteractiveWidget 
+		 */		
+		public static const WIDGET_SELECTED: String = 'widgetSelected';
+		
+		
+		/**
 		 * How many layers are currently loading 
 		 */		
 		public var layersLoading: int;

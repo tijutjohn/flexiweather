@@ -118,6 +118,8 @@ package com.iblsoft.flexiweather.widgets
 		{
 			super(container);
 			
+			timelineConfiguration = new MapTimelineConfiguration();
+			
 			_periodicTimer = new Timer(10 * 1000);
 			_periodicTimer.addEventListener(TimerEvent.TIMER, onPeriodicTimerTick);
 			_periodicTimer.start();
@@ -215,6 +217,11 @@ package com.iblsoft.flexiweather.widgets
 				storage.serializeNonpersistentArrayCollection("layer", wrappers, LayerSerializationWrapper);
 				trace("Map serialize: " + (storage as XMLStorage).xml);
 			}
+		}
+
+		public function invalidateTimeline(): void
+		{
+			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
 		}
 		
 		override protected function onLayerCollectionChanged(event: CollectionEvent): void
@@ -331,6 +338,13 @@ package com.iblsoft.flexiweather.widgets
 		}
 		
 		private var m_primaryLayer: InteractiveLayerMSBase;
+		
+		[Bindable (event=PRIMARY_LAYER_CHANGED)]
+		public function get primaryLayer(): InteractiveLayerMSBase
+		{
+			return m_primaryLayer;
+		}
+		
 		public function getPrimaryLayer(): InteractiveLayerMSBase
 		{
 			for each (var layer: InteractiveLayer in m_layers)
@@ -372,7 +386,7 @@ package com.iblsoft.flexiweather.widgets
 		 */		
 		private function primaryLayerHasChanged(): void
 		{
-			dispatchEvent(new DataEvent(PRIMARY_LAYER_CHANGED));
+			dispatchEvent(new DataEvent(PRIMARY_LAYER_CHANGED, true));
 		}
 		
 		// data global variables synchronisation
@@ -615,7 +629,7 @@ package com.iblsoft.flexiweather.widgets
           	return nowFrame;
 		}
 		
-		public function get  canAnimate(): Boolean
+		public function get canAnimate(): Boolean
 		{
 			var l_syncLayers: Array = [];
 			var l_timeAxis: Array = enumTimeAxis(l_syncLayers);
@@ -705,6 +719,26 @@ package com.iblsoft.flexiweather.widgets
 			}
 			
 			return null;	
+		}
+		
+		public function setLevel(newLevel: String, b_nearrest: Boolean = true): Boolean
+		{
+			for each(var l: InteractiveLayer in m_layers) {
+            	var so: ISynchronisedObject = l as ISynchronisedObject;
+            	if(so == null)
+            		continue;
+            	if(!so.hasSynchronisedVariable("level"))
+					continue;
+				
+				var bSynchronized: Boolean = so.synchroniseWith("level", newLevel);
+          		if(bSynchronized)
+				{
+          			l.refresh(false);
+				} else {
+					trace("InteractiveLayerMap setLevel ["+newLevel+"] FRAME NOT FOUND for "+l.name);
+				}
+          	}
+          	return true;
 		}
 		
 		public function setFrame(newFrame: Date, b_nearrest: Boolean = true): Boolean

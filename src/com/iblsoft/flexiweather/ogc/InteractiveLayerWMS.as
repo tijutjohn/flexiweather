@@ -48,11 +48,16 @@ package com.iblsoft.flexiweather.ogc
 		{
 			super(container, cfg);
 			
-			m_autoRefreshTimer.addEventListener(TimerEvent.TIMER_COMPLETE, autoRefreshTimerCompleted)
+			m_autoRefreshTimer.addEventListener(TimerEvent.TIMER_COMPLETE, autoRefreshTimerCompleted);
 			m_autoRefreshTimer.repeatCount = 1;
 			
-			m_cache = new WMSCache();
-			(m_cache as WMSCache).name = cfg.label + " cache";
+			if (container.wmsCacheManager)
+			{
+				m_cache = container.wmsCacheManager.getWMSCacheForConfiguration(cfg);
+			} else {
+				m_cache = new WMSCache();
+				(m_cache as WMSCache).name = cfg.label + " cache";
+			}
 			
 //			m_currentWMSViewProperties.cache = m_cache;
 		}

@@ -3,6 +3,8 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.events.InteractiveWidgetEvent;
 	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.ogc.cache.WMSCacheKey;
+	import com.iblsoft.flexiweather.ogc.cache.WMSCacheManager;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.CubicBezier;
@@ -49,6 +51,19 @@ package com.iblsoft.flexiweather.widgets
 	[Event (name="anticollisionUpdated", type="flash.events.Event")]
 	[Event (name="zoomLevelChanged", type="com.iblsoft.flexiweather.events.InteractiveLayerQTTEvent")]
 	
+	
+	/**
+	 *  Dispatched by the component when user click on InteractiveWidget
+	 *
+	 *  @eventType com.iblsoft.flexiweather.events.InteractiveWidgetEvent.WIDGET_SELECTED
+	 *  
+	 *  @langversion 3.0
+	 *  @playerversion Flash 9
+	 *  @playerversion AIR 1.1
+	 *  @productversion Flex 3
+	 */
+	[Event (name="widgetSelected", type="com.iblsoft.flexiweather.events.InteractiveWidgetEvent")]
+	
 	public class InteractiveWidget extends Group
 	{
 		public static const VIEW_BBOX_CHANGED: String = 'viewBBoxChanged';
@@ -61,7 +76,7 @@ package com.iblsoft.flexiweather.widgets
 
 		private var mb_autoLayout: Boolean = false;
 
-		private var mb_backgroundChessBoard: Boolean = false;
+		private var mb_backgroundChessBoard: Boolean = true;
 
 		private var m_resizeTimer: Timer;
 		
@@ -71,6 +86,7 @@ package com.iblsoft.flexiweather.widgets
 		
 		private var m_lastResizeTime: Number;
 		
+		private var m_wmsCacheManager: WMSCacheManager; 
 		/**
 		 * anticollision layout for Labels
 		 */
@@ -86,8 +102,59 @@ package com.iblsoft.flexiweather.widgets
 		 */		
 		private var m_suspendAnticollisionProcessing: Boolean;
 		
+		
+		private var _enableMouseClick: Boolean;
+		private var _enableMouseMove: Boolean;
+		private var _enableMouseWheel: Boolean;
+		private var _enableGestures: Boolean;
+		
+		public function get enableMouseClick():Boolean
+		{
+			return _enableMouseClick;
+		}
+		
+		public function set enableMouseClick(value:Boolean):void
+		{
+			_enableMouseClick = value;
+		}
+		
+		public function get enableMouseMove():Boolean
+		{
+			return _enableMouseMove;
+		}
+		
+		public function set enableMouseMove(value:Boolean):void
+		{
+			_enableMouseMove = value;
+		}
+		
+		public function get enableMouseWheel():Boolean
+		{
+			return _enableMouseWheel;
+		}
+		
+		public function set enableMouseWheel(value:Boolean):void
+		{
+			_enableMouseWheel = value;
+		}
+		
+		public function get enableGestures():Boolean
+		{
+			return _enableGestures;
+		}
+		
+		public function set enableGestures(value:Boolean):void
+		{
+			_enableGestures = value;
+		}
+		
 		public function InteractiveWidget() {
 			super();
+			
+			enableGestures = true;
+			enableMouseClick = true;
+			enableMouseMove = true;
+			enableMouseWheel = true;
 			
 			mouseEnabled = true;
 			mouseFocusEnabled = true;
@@ -111,6 +178,7 @@ package com.iblsoft.flexiweather.widgets
 			m_lastResizeTime = getTimer();
 		}
 		
+
 		public function destroy(): void
 		{
 			removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
@@ -250,6 +318,26 @@ package com.iblsoft.flexiweather.widgets
 			}
 			return 0;
 		}
+		
+		/**
+		 * Function returns first layer of requested type
+		 *  
+		 * @param classType
+		 * @return 
+		 * 
+		 */		
+		public function getLayerByType(classType: Class): InteractiveLayer
+		{
+			var total: int = m_layerContainer.numElements;
+			
+			for (var i: int = 0; i < total; i++)
+			{
+				var l: InteractiveLayer = m_layerContainer.getElementAt(i) as InteractiveLayer;
+				if (l && l is classType)
+					return l;
+			}
+			return null;
+		}
 		public function getLayerAt(position: int): InteractiveLayer
 		{
 			if (position < m_layerContainer.numElements)
@@ -323,20 +411,39 @@ package com.iblsoft.flexiweather.widgets
 		{
 			l.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onLayerLoaded);
 			l.addEventListener(InteractiveDataLayer.LOADING_STARTED, onLayerLoadingStart);
+
+			var bAddLayer: Boolean = true;
 			
-			if (index >= 0)
-				addElementAt(l, index);
-			else
-				addElement(l);
+			if (l is InteractiveLayerMap) {
+				m_interactiveLayerMap = l as InteractiveLayerMap;
+			} else {
+				if (m_interactiveLayerMap)
+				{
+					m_interactiveLayerMap.addLayer(l);
+					bAddLayer = false;
+				}
+			}
 			
-			//when new layer is added to container, call onAreaChange to notify layer, that layer is already added to container, so it can render itself
-			l.onAreaChanged(true);
 			
-			orderLayers();
+			if (bAddLayer)
+			{
+				if (index >= 0)
+					addElementAt(l, index);
+				else
+					addElement(l);
+				
+				//when new layer is added to container, call onAreaChange to notify layer, that layer is already added to container, so it can render itself
+				l.onAreaChanged(true);
+				orderLayers();
+			}
+			
 		}
 		
 		public function removeLayer(l: InteractiveLayer, b_destroy: Boolean = false): void
 		{
+			if (l is InteractiveLayerMap && m_interactiveLayerMap == l)
+				m_interactiveLayerMap =null;
+			
 			l.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onLayerLoaded);
 			l.removeEventListener(InteractiveDataLayer.LOADING_STARTED, onLayerLoadingStart);
 			
@@ -360,6 +467,8 @@ package com.iblsoft.flexiweather.widgets
 		
 		public function debugWidget(): void
 		{
+			return;
+			
 			var total: int = numChildren;
 			for (var i: int = 0; i < total; i++)
 			{
@@ -376,6 +485,8 @@ package com.iblsoft.flexiweather.widgets
 		}
 		public function debugLayers(): void
 		{
+			return;
+			
 			var total: int = m_layerContainer.numChildren;
 			for (var i: int = 0; i < total; i++)
 			{
@@ -849,9 +960,9 @@ package com.iblsoft.flexiweather.widgets
 						else
 							aNew.push(new BBox(bboxWest, bboxSouth, bboxEast, bboxNorth));
 						
-					} else {
-						
-						trace("Check this");
+//					} else {
+//						
+//						trace("Check this");
 					}
 					
 					bboxWest += f_crsExtentBBoxWidth;
@@ -991,21 +1102,34 @@ package com.iblsoft.flexiweather.widgets
 				
 
         // Mouse events handling
-
+		private function notifyWidgetSelected(): void
+		{
+			dispatchEvent(new InteractiveWidgetEvent(InteractiveWidgetEvent.WIDGET_SELECTED));
+		}
+		
         protected function onMouseDown(event: MouseEvent): void
         {
+			if (!_enableMouseClick)
+				return;
+			
             for(var i: int = m_layerContainer.numElements - 1; i >= 0; --i) {
             	var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
             	if(!l.enabled)
             		continue;
             	if(l.onMouseDown(event))
+				{
+					notifyWidgetSelected();
             		break; 
+				}
             }
 			postUserActionUpdate();			
         }
 
         protected function onMouseUp(event: MouseEvent): void
         {
+			if (!_enableMouseClick)
+				return;
+			
             for(var i: int = m_layerContainer.numElements - 1; i >= 0; --i) {
             	var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
             	if(!l.enabled)
@@ -1018,6 +1142,9 @@ package com.iblsoft.flexiweather.widgets
 
         protected function onMouseMove(event: MouseEvent): void
         {
+			if (!_enableMouseMove)
+				return;
+			
             for(var i: int = m_layerContainer.numElements - 1; i >= 0; --i) {
             	var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
             	if(!l.enabled)
@@ -1042,24 +1169,36 @@ package com.iblsoft.flexiweather.widgets
         
         protected function onMouseClick(event: MouseEvent): void
         {
+			if (!_enableMouseClick)
+				return;
+			
             for(var i: int = m_layerContainer.numElements - 1; i >= 0; --i) {
             	var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
             	if(!l.enabled)
             		continue;
             	if(l.onMouseClick(event))
+				{
+					notifyWidgetSelected();
             		break; 
+				}
             }
 			postUserActionUpdate();			
         }
 
         protected function onMouseDoubleClick(event: MouseEvent): void
         {
+			if (!_enableMouseClick)
+				return;
+			
             for(var i: int = m_layerContainer.numElements - 1; i >= 0; --i) {
             	var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
             	if(!l.enabled)
             		continue;
             	if(l.onMouseDoubleClick(event))
-            		break; 
+				{
+					notifyWidgetSelected();
+					break; 
+				}
             }
 			postUserActionUpdate();			
         }
@@ -1221,7 +1360,8 @@ package com.iblsoft.flexiweather.widgets
 			var bboxWidthDiff: int = Math.abs(bbox.width - oldBox.width);
 			var bboxHeightDiff: int = Math.abs(bbox.height - oldBox.height);
 			
-//			trace("InteractiveWidget.setViewBBox DIFF " + bboxWidthDiff + " , " + bboxHeightDiff);
+			
+			trace(this + ".setViewBBox DIFF " + bboxWidthDiff + " , " + bboxHeightDiff);
 			if (bboxHeightDiff == 0 && bboxWidthDiff == 0)
 			{
 				b_changeZoom = false;
@@ -1638,9 +1778,24 @@ package com.iblsoft.flexiweather.widgets
 			invalidateDisplayList();			
 		}
 
+		private var m_interactiveLayerMap: InteractiveLayerMap;
+		public function get interactiveLayerMap(): InteractiveLayerMap
+		{
+			return m_interactiveLayerMap;
+		}
 		public function get layerContainer(): Group
 		{
 			return m_layerContainer;
+		}
+		
+		public function get wmsCacheManager():WMSCacheManager
+		{
+			return m_wmsCacheManager;
+		}
+		
+		public function set wmsCacheManager(value:WMSCacheManager):void
+		{
+			m_wmsCacheManager = value;
 		}
 		
 		public function get labelLayout(): AnticollisionLayout
@@ -1651,7 +1806,7 @@ package com.iblsoft.flexiweather.widgets
 	
 		override public function toString(): String
 		{
-			return "InteractiveWidget ";
+			return "InteractiveWidget ["+id+"] " ;
 		}
 		
 		private var mb_autoLayoutChanged: Boolean;

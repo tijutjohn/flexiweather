@@ -131,11 +131,11 @@ package com.iblsoft.flexiweather.widgets
 			{
 				for each (var layer:InteractiveLayer in m_layers)
 				{
-					trace("\t InteractiveLayerCompose getLayerByID["+layerID+"] layer.id: " + layer.id + " name: " + layer.name + " label: " + layer.layerName);
+//					trace("\t InteractiveLayerCompose getLayerByID["+layerID+"] layer.id: " + layer.id + " name: " + layer.name + " label: " + layer.layerName);
 					if (layer is InteractiveLayerMSBase)
 					{
 						var config: WMSLayerConfiguration = (layer as InteractiveLayerMSBase).configuration as WMSLayerConfiguration;
-						trace("\t InteractiveLayerCompose config: " + config.label);
+//						trace("\t InteractiveLayerCompose config: " + config.label);
 					}
 						
 					if (layer.id && layer.id == layerID)

@@ -13,7 +13,7 @@ package com.iblsoft.flexiweather.widgets
 		public static const ANIMATION_TYPE_FULL:String = 'full';
 		public static const ANIMATION_TYPE_USER:String = 'user';
 		
-		public var mapVisibleUnderTimeline: Boolean = true;
+		private var _mapVisibleUnderTimeline: Boolean = true;
 		public var timelineVisibleAtStartup: Boolean;
 		
 		public var currentTimeFormat: String = '%H:%M %d.%m.%Y';
@@ -35,6 +35,17 @@ package com.iblsoft.flexiweather.widgets
 			animationExtent = 'PT1H';
 		}
 		
+
+		public function get mapVisibleUnderTimeline():Boolean
+		{
+			return _mapVisibleUnderTimeline;
+		}
+
+		public function set mapVisibleUnderTimeline(value:Boolean):void
+		{
+			_mapVisibleUnderTimeline = value;
+		}
+
 		public function limitsChangedByUser(): void
 		{
 			animationType = ANIMATION_TYPE_USER;

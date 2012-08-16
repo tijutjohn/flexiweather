@@ -165,8 +165,11 @@ package com.iblsoft.flexiweather.widgets
 		{
 			this.x = 0;
 			this.y = 0;
-			this.width = container.width;
-			this.height = container.height;
+			if (container)
+			{
+				this.width = container.width;
+				this.height = container.height;
+			}
 		}
 
 		public function negotiateBBox(newBBox: BBox, changeZoom: Boolean = true): BBox
