@@ -428,15 +428,19 @@ package com.iblsoft.flexiweather.ogc.multiview
 		 */		
 		private function registerSelectedInteractiveWidget(): void
 		{
-			_selectedInteractiveWidget.enableMouseMove = true;
-			_selectedInteractiveWidget.enableMouseClick = true;
-			_selectedInteractiveWidget.enableMouseWheel = true;
-			_selectedInteractiveWidget.addEventListener(InteractiveWidgetEvent.AREA_CHANGED, onAreaChanged);
-			_selectedInteractiveWidget.addEventListener(InteractiveLayerMap.PRIMARY_LAYER_CHANGED, onPrimaryLayerChanged);
-			_selectedInteractiveWidget.addEventListener(ResizeEvent.RESIZE, onSelectedWidgetResize);
-			
-			onPrimaryLayerChanged();
-			_selectedInteractiveWidget.interactiveLayerMap.invalidateTimeline();
+			if (_selectedInteractiveWidget)
+			{
+				_selectedInteractiveWidget.enableMouseMove = true;
+				_selectedInteractiveWidget.enableMouseClick = true;
+				_selectedInteractiveWidget.enableMouseWheel = true;
+				_selectedInteractiveWidget.addEventListener(InteractiveWidgetEvent.AREA_CHANGED, onAreaChanged);
+				_selectedInteractiveWidget.addEventListener(InteractiveLayerMap.PRIMARY_LAYER_CHANGED, onPrimaryLayerChanged);
+				_selectedInteractiveWidget.addEventListener(ResizeEvent.RESIZE, onSelectedWidgetResize);
+				
+				onPrimaryLayerChanged();
+				if (_selectedInteractiveWidget.interactiveLayerMap)
+					_selectedInteractiveWidget.interactiveLayerMap.invalidateTimeline();
+			}
 		}
 		
 		/**
@@ -445,14 +449,17 @@ package com.iblsoft.flexiweather.ogc.multiview
 		 */		
 		private function unregisterSelectedInteractiveWidget(): void
 		{
-			_selectedInteractiveWidget.enableMouseMove = true;
-			_selectedInteractiveWidget.enableMouseClick = false;
-			_selectedInteractiveWidget.enableMouseWheel = false;
-			_selectedInteractiveWidget.removeEventListener(InteractiveWidgetEvent.AREA_CHANGED, onAreaChanged);
-			_selectedInteractiveWidget.removeEventListener(InteractiveLayerMap.PRIMARY_LAYER_CHANGED, onPrimaryLayerChanged);
-			_selectedInteractiveWidget.removeEventListener(ResizeEvent.RESIZE, onSelectedWidgetResize);
-			
-			onPrimaryLayerChanged();
+			if (_selectedInteractiveWidget)
+			{
+				_selectedInteractiveWidget.enableMouseMove = true;
+				_selectedInteractiveWidget.enableMouseClick = false;
+				_selectedInteractiveWidget.enableMouseWheel = false;
+				_selectedInteractiveWidget.removeEventListener(InteractiveWidgetEvent.AREA_CHANGED, onAreaChanged);
+				_selectedInteractiveWidget.removeEventListener(InteractiveLayerMap.PRIMARY_LAYER_CHANGED, onPrimaryLayerChanged);
+				_selectedInteractiveWidget.removeEventListener(ResizeEvent.RESIZE, onSelectedWidgetResize);
+				
+				onPrimaryLayerChanged();
+			}
 		}
 		
 		private var _previousPrimaryLayer: InteractiveLayerMSBase;
@@ -465,7 +472,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 				_previousPrimaryLayer.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onSychronisedVariableChanged);
 			}
 			
-			_previousPrimaryLayer = _selectedInteractiveWidget.interactiveLayerMap.primaryLayer;
+			if (_selectedInteractiveWidget.interactiveLayerMap)
+				_previousPrimaryLayer = _selectedInteractiveWidget.interactiveLayerMap.primaryLayer;
 
 			if (_previousPrimaryLayer)
 			{
@@ -478,7 +486,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 			var layer: InteractiveLayerMSBase = event.target as InteractiveLayerMSBase;
 			var synchronizedVariable: String = event.variableId;
 			
-			if (_synchronizator.hasSynchronisedVariable(synchronizedVariable))
+			if (_synchronizator && _synchronizator.hasSynchronisedVariable(synchronizedVariable))
 			{
 				synchronizeWidgets(_synchronizator);	
 			}
@@ -696,6 +704,9 @@ package com.iblsoft.flexiweather.ogc.multiview
 		
 		private function registerSynchronizator(synchronizator: ISynchronizator):void
 		{
+			if (!synchronizator)
+				return;
+			
 			var syncVars: Array = synchronizator.getSynchronisedVariables();
 			if (syncVars && syncVars.length > 0)
 			{
