@@ -27,8 +27,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 	import flash.utils.clearTimeout;
 	import flash.utils.setTimeout;
 	
-	import flashx.textLayout.formats.WhiteSpaceCollapse;
-	
 	import mx.collections.ArrayCollection;
 	import mx.collections.IList;
 	import mx.controls.Alert;
@@ -37,8 +35,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 	import mx.events.FlexEvent;
 	import mx.events.PropertyChangeEvent;
 	import mx.events.ResizeEvent;
-	
-	import org.hamcrest.mxml.collection.Array;
 	
 	import spark.components.Group;
 	import spark.components.SkinnableContainer;
