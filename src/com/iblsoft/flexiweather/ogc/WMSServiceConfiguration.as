@@ -11,6 +11,7 @@ package com.iblsoft.flexiweather.ogc
 	import flash.net.URLRequest;
 	
 	import mx.collections.ArrayCollection;
+	import com.iblsoft.flexiweather.ogc.managers.ProjectionConfigurationManager;
 	
 	public class WMSServiceConfiguration extends OGCServiceConfiguration
 	{

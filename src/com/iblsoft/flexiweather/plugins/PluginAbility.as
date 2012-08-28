@@ -12,6 +12,7 @@ package com.iblsoft.flexiweather.plugins
 		public static const CONSOLE: String = "console";
 		public static const CHAT: String = "chat";
 		public static const POPUP: String = "popup";
+		public static const MULTI_VIEW: String = "multiView";
 		public static const PERSISTENT_CONFIGURATION: String = "persistenConfiguration";
 		public static const PANE_CLIENT: String = "paneClient";
 		public static const INTERACTIVE_WIDGET_CLIENT: String = "interactiveWidgetClient";
@@ -68,6 +69,13 @@ package com.iblsoft.flexiweather.plugins
 				s_id: String, s_name: String,s_plugin_id: String = null): PluginAbility
 		{
 			return new PluginAbility(PluginAbility.CHAT, s_id, s_plugin_id, classOrInstance) 
+					.withMetadata("name", s_name);
+		}
+		
+		public static function multiView(classOrInstance: Object,
+				s_id: String, s_name: String, s_plugin_id: String = null): PluginAbility
+		{
+			return new PluginAbility(PluginAbility.MULTI_VIEW, s_id, s_plugin_id, classOrInstance) 
 					.withMetadata("name", s_name);
 		}
 		

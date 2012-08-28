@@ -45,8 +45,8 @@ package com.iblsoft.flexiweather.utils
 					
 				} while (pos > -1)
 				
-				trace("start: " + startIndices);
-				trace("end: " + endIndices);
+//				trace("start: " + startIndices);
+//				trace("end: " + endIndices);
 				
 				if(startIndices.length != endIndices.length)
 				{
@@ -60,7 +60,7 @@ package com.iblsoft.flexiweather.utils
 						var start: int = startIndices[i];
 						var end: int = endIndices[i];
 						var tagString: String = label.substring(start, end+2);
-						trace('tagString: ' + tagString);
+//						trace('tagString: ' + tagString);
 						var tag: XML = new XML(tagString);
 						
 						var tagName: String = tag.name();
@@ -140,9 +140,10 @@ package com.iblsoft.flexiweather.utils
 			if (value && value.hasOwnProperty('data') && value.data is Date && dateFormat && dateFormat.length > 0)
 			{
 				valueString = DateUtils.strftime(value.data, dateFormat, useUTC);
+			} else if (value && value.hasOwnProperty('label')) {
+				valueString = value.label;
 			} else {
-				if (value && value.hasOwnProperty('label'))
-					valueString = value.label;
+				valueString = value as String;
 			}
 			return valueString;
 			

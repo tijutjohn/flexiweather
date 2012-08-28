@@ -1,4 +1,4 @@
-package com.iblsoft.flexiweather.ogc
+package com.iblsoft.flexiweather.ogc.managers
 {
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
@@ -13,6 +13,7 @@ package com.iblsoft.flexiweather.ogc
 	import mx.collections.Sort;
 	
 	import spark.collections.SortField;
+	import com.iblsoft.flexiweather.ogc.AreaConfiguration;
 
 	public class AreaConfigurationManager extends BaseConfigurationManager implements Serializable
 	{

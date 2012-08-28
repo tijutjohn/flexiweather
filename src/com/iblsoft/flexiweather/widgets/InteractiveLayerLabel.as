@@ -60,18 +60,18 @@ package com.iblsoft.flexiweather.widgets
 		
 
 
-		public function addSynchronisedVariable(synchronisedVariable: String): void
-		{
-			trace("InteractiveLayerLabel addSynchronisedVariable: " + synchronisedVariable);
-			if (ArrayUtil.getItemIndex(synchronisedVariable, _synchronizedVariableNames) == -1)
-			{
-				trace("\tInteractiveLayerLabel addSynchronisedVariable: " + synchronisedVariable + " ADDED");
-				_synchronizedVariableNames.push(synchronisedVariable);
-				invalidateDynamicPart();
-			} else {
-				trace("\tInteractiveLayerLabel addSynchronisedVariable: " + synchronisedVariable + " NOT ADDED");
-			}
-		}
+//		public function addSynchronisedVariable(synchronisedVariable: String): void
+//		{
+//			trace("InteractiveLayerLabel addSynchronisedVariable: " + synchronisedVariable);
+//			if (ArrayUtil.getItemIndex(synchronisedVariable, _synchronizedVariableNames) == -1)
+//			{
+//				trace("\tInteractiveLayerLabel addSynchronisedVariable: " + synchronisedVariable + " ADDED");
+//				_synchronizedVariableNames.push(synchronisedVariable);
+//				invalidateDynamicPart();
+//			} else {
+//				trace("\tInteractiveLayerLabel addSynchronisedVariable: " + synchronisedVariable + " NOT ADDED");
+//			}
+//		}
 		override protected function createChildren():void
 		{
 			_label = new TextField();
@@ -128,7 +128,7 @@ package com.iblsoft.flexiweather.widgets
 			if (_synchronizator)
 			{
 				var labelText: String = dimensionLabelParser.parseLabel(_synchronizator.labelString, container.interactiveLayerMap);
-				trace("InteractiveLayerLabel: " + labelText);
+//				trace("InteractiveLayerLabel: " + labelText);
 				_label.text = labelText;
 				updateLabelStyles();
 			}
@@ -184,7 +184,7 @@ package com.iblsoft.flexiweather.widgets
 			
 			if (w < 10 || h < 10)
 			{
-				trace("InteractiveLayerLabel check this, size problem");
+//				trace("InteractiveLayerLabel check this, size problem");
 				bkgColor = 0x880000;
 			}
 			
@@ -205,7 +205,7 @@ package com.iblsoft.flexiweather.widgets
 		private function updateLabelStyles(): void
 		{
 			_label.multiline = false;
-			_label.border = true;
+			_label.border = false;
 			
 			var tf: TextFormat = _label.getTextFormat();
 			tf.color = 0xffffff;

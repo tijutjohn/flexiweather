@@ -48,8 +48,11 @@ package com.iblsoft.flexiweather.widgets
 		public static const PRIMARY_LAYER_CHANGED: String = "primaryLayerChanged";
 		[Event(name = PRIMARY_LAYER_CHANGED, type = "flash.events.DataEvent")]
 
-		public static const TIME_VARIABLE_CHANGED: String = "timeVariableChanged";
-		[Event(name = TIME_VARIABLE_CHANGED, type = "mx.events.DynamicEvent")]
+		public static const FRAME_VARIABLE_CHANGED: String = "frameVariableChanged";
+		[Event(name = FRAME_VARIABLE_CHANGED, type = "mx.events.DynamicEvent")]
+		
+		public static const LEVEL_VARIABLE_CHANGED: String = "levelVariableChanged";
+		[Event(name = LEVEL_VARIABLE_CHANGED, type = "mx.events.DynamicEvent")]
 		
 		public static const SYNCHRONISE_WITH: String = "synchroniseWith";
 		[Event(name = SYNCHRONISE_WITH, type = "mx.events.DynamicEvent")]
@@ -80,16 +83,16 @@ package com.iblsoft.flexiweather.widgets
 		public function set dateFormat(value: String): void
 		{
 			_dateFormat = value;
-			dispatchEvent(new Event('frameChanged'));
+			dispatchEvent(new Event(FRAME_VARIABLE_CHANGED));
 		}
 		
-		[Bindable (event="frameChanged")]
+		[Bindable (event=FRAME_VARIABLE_CHANGED)]
 		public function get frame(): Date
 		{
 			var frameDate: Date = getSynchronizedFrameValue();
 			return frameDate;
 		}
-		[Bindable (event="frameChanged")]
+		[Bindable (event=FRAME_VARIABLE_CHANGED)]
 		public function get frameString(): String
 		{
 			var frameDate: Date = getSynchronizedFrameValue();
@@ -234,13 +237,21 @@ package com.iblsoft.flexiweather.widgets
 		protected function onSynchronisedVariableChanged(event: SynchronisedVariableChangeEvent): void
 		{
 			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
-			dispatchEvent(new Event('frameChanged'));
+
+			if (event.variableId == "frame")
+				dispatchEvent(new Event(FRAME_VARIABLE_CHANGED));
+			if (event.variableId == "level")
+				dispatchEvent(new Event(LEVEL_VARIABLE_CHANGED));
 		}
 
 		protected function onSynchronisedVariableDomainChanged(event: SynchronisedVariableChangeEvent): void
 		{
 			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
-			dispatchEvent(new Event('frameChanged'));
+			
+			if (event.variableId == "frame")
+				dispatchEvent(new Event(FRAME_VARIABLE_CHANGED));
+			if (event.variableId == "level")
+				dispatchEvent(new Event(LEVEL_VARIABLE_CHANGED));
 		}
 		
 		public function getLayersOrderString(): String
@@ -528,7 +539,7 @@ package com.iblsoft.flexiweather.widgets
           	for each(so in l_syncLayers) 
           	{
           		//trace("\n Composer getDimensionValues ["+dimName+"] get values for layer: " + (so as Object).name);
-				var values: Array = (so as InteractiveLayerMSBase).getWMSDimensionsValues(dimName, true);
+				var values: Array = (so as InteractiveLayerMSBase).getWMSDimensionsValues(dimName, b_intersection);
           		
           		if(a_dimValues == null)
     				a_dimValues = values;
@@ -911,7 +922,7 @@ package com.iblsoft.flexiweather.widgets
 
 import com.iblsoft.flexiweather.ogc.ILayerConfiguration;
 import com.iblsoft.flexiweather.ogc.LayerConfiguration;
-import com.iblsoft.flexiweather.ogc.LayerConfigurationManager;
+import com.iblsoft.flexiweather.ogc.managers.LayerConfigurationManager;
 import com.iblsoft.flexiweather.utils.Serializable;
 import com.iblsoft.flexiweather.utils.Storage;
 import com.iblsoft.flexiweather.widgets.IConfigurableLayer;

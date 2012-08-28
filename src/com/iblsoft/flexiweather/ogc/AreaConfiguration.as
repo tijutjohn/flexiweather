@@ -8,6 +8,7 @@ package com.iblsoft.flexiweather.ogc
 	import flash.geom.Rectangle;
 	import flash.net.URLRequest;
 	import flash.net.URLVariables;
+	import com.iblsoft.flexiweather.ogc.managers.ProjectionConfigurationManager;
 
 	public class AreaConfiguration implements Serializable
 	{

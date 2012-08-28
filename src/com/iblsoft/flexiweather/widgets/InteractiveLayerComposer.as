@@ -290,7 +290,7 @@ package com.iblsoft.flexiweather.widgets
         	{
         		for each (var layer: IConfigurableLayer in m_layers)
         		{
-        			if (!layer.configuration.isCompatibleWithCRS(crs))
+        			if (layer && !layer.configuration.isCompatibleWithCRS(crs))
         				return false;
         		}
         	}

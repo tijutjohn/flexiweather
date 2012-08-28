@@ -1,4 +1,4 @@
-package com.iblsoft.flexiweather.ogc
+package com.iblsoft.flexiweather.ogc.managers
 {
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
@@ -6,6 +6,7 @@ package com.iblsoft.flexiweather.ogc
 	import flash.events.Event;
 	
 	import mx.collections.ArrayCollection;
+	import com.iblsoft.flexiweather.ogc.MapConfiguration;
 	
 	public class MapConfigurationManager extends BaseConfigurationManager implements Serializable
 	{

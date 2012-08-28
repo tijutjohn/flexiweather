@@ -81,6 +81,7 @@ package com.iblsoft.flexiweather.ogc
 		protected var md_customParameters: Dictionary = new Dictionary(); 
 		protected var ma_subLayerStyleNames: Array = [];
 		
+		protected var mb_synchroniseLevel: Boolean;
 		protected var m_synchronisationRole: SynchronisationRole;
 
 		protected var m_cache: ICache;
@@ -1437,6 +1438,12 @@ package com.iblsoft.flexiweather.ogc
 			dispatchEvent(new SynchronisedVariableChangeEvent(
 					SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, "frame"));
 			
+			if (mb_synchroniseLevel)
+			{
+				dispatchEvent(new SynchronisedVariableChangeEvent(
+						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, "level"));
+			}
+			
 			checkPostponedUpdateDataCall();
 		}
 
@@ -1577,6 +1584,15 @@ package com.iblsoft.flexiweather.ogc
 
 		public function get synchronisationRole(): SynchronisationRole
 		{ return m_synchronisationRole; }
+		
+		public function get synchroniseLevel(): Boolean
+		{
+			return mb_synchroniseLevel;
+		}
+		public function set synchroniseLevel(value: Boolean): void
+		{
+			mb_synchroniseLevel = value;
+		}
 		
 		override public function toString(): String
 		{

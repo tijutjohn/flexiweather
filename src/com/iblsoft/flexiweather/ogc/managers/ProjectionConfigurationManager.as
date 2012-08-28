@@ -1,4 +1,4 @@
-package com.iblsoft.flexiweather.ogc
+package com.iblsoft.flexiweather.ogc.managers
 {
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
@@ -8,6 +8,8 @@ package com.iblsoft.flexiweather.ogc
 	import flash.utils.Dictionary;
 	
 	import mx.collections.ArrayCollection;
+	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.ogc.ProjectionConfiguration;
 
 	public class ProjectionConfigurationManager implements Serializable
 	{

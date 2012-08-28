@@ -1,5 +1,8 @@
-package com.iblsoft.flexiweather.ogc
+package com.iblsoft.flexiweather.ogc.managers
 {
+	import com.iblsoft.flexiweather.ogc.OGCServiceConfiguration;
+	import com.iblsoft.flexiweather.ogc.Version;
+	import com.iblsoft.flexiweather.ogc.WMSServiceConfiguration;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	

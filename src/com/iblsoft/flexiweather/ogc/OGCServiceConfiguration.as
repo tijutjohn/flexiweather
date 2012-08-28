@@ -20,7 +20,7 @@ package com.iblsoft.flexiweather.ogc
 		// runtime variables
 		private var ms_baseURL: String;
 		private var m_data: URLVariables;
-		internal var mi_lastUpdateFlashStamp: int = -1000000;
+		public var mi_lastUpdateFlashStamp: int = -1000000;
 
 		public function OGCServiceConfiguration(s_url: String, s_service: String, version: Version)
 		{

@@ -10,11 +10,10 @@ package com.iblsoft.flexiweather.widgets
 		public var autoSize: Boolean;
 		public var defaultText: String;
 		
-		override public function set y(value:Number):void
-		{
-			super.y = value;
-			trace("GlowLabel y: " + value);
-		}
+//		override public function set y(value:Number):void
+//		{
+//			super.y = value;
+//		}
 		private var _glowColor: uint;
 		private var _glowColorChanged: Boolean;
 		public function get glowColor(): uint
