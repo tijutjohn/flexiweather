@@ -69,7 +69,10 @@ package com.iblsoft.flexiweather.ogc.multiview
 	 */
 	[Style(name="selectedBorderAlpha", type="Number", inherit="yes", theme="spark, mobile", minValue="0.0", maxValue="1.0")]
 	
+	[Event (name="selectionChange", type="mx.events.FlexEvent")]
+	
 	[Event (name="multiViewReady", type="com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent")]
+	
 	public class InteractiveMultiView extends SkinnableDataContainer
 	{
 		private var _selectedInteractiveWidget: InteractiveWidget;
@@ -133,6 +136,21 @@ package com.iblsoft.flexiweather.ogc.multiview
 		private var m_viewBBox: BBox = new BBox(-180, -90, 180, 90);
 		private var m_extentBBox: BBox = new BBox(-180, -90, 180, 90);
 		
+		private function createDefaultConfiguration(): void
+		{
+			var config: MultiViewConfiguration = new MultiViewConfiguration();
+			config.columns = 1;
+			config.rows = 1;
+			
+			createInteractiveWidgetsFromConfiguration(config);
+		}
+		
+		override protected function createChildren():void
+		{
+			super.createChildren();
+			
+			createDefaultConfiguration();
+		}
 		
 		private function onMouseClick(event: MouseEvent): void
 		{
@@ -376,6 +394,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 			{
 				registerSelectedInteractiveWidget();	
 			}
+			
+			dispatchEvent(new FlexEvent(FlexEvent.SELECTION_CHANGE));
 			
 			dispatchEvent(new Event("interactiveLayerMapChanged"));
 			invalidateDisplayList();
