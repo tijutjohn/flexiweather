@@ -719,7 +719,8 @@ package com.iblsoft.flexiweather.widgets
 				vBBox = m_crsProjection.extentBBox;
 			}
 			
-			var a: Array = [];
+//			var a: Array = [];
+			var aNew: Array = [];
 			if(m_crsProjection.wrapsHorizontally) 
 			{
 				var f_crsExtentBBoxWidth: Number = m_crsProjection.extentBBox.width;
@@ -761,7 +762,6 @@ package com.iblsoft.flexiweather.widgets
 				var bboxNorth: Number = Math.min(vBBox.yMax, bbox.yMax);
 				var bboxSouth: Number = Math.max(vBBox.yMin, bbox.yMin);
 				
-				var aNew: Array = [];
 				
 				var partWidth: Number;
 				
@@ -821,12 +821,12 @@ package com.iblsoft.flexiweather.widgets
 				}
 				
 			}
-			if(a.length == 0) {
+			if(aNew.length == 0) {
 				var primaryPartBBox: BBox = bbox;
 				primaryPartBBox = primaryPartBBox.intersected(m_crsProjection.extentBBox);
 				if(primaryPartBBox == null) // no intersection!
 					primaryPartBBox = bbox; // just keep the current view BBox and let's see what server returns
-				a.push(primaryPartBBox);
+				aNew.push(primaryPartBBox);
 //				trace("InteractiveWidget.mapBBoxToViewParts(): primary part only " + primaryPartBBox.toString());
 			}
 			

@@ -2,6 +2,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 {
 	import com.iblsoft.flexiweather.events.InteractiveWidgetEvent;
 	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.ogc.ILayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.SynchronisedVariableChangeEvent;
 	import com.iblsoft.flexiweather.ogc.cache.WMSCacheManager;
@@ -11,6 +12,9 @@ package com.iblsoft.flexiweather.ogc.multiview
 	import com.iblsoft.flexiweather.ogc.multiview.synchronization.AreaSynchronizator;
 	import com.iblsoft.flexiweather.ogc.multiview.synchronization.ISynchronizator;
 	import com.iblsoft.flexiweather.proj.Projection;
+	import com.iblsoft.flexiweather.utils.XMLStorage;
+	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
+	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerLabel;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerPan;
@@ -32,6 +36,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 	import mx.controls.Alert;
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
+	import mx.events.DynamicEvent;
 	import mx.events.FlexEvent;
 	import mx.events.PropertyChangeEvent;
 	import mx.events.ResizeEvent;
@@ -369,6 +374,66 @@ package com.iblsoft.flexiweather.ogc.multiview
 		private function notifyWidgetsReady(): void
 		{
 			dispatchEvent(new InteractiveMultiViewEvent(InteractiveMultiViewEvent.MULTI_VIEW_READY));
+			
+			//load maps from previous multiView state
+			callLater(loadMaps);
+		}
+		
+		private var _serializedMap: XMLStorage;
+		private var _oldCRS: String;
+		private var _oldViewBBox: BBox;
+		private var _oldExtentBBox: BBox;
+		
+		private function saveMapBeforeChangingToNewLayout(widget: InteractiveWidget): void
+		{
+			_serializedMap = new XMLStorage();
+			_oldCRS = widget.getCRS();
+			_oldViewBBox = widget.getViewBBox().clone();
+			_oldExtentBBox = widget.getExtentBBox().clone();
+			widget.interactiveLayerMap.serialize(_serializedMap);
+		}
+		
+		private function loadMaps(): void
+		{
+			if (_serializedMap)
+			{
+				_serializedMap = new XMLStorage(_serializedMap.xml);
+				for each (var currIW: InteractiveWidget in _interactiveWidgets.widgets)
+				{
+					currIW.setCRS(_oldCRS, false);
+					currIW.setExtentBBOX(_oldExtentBBox, false);
+					currIW.setViewBBox(_oldViewBBox, true);
+					
+					currIW.interactiveLayerMap.addEventListener(InteractiveLayerMap.LAYERS_SERIALIZED_AND_READY, onMapFromXMLReady);
+					currIW.interactiveLayerMap.serialize(_serializedMap);
+				}
+			}
+		}
+		
+		private function onMapFromXMLReady(event: DynamicEvent): void
+		{
+			var interactiveLayerMap: InteractiveLayerMap = event.target as InteractiveLayerMap;
+			interactiveLayerMap.removeEventListener(InteractiveLayerMap.LAYERS_SERIALIZED_AND_READY, onMapFromXMLReady);
+			var layers: Array = event['layers'] as Array;
+			for each (var layer: InteractiveLayer in layers)
+			{
+				var configuration: ILayerConfiguration;
+				if (layer)
+				{
+					if (layer is IConfigurableLayer)
+					{
+						configuration = (layer as IConfigurableLayer).configuration;	
+					}
+					interactiveLayerMap.addLayer(layer);
+				} else {
+					trace("onMapFromXMLReady: Layer not exists")
+				}
+			}
+//			listLayers.executeBindings();
+//			player.timeAxis.executeBindings();
+			for each(var l: InteractiveLayer in interactiveLayerMap.layers) {
+				l.refresh(true);
+			}
 		}
 		
 		private function onWidgetSelected(event: InteractiveWidgetEvent): void
@@ -539,6 +604,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 			if (!widget)
 				widget = selectedInteractiveWidget;
 			
+			saveMapBeforeChangingToNewLayout(widget);
+			
 			//all views are removed, so forget this configuration
 			_configuration = null;
 			configurationChanged();
@@ -691,6 +758,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 		
 		private function onAreaChanged(event: InteractiveWidgetEvent): void
 		{
+			//check what was changed
 			synchronizeWidgets(_areaSynchronizator, event.target as InteractiveWidget);
 		}
 		
