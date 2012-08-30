@@ -288,10 +288,14 @@ package com.iblsoft.flexiweather.widgets
         {
         	if (m_layers && m_layers.length > 0)
         	{
-        		for each (var layer: IConfigurableLayer in m_layers)
+        		for each (var layer: InteractiveLayer in m_layers)
         		{
-        			if (layer && !layer.configuration.isCompatibleWithCRS(crs))
-        				return false;
+					if (layer is IConfigurableLayer)
+					{
+						var configurableLayer: IConfigurableLayer = layer as IConfigurableLayer;
+        				if (configurableLayer && configurableLayer.configuration && !configurableLayer.configuration.isCompatibleWithCRS(crs))
+        					return false;
+					}
         		}
         	}
         	return true;
