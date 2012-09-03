@@ -5,7 +5,5 @@ package com.iblsoft.flexiweather.plugins
 	public interface IMultiViewManager
 	{
 		function changeMultiView(configuration: MultiViewConfiguration): void;
-		//DocStorageWebService is only in OnlineWeather project, so for now, we are requesting just Object
-		function getMapsDocStorage(): Object;
 	}
 }
