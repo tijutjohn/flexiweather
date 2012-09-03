@@ -9,20 +9,24 @@ package com.iblsoft.flexiweather.ogc.multiview.layouts
 		
 		override public function set columnAlign(value:String):void
 		{
-			super.columnAlign = ColumnAlign.JUSTIFY_USING_GAP;
+//			super.columnAlign = ColumnAlign.JUSTIFY_USING_WIDTH;
+			super.columnAlign = ColumnAlign.LEFT;
 		}
 		
 		override public function set rowAlign(value:String):void
 		{
-			super.rowAlign = RowAlign.JUSTIFY_USING_GAP;
+//			super.rowAlign = RowAlign.JUSTIFY_USING_HEIGHT;
+			super.rowAlign = RowAlign.TOP;
 		}
 		
 		public function MultiViewLayout()
 		{
 			super();
 			
-			columnAlign =  ColumnAlign.JUSTIFY_USING_GAP;
-			rowAlign =  RowAlign.JUSTIFY_USING_GAP;
+//			columnAlign =  ColumnAlign.JUSTIFY_USING_WIDTH;
+//			rowAlign =  RowAlign.JUSTIFY_USING_HEIGHT;
+			columnAlign =  ColumnAlign.LEFT;
+			rowAlign =  RowAlign.TOP;
 		}
 		
 		override public function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void

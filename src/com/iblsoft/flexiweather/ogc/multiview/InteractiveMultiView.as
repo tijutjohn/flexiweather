@@ -6,6 +6,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.SynchronisedVariableChangeEvent;
 	import com.iblsoft.flexiweather.ogc.cache.WMSCacheManager;
+	import com.iblsoft.flexiweather.ogc.editable.IInteractiveLayerProvider;
 	import com.iblsoft.flexiweather.ogc.multiview.data.MultiViewConfiguration;
 	import com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent;
 	import com.iblsoft.flexiweather.ogc.multiview.skins.InteractiveMultiViewSkin;
@@ -181,7 +182,10 @@ package com.iblsoft.flexiweather.ogc.multiview
 			
 			if (iw)
 			{
-				selectedInteractiveWidget = iw;
+				if (selectedInteractiveWidget != iw)
+				{
+					selectedInteractiveWidget = iw;
+				}
 			}
 		}
 		public function setViewBBox(bbox: BBox, b_finalChange: Boolean, b_negotiateBBox: Boolean = true): void
@@ -376,28 +380,40 @@ package com.iblsoft.flexiweather.ogc.multiview
 			dispatchEvent(new InteractiveMultiViewEvent(InteractiveMultiViewEvent.MULTI_VIEW_READY));
 			
 			//load maps from previous multiView state
-			callLater(loadMaps);
+			callLater(loadMaps, [_serializedMapXML]);
 		}
 		
-		private var _serializedMap: XMLStorage;
+		private var _serializedMapXML: XML;
 		private var _oldCRS: String;
 		private var _oldViewBBox: BBox;
 		private var _oldExtentBBox: BBox;
 		
 		private function saveMapBeforeChangingToNewLayout(widget: InteractiveWidget): void
 		{
-			_serializedMap = new XMLStorage();
+			var _serializedMap: XMLStorage = new XMLStorage();
 			_oldCRS = widget.getCRS();
 			_oldViewBBox = widget.getViewBBox().clone();
 			_oldExtentBBox = widget.getExtentBBox().clone();
 			widget.interactiveLayerMap.serialize(_serializedMap);
+			
+			_serializedMapXML = _serializedMap.xml;
 		}
 		
-		private function loadMaps(): void
+		/**
+		 * Load map for all widget at once 
+		 * @param mapXML
+		 * 
+		 */		
+		public function loadMap(mapXML: XML): void
 		{
-			if (_serializedMap)
+			loadMaps(mapXML);	
+		}
+		
+		private function loadMaps(mapXML: XML): void
+		{
+			if (mapXML)
 			{
-				_serializedMap = new XMLStorage(_serializedMap.xml);
+				var _serializedMap: XMLStorage = new XMLStorage(mapXML);
 				for each (var currIW: InteractiveWidget in _interactiveWidgets.widgets)
 				{
 					currIW.setCRS(_oldCRS, false);
@@ -407,6 +423,54 @@ package com.iblsoft.flexiweather.ogc.multiview
 					currIW.interactiveLayerMap.addEventListener(InteractiveLayerMap.LAYERS_SERIALIZED_AND_READY, onMapFromXMLReady);
 					currIW.interactiveLayerMap.serialize(_serializedMap);
 				}
+			}
+		}
+		
+		public function removeAllLayers(removeLayerCallback: Function = null): void
+		{
+			for each (var iw: InteractiveWidget in _interactiveWidgets.widgets)
+			{
+				var im: InteractiveLayerMap = iw.interactiveLayerMap;
+				while ( im.layers.length > 0)
+				{
+					var l: InteractiveLayer = im.layers.getItemAt(0) as InteractiveLayer;
+					im.removeLayer(l);
+					
+					removeLayer(l, removeLayerCallback);
+				}
+			}
+		}
+		
+		public function removeLayer(l: InteractiveLayer, removeLayerCallback: Function = null): void
+		{
+			for each (var iw: InteractiveWidget in _interactiveWidgets.widgets)
+			{
+				iw.interactiveLayerMap.removeLayer(l);
+				if (removeLayerCallback != null)
+				{
+					removeLayerCallback(l);
+				}
+			}
+		}
+		
+		public function addLayer(ilp: IInteractiveLayerProvider, layerAddedCallback: Function = null): void
+		{
+			for each (var iw: InteractiveWidget in _interactiveWidgets.widgets)
+			{
+				var l: InteractiveLayer = ilp.createInteractiveLayer(iw);
+				iw.interactiveLayerMap.addLayer(l);
+				if (layerAddedCallback != null)
+				{
+					layerAddedCallback(l);
+				}
+			}
+		}
+		
+		public function refresh(b_force: Boolean): void
+		{
+			for each (var iw: InteractiveWidget in _interactiveWidgets.widgets)
+			{
+				iw.interactiveLayerMap.refresh(b_force);
 			}
 		}
 		
@@ -432,7 +496,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 //			listLayers.executeBindings();
 //			player.timeAxis.executeBindings();
 			for each(var l: InteractiveLayer in interactiveLayerMap.layers) {
-				l.refresh(true);
+				//we need to set b_force parameter to force to be able to get cached bitmaps
+				l.refresh(false);
 			}
 		}
 		
@@ -448,22 +513,25 @@ package com.iblsoft.flexiweather.ogc.multiview
 
 		public function set selectedInteractiveWidget(value:InteractiveWidget):void
 		{
-			if (_selectedInteractiveWidget)
+			if (value != _selectedInteractiveWidget)
 			{
-				unregisterSelectedInteractiveWidget();	
+				if (_selectedInteractiveWidget)
+				{
+					unregisterSelectedInteractiveWidget();	
+				}
+				
+				_selectedInteractiveWidget = value;
+				
+				if (_selectedInteractiveWidget)
+				{
+					registerSelectedInteractiveWidget();	
+				}
+				
+				dispatchEvent(new FlexEvent(FlexEvent.SELECTION_CHANGE));
+				
+				dispatchEvent(new Event("interactiveLayerMapChanged"));
+				invalidateDisplayList();
 			}
-			
-			_selectedInteractiveWidget = value;
-			
-			if (_selectedInteractiveWidget)
-			{
-				registerSelectedInteractiveWidget();	
-			}
-			
-			dispatchEvent(new FlexEvent(FlexEvent.SELECTION_CHANGE));
-			
-			dispatchEvent(new Event("interactiveLayerMapChanged"));
-			invalidateDisplayList();
 		}
 		
 		/**
@@ -759,6 +827,74 @@ package com.iblsoft.flexiweather.ogc.multiview
 		private function onAreaChanged(event: InteractiveWidgetEvent): void
 		{
 			//check what was changed
+			var widget: InteractiveWidget = event.target as InteractiveWidget;
+			if (widget && _selectedInteractiveWidget)
+			{
+				
+				
+				
+				//TODO do not change it for selected widget, it was already changed
+				
+				
+				
+				
+				trace("IMV onAreaChanged " + widget.id + " > " + _selectedInteractiveWidget.id);
+				if (widget.id == _selectedInteractiveWidget.id)
+				{
+					var newCRS: String = widget.getCRS(); 
+					var newViewBBox: BBox = widget.getViewBBox(); 
+					var newExtentBBox: BBox = widget.getExtentBBox();
+					
+					var viewBBoxChanged: Boolean;
+					var extentBBoxChanged: Boolean;
+					var crsChanged: Boolean;
+					var crsProjectionChanged: Boolean;
+					var changes: int = 0;
+					
+					if (!m_viewBBox.equals(newViewBBox))
+					{
+						viewBBoxChanged = true;
+						changes++;
+					}
+					if (m_extentBBox.equals(newExtentBBox))
+					{
+						extentBBoxChanged = true;
+						changes++;
+					}
+					if (ms_crs !=newCRS)
+					{
+						crsChanged = true;
+						changes++;
+					}
+					
+					if (changes > 0)
+					{
+						if (crsChanged)
+						{
+//							setCRS(newCRS, changes == 1);
+							ms_crs = newCRS;
+							m_crsProjection = widget.getCRSProjection();
+							changes--;
+						}
+						if (extentBBoxChanged)
+						{
+//							setExtentBBOXRaw(newExtentBBox.xMax, newExtentBBox.yMin, newExtentBBox.xMax, newExtentBBox.yMax, changes == 1);
+							m_extentBBox = newExtentBBox.clone();
+							changes--;
+						}
+						if (m_viewBBox)
+						{
+							m_viewBBox = newViewBBox.clone();
+//							setViewBBox(newViewBBox, changes == 1);
+							changes--;
+						}
+						if (changes > 0)
+						{
+							trace("InteractiveMultiView onAreaChange: something is wrong");
+						}
+					}
+				}
+			}
 			synchronizeWidgets(_areaSynchronizator, event.target as InteractiveWidget);
 		}
 		

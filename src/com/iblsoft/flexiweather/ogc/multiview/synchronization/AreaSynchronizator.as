@@ -29,19 +29,28 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 				clearTimeout(_areaChangeTimeout);
 			}
 			
-			_areaChangeTimeout = setTimeout(changeAreaAfterDelay, 200, synchronizeFromWidget, widgetsForSynchronisation);
 			
 			var crs: String = synchronizeFromWidget.getCRS();
 			var viewBBox: BBox = synchronizeFromWidget.getViewBBox();
 			
+			var cnt: int = 1;
+			trace("\n\n AreaSynchronizator synchronizeWidgets CRS: " + crs + " vievBBox: " + viewBBox.toBBOXString());
 			for each (var widget: InteractiveWidget in widgetsForSynchronisation)
 			{
 				if (widget.id != synchronizeFromWidget.id)
 				{
-					widget.setCRS(crs, false);
-					widget.setViewBBox(viewBBox, false);
+					setTimeout(updateWidgetArea, cnt * 2300, widget, crs, viewBBox);
+//					cnt++;
 				}
 			}
+			_areaChangeTimeout = setTimeout(changeAreaAfterDelay, cnt * 2350, synchronizeFromWidget, widgetsForSynchronisation);
+		}
+		
+		private function updateWidgetArea(widget: InteractiveWidget, crs: String, viewBBox: BBox): void
+		{
+			trace("AreaSynchronizator for " + widget + " CRS: " + crs + " vievBBox: " + viewBBox.toBBOXString());
+			widget.setCRS(crs, false);
+			widget.setViewBBox(viewBBox, false);
 		}
 		
 		private function changeAreaAfterDelay(synchronizeFromWidget: InteractiveWidget, widgetsForSynchronisation: ArrayCollection): void
@@ -49,7 +58,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			clearTimeout(_areaChangeTimeout);
 			_areaChangeTimeout = 0;
 			
-			trace("\n\nAreaSynchronizator changeAreaAfterDelay by " + synchronizeFromWidget.name);
+//			trace("\n\nAreaSynchronizator changeAreaAfterDelay by " + synchronizeFromWidget.name);
 			
 			var crs: String = synchronizeFromWidget.getCRS();
 			var viewBBox: BBox = synchronizeFromWidget.getViewBBox();
@@ -65,7 +74,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 					
 					if (!widget.getViewBBox().equals(viewBBox))
 					{
-						trace("AreaSynchronizator change viewBBox from " + widget.getViewBBox().toBBOXString() + " TO " + viewBBox.toBBOXString());
+//						trace("AreaSynchronizator change viewBBox from " + widget.getViewBBox().toBBOXString() + " TO " + viewBBox.toBBOXString());
 						widget.setViewBBox(viewBBox, true);
 					}
 				}

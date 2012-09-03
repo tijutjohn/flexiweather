@@ -15,9 +15,20 @@ package com.iblsoft.flexiweather.ogc.cache
 		public var cacheKey: CacheKey;
 		public var lastUsed: Date;
 		public var viewProperties: IViewProperties;
-		public var image: DisplayObject;
+		private var _image: DisplayObject;
 		
 		private var _displayed: Boolean;
+
+		public function get image():DisplayObject
+		{
+			return _image;
+		}
+
+		public function set image(value:DisplayObject):void
+		{
+			_image = value;
+		}
+
 		public function get displayed():Boolean 
 		{
 			//		trace(this + " GET displayed = " + _displayed);

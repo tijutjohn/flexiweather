@@ -260,11 +260,9 @@ package com.iblsoft.flexiweather.widgets
 			
 			if ((currTime - m_lastResizeTime) >= resizeMinimumTime)
 			{
-				trace("go autolayout: time diff: "+(currTime - m_lastResizeTime) +" ms");
 				m_lastResizeTime = currTime;
 				autoLayoutViewBBox(m_viewBBox, true, true);
 			} else {
-				trace("on parent resize: wait at least "+(currTime - m_lastResizeTime) +" ms");
 				//uto layout but do not load layers (finalUpdate = false)
 				autoLayoutViewBBox(m_viewBBox, false, true);
 				
@@ -407,20 +405,45 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 		
+		private var _tempLayersForInteractiveLayerMap: Array;
 		public function addLayer(l: InteractiveLayer, index: int = -1): void
 		{
 			l.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onLayerLoaded);
 			l.addEventListener(InteractiveDataLayer.LOADING_STARTED, onLayerLoadingStart);
 
-			var bAddLayer: Boolean = true;
+			var bAddLayer: Boolean = false;
+			
+			//all map data layer have to go to interactiveLayerMap, all others just to interactiveWidget
 			
 			if (l is InteractiveLayerMap) {
 				m_interactiveLayerMap = l as InteractiveLayerMap;
-			} else {
+				if (_tempLayersForInteractiveLayerMap && _tempLayersForInteractiveLayerMap.length > 0)
+				{
+					//add all layers which was added beofere interactiveLayerMap to layer map
+					while (_tempLayersForInteractiveLayerMap.length > 0)
+					{
+						m_interactiveLayerMap.addLayer(_tempLayersForInteractiveLayerMap.shift() as InteractiveLayer);
+					}
+				}
+				bAddLayer = true;
+			} else if (!(l is InteractiveDataLayer)) {
+				trace("this is not data layer, should go to interactiveWidget");
+				bAddLayer = true;
+			} else if (l is InteractiveDataLayer) {
+				trace("this is data layer, should go to layerMap");
+			} 
+			
+			if (!bAddLayer)
+			{
 				if (m_interactiveLayerMap)
 				{
 					m_interactiveLayerMap.addLayer(l);
-					bAddLayer = false;
+				} else {
+					trace("InteractiveWidget, there is no InteractiveLayerMa, we need to add this layer later");
+					if (!_tempLayersForInteractiveLayerMap)
+						_tempLayersForInteractiveLayerMap = [];
+					
+					_tempLayersForInteractiveLayerMap.push(l);
 				}
 			}
 			
@@ -1361,7 +1384,6 @@ package com.iblsoft.flexiweather.widgets
 			var bboxHeightDiff: int = Math.abs(bbox.height - oldBox.height);
 			
 			
-			trace(this + ".setViewBBox DIFF " + bboxWidthDiff + " , " + bboxHeightDiff);
 			if (bboxHeightDiff == 0 && bboxWidthDiff == 0)
 			{
 				b_changeZoom = false;
@@ -1465,7 +1487,7 @@ package com.iblsoft.flexiweather.widgets
 		
 		private function autoLayoutViewBBox(bbox: BBox, b_finalChange:Boolean, b_setViewBBox: Boolean = false): void
 		{
-			trace("autoLayoutViewBBox: " + bbox.toBBOXString() + " b_finalChange: " + b_finalChange);
+//			trace("autoLayoutViewBBox: " + bbox.toBBOXString() + " b_finalChange: " + b_finalChange);
 			//auto layout in widget parent
 				var widgetParent: Group = parent as Group; 
 				if (widgetParent)

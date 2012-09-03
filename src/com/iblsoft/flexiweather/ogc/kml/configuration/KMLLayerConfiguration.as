@@ -9,6 +9,7 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 	import com.iblsoft.flexiweather.net.loaders.XMLLoader;
 	import com.iblsoft.flexiweather.ogc.LayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.Version;
+	import com.iblsoft.flexiweather.ogc.editable.IInteractiveLayerProvider;
 	import com.iblsoft.flexiweather.ogc.kml.InteractiveLayerKML;
 	import com.iblsoft.flexiweather.ogc.kml.data.KMZFile;
 	import com.iblsoft.flexiweather.ogc.kml.events.KMLEvent;
@@ -23,7 +24,7 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 	
 	import mx.controls.Alert;
 	
-	public class KMLLayerConfiguration extends LayerConfiguration
+	public class KMLLayerConfiguration extends LayerConfiguration implements IInteractiveLayerProvider
 	{
 		
 		/**

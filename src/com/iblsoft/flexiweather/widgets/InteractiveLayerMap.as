@@ -58,6 +58,8 @@ package com.iblsoft.flexiweather.widgets
 		[Event(name = SYNCHRONISE_WITH, type = "mx.events.DynamicEvent")]
 		
 		
+		private static var mapUID: int = 0;
+		public var mapID: int;
 		/**
 		 * first frame date from last periodical check 
 		 */		
@@ -120,6 +122,9 @@ package com.iblsoft.flexiweather.widgets
 		public function InteractiveLayerMap(container:InteractiveWidget)
 		{
 			super(container);
+			
+			mapUID++;
+			mapID = mapUID;
 			
 			timelineConfiguration = new MapTimelineConfiguration();
 			
@@ -268,10 +273,13 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (l)
 			{
+				
 				super.addLayer(l);
 				
+				trace(this + " ADD LAYER: " + l.toString());
+				
 				var dynamicEvent: DynamicEvent = new DynamicEvent(TIME_AXIS_ADDED);
-				trace("InteractiveLayerMap addlayer: " + l.name);
+//				trace("InteractiveLayerMap addlayer: " + l.name);
 				dynamicEvent['layer'] = l;
 				dispatchEvent(dynamicEvent);
 				
@@ -910,7 +918,7 @@ package com.iblsoft.flexiweather.widgets
 		}
 		override public function toString(): String
 		{
-			var retStr: String =  "InteractiveLayerMap " ;
+			var retStr: String =  "InteractiveLayerMap ["+mapID+"] " ;
 			for each (var l: InteractiveLayer in layers)
 			{
 				retStr += "\n\t"+l;

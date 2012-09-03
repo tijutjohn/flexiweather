@@ -1,17 +1,19 @@
 package com.iblsoft.flexiweather.ogc.cache
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.ogc.cache.event.WMSCacheEvent;
 	import com.iblsoft.flexiweather.ogc.data.IViewProperties;
 	import com.iblsoft.flexiweather.ogc.data.WMSViewProperties;
 	
 	import flash.display.Bitmap;
 	import flash.display.DisplayObject;
+	import flash.events.EventDispatcher;
 	import flash.events.TimerEvent;
 	import flash.net.URLRequest;
 	import flash.utils.Dictionary;
 	import flash.utils.Timer;
 	
-	public class WMSCache implements ICache
+	public class WMSCache extends EventDispatcher implements ICache
 	{
 		public static var supportCaching: Boolean = true;
 		
@@ -225,6 +227,32 @@ package com.iblsoft.flexiweather.ogc.cache
 			return (md_noDataCache && md_noDataCache[s_key] == true);
 		}
 		
+		/**
+		 * Function just check if this item is currently loading and not if it is cached. 
+		 * @param viewProperties
+		 * @param b_checkNoDataCache
+		 * @return 
+		 * 
+		 */		
+		public function isItemLoading(viewProperties: IViewProperties, b_checkNoDataCache: Boolean = false): Boolean
+		{
+			var wmsViewProperties: WMSViewProperties = viewProperties as WMSViewProperties;
+			if (!wmsViewProperties)
+				return false;
+			
+			var s_key: String = qetWMSViewCacheKey(wmsViewProperties);
+			
+			if (b_checkNoDataCache)
+			{
+				if (md_noDataCache && md_noDataCache[s_key])
+				{
+					return true;
+				}
+			}
+			return md_cacheLoading[s_key];
+				
+		}
+		
 		public function isItemCached(viewProperties: IViewProperties, b_checkNoDataCache: Boolean = false): Boolean
 		{
 			var wmsViewProperties: WMSViewProperties = viewProperties as WMSViewProperties;
@@ -264,7 +292,10 @@ package com.iblsoft.flexiweather.ogc.cache
 		{
 			var item: CacheItem = getCacheItem(viewProperties);
 			if (item)
-				return item.image;
+			{
+				var bmp: Bitmap = item.image as Bitmap;
+				return new Bitmap(bmp.bitmapData.clone());
+			}
 			return null;
 		}
 	
@@ -334,6 +365,9 @@ package com.iblsoft.flexiweather.ogc.cache
 			debugCache();
 			
 			delete md_cacheLoading[s_key];
+			
+			var wce: WMSCacheEvent = new WMSCacheEvent(WMSCacheEvent.ITEM_ADDED, item);
+			dispatchEvent(wce);
 		}
 		
 		public function debugCache(): String

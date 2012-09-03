@@ -8,7 +8,9 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 	import com.iblsoft.flexiweather.ogc.ExceptionUtils;
 	import com.iblsoft.flexiweather.ogc.IWMSLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
+	import com.iblsoft.flexiweather.ogc.cache.CacheItem;
 	import com.iblsoft.flexiweather.ogc.cache.WMSCache;
+	import com.iblsoft.flexiweather.ogc.cache.event.WMSCacheEvent;
 	import com.iblsoft.flexiweather.ogc.data.IViewProperties;
 	import com.iblsoft.flexiweather.ogc.data.IWMSViewPropertiesLoader;
 	import com.iblsoft.flexiweather.ogc.data.ImagePart;
@@ -37,6 +39,8 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 		private var m_layer: InteractiveLayerMSBase;
 		
 		protected var m_loader: WMSImageLoader;
+		
+		private var m_wmsViewProperties: WMSViewProperties;
 		
 		public function MSBaseLoader(layer: InteractiveLayerMSBase)
 		{
@@ -75,7 +79,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 		 */		
 		public function updateWMSData(b_forceUpdate: Boolean, viewProperties: IViewProperties, forcedLayerWidth: Number, forcedLayerHeight: Number): void
 		{
-			var wmsViewProperties: WMSViewProperties = viewProperties as WMSViewProperties;
+			m_wmsViewProperties = viewProperties as WMSViewProperties;
 			
 			//check if data are not already cached
 			
@@ -98,8 +102,8 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				i_height = forcedLayerHeight;
 			
 			//TODO do we want support custom CRS and ViewBBox, which should be stored in WMSViewProperties or we can take it from InteractiveWidget
-			var s_currentCRS: String = wmsViewProperties.crs;
-			var currentViewBBox: BBox = wmsViewProperties.getViewBBox();
+			var s_currentCRS: String = m_wmsViewProperties.crs;
+			var currentViewBBox: BBox = m_wmsViewProperties.getViewBBox();
 			
 			var f_horizontalPixelSize: Number = currentViewBBox.width / i_width;
 			var f_verticalPixelSize: Number = currentViewBBox.height / i_height;
@@ -107,10 +111,10 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 			var projection: Projection = Projection.getByCRS(s_currentCRS);
 			var parts: Array = m_layer.container.mapBBoxToProjectionExtentParts(currentViewBBox);
 			//			var parts: Array = container.mapBBoxToViewParts(projection.extentBBox);
-			//		var dimensions: Array = m_layer.getDimensionForCache(wmsViewProperties);
+			//		var dimensions: Array = m_layer.getDimensionForCache(m_wmsViewProperties);
 			
 			for each(var partBBoxToUpdate: BBox in parts) {
-				updateDataPart(wmsViewProperties,
+				updateDataPart(m_wmsViewProperties,
 					partBBoxToUpdate,
 					uint(Math.round(partBBoxToUpdate.width / f_horizontalPixelSize)),
 					uint(Math.round(partBBoxToUpdate.height / f_verticalPixelSize)),
@@ -156,9 +160,19 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				//			itemMetadata.url = request;
 				//			itemMetadata.dimensions = dimensions;
 				
+				var isItemLoading: Boolean = wmsCache.isItemLoading(wmsViewProperties, true);
 				var isCached: Boolean = wmsCache.isItemCached(wmsViewProperties, true);
 				
 				var imgTest: DisplayObject = wmsCache.getCacheItemBitmap(wmsViewProperties);
+				
+				if (isItemLoading)
+				{
+					trace(this + " updateDataPart  isItemLoading = true");
+					m_wmsViewProperties = wmsViewProperties;
+					var cacheItem: CacheItem = wmsCache.getCacheItem(wmsViewProperties);
+					wmsCache.addEventListener(WMSCacheEvent.ITEM_ADDED, onCacheItemLoaded);
+					return;
+				}
 				if (isCached && imgTest == null) {
 					//is cached, but no data, do not load anything (it's data which was loaded before, but exception was returned, so we cached this info
 					// invalidate property "displayed" for cached items		
@@ -206,6 +220,18 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				onFinishedRequest(wmsViewProperties, null);
 				invalidateDynamicPart();
 			}
+		}
+		
+		private function onCacheItemLoaded(event: WMSCacheEvent): void
+		{
+			trace(this + " onCacheItemLoaded");
+			var wmsCache: WMSCache = event.target as WMSCache;
+			var item: CacheItem = event.item;
+			
+			wmsCache.removeEventListener(WMSCacheEvent.ITEM_ADDED, onCacheItemLoaded);
+			
+			onFinishedRequest(m_wmsViewProperties, null);
+			invalidateDynamicPart();
 		}
 		
 		protected function notifyLoadingStart(associatedData: Object): void
