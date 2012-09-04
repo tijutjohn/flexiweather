@@ -1125,6 +1125,16 @@ package com.iblsoft.flexiweather.widgets
 				
 
         // Mouse events handling
+		/**
+		 * InteractiveWidget needs to call this function is anything, what needs to be synchronized was changed 
+		 * 
+		 */		
+		public function notifyWidgetChanged(change: String): void
+		{
+			var iwe: InteractiveWidgetEvent = new InteractiveWidgetEvent(InteractiveWidgetEvent.WIDGET_CHANGED)
+			dispatchEvent(iwe);
+		}
+		
 		private function notifyWidgetSelected(): void
 		{
 			dispatchEvent(new InteractiveWidgetEvent(InteractiveWidgetEvent.WIDGET_SELECTED));

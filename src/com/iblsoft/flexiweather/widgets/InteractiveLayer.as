@@ -70,15 +70,24 @@ package com.iblsoft.flexiweather.widgets
 		
 		public static var ID: int = 0;
 		
+		override public function get visible():Boolean
+		{
+			return super.visible;
+		}
 		override public function set visible(b_visible: Boolean): void
 		{
-			super.visible = b_visible;
-			
-			var ile: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.VISIBILITY_CHANGED);
-			dispatchEvent(ile);
-			
-			if (container)
-				container.onLayerVisibilityChanged(this);
+			if (super.visible != b_visible)
+			{
+				super.visible = b_visible;
+				
+				var ile: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.VISIBILITY_CHANGED);
+				dispatchEvent(ile);
+				
+				if (container)
+					container.onLayerVisibilityChanged(this);
+				
+				notifyLayerChanged('visible');
+			}
 		}
 		
 		public function InteractiveLayer(container: InteractiveWidget)
@@ -169,6 +178,16 @@ package com.iblsoft.flexiweather.widgets
 			{
 				this.width = container.width;
 				this.height = container.height;
+			}
+		}
+		
+		protected function notifyLayerChanged(change: String): void
+		{
+			if (container)
+			{
+				container.notifyWidgetChanged(change);
+			} else {
+				trace(this + " [notifyLayerChanged] was changed ("+change+"), but there is no InteractiveWidget assigned");
 			}
 		}
 

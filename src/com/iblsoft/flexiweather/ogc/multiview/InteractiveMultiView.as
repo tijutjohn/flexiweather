@@ -238,7 +238,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 			
 			var iw: InteractiveWidget;
 			var ac: ArrayCollection = new ArrayCollection();
-			var cnt: int = 1;
 			
 			
 			if (dataGroup)
@@ -256,22 +255,68 @@ package com.iblsoft.flexiweather.ogc.multiview
 				
 			}
 			
+			stopWatchingChanges();
+			
 			_widgetsCountToBeReady = new ArrayCollection();
 			
-			for (var j: int = 0; j < newConfiguration.rows; j++)
+			var alreadyExistingWidgetsCount: int = _interactiveWidgets.widgets.length;
+			var cnt: int = 0;
+			var i: int;
+			var j: int;
+			var oldIW: InteractiveWidget
+			for (j = 0; j < newConfiguration.rows; j++)
 			{
-				for (var i: int = 0; i < newConfiguration.columns; i++)
+				for (i = 0; i < newConfiguration.columns; i++)
 				{
-					iw = createInteractiveWidget(cnt);
-					ac.addItem(iw);
-					
-					_widgetsCountToBeReady.addItem(iw);
+					oldIW = _interactiveWidgets.getWidgetAt(cnt);
+					if (oldIW)
+					{
+						resetWidget(oldIW);
+						ac.addItem(oldIW);
+						
+					} else {
+						iw = createInteractiveWidget(cnt);
+						ac.addItem(iw);
+						
+						_widgetsCountToBeReady.addItem(iw);
+					}
 					
 					cnt++;
+					
+					if (!_selectedInteractiveWidget)
+					{
+						selectedInteractiveWidget = iw;
+					}
 				}
 			}
 			
+			//remove not needed widgets
+			if (cnt < alreadyExistingWidgetsCount)
+			{
+				while (cnt < _interactiveWidgets.widgets.length)
+				{
+					oldIW = _interactiveWidgets.getWidgetAt(cnt);
+					if (_selectedInteractiveWidget == oldIW)
+					{
+						selectedInteractiveWidget = null;
+					}
+					removeWidget(oldIW);
+				}
+			}
+			
+			if (!_selectedInteractiveWidget && ac.length > 0)
+			{
+				selectedInteractiveWidget = (ac.getItemAt(0) as InteractiveWidget);
+			}
+			
 			dataProvider = ac;
+			
+			invalidateDisplayList();
+			
+			if (_widgetsCountToBeReady.length == 0)
+			{
+				notifyWidgetsReady();
+			}
 		}
 		
 		
@@ -281,18 +326,18 @@ package com.iblsoft.flexiweather.ogc.multiview
 			iw.id = 'm_iw'+id;
 			iw.name = 'Widget '+id;
 			
-			var iz: InteractiveLayerZoom = new InteractiveLayerZoom(iw);
-			iz.zOrder = 1;
-			var ip: InteractiveLayerPan = new InteractiveLayerPan(iw);
-			ip.zOrder = 2;
+//			var iz: InteractiveLayerZoom = new InteractiveLayerZoom(iw);
+//			iz.zOrder = 1;
+//			var ip: InteractiveLayerPan = new InteractiveLayerPan(iw);
+//			ip.zOrder = 2;
 			
 			
 			var mapLabel: InteractiveLayerLabel = new InteractiveLayerLabel(_synchronizator, iw);
 			mapLabel.zOrder = 3;
 			var layerMap: InteractiveLayerMap = new InteractiveLayerMap(iw);
 			
-			iw.addElement(iz);
-			iw.addElement(ip);
+//			iw.addElement(iz);
+//			iw.addElement(ip);
 
 			iw.addLayer(mapLabel);
 			iw.addLayer(layerMap);
@@ -381,6 +426,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 			
 			//load maps from previous multiView state
 			callLater(loadMaps, [_serializedMapXML]);
+			
+			_watchChanges = true;
 		}
 		
 		private var _serializedMapXML: XML;
@@ -534,6 +581,48 @@ package com.iblsoft.flexiweather.ogc.multiview
 			}
 		}
 		
+		public function startWatchingChanges(): void
+		{
+			_watchChanges = true;
+		}
+		public function stopWatchingChanges(): void
+		{
+			_watchChanges = false;
+		}
+		
+		private var _watchChanges: Boolean = true;
+		private function onWidgetChanged(event: InteractiveWidgetEvent): void
+		{
+			if (_watchChanges)
+			{
+				var iw: InteractiveWidget = event.target as  InteractiveWidget;
+				if (iw != _selectedInteractiveWidget)
+				{
+					trace("We are not doing synchronization from others widget, but currently selected");
+				} else {
+					stopWatchingChanges();
+					rebuildWidgets();	
+					startWatchingChanges();
+				}
+			} else {
+				trace("\n	widget changes, but multiview is not watching changes now");
+			}
+		}
+		
+		private function rebuildWidgets(): void
+		{
+			for each (var currWidget: InteractiveWidget in _interactiveWidgets.widgets)
+			{
+				if (_selectedInteractiveWidget == currWidget)
+				{
+					//do not anything with selected widget, change came from it
+				} else {
+					currWidget.interactiveLayerMap.removeAllLayers();
+					_selectedInteractiveWidget.interactiveLayerMap.cloneLayersForComposer(currWidget.interactiveLayerMap);
+				}
+			}
+		}
+		
 		/**
 		 * When new interactive widget is added, all needed registrations need to be done. E.g. Adding event listeners and so 
 		 * 
@@ -545,6 +634,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 			iw.enableMouseMove = true;
 			iw.enableMouseClick = false;
 			iw.enableMouseWheel = false;
+			
+			
 			
 			if (ms_crs)
 				iw.setCRS(ms_crs);
@@ -579,14 +670,19 @@ package com.iblsoft.flexiweather.ogc.multiview
 		{
 			if (_selectedInteractiveWidget)
 			{
+				
 				_selectedInteractiveWidget.enableMouseMove = true;
 				_selectedInteractiveWidget.enableMouseClick = true;
 				_selectedInteractiveWidget.enableMouseWheel = true;
+				
+				_selectedInteractiveWidget.addEventListener(InteractiveWidgetEvent.WIDGET_CHANGED, onWidgetChanged);
+				
 				_selectedInteractiveWidget.addEventListener(InteractiveWidgetEvent.AREA_CHANGED, onAreaChanged);
 				_selectedInteractiveWidget.addEventListener(InteractiveLayerMap.PRIMARY_LAYER_CHANGED, onPrimaryLayerChanged);
 				_selectedInteractiveWidget.addEventListener(ResizeEvent.RESIZE, onSelectedWidgetResize);
 				
 				onPrimaryLayerChanged();
+				
 				if (_selectedInteractiveWidget.interactiveLayerMap)
 					_selectedInteractiveWidget.interactiveLayerMap.invalidateTimeline();
 			}
@@ -603,6 +699,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 				_selectedInteractiveWidget.enableMouseMove = true;
 				_selectedInteractiveWidget.enableMouseClick = false;
 				_selectedInteractiveWidget.enableMouseWheel = false;
+				
+				_selectedInteractiveWidget.removeEventListener(InteractiveWidgetEvent.WIDGET_CHANGED, onWidgetChanged);
 				_selectedInteractiveWidget.removeEventListener(InteractiveWidgetEvent.AREA_CHANGED, onAreaChanged);
 				_selectedInteractiveWidget.removeEventListener(InteractiveLayerMap.PRIMARY_LAYER_CHANGED, onPrimaryLayerChanged);
 				_selectedInteractiveWidget.removeEventListener(ResizeEvent.RESIZE, onSelectedWidgetResize);
@@ -659,6 +757,19 @@ package com.iblsoft.flexiweather.ogc.multiview
 				
 			}
 		}
+		
+		/**
+		 * Reset widget to prepare it for new map
+		 *  
+		 * @param widget
+		 * 
+		 */		
+		private function resetWidget(widget: InteractiveWidget): void
+		{
+			widget.removeAllLayers();
+			widget.interactiveLayerMap.removeAllLayers();
+		}
+		
 		/**
 		 * You can reset multiView to one view (InteractiveWidget). If you specify interactiveWidget it will reset to that specified widget.
 		 * If you do not specify interactiveWidget, it will be reset to currently selected widget
@@ -678,22 +789,22 @@ package com.iblsoft.flexiweather.ogc.multiview
 			_configuration = null;
 			configurationChanged();
 			
-			changeTileLayoutToSingleView();
+//			changeTileLayoutToSingleView();
 
-			var cnt: int = 0;
-			var ok: Boolean = true;
-			while (ok)
-			{
-				var currWidget: InteractiveWidget = _interactiveWidgets.widgets.getItemAt(cnt) as InteractiveWidget;
-				if (widget != currWidget)
-				{
-					removeWidget(currWidget);
-				} else {
-					cnt++;
-				}
-				if (cnt == _interactiveWidgets.widgets.length)
-					ok = false;
-			}
+//			var cnt: int = 0;
+//			var ok: Boolean = true;
+//			while (ok)
+//			{
+//				var currWidget: InteractiveWidget = _interactiveWidgets.widgets.getItemAt(cnt) as InteractiveWidget;
+//				if (widget != currWidget)
+//				{
+//					removeWidget(currWidget);
+//				} else {
+//					cnt++;
+//				}
+//				if (cnt == _interactiveWidgets.widgets.length)
+//					ok = false;
+//			}
 			
 			invalidateDisplayList();
 		}
@@ -770,6 +881,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 		{
 			if (widget)
 			{
+				widget.interactiveLayerMap.removeAllLayers();
 				_interactiveWidgets.removeWidget(widget);
 				var ac: ArrayCollection = dataProvider as ArrayCollection;
 				if (ac)
@@ -781,6 +893,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 					}
 				}
 				
+				widget.interactiveLayerMap.removeAllLayers();
+				widget.destroy();
 			}
 		}
 		
@@ -813,6 +927,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 				}
 					
 			}
+			debugWidgets();
 			if (selectedInteractiveWidget)
 			{
 				selectionL = selectedInteractiveWidget.x;
@@ -824,6 +939,15 @@ package com.iblsoft.flexiweather.ogc.multiview
 			}
 		}
 		
+		private function debugWidgets(): void
+		{
+			trace("\n debug widgets");
+			var cnt: int = 0;
+			for each (var currIW: InteractiveWidget in _interactiveWidgets.widgets)
+			{
+				trace("IW ["+cnt+"] width: " + currIW.width + ", height: " + currIW.height);
+			}
+		}
 		private function onAreaChanged(event: InteractiveWidgetEvent): void
 		{
 			//check what was changed
@@ -1005,7 +1129,9 @@ class WidgetCollection
 	
 	public function getWidgetAt(position: int): InteractiveWidget
 	{
-		return _collection.getItemAt(position) as InteractiveWidget;
+		if (_collection && _collection.length > position)
+			return _collection.getItemAt(position) as InteractiveWidget;
+		return null;
 	}
 	public function addWidget(widget: InteractiveWidget): void
 	{

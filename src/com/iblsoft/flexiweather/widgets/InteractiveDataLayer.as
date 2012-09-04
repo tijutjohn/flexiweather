@@ -200,7 +200,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			invalidateDataFlag = true;
 			_invalidateDataForceUpdateFlag = _invalidateDataForceUpdateFlag || b_forceUpdate;
-			trace(this + " invalidateData _invalidateDataForceUpdateFlag: " + _invalidateDataForceUpdateFlag + " (b_forceUpdate = " + b_forceUpdate + ")");
+//			trace(this + " invalidateData _invalidateDataForceUpdateFlag: " + _invalidateDataForceUpdateFlag + " (b_forceUpdate = " + b_forceUpdate + ")");
 			invalidateProperties();
 		}
 		
@@ -215,7 +215,7 @@ package com.iblsoft.flexiweather.widgets
 			
 			if (_invalidateDataFlag)
 			{
-				trace(this + " commitProperties _invalidateDataForceUpdateFlag: " + _invalidateDataForceUpdateFlag);
+//				trace(this + " commitProperties _invalidateDataForceUpdateFlag: " + _invalidateDataForceUpdateFlag);
 				updateData(_invalidateDataForceUpdateFlag);
 				invalidateDataFlag = false;
 			}
@@ -289,8 +289,6 @@ package com.iblsoft.flexiweather.widgets
 			dispatchEvent(event);
 			
 		}
-		
-		
 		
 		protected function onDataProgress(event: ProgressEvent): void
 		{

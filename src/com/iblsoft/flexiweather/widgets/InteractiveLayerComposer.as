@@ -322,5 +322,21 @@ package com.iblsoft.flexiweather.widgets
 			
 			return composer;
 		}
+        /**
+		 * Clone interactiveLayer 
+		 * 
+		 */		
+		public function cloneLayersForComposer(composer: InteractiveLayerComposer): void
+		{
+			var total: int = layers.length
+			for (var i: int = 0; i < total; i++)
+			{
+				var l: InteractiveLayer = layers.getItemAt(i) as InteractiveLayer;
+				
+				trace("\t cloneLayersForComposer l " + l.name);
+				var newLayer: InteractiveLayer = l.clone();
+				composer.addLayer(newLayer);
+			}
+		}
 	}
 }
