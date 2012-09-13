@@ -2,6 +2,7 @@ package com.iblsoft.flexiweather.utils
 {
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.WMSDimension;
+	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerComposer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
 	
@@ -81,7 +82,7 @@ package com.iblsoft.flexiweather.utils
 						if (attrs['tz'])
 							useUTC = (attrs['tz'] as String).toLowerCase() == 'utc';
 						
-						if (tagName.toLowerCase() == 'frame')
+						if (tagName.toLowerCase() == GlobalVariable.FRAME)
 						{
 							//run + forecast
 							var run: Object = getWMSDimensionValue(layerComposer, layerID, 'RUN');
@@ -96,7 +97,7 @@ package com.iblsoft.flexiweather.utils
 								
 								replacedString = formatWMSDimensionValue( run , format, useUTC);
 							}
-						} else if (tagName.toLowerCase() == 'level') {
+						} else if (tagName.toLowerCase() == GlobalVariable.LEVEL) {
 							var elevation: Object = getWMSDimensionValue(layerComposer, layerID, 'ELEVATION');
 							if (elevation)
 							{

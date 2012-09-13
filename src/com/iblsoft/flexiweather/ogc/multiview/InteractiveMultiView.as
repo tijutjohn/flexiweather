@@ -463,9 +463,12 @@ package com.iblsoft.flexiweather.ogc.multiview
 				var _serializedMap: XMLStorage = new XMLStorage(mapXML);
 				for each (var currIW: InteractiveWidget in _interactiveWidgets.widgets)
 				{
-					currIW.setCRS(_oldCRS, false);
-					currIW.setExtentBBOX(_oldExtentBBox, false);
-					currIW.setViewBBox(_oldViewBBox, true);
+					if (_oldCRS)
+						currIW.setCRS(_oldCRS, false);
+					if (_oldExtentBBox)
+						currIW.setExtentBBOX(_oldExtentBBox, false);
+					if (_oldViewBBox)
+						currIW.setViewBBox(_oldViewBBox, true);
 					
 					currIW.interactiveLayerMap.addEventListener(InteractiveLayerMap.LAYERS_SERIALIZED_AND_READY, onMapFromXMLReady);
 					currIW.interactiveLayerMap.serialize(_serializedMap);
@@ -478,12 +481,15 @@ package com.iblsoft.flexiweather.ogc.multiview
 			for each (var iw: InteractiveWidget in _interactiveWidgets.widgets)
 			{
 				var im: InteractiveLayerMap = iw.interactiveLayerMap;
-				while ( im.layers.length > 0)
+				if (im)
 				{
-					var l: InteractiveLayer = im.layers.getItemAt(0) as InteractiveLayer;
-					im.removeLayer(l);
-					
-					removeLayer(l, removeLayerCallback);
+					while ( im.layers.length > 0)
+					{
+						var l: InteractiveLayer = im.layers.getItemAt(0) as InteractiveLayer;
+						im.removeLayer(l);
+						
+						removeLayer(l, removeLayerCallback);
+					}
 				}
 			}
 		}
@@ -492,10 +498,13 @@ package com.iblsoft.flexiweather.ogc.multiview
 		{
 			for each (var iw: InteractiveWidget in _interactiveWidgets.widgets)
 			{
-				iw.interactiveLayerMap.removeLayer(l);
-				if (removeLayerCallback != null)
+				if (iw && iw.interactiveLayerMap)
 				{
-					removeLayerCallback(l);
+					iw.interactiveLayerMap.removeLayer(l);
+					if (removeLayerCallback != null)
+					{
+						removeLayerCallback(l);
+					}
 				}
 			}
 		}
@@ -634,8 +643,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 			iw.enableMouseMove = true;
 			iw.enableMouseClick = false;
 			iw.enableMouseWheel = false;
-			
-			
 			
 			if (ms_crs)
 				iw.setCRS(ms_crs);

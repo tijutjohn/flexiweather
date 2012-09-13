@@ -110,7 +110,7 @@ package com.iblsoft.flexiweather.ogc
 				
 //				for each(s_dimName in getWMSDimensionsNames()) {
 //					if (s_dimName.toLowerCase() == 'elevation')
-//						storage.serializeString('level', getWMSDimensionValue(s_dimName), null);
+//						storage.serializeString(GlobalVariable.LEVEL, getWMSDimensionValue(s_dimName), null);
 //				}
 				if (alpha < 1)
 					storage.serializeNumber("transparency", alpha);

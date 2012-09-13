@@ -304,6 +304,7 @@ package com.iblsoft.flexiweather.widgets
 			if (event.element is InteractiveLayer)
 			{
 				_mxmlContentElements.push(event.element as InteractiveLayer);
+				(event.element as InteractiveLayer).container = this;
 //				addLayer(event.element as InteractiveLayer);
 			}
 		}
@@ -411,10 +412,14 @@ package com.iblsoft.flexiweather.widgets
 			l.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onLayerLoaded);
 			l.addEventListener(InteractiveDataLayer.LOADING_STARTED, onLayerLoadingStart);
 
-			var bAddLayer: Boolean = false;
+//			var bAddLayer: Boolean = false;
 			
 			//all map data layer have to go to interactiveLayerMap, all others just to interactiveWidget
 			
+			if (l is InteractiveLayerMap) {
+				m_interactiveLayerMap = l as InteractiveLayerMap;
+			}
+			/*
 			if (l is InteractiveLayerMap) {
 				m_interactiveLayerMap = l as InteractiveLayerMap;
 				if (_tempLayersForInteractiveLayerMap && _tempLayersForInteractiveLayerMap.length > 0)
@@ -427,29 +432,31 @@ package com.iblsoft.flexiweather.widgets
 				}
 				bAddLayer = true;
 			} else if (!(l is InteractiveDataLayer)) {
-				trace("this is not data layer, should go to interactiveWidget");
+//				trace("this is not data layer, should go to interactiveWidget");
 				bAddLayer = true;
 			} else if (l is InteractiveDataLayer) {
-				trace("this is data layer, should go to layerMap");
+//				trace("this is data layer, should go to layerMap");
+				bAddLayer = false;
 			} 
+			*/
+//			if (!bAddLayer)
+//			{
+//				if (m_interactiveLayerMap)
+//				{
+//					m_interactiveLayerMap.addLayer(l);
+//				} else {
+//					trace("InteractiveWidget, there is no InteractiveLayerMa, we need to add this layer later");
+//					if (!_tempLayersForInteractiveLayerMap)
+//						_tempLayersForInteractiveLayerMap = [];
+//					
+//					_tempLayersForInteractiveLayerMap.push(l);
+//				}
+//			}
 			
-			if (!bAddLayer)
-			{
-				if (m_interactiveLayerMap)
-				{
-					m_interactiveLayerMap.addLayer(l);
-				} else {
-					trace("InteractiveWidget, there is no InteractiveLayerMa, we need to add this layer later");
-					if (!_tempLayersForInteractiveLayerMap)
-						_tempLayersForInteractiveLayerMap = [];
-					
-					_tempLayersForInteractiveLayerMap.push(l);
-				}
-			}
 			
-			
-			if (bAddLayer)
-			{
+//			if (bAddLayer)
+//			{
+				l.container = this;
 				if (index >= 0)
 					addElementAt(l, index);
 				else
@@ -458,7 +465,7 @@ package com.iblsoft.flexiweather.widgets
 				//when new layer is added to container, call onAreaChange to notify layer, that layer is already added to container, so it can render itself
 				l.onAreaChanged(true);
 				orderLayers();
-			}
+//			}
 			
 		}
 		
@@ -471,6 +478,7 @@ package com.iblsoft.flexiweather.widgets
 			l.removeEventListener(InteractiveDataLayer.LOADING_STARTED, onLayerLoadingStart);
 			
 			if(l.parent == m_layerContainer) {
+				l.container = null;
 				m_layerContainer.removeElement(l);
 				l.destroy();
 			}

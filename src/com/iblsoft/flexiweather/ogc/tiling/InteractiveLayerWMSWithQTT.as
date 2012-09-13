@@ -15,6 +15,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import com.iblsoft.flexiweather.ogc.WMSWithQTTLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.cache.ICache;
 	import com.iblsoft.flexiweather.ogc.cache.ICachedLayer;
+	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.ogc.data.IViewProperties;
 	import com.iblsoft.flexiweather.ogc.data.IWMSViewPropertiesLoader;
 	import com.iblsoft.flexiweather.ogc.data.QTTViewProperties;
@@ -412,7 +413,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			
 			if (b_frameChanged)
 			{
-				_currentValidityTime = getSynchronisedVariableValue("frame") as Date;
+				_currentValidityTime = getSynchronisedVariableValue(GlobalVariable.FRAME) as Date;
 				trace("setWMSDimensionValue _currentValidityTime : " + _currentValidityTime );
 				if (m_tiledLayer)
 				{
@@ -450,11 +451,11 @@ package com.iblsoft.flexiweather.ogc.tiling
 		
 		override public function toString(): String
 		{
-			var retStr: String = "InteractiveLayerWMSWithQTT " + name + " isTileable: " + isTileable ;
-			if (m_tiledLayer)
-			{
-				retStr += "\n\t\t" + m_tiledLayer;
-			}
+			var retStr: String = "InteractiveLayerWMSWithQTT " + name + " isTileable: " + isTileable + " / IW: " + container.id;
+//			if (m_tiledLayer)
+//			{
+//				retStr += "\n\t\t" + m_tiledLayer;
+//			}
 			return retStr;
 		}
 		

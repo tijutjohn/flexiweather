@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.ogc.multiview.synchronization
 {
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
+	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import mx.collections.ArrayCollection;
@@ -25,11 +26,11 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			if (primaryLayer)
 			{
 				var variables: Array = primaryLayer.getSynchronisedVariables();
-				var frames: Array = primaryLayer.getSynchronisedVariableValuesList('frame');
+				var frames: Array = primaryLayer.getSynchronisedVariableValuesList(GlobalVariable.FRAME);
 			
 				var synchronizeFromWidgetPosition: int = getWidgetPosition(synchronizeFromWidget, widgetsForSynchronisation);
 				
-				var currFrame: Date = primaryLayer.getSynchronisedVariableValue('frame') as Date;
+				var currFrame: Date = primaryLayer.getSynchronisedVariableValue(GlobalVariable.FRAME) as Date;
 				var currFramePosition: int = getFramePosition(currFrame, frames);
 				
 //				trace("curr frame: " + currFrame.toTimeString() + " currFramePosition: " + currFramePosition);
@@ -58,7 +59,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 									
 	//								if (currPrimaryLayer)
 	//								{
-	//									currPrimaryLayer.se('frame', frame);
+	//									currPrimaryLayer.se(GlobalVariable.FRAME, frame);
 	//								}
 								}
 							}
@@ -116,12 +117,12 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		
 		public function getSynchronisedVariables():Array
 		{
-			return ['frame'];
+			return [GlobalVariable.FRAME];
 		}
 		
 		public function hasSynchronisedVariable(s_variableId: String): Boolean
 		{
-			return s_variableId == 'frame';
+			return s_variableId == GlobalVariable.FRAME;
 		}
 	}
 }

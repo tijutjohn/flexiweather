@@ -41,6 +41,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 		protected var m_loader: WMSImageLoader;
 		
 		private var m_wmsViewProperties: WMSViewProperties;
+		private var m_imagePart: ImagePart;
 		
 		public function MSBaseLoader(layer: InteractiveLayerMSBase)
 		{
@@ -152,6 +153,13 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 			var img: DisplayObject = null;
 			
 			var wmsCache: WMSCache = m_layer.getCache() as WMSCache;
+			
+			var imagePart: ImagePart = new ImagePart();
+			imagePart.mi_updateCycleAge = mi_updateCycleAge;
+			imagePart.ms_imageCRS = wmsViewProperties.crs;
+			imagePart.m_imageBBox = currentViewBBox;
+			
+			
 			if(!b_forceUpdate)
 			{
 				//			var itemMetadata: CacheItemMetadata = new CacheItemMetadata();
@@ -169,6 +177,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				{
 					trace(this + " updateDataPart  isItemLoading = true");
 					m_wmsViewProperties = wmsViewProperties;
+					m_imagePart = imagePart;
 					var cacheItem: CacheItem = wmsCache.getCacheItem(wmsViewProperties);
 					wmsCache.addEventListener(WMSCacheEvent.ITEM_ADDED, onCacheItemLoaded);
 					return;
@@ -187,10 +196,6 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				wmsCache.removeFromScreen();
 			}
 			
-			var imagePart: ImagePart = new ImagePart();
-			imagePart.mi_updateCycleAge = mi_updateCycleAge;
-			imagePart.ms_imageCRS = wmsViewProperties.crs;
-			imagePart.m_imageBBox = currentViewBBox;
 			
 			if(img == null) {
 				
@@ -224,11 +229,37 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 		
 		private function onCacheItemLoaded(event: WMSCacheEvent): void
 		{
-			trace(this + " onCacheItemLoaded");
+			trace("\n\n"+this + " onCacheItemLoaded");
 			var wmsCache: WMSCache = event.target as WMSCache;
 			var item: CacheItem = event.item;
 			
 			wmsCache.removeEventListener(WMSCacheEvent.ITEM_ADDED, onCacheItemLoaded);
+			
+			
+			
+			//		super.onDataLoaded(event);
+			var wmsViewProperties: WMSViewProperties = m_wmsViewProperties;
+			var imagePart: ImagePart = m_imagePart;
+			
+			var result: * = item.image;
+//			event.associatedData.result = result;
+			
+				imagePart.mi_updateCycleAge = mi_updateCycleAge;
+				addImagePart(wmsViewProperties, imagePart, result);
+				
+//				wmsViewProperties.url = event.request;
+				
+//				wmsCache.addCacheItem( item.image, wmsViewProperties);
+				
+//				invalidateDynamicPart();
+			
+//			var bFinishedAll: Boolean = onFinishedRequest(wmsViewProperties, event.request);
+//			if (bFinishedAll)
+//			{
+//				//notify layer that data was loaded
+//				notifyLoadingFinished(event.associatedData);	
+//			}
+			
 			
 			onFinishedRequest(m_wmsViewProperties, null);
 			invalidateDynamicPart();
@@ -438,6 +469,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 		
 		private function invalidateDynamicPart(b_invalid: Boolean = true): void
 		{
+			trace("\t MSBaseLoader invalidateDynamicPart: " + id);
 			var de: DynamicEvent = new DynamicEvent("invalidateDynamicPart");
 			de["invalid"] = b_invalid;
 			dispatchEvent(de);

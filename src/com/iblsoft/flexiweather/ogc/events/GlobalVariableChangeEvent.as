@@ -1,5 +1,7 @@
 package com.iblsoft.flexiweather.ogc.events
 {
+	import com.iblsoft.flexiweather.ogc.data.GlobalVariableValue;
+	
 	import flash.events.Event;
 	
 	public class GlobalVariableChangeEvent extends Event

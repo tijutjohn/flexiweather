@@ -294,6 +294,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			if (item)
 			{
 				var bmp: Bitmap = item.image as Bitmap;
+				trace("WMSCache getCacheItemBitmap for " + item.cacheKey);
 				return new Bitmap(bmp.bitmapData.clone());
 			}
 			return null;

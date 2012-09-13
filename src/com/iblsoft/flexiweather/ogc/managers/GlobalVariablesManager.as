@@ -2,6 +2,8 @@ package com.iblsoft.flexiweather.ogc.managers
 {
 	import com.iblsoft.flexiweather.data.SetOperationType;
 	import com.iblsoft.flexiweather.ogc.WMSDimension;
+	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
+	import com.iblsoft.flexiweather.ogc.multiview.synchronization.events.SynchronisationEvent;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
 	
 	import flash.events.DataEvent;
@@ -12,9 +14,6 @@ package com.iblsoft.flexiweather.ogc.managers
 
 	public class GlobalVariablesManager extends EventDispatcher
 	{
-		public static const VARIABLE_FRAME: String = 'frame';
-		public static const VARIABLE_LEVEL: String = 'level';
-		
 		public static const FRAMES_CHANGED: String = 'framesChanged';
 		public static const LEVELS_CHANGED: String = 'levelsChanged';
 	
@@ -67,13 +66,24 @@ package com.iblsoft.flexiweather.ogc.managers
 				//unregister old map
 				_interactiveLayerMap.removeEventListener(InteractiveLayerMap.FRAME_VARIABLE_CHANGED, onFrameVariableChanged);
 				_interactiveLayerMap.removeEventListener(InteractiveLayerMap.LEVEL_VARIABLE_CHANGED, onLevelVariableChanged);
+				_interactiveLayerMap.removeEventListener(SynchronisationEvent.START_GLOBAL_VARIABLE_SYNCHRONIZATION, onGlobalVariableSynchronisationChanged);
+				_interactiveLayerMap.removeEventListener(SynchronisationEvent.STOP_GLOBAL_VARIABLE_SYNCHRONIZATION, onGlobalVariableSynchronisationChanged);
+				_interactiveLayerMap.removeEventListener(InteractiveLayerMap.PRIMARY_LAYER_CHANGED, onPrimaryLayerChanged);
 				
 			}
 
 			_interactiveLayerMap = interactiveMap;
 			_interactiveLayerMap.addEventListener(InteractiveLayerMap.FRAME_VARIABLE_CHANGED, onFrameVariableChanged);
 			_interactiveLayerMap.addEventListener(InteractiveLayerMap.LEVEL_VARIABLE_CHANGED, onLevelVariableChanged);
+			_interactiveLayerMap.addEventListener(SynchronisationEvent.START_GLOBAL_VARIABLE_SYNCHRONIZATION, onGlobalVariableSynchronisationChanged);
+			_interactiveLayerMap.addEventListener(SynchronisationEvent.STOP_GLOBAL_VARIABLE_SYNCHRONIZATION, onGlobalVariableSynchronisationChanged);
+			_interactiveLayerMap.addEventListener(InteractiveLayerMap.PRIMARY_LAYER_CHANGED, onPrimaryLayerChanged);
 
+			checkGlobalVariableChange();
+		}
+		
+		private function checkGlobalVariableChange(): void
+		{
 			if (_interactiveLayerMap && _interactiveLayerMap.primaryLayer)
 			{
 				onFrameVariableChanged();
@@ -81,23 +91,50 @@ package com.iblsoft.flexiweather.ogc.managers
 			}
 		}
 		
+		private function onPrimaryLayerChanged(event: DataEvent): void
+		{
+			checkGlobalVariableChange();
+		}
+		
+		private function onGlobalVariableSynchronisationChanged(event: SynchronisationEvent): void
+		{
+			switch (event.globalVariable)
+			{
+				case GlobalVariable.LEVEL:
+					onLevelVariableChanged();
+					break;
+				case GlobalVariable.FRAME:
+					onFrameVariableChanged();
+					break;
+			}
+		}
+		
 		private function onLevelVariableChanged(event: Event = null): void
 		{
 			if (_interactiveLayerMap && _interactiveLayerMap.primaryLayer)
 			{
-				var levels: Array = _interactiveLayerMap.primaryLayer.getSynchronisedVariableValuesList('level');
+				var levels: Array;
+				if (_interactiveLayerMap.primaryLayer.synchroniseLevel)
+				{
+					_levels = _interactiveLayerMap.primaryLayer.getSynchronisedVariableValuesList(GlobalVariable.LEVEL);
+				}
 				_levels = new ArrayCollection(levels);
-				dispatchEvent(new Event(LEVELS_CHANGED, true));
+			} else {
+				_levels = new ArrayCollection();
 			}
+			dispatchEvent(new Event(LEVELS_CHANGED, true));
 		}
-		private function onFrameVariableChanged(event: Event = null): void
+		
+		private function onFrameVariableChanged(event: Event = null): void 
 		{
 			if (_interactiveLayerMap && _interactiveLayerMap.primaryLayer)
 			{
-				var frames: Array = _interactiveLayerMap.primaryLayer.getSynchronisedVariableValuesList('frame');
+				var frames: Array = _interactiveLayerMap.primaryLayer.getSynchronisedVariableValuesList(GlobalVariable.FRAME);
 				_frames = new ArrayCollection(frames);
-				dispatchEvent(new Event(FRAMES_CHANGED, true));
+			} else {
+				_frames = new ArrayCollection();
 			}
+			dispatchEvent(new Event(FRAMES_CHANGED, true));
 			
 		}
 	}

@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.ogc.data.GlobalVariableValue;
 	import com.iblsoft.flexiweather.utils.Duration;
 	import com.iblsoft.flexiweather.utils.ISO8601Parser;
 	
@@ -122,10 +123,7 @@ package com.iblsoft.flexiweather.ogc
 										data = new Date();
 										(data as Date).time = f;
 										s_label = (data as Date).toUTCString();
-										a_values.push({
-												label: s_label,
-												value: ISO8601Parser.dateToString(data as Date),
-												data: data});
+										a_values.push(new GlobalVariableValue(s_label, ISO8601Parser.dateToString(data as Date), data));
 									}
 								}
 								return;
@@ -167,10 +165,10 @@ package com.iblsoft.flexiweather.ogc
 							}
 							var f_num: Number;
 							for(f_num = f_numFrom; f_num < f_numTo; f_num += f_numStep) {
-								a_values.push({label: String(f_num), value: String(f_num), data: f_num});
+								a_values.push(new GlobalVariableValue(String(f_num), String(f_num), f_num));
 							}
 							if(f_numFrom != f_numTo) {
-								a_values.push({label: String(f_numTo), value: String(f_numTo), data: f_numTo});
+								a_values.push(new GlobalVariableValue( String(f_numTo), String(f_numTo), f_numTo));
 							}
 							return;
 						}
@@ -178,7 +176,7 @@ package com.iblsoft.flexiweather.ogc
 				}
 			}
 			// default operation
-			a_values.push({label: s_label, value: s_value, data: data});
+			a_values.push(new GlobalVariableValue(s_label, s_value, data));
 		}
 		
 		public static function stringValueToObject(s_value: String, s_units: String): Object

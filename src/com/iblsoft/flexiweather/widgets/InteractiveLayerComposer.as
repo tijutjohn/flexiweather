@@ -41,7 +41,11 @@ package com.iblsoft.flexiweather.widgets
 			
 		}
 		
-
+		override public function invalidateDynamicPart(b_invalid: Boolean = true): void
+		{
+			//do not do anything in layer composer on invalidate dynamic part, each layer will handle this on its own
+		}
+		
 		private function notifyLayersChanged(layer: InteractiveLayer = null): void
 		{
 			if (layer)

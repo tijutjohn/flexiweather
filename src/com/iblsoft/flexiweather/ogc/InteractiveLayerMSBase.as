@@ -9,12 +9,15 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.ogc.cache.ICache;
 	import com.iblsoft.flexiweather.ogc.cache.ICachedLayer;
 	import com.iblsoft.flexiweather.ogc.cache.WMSCache;
+	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
+	import com.iblsoft.flexiweather.ogc.data.GlobalVariableValue;
 	import com.iblsoft.flexiweather.ogc.data.IViewProperties;
 	import com.iblsoft.flexiweather.ogc.data.IWMSViewPropertiesLoader;
 	import com.iblsoft.flexiweather.ogc.data.ImagePart;
 	import com.iblsoft.flexiweather.ogc.data.WMSViewProperties;
 	import com.iblsoft.flexiweather.ogc.events.GetCapabilitiesEvent;
 	import com.iblsoft.flexiweather.ogc.events.MSBaseLoaderEvent;
+	import com.iblsoft.flexiweather.ogc.multiview.synchronization.events.SynchronisationEvent;
 	import com.iblsoft.flexiweather.ogc.net.loaders.MSBaseLoader;
 	import com.iblsoft.flexiweather.ogc.net.loaders.WMSFeatureInfoLoader;
 	import com.iblsoft.flexiweather.ogc.net.loaders.WMSImageLoader;
@@ -141,6 +144,8 @@ package com.iblsoft.flexiweather.ogc
 			setStyle('showEffect', fadeIn);
 //			setStyle('removedEffect', fadeOut);
 			setStyle('hideEffect', fadeOut);
+			
+			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
 		}
 		
 		private var fadeIn: Fade;
@@ -149,6 +154,13 @@ package com.iblsoft.flexiweather.ogc
 		[Bindable]
 		public var alphaBackup: Number = 1;
 		
+		private function onAddedToStage(event: Event): void
+		{
+			removeEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
+			
+			//WMS layer always synchronise FRAME variable
+			notifySynchronizationChange(GlobalVariable.FRAME, true);
+		}
 		
 		public function changeViewProperties(viewProperties: IViewProperties): void
 		{
@@ -445,7 +457,7 @@ package com.iblsoft.flexiweather.ogc
 		
 		protected function onCurrentWMSDataInvalidateDynamicPart(event: DynamicEvent): void
 		{
-//			trace("\t onCurrentWMSDataInvalidateDynamicPart ["+name+"]");
+			trace("\t onCurrentWMSDataInvalidateDynamicPart ["+name+"]");
 			invalidateDynamicPart(event['invalid']);
 		}
 		
@@ -593,6 +605,7 @@ package com.iblsoft.flexiweather.ogc
 				
 				var loader: IWMSViewPropertiesLoader = getWMSViewPropertiesLoader();
 				
+				trace("\n\n" + this + " updateData loader: "+ (loader as MSBaseLoader).id);
 				loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
 				loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
 				loader.addEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
@@ -687,6 +700,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			if (!layerWasDestroyed)
 			{
+				trace("\n" + this + " DRAW");
 				super.draw(graphics);
 				
 				var imageParts: ArrayCollection = m_currentWMSViewProperties.imageParts;
@@ -744,7 +758,7 @@ package com.iblsoft.flexiweather.ogc
 			ptImageEndPoint.x += 1;
 			ptImageEndPoint.y += 1;
 			
-			//			trace("InteractiveLayerWMS.draw(): image-w=" + image.width + " image-h=" + image.height);
+			trace("\t" + this + " | DRAWIMAGEPARTASBITMAP(): image-w=" + image.width + " image-h=" + image.height);
 			var ptImageSize: Point = ptImageEndPoint.subtract(ptImageStartPoint);
 			ptImageSize.x = int(Math.round(ptImageSize.x));
 			ptImageSize.y = int(Math.round(ptImageSize.y));
@@ -1213,17 +1227,17 @@ package com.iblsoft.flexiweather.ogc
 			// if "run" changed, then even time axis changes
 			if(m_cfg.dimensionRunName != null && s_dimName == m_cfg.dimensionRunName) {
 				dispatchEvent(new SynchronisedVariableChangeEvent(
-					SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, "frame"));
+					SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, GlobalVariable.FRAME));
 			}
 			//if "forecast" changed, we need to update timeline, so we need to dispatch event
 			if(m_cfg.dimensionForecastName != null && s_dimName == m_cfg.dimensionForecastName) {
 				dispatchEvent(new SynchronisedVariableChangeEvent(
-					SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, "frame"));
+					SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.FRAME));
 			}
 			//if "time" changed, we need to update timeline, so we need to dispatch event
 			if(m_cfg.dimensionTimeName != null && s_dimName == m_cfg.dimensionTimeName) {
 				dispatchEvent(new SynchronisedVariableChangeEvent(
-					SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, "frame"));
+					SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.FRAME));
 			}
 		}
 		/**
@@ -1236,7 +1250,6 @@ package com.iblsoft.flexiweather.ogc
 		 */		
         public function setWMSDimensionValue(s_dimName: String, s_value: String): void
         {
-			//TODO check if bitmap for dimension is value
 			if (m_currentWMSViewProperties)
 				m_currentWMSViewProperties.setWMSDimensionValue(s_dimName, s_value);
 			
@@ -1436,12 +1449,12 @@ package com.iblsoft.flexiweather.ogc
 			_capabilitiesReady = true;
 			
 			dispatchEvent(new SynchronisedVariableChangeEvent(
-					SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, "frame"));
+					SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, GlobalVariable.FRAME));
 			
 			if (mb_synchroniseLevel)
 			{
 				dispatchEvent(new SynchronisedVariableChangeEvent(
-						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, "level"));
+						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, GlobalVariable.LEVEL));
 			}
 			
 			checkPostponedUpdateDataCall();
@@ -1591,12 +1604,30 @@ package com.iblsoft.flexiweather.ogc
 		}
 		public function set synchroniseLevel(value: Boolean): void
 		{
-			mb_synchroniseLevel = value;
+			if (mb_synchroniseLevel != value)
+			{
+				mb_synchroniseLevel = value;
+				notifySynchronizationChange(GlobalVariable.LEVEL, mb_synchroniseLevel);
+			}
+		}
+		
+		protected function notifySynchronizationChange(globalVariable: String, synchronise: Boolean): void
+		{
+			var eventType: String;
+			
+			if (synchronise)
+				eventType = SynchronisationEvent.START_GLOBAL_VARIABLE_SYNCHRONIZATION;
+			else
+				eventType = SynchronisationEvent.STOP_GLOBAL_VARIABLE_SYNCHRONIZATION;
+
+			var se: SynchronisationEvent = new SynchronisationEvent(eventType, true);
+			se.globalVariable = globalVariable;
+			dispatchEvent(se);
 		}
 		
 		override public function toString(): String
 		{
-			return "InteractiveLayerMSBase " + name;
+			return "InteractiveLayerMSBase " + name + " / IW: " + container.id;
 		}
 		
 		private function destroyCache():void

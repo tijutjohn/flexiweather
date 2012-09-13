@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.ogc.multiview.synchronization
 {
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
+	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import mx.collections.ArrayCollection;
@@ -13,10 +14,16 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			return '<level/>';
 		}
 		
+		public var levelValues: Array;
+		
 		public function LevelSynchronizator()
 		{
 		}
 		
+		private function getLevelValue(position: int): void
+		{
+			
+		}
 		public function synchronizeWidgets(synchronizeFromWidget:InteractiveWidget, widgetsForSynchronisation:ArrayCollection):void
 		{
 			trace("\nLevelSychronizator synchronizeWidgets");
@@ -24,11 +31,11 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			if (primaryLayer)
 			{
 				var variables: Array = primaryLayer.getSynchronisedVariables();
-				var levels: Array = primaryLayer.getSynchronisedVariableValuesList('level');
+				var levels: Array = primaryLayer.getSynchronisedVariableValuesList(GlobalVariable.LEVEL);
 			
 				var synchronizeFromWidgetPosition: int = getWidgetPosition(synchronizeFromWidget, widgetsForSynchronisation);
 				
-				var currLevel: String = primaryLayer.getSynchronisedVariableValue('level') as String;
+				var currLevel: String = primaryLayer.getSynchronisedVariableValue(GlobalVariable.LEVEL) as String;
 				var currLevelPosition: int = getLevelPosition(currLevel, levels);
 				
 				trace("curr level: " + currLevel + " currLevelPosition: " + currLevelPosition);
@@ -57,7 +64,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 									
 	//								if (currPrimaryLayer)
 	//								{
-	//									currPrimaryLayer.se('frame', frame);
+	//									currPrimaryLayer.se(GlobalVariable.FRAME, frame);
 	//								}
 								}
 							}
@@ -111,12 +118,12 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		
 		public function getSynchronisedVariables():Array
 		{
-			return ['level'];
+			return [GlobalVariable.LEVEL];
 		}
 		
 		public function hasSynchronisedVariable(s_variableId: String): Boolean
 		{
-			return s_variableId == 'level';
+			return s_variableId == GlobalVariable.LEVEL;
 		}
 	}
 }
