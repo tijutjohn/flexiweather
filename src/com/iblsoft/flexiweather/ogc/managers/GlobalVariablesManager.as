@@ -113,12 +113,11 @@ package com.iblsoft.flexiweather.ogc.managers
 		{
 			if (_interactiveLayerMap && _interactiveLayerMap.primaryLayer)
 			{
-				var levels: Array;
+				var levels: ArrayCollection;
 				if (_interactiveLayerMap.primaryLayer.synchroniseLevel)
 				{
-					_levels = _interactiveLayerMap.primaryLayer.getSynchronisedVariableValuesList(GlobalVariable.LEVEL);
+					_levels = new ArrayCollection(_interactiveLayerMap.primaryLayer.getSynchronisedVariableValuesList(GlobalVariable.LEVEL));
 				}
-				_levels = new ArrayCollection(levels);
 			} else {
 				_levels = new ArrayCollection();
 			}
