@@ -4,6 +4,7 @@ package com.iblsoft.flexiweather.ogc.data
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.ILayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.IWMSLayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
 	import com.iblsoft.flexiweather.ogc.SynchronisedVariableChangeEvent;
 	import com.iblsoft.flexiweather.ogc.WMSDimension;
@@ -27,9 +28,14 @@ package com.iblsoft.flexiweather.ogc.data
 	{
 //		public var cache: ICache;
 //		
+		/**
+		 * this is just debug variable. Do not use it for implementation purpose, can be removed anytime.
+		 */
+		public var parentLayer: InteractiveLayerMSBase;
+		
 		public var name: String;
 		
-		protected var m_cfg: IWMSLayerConfiguration;
+		private var _m_cfg: IWMSLayerConfiguration;
 		
 		protected var md_dimensionValues: Dictionary = new Dictionary();
 		protected var md_customParameters: Dictionary = new Dictionary(); 
@@ -37,6 +43,18 @@ package com.iblsoft.flexiweather.ogc.data
 		
 		
 		protected var ma_imageParts: ArrayCollection = new ArrayCollection(); // of ImagePart
+
+
+		public function get m_cfg():IWMSLayerConfiguration
+		{
+			return _m_cfg;
+		}
+
+		public function set m_cfg(value:IWMSLayerConfiguration):void
+		{
+			_m_cfg = value;
+		}
+
 		public function get imageParts(): ArrayCollection
 		{
 			return ma_imageParts;
@@ -131,6 +149,16 @@ package com.iblsoft.flexiweather.ogc.data
 			_viewBBox = null;
 			m_url = null;
 			_validity = null;
+			
+		}
+		
+		public function addImagePart(imagePart: ImagePart): void
+		{
+			ma_imageParts.addItem(imagePart);
+			if (parentLayer)
+				trace("WMSViewProperties.addImagePart: " + ma_imageParts.length + " ["+parentLayer+"]");
+			else
+				trace("WMSViewProperties.addImagePart: " + ma_imageParts.length + " ["+this+"]");
 			
 		}
 		

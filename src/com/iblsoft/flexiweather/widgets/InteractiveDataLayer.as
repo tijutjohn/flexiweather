@@ -13,7 +13,14 @@ package com.iblsoft.flexiweather.widgets
 	
 	import mx.events.DynamicEvent;
 
+	[Event (name="loadingStarted", type="com.iblsoft.flexiweather.events.InteractiveLayerEvent")]
+	[Event (name="loadingFinished", type="com.iblsoft.flexiweather.events.InteractiveLayerEvent")]
+	[Event (name="loadingError", type="com.iblsoft.flexiweather.events.InteractiveLayerEvent")]
+	[Event (name="operationNotSupported", type="com.iblsoft.flexiweather.events.InteractiveLayerEvent")]
+	[Event (name="progress", type="com.iblsoft.flexiweather.events.InteractiveLayerProgressEvent")]
+	
 	[Event (name="statusChanged", type="flash.events.Event")]
+	
 	public class InteractiveDataLayer extends InteractiveLayer
 	{
 		/**
@@ -149,6 +156,7 @@ package com.iblsoft.flexiweather.widgets
 		 * 
 		 */		
 		[Bindable (event="statusChanged")]
+		[Inspectable (enumeration="empty,loading data,no data available,data loaded with errors")]
 		public function get status(): String
 		{		
 			return _status;
@@ -200,7 +208,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			invalidateDataFlag = true;
 			_invalidateDataForceUpdateFlag = _invalidateDataForceUpdateFlag || b_forceUpdate;
-			trace(this + " invalidateData _invalidateDataForceUpdateFlag: " + _invalidateDataForceUpdateFlag + " (b_forceUpdate = " + b_forceUpdate + ")");
+			trace("**** invalidateData _invalidateDataForceUpdateFlag: " + _invalidateDataForceUpdateFlag + " (b_forceUpdate = " + b_forceUpdate + ") ["+this+"]");
 			invalidateProperties();
 		}
 		
@@ -213,7 +221,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			super.commitProperties();
 			
-			trace(this + " commitProperties _invalidateDataForceUpdateFlag: " + _invalidateDataForceUpdateFlag);
+			trace("*** commitProperties _invalidateDataForceUpdateFlag: " + _invalidateDataForceUpdateFlag + " ["+this+"]");
 			if (_invalidateDataFlag)
 			{
 				updateData(_invalidateDataForceUpdateFlag);

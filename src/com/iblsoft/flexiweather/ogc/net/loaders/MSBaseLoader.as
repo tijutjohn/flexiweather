@@ -175,7 +175,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				
 				if (isItemLoading)
 				{
-					trace(this + " updateDataPart  isItemLoading = true");
+					trace(" updateDataPart  isItemLoading = true ["+this+"/"+wmsViewProperties.parentLayer+"]");
 					m_wmsViewProperties = wmsViewProperties;
 					m_imagePart = imagePart;
 					var cacheItem: CacheItem = wmsCache.getCacheItem(wmsViewProperties);
@@ -322,7 +322,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 							++i;
 					}
 				}
-				imageParts.addItem(imagePart);
+				wmsViewProperties.addImagePart(imagePart);
 			}
 		}
 		

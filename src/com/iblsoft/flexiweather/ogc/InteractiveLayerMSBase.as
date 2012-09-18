@@ -127,6 +127,7 @@ package com.iblsoft.flexiweather.ogc
 			ma_preloadedWMSViewProperties = [];
 			
 			m_currentWMSViewProperties = new WMSViewProperties();
+			m_currentWMSViewProperties.parentLayer = this;
 			m_currentWMSViewProperties.crs = container.crs;
 			m_currentWMSViewProperties.setViewBBox(container.getViewBBox());
 			m_currentWMSViewProperties.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onCurrentWMSDataSynchronisedVariableChanged);
@@ -457,7 +458,7 @@ package com.iblsoft.flexiweather.ogc
 		
 		protected function onCurrentWMSDataInvalidateDynamicPart(event: DynamicEvent): void
 		{
-			trace("\t onCurrentWMSDataInvalidateDynamicPart ["+name+"]");
+			trace("\t onCurrentWMSDataInvalidateDynamicPart ["+this+"]");
 			invalidateDynamicPart(event['invalid']);
 		}
 		
@@ -605,7 +606,7 @@ package com.iblsoft.flexiweather.ogc
 				
 				var loader: IWMSViewPropertiesLoader = getWMSViewPropertiesLoader();
 				
-				trace("\n\n" + this + " updateData loader: "+ (loader as MSBaseLoader).id);
+				trace("\n\n ***** updateData loader: "+ (loader as MSBaseLoader).id + " ["+this+"]");
 				loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
 				loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
 				loader.addEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
@@ -700,7 +701,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			if (!layerWasDestroyed)
 			{
-				trace("\n" + this + " DRAW");
+				trace("\n DRAW ["+ this+"]");
 				super.draw(graphics);
 				
 				var imageParts: ArrayCollection = m_currentWMSViewProperties.imageParts;
@@ -711,7 +712,10 @@ package com.iblsoft.flexiweather.ogc
 					return;
 				
 				var s_currentCRS: String = m_currentWMSViewProperties.crs;
-				//			trace("InteractiveLayerWMS.draw(): currentViewBBox=" + container.getViewBBox().toString());
+				
+				if (imageParts)
+					trace("\t DRAW currentViewBBox=" + container.getViewBBox().toString() + " imageParts: " + imageParts.length);
+				
 				for each(var imagePart: ImagePart in imageParts) {
 					// Check if CRS of the image part == current CRS of the container
 					if(s_currentCRS != imagePart.ms_imageCRS)
@@ -758,7 +762,7 @@ package com.iblsoft.flexiweather.ogc
 			ptImageEndPoint.x += 1;
 			ptImageEndPoint.y += 1;
 			
-			trace("\t" + this + " | DRAWIMAGEPARTASBITMAP(): image-w=" + image.width + " image-h=" + image.height);
+			trace("\t DRAWIMAGEPARTASBITMAP(): image-w=" + image.width + " image-h=" + image.height + " ["+this+"]");
 			var ptImageSize: Point = ptImageEndPoint.subtract(ptImageStartPoint);
 			ptImageSize.x = int(Math.round(ptImageSize.x));
 			ptImageSize.y = int(Math.round(ptImageSize.y));

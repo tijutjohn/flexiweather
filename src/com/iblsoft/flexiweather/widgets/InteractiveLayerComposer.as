@@ -1,5 +1,7 @@
 package com.iblsoft.flexiweather.widgets
 {
+	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
+	import com.iblsoft.flexiweather.events.InteractiveLayerMapEvent;
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
@@ -16,6 +18,7 @@ package com.iblsoft.flexiweather.widgets
 	import mx.events.CollectionEventKind;
 	import mx.events.FlexEvent;
 	
+	[Event (name="mapLoaded", type="com.iblsoft.flexiweather.events.InteractiveLayerMapEvent")]
 	public class InteractiveLayerComposer extends InteractiveDataLayer implements Serializable
 	{
         protected var m_layers: ArrayCollection = new ArrayCollection();
@@ -28,9 +31,45 @@ package com.iblsoft.flexiweather.widgets
 			m_layers.addEventListener(CollectionEvent.COLLECTION_CHANGE, onLayerCollectionChanged);
 		}
 		
+		private function onLayerLoadingFinished(event: InteractiveLayerEvent): void
+		{
+			var l: InteractiveLayer = event.interactiveLayer;
+		
+			trace("Composer onLayerLoadingFinished ["+l.toString()+"]");
+			for each (l in m_layers)
+			{
+				if (l is InteractiveDataLayer)
+				{
+					if ((l as InteractiveDataLayer).status != InteractiveDataLayer.STATE_DATA_LOADED)
+					{
+						//not all layers are loaded, stop checking
+						return;	
+					}
+				}
+			}
+			dispatchEvent(new InteractiveLayerMapEvent(InteractiveLayerMapEvent.MAP_LOADED, true));	
+		}
+		
+		public function addLayers(layers: Array): void
+		{
+			var l: InteractiveLayer;
+			for each (l in layers)
+			{
+				if (l is InteractiveDataLayer)
+				{
+					(l as InteractiveDataLayer).addEventListener(InteractiveDataLayer.LOADING_FINISHED, onLayerLoadingFinished);				
+				}
+			}
+			for each (l in layers)
+			{
+				addLayer(l);
+			}
+		}
 		
 		public function addLayer(l: InteractiveLayer): void
 		{
+			if (container)
+				l.container = container;
 			m_layers.addItemAt(l, 0);
 			bindSubLayer(l);
 			
@@ -337,9 +376,11 @@ package com.iblsoft.flexiweather.widgets
 			{
 				var l: InteractiveLayer = layers.getItemAt(i) as InteractiveLayer;
 				
-				trace("\t cloneLayersForComposer l " + l.name);
+				trace("\t cloneLayersForComposer layer: " + l.toString());
 				var newLayer: InteractiveLayer = l.clone();
 				composer.addLayer(newLayer);
+				newLayer.refresh(true);
+				
 			}
 		}
 	}

@@ -11,6 +11,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.SynchronisedVariableChangeEvent;
 	import com.iblsoft.flexiweather.ogc.cache.ICache;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
+	import com.iblsoft.flexiweather.ogc.managers.GlobalVariablesManager;
 	import com.iblsoft.flexiweather.ogc.tiling.ITiledLayer;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
@@ -89,6 +90,13 @@ package com.iblsoft.flexiweather.widgets
 			dispatchEvent(new Event(FRAME_VARIABLE_CHANGED));
 		}
 		
+		[Bindable (event=LEVEL_VARIABLE_CHANGED)]
+		public function get level(): String
+		{
+			var levelString: String = getSynchronizedLevelValue();
+			return levelString;
+		}
+		
 		[Bindable (event=FRAME_VARIABLE_CHANGED)]
 		public function get frame(): Date
 		{
@@ -120,6 +128,12 @@ package com.iblsoft.flexiweather.widgets
 			dispatchEvent(new Event(TIMELINE_CONFIGURATION_CHANGE));
 		}
 		
+		private var _globalVariablesManager: GlobalVariablesManager;
+		public function get globalVariablesManager(): GlobalVariablesManager
+		{
+			return _globalVariablesManager;
+		}
+		
 		public function InteractiveLayerMap(container:InteractiveWidget)
 		{
 			super(container);
@@ -128,6 +142,9 @@ package com.iblsoft.flexiweather.widgets
 			mapID = mapUID;
 			
 			timelineConfiguration = new MapTimelineConfiguration();
+			
+			_globalVariablesManager = new GlobalVariablesManager();
+			_globalVariablesManager.registerInteractiveLayerMap(this);
 			
 			_periodicTimer = new Timer(10 * 1000);
 			_periodicTimer.addEventListener(TimerEvent.TIMER, onPeriodicTimerTick);
@@ -229,6 +246,21 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 
+		private var _frameInvalidated: Boolean;
+		private var _levelInvalidated: Boolean;
+		
+		public function invalidateFrame(): void
+		{
+			_frameInvalidated = true;
+			invalidateProperties();
+		}
+		
+		public function invalidateLevel(): void
+		{
+			_levelInvalidated = true;
+			invalidateProperties();
+		}
+		
 		public function invalidateTimeline(): void
 		{
 			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
@@ -271,6 +303,26 @@ package com.iblsoft.flexiweather.widgets
 			return str;
 		}
 		
+		override protected function commitProperties():void
+		{
+			super.commitProperties();
+			
+//			trace("InteractiveLayerMap commitProperties: _frameInvalidated: " + _frameInvalidated + " _levelInvalidated: " + _levelInvalidated);
+			if (_frameInvalidated)
+			{
+				_frameInvalidated = false;
+				
+				//it will set frame again. This is done by purpose when adding new layer, to synchronise frame with newly added layer
+				setFrame(frame);
+			}
+			if (_levelInvalidated)
+			{
+				_levelInvalidated = false;
+				//it will set level again. This is done by purpose when adding new layer, to synchronise level with newly added layer
+				setLevel(level);
+			}
+		}
+		
 		override public function addLayer(l:InteractiveLayer):void
 		{
 			if (l)
@@ -285,17 +337,47 @@ package com.iblsoft.flexiweather.widgets
 				dynamicEvent['layer'] = l;
 				dispatchEvent(dynamicEvent);
 				
+				var synchronisableFrame: Boolean = false;
+				var synchronisableLevel: Boolean = false;
+				var so: ISynchronisedObject = l as ISynchronisedObject;
+				
+				//need to wait when synchronizaed variables will be update (set FRAME and LEVEL)
+            	if(so) {
+					
+					synchronisableFrame = so.getSynchronisedVariables().indexOf(GlobalVariable.FRAME) >= 0;
+					synchronisableLevel = so.getSynchronisedVariables().indexOf(GlobalVariable.LEVEL) >= 0;
+				}
+				
 				if (getPrimaryLayer() == null)
 				{
-					var so: ISynchronisedObject = l as ISynchronisedObject;
-	            	if(so == null)
-	            		return;
-	            	if(so.getSynchronisedVariables().indexOf(GlobalVariable.FRAME) < 0)
-	            		return;
+					if (!so || !synchronisableFrame)
+						return;
 					
 	            	//this layer can be primary layer and there is no primary layer set, set this one as primaty layer	
 					setPrimaryLayer(l as InteractiveLayerMSBase);
+				} else {
+					invalidateFrame();
+					if (synchronisableLevel && (l as InteractiveLayerMSBase).synchroniseLevel)
+					{
+						invalidateLevel();
+					}
 				}
+				
+				if (l is InteractiveLayerMSBase)
+				{
+					var msBaseLayer: InteractiveLayerMSBase = l as InteractiveLayerMSBase;
+					if (synchronisableLevel && msBaseLayer.synchroniseLevel)
+					{
+						var globalLevel: String = level;
+						var bSynchronized: Boolean = so.synchroniseWith(GlobalVariable.FRAME, frame);
+						bSynchronized = bSynchronized || so.synchroniseWith(GlobalVariable.LEVEL, level);
+						if(bSynchronized)
+						{
+							l.refresh(false);
+						}
+					}
+				}
+					
 			} else {
 				trace("Layer is null, do not add it to InteractiveLayerMap");
 			}
@@ -342,6 +424,16 @@ package com.iblsoft.flexiweather.widgets
 		
 		private function getSynchronizedFrameValue(): Date
 		{
+			return getSynchronizedVariableValue(GlobalVariable.FRAME) as Date;	
+		}
+		
+		private function getSynchronizedLevelValue(): String
+		{
+			return getSynchronizedVariableValue(GlobalVariable.LEVEL) as String;	
+		}
+		
+		private function getSynchronizedVariableValue(variable: String): Object
+		{
 			var l_syncLayers: Array = [];
 			var l_timeAxis: Array = enumTimeAxis(l_syncLayers);
           	if(l_timeAxis == null) // no time axis
@@ -352,11 +444,11 @@ package com.iblsoft.flexiweather.widgets
           	for each(so in l_syncLayers) 
           	{
           		var frame: Date = so.getSynchronisedVariableValue(GlobalVariable.FRAME) as Date;
-//          		trace("getSynchronizedFrameValue frame: " + frame);
           	}
 
 			return frame;
 		}
+		
 		
 		private var m_primaryLayer: InteractiveLayerMSBase;
 		

@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc.multiview
 {
+	import com.iblsoft.flexiweather.events.InteractiveLayerMapEvent;
 	import com.iblsoft.flexiweather.events.InteractiveWidgetEvent;
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.ILayerConfiguration;
@@ -257,13 +258,24 @@ package com.iblsoft.flexiweather.ogc.multiview
 			
 			stopWatchingChanges();
 			
-			_widgetsCountToBeReady = new ArrayCollection();
-			
-			var alreadyExistingWidgetsCount: int = _interactiveWidgets.widgets.length;
 			var cnt: int = 0;
+			var oldIW: InteractiveWidget
+			var alreadyExistingWidgetsCount: int = _interactiveWidgets.widgets.length;
 			var i: int;
 			var j: int;
-			var oldIW: InteractiveWidget
+			//remove all widgets
+			while (cnt < _interactiveWidgets.widgets.length)
+			{
+				oldIW = _interactiveWidgets.getWidgetAt(cnt);
+				if (_selectedInteractiveWidget == oldIW)
+				{
+					selectedInteractiveWidget = null;
+				}
+				removeWidget(oldIW);
+			}
+			
+			_widgetsCountToBeReady = new ArrayCollection();
+			
 			for (j = 0; j < newConfiguration.rows; j++)
 			{
 				for (i = 0; i < newConfiguration.columns; i++)
@@ -275,7 +287,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 						ac.addItem(oldIW);
 						
 					} else {
-						iw = createInteractiveWidget(cnt);
+						iw = createInteractiveWidget();
 						ac.addItem(iw);
 						
 						_widgetsCountToBeReady.addItem(iw);
@@ -290,24 +302,19 @@ package com.iblsoft.flexiweather.ogc.multiview
 				}
 			}
 			
-			//remove not needed widgets
-			if (cnt < alreadyExistingWidgetsCount)
-			{
-				while (cnt < _interactiveWidgets.widgets.length)
-				{
-					oldIW = _interactiveWidgets.getWidgetAt(cnt);
-					if (_selectedInteractiveWidget == oldIW)
-					{
-						selectedInteractiveWidget = null;
-					}
-					removeWidget(oldIW);
-				}
-			}
-			
 			if (!_selectedInteractiveWidget && ac.length > 0)
 			{
 				selectedInteractiveWidget = (ac.getItemAt(0) as InteractiveWidget);
 			}
+			
+			//debug
+//			cnt = 0;
+//			for each (var currIW: InteractiveWidget in ac)
+//			{
+//				trace("IW: " + currIW.id + " / " + currIW.name + " cnt: " + cnt);
+//				cnt++;
+//				currIW.interactiveLayerMap.invalidateProperties();
+//			}
 			
 			dataProvider = ac;
 			
@@ -320,24 +327,18 @@ package com.iblsoft.flexiweather.ogc.multiview
 		}
 		
 		
-		private function createInteractiveWidget(id: int): InteractiveWidget
+		private static var WIDGET_UI: int = 0;
+		private function createInteractiveWidget(): InteractiveWidget
 		{
+			var id: int = WIDGET_UI++
+				
 			var iw: InteractiveWidget = new InteractiveWidget();
-			iw.id = 'm_iw'+id;
+			iw.id = 'm_iw'+ id;
 			iw.name = 'Widget '+id;
-			
-//			var iz: InteractiveLayerZoom = new InteractiveLayerZoom(iw);
-//			iz.zOrder = 1;
-//			var ip: InteractiveLayerPan = new InteractiveLayerPan(iw);
-//			ip.zOrder = 2;
-			
-			
+				
 			var mapLabel: InteractiveLayerLabel = new InteractiveLayerLabel(_synchronizator, iw);
 			mapLabel.zOrder = 3;
 			var layerMap: InteractiveLayerMap = new InteractiveLayerMap(iw);
-			
-//			iw.addElement(iz);
-//			iw.addElement(ip);
 
 			iw.addLayer(mapLabel);
 			iw.addLayer(layerMap);
@@ -626,10 +627,27 @@ package com.iblsoft.flexiweather.ogc.multiview
 				{
 					//do not anything with selected widget, change came from it
 				} else {
+					//do not listen for changes, because widget is going to be recreated
+					currWidget.stopListenForChanges();
+
+					//wait for event, which id dispatched when map is rebuild and start listening for changes again
+					currWidget.addEventListener(InteractiveLayerMapEvent.MAP_LOADED, onWidgetMapRebuild);
+					
 					currWidget.interactiveLayerMap.removeAllLayers();
 					_selectedInteractiveWidget.interactiveLayerMap.cloneLayersForComposer(currWidget.interactiveLayerMap);
 				}
 			}
+		}
+		
+		/**
+		 * When InteractiveLayerMap in InteractiveWidget is rebuilded, start to listen for changes inside widget 
+		 * @param event
+		 * 
+		 */		
+		private function onWidgetMapRebuild(event: InteractiveLayerMapEvent): void
+		{
+			var widget: InteractiveWidget = event.target as InteractiveWidget;
+			widget.startListenForChanges();
 		}
 		
 		/**

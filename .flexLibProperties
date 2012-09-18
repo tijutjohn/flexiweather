@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <flexLibProperties includeAllClasses="false" useMultiPlatformConfig="false" version="1">
   <includeClasses>
+    <classEntry path="com.iblsoft.flexiweather.components.MultiSelectionButtonBar"/>
     <classEntry path="com.iblsoft.flexiweather.components.ResizableDropDownList"/>
     <classEntry path="com.iblsoft.flexiweather.components.charts.FlexChart"/>
     <classEntry path="com.iblsoft.flexiweather.components.charts.SimpleChart"/>
     <classEntry path="com.iblsoft.flexiweather.constants.AnticollisionDisplayMode"/>
+    <classEntry path="com.iblsoft.flexiweather.data.SetOperationType"/>
     <classEntry path="com.iblsoft.flexiweather.events.BackgroundJobEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.GetFeatureInfoEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.InteractiveLayerEvent"/>
@@ -40,9 +42,7 @@
     <classEntry path="com.iblsoft.flexiweather.net.managers.UniURLLoaderBasicAuthManager"/>
     <classEntry path="com.iblsoft.flexiweather.net.managers.UniURLLoaderManager"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.AreaConfiguration"/>
-    <classEntry path="com.iblsoft.flexiweather.ogc.AreaConfigurationManager"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.BBox"/>
-    <classEntry path="com.iblsoft.flexiweather.ogc.BaseConfigurationManager"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.CRSWithBBox"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.CRSWithBBoxAndTilingInfo"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.ExceptionUtils"/>
@@ -61,14 +61,10 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.InteractiveLayerWMS"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.LayerArrayCollection"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.LayerConfiguration"/>
-    <classEntry path="com.iblsoft.flexiweather.ogc.LayerConfigurationManager"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.MapConfiguration"/>
-    <classEntry path="com.iblsoft.flexiweather.ogc.MapConfigurationManager"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.OGCLayerConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.OGCServiceConfiguration"/>
-    <classEntry path="com.iblsoft.flexiweather.ogc.OGCServiceConfigurationManager"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.ProjectionConfiguration"/>
-    <classEntry path="com.iblsoft.flexiweather.ogc.ProjectionConfigurationManager"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.QTTLayerOptions"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.QTTMSLayerConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.QTTilingInfo"/>
@@ -96,6 +92,9 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.cache.WMSCacheManager"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.cache.WMSTileCache"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.cache.WMSTileCacheKey"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.cache.event.WMSCacheEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.data.GlobalVariable"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.data.GlobalVariableValue"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.data.IViewProperties"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.data.IWMSViewPropertiesLoader"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.data.ImagePart"/>
@@ -121,6 +120,7 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableMode"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.events.FeatureEvent"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.events.GetCapabilitiesEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.events.GlobalVariableChangeEvent"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.events.MSBaseLoaderEvent"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.events.ReflectionEvent"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.InteractiveLayerKML"/>
@@ -191,6 +191,13 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.managers.NetworkLinkManager"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.renderer.DefaultKMLRenderer"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.renderer.IKMLRenderer"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.managers.AreaConfigurationManager"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.managers.BaseConfigurationManager"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.managers.GlobalVariablesManager"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.managers.LayerConfigurationManager"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.managers.MapConfigurationManager"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.managers.OGCServiceConfigurationManager"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.managers.ProjectionConfigurationManager"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.multiview.InteractiveMultiView"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.multiview.data.MultiViewConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent"/>
@@ -200,6 +207,8 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.multiview.synchronization.FrameSynchronizator"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.multiview.synchronization.ISynchronizator"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.multiview.synchronization.LevelSynchronizator"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.multiview.synchronization.MapSynchronizator"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.multiview.synchronization.events.SynchronisationEvent"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.net.loaders.MSBaseLoader"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.net.loaders.WMSFeatureInfoLoader"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.net.loaders.WMSGetCapabilitiesLoader"/>
@@ -239,6 +248,8 @@
     <classEntry path="com.iblsoft.flexiweather.plugins.ILayerSelectionListener"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.IMenu"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.IMenuManager"/>
+    <classEntry path="com.iblsoft.flexiweather.plugins.IMultiView"/>
+    <classEntry path="com.iblsoft.flexiweather.plugins.IMultiViewManager"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.IPaneClient"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.IPaneManager"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.IPersisentConfiguration"/>
@@ -338,6 +349,7 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerRoute"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerZoom"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveWidget"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveWidgetUpdateContent"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.JobPreloader"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.JobProgressIndicator"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.LabelJobProgressIndicator"/>

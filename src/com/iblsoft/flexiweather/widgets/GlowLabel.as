@@ -51,7 +51,6 @@ package com.iblsoft.flexiweather.widgets
 		public function GlowLabel()
 		{
 			super();
-			trace("create new GlowLabel");
 		}
 		
 		override protected function createChildren(): void

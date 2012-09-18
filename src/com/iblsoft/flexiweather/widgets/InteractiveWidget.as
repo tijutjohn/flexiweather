@@ -299,13 +299,10 @@ package com.iblsoft.flexiweather.widgets
 		 */		
 		private function onElementAdd(event: ElementExistenceEvent): void
 		{
-//			trace("onElementAdd");
-			
 			if (event.element is InteractiveLayer)
 			{
 				_mxmlContentElements.push(event.element as InteractiveLayer);
 				(event.element as InteractiveLayer).container = this;
-//				addLayer(event.element as InteractiveLayer);
 			}
 		}
 		
@@ -1132,15 +1129,27 @@ package com.iblsoft.flexiweather.widgets
 
 				
 
-        // Mouse events handling
+		private var mb_listenForChanges: Boolean;
+
+		public function startListenForChanges(): void
+		{
+			mb_listenForChanges = true;
+		}
+		public function stopListenForChanges(): void
+		{
+			mb_listenForChanges = false;
+		}
 		/**
 		 * InteractiveWidget needs to call this function is anything, what needs to be synchronized was changed 
 		 * 
 		 */		
 		public function notifyWidgetChanged(change: String): void
 		{
-			var iwe: InteractiveWidgetEvent = new InteractiveWidgetEvent(InteractiveWidgetEvent.WIDGET_CHANGED)
-			dispatchEvent(iwe);
+			if (mb_listenForChanges)
+			{
+				var iwe: InteractiveWidgetEvent = new InteractiveWidgetEvent(InteractiveWidgetEvent.WIDGET_CHANGED)
+				dispatchEvent(iwe);
+			}
 		}
 		
 		private function notifyWidgetSelected(): void
@@ -1148,6 +1157,7 @@ package com.iblsoft.flexiweather.widgets
 			dispatchEvent(new InteractiveWidgetEvent(InteractiveWidgetEvent.WIDGET_SELECTED));
 		}
 		
+        // Mouse events handling
         protected function onMouseDown(event: MouseEvent): void
         {
 			if (!_enableMouseClick)

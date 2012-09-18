@@ -1,9 +1,12 @@
 package com.iblsoft.flexiweather.ogc.managers
 {
 	import com.iblsoft.flexiweather.data.SetOperationType;
+	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.WMSDimension;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.ogc.multiview.synchronization.events.SynchronisationEvent;
+	import com.iblsoft.flexiweather.utils.ArrayUtils;
+	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
 	
 	import flash.events.DataEvent;
@@ -25,7 +28,7 @@ package com.iblsoft.flexiweather.ogc.managers
 		{
 			return _frames;	
 		}
-		[Bindable (event=FRAMES_CHANGED)]
+		[Bindable (event=LEVELS_CHANGED)]
 		public function get levels(): ArrayCollection
 		{
 			return _levels;	
@@ -111,15 +114,23 @@ package com.iblsoft.flexiweather.ogc.managers
 		
 		private function onLevelVariableChanged(event: Event = null): void
 		{
-			if (_interactiveLayerMap && _interactiveLayerMap.primaryLayer)
+			_levels = new ArrayCollection();
+			if (_interactiveLayerMap )
 			{
-				var levels: ArrayCollection;
-				if (_interactiveLayerMap.primaryLayer.synchroniseLevel)
+				for each (var layer: InteractiveLayer in _interactiveLayerMap.layers)
 				{
-					_levels = new ArrayCollection(_interactiveLayerMap.primaryLayer.getSynchronisedVariableValuesList(GlobalVariable.LEVEL));
+					if (layer is InteractiveLayerMSBase)
+					{
+						var layerMSBase: InteractiveLayerMSBase = layer as InteractiveLayerMSBase;
+						if ( layerMSBase.synchroniseLevel )
+						{
+							
+							var _layerLevels: Array = layerMSBase.getSynchronisedVariableValuesList(GlobalVariable.LEVEL);
+							ArrayUtils.unionArrays(_levels.source, _layerLevels);
+						}
+					}
 				}
-			} else {
-				_levels = new ArrayCollection();
+				_levels.refresh();
 			}
 			dispatchEvent(new Event(LEVELS_CHANGED, true));
 		}
