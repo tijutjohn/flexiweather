@@ -177,6 +177,13 @@ package com.iblsoft.flexiweather.plugins
 			var bytesLoaded: int = _plugins.loaders.bytesLoaded + _pluginsInfo.loaders.bytesLoaded;	
 			var bytesTotal: int = _plugins.loaders.bytesTotal + _pluginsInfo.loaders.bytesTotal;
 			
+			trace("PluginManager onPluginModulesProgress 1: " + bytesLoaded + " / " + bytesTotal + " Loaders count: " + loaders);
+			
+			//update bytes information with already loaded modules;
+			bytesLoaded += _plugins.loadedLoaders.bytesLoaded + _pluginsInfo.loadedLoaders.bytesLoaded;
+			bytesTotal += _plugins.loadedLoaders.bytesTotal + _pluginsInfo.loadedLoaders.bytesTotal;
+			
+			trace("PluginManager onPluginModulesProgress 2: " + bytesLoaded + " / " + bytesTotal + " Loaders count: " + loaders);
 			var pe: PluginEvent =  new PluginEvent(PluginEvent.PLUGIN_MODULES_PROGRESS);
 			pe.bytesLoaded = bytesLoaded;
 			pe.bytesTotal = bytesTotal;

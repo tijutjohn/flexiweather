@@ -11,9 +11,17 @@ package com.iblsoft.flexiweather.ogc.events
 		public var dimensionName: String;
 		public var dimensionValue: Object;
 		
-		public function GlobalVariableChangeEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false)
+		public function GlobalVariableChangeEvent(type:String, dimensionName: String,  dimensionValue: Object, bubbles:Boolean=false, cancelable:Boolean=false)
 		{
 			super(type, bubbles, cancelable);
+			
+			this.dimensionName = dimensionName;
+			this.dimensionValue = dimensionValue;
+		}
+		
+		override public function clone():Event
+		{
+			return new GlobalVariableChangeEvent(type, dimensionName, dimensionValue);
 		}
 	}
 }

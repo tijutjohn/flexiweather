@@ -50,6 +50,9 @@ package com.iblsoft.flexiweather.plugins.data
 		
 		public var loaders: ModuleLoaderCollection = new ModuleLoaderCollection();
 		
+		//just store already loaded loaders to have them for total loaded bytes information
+		public var loadedLoaders: ModuleLoaderCollection = new ModuleLoaderCollection();
+		
 		public function get loadingPluginsCount(): int
 		{
 			return _pluginsInfoLoading.length;
@@ -533,7 +536,11 @@ package com.iblsoft.flexiweather.plugins.data
 			var loader: ModuleLoaderWithData = event.target as ModuleLoaderWithData;
 			removeModuleListeners(loader);
 			
-			loaders.removeModuleLoader(loader as ModuleLoader);
+			var moduleLoader: ModuleLoader = loader as ModuleLoader;
+			
+			loaders.removeModuleLoader(moduleLoader);
+			
+			loadedLoaders.addModuleLoaderItem(moduleLoader, event.bytesLoaded, event.bytesTotal);
 			
 			trace("\t PLUGIN MANAGER module IS LOADED and ready : " + loader.url);
 			

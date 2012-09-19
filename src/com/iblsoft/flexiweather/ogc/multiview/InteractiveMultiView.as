@@ -621,6 +621,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 		
 		private function rebuildWidgets(): void
 		{
+			trace("InteractiveMultiView rebuildWdigets");
+			
 			for each (var currWidget: InteractiveWidget in _interactiveWidgets.widgets)
 			{
 				if (_selectedInteractiveWidget == currWidget)

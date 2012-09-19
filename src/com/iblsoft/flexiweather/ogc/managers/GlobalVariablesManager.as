@@ -4,6 +4,7 @@ package com.iblsoft.flexiweather.ogc.managers
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.WMSDimension;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
+	import com.iblsoft.flexiweather.ogc.events.GlobalVariableChangeEvent;
 	import com.iblsoft.flexiweather.ogc.multiview.synchronization.events.SynchronisationEvent;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
@@ -17,6 +18,9 @@ package com.iblsoft.flexiweather.ogc.managers
 
 	public class GlobalVariablesManager extends EventDispatcher
 	{
+		public static const SELECTED_FRAME_CHANGED: String = 'selectedFrameChanged';
+		public static const SELECTED_LEVEL_CHANGED: String = 'selectedLevelChanged';
+		
 		public static const FRAMES_CHANGED: String = 'framesChanged';
 		public static const LEVELS_CHANGED: String = 'levelsChanged';
 	
@@ -24,6 +28,10 @@ package com.iblsoft.flexiweather.ogc.managers
 		private var _levels: ArrayCollection;
 		
 		[Bindable (event=FRAMES_CHANGED)]
+
+
+		
+
 		public function get frames(): ArrayCollection
 		{
 			return _frames;	
@@ -35,6 +43,29 @@ package com.iblsoft.flexiweather.ogc.managers
 		}
 
 		private var _interactiveLayerMap: InteractiveLayerMap;
+		
+		private var _frame: Date;
+		private var _level: String;
+		
+		public function get frame():Date
+		{
+			return _frame;
+		}
+		
+		public function set frame(value:Date):void
+		{
+			_frame = value;
+		}
+		
+		public function get level():String
+		{
+			return _level;
+		}
+		
+		public function set level(value:String):void
+		{
+			_level = value;
+		}
 		
 		/**
 		 * Should be one of SetOperationType constants
@@ -141,11 +172,43 @@ package com.iblsoft.flexiweather.ogc.managers
 			{
 				var frames: Array = _interactiveLayerMap.primaryLayer.getSynchronisedVariableValuesList(GlobalVariable.FRAME);
 				_frames = new ArrayCollection(frames);
+				
+				var selectedFrame: Date = _interactiveLayerMap.frame;
+				if (!selectedFrame)
+					return;
+				
+				if (_frame)
+				{
+					if (_frame.time != selectedFrame.time)
+					{
+						//frame is changed
+						notifySelectedFrameChanged(selectedFrame);
+					} else {
+						trace("Global frame is not changed, do not notify");
+					}
+				} else {
+					notifySelectedFrameChanged(selectedFrame);
+				}
 			} else {
 				_frames = new ArrayCollection();
 			}
 			dispatchEvent(new Event(FRAMES_CHANGED, true));
-			
+		}
+		
+		private function notifySelectedFrameChanged(selectedFrame: Date): void
+		{
+			if (selectedFrame)
+			{
+				_frame = selectedFrame;
+				var gvce: GlobalVariableChangeEvent = new GlobalVariableChangeEvent(GlobalVariableChangeEvent.DIMENSION_VALUE_CHANGED, GlobalVariable.FRAME, selectedFrame);
+				dispatchEvent(gvce);
+			}
+		}
+		private function notifySelectedLevelChanged(selectedLevel: String): void
+		{
+			_level = selectedLevel;
+			var gvce: GlobalVariableChangeEvent = new GlobalVariableChangeEvent(GlobalVariableChangeEvent.DIMENSION_VALUE_CHANGED, GlobalVariable.LEVEL, selectedLevel);
+			dispatchEvent(gvce);
 		}
 	}
 }
