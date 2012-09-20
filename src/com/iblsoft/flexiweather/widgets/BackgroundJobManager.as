@@ -27,6 +27,7 @@ package com.iblsoft.flexiweather.widgets
 		public var m_progressBar: JobProgressIndicator;
 		
 		internal var m_jobs: ArrayCollection = new ArrayCollection();
+		internal var m_finishedJobs: ArrayCollection = new ArrayCollection();
 		
 		internal var mi_jobsCount: int = 0;
 		internal var mi_jobsDone: int = 0;
@@ -65,8 +66,8 @@ package com.iblsoft.flexiweather.widgets
 		
 		private function updateTotalJobsStatus(): void
 		{
-			mi_jobsCount -= mi_jobsDone;
-			mi_jobsDone = 0;
+//			mi_jobsCount -= mi_jobsDone;
+//			mi_jobsDone = 0;
 		}
 		public function startJob(s_label: String): BackgroundJob
 		{
@@ -98,6 +99,7 @@ package com.iblsoft.flexiweather.widgets
 			var i: int = m_jobs.getItemIndex(job);
 			if(i >= 0) {
 				m_jobs.removeItemAt(i);
+				m_finishedJobs.addItem(job);
 				mi_jobsDone++;
 				updateUI();
 			}
@@ -107,6 +109,12 @@ package com.iblsoft.flexiweather.widgets
 			
 			if (m_jobs.length == 0)
 			{
+				mi_jobsDone = 0;
+				mi_jobsCount = 0;
+				
+				m_jobs.removeAll();
+				m_finishedJobs.removeAll();
+				
 				noJobs();
 				dispatchJobEvent(BackgroundJobEvent.ALL_JOBS_FINISHED);
 			}
