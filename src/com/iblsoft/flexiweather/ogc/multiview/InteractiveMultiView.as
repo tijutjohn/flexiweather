@@ -294,18 +294,13 @@ package com.iblsoft.flexiweather.ogc.multiview
 					}
 					
 					cnt++;
-					
-					if (!_selectedInteractiveWidget)
-					{
-						selectedInteractiveWidget = iw;
-					}
 				}
 			}
 			
-			if (!_selectedInteractiveWidget && ac.length > 0)
-			{
-				selectedInteractiveWidget = (ac.getItemAt(0) as InteractiveWidget);
-			}
+//			if (!_selectedInteractiveWidget && ac.length > 0)
+//			{
+//				selectedInteractiveWidget = (ac.getItemAt(0) as InteractiveWidget);
+//			}
 			
 			//debug
 //			cnt = 0;
