@@ -59,5 +59,8 @@ package com.iblsoft.flexiweather.utils
 
 		public function set days(f: Number): void
 		{ mf_secondTotal = mf_secondTotal - days * 86400 + f * 86400; }
+		
+		public function add(other: Duration): void
+		{ mf_secondTotal += other.secondsTotal; }
 	}
 }
