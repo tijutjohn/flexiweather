@@ -220,7 +220,22 @@ package com.iblsoft.flexiweather.proj
 		override public function toString(): String
 		{
 			return crs + "[" + x + ";" + y + "]";			
-		} 
+		}
+		
+		public static function fromString(s: String): Coord
+		{
+			var i_leftBracketPos: int = s.indexOf("[");
+			var i_rightBracketPos: int = s.indexOf("]");
+			var i_semicolonPos: int = s.indexOf(";");
+			if (i_leftBracketPos < 0 || i_rightBracketPos < 0 || i_semicolonPos < 0)
+			{
+				throw new Error("Invalid coordinates format: " + s);
+			}
+			var s_src: String = s.substring(0, i_leftBracketPos);
+			var f_x: Number = new Number(s.substring(i_leftBracketPos + 1, i_semicolonPos));
+			var f_y: Number = new Number(s.substring(i_semicolonPos + 1, i_rightBracketPos));
+			return new Coord(s_src, f_x, f_y);
+		}
 		
 		/**
 		 * 
