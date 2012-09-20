@@ -96,6 +96,21 @@ package com.iblsoft.flexiweather.net.loaders
 		
 		public static function navigateToURL(request: URLRequest): void
 		{
+			if (request.data)
+			{
+				var s_params: String = "";
+				for (var s_key: String in request.data)
+				{
+					if (s_params != "")
+					{
+						s_params += "&";
+					}
+					s_params += s_key;
+					s_params += "=";
+					s_params += encodeURIComponent(request.data[s_key]);
+				}
+				request.url += "?" + s_params;
+			}
 			flash.net.navigateToURL(new URLRequest(AbstractURLLoader.fromBaseURL(request.url)));
 		}
 		
