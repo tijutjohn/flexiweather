@@ -369,7 +369,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 				graphics.clear();
 				
 				m_tiledLayer.draw(m_tiledLayer.graphics);
-				changeTiledLayerVisibility(true);
+//				changeTiledLayerVisibility(true);
+				changeTiledLayerVisibility(visible);
 			} else {
 				changeTiledLayerVisibility(false);
 				super.draw(graphics);
