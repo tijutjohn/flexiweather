@@ -150,7 +150,7 @@ package com.iblsoft.flexiweather.ogc
 				container: InteractiveWidget,
 				cfg: QTTMSLayerConfiguration,
 				s_baseURLPattern: String = null, s_primaryCRS: String = null, primaryCRSTilingExtent: BBox = null,
-				minimumZoomLevel: uint = 0, maximumZoomLevel: uint = 10)
+				minimumZoomLevel: uint = 0, maximumZoomLevel: uint = 10, tileWidth: uint = 256, tileHeight: uint = 256)
 		{
 			super(container);
 			
@@ -164,6 +164,8 @@ package com.iblsoft.flexiweather.ogc
 //						cfg.tilingCRSsAndExtents.push(new CRSWithBBox(s_primaryCRS, primaryCRSTilingExtent));
 				tilingInfo.minimumZoomLevel = minimumZoomLevel;
 				tilingInfo.maximumZoomLevel = maximumZoomLevel;
+				tilingInfo.tileWidth = tileWidth;
+				tilingInfo.tileHeight = tileHeight;
 				cfg.addQTTilingInfo(tilingInfo);
 			}
 			m_cfg = cfg;
@@ -277,10 +279,12 @@ package com.iblsoft.flexiweather.ogc
 			//md_crsToTilingExtent = new Dictionary(); 
 		}
 
-		public function addCRSWithTilingExtent(s_urlPattern: String, s_tilingCRS: String, crsTilingExtent: BBox): void
+		public function addCRSWithTilingExtent(s_urlPattern: String, s_tilingCRS: String, crsTilingExtent: BBox, tileWidth: uint = 256, tileHeight: uint = 256): void
 		{
 			var crsWithBBox: CRSWithBBox = new CRSWithBBox(s_tilingCRS, crsTilingExtent);
 			var tilingInfo: QTTilingInfo = new QTTilingInfo(s_urlPattern, crsWithBBox);
+			tilingInfo.tileWidth = tileWidth;
+			tilingInfo.tileHeight = tileHeight;
 			
 			m_cfg.addQTTilingInfo(tilingInfo);
 			
@@ -857,8 +861,8 @@ package com.iblsoft.flexiweather.ogc
 			
 			newWidth = origNewWidth;
 			newHeight = origNewHeight;
-			sx = newWidth / 256;
-			sy = newHeight / 256;
+			sx = newWidth / bitmapData.width;
+			sy = newHeight / bitmapData.height;
 			xx = topLeftPoint.x;
 			yy = topLeftPoint.y;
 			

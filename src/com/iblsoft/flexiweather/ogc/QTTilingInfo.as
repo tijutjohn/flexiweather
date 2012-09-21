@@ -15,6 +15,8 @@ package com.iblsoft.flexiweather.ogc
 		private var _crsWithBBox: CRSWithBBox;
 		private var _minimumZoomLevel: uint = 0;
 		public var maximumZoomLevel: uint = 12;
+		public var tileWidth: uint;
+		public var tileHeight: uint;
 		
 
 
@@ -47,7 +49,7 @@ package com.iblsoft.flexiweather.ogc
 			return _crsWithBBox;
 		}
 		
-		public function QTTilingInfo(_urlPattern: String = '', crsWithBBox: CRSWithBBox = null)
+		public function QTTilingInfo(_urlPattern: String = '', crsWithBBox: CRSWithBBox = null, tileWidth: uint = 256, tileHeight: uint = 256)
 		{
 			urlPattern = _urlPattern;
 			_crsWithBBox = crsWithBBox;
@@ -75,6 +77,8 @@ package com.iblsoft.flexiweather.ogc
 			
 			minimumZoomLevel = storage.serializeUInt("minimum-zoom-level", minimumZoomLevel, 1);
 			maximumZoomLevel = storage.serializeUInt("maximum-zoom-level", maximumZoomLevel, 12);
+			tileWidth = storage.serializeUInt("tile-width", tileWidth, 0);
+			tileHeight = storage.serializeUInt("tile-height", tileHeight, 0);
 		}
 	}
 }

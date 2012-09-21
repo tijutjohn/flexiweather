@@ -16,7 +16,11 @@ package com.iblsoft.flexiweather.ogc
 	{
 //		public var baseURLPattern: String;
 		/** Array of QTTilingInfo instances */
-		public var tilingCRSsAndExtents: Array = [];
+		private var _tilingCRSsAndExtents: Array = [];
+		public function get tilingCRSsAndExtents():Array
+		{
+			return _tilingCRSsAndExtents;
+		}
 
 		public var ma_behaviours: Array = [];
 		
@@ -24,6 +28,8 @@ package com.iblsoft.flexiweather.ogc
 		{
 		}
 		
+
+
 		override public function destroy():void
 		{
 			
@@ -42,8 +48,9 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function removeAllTilingInfo(): void
 		{
-			tilingCRSsAndExtents = [];
+			_tilingCRSsAndExtents = [];
 		}
+		
 		/**
 		 * Add QTTilingInfo into array of supported tilingInfo data for this configuration 
 		 * @param tilingInfo
@@ -53,7 +60,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			if (!tilingCRSsAndExtents)
 			{
-				tilingCRSsAndExtents = [];
+				_tilingCRSsAndExtents = [];
 			}
 			tilingCRSsAndExtents.push(tilingInfo);
 		}

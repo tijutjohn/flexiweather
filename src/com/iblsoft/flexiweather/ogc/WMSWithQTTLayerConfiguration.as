@@ -13,6 +13,8 @@ package com.iblsoft.flexiweather.ogc
 		
 		public var minimumZoomLevel: uint = 1;
 		public var maximumZoomLevel: uint = 12;
+		public var tileWidth: uint = 256;
+		public var tileHeight: uint = 256;
 		
 		public function WMSWithQTTLayerConfiguration(service: WMSServiceConfiguration = null, a_layerNames: Array = null)
 		{
@@ -43,6 +45,8 @@ package com.iblsoft.flexiweather.ogc
 			avoidTiling = storage.serializeBool("avoid-tiling", avoidTiling, false);
 			minimumZoomLevel = storage.serializeUInt("minimum-zoom-level", minimumZoomLevel, 1);
 			maximumZoomLevel = storage.serializeUInt("maximum-zoom-level", maximumZoomLevel, 12);
+			tileWidth = storage.serializeUInt("tile-width", tileWidth, 256);
+			tileHeight = storage.serializeUInt("tile-height", tileHeight, 256);
 		}
 		
 		override public function renderPreview(f_width: Number, f_height: Number, iw: InteractiveWidget = null): void

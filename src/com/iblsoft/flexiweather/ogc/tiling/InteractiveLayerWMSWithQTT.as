@@ -249,12 +249,24 @@ package com.iblsoft.flexiweather.ogc.tiling
 			m_tiledLayer.clearCRSWithTilingExtents();
 			if(a_layers.length == 1) {
 				var l: WMSLayer = a_layers[0];
+				
+				var tileWidth: uint = 0;
+				var tileHeight: uint = 0;
+				if (m_cfg && m_cfg.hasOwnProperty('tileWidth'))
+				{
+					tileWidth = m_cfg['tileWidth'] as uint;
+					tileHeight = m_cfg['tileHeight'] as uint;
+				}
 				for each(var crsWithBBox: CRSWithBBox in l.crsWithBBoxes) 
 				{
 					if(crsWithBBox is CRSWithBBoxAndTilingInfo) 
 					{
 						var ti: CRSWithBBoxAndTilingInfo = CRSWithBBoxAndTilingInfo(crsWithBBox);
-						m_tiledLayer.addCRSWithTilingExtent(WMS_TILING_URL_PATTERN, ti.crs, ti.tilingExtent);
+						
+						if (tileWidth > 0 && tileHeight > 0)
+							m_tiledLayer.addCRSWithTilingExtent(WMS_TILING_URL_PATTERN, ti.crs, ti.tilingExtent, tileWidth, tileHeight);
+						else
+							m_tiledLayer.addCRSWithTilingExtent(WMS_TILING_URL_PATTERN, ti.crs, ti.tilingExtent);
 					}
 				}
 			}
