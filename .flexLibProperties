@@ -123,6 +123,9 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableCurveWithBaseTimeAndValidity"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableMode"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableWithBaseTimeAndValidity"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.FrontType"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.GenericEditableFeature"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.PressureCentreType"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableFront"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditablePressureCentre"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.events.FeatureEvent"/>
@@ -380,8 +383,6 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.GoogleMapLayerConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.GoogleMapsLayerOption"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.InteractiveLayerGoogleMaps"/>
-    <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.FrontType"/>
-    <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.PressureCentreType"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
