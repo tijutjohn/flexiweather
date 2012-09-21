@@ -164,7 +164,7 @@ package com.iblsoft.flexiweather.widgets
 		
 		protected var m_loader: WMSImageLoader = new WMSImageLoader();
 		
-		public function InteractiveDataLayer(container:InteractiveWidget)
+		public function InteractiveDataLayer(container:InteractiveWidget = null)
 		{
 			super(container);
 			

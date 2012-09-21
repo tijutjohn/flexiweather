@@ -34,8 +34,8 @@ package com.iblsoft.flexiweather.ogc.editable
 		[Event(name = SELECTION_CHANGE, type = "mx.events.PropertyChangeEvent")]
 
 		public function InteractiveLayerWFSEditable(
-				container: InteractiveWidget,
-				version: Version)
+				container: InteractiveWidget = null,
+				version: Version = null)
 		{
 			super(container, version);
 			mouseChildren = true;

@@ -90,7 +90,7 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 		
-		public function InteractiveLayer(container: InteractiveWidget)
+		public function InteractiveLayer(container: InteractiveWidget = null)
 		{
 			super();
 			

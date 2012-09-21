@@ -23,8 +23,8 @@ package com.iblsoft.flexiweather.ogc
 		private var md_queryParametersGET: Array = new Array();
 		
 		public function InteractiveLayerWFS(
-				container: InteractiveWidget,
-				version: Version)
+				container: InteractiveWidget = null,
+				version: Version = null)
 		{
 			super(container, version);
 			
@@ -47,12 +47,12 @@ package com.iblsoft.flexiweather.ogc
 			if(url.data == null)
 				url.data = new URLVariables();
 			url.data['SERVICE'] = 'WFS';
-			url.data['VERSION'] = m_version.toString();
+			url.data['VERSION'] = version.toString();
 			url.data['REQUEST'] = 'GetFeature';
 			url.data['RUN'] = run;
 			url.data['VALIDITY'] = validity;
 			
-			if(!m_version.isLessThan(1, 1, 0)) {
+			if(!version.isLessThan(1, 1, 0)) {
 				url.data['SRSNAME'] = container.getCRS();
 			}
 			url.data['TYPENAME'] = ma_queryFeatures.toArray().join(",");
@@ -84,13 +84,13 @@ package com.iblsoft.flexiweather.ogc
 			if(url.data == null)
 				url.data = new URLVariables();
 			url.data['SERVICE'] = 'WFS';
-			url.data['VERSION'] = m_version.toString();
-			url.data['REQUEST'] = 'GetFeature';
+			url.data['VERSION'] = version.toString();
+			url.data['REQUEST'] = 'version';
 			for(var s_param: String in md_queryParametersGET) {
 				var s_value: String = md_queryParametersGET[s_param];
 				url.data[s_param] = s_value;
 			}
-			if(!m_version.isLessThan(1, 1, 0)) {
+			if(!version.isLessThan(1, 1, 0)) {
 				url.data['SRSNAME'] = container.getCRS();
 			}
 			url.data['TYPENAME'] = ma_queryFeatures.toArray().join(",");

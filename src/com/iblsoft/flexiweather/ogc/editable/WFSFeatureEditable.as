@@ -311,6 +311,11 @@ package com.iblsoft.flexiweather.ogc.editable
 			}
 		}
 		
+		public function addPoint(pt: Point): void
+		{
+			insertPointBefore(m_points.length, pt);
+		}
+		
 		public function insertPointBefore(i_pointIndex: uint, pt: Point): void
 		{
 			m_points.addItemAt(pt, i_pointIndex);

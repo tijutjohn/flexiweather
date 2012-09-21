@@ -18,6 +18,18 @@ package com.iblsoft.flexiweather.ogc
 	public class InteractiveLayerFeatureBase extends InteractiveDataLayer
 	{
 		protected var m_firstFeature: FeatureBase;
+
+
+		public function get version():Version
+		{
+			return m_version;
+		}
+
+		public function set version(value:Version):void
+		{
+			m_version = value;
+		}
+
 		public function get firstFeature(): FeatureBase
 		{
 			return m_firstFeature;
@@ -31,15 +43,15 @@ package com.iblsoft.flexiweather.ogc
 		private var m_featuresContainer: Sprite = new Sprite();
 		
 		protected var ms_serviceURL: String = null;
-		protected var m_version: Version;
+		private var m_version: Version;
 		
 		protected var mb_useMonochrome: Boolean = false;
 		protected var mi_monochromeColor: uint = 0x333333;
 		
 		protected var _screenshot: Screenshot;
 		
-		public function InteractiveLayerFeatureBase(container: InteractiveWidget,
-													version: Version)
+		public function InteractiveLayerFeatureBase(container: InteractiveWidget = null,
+													version: Version = null)
 		{
 			super(container);
 			
