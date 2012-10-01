@@ -154,6 +154,8 @@ package com.iblsoft.flexiweather.widgets
 			//this must be null 
 			super(container);
 			
+			changeDrawMode(DRAW_MODE_GREAT_ARC);
+			
 			setStyle("routeThickness", 1);
 			setStyle("routeBorderThickness", 1);
 			setStyle("routeBorderColor", 0x000000);
@@ -304,6 +306,8 @@ package com.iblsoft.flexiweather.widgets
 		
 		public function distanceValidator(c1: Coord, c2: Coord): Boolean
 		{
+			c1 = c1.toLaLoCoord();
+			c2 = c2.toLaLoCoord();
 			var dist: Number = c1.distanceTo(c2);
 			return (dist < 100);
 		}
@@ -313,6 +317,11 @@ package com.iblsoft.flexiweather.widgets
 			super.draw(graphics);
 			
 			_drawMode = getStyle('drawMode');
+			
+			if (!_drawMode)
+			{
+				_drawMode == DRAW_MODE_GREAT_ARC;
+			}
 			
 			if (_ma_coords.length > 1)
 			{

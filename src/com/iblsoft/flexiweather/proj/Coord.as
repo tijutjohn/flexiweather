@@ -63,9 +63,8 @@ package com.iblsoft.flexiweather.proj
 
 		public static function interpolateGreatArc(c1: Coord, c2: Coord, distanceValidator: Function): Array
 		{
-			var lp1: Coord = c1.toCRS84();			
-			var lp2: Coord = c2.toCRS84();
-//			var lp1 = c1.toCRS84();
+			var lp1: Coord = c1.toLaLoCoord();			
+			var lp2: Coord = c2.toLaLoCoord();
 			
 			var a: Array = [c1];
 			var projection: Projection = Projection.getByCRS(c1.crs);
@@ -128,13 +127,13 @@ package com.iblsoft.flexiweather.proj
 			
 			
 			if(!distanceValidator(c1, cM)) {
-//				trace("call bisectGreatArc LEFT lp1: " + lp1.toString() + " c1: " + c1.toString() + " || lpM: " + lpM.toString() + " cM: " + cM.toString());
+				trace("call bisectGreatArc LEFT lp1: " + lp1.toString() + " c1: " + c1.toString() + " || lpM: " + lpM.toString() + " cM: " + cM.toString());
 				bisectGreatArc(lp1, c1, lpM, cM, a, projection, distanceValidator);
 			} else
 				a.push(cM);
 			
 			if(!distanceValidator(c2, cM)) {
-//				trace("call bisectGreatArc LEFT lpM: " + lpM.toString() + " cM: " + cM.toString()+ " || lp2: " + lp1.toString() + " c2: " + c2.toString());
+				trace("call bisectGreatArc RIGHT lpM: " + lpM.toString() + " cM: " + cM.toString()+ " || lp2: " + lp1.toString() + " c2: " + c2.toString());
 				bisectGreatArc(lpM, cM, lp2, c2, a, projection, distanceValidator);
 			} else
 				a.push(c2);
