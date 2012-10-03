@@ -136,8 +136,12 @@ package com.iblsoft.flexiweather.widgets
 	 */
 	[Style(name="drawMode", inherit="no", type="String", enumeration="plain,greatArc")]
 	
+	[Event(name="routeChanged", type="flash.events.Event")]
+	
 	public class InteractiveLayerRoute extends InteractiveLayer
 	{
+		public static const ROUTE_CHANGED: String = 'routeChanged';
+		
 		public static const DRAW_MODE_PLAIN: String = 'plain';
 		public static const DRAW_MODE_GREAT_ARC: String = 'greatArc';
 		
@@ -207,7 +211,9 @@ package com.iblsoft.flexiweather.widgets
 		public function clearRoute(): void
 		{
 			_ma_coords.removeAll();
+			invalidateDynamicPart();
 		}
+		
 		override public function onAreaChanged(b_finalChange: Boolean): void
 		{
 			invalidateDynamicPart();
@@ -359,7 +365,13 @@ package com.iblsoft.flexiweather.widgets
 				graphics.drawCircle(pt.x, pt.y, f_pointRadius);
 				graphics.endFill();
 			}
-			return;
+			
+			notifyRouteChanged();
+		}
+		
+		private function notifyRouteChanged(): void
+		{
+			dispatchEvent(new Event(ROUTE_CHANGED));
 		}
 		
 		private function drawCoordsPath(coordsForDrawing: Array):void
