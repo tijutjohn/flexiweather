@@ -16,10 +16,12 @@ package com.iblsoft.flexiweather.ogc.editable
 	import mx.events.PropertyChangeEvent;
 	import mx.events.PropertyChangeEventKind;
 
+	[Event(name = "selectionChange", type = "mx.events.PropertyChangeEvent")]
 	public class InteractiveLayerWFSEditable extends InteractiveLayerWFS
 		implements IHighlightableItemManager, ISelectableItemManager, IEditableItemManager
 	{
-		public static const SELECTION_CHANGE: String = "interactiveLayerWFSEditable.selectionChange";
+		public static const SELECTION_CHANGE: String = "selectionChange";
+		
 		protected var ma_items: ArrayCollection = new ArrayCollection();
 		protected var m_highlightedItem: IHighlightableItem = null;
 		protected var m_selectedItem: ISelectableItem = null;
@@ -31,7 +33,6 @@ package com.iblsoft.flexiweather.ogc.editable
 		
 		protected var m_editingComponentsContainer: Sprite = new Sprite;
 		 
-		[Event(name = SELECTION_CHANGE, type = "mx.events.PropertyChangeEvent")]
 
 		public function InteractiveLayerWFSEditable(
 				container: InteractiveWidget = null,

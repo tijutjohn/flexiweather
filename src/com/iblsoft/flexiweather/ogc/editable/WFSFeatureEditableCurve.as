@@ -171,7 +171,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				var reflectionData: WFSEditableReflectionData = (reflectionDictionary.getReflection(0) as WFSEditableReflectionData);
 				var moveablePoints: Array = [];
 				if (reflectionData)
-					reflectionData.moveablePoints;
+					moveablePoints = reflectionData.moveablePoints;
 				
 				for each(var mpSprite: Sprite in moveablePoints) {
 					if(mpSprite.hitTestPoint(stagePt.x, stagePt.y, true))
