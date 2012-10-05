@@ -176,7 +176,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				}
 				m_editableSprite.removeChild(mp);
 
-				reflection.moveablePoints.splice(i, 1);
+				reflection.removeItemAt(i);
 			}
 		}
 		
