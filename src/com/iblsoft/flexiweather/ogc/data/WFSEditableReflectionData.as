@@ -39,6 +39,14 @@ package com.iblsoft.flexiweather.ogc.data
 			
 			_moveablePoints.splice(pointer, 1);
 //			_annotations.splice(pointer, 1);
+			
+			//update pointIndex of moveable points after remove point
+			var total: int = _moveablePoints.length;
+			for (var i: int = pointer; i < total; i++)
+			{
+				var mp: MoveablePoint = _moveablePoints[i] as MoveablePoint;
+				mp.pointIndex--;
+			}
 		}
 		
 		public function addMoveablePoint(mp: MoveablePoint, pointer: int): void
