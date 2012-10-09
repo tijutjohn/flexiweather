@@ -49,6 +49,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	
 		public var m_pointCursor: int = WFSCursorManagerTypes.CURSOR_ADD_POINT;
 	
+		
 		public function MoveablePoint(feature: WFSFeatureEditable, i_pointIndex: uint, i_reflection: uint, i_reflectionDelta: int)
 		{
 			super();
@@ -231,6 +232,11 @@ package com.iblsoft.flexiweather.ogc.editable
 			//if (!mb_dragging){
 			//	dispatchEvent(new WFSCursorManagerEvent(WFSCursorManagerEvent.CLEAR_CURSOR));
 			//}
+		}
+		
+		override public function toString(): String
+		{
+			return "MoveablePoint: " + m_pt + " index: " + pointIndex + " reflection: " + mi_reflection + " delta: " + mi_reflection;
 		}
 	}
 }

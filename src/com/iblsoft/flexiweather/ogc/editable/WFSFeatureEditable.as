@@ -287,6 +287,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				reflectionWidth = master.container.getExtentBBox().width * i_reflectionDelta;
 			}
 			
+			trace("WFSFeatureEditable setPoint: " + i_pointIndex + " pt: " + pt + " reflection delta: " + i_reflectionDelta);
 			
 			var c: Coord = m_master.container.pointToCoord(pt.x, pt.y);
 			//need to move coord to 0 reflection
@@ -352,17 +353,23 @@ package com.iblsoft.flexiweather.ogc.editable
 			}
 		}
 		
-		public function addPoint(pt: Point): void
+		override public function addPointAt(point:Point, index:uint):void
+		{
+			insertPointBefore(index, point);
+		}
+		override public function addPoint(pt: Point): void
 		{
 			insertPointBefore(m_points.length, pt);
 		}
 		
-		public function insertPointBefore(i_pointIndex: uint, pt: Point): void
+		override public function insertPointBefore(i_pointIndex: uint, pt: Point): void
 		{
-			m_points.addItemAt(pt, i_pointIndex);
-			m_coordinates.addItemAt(m_master.container.pointToCoord(pt.x, pt.y), i_pointIndex);
-			update(FeatureUpdateContext.fullUpdate());
+			super.insertPointBefore(i_pointIndex, pt);
+//			addPointAt(pt, i_pointIndex);
+//			m_coordinates.addItemAt(m_master.container.pointToCoord(pt.x, pt.y), i_pointIndex);
+//			update(FeatureUpdateContext.fullUpdate());
 			modified = true;
+			trace("WFSFeatureEditable insertPointBefore i_pointIndex: " + i_pointIndex + " pt: " + pt);
 		}
 		
 		public function removePoint(i_pointIndex: uint): void

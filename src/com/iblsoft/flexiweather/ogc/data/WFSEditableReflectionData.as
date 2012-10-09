@@ -52,6 +52,13 @@ package com.iblsoft.flexiweather.ogc.data
 		public function addMoveablePoint(mp: MoveablePoint, pointer: int): void
 		{
 			_moveablePoints[pointer] = mp;	
+			
+			trace("WFSEditableRefelction data addMoveablePoints");
+			
+			for each (var p: MoveablePoint in _moveablePoints)
+			{
+				trace("\t MoveablePoint: " + p.toString());
+			}
 		}
 		
 		public function addAnnotation(annotation: AnnotationBox): void

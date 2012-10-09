@@ -794,13 +794,13 @@ package com.iblsoft.flexiweather.widgets
         	s = HTMLUtils.fixFeatureInfoHTML(s);
 			
 			var parsingCorrect: Boolean = true;
-			try {
-				var infoXML: XML = new XML(s);
-			} catch (error: Error) {
-				parsingCorrect = false;
-				trace("ERROR parsing FEatureINFO");
-				Alert.show(error.message, "Problem with parsing GetFeatureInfo request", Alert.OK);
-			}
+//			try {
+//				var infoXML: XML = new XML(s);
+//			} catch (error: Error) {
+//				parsingCorrect = false;
+//				trace("ERROR parsing FEatureINFO");
+//				Alert.show(error.message, "Problem with parsing GetFeatureInfo request", Alert.OK);
+//			}
         	if (_featureTooltipCallsCount < 1)
         	{
         		_featureTooltipCallsRunning = false;
@@ -810,7 +810,8 @@ package com.iblsoft.flexiweather.widgets
 			
 			if (parsingCorrect)
 			{
-				var info: String = infoXML.text();
+//				var info: String = infoXML.text();
+				var info: String = s;
 	        	_featureTooltipString += '<p><b><font color="#3080c0">'+layer.name+'</font></b>';
 				_featureTooltipString += s+'</p>';
 	        	
