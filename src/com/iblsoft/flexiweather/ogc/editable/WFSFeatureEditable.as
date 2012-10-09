@@ -40,6 +40,11 @@ package com.iblsoft.flexiweather.ogc.editable
 
 		protected var m_firstInit: Boolean = true;
 
+		public function get selectedMoveablePointIndex(): int
+		{
+			return mi_actSelectedMoveablePointIndex;
+		}
+		
 		public function WFSFeatureEditable(s_namespace: String, s_typeName: String, s_featureId: String)
 		{
 			super(s_namespace, s_typeName, s_featureId);
@@ -107,7 +112,8 @@ package com.iblsoft.flexiweather.ogc.editable
 				var reflection: WFSEditableReflectionData = reflectionDictionary.getReflection(r) as WFSEditableReflectionData;
 				var pTotal: int = reflection.points.length;
 				
-				for(i = 0; i < pTotal; ++i) {
+				for(i = 0; i < pTotal; ++i) 
+				{
 					
 					var pt: Point = reflection.points[i] as Point;
 					
@@ -125,29 +131,53 @@ package com.iblsoft.flexiweather.ogc.editable
 					
 					if(pt == null || mp == null)
 						continue;  // TODO: check for CRS
-					if(!mp.getPoint().equals(pt)) {
+					
+					var p: Point = mp.getPoint() 
+					if(p && !p.equals(pt)) {
 						// reuse MoveablePoint instance, just change it's location 
 						mp.setPoint(pt);
 					}
 				}
-				//remove all unused  MoveablePoints (because coordinates was removed from feature)
-				for(; i < reflection.moveablePoints.length; ++i) {
-					mp = reflection.moveablePoints[i] as MoveablePoint;
-					if(mp && eim != null) {
-						eim.removeEditableItem(mp);
-						// ADD CHECK ABOUT SELECTED MOVEABLE POINT
-					}
-					m_editableSprite.removeChild(mp);
-				}
-				while(reflection.points.length < reflection.moveablePoints.length) {
-					reflection.moveablePoints.pop();
-				}
+				
+//				trace("update i: " + i);
+//				//remove all unused  MoveablePoints (because coordinates was removed from feature)
+//				for(; i < reflection.moveablePoints.length; ++i) {
+//					trace("update check point for remove i: " + i);
+//					mp = reflection.moveablePoints[i] as MoveablePoint;
+//					if(mp && eim != null) {
+//						eim.removeEditableItem(mp);
+//						// ADD CHECK ABOUT SELECTED MOVEABLE POINT
+//					}
+//					m_editableSprite.removeChild(mp);
+//				}
+//				while(reflection.points.length < reflection.moveablePoints.length) {
+//					reflection.moveablePoints.pop();
+//				}
 			
 			}
 			
 			editableSpriteVisible(mb_selected);
 			
+		}
+		
+		private function removeMoveablePointAt(i: int): void
+		{
+			var reflectionsTotal: int = reflectionDictionary.totalReflections;
+			var eim: IEditableItemManager = master as IEditableItemManager; 
+			
+			for (var r: int = 0; r < reflectionsTotal; r++)
+			{
+				var reflection: WFSEditableReflectionData = reflectionDictionary.getReflection(r) as WFSEditableReflectionData;
 				
+				var mp: MoveablePoint = reflection.moveablePoints[i] as MoveablePoint;
+				if(mp && eim != null) {
+					eim.removeEditableItem(mp);
+					// ADD CHECK ABOUT SELECTED MOVEABLE POINT
+				}
+				m_editableSprite.removeChild(mp);
+
+				reflection.removeItemAt(i);
+			}
 		}
 		
 		protected function editableSpriteVisible(bool: Boolean): void
@@ -272,6 +302,17 @@ package com.iblsoft.flexiweather.ogc.editable
 			modified = true;
 		}
 		
+		public function selectPreviousMoveablePoint(): void
+		{
+			var newSelectionIndex: int = Math.max(0, mi_actSelectedMoveablePointIndex - 1);
+			selectMoveablePoint(newSelectionIndex, mi_actSelectedMoveablePointReflectionIndex);
+		}
+		public function selectNextMoveablePoint(): void
+		{
+			var newSelectionIndex: int = Math.min(m_points.length - 1, mi_actSelectedMoveablePointIndex + 1);
+			selectMoveablePoint(newSelectionIndex, mi_actSelectedMoveablePointReflectionIndex);
+		}
+		
 		/**
 		 * 
 		 */
@@ -311,6 +352,11 @@ package com.iblsoft.flexiweather.ogc.editable
 			}
 		}
 		
+		public function addPoint(pt: Point): void
+		{
+			insertPointBefore(m_points.length, pt);
+		}
+		
 		public function insertPointBefore(i_pointIndex: uint, pt: Point): void
 		{
 			m_points.addItemAt(pt, i_pointIndex);
@@ -323,8 +369,18 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			m_points.removeItemAt(i_pointIndex);
 			m_coordinates.removeItemAt(i_pointIndex);
+			
+			removeMoveablePointAt(i_pointIndex);
+			
+			if (mi_actSelectedMoveablePointIndex == i_pointIndex)
+			{
+				//point was selected, select other poin
+				selectPreviousMoveablePoint();
+			}
+			
 			update(FeatureUpdateContext.fullUpdate());
 		}
+		
 
 		public function deselect(): void
 		{

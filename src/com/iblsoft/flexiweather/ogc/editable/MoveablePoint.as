@@ -13,8 +13,28 @@ package com.iblsoft.flexiweather.ogc.editable
 			implements IMouseEditableItem, IHighlightableItem
 	{
 		protected var m_feature: WFSFeatureEditable;
-		protected var mi_pointIndex: uint;
-	
+		
+		private var _mi_pointIndex: uint;
+		protected function get mi_pointIndex():uint
+		{
+			return _mi_pointIndex;
+		}
+		
+		protected function set mi_pointIndex(value:uint):void
+		{
+			_mi_pointIndex = value;
+		}
+		
+		public function get pointIndex():uint
+		{
+			return _mi_pointIndex;
+		}
+		
+		public function set pointIndex(value:uint):void
+		{
+			_mi_pointIndex = value;
+		}
+		
 		protected var mi_reflection: uint;
 		protected var mi_reflectionDelta: int;
 		

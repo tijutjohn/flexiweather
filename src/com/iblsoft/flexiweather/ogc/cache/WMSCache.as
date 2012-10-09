@@ -222,7 +222,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			
 			var s_key: String = qetWMSViewCacheKey(wmsViewProperties);
 			
-			return (md_noDataCache[s_key] == true);
+			return (md_noDataCache && md_noDataCache[s_key] == true);
 		}
 		
 		public function isItemCached(viewProperties: IViewProperties, b_checkNoDataCache: Boolean = false): Boolean
@@ -235,7 +235,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			
 			if (b_checkNoDataCache)
 			{
-				if (md_noDataCache[s_key])
+				if (md_noDataCache && md_noDataCache[s_key])
 				{
 					return true;
 				}

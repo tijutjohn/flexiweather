@@ -168,7 +168,10 @@ package com.iblsoft.flexiweather.ogc.editable
 				// don't do anything if this click is on MoveablePoint belonging to this curve
 				
 				//FIXME fix snap for reflection from which point is dragged
-				var moveablePoints: Array = (reflectionDictionary.getReflection(0) as WFSEditableReflectionData).moveablePoints;
+				var reflectionData: WFSEditableReflectionData = (reflectionDictionary.getReflection(0) as WFSEditableReflectionData);
+				var moveablePoints: Array = [];
+				if (reflectionData)
+					moveablePoints = reflectionData.moveablePoints;
 				
 				for each(var mpSprite: Sprite in moveablePoints) {
 					if(mpSprite.hitTestPoint(stagePt.x, stagePt.y, true))
