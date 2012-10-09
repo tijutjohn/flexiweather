@@ -1,6 +1,6 @@
 package com.iblsoft.flexiweather.ogc.preload
 {
-	import com.iblsoft.flexiweather.ogc.data.IViewProperties;
+	import com.iblsoft.flexiweather.ogc.data.viewProperties.IViewProperties;
 
 	public interface IPreloadableLayer
 	{

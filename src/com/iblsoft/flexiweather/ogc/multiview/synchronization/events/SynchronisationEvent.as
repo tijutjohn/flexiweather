@@ -8,6 +8,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization.events
 		public static const STOP_GLOBAL_VARIABLE_SYNCHRONIZATION: String = 'stopGlobalVariableSynchronization';
 		
 		public var globalVariable: String;
+		public var globalVariableValue: Object;
 		
 		public function SynchronisationEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false)
 		{

@@ -1,24 +1,31 @@
-package com.iblsoft.flexiweather.ogc
+package com.iblsoft.flexiweather.ogc.configuration.layers
 {
 	import com.iblsoft.flexiweather.net.loaders.AbstractURLLoader;
 	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
+	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.ogc.IBehaviouralObject;
+	import com.iblsoft.flexiweather.ogc.Version;
 	import com.iblsoft.flexiweather.ogc.tiling.InteractiveLayerWMSWithQTT;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	import com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceConfiguration;
 	
 	public class WMSWithQTTLayerConfiguration extends WMSLayerConfiguration implements IBehaviouralObject
 	{
+		Storage.addChangedClass('com.iblsoft.flexiweather.ogc.WMSWithQTTLayerConfiguration','com.iblsoft.flexiweather.ogc.configuration.layers.WMSWithQTTLayerConfiguration', new Version(1,6,0));
+		
 		private var _avoidTiling:Boolean;
 		
 		public var minimumZoomLevel: uint = 1;
 		public var maximumZoomLevel: uint = 12;
-		public var tileWidth: uint = 256;
-		public var tileHeight: uint = 256;
+		public var tileSize: uint = 256;
 		
-		public function WMSWithQTTLayerConfiguration(service: WMSServiceConfiguration = null, a_layerNames: Array = null)
+		public function WMSWithQTTLayerConfiguration(service: WMSServiceConfiguration = null, a_layerNames: Array = null, tileSize: uint = 256)
 		{
 			super(service, a_layerNames);
+			
+			this.tileSize = tileSize;
 		}
 		
 
@@ -45,8 +52,7 @@ package com.iblsoft.flexiweather.ogc
 			avoidTiling = storage.serializeBool("avoid-tiling", avoidTiling, false);
 			minimumZoomLevel = storage.serializeUInt("minimum-zoom-level", minimumZoomLevel, 1);
 			maximumZoomLevel = storage.serializeUInt("maximum-zoom-level", maximumZoomLevel, 12);
-			tileWidth = storage.serializeUInt("tile-width", tileWidth, 256);
-			tileHeight = storage.serializeUInt("tile-height", tileHeight, 256);
+			tileSize = storage.serializeUInt("tile-size", tileSize, 256);
 		}
 		
 		override public function renderPreview(f_width: Number, f_height: Number, iw: InteractiveWidget = null): void

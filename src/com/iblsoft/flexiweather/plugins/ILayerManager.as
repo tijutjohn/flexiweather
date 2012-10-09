@@ -7,7 +7,7 @@ package com.iblsoft.flexiweather.plugins
 	// Supporting interface for ILayerChangeListener's management
 	public interface ILayerManager
 	{
-		function addLayer(ilp: IInteractiveLayerProvider, layerAddedCallback: Function = null): void;
+		function addLayer(ilp: IInteractiveLayerProvider): InteractiveLayer;
 		function removeLayer(l: InteractiveLayer): void;
 		function getLayerCount(): uint;
 		function getLayerAt(i_index: uint): InteractiveLayer;

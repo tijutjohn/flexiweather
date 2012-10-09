@@ -16,20 +16,23 @@
 	
 	<fx:Script>
 		<![CDATA[
+			import com.iblsoft.flexiweather.ogc.configuration.layers.TiledLayerConfiguration;
+
+			
 			[Bindable]
 			public var selectMapTypeIndex:int;
 			[Bindable]
 			public var label: String;
 			
-			private var _layer: InteractiveLayerQTTMS;
+			private var _layer: InteractiveLayerTiled;
 			
 			
-			public function get layer():InteractiveLayerQTTMS
+			public function get layer(): InteractiveLayerTiled
 			{
 				return _layer;
 			}
 			
-			public function set layer(value:InteractiveLayerQTTMS):void
+			public function set layer(value: InteractiveLayerTiled):void
 			{
 				_layer = value;
 				if (_layer)

@@ -11,6 +11,16 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 	{
 		private var timeDifference: Number = 3;
 		
+		public function get willSynchronisePrimaryLayer(): Boolean
+		{
+			return false;
+		}
+		
+		public function set viewData(data: Array): void
+		{
+			// Map synchronizator does not need any data, so it's nothing done here
+		}
+		
 		public function get labelString(): String
 		{
 			return "<frame format='%H:%M %d.%m.%Y' tz='UTC'/>";

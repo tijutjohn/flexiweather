@@ -28,12 +28,13 @@ package com.iblsoft.flexiweather.ogc.tiling
 			m_extent = extent;
 		}
 		
-		public function getTiledArea(viewBBox: BBox, zoomLevel: int): TiledArea
+		
+		public function getTiledArea(viewBBox: BBox, zoomLevel: int, tileSize: int): TiledArea
 		{
 			if(!m_extent)
 				return null;
-			var maxColTiles: int = getColTiles(zoomLevel);
-			var maxRowTiles: int = getRowTiles(zoomLevel);
+			var maxColTiles: int = getColTiles(zoomLevel, tileSize);
+			var maxRowTiles: int = getRowTiles(zoomLevel, tileSize);
 			
 			var tileBBox: Point = new Point(m_extent.width / maxColTiles, m_extent.height / maxRowTiles);
 			var viewTiles: Point = new Point((viewBBox.width / tileBBox.x), (viewBBox.height / tileBBox.y));
@@ -41,10 +42,11 @@ package com.iblsoft.flexiweather.ogc.tiling
 			var leftCol: int = Math.max(0, Math.floor((viewBBox.xMin - m_extent.xMin) / tileBBox.x));
 			var topRow: int = Math.floor((m_extent.yMax - viewBBox.yMax) / tileBBox.y);
 			
-			var _maxTileID: int = (1 << (zoomLevel + 1) - 1) - 1;
-			var topLeftIndex: TileIndex = new TileIndex(zoomLevel, Math.min(_maxTileID, Math.max(0,topRow)), Math.min(_maxTileID, Math.max(0,leftCol)));
-			var bottomRightIndex: TileIndex = new TileIndex(zoomLevel, Math.min(_maxTileID, Math.ceil(topRow + viewTiles.y)),  Math.min(_maxTileID, Math.ceil(leftCol + viewTiles.x)));
-			var area: TiledArea = new TiledArea(topLeftIndex, bottomRightIndex );
+			var _maxTileID: int = getMaxTileID(zoomLevel, tileSize);
+			
+			var topLeftIndex: TileIndex = new TileIndex(zoomLevel, Math.min(_maxTileID, Math.max(0,topRow)), Math.min(_maxTileID, Math.max(0,leftCol)), tileSize);
+			var bottomRightIndex: TileIndex = new TileIndex(zoomLevel, Math.min(_maxTileID, Math.ceil(topRow + viewTiles.y)),  Math.min(_maxTileID, Math.ceil(leftCol + viewTiles.x)), tileSize);
+			var area: TiledArea = new TiledArea(topLeftIndex, bottomRightIndex, tileSize );
 			return area;
 			
 		}
@@ -63,18 +65,44 @@ package com.iblsoft.flexiweather.ogc.tiling
 			}
 		}
 		
+		public function getTileSize(zoomLevel: int, tileSize: int = 256): int
+		{
+			var max256ID: int = (1 << (zoomLevel + 1) - 1) - 1;
+			
+			if (tileSize != 256)
+			{
+				var totalSize: int = (max256ID + 1) * 256;
+				if (totalSize >= tileSize &&  (totalSize % tileSize) == 0)
+					return tileSize;
+			}
+			
+			return 256;
+			
+		}
+		public function getMaxTileID(zoomLevel: int, tileSize: int = 256): int
+		{
+			var max256ID: int = (1 << (zoomLevel + 1) - 1) - 1;
+			
+			if (tileSize != 256)
+			{
+				var totalSize: int = (max256ID + 1) * 256;
+				if (totalSize >= tileSize &&  (totalSize % tileSize) == 0)
+					return (totalSize / tileSize) - 1;
+			}
+			
+			return max256ID;
+		}
 		public function getTiles(zoomLevel: int): int
 		{
 			return getColTiles(zoomLevel) * getRowTiles(zoomLevel)	
 		}
-		public function getColTiles(zoomLevel: int): int
+		public function getColTiles(zoomLevel: int, tileSize: int = 256): int
 		{
-			var _maxTileID: int = (1 << (zoomLevel + 1) - 1) - 1;
-			return (1 << (zoomLevel + 1) - 1);	
+			return getMaxTileID(zoomLevel, tileSize) + 1;	
 		}
-		public function getRowTiles(zoomLevel: int): int
+		public function getRowTiles(zoomLevel: int, tileSize: int = 256): int
 		{
-			return (1 << (zoomLevel + 1) - 1);	
+			return getMaxTileID(zoomLevel, tileSize) + 1;	
 		}
 		
 		public function getTileIndexForPosition(x: Number, y: Number, zoomLevel: int): TileIndex

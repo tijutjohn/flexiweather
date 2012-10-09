@@ -1,6 +1,7 @@
-package com.iblsoft.flexiweather.ogc
+package com.iblsoft.flexiweather.ogc.configuration.layers.interfaces
 {
 	import flash.net.URLRequest;
+	import com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceConfiguration;
 
 	public interface IWMSLayerConfiguration extends ILayerConfiguration
 	{

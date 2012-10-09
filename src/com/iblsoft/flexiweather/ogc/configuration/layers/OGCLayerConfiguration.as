@@ -1,10 +1,16 @@
-package com.iblsoft.flexiweather.ogc
+package com.iblsoft.flexiweather.ogc.configuration.layers
 {
-	import com.iblsoft.flexiweather.utils.Storage;
+	import com.iblsoft.flexiweather.ogc.Version;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.configuration.services.OGCServiceConfiguration;
 	import com.iblsoft.flexiweather.ogc.managers.OGCServiceConfigurationManager;
+	import com.iblsoft.flexiweather.utils.Storage;
+	import com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceConfiguration;
 	
 	public class OGCLayerConfiguration extends LayerConfiguration implements ILayerConfiguration
 	{
+		Storage.addChangedClass('com.iblsoft.flexiweather.ogc.OGCLayerConfiguration','com.iblsoft.flexiweather.ogc.configuration.layers.OGCLayerConfiguration', new Version(1,6,0));
+		
 		// runtime variable
 		protected var m_service: OGCServiceConfiguration;
 

@@ -9,7 +9,7 @@ package com.iblsoft.flexiweather.ogc.managers
 	
 	import mx.collections.ArrayCollection;
 	import com.iblsoft.flexiweather.ogc.BBox;
-	import com.iblsoft.flexiweather.ogc.ProjectionConfiguration;
+	import com.iblsoft.flexiweather.ogc.configuration.ProjectionConfiguration;
 
 	public class ProjectionConfigurationManager implements Serializable
 	{

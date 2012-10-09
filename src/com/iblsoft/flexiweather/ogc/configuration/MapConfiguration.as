@@ -1,4 +1,4 @@
-package com.iblsoft.flexiweather.ogc
+package com.iblsoft.flexiweather.ogc.configuration
 {
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;

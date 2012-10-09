@@ -4,8 +4,8 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 	import com.google.maps.interfaces.IMapType;
 	import com.iblsoft.flexiweather.ogc.CRSWithBBox;
 	import com.iblsoft.flexiweather.ogc.IBehaviouralObject;
-	import com.iblsoft.flexiweather.ogc.ILayerConfiguration;
-	import com.iblsoft.flexiweather.ogc.LayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.LayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.editable.IInteractiveLayerProvider;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
@@ -14,7 +14,7 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 	
 	import spark.components.Group;
 
-	public class GoogleMapLayerConfiguration extends LayerConfiguration implements IInteractiveLayerProvider, ILayerConfiguration, IBehaviouralObject
+	public class GoogleMapLayerConfiguration extends com.iblsoft.flexiweather.ogc.configuration.layers.LayerConfiguration implements IInteractiveLayerProvider, ILayerConfiguration, IBehaviouralObject
 	{
 		public static const MAP_TYPE_NORMAL: String = 'normal';
 		public static const MAP_TYPE_PHYSICAL: String = 'physical';

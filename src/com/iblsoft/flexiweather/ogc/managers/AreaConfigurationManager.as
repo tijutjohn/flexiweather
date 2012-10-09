@@ -13,7 +13,7 @@ package com.iblsoft.flexiweather.ogc.managers
 	import mx.collections.Sort;
 	
 	import spark.collections.SortField;
-	import com.iblsoft.flexiweather.ogc.AreaConfiguration;
+	import com.iblsoft.flexiweather.ogc.configuration.AreaConfiguration;
 
 	public class AreaConfigurationManager extends BaseConfigurationManager implements Serializable
 	{

@@ -1,22 +1,22 @@
-package com.iblsoft.flexiweather.ogc
+package com.iblsoft.flexiweather.ogc.tiling
 {
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
+	import com.iblsoft.flexiweather.ogc.CRSWithBBox;
 
 	/**
 	 * QuadTree tiling info. There is stored urlPattern, crs, bbox and minimum and maximum zoom  
 	 * @author fkormanak
 	 * 
 	 */	
-	public class QTTilingInfo implements Serializable
+	public class TiledTilingInfo implements Serializable
 	{
 		
 		private var _urlPattern: String;
 		private var _crsWithBBox: CRSWithBBox;
 		private var _minimumZoomLevel: uint = 0;
 		public var maximumZoomLevel: uint = 12;
-		public var tileWidth: uint;
-		public var tileHeight: uint;
+		public var tileSize: uint;
 		
 
 
@@ -39,7 +39,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 //			if (value != '&TILEZOOM=%ZOOM%&TILECOL=%COL%&TILEROW=%ROW%')
 //			{
-//				trace("check QTTilingInfo urlPattern: " + value);
+//				trace("check TiledTilingInfo urlPattern: " + value);
 //			}
 			_urlPattern = value;
 		}
@@ -49,10 +49,11 @@ package com.iblsoft.flexiweather.ogc
 			return _crsWithBBox;
 		}
 		
-		public function QTTilingInfo(_urlPattern: String = '', crsWithBBox: CRSWithBBox = null, tileWidth: uint = 256, tileHeight: uint = 256)
+		public function TiledTilingInfo(_urlPattern: String = '', crsWithBBox: CRSWithBBox = null, tileSize: uint = 256)
 		{
 			urlPattern = _urlPattern;
 			_crsWithBBox = crsWithBBox;
+			this.tileSize = tileSize;
 		}
 		
 		public function destroy(): void
@@ -77,8 +78,7 @@ package com.iblsoft.flexiweather.ogc
 			
 			minimumZoomLevel = storage.serializeUInt("minimum-zoom-level", minimumZoomLevel, 1);
 			maximumZoomLevel = storage.serializeUInt("maximum-zoom-level", maximumZoomLevel, 12);
-			tileWidth = storage.serializeUInt("tile-width", tileWidth, 0);
-			tileHeight = storage.serializeUInt("tile-height", tileHeight, 0);
+			tileSize = storage.serializeUInt("tile-size", tileSize, 0);
 		}
 	}
 }

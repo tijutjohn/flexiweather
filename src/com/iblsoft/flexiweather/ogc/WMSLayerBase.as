@@ -140,9 +140,10 @@ package com.iblsoft.flexiweather.ogc
 										trace("WMSLayerBase.WMSLayerBase(): already having CRSWithBBoxAndTilingInfo for " + s_tilingCRS);
 									}
 									else {
+										//TODO we support just tileSize... if you need support tileWidth and tileHeight, change it here as well
 										crsBBoxTiled = new CRSWithBBoxAndTilingInfo(
 												originalCRSWithBBox.crs, originalCRSWithBBox.bbox,
-												tilingExtent, tileWidth, tileHeight);
+												tilingExtent, tileWidth);
 										ma_crsWithBBoxes[i] = crsBBoxTiled;
 									}
 									break;
@@ -150,9 +151,10 @@ package com.iblsoft.flexiweather.ogc
 							}
 							//there is no such crs already defined, add it as new CRS
 							if(!b_crsFound) {
+								//TODO we support just tileSize... if you need support tileWidth and tileHeight, change it here as well
 								crsBBoxTiled = new CRSWithBBoxAndTilingInfo(
 										s_tilingCRS, null,
-										tilingExtent, tileWidth, tileHeight);
+										tilingExtent, tileWidth);
 								ma_crsWithBBoxes.addItem(crsBBoxTiled);
 							}
 						}

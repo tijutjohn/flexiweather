@@ -167,7 +167,12 @@ package com.iblsoft.flexiweather.widgets
 		public function InteractiveDataLayer(container:InteractiveWidget = null)
 		{
 			super(container);
+		}
 			
+		
+		override protected function initializeLayer():void
+		{
+			super.initializeLayer();
 			setStatus(STATE_EMPTY);
 			
 			m_loader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onDataLoaded);

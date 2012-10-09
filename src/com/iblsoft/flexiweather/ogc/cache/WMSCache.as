@@ -2,8 +2,8 @@ package com.iblsoft.flexiweather.ogc.cache
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.cache.event.WMSCacheEvent;
-	import com.iblsoft.flexiweather.ogc.data.IViewProperties;
-	import com.iblsoft.flexiweather.ogc.data.WMSViewProperties;
+	import com.iblsoft.flexiweather.ogc.data.viewProperties.IViewProperties;
+	import com.iblsoft.flexiweather.ogc.data.viewProperties.WMSViewProperties;
 	
 	import flash.display.Bitmap;
 	import flash.display.DisplayObject;

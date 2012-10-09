@@ -1,9 +1,9 @@
 package com.iblsoft.flexiweather.ogc.cache
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
-	import com.iblsoft.flexiweather.ogc.data.IViewProperties;
-	import com.iblsoft.flexiweather.ogc.data.QTTViewProperties;
-	import com.iblsoft.flexiweather.ogc.tiling.QTTTileViewProperties;
+	import com.iblsoft.flexiweather.ogc.data.viewProperties.IViewProperties;
+	import com.iblsoft.flexiweather.ogc.data.viewProperties.TiledViewProperties;
+	import com.iblsoft.flexiweather.ogc.data.viewProperties.TiledTileViewProperties;
 	import com.iblsoft.flexiweather.ogc.tiling.TileIndex;
 	import com.iblsoft.flexiweather.ogc.tiling.TiledArea;
 	import com.iblsoft.flexiweather.plugins.IConsole;
@@ -135,7 +135,7 @@ package com.iblsoft.flexiweather.ogc.cache
 		
 		override public function getCacheItem(viewProperties: IViewProperties): CacheItem
 		{
-			var qttTileViewProperties: QTTTileViewProperties = viewProperties as QTTTileViewProperties;
+			var qttTileViewProperties: TiledTileViewProperties = viewProperties as TiledTileViewProperties;
 			if (!qttTileViewProperties)
 				return null;
 			
@@ -221,9 +221,9 @@ package com.iblsoft.flexiweather.ogc.cache
 			return a;
 		}
 	
-		private function getQTTTileViewCacheKey(qttTileViewProperties: QTTTileViewProperties): String
+		private function getQTTTileViewCacheKey(qttTileViewProperties: TiledTileViewProperties): String
 		{
-			var parentQTT: QTTViewProperties = qttTileViewProperties.qttViewProperties;
+			var parentQTT: TiledViewProperties = qttTileViewProperties.qttViewProperties;
 			
 			var s_crs: String = parentQTT.crs as String;
 			var time: Date = parentQTT.validity;
@@ -241,7 +241,7 @@ package com.iblsoft.flexiweather.ogc.cache
 		
 		override public function isNoDataItemCached(viewProperties: IViewProperties): Boolean
 		{
-			var qttTileViewProperties: QTTTileViewProperties = viewProperties as QTTTileViewProperties;
+			var qttTileViewProperties: TiledTileViewProperties = viewProperties as TiledTileViewProperties;
 			if (!qttTileViewProperties)
 				return false;
 			
@@ -256,7 +256,7 @@ package com.iblsoft.flexiweather.ogc.cache
 		
 		override public function addCacheNoDataItem(viewProperties: IViewProperties): void
 		{
-			var qttTileViewProperties: QTTTileViewProperties = viewProperties as QTTTileViewProperties;
+			var qttTileViewProperties: TiledTileViewProperties = viewProperties as TiledTileViewProperties;
 			if (!qttTileViewProperties)
 				return;
 			
@@ -267,7 +267,7 @@ package com.iblsoft.flexiweather.ogc.cache
 		
 		override public function isItemCached(viewProperties: IViewProperties, b_checkNoDataCache: Boolean = true): Boolean
 		{
-			var qttTileViewProperties: QTTTileViewProperties = viewProperties as QTTTileViewProperties;
+			var qttTileViewProperties: TiledTileViewProperties = viewProperties as TiledTileViewProperties;
 			if (!qttTileViewProperties)
 				return false;
 			
@@ -289,11 +289,11 @@ package com.iblsoft.flexiweather.ogc.cache
 		
 		override public function addCacheItem(img: DisplayObject, viewProperties: IViewProperties): void
 		{
-			var qttTileViewProperties: QTTTileViewProperties = viewProperties as QTTTileViewProperties;
+			var qttTileViewProperties: TiledTileViewProperties = viewProperties as TiledTileViewProperties;
 			if (!qttTileViewProperties)
 				return;
 			
-			var parentQTT: QTTViewProperties = qttTileViewProperties.qttViewProperties;
+			var parentQTT: TiledViewProperties = qttTileViewProperties.qttViewProperties;
 			
 			var s_crs: String = parentQTT.crs as String;
 			var bbox: BBox = parentQTT.getViewBBox() as BBox;

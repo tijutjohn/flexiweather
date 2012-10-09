@@ -7,8 +7,8 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 	import com.iblsoft.flexiweather.net.loaders.KMZLoader;
 	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
 	import com.iblsoft.flexiweather.net.loaders.XMLLoader;
-	import com.iblsoft.flexiweather.ogc.LayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.Version;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.LayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.editable.IInteractiveLayerProvider;
 	import com.iblsoft.flexiweather.ogc.kml.InteractiveLayerKML;
 	import com.iblsoft.flexiweather.ogc.kml.data.KMZFile;

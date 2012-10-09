@@ -2,11 +2,12 @@ package com.iblsoft.flexiweather.ogc.tiling
 {
 	public class TileIndex
 	{
+		public var mi_tileSize: int;
 		public var mi_tileZoom: int;
 		public var mi_tileRow: int;
 		public var mi_tileCol: int;
 	
-		public function TileIndex(i_tileZoom: int = 0, i_tileRow: int = 0, i_tileCol: int = 0)
+		public function TileIndex(i_tileZoom: int = 0, i_tileRow: int = 0, i_tileCol: int = 0, i_tileSize: int = 256)
 		{
 			if (i_tileZoom < 0)
 			{
@@ -19,6 +20,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			{
 				trace("TileIndex.TileIndex(): Stop, wrong tile for zoom: " + i_tileZoom);
 			}
+			mi_tileSize = i_tileSize;
 			mi_tileZoom = i_tileZoom;
 			mi_tileRow = i_tileRow;
 			mi_tileCol = i_tileCol;

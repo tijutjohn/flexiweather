@@ -11,10 +11,10 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.ogc.cache.WMSCache;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariableValue;
-	import com.iblsoft.flexiweather.ogc.data.IViewProperties;
-	import com.iblsoft.flexiweather.ogc.data.IWMSViewPropertiesLoader;
+	import com.iblsoft.flexiweather.ogc.data.viewProperties.IViewProperties;
+	import com.iblsoft.flexiweather.ogc.data.viewProperties.IWMSViewPropertiesLoader;
 	import com.iblsoft.flexiweather.ogc.data.ImagePart;
-	import com.iblsoft.flexiweather.ogc.data.WMSViewProperties;
+	import com.iblsoft.flexiweather.ogc.data.viewProperties.WMSViewProperties;
 	import com.iblsoft.flexiweather.ogc.events.GetCapabilitiesEvent;
 	import com.iblsoft.flexiweather.ogc.events.MSBaseLoaderEvent;
 	import com.iblsoft.flexiweather.ogc.multiview.synchronization.events.SynchronisationEvent;
@@ -62,6 +62,8 @@ package com.iblsoft.flexiweather.ogc
 	import mx.logging.Log;
 	
 	import spark.components.Group;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration;
 	
 	[Event(name="wmsStyleChanged", type="flash.events.Event")]
 	
@@ -123,6 +125,15 @@ package com.iblsoft.flexiweather.ogc
 		{
 			super(container);
 			
+			m_cfg = cfg;
+			
+			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
+		}
+		
+		override protected function initializeLayer():void
+		{
+			super.initializeLayer();
+			
 			ma_preloadingWMSViewProperties = [];
 			ma_preloadedWMSViewProperties = [];
 			
@@ -138,7 +149,7 @@ package com.iblsoft.flexiweather.ogc
 			
 			m_synchronisationRole = new SynchronisationRole();
 			
-			setConfiguration(cfg);
+			setConfiguration(m_cfg);
 			//filters = [ new GlowFilter(0xffffe0, 0.8, 2, 2, 2) ];
 			createEffects();
 //			setStyle('addedEffect', fadeIn);
@@ -146,7 +157,6 @@ package com.iblsoft.flexiweather.ogc
 //			setStyle('removedEffect', fadeOut);
 			setStyle('hideEffect', fadeOut);
 			
-			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
 		}
 		
 		private var fadeIn: Fade;
@@ -160,7 +170,7 @@ package com.iblsoft.flexiweather.ogc
 			removeEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
 			
 			//WMS layer always synchronise FRAME variable
-			notifySynchronizationChange(GlobalVariable.FRAME, true);
+			notifySynchronizationChange(GlobalVariable.FRAME, null, true);
 		}
 		
 		public function changeViewProperties(viewProperties: IViewProperties): void
@@ -584,6 +594,8 @@ package com.iblsoft.flexiweather.ogc
 		}
 		override protected function updateData(b_forceUpdate: Boolean): void
 		{
+			if (!layerInitialized)
+				return;
 			//we need to postpone updateData if capabilities was not received, otherwise we do not know, if layes is tileable or not
 //			trace("MSBase updateData capabilitiesReady: " + capabilitiesReady + " layerWasDestroyed: " + layerWasDestroyed);
 			if (!capabilitiesReady)
@@ -699,9 +711,12 @@ package com.iblsoft.flexiweather.ogc
 		
 		public override function draw(graphics: Graphics): void
 		{
+			if (!m_currentWMSViewProperties)
+				return;
+			
 			if (!layerWasDestroyed)
 			{
-				trace("\n DRAW ["+ this+"]");
+//				trace("\n DRAW ["+ this+"]");
 				super.draw(graphics);
 				
 				var imageParts: ArrayCollection = m_currentWMSViewProperties.imageParts;
@@ -713,8 +728,8 @@ package com.iblsoft.flexiweather.ogc
 				
 				var s_currentCRS: String = m_currentWMSViewProperties.crs;
 				
-				if (imageParts)
-					trace("\t DRAW currentViewBBox=" + container.getViewBBox().toString() + " imageParts: " + imageParts.length);
+//				if (imageParts)
+//					trace("\t DRAW currentViewBBox=" + container.getViewBBox().toString() + " imageParts: " + imageParts.length);
 				
 				for each(var imagePart: ImagePart in imageParts) {
 					// Check if CRS of the image part == current CRS of the container
@@ -762,7 +777,7 @@ package com.iblsoft.flexiweather.ogc
 			ptImageEndPoint.x += 1;
 			ptImageEndPoint.y += 1;
 			
-			trace("\t DRAWIMAGEPARTASBITMAP(): image-w=" + image.width + " image-h=" + image.height + " ["+this+"]");
+//			trace("\t DRAWIMAGEPARTASBITMAP(): image-w=" + image.width + " image-h=" + image.height + " ["+this+"]");
 			var ptImageSize: Point = ptImageEndPoint.subtract(ptImageStartPoint);
 			ptImageSize.x = int(Math.round(ptImageSize.x));
 			ptImageSize.y = int(Math.round(ptImageSize.y));
@@ -1611,11 +1626,11 @@ package com.iblsoft.flexiweather.ogc
 			if (mb_synchroniseLevel != value)
 			{
 				mb_synchroniseLevel = value;
-				notifySynchronizationChange(GlobalVariable.LEVEL, mb_synchroniseLevel);
+				notifySynchronizationChange(GlobalVariable.LEVEL, getSynchronisedVariableValue(GlobalVariable.LEVEL), mb_synchroniseLevel);
 			}
 		}
 		
-		protected function notifySynchronizationChange(globalVariable: String, synchronise: Boolean): void
+		protected function notifySynchronizationChange(globalVariable: String, globalVariableValue: Object, synchronise: Boolean): void
 		{
 			var eventType: String;
 			
@@ -1626,6 +1641,7 @@ package com.iblsoft.flexiweather.ogc
 
 			var se: SynchronisationEvent = new SynchronisationEvent(eventType, true);
 			se.globalVariable = globalVariable;
+			se.globalVariableValue = globalVariableValue;
 			dispatchEvent(se);
 		}
 		

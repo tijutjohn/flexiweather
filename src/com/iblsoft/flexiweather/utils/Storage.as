@@ -1,5 +1,8 @@
 package com.iblsoft.flexiweather.utils
 {
+	import com.iblsoft.flexiweather.ogc.Version;
+	
+	import flash.utils.Dictionary;
 	import flash.utils.getDefinitionByName;
 	import flash.utils.getQualifiedClassName;
 	
@@ -13,9 +16,28 @@ package com.iblsoft.flexiweather.utils
 		
 		internal var mb_mode: Boolean;
 		
+		private static var _changedClassDictionary: Dictionary = new Dictionary();
+		
 		public function Storage(b_mode: Boolean): void
 		{
 			mb_mode = b_mode;
+		}
+		
+		public static function addChangedClass(oldClassPath: String, newClassPath: String, version: Version): void
+		{
+			if (!_changedClassDictionary[oldClassPath])
+				_changedClassDictionary[oldClassPath] = new Array();
+			
+			(_changedClassDictionary[oldClassPath] as Array).push({newClass: newClassPath, version: version});
+		}
+		public static function getChangedClass(classPath: String): String
+		{
+			if (_changedClassDictionary[classPath])
+			{
+				return ((_changedClassDictionary[classPath] as Array)[0] as Object)['newClass'] as String;
+			}
+			
+			return classPath;
 		}
 		
 		public function serialize(s_key: String, o: Serializable): void
@@ -76,6 +98,7 @@ package com.iblsoft.flexiweather.utils
 					var c: Class = null; 
 					try {
 						s_class = __serializeString("class", NONINDEXED, null);
+						s_class = Storage.getChangedClass(s_class);
 						try {
 							c = Class(getDefinitionByName(s_class));
 						}

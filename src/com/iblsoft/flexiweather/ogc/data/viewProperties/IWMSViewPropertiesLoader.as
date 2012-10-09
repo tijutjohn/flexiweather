@@ -1,4 +1,4 @@
-package com.iblsoft.flexiweather.ogc.data
+package com.iblsoft.flexiweather.ogc.data.viewProperties
 {
 	import flash.events.IEventDispatcher;
 

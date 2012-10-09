@@ -1,4 +1,4 @@
-package com.iblsoft.flexiweather.ogc
+package com.iblsoft.flexiweather.ogc.configuration
 {
 	import com.iblsoft.flexiweather.net.loaders.AbstractURLLoader;
 	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
@@ -9,6 +9,7 @@ package com.iblsoft.flexiweather.ogc
 	import flash.net.URLRequest;
 	import flash.net.URLVariables;
 	import com.iblsoft.flexiweather.ogc.managers.ProjectionConfigurationManager;
+	import com.iblsoft.flexiweather.ogc.BBox;
 
 	public class AreaConfiguration implements Serializable
 	{

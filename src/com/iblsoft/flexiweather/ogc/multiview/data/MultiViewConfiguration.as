@@ -7,6 +7,11 @@ package com.iblsoft.flexiweather.ogc.multiview.data
 		
 		public var synchronizators: Array;
 		
+		/**
+		 *  Data information for each view, if needed 
+		 */		
+		public var viewData: Array;
+		
 		public function MultiViewConfiguration()
 		{
 		}

@@ -1,7 +1,15 @@
-package com.iblsoft.flexiweather.ogc
+package com.iblsoft.flexiweather.ogc.configuration.layers
 {
 	import com.iblsoft.flexiweather.net.loaders.AbstractURLLoader;
 	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
+	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.ogc.IBehaviouralObject;
+	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
+	import com.iblsoft.flexiweather.ogc.Version;
+	import com.iblsoft.flexiweather.ogc.WMSDimension;
+	import com.iblsoft.flexiweather.ogc.WMSLayer;
+	import com.iblsoft.flexiweather.ogc.WMSLayerBase;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.IWMSLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.editable.IInteractiveLayerProvider;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
@@ -12,11 +20,15 @@ package com.iblsoft.flexiweather.ogc
 	import flash.net.URLRequest;
 	
 	import mx.collections.ArrayCollection;
+	import com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceConfiguration;
 	
 	public class WMSLayerConfiguration extends OGCLayerConfiguration
 			implements IBehaviouralObject, IInteractiveLayerProvider, IWMSLayerConfiguration
 	{
 
+		Storage.addChangedClass('com.iblsoft.flexiweather.ogc.WMSLayerConfiguration','com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration', new Version(1,6,0));
+		
+		
 		private var ma_layerNames: Array = [];
 		private var ma_styleNames: Array = [];
 		private var ma_behaviours: Array = [];

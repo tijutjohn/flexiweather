@@ -1,9 +1,9 @@
-package com.iblsoft.flexiweather.ogc.data
+package com.iblsoft.flexiweather.ogc.data.viewProperties
 {
 	import com.iblsoft.flexiweather.events.WMSViewPropertiesEvent;
 	import com.iblsoft.flexiweather.ogc.BBox;
-	import com.iblsoft.flexiweather.ogc.ILayerConfiguration;
-	import com.iblsoft.flexiweather.ogc.IWMSLayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.IWMSLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
 	import com.iblsoft.flexiweather.ogc.SynchronisedVariableChangeEvent;
@@ -23,6 +23,8 @@ package com.iblsoft.flexiweather.ogc.data
 	import flash.utils.Dictionary;
 	
 	import mx.collections.ArrayCollection;
+	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
+	import com.iblsoft.flexiweather.ogc.data.ImagePart;
 
 	public class WMSViewProperties extends EventDispatcher implements IViewProperties, Serializable
 	{
@@ -337,7 +339,10 @@ package com.iblsoft.flexiweather.ogc.data
 		{
 			var s_defaultValue: String = null;
 			var b_anyDimensionFound: Boolean = false;
-			for each(var layer: WMSLayer in getWMSLayers()) {
+			
+			var wmsLayers: Array = getWMSLayers();
+			
+			for each(var layer: WMSLayer in wmsLayers) {
 				for each(var dim: WMSDimension in layer.dimensions) {
 					if(dim.name != s_dimName)
 						continue;
@@ -356,11 +361,20 @@ package com.iblsoft.flexiweather.ogc.data
 				return "";
 			return s_defaultValue;
 		}
+		
+		
 		// returns null is no such dimension exist
 		public function getWMSDimensionsValues(s_dimName: String, b_intersection: Boolean = true): Array
 		{
 			var a_dimValues: Array;
-			for each(var layer: WMSLayer in getWMSLayers()) {
+			
+			if (s_dimName == 'ELEVATION')
+			{
+				trace("WMSViewProperties: check ELEVATION getWMSDimensionsValues function");
+			}
+			var wmsLayers: Array = getWMSLayers();
+			
+			for each(var layer: WMSLayer in wmsLayers) {
 				for each(var dim: WMSDimension in layer.dimensions) {
 					if(dim.name != s_dimName)
 						continue;

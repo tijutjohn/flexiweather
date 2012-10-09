@@ -14,7 +14,7 @@ package com.iblsoft.flexiweather.ogc.wfs
 	import flash.net.URLVariables;
 	
 	import mx.collections.ArrayCollection;
-	import com.iblsoft.flexiweather.ogc.OGCServiceConfiguration;
+	import com.iblsoft.flexiweather.ogc.configuration.services.OGCServiceConfiguration;
 	import com.iblsoft.flexiweather.ogc.SchemaParser;
 	import com.iblsoft.flexiweather.ogc.Version;
 	

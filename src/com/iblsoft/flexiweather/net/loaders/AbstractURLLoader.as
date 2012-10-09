@@ -189,11 +189,18 @@ package com.iblsoft.flexiweather.net.loaders
 				//don't do anything, there are not url params
 				return;
 			}
+			
+			if ((urlArr[1] as String).indexOf('&') == 0)
+			{
+				var paramsString: String = urlArr[1] as String;
+				urlArr[1] = paramsString.substring(1, paramsString.length);
+			}
+				
 			var urlVariablesParamsExists: Boolean = false;
 			
 			var vars: URLVariables; 
 			
-			var urlParams: String = url;
+			var urlParams: String = urlArr.join('?');
 			
 			if (urlRequest.data)
 			{
@@ -468,6 +475,10 @@ package com.iblsoft.flexiweather.net.loaders
 			basicAuthAccount: BasicAuthAccount = null,
 			basicAuthRequestData: UniURLLoaderData = null): void
 		{
+			if (urlRequest.url.indexOf('gfs') >= 0)
+			{
+				trace("GFS request");
+			}
 			checkRequestData(urlRequest);
 			checkRequestBaseURL(urlRequest);
 			

@@ -4,11 +4,17 @@ package com.iblsoft.flexiweather.ogc.tiling
 	
 	public class TiledArea
 	{
+		/**
+		 * Tile size of all tiles inside TiledArea, one of TileSize constants 
+		 */		
+		public var tileSize: int;
+		
 		public var topLeftTileIndex: TileIndex;
 		public var bottomRightTileIndex: TileIndex;
 		
-		public function TiledArea(topLeftTileIndex: TileIndex, bottomRightTileIndex: TileIndex)
+		public function TiledArea(topLeftTileIndex: TileIndex, bottomRightTileIndex: TileIndex, tileSize: int)
 		{
+			this.tileSize = tileSize;
 			this.topLeftTileIndex = topLeftTileIndex;
 			this.bottomRightTileIndex = bottomRightTileIndex;
 			

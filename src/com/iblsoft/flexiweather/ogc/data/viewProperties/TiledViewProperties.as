@@ -1,10 +1,9 @@
-package com.iblsoft.flexiweather.ogc.data
+package com.iblsoft.flexiweather.ogc.data.viewProperties
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
-	import com.iblsoft.flexiweather.ogc.ILayerConfiguration;
-	import com.iblsoft.flexiweather.ogc.IWMSLayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.IWMSLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.cache.WMSTileCache;
-	import com.iblsoft.flexiweather.ogc.tiling.QTTTileViewProperties;
 	import com.iblsoft.flexiweather.ogc.tiling.TileIndex;
 	import com.iblsoft.flexiweather.ogc.tiling.TileIndicesMapper;
 	import com.iblsoft.flexiweather.ogc.tiling.TiledArea;
@@ -12,7 +11,7 @@ package com.iblsoft.flexiweather.ogc.data
 	import flash.events.EventDispatcher;
 	import flash.net.URLRequest;
 
-	public class QTTViewProperties extends EventDispatcher implements IViewProperties
+	public class TiledViewProperties extends EventDispatcher implements IViewProperties
 	{
 		private static var _uid: int = 0;
 		
@@ -55,7 +54,7 @@ package com.iblsoft.flexiweather.ogc.data
 		
 		private var ma_qttTiles: Array;
 		
-		public function QTTViewProperties()
+		public function TiledViewProperties()
 		{
 			super();
 			
@@ -75,7 +74,7 @@ package com.iblsoft.flexiweather.ogc.data
 			_tileIndicesMapper.destroy();
 			_tileIndicesMapper = null;
 			
-			for each (var qttTile: QTTTileViewProperties in ma_qttTiles)
+			for each (var qttTile: TiledTileViewProperties in ma_qttTiles)
 			{
 				qttTile.destroy();
 			}
@@ -90,11 +89,11 @@ package com.iblsoft.flexiweather.ogc.data
 			_viewBBox = null;
 		}
 		
-		public function clearTileProperties(qttTileViewProperties: QTTTileViewProperties): void
+		public function clearTileProperties(qttTileViewProperties: TiledTileViewProperties): void
 		{
 			ma_qttTiles = [];
 		}
-		public function addTileProperties(qttTileViewProperties: QTTTileViewProperties): void
+		public function addTileProperties(qttTileViewProperties: TiledTileViewProperties): void
 		{
 			ma_qttTiles.push(qttTileViewProperties);
 		}
@@ -109,6 +108,10 @@ package com.iblsoft.flexiweather.ogc.data
 			_viewBBox = bbox;
 		}
 		
+		public function get configuration(): ILayerConfiguration
+		{
+			return m_cfg;
+		}
 		public function setConfiguration(cfg: ILayerConfiguration): void
 		{
 			m_cfg = cfg;
@@ -121,7 +124,7 @@ package com.iblsoft.flexiweather.ogc.data
 		 * @return 
 		 * 
 		 */		
-		public function equals(viewProperties: QTTViewProperties): Boolean
+		public function equals(viewProperties: TiledViewProperties): Boolean
 		{
 			//FIXME neet to implement QTTViewProperties equals function
 			if (validity)
@@ -137,7 +140,7 @@ package com.iblsoft.flexiweather.ogc.data
 		public function isPreloaded(cache: WMSTileCache): Boolean
 		{
 			var isCached: Boolean = true;
-			for each (var qttTile: QTTTileViewProperties in ma_qttTiles)
+			for each (var qttTile: TiledTileViewProperties in ma_qttTiles)
 			{
 				var isTileCached: Boolean = cache.getCacheItem(qttTile) != null;
 				if (!isTileCached)
@@ -150,7 +153,7 @@ package com.iblsoft.flexiweather.ogc.data
 		
 		public function clone():IViewProperties
 		{
-			var viewProperties: QTTViewProperties = new QTTViewProperties();
+			var viewProperties: TiledViewProperties = new TiledViewProperties();
 			//FIXME implement QTTViewProperties clone() function
 			
 			return viewProperties

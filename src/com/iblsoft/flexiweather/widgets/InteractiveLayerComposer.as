@@ -5,7 +5,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
-	import com.iblsoft.flexiweather.ogc.WMSLayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.widgets.googlemaps.InteractiveLayerGoogleMaps;
@@ -24,12 +24,27 @@ package com.iblsoft.flexiweather.widgets
         protected var m_layers: ArrayCollection = new ArrayCollection();
 
 		private var mb_orderingLayers: Boolean = false;
-
+		private var _layersOrderInvalidated: Boolean;
+		
 		public function InteractiveLayerComposer(container: InteractiveWidget)
 		{
 			super(container);
 			m_layers.addEventListener(CollectionEvent.COLLECTION_CHANGE, onLayerCollectionChanged);
 		}
+		
+		
+		override protected function commitProperties():void
+		{
+			super.commitProperties();
+			
+			if (_layersOrderInvalidated)
+			{
+				orderLayers();
+				_layersOrderInvalidated = false;
+			}
+		}
+		
+		
 		
 		private function onLayerLoadingFinished(event: InteractiveLayerEvent): void
 		{
@@ -68,16 +83,31 @@ package com.iblsoft.flexiweather.widgets
 		
 		public function addLayer(l: InteractiveLayer): void
 		{
+			l.addEventListener(InteractiveLayerEvent.LAYER_INITIALIZED, onLayerInitialized);
+			
 			if (container)
 				l.container = container;
 			m_layers.addItemAt(l, 0);
-			bindSubLayer(l);
 			
-			notifyLayersChanged(l);
+			//wait for layer is initialized. Function "layerAdded" will be called
+		}
+		
+		private function onLayerInitialized(event: InteractiveLayerEvent): void
+		{
+			var l: InteractiveLayer = event.target as InteractiveLayer;
+			l.removeEventListener(InteractiveLayerEvent.LAYER_INITIALIZED, onLayerInitialized);
+			
+			layerAdded(l);
+		}
+		
+		protected function layerAdded(layer: InteractiveLayer): void
+		{
+			bindSubLayer(layer);
+			
+			notifyLayersChanged(layer);
 			
 			//when new layer is added to container, call onAreaChange to notify layer, that layer is already added to container, so it can render itself
-			l.onAreaChanged(true);
-			
+			layer.onAreaChanged(true);
 		}
 		
 		override public function invalidateDynamicPart(b_invalid: Boolean = true): void
@@ -93,32 +123,36 @@ package com.iblsoft.flexiweather.widgets
 			} else {
 				dispatchEvent(new Event("layersChanged"));
 			}
+			
+			_layersOrderInvalidated = true;
+			invalidateProperties();
 		}
+		
 		public function orderLayers(): void
 		{
 			if(mb_orderingLayers)
 				return;
 			mb_orderingLayers = true;
 			try {
-//				trace("**********************************************")
-//				trace("                 SORTING by ZORDER start state");
-//				trace("**********************************************")
-//				for(i = 0; i < numChildren; ++i) 
-//				{
-//					var layer: InteractiveLayer = InteractiveLayer(getChildAt(i)); 
-//					trace("LAYER ["+i+"] = " + layer.name + " order: " + layer.zOrder); 
-//				}
-//				trace("**********************************************")
+				trace("************************************************************************************");
+				trace("                InteractiveLayerComposer SORTING by ZORDER start state");
+				trace("************************************************************************************");
+				for(i = 0; i < numChildren; ++i) 
+				{
+					var layer: InteractiveLayer = InteractiveLayer(getChildAt(i)); 
+					trace("LAYER ["+i+"] = " + layer.name + " order: " + layer.zOrder); 
+				}
+				trace("**********************************************")
 				
 				// stable-sort interactive layers in ma_layers according to their zOrder property
 				for(var i: int = 0; i < numChildren; ++i) {
 					var ilI: InteractiveLayer = InteractiveLayer(getChildAt(i)); 
 					for(var j: int = i + 1; j < numChildren; ++j) {
 						var ilJ: InteractiveLayer = InteractiveLayer(getChildAt(j));
-//						trace('[InteractiveLayerComposer.orderLayers] ... checking ' + ilJ.name + '['+ilJ.zOrder+'] with ' + ilI.name+'['+ilI.zOrder+']');
+						trace('[InteractiveLayerComposer.orderLayers] ... checking ' + ilJ.name + '['+ilJ.zOrder+'] with ' + ilI.name+'['+ilI.zOrder+']');
 						if(ilJ.zOrder < ilI.zOrder) {
 							// swap Ith and Jth layer, we know that J > I
-//							trace('\t [InteractiveLayerComposer.orderLayers] ... swapping ' + ilJ.name + '['+ilJ.zOrder+'] with ' + ilI.name+'['+ilI.zOrder+']');
+							trace('\t [InteractiveLayerComposer.orderLayers] ... swapping ' + ilJ.name + '['+ilJ.zOrder+'] with ' + ilI.name+'['+ilI.zOrder+']');
 							swapChildren(ilJ, ilI); 
 							ilI = InteractiveLayer(getChildAt(i)); 
 							//removeChildAt(j);

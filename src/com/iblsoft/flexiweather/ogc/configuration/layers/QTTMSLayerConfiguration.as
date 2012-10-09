@@ -1,10 +1,18 @@
-package com.iblsoft.flexiweather.ogc
+package com.iblsoft.flexiweather.ogc.configuration.layers
 {
 	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
+	import com.iblsoft.flexiweather.ogc.CRSWithBBox;
+	import com.iblsoft.flexiweather.ogc.IBehaviouralObject;
+	import com.iblsoft.flexiweather.ogc.InteractiveLayerQTTMS;
+	import com.iblsoft.flexiweather.ogc.Version;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.editable.IInteractiveLayerProvider;
+	import com.iblsoft.flexiweather.ogc.tiling.InteractiveLayerTiled;
 	import com.iblsoft.flexiweather.ogc.tiling.InteractiveLayerWMSWithQTT;
-	import com.iblsoft.flexiweather.ogc.tiling.QTTTilesProvider;
 	import com.iblsoft.flexiweather.ogc.tiling.TileIndex;
+	import com.iblsoft.flexiweather.ogc.tiling.TiledLayerOptions;
+	import com.iblsoft.flexiweather.ogc.tiling.TiledTilesProvider;
+	import com.iblsoft.flexiweather.ogc.tiling.TiledTilingInfo;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
@@ -12,20 +20,24 @@ package com.iblsoft.flexiweather.ogc
 	
 	import spark.components.Group;
 	
-	public class QTTMSLayerConfiguration extends LayerConfiguration implements IInteractiveLayerProvider, ILayerConfiguration, IBehaviouralObject
+	public class QTTMSLayerConfiguration extends TiledLayerConfiguration implements IInteractiveLayerProvider, ILayerConfiguration, IBehaviouralObject
 	{
+		
+		Storage.addChangedClass('com.iblsoft.flexiweather.ogc.QTTMSLayerConfiguration','com.iblsoft.flexiweather.ogc.configuration.layers.QTTMSLayerConfiguration', new Version(1,6,0));
+		
 //		public var baseURLPattern: String;
-		/** Array of QTTilingInfo instances */
+		/** Array of TiledTilingInfo instances */
 		private var _tilingCRSsAndExtents: Array = [];
 		public function get tilingCRSsAndExtents():Array
 		{
 			return _tilingCRSsAndExtents;
 		}
 
-		public var ma_behaviours: Array = [];
+		public var tileSize: uint = 256;
 		
-		public function QTTMSLayerConfiguration()
+		public function QTTMSLayerConfiguration(tileSize: uint = 256)
 		{
+			this.tileSize = tileSize;
 		}
 		
 
@@ -35,7 +47,7 @@ package com.iblsoft.flexiweather.ogc
 			
 			if (tilingCRSsAndExtents && tilingCRSsAndExtents.length > 0)
 			{
-				for each (var qttilingInfo: QTTilingInfo in tilingCRSsAndExtents)
+				for each (var qttilingInfo: TiledTilingInfo in tilingCRSsAndExtents)
 				{
 					qttilingInfo.destroy();
 				}
@@ -52,11 +64,11 @@ package com.iblsoft.flexiweather.ogc
 		}
 		
 		/**
-		 * Add QTTilingInfo into array of supported tilingInfo data for this configuration 
+		 * Add TiledTilingInfo into array of supported tilingInfo data for this configuration 
 		 * @param tilingInfo
 		 * 
 		 */		
-		public function addQTTilingInfo(tilingInfo: QTTilingInfo): void
+		public function addTiledTilingInfo(tilingInfo: TiledTilingInfo): void
 		{
 			if (!tilingCRSsAndExtents)
 			{
@@ -66,17 +78,17 @@ package com.iblsoft.flexiweather.ogc
 		}
 		
 		/**
-		 * Get QTTilingInfo for given CRS
+		 * Get TiledTilingInfo for given CRS
 		 *  
 		 * @param crs
 		 * @return 
 		 * 
 		 */		
-		public function getQTTilingInfoForCRS(crs: String): QTTilingInfo
+		override public function getTiledTilingInfoForCRS(crs: String): TiledTilingInfo
 		{
 			if (tilingCRSsAndExtents && tilingCRSsAndExtents.length > 0)
 			{
-				for each (var info: QTTilingInfo in tilingCRSsAndExtents)
+				for each (var info: TiledTilingInfo in tilingCRSsAndExtents)
 				{
 					if (info.crsWithBBox && info.crsWithBBox.crs == crs)
 					{
@@ -104,8 +116,8 @@ package com.iblsoft.flexiweather.ogc
 		
 		override public function createCustomLayerOption(layer: IConfigurableLayer): Group
 		{
-			var options: QTTLayerOptions = new QTTLayerOptions();
-			options.layer = layer as InteractiveLayerQTTMS;
+			var options: TiledLayerOptions = new TiledLayerOptions();
+			options.layer = layer as InteractiveLayerTiled;
 			return options;	
 		}
 		
@@ -125,7 +137,7 @@ package com.iblsoft.flexiweather.ogc
 			}
 			
 //			baseURLPattern = storage.serializeString("url-pattern", baseURLPattern);
-			storage.serializeNonpersistentArray("tiling-crs-and-extent", tilingCRSsAndExtents, QTTilingInfo);
+			storage.serializeNonpersistentArray("tiling-crs-and-extent", tilingCRSsAndExtents, TiledTilingInfo);
 		}
 		
 		override public function renderPreview(f_width: Number, f_height: Number, iw: InteractiveWidget = null): void
@@ -139,7 +151,7 @@ package com.iblsoft.flexiweather.ogc
 		
 		override public function isCompatibleWithCRS(s_crs: String): Boolean
 		{
-			for each(var qtTilingInfo: QTTilingInfo in tilingCRSsAndExtents) {
+			for each(var qtTilingInfo: TiledTilingInfo in tilingCRSsAndExtents) {
 				var crsWithBBox: CRSWithBBox = qtTilingInfo.crsWithBBox;  
 				if(crsWithBBox && crsWithBBox.crs == s_crs)
 					return true;
@@ -147,31 +159,15 @@ package com.iblsoft.flexiweather.ogc
 			return false;
 		}
 
-		// IBehaviouralObject implementation
-		public function setBehaviourString(s_behaviourId: String, s_value: String): void
-		{ 
-			ma_behaviours[s_behaviourId] = s_value; 
-		}
-		
-		public function getBehaviourString(s_behaviourId: String, s_default: String = null): String
-		{
-			return (s_behaviourId in ma_behaviours) ? ma_behaviours[s_behaviourId] : s_default;
-		}
-		
-		public function hasBehaviourString(s_behaviourId: String): Boolean
-		{ return s_behaviourId in ma_behaviours; }
-		
-		public function get behaviours(): Array
-		{ return ma_behaviours; }
 
-		public function get serviceType(): String
+		override public function get serviceType(): String
 		{ return "QTT"; }
 		
 		override public function toString(): String
 		{
 			if (tilingCRSsAndExtents && tilingCRSsAndExtents.length > 0)
 			{
-				var tilingInfo: QTTilingInfo = tilingCRSsAndExtents[0];
+				var tilingInfo: TiledTilingInfo = tilingCRSsAndExtents[0];
 				if (tilingInfo)
 				{
 					return 'QTTMSLayerConfiguration urlPattern: ' + tilingInfo.urlPattern + ' CRS: ' + tilingInfo.crsWithBBox.crs + ' bbox: ' + tilingInfo.crsWithBBox.bbox.toBBOXString(); 

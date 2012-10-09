@@ -7,9 +7,9 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.ogc.cache.ICache;
 	import com.iblsoft.flexiweather.ogc.cache.ICachedLayer;
 	import com.iblsoft.flexiweather.ogc.cache.WMSCache;
-	import com.iblsoft.flexiweather.ogc.data.IWMSViewPropertiesLoader;
+	import com.iblsoft.flexiweather.ogc.data.viewProperties.IWMSViewPropertiesLoader;
 	import com.iblsoft.flexiweather.ogc.data.ImagePart;
-	import com.iblsoft.flexiweather.ogc.data.WMSViewProperties;
+	import com.iblsoft.flexiweather.ogc.data.viewProperties.WMSViewProperties;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
@@ -34,6 +34,7 @@ package com.iblsoft.flexiweather.ogc
 	import mx.collections.ArrayCollection;
 	import mx.events.DynamicEvent;
 	import mx.logging.Log;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration;
 	
 	[Event(name="wmsStyleChanged", type="flash.events.Event")]
 	
@@ -48,18 +49,26 @@ package com.iblsoft.flexiweather.ogc
 		{
 			super(container, cfg);
 			
+			
+		}
+		
+		/**
+		 * Override this function and add functionality, which needs to be done when layer is created 
+		 * 
+		 */		
+		override protected function initializeLayer(): void
+		{
+			super.initializeLayer();
 			m_autoRefreshTimer.addEventListener(TimerEvent.TIMER_COMPLETE, autoRefreshTimerCompleted);
 			m_autoRefreshTimer.repeatCount = 1;
 			
 			if (container.wmsCacheManager)
 			{
-				m_cache = container.wmsCacheManager.getWMSCacheForConfiguration(cfg);
+				m_cache = container.wmsCacheManager.getWMSCacheForConfiguration(m_cfg);
 			} else {
 				m_cache = new WMSCache();
-				(m_cache as WMSCache).name = cfg.label + " cache";
+				(m_cache as WMSCache).name = m_cfg.label + " cache";
 			}
-			
-//			m_currentWMSViewProperties.cache = m_cache;
 		}
 		
 		override public function destroy():void
@@ -96,6 +105,7 @@ package com.iblsoft.flexiweather.ogc
 				}
 				
 				visible = storage.serializeBool("visible", visible, true);
+				synchroniseLevel = storage.serializeBool('synchroniseLevel', false);
 				
 //				for each(s_dimName in getWMSDimensionsNames()) {
 //					var level: String = storage.serializeString(s_dimName, null, null);
@@ -119,6 +129,8 @@ package com.iblsoft.flexiweather.ogc
 				
 				if (isPrimaryLayer())
 					storage.serializeBool("primary-layer", true);
+				
+				storage.serializeBool('synchroniseLevel', synchroniseLevel);
 			}
 			
 			if (m_currentWMSViewProperties)
@@ -153,6 +165,9 @@ package com.iblsoft.flexiweather.ogc
 		
 		override protected function updateData(b_forceUpdate: Boolean): void
 		{
+			if (!layerInitialized)
+				return;
+			
 			super.updateData(b_forceUpdate);
 			
 			if(!visible) {

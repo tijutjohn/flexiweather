@@ -1,9 +1,18 @@
-package com.iblsoft.flexiweather.ogc
+package com.iblsoft.flexiweather.ogc.configuration.services
 {
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderErrorEvent;
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
 	import com.iblsoft.flexiweather.net.loaders.XMLLoader;
+	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.ogc.CRSWithBBox;
+	import com.iblsoft.flexiweather.ogc.Version;
+	import com.iblsoft.flexiweather.ogc.WMSLayer;
+	import com.iblsoft.flexiweather.ogc.WMSLayerBase;
+	import com.iblsoft.flexiweather.ogc.WMSLayerGroup;
+	import com.iblsoft.flexiweather.ogc.configuration.ProjectionConfiguration;
+	import com.iblsoft.flexiweather.ogc.managers.ProjectionConfigurationManager;
+	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.widgets.BackgroundJob;
 	import com.iblsoft.flexiweather.widgets.BackgroundJobManager;
 	
@@ -11,10 +20,11 @@ package com.iblsoft.flexiweather.ogc
 	import flash.net.URLRequest;
 	
 	import mx.collections.ArrayCollection;
-	import com.iblsoft.flexiweather.ogc.managers.ProjectionConfigurationManager;
 	
 	public class WMSServiceConfiguration extends OGCServiceConfiguration
 	{
+		Storage.addChangedClass('com.iblsoft.flexiweather.ogc.WMSServiceConfiguration','com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceConfiguration', new Version(1,6,0));
+		
 		private var m_capabilitiesLoader: XMLLoader = new XMLLoader();
 		private var m_capabilities: XML = null;
 		private var m_capabilitiesLoadJob: BackgroundJob = null;

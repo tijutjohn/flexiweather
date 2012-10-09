@@ -12,6 +12,16 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 	{
 		private var _areaChangeTimeout: Number;
 		
+		public function get willSynchronisePrimaryLayer(): Boolean
+		{
+			return false;
+		}
+		
+		public function set viewData(data: Array): void
+		{
+			// Area synchronizator does not need any data, so it's nothing done here
+		}
+		
 		public function get labelString(): String
 		{
 			return '';

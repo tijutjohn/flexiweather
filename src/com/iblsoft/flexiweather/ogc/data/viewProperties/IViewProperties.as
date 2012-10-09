@@ -1,6 +1,6 @@
-package com.iblsoft.flexiweather.ogc.data
+package com.iblsoft.flexiweather.ogc.data.viewProperties
 {
-	import com.iblsoft.flexiweather.ogc.ILayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
 
 	public interface IViewProperties
 	{

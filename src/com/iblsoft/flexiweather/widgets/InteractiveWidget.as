@@ -108,6 +108,13 @@ package com.iblsoft.flexiweather.widgets
 		private var _enableMouseWheel: Boolean;
 		private var _enableGestures: Boolean;
 		
+		override public function set enabled(value:Boolean):void
+		{
+			super.enabled = value;
+			
+			invalidateDisplayList();
+			
+		}
 		public function get enableMouseClick():Boolean
 		{
 			return _enableMouseClick;
@@ -403,73 +410,56 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 		
+		private function setInteractiveLayerMap(ilm: InteractiveLayerMap): void
+		{
+			m_interactiveLayerMap = ilm;
+			notifyInteractiveLayerMapChanged();
+		}
+		private function notifyInteractiveLayerMapChanged(): void
+		{
+			dispatchEvent(new Event('interactiveLayerMapChanged'));
+		}
+		
 		private var _tempLayersForInteractiveLayerMap: Array;
 		public function addLayer(l: InteractiveLayer, index: int = -1): void
 		{
 			l.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onLayerLoaded);
 			l.addEventListener(InteractiveDataLayer.LOADING_STARTED, onLayerLoadingStart);
+			l.addEventListener(InteractiveLayerEvent.LAYER_INITIALIZED, onLayerInitialized);
 
 //			var bAddLayer: Boolean = false;
 			
 			//all map data layer have to go to interactiveLayerMap, all others just to interactiveWidget
 			
 			if (l is InteractiveLayerMap) {
-				m_interactiveLayerMap = l as InteractiveLayerMap;
+				setInteractiveLayerMap(l as InteractiveLayerMap);
 			}
-			/*
-			if (l is InteractiveLayerMap) {
-				m_interactiveLayerMap = l as InteractiveLayerMap;
-				if (_tempLayersForInteractiveLayerMap && _tempLayersForInteractiveLayerMap.length > 0)
-				{
-					//add all layers which was added beofere interactiveLayerMap to layer map
-					while (_tempLayersForInteractiveLayerMap.length > 0)
-					{
-						m_interactiveLayerMap.addLayer(_tempLayersForInteractiveLayerMap.shift() as InteractiveLayer);
-					}
-				}
-				bAddLayer = true;
-			} else if (!(l is InteractiveDataLayer)) {
-//				trace("this is not data layer, should go to interactiveWidget");
-				bAddLayer = true;
-			} else if (l is InteractiveDataLayer) {
-//				trace("this is data layer, should go to layerMap");
-				bAddLayer = false;
-			} 
-			*/
-//			if (!bAddLayer)
-//			{
-//				if (m_interactiveLayerMap)
-//				{
-//					m_interactiveLayerMap.addLayer(l);
-//				} else {
-//					trace("InteractiveWidget, there is no InteractiveLayerMa, we need to add this layer later");
-//					if (!_tempLayersForInteractiveLayerMap)
-//						_tempLayersForInteractiveLayerMap = [];
-//					
-//					_tempLayersForInteractiveLayerMap.push(l);
-//				}
-//			}
 			
+			l.container = this;
+			if (index >= 0)
+				addElementAt(l, index);
+			else
+				addElement(l);
 			
-//			if (bAddLayer)
-//			{
-				l.container = this;
-				if (index >= 0)
-					addElementAt(l, index);
-				else
-					addElement(l);
-				
-				//when new layer is added to container, call onAreaChange to notify layer, that layer is already added to container, so it can render itself
-				l.onAreaChanged(true);
-				orderLayers();
-//			}
+
+			//all other functionality will be done after layer will be initialized in onLayerInitialized function
+		}
+		
+		private function onLayerInitialized(event: InteractiveLayerEvent): void
+		{
+			var l: InteractiveLayer = event.target as InteractiveLayer;
 			
+			//when new layer is added to container, call onAreaChange to notify layer, that layer is already added to container, so it can render itself
+			l.onAreaChanged(true);
+			orderLayers();
+			
+			notifyWidgetChanged('addLayer');
 		}
 		
 		public function removeLayer(l: InteractiveLayer, b_destroy: Boolean = false): void
 		{
 			if (l is InteractiveLayerMap && m_interactiveLayerMap == l)
-				m_interactiveLayerMap =null;
+				setInteractiveLayerMap(null);
 			
 			l.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onLayerLoaded);
 			l.removeEventListener(InteractiveDataLayer.LOADING_STARTED, onLayerLoadingStart);
@@ -479,6 +469,8 @@ package com.iblsoft.flexiweather.widgets
 				m_layerContainer.removeElement(l);
 				l.destroy();
 			}
+			
+			notifyWidgetChanged('removeLayer');
 		}
 		
 		public function removeAllLayers(): void
@@ -577,11 +569,36 @@ package com.iblsoft.flexiweather.widgets
 //				debugLayers();
 				mb_orderingLayers = false;
 			}
+			
+			if (interactiveLayerMap)
+			{
+				interactiveLayerMap.orderLayers();
+			}
 		}
 
+		private var _disableUI: UIComponent;
+		private function drawDisabledState(): void
+		{
+			if (!_disableUI)
+			{
+				_disableUI = new Group();
+				addElement(_disableUI);
+			}
+			
+			_disableUI.includeInLayout = true;	
+			_disableUI.visible = true;
+			
+			var g: Graphics = _disableUI.graphics;
+			
+			g.clear();
+			g.beginFill(0);
+			g.drawRect(0,0, unscaledWidth, unscaledHeight);
+			g.endFill()
+		}
         override protected function updateDisplayList(
             	unscaledWidth: Number, unscaledHeight: Number): void
         {
+			
             if (isNaN(unscaledWidth) || isNaN(unscaledHeight))
             {
             	//when user press Cancel on printing interactiveWidget, both sizes was NaN
@@ -594,11 +611,23 @@ package com.iblsoft.flexiweather.widgets
 			if(m_labelLayout.m_placementBitmap == null)
 				m_labelLayout.setBoundary(new Rectangle(0, 0, width, height)); 
 			
-			anticollisionUpdate();
 
 			var g: Graphics = m_layerBackground.graphics; 
 			g.clear();
 
+			if (!enabled)
+			{
+				drawDisabledState();
+				return;
+			} else {
+				if (_disableUI)
+				{
+					_disableUI.includeInLayout = false;	
+					_disableUI.visible = false;
+				}
+			}
+			anticollisionUpdate();
+			
 			if(mb_backgroundChessBoard) {
 				var i_squareSize: uint = 10;
 				var i_row: uint = 0;
@@ -1131,13 +1160,20 @@ package com.iblsoft.flexiweather.widgets
 
 		private var mb_listenForChanges: Boolean;
 
+		[Bindable (event="listeningForChangesChanged")]
+		public function get listeningForChanges(): Boolean
+		{
+			return mb_listenForChanges;
+		}
 		public function startListenForChanges(): void
 		{
 			mb_listenForChanges = true;
+			dispatchEvent(new Event("listeningForChangesChanged"));
 		}
 		public function stopListenForChanges(): void
 		{
 			mb_listenForChanges = false;
+			dispatchEvent(new Event("listeningForChangesChanged"));
 		}
 		/**
 		 * InteractiveWidget needs to call this function is anything, what needs to be synchronized was changed 
@@ -1829,6 +1865,7 @@ package com.iblsoft.flexiweather.widgets
 		}
 
 		private var m_interactiveLayerMap: InteractiveLayerMap;
+		[Bindable (event="interactiveLayerMapChanged")]
 		public function get interactiveLayerMap(): InteractiveLayerMap
 		{
 			return m_interactiveLayerMap;

@@ -1,13 +1,12 @@
-package com.iblsoft.flexiweather.ogc.tiling
+package com.iblsoft.flexiweather.ogc.data.viewProperties
 {
-	import com.iblsoft.flexiweather.ogc.ILayerConfiguration;
-	import com.iblsoft.flexiweather.ogc.data.IViewProperties;
-	import com.iblsoft.flexiweather.ogc.data.QTTViewProperties;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
 	
 	import flash.display.Bitmap;
 	import flash.net.URLRequest;
+	import com.iblsoft.flexiweather.ogc.tiling.TileIndex;
 	
-	public class QTTTileViewProperties implements IViewProperties
+	public class TiledTileViewProperties implements IViewProperties
 	{
 		// loaded bitmap for this tileIndex
 		public var bitmap: Bitmap;
@@ -15,8 +14,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 		public var tileIndex: TileIndex;
 		public var updateCycleAge: uint;
 		
-		private var m_qttViewProperties: QTTViewProperties;
-		public function get qttViewProperties(): QTTViewProperties
+		private var m_qttViewProperties: TiledViewProperties;
+		public function get qttViewProperties(): TiledViewProperties
 		{
 			return m_qttViewProperties;
 		}
@@ -31,7 +30,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			m_url = value;	
 		}
 		
-		public function QTTTileViewProperties(qttViewProperties: QTTViewProperties)
+		public function TiledTileViewProperties(qttViewProperties: TiledViewProperties)
 		{
 			m_qttViewProperties = qttViewProperties;
 		}
@@ -57,7 +56,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 		
 		public function clone():IViewProperties
 		{
-			var qttTile: QTTTileViewProperties = new QTTTileViewProperties(qttViewProperties);
+			var qttTile: TiledTileViewProperties = new TiledTileViewProperties(qttViewProperties);
 			trace("QTTTileViewProperties clone: " + qttViewProperties.specialCacheStrings[0]);
 			qttTile.tileIndex = tileIndex;
 			qttTile.updateCycleAge = updateCycleAge;

@@ -4,6 +4,8 @@ package com.iblsoft.flexiweather.plugins
 
 	public interface IMultiViewManager
 	{
+		function multiViewDialogOpened(): void;
+		function multiViewDialogClosed(): void;
 		function changeMultiView(configuration: MultiViewConfiguration): void;
 	}
 }

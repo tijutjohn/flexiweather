@@ -10,9 +10,11 @@ package com.iblsoft.flexiweather.widgets
 	import flash.geom.Rectangle;
 	
 	import mx.core.UIComponent;
+	import mx.events.FlexEvent;
 	
 	import spark.components.Group;
 	
+	[Event(name="layerInitialized", type="com.iblsoft.flexiweather.events.InteractiveLayerEvent")]
 	public class InteractiveLayer extends UIComponent
 	{
 		
@@ -90,6 +92,8 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 		
+		protected var layerInitialized: Boolean;
+		
 		public function InteractiveLayer(container: InteractiveWidget = null)
 		{
 			super();
@@ -105,8 +109,31 @@ package com.iblsoft.flexiweather.widgets
 			uid = 'interactiveLayer'+InteractiveLayer.ID;
 			
 			this.container = container;
+			
+			addEventListener(FlexEvent.CREATION_COMPLETE, onLayerCreationComplete);
 		}
 		
+		private function onLayerCreationComplete(event: FlexEvent): void
+		{
+			removeEventListener(FlexEvent.CREATION_COMPLETE, onLayerCreationComplete);
+			initializeLayer();
+		}
+		
+		/**
+		 * Override this function and add functionality, which needs to be done when layer is created 
+		 * 
+		 */		
+		protected function initializeLayer(): void
+		{
+			layerInitialized = true;
+			
+			callLater(notifyLayerInitialized);
+		}
+		
+		protected function notifyLayerInitialized(): void
+		{
+			dispatchEvent(new InteractiveLayerEvent(InteractiveLayerEvent.LAYER_INITIALIZED, true));
+		}
 		/**
 		 * Call this function if you want clear layer graphics 
 		 * @param graphics

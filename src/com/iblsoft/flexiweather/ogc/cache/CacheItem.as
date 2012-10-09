@@ -1,6 +1,6 @@
 package com.iblsoft.flexiweather.ogc.cache
 {
-	import com.iblsoft.flexiweather.ogc.data.IViewProperties;
+	import com.iblsoft.flexiweather.ogc.data.viewProperties.IViewProperties;
 	
 	import flash.display.Bitmap;
 	import flash.display.DisplayObject;

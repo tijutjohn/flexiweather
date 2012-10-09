@@ -1,7 +1,7 @@
 package com.iblsoft.flexiweather.proj
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
-	import com.iblsoft.flexiweather.ogc.ProjectionConfiguration;
+	import com.iblsoft.flexiweather.ogc.configuration.ProjectionConfiguration;
 	
 	import flash.geom.Point;
 	import flash.utils.Dictionary;

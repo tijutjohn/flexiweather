@@ -13,6 +13,9 @@ package com.iblsoft.flexiweather.ogc
 	import flash.geom.Point;
 	
 	import mx.collections.ArrayCollection;
+	import mx.events.CollectionEvent;
+	import mx.events.CollectionEventKind;
+	import mx.events.PropertyChangeEvent;
 	
 	public class FeatureBase extends Sprite
 	{
@@ -77,12 +80,76 @@ package com.iblsoft.flexiweather.ogc
 			m_master = master;
 		}
 		
+		private function onPointsChanged(event: CollectionEvent): void
+		{
+			trace("FeatureBase points changed: " + event.kind);
+			
+			var changeEvent: PropertyChangeEvent
+			
+			if (event.kind == CollectionEventKind.ADD)
+			{
+				trace("new Point added: " + (event.items[0] as Point));
+			}
+			if (event.kind == CollectionEventKind.UPDATE)
+			{
+				changeEvent = event.items[0] as PropertyChangeEvent;
+				trace("point updated: " + (changeEvent.oldValue as Point) + " to " + (changeEvent.newValue as Point));
+			}
+			if (event.kind == CollectionEventKind.RESET)
+			{
+				trace("RESET");
+			}
+			if (event.kind == CollectionEventKind.MOVE)
+			{
+				trace("MOVE");
+			}
+			if (event.kind == CollectionEventKind.REFRESH)
+			{
+				trace("REFRESH");
+				
+			}
+			if (event.kind == CollectionEventKind.REPLACE)
+			{
+				changeEvent = event.items[0] as PropertyChangeEvent;
+				trace("point replace: " + (changeEvent.oldValue as Point) + " to " + (changeEvent.newValue as Point));
+			}
+		}
+		
+		public function addPointAt(point: Point, index: uint): void
+		{
+			m_points.addItemAt(point, index);
+		}
+		
+		public function addPoint(point: Point): void
+		{
+			m_points.addItem(point);
+		}
+		
+		public function insertPointBefore(i_pointIndex: uint, pt: Point): void
+		{
+			trace("FeatureBase insertPointBefore i_pointIndex: " + i_pointIndex + " pt: " + pt);
+			
+			m_points.addItemAt(pt, i_pointIndex);
+			
+			m_coordinates.addItemAt(m_master.container.pointToCoord(pt.x, pt.y), i_pointIndex);
+			update(FeatureUpdateContext.fullUpdate());
+		}
+		private function initializePoints(): void
+		{
+			if (m_points)
+				m_points.removeEventListener(CollectionEvent.COLLECTION_CHANGE, onPointsChanged); 
+			m_points = new ArrayCollection();
+			m_points.addEventListener(CollectionEvent.COLLECTION_CHANGE, onPointsChanged); 
+			
+		}
 		/** Called after the feature is added to master or after any change (e.g. area change). */
 		public function update(changeFlag: FeatureUpdateContext): void
 		{
 			if(mb_pointsDirty) {
 				mb_pointsDirty = false;
-				m_points = new ArrayCollection();
+				
+				initializePoints();
+				
 				if(m_coordinates.length) {
 					var iw: InteractiveWidget = m_master.container;
 					var total: int = m_coordinates.length;
@@ -101,7 +168,7 @@ package com.iblsoft.flexiweather.ogc
 						}
 						
 						var pt: Point = iw.coordToPoint(c);
-						m_points.addItem(pt);
+						addPoint(pt);
 						
 					}
 					

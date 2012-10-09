@@ -872,6 +872,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 			if (!object || (!object is IAnticollisionLayoutObject))
 			{
 				trace("getAnticollisionLayoutObjectFor PROBLEM");
+				return null;
 			}
 			
 			return object.anticollisionLayoutObject;
@@ -894,6 +895,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 			if (!anchor || (!anchor is IAnticollisionLayoutObject))
 			{
 				trace("getAnticollisionLayoutObjectForAnchor PROBLEM");
+				return null;
 			}
 			
 

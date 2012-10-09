@@ -2,6 +2,11 @@ package com.iblsoft.flexiweather.ogc.managers
 {
 	import com.iblsoft.flexiweather.net.loaders.AbstractURLLoader;
 	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
+	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
+	import com.iblsoft.flexiweather.ogc.WMSLayer;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.LayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
@@ -12,11 +17,6 @@ package com.iblsoft.flexiweather.ogc.managers
 	import mx.collections.Sort;
 	
 	import spark.collections.SortField;
-	import com.iblsoft.flexiweather.ogc.BBox;
-	import com.iblsoft.flexiweather.ogc.ILayerConfiguration;
-	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
-	import com.iblsoft.flexiweather.ogc.LayerConfiguration;
-	import com.iblsoft.flexiweather.ogc.WMSLayer;
 
 	public class LayerConfigurationManager extends BaseConfigurationManager implements Serializable
 	{

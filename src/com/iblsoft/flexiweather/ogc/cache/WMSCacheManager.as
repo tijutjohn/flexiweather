@@ -1,6 +1,6 @@
 package com.iblsoft.flexiweather.ogc.cache
 {
-	import com.iblsoft.flexiweather.ogc.WMSLayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration;
 	
 	import flash.utils.Dictionary;
 

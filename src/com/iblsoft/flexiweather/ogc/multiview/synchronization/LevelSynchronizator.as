@@ -2,6 +2,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 {
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
+	import com.iblsoft.flexiweather.ogc.data.GlobalVariableValue;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import mx.collections.ArrayCollection;
@@ -14,16 +15,29 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			return '<level/>';
 		}
 		
-		public var levelValues: Array;
+		private var _levelValues: Array;
+		
+		public function get willSynchronisePrimaryLayer(): Boolean
+		{
+			return true;
+		}
+		
+		public function set viewData(data: Array): void
+		{
+			_levelValues = data;
+		}
 		
 		public function LevelSynchronizator()
 		{
+			trace("new LevelSynchronizator");
 		}
 		
 		private function getLevelValue(position: int): void
 		{
 			
 		}
+		
+		/*
 		public function synchronizeWidgets(synchronizeFromWidget:InteractiveWidget, widgetsForSynchronisation:ArrayCollection):void
 		{
 			trace("\nLevelSychronizator synchronizeWidgets");
@@ -60,15 +74,50 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 								{
 									trace("LevelSychronizator synchroniseWidWidgets syncWidget["+synchronizeFromWidgetPosition+"] setLevel: " + level + " for widget: " + widget.id + " i: " + i + " currLevel: " + currLevelPosition + " levelPos: " + levelPos);
 									widget.interactiveLayerMap.setLevel(level);
-	//								var currPrimaryLayer: InteractiveLayerMSBase = widget.interactiveLayerMap.getPrimaryLayer();
-									
-	//								if (currPrimaryLayer)
-	//								{
-	//									currPrimaryLayer.se(GlobalVariable.FRAME, frame);
-	//								}
 								}
 							}
 						}
+						cnt++;
+					}
+				}
+			}
+		}
+		*/
+		
+		public function synchronizeWidgets(synchronizeFromWidget:InteractiveWidget, widgetsForSynchronisation:ArrayCollection):void
+		{
+			trace("\nLevelSychronizator synchronizeWidgets");
+			if (_levelValues)
+			{
+				var levels: Array = _levelValues;
+			
+				var synchronizeFromWidgetPosition: int = getWidgetPosition(synchronizeFromWidget, widgetsForSynchronisation);
+				
+				if (synchronizeFromWidgetPosition > -1)
+				{
+					var cnt: int = 0;
+					var total: int = widgetsForSynchronisation.length;
+					if (total != _levelValues.length)
+						trace("LevelSynchronisation => widget count != _levelValues count");
+					
+					for (var i: int = 0; i < total; i++)
+					{
+						var widget: InteractiveWidget = widgetsForSynchronisation.getItemAt(i) as InteractiveWidget;
+//						if (widget.id != synchronizeFromWidget.id)
+//						{
+							var level: String = (_levelValues[cnt] as GlobalVariableValue).label;
+							if (level)
+							{
+								if (widget.interactiveLayerMap.level != level)
+								{
+									trace("LevelSychronizator synchroniseWidWidgets syncWidget["+synchronizeFromWidgetPosition+"] setLevel: " + level + " for widget: " + widget.id + " i: " + i);
+									widget.interactiveLayerMap.setLevel(level);
+								} else {
+									trace("LevelSychronizator synchroniseWidWidgets level fro widget ["+cnt+"] is already set to " + level + " Do not do anything!");
+								}
+								
+							}
+//						}
 						cnt++;
 					}
 				}

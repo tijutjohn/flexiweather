@@ -16,6 +16,11 @@ package com.iblsoft.flexiweather.utils
 		
 		public function parseLabel(label: String, layerComposer: InteractiveLayerMap): String
 		{
+			if (layerComposer && !layerComposer.visible)
+			{
+				return 'No data';
+			}
+			
 			if (label && label.indexOf('<') >= 0)
 			{
 				label = label.split('%lt;').join('<');

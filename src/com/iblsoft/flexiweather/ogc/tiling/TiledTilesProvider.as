@@ -9,12 +9,12 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import flash.events.ProgressEvent;
 	import flash.net.URLRequest;
 
-	public class QTTTilesProvider implements ITilesProvider
+	public class TiledTilesProvider implements ITilesProvider
 	{
 		private var _callbackTileLoaded: Function;
 		private var _callbackTileLoadFailed: Function;
 		
-		public function QTTTilesProvider()
+		public function TiledTilesProvider()
 		{
 		}
 		
@@ -38,7 +38,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 				_callbackTileLoaded = callbackTileLoaded;
 				_callbackTileLoadFailed = callbackTileLoadFailed;
 				
-				for each (var data: QTTTileRequest in tilesIndices)
+				for each (var data: TiledTileRequest in tilesIndices)
 				{
 					var customAssociatedData: Object = {tileRequest: data};
 					var request: URLRequest = data.qttTileViewProperties.url;
@@ -69,7 +69,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			var m_loader: WMSImageLoader = event.target as WMSImageLoader;
 			removeEventListeners(m_loader);
 			
-			var tileRequested: QTTTileRequest = event.associatedData.tileRequest as QTTTileRequest;
+			var tileRequested: TiledTileRequest = event.associatedData.tileRequest as TiledTileRequest;
 			
 			_callbackTileLoaded(Bitmap(event.result), tileRequested, tileRequested.qttTileViewProperties.tileIndex);
 		}
@@ -80,7 +80,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			removeEventListeners(m_loader);
 			
 			var tileAssociatedData: Object = event.associatedData.associatedData;
-			var tileRequested: QTTTileRequest = event.associatedData.tileRequest as QTTTileRequest;
+			var tileRequested: TiledTileRequest = event.associatedData.tileRequest as TiledTileRequest;
 			
 			if (tileAssociatedData)
 				tileAssociatedData.errorResult = event.result;

@@ -3,7 +3,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 	import com.iblsoft.flexiweather.events.InteractiveLayerMapEvent;
 	import com.iblsoft.flexiweather.events.InteractiveWidgetEvent;
 	import com.iblsoft.flexiweather.ogc.BBox;
-	import com.iblsoft.flexiweather.ogc.ILayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.SynchronisedVariableChangeEvent;
 	import com.iblsoft.flexiweather.ogc.cache.WMSCacheManager;
@@ -79,6 +79,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 	[Event (name="selectionChange", type="mx.events.FlexEvent")]
 	
 	[Event (name="multiViewReady", type="com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent")]
+	
+	[Event (name="multiViewMapsLoaded", type="com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent")]
 	
 	public class InteractiveMultiView extends SkinnableDataContainer
 	{
@@ -416,6 +418,10 @@ package com.iblsoft.flexiweather.ogc.multiview
 			}
 		}
 		
+		private function notifyWidgetsMapsLoaded(): void
+		{
+			dispatchEvent(new InteractiveMultiViewEvent(InteractiveMultiViewEvent.MULTI_VIEW_MAPS_LOADED));
+		}
 		private function notifyWidgetsReady(): void
 		{
 			dispatchEvent(new InteractiveMultiViewEvent(InteractiveMultiViewEvent.MULTI_VIEW_READY));
@@ -452,11 +458,16 @@ package com.iblsoft.flexiweather.ogc.multiview
 			loadMaps(mapXML);	
 		}
 		
+		private var _loadingMapsCount: int;
+		
 		private function loadMaps(mapXML: XML): void
 		{
 			if (mapXML)
 			{
 				var _serializedMap: XMLStorage = new XMLStorage(mapXML);
+				
+				_loadingMapsCount = _interactiveWidgets.widgets.length;
+				
 				for each (var currIW: InteractiveWidget in _interactiveWidgets.widgets)
 				{
 					if (_oldCRS)
@@ -472,51 +483,51 @@ package com.iblsoft.flexiweather.ogc.multiview
 			}
 		}
 		
-		public function removeAllLayers(removeLayerCallback: Function = null): void
-		{
-			for each (var iw: InteractiveWidget in _interactiveWidgets.widgets)
-			{
-				var im: InteractiveLayerMap = iw.interactiveLayerMap;
-				if (im)
-				{
-					while ( im.layers.length > 0)
-					{
-						var l: InteractiveLayer = im.layers.getItemAt(0) as InteractiveLayer;
-						im.removeLayer(l);
-						
-						removeLayer(l, removeLayerCallback);
-					}
-				}
-			}
-		}
-		
-		public function removeLayer(l: InteractiveLayer, removeLayerCallback: Function = null): void
-		{
-			for each (var iw: InteractiveWidget in _interactiveWidgets.widgets)
-			{
-				if (iw && iw.interactiveLayerMap)
-				{
-					iw.interactiveLayerMap.removeLayer(l);
-					if (removeLayerCallback != null)
-					{
-						removeLayerCallback(l);
-					}
-				}
-			}
-		}
-		
-		public function addLayer(ilp: IInteractiveLayerProvider, layerAddedCallback: Function = null): void
-		{
-			for each (var iw: InteractiveWidget in _interactiveWidgets.widgets)
-			{
-				var l: InteractiveLayer = ilp.createInteractiveLayer(iw);
-				iw.interactiveLayerMap.addLayer(l);
-				if (layerAddedCallback != null)
-				{
-					layerAddedCallback(l);
-				}
-			}
-		}
+//		public function removeAllLayers(removeLayerCallback: Function = null): void
+//		{
+//			for each (var iw: InteractiveWidget in _interactiveWidgets.widgets)
+//			{
+//				var im: InteractiveLayerMap = iw.interactiveLayerMap;
+//				if (im)
+//				{
+//					while ( im.layers.length > 0)
+//					{
+//						var l: InteractiveLayer = im.layers.getItemAt(0) as InteractiveLayer;
+//						im.removeLayer(l);
+//						
+//						removeLayer(l, removeLayerCallback);
+//					}
+//				}
+//			}
+//		}
+//		
+//		public function removeLayer(l: InteractiveLayer, removeLayerCallback: Function = null): void
+//		{
+//			for each (var iw: InteractiveWidget in _interactiveWidgets.widgets)
+//			{
+//				if (iw && iw.interactiveLayerMap)
+//				{
+//					iw.interactiveLayerMap.removeLayer(l);
+//					if (removeLayerCallback != null)
+//					{
+//						removeLayerCallback(l);
+//					}
+//				}
+//			}
+//		}
+//		
+//		public function addLayer(ilp: IInteractiveLayerProvider, layerAddedCallback: Function = null): void
+//		{
+//			for each (var iw: InteractiveWidget in _interactiveWidgets.widgets)
+//			{
+//				var l: InteractiveLayer = ilp.createInteractiveLayer(iw);
+//				iw.interactiveLayerMap.addLayer(l);
+//				if (layerAddedCallback != null)
+//				{
+//					layerAddedCallback(l);
+//				}
+//			}
+//		}
 		
 		public function refresh(b_force: Boolean): void
 		{
@@ -551,6 +562,13 @@ package com.iblsoft.flexiweather.ogc.multiview
 				//we need to set b_force parameter to force to be able to get cached bitmaps
 				l.refresh(false);
 			}
+			
+			_loadingMapsCount--;
+			
+			if (_loadingMapsCount == 0)
+			{
+				notifyWidgetsMapsLoaded();
+			}
 		}
 		
 		private function onWidgetSelected(event: InteractiveWidgetEvent): void
@@ -558,6 +576,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 			selectedInteractiveWidget = event.currentTarget as InteractiveWidget;
 		}
 		
+		[Bindable (event="interactiveLayerMapChanged")]
 		public function get selectedInteractiveWidget():InteractiveWidget
 		{
 			return _selectedInteractiveWidget;
@@ -735,21 +754,31 @@ package com.iblsoft.flexiweather.ogc.multiview
 		
 		private function onPrimaryLayerChanged(event: DataEvent = null): void
 		{
-			if (_previousPrimaryLayer)
-			{
-				_previousPrimaryLayer.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, onSychronisedVariableChanged);
-				_previousPrimaryLayer.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onSychronisedVariableChanged);
-			}
+			stopListenForSynchronisedVariableChange(_previousPrimaryLayer);
 			
 			if (_selectedInteractiveWidget.interactiveLayerMap)
 				_previousPrimaryLayer = _selectedInteractiveWidget.interactiveLayerMap.primaryLayer;
 
-			if (_previousPrimaryLayer)
+			startListenForSynchronisedVariableChange(_previousPrimaryLayer);
+		}
+		
+		private function startListenForSynchronisedVariableChange(layer: InteractiveLayerMSBase): void
+		{
+			if (layer)
 			{
-				_previousPrimaryLayer.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, onSychronisedVariableChanged);
-				_previousPrimaryLayer.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onSychronisedVariableChanged);
+				layer.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, onSychronisedVariableChanged);
+				layer.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onSychronisedVariableChanged);
 			}
 		}
+		private function stopListenForSynchronisedVariableChange(layer: InteractiveLayerMSBase): void
+		{
+			if (layer)
+			{
+				layer.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, onSychronisedVariableChanged);
+				layer.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onSychronisedVariableChanged);
+			}
+		}
+		
 		private function onSychronisedVariableChanged(event: SynchronisedVariableChangeEvent): void
 		{
 			var layer: InteractiveLayerMSBase = event.target as InteractiveLayerMSBase;
@@ -977,10 +1006,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 			if (widget && _selectedInteractiveWidget)
 			{
 				
-				
-				
 				//TODO do not change it for selected widget, it was already changed
-				
 				
 				
 				
@@ -1058,6 +1084,39 @@ package com.iblsoft.flexiweather.ogc.multiview
 		{
 			_synchronizator = synchronizator;
 			invalidateSychronizator();
+		}
+		
+		
+		public function synchronize(): void
+		{
+			if (synchronizator)
+			{
+				if (synchronizator.willSynchronisePrimaryLayer)
+				{
+					/**
+					 * If primary layer will be synchronised, we need to stop listen for synchronization and call synchronize method again, othewise it will be infinite loop.
+					 * Instead we will listen for synchronisation and after receiving SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED we will start again previous listener.
+					 * 
+					 * Just to avoid infinity synchronisation loop
+					 * 
+					 */			
+					var primaryLayer: InteractiveLayerMSBase = selectedInteractiveWidget.interactiveLayerMap.primaryLayer; 
+					stopListenForSynchronisedVariableChange(primaryLayer);
+					
+					primaryLayer.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, waitForSynchronisedVariableChange);
+					primaryLayer.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, waitForSynchronisedVariableChange);
+				}
+				synchronizeWidgets(synchronizator);
+			}
+		}
+		
+		private function waitForSynchronisedVariableChange(event: SynchronisedVariableChangeEvent): void
+		{
+			var primaryLayer: InteractiveLayerMSBase = selectedInteractiveWidget.interactiveLayerMap.primaryLayer; 
+			primaryLayer.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, waitForSynchronisedVariableChange);
+			primaryLayer.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, waitForSynchronisedVariableChange);
+			
+//			startListenForSynchronisedVariableChange(primaryLayer);
 		}
 		
 		public function synchronizeWidgets(synchronizator: ISynchronizator, interactiveWidget: InteractiveWidget = null):void

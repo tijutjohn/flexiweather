@@ -1,5 +1,6 @@
-package com.iblsoft.flexiweather.ogc
+package com.iblsoft.flexiweather.ogc.configuration.services
 {
+	import com.iblsoft.flexiweather.ogc.Version;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	
@@ -9,6 +10,9 @@ package com.iblsoft.flexiweather.ogc
 	
 	public class OGCServiceConfiguration extends EventDispatcher implements Serializable
 	{
+		
+		Storage.addChangedClass('com.iblsoft.flexiweather.ogc.OGCServiceConfiguration','com.iblsoft.flexiweather.ogc.configuration.services.OGCServiceConfiguration', new Version(1,6,0));
+		
 		private var ms_id: String;
 		private var ms_fullURL: String;
 		private var ms_service: String;

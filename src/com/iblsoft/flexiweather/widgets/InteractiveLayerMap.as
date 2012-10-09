@@ -17,6 +17,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.utils.DateUtils;
 	import com.iblsoft.flexiweather.utils.HTMLUtils;
+	import com.iblsoft.flexiweather.utils.ISO8601Parser;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.utils.XMLStorage;
@@ -93,7 +94,8 @@ package com.iblsoft.flexiweather.widgets
 		[Bindable (event=LEVEL_VARIABLE_CHANGED)]
 		public function get level(): String
 		{
-			var levelString: String = getSynchronizedLevelValue();
+//			var levelString: String = getSynchronizedLevelValue();
+			var levelString: String = _globalVariablesManager.level;
 			return levelString;
 		}
 		
@@ -101,16 +103,17 @@ package com.iblsoft.flexiweather.widgets
 		public function get frame(): Date
 		{
 			var frameDate: Date = getSynchronizedFrameValue();
+//			var frameDate: Date = _globalVariablesManager.frame;
 			return frameDate;
 		}
 		[Bindable (event=FRAME_VARIABLE_CHANGED)]
 		public function get frameString(): String
 		{
-			var frameDate: Date = getSynchronizedFrameValue();
+//			var frameDate: Date = getSynchronizedFrameValue();
 			if (dateFormat && dateFormat.length > 0)
-				return DateUtils.strftime(frameDate, dateFormat);
+				return DateUtils.strftime(frame, dateFormat);
 				
-			return '';
+			return frame.toString();
 		}
 		
 		private var m_timelineConfiguration: MapTimelineConfiguration;
@@ -129,12 +132,14 @@ package com.iblsoft.flexiweather.widgets
 		}
 		
 		private var _globalVariablesManager: GlobalVariablesManager;
+		
+		[Bindable (event="globalVariablesManagerChanged")]
 		public function get globalVariablesManager(): GlobalVariablesManager
 		{
 			return _globalVariablesManager;
 		}
 		
-		public function InteractiveLayerMap(container:InteractiveWidget)
+		public function InteractiveLayerMap(container:InteractiveWidget = null)
 		{
 			super(container);
 			
@@ -149,6 +154,8 @@ package com.iblsoft.flexiweather.widgets
 			_periodicTimer = new Timer(10 * 1000);
 			_periodicTimer.addEventListener(TimerEvent.TIMER, onPeriodicTimerTick);
 			_periodicTimer.start();
+			
+			dispatchEvent(new Event("globalVariablesManagerChanged"));
 		}
 		
 		private function onPeriodicTimerTick(event: TimerEvent): void
@@ -229,6 +236,18 @@ package com.iblsoft.flexiweather.widgets
 				var de: DynamicEvent = new DynamicEvent(LAYERS_SERIALIZED_AND_READY);
 				de['layers'] = newLayers;
 				dispatchEvent(de);
+				
+				var globalFrame8601: String = storage.serializeString('global-frame', null);
+				var globalLevel: String = storage.serializeString('global-level', null);
+				
+				if (globalVariablesManager)
+				{
+					if (globalFrame8601)
+						globalVariablesManager.frame = ISO8601Parser.stringToDate(globalFrame8601);
+					if (globalLevel)
+						globalVariablesManager.level = globalLevel;
+				}
+				//set global vars
 
 			} else {
 				//create wrapper collection
@@ -242,6 +261,15 @@ package com.iblsoft.flexiweather.widgets
 				}
 				
 				storage.serializeNonpersistentArrayCollection("layer", wrappers, LayerSerializationWrapper);
+				
+				if (globalVariablesManager)
+				{
+					var frameDateString: String;
+					if (globalVariablesManager.frame)
+						frameDateString = ISO8601Parser.dateToString(globalVariablesManager.frame)
+					storage.serializeString('global-frame', frameDateString);
+					storage.serializeString('global-level', globalVariablesManager.level);
+				}
 				trace("Map serialize: " + (storage as XMLStorage).xml);
 			}
 		}
@@ -313,7 +341,8 @@ package com.iblsoft.flexiweather.widgets
 				_frameInvalidated = false;
 				
 				//it will set frame again. This is done by purpose when adding new layer, to synchronise frame with newly added layer
-				setFrame(frame);
+				if (frame)
+					setFrame(frame);
 			}
 			if (_levelInvalidated)
 			{
@@ -327,22 +356,29 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (l)
 			{
-				
 				super.addLayer(l);
 				
+			} else {
+				trace("Layer is null, do not add it to InteractiveLayerMap");
+			}
+		}
+		
+		override protected function layerAdded(layer: InteractiveLayer): void
+		{
 //				trace(this + " ADD LAYER: " + l.toString());
-				
+			if (layer)
+			{
 				var dynamicEvent: DynamicEvent = new DynamicEvent(TIME_AXIS_ADDED);
 //				trace("InteractiveLayerMap addlayer: " + l.name);
-				dynamicEvent['layer'] = l;
+				dynamicEvent['layer'] = layer;
 				dispatchEvent(dynamicEvent);
 				
 				var synchronisableFrame: Boolean = false;
 				var synchronisableLevel: Boolean = false;
-				var so: ISynchronisedObject = l as ISynchronisedObject;
+				var so: ISynchronisedObject = layer as ISynchronisedObject;
 				
 				//need to wait when synchronizaed variables will be update (set FRAME and LEVEL)
-            	if(so) {
+            	if(so && so.getSynchronisedVariables()) {
 					
 					synchronisableFrame = so.getSynchronisedVariables().indexOf(GlobalVariable.FRAME) >= 0;
 					synchronisableLevel = so.getSynchronisedVariables().indexOf(GlobalVariable.LEVEL) >= 0;
@@ -354,18 +390,18 @@ package com.iblsoft.flexiweather.widgets
 						return;
 					
 	            	//this layer can be primary layer and there is no primary layer set, set this one as primaty layer	
-					setPrimaryLayer(l as InteractiveLayerMSBase);
+					setPrimaryLayer(layer as InteractiveLayerMSBase);
 				} else {
 					invalidateFrame();
-					if (synchronisableLevel && (l as InteractiveLayerMSBase).synchroniseLevel)
+					if (synchronisableLevel && (layer as InteractiveLayerMSBase).synchroniseLevel)
 					{
 						invalidateLevel();
 					}
 				}
 				
-				if (l is InteractiveLayerMSBase)
+				if (layer is InteractiveLayerMSBase)
 				{
-					var msBaseLayer: InteractiveLayerMSBase = l as InteractiveLayerMSBase;
+					var msBaseLayer: InteractiveLayerMSBase = layer as InteractiveLayerMSBase;
 					if (synchronisableLevel && msBaseLayer.synchroniseLevel)
 					{
 						var globalLevel: String = level;
@@ -373,7 +409,7 @@ package com.iblsoft.flexiweather.widgets
 						bSynchronized = bSynchronized || so.synchroniseWith(GlobalVariable.LEVEL, level);
 						if(bSynchronized)
 						{
-							l.refresh(false);
+							layer.refresh(false);
 						}
 					}
 				}
@@ -397,6 +433,11 @@ package com.iblsoft.flexiweather.widgets
 					var so: ISynchronisedObject = lWMS as ISynchronisedObject;
 	            	if(so == null)
 	            		continue;
+					
+					var test: * = so.getSynchronisedVariables();
+					if (!test)
+						continue;
+					
 	            	if(so.getSynchronisedVariables().indexOf(GlobalVariable.FRAME) < 0)
 	            		continue;
 	            	//this layer can be primary layer and there is no primary layer set, set this one as primaty layer	
@@ -424,30 +465,33 @@ package com.iblsoft.flexiweather.widgets
 		
 		private function getSynchronizedFrameValue(): Date
 		{
-			return getSynchronizedVariableValue(GlobalVariable.FRAME) as Date;	
-		}
-		
-		private function getSynchronizedLevelValue(): String
-		{
-			return getSynchronizedVariableValue(GlobalVariable.LEVEL) as String;	
-		}
-		
-		private function getSynchronizedVariableValue(variable: String): Object
-		{
-			var l_syncLayers: Array = [];
-			var l_timeAxis: Array = enumTimeAxis(l_syncLayers);
-          	if(l_timeAxis == null) // no time axis
-          		return null;
-          		
-			var so: ISynchronisedObject;
+			if (primaryLayer)
+				return (primaryLayer as ISynchronisedObject).getSynchronisedVariableValue(GlobalVariable.FRAME) as Date;	
 			
-          	for each(so in l_syncLayers) 
-          	{
-          		var frame: Date = so.getSynchronisedVariableValue(GlobalVariable.FRAME) as Date;
-          	}
-
-			return frame;
+			return null;
 		}
+//		
+//		private function getSynchronizedLevelValue(): String
+//		{
+//			return getSynchronizedVariableValue(GlobalVariable.LEVEL) as String;	
+//		}
+//		
+//		private function getSynchronizedVariableValue(variable: String): Object
+//		{
+//			var l_syncLayers: Array = [];
+//			var l_timeAxis: Array = enumTimeAxis(l_syncLayers);
+//          	if(l_timeAxis == null) // no time axis
+//          		return null;
+//          		
+//			var so: ISynchronisedObject;
+//			
+//          	for each(so in l_syncLayers) 
+//          	{
+//          		var frame: Date = so.getSynchronisedVariableValue(variable) as Date;
+//          	}
+//
+//			return frame;
+//		}
 		
 		
 		private var m_primaryLayer: InteractiveLayerMSBase;
@@ -514,7 +558,7 @@ package com.iblsoft.flexiweather.widgets
 					continue;
 				var test: * = so.getSynchronisedVariables();
 				//trace("enumTimeAxis so: " + (so as Object).name + " synchro vars: " + test.toString());
-            	if(so == null)
+            	if(test == null)
             		continue;
             	if(so.getSynchronisedVariables().indexOf(GlobalVariable.FRAME) < 0)
             		continue;
@@ -848,7 +892,7 @@ package com.iblsoft.flexiweather.widgets
 				{
           			l.refresh(false);
 				} else {
-					trace("InteractiveLayerMap setLevel ["+newLevel+"] FRAME NOT FOUND for "+l.name);
+					trace("InteractiveLayerMap setLevel ["+newLevel+"] LEVEL NOT FOUND for "+l.name);
 				}
           	}
           	return true;
@@ -863,12 +907,13 @@ package com.iblsoft.flexiweather.widgets
             	if(!so.hasSynchronisedVariable(GlobalVariable.FRAME))
 					continue;
 				
+				trace(this + " setFrame try to synchronize: ["+newFrame.toTimeString()+"]  for "+l.name);
 				var bSynchronized: Boolean = so.synchroniseWith(GlobalVariable.FRAME, newFrame);
           		if(bSynchronized)
 				{
           			l.refresh(false);
 				} else {
-					trace("InteractiveLayerMap setFrame ["+newFrame.toTimeString()+"] FRAME NOT FOUND for "+l.name);
+					trace(this + " setFrame ["+newFrame.toTimeString()+"] FRAME NOT FOUND for "+l.name);
 				}
           	}
           	return true;
@@ -1022,8 +1067,7 @@ package com.iblsoft.flexiweather.widgets
 	}
 }
 
-import com.iblsoft.flexiweather.ogc.ILayerConfiguration;
-import com.iblsoft.flexiweather.ogc.LayerConfiguration;
+import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
 import com.iblsoft.flexiweather.ogc.managers.LayerConfigurationManager;
 import com.iblsoft.flexiweather.utils.Serializable;
 import com.iblsoft.flexiweather.utils.Storage;
