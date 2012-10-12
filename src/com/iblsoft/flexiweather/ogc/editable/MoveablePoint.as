@@ -2,8 +2,10 @@ package com.iblsoft.flexiweather.ogc.editable
 {
 	import com.iblsoft.flexiweather.events.WFSCursorManagerEvent;
 	import com.iblsoft.flexiweather.events.WFSCursorManagerTypes;
+	import com.iblsoft.flexiweather.ogc.events.MoveablePointEvent;
 	
 	import flash.display.Sprite;
+	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	import flash.system.Capabilities;
@@ -134,6 +136,14 @@ package com.iblsoft.flexiweather.ogc.editable
 			m_pt = pt;
 			update();
 			m_feature.setPoint(mi_pointIndex, m_pt, mi_reflectionDelta);
+			
+			var mpe: MoveablePointEvent = new MoveablePointEvent(MoveablePointEvent.MOVEABLE_POINT_MOVE, true);
+			mpe.point = this;
+			mpe.feature = m_feature;
+			mpe.x = pt.x;
+			mpe.y = pt.y;
+			dispatchEvent(mpe);
+			
 			return true;
 		}
 	
@@ -161,6 +171,13 @@ package com.iblsoft.flexiweather.ogc.editable
 			m_feature.selectMoveablePoint(mi_pointIndex, mi_reflection);
 			
 			mb_dragging = true;
+			
+			var mpe: MoveablePointEvent = new MoveablePointEvent(MoveablePointEvent.MOVEABLE_POINT_DOWN, true);
+			mpe.point = this;
+			mpe.feature = m_feature;
+			mpe.x = pt.x;
+			mpe.y = pt.y;
+			dispatchEvent(mpe);
 			return true;
 		}
 	
@@ -188,6 +205,14 @@ package com.iblsoft.flexiweather.ogc.editable
 					}
 				}
 			}
+			
+			var mpe: MoveablePointEvent = new MoveablePointEvent(MoveablePointEvent.MOVEABLE_POINT_UP, true);
+			mpe.point = this;
+			mpe.feature = m_feature;
+			mpe.x = pt.x;
+			mpe.y = pt.y;
+			dispatchEvent(mpe);
+			
 			return true;
 		}
 		

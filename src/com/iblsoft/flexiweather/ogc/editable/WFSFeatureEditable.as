@@ -6,6 +6,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.ogc.data.ReflectionData;
 	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
 	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionDictionary;
+	import com.iblsoft.flexiweather.ogc.events.MoveablePointEvent;
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithReflection;
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureBase;
 	import com.iblsoft.flexiweather.proj.Coord;
@@ -95,6 +96,42 @@ package com.iblsoft.flexiweather.ogc.editable
 				}
 			}
 		}
+		
+		private function addMoveablePointListeners(mp: MoveablePoint): void
+		{
+			if ( mp )
+			{
+				mp.addEventListener(MoveablePointEvent.MOVEABLE_POINT_CLICK, redispatchMoveablePointEvent);
+				mp.addEventListener(MoveablePointEvent.MOVEABLE_POINT_DOWN, redispatchMoveablePointEvent);
+				mp.addEventListener(MoveablePointEvent.MOVEABLE_POINT_DRAG_END, redispatchMoveablePointEvent);
+				mp.addEventListener(MoveablePointEvent.MOVEABLE_POINT_DRAG_START, redispatchMoveablePointEvent);
+				mp.addEventListener(MoveablePointEvent.MOVEABLE_POINT_MOVE, redispatchMoveablePointEvent);
+				mp.addEventListener(MoveablePointEvent.MOVEABLE_POINT_OUT, redispatchMoveablePointEvent);
+				mp.addEventListener(MoveablePointEvent.MOVEABLE_POINT_OVER, redispatchMoveablePointEvent);
+				mp.addEventListener(MoveablePointEvent.MOVEABLE_POINT_UP, redispatchMoveablePointEvent);
+			}
+			
+		}
+		private function removeMoveablePointListeners(mp: MoveablePoint): void
+		{
+			if ( mp )
+			{
+				mp.removeEventListener(MoveablePointEvent.MOVEABLE_POINT_CLICK, redispatchMoveablePointEvent);
+				mp.removeEventListener(MoveablePointEvent.MOVEABLE_POINT_DOWN, redispatchMoveablePointEvent);
+				mp.removeEventListener(MoveablePointEvent.MOVEABLE_POINT_DRAG_END, redispatchMoveablePointEvent);
+				mp.removeEventListener(MoveablePointEvent.MOVEABLE_POINT_DRAG_START, redispatchMoveablePointEvent);
+				mp.removeEventListener(MoveablePointEvent.MOVEABLE_POINT_MOVE, redispatchMoveablePointEvent);
+				mp.removeEventListener(MoveablePointEvent.MOVEABLE_POINT_OUT, redispatchMoveablePointEvent);
+				mp.removeEventListener(MoveablePointEvent.MOVEABLE_POINT_OVER, redispatchMoveablePointEvent);
+				mp.removeEventListener(MoveablePointEvent.MOVEABLE_POINT_UP, redispatchMoveablePointEvent);
+			}
+			
+		}
+		
+		private function redispatchMoveablePointEvent(event:  MoveablePointEvent): void
+		{
+			dispatchEvent(event);
+		}
 		override public function update(changeFlag: FeatureUpdateContext): void
 		{
 			super.update(changeFlag);
@@ -124,6 +161,9 @@ package com.iblsoft.flexiweather.ogc.editable
 						m_editableSprite.addChild(mp);
 						if(eim != null)
 							eim.addEditableItem(mp);
+						
+						addMoveablePointListeners(mp);
+						
 						continue;
 					}
 					
@@ -170,6 +210,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				var reflection: WFSEditableReflectionData = reflectionDictionary.getReflection(r) as WFSEditableReflectionData;
 				
 				var mp: MoveablePoint = reflection.moveablePoints[i] as MoveablePoint;
+				removeMoveablePointListeners(mp);
 				if(mp && eim != null) {
 					eim.removeEditableItem(mp);
 					// ADD CHECK ABOUT SELECTED MOVEABLE POINT

@@ -393,6 +393,7 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.GoogleMapLayerConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.GoogleMapsLayerOption"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.InteractiveLayerGoogleMaps"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.events.MoveablePointEvent"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

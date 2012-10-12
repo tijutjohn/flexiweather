@@ -158,17 +158,17 @@ package com.iblsoft.flexiweather.ogc
 					for(var i: uint = 0; i < total; ++i) {
 						var c: Coord = m_coordinates[i];
 						
-						if (iw.coordInside(c))
-						{
+//						if (iw.coordInside(c))
+//						{
 //							trace("Coord is cinside");
 							featureIsInside = true;
-						} else {
+							var pt: Point = iw.coordToPoint(c);
+							addPoint(pt);
+//						} else {
 							
 //							trace("Coord is not inside");
-						}
+//						}
 						
-						var pt: Point = iw.coordToPoint(c);
-						addPoint(pt);
 						
 					}
 					
