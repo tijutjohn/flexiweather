@@ -530,6 +530,16 @@ package com.iblsoft.flexiweather.widgets
 	        		(height - 1 - y) * m_viewBBox.height / (height - 1) + m_viewBBox.yMin)
         }
 
+        public function coordInside(c: Coord): Boolean
+		{
+			if(!Projection.equalCRSs(c.crs, ms_crs)) {
+				//same projectsion
+				c = c.convertToProjection(m_crsProjection);
+			}
+			
+			return m_viewBBox.coordInside(c);
+			
+		}
 		/** Converts Coord into screen point (pixels) with current CRS. */ 
         public function coordToPoint(c: Coord): Point
         {
@@ -558,7 +568,8 @@ package com.iblsoft.flexiweather.widgets
 				var pX: Number = (ptInOurCRS.x - m_viewBBox.xMin) * (width - 1) / m_viewBBox.width;
 				var pY: Number = height - 1 - (ptInOurCRS.y - m_viewBBox.yMin) * (height - 1) / m_viewBBox.height;
 				
-				return new Point(pX, pY);
+				var p: Point = new Point(pX, pY)
+				return p;
 			}
 			return null;
         }
@@ -1197,6 +1208,20 @@ package com.iblsoft.flexiweather.widgets
 			
 			return features;
 		}
+		
+		public function pointIsOutside(p: Point): Boolean
+		{
+			if (p.x < 0 || p.x > width)
+				return true;
+			if (p.y < 0 || p.y > height)
+				return true;
+			
+			return false;
+		}
+		public function lineIsOutside(p1: Point, p2: Point): Boolean
+		{
+			return pointIsOutside(p1) && pointIsOutside(p2);
+		}
 		/**
 		 * Draw polyline with given curve renderer. If you just want all polyline reflections without drawing it, use getPolylineReflections function instead
 		 * @param g
@@ -1211,12 +1236,16 @@ package com.iblsoft.flexiweather.widgets
 //			trace("\n\n IW drawPolyline features: " + features.length);
 			var p: Point;
 			
+			var oldPoint: Point;
+			
 			for each (var mPoints: Array in features)
 			{
 				var total: int = mPoints.length;
 				if (total > 0)
 				{
 					p = mPoints[0] as Point;
+
+					oldPoint = p;
 					
 //					trace("\t drawPolyline start ["+p.x+","+p.y+"]");
 					g.start(p.x, p.y);
@@ -1224,8 +1253,17 @@ package com.iblsoft.flexiweather.widgets
 					
 					for (var i: int = 1; i < mPoints.length; i++){
 						p = mPoints[i] as Point;
-						g.lineTo(p.x, p.y);
+						
+						if (!lineIsOutside(p, oldPoint))
+						{
+							g.lineTo(p.x, p.y);
+//						} else {
+//							trace("IW drawPolyline do not draw line, it's outside, p1: " + p + " p2: " + oldPoint);
+						}
+						
 //						trace("\t drawPolyline lineTo ["+p.x+","+p.y+"]");
+						
+						oldPoint = p;
 					}
 					
 					g.finish(p.x, p.y);

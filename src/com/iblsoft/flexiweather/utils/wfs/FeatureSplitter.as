@@ -187,7 +187,11 @@ package com.iblsoft.flexiweather.utils.wfs
 			var resultArr: Array = [];
 			for(i = 0; i < 5; i++) {
 				var i_delta: int = (i & 1 ? 1 : -1) * ((i + 1) >> 1); // generates sequence 0, 1, -1, 2, -2, ..., 5, -5
-				resultArr.push(convertToScreenPoints(shiftCoords(points, i_delta)));
+				var polygons: Array = convertToScreenPoints(shiftCoords(points, i_delta));
+				for each (var polygon: Array in polygons)
+				{
+					resultArr.push(polygon);
+				}
 			}
 			
 //			var resultArr: Array = [convertToScreenPoints(points)];
@@ -230,11 +234,27 @@ package com.iblsoft.flexiweather.utils.wfs
 			
 			var total: int = coords.length;
 			var crs: String =  m_iw.getCRS();
+			
+			var currentPolygon: Array = [];
 			for (var i: int = 0; i < total; i++)
 			{
 				var p: Point = coords[i] as Point;
-				arr.push(m_iw.coordToPoint(new Coord(crs, p.x, p.y)));
+				
+				var screenPoint: Point = m_iw.coordToPoint(new Coord(crs, p.x, p.y));
+				if (m_iw.pointIsOutside(screenPoint))
+				{
+					if (currentPolygon.length > 0)
+					{
+						arr.push(currentPolygon);
+						currentPolygon = [];
+					}
+				} else {
+					currentPolygon.push(screenPoint);
+				}
 			}
+			
+			arr.push(currentPolygon);
+			
 			return arr;
 		}
 		

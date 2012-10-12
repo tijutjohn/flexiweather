@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.ogc.editable.IClosableCurve;
+	import com.iblsoft.flexiweather.ogc.events.FeatureEvent;
 	import com.iblsoft.flexiweather.ogc.kml.renderer.IKMLRenderer;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.utils.CubicBezier;
@@ -83,13 +84,15 @@ package com.iblsoft.flexiweather.ogc
 		{
 			trace("FeatureBase points changed: " + event.kind);
 			
+			var changeEvent: PropertyChangeEvent
+			
 			if (event.kind == CollectionEventKind.ADD)
 			{
 				trace("new Point added: " + (event.items[0] as Point));
 			}
 			if (event.kind == CollectionEventKind.UPDATE)
 			{
-				var changeEvent: PropertyChangeEvent = event.items[0] as PropertyChangeEvent;
+				changeEvent = event.items[0] as PropertyChangeEvent;
 				trace("point updated: " + (changeEvent.oldValue as Point) + " to " + (changeEvent.newValue as Point));
 			}
 			if (event.kind == CollectionEventKind.RESET)
@@ -107,7 +110,7 @@ package com.iblsoft.flexiweather.ogc
 			}
 			if (event.kind == CollectionEventKind.REPLACE)
 			{
-				var changeEvent: PropertyChangeEvent = event.items[0] as PropertyChangeEvent;
+				changeEvent = event.items[0] as PropertyChangeEvent;
 				trace("point replace: " + (changeEvent.oldValue as Point) + " to " + (changeEvent.newValue as Point));
 			}
 		}
@@ -151,14 +154,34 @@ package com.iblsoft.flexiweather.ogc
 				if(m_coordinates.length) {
 					var iw: InteractiveWidget = m_master.container;
 					var total: int = m_coordinates.length;
+					
+					var oldPoint: Point;
+					var oldCoordNotInside: Coord;
+					var previousPointVisible: Boolean;
+					var pt: Point;
+					
+					var featureIsInside: Boolean = false;
+
 					for(var i: uint = 0; i < total; ++i) {
 						var c: Coord = m_coordinates[i];
-						var pt: Point = iw.coordToPoint(c);
-						addPoint(pt);
+						pt = iw.coordToPoint(c);
+						m_points.addItem(pt);
 					}
+					
+					if (featureIsInViewBBox != featureIsInside)
+					{
+						var event: FeatureEvent = new FeatureEvent(FeatureEvent.PRESENCE_IN_VIEW_BBOX_CHANGED, true);
+						event.insideViewBBox = featureIsInside;
+						dispatchEvent(event);
+					}
+					
+					featureIsInViewBBox = featureIsInside;
+					
 				}
 			}
 		}
+		
+		public var featureIsInViewBBox: Boolean;
 		
 		/** Called internally before the feature is removed from the master. */ 
 		public function cleanup(): void
