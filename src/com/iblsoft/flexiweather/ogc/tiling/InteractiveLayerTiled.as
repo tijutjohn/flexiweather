@@ -1224,7 +1224,10 @@ package com.iblsoft.flexiweather.ogc.tiling
 		
 		public function setValidityTime(validity: Date): void
 		{
-			m_currentQTTViewProperties.setValidityTime(validity);
+			if (m_currentQTTViewProperties)
+			{
+				m_currentQTTViewProperties.setValidityTime(validity);
+			}
 		}
 		
 		public function serialize(storage:Storage):void
