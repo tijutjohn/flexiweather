@@ -70,13 +70,17 @@ package com.iblsoft.flexiweather.ogc.editable
 		 */
 		protected function createHitMask(curvesPoints: Array): void
 		{
+			
 			for each (var curvePoints: Array in curvesPoints)
 			{
-				// CREATE CURVE MASK
-				graphics.lineStyle(10, 0xFF0000, 0.0);
-				graphics.moveTo(curvePoints[0].x, curvePoints[0].y);
-				for (var p: int = 1; p < curvePoints.length; p++){
-					graphics.lineTo(curvePoints[p].x, curvePoints[p].y);
+				if (curvePoints.length > 1)
+				{
+					// CREATE CURVE MASK
+					graphics.lineStyle(10, 0xFF0000, 0.0);
+					graphics.moveTo(curvePoints[0].x, curvePoints[0].y);
+					for (var p: int = 1; p < curvePoints.length; p++){
+						graphics.lineTo(curvePoints[p].x, curvePoints[p].y);
+					}
 				}
 			}
 		}

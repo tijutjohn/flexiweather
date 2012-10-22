@@ -149,7 +149,17 @@ package com.iblsoft.flexiweather.utils.wfs
 			}
 			
 			var resultArr: Array = [];
-			
+			for(i = 0; i < 5; i++) {
+				var i_delta: int = (i & 1 ? 1 : -1) * ((i + 1) >> 1); // generates sequence 0, 1, -1, 2, -2, ..., 5, -5
+				var polygons: Array = convertToScreenPoints(shiftCoords(points, i_delta));
+				for each (var polygon: Array in polygons)
+				{
+					resultArr.push(polygon);
+				}
+			}
+						
+			return resultArr;
+/*			
 			//get reflected features
 			
 			var polygonsDict: Dictionary = new Dictionary();
@@ -187,16 +197,8 @@ package com.iblsoft.flexiweather.utils.wfs
 			{
 				resultArr.push(arr);
 			}
-//			var resultArr: Array = [];
-//			for(i = 0; i < 5; i++) {
-//				var i_delta: int = (i & 1 ? 1 : -1) * ((i + 1) >> 1); // generates sequence 0, 1, -1, 2, -2, ..., 5, -5
-//				var reflectedPolylinePoints: Array = convertToScreenPoints(shiftCoords(points, i_delta), currentViewBBox);
-//				if (reflectedPolylinePoints)
-//					resultArr.push();
-//				else
-//					trace("Reflected polyline is out of screen");
-//			}
-			return resultArr;
+			*/
+
 		}
 		
 		
@@ -205,27 +207,37 @@ package com.iblsoft.flexiweather.utils.wfs
 		 * @param coords
 		 * @param shiftSize
 		 * @return 
-		 * 
-		 */		
-		private function convertToScreenPoints(coords: Array, currentViewBBox: BBox): Array
+		 */
+		private function convertToScreenPoints(coords: Array): Array
 		{
 			var arr: Array = [];
 			
 			var total: int = coords.length;
 			var crs: String =  m_iw.getCRS();
+			
+			var currentPolygon: Array = [];
 			for (var i: int = 0; i < total; i++)
 			{
 				var p: Point = coords[i] as Point;
-				var c: Coord = new Coord(crs, p.x, p.y);
-				if (currentViewBBox.coordInside(c))
+				
+				var screenPoint: Point = m_iw.coordToPoint(new Coord(crs, p.x, p.y));
+				if (m_iw.pointIsOutside(screenPoint))
 				{
-					arr.push(m_iw.coordToPoint(c));
+					if (currentPolygon.length > 0)
+					{
+						arr.push(currentPolygon);
+						currentPolygon = [];
+					}
 				} else {
-					return null;
+					currentPolygon.push(screenPoint);
 				}
 			}
+			
+			arr.push(currentPolygon);
+			
 			return arr;
 		}
+
 		
 		/**
 		 * Shift coordinates in array of projection extent width multiplies "shiftSize" 

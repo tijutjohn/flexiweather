@@ -257,5 +257,10 @@ package com.iblsoft.flexiweather.ogc.editable
 			//	dispatchEvent(new WFSCursorManagerEvent(WFSCursorManagerEvent.CLEAR_CURSOR));
 			//}
 		}
+		
+		override public function toString(): String
+		{
+			return "MoveablePoint: " + m_pt + " index: " + pointIndex + " reflection: " + mi_reflection + " delta: " + mi_reflection;
+		}
 	}
 }

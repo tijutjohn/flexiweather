@@ -154,23 +154,19 @@ package com.iblsoft.flexiweather.ogc
 					var iw: InteractiveWidget = m_master.container;
 					var total: int = m_coordinates.length;
 					
+					var oldPoint: Point;
+					var oldCoordNotInside: Coord;
+					var previousPointVisible: Boolean;
+					var pt: Point;
+					
 					var featureIsInside: Boolean = false;
+
 					for(var i: uint = 0; i < total; ++i) {
 						var c: Coord = m_coordinates[i];
-						
-//						if (iw.coordInside(c))
-//						{
-//							trace("Coord is cinside");
-							featureIsInside = true;
-							var pt: Point = iw.coordToPoint(c);
-							addPoint(pt);
-//						} else {
-							
-//							trace("Coord is not inside");
-//						}
-						
-						
+						pt = iw.coordToPoint(c);
+						m_points.addItem(pt);
 					}
+
 					
 					if (featureIsInViewBBox != featureIsInside)
 					{

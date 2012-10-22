@@ -1701,7 +1701,7 @@ package com.iblsoft.flexiweather.widgets
 			return features;
 		}
 		
-		private function pointIsOutside(p: Point): Boolean
+		public function pointIsOutside(p: Point): Boolean
 		{
 			if (p.x < 0 || p.x > width)
 				return true;
@@ -1710,10 +1710,11 @@ package com.iblsoft.flexiweather.widgets
 			
 			return false;
 		}
-		private function lineIsOutside(p1: Point, p2: Point): Boolean
+		public function lineIsOutside(p1: Point, p2: Point): Boolean
 		{
 			return pointIsOutside(p1) && pointIsOutside(p2);
 		}
+
 		/**
 		 * Draw polyline with given curve renderer. If you just want all polyline reflections without drawing it, use getPolylineReflections function instead
 		 * @param g
