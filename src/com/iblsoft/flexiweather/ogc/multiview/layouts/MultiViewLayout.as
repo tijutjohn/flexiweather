@@ -94,7 +94,6 @@ package com.iblsoft.flexiweather.ogc.multiview.layouts
 			if (row < 0)
 				row = 0;
 			
-			var index:int;
 			if (rowOrientation)
 			{
 				if (row >= rowCount)
