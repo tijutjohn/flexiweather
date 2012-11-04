@@ -74,7 +74,9 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		{
 			if(m_layers == null)
 				return null;
-			return m_layers.getLayerByName(s_name);
+			var wmsLayer: WMSLayer = m_layers.getLayerByName(s_name);
+			
+			return wmsLayer;
 		}
 
 		public function toGetCapabilitiesRequest(): URLRequest

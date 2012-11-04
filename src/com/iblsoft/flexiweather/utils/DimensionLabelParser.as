@@ -136,6 +136,9 @@ package com.iblsoft.flexiweather.utils
 				
 			}
 			
+			if (label == "null")
+				label = "";
+			
 			return label;
 			
 		}

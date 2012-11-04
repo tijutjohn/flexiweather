@@ -33,7 +33,11 @@ package com.iblsoft.flexiweather.ogc
 		}
 		public function getLayerByName(s_name: String): WMSLayer
 		{
-			for each(var l: WMSLayerBase in ma_layers) {
+			var total: int = ma_layers.length;
+//			for each(var l: WMSLayerBase in ma_layers) {
+			for (var i: int = 0; i < total; i++)
+			{
+				var l: WMSLayerBase = ma_layers.getItemAt(i) as WMSLayerBase
 				if(l is WMSLayerGroup) {
 					var wl: WMSLayer = WMSLayerGroup(l).getLayerByName(s_name);
 					if(wl != null)

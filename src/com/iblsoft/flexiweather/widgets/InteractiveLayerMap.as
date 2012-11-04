@@ -13,6 +13,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.ogc.managers.GlobalVariablesManager;
 	import com.iblsoft.flexiweather.ogc.tiling.ITiledLayer;
+	import com.iblsoft.flexiweather.plugins.IConsole;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.utils.DateUtils;
@@ -60,6 +61,7 @@ package com.iblsoft.flexiweather.widgets
 		public static const SYNCHRONISE_WITH: String = "synchroniseWith";
 		[Event(name = SYNCHRONISE_WITH, type = "mx.events.DynamicEvent")]
 		
+		public static var debugConsole: IConsole;
 		
 		private static var mapUID: int = 0;
 		public var mapID: int;
@@ -289,21 +291,26 @@ package com.iblsoft.flexiweather.widgets
 			invalidateProperties();
 		}
 		
-		public function invalidateTimeline(): void
+		private function notifyTimeAxisUpdate(): void
 		{
 			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
+		}
+		
+		public function invalidateTimeline(): void
+		{
+			notifyTimeAxisUpdate();
 		}
 		
 		override protected function onLayerCollectionChanged(event: CollectionEvent): void
 		{
 			super.onLayerCollectionChanged(event);
 			
-			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
+			notifyTimeAxisUpdate();
 		}
 		
 		protected function onSynchronisedVariableChanged(event: SynchronisedVariableChangeEvent): void
 		{
-			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
+			notifyTimeAxisUpdate();
 
 			if (event.variableId == GlobalVariable.FRAME)
 				dispatchEvent(new Event(FRAME_VARIABLE_CHANGED));
@@ -907,7 +914,7 @@ package com.iblsoft.flexiweather.widgets
             	if(!so.hasSynchronisedVariable(GlobalVariable.FRAME))
 					continue;
 				
-				trace(this + " setFrame try to synchronize: ["+newFrame.toTimeString()+"]  for "+l.name);
+				debug(this + " setFrame try to synchronize: ["+newFrame.toTimeString()+"]  for "+l.name, 'Info', 'Layer Map');
 				var bSynchronized: Boolean = so.synchroniseWith(GlobalVariable.FRAME, newFrame);
           		if(bSynchronized)
 				{
@@ -1064,6 +1071,12 @@ package com.iblsoft.flexiweather.widgets
 //				retStr += "\n\t"+l;
 //			}
 			return retStr;
+		}
+		
+		private function debug(str: String, type: String, tag: String): void
+		{
+			if (debugConsole)
+				debugConsole.print(str, type, tag);
 		}
 	}
 }

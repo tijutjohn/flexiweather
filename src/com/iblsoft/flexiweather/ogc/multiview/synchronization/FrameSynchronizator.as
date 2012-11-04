@@ -2,6 +2,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 {
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
+	import com.iblsoft.flexiweather.plugins.IConsole;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import mx.collections.ArrayCollection;
@@ -9,6 +10,8 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 	
 	public class FrameSynchronizator implements ISynchronizator
 	{
+		public static var debugConsole: IConsole;
+		
 		private var timeDifference: Number = 3;
 		
 		public function get willSynchronisePrimaryLayer(): Boolean
@@ -32,10 +35,16 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		{
 		}
 		
+		private function debug(str: String, type: String, tag: String): void
+		{
+			if (debugConsole)
+				debugConsole.print(str, type, tag);
+		}
+		
 		public function synchronizeWidgets(synchronizeFromWidget:InteractiveWidget, widgetsForSynchronisation:ArrayCollection):void
 		{
 			
-//			trace("\nFrameSychronizator synchronizeWidgets");
+			debug("FrameSychronizator synchronizeWidgets", 'Info', 'FrameSychronizator');
 			var primaryLayer: InteractiveLayerMSBase = synchronizeFromWidget.interactiveLayerMap.getPrimaryLayer();
 			if (primaryLayer)
 			{
@@ -73,7 +82,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 							{
 								if (widget.interactiveLayerMap.frame != frame)
 								{
-									trace("Goidng to synchronise frame: " + frame.toTimeString());
+									debug("Going to synchronise frame: " + frame.toTimeString() + " for widget: " + widget.id, 'Info', 'FrameSychronizator');
 									widget.interactiveLayerMap.setFrame(frame);
 									dataForWidgetAvailable(widget);
 								}

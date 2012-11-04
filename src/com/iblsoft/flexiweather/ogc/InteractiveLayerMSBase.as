@@ -829,6 +829,9 @@ package com.iblsoft.flexiweather.ogc
         override public function hasLegend(): Boolean
         { 
 			//check if layer has legend	
+			if (!m_currentWMSViewProperties)
+				return false;
+			
 			var styleName: String = m_currentWMSViewProperties.getWMSStyleName(0);
 			if (!styleName)
 				styleName = '';

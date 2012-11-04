@@ -164,7 +164,7 @@ package com.iblsoft.flexiweather.widgets
 			//draw label
 			var bkgColor: uint = 0x000000;
 			
-			if (_primaryLayer && _primaryLayer.status == InteractiveDataLayer.STATE_NO_DATA_AVAILABLE)
+			if (_primaryLayer && _primaryLayer.status == InteractiveDataLayer.STATE_NO_DATA_AVAILABLE || labelText == '')
 			{
 				bkgColor = 0x880000;
 				_label.text = "No data";
@@ -197,6 +197,9 @@ package com.iblsoft.flexiweather.widgets
 //			trace("InteractiveLayerLabel size: " + width + " , " + height);
 			
 			var gr: Graphics = graphics;
+			gr.clear();
+			
+			
 			gr.beginFill(0x000000);
 			gr.drawRect(0,height - h,w,h);
 			gr.endFill();
