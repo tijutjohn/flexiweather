@@ -8,13 +8,9 @@ package com.iblsoft.flexiweather.ogc.editable.features
 	public class LabeledEditableFeature extends GenericEditableFeature
 	{
 		protected var textfield: TextField;
-
 		private var _fontSize: uint;
-
 		private var _bold: Boolean;
-
 		private var _color: uint;
-
 		private var _text: String;
 
 		public function get fontSize(): uint

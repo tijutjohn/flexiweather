@@ -11,7 +11,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 	public class TiledTilesProvider implements ITilesProvider
 	{
 		private var _callbackTileLoaded: Function;
-
 		private var _callbackTileLoadFailed: Function;
 
 		public function TiledTilesProvider()

@@ -14,7 +14,6 @@ package com.iblsoft.flexiweather.syndication
 	public class XmlElement extends EventDispatcher
 	{
 		protected var xmlSource: XMLList;
-
 		protected var namespace: String;
 
 		/**

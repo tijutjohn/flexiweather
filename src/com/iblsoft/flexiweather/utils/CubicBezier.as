@@ -773,11 +773,8 @@ import flash.geom.Point;
 class BezierSegment
 {
 	protected var p1: Point;
-
 	protected var p2: Point;
-
 	protected var p3: Point;
-
 	protected var p4: Point;
 
 	public function BezierSegment(p1: Point, p2: Point, p3: Point, p4: Point)
@@ -807,9 +804,7 @@ class BezierSegment
 class ControlPointsDescriptor
 {
 	public var firstPt: uint;
-
 	public var lastPt: uint;
-
 	public var controlPts: Array;
 
 	public function ControlPointsDescriptor()
@@ -821,9 +816,7 @@ class MPoint extends Point
 {
 //	public var point: Point = new Point();
 	public var deriv: Point = new Point();
-
 	public var dist: Number = 0;
-
 	public var segmentIndex: int = 0;
 
 	public function MPoint(x: Number = 0, y: Number = 0, _deriv: Point = null)

@@ -20,15 +20,10 @@ package com.iblsoft.flexiweather.net.managers
 	public class UniURLLoaderBasicAuthManager extends EventDispatcher
 	{
 		private var _applicationName: String;
-
 		private var _waitingForCredentials: Dictionary;
-
 		private var _requests: Dictionary;
-
 		private var _accounts: Array;
-
 		public var authenticated: Boolean;
-
 		private static var _instance: UniURLLoaderBasicAuthManager;
 
 		public function get applicationName(): String

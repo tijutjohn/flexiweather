@@ -16,7 +16,6 @@ package com.iblsoft.flexiweather.ogc.wfs
 	public class WFSFeatureEditableSprite extends Sprite implements ILineSegmentApproximableBounds, IAnticollisionLayoutObject
 	{
 		public var points: Array;
-
 		protected var _feature: WFSFeatureEditable;
 
 		public function WFSFeatureEditableSprite(feature: WFSFeatureEditable)
@@ -115,7 +114,6 @@ package com.iblsoft.flexiweather.ogc.wfs
 //			
 //			return newSegmentRenderer.segments;
 		}
-
 		private var _anticollisionLayoutObject: AnticollisionLayoutObject;
 
 		public function set anticollisionLayoutObject(object: AnticollisionLayoutObject): void

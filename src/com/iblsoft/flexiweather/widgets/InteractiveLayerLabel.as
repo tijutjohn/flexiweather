@@ -24,11 +24,8 @@ package com.iblsoft.flexiweather.widgets
 	public class InteractiveLayerLabel extends InteractiveLayer
 	{
 		private var _label: TextField;
-
 		private var _synchronizator: ISynchronizator
-
 		private var _synchronizedVariableNames: Array;
-
 		private var _primaryLayer: InteractiveLayerMSBase;
 
 		public function get synchronizator(): ISynchronizator
@@ -178,8 +175,6 @@ package com.iblsoft.flexiweather.widgets
 //			trace("InteractiveLayerLabel size: " + width + " , " + height);
 			var gr: Graphics = graphics;
 			gr.clear();
-
-
 			gr.beginFill(0x000000);
 			gr.drawRect(0, height - h, w, h);
 			gr.endFill();

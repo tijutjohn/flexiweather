@@ -6,11 +6,8 @@ package com.iblsoft.flexiweather.widgets.basicauth.data
 	public class BasicAuthAccount implements Serializable
 	{
 		public var name: String;
-
 		public var password: String;
-
 		public var domain: String;
-
 		public var realm: String;
 
 		public function BasicAuthAccount(name: String = null, password: String = null, domain: String = null, realm: String = null)

@@ -4,11 +4,8 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	public class KMLVec2
 	{
 		private var _x: Number;
-
 		private var _y: Number;
-
 		private var _xunits: String;
-
 		private var _yunits: String;
 
 		public function KMLVec2(x: XML)

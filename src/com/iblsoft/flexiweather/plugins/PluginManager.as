@@ -21,29 +21,17 @@ package com.iblsoft.flexiweather.plugins
 	public class PluginManager extends EventDispatcher
 	{
 		public static const ACTION_CALL_PLUGIN: String = 'call plugin action';
-
 		public static const GET_PLUGIN: String = 'get plugin';
-
 		public static const PLUGIN_DOES_NOT_EXISTS: String = 'plugin does not exists';
-
 		public static const START_LOADING: String = 'start loading';
-
 		public static const STOP_LOADING: String = 'stop loading';
-
 		public static const ALL_PLUGINS_LOADED: String = 'all plugins are loaded';
-
 		public static const ALL_PLUGINS_INFO_LOADED: String = 'all plugins info are loaded';
-
 		internal static var sm_instance: PluginManager;
-
 		private var _typesSorted: Array = [];
-
 		private var _modules: ModuleCollection;
-
 		private var _internalPlugins: Array = [];
-
 		private var _plugins: PluginCollection;
-
 		private var _pluginsInfo: PluginCollection;
 
 		[Bindable(event = "countChanged")]

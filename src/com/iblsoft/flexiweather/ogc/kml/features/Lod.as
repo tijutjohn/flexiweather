@@ -5,11 +5,8 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	public class Lod extends KmlObject
 	{
 		private var _minLodPixels: Number;
-
 		private var _maxLodPixels: Number;
-
 		private var _minFadeExtent: Number;
-
 		private var _maxFadeExtent: Number;
 
 		public function Lod(s_namespace: String, x: XMLList)

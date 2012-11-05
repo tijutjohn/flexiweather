@@ -12,7 +12,6 @@ package com.iblsoft.flexiweather.ogc.managers
 	public class ProjectionConfigurationManager implements Serializable
 	{
 		internal static var sm_instance: ProjectionConfigurationManager;
-
 		internal var ma_projections: ArrayCollection = new ArrayCollection();
 
 		public function ProjectionConfigurationManager()
@@ -37,9 +36,7 @@ package com.iblsoft.flexiweather.ogc.managers
 			storage.serializeNonpersistentArrayCollection("projection", ma_projections, ProjectionConfiguration);
 			trace("pr: " + ma_projections);
 		}
-
 		private var ma_parsedProjectionsDictionary: Dictionary = new Dictionary();
-
 		private var ma_parsedProjections: ArrayCollection = new ArrayCollection();
 
 		public function removeParsedProjections(): void

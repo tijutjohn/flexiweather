@@ -5,7 +5,6 @@ package com.iblsoft.flexiweather.ogc.events
 	public class GetCapabilitiesEvent extends Event
 	{
 		public static const CAPABILITIES_UPDATED: String = "capabilitiesUpdated";
-
 		public static const CAPABILITIES_RECEIVED: String = "capabilitiesReceived";
 
 		public function GetCapabilitiesEvent(type: String, bubbles: Boolean = false, cancelable: Boolean = false)

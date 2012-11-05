@@ -10,41 +10,23 @@ package com.iblsoft.flexiweather.events
 	public class InteractiveLayerEvent extends Event
 	{
 		public static const LAYER_INITIALIZED: String = 'layerInitialized';
-
 		public static const FEATURES_LOADED: String = 'featuresLoaded';
-
 		public static const FEATURES_IMPORTED: String = 'featuresImported';
-
 		public static const VISIBILITY_CHANGED: String = 'visibilityChanged';
-
 		public static const VISIBILITY_EFFECT_FINISHED: String = 'visibilityEffectFinished';
-
 		public static const LAYER_ROLL_OVER: String = 'layerRollOver';
-
 		public static const LAYER_ROLL_OUT: String = 'layerRollOut';
-
 		public static const LEGENDS_AREA_UPDATED: String = 'legendsAreaUpdated';
-
 		public static const AREA_CHANGED: String = 'areaChanged';
-
 		public var text: String;
-
 		public var interactiveLayer: InteractiveLayer;
-
 		public var point: Point;
-
 		public var area: Rectangle;
-
 		public var newFeaturesCount: int;
-
 		public var newFeatures: ArrayCollection;
-
 		public var topLeftCoord: Coord;
-
 		public var bottomRightCoord: Coord;
-
 		public var refreshFeaturesObject: Object;
-
 		public var data: Object;
 
 		public function InteractiveLayerEvent(type: String, bubbles: Boolean = false, cancelable: Boolean = false)

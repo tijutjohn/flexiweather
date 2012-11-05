@@ -13,7 +13,6 @@ package com.iblsoft.flexiweather.ogc
 	public class CRSWithBBox implements Serializable
 	{
 		protected var ms_crs: String;
-
 		protected var m_bbox: BBox = null;
 
 		public function CRSWithBBox(

@@ -18,21 +18,13 @@ package com.iblsoft.flexiweather.ogc.editable
 	public class InteractiveLayerWFSEditable extends InteractiveLayerWFS implements IHighlightableItemManager, ISelectableItemManager, IEditableItemManager
 	{
 		public static const SELECTION_CHANGE: String = "selectionChange";
-
 		protected var ma_items: ArrayCollection = new ArrayCollection();
-
 		protected var m_highlightedItem: IHighlightableItem = null;
-
 		protected var m_selectedItem: ISelectableItem = null;
-
 		protected var m_mouseMoveCapturingItem: IMouseEditableItem = null;
-
 		protected var ml_mouseMoveCapturingItemStack: Array = [];
-
 		protected var m_mouseClickCapturingItem: IMouseEditableItem = null;
-
 		protected var ml_mouseClickCapturingItemStack: Array = [];
-
 		protected var m_editingComponentsContainer: Sprite = new Sprite;
 
 		public function InteractiveLayerWFSEditable(

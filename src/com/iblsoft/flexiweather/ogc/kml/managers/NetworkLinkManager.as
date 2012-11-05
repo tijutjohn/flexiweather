@@ -11,7 +11,6 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 	public class NetworkLinkManager extends KMLLoaderManager
 	{
 		private var _links: Array;
-
 		private var _linksDictionary: Dictionary;
 
 		public function NetworkLinkManager()
@@ -100,9 +99,7 @@ import flash.utils.setTimeout;
 class NetworkLinkObject extends EventDispatcher
 {
 	private var _link: NetworkLink;
-
 	private var _refreshInterval: uint;
-
 	private var _timeout: int;
 
 	public function NetworkLinkObject(link: NetworkLink, refreshInterval: uint = 0)

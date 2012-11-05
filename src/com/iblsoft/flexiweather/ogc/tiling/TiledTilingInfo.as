@@ -12,13 +12,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 	public class TiledTilingInfo implements Serializable
 	{
 		private var _urlPattern: String;
-
 		private var _crsWithBBox: CRSWithBBox;
-
 		private var _minimumZoomLevel: uint = 0;
-
 		public var maximumZoomLevel: uint = 12;
-
 		public var tileSize: uint;
 
 		public function get minimumZoomLevel(): uint

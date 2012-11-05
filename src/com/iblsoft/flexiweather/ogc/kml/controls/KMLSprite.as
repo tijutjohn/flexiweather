@@ -8,11 +8,8 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 	public class KMLSprite extends Sprite implements IAnticollisionLayoutObject
 	{
 		public var reflection: uint;
-
 		private var _kmlLabel: KMLLabel;
-
 		private var _feature: KMLFeature;
-
 		private var _anticollisionLayoutObject: AnticollisionLayoutObject;
 
 		public function get kmlLabel(): KMLLabel
@@ -50,9 +47,7 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 //				trace("KMLSprite.y = " + value);
 			_feature.notifyPositionChange();
 		}
-
 		private static var uid: int = 0;
-
 		private var _id: int;
 
 		public function get id(): int

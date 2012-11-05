@@ -9,13 +9,9 @@ package com.iblsoft.flexiweather.symbology
 	{
 		// style variables
 		protected var mf_thickness: Number;
-
 		protected var mi_color: uint;
-
 		protected var mf_alpha: Number;
-
 		protected var mf_lastDX: Number = 0;
-
 		protected var mf_lastDY: Number = 0;
 
 		function JetStreamCurveRenderer(g: Graphics,

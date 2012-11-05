@@ -11,7 +11,6 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 	public class KMLInfoWindowBase extends TitleWindow
 	{
 		public var textArea: TextArea;
-
 		private var _feature: KMLFeature;
 
 		override public function set y(value: Number): void
@@ -109,7 +108,6 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 		{
 			textArea.textFlow = HTMLUtils.createHTMLTextFlow(txt);
 		}
-
 		private var _waitForSize: Boolean;
 
 		private function createBorderPath(): String

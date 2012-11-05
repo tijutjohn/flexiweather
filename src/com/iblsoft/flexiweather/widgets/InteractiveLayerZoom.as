@@ -21,25 +21,15 @@ package com.iblsoft.flexiweather.widgets
 	public class InteractiveLayerZoom extends InteractiveLayer
 	{
 		public static const ZOOM: String = 'zoom';
-
 		protected var mb_requireCtrlKey: Boolean = true;
-
 		protected var m_areaZoomingRectangle: Rectangle;
-
 		protected var m_wheelZoomTimer: Timer = new Timer(2500, 1);
-
 		protected var mb_finalChangeOccuredAfterWheelZoom: Boolean = true;
-
 		private var m_slideZoomSprite: Sprite;
-
 		private var mi_slideZoomStartY: int = -1;
-
 		private var mb_showSlideZoomingSprite: Boolean = false;
-
 		private var m_previousGestureZoomMidPoint: Coord = null;
-
 		private var m_delayBeforeLoad: int
-
 		private var m_delayBeforeLoadChanged: Boolean;
 
 		/**

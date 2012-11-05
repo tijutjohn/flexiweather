@@ -51,13 +51,9 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	public class KMLFeature extends FeatureBase
 	{
 		public static const VISIBILITY_CHANGE: String = 'visibilityChange';
-
 		public static const ICON_TYPE_NORMAL: String = 'normal';
-
 		public static const ICON_TYPE_HIGHLIGHTED: String = 'highlighted';
-
 		private var _displaySprites: Array = [];
-
 		public var featureScale: Number = 1;
 
 		public function removeDisplaySprite(sprite: Sprite): void
@@ -117,34 +113,21 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			if (value != oldValue)
 				notifyVisibilityChange();
 		}
-
 		private var _xmlList: XMLList;
-
 		public var _name: String;
-
 		public var _id: String;
-
 		//		public var _link: com.adobe.xml.syndication.atom.Link;
 		public var _visibility: Boolean = true;
-
 		public var _open: Boolean = false;
-
 		//		public var _author:Author;
 		public var _snippet: String;
-
 		public var _styleUrl: String;
-
 		public var _styleSelector: StyleSelector;
-
 		public var _lookAt: LookAt;
-
 		public var _description: String;
-
 		private var _parentDocument: Document;
-
 //		private var _kmlIcon: KMLIcon;
 		private var _kmlLabel: KMLLabel;
-
 		private var _region: Region;
 
 //		public function get kmlIcon(): KMLIcon
@@ -155,21 +138,18 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		{
 			return _kmlLabel;
 		}
-
 		private var _kml: KML
 
 		public function get kml(): KML
 		{
 			return _kml;
 		}
-
 		protected var _kmlReflectionDictionary: KMLFeaturesReflectionDictionary;
 
 		public function get kmlReflectionDictionary(): KMLFeaturesReflectionDictionary
 		{
 			return _kmlReflectionDictionary
 		}
-
 		private var _kmlns: Namespace;
 
 		public function get kmlns(): Namespace
@@ -186,7 +166,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			_xmlList = s_xml;
 			init();
 		}
-
 		private var _iconState: String;
 
 		private function set iconState(value: String): void
@@ -215,9 +194,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			iconState = ICON_TYPE_HIGHLIGHTED;
 			update(FeatureUpdateContext.fullUpdate());
 		}
-
 		private var _normalStyle: StyleSelector;
-
 		private var _highlightStyle: StyleSelector;
 
 		public function get normalStyle(): StyleSelector
@@ -240,9 +217,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		{
 			_highlightStyle = value;
 		}
-
 		private var _normalResourceKey: KMLResourceKey;
-
 		private var _highlightResourceKey: KMLResourceKey;
 
 		public function setNormalBitmapResourceKey(key: KMLResourceKey): void
@@ -584,7 +559,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			else if (open == 0)
 				this._open = false;
 		}
-
 		private var _itemRendererInstance: IKMLRenderer;
 
 		public function setItemRenderer(itemRendererInstance: IKMLRenderer): void
@@ -811,7 +785,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		{
 			return ProfilerUtils.stopProfileTimer(startTime);
 		}
-
 		public static var debugConsole: IConsole;
 
 		public function debug(txt: String): void

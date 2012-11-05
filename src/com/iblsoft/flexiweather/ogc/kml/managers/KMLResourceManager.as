@@ -19,21 +19,13 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 	public class KMLResourceManager extends EventDispatcher
 	{
 		public static const ALL_RESOURCES_LOADED: String = 'allResourcesLoaded';
-
 		public static const RESOURCE_TYPE_ICON: String = 'icon';
-
 		public static const RESOURCE_TYPE_IMAGE: String = 'image';
-
 		public static var debugConsole: IConsole;
-
 		public static var reuseKMLLabels: Boolean = false;
-
 		private var _cache: ResourceCache;
-
 		private var _kmzFiles: Dictionary;
-
 		private var _basePath: String;
-
 		private var _icons: KMLIconPins;
 
 		public function get basePath(): String
@@ -269,7 +261,6 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 			}
 			notifyAllResourcesLoaded();
 		}
-
 		private var _kmlLabels: Array = [];
 
 		public function pushKMLLabel(label: KMLLabel): void
@@ -377,9 +368,7 @@ class ResourceCache
 class Resource extends EventDispatcher
 {
 	public var key: KMLResourceKey
-
 	private var _loader: KMLBitmapLoader;
-
 	private var _loadingFinished: Boolean;
 
 	public function get loadingFinished(): Boolean

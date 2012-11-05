@@ -7,7 +7,6 @@ package com.iblsoft.flexiweather.proj
 	public class Coord extends Point
 	{
 		public var crs: String;
-
 		private var toRadConst: Number = Math.PI / 180;
 
 		/**

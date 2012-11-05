@@ -6,11 +6,8 @@ package com.iblsoft.flexiweather.utils.geometry
 	public class LineSegment
 	{
 		public var x1: Number;
-
 		public var y1: Number;
-
 		public var x2: Number;
-
 		public var y2: Number;
 
 		public function LineSegment(x1: Number, y1: Number, x2: Number, y2: Number)

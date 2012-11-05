@@ -5,14 +5,11 @@ package com.iblsoft.flexiweather.events
 	public class GetFeatureInfoEvent extends Event
 	{
 		public static const FEATURE_INFO_RECEIVED: String = 'featureInfoReceived';
-
 		public var text: String;
-
 		/**
 		 * get feature info is called for many layers. set this to true in case it is first feature info
 		 */
 		public var firstFeatureInfo: Boolean;
-
 		/**
 		 * get feature info is called for many layers. set this to true in case it is first feature info
 		 */

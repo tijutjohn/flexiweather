@@ -11,15 +11,10 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 	public class KMLLabel extends Sprite implements IAnticollisionLayoutObject
 	{
 		public static var labelFont: String = 'defaultFontMX';
-
 		public static var allowLabelGlow: Boolean = true;
-
 		public static var glow: GlowFilter;
-
 		public var tempPosition: Number;
-
 		public var reflection: uint;
-
 		private var _anticollisionLayoutObject: AnticollisionLayoutObject;
 
 		public function set anticollisionLayoutObject(object: AnticollisionLayoutObject): void
@@ -52,13 +47,9 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 //			if (reflection == 0)
 //				trace("KMLLabel["+_id+"].y = " + value);
 		}
-
 		private var _color: uint;
-
 		private var _scale: Number;
-
 		private var _txt: TextField;
-
 		private var _text: String;
 
 		public function get textfield(): TextField
@@ -76,9 +67,7 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 			_text = value;
 			updateLabel();
 		}
-
 		private static var uid: int = 0;
-
 		private var _id: int;
 
 		public function get id(): int

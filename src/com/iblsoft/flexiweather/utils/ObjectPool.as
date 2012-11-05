@@ -6,19 +6,12 @@ package com.iblsoft.flexiweather.utils
 	public class ObjectPool
 	{
 		public var maximumPooledObject: int = 20;
-
 		public var tracingEnabled: Boolean;
-
 		public var reuseObjects: Boolean = false;
-
 		private var _pool: Array;
-
 		public var name: String;
-
 		public var itemRenderer: Class;
-
 		private var _cntAdd: int = 0;
-
 		private var _cntGet: int = 0;
 
 		public function get length(): int

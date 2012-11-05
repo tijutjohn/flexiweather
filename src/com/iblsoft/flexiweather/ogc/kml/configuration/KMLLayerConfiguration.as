@@ -28,19 +28,16 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 		 * Storage for kmzFile with all assets stored inside;
 		 */
 		private var _kmzFile: KMZFile;
-
 		private var _kml: KML22;
 
 		public function get kml(): KML22
 		{
 			return _kml;
 		}
-
 		/**
 		 * Path which will be added to icon URL (if they are relative)
 		 */
 		private var _kmlBaseURLPath: String;
-
 		private var _kmlPath: String;
 
 		public function set kmlPath(value: String): void

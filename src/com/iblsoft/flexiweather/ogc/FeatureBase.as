@@ -18,7 +18,6 @@ package com.iblsoft.flexiweather.ogc
 	public class FeatureBase extends Sprite
 	{
 		private var _next: FeatureBase;
-
 		private var _previous: FeatureBase;
 
 		public function set next(node: FeatureBase): void
@@ -40,7 +39,6 @@ package com.iblsoft.flexiweather.ogc
 		{
 			return _previous;
 		}
-
 		private var _parentFeature: FeatureBase;
 
 		public function get parentFeature(): FeatureBase
@@ -52,21 +50,13 @@ package com.iblsoft.flexiweather.ogc
 		{
 			_parentFeature = value;
 		}
-
 		protected var m_master: InteractiveLayerFeatureBase;
-
 		protected var ms_namespace: String;
-
 		protected var ms_typeName: String;
-
 		protected var ms_featureId: String;
-
 		protected var ms_internalFeatureId: String;
-
 		protected var m_coordinates: ArrayCollection = new ArrayCollection();
-
 		protected var m_points: ArrayCollection = new ArrayCollection();
-
 		protected var mb_pointsDirty: Boolean = false;
 
 		public function FeatureBase(s_namespace: String, s_typeName: String, s_featureId: String)
@@ -168,7 +158,6 @@ package com.iblsoft.flexiweather.ogc
 				}
 			}
 		}
-
 		public var featureIsInViewBBox: Boolean;
 
 		/** Called internally before the feature is removed from the master. */

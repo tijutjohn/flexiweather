@@ -8,9 +8,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 		 * Tile size of all tiles inside TiledArea, one of TileSize constants
 		 */
 		public var tileSize: int;
-
 		public var topLeftTileIndex: TileIndex;
-
 		public var bottomRightTileIndex: TileIndex;
 
 		public function TiledArea(topLeftTileIndex: TileIndex, bottomRightTileIndex: TileIndex, tileSize: int)
@@ -26,7 +24,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 			topLeftTileIndex = null;
 			bottomRightTileIndex = null;
 		}
-
 		private var _center: Point;
 
 		public function get center(): Point

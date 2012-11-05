@@ -20,31 +20,18 @@ package com.iblsoft.flexiweather.ogc.editable
 	public class WFSFeatureEditable extends WFSFeatureBase implements IEditableItem, IHighlightableItem, ISelectableItem, IWFSFeatureWithReflection
 	{
 		protected var mb_selected: Boolean;
-
 		protected var mb_highlighted: Boolean;
-
 		protected var mb_modified: Boolean = false;
-
 		protected var m_editableSprite: Sprite = new Sprite();
-
 		protected var ml_movablePoints: WFSEditableReflectionDictionary;
-
 		protected var mi_editMode: int = WFSFeatureEditableMode.ADD_POINTS_WITH_MOVE_POINTS;
-
 		protected var mn_justSelectable: Boolean;
-
 		protected var mb_useMonochrome: Boolean = false;
-
 		protected var mi_monochromeColor: uint = 0x333333;
-
 		protected var ma_points: Array;
-
 		protected var m_editableItemManager: IEditableItemManager;
-
 		protected var mi_actSelectedMoveablePointIndex: int = -1;
-
 		protected var mi_actSelectedMoveablePointReflectionIndex: int = -1;
-
 		protected var m_firstInit: Boolean = true;
 
 		public function get selectedMoveablePointIndex(): int

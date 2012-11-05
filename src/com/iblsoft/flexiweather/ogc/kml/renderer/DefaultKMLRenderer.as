@@ -50,13 +50,9 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 	public class DefaultKMLRenderer extends EventDispatcher implements IKMLRenderer
 	{
 		public static var debugConsole: IConsole;
-
 		public static var defaultLabelColor: uint = 0xffffff;
-
 		private var _container: InteractiveWidget;
-
 		private var _styleDictionary: StylesDictionary;
-
 		private var _featureScale: Number = 1;
 
 		public function DefaultKMLRenderer()
@@ -89,7 +85,6 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 			if (_featureScale != scale)
 				_featureScale = scale;
 		}
-
 		/*
 		protected function getFeatureFromReflectionDirectory(kmlReflectionDictionary: KMLFeaturesReflectionDictionary): KMLFeature
 		{
@@ -1061,9 +1056,7 @@ import flash.utils.Dictionary;
 class ObjectStyles
 {
 	public var normalStyle: Style;
-
 	public var highlightStyle: Style;
-
 	private var _feature: KMLFeature;
 
 	public function ObjectStyles(feature: KMLFeature)
@@ -1155,9 +1148,7 @@ class StylesDictionary
 class StyleResource
 {
 	public var key: KMLResourceKey
-
 	public var feature: KMLFeature;
-
 	public var style: Style;
 
 	public function StyleResource(key: KMLResourceKey, feature: KMLFeature, style: Style = null)

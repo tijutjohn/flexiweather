@@ -6,9 +6,7 @@ package com.iblsoft.flexiweather.ogc.events
 	public class ReflectionEvent extends Event
 	{
 		public static const ADD_REFLECTION: String = 'addReflection';
-
 		public static const REMOVE_REFLECTION: String = 'removeReflection';
-
 		public var reflection: ReflectionData;
 
 		public function ReflectionEvent(type: String, bubbles: Boolean = false, cancelable: Boolean = false)

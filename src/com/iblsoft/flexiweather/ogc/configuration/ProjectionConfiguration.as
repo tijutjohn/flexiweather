@@ -13,7 +13,6 @@ package com.iblsoft.flexiweather.ogc.configuration
 		{
 			return title + " (" + crs + ")";
 		}
-
 		private var _wrapsHorizontally: Boolean;
 
 		public function get wrapsHorizontally(): Boolean
@@ -25,7 +24,6 @@ package com.iblsoft.flexiweather.ogc.configuration
 		{
 			_wrapsHorizontally = value;
 		}
-
 		private var _proj4String: String;
 
 		public function get proj4String(): String

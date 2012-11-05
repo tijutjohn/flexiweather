@@ -9,9 +9,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	public class WFSFeatureEditableCurveWithBaseTimeAndValidity extends WFSFeatureEditableCurve implements IObjectWithBaseTimeAndValidity
 	{
 		protected var m_baseTime: Date;
-
 		protected var m_validity: Date;
-
 		protected var m_curvePoints: Array;
 
 		public function WFSFeatureEditableCurveWithBaseTimeAndValidity(

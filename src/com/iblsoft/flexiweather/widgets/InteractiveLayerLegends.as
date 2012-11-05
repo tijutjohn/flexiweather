@@ -56,25 +56,15 @@ package com.iblsoft.flexiweather.widgets
 	public class InteractiveLayerLegends extends InteractiveLayer
 	{
 		public static const LEGENDS_LOADING_STARTED: String = 'legendsLoadingStarted';
-
 		public static const LEGENDS_LOADING_FINISHED: String = 'legendsLoadingFinished';
-
 		public static const LEGENDS_LAYERING_STARTED: String = 'legendsLayeringStarted';
-
 		public static const LEGENDS_LAYERING_FINISHED: String = 'legendsLayeringFinished';
-
 		internal var m_layers: ArrayCollection = new ArrayCollection();
-
 		private var _legendsLoadingCount: int;
-
 		private var _legendsAlreadyLoaded: int;
-
 		private var _legendScaleX: Number = 1;
-
 		private var _legendScaleY: Number = 1;
-
 		private var _maximumArea: Rectangle;
-
 		private var _logger: ILogger;
 
 		public function get maximumArea(): Rectangle
@@ -125,9 +115,7 @@ package com.iblsoft.flexiweather.widgets
 			_legendsAlreadyLoaded = value;
 			debug("_legendsAlreadyLoaded = " + _legendsAlreadyLoaded);
 		}
-
 		private var legendsBkgRectangle: Rectangle;
-
 		private var _currentRectangle: Rectangle;
 
 		public function InteractiveLayerLegends(container: InteractiveWidget = null)
@@ -209,9 +197,7 @@ package com.iblsoft.flexiweather.widgets
 			ile.area = legendsBkgRectangle;
 			dispatchEvent(ile);
 		}
-
 		private var m_groupDictionary: Dictionary = new Dictionary();
-
 		private var _legends: Array = new Array();
 
 		public function clearCanvasDictionary(): void
@@ -228,7 +214,6 @@ package com.iblsoft.flexiweather.widgets
 			m_groupDictionary[layer] = group;
 //			_legends[layer] = new Rectangle(cnv.x, cnv.y, cnv.width, cnv.height);
 		}
-
 		private var _scaleDict: Dictionary = new Dictionary();
 
 		private function getRectangleFromLayer(layer: InteractiveLayer): Rectangle
@@ -266,7 +251,6 @@ package com.iblsoft.flexiweather.widgets
 			super.clear(graphics);
 			graphics.clear();
 		}
-
 		private var _legendsAreLoading: Boolean;
 
 		/**
@@ -445,11 +429,8 @@ package com.iblsoft.flexiweather.widgets
 				return 1;
 			return 0;
 		}
-
 		private var properties: PackingLayoutProperties;
-
 		private var _topArea: DynamicArea;
-
 		public var step: int;
 
 		private function notify(type: String): void

@@ -20,7 +20,6 @@ package com.iblsoft.flexiweather.ogc
 
 		override public function destroy(): void
 		{
-
 			if (ma_layers && ma_layers.length > 0)
 			{
 				for each (var l: WMSLayerBase in ma_layers)
@@ -56,7 +55,6 @@ package com.iblsoft.flexiweather.ogc
 		}
 
 		// getters & setters
-
 		public function get layers(): ArrayCollection
 		{
 			return ma_layers;

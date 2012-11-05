@@ -7,37 +7,21 @@ package com.iblsoft.flexiweather.widgets
 	public class MapTimelineConfiguration implements Serializable
 	{
 		public static const ANIMATION_TYPE_TO_LAST_FRAME: String = 'to-last-frame';
-
 		public static const ANIMATION_TYPE_FROM_FIRST_FRAME: String = 'from-first-frame';
-
 		public static const ANIMATION_TYPE_TO_NOW: String = 'to-now';
-
 		public static const ANIMATION_TYPE_FROM_NOW: String = 'from-now';
-
 		public static const ANIMATION_TYPE_FULL: String = 'full';
-
 		public static const ANIMATION_TYPE_USER: String = 'user';
-
 		private var _mapVisibleUnderTimeline: Boolean = true;
-
 		public var timelineVisibleAtStartup: Boolean;
-
 		public var currentTimeFormat: String = '%H:%M %d.%m.%Y';
-
 		public var dateFormat: String = '%d-%m';
-
 		public var timeFormat: String = '%HZ';
-
 		public var duration: int = 1000;
-
 		public var durationStep: int = 100;
-
 		public var minDuration: int = 100;
-
 		public var maxDuration: int = 5000;
-
 		public var animationExtent: String;
-
 		public var animationType: String;
 
 		public function MapTimelineConfiguration()

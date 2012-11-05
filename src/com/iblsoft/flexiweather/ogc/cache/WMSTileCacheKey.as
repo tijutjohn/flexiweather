@@ -8,7 +8,6 @@ package com.iblsoft.flexiweather.ogc.cache
 	public class WMSTileCacheKey extends CacheKey
 	{
 		public var m_tileIndex: TileIndex;
-
 		public var m_validity: Date;
 
 		public function WMSTileCacheKey(s_crs: String, bbox: BBox, tileIndex: TileIndex, url: URLRequest, validity: Date, specialStrings: Array = null)

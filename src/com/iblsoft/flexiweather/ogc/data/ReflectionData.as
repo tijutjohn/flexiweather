@@ -9,13 +9,9 @@ package com.iblsoft.flexiweather.ogc.data
 	public class ReflectionData
 	{
 		public var displaySprite: Sprite;
-
 		public var reflectionDelta: int;
-
 		protected var _coords: Array;
-
 		protected var _points: Array;
-
 		private var _iw: InteractiveWidget;
 
 		public function get length(): int

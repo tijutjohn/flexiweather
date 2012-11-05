@@ -33,18 +33,12 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 	public class InteractiveLayerGoogleMaps extends InteractiveDataLayer implements Serializable, IConfigurableLayer
 	{
 		public static const MAP_UDPATED: String = 'mapUpdated';
-
 //		private var m_map: Map3D;
 		private var m_map: Map;
-
 		private var mb_mapIsReady: Boolean;
-
 		private var mb_mapIsInitialized: Boolean;
-
 		public var negotiatedBBoxes: ArrayCollection = new ArrayCollection();
-
 		private var m_cfg: GoogleMapLayerConfiguration;
-
 		private var _mapType: String;
 
 		public function get mapType(): String
@@ -92,7 +86,6 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 					storage.serializeNumber("transparency", alpha);
 			}
 		}
-
 		public static var mapID: int = 0;
 
 		override protected function createChildren(): void
@@ -343,7 +336,6 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 			}
 			return null;
 		}
-
 		private var _layerJustCreated: Boolean;
 
 		override public function negotiateBBox(newBBox: BBox, changeZoom: Boolean = true): BBox

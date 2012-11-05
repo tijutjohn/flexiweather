@@ -8,11 +8,8 @@ package com.iblsoft.flexiweather.widgets
 	public class InteractiveLayerNorthIndicator extends InteractiveLayer
 	{
 		private var _northIndicator: NorthIndicator;
-
 		private var _currentDirection: Number;
-
 		private var _recomputeNeeded: Boolean;
-
 		private var _indicatorPosition: Point;
 
 		public function set indicatorPosition(point: Point): void
@@ -131,15 +128,10 @@ import mx.core.UIComponent;
 class NorthIndicator extends UIComponent
 {
 	private var _tfParent: UIComponent;
-
 	private var _textfield: TextField;
-
 	private var _perimeter: int;
-
 	private var _text: String;
-
 	private var _textChanged: Boolean;
-
 	private var _glow: GlowFilter;
 
 	public function set text(value: String): void
@@ -148,7 +140,6 @@ class NorthIndicator extends UIComponent
 		_textChanged = true;
 		invalidateProperties();
 	}
-
 	private var _rotationChanged: Boolean;
 
 	override public function set rotation(value: Number): void

@@ -60,54 +60,34 @@ package com.iblsoft.flexiweather.widgets
 	public class InteractiveWidget extends Group
 	{
 		public static const VIEW_BBOX_CHANGED: String = 'viewBBoxChanged';
-
 		private var ms_crs: String = Projection.CRS_EPSG_GEOGRAPHIC;
-
 		private var m_crsProjection: Projection = Projection.getByCRS(ms_crs);
-
 		private var m_viewBBox: BBox = new BBox(-180, -90, 180, 90);
-
 		private var m_extentBBox: BBox = new BBox(-180, -90, 180, 90);
-
 		private var mb_orderingLayers: Boolean = false;
-
 		private var mb_autoLayout: Boolean = false;
-
 		private var mb_backgroundChessBoard: Boolean = true;
-
 		private var m_resizeTimer: Timer;
-
 		private var m_layerBackground: UIComponent;
-
 		private var m_layerContainer: Group = new Group();
-
 		private var m_layerLayoutParent: UIComponent;
-
 		private var m_lastResizeTime: Number;
-
 		private var m_wmsCacheManager: WMSCacheManager;
-
 		/**
 		 * anticollision layout for Labels
 		 */
 		private var m_labelLayout: AnticollisionLayout = new AnticollisionLayout('Label Layout');
-
 		/**
 		 * anticollision layout for Labels
 		 */
 		private var m_objectLayout: AnticollisionLayout = new AnticollisionLayout('Object Layout');
-
 		/**
 		 * Set it to true when you want suspend anticaollision processing (e.g. user is dragging map)
 		 */
 		private var m_suspendAnticollisionProcessing: Boolean;
-
 		private var _enableMouseClick: Boolean;
-
 		private var _enableMouseMove: Boolean;
-
 		private var _enableMouseWheel: Boolean;
-
 		private var _enableGestures: Boolean;
 
 		override public function set enabled(value: Boolean): void
@@ -237,7 +217,6 @@ package com.iblsoft.flexiweather.widgets
 				}
 			}
 		}
-
 		private var _resizeInterval: Number;
 
 		private function onParentResize(event: ResizeEvent): void
@@ -274,7 +253,6 @@ package com.iblsoft.flexiweather.widgets
 				addLayer(layer);
 			}
 		}
-
 		private var _mxmlContentElements: Array = [];
 
 		/**
@@ -360,7 +338,6 @@ package com.iblsoft.flexiweather.widgets
 			else
 				return super.addElementAt(element, index);
 		}
-
 		private var m_layersLoading: int = 0;
 
 		private function onLayerLoadingStart(event: InteractiveLayerEvent): void
@@ -395,7 +372,6 @@ package com.iblsoft.flexiweather.widgets
 		{
 			dispatchEvent(new Event('interactiveLayerMapChanged'));
 		}
-
 		private var _tempLayersForInteractiveLayerMap: Array;
 
 		public function addLayer(l: InteractiveLayer, index: int = -1): void
@@ -488,7 +464,6 @@ package com.iblsoft.flexiweather.widgets
 			if (interactiveLayerMap)
 				interactiveLayerMap.orderLayers();
 		}
-
 		private var _disableUI: UIComponent;
 
 		private function drawDisabledState(): void
@@ -570,7 +545,6 @@ package com.iblsoft.flexiweather.widgets
 		{
 			onAreaChanged(b_finalChange);
 		}
-
 		private var _oldViewBBox: BBox = new BBox(0, 0, 0, 0);
 
 		protected function onAreaChanged(b_finalChange: Boolean): void
@@ -968,7 +942,6 @@ package com.iblsoft.flexiweather.widgets
 			}
 			return [{point: point, reflection: 0}];
 		}
-
 		private var mb_listenForChanges: Boolean;
 
 		[Bindable(event = "listeningForChangesChanged")]
@@ -1354,9 +1327,7 @@ package com.iblsoft.flexiweather.widgets
 				autoLayoutViewBBox(bbox, b_finalChange, true);
 			}
 		}
-
 		private var _oldWidgetWidth: Number = 0;
-
 		private var _oldWidgetHeight: Number = 0;
 
 		private function autoLayoutViewBBox(bbox: BBox, b_finalChange: Boolean, b_setViewBBox: Boolean = false): void
@@ -1468,7 +1439,6 @@ package com.iblsoft.flexiweather.widgets
 		{
 			signalAreaChanged(true);
 		}
-
 		//*****************************************************************************************
 		// Drawing of splitted features
 		//*****************************************************************************************
@@ -1641,7 +1611,6 @@ package com.iblsoft.flexiweather.widgets
 			mb_backgroundChessBoard = b;
 			invalidateDisplayList();
 		}
-
 		private var m_interactiveLayerMap: InteractiveLayerMap;
 
 		[Bindable(event = "interactiveLayerMapChanged")]
@@ -1679,7 +1648,6 @@ package com.iblsoft.flexiweather.widgets
 		{
 			return "InteractiveWidget [" + id + "] ";
 		}
-
 		private var mb_autoLayoutChanged: Boolean;
 
 		public function set autoLayoutInParent(value: Boolean): void

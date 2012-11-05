@@ -8,7 +8,6 @@ package com.iblsoft.flexiweather.ogc
 	public class SchemaParser extends EventDispatcher
 	{
 		protected var m_schemaXML: XML;
-
 		protected var m_Elements: ArrayCollection;
 
 		/**

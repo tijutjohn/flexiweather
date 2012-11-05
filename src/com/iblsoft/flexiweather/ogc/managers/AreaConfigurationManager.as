@@ -15,13 +15,9 @@ package com.iblsoft.flexiweather.ogc.managers
 	public class AreaConfigurationManager extends BaseConfigurationManager implements Serializable
 	{
 		public static const AREAS_CHANGED: String = 'areas changed';
-
 		public static const AREAS_THUMBNAILS_CACHE: Dictionary = new Dictionary();
-
 		public static const AREAS_THUMBNAILS_CACHE2: Dictionary = new Dictionary();
-
 		private static var sm_instance: AreaConfigurationManager;
-
 		private var ma_areas: ArrayCollection = new ArrayCollection();
 
 		public function AreaConfigurationManager()

@@ -90,9 +90,7 @@ class Pair extends XmlElement
 	 * can be "normal" or "highlight "
 	 */
 	private var _key: String;
-
 	private var _styleUrl: String;
-
 	private var _style: Style;
 
 	public function Pair(kml: KML, s_namespace: String, x: XMLList, document: Document)

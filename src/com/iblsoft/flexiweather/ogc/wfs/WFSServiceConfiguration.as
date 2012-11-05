@@ -19,19 +19,12 @@ package com.iblsoft.flexiweather.ogc.wfs
 	public class WFSServiceConfiguration extends OGCServiceConfiguration
 	{
 		private var m_capabilitiesLoader: XMLLoader = new XMLLoader();
-
 		private var m_featureTypesLoader: XMLLoader = new XMLLoader();
-
 		private var m_capabilities: XML = null;
-
 		private var m_capabilitiesLoadJob: BackgroundJob = null;
-
 		private var m_featureTypesLoadJob: BackgroundJob = null;
-
 		private var m_featureTypes: ArrayCollection = null;
-
 		private var m_schemaParser: SchemaParser;
-
 		public static const CAPABILITIES_UPDATED: String = "capabilitiesUpdated";
 
 		[Event(name = CAPABILITIES_UPDATED, type = "flash.events.DataEvent")]

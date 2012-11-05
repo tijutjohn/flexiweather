@@ -10,9 +10,7 @@ package com.iblsoft.flexiweather.ogc.data
 	public class ReflectionDictionary extends EventDispatcher
 	{
 		protected var _dictionary: Dictionary;
-
 		protected var _iw: InteractiveWidget;
-
 		protected var _totalReflections: int;
 
 		public function get totalReflections(): int

@@ -8,11 +8,8 @@ package com.iblsoft.flexiweather.ogc.kml.events
 	public class KMLBitmapEvent extends Event
 	{
 		public static const BITMAP_LOADED: String = 'bitmapLoaded';
-
 		public static const BITMAP_LOAD_ERROR: String = 'bitmapLoadError';
-
 		public var key: KMLResourceKey;
-
 		public var bitmapData: BitmapData;
 
 		public function KMLBitmapEvent(type: String, bubbles: Boolean = false, cancelable: Boolean = false)

@@ -8,33 +8,22 @@ package com.iblsoft.flexiweather.net.events
 	public class UniURLLoaderErrorEvent extends Event
 	{
 		public static const DATA_LOAD_FAILED: String = "dataLoadFailed";
-
 		public static const ERROR_BAD_IMAGE: String = "errorBadImage";
-
 		public static const ERROR_IO: String = "errorIO";
-
 		/**
 		 * result is received but format is not included in allowedFormats array
 		 */
 		public static const ERROR_UNEXPECTED_FORMAT: String = "errorUnexpectedFormat";
-
 		/**
 		 * result is received, and format is allowed, but content is invalid (not as expected)
 		 */
 		public static const ERROR_INVALID_CONTENT: String = "errorInvalidConter";
-
 		public static const ERROR_SECURITY: String = "errorSecurity";
-
 		public static const ERROR_CANCELLED: String = "errorCancelled";
-
 		protected var m_result: Object;
-
 		protected var m_request: URLRequest;
-
 		protected var m_loader: URLLoader;
-
 		protected var m_associatedData: Object;
-
 		protected var m_errorString: String;
 
 		public function UniURLLoaderErrorEvent(

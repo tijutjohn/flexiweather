@@ -5,7 +5,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	public class Region extends KmlObject
 	{
 		private var _latLongAltBox: LatLonAltBox;
-
 		private var _lod: Lod;
 
 		public function Region(s_namespace: String, x: XMLList)

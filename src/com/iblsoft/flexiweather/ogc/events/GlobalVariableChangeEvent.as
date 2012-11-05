@@ -6,9 +6,7 @@ package com.iblsoft.flexiweather.ogc.events
 	public class GlobalVariableChangeEvent extends Event
 	{
 		public static const DIMENSION_VALUE_CHANGED: String = 'dimensionValueChanged';
-
 		public var dimensionName: String;
-
 		public var dimensionValue: Object;
 
 		public function GlobalVariableChangeEvent(type: String, dimensionName: String, dimensionValue: Object, bubbles: Boolean = false, cancelable: Boolean = false)

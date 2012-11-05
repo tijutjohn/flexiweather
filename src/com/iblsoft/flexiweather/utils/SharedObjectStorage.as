@@ -5,7 +5,6 @@ package com.iblsoft.flexiweather.utils
 	public class SharedObjectStorage extends Storage
 	{
 		internal var m_sharedObject: SharedObject;
-
 		internal var m_current: Object;
 
 		public function SharedObjectStorage(b_mode: Boolean, sharedObject: SharedObject)

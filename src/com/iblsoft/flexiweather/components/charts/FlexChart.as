@@ -20,13 +20,9 @@ package com.iblsoft.flexiweather.components.charts
 			if (simpleChart)
 				simpleChart.name = value;
 		}
-
 		private var _dataProvider: ArrayCollection;
-
 		private var _dataProviderChanged: Boolean;
-
 		private var _xField: String;
-
 		private var _yField: String;
 
 		public function get xField(): String
@@ -66,9 +62,7 @@ package com.iblsoft.flexiweather.components.charts
 			invalidateProperties();
 			dispatchEvent(new Event("labelFunctionChanged"));
 		}
-
 		private var _labelFunction: Function;
-
 		private var _labelFunctionChanged: Boolean;
 
 		[Bindable]
@@ -87,27 +81,16 @@ package com.iblsoft.flexiweather.components.charts
 			_dataProviderChanged = true;
 			invalidateProperties();
 		}
-
 		private var _styleChanged: Boolean;
-
 		private var _backgroundColor: uint;
-
 		private var _axisColor: uint;
-
 		private var _axisWidth: int;
-
 		private var _gridColor: uint;
-
 		private var _gridAlpha: Number;
-
 		private var _labelsColor: uint;
-
 		private var _xLabelsRotation: Number;
-
 		private var _yLabelsRotation: Number;
-
 		private var _serieColor: uint;
-
 		private var _serieWidth: int;
 
 		[Bindable(event = "backgroundColorChanged")]
@@ -269,7 +252,6 @@ package com.iblsoft.flexiweather.components.charts
 				notify("serieWidthChanged");
 			}
 		}
-
 		protected var simpleChart: SimpleChart;
 
 		public function FlexChart()

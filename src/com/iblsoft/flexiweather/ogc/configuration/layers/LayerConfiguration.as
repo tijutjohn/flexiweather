@@ -14,9 +14,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 	public class LayerConfiguration extends EventDispatcher implements Serializable, ILayerConfiguration
 	{
 		Storage.addChangedClass('com.iblsoft.flexiweather.ogc.LayerConfiguration', 'com.iblsoft.flexiweather.ogc.configuration.layers.LayerConfiguration', new Version(1, 6, 0));
-
 		protected var ms_label: String;
-
 		protected var ms_previewURL: String = null;
 
 		public function LayerConfiguration()

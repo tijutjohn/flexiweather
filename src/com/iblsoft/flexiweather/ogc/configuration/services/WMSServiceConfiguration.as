@@ -22,29 +22,22 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 	public class WMSServiceConfiguration extends OGCServiceConfiguration
 	{
 		Storage.addChangedClass('com.iblsoft.flexiweather.ogc.WMSServiceConfiguration', 'com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceConfiguration', new Version(1, 6, 0));
-
 		private var m_capabilitiesLoader: XMLLoader = new XMLLoader();
-
 		private var m_capabilities: XML = null;
-
 		private var m_capabilitiesLoadJob: BackgroundJob = null;
-
 		private var mb_capabilitiesUpdated: Boolean;
 
 		public function get capabilitiesUpdated(): Boolean
 		{
 			return mb_capabilitiesUpdated;
 		}
-
 		private var m_layers: WMSLayerGroup = null;
-
 		private var _imageFormats: Array = [];
 
 		public function get imageFormats(): Array
 		{
 			return _imageFormats;
 		}
-
 		public static const CAPABILITIES_UPDATED: String = "capabilitiesUpdated";
 
 		[Event(name = CAPABILITIES_UPDATED, type = "flash.events.DataEvent")]
@@ -73,7 +66,6 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 			if (m_layers == null)
 				return null;
 			var wmsLayer: WMSLayer = m_layers.getLayerByName(s_name);
-
 			return wmsLayer;
 		}
 

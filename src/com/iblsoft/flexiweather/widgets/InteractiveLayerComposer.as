@@ -123,12 +123,14 @@ package com.iblsoft.flexiweather.widgets
 			mb_orderingLayers = true;
 			try
 			{
+				var layer: InteractiveLayer;
+				;
 				trace("************************************************************************************");
 				trace("                InteractiveLayerComposer SORTING by ZORDER start state");
 				trace("************************************************************************************");
 				for (i = 0; i < numChildren; ++i)
 				{
-					var layer: InteractiveLayer = InteractiveLayer(getChildAt(i));
+					layer = InteractiveLayer(getChildAt(i));
 					trace("LAYER [" + i + "] = " + layer.name + " order: " + layer.zOrder);
 				}
 				trace("**********************************************")
@@ -158,7 +160,7 @@ package com.iblsoft.flexiweather.widgets
 				trace("**********************************************")
 				for (i = 0; i < numChildren; ++i)
 				{
-					var layer: InteractiveLayer = InteractiveLayer(getChildAt(i));
+					layer = InteractiveLayer(getChildAt(i));
 					trace("LAYER [" + i + "] = " + layer.name + " order: " + layer.zOrder);
 				}
 				trace("**********************************************")

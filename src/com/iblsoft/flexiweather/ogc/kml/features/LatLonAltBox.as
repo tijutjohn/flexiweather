@@ -5,7 +5,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	public class LatLonAltBox extends AbstractLatLonBox
 	{
 		private var _minAltitude: Number;
-
 		private var _maxAltitude: Number;
 
 		public function LatLonAltBox(s_namespace: String, x: XMLList)

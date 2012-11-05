@@ -15,7 +15,6 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 	public class TiledLayerConfiguration extends LayerConfiguration implements IInteractiveLayerProvider, ILayerConfiguration, IBehaviouralObject
 	{
 		public var tileMatrixSetLink: TileMatrixSetLink;
-
 		public var ma_behaviours: Array = [];
 
 		public function TiledLayerConfiguration()

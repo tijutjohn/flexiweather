@@ -6,11 +6,8 @@ package com.iblsoft.flexiweather.net.data
 	public class UniURLLoaderData
 	{
 		public var request: URLRequest;
-
 		public var loader: AbstractURLLoader;
-
 		public var associatedData: Object;
-
 		public var backgroundJobName: String;
 
 		public function UniURLLoaderData(request: URLRequest, loader: AbstractURLLoader, associatedData: Object, backgroundJobName: String)

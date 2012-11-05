@@ -7,9 +7,7 @@ package com.iblsoft.flexiweather.utils
 	public class AnnotationBox extends Sprite
 	{
 		public var measuredWidth: Number = 0;
-
 		public var measuredHeight: Number = 0;
-
 		private var _color: uint;
 
 		public function AnnotationBox()

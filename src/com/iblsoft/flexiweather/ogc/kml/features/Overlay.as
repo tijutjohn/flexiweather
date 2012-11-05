@@ -20,11 +20,8 @@ package com.iblsoft.flexiweather.ogc.kml.features
 //		private var atom:Namespace = Namespaces.ATOM_NS;
 //		private var georss:Namespace = Namespaces.GEORSS_NS;
 		private var _color: String;
-
 		private var _drawOrder: Number;
-
 		private var _icon: Icon;
-
 		private var _loader: KMLBitmapLoader;
 
 		/**

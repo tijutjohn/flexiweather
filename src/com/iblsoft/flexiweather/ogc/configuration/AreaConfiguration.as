@@ -13,11 +13,8 @@ package com.iblsoft.flexiweather.ogc.configuration
 	public class AreaConfiguration implements Serializable
 	{
 		public static const AREA_ICON_WIDTH: int = 60;
-
 		public static const AREA_ICON_HEIGHT: int = 60;
-
 		public var projection: ProjectionConfiguration;
-
 		private var ms_default_area: Boolean;
 
 		public function get isDefaultArea(): Boolean
@@ -30,7 +27,6 @@ package com.iblsoft.flexiweather.ogc.configuration
 			if (value != ms_default_area)
 				ms_default_area = value;
 		}
-
 		private var ms_name: String;
 
 		public function get name(): String
@@ -90,7 +86,6 @@ package com.iblsoft.flexiweather.ogc.configuration
 				projection = new ProjectionConfiguration(_crs, newProjectionBBox);
 			createThumbnailBBox();
 		}
-
 		private var _thumbBBox: BBox;
 
 		public function update(): void

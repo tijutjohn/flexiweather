@@ -67,7 +67,6 @@ package com.iblsoft.flexiweather.ogc
 	public class InteractiveLayerQTTMS extends InteractiveLayerTiled implements IConfigurableLayer, ICachedLayer, ITiledLayer, IPreloadableLayer, Serializable
 	{
 		private var mi_updateCycleAge: uint = 0;
-
 		private var m_tilingUtils: TilingUtils;
 
 //		protected var m_cfg: QTTMSLayerConfiguration;
@@ -560,7 +559,6 @@ import mx.messaging.AbstractConsumer;
 class ViewPartReflectionsHelper
 {
 	private var _dictionary: Dictionary = new Dictionary();
-
 	private var _container: InteractiveWidget;
 
 	function ViewPartReflectionsHelper(iw: InteractiveWidget)

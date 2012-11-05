@@ -16,9 +16,7 @@ package com.iblsoft.flexiweather.ogc.managers
 	public class OGCServiceConfigurationManager extends EventDispatcher implements Serializable
 	{
 		private static var sm_instance: OGCServiceConfigurationManager;
-
 		private var ma_services: ArrayCollection = new ArrayCollection();
-
 		private var m_timer: Timer = new Timer(500);
 
 		public function OGCServiceConfigurationManager()
@@ -113,9 +111,7 @@ package com.iblsoft.flexiweather.ogc.managers
 			if (ma_services.length == 0)
 				m_timer.stop();
 		}
-
 		private var _currentServices: Array = [];
-
 		private var _runningServices: Array = [];
 
 		public function getServiceByName(serviceName: String): OGCServiceConfiguration

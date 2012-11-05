@@ -15,19 +15,12 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	{
 		//todo: add constants for the enum values?
 		private var _href: String;
-
 		private var _refreshMode: String;
-
 		private var _refreshInterval: Number;
-
 		private var _viewRefreshMode: String;
-
 		private var _viewRefreshTime: Number;
-
 		private var _viewBoundScale: Number;
-
 		private var _viewFormat: String;
-
 		private var _httpQuery: String;
 
 		/**

@@ -38,7 +38,6 @@ package com.iblsoft.flexiweather.ogc
 	public class InteractiveLayerWMS extends InteractiveLayerMSBase implements ISynchronisedObject, Serializable, IConfigurableLayer, ICachedLayer
 	{
 		public static const WMS_STYLE_CHANGED: String = 'wmsStyleChanged';
-
 		protected var m_autoRefreshTimer: Timer = new Timer(5000);
 
 		public function InteractiveLayerWMS(container: InteractiveWidget, cfg: WMSLayerConfiguration)
@@ -256,7 +255,6 @@ package com.iblsoft.flexiweather.ogc
 		{
 			invalidateData(true);
 		}
-
 		private var _invalidateCacheAfterImageLoad: Boolean;
 
 		override public function onAreaChanged(b_finalChange: Boolean): void

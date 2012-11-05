@@ -17,7 +17,6 @@ package com.iblsoft.flexiweather.ogc.kml.features.styles
 			<outline>1</outline>               <!-- boolean -->
 		*/
 		private var _fill: Boolean;
-
 		private var _outline: Boolean;
 
 		public function PolyStyle(kml: KML, s_namespace: String, x: XMLList, document: Document)

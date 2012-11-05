@@ -6,9 +6,7 @@ package com.iblsoft.flexiweather.ogc.wfs
 	public class WFSFeature
 	{
 		internal var ms_name: String;
-
 		public var location: Coord;
-
 		public var values: ArrayCollection;
 
 		/**

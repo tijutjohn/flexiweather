@@ -9,13 +9,9 @@ package com.iblsoft.flexiweather.utils
 	public class Storage
 	{
 		public static const LOADING: Boolean = false;
-
 		public static const STORING: Boolean = true;
-
 		public static const NONINDEXED: uint = 0xFFFFFFFF;
-
 		internal var mb_mode: Boolean;
-
 		private static var _changedClassDictionary: Dictionary = new Dictionary();
 
 		public function Storage(b_mode: Boolean): void

@@ -6,13 +6,9 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	public class NetworkLink extends KMLFeature
 	{
 		private var _refreshVisibility: int;
-
 		private var _flyToView: int;
-
 		private var _link: Link;
-
 		private var _container: Container;
-
 		private var _contentKML: KML;
 
 		public function NetworkLink(kml: KML, s_namespace: String, s_xml: XMLList)

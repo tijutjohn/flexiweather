@@ -50,19 +50,14 @@ package com.iblsoft.flexiweather.net.loaders
 	public class AbstractURLLoader extends EventDispatcher implements IURLLoaderBasicAuth
 	{
 		public static var debugConsole: IConsole;
-
 		/**
 		 *  basicAuthURLLoaderClass must be of Class which implement IURLLoaderBasicAuthListener
 		 * it server for listening to HTTPStatusEvent.HTTP_RESPONSE_STATUS which is available only in AIR projects and consists of response headers with BasicAuth information (e.g. REALM)
 		 */
 		public static var basicAuthURLLoaderClass: Class;
-
 		private var _baLoader: IURLLoaderBasicAuthListener;
-
 		public static var basicAuthCredentialsPopupClass: IBasicAuthCredentialsPopup;
-
 		protected var md_urlLoaderToRequestMap: Dictionary = new Dictionary();
-
 		private static var _baseURL: String = '';
 
 		public static function get baseURL(): String
@@ -74,9 +69,7 @@ package com.iblsoft.flexiweather.net.loaders
 		{
 			_baseURL = value;
 		}
-
 		public static var proxyBaseURL: String = '';
-
 		/**
 		 * URL of the cross-domain script bridging script. The ${URL} pattern
 		 * in this string is replaced with the actual URL required to be proxied.
@@ -85,7 +78,6 @@ package com.iblsoft.flexiweather.net.loaders
 		 * Example: "http://server.com/proxy?url=${URL}"
 		 */
 		public static var crossDomainProxyURLPattern: String = null;
-
 		/** Deprecated - associated data. Use load(request, associatedData) instead. */
 		public var data: Object;
 

@@ -8,7 +8,6 @@ package com.iblsoft.flexiweather.widgets
 	public class InteractiveLayerClickActionEvent extends Event
 	{
 		protected var m_coord: Coord;
-
 		protected var m_localPoint: Point;
 
 		public function InteractiveLayerClickActionEvent(type: String, bubbles: Boolean = false, cancelable: Boolean = false)

@@ -24,33 +24,19 @@ package com.iblsoft.flexiweather.widgets
 	public class InteractiveLayerPan extends InteractiveLayer
 	{
 		public static const PAN: String = 'pan';
-
 		public static const START_PANNING: String = 'startPanning';
-
 		public static const STOP_PANNING: String = 'stopPanning';
-
 		public var supportsPanAnimation: Boolean;
-
 		internal var _oldStartPoint: Point;
-
 		internal var _p: Point;
-
 		internal var mb_requireShiftKey: Boolean = true;
-
 		private var _moveInterval: int;
-
 		private var _moveIntervalPoint: Point;
-
 		private var _oldMouseX: int;
-
 		private var _oldMouseY: int;
-
 		private var _diffMouseX: int;
-
 		private var _diffMouseY: int;
-
 		private var _animate: Move;
-
 		private var _wrapLimiter: WrapLimiter;
 
 		public function InteractiveLayerPan(container: InteractiveWidget = null)
@@ -138,7 +124,6 @@ package com.iblsoft.flexiweather.widgets
 			}
 			_p = null;
 		}
-
 		private var _animPoint: Point = new Point();
 
 		private function onMoveAnimate(event: TweenEvent): void
@@ -193,7 +178,6 @@ package com.iblsoft.flexiweather.widgets
 			if (doPanTo(_moveIntervalPoint, true, 'onMouseMoveDelay'))
 				invalidateDynamicPart();
 		}
-
 		private var _oldPoint: Point;
 
 		override public function onMouseMove(event: MouseEvent): Boolean
@@ -269,7 +253,6 @@ package com.iblsoft.flexiweather.widgets
 			var withinTreshold: Boolean = Math.abs(100 - extentRatio) < percentageTreshold;
 			return projection.wrapsHorizontally && withinTreshold;
 		}
-
 		private var _diff: Point;
 
 		private function doRealPan(xDiff: Number, yDiff: Number, b_finalChange: Boolean): void
@@ -406,9 +389,7 @@ import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 class WrapLimiter
 {
 	private var _container: InteractiveWidget;
-
 	private var _projection: Projection;
-
 	private var _maxReflections: int = 1;
 
 	public function WrapLimiter(container: InteractiveWidget, maxReflections: int)

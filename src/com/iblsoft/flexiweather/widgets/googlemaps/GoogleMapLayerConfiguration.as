@@ -16,22 +16,14 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 	public class GoogleMapLayerConfiguration extends com.iblsoft.flexiweather.ogc.configuration.layers.LayerConfiguration implements IInteractiveLayerProvider, ILayerConfiguration, IBehaviouralObject
 	{
 		public static const MAP_TYPE_NORMAL: String = 'normal';
-
 		public static const MAP_TYPE_PHYSICAL: String = 'physical';
-
 		public static const MAP_TYPE_SATELLITE: String = 'satellite';
-
 		public static const MAP_TYPE_HYBRID: String = 'hybrid';
-
 		/** Array of CRSWithBBox */
 		public var tilingCRSsAndExtents: Array = [];
-
 		public var minimumZoomLevel: uint = 1;
-
 		public var maximumZoomLevel: uint = 12;
-
 		public var ma_behaviours: Array = [];
-
 		/**
 		 * Possible values are all static const MAP_TYPE_
 		 */

@@ -50,41 +50,26 @@ package com.iblsoft.flexiweather.utils.anticollision
 	public class AnticollisionLayout extends Sprite
 	{
 		public static const ANTICOLLISTION_UPDATED: String = 'anticollisionUpdated';
-
 		public static var drawDebugMap: Boolean = false;
-
 		/**
 		 * Debug variable to test how many objects needs to be layouted
 		 */
 		public var layoutObjectsLength: int;
-
 		protected var m_boundaryRect: Rectangle;
-
 		public var m_placementBitmap: BitmapData; // HACK: change back to protected
-
 		protected var mi_lastUpdate: int = 0;
-
 		protected var mb_dirty: Boolean = false;
-
 		protected var ma_layoutObjects: ArrayCollection = new ArrayCollection();
-
 		protected var ma_currentLayoutObjects: Array = new Array();
-
 		protected var m_anchorsLayer: Sprite = new Sprite();
-
 		/**
 		 * Set it to true when you want suspend anticaollision processing (e.g. user is dragging map)
 		 */
 		private var m_suspendAnticollisionProcessing: Boolean;
-
 		private var m_drawAnnotationAnchor: Boolean;
-
 		private var m_updateInterval: int = 500;
-
 		private var m_areaChangedUpdateTime: Number;
-
 		private var _layoutName: String;
-
 		private var _updateLocationDictionary: UpdateLocationDictionary;
 
 		public function AnticollisionLayout(layoutName: String)
@@ -115,9 +100,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 				}
 			}
 		}
-
 		private var _areaChangedScheduled: Boolean;
-
 		private var _areaChangedScheduledBBox: BBox;
 
 		/**
@@ -298,7 +281,6 @@ package com.iblsoft.flexiweather.utils.anticollision
 			m_boundaryRect = new Rectangle(boundary.x, boundary.y, boundary.width, boundary.height);
 			setDirty();
 		}
-
 		private var _updateLocked: Boolean;
 
 		public function update(): void
@@ -697,7 +679,6 @@ package com.iblsoft.flexiweather.utils.anticollision
 		return a_refined;
 		*/
 		}
-
 		private var m_makeRed: ColorTransform = new ColorTransform(1, 1, 1, 1, 255, -255, -255, 255);
 
 		private function drawObjectPlacement(layoutObject: AnticollisionLayoutObject, f_dx: Number, f_dy: Number): void
@@ -776,7 +757,6 @@ package com.iblsoft.flexiweather.utils.anticollision
 		{
 			m_updateInterval = value;
 		}
-
 		/**
 		 *  Debug functions
 		 *
@@ -914,19 +894,12 @@ import mx.utils.object_proxy;
 class UpdateLocationDictionary
 {
 	private var _maxObjectsUpdatePerTick: int = 50;
-
 	private var _len: int = 0;
-
 	private var _dictionary: Dictionary;
-
 	private var _firstItem: UpdateLocationDictionaryItem;
-
 	private var _lastItem: UpdateLocationDictionaryItem;
-
 	private var _running: Boolean;
-
 	private var _timer: Timer;
-
 	private var _layout: AnticollisionLayout;
 
 	public function UpdateLocationDictionary(layout: AnticollisionLayout)
@@ -1085,17 +1058,11 @@ class UpdateLocationDictionary
 class UpdateLocationDictionaryItem
 {
 	public static var uid: int = 0;
-
 	public var previousItem: UpdateLocationDictionaryItem;
-
 	public var nextItem: UpdateLocationDictionaryItem;
-
 	public var displayObject: DisplayObject;
-
 	private var _lastUpdate: Number;
-
 	private var _minWaitingTime: int = 500;
-
 	public var id: int;
 
 	public function UpdateLocationDictionaryItem(object: DisplayObject)

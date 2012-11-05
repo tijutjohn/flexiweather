@@ -16,13 +16,9 @@ package com.iblsoft.flexiweather.ogc.cache
 		{
 			ms_key = value;
 		}
-
 		public var url: URLRequest;
-
 		public var crs: String;
-
 		public var bbox: BBox;
-
 		public var validity: Date;
 
 		public function CacheKey(s_crs: String, bbox: BBox, url: URLRequest, validity: Date = null)

@@ -4,15 +4,10 @@ package com.iblsoft.flexiweather.utils
 	public class ISO8601Parser
 	{
 		public var m_validator: DateTimeValidator = new DateTimeValidator();
-
 		private static var sm_defaultParser: ISO8601Parser = new ISO8601Parser();
-
 		protected var m_patternYYYYMMDD: RegExp = /\A(\d{4})-(\d{2})-(\d{2}$)\Z/;
-
 		protected var m_patternHHMMSSsss: RegExp = /\A(\d{2})(:(\d{2})(:(\d{2})(\.(\d{3}))?)?)?Z?\Z/;
-
 		protected var m_regExpDurationLike: RegExp = /\AP.*/;
-
 		protected var m_regExpDuration: RegExp = /\AP((\d+)D)?(T((\d+)H)?((\d+)M)?((\d+)S)?)?\Z/;
 
 		/**

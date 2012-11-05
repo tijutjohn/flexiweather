@@ -18,19 +18,12 @@ package com.iblsoft.flexiweather.widgets
 	public class BackgroundJobManager extends EventDispatcher
 	{
 		internal static var sm_instance: BackgroundJobManager;
-
 		public static var maximumTileDescriptionCount: int = 25;
-
 		public var m_progressBar: JobProgressIndicator;
-
 		internal var m_jobs: ArrayCollection = new ArrayCollection();
-
 		internal var m_finishedJobs: ArrayCollection = new ArrayCollection();
-
 		internal var mi_jobsCount: int = 0;
-
 		internal var mi_jobsDone: int = 0;
-
 		private var ms_pendingJobsDescription: String;
 
 		public function get pendingJobsDescription(): String

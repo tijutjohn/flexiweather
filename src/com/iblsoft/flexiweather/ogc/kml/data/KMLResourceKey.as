@@ -4,9 +4,7 @@ package com.iblsoft.flexiweather.ogc.kml.data
 	public class KMLResourceKey
 	{
 		public var href: String;
-
 		private var _baseURL: String
-
 		public var type: String;
 
 		public function KMLResourceKey(href: String, baseURL: String, type: String)

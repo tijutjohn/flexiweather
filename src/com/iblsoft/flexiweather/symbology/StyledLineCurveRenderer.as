@@ -10,73 +10,41 @@ package com.iblsoft.flexiweather.symbology
 	public class StyledLineCurveRenderer extends DistanceMarkingCurveRenderer
 	{
 		public static const STYLE_NONE: String = "None";
-
 		public static const STYLE_SOLID: String = "Solid";
-
 		public static const STYLE_DASHED: String = "Dashed";
-
 		public static const STYLE_DOTTED: String = "Dotted";
-
 		public static const STYLE_DASHDOT: String = "DashDot";
-
 		public static const STYLE_DASHDOTDOT: String = "DashDotDot";
-
 		public static const STYLE_ICING_STYLE: String = "IcingStyle";
-
 		public static const FILL_STYLE_NONE: String = 'None';
-
 		public static const FILL_STYLE_SOLID: String = 'Solid';
-
 		public static const FILL_STYLE_HORIZONTAL_LINES: String = 'HorizontalLines';
-
 		public static const FILL_STYLE_VERTICAL_LINES: String = 'VerticalLines';
-
 		public static const FILL_STYLE_CROSING_LINES: String = 'CrossingLines';
-
 		public static const FILL_STYLE_BACKWARD_DIAGONAL_LINES: String = 'BackwardDiagonalLines';
-
 		public static const FILL_STYLE_FORWARD_DIAGONAL_LINES: String = 'ForwardDiagonalLines';
-
 		public static const FILL_STYLE_CROSSING_DIAGONAL_LINES: String = 'CrossingDiagonalLines';
-
 		// style variables
 		protected var mf_thickness: Number;
-
 		protected var mi_color: uint;
-
 		protected var mf_alpha: Number;
-
 		protected var ms_style: String;
-
 		protected var ms_filLStyle: String;
-
 		protected var mi_fillColor: uint;
-
 		// runtime variables
 		//protected var mf_currentDistance: Number = 0; 
 		//protected var mf_lastMarkDistance: Number = -1000; 
 		protected var mf_markStep: Number = 6;
-
 		protected var mf_paternStep: Number = 6;
-
 		protected var mi_lastPaternStep: int = 0;
-
 		protected var mi_counter: int = 0;
-
 		protected var mf_actPaternDistance: Number = 0;
-
 		protected var ma_paternDef: Array;
-
 		protected var mp_lastMarkPoint: Point;
-
 		protected var mp_actMarkPoint: Point;
-
 		protected var mb_markChanged: Boolean = false;
-
 		protected var ma_markParts: Array = new Array();
-
 		protected var mf_lastPaternRatio: Number = 0;
-
 		protected var mp_fIcingPoint: Point;
 
 		public function set thickness(value: Number): void

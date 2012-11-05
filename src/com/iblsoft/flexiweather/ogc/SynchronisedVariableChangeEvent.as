@@ -5,9 +5,7 @@ package com.iblsoft.flexiweather.ogc
 	public class SynchronisedVariableChangeEvent extends Event
 	{
 		public static const SYNCHRONISED_VARIABLE_CHANGED: String = "synchronisedVariableChanged";
-
 		public static const SYNCHRONISED_VARIABLE_DOMAIN_CHANGED: String = "synchronisedVariableDomainChanged";
-
 		//[Event(name = SYNCHRONISED_VARIABLE_CHANGED, type = "com.iblsoft.flexiweather.ogc.SynchronisedVariableChangeEvent")]
 		protected var ms_variableId: String;
 

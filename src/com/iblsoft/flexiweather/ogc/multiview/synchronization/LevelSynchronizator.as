@@ -13,7 +13,6 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		{
 			return '<level/>';
 		}
-
 		private var _levelValues: Array;
 
 		public function get willSynchronisePrimaryLayer(): Boolean

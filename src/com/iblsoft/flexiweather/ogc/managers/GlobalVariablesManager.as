@@ -18,15 +18,10 @@ package com.iblsoft.flexiweather.ogc.managers
 	public class GlobalVariablesManager extends EventDispatcher
 	{
 		public static const SELECTED_FRAME_CHANGED: String = 'selectedFrameChanged';
-
 		public static const SELECTED_LEVEL_CHANGED: String = 'selectedLevelChanged';
-
 		public static const FRAMES_CHANGED: String = 'framesChanged';
-
 		public static const LEVELS_CHANGED: String = 'levelsChanged';
-
 		private var _frames: ArrayCollection;
-
 		private var _levels: ArrayCollection;
 
 		[Bindable(event = FRAMES_CHANGED)]
@@ -40,13 +35,9 @@ package com.iblsoft.flexiweather.ogc.managers
 		{
 			return _levels;
 		}
-
 		private var _interactiveLayerMap: InteractiveLayerMap;
-
 		private var _frame: Date;
-
 		private var _level: String;
-
 		private var _levelChanged: Boolean;
 
 		public function get frame(): Date
@@ -72,7 +63,6 @@ package com.iblsoft.flexiweather.ogc.managers
 			_levelChanged = true;
 			onLevelVariableChanged();
 		}
-
 		/**
 		 * Should be one of SetOperationType constants
 		 */
@@ -139,7 +129,6 @@ package com.iblsoft.flexiweather.ogc.managers
 			 * SynchronisationEvent.START_GLOBAL_VARIABLE_SYNCHRONIZATION
 			 * SynchronisationEvent.STOP_GLOBAL_VARIABLE_SYNCHRONIZATION
 			 */
-				
 			switch (event.globalVariable)
 			{
 				case GlobalVariable.LEVEL:

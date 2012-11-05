@@ -10,7 +10,6 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 	public class OGCLayerConfiguration extends LayerConfiguration implements ILayerConfiguration
 	{
 		Storage.addChangedClass('com.iblsoft.flexiweather.ogc.OGCLayerConfiguration', 'com.iblsoft.flexiweather.ogc.configuration.layers.OGCLayerConfiguration', new Version(1, 6, 0));
-
 		// runtime variable
 		protected var m_service: OGCServiceConfiguration;
 

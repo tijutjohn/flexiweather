@@ -15,7 +15,6 @@ package com.iblsoft.flexiweather.widgets
 	public class InteractiveLayer extends UIComponent
 	{
 		protected var m_layerWasDestroyed: Boolean;
-
 		protected var _type: String;
 
 		/**
@@ -26,22 +25,14 @@ package com.iblsoft.flexiweather.widgets
 		{
 			return _type;
 		}
-
 		public var container: InteractiveWidget;
-
 		private var mb_dynamicPartInvalid: Boolean = false;
-
 		private var mi_zOrder: int = 0;
-
 		protected var m_legendCallBack: Function;
-
 		protected var m_legendGroup: Group;
-
 		protected var m_legendLabelAlign: String;
-
 		[Bindable]
 		public var layerName: String;
-
 		private var _forcedLayerWidth: int = 0;
 
 		public function get forcedLayerWidth(): int
@@ -53,7 +44,6 @@ package com.iblsoft.flexiweather.widgets
 		{
 			_forcedLayerWidth = value;
 		}
-
 		private var _forcedLayerHeight: int = 0;
 
 		public function get forcedLayerHeight(): int
@@ -70,7 +60,6 @@ package com.iblsoft.flexiweather.widgets
 		{
 			return m_legendGroup;
 		}
-
 		public static var ID: int = 0;
 
 		override public function get visible(): Boolean
@@ -90,7 +79,6 @@ package com.iblsoft.flexiweather.widgets
 				notifyLayerChanged('visible');
 			}
 		}
-
 		protected var layerInitialized: Boolean;
 
 		public function InteractiveLayer(container: InteractiveWidget = null)

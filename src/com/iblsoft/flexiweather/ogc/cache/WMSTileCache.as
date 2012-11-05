@@ -22,35 +22,26 @@ package com.iblsoft.flexiweather.ogc.cache
 	public class WMSTileCache extends WMSCache
 	{
 		private static var _uid: int = 0;
-
 		public static var debugConsole: IConsole;
-
 		public var maxCachedItems: int = 300;
-
 		/**
 		 * Expiration check interval. How ofter will be expiration checked
 		 */
 		private var _checkExpirationTime: int = 10 * 1000;
-
 		/**
 		 * Expiration time. How long will tile be valid (in seconds).
 		 * Value "0" means no expiration will be done.
 		 */
 		private var _expirationTime: int = 0;
-
 		private var _expirationTimer: Timer;
-
 		private var _animationModeEnabled: Boolean;
-
 		private var _itemCount: int = 0;
-
 		private var _items: Array = [];
 
 		public function get cachedTilesCount(): int
 		{
 			return _items.length;
 		}
-
 		private var _id: int;
 
 		public function WMSTileCache()
@@ -353,9 +344,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			}
 			return false;
 		}
-
 		private var _tiledArea: TiledArea;
-
 		private var _tiledAreaCenter: Point;
 
 		public function sortCache(tiledArea: TiledArea): void

@@ -15,13 +15,9 @@ package com.iblsoft.flexiweather.widgets
 	public class InteractiveLayerPlaces extends InteractiveLayer
 	{
 		private var placeSpacing: int = 5;
-
 		protected var ma_coords: ArrayCollection = new ArrayCollection();
-
 		public static const CHANGE: String = "interactiveLayerPlacesChanged";
-
 		public static const SHOW_TOOLTIP: String = 'showTooltip';
-
 		public static const HIDE_TOOLTIP: String = 'hideTooltip';
 
 		public function InteractiveLayerPlaces(container: InteractiveWidget = null)
@@ -32,7 +28,6 @@ package com.iblsoft.flexiweather.widgets
 			_sprites = new Array();
 			ma_coords.addEventListener(CollectionEvent.COLLECTION_CHANGE, onCoordsCollectionChanged);
 		}
-
 		private var _sprites: Array;
 
 		private function clearOldState(): void
@@ -237,12 +232,9 @@ import mx.core.UITextField;
 class IconSprite extends Sprite
 {
 	public var place: InteractiveLayerPlace;
-
 	//private var _letters: Array;
 	public var tooltip: String;
-
 	private var iconsPosition: int = 16;
-
 	private var size: int = 16;
 
 	private function get halfSize(): Number
@@ -313,18 +305,14 @@ class IconSprite extends Sprite
 class PlaceSprite extends Sprite
 {
 	private var labelTxt: TextField;
-
 	private var size: int = 16;
 
 	private function get halfSize(): Number
 	{
 		return size / 2;
 	}
-
 	private var gap: int = 3;
-
 	private static var cnt: int = 0;
-
 	private var icons: Sprite;
 
 	public function get placeWidth(): Number

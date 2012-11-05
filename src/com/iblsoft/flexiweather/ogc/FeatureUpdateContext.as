@@ -4,17 +4,11 @@ package com.iblsoft.flexiweather.ogc
 	public class FeatureUpdateContext
 	{
 		public static var FULL_UPDATE: int = 7;
-
 		public static var CRS_CHANGED: int = 1;
-
 		public static var VIEW_BBOX_MOVED: int = 2;
-
 		public static var VIEW_BBOX_SIZE_CHANGED: int = 4;
-
 		public static var PARTS_CHANGED: int = 8;
-
 		public static var FEATURE_SCALE_CHANGED: int = 16;
-
 		private var _flag: uint;
 
 		public function get anyChange(): Boolean

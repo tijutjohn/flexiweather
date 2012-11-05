@@ -120,20 +120,13 @@ package com.iblsoft.flexiweather.widgets
 	public class InteractiveLayerRoute extends InteractiveLayer
 	{
 		public static const ROUTE_CHANGED: String = 'routeChanged';
-
 		public static const DRAW_MODE_PLAIN: String = 'plain';
-
 		public static const DRAW_MODE_GREAT_ARC: String = 'greatArc';
-
 		private var _ma_coords: ArrayCollection;
-
 		protected var m_highlightedCoord: Coord = null;
-
 		protected var m_selectedCoord: Coord = null;
-
 //		protected var m_highlightedLineFrom: Coord = null;
 		public static const CHANGE: String = "interactiveLayerRouteChanged";
-
 		private var _drawMode: String;
 
 		public function InteractiveLayerRoute(container: InteractiveWidget = null)

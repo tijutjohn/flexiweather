@@ -22,7 +22,6 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 	public class QTTMSLayerConfiguration extends TiledLayerConfiguration implements IInteractiveLayerProvider, ILayerConfiguration, IBehaviouralObject
 	{
 		Storage.addChangedClass('com.iblsoft.flexiweather.ogc.QTTMSLayerConfiguration', 'com.iblsoft.flexiweather.ogc.configuration.layers.QTTMSLayerConfiguration', new Version(1, 6, 0));
-
 //		public var baseURLPattern: String;
 		/** Array of TiledTilingInfo instances */
 		private var _tilingCRSsAndExtents: Array = [];
@@ -31,7 +30,6 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		{
 			return _tilingCRSsAndExtents;
 		}
-
 		public var tileSize: uint = 256;
 
 		public function QTTMSLayerConfiguration(tileSize: uint = 256)

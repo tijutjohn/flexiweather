@@ -15,21 +15,13 @@ package com.iblsoft.flexiweather.widgets
 	public class AreaSelectorTool extends InteractiveLayer
 	{
 		public static const AREA_CREATED: String = 'area created';
-
 		public static const AREA_CANCELLED: String = 'area cancelled';
-
 		private var _areaComponent: AreaRectangle;
-
 		private var _r: CustomRectangle;
-
 		private var _mouseDown: Boolean;
-
 		private var _toolIsCreated: Boolean;
-
 		private var _p: Point;
-
 		private var _projection: Projection;
-
 		private var _projectionConfiguration: ProjectionConfiguration;
 
 		public function set projectionConfiguration(value: ProjectionConfiguration): void
@@ -37,7 +29,6 @@ package com.iblsoft.flexiweather.widgets
 			_projectionConfiguration = value;
 			_projection = Projection.getByCfg(value);
 		}
-
 		private var _selectedBBox: BBox;
 
 		public function get selectedBBox(): BBox
@@ -108,7 +99,6 @@ package com.iblsoft.flexiweather.widgets
 				_areaComponent.startDrag();
 			return true;
 		}
-
 		private var _lastCreatedRectangle: CustomRectangle;
 
 		override public function onMouseUp(event: MouseEvent): Boolean
@@ -282,27 +272,16 @@ class CustomRectangle extends Rectangle
 class AreaRectangle extends UIComponent
 {
 	public var isResizing: Boolean;
-
 	private var _leftEdge: Sprite;
-
 	private var _rightEdge: Sprite;
-
 	private var _topEdge: Sprite;
-
 	private var _bottomEdge: Sprite;
-
 	private var _bottomRightCorner: Sprite;
-
 	private var _currentlyDraggedSprite: Sprite;
-
 	private var leftX: Number;
-
 	private var rightX: Number;
-
 	private var topY: Number;
-
 	private var bottomY: Number;
-
 	private var _r: CustomRectangle;
 
 	public function AreaRectangle()

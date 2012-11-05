@@ -9,9 +9,7 @@ package com.iblsoft.flexiweather.ogc.managers
 	public class MapConfigurationManager extends BaseConfigurationManager implements Serializable
 	{
 		public static const MAPS_CHANGED: String = 'maps changed';
-
 		internal static var sm_instance: MapConfigurationManager;
-
 		internal var ma_maps: ArrayCollection = new ArrayCollection();
 
 		// getters & setters

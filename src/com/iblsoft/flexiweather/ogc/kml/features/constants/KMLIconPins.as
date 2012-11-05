@@ -18,21 +18,13 @@ package com.iblsoft.flexiweather.ogc.kml.features.constants
 	public class KMLIconPins
 	{
 		private var yellow_pin: String = 'http://maps.google.com/mapfiles/kml/pushpin/ylw-pushpin.png';
-
 		private var blue_pin: String = 'http://maps.google.com/mapfiles/kml/pushpin/blue-pushpin.png';
-
 		private var green_pin: String = 'http://maps.google.com/mapfiles/kml/pushpin/grn-pushpin.png';
-
 		private var light_blue_pin: String = 'http://maps.google.com/mapfiles/kml/pushpin/ltblu-pushpin.png';
-
 		private var pink_pin: String = 'http://maps.google.com/mapfiles/kml/pushpin/pink-pushpin.png';
-
 		private var purple_pin: String = 'http://maps.google.com/mapfiles/kml/pushpin/purple-pushpin.png';
-
 		private var red_pin: String = 'http://maps.google.com/mapfiles/kml/pushpin/red-pushpin.png';
-
 		private var white_pin: String = 'http://maps.google.com/mapfiles/kml/pushpin/wht-pushpin.png';
-
 		static private var _icons: Dictionary = new Dictionary();
 
 		public function KMLIconPins()

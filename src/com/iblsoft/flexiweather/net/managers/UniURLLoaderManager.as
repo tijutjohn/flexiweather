@@ -7,9 +7,7 @@ package com.iblsoft.flexiweather.net.managers
 	public class UniURLLoaderManager extends EventDispatcher
 	{
 		public static const ADD_LOADER: String = 'addLoader';
-
 		public static const REMOVE_LOADER: String = 'removeLoader';
-
 		private static var _instance: UniURLLoaderManager;
 
 		public static function get instance(): UniURLLoaderManager

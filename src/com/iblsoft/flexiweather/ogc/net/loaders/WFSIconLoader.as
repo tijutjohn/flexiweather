@@ -10,11 +10,8 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 	public class WFSIconLoader extends EventDispatcher
 	{
 		internal static var sm_instance: WFSIconLoader;
-
 		protected var md_iconStorage: Dictionary = new Dictionary();
-
 		protected var md_loadingIcons: Dictionary = new Dictionary();
-
 		protected var ml_loader: UniURLLoader = new UniURLLoader();
 
 		/**
@@ -121,7 +118,6 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 class IconAssociatedData
 {
 	public var callbackFunction: Function;
-
 	public var url: String;
 
 	public function IconAssociatedData(_callbackFunction: Function, s_url: String)

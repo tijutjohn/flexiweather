@@ -33,11 +33,8 @@ import flash.net.URLRequest;
 class TileJob
 {
 	private var mi_x: int;
-
 	private var mi_y: int;
-
 	private var m_urlRequest: URLRequest;
-
 	private var m_urlLoader: WMSImageLoader;
 
 	public function set urlRequest(value: URLRequest): void

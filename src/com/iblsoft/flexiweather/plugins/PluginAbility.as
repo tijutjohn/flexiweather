@@ -6,45 +6,25 @@ package com.iblsoft.flexiweather.plugins
 	public class PluginAbility
 	{
 		public static const ACTION: String = "action";
-
 		public static const DOCKLET: String = "docklet";
-
 		public static const STORAGE: String = "storage";
-
 		public static const CONSOLE: String = "console";
-
 		public static const CHAT: String = "chat";
-
 		public static const POPUP: String = "popup";
-
 		public static const MULTI_VIEW: String = "multiView";
-
 		public static const PERSISTENT_CONFIGURATION: String = "persistenConfiguration";
-
 		public static const PANE_CLIENT: String = "paneClient";
-
 		public static const INTERACTIVE_WIDGET_CLIENT: String = "interactiveWidgetClient";
-
 		public static const LAYER_SELECTION_LISTENER: String = "layerSelectionListener";
-
 		public static const LAYER_CHANGE_LISTENER: String = "layerChangeListener";
-
 		public static const LAYER_OPTIONS_PROVIDER: String = "layerOptionsProvider";
-
 		public static const LAYER_BEHAVIOUR: String = "layerBehaviour";
-
 		public static const MENU_ITEM: String = "menuItem";
-
 		public static const SUBMENU_ITEM: String = "submenuItem";
-
 		private var ms_abilityType: String;
-
 		private var m_classOrInstance: Object;
-
 		private var ms_id: String;
-
 		private var ms_plugin_id: String;
-
 		private var m_metadata: Object = new Object;
 
 		function PluginAbility(s_abilityType: String, s_id: String, s_plugin_id: String, classOrInstance: Object)

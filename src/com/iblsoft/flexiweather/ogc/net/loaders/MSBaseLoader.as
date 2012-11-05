@@ -30,19 +30,12 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 	public class MSBaseLoader extends EventDispatcher implements IWMSViewPropertiesLoader
 	{
 		private static var uid: int = 0;
-
 		public var id: int;
-
 		private var ma_requests: ArrayCollection = new ArrayCollection(); // of URLRequest
-
 		private var mi_updateCycleAge: uint = 0;
-
 		private var m_layer: InteractiveLayerMSBase;
-
 		protected var m_loader: WMSImageLoader;
-
 		private var m_wmsViewProperties: WMSViewProperties;
-
 		private var m_imagePart: ImagePart;
 
 		public function MSBaseLoader(layer: InteractiveLayerMSBase)

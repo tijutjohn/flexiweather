@@ -29,7 +29,6 @@ package com.iblsoft.flexiweather.widgets
 		 *  @productversion Flex 3
 		 */
 		public static const OPERATION_NOT_SUPPORTED: String = 'operationNotSupported';
-
 		/**
 		 *
 		 *  @eventType progress
@@ -40,7 +39,6 @@ package com.iblsoft.flexiweather.widgets
 		 *  @productversion Flex 3
 		 */
 		public static const PROGRESS: String = 'progress';
-
 		/**
 		 *
 		 *  @eventType loadingStarted
@@ -51,7 +49,6 @@ package com.iblsoft.flexiweather.widgets
 		 *  @productversion Flex 3
 		 */
 		public static const LOADING_STARTED: String = 'loadingStarted';
-
 		/**
 		 *
 		 *  @eventType loadingFinished
@@ -62,7 +59,6 @@ package com.iblsoft.flexiweather.widgets
 		 *  @productversion Flex 3
 		 */
 		public static const LOADING_FINISHED: String = 'loadingFinished';
-
 		/**
 		 *
 		 *  @eventType loadingError
@@ -73,7 +69,6 @@ package com.iblsoft.flexiweather.widgets
 		 *  @productversion Flex 3
 		 */
 		public static const LOADING_ERROR: String = 'loadingError';
-
 		/**
 		 *
 		 *  @eventType preloadingStarted
@@ -84,7 +79,6 @@ package com.iblsoft.flexiweather.widgets
 		 *  @productversion Flex 3
 		 */
 		public static const PRELOADING_STARTED: String = 'preloadingStarted';
-
 		/**
 		 *
 		 *  @eventType preloadingFinished
@@ -95,7 +89,6 @@ package com.iblsoft.flexiweather.widgets
 		 *  @productversion Flex 3
 		 */
 		public static const PRELOADING_FINISHED: String = 'preloadingFinished';
-
 		/**
 		 *
 		 *  @eventType statusChanged
@@ -106,39 +99,32 @@ package com.iblsoft.flexiweather.widgets
 		 *  @productversion Flex 3
 		 */
 		public static const STATUS_CHANGED: String = 'statusChanged';
-
 		/**
 		 * Empty layer state. This state is default, when <code>InteractiveDataLayer</code> is created
 		 */
 		public static const STATE_EMPTY: String = 'empty';
-
 		/**
 		 * STATE_LOADING_DATA
 		 */
 		public static const STATE_LOADING_DATA: String = 'loading data';
-
 		/**
 		 * STATE_DATA_LOADED.
 		 */
 		public static const STATE_DATA_LOADED: String = 'data loaded';
-
 		/**
 		 * STATE_NO_DATA_AVAILABLE.
 		 */
 		public static const STATE_NO_DATA_AVAILABLE: String = 'no data available';
-
 		/**
 		 * Layer state where some of data are loaded, but some data are not loaded because of error. E.g. Loading 50 tiles, but some tiles are not loaded (no returned from server).
 		 * Also IOErrors belong here.
 		 * You need to dispatch this state in your custom class which extends <code>InteractiveDataLayer</code>
 		 */
 		public static const STATE_DATA_LOADED_WITH_ERRORS: String = 'data loaded with errors';
-
 		/**
 		 * 	Available in state: <code>InteractiveDataLayer.STATE_DATA_LOADED_WITH_ERRORS</code> or <code>InteractiveDataLayer.STATE_DATA_ERROR</code>.
 		 */
 		public var errorText: String;
-
 		private var _status: String;
 
 		/**
@@ -153,7 +139,6 @@ package com.iblsoft.flexiweather.widgets
 		{
 			return _status;
 		}
-
 		protected var m_loader: WMSImageLoader = new WMSImageLoader();
 
 		public function InteractiveDataLayer(container: InteractiveWidget = null)
@@ -182,14 +167,12 @@ package com.iblsoft.flexiweather.widgets
 			}
 			m_loader = null;
 		}
-
 		private var _invalidateDataFlag: Boolean;
 
 		public function set invalidateDataFlag(value: Boolean): void
 		{
 			_invalidateDataFlag = value;
 		}
-
 		private var _invalidateDataForceUpdateFlag: Boolean;
 
 		/**

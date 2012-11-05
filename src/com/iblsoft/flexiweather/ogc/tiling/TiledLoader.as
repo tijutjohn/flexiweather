@@ -37,20 +37,13 @@ package com.iblsoft.flexiweather.ogc.tiling
 	public class TiledLoader extends EventDispatcher implements IWMSViewPropertiesLoader
 	{
 		private var mi_zoom: int;
-
 		private var m_layer: InteractiveLayerTiled;
-
 		private var mi_tilesCurrentlyLoading: int;
-
 		private var mi_tilesLoadingTotal: int;
-
 		private var mi_totalVisibleTiles: int;
-
 //		private var ma_currentTilesRequests: Array = [];
 		private var mi_updateCycleAge: uint = 0;
-
 		private var m_jobs: TileJobs;
-
 		private var _tilesProvider: ITilesProvider;
 
 		public function get tilesProvider(): ITilesProvider
@@ -62,7 +55,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			_tilesProvider = value;
 		}
-
 		private var _qttViewProperties: TiledViewProperties;
 
 		public function TiledLoader(layer: InteractiveLayerTiled, zoom: int)

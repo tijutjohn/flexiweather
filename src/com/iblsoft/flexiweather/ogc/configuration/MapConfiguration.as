@@ -8,7 +8,6 @@ package com.iblsoft.flexiweather.ogc.configuration
 	public class MapConfiguration extends EventDispatcher implements Serializable
 	{
 		protected var ms_label: String;
-
 		protected var ms_mapConfiguration: XML;
 
 		[Bindable(event = "labelChanged")]

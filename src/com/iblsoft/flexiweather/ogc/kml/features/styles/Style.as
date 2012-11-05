@@ -8,11 +8,8 @@ package com.iblsoft.flexiweather.ogc.kml.features.styles
 	public class Style extends StyleSelector
 	{
 		private var _iconStyle: IconStyle;
-
 		private var _labelStyle: LabelStyle;
-
 		private var _lineStyle: LineStyle;
-
 		private var _polyStyle: PolyStyle;
 
 		public function Style(kml: KML, s_namespace: String, x: XMLList, document: Document)

@@ -12,7 +12,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 		 * Optional parameter. Job name for backroundJobManager
 		 */
 		private var _jobName: String;
-
 		private var _qttTileViewProperties: TiledTileViewProperties;
 
 		public function get jobName(): String

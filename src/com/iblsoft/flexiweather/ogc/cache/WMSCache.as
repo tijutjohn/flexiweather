@@ -15,30 +15,21 @@ package com.iblsoft.flexiweather.ogc.cache
 	public class WMSCache extends EventDispatcher implements ICache
 	{
 		public static var supportCaching: Boolean = true;
-
 		public var name: String;
-
 		/**
 		 * Expiration check interval. How ofter will be expiration checked
 		 */
 		private var mf_expirationCheckTime: int = 10 * 1000;
-
 		/**
 		 * Expiration time. How long will tile be valid (in seconds).
 		 * Value "0" means no expiration will be done.
 		 */
 		private var mf_expirationTime: int = 0;
-
 		private var m_expirationTimer: Timer;
-
 		private var _animationModeEnabled: Boolean;
-
 		private var mi_cacheItemCount: int = 0;
-
 		protected var md_cache: Dictionary = new Dictionary();
-
 		protected var md_noDataCache: Dictionary = new Dictionary();
-
 		protected var md_cacheLoading: Dictionary = new Dictionary();
 
 		public function clearCache(): void

@@ -6,21 +6,16 @@ package com.iblsoft.flexiweather.ogc.cache
 	public dynamic class CacheItemMetadata
 	{
 		private var _crs: String;
-
 		private var _bbox: BBox;
-
 		private var _url: URLRequest;
-
 		/**
 		 * time in which image is valid
 		 */
 		private var _validity: Date;
-
 		/**
 		 * Dimensions, which will be part of Cache key
 		 */
 		private var _dimensions: Array;
-
 		private var _updateCycleAge: uint;
 
 		public function CacheItemMetadata()

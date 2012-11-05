@@ -26,7 +26,6 @@ package com.iblsoft.flexiweather.components
 		{
 			super();
 		}
-
 		private var _typicalItemFound: Boolean;
 
 		override protected function commitProperties(): void

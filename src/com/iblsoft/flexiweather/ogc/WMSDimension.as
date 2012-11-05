@@ -8,21 +8,15 @@ package com.iblsoft.flexiweather.ogc
 	public class WMSDimension
 	{
 		private var ms_name: String;
-
 		private var ma_values: Array;
-
 		private var ms_units: String;
-
 		private var ms_default: String;
-
 		/**
 		 * String representing values of dimensions as found in the GetCapabilities document.
 		 * It will be parsed if the values getter is invoked.
 		 **/
 		private var ms_values: String = null;
-
 		private var mb_valuesHaveToBeParsed: Boolean = true;
-
 		protected static var sm_dateTimeParser: ISO8601Parser = new ISO8601Parser();
 
 		public function WMSDimension(xml: XML, wms: Namespace, version: Version)

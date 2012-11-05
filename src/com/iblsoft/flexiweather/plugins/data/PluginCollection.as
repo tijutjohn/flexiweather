@@ -28,28 +28,21 @@ package com.iblsoft.flexiweather.plugins.data
 		{
 			return _name;
 		}
-
 		private var _typesSorted: Array = [];
-
 		/**
 		 * list of all plugins
 		 */
 		private var _pluginsInfo: Array = [];
-
 		/**
 		 * info of all modules currently loading
 		 */
 		private var _pluginsInfoLoading: Array = [];
-
 		/**
 		 * list of all modules
 		 */
 		private var _pluginInfoModules: Array = [];
-
 		private var _pluginFunction: String;
-
 		public var loaders: ModuleLoaderCollection = new ModuleLoaderCollection();
-
 		//just store already loaded loaders to have them for total loaded bytes information
 		public var loadedLoaders: ModuleLoaderCollection = new ModuleLoaderCollection();
 

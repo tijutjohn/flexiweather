@@ -7,7 +7,6 @@ package com.iblsoft.flexiweather.ogc.editable
 	public class WFSFeatureEditableWithBaseTimeAndValidity extends WFSFeatureEditable implements IObjectWithBaseTimeAndValidity
 	{
 		protected var m_baseTime: Date;
-
 		protected var m_validity: Date;
 
 		public function WFSFeatureEditableWithBaseTimeAndValidity(

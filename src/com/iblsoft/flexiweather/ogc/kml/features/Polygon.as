@@ -36,7 +36,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		// Can contain: <extrude>, <tessellate>, <altitudeMode>, <coordinates>, <outerBoundaryIs>, <innerBoundaryIs>*
 		// there must be 1 outerBoundayIs (LineString) REQUIRED
 		private var _outerBoundaryIs: OuterBoundaryIs;
-
 		// there can be 0 or more inner boundaries (LineString)
 		private var _innerBoundaryIs: Array;
 

@@ -12,9 +12,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 	public class WFSFeatureEditablePressureCentre extends WFSFeatureEditableWithBaseTimeAndValidity implements IWFSFeatureWithReflection
 	{
 		public var type: String;
-
 		public var pressure: int;
-
 		private var _pressureSprites: Array = [];
 
 		public function WFSFeatureEditablePressureCentre(s_namespace: String, s_typeName: String, s_featureId: String)
@@ -95,7 +93,6 @@ import mx.core.UITextField;
 class PressureInfoSprite extends Sprite
 {
 	protected var mtf_presureType: UITextField = new UITextField();
-
 	protected var mtf_presureValue: UITextField = new UITextField();
 
 	public function PressureInfoSprite(): void

@@ -10,7 +10,6 @@ package com.iblsoft.flexiweather.net.loaders
 	public class ImageLoader extends AbstractURLLoader
 	{
 		protected var md_imageLoaders: Dictionary = new Dictionary();
-
 		protected var md_imageLoaderToRequestMap: Dictionary = new Dictionary();
 
 		public function ImageLoader()

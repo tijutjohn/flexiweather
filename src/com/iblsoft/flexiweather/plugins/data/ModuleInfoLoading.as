@@ -10,7 +10,6 @@ package com.iblsoft.flexiweather.plugins.data
 	public class ModuleInfoLoading
 	{
 		public var info: ModuleInfo;
-
 		public var loader: ModuleLoaderWithData;
 
 		function ModuleInfoLoading(moduleInfo: ModuleInfo = null, _loader: ModuleLoaderWithData = null)

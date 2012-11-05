@@ -7,15 +7,12 @@ package com.iblsoft.flexiweather.widgets
 	public class GlowLabel extends Label
 	{
 		public var autoSize: Boolean;
-
 		public var defaultText: String;
-
 //		override public function set y(value:Number):void
 //		{
 //			super.y = value;
 //		}
 		private var _glowColor: uint;
-
 		private var _glowColorChanged: Boolean;
 
 		public function get glowColor(): uint
@@ -32,9 +29,7 @@ package com.iblsoft.flexiweather.widgets
 				invalidateProperties();
 			}
 		}
-
 		private var _glowBlur: int = 3;
-
 		private var _glowBlurChanged: Boolean;
 
 		public function get glowBlur(): uint
@@ -51,7 +46,6 @@ package com.iblsoft.flexiweather.widgets
 				invalidateProperties();
 			}
 		}
-
 		private var _glow: GlowFilter;
 
 		public function GlowLabel()

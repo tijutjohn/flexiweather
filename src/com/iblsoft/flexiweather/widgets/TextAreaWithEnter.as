@@ -34,7 +34,6 @@ package com.iblsoft.flexiweather.widgets
 		{
 			trace("TextAreaWithEnter onTextInput");
 		}
-
 		private var _shiftPressed: Boolean;
 
 		override protected function keyDownHandler(event: KeyboardEvent): void

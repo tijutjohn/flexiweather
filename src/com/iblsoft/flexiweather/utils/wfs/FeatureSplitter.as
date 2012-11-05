@@ -10,7 +10,6 @@ package com.iblsoft.flexiweather.utils.wfs
 	public class FeatureSplitter
 	{
 		private var m_iw: InteractiveWidget;
-
 		private var m_crs84Projection: Projection;
 
 		public function FeatureSplitter(iw: InteractiveWidget)
@@ -59,9 +58,7 @@ package com.iblsoft.flexiweather.utils.wfs
 //			return [];
 			return splitCoordPolyLineToArrayOfPointPolyLines(coords, b_closed);
 		}
-
 		private var m_projectionWidth: Number;
-
 		private var m_projectionWidthHalf: Number;
 
 		public function splitCoordPolyLineToArrayOfPointPolyLines(coords: Array, b_closed: Boolean): Array

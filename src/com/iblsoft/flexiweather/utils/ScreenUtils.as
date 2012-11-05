@@ -77,7 +77,6 @@ package com.iblsoft.flexiweather.utils
 			}
 			return true;
 		}
-
 		private static var sm_dimFilter: BitmapFilter = BitmapFilterUtils.createGrayscale(0.3);
 
 		public static function setEnabledWithDim(o: UIComponent, b_enabled: Boolean): void

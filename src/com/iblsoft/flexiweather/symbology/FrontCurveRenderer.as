@@ -7,31 +7,19 @@ package com.iblsoft.flexiweather.symbology
 	public class FrontCurveRenderer extends DistanceMarkingCurveRenderer
 	{
 		public static const MARK_WARM: uint = 0;
-
 		public static const MARK_COLD: uint = 1;
-
 		public static const MARK_OCCLUDED: uint = 2;
-
 		public static const MARK_STATIONARY: uint = 3;
-
 		// style variables
 		protected var mi_color: uint;
-
 		protected var mi_colorSecondary: uint;
-
 		protected var mi_markType: uint;
-
 		// runtime variables
 		protected var mf_markStep: Number = 20;
-
 		protected var mf_markWidth: Number = 10;
-
 		protected var mi_markCounter: uint = 0;
-
 		protected var ml_markPoints: Array;
-
 		protected var mf_lastDX: Number = 0;
-
 		protected var mf_lastDY: Number = 0;
 
 		function FrontCurveRenderer(g: Graphics, i_color: uint, i_colorSecondary: uint, i_markType: uint)
@@ -224,11 +212,8 @@ import com.iblsoft.flexiweather.utils.CubicBezier;
 class Mark
 {
 	internal var pt: Point;
-
 	internal var vNormal: Point;
-
 	internal var vDiff: Point;
-
 	internal var f_distance: Number;
 
 	public function Mark(pt: Point, vNormal: Point, vDiff: Point, f_distance: Number)
@@ -244,13 +229,9 @@ class Mark
 class Line
 {
 	internal var x1: Number;
-
 	internal var y1: Number;
-
 	internal var x2: Number;
-
 	internal var y2: Number;
-
 	internal var afterMark: Mark;
 
 	public function Line(x1: Number, y1: Number, x2: Number, y2: Number, afterMark: Mark)

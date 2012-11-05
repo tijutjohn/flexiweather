@@ -5,7 +5,6 @@ package com.iblsoft.flexiweather.ogc
 	public class WMSLayer extends WMSLayerBase
 	{
 		private var mb_queryable: Boolean = false;
-
 		private var ma_styles: ArrayCollection = new ArrayCollection();
 
 		public function WMSLayer(parent: WMSLayerGroup, xml: XML, wms: Namespace, version: Version)

@@ -14,11 +14,8 @@ package com.iblsoft.flexiweather.ogc
 	public class BBox
 	{
 		private var mf_xMin: Number;
-
 		private var mf_yMin: Number;
-
 		private var mf_xMax: Number;
-
 		private var mf_yMax: Number;
 
 		public function BBox(

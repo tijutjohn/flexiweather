@@ -7,17 +7,11 @@ package com.iblsoft.flexiweather.plugins.data
 	public class ModuleInfo
 	{
 		public var plugins: String;
-
 		public var type: String;
-
 		public var url: String;
-
 		public var paramName: String;
-
 		public var module: Module;
-
 		private var _plugin: IPlugin;
-
 		private var _pluginInfo: IPluginInfo;
 
 		public function ModuleInfo()

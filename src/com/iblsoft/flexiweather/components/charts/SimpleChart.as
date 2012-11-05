@@ -17,57 +17,31 @@ package com.iblsoft.flexiweather.components.charts
 	public class SimpleChart extends Sprite
 	{
 		private var _chartWidth: int;
-
 		private var _chartHeight: int;
-
 		private var _dataSprite: Sprite;
-
 		private var _axisSprite: Sprite;
-
 		private var _gridSprite: Sprite;
-
 		private var _labelsSprite: Sprite;
-
 		private var _data: Array;
-
 		private var _axisDrawn: Boolean;
-
 		private var _yAxisLabelsWidth: int;
-
 		private var _xAxisLabelsHeight: int;
-
 		public var xField: String;
-
 		public var yField: String;
-
 		private var _xLabelsList: ChartLabelList;
-
 		private var _yLabelsList: ChartLabelList;
-
 		private var _usedLabels: Array;
-
 		private var _unusedLabels: Array;
-
 		private var _styleChanged: Boolean;
-
 		private var _backgroundColor: uint;
-
 		private var _axisColor: uint;
-
 		private var _axisWidth: int;
-
 		private var _gridColor: uint;
-
 		private var _gridAlpha: Number;
-
 		private var _labelsColor: uint;
-
 		private var _xLabelsRotation: Number;
-
 		private var _yLabelsRotation: Number;
-
 		private var _serieColor: uint;
-
 		private var _serieWidth: int;
 
 		public function get backgroundColor(): uint
@@ -220,7 +194,6 @@ package com.iblsoft.flexiweather.components.charts
 			_labelFunction = value;
 			refresh();
 		}
-
 		private var _labelFunction: Function;
 
 		public function SimpleChart()
@@ -257,7 +230,6 @@ package com.iblsoft.flexiweather.components.charts
 			_data = value;
 //			draw();
 		}
-
 		private var _enterFrameRunning: Boolean;
 
 		private function invalidateStyle(): void

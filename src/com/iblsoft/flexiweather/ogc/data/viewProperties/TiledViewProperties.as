@@ -13,19 +13,12 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 	public class TiledViewProperties extends EventDispatcher implements IViewProperties
 	{
 		private static var _uid: int = 0;
-
 		private var _id: int;
-
 		public var name: String;
-
 		public var crs: String;
-
 		public var zoom: Number;
-
 		protected var m_cfg: ILayerConfiguration;
-
 		public var tiledAreas: Array;
-
 		private var _validity: Date;
 
 		public function get validity(): Date
@@ -37,7 +30,6 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		{
 			_validity = validity;
 		}
-
 		private var ma_specialCacheStrings: Array;
 
 		public function get specialCacheStrings(): Array
@@ -49,14 +41,12 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		{
 			ma_specialCacheStrings = arr;
 		}
-
 		private var _tileIndicesMapper: TileIndicesMapper;
 
 		public function get tileIndicesMapper(): TileIndicesMapper
 		{
 			return _tileIndicesMapper;
 		}
-
 		private var ma_qttTiles: Array;
 
 		public function TiledViewProperties()
@@ -99,7 +89,6 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		{
 			ma_qttTiles.push(qttTileViewProperties);
 		}
-
 		private var _viewBBox: BBox;
 
 		public function getViewBBox(): BBox

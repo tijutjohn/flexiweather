@@ -7,9 +7,7 @@ package com.iblsoft.flexiweather.utils
 	{
 		// runtime variables
 		protected var mf_currentDistance: Number = 0;
-
 		protected var mf_lastMarkDistance: Number = -1000;
-
 		protected var mf_nextMarkDistance: Number = 10;
 
 		public function DistanceMarkingCurveRenderer(graphics: Graphics)

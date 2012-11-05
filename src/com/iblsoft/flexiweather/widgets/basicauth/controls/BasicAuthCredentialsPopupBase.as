@@ -9,13 +9,10 @@ package com.iblsoft.flexiweather.widgets.basicauth.controls
 	public class BasicAuthCredentialsPopupBase extends TitleWindow implements IBasicAuthCredentialsPopup
 	{
 		private var popupManager: IPopupManager;
-
 		[Bindable]
 		public var domain: String;
-
 		[Bindable]
 		public var realm: String;
-
 		public var requestData: UniURLLoaderData;
 
 		public function BasicAuthCredentialsPopupBase()

@@ -6,20 +6,14 @@ package com.iblsoft.flexiweather.events
 	public class InteractiveLayerProgressEvent extends Event
 	{
 		public static const UNIT_BYTES: String = 'bytes';
-
 		public static const UNIT_TILES: String = 'tiles';
-
 		public var interactiveLayer: InteractiveLayer;
-
 		public var loaded: int;
-
 		public var total: int;
-
 		/**
 		 * Progress in percentage
 		 */
 		public var progress: Number;
-
 		/**
 		 * Units type. One of constant starting with UNIT_.
 		 * Tiles layer dispatch progress with loaded tiles / total tiles,

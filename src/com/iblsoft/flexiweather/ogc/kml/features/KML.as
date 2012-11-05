@@ -14,23 +14,14 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	public class KML extends XmlParser
 	{
 		protected var _kmlURLPath: String;
-
 		protected var _kmlBaseURLPath: String;
-
 		protected var _kmlNamespace: String;
-
 		protected var _kmlSource: String;
-
 		protected var _feature: KMLFeature;
-
 		protected var _document: Document;
-
 		protected var _localResourceManager: Boolean;
-
 		protected var _resourceManager: KMLResourceManager;
-
 		protected var _kmlParserManager: KMLParserManager;
-
 		protected var _networkLinkManager: NetworkLinkManager;
 
 		public function get networkLinkManager(): NetworkLinkManager

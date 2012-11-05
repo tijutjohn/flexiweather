@@ -14,16 +14,13 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 	public class KMLBitmapLoader extends EventDispatcher
 	{
 		public static var console: IConsole;
-
 		private var _isLoading: Boolean;
 
 		public function get isLoading(): Boolean
 		{
 			return _isLoading;
 		}
-
 		private var _baseURLPath: String;
-
 		private var _iconBitmapData: BitmapData;
 
 		public function KMLBitmapLoader(baseURLPath: String)

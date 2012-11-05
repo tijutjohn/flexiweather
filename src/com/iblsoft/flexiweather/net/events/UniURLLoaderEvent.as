@@ -8,19 +8,12 @@ package com.iblsoft.flexiweather.net.events
 	public class UniURLLoaderEvent extends Event
 	{
 		public static const RUN_STOPPED_REQUEST: String = "runStoppedRequest";
-
 		public static const STOP_REQUEST: String = "stopRequest";
-
 		public static const LOAD_STARTED: String = "loadStarted";
-
 		public static const DATA_LOADED: String = "dataLoaded";
-
 		protected var m_result: Object;
-
 		protected var m_request: URLRequest;
-
 		protected var m_loader: URLLoader;
-
 		protected var m_associatedData: Object;
 
 		public function UniURLLoaderEvent(

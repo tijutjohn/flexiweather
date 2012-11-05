@@ -25,7 +25,6 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 				instance = new KMLPopupManager();
 			return instance;
 		}
-
 		private var windowsDictionary: Dictionary;
 
 		public function KMLPopupManager()

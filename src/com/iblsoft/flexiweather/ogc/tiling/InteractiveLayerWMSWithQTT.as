@@ -39,13 +39,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 	public class InteractiveLayerWMSWithQTT extends InteractiveLayerWMS implements ICachedLayer, ITiledLayer
 	{
 		public static const WMS_TILING_URL_PATTERN: String = '&TILEZOOM=%ZOOM%&TILECOL=%COL%&TILEROW=%ROW%';
-
 		public static var avoidTilingForAllLayers: Boolean = false;
-
 		private var _currentValidityTime: Date;
-
 		private var ma_specialCacheStrings: Array;
-
 		private var m_tiledLayer: InteractiveLayerQTTMS;
 
 		public function get tileLayer(): InteractiveLayerQTTMS
@@ -487,7 +483,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 			}
 			return arr;
 		}
-
 		private var _qttViewPropertiesDictionary: Dictionary = new Dictionary
 
 		public function convertWMSViewPropertiesToQTTViewProperties(wmsViewProperties: WMSViewProperties): TiledViewProperties

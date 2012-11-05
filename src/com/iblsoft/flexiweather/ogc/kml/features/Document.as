@@ -17,7 +17,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	public class Document extends Container
 	{
 		public var baseUrlPath: String;
-
 		private var _styles: Array;
 
 		// todo: Support Schema, StyleSelector elements

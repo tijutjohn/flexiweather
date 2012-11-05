@@ -4,7 +4,6 @@ package com.iblsoft.flexiweather.ogc
 	public class CRSWithBBoxAndTilingInfo extends CRSWithBBox
 	{
 		private var m_tilingExtent: BBox;
-
 		private var mi_tileSize: int;
 
 		public function CRSWithBBoxAndTilingInfo(

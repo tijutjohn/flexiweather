@@ -5,7 +5,6 @@ package com.iblsoft.flexiweather.ogc
 	public class LayerArrayCollection extends ArrayCollection
 	{
 		public var layer: InteractiveLayerMSBase;
-
 		private var _selectedItem: Object;
 
 		public function get selectedItem(): Object

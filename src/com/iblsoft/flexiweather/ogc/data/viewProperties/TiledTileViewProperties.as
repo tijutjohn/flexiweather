@@ -9,18 +9,14 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 	{
 		// loaded bitmap for this tileIndex
 		public var bitmap: Bitmap;
-
 		public var tileIndex: TileIndex;
-
 		public var updateCycleAge: uint;
-
 		private var m_qttViewProperties: TiledViewProperties;
 
 		public function get qttViewProperties(): TiledViewProperties
 		{
 			return m_qttViewProperties;
 		}
-
 		private var m_url: URLRequest;
 
 		public function get url(): URLRequest

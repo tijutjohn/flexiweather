@@ -7,7 +7,6 @@ package com.iblsoft.flexiweather.ogc.data
 	public class WFSEditableReflectionData extends ReflectionData
 	{
 		protected var _moveablePoints: Array;
-
 		protected var _annotation: AnnotationBox;
 
 		public function get moveablePoints(): Array

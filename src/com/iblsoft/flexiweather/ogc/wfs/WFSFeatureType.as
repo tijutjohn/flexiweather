@@ -11,15 +11,10 @@ package com.iblsoft.flexiweather.ogc.wfs
 	public class WFSFeatureType extends EventDispatcher
 	{
 		internal var ms_name: String;
-
 		internal var ms_title: String;
-
 		internal var ma_crsWithBBoxes: ArrayCollection = new ArrayCollection();
-
 		protected var m_definition: SchemaParserDataItem;
-
 		protected var m_definition_items: ArrayCollection;
-
 		private var _stringItems: ArrayCollection;
 
 		[Bindable(event = "stringItemsChanged")]
@@ -27,7 +22,6 @@ package com.iblsoft.flexiweather.ogc.wfs
 		{
 			return _stringItems;
 		}
-
 		private var _items: ArrayCollection;
 
 		[Bindable(event = "itemsChanged")]

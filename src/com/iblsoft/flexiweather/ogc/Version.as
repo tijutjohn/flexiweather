@@ -4,9 +4,7 @@ package com.iblsoft.flexiweather.ogc
 	public class Version
 	{
 		internal var _v1: int;
-
 		internal var _v2: int;
-
 		internal var _v3: int;
 
 		public function Version(v1: int, v2: int, v3: int)

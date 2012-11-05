@@ -4,21 +4,13 @@ package com.iblsoft.flexiweather.utils
 	public class DateTimeValidator
 	{
 		public const MIN_YEAR: uint = 1582
-
 		public const MAX_YEAR: uint = 2999
-
 		public const MIN_MONTH: uint = 1
-
 		public const MAX_MONTH: uint = 12
-
 		public const MIN_DAY: uint = 1
-
 		public const MAX_HOUR: uint = 23
-
 		public const MAX_MINUTE: uint = 59
-
 		public const MAX_SECOND: uint = 59
-
 		public const MAX_MILLIS: uint = 999
 
 		/**

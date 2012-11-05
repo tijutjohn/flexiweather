@@ -14,15 +14,10 @@ package com.iblsoft.flexiweather.ogc.kml.data
 	public class KMZFile extends EventDispatcher
 	{
 		public static const KMZ_FILE_READY: String = 'kmzFileReady';
-
 		private var _kmzURL: String;
-
 		private var _kmlSource: String;
-
 		private var _name: String;
-
 		private var _assets: Dictionary;
-
 		private var _isReady: Boolean
 
 		public function get ready(): Boolean

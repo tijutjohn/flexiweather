@@ -4,7 +4,6 @@ package com.iblsoft.flexiweather.widgets
 	public class BackgroundJob extends Object
 	{
 		internal var ms_label: String;
-
 		internal var m_manager: BackgroundJobManager;
 
 		public function BackgroundJob(s_label: String, manager: BackgroundJobManager)

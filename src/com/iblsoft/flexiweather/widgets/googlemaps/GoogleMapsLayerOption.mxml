@@ -49,16 +49,12 @@
 		<![CDATA[
 			import com.google.maps.MapType;
 			import com.google.maps.interfaces.IMapType;
-
 			[Bindable]
 			public var selectMapTypeIndex: int;
-
 			[Bindable]
 			public var negotiatedBBoxes: ArrayCollection;
-
 			[Bindable]
 			public var viewBBox: String;
-
 			private var _layer: InteractiveLayerGoogleMaps;
 
 			public function get layer(): InteractiveLayerGoogleMaps

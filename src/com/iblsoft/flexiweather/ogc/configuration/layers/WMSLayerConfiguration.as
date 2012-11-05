@@ -23,34 +23,20 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 	public class WMSLayerConfiguration extends OGCLayerConfiguration implements IBehaviouralObject, IInteractiveLayerProvider, IWMSLayerConfiguration
 	{
 		Storage.addChangedClass('com.iblsoft.flexiweather.ogc.WMSLayerConfiguration', 'com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration', new Version(1, 6, 0));
-
 		private var ma_layerNames: Array = [];
-
 		private var ma_styleNames: Array = [];
-
 		private var ma_behaviours: Array = [];
-
 		private var ma_availableImageFormats: Array = [];
-
 		private var ms_dimensionTimeName: String = null;
-
 		private var ms_dimensionRunName: String = null;
-
 		private var ms_dimensionForecastName: String = null;
-
 		private var ms_dimensionVerticalLevelName: String = null;
-
 		private var _ms_imageFormat: String = null;
-
 		private var mb_legendIsDimensionDependant: Boolean;
-
 		private var mi_autoRefreshPeriod: uint = 0;
-
 		// runtime variables
 		private var _layerConfigurations: Array;
-
 		public static const CAPABILITIES_UPDATED: String = "capabilitiesUpdated";
-
 		public static const CAPABILITIES_RECEIVED: String = "capabilitiesReceived";
 
 		[Event(name = CAPABILITIES_UPDATED, type = "flash.events.DataEvent")]

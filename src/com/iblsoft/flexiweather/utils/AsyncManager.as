@@ -10,15 +10,10 @@ package com.iblsoft.flexiweather.utils
 	public class AsyncManager extends UIComponent
 	{
 		public static const EMPTY: String = 'empty';
-
 		private static var _counter: int = 0;
-
 		private var _uid: int;
-
 		private var _timer: Timer;
-
 		protected var _stack: Array;
-
 		protected var _presence: Dictionary;
 
 		public function get notEmpty(): Boolean
@@ -27,7 +22,6 @@ package com.iblsoft.flexiweather.utils
 				return _stack.length > 0;
 			return false;
 		}
-
 		private var _maxCallsPerTick: int;
 
 		public function get maxCallsPerTick(): int
@@ -39,7 +33,6 @@ package com.iblsoft.flexiweather.utils
 		{
 			_maxCallsPerTick = value;
 		}
-
 		/**
 		 * You can store here any data, which you want to have after all task are done
 		 */

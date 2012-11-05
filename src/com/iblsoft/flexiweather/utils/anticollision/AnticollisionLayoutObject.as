@@ -6,9 +6,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 	public class AnticollisionLayoutObject
 	{
 		public var name: String;
-
 		public var object: DisplayObject;
-
 //		private var _object: DisplayObject;
 //		public function get object():DisplayObject
 //		{
@@ -20,23 +18,14 @@ package com.iblsoft.flexiweather.utils.anticollision
 //			_object = value;
 //		}
 		public var managedChild: Boolean;
-
 		public var displacementMode: String;
-
 		private var m_referenceLocation: Point;
-
 		public var reflectionID: int;
-
 		public var objectsToAnchor: Array;
-
 		public var anchorColor: uint = 0;
-
 		public var anchorAlpha: Number = 1;
-
 		public var drawAnchorArrow: Boolean = true;
-
 		public var manageVisibilityWithAnchors: Boolean
-
 		private var _visible: Boolean;
 
 		public function get visible(): Boolean

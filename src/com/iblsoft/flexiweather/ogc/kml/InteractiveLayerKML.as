@@ -60,9 +60,7 @@ package com.iblsoft.flexiweather.ogc.kml
 	public class InteractiveLayerKML extends InteractiveLayerFeatureBase
 	{
 		public var kmzFile: KMZFile;
-
 		public var itemRenderer: Class;
-
 		private var _itemRendererInstance: IKMLRenderer;
 
 		public function get itemRendererInstance(): IKMLRenderer
@@ -83,7 +81,6 @@ package com.iblsoft.flexiweather.ogc.kml
 			}
 			return _itemRendererInstance;
 		}
-
 		private var _kml: KML;
 
 		[Bindable(event = "kmlChanged")]
@@ -91,11 +88,8 @@ package com.iblsoft.flexiweather.ogc.kml
 		{
 			return _kml;
 		}
-
 		private var m_boundaryRect: Rectangle;
-
 		private var _syncManager: AsyncManager;
-
 		private var _syncManagerFullUpdate: AsyncManager;
 
 		public function InteractiveLayerKML(container: InteractiveWidget, kml: KML, version: Version)
@@ -291,7 +285,6 @@ package com.iblsoft.flexiweather.ogc.kml
 				feature = feature.next as KMLFeature;
 			}
 		}
-
 		private var _childrenFeatures: Array;
 
 		private function getChildrenFeatures(kmlContainer: Container): void
@@ -353,7 +346,6 @@ package com.iblsoft.flexiweather.ogc.kml
 			highlightFeature(null);
 			return false;
 		}
-
 		private var m_highlightedFeature: KMLFeature;
 
 		public function highlightFeature(feature: KMLFeature): void
@@ -567,7 +559,6 @@ package com.iblsoft.flexiweather.ogc.kml
 			else
 				callLater(isUpdateNeeded);
 		}
-
 		public var kmlFeatureScaleX: Number = 1;
 
 		private function countKMLFeaturesZoomBasedOnViewBBox(viewBBox: BBox): Boolean
@@ -626,9 +617,7 @@ package com.iblsoft.flexiweather.ogc.kml
 			m_oldCRS = crs;
 			m_oldViewBBox = viewBBox;
 		}
-
 		private var m_oldCRS: String;
-
 		private var m_oldViewBBox: BBox;
 
 		override public function onContainerSizeChanged(): void

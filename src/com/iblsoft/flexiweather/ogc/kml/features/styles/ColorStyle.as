@@ -8,9 +8,7 @@ package com.iblsoft.flexiweather.ogc.kml.features.styles
 	public class ColorStyle extends Style
 	{
 		private var _color: uint;
-
 		private var _alpha: Number;
-
 		/**
 		 * Allowed values are: "normal" or "random"
 		 */

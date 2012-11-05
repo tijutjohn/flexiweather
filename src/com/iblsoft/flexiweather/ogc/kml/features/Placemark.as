@@ -39,7 +39,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	public class Placemark extends KMLFeature implements IKMLLabeledFeature, ILineSegmentApproximableBounds
 	{
 		private var _geometry: Geometry;
-
 		private var _multigeometry: Geometry;
 
 		override public function set x(value: Number): void

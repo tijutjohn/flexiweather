@@ -9,11 +9,8 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	public class ScreenOverlay extends Overlay
 	{
 		private var _overlayXY: KMLVec2;
-
 		private var _screenXY: KMLVec2;
-
 		private var _rotationXY: KMLVec2;
-
 		private var _size: KMLVec2;
 
 		public function ScreenOverlay(kml: KML, s_namespace: String, x: XMLList)

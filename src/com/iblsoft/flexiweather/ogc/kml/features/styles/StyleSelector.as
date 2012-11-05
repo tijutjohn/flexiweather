@@ -18,15 +18,12 @@ package com.iblsoft.flexiweather.ogc.kml.features.styles
 	public class StyleSelector extends XmlElement
 	{
 		private var _id: String;
-
 //		private var _iconCallbacks: Array;
 //		private var _iconSucessfulCallbacks: Array;
 //		private var _iconUnsucessfulCallback: Array;
 		private var _document: Document;
-
 //		private var _loader: KMLBitmapLoader;
 		private var _href: String;
-
 		private var _kml: KML
 
 		public function get kml(): KML

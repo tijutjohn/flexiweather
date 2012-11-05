@@ -6,15 +6,10 @@ package com.iblsoft.flexiweather.widgets
 	public class InteractiveLayerClickAction extends InteractiveLayer
 	{
 		internal var m_textLabel: Text;
-
 		public static const MOUSE_DOWN: String = "ilcaMouseDown";
-
 		public static const MOUSE_MOVE: String = "ilcaMouseMoved";
-
 		public static const MOUSE_PRESSED_MOVE: String = "ilcaMousePressedAndMoved";
-
 		public static const MOUSE_UP: String = "ilcaMouseUp";
-
 		public static const MOUSE_CLICKED: String = "ilcaMouseClicked";
 
 		public function InteractiveLayerClickAction(container: InteractiveWidget)

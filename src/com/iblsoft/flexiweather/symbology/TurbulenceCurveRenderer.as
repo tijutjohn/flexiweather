@@ -7,11 +7,8 @@ package com.iblsoft.flexiweather.symbology
 	{
 		// style variables
 		protected var mf_thickness: Number;
-
 		protected var mi_color: uint;
-
 		protected var mf_alpha: Number;
-
 		// runtime variables
 		protected var mi_counter: int = 0;
 

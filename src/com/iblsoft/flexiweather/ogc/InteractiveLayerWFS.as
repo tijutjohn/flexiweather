@@ -18,7 +18,6 @@ package com.iblsoft.flexiweather.ogc
 	public class InteractiveLayerWFS extends InteractiveLayerFeatureBase
 	{
 		private var ma_queryFeatures: ArrayCollection = new ArrayCollection();
-
 		private var md_queryParametersGET: Array = new Array();
 
 		public function InteractiveLayerWFS(

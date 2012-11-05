@@ -13,7 +13,6 @@ package com.iblsoft.flexiweather.ogc.editable
 	public class MoveablePoint extends Sprite implements IMouseEditableItem, IHighlightableItem
 	{
 		protected var m_feature: WFSFeatureEditable;
-
 		private var _mi_pointIndex: uint;
 
 		protected function get mi_pointIndex(): uint
@@ -35,21 +34,13 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			_mi_pointIndex = value;
 		}
-
 		protected var mi_reflection: uint;
-
 		protected var mi_reflectionDelta: int;
-
 		protected var m_pt: Point;
-
 		protected var mb_highlighted: Boolean = false;
-
 		protected var mb_selected: Boolean = false;
-
 		protected var m_editableItemManager: IEditableItemManager;
-
 		protected var mb_dragging: Boolean = false;
-
 		public var m_pointCursor: int = WFSCursorManagerTypes.CURSOR_ADD_POINT;
 
 		public function MoveablePoint(feature: WFSFeatureEditable, i_pointIndex: uint, i_reflection: uint, i_reflectionDelta: int)

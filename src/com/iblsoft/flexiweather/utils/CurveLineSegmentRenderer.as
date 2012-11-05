@@ -9,11 +9,8 @@ package com.iblsoft.flexiweather.utils
 	public class CurveLineSegmentRenderer implements ICurveRenderer
 	{
 		private var ml_segments: Array = [];
-
 		private var m_lastX: Number;
-
 		private var m_lastY: Number;
-
 		public var mi_originatingSegmentIndex: uint = 0;
 
 		public function CurveLineSegmentRenderer(): void

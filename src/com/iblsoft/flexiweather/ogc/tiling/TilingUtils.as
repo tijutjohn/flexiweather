@@ -7,19 +7,12 @@ package com.iblsoft.flexiweather.ogc.tiling
 	{
 		/** these variables are static to be able to fast test different methods to find best zoom for BBox */
 		public static var checkColumnScale: Boolean = true;
-
 		public static var checkRowScale: Boolean = false;
-
 		public static var columnScaleMax: Number = 1;
-
 		public static var rowScaleMax: Number = 1;
-
 		private var ms_crs: String;
-
 		private var m_extent: BBox;
-
 		private var _minimumZoom: int = 1;
-
 		private var _maximumZoom: int = 10;
 
 		public function TilingUtils()

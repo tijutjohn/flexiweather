@@ -10,17 +10,13 @@ package com.iblsoft.flexiweather.ogc.managers
 	public class WFSCursorManager extends UIComponent
 	{
 		public static var instance: WFSCursorManager;
-
 		[Embed(source = "/assets/cursors/cursor_tablet_add_control_point_to_segment.png")]
 		[Bindable]
 		protected var clsCursor_AddPoint: Class;
-
 		[Embed(source = "/assets/cursors/cursor_tablet_edit_closeable.png")]
 		[Bindable]
 		protected var clsCursor_CloseCurve: Class;
-
 		protected var actCursor: DisplayObject;
-
 		protected var actCursorType: int = 0;
 
 		/**

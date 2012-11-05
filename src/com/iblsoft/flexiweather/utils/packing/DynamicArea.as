@@ -6,15 +6,10 @@ package com.iblsoft.flexiweather.utils.packing
 	public class DynamicArea
 	{
 		public var area: Rectangle;
-
 		public var itemArea: Rectangle;
-
 		public var empty: Boolean = true;
-
 		public var parentArea: DynamicArea;
-
 		public var firstArea: DynamicArea;
-
 		public var secondArea: DynamicArea;
 
 		public function DynamicArea(_parentArea: DynamicArea)

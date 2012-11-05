@@ -36,19 +36,12 @@ package com.iblsoft.flexiweather.ogc
 		{
 			m_firstFeature = value;
 		}
-
 		private var ma_features: ArrayCollection = new ArrayCollection();
-
 		private var m_featuresContainer: Sprite = new Sprite();
-
 		protected var ms_serviceURL: String = null;
-
 		private var m_version: Version;
-
 		protected var mb_useMonochrome: Boolean = false;
-
 		protected var mi_monochromeColor: uint = 0x333333;
-
 		protected var _screenshot: Screenshot;
 
 		public function InteractiveLayerFeatureBase(container: InteractiveWidget = null,
@@ -86,7 +79,6 @@ package com.iblsoft.flexiweather.ogc
 		{
 			return null;
 		}
-
 		private var _oldFeature: FeatureBase;
 
 		public function addFeature(feature: FeatureBase, bDoUpdate: Boolean = true): void
@@ -160,7 +152,6 @@ package com.iblsoft.flexiweather.ogc
 			removeAllFeatures();
 			super.destroy();
 		}
-
 		/**
 		 * Screenshot functionality
 		 */
@@ -302,9 +293,7 @@ class Screenshot extends UIComponent
 	 * Bitmap stores screenshot of current layer features. It's used for moving 1 bitmap instead of many features when panning
 	 */
 	private var _featuresBitmap: Bitmap;
-
 	private var _bd: BitmapData;
-
 	private var _changed: Boolean;
 
 	public function Screenshot()

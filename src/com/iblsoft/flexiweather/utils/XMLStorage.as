@@ -4,7 +4,6 @@ package com.iblsoft.flexiweather.utils
 	public class XMLStorage extends Storage
 	{
 		internal var m_xml: XML;
-
 		internal var m_current: XML;
 
 		public function XMLStorage(xml: XML = null)

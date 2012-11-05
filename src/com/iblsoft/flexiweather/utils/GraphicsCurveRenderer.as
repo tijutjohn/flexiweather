@@ -9,11 +9,8 @@ package com.iblsoft.flexiweather.utils
 	public class GraphicsCurveRenderer implements ICurveRenderer
 	{
 		protected var m_graphics: Graphics;
-
 		protected var m_lastX: Number = 0;
-
 		protected var m_lastY: Number = 0;
-
 		protected var mi_recursionDepth: uint = 0;
 
 		public function GraphicsCurveRenderer(graphics: Graphics)

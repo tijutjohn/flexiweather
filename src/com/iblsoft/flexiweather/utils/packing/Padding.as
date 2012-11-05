@@ -5,11 +5,8 @@ package com.iblsoft.flexiweather.utils.packing
 	public class Padding
 	{
 		public var left: int = 0;
-
 		public var right: int = 0;
-
 		public var top: int = 0;
-
 		public var bottom: int = 0;
 
 		public function Padding()

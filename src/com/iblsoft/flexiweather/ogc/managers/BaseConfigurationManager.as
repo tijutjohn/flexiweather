@@ -6,7 +6,6 @@ package com.iblsoft.flexiweather.ogc.managers
 	public class BaseConfigurationManager extends EventDispatcher
 	{
 		protected var groups: Array = [];
-
 		protected var submenuPos: int = 0;
 
 		public function BaseConfigurationManager()

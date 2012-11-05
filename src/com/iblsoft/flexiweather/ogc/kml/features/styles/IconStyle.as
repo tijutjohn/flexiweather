@@ -18,11 +18,8 @@ package com.iblsoft.flexiweather.ogc.kml.features.styles
 			xunits="fraction" yunits="fraction"/>
 		*/
 		private var _scale: Number;
-
 		private var _heading: Number;
-
 		private var _icon: Icon;
-
 		private var _hotspot: HotSpot;
 
 		public function IconStyle(kml: KML, s_namespace: String, x: XMLList, document: Document)

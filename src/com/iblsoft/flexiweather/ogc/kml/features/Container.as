@@ -119,9 +119,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				childFeature.parentDocument = value;
 			}
 		}
-
 		private var _oldFeature: KMLFeature;
-
 		private var _firstFeature: KMLFeature;
 
 		public function get firstFeature(): KMLFeature

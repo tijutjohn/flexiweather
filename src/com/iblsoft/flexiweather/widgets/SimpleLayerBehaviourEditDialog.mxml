@@ -7,13 +7,9 @@
 		<![CDATA[
 			import mx.managers.PopUpManager;
 			import com.iblsoft.flexiweather.plugins.IPlugin;
-
 			protected var ms_behaviourId: String;
-
 			protected var ms_initalValue: String;
-
 			protected var m_saveCallback: Function;
-
 			protected var m_cancelCallback: Function;
 
 			// IAbility implementation

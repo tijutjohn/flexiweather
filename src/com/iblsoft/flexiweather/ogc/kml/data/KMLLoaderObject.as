@@ -7,13 +7,9 @@ package com.iblsoft.flexiweather.ogc.kml.data
 	public class KMLLoaderObject
 	{
 		private var _url: String;
-
 		private var _type: String;
-
 		private var _configuration: KMLLayerConfiguration;
-
 		public var layer: InteractiveLayerKML;
-
 		public var dataProviderWatcher: ChangeWatcher;
 
 		public function KMLLoaderObject(url: String, type: String, configuration: KMLLayerConfiguration)

@@ -5,11 +5,8 @@ package com.iblsoft.flexiweather.plugins.data
 	public class ModuleItem
 	{
 		public var module: Module;
-
 		public var url: String;
-
 		private var _isLoading: Boolean;
-
 		private var _isReady: Boolean;
 
 		public function get isLoading(): Boolean

@@ -9,22 +9,15 @@
 	<fx:Script>
 		<![CDATA[
 			import mx.managers.PopUpManager;
-
 			public static const NORMAL: int = 0;
-
 			public static const PASSWORD: int = 2;
-
 			[Bindable]
 			public var ms_label: String;
-
 			[Bindable]
 			public var mi_echoMode: int = NORMAL;
-
 			[Bindable]
 			public var ms_text: String;
-
 			protected var m_okCallback: Function;
-
 			protected var m_cancelCallback: Function;
 
 			public static function getText(parent: DisplayObject, s_title: String, s_label: String, i_echoMode: int = NORMAL, s_text: String = null, okCallback: Function = null, cancelCallback: Function = null): InputDialog

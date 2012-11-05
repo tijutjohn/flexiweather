@@ -6,13 +6,9 @@ package com.iblsoft.flexiweather.ogc
 	public class WMSLayerBase
 	{
 		internal var m_parent: WMSLayerGroup;
-
 		internal var ms_name: String;
-
 		internal var ms_title: String;
-
 		internal var ma_crsWithBBoxes: ArrayCollection = new ArrayCollection();
-
 		internal var ma_dimensions: ArrayCollection = new ArrayCollection();
 
 		public function destroy(): void

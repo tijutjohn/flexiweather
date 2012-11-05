@@ -15,13 +15,10 @@
 	<fx:Script>
 		<![CDATA[
 			import com.iblsoft.flexiweather.ogc.configuration.layers.TiledLayerConfiguration;
-
 			[Bindable]
 			public var selectMapTypeIndex: int;
-
 			[Bindable]
 			public var label: String;
-
 			private var _layer: InteractiveLayerTiled;
 
 			public function get layer(): InteractiveLayerTiled

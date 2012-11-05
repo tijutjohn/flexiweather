@@ -15,11 +15,8 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	{
 		//todo: add constants for the enum values?
 		private var _north: Number;
-
 		private var _south: Number;
-
 		private var _east: Number;
-
 		private var _west: Number;
 
 		/**

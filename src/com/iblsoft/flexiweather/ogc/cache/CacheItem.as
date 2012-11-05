@@ -7,17 +7,11 @@ package com.iblsoft.flexiweather.ogc.cache
 	public class CacheItem
 	{
 		public static var CID: int = 0;
-
 		private var _id: int;
-
 		public var cacheKey: CacheKey;
-
 		public var lastUsed: Date;
-
 		public var viewProperties: IViewProperties;
-
 		private var _image: DisplayObject;
-
 		private var _displayed: Boolean;
 
 		public function get image(): DisplayObject

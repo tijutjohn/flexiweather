@@ -18,9 +18,7 @@ package com.iblsoft.flexiweather.ogc.managers
 	public class LayerConfigurationManager extends BaseConfigurationManager implements Serializable
 	{
 		public static const LAYERS_CHANGED: String = 'layers changed';
-
 		internal static var sm_instance: LayerConfigurationManager;
-
 		internal var ma_layers: ArrayCollection = new ArrayCollection();
 
 		public function LayerConfigurationManager()

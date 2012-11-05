@@ -30,25 +30,18 @@ package com.iblsoft.flexiweather.widgets.containers
 	[Style(name = "titleColor", type = "uint", format = "Color", inherit = "no", theme = "spark")]
 	public class GroupBox extends SkinnableContainer
 	{
-
 		[SkinPart(require = "true")]
 		public var contents: Group;
-
 		[SkinPart(require = "true")]
 		public var topGroup: Group;
-
 		[SkinPart(require = "true")]
 		public var titleDisplay: IDisplayText;
-
 		[SkinPart(require = "true")]
 		public var background: Rect;
-
 		[SkinPart(require = "true")]
 		public var titleBackground: Rect;
-
 		[SkinPart(require = "true")]
 		public var border: Rect;
-
 		private var _captionGap: int;
 
 		[Bindable]
@@ -66,7 +59,6 @@ package com.iblsoft.flexiweather.widgets.containers
 					skin.invalidateDisplayList();
 			}
 		}
-
 		private var _cornerRadius: int = 10;
 
 		[Bindable]
@@ -81,7 +73,6 @@ package com.iblsoft.flexiweather.widgets.containers
 			if (skin)
 				skin.invalidateDisplayList();
 		}
-
 		//----------------------------------
 		//  title
 		//----------------------------------
@@ -89,7 +80,6 @@ package com.iblsoft.flexiweather.widgets.containers
 		 *  @private
 		 */
 		private var _title: String = "";
-
 		/**
 		 *  @private
 		 */

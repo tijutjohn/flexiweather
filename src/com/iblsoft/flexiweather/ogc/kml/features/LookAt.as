@@ -25,17 +25,11 @@ package com.iblsoft.flexiweather.ogc.kml.features
 
 		*/
 		private var _longitude: Number;
-
 		private var _latitude: Number;
-
 		private var _altitude: Number;
-
 		private var _heading: Number;
-
 		private var _tilt: Number;
-
 		private var _range: Number;
-
 		private var _altitudeMode: String;
 
 		public function LookAt(s_namespace: String, x: XMLList)

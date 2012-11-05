@@ -18,7 +18,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		// Can contain: <extrude>, <tessellate>, <altitudeMode>, <coordinates>
 		// We support coordinates only
 		private var _coordinates: Coordinates;
-
 		private var _coordinatesPoints: ArrayCollection;
 
 		/**

@@ -11,17 +11,11 @@ package com.iblsoft.flexiweather.proj
 	public class Projection
 	{
 		public static const CRS_GEOGRAPHIC: String = "CRS:84";
-
 		public static const CRS_EPSG_GEOGRAPHIC: String = "EPSG:4326";
-
 		protected var m_proj: ProjProjection;
-
 		protected var m_extentBBox: BBox;
-
 		protected var mb_wrapsHorizontally: Boolean;
-
 		protected static var m_cache: Dictionary = new Dictionary();
-
 		protected static var md_crsToDetails: Dictionary = new Dictionary();
 		Projection.addCRSByProj4(
 				"CRS:84",
