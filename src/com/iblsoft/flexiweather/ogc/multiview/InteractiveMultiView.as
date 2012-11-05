@@ -554,6 +554,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 					{
 						configuration = (layer as IConfigurableLayer).configuration;	
 					}
+					trace("InteractiveMultiView onMapFromXMLReady addLayer: " + layer.name + " | " + layer.id);
 					interactiveLayerMap.addLayer(layer);
 				} else {
 					trace("onMapFromXMLReady: Layer not exists")
@@ -995,6 +996,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 		
 		private function debugWidgets(): void
 		{
+			return;
+			
 			trace("\n debug widgets");
 			var cnt: int = 0;
 			for each (var currIW: InteractiveWidget in _interactiveWidgets.widgets)

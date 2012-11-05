@@ -149,10 +149,10 @@ package com.iblsoft.flexiweather.widgets
 					var ilI: InteractiveLayer = InteractiveLayer(getChildAt(i)); 
 					for(var j: int = i + 1; j < numChildren; ++j) {
 						var ilJ: InteractiveLayer = InteractiveLayer(getChildAt(j));
-						trace('[InteractiveLayerComposer.orderLayers] ... checking ' + ilJ.name + '['+ilJ.zOrder+'] with ' + ilI.name+'['+ilI.zOrder+']');
+//						trace('[InteractiveLayerComposer.orderLayers] ... checking ' + ilJ.name + '['+ilJ.zOrder+'] with ' + ilI.name+'['+ilI.zOrder+']');
 						if(ilJ.zOrder < ilI.zOrder) {
 							// swap Ith and Jth layer, we know that J > I
-							trace('\t [InteractiveLayerComposer.orderLayers] ... swapping ' + ilJ.name + '['+ilJ.zOrder+'] with ' + ilI.name+'['+ilI.zOrder+']');
+//							trace('\t [InteractiveLayerComposer.orderLayers] ... swapping ' + ilJ.name + '['+ilJ.zOrder+'] with ' + ilI.name+'['+ilI.zOrder+']');
 							swapChildren(ilJ, ilI); 
 							ilI = InteractiveLayer(getChildAt(i)); 
 							//removeChildAt(j);
@@ -163,15 +163,15 @@ package com.iblsoft.flexiweather.widgets
 					}
 				}
 				
-//				trace("**********************************************")
-//				trace("                 SORTING by ZORDER end state");
-//				trace("**********************************************")
-//				for(i = 0; i < numChildren; ++i) 
-//				{
-//					var layer: InteractiveLayer = InteractiveLayer(getChildAt(i)); 
-//					trace("LAYER ["+i+"] = " + layer.name + " order: " + layer.zOrder); 
-//				}
-//				trace("**********************************************")
+				trace("**********************************************")
+				trace("                 SORTING by ZORDER end state");
+				trace("**********************************************")
+				for(i = 0; i < numChildren; ++i) 
+				{
+					var layer: InteractiveLayer = InteractiveLayer(getChildAt(i)); 
+					trace("LAYER ["+i+"] = " + layer.name + " order: " + layer.zOrder); 
+				}
+				trace("**********************************************")
 				
 			}
 			finally {

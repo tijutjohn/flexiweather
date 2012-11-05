@@ -1078,6 +1078,8 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (debugConsole)
 				debugConsole.print(str, type, tag);
+			
+			trace(tag + "| " + type + "| " + str);
 		}
 	}
 }

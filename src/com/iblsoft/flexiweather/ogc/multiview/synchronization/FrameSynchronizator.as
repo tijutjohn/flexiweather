@@ -39,6 +39,8 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		{
 			if (debugConsole)
 				debugConsole.print(str, type, tag);
+			
+			trace(tag + "| " + type + "| " + str);
 		}
 		
 		public function synchronizeWidgets(synchronizeFromWidget:InteractiveWidget, widgetsForSynchronisation:ArrayCollection):void
@@ -80,7 +82,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 							var frame: Date = frames[i] as Date;
 							if (frame)
 							{
-								if (widget.interactiveLayerMap.frame != frame)
+								if (widget.interactiveLayerMap.frame.time != frame.time)
 								{
 									debug("Going to synchronise frame: " + frame.toTimeString() + " for widget: " + widget.id, 'Info', 'FrameSychronizator');
 									widget.interactiveLayerMap.setFrame(frame);

@@ -469,7 +469,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 		
 		private function invalidateDynamicPart(b_invalid: Boolean = true): void
 		{
-			trace("\t MSBaseLoader invalidateDynamicPart: " + id);
+//			trace("\t MSBaseLoader invalidateDynamicPart: " + id);
 			var de: DynamicEvent = new DynamicEvent("invalidateDynamicPart");
 			de["invalid"] = b_invalid;
 			dispatchEvent(de);

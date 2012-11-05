@@ -157,10 +157,10 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		public function addImagePart(imagePart: ImagePart): void
 		{
 			ma_imageParts.addItem(imagePart);
-			if (parentLayer)
-				trace("WMSViewProperties.addImagePart: " + ma_imageParts.length + " ["+parentLayer+"]");
-			else
-				trace("WMSViewProperties.addImagePart: " + ma_imageParts.length + " ["+this+"]");
+//			if (parentLayer)
+//				trace("WMSViewProperties.addImagePart: " + ma_imageParts.length + " ["+parentLayer+"]");
+//			else
+//				trace("WMSViewProperties.addImagePart: " + ma_imageParts.length + " ["+this+"]");
 			
 		}
 		

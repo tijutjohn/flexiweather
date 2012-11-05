@@ -135,6 +135,11 @@ package com.iblsoft.flexiweather.ogc.managers
 		
 		private function onGlobalVariableSynchronisationChanged(event: SynchronisationEvent): void
 		{
+			/** this can be called when these 2 event are dispatched
+			 * SynchronisationEvent.START_GLOBAL_VARIABLE_SYNCHRONIZATION
+			 * SynchronisationEvent.STOP_GLOBAL_VARIABLE_SYNCHRONIZATION
+			 */
+				
 			switch (event.globalVariable)
 			{
 				case GlobalVariable.LEVEL:

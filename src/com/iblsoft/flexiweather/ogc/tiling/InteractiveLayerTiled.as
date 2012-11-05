@@ -954,10 +954,10 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			var i_oldZoom: int = mi_zoom;
 			findZoom();
-			if (mi_zoom == 0)
-			{
-				trace("check zoom level 0");	
-			}
+//			if (mi_zoom == 0)
+//			{
+//				trace("check zoom level 0");	
+//			}
 			if (i_oldZoom != mi_zoom)
 			{
 				

@@ -468,7 +468,7 @@ package com.iblsoft.flexiweather.ogc
 		
 		protected function onCurrentWMSDataInvalidateDynamicPart(event: DynamicEvent): void
 		{
-			trace("\t onCurrentWMSDataInvalidateDynamicPart ["+this+"]");
+//			trace("\t onCurrentWMSDataInvalidateDynamicPart ["+this+"]");
 			invalidateDynamicPart(event['invalid']);
 		}
 		
@@ -618,7 +618,7 @@ package com.iblsoft.flexiweather.ogc
 				
 				var loader: IWMSViewPropertiesLoader = getWMSViewPropertiesLoader();
 				
-				trace("\n\n ***** updateData loader: "+ (loader as MSBaseLoader).id + " ["+this+"]");
+//				trace("\n\n ***** updateData loader: "+ (loader as MSBaseLoader).id + " ["+this+"]");
 				loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
 				loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
 				loader.addEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
