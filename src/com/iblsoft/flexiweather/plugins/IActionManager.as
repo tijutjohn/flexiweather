@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.plugins
 {
+
 	// Supporting interface for IAction's management
 	public interface IActionManager
 	{

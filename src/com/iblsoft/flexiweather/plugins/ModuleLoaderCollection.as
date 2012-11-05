@@ -1,18 +1,18 @@
 package com.iblsoft.flexiweather.plugins
 {
 	import com.iblsoft.flexiweather.plugins.data.ModuleLoaderItem;
-	
 	import mx.collections.ArrayCollection;
 	import mx.modules.ModuleLoader;
 
 	public class ModuleLoaderCollection
 	{
 		private var _collection: ArrayCollection = new ArrayCollection();
-		
+
 		public function get modulesLoadingCount(): int
 		{
 			return _collection.length;
 		}
+
 		public function get bytesLoaded(): int
 		{
 			var bytes: int = 0;
@@ -25,6 +25,7 @@ package com.iblsoft.flexiweather.plugins
 			}
 			return bytes;
 		}
+
 		public function get bytesTotal(): int
 		{
 			var bytes: int = 0;
@@ -37,12 +38,11 @@ package com.iblsoft.flexiweather.plugins
 			}
 			return bytes;
 		}
-		
+
 		public function ModuleLoaderCollection()
 		{
-			
 		}
-		
+
 		private function getModuleLoader(module: ModuleLoader): ModuleLoaderItem
 		{
 			if (_collection && _collection.length > 0)
@@ -54,13 +54,13 @@ package com.iblsoft.flexiweather.plugins
 				}
 			}
 			return null;
-		}	
-		
+		}
+
 		private function isModuleInside(module: ModuleLoader): Boolean
 		{
 			return getModuleLoader(module) != null;
-		}	
-		
+		}
+
 		public function addModuleLoaderItem(module: ModuleLoader, bytesLoaded: int, bytesTotal: int): void
 		{
 			if (!isModuleInside(module))
@@ -69,15 +69,16 @@ package com.iblsoft.flexiweather.plugins
 				loaderItem.module = module;
 				loaderItem.bytesLoaded = bytesLoaded;
 				loaderItem.bytesTotal = bytesTotal;
-				
 				_collection.addItem(loaderItem);
-			} else {
+			}
+			else
+			{
 				var item: ModuleLoaderItem = getModuleLoader(module);
 				item.bytesLoaded = bytesLoaded;
 				item.bytesTotal = bytesTotal;
 			}
 		}
-		
+
 		public function removeModuleLoader(module: ModuleLoader): void
 		{
 			if (isModuleInside(module))
@@ -85,9 +86,7 @@ package com.iblsoft.flexiweather.plugins
 				var item: ModuleLoaderItem = getModuleLoader(module);
 				var pos: int = _collection.getItemIndex(item);
 				if (pos >= 0)
-				{
 					_collection.removeItemAt(pos);
-				}
 			}
 		}
 	}

@@ -7,56 +7,53 @@ package com.iblsoft.flexiweather.ogc.kml.features.styles
 
 	public class ColorStyle extends Style
 	{
-		private var _color: uint;		
-		private var _alpha: Number;		
+		private var _color: uint;
+
+		private var _alpha: Number;
+
 		/**
-		 * Allowed values are: "normal" or "random" 
-		 */		
-		private var _colorMode:String;		
-		
-		public function ColorStyle(kml: KML, s_namespace: String, x:XMLList, document: Document)
+		 * Allowed values are: "normal" or "random"
+		 */
+		private var _colorMode: String;
+
+		public function ColorStyle(kml: KML, s_namespace: String, x: XMLList, document: Document)
 		{
 			super(kml, s_namespace, x, document);
-			
-			var kmlns:Namespace = new Namespace(s_namespace);
-			
+			var kmlns: Namespace = new Namespace(s_namespace);
 			var colorStr: String = ParsingTools.nullCheck(this.xml.kmlns::color);
 			if (colorStr)
 			{
 				if (colorStr.indexOf("#") == 0)
-				{
 					colorStr = colorStr.substring(1, colorStr.length);
-				}
-				
-				_alpha = parseInt("0x"+colorStr.substr(0,2));
+				_alpha = parseInt("0x" + colorStr.substr(0, 2));
 				_alpha = _alpha / 255;
-				
 				//color is stored as  aabbggrr
-				if (colorStr.substr(6,2) != '00' && colorStr.substr(4,2) == '00' && colorStr.substr(2,2) == '00')
-				{
+				if (colorStr.substr(6, 2) != '00' && colorStr.substr(4, 2) == '00' && colorStr.substr(2, 2) == '00')
 					trace("RED COLOR");
-				}
-//				colorStr = colorStr.substr(0,2)+colorStr.substr(6,2)+colorStr.substr(4,2)+colorStr.substr(2,2);
-				colorStr = colorStr.substr(6,2)+colorStr.substr(4,2)+colorStr.substr(2,2);
-				this._color  = parseInt("0x"+colorStr);
+				//				colorStr = colorStr.substr(0,2)+colorStr.substr(6,2)+colorStr.substr(4,2)+colorStr.substr(2,2);
+				colorStr = colorStr.substr(6, 2) + colorStr.substr(4, 2) + colorStr.substr(2, 2);
+				this._color = parseInt("0x" + colorStr);
 			}
-			this._colorMode  = ParsingTools.nullCheck(this.xml.kmlns::colorMode);
+			this._colorMode = ParsingTools.nullCheck(this.xml.kmlns::colorMode);
 		}
-		
+
 		public function get alpha(): Number
 		{
 			return this._alpha;
 		}
+
 		public function get color(): uint
 		{
 			return this._color;
 		}
+
 		public function get colorMode(): String
 		{
 			return this._colorMode;
 		}
-		
-		public override function toString():String {
+
+		public override function toString(): String
+		{
 			return "ColorStyle: [" + super.toString() + "] color: " + this._color + " alpha" + alpha + " mode: " + this._colorMode;
 		}
 	}

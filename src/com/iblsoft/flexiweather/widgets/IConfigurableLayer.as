@@ -4,6 +4,6 @@ package com.iblsoft.flexiweather.widgets
 
 	public interface IConfigurableLayer
 	{
-		function get configuration(): ILayerConfiguration;		
+		function get configuration(): ILayerConfiguration;
 	}
 }

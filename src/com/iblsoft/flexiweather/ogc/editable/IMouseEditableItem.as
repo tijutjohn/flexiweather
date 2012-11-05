@@ -2,7 +2,7 @@ package com.iblsoft.flexiweather.ogc.editable
 {
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
-	
+
 	public interface IMouseEditableItem extends IEditableItem
 	{
 		function onMouseMove(pt: Point): Boolean;

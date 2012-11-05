@@ -4,75 +4,64 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import com.iblsoft.flexiweather.syndication.ParsingTools;
 	import com.iblsoft.flexiweather.syndication.XmlParser;
 	import com.iblsoft.flexiweather.utils.AsyncManager;
-	
 	import flash.events.Event;
-	
 	import mx.collections.ArrayCollection;
 	import mx.core.UIComponent;
-	
+
 	/**
 	*	Class that represents an KML version 2.2 document.
-	* 
+	*
 	* 	@langversion ActionScript 3.0
 	*	@playerversion Flash 8.5
 	*	@tiptext
-	* 
-	*/	
+	*
+	*/
 	public class KML22 extends KML
 	{
 		/**
 		*	Constructor for class.
-		* 
+		*
 		* 	@langversion ActionScript 3.0
 		*	@playerversion Flash 8.5
 		*	@tiptext
-		*/	
-		public function KML22(xmlStr:String, urlPath: String, baseUrlPath: String)
+		*/
+		public function KML22(xmlStr: String, urlPath: String, baseUrlPath: String)
 		{
 			super(xmlStr, urlPath, baseUrlPath);
-			
-
-			
 		}
-		
+
 		override public function cleanup(): void
 		{
 			super.cleanup();
-			
 			if (_kmlParserManager)
 				_kmlParserManager.removeEventListener(AsyncManager.EMPTY, onKMLParserFinished);
 		}
-		
+
 		override public function parse(kmzFile: KMZFile = null): void
 		{
 //			trace("KML 2.2");
 			super.parse(kmzFile);
-			
-			var kmlns:Namespace = new Namespace(_kmlNamespace);
+			var kmlns: Namespace = new Namespace(_kmlNamespace);
 			// todo support other features
-			if (ParsingTools.nullCheck(this.xml.kmlns::Placemark)) {
+			if (ParsingTools.nullCheck(this.xml.kmlns::Placemark))
 				this._feature = new Placemark(this, _kmlNamespace, this.xml.kmlns::Placemark);
-			}
-			if (ParsingTools.nullCheck(this.xml.kmlns::GroundOverlay)) {
+			if (ParsingTools.nullCheck(this.xml.kmlns::GroundOverlay))
 				this._feature = new GroundOverlay(this, _kmlNamespace, this.xml.kmlns::GroundOverlay);
-			}
-			if (ParsingTools.nullCheck(this.xml.kmlns::GroundOverlay)) {
+			if (ParsingTools.nullCheck(this.xml.kmlns::GroundOverlay))
 				this._feature = new GroundOverlay(this, _kmlNamespace, this.xml.kmlns::GroundOverlay);
-			}
-			if (ParsingTools.nullCheck(this.xml.kmlns::ScreenOverlay)) {
+			if (ParsingTools.nullCheck(this.xml.kmlns::ScreenOverlay))
 				this._feature = new ScreenOverlay(this, _kmlNamespace, this.xml.kmlns::ScreenOverlay)
-			}
-			if (ParsingTools.nullCheck(this.xml.kmlns::Folder)) {
+			if (ParsingTools.nullCheck(this.xml.kmlns::Folder))
 				this._feature = new Folder(this, _kmlNamespace, this.xml.kmlns::Folder);
-			}
-			if (ParsingTools.nullCheck(this.xml.kmlns::Document)) {
+			if (ParsingTools.nullCheck(this.xml.kmlns::Document))
+			{
 				this._document = new Document(this, _kmlNamespace, this.xml.kmlns::Document);
 				this._document.baseUrlPath = _kmlBaseURLPath;
 				this._feature = document;
 			}
-			if (ParsingTools.nullCheck(this.xml.kmlns::NetworkLink)) {
+			if (ParsingTools.nullCheck(this.xml.kmlns::NetworkLink))
+			{
 				this._feature = new NetworkLink(this, _kmlNamespace, this.xml.kmlns::NetworkLink);
-				
 				var nLink: NetworkLink = _feature as NetworkLink;
 				_networkLinkManager.addNetworkLink(nLink, nLink.refreshInterval, true);
 			}
@@ -80,7 +69,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			_kmlParserManager.addEventListener(AsyncManager.EMPTY, onKMLParserFinished);
 			_kmlParserManager.maxCallsPerTick = 150;
 			_kmlParserManager.start();
-			
 		}
 
 		private function onKMLParserFinished(event: Event): void
@@ -90,7 +78,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 //			trace("kml parser finished");	
 			notifyParsingFinished();
 		}
-		
+
 		private function debug(): void
 		{
 			return;
@@ -98,10 +86,11 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			{
 				var txt: String = debugFeature(_feature, 1);
 				trace(txt);
-			} else {
-				trace("there is no main feature in this KML: " + _kmlSource);
 			}
+			else
+				trace("there is no main feature in this KML: " + _kmlSource);
 		}
+
 		private function debugFeature(featureForDebugging: KMLFeature, tabs: int): String
 		{
 			var tmp: String = getTabsString(tabs);
@@ -116,7 +105,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			}
 			return tmp;
 		}
-		
+
 		private function getTabsString(count: int): String
 		{
 			var tmp: String = '';
@@ -126,8 +115,8 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			}
 			return tmp
 		}
-		
-		override public function toString():String 
+
+		override public function toString(): String
 		{
 			return "KML 2.2: " + this._feature.toString();
 		}

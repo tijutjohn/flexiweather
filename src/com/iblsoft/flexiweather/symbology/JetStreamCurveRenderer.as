@@ -2,41 +2,42 @@ package com.iblsoft.flexiweather.symbology
 {
 	import com.iblsoft.flexiweather.utils.CubicBezier;
 	import com.iblsoft.flexiweather.utils.GraphicsCurveRenderer;
-	
 	import flash.display.Graphics;
 	import flash.geom.Point;
-	
+
 	public class JetStreamCurveRenderer extends GraphicsCurveRenderer
 	{
 		// style variables
 		protected var mf_thickness: Number;
+
 		protected var mi_color: uint;
+
 		protected var mf_alpha: Number;
-		
-		protected var mf_lastDX: Number = 0; 
-		protected var mf_lastDY: Number = 0; 
-	
+
+		protected var mf_lastDX: Number = 0;
+
+		protected var mf_lastDY: Number = 0;
+
 		function JetStreamCurveRenderer(g: Graphics,
-			f_thickness: Number = 2, i_color: uint = 0x000000, f_alpha: Number = 1.0)
+				f_thickness: Number = 2, i_color: uint = 0x000000, f_alpha: Number = 1.0)
 		{
 			super(g);
 			mf_thickness = f_thickness;
 			mi_color = i_color;
 			mf_alpha = f_alpha;
 		}
-	
+
 		override public function started(x: Number, y: Number): void
 		{
 //			trace('mf_thickness:' + mf_thickness);
 //			trace('mi_color:' + mi_color);
 //			trace('mf_alpha:' + mf_alpha);
-			
 			m_graphics.lineStyle(mf_thickness, mi_color, mf_alpha);
 			m_graphics.moveTo(x, y);
 			mf_lastDX = 0;
 			mf_lastDY = 0;
 		}
-	
+
 		override public function finished(x: Number, y: Number): void
 		{
 			var p: Point = new Point(mf_lastDX, mf_lastDY);
@@ -52,21 +53,22 @@ package com.iblsoft.flexiweather.symbology
 			m_graphics.lineTo(x + pp.x, y + pp.y);
 			m_graphics.endFill();
 		}
-	
+
 		override public function moveTo(x: Number, y: Number): void
 		{
 			super.moveTo(x, y);
 		}
-	
+
 		override public function lineTo(x: Number, y: Number): void
 		{
-			if(x != m_lastX || y != m_lastY) { 
+			if (x != m_lastX || y != m_lastY)
+			{
 				mf_lastDX = x - m_lastX;
 				mf_lastDY = y - m_lastY;
 			}
 			super.lineTo(x, y);
 		}
-	
+
 		override public function curveTo(controlX: Number, controlY: Number, anchorX: Number, anchorY: Number): void
 		{
 			//super.curveTo(controlX, controlY, anchorX, anchorY);

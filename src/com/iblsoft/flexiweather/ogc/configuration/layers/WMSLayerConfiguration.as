@@ -14,60 +14,61 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
-	
 	import flash.events.DataEvent;
 	import flash.events.Event;
 	import flash.net.URLRequest;
-	
 	import mx.collections.ArrayCollection;
 	import com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceConfiguration;
-	
-	public class WMSLayerConfiguration extends OGCLayerConfiguration
-			implements IBehaviouralObject, IInteractiveLayerProvider, IWMSLayerConfiguration
-	{
 
-		Storage.addChangedClass('com.iblsoft.flexiweather.ogc.WMSLayerConfiguration','com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration', new Version(1,6,0));
-		
-		
+	public class WMSLayerConfiguration extends OGCLayerConfiguration implements IBehaviouralObject, IInteractiveLayerProvider, IWMSLayerConfiguration
+	{
+		Storage.addChangedClass('com.iblsoft.flexiweather.ogc.WMSLayerConfiguration', 'com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration', new Version(1, 6, 0));
+
 		private var ma_layerNames: Array = [];
+
 		private var ma_styleNames: Array = [];
+
 		private var ma_behaviours: Array = [];
+
 		private var ma_availableImageFormats: Array = [];
+
 		private var ms_dimensionTimeName: String = null;
+
 		private var ms_dimensionRunName: String = null;
+
 		private var ms_dimensionForecastName: String = null;
+
 		private var ms_dimensionVerticalLevelName: String = null;
+
 		private var _ms_imageFormat: String = null;
+
 		private var mb_legendIsDimensionDependant: Boolean;
+
 		private var mi_autoRefreshPeriod: uint = 0;
-		
+
 		// runtime variables
 		private var _layerConfigurations: Array;
-		
-		
+
 		public static const CAPABILITIES_UPDATED: String = "capabilitiesUpdated";
+
 		public static const CAPABILITIES_RECEIVED: String = "capabilitiesReceived";
-		
+
 		[Event(name = CAPABILITIES_UPDATED, type = "flash.events.DataEvent")]
 		[Event(name = CAPABILITIES_RECEIVED, type = "flash.events.DataEvent")]
-
 		public function WMSLayerConfiguration(service: WMSServiceConfiguration = null, a_layerNames: Array = null)
 		{
 			super(service);
-			if(a_layerNames != null)
+			if (a_layerNames != null)
 				ma_layerNames = a_layerNames;
-			if(m_service != null)
+			if (m_service != null)
 				m_service.addEventListener(WMSServiceConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated)
 			onCapabilitiesUpdated(null);
 		}
-		
 
 		override public function destroy(): void
 		{
-			
-			if(m_service != null)
+			if (m_service != null)
 				m_service.removeEventListener(WMSServiceConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
-					
 			ma_layerNames = null;
 			debugArray(ma_styleNames);
 			debugArray(ma_behaviours);
@@ -82,47 +83,54 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 				}
 				_layerConfigurations = null;
 			}
-			
 			super.destroy();
 		}
-		public function get ms_imageFormat():String
+
+		public function get ms_imageFormat(): String
 		{
 			return _ms_imageFormat;
 		}
 
-		public function set ms_imageFormat(value:String):void
+		public function set ms_imageFormat(value: String): void
 		{
 			_ms_imageFormat = value;
 		}
 
 		override public function serialize(storage: Storage): void
 		{
-			if(storage.isLoading() && m_service != null)
+			if (storage.isLoading() && m_service != null)
 				m_service.removeEventListener(WMSServiceConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated)
 			super.serialize(storage);
 			m_service.addEventListener(WMSServiceConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated)
-
-			try {
+			try
+			{
 				storage.serializeNonpersistentArray("layer-name", ma_layerNames, String);
-			} catch (error: Error) {
+			}
+			catch (error: Error)
+			{
 				trace("WMSLayeConfig ma_layerNames error: " + error.message);
 			}
-			try {
+			try
+			{
 				storage.serializeNonpersistentArray("style-name", ma_styleNames, String)
-			} catch (error: Error) {
+			}
+			catch (error: Error)
+			{
 				trace("WMSLayeConfig ma_styleNames error: " + error.message);
 			}
-			try {
+			try
+			{
 				storage.serializeNonpersistentArrayMap("behaviour", ma_behaviours, String, String);
 				trace("ma_behaviours: ")
 				for (var k: String in ma_behaviours)
 				{
-					trace("ma_behaviours["+k+"] = " + ma_behaviours[k] + "<<");
+					trace("ma_behaviours[" + k + "] = " + ma_behaviours[k] + "<<");
 				}
-			} catch (error: Error) {
+			}
+			catch (error: Error)
+			{
 				trace("WMSLayeConfig ma_behaviours error: " + error.message);
 			}
-			
 			ms_dimensionTimeName = storage.serializeString(
 					"dimension-time-name", ms_dimensionTimeName, null);
 			ms_dimensionRunName = storage.serializeString(
@@ -131,50 +139,45 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 					"dimension-forecast-name", ms_dimensionForecastName, null);
 			ms_dimensionVerticalLevelName = storage.serializeString(
 					"dimension-level-name", ms_dimensionVerticalLevelName, null);
-
 			ms_previewURL = storage.serializeString("preview-url", ms_previewURL, "<internal>");
-			
 			mi_autoRefreshPeriod = storage.serializeInt(
 					"auto-refresh-period", mi_autoRefreshPeriod, 0);
 			ms_imageFormat = storage.serializeString(
 					"image-format", ms_imageFormat, "image/png");
-					
 		}
-		
+
 		public function toGetGTileRequest(
-            s_crs: String, i_tileZoom: uint,
-            i_tileRow: uint, i_tileCol: uint,
-            s_style: String): URLRequest
-        {
-            var r: URLRequest = m_service.toRequest("GetGTile");
-            r.data.LAYER = ma_layerNames.length > 0 ? ma_layerNames[0] : '';
-            if(m_service.version.isLessThan(1, 3, 0)) 
-                r.data.SRS = s_crs;
-            else 
-                r.data.CRS = s_crs; 
-            r.data.TILEZOOM = i_tileZoom; 
-            r.data.TILEROW = i_tileRow; 
-            r.data.TILECOL = i_tileCol; 
-            if(s_style != null)
-                r.data.STYLE = s_style;
-                
-            
-            r.data.FORMAT = getCurrentImageFormat(); 
-            r.data.TRANSPARENT = "TRUE";
-            return r;
-        }
-        
+				s_crs: String, i_tileZoom: uint,
+				i_tileRow: uint, i_tileCol: uint,
+				s_style: String): URLRequest
+		{
+			var r: URLRequest = m_service.toRequest("GetGTile");
+			r.data.LAYER = ma_layerNames.length > 0 ? ma_layerNames[0] : '';
+			if (m_service.version.isLessThan(1, 3, 0))
+				r.data.SRS = s_crs;
+			else
+				r.data.CRS = s_crs;
+			r.data.TILEZOOM = i_tileZoom;
+			r.data.TILEROW = i_tileRow;
+			r.data.TILECOL = i_tileCol;
+			if (s_style != null)
+				r.data.STYLE = s_style;
+			r.data.FORMAT = getCurrentImageFormat();
+			r.data.TRANSPARENT = "TRUE";
+			return r;
+		}
+
 		public function toGetLegendRequest(
 				i_width: int, i_height: int,
 				s_style: String = null): URLRequest
 		{
 			var r: URLRequest = m_service.toRequest("GetLegendGraphic");
 			r.data.LAYER = ma_layerNames[0];
-			if(s_style != null)
+			if (s_style != null)
 				r.data.STYLE = s_style;
 			return r;
 		}
-		
+
 		public function toGetMapRequest(
 				s_crs: String, s_bbox: String,
 				i_width: int, i_height: int,
@@ -183,24 +186,19 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		{
 			var r: URLRequest = m_service.toRequest("GetMap");
 			r.data.LAYERS = s_layersOverride == null ? ma_layerNames.join(",") : s_layersOverride;
-			if(m_service.version.isLessThan(1, 3, 0)) 
+			if (m_service.version.isLessThan(1, 3, 0))
 				r.data.SRS = s_crs;
-			else 
-				r.data.CRS = s_crs; 
-			r.data.BBOX = s_bbox; 
+			else
+				r.data.CRS = s_crs;
+			r.data.BBOX = s_bbox;
 			if (i_width == 0 || i_height == 0)
-			{
 				return null;
-			}
-			
-			r.data.WIDTH = i_width; 
+			r.data.WIDTH = i_width;
 			r.data.HEIGHT = i_height;
-			if(s_stylesList != null)
+			if (s_stylesList != null)
 				r.data.STYLES = s_stylesList;
-				
-			r.data.FORMAT = getCurrentImageFormat(); 
+			r.data.FORMAT = getCurrentImageFormat();
 			r.data.TRANSPARENT = "TRUE";
-			
 			return r;
 		}
 
@@ -209,9 +207,9 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			var format: String = ms_imageFormat;
 			if (format == null)
 				format = 'image/png';
-				
 			return format;
 		}
+
 		public function toGetFeatureInfoRequest(
 				s_crs: String, s_bbox: String,
 				i_width: int, i_height: int,
@@ -222,78 +220,80 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			var r: URLRequest = m_service.toRequest("GetFeatureInfo");
 			r.data.LAYERS = ma_layerNames.join(",");
 			r.data.QUERY_LAYERS = a_queriedLayerNames.join(",");
-			if(m_service.version.isLessThan(1, 3, 0)) {
+			if (m_service.version.isLessThan(1, 3, 0))
+			{
 				r.data.SRS = s_crs;
 				r.data.X = i_x;
 				r.data.Y = i_y;
 			}
-			else { 
+			else
+			{
 				r.data.CRS = s_crs;
 				r.data.I = i_x;
 				r.data.J = i_y;
-			} 
-			r.data.BBOX = s_bbox; 
-			r.data.WIDTH = i_width; 
+			}
+			r.data.BBOX = s_bbox;
+			r.data.WIDTH = i_width;
 			r.data.HEIGHT = i_height;
-			if(s_stylesList != null)
+			if (s_stylesList != null)
 				r.data.STYLES = s_stylesList;
-			r.data.FORMAT = "text/html"; 
+			r.data.FORMAT = "text/html";
 			r.data.TRANSPARENT = "TRUE";
 			return r;
 		}
-		
+
 		public function dimensionToParameterName(s_dim: String): String
 		{
-			if(s_dim.toUpperCase() == "TIME" || s_dim.toUpperCase() == "ELEVATION")
+			if (s_dim.toUpperCase() == "TIME" || s_dim.toUpperCase() == "ELEVATION")
 				return s_dim;
-			return "DIM_" + s_dim; 
+			return "DIM_" + s_dim;
 		}
-		
+
 		protected function onCapabilitiesUpdated(event: Event): void
 		{
 			var layer: WMSLayer
 			var layerConf: WMSLayer
-			
 			var a_layers: ArrayCollection = new ArrayCollection();
 			if (ma_layerNames)
 			{
-				for(var i: int = 0; i < ma_layerNames.length; ++i) {
+				for (var i: int = 0; i < ma_layerNames.length; ++i)
+				{
 					var l: WMSLayer = null;
-					if(m_service != null)
+					if (m_service != null)
 						l = service.getLayerByName(ma_layerNames[i]);
 					if (l)
 						a_layers.addItem(l);
 				}
 			}
 			var b_changed: Boolean = false;
-			if(_layerConfigurations == null)
+			if (_layerConfigurations == null)
 				b_changed = true;
-			else {
-				for(i = 0; i < a_layers.length; ++i) 
+			else
+			{
+				for (i = 0; i < a_layers.length; ++i)
 				{
 					layer = a_layers[i] as WMSLayer;
-					
 					updateDimensions(layer);
-					
 					layerConf = _layerConfigurations[i] as WMSLayer
-					if(layer == null) 
+					if (layer == null)
 					{
-						if(layerConf == null)
+						if (layerConf == null)
 							continue;
-						else {
+						else
+						{
 							b_changed = true;
 							break;
 						}
 					}
-					if(!layer.equals(layerConf)) 
+					if (!layer.equals(layerConf))
 					{
 						b_changed = true;
 						break;
-					} 
+					}
 				}
 			}
-			
-			if(b_changed) {
+			if (b_changed)
+			{
 				_layerConfigurations = a_layers.toArray();
 				dispatchEvent(new DataEvent(CAPABILITIES_UPDATED));
 			}
@@ -304,23 +304,32 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		{
 			for each (var dimension: WMSDimension in layer.dimensions)
 			{
-				switch(dimension.name)
+				switch (dimension.name)
 				{
 					case "RUN":
+					{
 						dimensionRunName = dimension.name;
 						break;
+					}
 					case "FORECAST":
+					{
 						dimensionForecastName = dimension.name;
 						break;
+					}
 					case "TIME":
+					{
 						dimensionTimeName = dimension.name;
 						break;
+					}
 					case "ELEVATION":
+					{
 						dimensionVerticalLevelName = dimension.name;
 						break;
+					}
 				}
 			}
 		}
+
 		public function isTileableForCRS(crs: String): Boolean
 		{
 			if (_layerConfigurations && _layerConfigurations.length > 0)
@@ -334,7 +343,6 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 				}
 				return false;
 			}
-			
 			return false;
 		}
 
@@ -349,36 +357,37 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 				}
 				return false;
 			}
-			
 			return true;
 		}
-		
+
 		override public function hasPreview(): Boolean
-        { return true; }
-        
+		{
+			return true;
+		}
+
 		override public function getPreviewURL(): String
 		{
 			var s_url: String = '';
-			
-			if(ms_previewURL == null || ms_previewURL.length == 0) 
+			if (ms_previewURL == null || ms_previewURL.length == 0)
 			{
 				var iw: InteractiveWidget = new InteractiveWidget();
 				var lWMS: InteractiveLayerWMS = createInteractiveLayer(iw) as InteractiveLayerWMS;
-				if(lWMS != null)
+				if (lWMS != null)
 				{
 					var bbox: BBox = lWMS.getExtent();
-					if(bbox != null)
-						iw.setExtentBBOX(bbox);
+					if (bbox != null)
+						iw.setExtentBBox(bbox);
 					iw.addLayer(lWMS);
-					lWMS.dataLoader.data = { label: label, cfg: this };
+					lWMS.dataLoader.data = {label: label, cfg: this};
 					s_url = lWMS.getFullURLWithSize(150, 100);
-						
-				} else {
-					trace("getMenuLayersXMLList interactive layer does not exist");
 				}
-			} else {
-			
-				if(ms_previewURL == "<internal>") {
+				else
+					trace("getMenuLayersXMLList interactive layer does not exist");
+			}
+			else
+			{
+				if (ms_previewURL == "<internal>")
+				{
 					if (service && ma_layerNames)
 					{
 						s_url = service.fullURL;
@@ -390,29 +399,29 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 						s_url = "assets/layer-previews/" + s_url + ".png";
 					}
 				}
-			}	
-			
+			}
 			return s_url;
 		}
-		
-		override public function renderPreview(f_width: Number, f_height: Number, iw: InteractiveWidget =  null): void
+
+		override public function renderPreview(f_width: Number, f_height: Number, iw: InteractiveWidget = null): void
 		{
 			if (!iw)
 				iw = new InteractiveWidget();
-				
 			var lWMS: InteractiveLayerWMS = createInteractiveLayer(iw) as InteractiveLayerWMS;
 			lWMS.renderPreview(lWMS.graphics, f_width, f_height);
 		}
-		
+
 		// IBehaviouralObject implementation
 		public function setBehaviourString(s_behaviourId: String, s_value: String): void
-		{ ma_behaviours[s_behaviourId] = s_value; }
+		{
+			ma_behaviours[s_behaviourId] = s_value;
+		}
 
 		public function getBehaviourString(s_behaviourId: String, s_default: String = null): String
 		{
 			return (s_behaviourId in ma_behaviours) ? ma_behaviours[s_behaviourId] : s_default;
 		}
-		
+
 		// IInteractiveLayerProvider implementation
 		override public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer
 		{
@@ -422,104 +431,121 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		}
 
 		public function hasBehaviourString(s_behaviourId: String): Boolean
-		{ return s_behaviourId in ma_behaviours; }
-				
+		{
+			return s_behaviourId in ma_behaviours;
+		}
+
 		// getters & setters				
 		public function get service(): WMSServiceConfiguration
-		{ return WMSServiceConfiguration(m_service); }
+		{
+			return WMSServiceConfiguration(m_service);
+		}
 
-		public function set service(service: WMSServiceConfiguration): void 
-		{ m_service = service; }
+		public function set service(service: WMSServiceConfiguration): void
+		{
+			m_service = service;
+		}
 
 		public function get behaviours(): Array
-		{ return ma_behaviours; }
+		{
+			return ma_behaviours;
+		}
 
 		public function set dimensionTimeName(s: String): void
-		{ 
-			ms_dimensionTimeName = s; 
+		{
+			ms_dimensionTimeName = s;
 		}
 
 		public function get dimensionTimeName(): String
-		{ return ms_dimensionTimeName; }
+		{
+			return ms_dimensionTimeName;
+		}
 
 		public function set dimensionRunName(s: String): void
-		{ 
-			ms_dimensionRunName = s; 
+		{
+			ms_dimensionRunName = s;
 		}
 
 		public function get dimensionRunName(): String
-		{ return ms_dimensionRunName; }
+		{
+			return ms_dimensionRunName;
+		}
 
 		public function set dimensionForecastName(s: String): void
-		{ 
-			ms_dimensionForecastName = s; 
+		{
+			ms_dimensionForecastName = s;
 		}
 
 		public function get dimensionForecastName(): String
-		{ return ms_dimensionForecastName; }
+		{
+			return ms_dimensionForecastName;
+		}
 
 		public function set dimensionVerticalLevelName(s: String): void
-		{ ms_dimensionVerticalLevelName = s; }
+		{
+			ms_dimensionVerticalLevelName = s;
+		}
 
 		public function get dimensionVerticalLevelName(): String
-		{ return ms_dimensionVerticalLevelName; }
-		
+		{
+			return ms_dimensionVerticalLevelName;
+		}
+
 		public function get layerType(): String
-		{  
+		{
 			if (ma_layerNames && ma_layerNames.length > 0)
-			{
 				return ma_layerNames[0] as String;
-			}
 			return null;
 		}
-		
+
 		public function get layerConfigurations(): Array
 		{
 			return _layerConfigurations;
 		}
+
 		public function set layerConfigurations(value: Array): void
 		{
 			_layerConfigurations = value;
 		}
-		
-		public function get styleNames():Array
+
+		public function get styleNames(): Array
 		{
 			return ma_styleNames;
 		}
-		
-		public function set styleNames(value:Array):void
+
+		public function set styleNames(value: Array): void
 		{
 			ma_styleNames = value;
 		}
-		
-		public function get autoRefreshPeriod():uint
+
+		public function get autoRefreshPeriod(): uint
 		{
 			return mi_autoRefreshPeriod;
 		}
-		
-		public function set autoRefreshPeriod(value:uint):void
+
+		public function set autoRefreshPeriod(value: uint): void
 		{
 			mi_autoRefreshPeriod = value;
 		}
-		
+
 		public function get layerNames(): Array
 		{
 			return ma_layerNames;
 		}
+
 		public function set layerNames(value: Array): void
 		{
 			ma_layerNames = value;
 		}
 
-		public function get imageFormat():String
+		public function get imageFormat(): String
 		{
 			return ms_imageFormat;
 		}
-		
-		public function set imageFormat(value:String):void
+
+		public function set imageFormat(value: String): void
 		{
 			ms_imageFormat = value;
 		}
-		
 	}
 }

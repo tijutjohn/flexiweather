@@ -10,31 +10,31 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	import com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceConfiguration;
-	
+
 	public class WMSWithQTTLayerConfiguration extends WMSLayerConfiguration implements IBehaviouralObject
 	{
-		Storage.addChangedClass('com.iblsoft.flexiweather.ogc.WMSWithQTTLayerConfiguration','com.iblsoft.flexiweather.ogc.configuration.layers.WMSWithQTTLayerConfiguration', new Version(1,6,0));
-		
-		private var _avoidTiling:Boolean;
-		
+		Storage.addChangedClass('com.iblsoft.flexiweather.ogc.WMSWithQTTLayerConfiguration', 'com.iblsoft.flexiweather.ogc.configuration.layers.WMSWithQTTLayerConfiguration', new Version(1, 6, 0));
+
+		private var _avoidTiling: Boolean;
+
 		public var minimumZoomLevel: uint = 1;
+
 		public var maximumZoomLevel: uint = 12;
+
 		public var tileSize: uint = 256;
-		
+
 		public function WMSWithQTTLayerConfiguration(service: WMSServiceConfiguration = null, a_layerNames: Array = null, tileSize: uint = 256)
 		{
 			super(service, a_layerNames);
-			
 			this.tileSize = tileSize;
 		}
-		
 
-		public function get avoidTiling():Boolean
+		public function get avoidTiling(): Boolean
 		{
 			return _avoidTiling;
 		}
 
-		public function set avoidTiling(value:Boolean):void
+		public function set avoidTiling(value: Boolean): void
 		{
 			_avoidTiling = value;
 		}
@@ -45,7 +45,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			l.layerName = label;
 			return l;
 		}
-		
+
 		override public function serialize(storage: Storage): void
 		{
 			super.serialize(storage);
@@ -54,42 +54,40 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			maximumZoomLevel = storage.serializeUInt("maximum-zoom-level", maximumZoomLevel, 12);
 			tileSize = storage.serializeUInt("tile-size", tileSize, 256);
 		}
-		
+
 		override public function renderPreview(f_width: Number, f_height: Number, iw: InteractiveWidget = null): void
 		{
 			if (!iw)
 				iw = new InteractiveWidget();
-				
 			var lWMSWithQTT: InteractiveLayerWMSWithQTT = createInteractiveLayer(iw) as InteractiveLayerWMSWithQTT;
 			lWMSWithQTT.renderPreview(lWMSWithQTT.graphics, f_width, f_height);
 		}
-		
+
 		override public function getPreviewURL(): String
 		{
 			var s_url: String = '';
-			
-			if(ms_previewURL == null || ms_previewURL.length == 0) {
+			if (ms_previewURL == null || ms_previewURL.length == 0)
+			{
 				var iw: InteractiveWidget = new InteractiveWidget();
 				var lWMSWithQTT: InteractiveLayerWMSWithQTT = createInteractiveLayer(iw) as InteractiveLayerWMSWithQTT;
 				var lCfg: WMSWithQTTLayerConfiguration = new WMSWithQTTLayerConfiguration();
 				lCfg.avoidTiling = true;
-				
-				if(lWMSWithQTT != null)
+				if (lWMSWithQTT != null)
 				{
 					var bbox: BBox = lWMSWithQTT.getExtent();
-					if(bbox != null)
-						iw.setExtentBBOX(bbox);
+					if (bbox != null)
+						iw.setExtentBBox(bbox);
 					iw.addLayer(lWMSWithQTT);
-					lWMSWithQTT.dataLoader.data = { label: label, cfg: this };
+					lWMSWithQTT.dataLoader.data = {label: label, cfg: this};
 					s_url = lWMSWithQTT.getFullURL();
-						
 				}
-				else {
+				else
 					trace("getMenuLayersXMLList interactive layer does not exist");
-				}
-			} 
-			else {
-				if(ms_previewURL == "<internal>") {
+			}
+			else
+			{
+				if (ms_previewURL == "<internal>")
+				{
 					if (service && layerNames)
 					{
 						s_url = service.fullURL;
@@ -101,8 +99,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 						s_url = "assets/layer-previews/" + s_url + ".png";
 					}
 				}
-			}	
-			
+			}
 			return s_url;
 		}
 	}

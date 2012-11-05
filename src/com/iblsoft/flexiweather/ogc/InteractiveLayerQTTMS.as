@@ -42,7 +42,6 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
-	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
@@ -57,33 +56,22 @@ package com.iblsoft.flexiweather.ogc
 	import flash.utils.Dictionary;
 	import flash.utils.Timer;
 	import flash.utils.setTimeout;
-	
 	import mx.controls.Alert;
 	import mx.events.DynamicEvent;
-	
 	import spark.primitives.Graphic;
-	
-	[Event(name='drawTiles', type='')]
-	
+
+	[Event(name = 'drawTiles', type = '')]
 	/**
 	 * Generic Quad Tree (like Google Maps) tiling layer
 	 **/
-	public class InteractiveLayerQTTMS extends InteractiveLayerTiled 
-					implements IConfigurableLayer, ICachedLayer, ITiledLayer, IPreloadableLayer, Serializable
+	public class InteractiveLayerQTTMS extends InteractiveLayerTiled implements IConfigurableLayer, ICachedLayer, ITiledLayer, IPreloadableLayer, Serializable
 	{
-		
-		
 		private var mi_updateCycleAge: uint = 0;
 
-		
 		private var m_tilingUtils: TilingUtils;
-		
+
 //		protected var m_cfg: QTTMSLayerConfiguration;
-		
-		
-		
 //		protected var mb_updateAfterMakingVisible: Boolean = false;
-		
 //		public function InteractiveLayerQTTMS(
 //				container: InteractiveWidget,
 //				cfg: QTTMSLayerConfiguration,
@@ -93,27 +81,23 @@ package com.iblsoft.flexiweather.ogc
 		{
 			super(container, cfg);
 		}
-		
+
 		override protected function initializeLayer(): void
 		{
 			super.initializeLayer();
-			
 			m_tilingUtils = new TilingUtils();
 			m_tilingUtils.minimumZoom = 0;
 			m_tilingUtils.maximumZoom = 10;
-			
 			m_currentQTTViewProperties.setConfiguration(m_cfg);
 			updateCurrentWMSViewProperties();
-			
 		}
-		
+
 		override protected function createDefaultConfiguration(): TiledLayerConfiguration
 		{
 			var tileSize: uint = 256;
 			var baseURLPattern: String;
 			var primaryCRS: String = 'CRS:84';
 			var primaryCRSTilingExtent: BBox = new BBox(-180, -90, 180, 90);
-			
 			var cfg: QTTMSLayerConfiguration = new QTTMSLayerConfiguration();
 			cfg.tileSize = tileSize;
 			var tilingInfo: TiledTilingInfo = new TiledTilingInfo(baseURLPattern, new CRSWithBBox(primaryCRS, primaryCRSTilingExtent));
@@ -124,7 +108,6 @@ package com.iblsoft.flexiweather.ogc
 			tilingInfo.maximumZoomLevel = 10;
 			tilingInfo.tileSize = tileSize;
 			cfg.addTiledTilingInfo(tilingInfo);
-			
 			return cfg;
 		}
 
@@ -149,7 +132,6 @@ package com.iblsoft.flexiweather.ogc
 //				invalidateData(false);
 //			}
 //		}
-		
 		public function clearCRSWithTilingExtents(): void
 		{
 			(m_cfg as QTTMSLayerConfiguration).removeAllTilingInfo();
@@ -161,32 +143,30 @@ package com.iblsoft.flexiweather.ogc
 			var crsWithBBox: CRSWithBBox = new CRSWithBBox(s_tilingCRS, crsTilingExtent);
 			var tilingInfo: TiledTilingInfo = new TiledTilingInfo(s_urlPattern, crsWithBBox);
 			tilingInfo.tileSize = tileSize;
-			
 			(m_cfg as QTTMSLayerConfiguration).addTiledTilingInfo(tilingInfo);
-			
 			//md_crsToTilingExtent[s_tilingCRS] = crsTilingExtent;
 		}
-		
+
 		/*
 		protected function onPreloadingWMSDataLoadingStarted(event: InteractiveLayerEvent): void
 		{
 			//			var wmsViewProperties: WMSViewProperties = event.target as WMSViewProperties;
 			//			wmsViewProperties.removeEventListener(InteractiveDataLayer.LOADING_STARTED, onPreloadingWMSDataLoadingStarted);
 			//			trace("\t onPreloadingWMSDataLoadingStarted wmsData: " + wmsViewProperties);
-			
+
 		}
 		protected function onPreloadingWMSDataLoadingFinished(event: InteractiveLayerEvent): void
 		{
 			var loader: IWMSViewPropertiesLoader = event.target as IWMSViewPropertiesLoader;
 			destroyWMSViewPropertiesPreloader(loader);
-			
+
 			var qttViewProperties: QTTViewProperties = event.data as QTTViewProperties;
 			if (qttViewProperties)
 			{
 				qttViewProperties.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
 				//			debug("onPreloadingWMSDataLoadingFinished wmsData: " + wmsViewProperties);
 				//			trace("\t onPreloadingWMSDataLoadingFinished PRELOADED: " + ma_preloadedWMSViewProperties.length + " , PRELAODING: " + ma_preloadingWMSViewProperties.length);
-				
+
 				//remove wmsViewProperties from array of currently preloading wms view properties
 				var total: int = ma_preloadingQTTViewProperties.length;
 				for (var i: int = 0; i < total; i++)
@@ -200,9 +180,9 @@ package com.iblsoft.flexiweather.ogc
 				}
 				//add wmsViewProperties to array of already preloaded wms view properties
 				ma_preloadedQTTViewProperties.push(qttViewProperties);
-			
+
 				notifyProgress(ma_preloadedQTTViewProperties.length, ma_preloadingQTTViewProperties.length + ma_preloadedQTTViewProperties.length, 'frames');
-			
+
 				if (ma_preloadingQTTViewProperties.length == 0)
 				{
 					//all wms view properties are preloaded, delete preloaded wms properties, bitmaps are stored in cache
@@ -213,20 +193,18 @@ package com.iblsoft.flexiweather.ogc
 					//					delete currWMSViewProperties;
 					//				}
 					ma_preloadedQTTViewProperties = [];
-					
+
 					//dispatch preloading finished to notify all about all WMSViewProperties are preloaded
 					dispatchEvent(new InteractiveLayerEvent(InteractiveDataLayer.PRELOADING_FINISHED, true));
 				}
 			}
 		}
 		*/
-		
-		
 		/**
 		 * Instead of call updateData, call invalidateData() function. It works exactly as invalidateProperties, invalidateSize or invalidateDisplayList.
-		 * You can call as many times as you want invalidateData function and updateData will be called just once each frame (if neeeded) 
+		 * You can call as many times as you want invalidateData function and updateData will be called just once each frame (if neeeded)
 		 * @param b_forceUpdate
-		 * 
+		 *
 		 */
 //		override protected function updateData(b_forceUpdate: Boolean): void
 //		{
@@ -263,8 +241,6 @@ package com.iblsoft.flexiweather.ogc
 //			}
 //			
 //		}
-		
-		
 //		private function updateCurrentWMSViewProperties(): void
 //		{
 //			if (currentQTTViewProperties && container)
@@ -275,8 +251,6 @@ package com.iblsoft.flexiweather.ogc
 //			}
 //			
 //		}
-		
-		
 		override protected function findZoom(): void
 		{
 			if (m_tilingUtils)
@@ -284,7 +258,6 @@ package com.iblsoft.flexiweather.ogc
 				var tilingExtent: BBox = getGTileBBoxForWholeCRS(container.crs);
 				m_tilingUtils.onAreaChanged(container.crs, tilingExtent);
 				var viewBBox: BBox = container.getViewBBox();
-				
 				var newZoomLevel2: Number = 1;
 				if (tilingExtent)
 				{
@@ -293,16 +266,16 @@ package com.iblsoft.flexiweather.ogc
 					//zoom level must be alway 0 or more
 					newZoomLevel2 = Math.max(0, newZoomLevel2);
 				}
-				
 				mi_zoom = Math.round(newZoomLevel2);
 				return;
 			}
 			mi_zoom = 0;
 		}
+
 		/*
 		public override function hasPreview(): Boolean
 		{ return zoomLevel != -1; }
-		
+
 		public override function renderPreview(graphics: Graphics, f_width: Number, f_height: Number): void
 		{
 			if(!width || !height)
@@ -313,7 +286,7 @@ package com.iblsoft.flexiweather.ogc
 				drawNoDataPreview(graphics, f_width, f_height);
 				return;
 			}
-			
+
 			var newCRS: String = container.crs;
 			var tilingInfo: TiledTilingInfo = m_cfg.getTiledTilingInfoForCRS(newCRS);
 			if (!tilingInfo)
@@ -324,42 +297,42 @@ package com.iblsoft.flexiweather.ogc
 				graphics.lineTo(f_width - 1, f_height - 1);
 				graphics.moveTo(0, f_height - 1);
 				graphics.lineTo(f_width - 1, 0);
-				
+
 				return;
 			}
-			
-			
-			
+
+
+
 			var matrix: Matrix  = new Matrix();
 //			matrix.translate(-f_width / 3, -f_width / 3);
 //			matrix.scale(3, 3);
 //			matrix.translate(width / 3, height / 3);
 //			matrix.invert();
-			
-			
+
+
 			var scaleW: Number = f_width / width;
 			var scaleH: Number = f_height / height;
 			var scale: Number = Math.max(scaleW, scaleH);
-			
+
 			scale = Math.min(scale * 2, 1);
-			
+
 			var nw: Number = width * scale;
 			var nh: Number = height * scale;
 			var xDiff: Number = (nw - f_width) / 2;
 			var yDiff: Number = (nh - f_height) / 2;
-			
+
 			matrix.scale(scale, scale);
 			matrix.translate(-xDiff, -yDiff);
-			
+
 			var bd: BitmapData = new BitmapData(width, height, true, 0x00000000);
 			bd.draw(this);
-			
+
 			graphics.beginBitmapFill(bd, matrix, false, true);
 			graphics.drawRect(0, 0, f_width, f_height);
 			graphics.endFill();
 		}
-		
-		
+
+
 		private function drawNoDataPreview(graphics: Graphics, f_width: Number, f_height: Number): void
 		{
 			graphics.lineStyle(2, 0xcc0000, 0.7, true);
@@ -367,10 +340,9 @@ package com.iblsoft.flexiweather.ogc
 			graphics.lineTo(f_width - 1, f_height - 1);
 			graphics.moveTo(0, f_height - 1);
 			graphics.lineTo(f_width - 1, 0);
-			
+
 		}
 		*/
-		
 //		private var _tf:TextField = new TextField();
 //		private var _tfBD:BitmapData;
 //		private function drawText(txt: String, gr: Graphics, pos: Point): void
@@ -395,7 +367,6 @@ package com.iblsoft.flexiweather.ogc
 //			gr.drawRect(pos.x, pos.y, tfWidth, tfHeight);
 //			gr.endFill();
 //		}
-		
 //		public function getGTileBBoxForWholeCRS(s_crs: String): BBox
 //		{
 //			var tilingInfo: TiledTilingInfo = m_cfg.getTiledTilingInfoForCRS(s_crs);
@@ -404,7 +375,6 @@ package com.iblsoft.flexiweather.ogc
 //			
 //			return null;
 //		}
-		
 //		private function hideMap(): void
 //		{
 //			var gr: Graphics = graphics; 
@@ -440,58 +410,52 @@ package com.iblsoft.flexiweather.ogc
 //			}
 //			return true;
 //		}
-		
 		override public function destroy(): void
 		{
 			super.destroy();
-			
 			m_tilingUtils = null;
 		}
-		
+
 		override public function baseURLPatternForCRS(crs: String): String
 		{
-			if(ms_explicitBaseURLPattern == null)
+			if (ms_explicitBaseURLPattern == null)
 			{
 				var tilingInfo: TiledTilingInfo;
 				var qttmsConfig: QTTMSLayerConfiguration = m_cfg as QTTMSLayerConfiguration;
 				if (qttmsConfig.tilingCRSsAndExtents && qttmsConfig.tilingCRSsAndExtents.length > 0)
 					tilingInfo = qttmsConfig.getTiledTilingInfoForCRS(crs);
-				
 				if (tilingInfo && tilingInfo.urlPattern)
 					return tilingInfo.urlPattern;
 			}
 			return ms_explicitBaseURLPattern;
-			
 		}
-		
+
 //		private function notifyZoomLevelChange(zoomLevel: int): void
 //		{
 //			var ilqe: InteractiveLayerQTTEvent = new InteractiveLayerQTTEvent(InteractiveLayerQTTEvent.ZOOM_LEVEL_CHANGED, true);
 //			ilqe.zoomLevel = zoomLevel;
 //			dispatchEvent(ilqe);			
 //		}
-		
 		override public function getTiledArea(viewBBox: BBox, zoomLevel: int, tileSize: int): TiledArea
 		{
 			if (m_tilingUtils)
 				return m_tilingUtils.getTiledArea(viewBBox, zoomLevel, tileSize);
-			
 			return null;
 		}
-		
+
 		override public function tiledAreaChanged(newCRS: String, newBBox: BBox): void
 		{
 			if (m_tilingUtils)
 				m_tilingUtils.onAreaChanged(newCRS, newBBox);
 		}
-		
+
 		/*
 		override public function onAreaChanged(b_finalChange: Boolean): void
 		{
 			super.onAreaChanged(b_finalChange);
-			
+
 			var newCRS: String = container.crs;
-			
+
 			//check if CRS is supported
 			if (!isCRSCompatible())
 			{
@@ -499,21 +463,21 @@ package com.iblsoft.flexiweather.ogc
 			}
 			var newBBox: BBox = getGTileBBoxForWholeCRS(newCRS);
 			var viewBBox: BBox = container.getViewBBox();
-			
+
 			updateCurrentWMSViewProperties();
-			
+
 //			trace("onAreaChanged newBBox: " + newBBox);
 //			trace("onAreaChanged viewBBox: " + viewBBox);
-			
+
 			m_tilingUtils.onAreaChanged(newCRS, newBBox);
-			
+
 			if(b_finalChange || zoomLevel < 0) {
 				var i_oldZoom: int = zoomLevel;
-				
+
 				findZoom();
 				if (!isZoomCompatible(zoomLevel))
 					return;
-					
+
 				if(zoomLevel != i_oldZoom)
 				{
 					notifyZoomLevelChange(zoomLevel);
@@ -525,8 +489,6 @@ package com.iblsoft.flexiweather.ogc
 				invalidateDynamicPart();
 		}
 		*/
-		
-		
 //
 //		public function getGTileBBox(s_crs: String, tileIndex: TileIndex): BBox
 //		{
@@ -547,13 +509,11 @@ package com.iblsoft.flexiweather.ogc
 //			
 //			return tileBBox;
 //		}
-		
-		
 		public function get tilingUtils(): TilingUtils
 		{
 			return m_tilingUtils;
 		}
-		
+
 		override public function clone(): InteractiveLayer
 		{
 			var newLayer: InteractiveLayerQTTMS = new InteractiveLayerQTTMS(container, m_cfg as QTTMSLayerConfiguration);
@@ -562,8 +522,6 @@ package com.iblsoft.flexiweather.ogc
 			newLayer.visible = visible;
 			return newLayer;
 		}
-		
-		
 
 //		public function baseURLPatternForCRS(crs: String): String
 //		{
@@ -583,12 +541,10 @@ package com.iblsoft.flexiweather.ogc
 //		{
 //			return baseURLPatternForCRS(container.getCRS());
 //		}
-		
 		override public function toString(): String
 		{
-			return "InteractiveLayerQTTMS " + name  ;
+			return "InteractiveLayerQTTMS " + name;
 		}
-		
 	}
 }
 import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
@@ -597,45 +553,38 @@ import com.iblsoft.flexiweather.ogc.net.loaders.WMSImageLoader;
 import com.iblsoft.flexiweather.ogc.tiling.TileIndex;
 import com.iblsoft.flexiweather.widgets.BackgroundJob;
 import com.iblsoft.flexiweather.widgets.InteractiveWidget;
-
 import flash.net.URLRequest;
 import flash.utils.Dictionary;
-
 import mx.messaging.AbstractConsumer;
-
-
 
 class ViewPartReflectionsHelper
 {
 	private var _dictionary: Dictionary = new Dictionary();
+
 	private var _container: InteractiveWidget;
-	
+
 	function ViewPartReflectionsHelper(iw: InteractiveWidget)
 	{
 		_container = iw;
 	}
-	
+
 	private function getDictionaryKey(viewPart: BBox): String
 	{
-		return viewPart.toBBOXString();	
+		return viewPart.toBBOXString();
 	}
-	
+
 	public function addViewPartReflections(viewPart: BBox): Array
 	{
 		var arr: Array = _container.mapBBoxToViewReflections(viewPart);
 		_dictionary[getDictionaryKey(viewPart)] = arr;
 		return arr;
 	}
-	
+
 	public function getViewPartReflections(viewPart: BBox): Array
 	{
 		if (_dictionary[getDictionaryKey(viewPart)])
-		{
 			return _dictionary[getDictionaryKey(viewPart)];
-		} else {
+		else
 			return addViewPartReflections(viewPart);
-		}
 	}
-	
-	
 }

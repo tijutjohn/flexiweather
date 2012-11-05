@@ -10,38 +10,35 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
-	
 	import spark.components.Group;
 
 	public class TiledLayerConfiguration extends LayerConfiguration implements IInteractiveLayerProvider, ILayerConfiguration, IBehaviouralObject
 	{
 		public var tileMatrixSetLink: TileMatrixSetLink;
-		
+
 		public var ma_behaviours: Array = [];
-		
+
 		public function TiledLayerConfiguration()
 		{
 		}
-		
-		override public function createInteractiveLayer(iw:InteractiveWidget): InteractiveLayer
+
+		override public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer
 		{
 			var l: InteractiveLayerTiled = new InteractiveLayerTiled(iw);
 			l.name = label;
 			l.layerName = label;
 			return l;
 		}
-		
-		
+
 		/**
 		 * Get TiledTilingInfo for given CRS
-		 *  
+		 *
 		 * @param crs
-		 * @return 
-		 * 
-		 */		
+		 * @return
+		 *
+		 */
 		public function getTiledTilingInfoForCRS(crs: String): TiledTilingInfo
 		{
-			
 			//TODO implement TiledLayerConfiguration getTiledTilingInfoForCRS
 //			if (tilingCRSsAndExtents && tilingCRSsAndExtents.length > 0)
 //			{
@@ -55,45 +52,39 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 //			}
 			return null;
 		}
-		
-		override public function destroy():void
+
+		override public function destroy(): void
 		{
 			super.destroy();
-			
 			//TODO implement destroy functionality
-			
 			//destroy tileMatrixSetLink
-			
 			ma_behaviours = null;
-			
 			super.destroy();
 		}
-		
+
 		override public function hasCustomLayerOptions(): Boolean
 		{
 			return false;
 		}
-		
+
 		override public function createCustomLayerOption(layer: IConfigurableLayer): Group
 		{
 			var options: TiledLayerOptions = new TiledLayerOptions();
 			options.layer = layer as InteractiveLayerTiled;
-			return options;	
+			return options;
 		}
-		
+
 		override public function renderPreview(f_width: Number, f_height: Number, iw: InteractiveWidget = null): void
 		{
 			if (!iw)
 				iw = new InteractiveWidget();
-			
 			var l: InteractiveLayerTiled = createInteractiveLayer(iw) as InteractiveLayerTiled;
 			l.renderPreview(l.graphics, f_width, f_height);
 		}
-		
+
 		override public function isCompatibleWithCRS(s_crs: String): Boolean
 		{
 			//TODO implement TiledLayerConfiguration isCompatibleWithCRS
-			
 //			for each(var qtTilingInfo: TiledTilingInfo in tilingCRSsAndExtents) {
 //				var crsWithBBox: CRSWithBBox = qtTilingInfo.crsWithBBox;  
 //				if(crsWithBBox && crsWithBBox.crs == s_crs)
@@ -101,27 +92,33 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 //			}
 			return false;
 		}
-		
+
 		// IBehaviouralObject implementation
 		public function setBehaviourString(s_behaviourId: String, s_value: String): void
-		{ 
-			ma_behaviours[s_behaviourId] = s_value; 
+		{
+			ma_behaviours[s_behaviourId] = s_value;
 		}
-		
+
 		public function getBehaviourString(s_behaviourId: String, s_default: String = null): String
 		{
 			return (s_behaviourId in ma_behaviours) ? ma_behaviours[s_behaviourId] : s_default;
 		}
-		
+
 		public function hasBehaviourString(s_behaviourId: String): Boolean
-		{ return s_behaviourId in ma_behaviours; }
-		
+		{
+			return s_behaviourId in ma_behaviours;
+		}
+
 		public function get behaviours(): Array
-		{ return ma_behaviours; }
-		
+		{
+			return ma_behaviours;
+		}
+
 		public function get serviceType(): String
-		{ return "Tiled"; }
-		
+		{
+			return "Tiled";
+		}
+
 		override public function toString(): String
 		{
 //			if (tilingCRSsAndExtents && tilingCRSsAndExtents.length > 0)
@@ -134,6 +131,5 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 //			}
 			return 'TiledLayerConfiguration with NO TILING info';
 		}
-		
 	}
 }

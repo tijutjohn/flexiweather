@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.plugins
 {
+
 	// Interface for "Action" Plugin Ability - a button in the Action Toolbar  
 	public interface IAction extends IAbility
 	{

@@ -8,12 +8,13 @@ package com.iblsoft.flexiweather.utils
 		{
 			return getTimer();
 		}
+
 		/**
-		 * Return time interval in seconds 
+		 * Return time interval in seconds
 		 * @param startTime
-		 * @return 
-		 * 
-		 */		
+		 * @return
+		 *
+		 */
 		static public function stopProfileTimer(startTime: Number): Number
 		{
 			var diff: Number = getTimer() - startTime;

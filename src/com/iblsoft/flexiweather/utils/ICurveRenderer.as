@@ -2,7 +2,7 @@ package com.iblsoft.flexiweather.utils
 {
 	import flash.display.Graphics;
 	import flash.geom.Point;
-	
+
 	/**
 	 * Abstract interface for curve rendering (user by CubicBezier)
 	 **/

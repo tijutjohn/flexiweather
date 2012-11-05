@@ -3,7 +3,7 @@ package com.iblsoft.flexiweather.plugins
 	import com.iblsoft.flexiweather.ogc.editable.IInteractiveLayerProvider;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
-	
+
 	// Supporting interface for ILayerChangeListener's management
 	public interface ILayerManager
 	{

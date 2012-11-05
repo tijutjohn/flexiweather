@@ -4,6 +4,6 @@ package com.iblsoft.flexiweather.ogc.wfs
 
 	public interface IWFSFeatureWithAnnotation
 	{
-		function get annotation(): AnnotationBox;	
+		function get annotation(): AnnotationBox;
 	}
 }

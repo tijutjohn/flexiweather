@@ -29,7 +29,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayout;
 	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayoutObject;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
-	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.Sprite;
@@ -40,27 +39,27 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import flash.net.URLRequest;
 	import flash.utils.Dictionary;
 	import flash.utils.getTimer;
-	
 	import mx.states.OverrideBase;
 	import mx.utils.object_proxy;
-	
+
 	/**
 	 * Main class for KML feature
-	 *  
+	 *
 	 * @author fkormanak
-	 * 
-	 */	
+	 *
+	 */
 	public class KMLFeature extends FeatureBase
 	{
 		public static const VISIBILITY_CHANGE: String = 'visibilityChange';
-		
+
 		public static const ICON_TYPE_NORMAL: String = 'normal';
+
 		public static const ICON_TYPE_HIGHLIGHTED: String = 'highlighted';
-		
+
 		private var _displaySprites: Array = [];
-		
+
 		public var featureScale: Number = 1;
-		
+
 		public function removeDisplaySprite(sprite: Sprite): void
 		{
 			var total: int = _displaySprites.length;
@@ -73,17 +72,19 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				}
 			}
 		}
+
 		public function get displaySpritesLength(): int
 		{
 			if (_displaySprites)
 				return _displaySprites.length;
-			
 			return 0;
 		}
+
 		public function addDisplaySprite(sprite: Sprite): void
 		{
 			_displaySprites.push(sprite);
 		}
+
 		public function get visibleDisplaySprite(): Sprite
 		{
 			var containerWidth: int = master.container.width;
@@ -94,186 +95,188 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			}
 			return null;
 		}
-		
-		override public function set x(value:Number):void
+
+		override public function set x(value: Number): void
 		{
 			super.x = value;
 //			trace("feature: x: " + x);
 			notifyPositionChange();
 		}
-		override public function set y(value:Number):void
+
+		override public function set y(value: Number): void
 		{
 			super.y = value;
 //			trace("feature: y: " + y);
 			notifyPositionChange();
 		}
-		override public function set visible(value:Boolean):void
+
+		override public function set visible(value: Boolean): void
 		{
 			var oldValue: Boolean = super.visible;
-			
 			super.visible = value;
 			if (value != oldValue)
-			{
 				notifyVisibilityChange();
-			}
 		}
-		
-		
-		private var _xmlList:XMLList;
-		
-		public var _name:String;
-		public var _id:String;
+
+		private var _xmlList: XMLList;
+
+		public var _name: String;
+
+		public var _id: String;
+
 		//		public var _link: com.adobe.xml.syndication.atom.Link;
-		public var _visibility:Boolean = true;
-		public var _open:Boolean = false;
+		public var _visibility: Boolean = true;
+
+		public var _open: Boolean = false;
+
 		//		public var _author:Author;
-		public var _snippet:String;
-		
-		public var _styleUrl:String;
+		public var _snippet: String;
+
+		public var _styleUrl: String;
+
 		public var _styleSelector: StyleSelector;
-		
+
 		public var _lookAt: LookAt;
-		
-		public var _description:String;
-		
+
+		public var _description: String;
+
 		private var _parentDocument: Document;
-		
+
 //		private var _kmlIcon: KMLIcon;
 		private var _kmlLabel: KMLLabel;
+
 		private var _region: Region;
-		
+
 //		public function get kmlIcon(): KMLIcon
 //		{
 //			return _kmlIcon;
 //		}
-		public function get kmlLabel(): KMLLabel 
+		public function get kmlLabel(): KMLLabel
 		{
 			return _kmlLabel;
 		}
-		
+
 		private var _kml: KML
+
 		public function get kml(): KML
 		{
 			return _kml;
 		}
-		
+
 		protected var _kmlReflectionDictionary: KMLFeaturesReflectionDictionary;
+
 		public function get kmlReflectionDictionary(): KMLFeaturesReflectionDictionary
 		{
 			return _kmlReflectionDictionary
 		}
-		
+
 		private var _kmlns: Namespace;
+
 		public function get kmlns(): Namespace
 		{
 			if (!_kmlns)
 				_kmlns = new Namespace(ms_namespace);
-			
 			return _kmlns;
 		}
+
 		public function KMLFeature(kml: KML, s_namespace: String, s_xml: XMLList)
 		{
 			super(s_namespace, null, null);
-		
 			_kml = kml;
-			
-			
 			_xmlList = s_xml;
-			
 			init();
-			
 		}
-		
+
 		private var _iconState: String;
+
 		private function set iconState(value: String): void
 		{
 			_iconState = value;
 		}
+
 		public function get state(): String
 		{
 			return _iconState;
 		}
+
 		public function get isHighlighted(): Boolean
 		{
 			return _iconState == ICON_TYPE_HIGHLIGHTED;
 		}
-		
+
 		public function showNormal(): void
 		{
 			iconState = ICON_TYPE_NORMAL;
-			
 			update(FeatureUpdateContext.fullUpdate());
 		}
+
 		public function showHighlight(): void
 		{
 			iconState = ICON_TYPE_HIGHLIGHTED;
-			
 			update(FeatureUpdateContext.fullUpdate());
 		}
-		
+
 		private var _normalStyle: StyleSelector;
+
 		private var _highlightStyle: StyleSelector;
-		public function get normalStyle():StyleSelector
+
+		public function get normalStyle(): StyleSelector
 		{
 			return _normalStyle;
 		}
-		
-		public function set normalStyle(value:StyleSelector):void
+
+		public function set normalStyle(value: StyleSelector): void
 		{
 			_normalStyle = value;
-			
 			update(FeatureUpdateContext.fullUpdate());
 		}
-		
-		public function get highlightStyle():StyleSelector
+
+		public function get highlightStyle(): StyleSelector
 		{
 			return _highlightStyle;
 		}
-		
-		public function set highlightStyle(value:StyleSelector):void
+
+		public function set highlightStyle(value: StyleSelector): void
 		{
 			_highlightStyle = value;
 		}
-		
-		
-		
+
 		private var _normalResourceKey: KMLResourceKey;
+
 		private var _highlightResourceKey: KMLResourceKey;
-		
+
 		public function setNormalBitmapResourceKey(key: KMLResourceKey): void
 		{
 			_normalResourceKey = key;
 		}
+
 		public function setHighlightBitmapResourceKey(key: KMLResourceKey): void
 		{
 			_highlightResourceKey = key;
 		}
-		
-		
+
 		public function init(): void
 		{
 			showNormal();
-			
 			mouseEnabled = true;
 			mouseChildren = true;
 			doubleClickEnabled = true;
 			addEventListener(MouseEvent.CLICK, onKMLFeatureClick);
 		}
-		
-		override public function setMaster(master:InteractiveLayerFeatureBase):void
+
+		override public function setMaster(master: InteractiveLayerFeatureBase): void
 		{
 			super.setMaster(master);
-			
 			_kmlReflectionDictionary = new KMLFeaturesReflectionDictionary(master.container);
 			_kmlReflectionDictionary.addEventListener(ReflectionEvent.ADD_REFLECTION, onKMLAddReflection);
 			_kmlReflectionDictionary.addEventListener(ReflectionEvent.REMOVE_REFLECTION, onKMLRemoveReflection);
 		}
-		
+
 		protected function get currentCoordinates(): Array
 		{
 			return coordinates;
 		}
-		
+
 		override public function getExtent(): CRSWithBBox
 		{
 			var a_coordinates: Array = currentCoordinates;
@@ -282,81 +285,67 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				//point has no bounding box
 				return null;
 			}
-		
 			return getExtentFromCoordinates(a_coordinates);
-			
 		}
-		
+
 		protected function addLabelToAnticollisionLayout(kmlLabel: KMLLabel): void
 		{
-			
 		}
+
 		protected function removeLabelFromAnticollisionLayout(kmlLabel: KMLLabel): void
 		{
-			
 		}
+
 		protected function removeReflection(reflection: KMLReflectionData): void
 		{
 			var kmlSprite: KMLSprite = reflection.displaySprite as KMLSprite;
 			removeLabelFromAnticollisionLayout(kmlSprite.kmlLabel);
-			
 			removeChild(kmlSprite);
 			removeDisplaySprite(kmlSprite);
-			
 			kmlSprite.kmlLabel = null;
 			kmlLabel.cleanup();
-			
 		}
+
 		protected function onKMLRemoveReflection(event: ReflectionEvent): void
 		{
 			//remove whole reflection
 			var reflection: KMLReflectionData = event.reflection as KMLReflectionData;
-			removeReflection(reflection);			
+			removeReflection(reflection);
 		}
-		
+
 		protected function onKMLAddReflection(event: ReflectionEvent): void
 		{
 			update(FeatureUpdateContext.fullUpdate());
 //			updateCoordsReflections();
 		}
-		
+
 		protected function updateCoordsReflections(): void
 		{
-			
 			//FIXME need to chack correct coordinate e.g. for Placemark Polygon
 			_kmlReflectionDictionary.cleanup();
-			
 			var reflectionIDs: Array = _kmlReflectionDictionary.reflectionIDs;
-			
 			var currCoordinates: Array = currentCoordinates;
 			var total: int = currentCoordinates.length;
-			
-			
-			
 			var coordsPosition: Array = [];
 			for (var i: int = 0; i < total; i++)
 			{
 				coordsPosition.push(i);
 			}
-			
 			var invisibleCoordsPositions: Array = updateCoordsReflectionsForSpecifiedCoordinates(coordsPosition, true);
-			
 			if (invisibleCoordsPositions.length > 0 && invisibleCoordsPositions.length < total)
 			{
 				/**
-				 * feature is partly visible, add all coordinates, otherwise there can be problem with rendering KML 
+				 * feature is partly visible, add all coordinates, otherwise there can be problem with rendering KML
 				 * e.g. position of each KMLFeature is taken from first coordinates and if it is not present in returned points, KML feature will be renderer on wrong position
 				 */
 				invisibleCoordsPositions = updateCoordsReflectionsForSpecifiedCoordinates(invisibleCoordsPositions, false);
 				if (invisibleCoordsPositions.length > 0)
-				{
 					trace("invisibleCoordsPositions should be empty now");
-				}
-//			} else {
+					//			} else {
 //				trace("updateCoordsReflectionsForSpecifiedCoordinates correct, nothing needs to be added");
 			}
 		}
-		
+
 		private function updateCoordsReflectionsForSpecifiedCoordinates(coords: Array, bCheckCoordIsInside: Boolean): Array
 		{
 			var iw: InteractiveWidget = master.container;
@@ -364,10 +353,8 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			var projection: Projection = iw.getCRSProjection();
 			var viewBBox: BBox = iw.getViewBBox();
 			var currCoordinates: Array = currentCoordinates;
-			
 //			var visibleCoords: int = 0;
 			var invisibleCoords: Array = [];
-			
 			for each (var i: int in coords)
 			{
 				var coord: Coord = currCoordinates[i] as Coord;
@@ -376,14 +363,11 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				{
 					//conver to InteractiveWidget CRS
 					coordPointForReflection = coord.convertToProjection(projection);
-					
-				} else {
-					coordPointForReflection = new flash.geom.Point(coord.x, coord.y);
 				}
-				
+				else
+					coordPointForReflection = new flash.geom.Point(coord.x, coord.y);
 				var pointReflections: Array = iw.mapCoordInCRSToViewReflections(coordPointForReflection);
 				var reflectionsCount: int = pointReflections.length;
-				
 				for (var j: int = 0; j < reflectionsCount; j++)
 				{
 					var pointReflectedObject: Object = pointReflections[j];
@@ -398,36 +382,31 @@ package com.iblsoft.flexiweather.ogc.kml.features
 					_kmlReflectionDictionary.addReflectedCoordAt(coordReflected, i, j, pointReflectedObject.reflection);
 				}
 			}
-			
 			return invisibleCoords;
 		}
+
 		/**
-		 * Returns "active" flag for Feature. If there is no Region and LOD present, it will return always true. Otherwise it will return correct value dependent on size of  
-		 * @return 
-		 * 
-		 */		
+		 * Returns "active" flag for Feature. If there is no Region and LOD present, it will return always true. Otherwise it will return correct value dependent on size of
+		 * @return
+		 *
+		 */
 		public function isActive(w: int, h: int): Boolean
 		{
 			return true;
-			
 			if (!_region)
 				return true;
-		
 			if (_region.lod)
 			{
 				var minLodPixels: Number = _region.lod.minLodPixels;
 				var maxLodPixels: Number = _region.lod.maxLodPixels;
-			
-				if (w >= minLodPixels  && w <= maxLodPixels && h >= minLodPixels && h <= maxLodPixels)
-				{
+				if (w >= minLodPixels && w <= maxLodPixels && h >= minLodPixels && h <= maxLodPixels)
 					return true;
-				} else {
+				else
 					return false;
-				}
 			}
 			return true;
 		}
-		
+
 		protected function cleanupIcon(): void
 		{
 //			if (_kmlIcon)
@@ -437,22 +416,19 @@ package com.iblsoft.flexiweather.ogc.kml.features
 //				
 //				_kmlIcon = null;
 //			}
-			
 			var resourceManager: KMLResourceManager = kml.resourceManager;
 			resourceManager.disposeResource(_normalResourceKey);
 			resourceManager.disposeResource(_highlightResourceKey);
-			
 			_normalResourceKey = null;
 			_highlightResourceKey = null;
 		}
-		
-		
+
 		protected function createIcon(): void
 		{
 //			_kmlIcon = new KMLIcon(this);
 //			addChild(_kmlIcon);
 		}
-		
+
 		protected function cleanupKMLLabel(): void
 		{
 			if (_kmlLabel)
@@ -463,28 +439,25 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				_kmlLabel = null;
 			}
 		}
-		
+
 		protected function createKMLLabel(parent: Sprite): KMLLabel
 		{
 			//reuse KMLLabels
 			_kmlLabel = kml.resourceManager.getKMLLabel();
 			_kmlLabel.visible = true;
-			
-			trace("\t KMLFeature createKMLLabel ["+_kmlLabel.id+"]: " + _kmlLabel.text);
-			
+			trace("\t KMLFeature createKMLLabel [" + _kmlLabel.id + "]: " + _kmlLabel.text);
 			_kmlLabel.reflection = (parent as KMLSprite).reflection;
 //			parent.addChild(_kmlLabel);
-			
 			return _kmlLabel
 		}
-		
+
 		/*
 		private var _listenersArray: Dictionary = new Dictionary();
-		
+
 		public override function addEventListener(type:String, listener:Function, useCapture:Boolean=false, priority:int=0, useWeakReference:Boolean=false):void
 		{
 			super.addEventListener(type, listener, useCapture, priority, useWeakReference);
-			
+
 			if (!_listenersArray[type]) {
 				_listenersArray[type] = 1;
 			} else {
@@ -492,26 +465,23 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			}
 			trace("KMLFeature addEventListener ["+type+"]: " + _listenersArray[type]);
 		}
-		
+
 		public override function removeEventListener(type:String, listener:Function, useCapture:Boolean=false):void
 		{
 			super.removeEventListener(type, listener, useCapture);
-			
+
 			trace("KMLFeature removeEventListener ["+type+"]: " + _listenersArray[type]);
 			delete _listenersArray[type];
 		}
 		*/
-		
 		public override function cleanup(): void
 		{
 			removeEventListener(MouseEvent.CLICK, onKMLFeatureClick);
-			
 			if (master && master.container)
 			{
 				var kmlSprite: KMLSprite;
 				var kmlLabel: KMLLabel;
 				var reflection: KMLReflectionData;
-				
 				var totalReflections: int = kmlReflectionDictionary.totalReflections;
 				for (var i: int = 0; i < totalReflections; i++)
 				{
@@ -522,50 +492,39 @@ package com.iblsoft.flexiweather.ogc.kml.features
 						kmlLabel = kmlSprite.kmlLabel;
 						master.container.labelLayout.removeObject(reflection.displaySprite);
 						master.container.labelLayout.removeObject(kmlLabel);
-						
 						if (kmlSprite.parent)
-						{
-							kmlSprite.parent.removeChild(kmlSprite); 
-						}
+							kmlSprite.parent.removeChild(kmlSprite);
 					}
 				}
-				
 //				master.container.labelLayout.removeObject(this);
 //				master.container.labelLayout.removeObject(_kmlLabel);
-				
 				master.container.objectLayout.removeObject(this);
-				
 			}
-			
 			_itemRendererInstance = null;
-			
 			previous = null;
 			next = null;
 			cleanupIcon();
 			cleanupKMLLabel();
-			
 			cleanupKML();
-			
 			super.cleanup();
 		}
-		
+
 		private function onKMLFeatureClick(event: MouseEvent): void
 		{
 			var kfe: KMLFeatureEvent = new KMLFeatureEvent(KMLFeatureEvent.KML_FEATURE_CLICK, true);
 			kfe.kmlFeature = this;
 			dispatchEvent(kfe);
 		}
-		
+
 		public function parse(s_namespace: String, kmlParserManager: KMLParserManager): void
 		{
 			parseKML(s_namespace, kmlParserManager);
 		}
-		
+
 		public function cleanupKML(): void
 		{
 			_kml = null;
 			_xmlList = null;
-			
 			if (_styleSelector)
 			{
 				_styleSelector.cleanupKML();
@@ -582,95 +541,83 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				_region = null;
 			}
 		}
-		
+
 		protected function parseKML(s_namespace: String, kmlParserManager: KMLParserManager): void
 		{
 			if (!_xmlList)
 				return;
-			
 			_kmlns = new Namespace(s_namespace);
-			
 			this._id = ParsingTools.nullCheck(_xmlList.@id);
 			this._name = ParsingTools.nullCheck(_xmlList.kmlns::name);
-			
 			this._description = ParsingTools.nullCheck(_xmlList.kmlns::description);
 			this._snippet = ParsingTools.nullCheck(_xmlList.kmlns::Snippet);
 			this._styleUrl = ParsingTools.nullCheck(_xmlList.kmlns::styleUrl);
-			
-			if (ParsingTools.nullCheck(this.xml.kmlns::Style)) {
+			if (ParsingTools.nullCheck(this.xml.kmlns::Style))
 				this._styleSelector = new Style(kml, ms_namespace, this.xml.kmlns::Style, parentDocument);
-			}
-			if (ParsingTools.nullCheck(this.xml.kmlns::StyleMap)) {
+			if (ParsingTools.nullCheck(this.xml.kmlns::StyleMap))
 				this._styleSelector = new StyleMap(kml, ms_namespace, this.xml.kmlns::StyleMap, parentDocument);
-			}
-			if (ParsingTools.nullCheck(this.xml.kmlns::LookAt)) {
+			if (ParsingTools.nullCheck(this.xml.kmlns::LookAt))
 				this._lookAt = new LookAt(ms_namespace, this.xml.kmlns::LookAt);
-			}
-			if (ParsingTools.nullCheck(this.xml.kmlns::Region)) {
+			if (ParsingTools.nullCheck(this.xml.kmlns::Region))
 				this._region = new Region(ms_namespace, this.xml.kmlns::Region);
-			}
-			
-//			trace("Feature name: " + _name + " ID: " + _id);
+			//			trace("Feature name: " + _name + " ID: " + _id);
 //			trace("\t description: " + _description);
 //			trace("\t snippet: " + _snippet);
-			
 			dispatchEvent(new Event("nameChanged"));
-			
 			/*
 			if (ParsingTools.nullCheck(_xmlList.atom::link) != null) {
 			this._link = new com.adobe.xml.syndication.atom.Link::Link(_xmlList.atom::link);
 			}
-			
+
 			if (ParsingTools.nullCheck(_xmlList.atom::author) != null) {
 			this._author = new Author(_xmlList.atom::author);
 			}
 			*/
-			
-			var visibility:Number = ParsingTools.nanCheck(_xmlList.kmlns::visibility);
-			if (visibility == 1) {
+			var visibility: Number = ParsingTools.nanCheck(_xmlList.kmlns::visibility);
+			if (visibility == 1)
 				this._visibility = true;
-			} else if (visibility == 0) {
+			else if (visibility == 0)
 				this._visibility = false;
-			}
-			
-			var open:Number = ParsingTools.nanCheck(_xmlList.kmlns::open);
-			if (open == 1) {
+			var open: Number = ParsingTools.nanCheck(_xmlList.kmlns::open);
+			if (open == 1)
 				this._open = true;
-			} else if (open == 0) {
+			else if (open == 0)
 				this._open = false;
-			}
 		}
-		
+
 		private var _itemRendererInstance: IKMLRenderer;
+
 		public function setItemRenderer(itemRendererInstance: IKMLRenderer): void
 		{
 			_itemRendererInstance = itemRendererInstance;
 		}
-		
+
 		private function getKMLVisibility(): Boolean
 		{
 			if (!visibility)
-			{
 				return false;
-			} else {
+			else
+			{
 				if (parentFeature && parentFeature is KMLFeature)
 					return (parentFeature as KMLFeature).visibility;
 			}
 			return true;
 		}
+
 		public function notifyVisibilityChange(): void
 		{
 			var kfe: KMLFeatureEvent = new KMLFeatureEvent(KMLFeatureEvent.KML_FEATURE_VISIBILITY_CHANGE, true);
 			kfe.kmlFeature = this;
 			dispatchEvent(kfe);
 		}
-		
+
 		public function notifyPositionChange(): void
 		{
 			var kfe: KMLFeatureEvent = new KMLFeatureEvent(KMLFeatureEvent.KML_FEATURE_POSITION_CHANGE, true);
 			kfe.kmlFeature = this;
 			dispatchEvent(kfe);
 		}
+
 		/**
 		 * @langversion ActionScript 3.0
 		 * @playerversion Flash 8.5
@@ -680,11 +627,12 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		{
 			return _parentDocument;
 		}
+
 		public function set parentDocument(value: Document): void
 		{
 			_parentDocument = value;
 		}
-		
+
 		/**
 		 * Get the XML used to populate the NewsFeedElement.
 		 *
@@ -692,11 +640,11 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		 * @playerversion Flash 8.5
 		 * @tiptext
 		 */
-		public function get xml():XMLList
+		public function get xml(): XMLList
 		{
 			return _xmlList;
 		}
-		
+
 		/**
 		 * Set the XML used to populate the NewsFeedElement.
 		 *
@@ -705,54 +653,49 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		 * @playerversion Flash 8.5
 		 * @tiptext
 		 */
-		public function set xml(x:XMLList):void
+		public function set xml(x: XMLList): void
 		{
 			_xmlList = x;
 		}
-		
+
 		/**
 		 *	The string in the name tag.
-		 */	
-		[Bindable (event="nameChanged")]
-		public override function get name():String
+		 */
+		[Bindable(event = "nameChanged")]
+		public override function get name(): String
 		{
 			return this._name;
 		}
-		
+
 		public function get style(): StyleSelector
 		{
 			if (_styleUrl && _parentDocument)
-			{
 				var currStyle: StyleSelector = _parentDocument.getStyleSelectorByID(_styleUrl);
-			}
 			var hasStyle: Boolean = _styleSelector != null;
 			var hasStyleURL: Boolean = (currStyle != null)
-				
 			//check current style first
 			if (hasStyle && !hasStyleURL)
 				return _styleSelector;
 			if (!hasStyle && hasStyleURL)
 				return currStyle;
-			
 			if (hasStyle && hasStyleURL)
 			{
 				//has both, check what to do
-				
 				//for now return style by styleURL
 				return currStyle;
 			}
 			return null;
 		}
+
 		/**
 		 *	An array containing one or more link objects relating to this entry.
-		 */	
+		 */
 		/*
 		public function get link(): com.adobe.xml.syndication.atom.Link::Link
-		{	
+		{
 		return this._link;
 		}
 		*/
-		
 		public function changeVisibility(value: Boolean): void
 		{
 			if (this._visibility != value)
@@ -761,21 +704,22 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				dispatchEvent(new Event(VISIBILITY_CHANGE));
 			}
 		}
-		
-		public function get visibility():Boolean
+
+		public function get visibility(): Boolean
 		{
 			return this._visibility;
 		}
-		public function get kmlVisibility():Boolean
+
+		public function get kmlVisibility(): Boolean
 		{
 			return getKMLVisibility();
 		}
-		
+
 		public function get region(): Region
 		{
 			return this._region;
 		}
-		
+
 		/**
 		 *	A String that uniquely identifies the Entry.
 		 *
@@ -785,53 +729,51 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		 * 	@langversion ActionScript 3.0
 		 *	@playerversion Flash 8.5
 		 *	@tiptext
-		 */	
-		public function get open():Boolean
+		 */
+		public function get open(): Boolean
 		{
 			return this._open;
 		}
-		
-		
+
 		/**
 		 *	An Array of Author objects that represent the authors for the entry.
 		 *
 		 * 	@langversion ActionScript 3.0
 		 *	@playerversion Flash 8.5
 		 *	@tiptext
-		 */	
+		 */
 		/*
 		public function get author():Author
 		{
 		return this._author;
 		}
 		*/
-		
-		
 		/**
 		 *	A Content object that contains the content of the entry.
 		 *
 		 * 	@langversion ActionScript 3.0
 		 *	@playerversion Flash 8.5
 		 *	@tiptext
-		 */	
-		public function get description():String
+		 */
+		public function get description(): String
 		{
 			return this._description;
 		}
-		
+
 		/**
 		 *	A Content object that contains the content of the entry.
 		 *
 		 * 	@langversion ActionScript 3.0
 		 *	@playerversion Flash 8.5
 		 *	@tiptext
-		 */	
-		public function get snippet():String
+		 */
+		public function get snippet(): String
 		{
 			return this._snippet;
 		}
-		
-		public override function toString():String {
+
+		public override function toString(): String
+		{
 			//			return super.toString() + "name: " + _name +
 			//				   "id: " + _id +
 			//				   "link: " + _link +
@@ -842,41 +784,40 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			//				   "description: " + description +
 			//				   "\n";
 			return super.toString() + "name: " + _name +
-				"id: " + _id +
-				"visibility: " + _visibility +
-				"open: " + _open +
-				"snippet: " + snippet +
-				"description: " + description +
-				"\n";
+					"id: " + _id +
+					"visibility: " + _visibility +
+					"open: " + _open +
+					"snippet: " + snippet +
+					"description: " + description +
+					"\n";
 		}
-		
+
 		/**
 		 *  Debug functions
-		 * 
+		 *
 		 */
-		
 		protected function startProfileTimer(): int
 		{
 			return ProfilerUtils.startProfileTimer();
 		}
+
 		/**
-		 * Return time interval in seconds 
+		 * Return time interval in seconds
 		 * @param startTime
-		 * @return 
-		 * 
-		 */		
+		 * @return
+		 *
+		 */
 		protected function stopProfileTimer(startTime: int): Number
 		{
 			return ProfilerUtils.stopProfileTimer(startTime);
 		}
-		
+
 		public static var debugConsole: IConsole;
+
 		public function debug(txt: String): void
 		{
 			if (debugConsole)
-			{
-				debugConsole.print("KMLFeature: " + txt,'Info','KMLFeature');
-			}
+				debugConsole.print("KMLFeature: " + txt, 'Info', 'KMLFeature');
 		}
 	}
 }

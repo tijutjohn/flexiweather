@@ -7,14 +7,14 @@ package com.iblsoft.flexiweather.widgets.basicauth.controls
 	{
 		/**
 		 * Needs to dispatch BasicAuthEvent.CREDENTIALS_READY with filled up username and password
-		 * 
+		 *
 		 * @param username
 		 * @param password
 		 * @param domain
 		 * @param realm
-		 * @param data UniURLLoaderData returned by UniURLLoaderBasicAuthManager.createRequest (or addRequest) before showing BasiAuth credentials popup 
-		 * 
-		 */		
+		 * @param data UniURLLoaderData returned by UniURLLoaderBasicAuthManager.createRequest (or addRequest) before showing BasiAuth credentials popup
+		 *
+		 */
 		function login(username: String, password: String, domain: String, realm: String, data: UniURLLoaderData): void;
 		function cancelAuthentication(domain: String, realm: String, data: UniURLLoaderData): void;
 	}

@@ -14,14 +14,12 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 	import com.iblsoft.flexiweather.utils.ISO8601Parser;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
-	
 	import flash.display.Bitmap;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.net.URLRequest;
 	import flash.net.URLVariables;
 	import flash.utils.Dictionary;
-	
 	import mx.collections.ArrayCollection;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.ogc.data.ImagePart;
@@ -34,25 +32,19 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		 * this is just debug variable. Do not use it for implementation purpose, can be removed anytime.
 		 */
 		public var parentLayer: InteractiveLayerMSBase;
-		
 		public var name: String;
-		
 		private var _m_cfg: IWMSLayerConfiguration;
-		
 		protected var md_dimensionValues: Dictionary = new Dictionary();
-		protected var md_customParameters: Dictionary = new Dictionary(); 
+		protected var md_customParameters: Dictionary = new Dictionary();
 		protected var ma_subLayerStyleNames: Array = [];
-		
-		
 		protected var ma_imageParts: ArrayCollection = new ArrayCollection(); // of ImagePart
 
-
-		public function get m_cfg():IWMSLayerConfiguration
+		public function get m_cfg(): IWMSLayerConfiguration
 		{
 			return _m_cfg;
 		}
 
-		public function set m_cfg(value:IWMSLayerConfiguration):void
+		public function set m_cfg(value: IWMSLayerConfiguration): void
 		{
 			_m_cfg = value;
 		}
@@ -61,53 +53,55 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		{
 			return ma_imageParts;
 		}
-
-		
 		/**
-		 * Bitmap image holder for legend 
+		 * Bitmap image holder for legend
 		 */
 		protected var m_legendImage: Bitmap = null;
+
 		public function set legendImage(bmp: Bitmap): void
 		{
 			m_legendImage = bmp;
 		}
+
 		public function get legendImage(): Bitmap
 		{
 			return m_legendImage;
 		}
-		
 		public var crs: String;
-		
 		private var _viewBBox: BBox;
+
 		public function getViewBBox(): BBox
 		{
 			return _viewBBox
 		}
+
 		public function setViewBBox(bbox: BBox): void
 		{
 			_viewBBox = bbox;
 		}
-		
 		private var m_url: URLRequest;
+
 		public function get url(): URLRequest
 		{
 			return m_url
 		}
+
 		public function set url(value: URLRequest): void
 		{
-			m_url = value;	
+			m_url = value;
 		}
-		
 		private var _validity: Date;
-		public function get validity():Date
+
+		public function get validity(): Date
 		{
 			return _validity;
 		}
+
 		public function setValidityTime(validity: Date): void
 		{
 			_validity = validity;
 		}
-		
+
 		public function get dimensions(): Array
 		{
 			var dimNames: Array = getWMSDimensionsNames();
@@ -119,18 +113,18 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					var value: Object = getWMSDimensionValue(dimName);
 					if (value)
 						ret.push({name: dimName, value: value});
-					else 
+					else
 						ret.push({name: dimName, value: null});
 				}
 				return ret;
 			}
 			return null;
 		}
-		
+
 		public function WMSViewProperties()
 		{
 		}
-		
+
 		public function destroy(): void
 		{
 			m_cfg = null;
@@ -140,7 +134,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 			if (ma_imageParts && ma_imageParts.length > 0)
 			{
 				for each (var imagePart: ImagePart in ma_imageParts)
-					imagePart.destroy(); 
+					imagePart.destroy();
 			}
 			ma_imageParts = null;
 			if (m_legendImage && m_legendImage.bitmapData)
@@ -151,9 +145,8 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 			_viewBBox = null;
 			m_url = null;
 			_validity = null;
-			
 		}
-		
+
 		public function addImagePart(imagePart: ImagePart): void
 		{
 			ma_imageParts.addItem(imagePart);
@@ -161,85 +154,77 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 //				trace("WMSViewProperties.addImagePart: " + ma_imageParts.length + " ["+parentLayer+"]");
 //			else
 //				trace("WMSViewProperties.addImagePart: " + ma_imageParts.length + " ["+this+"]");
-			
 		}
-		
+
 		public function setConfiguration(cfg: ILayerConfiguration): void
 		{
 			if (cfg is IWMSLayerConfiguration)
 				m_cfg = cfg as IWMSLayerConfiguration;
 		}
-		
-		
+
 		public function serialize(storage: Storage): void
 		{
 			//super.serialize(storage);
 			var s_dimName: String;
-			
 			var styleName: String;
 			if (storage.isLoading())
 			{
 				styleName = storage.serializeString("style-name", name);
 				if (styleName)
 					setWMSStyleName(0, styleName);
-				
-				for each(s_dimName in getWMSDimensionsNames()) {
+				for each (s_dimName in getWMSDimensionsNames())
+				{
 					var level: String = storage.serializeString(s_dimName, null, null);
 					if (level)
-						setWMSDimensionValue('ELEVATION', level );
+						setWMSDimensionValue('ELEVATION', level);
 				}
-				
-			} else {
+			}
+			else
+			{
 				styleName = getWMSStyleName(0);
 				if (styleName)
 					storage.serializeString("style-name", styleName, null);
-				
-				for each(s_dimName in getWMSDimensionsNames()) {
+				for each (s_dimName in getWMSDimensionsNames())
+				{
 					if (s_dimName.toLowerCase() == 'elevation')
 						storage.serializeString(GlobalVariable.LEVEL, getWMSDimensionValue(s_dimName), null);
 				}
 			}
 		}
-		
+
 		/**
-		 * Return true is viewProperties is same 
-		 *  
+		 * Return true is viewProperties is same
+		 *
 		 * @param viewProperties
-		 * @return 
-		 * 
-		 */		
+		 * @return
+		 *
+		 */
 		public function equals(viewProperties: WMSViewProperties): Boolean
 		{
 			var currDimNames: Array = getWMSDimensionsNames();
 			var dimNames: Array = viewProperties.getWMSDimensionsNames();
-			
 			if (!dimNames || !currDimNames)
 				return false;
-			
 			if (dimNames && currDimNames && dimNames.length != currDimNames.length)
 				return false;
-			
 			//check dimensions names
 			dimNames.sort();
 			currDimNames.sort();
 			var total: int = dimNames.length;
 			for (var i: int = 0; i < total; i++)
 			{
-				var dimName: String = dimNames[i] as String; 
-				var currDimName: String = currDimNames[i] as String; 
+				var dimName: String = dimNames[i] as String;
+				var currDimName: String = currDimNames[i] as String;
 				if (dimName != currDimName)
 					return false;
-				
 				var dimValue: Object = getWMSDimensionValue(dimName);
 				var currDimValue: Object = viewProperties.getWMSDimensionValue(dimName);
-				
 				if (dimValue != currDimValue)
 					return false;
 			}
-			
 			return true;
 		}
-		
+
 		public function setWMSDimensionValue(s_dimName: String, s_value: String): void
 		{
 			//FIXME clearing legend cache must be moved to layer
@@ -247,182 +232,185 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 //			{
 //				clearLegendCache();
 //			}
-			
-			if(s_value != null)
+			if (s_value != null)
 				md_dimensionValues[s_dimName] = s_value;
 			else
 				delete md_dimensionValues[s_dimName];
-			
 			var wvpe: WMSViewPropertiesEvent = new WMSViewPropertiesEvent(WMSViewPropertiesEvent.WMS_DIMENSION_VALUE_SET);
 			wvpe.dimension = s_dimName;
 			wvpe.value = s_value;
 			notifyEvent(wvpe);
-
 		}
-		
+
 		public function getWMSDimensionValue(s_dimName: String,
-											 b_returnDefault: Boolean = false): String
+				b_returnDefault: Boolean = false): String
 		{
-			if(s_dimName in md_dimensionValues) 
+			if (s_dimName in md_dimensionValues)
 				return md_dimensionValues[s_dimName];
-			else {
-				if(b_returnDefault)
+			else
+			{
+				if (b_returnDefault)
 					return getWMSDimensionDefaultValue(s_dimName);
 				return null;
 			}
 		}
-		
-		
+
 		public function supportWMSDimension(s_dimName: String): Boolean
 		{
 			var a_dimNames: Array = [];
-			for each(var layer: WMSLayer in getWMSLayers()) {
-				for each(var dim: WMSDimension in layer.dimensions) {
-					if(dim.name == s_dimName)
+			for each (var layer: WMSLayer in getWMSLayers())
+			{
+				for each (var dim: WMSDimension in layer.dimensions)
+				{
+					if (dim.name == s_dimName)
 						return true;
 				}
 			}
 			return false;
-			
 		}
-		
+
 		public function getWMSLayers(): Array
 		{
 			var a: Array = [];
-			for each(var s_layerName: String in m_cfg.layerNames) {
+			for each (var s_layerName: String in m_cfg.layerNames)
+			{
 				var layer: WMSLayer = m_cfg.service.getLayerByName(s_layerName);
-				if(layer != null)
+				if (layer != null)
 					a.push(layer);
 			}
 			return a;
 		}
-		
+
 		public function getWMSDimensionsNames(): Array
 		{
 			var a_dimNames: Array = [];
-			for each(var layer: WMSLayer in getWMSLayers()) {
-				for each(var dim: WMSDimension in layer.dimensions) {
-					if(a_dimNames.indexOf(dim.name) < 0)
+			for each (var layer: WMSLayer in getWMSLayers())
+			{
+				for each (var dim: WMSDimension in layer.dimensions)
+				{
+					if (a_dimNames.indexOf(dim.name) < 0)
 						a_dimNames.push(dim.name);
 				}
 			}
 			return a_dimNames;
 		}
-		
+
 		// returns null is no such dimension exist
 		public function getWMSDimensionUnitsName(s_dimName: String): String
 		{
 			var s_units: String = null;
 			var b_anyDimensionFound: Boolean = false;
-			for each(var layer: WMSLayer in getWMSLayers()) {
-				for each(var dim: WMSDimension in layer.dimensions) {
-					if(dim.name != s_dimName)
+			for each (var layer: WMSLayer in getWMSLayers())
+			{
+				for each (var dim: WMSDimension in layer.dimensions)
+				{
+					if (dim.name != s_dimName)
 						continue;
-					if(dim.units == null)
+					if (dim.units == null)
 						continue;
 					b_anyDimensionFound = true;
-					if(s_units == null)
+					if (s_units == null)
 						s_units = dim.units;
-					else {
-						if(dim.units != s_units)
+					else
+					{
+						if (dim.units != s_units)
 							return "mixed units";
 					}
 				}
 			}
-			if(b_anyDimensionFound && s_units == null)
+			if (b_anyDimensionFound && s_units == null)
 				return "no units";
 			return s_units;
 		}
-		
+
 		// returns null is no such dimension exist
 		public function getWMSDimensionDefaultValue(s_dimName: String): String
 		{
 			var s_defaultValue: String = null;
 			var b_anyDimensionFound: Boolean = false;
-			
 			var wmsLayers: Array = getWMSLayers();
-			
-			for each(var layer: WMSLayer in wmsLayers) {
-				for each(var dim: WMSDimension in layer.dimensions) {
-					if(dim.name != s_dimName)
+			for each (var layer: WMSLayer in wmsLayers)
+			{
+				for each (var dim: WMSDimension in layer.dimensions)
+				{
+					if (dim.name != s_dimName)
 						continue;
-					if(dim.units == null)
+					if (dim.units == null)
 						continue;
 					b_anyDimensionFound = true;
-					if(s_defaultValue == null)
+					if (s_defaultValue == null)
 						s_defaultValue = dim.defaultValue;
-					else {
-						if(dim.defaultValue != s_defaultValue)
+					else
+					{
+						if (dim.defaultValue != s_defaultValue)
 							return "mixed values";
 					}
 				}
 			}
-			if(b_anyDimensionFound && s_defaultValue == null)
+			if (b_anyDimensionFound && s_defaultValue == null)
 				return "";
 			return s_defaultValue;
 		}
-		
-		
+
 		// returns null is no such dimension exist
 		public function getWMSDimensionsValues(s_dimName: String, b_intersection: Boolean = true): Array
 		{
 			var a_dimValues: Array;
-			
 			if (s_dimName == 'ELEVATION')
 			{
 				trace("WMSViewProperties: check ELEVATION getWMSDimensionsValues function");
 			}
 			var wmsLayers: Array = getWMSLayers();
-			
-			for each(var layer: WMSLayer in wmsLayers) {
-				for each(var dim: WMSDimension in layer.dimensions) {
-					if(dim.name != s_dimName)
+			for each (var layer: WMSLayer in wmsLayers)
+			{
+				for each (var dim: WMSDimension in layer.dimensions)
+				{
+					if (dim.name != s_dimName)
 						continue;
-					if(a_dimValues == null)
+					if (a_dimValues == null)
 						a_dimValues = dim.values;
-					else {
-						if(b_intersection)
+					else
+					{
+						if (b_intersection)
 							a_dimValues = ArrayUtils.intersectedArrays(a_dimValues, dim.values);
 						else
 							ArrayUtils.unionArrays(a_dimValues, dim.values);
 					}
 				}
 			}
-			
 			//debug("getWMSDimensionsValues ["+s_dimName+"] = " +createDimensionsValuesString(a_dimValues));
 			return a_dimValues;
 		}
-		
+
 		/**
-		 * It returns date from RUN and FORECAST set for this layer 
-		 * @return 
-		 * 
-		 */		
+		 * It returns date from RUN and FORECAST set for this layer
+		 * @return
+		 *
+		 */
 		public function getWMSCurrentDate(): Date
 		{
 			var run: String = getWMSDimensionValue('RUN');
 			var forecast: String = getWMSDimensionValue('FORECAST');
-			
 			//			debug('run: ' + run + ' forecast: ' + forecast);
-			
 			return new Date();
 		}
-		
+
 		public function getWMSStyleListString(): String
 		{
 			var s: String = "";
 			var total: int = m_cfg.layerNames.length;
-			for(var i_subLayer: uint = 0; i_subLayer < total; ++i_subLayer) {
-				if(i_subLayer > 0)
+			for (var i_subLayer: uint = 0; i_subLayer < total; ++i_subLayer)
+			{
+				if (i_subLayer > 0)
 					s += ",";
-				if(i_subLayer in ma_subLayerStyleNames)
+				if (i_subLayer in ma_subLayerStyleNames)
 					s += ma_subLayerStyleNames[i_subLayer];
-				else if(i_subLayer in m_cfg.styleNames)
+				else if (i_subLayer in m_cfg.styleNames)
 					s += m_cfg.styleNames[i_subLayer];
 			}
 			return s;
 		}
-		
+
 		/**
 		 * For each WMS sub-layer, returns array of objects having .name and .label properties
 		 * or null if the sub-layer doesn't have any styles. This is bound together
@@ -432,38 +420,42 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		{
 			var b_foundAnyStyle: Boolean = false;
 			var a_styles: Array = [];
-			for each(var layer: WMSLayer in getWMSLayers()) {
+			for each (var layer: WMSLayer in getWMSLayers())
+			{
 				var a_layerStyles: Array = [];
-				for each(var style: Object in layer.styles) {
+				for each (var style: Object in layer.styles)
+				{
 					b_foundAnyStyle = true;
 					a_layerStyles.push({
-						label: style.title != null ? (style.title + " (" + style.name + ")") : style.name,
-						title: style.title != null  ? style.title : style.name,
-						name: style.name
-					});
-				} 
+								label: style.title != null ? (style.title + " (" + style.name + ")") : style.name,
+								title: style.title != null ? style.title : style.name,
+								name: style.name
+							});
+				}
 				a_styles.push(a_layerStyles.length > 0 ? a_layerStyles : null);
 			}
 			return b_foundAnyStyle ? a_styles : null;
 		}
-		
+
 		public function getWMSStyleName(i_subLayer: uint): String
 		{
-			if(i_subLayer in ma_subLayerStyleNames)
+			if (i_subLayer in ma_subLayerStyleNames)
 				return ma_subLayerStyleNames[i_subLayer];
 			else
 				return null;
 		}
-		
+
 		public function getWMSStyleObject(i_subLayer: uint, s_styleName: String = ''): Object
 		{
 			if (m_cfg && m_cfg.layerConfigurations)
 			{
-				var layer:WMSLayer = m_cfg.layerConfigurations[i_subLayer] as WMSLayer;
-				if (layer && layer.styles && layer.styles.length > 0) {
+				var layer: WMSLayer = m_cfg.layerConfigurations[i_subLayer] as WMSLayer;
+				if (layer && layer.styles && layer.styles.length > 0)
+				{
 					if (s_styleName == '')
 						return layer.styles[0];
-					else {
+					else
+					{
 						for each (var styleObj: Object in layer.styles)
 						{
 							if (styleObj.name == s_styleName)
@@ -474,167 +466,182 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 			}
 			return null;
 		}
+
 		public function getWMSEffectiveStyleName(i_subLayer: uint): String
 		{
 			var s_styleName: String = getWMSStyleName(i_subLayer);
-			if(s_styleName == null) {
-				var layer:WMSLayer = m_cfg.layerConfigurations[i_subLayer] as WMSLayer;
-				if (layer && layer.styles && layer.styles.length > 0) {
+			if (s_styleName == null)
+			{
+				var layer: WMSLayer = m_cfg.layerConfigurations[i_subLayer] as WMSLayer;
+				if (layer && layer.styles && layer.styles.length > 0)
+				{
 					return layer.styles[0].name;
 				}
 			}
 			return null;
 		}
-		
+
 		public function setWMSStyleName(i_subLayer: uint, s_styleName: String): void
 		{
 			//FIXME moved clear legend cache to layer
 //			clearLegendCache();
-			
-			if(s_styleName != null)
+			if (s_styleName != null)
 				ma_subLayerStyleNames[i_subLayer] = s_styleName;
 			else
 				delete ma_subLayerStyleNames[i_subLayer];
-			
 			dispatchEvent(new Event(InteractiveLayerWMS.WMS_STYLE_CHANGED));
 		}
-		
-		
+
 		public function setWMSCustomParameter(s_parameter: String, s_value: String): void
 		{
-			if(s_value != null)
+			if (s_value != null)
 				md_customParameters[s_parameter] = s_value;
 			else
 				delete md_customParameters[s_parameter];
 		}
-		
+
 		/**
 		 * Populates URLRequest with dimension values.
 		 **/
 		public function updateDimensionsInURLRequest(url: URLRequest): void
 		{
-			for(var s_dimName: String in md_dimensionValues) {
-				if(url.data == null)
+			for (var s_dimName: String in md_dimensionValues)
+			{
+				if (url.data == null)
 					url.data = new URLVariables();
 				url.data[m_cfg.dimensionToParameterName(s_dimName)] = md_dimensionValues[s_dimName];
 			}
-			
 		}
-		
+
 		/**
 		 * Populates URLRequest with custom parameter values.
 		 **/
 		public function updateCustomParametersInURLRequest(url: URLRequest): void
 		{
-			for(var s_parameter: String in md_customParameters) {
-				if(url.data == null)
+			for (var s_parameter: String in md_customParameters)
+			{
+				if (url.data == null)
 					url.data = new URLVariables();
 				url.data[s_parameter] = md_customParameters[s_parameter];
 			}
 		}
-		
+
 		// ISynchronisedObject implementation
 		public function getSynchronisedVariables(): Array
 		{
 			var a: Array = [];
-			
-			if(m_cfg.dimensionTimeName != null
-				|| (m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null))
+			if (m_cfg.dimensionTimeName != null
+					|| (m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null))
 				a.push(GlobalVariable.FRAME);
-			
-			if(m_cfg.dimensionRunName != null)
+			if (m_cfg.dimensionRunName != null)
 				a.push("run");
-			
-			if(m_cfg.dimensionVerticalLevelName != null)
+			if (m_cfg.dimensionVerticalLevelName != null)
 				a.push(GlobalVariable.LEVEL);
 			return a;
 		}
-		
+
 		public function hasSynchronisedVariable(s_variableId: String): Boolean
 		{
-			if(s_variableId == GlobalVariable.FRAME) {
-				if(m_cfg.dimensionTimeName != null) {
+			if (s_variableId == GlobalVariable.FRAME)
+			{
+				if (m_cfg.dimensionTimeName != null)
+				{
 					return true;
 				}
-				else if(m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null) {
+				else if (m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null)
+				{
 					return true;
 				}
 			}
-			if(s_variableId == GlobalVariable.LEVEL) {
-				if(m_cfg.dimensionVerticalLevelName != null) {
+			if (s_variableId == GlobalVariable.LEVEL)
+			{
+				if (m_cfg.dimensionVerticalLevelName != null)
+				{
 					return true;
 				}
 			}
 			return false;
 		}
-		
+
 		public function getSynchronisedVariableValue(s_variableId: String): Object
 		{
-			if(s_variableId == GlobalVariable.FRAME) {
-				if(m_cfg.dimensionTimeName != null) {
+			if (s_variableId == GlobalVariable.FRAME)
+			{
+				if (m_cfg.dimensionTimeName != null)
+				{
 					return ISO8601Parser.stringToDate(getWMSDimensionValue(m_cfg.dimensionTimeName, true));
 				}
-				else if(m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null) {
+				else if (m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null)
+				{
 					var run: Date = ISO8601Parser.stringToDate(
-						getWMSDimensionValue(m_cfg.dimensionRunName, true));
+							getWMSDimensionValue(m_cfg.dimensionRunName, true));
 					var forecast: Duration = ISO8601Parser.stringToDuration(
-						getWMSDimensionValue(m_cfg.dimensionForecastName, true));
+							getWMSDimensionValue(m_cfg.dimensionForecastName, true));
 					if (run != null && forecast != null)
 						return new Date(run.time + forecast.milisecondsTotal);
-					
 					return null;
 				}
 			}
-			if(s_variableId == GlobalVariable.LEVEL) {
-				if(m_cfg.dimensionVerticalLevelName != null) {
+			if (s_variableId == GlobalVariable.LEVEL)
+			{
+				if (m_cfg.dimensionVerticalLevelName != null)
+				{
 					return (getWMSDimensionValue(m_cfg.dimensionVerticalLevelName, true));
 				}
 			}
 			return null;
 		}
-		
+
 		public function getSynchronisedVariableValuesList(s_variableId: String): Array
 		{
-			if(s_variableId == GlobalVariable.LEVEL) {
-				if(m_cfg.dimensionVerticalLevelName != null) {
-					
+			if (s_variableId == GlobalVariable.LEVEL)
+			{
+				if (m_cfg.dimensionVerticalLevelName != null)
+				{
 					var l_levels: Array = getWMSDimensionsValues(m_cfg.dimensionVerticalLevelName);
-					
 					return l_levels;
 				}
-				
-			} else if(s_variableId == GlobalVariable.FRAME) {
-				if(m_cfg.dimensionTimeName != null) {
+			}
+			else if (s_variableId == GlobalVariable.FRAME)
+			{
+				if (m_cfg.dimensionTimeName != null)
+				{
 					var l_times: Array = getWMSDimensionsValues(m_cfg.dimensionTimeName);
 					var l_resultTimes: Array = [];
-					for each(var time: Object in l_times) {
-						if (time.data is Date) {
+					for each (var time: Object in l_times)
+					{
+						if (time.data is Date)
+						{
 							l_resultTimes.push(time.data);
-						} else {
+						}
+						else
+						{
 							debug("PROBLEM: InteractiveLayerMSBase getSynchronisedVariableValuesList time.data is not Date: " + time.data);
 						}
 					}
-					
 					//sort forecast by Date
 					if (l_resultTimes && l_resultTimes.length > 0)
 					{
 						//sort Duration
 						l_resultTimes.sort(sortDates);
 					}
-					
 					return l_resultTimes;
 				}
-				else if(m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null) {
+				else if (m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null)
+				{
 					var run: Date = ISO8601Parser.stringToDate(getWMSDimensionValue(m_cfg.dimensionRunName, true));
-					if(run == null)
+					if (run == null)
 						return [];
 					var l_forecasts: Array = getWMSDimensionsValues(m_cfg.dimensionForecastName);
 					var l_resultForecasts: Array = [];
-					for each(var forecast: Object in l_forecasts) {
+					for each (var forecast: Object in l_forecasts)
+					{
 						if (forecast && (forecast.data is Duration))
 						{
 							l_resultForecasts.push(new Date(run.time + Duration(forecast.data).milisecondsTotal));
-						} else {
+						}
+						else
+						{
 							debug("PROBLEM: InteractiveLayerMSBase getSynchronisedVariableValuesList forecast.data is not Number: " + forecast.data);
 						}
 					}
@@ -649,22 +656,24 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 				else
 					return [];
 			}
-				
 			return null;
 		}
-	
+
 		public function exactlySynchroniseWith(s_variableId: String, value: Object): Boolean
 		{
 			var of: Object;
 			var ofExactForecast: Object = null;
-			if(s_variableId == GlobalVariable.LEVEL) {
-				
-				if(m_cfg.dimensionVerticalLevelName != null) {
+			if (s_variableId == GlobalVariable.LEVEL)
+			{
+				if (m_cfg.dimensionVerticalLevelName != null)
+				{
 					var level: String = value as String;
 					var l_levels: Array = getWMSDimensionsValues(m_cfg.dimensionVerticalLevelName);
 					ofExactForecast = null;
-					for each(of in l_levels) {
-						if((of.data as String) == level) {
+					for each (of in l_levels)
+					{
+						if ((of.data as String) == level)
+						{
 							ofExactForecast = of;
 							break;
 						}
@@ -673,23 +682,23 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					{
 						setWMSDimensionValue(m_cfg.dimensionVerticalLevelName, ofExactForecast.data as String);
 						dispatchSynchronizedVariableChangeEvent(new SynchronisedVariableChangeEvent(
-							SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.LEVEL));
+								SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.LEVEL));
 						return true;
 					}
 				}
-				
 			}
-			
-			if(s_variableId == GlobalVariable.FRAME) {
-				
-				
-				if(m_cfg.dimensionTimeName != null) {
+			if (s_variableId == GlobalVariable.FRAME)
+			{
+				if (m_cfg.dimensionTimeName != null)
+				{
 					var frame: Date = value as Date;
 					// TODO: interpolation vs. find nearest value?
 					var l_times: Array = getWMSDimensionsValues(m_cfg.dimensionTimeName);
 					ofExactForecast = null;
-					for each(of in l_times) {
-						if((of.data as Date).time == frame.time) {
+					for each (of in l_times)
+					{
+						if ((of.data as Date).time == frame.time)
+						{
 							ofExactForecast = of;
 							break;
 						}
@@ -698,27 +707,30 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					{
 						setWMSDimensionValue(m_cfg.dimensionTimeName, ISO8601Parser.dateToString(ofExactForecast.data as Date));
 						dispatchSynchronizedVariableChangeEvent(new SynchronisedVariableChangeEvent(
-							SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.FRAME));
+								SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.FRAME));
 						return true;
 					}
 				}
-				else if(m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null) {
+				else if (m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null)
+				{
 					var run: Date = ISO8601Parser.stringToDate(
-						getWMSDimensionValue(m_cfg.dimensionRunName, true));
+							getWMSDimensionValue(m_cfg.dimensionRunName, true));
 					var forecast: Duration = new Duration(((value as Date).time - run.time) / 1000.0);
 					var l_forecasts: Array = getWMSDimensionsValues(m_cfg.dimensionForecastName);
 					ofExactForecast = null;
-					
-					for each(of in l_forecasts) {
-						if(Duration(of.data).secondsTotal == forecast.secondsTotal) {
+					for each (of in l_forecasts)
+					{
+						if (Duration(of.data).secondsTotal == forecast.secondsTotal)
+						{
 							ofExactForecast = of;
-							break; 
+							break;
 						}
 					}
-					if(ofExactForecast != null) {
+					if (ofExactForecast != null)
+					{
 						setWMSDimensionValue(m_cfg.dimensionForecastName, ofExactForecast.value);
 						dispatchSynchronizedVariableChangeEvent(new SynchronisedVariableChangeEvent(
-							SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.FRAME));
+								SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.FRAME));
 						return true;
 					}
 				}
@@ -729,134 +741,131 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		public function synchroniseWith(s_variableId: String, value: Object): Boolean
 		{
 			var a: Array
-			if(s_variableId == GlobalVariable.LEVEL) {
-				
-				if(!exactlySynchroniseWith(s_variableId, value)) {
-					
+			if (s_variableId == GlobalVariable.LEVEL)
+			{
+				if (!exactlySynchroniseWith(s_variableId, value))
+				{
 					a = getSynchronisedVariableValuesList(s_variableId);
 					var bestLevel: String;
 					var requiredLevel: String = value as String;
-					
 //					var leftDist: Number = 1000 * 60 * 60 * 3;
 //					var rightDist: Number = 1000 * 60 * 60 * 3;
-					
-					for each(var level: Object in a) {
-						if(level.data == requiredLevel) {   
+					for each (var level: Object in a)
+					{
+						if (level.data == requiredLevel)
+						{
 							bestLevel = level.data as String;
 						}
 					}
-					if(!bestLevel)
+					if (!bestLevel)
 						return false;
-					
 					return exactlySynchroniseWith(s_variableId, bestLevel);
 				}
-				
 			}
-			
-			if(s_variableId == GlobalVariable.FRAME) {
-				if(!exactlySynchroniseWith(s_variableId, value)) {
+			if (s_variableId == GlobalVariable.FRAME)
+			{
+				if (!exactlySynchroniseWith(s_variableId, value))
+				{
 					a = getSynchronisedVariableValuesList(s_variableId);
 					var best: Date = null;
 					var required: Date = value as Date;
 					var requiredTime: Number = required.time;
-					
 					var leftDist: Number = 1000 * 60 * 60 * 3;
 					var rightDist: Number = 1000 * 60 * 60 * 3;
-					
-					for each(var i: Date in a) {
-						if(i.time >= requiredTime - leftDist && i.time <= requiredTime + rightDist) {   
-							if(best == null || Math.abs(best.time - requiredTime) > Math.abs(i.time - requiredTime))
+					for each (var i: Date in a)
+					{
+						if (i.time >= requiredTime - leftDist && i.time <= requiredTime + rightDist)
+						{
+							if (best == null || Math.abs(best.time - requiredTime) > Math.abs(i.time - requiredTime))
 								best = i;
 						}
 					}
-					if(best == null)
+					if (best == null)
 						return false;
 					return exactlySynchroniseWith(s_variableId, best);
 				}
 			}
 			return exactlySynchroniseWith(s_variableId, value);
 		}
-		
+
 		private function dispatchSynchronizedVariableChangeEvent(event: SynchronisedVariableChangeEvent): void
 		{
 			dispatchEvent(event);
 		}
-		
+
 		public static function sortDates(obj1: Object, obj2: Object): int
 		{
-			var date1: Date = obj1 as Date; 
+			var date1: Date = obj1 as Date;
 			var date2: Date = obj2 as Date;
-			
 			if (date1 && date2)
 			{
-				var dSec1: Number = date1.time; 
-				var dSec2: Number = date2.time; 
+				var dSec1: Number = date1.time;
+				var dSec2: Number = date2.time;
 				if (dSec1 > dSec2)
 				{
 					return 1;
-				} else {
+				}
+				else
+				{
 					if (dSec1 < dSec2)
 						return -1;
 				}
 			}
 			return 0;
 		}
+
 		public static function sortDurations(obj1: Object, obj2: Object): int
 		{
-			var duration1: Duration = obj1.data as Duration; 
+			var duration1: Duration = obj1.data as Duration;
 			var duration2: Duration = obj2.data as Duration;
-			
 			if (duration1 && duration2)
 			{
-				var dSec1: Number = duration1.secondsTotal; 
-				var dSec2: Number = duration2.secondsTotal; 
+				var dSec1: Number = duration1.secondsTotal;
+				var dSec2: Number = duration2.secondsTotal;
 				if (dSec1 > dSec2)
 				{
 					return 1;
-				} else {
+				}
+				else
+				{
 					if (dSec1 < dSec2)
 						return -1;
 				}
 			}
 			return 0;
 		}
-		
-		/******************************************************************************************
-		 * 	
-		 * 	Legends part
-		 * 
-		 ******************************************************************************************/
 
+		/******************************************************************************************
+		 *
+		 * 	Legends part
+		 *
+		 ******************************************************************************************/
 		public function clone(): IViewProperties
 		{
 			var newViewProperties: WMSViewProperties = new WMSViewProperties();
 			newViewProperties.setConfiguration(m_cfg);
-			
 			newViewProperties.crs = crs;
 			newViewProperties.setViewBBox(_viewBBox);
-			
 			var styleName: String = getWMSStyleName(0)
 			newViewProperties.setWMSStyleName(0, styleName);
 //			debug("\n\n CLONE InteractiveLayerWMS ["+newViewProperties.name+"] alpha: " + newViewProperties.alpha + " zOrder: " +  newViewProperties.zOrder);
-			
 			//clone all dimensions
 			var dimNames: Array = getWMSDimensionsNames();
 			for each (var dimName: String in dimNames)
 			{
-				var value : String = getWMSDimensionValue(dimName);
+				var value: String = getWMSDimensionValue(dimName);
 				newViewProperties.setWMSDimensionValue(dimName, value);
 			}
 //			debug("OLD: " + name + " label: " + id);
 			return newViewProperties;
-			
 		}
-		
+
 		private function debug(str: String): void
 		{
 			return;
 			trace(str);
 		}
-		
+
 		private function notifyEvent(event: Event): void
 		{
 			dispatchEvent(event);

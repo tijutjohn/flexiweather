@@ -6,10 +6,13 @@ package com.iblsoft.flexiweather.widgets.basicauth.data
 	public class BasicAuthAccount implements Serializable
 	{
 		public var name: String;
+
 		public var password: String;
+
 		public var domain: String;
+
 		public var realm: String;
-		
+
 		public function BasicAuthAccount(name: String = null, password: String = null, domain: String = null, realm: String = null)
 		{
 			this.name = name;
@@ -17,8 +20,8 @@ package com.iblsoft.flexiweather.widgets.basicauth.data
 			this.domain = domain;
 			this.realm = realm;
 		}
-		
-		public function serialize(storage:Storage):void
+
+		public function serialize(storage: Storage): void
 		{
 			if (storage.isLoading())
 			{
@@ -26,19 +29,19 @@ package com.iblsoft.flexiweather.widgets.basicauth.data
 				password = storage.serializeString('password', password);
 				domain = storage.serializeString('domain', domain);
 				realm = storage.serializeString('realm', realm);
-			} else {
+			}
+			else
+			{
 				storage.serializeString('name', name);
 				storage.serializeString('password', password);
 				storage.serializeString('domain', domain);
 				storage.serializeString('realm', realm);
-				
 			}
-			
 		}
-		
+
 		public function toString(): String
 		{
-			var str: String =  "BasicAuthAccount: ";
+			var str: String = "BasicAuthAccount: ";
 			if (name)
 				str += " name: " + name;
 			if (password)
@@ -47,7 +50,6 @@ package com.iblsoft.flexiweather.widgets.basicauth.data
 				str += " domain: " + domain;
 			if (realm)
 				str += " realm: " + realm;
-			
 			return str;
 		}
 	}

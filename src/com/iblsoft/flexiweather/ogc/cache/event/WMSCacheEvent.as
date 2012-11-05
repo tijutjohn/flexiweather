@@ -1,23 +1,21 @@
 package com.iblsoft.flexiweather.ogc.cache.event
 {
 	import com.iblsoft.flexiweather.ogc.cache.CacheItem;
-	
 	import flash.events.Event;
-	
+
 	public class WMSCacheEvent extends Event
 	{
 		public static const ITEM_ADDED: String = 'itemAdded';
-		
+
 		public var item: CacheItem;
-		
-		public function WMSCacheEvent(type:String, cacheItem: CacheItem, bubbles:Boolean=false, cancelable:Boolean=false)
+
+		public function WMSCacheEvent(type: String, cacheItem: CacheItem, bubbles: Boolean = false, cancelable: Boolean = false)
 		{
 			super(type, bubbles, cancelable);
-			
 			item = cacheItem;
 		}
-		
-		override public function clone():Event
+
+		override public function clone(): Event
 		{
 			return new WMSCacheEvent(type, item);
 		}

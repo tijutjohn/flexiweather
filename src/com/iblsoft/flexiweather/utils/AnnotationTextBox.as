@@ -6,7 +6,7 @@ package com.iblsoft.flexiweather.utils
 	public class AnnotationTextBox extends AnnotationBox
 	{
 		private var m_label: TextField = new TextField();
-		
+
 		public function AnnotationTextBox()
 		{
 			super();
@@ -15,7 +15,7 @@ package com.iblsoft.flexiweather.utils
 			m_label.selectable = false;
 			m_label.autoSize = TextFieldAutoSize.CENTER;
 		}
-		
+
 		public override function updateContent(): void
 		{
 			super.updateContent();
@@ -24,7 +24,7 @@ package com.iblsoft.flexiweather.utils
 			m_label.width = measuredWidth - 4;
 			m_label.height = measuredHeight - 4;
 		}
-		
+
 		public override function measureContent(): void
 		{
 			m_label.width = m_label.textWidth;
@@ -32,7 +32,10 @@ package com.iblsoft.flexiweather.utils
 			measuredWidth = m_label.textWidth + 4;
 			measuredHeight = m_label.textHeight + 4;
 		}
-		
+
 		public function get label(): TextField
-		{ return m_label; }
-	}}
+		{
+			return m_label;
+		}
+	}
+}

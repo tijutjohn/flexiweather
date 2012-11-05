@@ -4,55 +4,51 @@ package com.iblsoft.flexiweather.utils
 	import flash.events.TimerEvent;
 	import flash.utils.Dictionary;
 	import flash.utils.Timer;
-	
 	import mx.core.UIComponent;
-	
 	import org.osmf.events.TimeEvent;
 
 	public class AsyncManager extends UIComponent
 	{
 		public static const EMPTY: String = 'empty';
-		
+
 		private static var _counter: int = 0;
-		
+
 		private var _uid: int;
-		
+
 		private var _timer: Timer;
+
 		protected var _stack: Array;
+
 		protected var _presence: Dictionary;
-		
+
 		public function get notEmpty(): Boolean
 		{
 			if (_stack)
-			{
 				return _stack.length > 0;
-			}
 			return false;
 		}
-		
+
 		private var _maxCallsPerTick: int;
 
-		public function get maxCallsPerTick():int
+		public function get maxCallsPerTick(): int
 		{
 			return _maxCallsPerTick;
 		}
-		
-		public function set maxCallsPerTick(value:int):void
+
+		public function set maxCallsPerTick(value: int): void
 		{
 			_maxCallsPerTick = value;
 		}
-		
+
 		/**
-		 * You can store here any data, which you want to have after all task are done 
-		 */		
+		 * You can store here any data, which you want to have after all task are done
+		 */
 		public var data: Object;
-		
+
 		public function AsyncManager(name: String)
 		{
 			_uid = _counter++;
-			
 			this.name = name;
-			
 			init();
 		}
 
@@ -69,7 +65,6 @@ package com.iblsoft.flexiweather.utils
 				}
 			}
 			_stack = null;
-			
 			if (_presence)
 			{
 				for (var str: String in _presence)
@@ -79,36 +74,40 @@ package com.iblsoft.flexiweather.utils
 				_presence = null;
 			}
 		}
+
 		private function init(): void
 		{
 			_stack = new Array();
 			_presence = new Dictionary();
 			_maxCallsPerTick = 120;
 		}
+
 		public function start(): void
 		{
 			if (!hasEventListener(Event.ENTER_FRAME))
 				addEventListener(Event.ENTER_FRAME, onEnterFrame);
 		}
+
 		public function stop(): void
 		{
 			removeEventListener(Event.ENTER_FRAME, onEnterFrame);
 		}
-		
+
 		private function onEnterFrame(event: Event): void
 		{
 			tick();
 		}
+
 		private function onTimerEvent(event: TimerEvent): void
 		{
 			tick();
 		}
-		
+
 		private function notifyEmpty(): void
 		{
 			dispatchEvent(new Event(EMPTY));
 		}
-		
+
 		protected function tick(): void
 		{
 //			trace("AsuncManager ["+_uid+"] tick "  + _stack.length);
@@ -118,7 +117,6 @@ package com.iblsoft.flexiweather.utils
 				notifyEmpty();
 				return;
 			}
-			
 			var total: int = Math.min(_stack.length, _maxCallsPerTick);
 //			trace("AsyncManager ["+_uid+"] onTimerEvent total: " + total + " / " + _stack.length);
 			if (total > 0)
@@ -131,6 +129,7 @@ package com.iblsoft.flexiweather.utils
 				}
 			}
 		}
+
 		public function removeCall(obj: Object): void
 		{
 			if (_presence[obj])
@@ -148,7 +147,7 @@ package com.iblsoft.flexiweather.utils
 				}
 			}
 		}
-		
+
 		public function addCall(obj: Object, callback: Function, arguments: Array): void
 		{
 			//TODO this is jut for testing, we need to be sure, that callback and arguments are always same
@@ -157,7 +156,9 @@ package com.iblsoft.flexiweather.utils
 				_presence[obj] = true;
 				_stack.push({obj: obj, callback: callback, arguments: arguments});
 //				trace("AsuncManager ["+_uid+"] addCall "  + _stack.length);
-			} else {
+			}
+			else
+			{
 //				trace("AsyncManager ["+_uid+"] item was not added");
 			}
 		}
