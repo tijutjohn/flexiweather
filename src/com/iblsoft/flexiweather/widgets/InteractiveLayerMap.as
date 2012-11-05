@@ -320,7 +320,7 @@ package com.iblsoft.flexiweather.widgets
 
 		protected function onSynchronisedVariableDomainChanged(event: SynchronisedVariableChangeEvent): void
 		{
-			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
+			notifyTimeAxisUpdate();
 			
 			if (event.variableId == GlobalVariable.FRAME)
 				dispatchEvent(new Event(FRAME_VARIABLE_CHANGED));
@@ -372,6 +372,7 @@ package com.iblsoft.flexiweather.widgets
 		
 		override protected function layerAdded(layer: InteractiveLayer): void
 		{
+			super.layerAdded(layer);
 //				trace(this + " ADD LAYER: " + l.toString());
 			if (layer)
 			{
