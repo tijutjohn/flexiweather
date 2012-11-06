@@ -3,16 +3,17 @@ package com.iblsoft.flexiweather.ogc.multiview
 	import com.iblsoft.flexiweather.events.InteractiveLayerMapEvent;
 	import com.iblsoft.flexiweather.events.InteractiveWidgetEvent;
 	import com.iblsoft.flexiweather.ogc.BBox;
-	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.SynchronisedVariableChangeEvent;
 	import com.iblsoft.flexiweather.ogc.cache.WMSCacheManager;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.editable.IInteractiveLayerProvider;
 	import com.iblsoft.flexiweather.ogc.multiview.data.MultiViewConfiguration;
 	import com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent;
 	import com.iblsoft.flexiweather.ogc.multiview.skins.InteractiveMultiViewSkin;
 	import com.iblsoft.flexiweather.ogc.multiview.synchronization.AreaSynchronizator;
 	import com.iblsoft.flexiweather.ogc.multiview.synchronization.ISynchronizator;
+	import com.iblsoft.flexiweather.plugins.IConsole;
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.XMLStorage;
 	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
@@ -75,6 +76,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 	[Event(name = "multiViewMapsLoaded", type = "com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent")]
 	public class InteractiveMultiView extends SkinnableDataContainer
 	{
+		public static var debugConsole: IConsole;
 		private var _selectedInteractiveWidget: InteractiveWidget;
 		private var _interactiveWidgets: WidgetCollection;
 		private var _configuration: MultiViewConfiguration;
@@ -998,6 +1000,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 		{
 			if (!interactiveWidget)
 				interactiveWidget = selectedInteractiveWidget;
+			debug("synchronizeWidgets " + interactiveWidget.id, "Info", "InteractiveMultiView");
 			synchronizator.synchronizeWidgets(interactiveWidget, _interactiveWidgets.widgets);
 		}
 
@@ -1023,6 +1026,12 @@ package com.iblsoft.flexiweather.ogc.multiview
 						trace("there is no labelLayer");
 				}
 			}
+		}
+
+		private function debug(str: String, type: String, tag: String): void
+		{
+			if (debugConsole)
+				debugConsole.print(str, type, tag);
 		}
 	}
 }
