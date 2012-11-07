@@ -285,11 +285,11 @@ package com.iblsoft.flexiweather.ogc.multiview
 			{
 				for (i = 0; i < newConfiguration.columns; i++)
 				{
-					oldIW = _interactiveWidgets.getWidgetAt(cnt);
-					if (oldIW)
+					iw = _interactiveWidgets.getWidgetAt(cnt);
+					if (iw)
 					{
-						resetWidget(oldIW);
-						ac.addItem(oldIW);
+						resetWidget(iw);
+						ac.addItem(iw);
 						
 					} else {
 						iw = createInteractiveWidget();
@@ -298,6 +298,10 @@ package com.iblsoft.flexiweather.ogc.multiview
 						_widgetsCountToBeReady.addItem(iw);
 					}
 					
+					if (cnt == newConfiguration.selectedIndex)
+					{
+						selectedInteractiveWidget = iw;
+					}
 					cnt++;
 				}
 			}

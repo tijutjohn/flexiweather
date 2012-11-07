@@ -3,7 +3,10 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.plugins.IConsole;
+	import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	
+	import flash.events.DataEvent;
 	
 	import mx.collections.ArrayCollection;
 	import mx.utils.ArrayUtil;
@@ -66,8 +69,11 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			trace(tag + "| " + type + "| " + str);
 		}
 		
+		private var tempData: Object;
+		
 		public function synchronizeWidgets(synchronizeFromWidget:InteractiveWidget, widgetsForSynchronisation:ArrayCollection, preferredSelectedIndex: int = -1):void
 		{
+		
 			
 			debug("FrameSychronizator synchronizeWidgets", 'Info', 'FrameSychronizator');
 			var primaryLayer: InteractiveLayerMSBase = synchronizeFromWidget.interactiveLayerMap.getPrimaryLayer();
@@ -92,11 +98,22 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 //					if (currFramePosition > 0)
 //						frames = frames.slice(Math.max(0, currFramePosition - synchronizeFromWidgetPosition), frames.length);
 					
+					var cnt: int = 0;
+					
 					var frames: Array = getFrames(primaryLayer, synchronizeFromWidgetPosition);
 					
+					trace("FramSynchornisator frames: " + frames.length + " selected index: " + preferredSelectedIndex);
+					for each (var date: Date in frames)
+					{
+						if (date)
+							trace("\t frame["+cnt+"] = " + date.toTimeString());
+						else
+							trace("\t frame["+cnt+"] = NULL");
+						cnt++;
+					}
 					if (synchronizeFromWidgetPosition > -1)
 					{
-						var cnt: int = 0;
+						cnt = 0
 						var total: int = widgetsForSynchronisation.length;
 						for (var i: int = 0; i < total; i++)
 						{
@@ -105,7 +122,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 							var frame: Date = frames[i] as Date;
 							if (frame)
 							{
-								if (widget.interactiveLayerMap.frame.time != frame.time)
+								if (widget.interactiveLayerMap.frame && widget.interactiveLayerMap.frame.time != frame.time)
 								{
 									debug("Going to synchronise frame: " + frame.toTimeString() + " for widget: " + widget.id, 'Info', 'FrameSychronizator');
 									widget.interactiveLayerMap.setFrame(frame);
@@ -118,6 +135,22 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 						}
 					}
 				}
+			} else {
+				
+				tempData = { widget: synchronizeFromWidget, widgets: widgetsForSynchronisation, prefferedSelectedIndex: preferredSelectedIndex };
+				
+				//wait for primary layer
+				synchronizeFromWidget.interactiveLayerMap.addEventListener(InteractiveLayerMap.PRIMARY_LAYER_CHANGED, waitForPrimaryLayer);
+			}
+		}
+		
+		private function waitForPrimaryLayer(event: DataEvent): void
+		{
+			if (tempData)
+			{
+				var synchronizeFromWidget: InteractiveWidget = tempData.widget as InteractiveWidget;
+				synchronizeFromWidget.interactiveLayerMap.removeEventListener(InteractiveLayerMap.PRIMARY_LAYER_CHANGED, waitForPrimaryLayer);
+				synchronizeWidgets( synchronizeFromWidget, tempData.widgets as ArrayCollection, tempData.prefferedSelectedIndex as int);
 			}
 		}
 		
