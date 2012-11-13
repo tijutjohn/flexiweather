@@ -592,6 +592,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 			if (_loadingMapsCount == 0)
 			{
 				notifyWidgetsMapsLoaded();
+				
+				registerSelectedInteractiveWidget();
 			}
 		}
 		
@@ -723,6 +725,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 		private function registerInteractiveWidget(iw: InteractiveWidget): void
 		{
 			//TODO should be this done only if synchronization is ON?
+			trace("registerInteractiveWidget: " + iw.id);
 			
 			iw.enableMouseMove = true;
 			iw.enableMouseClick = false;
@@ -747,7 +750,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 		 */		
 		private function unregisterInteractiveWidget(iw: InteractiveWidget): void
 		{
-			trace("unregisterInteractiveWidget: " + iw);
+			trace("unregisterInteractiveWidget: " + iw.id);
 			iw.enableMouseMove = true;
 			iw.enableMouseClick = true;
 			iw.enableMouseWheel = true;
@@ -759,8 +762,11 @@ package com.iblsoft.flexiweather.ogc.multiview
 		 */		
 		private function registerSelectedInteractiveWidget(): void
 		{
+			unregisterSelectedInteractiveWidget();
+			
 			if (_selectedInteractiveWidget)
 			{
+				trace("registerInteractiveWidget: " + _selectedInteractiveWidget.id);
 				
 				_selectedInteractiveWidget.enableMouseMove = true;
 				_selectedInteractiveWidget.enableMouseClick = true;
@@ -789,6 +795,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 		{
 			if (_selectedInteractiveWidget)
 			{
+				trace("unregisterSelectedInteractiveWidget: " + _selectedInteractiveWidget.id);
+				
 				_selectedInteractiveWidget.enableMouseMove = true;
 				_selectedInteractiveWidget.enableMouseClick = false;
 				_selectedInteractiveWidget.enableMouseWheel = false;

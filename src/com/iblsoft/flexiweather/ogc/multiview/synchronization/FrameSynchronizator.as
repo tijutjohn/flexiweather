@@ -305,11 +305,13 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 
 		private function dataForWidgetAvailable(widget: InteractiveWidget): void
 		{
+			trace("\t FrameSynchronizator dataForWidgetAvailable " + widget.id);
 			widget.enabled = true;
 		}
 
 		private function dataForWidgetUnvailable(widget: InteractiveWidget): void
 		{
+			trace("\t FrameSynchronizator dataForWidgetUnvailable" + widget.id);
 			widget.enabled = false;
 		}
 

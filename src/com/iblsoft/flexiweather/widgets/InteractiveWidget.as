@@ -93,6 +93,8 @@ package com.iblsoft.flexiweather.widgets
 		override public function set enabled(value: Boolean): void
 		{
 			super.enabled = value;
+			
+			trace("\t\t InteractiveWidget ["+id+"] enabled = " + value);
 			invalidateDisplayList();
 		}
 
