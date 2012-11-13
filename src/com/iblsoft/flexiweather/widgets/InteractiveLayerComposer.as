@@ -19,6 +19,8 @@ package com.iblsoft.flexiweather.widgets
 	[Event(name = "mapLoaded", type = "com.iblsoft.flexiweather.events.InteractiveLayerMapEvent")]
 	public class InteractiveLayerComposer extends InteractiveDataLayer implements Serializable
 	{
+		public static const LAYERS_CHANGED: String = 'layersChanged';
+		
 		protected var m_layers: ArrayCollection = new ArrayCollection();
 		private var mb_orderingLayers: Boolean = false;
 		private var _layersOrderInvalidated: Boolean;
@@ -110,7 +112,7 @@ package com.iblsoft.flexiweather.widgets
 			}
 			else
 			{
-				dispatchEvent(new Event("layersChanged"));
+				dispatchEvent(new Event(LAYERS_CHANGED));
 			}
 			_layersOrderInvalidated = true;
 			invalidateProperties();

@@ -32,6 +32,12 @@ package com.iblsoft.flexiweather.widgets
 		private var m_delayBeforeLoad: int
 		private var m_delayBeforeLoadChanged: Boolean;
 
+		override public function set enabled(value:Boolean):void
+		{
+			super.enabled = value;
+			
+			trace("InteractiveLayerZoom enabled: " + value);
+		}
 		/**
 		 * Delay before load when user zoom in/out. Loading wait to do not halt server from loading data when user intensively zoon in/out.
 		 * @return

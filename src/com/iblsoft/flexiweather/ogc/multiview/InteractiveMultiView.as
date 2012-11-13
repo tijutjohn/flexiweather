@@ -18,6 +18,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 	import com.iblsoft.flexiweather.utils.XMLStorage;
 	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
+	import com.iblsoft.flexiweather.widgets.InteractiveLayerComposer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerLabel;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerPan;
@@ -616,10 +617,12 @@ package com.iblsoft.flexiweather.ogc.multiview
 		public function startWatchingChanges(): void
 		{
 			_watchChanges = true;
+			trace("InteractiveMultiView startWatchingChanges");
 		}
 		public function stopWatchingChanges(): void
 		{
 			_watchChanges = false;
+			trace("InteractiveMultiView stopWatchingChanges	");
 		}
 		
 		private var _watchChanges: Boolean = true;
@@ -634,22 +637,36 @@ package com.iblsoft.flexiweather.ogc.multiview
 				} else {
 					stopWatchingChanges();
 					rebuildWidgets();	
-					startWatchingChanges();
+//					startWatchingChanges();
 				}
 			} else {
 				trace("\n	widget changes, but multiview is not watching changes now");
 			}
 		}
 		
+		private var _widgetsWaitingForRebuild: int;
+		
 		private function rebuildWidgets(): void
 		{
-			trace("InteractiveMultiView rebuildWdigets");
-			
+			trace("\n\nInteractiveMultiView rebuildWdigets");
+			//first loop will check how many widgets need to be changed
+			_widgetsWaitingForRebuild = 0;
 			for each (var currWidget: InteractiveWidget in _interactiveWidgets.widgets)
 			{
 				if (_selectedInteractiveWidget == currWidget)
 				{
 					//do not anything with selected widget, change came from it
+				} else {
+					_widgetsWaitingForRebuild++;				
+				}
+			}
+			
+			for each (currWidget in _interactiveWidgets.widgets)
+			{
+				if (_selectedInteractiveWidget == currWidget)
+				{
+					//do not anything with selected widget, change came from it
+					trace("\t do not anything with selected widget, change came from it");
 				} else {
 					//do not listen for changes, because widget is going to be recreated
 					currWidget.stopListenForChanges();
@@ -658,6 +675,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 					currWidget.addEventListener(InteractiveLayerMapEvent.MAP_LOADED, onWidgetMapRebuild);
 					
 					currWidget.interactiveLayerMap.removeAllLayers();
+					trace("\t clone layers from composer: " + _selectedInteractiveWidget.interactiveLayerMap.id + " to composer: " + currWidget.interactiveLayerMap.id);
 					_selectedInteractiveWidget.interactiveLayerMap.cloneLayersForComposer(currWidget.interactiveLayerMap);
 				}
 			}
@@ -672,6 +690,15 @@ package com.iblsoft.flexiweather.ogc.multiview
 		{
 			var widget: InteractiveWidget = event.target as InteractiveWidget;
 			widget.startListenForChanges();
+			
+			_widgetsWaitingForRebuild--;
+			trace("\nInteractiveMultiView onWidgetMapRebuild widget: " + widget.id + " _widgetsWaitingForRebuild: " + _widgetsWaitingForRebuild);
+			
+			if (_widgetsWaitingForRebuild == 0)
+			{
+				//all widgets are rebuildt
+				startWatchingChanges();
+			}
 		}
 		
 		/**
@@ -731,6 +758,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 				_selectedInteractiveWidget.addEventListener(ResizeEvent.RESIZE, onSelectedWidgetResize);
 				
 				onPrimaryLayerChanged();
+				
+				_selectedInteractiveWidget.startListenForChanges();
 				
 				if (_selectedInteractiveWidget.interactiveLayerMap)
 					_selectedInteractiveWidget.interactiveLayerMap.invalidateTimeline();

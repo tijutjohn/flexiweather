@@ -54,7 +54,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			var viewBBox: BBox = synchronizeFromWidget.getViewBBox();
 			
 			var cnt: int = 1;
-//			trace("\n\n AreaSynchronizator synchronizeWidgets CRS: " + crs + " vievBBox: " + viewBBox.toBBOXString());
+			trace("\n\n AreaSynchronizator synchronizeWidgets CRS: " + crs + " vievBBox: " + viewBBox.toBBOXString());
 			for each (var widget: InteractiveWidget in widgetsForSynchronisation)
 			{
 				if (widget.id != synchronizeFromWidget.id)
@@ -68,7 +68,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		
 		private function updateWidgetArea(widget: InteractiveWidget, crs: String, viewBBox: BBox): void
 		{
-//			trace("AreaSynchronizator for " + widget + " CRS: " + crs + " vievBBox: " + viewBBox.toBBOXString());
+			trace("\tAreaSynchronizator for " + widget + " CRS: " + crs + " vievBBox: " + viewBBox.toBBOXString());
 			widget.setCRS(crs, false);
 			widget.setViewBBox(viewBBox, false);
 		}
@@ -78,7 +78,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			clearTimeout(_areaChangeTimeout);
 			_areaChangeTimeout = 0;
 			
-//			trace("\n\nAreaSynchronizator changeAreaAfterDelay by " + synchronizeFromWidget.name);
+			trace("\n\nAreaSynchronizator changeAreaAfterDelay by " + synchronizeFromWidget.name);
 			
 			var crs: String = synchronizeFromWidget.getCRS();
 			var viewBBox: BBox = synchronizeFromWidget.getViewBBox();
@@ -94,7 +94,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 					
 					if (!widget.getViewBBox().equals(viewBBox))
 					{
-//						trace("AreaSynchronizator change viewBBox from " + widget.getViewBBox().toBBOXString() + " TO " + viewBBox.toBBOXString());
+						trace("\tAreaSynchronizator change viewBBox from " + widget.getViewBBox().toBBOXString() + " TO " + viewBBox.toBBOXString());
 						widget.setViewBBox(viewBBox, true);
 					}
 				}
