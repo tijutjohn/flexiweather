@@ -284,8 +284,9 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (!mb_finalChangeOccuredAfterWheelZoom)
 			{
-				// noone else commited a final area change, so let's do it 
-				setViewBBoxFromRectangle(container.getViewBBox(), true);
+				// noone else commited a final area change, so let's do it
+				if (container)
+					setViewBBoxFromRectangle(container.getViewBBox(), true);
 			}
 		}
 

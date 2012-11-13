@@ -205,8 +205,8 @@ package com.iblsoft.flexiweather.ogc.managers
 						//frame is changed
 						notifySelectedFrameChanged(selectedFrame);
 					}
-					else
-						trace("Global frame is not changed, do not notify");
+//					else
+//						trace("Global frame is not changed, do not notify");
 				}
 				else
 					notifySelectedFrameChanged(selectedFrame);

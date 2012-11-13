@@ -82,6 +82,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 	
 	[Event (name="multiViewReady", type="com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent")]
 	
+	[Event (name="multiViewMapsLoadingStarted", type="com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent")]
+	
 	[Event (name="multiViewMapsLoaded", type="com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent")]
 	
 	public class InteractiveMultiView extends SkinnableDataContainer
@@ -426,6 +428,10 @@ package com.iblsoft.flexiweather.ogc.multiview
 			}
 		}
 		
+		private function notifyWidgetsMapsLoadingStarted(): void
+		{
+			dispatchEvent(new InteractiveMultiViewEvent(InteractiveMultiViewEvent.MULTI_VIEW_MAPS_LOADING_STARTED));
+		}
 		private function notifyWidgetsMapsLoaded(): void
 		{
 			dispatchEvent(new InteractiveMultiViewEvent(InteractiveMultiViewEvent.MULTI_VIEW_MAPS_LOADED));
@@ -472,6 +478,11 @@ package com.iblsoft.flexiweather.ogc.multiview
 		{
 			if (mapXML)
 			{
+				
+				stopWatchingChanges();
+				
+				notifyWidgetsMapsLoadingStarted();
+				
 				var _serializedMap: XMLStorage = new XMLStorage(mapXML);
 				
 				_loadingMapsCount = _interactiveWidgets.widgets.length;
@@ -484,6 +495,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 						currIW.setExtentBBOX(_oldExtentBBox, false);
 					if (_oldViewBBox)
 						currIW.setViewBBox(_oldViewBBox, true);
+					
+					currIW.stopListenForChanges();
 					
 					currIW.interactiveLayerMap.addEventListener(InteractiveLayerMap.LAYERS_SERIALIZED_AND_READY, onMapFromXMLReady);
 					currIW.interactiveLayerMap.serialize(_serializedMap);
@@ -565,8 +578,10 @@ package com.iblsoft.flexiweather.ogc.multiview
 					trace("onMapFromXMLReady: Layer not exists")
 				}
 			}
+			
 //			listLayers.executeBindings();
 //			player.timeAxis.executeBindings();
+			
 			for each(var l: InteractiveLayer in interactiveLayerMap.layers) {
 				//we need to set b_force parameter to force to be able to get cached bitmaps
 				l.refresh(false);
