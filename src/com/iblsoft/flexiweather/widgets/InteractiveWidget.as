@@ -11,6 +11,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.utils.ICurveRenderer;
 	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayout;
 	import com.iblsoft.flexiweather.utils.wfs.FeatureSplitter;
+	
 	import flash.display.DisplayObject;
 	import flash.display.GradientType;
 	import flash.display.Graphics;
@@ -26,12 +27,15 @@ package com.iblsoft.flexiweather.widgets
 	import flash.utils.clearTimeout;
 	import flash.utils.getTimer;
 	import flash.utils.setTimeout;
+	
 	import mx.containers.Canvas;
 	import mx.core.IVisualElement;
 	import mx.core.UIComponent;
 	import mx.core.mx_internal;
+	import mx.events.DynamicEvent;
 	import mx.events.FlexEvent;
 	import mx.events.ResizeEvent;
+	
 	import spark.components.Group;
 	import spark.components.SkinnableContainer;
 	import spark.events.ElementExistenceEvent;
@@ -94,7 +98,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			super.enabled = value;
 			
-			trace("\t\t InteractiveWidget ["+id+"] enabled = " + value);
+//			trace("\t\t InteractiveWidget ["+id+"] enabled = " + value);
 			invalidateDisplayList();
 		}
 
@@ -364,9 +368,43 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 
+		private function onLayerInInteractiveLayerMapAdded(event: DynamicEvent): void
+		{
+			notifyWidgetChanged('layerAddedInInteractiveLayerMap');
+		}
+		private function onLayerInInteractiveLayerMapRemoved(event: DynamicEvent): void
+		{
+			notifyWidgetChanged('layerRemovedInInteractiveLayerMap');
+		}
+		
+		private function registerInteractiveLayerMap(ilm: InteractiveLayerMap): void
+		{
+			if (ilm)
+			{
+//				ilm.addEventListener(InteractiveLayerMap.TIME_AXIS_UPDATED, onTimeAxisUpdated);
+				ilm.addEventListener(InteractiveLayerMap.TIME_AXIS_ADDED, onLayerInInteractiveLayerMapAdded);
+				ilm.addEventListener(InteractiveLayerMap.TIME_AXIS_REMOVED, onLayerInInteractiveLayerMapRemoved);
+			}
+		}
+
+		private function unregisterInteractiveLayerMap(ilm: InteractiveLayerMap): void
+		{
+			if (ilm)
+			{
+//				ilm.addEventListener(InteractiveLayerMap.TIME_AXIS_UPDATED, onTimeAxisUpdated);
+				ilm.addEventListener(InteractiveLayerMap.TIME_AXIS_ADDED, onLayerInInteractiveLayerMapAdded);
+				ilm.addEventListener(InteractiveLayerMap.TIME_AXIS_REMOVED, onLayerInInteractiveLayerMapRemoved);
+			}
+		}
+		
 		private function setInteractiveLayerMap(ilm: InteractiveLayerMap): void
 		{
+			unregisterInteractiveLayerMap(m_interactiveLayerMap);
+			
 			m_interactiveLayerMap = ilm;
+			
+			registerInteractiveLayerMap(m_interactiveLayerMap);
+			
 			notifyInteractiveLayerMapChanged();
 		}
 
@@ -972,7 +1010,8 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (mb_listenForChanges)
 			{
-				var iwe: InteractiveWidgetEvent = new InteractiveWidgetEvent(InteractiveWidgetEvent.WIDGET_CHANGED)
+				var iwe: InteractiveWidgetEvent = new InteractiveWidgetEvent(InteractiveWidgetEvent.WIDGET_CHANGED);
+				iwe.changeDescription = change;
 				dispatchEvent(iwe);
 			}
 		}

@@ -187,7 +187,7 @@ package com.iblsoft.flexiweather.widgets
 			var wrappers: ArrayCollection;
 			var wrapper: LayerSerializationWrapper;
 			var layer: InteractiveLayer;
-			trace("InteractiveLayerMap [IW: " + container.id + "] serialize loading: " + storage.isLoading());
+			debug("InteractiveLayerMap [IW: " + container.id + "] serialize loading: " + storage.isLoading());
 			LayerSerializationWrapper.m_iw = container;
 			if (storage.isLoading())
 			{
@@ -242,7 +242,7 @@ package com.iblsoft.flexiweather.widgets
 					storage.serializeString('global-frame', frameDateString);
 					storage.serializeString('global-level', globalVariablesManager.level);
 				}
-				trace("Map serialize: " + (storage as XMLStorage).xml);
+				debug("Map serialize: " + (storage as XMLStorage).xml);
 			}
 		}
 		private var _frameInvalidated: Boolean;
@@ -307,7 +307,7 @@ package com.iblsoft.flexiweather.widgets
 		override protected function commitProperties(): void
 		{
 			super.commitProperties();
-//			trace("InteractiveLayerMap commitProperties: _frameInvalidated: " + _frameInvalidated + " _levelInvalidated: " + _levelInvalidated);
+//			debug("InteractiveLayerMap commitProperties: _frameInvalidated: " + _frameInvalidated + " _levelInvalidated: " + _levelInvalidated);
 			if (_frameInvalidated)
 			{
 				_frameInvalidated = false;
@@ -331,18 +331,18 @@ package com.iblsoft.flexiweather.widgets
 			}
 			else
 			{
-				trace("Layer is null, do not add it to InteractiveLayerMap");
+				debug("Layer is null, do not add it to InteractiveLayerMap");
 			}
 		}
 
 		override protected function layerAdded(layer: InteractiveLayer): void
 		{
 			super.layerAdded(layer);
-//				trace(this + " ADD LAYER: " + l.toString());
+//				debug(this + " ADD LAYER: " + l.toString());
 			if (layer)
 			{
 				var dynamicEvent: DynamicEvent = new DynamicEvent(TIME_AXIS_ADDED);
-//				trace("InteractiveLayerMap addlayer: " + l.name);
+//				debug("InteractiveLayerMap addlayer: " + l.name);
 				dynamicEvent['layer'] = layer;
 				dispatchEvent(dynamicEvent);
 				var synchronisableFrame: Boolean = false;
@@ -386,7 +386,7 @@ package com.iblsoft.flexiweather.widgets
 			}
 			else
 			{
-				trace("Layer is null, do not add it to InteractiveLayerMap");
+				debug("Layer is null, do not add it to InteractiveLayerMap");
 			}
 		}
 
@@ -427,7 +427,6 @@ package com.iblsoft.flexiweather.widgets
 			var dynamicEvent: DynamicEvent = new DynamicEvent(TIME_AXIS_REMOVED);
 			dynamicEvent['layer'] = l;
 			dispatchEvent(dynamicEvent);
-//			l.destroy();
 		}
 
 		private function getSynchronizedFrameValue(): Date
@@ -520,7 +519,7 @@ package com.iblsoft.flexiweather.widgets
 				if (so == null)
 					continue;
 				var test: * = so.getSynchronisedVariables();
-				//trace("enumTimeAxis so: " + (so as Object).name + " synchro vars: " + test.toString());
+				//debug("enumTimeAxis so: " + (so as Object).name + " synchro vars: " + test.toString());
 				if (test == null)
 					continue;
 				if (so.getSynchronisedVariables().indexOf(GlobalVariable.FRAME) < 0)
@@ -571,7 +570,7 @@ package com.iblsoft.flexiweather.widgets
 			var a_dimensions: Array;
 			for each (so in l_syncLayers)
 			{
-				//trace("\n Composer getDimensionValues ["+dimName+"] get values for layer: " + (so as Object).name);
+				//debug("\n Composer getDimensionValues ["+dimName+"] get values for layer: " + (so as Object).name);
 				var values: Array = (so as InteractiveLayerMSBase).getWMSDimensionsNames()
 				if (a_dimensions == null)
 					a_dimensions = values;
@@ -604,7 +603,7 @@ package com.iblsoft.flexiweather.widgets
 			var a_layers: Array = [];
 			for each (so in l_syncLayers)
 			{
-				//trace("\n Composer getDimensionValues ["+dimName+"] get values for layer: " + (so as Object).name);
+				//debug("\n Composer getDimensionValues ["+dimName+"] get values for layer: " + (so as Object).name);
 				if ((so as InteractiveLayerMSBase).supportWMSDimension(dimName))
 					a_layers.push(so);
 			}
@@ -630,7 +629,7 @@ package com.iblsoft.flexiweather.widgets
 			var a_dimValues: Array;
 			for each (so in l_syncLayers)
 			{
-				//trace("\n Composer getDimensionValues ["+dimName+"] get values for layer: " + (so as Object).name);
+				//debug("\n Composer getDimensionValues ["+dimName+"] get values for layer: " + (so as Object).name);
 				var values: Array = (so as InteractiveLayerMSBase).getWMSDimensionsValues(dimName, b_intersection);
 				if (a_dimValues == null)
 					a_dimValues = values;
@@ -824,7 +823,7 @@ package com.iblsoft.flexiweather.widgets
 				}
 				else
 				{
-					trace("InteractiveLayerMap setLevel [" + newLevel + "] LEVEL NOT FOUND for " + l.name);
+					debug("InteractiveLayerMap setLevel [" + newLevel + "] LEVEL NOT FOUND for " + l.name);
 				}
 			}
 			return true;
@@ -847,7 +846,7 @@ package com.iblsoft.flexiweather.widgets
 				}
 				else
 				{
-					trace(this + " setFrame [" + newFrame.toTimeString() + "] FRAME NOT FOUND for " + l.name);
+					debug(this + " setFrame [" + newFrame.toTimeString() + "] FRAME NOT FOUND for " + l.name);
 				}
 			}
 			return true;
@@ -909,9 +908,9 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (s.indexOf('small') >= 0)
 			{
-				trace("Stop tag <small> is included in feature info");
+				debug("Stop tag <small> is included in feature info");
 			}
-			trace("InteractiveLayerMap onFeatureInfoAvailable _featureTooltipCallsCount: " + _featureTooltipCallsCount + " _featureTooltipCallsTotalCount: " + _featureTooltipCallsTotalCount);
+			debug("InteractiveLayerMap onFeatureInfoAvailable _featureTooltipCallsCount: " + _featureTooltipCallsCount + " _featureTooltipCallsTotalCount: " + _featureTooltipCallsTotalCount);
 			var firstFeatureInfo: Boolean = (_featureTooltipCallsCount == _featureTooltipCallsTotalCount);
 			_featureTooltipCallsCount--;
 			s = HTMLUtils.fixFeatureInfoHTML(s);
@@ -920,7 +919,7 @@ package com.iblsoft.flexiweather.widgets
 //				var infoXML: XML = new XML(s);
 //			} catch (error: Error) {
 //				parsingCorrect = false;
-//				trace("ERROR parsing FEatureINFO");
+//				debug("ERROR parsing FEatureINFO");
 //				Alert.show(error.message, "Problem with parsing GetFeatureInfo request", Alert.OK);
 //			}
 			if (_featureTooltipCallsCount < 1)
@@ -934,7 +933,7 @@ package com.iblsoft.flexiweather.widgets
 				var info: String = s;
 				_featureTooltipString += '<p><b><font color="#3080c0">' + layer.name + '</font></b>';
 				_featureTooltipString += s + '</p>';
-				trace("InteractiveLayerMap onFeatureInfoAvailable _featureTooltipCallsRunning: " + _featureTooltipCallsRunning);
+				debug("InteractiveLayerMap onFeatureInfoAvailable _featureTooltipCallsRunning: " + _featureTooltipCallsRunning);
 			}
 			else
 			{
@@ -946,7 +945,7 @@ package com.iblsoft.flexiweather.widgets
 			gfie.firstFeatureInfo = firstFeatureInfo;
 			gfie.lastFeatureInfo = !_featureTooltipCallsRunning;
 			dispatchEvent(gfie);
-			trace("InteractiveLayerMap onFeatureInfoAvailable event gfie.firstFeatureInfo: " + gfie.firstFeatureInfo + " gfie.lastFeatureInfo: " + gfie.lastFeatureInfo);
+			debug("InteractiveLayerMap onFeatureInfoAvailable event gfie.firstFeatureInfo: " + gfie.firstFeatureInfo + " gfie.lastFeatureInfo: " + gfie.lastFeatureInfo);
 		}
 
 		/**
@@ -991,11 +990,11 @@ package com.iblsoft.flexiweather.widgets
 			return retStr;
 		}
 
-		private function debug(str: String, type: String, tag: String): void
+		private function debug(str: String, type: String = "Info", tag: String = "InteractiveLayerMap"): void
 		{
 			if (debugConsole)
 				debugConsole.print(str, type, tag);
-			trace(tag + "| " + type + "| " + str);
+//			trace(tag + "| " + type + "| " + str);
 		}
 	}
 }

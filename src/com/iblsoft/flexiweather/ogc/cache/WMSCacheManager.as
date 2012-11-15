@@ -22,8 +22,8 @@ package com.iblsoft.flexiweather.ogc.cache
 			var layerNames: String = configuration.layerNames.join('_');
 			if (!_wmsCacheDictionary[layerNames])
 				_wmsCacheDictionary[layerNames] = new WMSCache();
-			else
-				trace("cache for layer " + layerNames + " already exists");
+//			else
+//				trace("cache for layer " + layerNames + " already exists");
 			return _wmsCacheDictionary[layerNames] as WMSCache;
 		}
 	}

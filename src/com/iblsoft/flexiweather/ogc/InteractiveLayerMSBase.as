@@ -1468,7 +1468,7 @@ package com.iblsoft.flexiweather.ogc
 
 		protected function debug(str: String): void
 		{
-			trace("InteractiveLayerMSBase: " + str);
+//			trace("InteractiveLayerMSBase: " + str);
 		}
 
 		public function get configuration(): ILayerConfiguration

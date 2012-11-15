@@ -57,11 +57,11 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			timeDifference = -1;
 		}
 
-		private function debug(str: String, type: String, tag: String): void
+		private function debug(str: String, type: String = "Info", tag: String = "FrameSynchronizator"): void
 		{
 			if (debugConsole)
 				debugConsole.print(str, type, tag);
-			trace(tag + "| " + type + "| " + str);
+//			trace(tag + "| " + type + "| " + str);
 		}
 		private var tempData: Object;
 
@@ -106,13 +106,13 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 //						frames = frames.slice(Math.max(0, currFramePosition - synchronizeFromWidgetPosition), frames.length);
 					var cnt: int = 0;
 					var frames: Array = getFrames(primaryLayer, synchronizeFromWidgetPosition);
-					trace("FramSynchornisator frames: " + frames.length + " selected index: " + preferredSelectedIndex);
+					debug("FramSynchornisator frames: " + frames.length + " selected index: " + preferredSelectedIndex);
 					for each (var date: Date in frames)
 					{
 						if (date)
-							trace("\t frame[" + cnt + "] = " + date.toTimeString());
+							debug("\t frame[" + cnt + "] = " + date.toTimeString());
 						else
-							trace("\t frame[" + cnt + "] = NULL");
+							debug("\t frame[" + cnt + "] = NULL");
 						cnt++;
 					}
 					if (synchronizeFromWidgetPosition > -1)
@@ -259,13 +259,13 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 				var synchronizeFromWidgetPosition: int = getWidgetPosition(synchronizeFromWidget, widgetsForSynchronisation);
 				var currFrame: Date = primaryLayer.getSynchronisedVariableValue(GlobalVariable.FRAME) as Date;
 				var currFramePosition: int = getFramePosition(currFrame, frames);
-				trace("FrameSynchronizator synchronizeFramesSequentialy: curr frame: " + currFrame.toTimeString() + " currFramePosition: " + currFramePosition);
+				debug("FrameSynchronizator synchronizeFramesSequentialy: curr frame: " + currFrame.toTimeString() + " currFramePosition: " + currFramePosition);
 				if (currFramePosition > 0)
 				{
 					var sliceFrom: int = Math.max(0, currFramePosition - synchronizeFromWidgetPosition);
 					var sliceTo: int = frames.length;
 					frames = frames.slice(sliceFrom, sliceTo);
-					trace("FrameSynchronizator synchronizeFramesSequentialy: sliceFrom: " + sliceFrom + " sliceTo: " + sliceTo);
+					debug("FrameSynchronizator synchronizeFramesSequentialy: sliceFrom: " + sliceFrom + " sliceTo: " + sliceTo);
 				}
 				if (synchronizeFromWidgetPosition > -1)
 				{
@@ -277,13 +277,13 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 						if (widget.id != synchronizeFromWidget.id)
 						{
 							var framePos: int = i - synchronizeFromWidgetPosition + currFramePosition;
-							trace("\t FrameSynchronizator synchronizeFramesSequentialy: widget: " + widget.id + " framePos: " + framePos);
+							debug("\t FrameSynchronizator synchronizeFramesSequentialy: widget: " + widget.id + " framePos: " + framePos);
 							if (framePos >= 0)
 							{
 								var frame: Date = getFrame(framePos, frames);
 								if (frame)
 								{
-									trace("\t FrameSynchronizator synchronizeFramesSequentialy: widget: " + widget.id + " framePos: " + framePos + " frame: " + frame.toTimeString());
+									debug("\t FrameSynchronizator synchronizeFramesSequentialy: widget: " + widget.id + " framePos: " + framePos + " frame: " + frame.toTimeString());
 									widget.interactiveLayerMap.setFrame(frame);
 									dataForWidgetAvailable(widget);
 								}
@@ -305,13 +305,13 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 
 		private function dataForWidgetAvailable(widget: InteractiveWidget): void
 		{
-			trace("\t FrameSynchronizator dataForWidgetAvailable " + widget.id);
+			debug("\t FrameSynchronizator dataForWidgetAvailable " + widget.id);
 			widget.enabled = true;
 		}
 
 		private function dataForWidgetUnvailable(widget: InteractiveWidget): void
 		{
-			trace("\t FrameSynchronizator dataForWidgetUnvailable" + widget.id);
+			debug("\t FrameSynchronizator dataForWidgetUnvailable" + widget.id);
 			widget.enabled = false;
 		}
 
