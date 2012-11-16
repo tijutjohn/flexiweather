@@ -547,17 +547,23 @@ package com.iblsoft.flexiweather.utils
 			{
 //				nMPoint = new MPoint(Point(_points[i]).clone());
 				p = Point(_points[i]);
-				nMPoint = new MPoint(p.x, p.y);
-				nMPoint.segmentIndex = i;
-				usePoints.push(nMPoint);
+				if (p)
+				{
+					nMPoint = new MPoint(p.x, p.y);
+					nMPoint.segmentIndex = i;
+					usePoints.push(nMPoint);
+				}
 					//trace('mPoints.push(new MPoint(new Point(' + Point(_points[i]).x + ', ' + Point(_points[i]).y + ')));');
 			}
 			if (_closed)
 			{
 				p = Point(_points[0]);
-				nMPoint = new MPoint(p.x, p.y);
-				nMPoint.segmentIndex = _points.length;
-				usePoints.push(nMPoint);
+				if (p)
+				{
+					nMPoint = new MPoint(p.x, p.y);
+					nMPoint.segmentIndex = _points.length;
+					usePoints.push(nMPoint);
+				}
 			}
 			// CALCULATE DISTANCES
 			if (_closed)
@@ -581,6 +587,12 @@ package com.iblsoft.flexiweather.utils
 					MPoint(usePoints[i]).dist = new Point(MPoint(usePoints[nextIndex]).x - MPoint(usePoints[i]).x, MPoint(usePoints[nextIndex]).y - MPoint(usePoints[i]).y).length;
 				}
 			}
+			
+			//there are no visible points, return empty array
+			if (usePoints.length == 0)
+				return [];
+			
+			
 			// CALCULATE DERIVATES
 			for (i = 0; i < usePoints.length; i++)
 			{

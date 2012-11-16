@@ -63,6 +63,9 @@ package com.iblsoft.flexiweather.utils.wfs
 
 		public function splitCoordPolyLineToArrayOfPointPolyLines(coords: Array, b_closed: Boolean): Array
 		{
+			if (coords.length == 0)
+				return [];
+			
 			var total: int = coords.length;
 			var projection: Projection = m_iw.getCRSProjection()
 			m_projectionWidth = projection.extentBBox.width;
@@ -122,11 +125,23 @@ package com.iblsoft.flexiweather.utils.wfs
 				currPos++;
 			}
 			var resultArr: Array = [];
-			for (i = 0; i < 5; i++)
+			var polygons: Array;
+			var polygon: Array;
+			if (projection.wrapsHorizontally)
 			{
-				var i_delta: int = (i & 1 ? 1 : -1) * ((i + 1) >> 1); // generates sequence 0, 1, -1, 2, -2, ..., 5, -5
-				var polygons: Array = convertToScreenPoints(shiftCoords(points, i_delta));
-				for each (var polygon: Array in polygons)
+				for (i = 0; i < 5; i++)
+				{
+					var i_delta: int = (i & 1 ? 1 : -1) * ((i + 1) >> 1); // generates sequence 0, 1, -1, 2, -2, ..., 5, -5
+					polygons = convertToScreenPoints(shiftCoords(points, i_delta));
+					for each (polygon in polygons)
+					{
+						resultArr.push(polygon);
+					}
+				}
+			} else {
+				// projection does not wrap around
+				polygons = convertToScreenPoints(points);
+				for each (polygon in polygons)
 				{
 					resultArr.push(polygon);
 				}

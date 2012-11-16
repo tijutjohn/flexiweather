@@ -68,9 +68,10 @@ package com.iblsoft.flexiweather.ogc.editable
 			for (var i: int = 0; i < total; i++)
 			{
 				var coord: Coord = coordinates[i] as Coord;
-				if (coord.crs != crs)
-					trace("Problem with Coord... not same as InteractiveWidget coord");
-				var pointReflections: Array = master.container.mapCoordInCRSToViewReflections(new Point(coord.x, coord.y));
+//				if (coord.crs != crs)
+//					coord = coord.convertToProjection(master.container.getCRSProjection());
+//					trace("Problem with Coord... not same as InteractiveWidget coord");
+				var pointReflections: Array = master.container.mapCoordToViewReflections(coord);
 				var reflectionsCount: int = pointReflections.length;
 				for (var j: int = 0; j < reflectionsCount; j++)
 				{
@@ -305,7 +306,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			var reflectionWidth: Number = 0;
 			if (i_reflectionDelta != 0)
 				reflectionWidth = master.container.getExtentBBox().width * i_reflectionDelta;
-			trace("WFSFeatureEditable setPoint: " + i_pointIndex + " pt: " + pt + " reflection delta: " + i_reflectionDelta);
+//			trace("WFSFeatureEditable setPoint: " + i_pointIndex + " pt: " + pt + " reflection delta: " + i_reflectionDelta);
 			var c: Coord = m_master.container.pointToCoord(pt.x, pt.y);
 			//need to move coord to 0 reflection
 			c.x -= reflectionWidth;

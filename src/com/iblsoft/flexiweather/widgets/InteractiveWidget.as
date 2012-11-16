@@ -11,7 +11,6 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.utils.ICurveRenderer;
 	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayout;
 	import com.iblsoft.flexiweather.utils.wfs.FeatureSplitter;
-	
 	import flash.display.DisplayObject;
 	import flash.display.GradientType;
 	import flash.display.Graphics;
@@ -27,7 +26,6 @@ package com.iblsoft.flexiweather.widgets
 	import flash.utils.clearTimeout;
 	import flash.utils.getTimer;
 	import flash.utils.setTimeout;
-	
 	import mx.containers.Canvas;
 	import mx.core.IVisualElement;
 	import mx.core.UIComponent;
@@ -35,7 +33,6 @@ package com.iblsoft.flexiweather.widgets
 	import mx.events.DynamicEvent;
 	import mx.events.FlexEvent;
 	import mx.events.ResizeEvent;
-	
 	import spark.components.Group;
 	import spark.components.SkinnableContainer;
 	import spark.events.ElementExistenceEvent;
@@ -97,7 +94,6 @@ package com.iblsoft.flexiweather.widgets
 		override public function set enabled(value: Boolean): void
 		{
 			super.enabled = value;
-			
 //			trace("\t\t InteractiveWidget ["+id+"] enabled = " + value);
 			invalidateDisplayList();
 		}
@@ -372,11 +368,12 @@ package com.iblsoft.flexiweather.widgets
 		{
 			notifyWidgetChanged('layerAddedInInteractiveLayerMap');
 		}
+
 		private function onLayerInInteractiveLayerMapRemoved(event: DynamicEvent): void
 		{
 			notifyWidgetChanged('layerRemovedInInteractiveLayerMap');
 		}
-		
+
 		private function registerInteractiveLayerMap(ilm: InteractiveLayerMap): void
 		{
 			if (ilm)
@@ -396,15 +393,12 @@ package com.iblsoft.flexiweather.widgets
 				ilm.addEventListener(InteractiveLayerMap.TIME_AXIS_REMOVED, onLayerInInteractiveLayerMapRemoved);
 			}
 		}
-		
+
 		private function setInteractiveLayerMap(ilm: InteractiveLayerMap): void
 		{
 			unregisterInteractiveLayerMap(m_interactiveLayerMap);
-			
 			m_interactiveLayerMap = ilm;
-			
 			registerInteractiveLayerMap(m_interactiveLayerMap);
-			
 			notifyInteractiveLayerMapChanged();
 		}
 
@@ -901,6 +895,13 @@ package com.iblsoft.flexiweather.widgets
 				}
 				return a;
 			}
+		}
+
+		public function mapCoordToViewReflections(coord: Coord, vBBox: BBox = null): Array
+		{
+			if (coord.crs != crs)
+				coord = coord.convertToProjection(m_crsProjection);
+			return mapCoordInCRSToViewReflections(new Point(coord.x, coord.y), vBBox);
 		}
 
 		/**

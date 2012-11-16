@@ -78,14 +78,14 @@ package com.iblsoft.flexiweather.ogc
 
 		private function onPointsChanged(event: CollectionEvent): void
 		{
-			trace("FeatureBase points changed: " + event.kind);
+//			trace("FeatureBase points changed: " + event.kind);
 			var changeEvent: PropertyChangeEvent
-			if (event.kind == CollectionEventKind.ADD)
-				trace("new Point added: " + (event.items[0] as Point));
+//			if (event.kind == CollectionEventKind.ADD)
+//				trace("new Point added: " + (event.items[0] as Point));
 			if (event.kind == CollectionEventKind.UPDATE)
 			{
 				changeEvent = event.items[0] as PropertyChangeEvent;
-				trace("point updated: " + (changeEvent.oldValue as Point) + " to " + (changeEvent.newValue as Point));
+//				trace("point updated: " + (changeEvent.oldValue as Point) + " to " + (changeEvent.newValue as Point));
 			}
 			if (event.kind == CollectionEventKind.RESET)
 				trace("RESET");
@@ -96,7 +96,7 @@ package com.iblsoft.flexiweather.ogc
 			if (event.kind == CollectionEventKind.REPLACE)
 			{
 				changeEvent = event.items[0] as PropertyChangeEvent;
-				trace("point replace: " + (changeEvent.oldValue as Point) + " to " + (changeEvent.newValue as Point));
+//				trace("point replace: " + (changeEvent.oldValue as Point) + " to " + (changeEvent.newValue as Point));
 			}
 		}
 
