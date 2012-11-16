@@ -17,7 +17,6 @@ package com.iblsoft.flexiweather.components
 		override public function set selectedIndex(value: int): void
 		{
 			super.selectedIndex = value;
-			trace("IndexRetainingDropDownList: selectedIndex: " + value);
 		}
 
 		public function IndexRetainingDropDownList()

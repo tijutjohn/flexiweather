@@ -61,6 +61,16 @@ package com.iblsoft.flexiweather.widgets
 		public static const LOADING_FINISHED: String = 'loadingFinished';
 		/**
 		 *
+		 *  @eventType loadingFinishedFromCache
+		 *
+		 *  @langversion 3.0
+		 *  @playerversion Flash 9
+		 *  @playerversion AIR 1.1
+		 *  @productversion Flex 3
+		 */
+		public static const LOADING_FINISHED_FROM_CACHE: String = 'loadingFinishedFromCache';
+		/**
+		 *
 		 *  @eventType loadingError
 		 *
 		 *  @langversion 3.0
@@ -237,6 +247,19 @@ package com.iblsoft.flexiweather.widgets
 			if (_status != STATE_DATA_LOADED_WITH_ERRORS)
 				setStatus(STATE_DATA_LOADED);
 			var event: InteractiveLayerEvent = new InteractiveLayerEvent(LOADING_FINISHED, bubbles);
+			event.interactiveLayer = this;
+			dispatchEvent(event);
+		}
+		
+		/**
+		 * Dispatch <code>InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE</code> event. If you need to dispatch more properties inside event, override this method in your class.
+		 *
+		 */
+		protected function notifyLoadingFinishedFromCache(bubbles: Boolean = true): void
+		{
+			if (_status != STATE_DATA_LOADED_WITH_ERRORS)
+				setStatus(STATE_DATA_LOADED);
+			var event: InteractiveLayerEvent = new InteractiveLayerEvent(LOADING_FINISHED_FROM_CACHE, bubbles);
 			event.interactiveLayer = this;
 			dispatchEvent(event);
 		}

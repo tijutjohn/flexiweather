@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.ogc.cache.event
 {
 	import com.iblsoft.flexiweather.ogc.cache.CacheItem;
+	
 	import flash.events.Event;
 
 	public class WMSCacheEvent extends Event
@@ -8,6 +9,8 @@ package com.iblsoft.flexiweather.ogc.cache.event
 		public static const ITEM_ADDED: String = 'itemAdded';
 		public var item: CacheItem;
 
+		public var associatedData: Object;
+		
 		public function WMSCacheEvent(type: String, cacheItem: CacheItem, bubbles: Boolean = false, cancelable: Boolean = false)
 		{
 			super(type, bubbles, cancelable);

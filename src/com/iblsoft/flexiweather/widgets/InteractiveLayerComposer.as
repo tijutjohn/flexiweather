@@ -9,8 +9,10 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.widgets.googlemaps.InteractiveLayerGoogleMaps;
+	
 	import flash.display.DisplayObject;
 	import flash.events.Event;
+	
 	import mx.collections.ArrayCollection;
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
@@ -43,13 +45,14 @@ package com.iblsoft.flexiweather.widgets
 
 		private function onLayerLoadingFinished(event: InteractiveLayerEvent): void
 		{
-			var l: InteractiveLayer = event.interactiveLayer;
+			var l: InteractiveLayer = event.interactiveLayer as InteractiveLayer;
 			trace("Composer onLayerLoadingFinished [" + l.toString() + "]");
 			for each (l in m_layers)
 			{
 				if (l is InteractiveDataLayer)
 				{
-					if ((l as InteractiveDataLayer).status != InteractiveDataLayer.STATE_DATA_LOADED)
+					var status: String = (l as InteractiveDataLayer).status;
+					if (status != InteractiveDataLayer.STATE_DATA_LOADED)
 					{
 						//not all layers are loaded, stop checking
 						return;
@@ -67,12 +70,15 @@ package com.iblsoft.flexiweather.widgets
 				if (l is InteractiveDataLayer)
 				{
 					(l as InteractiveDataLayer).addEventListener(InteractiveDataLayer.LOADING_FINISHED, onLayerLoadingFinished);
+					(l as InteractiveDataLayer).addEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onLayerLoadingFinished);
 				}
 			}
 			for each (l in layers)
 			{
+				trace("Composer addLayers: addLayer: " + l.layerName);
 				addLayer(l);
 			}
+			
 		}
 
 		public function addLayer(l: InteractiveLayer): void
@@ -80,8 +86,26 @@ package com.iblsoft.flexiweather.widgets
 			l.addEventListener(InteractiveLayerEvent.LAYER_INITIALIZED, onLayerInitialized);
 			if (container)
 				l.container = container;
+			
+			trace("Composer addLayer: " + l.layerName + " at 0");
 			m_layers.addItemAt(l, 0);
 			//wait for layer is initialized. Function "layerAdded" will be called
+			debugLayers();
+		}
+		
+		private function debugLayers(): void
+		{
+			var total: int = m_layers.length;
+			for (var i: int = 0; i < total; i++)
+			{
+				var l: InteractiveLayer = m_layers.getItemAt(i) as InteractiveLayer;
+				trace("\t Composer debugLayers m_layers["+i+"] = " + l.layerName);
+			}
+			for (var i: int = 0; i < numChildren; ++i)
+			{
+				var ilI: InteractiveLayer = InteractiveLayer(getChildAt(i));
+				trace("\t't Composer debugLayers childAt["+i+"] = " + ilI.layerName);
+			}
 		}
 
 		private function onLayerInitialized(event: InteractiveLayerEvent): void
@@ -126,15 +150,15 @@ package com.iblsoft.flexiweather.widgets
 			try
 			{
 				var layer: InteractiveLayer;
-//				trace("************************************************************************************");
-//				trace("                InteractiveLayerComposer SORTING by ZORDER start state");
-//				trace("************************************************************************************");
-//				for (i = 0; i < numChildren; ++i)
-//				{
-//					layer = InteractiveLayer(getChildAt(i));
-//					trace("LAYER [" + i + "] = " + layer.name + " order: " + layer.zOrder);
-//				}
-//				trace("**********************************************")
+				trace("************************************************************************************");
+				trace("                InteractiveLayerComposer SORTING by ZORDER start state");
+				trace("************************************************************************************");
+				for (i = 0; i < numChildren; ++i)
+				{
+					layer = InteractiveLayer(getChildAt(i));
+					trace("LAYER [" + i + "] = " + layer.name + " order: " + layer.zOrder);
+				}
+				trace("**********************************************")
 				// stable-sort interactive layers in ma_layers according to their zOrder property
 				for (var i: int = 0; i < numChildren; ++i)
 				{
@@ -142,11 +166,11 @@ package com.iblsoft.flexiweather.widgets
 					for (var j: int = i + 1; j < numChildren; ++j)
 					{
 						var ilJ: InteractiveLayer = InteractiveLayer(getChildAt(j));
-//						trace('[InteractiveLayerComposer.orderLayers] ... checking ' + ilJ.name + '['+ilJ.zOrder+'] with ' + ilI.name+'['+ilI.zOrder+']');
+						trace('[InteractiveLayerComposer.orderLayers] ... checking ' + ilJ.name + '['+ilJ.zOrder+'] with ' + ilI.name+'['+ilI.zOrder+']');
 						if (ilJ.zOrder < ilI.zOrder)
 						{
 							// swap Ith and Jth layer, we know that J > I
-//							trace('\t [InteractiveLayerComposer.orderLayers] ... swapping ' + ilJ.name + '['+ilJ.zOrder+'] with ' + ilI.name+'['+ilI.zOrder+']');
+							trace('\t [InteractiveLayerComposer.orderLayers] ... swapping ' + ilJ.name + '['+ilJ.zOrder+'] with ' + ilI.name+'['+ilI.zOrder+']');
 							swapChildren(ilJ, ilI);
 							ilI = InteractiveLayer(getChildAt(i));
 								//removeChildAt(j);
@@ -156,15 +180,20 @@ package com.iblsoft.flexiweather.widgets
 						}
 					}
 				}
-//				trace("**********************************************")
-//				trace("                 SORTING by ZORDER end state");
-//				trace("**********************************************")
-//				for (i = 0; i < numChildren; ++i)
-//				{
-//					layer = InteractiveLayer(getChildAt(i));
-//					trace("LAYER [" + i + "] = " + layer.name + " order: " + layer.zOrder);
-//				}
-//				trace("**********************************************")
+				trace("**********************************************")
+				trace("                 SORTING by ZORDER end state");
+				trace("**********************************************")
+				for (i = 0; i < numChildren; ++i)
+				{
+					layer = InteractiveLayer(getChildAt(i));
+					trace("LAYER [" + i + "] = " + layer.name + " order: " + layer.zOrder);
+					
+					if (i == 0 && layer.name.indexOf('Border') > 0)
+					{
+						trace("stop");
+					}
+				}
+				trace("**********************************************")
 			}
 			finally
 			{
@@ -399,7 +428,7 @@ package com.iblsoft.flexiweather.widgets
 		public function cloneLayersForComposer(composer: InteractiveLayerComposer): void
 		{
 			var total: int = layers.length;
-			
+			trace("From composers: " + id + " ["+layers.length+"] to composer: " + composer.id + " ["+composer.layers.length+"]");	
 			var newLayers: Array = [];
 			
 			var newLayer: InteractiveLayer;
@@ -415,9 +444,11 @@ package com.iblsoft.flexiweather.widgets
 			
 			for each (newLayer in newLayers)
 			{
-				composer.addLayer(newLayer);
+//				composer.addLayer(newLayer);
 				newLayer.refresh(true);
 			}
+			
+			orderLayers();
 		}
 	}
 }

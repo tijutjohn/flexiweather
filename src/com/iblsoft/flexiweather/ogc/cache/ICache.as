@@ -23,7 +23,7 @@ package com.iblsoft.flexiweather.ogc.cache
 		function setAnimationModeEnable(value: Boolean): void;
 		function invalidate(s_crs: String, bbox: BBox, validity: Date = null): void;
 		function addCacheNoDataItem(viewProperties: IViewProperties): void
-		function addCacheItem(img: DisplayObject, viewProperties: IViewProperties): void
+		function addCacheItem(img: DisplayObject, viewProperties: IViewProperties, associatedData: Object): void
 		function deleteCacheItem(cacheItem: CacheItem, b_disposeDisplayed: Boolean = false): Boolean
 		function deleteCacheItemByKey(s_key: String, b_disposeDisplayed: Boolean = false): Boolean
 		function isItemCached(viewProperties: IViewProperties, b_checkNoDataCache: Boolean = false): Boolean;

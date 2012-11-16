@@ -70,8 +70,12 @@ package com.iblsoft.flexiweather.ogc.tiling
 		override public function set visible(b_visible: Boolean): void
 		{
 			super.visible = b_visible;
-			if (m_tiledLayer)
+			if (m_tiledLayer) {
 				m_tiledLayer.visible = b_visible;
+				trace(this + " visible = " + b_visible + " / " + visible + " / " + m_tiledLayer.visible);
+			} else {
+				trace(this + " visible = " + b_visible + " / " + visible);
+			}
 		}
 
 		public function InteractiveLayerWMSWithQTT(

@@ -72,11 +72,13 @@ package com.iblsoft.flexiweather.widgets
 			if (super.visible != b_visible)
 			{
 				super.visible = b_visible;
+				
+				trace("InteractiveLayer " + name + "/" + id + "  visible = " + b_visible + " / " + visible);
 				var ile: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.VISIBILITY_CHANGED);
 				dispatchEvent(ile);
 				if (container)
 					container.onLayerVisibilityChanged(this);
-				notifyLayerChanged('visible');
+				callLater(notifyLayerChanged, ['visible']);
 			}
 		}
 		protected var layerInitialized: Boolean;
@@ -333,7 +335,7 @@ package com.iblsoft.flexiweather.widgets
 
 		override public function toString(): String
 		{
-			return "InteractiveLayer " + name;
+			return "InteractiveLayer " + name + " / " + id;
 		}
 	}
 }

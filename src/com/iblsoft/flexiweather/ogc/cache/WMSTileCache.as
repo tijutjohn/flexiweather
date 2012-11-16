@@ -251,7 +251,7 @@ package com.iblsoft.flexiweather.ogc.cache
 
 //		public function addTile(img: Bitmap, s_crs: String, tileIndex: TileIndex, url: URLRequest, specialStrings: Array, tiledArea: TiledArea, viewPart: BBox, time: Date): void
 //		override public function addCacheItem(img: Bitmap, s_crs: String, bbox: BBox, url: URLRequest, associatedCacheData: Object = null): void
-		override public function addCacheItem(img: DisplayObject, viewProperties: IViewProperties): void
+		override public function addCacheItem(img: DisplayObject, viewProperties: IViewProperties, associatedData: Object): void
 		{
 			var qttTileViewProperties: TiledTileViewProperties = viewProperties as TiledTileViewProperties;
 			if (!qttTileViewProperties)

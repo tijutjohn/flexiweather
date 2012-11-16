@@ -22,6 +22,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import com.iblsoft.flexiweather.widgets.BackgroundJobManager;
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	
 	import flash.display.Bitmap;
 	import flash.events.EventDispatcher;
 	import flash.events.IEventDispatcher;
@@ -30,6 +31,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import flash.net.URLRequest;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
+	
 	import mx.containers.Tile;
 	import mx.controls.Alert;
 	import mx.events.DynamicEvent;
@@ -240,11 +242,13 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		public function onTileLoaded(result: Bitmap, tileRequest: TiledTileRequest, tileIndex: TileIndex): void
 		{
+			//FIXME onTileLoaded need to find out associatedData
+			
 			if (!m_layer.layerWasDestroyed)
-				tileLoaded(result, tileRequest);
+				tileLoaded(result, tileRequest, null);
 		}
 
-		private function tileLoaded(result: Bitmap, tileRequest: TiledTileRequest): void
+		private function tileLoaded(result: Bitmap, tileRequest: TiledTileRequest, associatedData: Object): void
 		{
 			if (!m_layer.layerWasDestroyed)
 			{
@@ -277,7 +281,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 					//				if (qttTileViewProperties.qttViewProperties.specialCacheStrings)
 					//					trace("QTTLoader tileLaoded: " + qttTileViewProperties.qttViewProperties.specialCacheStrings[0] + "  tileIndex: " + qttTileViewProperties.tileIndex.toString());
 					if (wmsTileCache)
-						wmsTileCache.addCacheItem(Bitmap(result), qttTileViewProperties);
+						wmsTileCache.addCacheItem(Bitmap(result), qttTileViewProperties, associatedData);
 					invalidateDynamicPart();
 					return;
 				}

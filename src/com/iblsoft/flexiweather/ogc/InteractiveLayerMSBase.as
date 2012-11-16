@@ -430,15 +430,28 @@ package com.iblsoft.flexiweather.ogc
 			notifyProgress(event.loaded, event.total, event.units);
 		}
 
+		private function removeLoaderListeners(loader: MSBaseLoader): void
+		{
+			loader.removeEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
+			loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
+			loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onCurrentWMSDataLoadingFinishedFromCache);
+			loader.removeEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
+			loader.removeEventListener("invalidateDynamicPart", onCurrentWMSDataInvalidateDynamicPart);
+		}
 		protected function onCurrentWMSDataLoadingFinished(event: InteractiveLayerEvent): void
 		{
 //			trace("\t onCurrentWMSDataLoadingFinished ["+name+"]");
 			var loader: MSBaseLoader = event.target as MSBaseLoader;
-			loader.removeEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
-			loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
-			loader.removeEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
-			loader.removeEventListener("invalidateDynamicPart", onCurrentWMSDataInvalidateDynamicPart);
+			removeLoaderListeners(loader);
 			notifyLoadingFinished();
+			_currentWMSDataLoadingStarted = false;
+		}
+		protected function onCurrentWMSDataLoadingFinishedFromCache(event: InteractiveLayerEvent): void
+		{
+//			trace("\t onCurrentWMSDataLoadingFinished ["+name+"]");
+			var loader: MSBaseLoader = event.target as MSBaseLoader;
+			removeLoaderListeners(loader);
+			notifyLoadingFinishedFromCache();
 			_currentWMSDataLoadingStarted = false;
 		}
 
@@ -551,6 +564,7 @@ package com.iblsoft.flexiweather.ogc
 //				trace("\n\n ***** updateData loader: "+ (loader as MSBaseLoader).id + " ["+this+"]");
 				loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
 				loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
+				loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onCurrentWMSDataLoadingFinishedFromCache);
 				loader.addEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
 				loader.addEventListener("invalidateDynamicPart", onCurrentWMSDataInvalidateDynamicPart);
 				loader.updateWMSData(b_forceUpdate, m_currentWMSViewProperties, forcedLayerWidth, forcedLayerHeight);
@@ -1454,6 +1468,7 @@ package com.iblsoft.flexiweather.ogc
 			newLayer.alpha = alpha;
 			newLayer.zOrder = zOrder;
 			newLayer.visible = visible;
+			newLayer.layerName = layerName;
 			var styleName: String = getWMSStyleName(0)
 			newLayer.setWMSStyleName(0, styleName);
 			//clone all dimensions

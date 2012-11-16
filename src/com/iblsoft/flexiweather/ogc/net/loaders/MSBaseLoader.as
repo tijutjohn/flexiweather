@@ -191,6 +191,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				addImagePart(wmsViewProperties, imagePart, img);
 				onFinishedRequest(wmsViewProperties, null);
 				invalidateDynamicPart();
+				notifyLoadingFinishedFromCache(null);
 			}
 		}
 
@@ -218,6 +219,8 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 //			}
 			onFinishedRequest(m_wmsViewProperties, null);
 			invalidateDynamicPart();
+			
+			notifyLoadingFinishedFromCache(event.associatedData);
 		}
 
 		protected function notifyLoadingStart(associatedData: Object): void
@@ -238,6 +241,12 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 			dispatchEvent(event);
 		}
 
+		protected function notifyLoadingFinishedFromCache(associatedData: Object): void
+		{
+			var e: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE);
+			e.data = associatedData;
+			dispatchEvent(e);
+		}
 		protected function notifyLoadingFinished(associatedData: Object): void
 		{
 			var e: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveDataLayer.LOADING_FINISHED);
@@ -309,8 +318,10 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 					imagePart.mi_updateCycleAge = mi_updateCycleAge;
 					addImagePart(wmsViewProperties, imagePart, result);
 					wmsViewProperties.url = event.request;
-					wmsCache.addCacheItem(imagePart.m_image, wmsViewProperties);
+					wmsCache.addCacheItem(imagePart.m_image, wmsViewProperties, event.associatedData);
 					invalidateDynamicPart();
+					notifyLoadingFinishedFromCache(event.associatedData);
+					return;
 				}
 				else
 				{

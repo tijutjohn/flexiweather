@@ -302,7 +302,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			md_noDataCache[s_key] = true;
 		}
 
-		public function addCacheItem(img: DisplayObject, viewProperties: IViewProperties): void
+		public function addCacheItem(img: DisplayObject, viewProperties: IViewProperties, associatedData: Object): void
 		{
 			if (!supportCaching)
 				return;
@@ -327,6 +327,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			debugCache();
 			delete md_cacheLoading[s_key];
 			var wce: WMSCacheEvent = new WMSCacheEvent(WMSCacheEvent.ITEM_ADDED, item);
+			wce.associatedData = associatedData;
 			dispatchEvent(wce);
 		}
 

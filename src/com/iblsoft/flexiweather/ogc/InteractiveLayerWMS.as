@@ -273,11 +273,14 @@ package com.iblsoft.flexiweather.ogc
 
 		override public function clone(): InteractiveLayer
 		{
+			trace(this + " clone: visible: " + visible + " zOrder: " + zOrder);
+			
 			var newLayer: InteractiveLayerWMS = new InteractiveLayerWMS(container, m_cfg);
 			newLayer.id = id;
 			newLayer.alpha = alpha;
 			newLayer.zOrder = zOrder;
 			newLayer.visible = visible;
+			newLayer.layerName = layerName;
 			var styleName: String = getWMSStyleName(0)
 			newLayer.setWMSStyleName(0, styleName);
 			//clone all dimensions

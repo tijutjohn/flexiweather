@@ -742,7 +742,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 		 */		
 		private function onWidgetMapRebuild(event: InteractiveLayerMapEvent): void
 		{
-			var widget: InteractiveWidget = event.target as InteractiveWidget;
+			var widget: InteractiveWidget = event.currentTarget as InteractiveWidget;
 			widget.startListenForChanges();
 			
 			_widgetsWaitingForRebuild--;
