@@ -9,11 +9,13 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.ogc.cache.ICache;
 	import com.iblsoft.flexiweather.ogc.cache.ICachedLayer;
 	import com.iblsoft.flexiweather.ogc.cache.WMSCache;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariableValue;
+	import com.iblsoft.flexiweather.ogc.data.ImagePart;
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.IViewProperties;
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.IWMSViewPropertiesLoader;
-	import com.iblsoft.flexiweather.ogc.data.ImagePart;
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.WMSViewProperties;
 	import com.iblsoft.flexiweather.ogc.events.GetCapabilitiesEvent;
 	import com.iblsoft.flexiweather.ogc.events.MSBaseLoaderEvent;
@@ -33,6 +35,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	
 	import flash.display.AVM1Movie;
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
@@ -49,6 +52,7 @@ package com.iblsoft.flexiweather.ogc
 	import flash.text.engine.CFFHinting;
 	import flash.utils.Dictionary;
 	import flash.utils.Timer;
+	
 	import mx.binding.utils.BindingUtils;
 	import mx.collections.ArrayCollection;
 	import mx.controls.Image;
@@ -58,9 +62,8 @@ package com.iblsoft.flexiweather.ogc
 	import mx.events.DynamicEvent;
 	import mx.events.EffectEvent;
 	import mx.logging.Log;
+	
 	import spark.components.Group;
-	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
-	import com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration;
 
 	[Event(name = "wmsStyleChanged", type = "flash.events.Event")]
 	/**
@@ -80,6 +83,8 @@ package com.iblsoft.flexiweather.ogc
 		protected var mb_synchroniseLevel: Boolean;
 		protected var m_synchronisationRole: SynchronisationRole;
 		protected var m_cache: ICache;
+		
+		private var _tempParameterStorage: LayerTemporaryParameterStorage = new LayerTemporaryParameterStorage();
 		/**
 		 * Currently displayed wms data
 		 */
@@ -135,6 +140,10 @@ package com.iblsoft.flexiweather.ogc
 			setStyle('showEffect', fadeIn);
 //			setStyle('removedEffect', fadeOut);
 			setStyle('hideEffect', fadeOut);
+			
+			// update current wms properties from temporary storage. That means that user set wms style, wms dimension value, custom parameter or configuration
+			// before layer was added to stage
+			_tempParameterStorage.updateCurrentWMSPropertiesFromStorage(m_currentWMSViewProperties);
 		}
 		private var fadeIn: Fade;
 		private var fadeOut: Fade;
@@ -1163,8 +1172,11 @@ package com.iblsoft.flexiweather.ogc
 		 */
 		public function setWMSDimensionValue(s_dimName: String, s_value: String): void
 		{
-			if (m_currentWMSViewProperties)
+			if (m_currentWMSViewProperties) {
 				m_currentWMSViewProperties.setWMSDimensionValue(s_dimName, s_value);
+			} else {
+				_tempParameterStorage.setWMSDimensionValue(s_dimName, s_value);
+			}
 		}
 
 		public function getWMSDimensionValue(s_dimName: String,
@@ -1211,8 +1223,12 @@ package com.iblsoft.flexiweather.ogc
 		public function setWMSStyleName(i_subLayer: uint, s_styleName: String): void
 		{
 			if (m_currentWMSViewProperties)
+			{
 				m_currentWMSViewProperties.setWMSStyleName(i_subLayer, s_styleName);
-			dispatchEvent(new Event(InteractiveLayerWMS.WMS_STYLE_CHANGED));
+				dispatchEvent(new Event(InteractiveLayerWMS.WMS_STYLE_CHANGED));
+			} else {
+				_tempParameterStorage.setWMSStyleName(i_subLayer, s_styleName);
+			}
 		}
 
 		public function getWMSStyleListString(): String
@@ -1224,8 +1240,11 @@ package com.iblsoft.flexiweather.ogc
 
 		public function setWMSCustomParameter(s_parameter: String, s_value: String): void
 		{
-			if (m_currentWMSViewProperties)
+			if (m_currentWMSViewProperties) {
 				m_currentWMSViewProperties.setWMSCustomParameter(s_parameter, s_value);
+			} else {
+				_tempParameterStorage.setWMSCustomParameter(s_parameter, s_value);
+			}
 		}
 
 		/**
@@ -1545,5 +1564,65 @@ package com.iblsoft.flexiweather.ogc
 		{
 			return m_cache;
 		}
+	}
+}
+import com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration;
+import com.iblsoft.flexiweather.ogc.data.viewProperties.WMSViewProperties;
+
+import flash.utils.Dictionary;
+
+class LayerTemporaryParameterStorage {
+	
+	private var _styles: Dictionary = new Dictionary(true);
+	private var _dimension: Dictionary = new Dictionary(true);
+	private var _customParameter: Dictionary = new Dictionary(true);
+	private var _configuration: WMSLayerConfiguration;
+	
+	public function LayerTemporaryParameterStorage() {
+	
+	}
+	
+	public function setConfiguration(cfg: WMSLayerConfiguration): void
+	{
+		_configuration = cfg;
+	}
+	
+	public function updateCurrentWMSPropertiesFromStorage(currentWMSProperties: WMSViewProperties, bEmptyStorage: Boolean = true): void
+	{
+		if (currentWMSProperties)
+		{
+			currentWMSProperties.setConfiguration(_configuration);
+			var str: Object;
+			for (str in _styles)
+			{
+				var s_styleName: String = _styles[str] as String;
+				currentWMSProperties.setWMSStyleName(str as uint, s_styleName);
+			}
+			for (str in _dimension)
+			{
+				var s_dimName: String = _styles[str] as String;
+				currentWMSProperties.setWMSDimensionValue(str as String, s_dimName);
+			}
+			for (str in _customParameter)
+			{
+				var s_parameter: String = _customParameter[str] as String;
+				currentWMSProperties.setWMSCustomParameter(str as String, s_parameter);
+			}
+		}
+	}
+		
+	public function setWMSStyleName(i_subLayer: uint, s_styleName: String): void
+	{
+		_styles[i_subLayer] = s_styleName;
+	}
+	
+	public function setWMSDimensionValue(s_dimName: String, s_value: String): void
+	{
+		_dimension[s_dimName] = s_value;
+	}
+	
+	public function setWMSCustomParameter(s_parameter: String, s_value: String): void
+	{
+		_customParameter[s_parameter] = s_value;
 	}
 }
