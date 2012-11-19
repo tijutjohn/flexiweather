@@ -143,7 +143,7 @@ package com.iblsoft.flexiweather.ogc
 
 		override protected function updateData(b_forceUpdate: Boolean): void
 		{
-			if (!layerInitialized)
+			if (!_layerInitialized)
 				return;
 			super.updateData(b_forceUpdate);
 			if (!visible)

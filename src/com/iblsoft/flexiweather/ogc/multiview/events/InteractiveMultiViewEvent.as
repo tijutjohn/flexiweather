@@ -6,9 +6,9 @@ package com.iblsoft.flexiweather.ogc.multiview.events
     {
         public static const MULTI_VIEW_READY:String = 'multiViewReady';
 
-        public static const MULTI_VIEW_MAPS_LOADING_STARTED:String = 'multiViewMapsLoadingStarted';
+        public static const MULTI_VIEW_MAP_LOADING_STARTED:String = 'multiViewMapsLoadingStarted';
 
-        public static const MULTI_VIEW_MAPS_LOADED:String = 'multiViewMapsLoaded';
+        public static const MULTI_VIEW_MAP_LOADED:String = 'multiViewMapsLoaded';
 
         public function InteractiveMultiViewEvent(type:String, bubbles:Boolean = false, cancelable:Boolean = false)
         {

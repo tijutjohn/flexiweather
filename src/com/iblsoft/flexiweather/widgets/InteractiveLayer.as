@@ -4,11 +4,14 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.kml.data.KMZFile;
 	import com.iblsoft.flexiweather.proj.Coord;
+	
 	import flash.display.Graphics;
 	import flash.events.MouseEvent;
 	import flash.geom.Rectangle;
+	
 	import mx.core.UIComponent;
 	import mx.events.FlexEvent;
+	
 	import spark.components.Group;
 
 	[Event(name = "layerInitialized", type = "com.iblsoft.flexiweather.events.InteractiveLayerEvent")]
@@ -81,7 +84,13 @@ package com.iblsoft.flexiweather.widgets
 				callLater(notifyLayerChanged, ['visible']);
 			}
 		}
-		protected var layerInitialized: Boolean;
+		
+		protected var _layerInitialized: Boolean;
+		
+		public function get layerInitialized(): Boolean
+		{
+			return _layerInitialized;
+		}
 
 		public function InteractiveLayer(container: InteractiveWidget = null)
 		{
@@ -109,7 +118,7 @@ package com.iblsoft.flexiweather.widgets
 		 */
 		protected function initializeLayer(): void
 		{
-			layerInitialized = true;
+			_layerInitialized = true;
 			callLater(notifyLayerInitialized);
 		}
 

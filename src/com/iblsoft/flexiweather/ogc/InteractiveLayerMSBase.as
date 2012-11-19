@@ -551,7 +551,7 @@ package com.iblsoft.flexiweather.ogc
 
 		override protected function updateData(b_forceUpdate: Boolean): void
 		{
-			if (!layerInitialized)
+			if (!_layerInitialized)
 				return;
 			//we need to postpone updateData if capabilities was not received, otherwise we do not know, if layes is tileable or not
 //			trace("MSBase updateData capabilitiesReady: " + capabilitiesReady + " layerWasDestroyed: " + layerWasDestroyed);

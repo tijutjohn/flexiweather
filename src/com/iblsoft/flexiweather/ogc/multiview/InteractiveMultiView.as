@@ -447,13 +447,18 @@ package com.iblsoft.flexiweather.ogc.multiview
 		
 		private function notifyWidgetsMapsLoadingStarted(): void
 		{
-			dispatchEvent(new InteractiveMultiViewEvent(InteractiveMultiViewEvent.MULTI_VIEW_MAPS_LOADING_STARTED));
+			dispatchEvent(new InteractiveMultiViewEvent(InteractiveMultiViewEvent.MULTI_VIEW_MAP_LOADING_STARTED));
 		}
-		private function notifyWidgetsMapsLoaded(): void
+		private function notifyWidgetsMapLayersInitialized(): void
+		{
+			
+		}
+		
+		private function notifyWidgetsMapLoaded(): void
 		{
 			startWatchingChanges();
 			
-			dispatchEvent(new InteractiveMultiViewEvent(InteractiveMultiViewEvent.MULTI_VIEW_MAPS_LOADED));
+			dispatchEvent(new InteractiveMultiViewEvent(InteractiveMultiViewEvent.MULTI_VIEW_MAP_LOADED));
 		}
 		private function notifyWidgetsReady(): void
 		{
@@ -511,7 +516,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 					if (_oldCRS)
 						currIW.setCRS(_oldCRS, false);
 					if (_oldExtentBBox)
-						currIW.setExtentBBOX(_oldExtentBBox, false);
+						currIW.setExtentBBox(_oldExtentBBox, false);
 					if (_oldViewBBox)
 						currIW.setViewBBox(_oldViewBBox, true);
 					
@@ -610,7 +615,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 			
 			if (_loadingMapsCount == 0)
 			{
-				notifyWidgetsMapsLoaded();
+				notifyWidgetsMapLoaded();
 				
 				registerSelectedInteractiveWidget();
 			}

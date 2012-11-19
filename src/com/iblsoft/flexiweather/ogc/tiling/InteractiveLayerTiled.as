@@ -178,7 +178,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 		 */
 		override protected function updateData(b_forceUpdate: Boolean): void
 		{
-			if (!layerInitialized)
+			if (!_layerInitialized)
 				return;
 			if (!layerWasDestroyed)
 			{
@@ -268,7 +268,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		override public function onAreaChanged(b_finalChange: Boolean): void
 		{
-			if (!layerInitialized)
+			if (!_layerInitialized)
 				return;
 			super.onAreaChanged(b_finalChange);
 			var newCRS: String = container.crs;
@@ -305,7 +305,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 		 **************************************************************************************************************************************/
 		override public function draw(graphics: Graphics): void
 		{
-			if (!layerInitialized)
+			if (!_layerInitialized)
 				return;
 			super.draw(graphics);
 			//			graphics.clear();
