@@ -423,6 +423,14 @@ package com.iblsoft.flexiweather.ogc.multiview
 								if (!selectedInteractiveWidget)
 								{
 									selectedInteractiveWidget = iw;
+								} else {
+									if (selectedInteractiveWidget.id == iw.id)
+									{
+										//iw is registered, and it was previously selected, so we need to call eveything which is called on selectedInteractive
+										_selectedInteractiveWidget.enableMouseMove = true;
+										_selectedInteractiveWidget.enableMouseClick = true;
+										_selectedInteractiveWidget.enableMouseWheel = true;
+									}
 								}
 								
 								if (!iw.hasEventListener(InteractiveWidgetEvent.WIDGET_SELECTED))

@@ -202,12 +202,23 @@ package com.iblsoft.flexiweather.ogc.editable
 					}
 				}
 			}
-			var mpe: MoveablePointEvent = new MoveablePointEvent(MoveablePointEvent.MOVEABLE_POINT_UP, true);
+			
+			var mpe: MoveablePointEvent 
+			
+			mpe = new MoveablePointEvent(MoveablePointEvent.MOVEABLE_POINT_UP, true);
 			mpe.point = this;
 			mpe.feature = m_feature;
 			mpe.x = pt.x;
 			mpe.y = pt.y;
 			dispatchEvent(mpe);
+			
+			mpe = new MoveablePointEvent(MoveablePointEvent.MOVEABLE_POINT_CLICK, true);
+			mpe.point = this;
+			mpe.feature = m_feature;
+			mpe.x = pt.x;
+			mpe.y = pt.y;
+			dispatchEvent(mpe);
+			
 			return true;
 		}
 
