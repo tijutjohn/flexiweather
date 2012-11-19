@@ -6,6 +6,8 @@ package com.iblsoft.flexiweather.ogc.events
 
 	public class MoveablePointEvent extends Event
 	{
+		public static const MOVEABLE_POINT_SELECTION_CHANGE: String = 'moveablePointSelectionChange';
+		
 		public static const MOVEABLE_POINT_CLICK: String = 'moveablePointClick';
 		public static const MOVEABLE_POINT_MOVE: String = 'moveablePointDown';
 		public static const MOVEABLE_POINT_DOWN: String = 'moveablePointDown';

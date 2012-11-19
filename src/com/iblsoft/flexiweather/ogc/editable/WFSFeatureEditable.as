@@ -10,6 +10,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithReflection;
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureBase;
 	import com.iblsoft.flexiweather.proj.Coord;
+	
 	import flash.display.Sprite;
 	import flash.events.KeyboardEvent;
 	import flash.filters.GlowFilter;
@@ -87,6 +88,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			if (mp)
 			{
+				mp.addEventListener(MoveablePointEvent.MOVEABLE_POINT_SELECTION_CHANGE, redispatchMoveablePointEvent);
 				mp.addEventListener(MoveablePointEvent.MOVEABLE_POINT_CLICK, redispatchMoveablePointEvent);
 				mp.addEventListener(MoveablePointEvent.MOVEABLE_POINT_DOWN, redispatchMoveablePointEvent);
 				mp.addEventListener(MoveablePointEvent.MOVEABLE_POINT_DRAG_END, redispatchMoveablePointEvent);
@@ -102,6 +104,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			if (mp)
 			{
+				mp.removeEventListener(MoveablePointEvent.MOVEABLE_POINT_SELECTION_CHANGE, redispatchMoveablePointEvent);
 				mp.removeEventListener(MoveablePointEvent.MOVEABLE_POINT_CLICK, redispatchMoveablePointEvent);
 				mp.removeEventListener(MoveablePointEvent.MOVEABLE_POINT_DOWN, redispatchMoveablePointEvent);
 				mp.removeEventListener(MoveablePointEvent.MOVEABLE_POINT_DRAG_END, redispatchMoveablePointEvent);
@@ -358,6 +361,13 @@ package com.iblsoft.flexiweather.ogc.editable
 					selPoint.selected = true;
 					mi_actSelectedMoveablePointIndex = i_pointIndex;
 					mi_actSelectedMoveablePointReflectionIndex = i_reflection;
+					
+					var mpe: MoveablePointEvent = new MoveablePointEvent(MoveablePointEvent.MOVEABLE_POINT_SELECTION_CHANGE, true);
+					mpe.feature = this;
+					mpe.point = selPoint;
+					mpe.x = selPoint.x;
+					mpe.y = selPoint.y;
+					dispatchEvent(mpe);
 				}
 				else
 				{
