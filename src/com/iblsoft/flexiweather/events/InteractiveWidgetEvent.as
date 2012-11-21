@@ -31,6 +31,8 @@ package com.iblsoft.flexiweather.events
 		public var layersLoading: int;
 		public var changeDescription: String;
 
+		public var data: Object;
+		
 		public function InteractiveWidgetEvent(type: String, bubbles: Boolean = false, cancelable: Boolean = false)
 		{
 			super(type, bubbles, cancelable);

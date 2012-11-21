@@ -271,6 +271,22 @@ package com.iblsoft.flexiweather.ogc
 				invalidateDynamicPart();
 		}
 
+		override public function get visible(): Boolean
+		{
+			trace(this + "  get visible = " + super.visible);
+			return super.visible;
+		}
+		
+		override public function set visible(b_visible: Boolean): void
+		{
+			if (super.visible != b_visible)
+			{
+				super.visible = b_visible;
+				
+				trace(this + "  visible = " + b_visible + " / " + visible);
+			}
+		}
+		
 		override public function clone(): InteractiveLayer
 		{
 			trace(this + " clone: visible: " + visible + " zOrder: " + zOrder);

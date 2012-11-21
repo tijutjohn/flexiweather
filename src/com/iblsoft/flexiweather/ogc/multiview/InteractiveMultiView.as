@@ -478,7 +478,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 		}
 		private function notifyAllWidgetsMapLayersInitialized(): void
 		{
-			startWatchingChanges();
 			dispatchEvent(new InteractiveMultiViewEvent(InteractiveMultiViewEvent.MULTI_VIEW_ALL_MAPS_LAYERS_INITIALIZED));
 			
 		}
@@ -618,7 +617,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 		private function onMapFromXMLReady(event: DynamicEvent): void
 		{
 			
-			trace(this + "onMapFromXMLReady");
+			trace("\n" + this + "onMapFromXMLReady");
 			var interactiveLayerMap: InteractiveLayerMap = event.target as InteractiveLayerMap;
 			interactiveLayerMap.removeEventListener(InteractiveLayerMap.LAYERS_SERIALIZED_AND_READY, onMapFromXMLReady);
 			var layers: Array = event['layers'] as Array;
@@ -630,6 +629,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 			
 			var watcher:  MapLayersWatcher = _mapLayersWatchers[interactiveLayerMap] as MapLayersWatcher;
 			watcher.addEventListener("mapLayersInitialized", onMapLayersInitialized);	
+			watcher.onMapFromXMLReady(interactiveLayerMap, layers);
 			
 			_loadingMapsCount--;
 			
@@ -646,8 +646,14 @@ package com.iblsoft.flexiweather.ogc.multiview
 			_initializingMapsCount--;
 			if (_initializingMapsCount == 0)
 			{
-				notifyAllWidgetsMapLayersInitialized();
+				setTimeout(allWidgetsMapLayersAreInitialized, 2000);
 			}
+		}
+		
+		private function allWidgetsMapLayersAreInitialized(): void
+		{
+			notifyAllWidgetsMapLayersInitialized();
+			callLater(startWatchingChanges);
 		}
 //		private function onLayerInitialized(event: InteractiveLayerEvent): void
 //		{
@@ -1422,13 +1428,21 @@ class WidgetCollection
 
 class MapLayersWatcher extends EventDispatcher
 {
+	private static var uid: int = 0;
+	public var id: int;
+	
 	private var _mapLayersInitializing: int;
 	
 	public var interactiveLayerMap: InteractiveLayerMap;
 	
 	override public function toString(): String
 	{
-		return "\t\tMapLayersWatcher: ";
+		return "\tMapLayersWatcher ["+id+"]: ";
+	}
+	
+	public function MapLayersWatcher(): void
+	{
+		id = uid++;
 	}
 	public function onMapFromXMLReady(interactiveLayerMap: InteractiveLayerMap, layers: Array): void
 	{
@@ -1473,7 +1487,7 @@ class MapLayersWatcher extends EventDispatcher
 	private function onLayerInitialized(event: InteractiveLayerEvent): void
 	{
 		_mapLayersInitializing--;
-		trace("\t"+ this + "onLayerInitialized _mapLayersInitializing: " + _mapLayersInitializing);
+		trace(this + "onLayerInitialized _mapLayersInitializing: " + _mapLayersInitializing);
 		if (_mapLayersInitializing == 0)
 		{
 			dispatchEvent(new Event("mapLayersInitialized"));

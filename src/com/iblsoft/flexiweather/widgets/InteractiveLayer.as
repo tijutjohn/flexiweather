@@ -10,6 +10,8 @@ package com.iblsoft.flexiweather.widgets
 	import flash.geom.Rectangle;
 	
 	import mx.core.UIComponent;
+	import mx.effects.Effect;
+	import mx.events.EffectEvent;
 	import mx.events.FlexEvent;
 	
 	import spark.components.Group;
@@ -74,15 +76,48 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (super.visible != b_visible)
 			{
+				var effect: Effect;
+				
+				if (b_visible) {
+					effect = getStyle('showEffect');
+				} else {
+					effect = getStyle('hideEffect');
+				}
+				
+				if (effect)
+				{
+					effect.addEventListener(EffectEvent.EFFECT_END, onVisibleEffectEnd);
+					effect.addEventListener(EffectEvent.EFFECT_START, onVisibleEffectStart);
+				}
 				super.visible = b_visible;
 				
 				trace("InteractiveLayer " + name + "/" + id + "  visible = " + b_visible + " / " + visible);
-				var ile: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.VISIBILITY_CHANGED);
-				dispatchEvent(ile);
-				if (container)
-					container.onLayerVisibilityChanged(this);
-				callLater(notifyLayerChanged, ['visible']);
+//				var ile: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.VISIBILITY_CHANGED);
+//				dispatchEvent(ile);
+//				if (container)
+//					container.onLayerVisibilityChanged(this);
+				
+				if (!effect)
+					callLater(visibilityChanged);
 			}
+		}
+		
+		private function onVisibleEffectStart(event: EffectEvent): void
+		{
+			
+		}
+		
+		private function onVisibleEffectEnd(event: EffectEvent): void
+		{
+			visibilityChanged();
+		}
+		
+		private function visibilityChanged(): void
+		{
+			var ile: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.VISIBILITY_CHANGED);
+			dispatchEvent(ile);
+			if (container)
+				container.onLayerVisibilityChanged(this);
 		}
 		
 		protected var _layerInitialized: Boolean;
@@ -124,6 +159,7 @@ package com.iblsoft.flexiweather.widgets
 
 		protected function notifyLayerInitialized(): void
 		{
+			trace("\t" + this + " notifyLayerInitialized");
 			dispatchEvent(new InteractiveLayerEvent(InteractiveLayerEvent.LAYER_INITIALIZED, true));
 		}
 
@@ -206,7 +242,7 @@ package com.iblsoft.flexiweather.widgets
 		protected function notifyLayerChanged(change: String): void
 		{
 			if (container)
-				container.notifyWidgetChanged(change);
+				container.notifyWidgetChanged(change, this);
 			else
 				trace(this + " [notifyLayerChanged] was changed (" + change + "), but there is no InteractiveWidget assigned");
 		}
@@ -320,7 +356,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			mi_zOrder = i_zOrder;
 			if (container != null)
-				container.orderLayers();
+				container.invalidateLayersOrder();
 		}
 
 		public function getFullURLWithSize(width: int, height: int): String

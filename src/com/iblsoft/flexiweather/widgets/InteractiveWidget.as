@@ -3,6 +3,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.events.InteractiveWidgetEvent;
 	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
 	import com.iblsoft.flexiweather.ogc.cache.WMSCacheKey;
 	import com.iblsoft.flexiweather.ogc.cache.WMSCacheManager;
 	import com.iblsoft.flexiweather.proj.Coord;
@@ -11,6 +12,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.utils.ICurveRenderer;
 	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayout;
 	import com.iblsoft.flexiweather.utils.wfs.FeatureSplitter;
+	
 	import flash.display.DisplayObject;
 	import flash.display.GradientType;
 	import flash.display.Graphics;
@@ -26,6 +28,7 @@ package com.iblsoft.flexiweather.widgets
 	import flash.utils.clearTimeout;
 	import flash.utils.getTimer;
 	import flash.utils.setTimeout;
+	
 	import mx.containers.Canvas;
 	import mx.core.IVisualElement;
 	import mx.core.UIComponent;
@@ -33,6 +36,7 @@ package com.iblsoft.flexiweather.widgets
 	import mx.events.DynamicEvent;
 	import mx.events.FlexEvent;
 	import mx.events.ResizeEvent;
+	
 	import spark.components.Group;
 	import spark.components.SkinnableContainer;
 	import spark.events.ElementExistenceEvent;
@@ -218,6 +222,12 @@ package com.iblsoft.flexiweather.widgets
 						widgetParent.removeEventListener(ResizeEvent.RESIZE, onParentResize);
 				}
 			}
+			
+			if (_layersOrderChanged)
+			{
+				orderLayers();
+				_layersOrderChanged = false;
+			}
 		}
 		private var _resizeInterval: Number;
 
@@ -334,7 +344,7 @@ package com.iblsoft.flexiweather.widgets
 				element.width = width;
 				element.height = height;
 				var o: IVisualElement = m_layerContainer.addElementAt(element, index);
-				orderLayers();
+				invalidateLayersOrder();
 				return o;
 			}
 			else
@@ -366,19 +376,22 @@ package com.iblsoft.flexiweather.widgets
 
 		private function onLayerInInteractiveLayerMapAdded(event: DynamicEvent): void
 		{
-			notifyWidgetChanged('layerAddedInInteractiveLayerMap');
+			trace("\t" + this + " onLayerInInteractiveLayerMapAdded \n");
+			notifyWidgetChanged('layerAddedInInteractiveLayerMap', this);
 		}
 
 		private function onLayerInInteractiveLayerMapRemoved(event: DynamicEvent): void
 		{
-			notifyWidgetChanged('layerRemovedInInteractiveLayerMap');
+			trace(this + " onLayerInInteractiveLayerMapRemoved");
+			notifyWidgetChanged('layerRemovedInInteractiveLayerMap', this);
 		}
 
 		private function registerInteractiveLayerMap(ilm: InteractiveLayerMap): void
 		{
+			trace(this + " registerInteractiveLayerMap");
 			if (ilm)
 			{
-//				ilm.addEventListener(InteractiveLayerMap.TIME_AXIS_UPDATED, onTimeAxisUpdated);
+				ilm.addEventListener(InteractiveLayerEvent.VISIBILITY_CHANGED, onLayerChangedInInteractiveLayerMap);
 				ilm.addEventListener(InteractiveLayerMap.TIME_AXIS_ADDED, onLayerInInteractiveLayerMapAdded);
 				ilm.addEventListener(InteractiveLayerMap.TIME_AXIS_REMOVED, onLayerInInteractiveLayerMapRemoved);
 			}
@@ -386,11 +399,13 @@ package com.iblsoft.flexiweather.widgets
 
 		private function unregisterInteractiveLayerMap(ilm: InteractiveLayerMap): void
 		{
+			trace(this + " unregisterInteractiveLayerMap");
 			if (ilm)
 			{
 //				ilm.addEventListener(InteractiveLayerMap.TIME_AXIS_UPDATED, onTimeAxisUpdated);
-				ilm.addEventListener(InteractiveLayerMap.TIME_AXIS_ADDED, onLayerInInteractiveLayerMapAdded);
-				ilm.addEventListener(InteractiveLayerMap.TIME_AXIS_REMOVED, onLayerInInteractiveLayerMapRemoved);
+				ilm.removeEventListener(InteractiveLayerEvent.VISIBILITY_CHANGED, onLayerChangedInInteractiveLayerMap);
+				ilm.removeEventListener(InteractiveLayerMap.TIME_AXIS_ADDED, onLayerInInteractiveLayerMapAdded);
+				ilm.removeEventListener(InteractiveLayerMap.TIME_AXIS_REMOVED, onLayerInInteractiveLayerMapRemoved);
 			}
 		}
 
@@ -430,8 +445,8 @@ package com.iblsoft.flexiweather.widgets
 			var l: InteractiveLayer = event.target as InteractiveLayer;
 			//when new layer is added to container, call onAreaChange to notify layer, that layer is already added to container, so it can render itself
 			l.onAreaChanged(true);
-			orderLayers();
-			notifyWidgetChanged('addLayer');
+			invalidateLayersOrder();
+			notifyWidgetChanged('addLayer', this);
 		}
 
 		public function removeLayer(l: InteractiveLayer, b_destroy: Boolean = false): void
@@ -446,7 +461,7 @@ package com.iblsoft.flexiweather.widgets
 				m_layerContainer.removeElement(l);
 				l.destroy();
 			}
-			notifyWidgetChanged('removeLayer');
+			notifyWidgetChanged('removeLayer', this);
 		}
 
 		public function removeAllLayers(): void
@@ -461,13 +476,22 @@ package com.iblsoft.flexiweather.widgets
 				m_layerContainer.removeElementAt(i);
 			}
 		}
-
-		public function orderLayers(): void
+		
+		private var _layersOrderChanged: Boolean;
+		public function invalidateLayersOrder(): void
 		{
-			return;
-			
+			if (!_layersOrderChanged)
+			{
+				_layersOrderChanged = true;
+				invalidateProperties();
+			}
+		}
+
+		private function orderLayers(): void
+		{
 			if (mb_orderingLayers)
 				return;
+			
 			mb_orderingLayers = true;
 			try
 			{
@@ -498,7 +522,7 @@ package com.iblsoft.flexiweather.widgets
 				mb_orderingLayers = false;
 			}
 			if (interactiveLayerMap)
-				interactiveLayerMap.orderLayers();
+				interactiveLayerMap.invalidateLayersOrder();
 		}
 		private var _disableUI: UIComponent;
 
@@ -1011,16 +1035,24 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 
+		private function onLayerChangedInInteractiveLayerMap(event: Event): void
+		{
+			if (event.type == InteractiveLayerWMS.WMS_STYLE_CHANGED)
+				notifyWidgetChanged('wmsStyle', event.target);
+			if (event.type == InteractiveLayerEvent.VISIBILITY_CHANGED)
+				notifyWidgetChanged('visible', event.target);
+		}
 		/**
 		 * InteractiveWidget needs to call this function is anything, what needs to be synchronized was changed
 		 *
 		 */
-		public function notifyWidgetChanged(change: String): void
+		public function notifyWidgetChanged(change: String, objectChanged: Object): void
 		{
 			if (mb_listenForChanges)
 			{
 				var iwe: InteractiveWidgetEvent = new InteractiveWidgetEvent(InteractiveWidgetEvent.WIDGET_CHANGED);
 				iwe.changeDescription = change;
+				iwe.data = objectChanged;
 				dispatchEvent(iwe);
 			}
 		}
