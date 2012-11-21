@@ -464,6 +464,8 @@ package com.iblsoft.flexiweather.widgets
 
 		public function orderLayers(): void
 		{
+			return;
+			
 			if (mb_orderingLayers)
 				return;
 			mb_orderingLayers = true;
@@ -993,14 +995,20 @@ package com.iblsoft.flexiweather.widgets
 
 		public function startListenForChanges(): void
 		{
-			mb_listenForChanges = true;
-			dispatchEvent(new Event("listeningForChangesChanged"));
+			if (!mb_listenForChanges)
+			{
+				mb_listenForChanges = true;
+				dispatchEvent(new Event("listeningForChangesChanged"));
+			}
 		}
 
 		public function stopListenForChanges(): void
 		{
-			mb_listenForChanges = false;
-			dispatchEvent(new Event("listeningForChangesChanged"));
+			if (mb_listenForChanges)
+			{
+				mb_listenForChanges = false;
+				dispatchEvent(new Event("listeningForChangesChanged"));
+			}
 		}
 
 		/**

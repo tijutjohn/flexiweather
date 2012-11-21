@@ -197,7 +197,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 
 		private function onCacheItemLoaded(event: WMSCacheEvent): void
 		{
-			trace("\n\n" + this + " onCacheItemLoaded");
+//			trace("\n\n" + this + " onCacheItemLoaded");
 			var wmsCache: WMSCache = event.target as WMSCache;
 			var item: CacheItem = event.item;
 			wmsCache.removeEventListener(WMSCacheEvent.ITEM_ADDED, onCacheItemLoaded);

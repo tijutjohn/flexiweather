@@ -95,6 +95,8 @@ package com.iblsoft.flexiweather.widgets
 		
 		private function debugLayers(): void
 		{
+			return;
+			
 			var total: int = m_layers.length;
 			for (var i: int = 0; i < total; i++)
 			{
@@ -144,6 +146,8 @@ package com.iblsoft.flexiweather.widgets
 
 		public function orderLayers(): void
 		{
+			return;
+			
 			if (mb_orderingLayers)
 				return;
 			mb_orderingLayers = true;

@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc.multiview
 {
+	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerMapEvent;
 	import com.iblsoft.flexiweather.events.InteractiveWidgetEvent;
 	import com.iblsoft.flexiweather.ogc.BBox;
@@ -31,6 +32,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 	import flash.events.DataEvent;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
+	import flash.utils.Dictionary;
 	import flash.utils.clearInterval;
 	import flash.utils.clearTimeout;
 	import flash.utils.setTimeout;
@@ -86,6 +88,10 @@ package com.iblsoft.flexiweather.ogc.multiview
 	
 	[Event (name="multiViewMapsLoaded", type="com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent")]
 	
+	[Event (name="multiViewSingleMapLayersInitialized", type="com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent")]
+	
+	[Event (name="multiViewAllMapsLayersInitialized", type="com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent")]
+	
 	public class InteractiveMultiView extends SkinnableDataContainer
 	{
 		public static var debugConsole: IConsole;
@@ -122,6 +128,9 @@ package com.iblsoft.flexiweather.ogc.multiview
 		{
 			return _selectedInteractiveWidget.interactiveLayerMap;
 		}
+		
+		private var _loadingMapsCount: int;
+		private var _initializingMapsCount: int;
 		
 		override public function set dataProvider(value:IList):void
 		{
@@ -364,7 +373,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 		 
 		private function onDataProviderChange(event: CollectionEvent): void
 		{
-			trace("onDataProviderChange");
+			trace("\t" + this + "onDataProviderChange: " + event.kind);
 			
 			if (event.items && event.items.length > 0)
 			{
@@ -388,77 +397,100 @@ package com.iblsoft.flexiweather.ogc.multiview
 					
 					case CollectionEventKind.ADD:
 					case CollectionEventKind.UPDATE:
-						for each (item in event.items)
-						{
-							if (item.source is InteractiveWidget)
-							{
-								iw = item.source as InteractiveWidget;
-								
-								if (!iw.wmsCacheManager)
-								{
-									iw.wmsCacheManager = _cacheManager;
-								}
-								if (_widgetsCountToBeReady && _widgetsCountToBeReady.length > 0)
-								{
-									var iwID: int = _widgetsCountToBeReady.getItemIndex(iw);
-									if (iwID > -1)
-									{
-										_widgetsCountToBeReady.removeItemAt(iwID);
-										if (_widgetsCountToBeReady.length == 0)
-										{
-											notifyWidgetsReady();
-										}
-									}
-								}
-								if (!_interactiveWidgets.widgetExists(iw))
-								{
-									_interactiveWidgets.addWidget(iw);
-									registerInteractiveWidget(iw);
-									
-									//we need to invalidate synchronizator, when new widget is added
-									invalidateSychronizator();
-								}
-								
-								//check if there is selection
-								if (!selectedInteractiveWidget)
-								{
-									selectedInteractiveWidget = iw;
-								} else {
-									if (selectedInteractiveWidget.id == iw.id)
-									{
-										//iw is registered, and it was previously selected, so we need to call eveything which is called on selectedInteractive
-										_selectedInteractiveWidget.enableMouseMove = true;
-										_selectedInteractiveWidget.enableMouseClick = true;
-										_selectedInteractiveWidget.enableMouseWheel = true;
-									}
-								}
-								
-								if (!iw.hasEventListener(InteractiveWidgetEvent.WIDGET_SELECTED))
-									iw.addEventListener(InteractiveWidgetEvent.WIDGET_SELECTED, onWidgetSelected);
-								
-							} else {
-								Alert.show("MultiView can consists just InteractiveWidget instances");
-							}
-						}
+						
+						addWidgetsToDataProvider( event.items );
+						
 						break;
 				}
 			}
 		}
+	
+		private function addWidgetsToDataProvider(items: Array): void
+		{
+			trace("\t\t" + this + "addWidgetsToDataProvider: ");
+			var iw: InteractiveWidget;
+			var item: PropertyChangeEvent;
+			
+			for each (item in items)
+			{
+				if (item.source is InteractiveWidget)
+				{
+					iw = item.source as InteractiveWidget;
+					
+					if (!iw.wmsCacheManager)
+					{
+						iw.wmsCacheManager = _cacheManager;
+					}
+					if (!_interactiveWidgets.widgetExists(iw))
+					{
+						_interactiveWidgets.addWidget(iw);
+						registerInteractiveWidget(iw);
+						
+						//we need to invalidate synchronizator, when new widget is added
+						invalidateSychronizator();
+					}
+					
+					//check if there is selection
+					if (!selectedInteractiveWidget)
+					{
+						selectedInteractiveWidget = iw;
+					} else {
+						if (selectedInteractiveWidget.id == iw.id)
+						{
+							//iw is registered, and it was previously selected, so we need to call eveything which is called on selectedInteractive
+							_selectedInteractiveWidget.enableMouseMove = true;
+							_selectedInteractiveWidget.enableMouseClick = true;
+							_selectedInteractiveWidget.enableMouseWheel = true;
+						}
+					}
+					
+					if (!iw.hasEventListener(InteractiveWidgetEvent.WIDGET_SELECTED))
+						iw.addEventListener(InteractiveWidgetEvent.WIDGET_SELECTED, onWidgetSelected);
+				}
+			}
+				
+			//check if all widgets are ready as last action
+			for each (item in items)
+			{
+				if (item.source is InteractiveWidget)
+				{
+					iw = item.source as InteractiveWidget;
+					if (_widgetsCountToBeReady && _widgetsCountToBeReady.length > 0)
+					{
+						var iwID: int = _widgetsCountToBeReady.getItemIndex(iw);
+						if (iwID > -1)
+						{
+							_widgetsCountToBeReady.removeItemAt(iwID);
+							if (_widgetsCountToBeReady.length == 0)
+							{
+								callLater(notifyWidgetsReady);
+							}
+						}
+					}
+				}
+			}
+		}
+		
 		
 		private function notifyWidgetsMapsLoadingStarted(): void
 		{
-			dispatchEvent(new InteractiveMultiViewEvent(InteractiveMultiViewEvent.MULTI_VIEW_MAP_LOADING_STARTED));
+			dispatchEvent(new InteractiveMultiViewEvent(InteractiveMultiViewEvent.MULTI_VIEW_MAPS_LOADING_STARTED));
+		}
+		private function notifyAllWidgetsMapLayersInitialized(): void
+		{
+			startWatchingChanges();
+			dispatchEvent(new InteractiveMultiViewEvent(InteractiveMultiViewEvent.MULTI_VIEW_ALL_MAPS_LAYERS_INITIALIZED));
+			
 		}
 		private function notifyWidgetsMapLayersInitialized(): void
 		{
-			
+			dispatchEvent(new InteractiveMultiViewEvent(InteractiveMultiViewEvent.MULTI_VIEW_SINGLE_MAP_LAYERS_INITIALIZED));
 		}
 		
 		private function notifyWidgetsMapLoaded(): void
 		{
-			startWatchingChanges();
 			
-			dispatchEvent(new InteractiveMultiViewEvent(InteractiveMultiViewEvent.MULTI_VIEW_MAP_LOADED));
+			dispatchEvent(new InteractiveMultiViewEvent(InteractiveMultiViewEvent.MULTI_VIEW_MAPS_LOADED));
 		}
 		private function notifyWidgetsReady(): void
 		{
@@ -496,7 +528,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 			loadMaps(mapXML);	
 		}
 		
-		private var _loadingMapsCount: int;
 		
 		private function loadMaps(mapXML: XML): void
 		{
@@ -510,6 +541,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 				var _serializedMap: XMLStorage = new XMLStorage(mapXML);
 				
 				_loadingMapsCount = _interactiveWidgets.widgets.length;
+				_initializingMapsCount = _interactiveWidgets.widgets.length;
 				
 				for each (var currIW: InteractiveWidget in _interactiveWidgets.widgets)
 				{
@@ -582,44 +614,51 @@ package com.iblsoft.flexiweather.ogc.multiview
 			}
 		}
 		
+		private var _mapLayersWatchers: Dictionary = new Dictionary(true);
 		private function onMapFromXMLReady(event: DynamicEvent): void
 		{
+			
+			trace(this + "onMapFromXMLReady");
 			var interactiveLayerMap: InteractiveLayerMap = event.target as InteractiveLayerMap;
 			interactiveLayerMap.removeEventListener(InteractiveLayerMap.LAYERS_SERIALIZED_AND_READY, onMapFromXMLReady);
 			var layers: Array = event['layers'] as Array;
-			for each (var layer: InteractiveLayer in layers)
+			
+			if (_mapLayersWatchers[interactiveLayerMap] == null)
 			{
-				var configuration: ILayerConfiguration;
-				if (layer)
-				{
-					if (layer is IConfigurableLayer)
-					{
-						configuration = (layer as IConfigurableLayer).configuration;	
-					}
-					trace("InteractiveMultiView onMapFromXMLReady addLayer: " + layer.name + " | " + layer.id);
-					interactiveLayerMap.addLayer(layer);
-				} else {
-					trace("onMapFromXMLReady: Layer not exists")
-				}
+				_mapLayersWatchers[interactiveLayerMap] = new MapLayersWatcher();
 			}
 			
-//			listLayers.executeBindings();
-//			player.timeAxis.executeBindings();
-			
-			for each(var l: InteractiveLayer in interactiveLayerMap.layers) {
-				//we need to set b_force parameter to force to be able to get cached bitmaps
-				l.refresh(false);
-			}
+			var watcher:  MapLayersWatcher = _mapLayersWatchers[interactiveLayerMap] as MapLayersWatcher;
+			watcher.addEventListener("mapLayersInitialized", onMapLayersInitialized);	
 			
 			_loadingMapsCount--;
 			
 			if (_loadingMapsCount == 0)
 			{
 				notifyWidgetsMapLoaded();
-				
-				registerSelectedInteractiveWidget();
 			}
 		}
+		
+		private function onMapLayersInitialized(event: Event): void
+		{
+			notifyWidgetsMapLayersInitialized();
+			
+			_initializingMapsCount--;
+			if (_initializingMapsCount == 0)
+			{
+				notifyAllWidgetsMapLayersInitialized();
+			}
+		}
+//		private function onLayerInitialized(event: InteractiveLayerEvent): void
+//		{
+//			_mapLayersInitializing--;
+//			trace("\t"+ this + "onLayerInitialized _mapLayersInitializing: " + _mapLayersInitializing);
+//			if (_mapLayersInitializing == 0)
+//			{
+//				notifyWidgetsMapLayersInitialized();
+//				registerSelectedInteractiveWidget();
+//			}
+//		}
 		
 		private function onWidgetSelected(event: InteractiveWidgetEvent): void
 		{
@@ -759,7 +798,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 			widget.startListenForChanges();
 			
 			_widgetsWaitingForRebuild--;
-			trace("\nInteractiveMultiView onWidgetMapRebuild widget: " + widget.id + " _widgetsWaitingForRebuild: " + _widgetsWaitingForRebuild);
+			trace("\n"+this+" InteractiveMultiView onWidgetMapRebuild widget: " + widget.id + " _widgetsWaitingForRebuild: " + _widgetsWaitingForRebuild);
 			
 			if (_widgetsWaitingForRebuild == 0)
 			{
@@ -775,7 +814,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 		private function registerInteractiveWidget(iw: InteractiveWidget): void
 		{
 			//TODO should be this done only if synchronization is ON?
-			trace("registerInteractiveWidget: " + iw.id);
+			trace("\n"+this+"registerInteractiveWidget: " + iw.id);
 			
 			iw.enableMouseMove = true;
 			iw.enableMouseClick = false;
@@ -800,7 +839,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 		 */		
 		private function unregisterInteractiveWidget(iw: InteractiveWidget): void
 		{
-			trace("unregisterInteractiveWidget: " + iw.id);
+			trace("\n"+this+"unregisterInteractiveWidget: " + iw.id);
 			iw.enableMouseMove = true;
 			iw.enableMouseClick = true;
 			iw.enableMouseWheel = true;
@@ -816,7 +855,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 			
 			if (_selectedInteractiveWidget)
 			{
-				trace("registerInteractiveWidget: " + _selectedInteractiveWidget.id);
+				trace("\n"+this+"registerInteractiveWidget: " + _selectedInteractiveWidget.id);
 				
 				_selectedInteractiveWidget.enableMouseMove = true;
 				_selectedInteractiveWidget.enableMouseClick = true;
@@ -854,7 +893,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 		{
 			if (_selectedInteractiveWidget)
 			{
-				trace("unregisterSelectedInteractiveWidget: " + _selectedInteractiveWidget.id);
+				trace("\n"+this+"unregisterSelectedInteractiveWidget: " + _selectedInteractiveWidget.id);
 				
 				_selectedInteractiveWidget.enableMouseMove = true;
 				_selectedInteractiveWidget.enableMouseClick = false;
@@ -1052,6 +1091,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 		{
 			if (widget)
 			{
+				debug(this + "Removing widget: " + widget.id);
 				widget.stopListenForChanges();
 				
 				widget.interactiveLayerMap.removeAllLayers();
@@ -1280,14 +1320,27 @@ package com.iblsoft.flexiweather.ogc.multiview
 			}
 		}
 		
-		private function debug(str: String, type: String, tag: String): void
+		private function debug(str: String, type: String = "Info", tag: String = " InteractiveMultiView"): void
 		{
 			if (debugConsole)
 				debugConsole.print(str, type, tag);
 		}
+		
+		override public function toString(): String
+		{
+			return 'InteractiveMultiView: ';
+		}
 	}
 }
+import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
+import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
+import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
+import com.iblsoft.flexiweather.widgets.InteractiveLayer;
+import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
 import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+
+import flash.events.Event;
+import flash.events.EventDispatcher;
 
 import mx.collections.ArrayCollection;
 import mx.collections.Sort;
@@ -1349,7 +1402,7 @@ class WidgetCollection
 	}
 	public function addWidget(widget: InteractiveWidget): void
 	{
-		trace("addWidget: " + widget.id);
+		trace(this + "\t addWidget: " + widget.id);
 		_collection.addItem(widget);
 		_collection.refresh();
 		
@@ -1364,5 +1417,66 @@ class WidgetCollection
 		
 		return 0;
 		
+	}
+}
+
+class MapLayersWatcher extends EventDispatcher
+{
+	private var _mapLayersInitializing: int;
+	
+	public var interactiveLayerMap: InteractiveLayerMap;
+	
+	override public function toString(): String
+	{
+		return "\t\tMapLayersWatcher: ";
+	}
+	public function onMapFromXMLReady(interactiveLayerMap: InteractiveLayerMap, layers: Array): void
+	{
+		
+		trace(this + "onMapFromXMLReady");
+		var layer: InteractiveLayer;
+		
+		_mapLayersInitializing = 0;
+		for each (layer in layers)
+		{
+			if (layer)
+			{
+				layer.addEventListener(InteractiveLayerEvent.LAYER_INITIALIZED, onLayerInitialized);
+				_mapLayersInitializing++;
+			}
+		}
+		for each (layer in layers)
+		{
+			var configuration: ILayerConfiguration;
+			if (layer)
+			{
+				if (layer is IConfigurableLayer)
+				{
+					configuration = (layer as IConfigurableLayer).configuration;	
+				}
+				trace("InteractiveMultiView onMapFromXMLReady addLayer: " + layer.name + " | " + layer.id);
+				interactiveLayerMap.addLayer(layer);
+			} else {
+				trace("onMapFromXMLReady: Layer not exists")
+			}
+		}
+		
+		//			listLayers.executeBindings();
+		//			player.timeAxis.executeBindings();
+		
+		for each(var l: InteractiveLayer in interactiveLayerMap.layers) {
+			//we need to set b_force parameter to force to be able to get cached bitmaps
+			l.refresh(false);
+		}
+	}
+	
+	private function onLayerInitialized(event: InteractiveLayerEvent): void
+	{
+		_mapLayersInitializing--;
+		trace("\t"+ this + "onLayerInitialized _mapLayersInitializing: " + _mapLayersInitializing);
+		if (_mapLayersInitializing == 0)
+		{
+			dispatchEvent(new Event("mapLayersInitialized"));
+		}
 	}
 }

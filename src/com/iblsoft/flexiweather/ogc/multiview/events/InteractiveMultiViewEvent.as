@@ -6,13 +6,18 @@ package com.iblsoft.flexiweather.ogc.multiview.events
     {
         public static const MULTI_VIEW_READY:String = 'multiViewReady';
 
-        public static const MULTI_VIEW_MAP_LOADING_STARTED:String = 'multiViewMapsLoadingStarted';
+        public static const MULTI_VIEW_MAPS_LOADING_STARTED:String = 'multiViewMapsLoadingStarted';
 
-        public static const MULTI_VIEW_MAP_LOADED:String = 'multiViewMapsLoaded';
+        public static const MULTI_VIEW_MAPS_LOADED:String = 'multiViewMapsLoaded';
 
-        public function InteractiveMultiViewEvent(type:String, bubbles:Boolean = false, cancelable:Boolean = false)
+        public static const MULTI_VIEW_SINGLE_MAP_LAYERS_INITIALIZED:String = 'multiViewSingleMapLayersInitialized';
+        
+		public static const MULTI_VIEW_ALL_MAPS_LAYERS_INITIALIZED:String = 'multiViewAllMapsLayersInitialized';
+
+		public function InteractiveMultiViewEvent(type:String, bubbles:Boolean = false, cancelable:Boolean = false)
         {
             super(type, bubbles, cancelable);
         }
     }
 }
+
