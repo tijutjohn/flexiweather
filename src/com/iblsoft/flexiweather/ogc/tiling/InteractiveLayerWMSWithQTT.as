@@ -23,6 +23,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	
 	import flash.display.BitmapData;
 	import flash.display.Graphics;
 	import flash.events.DataEvent;
@@ -562,6 +563,17 @@ package com.iblsoft.flexiweather.ogc.tiling
 				if (cache)
 					cache.clearCache();
 			}
+		}
+		
+		override public function clone(): InteractiveLayer
+		{
+			trace(this + " clone: visible: " + visible + " zOrder: " + zOrder);
+			
+			var newLayer: InteractiveLayerWMSWithQTT = new InteractiveLayerWMSWithQTT(container, m_cfg as WMSWithQTTLayerConfiguration);
+			updatePropertyForCloneLayer(newLayer);
+//			newLayer.tileLayer.clone();
+			//TODO how to clone tiled layer
+			return newLayer;
 		}
 	}
 }

@@ -375,7 +375,24 @@ package com.iblsoft.flexiweather.widgets
 		 */
 		public function clone(): InteractiveLayer
 		{
-			return new InteractiveLayer(container);
+			var layer: InteractiveLayer = new InteractiveLayer(container);
+			updatePropertyForCloneLayer(layer);
+			return layer;
+		}
+		
+		/**
+		 * You can update all properties, which needs to be updated when clone InteractiveLayer. 
+		 * Please override this function in all layers which extend InteractiveLayer  
+		 * @param layer
+		 * 
+		 */		
+		protected function updatePropertyForCloneLayer(layer: InteractiveLayer): void
+		{
+			layer.id = id;
+			layer.alpha = alpha;
+			layer.zOrder = zOrder;
+			layer.visible = visible;
+			layer.layerName = layerName;
 		}
 
 		override public function toString(): String

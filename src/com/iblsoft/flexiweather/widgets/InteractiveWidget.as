@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.widgets
 {
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
+	import com.iblsoft.flexiweather.events.InteractiveLayerWMSEvent;
 	import com.iblsoft.flexiweather.events.InteractiveWidgetEvent;
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
@@ -386,12 +387,22 @@ package com.iblsoft.flexiweather.widgets
 			notifyWidgetChanged('layerRemovedInInteractiveLayerMap', this);
 		}
 
+		private function onLayerChangedInInteractiveLayerMap(event: Event): void
+		{
+			if (event.type == InteractiveLayerWMSEvent.WMS_STYLE_CHANGED)
+				notifyWidgetChanged('wmsStyle', event.target);
+			if (event.type == InteractiveLayerEvent.VISIBILITY_CHANGED)
+				notifyWidgetChanged('visible', event.target);
+		}
+		
 		private function registerInteractiveLayerMap(ilm: InteractiveLayerMap): void
 		{
 			trace(this + " registerInteractiveLayerMap");
 			if (ilm)
 			{
 				ilm.addEventListener(InteractiveLayerEvent.VISIBILITY_CHANGED, onLayerChangedInInteractiveLayerMap);
+				ilm.addEventListener(InteractiveLayerWMSEvent.WMS_STYLE_CHANGED, onLayerChangedInInteractiveLayerMap);
+				
 				ilm.addEventListener(InteractiveLayerMap.TIME_AXIS_ADDED, onLayerInInteractiveLayerMapAdded);
 				ilm.addEventListener(InteractiveLayerMap.TIME_AXIS_REMOVED, onLayerInInteractiveLayerMapRemoved);
 			}
@@ -1035,13 +1046,6 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 
-		private function onLayerChangedInInteractiveLayerMap(event: Event): void
-		{
-			if (event.type == InteractiveLayerWMS.WMS_STYLE_CHANGED)
-				notifyWidgetChanged('wmsStyle', event.target);
-			if (event.type == InteractiveLayerEvent.VISIBILITY_CHANGED)
-				notifyWidgetChanged('visible', event.target);
-		}
 		/**
 		 * InteractiveWidget needs to call this function is anything, what needs to be synchronized was changed
 		 *

@@ -2,6 +2,7 @@ package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerProgressEvent;
+	import com.iblsoft.flexiweather.events.InteractiveLayerWMSEvent;
 	import com.iblsoft.flexiweather.events.WMSViewPropertiesEvent;
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderErrorEvent;
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
@@ -65,7 +66,7 @@ package com.iblsoft.flexiweather.ogc
 	
 	import spark.components.Group;
 
-	[Event(name = "wmsStyleChanged", type = "flash.events.Event")]
+	[Event(name = "wmsStyleChanged", type = "com.iblsoft.flexiweather.events.InteractiveLayerWMSEvent")]
 	/**
 	 * Common base class for WMS type layers
 	 *
@@ -1225,7 +1226,7 @@ package com.iblsoft.flexiweather.ogc
 			if (m_currentWMSViewProperties)
 			{
 				m_currentWMSViewProperties.setWMSStyleName(i_subLayer, s_styleName);
-				dispatchEvent(new Event(InteractiveLayerWMS.WMS_STYLE_CHANGED));
+				dispatchEvent(new InteractiveLayerWMSEvent(InteractiveLayerWMSEvent.WMS_STYLE_CHANGED, true));
 			} else {
 				_tempParameterStorage.setWMSStyleName(i_subLayer, s_styleName);
 			}
@@ -1330,6 +1331,8 @@ package com.iblsoft.flexiweather.ogc
 					setStatus(InteractiveDataLayer.STATE_DATA_LOADED);
 				}
 				return bIsSyncronized;
+			} else {
+				_tempParameterStorage.synchroniseWith(s_variableId, s_value);
 			}
 			return false;
 		}
@@ -1482,22 +1485,46 @@ package com.iblsoft.flexiweather.ogc
 
 		override public function clone(): InteractiveLayer
 		{
-			var newLayer: InteractiveLayerWMS = new InteractiveLayerWMS(container, m_cfg);
-			newLayer.id = id;
-			newLayer.alpha = alpha;
-			newLayer.zOrder = zOrder;
-			newLayer.visible = visible;
-			newLayer.layerName = layerName;
-			var styleName: String = getWMSStyleName(0)
-			newLayer.setWMSStyleName(0, styleName);
-			//clone all dimensions
-			var dimNames: Array = getWMSDimensionsNames();
-			for each (var dimName: String in dimNames)
-			{
-				var value: String = getWMSDimensionValue(dimName);
-				newLayer.setWMSDimensionValue(dimName, value);
-			}
+			var newLayer: InteractiveLayerMSBase = new InteractiveLayerMSBase(container, m_cfg);
+			updatePropertyForCloneLayer(newLayer);
 			return newLayer;
+		}
+		
+		/**
+		 * You can update all properties, which needs to be updated when clone InteractiveLayer. 
+		 * Please override this function in all layers which extend InteractiveLayer  
+		 * @param layer
+		 * 
+		 */		
+		override protected function updatePropertyForCloneLayer(layer: InteractiveLayer): void
+		{
+			super.updatePropertyForCloneLayer(layer);
+			
+//			newLayer.id = id;
+//			newLayer.alpha = alpha;
+//			newLayer.zOrder = zOrder;
+//			newLayer.visible = visible;
+//			newLayer.layerName = layerName;
+			if (layer is InteractiveLayerMSBase)
+			{
+				var newLayer: InteractiveLayerMSBase = layer as InteractiveLayerMSBase;
+				newLayer.synchroniseLevel = synchroniseLevel;
+				if (synchroniseLevel)
+				{
+					newLayer.synchroniseWith(GlobalVariable.LEVEL, getSynchronisedVariableValue(GlobalVariable.LEVEL));
+				}
+				var styleName: String = getWMSStyleName(0)
+				newLayer.setWMSStyleName(0, styleName);
+				//clone all dimensions
+				var dimNames: Array = getWMSDimensionsNames();
+				for each (var dimName: String in dimNames)
+				{
+					var value: String = getWMSDimensionValue(dimName);
+					newLayer.setWMSDimensionValue(dimName, value);
+				}
+				
+			}
+			
 		}
 
 		protected function debug(str: String): void
@@ -1575,6 +1602,7 @@ class LayerTemporaryParameterStorage {
 	
 	private var _styles: Dictionary = new Dictionary(true);
 	private var _dimension: Dictionary = new Dictionary(true);
+	private var _synchroniseVariablesDictionary: Dictionary = new Dictionary(true);
 	private var _customParameter: Dictionary = new Dictionary(true);
 	private var _configuration: WMSLayerConfiguration;
 	
@@ -1608,6 +1636,11 @@ class LayerTemporaryParameterStorage {
 				var s_parameter: String = _customParameter[str] as String;
 				currentWMSProperties.setWMSCustomParameter(str as String, s_parameter);
 			}
+			for (str in _synchroniseVariablesDictionary)
+			{
+				var s_variableId: String = _synchroniseVariablesDictionary[str] as String;
+				currentWMSProperties.synchroniseWith(str as String, s_variableId);
+			}
 		}
 	}
 		
@@ -1624,5 +1657,10 @@ class LayerTemporaryParameterStorage {
 	public function setWMSCustomParameter(s_parameter: String, s_value: String): void
 	{
 		_customParameter[s_parameter] = s_value;
+	}
+	
+	public function synchroniseWith(s_variableId: String, s_value: Object): void
+	{
+		_synchroniseVariablesDictionary[s_variableId] = s_value;
 	}
 }

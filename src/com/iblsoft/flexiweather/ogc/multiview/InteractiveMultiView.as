@@ -8,6 +8,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 	import com.iblsoft.flexiweather.ogc.SynchronisedVariableChangeEvent;
 	import com.iblsoft.flexiweather.ogc.cache.WMSCacheManager;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.ogc.editable.IInteractiveLayerProvider;
 	import com.iblsoft.flexiweather.ogc.multiview.data.MultiViewConfiguration;
 	import com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent;
@@ -748,7 +749,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 					trace("We are not doing synchronization from others widget, but currently selected");
 				} else {
 					stopWatchingChanges();
-					rebuildWidgets();	
+					rebuildWidgets();
+//					rebuildGlobalVariables(event.changeDescription);
 //					startWatchingChanges();
 				}
 			} else {
@@ -756,6 +758,46 @@ package com.iblsoft.flexiweather.ogc.multiview
 			}
 		}
 		
+		private function rebuildGlobalVariables(changeDescription: String): void
+		{
+			if (changeDescription != GlobalVariable.LEVEL)
+			{
+				if (!synchronizator.hasSynchronisedVariable(changeDescription))
+				{
+					var level: String = _selectedInteractiveWidget.interactiveLayerMap.level;
+					//synchronisator does not synchronize this global variable, so it's needs to be set (because it was changed)
+					for each (var currWidget: InteractiveWidget in _interactiveWidgets.widgets)
+					{
+						if (_selectedInteractiveWidget == currWidget)
+						{
+							//do not anything with selected widget, change came from it
+						} else {
+							currWidget.interactiveLayerMap.setLevel(level, true);				
+						}
+					}
+					
+				}
+			}
+			if (changeDescription != GlobalVariable.FRAME)
+			{
+				if (!synchronizator.hasSynchronisedVariable(changeDescription))
+				{
+					var frame: Date = _selectedInteractiveWidget.interactiveLayerMap.frame as Date;
+					//synchronisator does not synchronize this global variable, so it's needs to be set (because it was changed)
+					for each (var currWidget: InteractiveWidget in _interactiveWidgets.widgets)
+					{
+						if (_selectedInteractiveWidget == currWidget)
+						{
+							//do not anything with selected widget, change came from it
+						} else {
+							currWidget.interactiveLayerMap.setFrame(frame, true);				
+						}
+					}
+					
+				}
+			}
+				
+		}
 		private var _widgetsWaitingForRebuild: int;
 		
 		private function rebuildWidgets(): void

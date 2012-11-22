@@ -1,28 +1,31 @@
 package com.iblsoft.flexiweather.ogc.data.viewProperties
 {
+	import com.iblsoft.flexiweather.events.InteractiveLayerWMSEvent;
 	import com.iblsoft.flexiweather.events.WMSViewPropertiesEvent;
 	import com.iblsoft.flexiweather.ogc.BBox;
-	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
-	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.IWMSLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
 	import com.iblsoft.flexiweather.ogc.SynchronisedVariableChangeEvent;
 	import com.iblsoft.flexiweather.ogc.WMSDimension;
 	import com.iblsoft.flexiweather.ogc.WMSLayer;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.IWMSLayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
+	import com.iblsoft.flexiweather.ogc.data.ImagePart;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.utils.Duration;
 	import com.iblsoft.flexiweather.utils.ISO8601Parser;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
+	
 	import flash.display.Bitmap;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.net.URLRequest;
 	import flash.net.URLVariables;
 	import flash.utils.Dictionary;
+	
 	import mx.collections.ArrayCollection;
-	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
-	import com.iblsoft.flexiweather.ogc.data.ImagePart;
 
 	public class WMSViewProperties extends EventDispatcher implements IViewProperties, Serializable
 	{
@@ -489,7 +492,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 				ma_subLayerStyleNames[i_subLayer] = s_styleName;
 			else
 				delete ma_subLayerStyleNames[i_subLayer];
-			dispatchEvent(new Event(InteractiveLayerWMS.WMS_STYLE_CHANGED));
+			dispatchEvent(new InteractiveLayerWMSEvent(InteractiveLayerWMSEvent.WMS_STYLE_CHANGED, true));
 		}
 
 		public function setWMSCustomParameter(s_parameter: String, s_value: String): void

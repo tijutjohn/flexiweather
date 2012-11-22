@@ -2,6 +2,7 @@ package com.iblsoft.flexiweather.widgets
 {
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerMapEvent;
+	import com.iblsoft.flexiweather.events.InteractiveLayerWMSEvent;
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
@@ -92,12 +93,12 @@ package com.iblsoft.flexiweather.widgets
 		
 		private function addComposerChangeEventListenersForLayer(l: InteractiveLayer): void
 		{
-			l.addEventListener(InteractiveLayerWMS.WMS_STYLE_CHANGED, redispatchComposerChange);
+			l.addEventListener(InteractiveLayerWMSEvent.WMS_STYLE_CHANGED, redispatchComposerChange);
 			l.addEventListener(InteractiveLayerEvent.VISIBILITY_CHANGED, redispatchComposerChange);
 		}
 		private function removeComposerChangeEventListenersForLayer(l: InteractiveLayer): void
 		{
-			l.removeEventListener(InteractiveLayerWMS.WMS_STYLE_CHANGED, redispatchComposerChange);
+			l.removeEventListener(InteractiveLayerWMSEvent.WMS_STYLE_CHANGED, redispatchComposerChange);
 			l.removeEventListener(InteractiveLayerEvent.VISIBILITY_CHANGED, redispatchComposerChange);
 		}
 		public function addLayer(l: InteractiveLayer): void

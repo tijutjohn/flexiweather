@@ -34,10 +34,9 @@ package com.iblsoft.flexiweather.ogc
 	import mx.logging.Log;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration;
 
-	[Event(name = "wmsStyleChanged", type = "flash.events.Event")]
+	[Event(name = "wmsStyleChanged", type = "fcom.iblsoft.flexiweather.events.InteractiveLayerWMSEvent")]
 	public class InteractiveLayerWMS extends InteractiveLayerMSBase implements ISynchronisedObject, Serializable, IConfigurableLayer, ICachedLayer
 	{
-		public static const WMS_STYLE_CHANGED: String = 'wmsStyleChanged';
 		protected var m_autoRefreshTimer: Timer = new Timer(5000);
 
 		public function InteractiveLayerWMS(container: InteractiveWidget, cfg: WMSLayerConfiguration)
@@ -292,20 +291,7 @@ package com.iblsoft.flexiweather.ogc
 			trace(this + " clone: visible: " + visible + " zOrder: " + zOrder);
 			
 			var newLayer: InteractiveLayerWMS = new InteractiveLayerWMS(container, m_cfg);
-			newLayer.id = id;
-			newLayer.alpha = alpha;
-			newLayer.zOrder = zOrder;
-			newLayer.visible = visible;
-			newLayer.layerName = layerName;
-			var styleName: String = getWMSStyleName(0)
-			newLayer.setWMSStyleName(0, styleName);
-			//clone all dimensions
-			var dimNames: Array = getWMSDimensionsNames();
-			for each (var dimName: String in dimNames)
-			{
-				var value: String = getWMSDimensionValue(dimName);
-				newLayer.setWMSDimensionValue(dimName, value);
-			}
+			updatePropertyForCloneLayer(newLayer);
 			return newLayer;
 		}
 

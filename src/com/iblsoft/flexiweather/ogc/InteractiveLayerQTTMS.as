@@ -516,9 +516,7 @@ package com.iblsoft.flexiweather.ogc
 		override public function clone(): InteractiveLayer
 		{
 			var newLayer: InteractiveLayerQTTMS = new InteractiveLayerQTTMS(container, m_cfg as QTTMSLayerConfiguration);
-			newLayer.alpha = alpha
-			newLayer.zOrder = zOrder;
-			newLayer.visible = visible;
+			updatePropertyForCloneLayer(newLayer);
 			return newLayer;
 		}
 
