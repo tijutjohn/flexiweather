@@ -4,20 +4,19 @@ package com.iblsoft.flexiweather.ogc.tiling
 	public class TileIndex
 	{
 		public var mi_tileSize: int;
-		public var mi_tileZoom: int;
+		public var mi_tileZoom: String;
 		public var mi_tileRow: int;
 		public var mi_tileCol: int;
 
-		public function TileIndex(i_tileZoom: int = 0, i_tileRow: int = 0, i_tileCol: int = 0, i_tileSize: int = 256)
+		public function TileIndex(i_tileZoom: String = null, i_tileRow: int = 0, i_tileCol: int = 0, i_tileSize: int = 256)
 		{
-			if (i_tileZoom < 0)
+			if (i_tileZoom == null)
 			{
-				i_tileZoom = 2;
-				trace("TileIndex.TileIndex(): Stop tileZoom is negative");
+				trace("TileIndex.TileIndex(): Stop tileZoom not set");
 			}
-			var _maxTilePos: int = 1 << (i_tileZoom + 1) - 1;
-			if (i_tileRow > _maxTilePos || i_tileCol > _maxTilePos || i_tileCol < 0 || i_tileRow < 0)
-				trace("TileIndex.TileIndex(): Stop, wrong tile for zoom: " + i_tileZoom);
+//			var _maxTilePos: int = 1 << (i_tileZoom + 1) - 1;
+//			if (i_tileRow > _maxTilePos || i_tileCol > _maxTilePos || i_tileCol < 0 || i_tileRow < 0)
+//				trace("TileIndex.TileIndex(): Stop, wrong tile for zoom: " + i_tileZoom);
 			mi_tileSize = i_tileSize;
 			mi_tileZoom = i_tileZoom;
 			mi_tileRow = i_tileRow;

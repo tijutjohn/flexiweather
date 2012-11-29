@@ -5,6 +5,11 @@ package com.iblsoft.flexiweather.ogc.tiling
 	{
 		private var _tileMatrixLimits: Array;
 
+		public function get tileMatrixLimits(): Array
+		{
+			return _tileMatrixLimits;
+		}
+		
 		public function TileMatrixSetLimits()
 		{
 			_tileMatrixLimits = [];

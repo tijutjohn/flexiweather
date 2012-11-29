@@ -675,7 +675,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					ofExactForecast = null;
 					for each (of in l_levels)
 					{
-						if ((of.data as String) == level)
+						if (of && of.data && (of.data as String) == level)
 						{
 							ofExactForecast = of;
 							break;
@@ -700,7 +700,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					ofExactForecast = null;
 					for each (of in l_times)
 					{
-						if ((of.data as Date).time == frame.time)
+						if (of && of.data && (of.data as Date).time == frame.time)
 						{
 							ofExactForecast = of;
 							break;
@@ -723,7 +723,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					ofExactForecast = null;
 					for each (of in l_forecasts)
 					{
-						if (Duration(of.data).secondsTotal == forecast.secondsTotal)
+						if (of && of.data && Duration(of.data).secondsTotal == forecast.secondsTotal)
 						{
 							ofExactForecast = of;
 							break;

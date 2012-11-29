@@ -17,75 +17,27 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	
+	import mx.utils.ArrayUtil;
+	import mx.utils.ObjectUtil;
+	
 	import spark.components.Group;
 
 	public class QTTMSLayerConfiguration extends TiledLayerConfiguration implements IInteractiveLayerProvider, ILayerConfiguration, IBehaviouralObject
 	{
 		Storage.addChangedClass('com.iblsoft.flexiweather.ogc.QTTMSLayerConfiguration', 'com.iblsoft.flexiweather.ogc.configuration.layers.QTTMSLayerConfiguration', new Version(1, 6, 0));
 //		public var baseURLPattern: String;
-		/** Array of TiledTilingInfo instances */
-		private var _tilingCRSsAndExtents: Array = [];
 
-		public function get tilingCRSsAndExtents(): Array
+		public function QTTMSLayerConfiguration()
 		{
-			return _tilingCRSsAndExtents;
-		}
-		public var tileSize: uint = 256;
-
-		public function QTTMSLayerConfiguration(tileSize: uint = 256)
-		{
-			this.tileSize = tileSize;
 		}
 
 		override public function destroy(): void
 		{
-			if (tilingCRSsAndExtents && tilingCRSsAndExtents.length > 0)
-			{
-				for each (var qttilingInfo: TiledTilingInfo in tilingCRSsAndExtents)
-				{
-					qttilingInfo.destroy();
-				}
-			}
 			ma_behaviours = null;
 			super.destroy();
 		}
 
-		public function removeAllTilingInfo(): void
-		{
-			_tilingCRSsAndExtents = [];
-		}
-
-		/**
-		 * Add TiledTilingInfo into array of supported tilingInfo data for this configuration
-		 * @param tilingInfo
-		 *
-		 */
-		public function addTiledTilingInfo(tilingInfo: TiledTilingInfo): void
-		{
-			if (!tilingCRSsAndExtents)
-				_tilingCRSsAndExtents = [];
-			tilingCRSsAndExtents.push(tilingInfo);
-		}
-
-		/**
-		 * Get TiledTilingInfo for given CRS
-		 *
-		 * @param crs
-		 * @return
-		 *
-		 */
-		override public function getTiledTilingInfoForCRS(crs: String): TiledTilingInfo
-		{
-			if (tilingCRSsAndExtents && tilingCRSsAndExtents.length > 0)
-			{
-				for each (var info: TiledTilingInfo in tilingCRSsAndExtents)
-				{
-					if (info.crsWithBBox && info.crsWithBBox.crs == crs)
-						return info;
-				}
-			}
-			return null;
-		}
 
 		override public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer
 		{
@@ -94,6 +46,22 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 //			l.tilesProvider = new QTTTilesProvider();
 			l.name = label;
 			l.layerName = label;
+			
+			if (tilingCRSsAndExtents && tilingCRSsAndExtents.length > 0)
+			{
+				var tilingExtents: Array = [];
+				var tilingInfo: TiledTilingInfo;
+				//make copy of tilingCRSsAndExtents..because next loops adds items to it
+				for each (tilingInfo in tilingCRSsAndExtents)
+				{
+					tilingExtents.push(tilingInfo);
+				}
+				
+				for each (tilingInfo in tilingExtents)
+				{
+					l.addCRSWithTilingExtent(tilingInfo.urlPattern, tilingInfo.crsWithBBox.crs, tilingInfo.crsWithBBox.bbox, tilingInfo.tileSize, tilingInfo.minimumZoomLevel, tilingInfo.maximumZoomLevel);
+				}
+			}
 			return l;
 		}
 

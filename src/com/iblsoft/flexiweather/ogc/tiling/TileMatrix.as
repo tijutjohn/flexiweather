@@ -1,5 +1,7 @@
 package com.iblsoft.flexiweather.ogc.tiling
 {
+	import com.iblsoft.flexiweather.ogc.BBox;
+	
 	import flash.geom.Point;
 
 	public class TileMatrix
@@ -12,6 +14,12 @@ package com.iblsoft.flexiweather.ogc.tiling
 		public var matrixWidth: int;
 		public var matrixHeight: int;
 
+		public function get extent(): BBox
+		{
+
+			var extentBBox: BBox = new BBox(topLeftCorner.x, topLeftCorner.y, topLeftCorner.x + matrixWidth * tileWidth * scaleDenominator, topLeftCorner.x + matrixHeight * tileHeight * scaleDenominator);
+			return extentBBox;
+		}
 		public function TileMatrix()
 		{
 		}

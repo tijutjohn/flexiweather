@@ -16,7 +16,9 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		private var _id: int;
 		public var name: String;
 		public var crs: String;
-		public var zoom: Number;
+		
+		public var zoom: String;
+		
 		protected var m_cfg: ILayerConfiguration;
 		public var tiledAreas: Array;
 		private var _validity: Date;

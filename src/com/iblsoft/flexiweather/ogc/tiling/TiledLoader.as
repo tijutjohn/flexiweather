@@ -38,7 +38,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 	public class TiledLoader extends EventDispatcher implements IWMSViewPropertiesLoader
 	{
-		private var mi_zoom: int;
+		private var mi_zoom: String;
 		private var m_layer: InteractiveLayerTiled;
 		private var mi_tilesCurrentlyLoading: int;
 		private var mi_tilesLoadingTotal: int;
@@ -57,9 +57,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			_tilesProvider = value;
 		}
-		private var _qttViewProperties: TiledViewProperties;
+		private var _tiledViewProperties: TiledViewProperties;
 
-		public function TiledLoader(layer: InteractiveLayerTiled, zoom: int)
+		public function TiledLoader(layer: InteractiveLayerTiled, zoom: String)
 		{
 			super(null);
 			m_layer = layer;
@@ -76,35 +76,44 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		public function updateWMSData(b_forceUpdate: Boolean, viewProperties: IViewProperties, forcedLayerWidth: Number, forcedLayerHeight: Number): void
 		{
-			var qttViewProperties: TiledViewProperties = viewProperties as TiledViewProperties;
-			//store qtt view properties for later use
-			_qttViewProperties = qttViewProperties;
-			var s_crs: String = qttViewProperties.crs;
-			var currentViewBBox: BBox = qttViewProperties.getViewBBox();
+			var tiledViewProperties: TiledViewProperties = viewProperties as TiledViewProperties;
+			//store tiled view properties for later use
+			_tiledViewProperties = tiledViewProperties;
+			var s_crs: String = tiledViewProperties.crs;
+			var currentViewBBox: BBox = tiledViewProperties.getViewBBox();
 			var tiledAreas: Array = [];
 			var _tiledArea: TiledArea;
 			mi_totalVisibleTiles = 0;
+			
+			var tileMatrix: TileMatrix = m_layer.getTileMatrixForCRSAndZoom(s_crs, mi_zoom);
+			
 			//update CRS and extent BBox
 			m_layer.tiledAreaChanged(s_crs, m_layer.getGTileBBoxForWholeCRS(s_crs));
-			//TODO create QTTTTileViewProperties
-			var tileSize: uint = TileSize.SIZE_256;
-			if (qttViewProperties.configuration && (qttViewProperties.configuration as Object).hasOwnProperty('tileSize'))
-				tileSize = (qttViewProperties.configuration as Object)['tileSize'];
+			//TODO create TiledTileViewProperties
+			
+			//TODO do we need support for non-square tiles?
+			
+			var tileSize: uint = 256; 
+			if (tileMatrix)
+				tileSize = tileMatrix.tileWidth;  // TileSize.SIZE_256;
+			
+//			if (tiledViewProperties.configuration && (tiledViewProperties.configuration as Object).hasOwnProperty('tileSize'))
+//				tileSize = (tiledViewProperties.configuration as Object)['tileSize'];
 			/**
- * request all tiled areas for which we need update data. if projection does not allow wrap across dateline, there will be always 1 tiled area
-*/
-			tiledAreas = getNeededTiledAreas(qttViewProperties, tileSize);
+			 * request all tiled areas for which we need update data. if projection does not allow wrap across dateline, there will be always 1 tiled area
+			*/
+			tiledAreas = getNeededTiledAreas(tiledViewProperties, tileSize);
 			if (tiledAreas.length == 0)
 				return;
-			qttViewProperties.tiledAreas = tiledAreas;
+			tiledViewProperties.tiledAreas = tiledAreas;
 			mi_updateCycleAge++;
 			var loadRequests: Array;
 			var baseURLPattern: String = m_layer.baseURLPatternForCRS(s_crs);
 			if (baseURLPattern)
-				loadRequests = prepareData(qttViewProperties, tiledAreas, b_forceUpdate);
+				loadRequests = prepareData(tiledViewProperties, tiledAreas, b_forceUpdate);
 			else
 				trace("baseURLpattern is NULL");
-			loadAllData(qttViewProperties, loadRequests);
+			loadAllData(tiledViewProperties, loadRequests);
 		}
 
 		/**
@@ -114,12 +123,12 @@ package com.iblsoft.flexiweather.ogc.tiling
 		 * If wrap across dateline is allowed, there can be more tiled areas returned
 		 *
 		 */
-		protected function getNeededTiledAreas(qttViewProperties: TiledViewProperties, tileSize: uint): Array
+		protected function getNeededTiledAreas(tiledViewProperties: TiledViewProperties, tileSize: uint): Array
 		{
 			var container: InteractiveWidget = m_layer.container;
 			var tiledAreas: Array = [];
 			var _tiledArea: TiledArea;
-			var s_crs: String = qttViewProperties.crs;
+			var s_crs: String = tiledViewProperties.crs;
 			var projection: Projection = Projection.getByCRS(s_crs);
 			//FIXME instead of projection.extentBBox use tiling extent
 			var partReflections: Array = container.mapBBoxToViewReflections(projection.extentBBox, true)
@@ -448,7 +457,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 		protected function notifyLoadingFinished(): void
 		{
 			var e: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveDataLayer.LOADING_FINISHED);
-			e.data = _qttViewProperties;
+			e.data = _tiledViewProperties;
 			dispatchEvent(e);
 		}
 
@@ -462,10 +471,10 @@ package com.iblsoft.flexiweather.ogc.tiling
 		private function getExpandedURL(tileIndex: TileIndex, crs: String): String
 		{
 			var url: String = InteractiveLayerTiled.expandURLPattern(m_layer.baseURLPatternForCRS(crs), tileIndex);
-			if (_qttViewProperties.specialCacheStrings && _qttViewProperties.specialCacheStrings.length > 0)
+			if (_tiledViewProperties.specialCacheStrings && _tiledViewProperties.specialCacheStrings.length > 0)
 			{
 				var specialLen: int = String("SPECIAL_").length;
-				for each (var str: String in _qttViewProperties.specialCacheStrings)
+				for each (var str: String in _tiledViewProperties.specialCacheStrings)
 				{
 					str = str.substring(specialLen, str.length);
 					url += "&" + str;

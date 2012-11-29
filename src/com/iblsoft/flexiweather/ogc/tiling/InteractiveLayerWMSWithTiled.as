@@ -20,7 +20,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			return null;
 		}
 
-		public function getTiledArea(viewBBox: BBox, zoomLevel: int, tileSize: int): TiledArea
+		public function getTiledArea(viewBBox: BBox, zoomLevel: String, tileSize: int): TiledArea
 		{
 			return null;
 		}

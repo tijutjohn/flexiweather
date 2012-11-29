@@ -11,7 +11,7 @@ package com.iblsoft.flexiweather.events
 		public static const TILES_LOADING_STARTED: String = 'tilesLoadingStarted';
 		public static const TILES_LOADED_FINISHED: String = 'tilesLoadedFinished';
 		public var tileIndex: TileIndex;
-		public var zoomLevel: int;
+		public var zoomLevel: String;
 
 		public function InteractiveLayerQTTEvent(type: String, bubbles: Boolean = false, cancelable: Boolean = false)
 		{

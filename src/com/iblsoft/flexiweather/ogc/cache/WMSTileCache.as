@@ -135,7 +135,7 @@ package com.iblsoft.flexiweather.ogc.cache
 		 * @return
 		 *
 		 */
-		public function getTiles(s_crs: String, i_tileZoom: uint, specialStrings: Array, validity: Date): Array
+		public function getTiles(s_crs: String, i_tileZoom: String, specialStrings: Array, validity: Date): Array
 		{
 			var a: Array = [];
 			for each (var cacheRecord: CacheItem in md_cache)

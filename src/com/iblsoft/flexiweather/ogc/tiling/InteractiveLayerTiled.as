@@ -24,6 +24,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	
 	import flash.display.BitmapData;
 	import flash.display.Graphics;
 	import flash.events.Event;
@@ -33,6 +34,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import flash.net.URLRequest;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
+	
 	import mx.events.DynamicEvent;
 	import mx.events.FlexEvent;
 
@@ -44,7 +46,17 @@ package com.iblsoft.flexiweather.ogc.tiling
 		public static var drawBorders: Boolean = false;
 		public static var drawDebugText: Boolean = false;
 		private var ms_oldCRS: String;
-		protected var mi_zoom: int = 1;
+		
+		private var m_tilingUtils: TilingUtils;
+		
+//		protected var mi_zoom: int = 1;
+		
+		/**
+		 * zoom is string, which refers to TileMatrix.id (e.g EPSG:26910:4) 
+		 */		
+		protected var mi_zoom: String;
+		
+		
 		public var tileScaleX: Number;
 		public var tileScaleY: Number;
 		/** This is used only if overriding using the setter, otherwise the value from m_cfg is used. */
@@ -106,8 +118,84 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			super(container);
 			m_cfg = cfg;
+			
+			_tileMatrixSetLinks = new Array();
 		}
 
+		/**************************************************************************************************************************************************
+		 * 
+		 *							Specific functionality of InteractiveLayerTiled
+		 *  
+		 **************************************************************************************************************************************************/
+		
+		private var _tileMatrixSetLinks: Array;
+		
+		public function getTileMatrixLimitsForCRSAndZoom(crs: String, zoom: String): TileMatrixLimits
+		{
+			var tileMatrixSetLink: TileMatrixSetLink = getTileMatrixSetLinkForCRS(crs);
+			if (tileMatrixSetLink && tileMatrixSetLink.tileMatrixSetLimitsArray)
+			{
+				var tileMatrixLimits: Array = tileMatrixSetLink.tileMatrixSetLimitsArray.tileMatrixLimits;
+				for each (var limit: TileMatrixLimits in tileMatrixLimits)
+				{
+					if (limit.tileMatrix == zoom)
+					{
+						return limit;
+					}
+				}
+			}
+			return null;
+		}
+		
+		public function getTileMatrixForCRSAndZoom(crs: String, zoom: String): TileMatrix
+		{
+			var tileMatrixSetLink: TileMatrixSetLink = getTileMatrixSetLinkForCRS(crs);
+			if (tileMatrixSetLink && tileMatrixSetLink.tileMatrixSet)
+			{
+				var tileMatrices: Array = tileMatrixSetLink.tileMatrixSet.tileMatrices;
+				for each (var tileMatrix: TileMatrix in tileMatrices)
+				{
+					if (tileMatrix.id == zoom)
+					{
+						return tileMatrix;
+					}
+				}
+			}
+			return null;
+		}
+		
+		protected function removeAllTileMatrixData(): void
+		{
+			//implement correct destroying of objects
+			_tileMatrixSetLinks = [];
+		}
+		public function addTileMatrixSetLink(tileMatrixSetLink: TileMatrixSetLink): void
+		{
+			_tileMatrixSetLinks.push(tileMatrixSetLink);
+		}
+		
+		protected function getTileMatrixSetLinkForCRS(crs: String): TileMatrixSetLink
+		{
+			//TODO do we support more TileMatrixSetLinks for same CRS ?
+			for each (var tileMatrixSetLink: TileMatrixSetLink in _tileMatrixSetLinks)
+			{
+				if (tileMatrixSetLink.tileMatrixSet)
+				{
+					var supportedCRS: String = tileMatrixSetLink.tileMatrixSet.supportedCRS;
+					if (supportedCRS == crs)
+						return tileMatrixSetLink;
+				}
+			}
+			return null;
+		}
+		
+		/**************************************************************************************************************************************************
+		 * 
+		 *							End of Specific functionality of InteractiveLayerTiled
+		 *  
+		 **************************************************************************************************************************************************/
+		
+		
 		override protected function initializeLayer(): void
 		{
 			super.initializeLayer();
@@ -116,6 +204,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 				var cfg: TiledLayerConfiguration = createDefaultConfiguration();
 				m_cfg = cfg;
 			}
+			
+			m_tilingUtils = new TilingUtils(this);
+			
 			ma_preloadingQTTViewProperties = [];
 			ma_preloadedQTTViewProperties = [];
 			m_currentQTTViewProperties = new TiledViewProperties();
@@ -125,6 +216,10 @@ package com.iblsoft.flexiweather.ogc.tiling
 			//			m_currentWMSViewProperties.addEventListener(WMSViewPropertiesEvent.WMS_DIMENSION_VALUE_SET, onWMSDimensionValueSet);
 			m_cache = new WMSTileCache();
 			//			_viewPartsReflections = new ViewPartReflectionsHelper(container);
+			
+			
+			//TODO test
+			updateData(true);
 		}
 
 		/**
@@ -188,7 +283,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 					//tiling for this layer is for now avoided, do not update data
 					return;
 				}
-				if (mi_zoom < 0)
+				if (mi_zoom == null)
 				{
 					// wrong zoom, do not continue
 					return;
@@ -256,8 +351,10 @@ package com.iblsoft.flexiweather.ogc.tiling
 		 * 		Default InteractiveLayer functionality
 		 *
 		 **************************************************************************************************************************************/
-		public function getTiledArea(viewBBox: BBox, zoomLevel: int, tileSize: int): TiledArea
+		public function getTiledArea(viewBBox: BBox, zoomLevel: String, tileSize: int): TiledArea
 		{
+			if (m_tilingUtils)
+				return m_tilingUtils.getTiledArea(viewBBox, zoomLevel, tileSize);
 			return null;
 		}
 
@@ -281,9 +378,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 			var viewBBox: BBox = container.getViewBBox();
 			updateCurrentWMSViewProperties();
 			tiledAreaChanged(newCRS, newBBox);
-			if (b_finalChange || mi_zoom < 0)
+			if (b_finalChange || mi_zoom == null)
 			{
-				var i_oldZoom: int = mi_zoom;
+				var i_oldZoom: String = mi_zoom;
 				findZoom();
 				if (!isZoomCompatible(mi_zoom))
 					return;
@@ -318,9 +415,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			if (!layerWasDestroyed)
 			{
-				if (mi_zoom == -1)
+				if (mi_zoom == null)
 				{
-					trace("InteractiveLayerQTTMS.customDraw(): Isomething is wrong, tile zoom is -1");
+					trace("InteractiveLayerQTTMS.customDraw(): Isomething is wrong, tile zoom is null");
 					return;
 				}
 				_debugDrawInfoArray = [];
@@ -535,7 +632,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 		 **************************************************************************************************************************************/
 		public override function hasPreview(): Boolean
 		{
-			return mi_zoom != -1;
+			return mi_zoom != null;
 		}
 
 		public override function renderPreview(graphics: Graphics, f_width: Number, f_height: Number): void
@@ -754,13 +851,19 @@ package com.iblsoft.flexiweather.ogc.tiling
 			var extent: BBox = getGTileBBoxForWholeCRS(s_crs);
 			if (extent == null)
 				return null;
-			var i_tilesInSerie: uint = 1 << tileIndex.mi_tileZoom;
-			var f_tileWidth: Number = extent.width / i_tilesInSerie;
-			var f_tileHeight: Number = extent.height / i_tilesInSerie;
-			var f_xMin: Number = extent.xMin + tileIndex.mi_tileCol * f_tileWidth;
+			
+			var tileMatrix: TileMatrix = getTileMatrixForCRSAndZoom(s_crs, tileIndex.mi_tileZoom);
+			
+			var zoomArr: Array = tileIndex.mi_tileZoom.split(':');
+			var zoomLevel: int = int(zoomArr[zoomArr.length - 1]);
+			
+			var f_tileWidthCount: Number = extent.width / tileMatrix.matrixWidth;
+			var f_tileHeightCount: Number = extent.height / tileMatrix.matrixHeight;
+			
+			var f_xMin: Number = extent.xMin + tileIndex.mi_tileCol * f_tileWidthCount;
 			// note that tile row numbers increase in the opposite way as the Y-axis
-			var f_yMin: Number = extent.yMax - (tileIndex.mi_tileRow + 1) * f_tileHeight;
-			var tileBBox: BBox = new BBox(f_xMin, f_yMin, f_xMin + f_tileWidth, f_yMin + f_tileHeight);
+			var f_yMin: Number = extent.yMax - (tileIndex.mi_tileRow + 1) * f_tileHeightCount;
+			var tileBBox: BBox = new BBox(f_xMin, f_yMin, f_xMin + f_tileWidthCount, f_yMin + f_tileHeightCount);
 			return tileBBox;
 		}
 
@@ -779,15 +882,15 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		public function baseURLPatternForCRS(crs: String): String
 		{
-//			if(ms_explicitBaseURLPattern == null)
-//			{
-//				var tilingInfo: TiledTilingInfo;
-//				if (m_cfg.tilingCRSsAndExtents && m_cfg.tilingCRSsAndExtents.length > 0)
-//					tilingInfo = m_cfg.getTiledTilingInfoForCRS(crs);
-//				
-//				if (tilingInfo && tilingInfo.urlPattern)
-//					return tilingInfo.urlPattern;
-//			}
+			if(ms_explicitBaseURLPattern == null)
+			{
+				var tilingInfo: TiledTilingInfo;
+				if (m_cfg.tilingCRSsAndExtents && m_cfg.tilingCRSsAndExtents.length > 0)
+					tilingInfo = m_cfg.getTiledTilingInfoForCRS(crs);
+				
+				if (tilingInfo && tilingInfo.urlPattern)
+					return tilingInfo.urlPattern;
+			}
 			return ms_explicitBaseURLPattern;
 		}
 
@@ -802,7 +905,12 @@ package com.iblsoft.flexiweather.ogc.tiling
 			{
 				s_url = s_url.replace('%COL%', String(tileIndex.mi_tileCol));
 				s_url = s_url.replace('%ROW%', String(tileIndex.mi_tileRow));
-				s_url = s_url.replace('%ZOOM%', String(tileIndex.mi_tileZoom));
+//				s_url = s_url.replace('%ZOOM%', String(tileIndex.mi_tileZoom));
+				
+				//need to extract zoom from zoomString
+				var zoomArr: Array = tileIndex.mi_tileZoom.split(':');
+				var zoomLevel:String = zoomArr[zoomArr.length - 1];
+				s_url = s_url.replace('%ZOOM%', zoomLevel);
 			}
 			else
 			{
@@ -821,17 +929,69 @@ package com.iblsoft.flexiweather.ogc.tiling
 		 * 		Zoom functionality
 		 *
 		 **************************************************************************************************************************************/
-		public function get zoomLevel(): int
+		public function get zoomLevel(): String
 		{
 			return mi_zoom;
 		}
 
 		protected function findZoom(): void
 		{
+			var tileMatrixSetLink: TileMatrixSetLink = getTileMatrixSetLinkForCRS(container.crs);
+			
+			//TODO how to get tiling extent from TileMatrixSetLink
+			
 //			var tilingExtent: BBox = getGTileBBoxForWholeCRS(container.crs);
 //			m_tilingUtils.onAreaChanged(container.crs, tilingExtent);
-//			var viewBBox: BBox = container.getViewBBox();
+			var viewBBox: BBox = container.getViewBBox();
 //			
+			if (tileMatrixSetLink && tileMatrixSetLink.tileMatrixSet)
+			{
+				
+				var viewBBoxPixelWidth: Number = viewBBox.width / width;
+				var viewBBoxPixelHeight: Number = viewBBox.height / height;
+				
+				var vBBoxPoint: Point = new Point(viewBBoxPixelWidth, viewBBoxPixelHeight);
+				
+				var tileMatrices: Array = tileMatrixSetLink.tileMatrixSet.tileMatrices;
+				if (tileMatrices)
+				{
+					var bestZoomMatrix: TileMatrix;
+					
+					var aspectRatioDistance: Number = Number.MAX_VALUE;
+					
+					for each (var tileMatrix: TileMatrix in tileMatrices)
+					{
+						var tileWidth: int = tileMatrix.tileWidth;
+						var tileHeight: int = tileMatrix.tileHeight;
+					
+						var tilingExtent: BBox = tileMatrix.extent;
+				
+						var tileMatrixPixelWidth: Number = tilingExtent.width / tileMatrix.matrixWidth / tileMatrix.tileWidth;
+						var tileMatrixPixelHeight: Number = tilingExtent.height / tileMatrix.matrixHeight / tileMatrix.tileHeight;
+						
+						var dist: Number = Point.distance(vBBoxPoint, new Point(tileMatrixPixelWidth, tileMatrixPixelHeight));
+						
+						trace("InteractiveLayerTiled findZoom ["+tileMatrix.matrixWidth+","+tileMatrix.matrixHeight+"] viewBBox ["+viewBBoxPixelWidth+","+viewBBoxPixelHeight+"]  tileMatrix ["+tileMatrixPixelWidth+","+tileMatrixPixelHeight+"]");
+						if (dist < aspectRatioDistance)
+						{
+							aspectRatioDistance = dist;
+							bestZoomMatrix = tileMatrix;
+						}
+//						trace("InteractiveLayerTiled findZoom dist: " + dist + " aspectRatioDistance: " + aspectRatioDistance);
+//						if (bestZoomMatrix)
+//							trace("\tBest zoom: " + bestZoomMatrix.id);
+					}
+				}
+			}
+
+			if (bestZoomMatrix)
+			{
+				mi_zoom = bestZoomMatrix.id;
+				//notify tilingUtils about area change
+				m_tilingUtils.onAreaChanged(container.crs, bestZoomMatrix.extent);
+				trace(this + " Best zoom is: " + bestZoomMatrix.id);
+			}
+			
 //			var newZoomLevel2: Number = 1;
 //			if (tilingExtent)
 //			{
@@ -846,25 +1006,25 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		public function checkZoom(): void
 		{
-			var i_oldZoom: int = mi_zoom;
-			findZoom();
-//			if (mi_zoom == 0)
-//			{
-//				trace("check zoom level 0");	
-//			}
-			if (i_oldZoom != mi_zoom)
+			if (layerInitialized)
 			{
-				notifyZoomLevelChange(mi_zoom);
-				/**
-				 * check if tiling pattern has been update with all data needed
-				 * (default pattern is just InteractiveLayerWMSWithQTT.WMS_TILING_URL_PATTERN ('&TILEZOOM=%ZOOM%&TILECOL=%COL%&TILEROW=%ROW%') without any WMS data)
-				 */
-				notifyTilingPatternUpdate();
-				invalidateData(false);
+				var i_oldZoom: String = mi_zoom;
+				findZoom();
+	
+				if (i_oldZoom != mi_zoom)
+				{
+					notifyZoomLevelChange(mi_zoom);
+					/**
+					 * check if tiling pattern has been update with all data needed
+					 * (default pattern is just InteractiveLayerWMSWithQTT.WMS_TILING_URL_PATTERN ('&TILEZOOM=%ZOOM%&TILECOL=%COL%&TILEROW=%ROW%') without any WMS data)
+					 */
+					notifyTilingPatternUpdate();
+					invalidateData(false);
+				}
 			}
 		}
 
-		private function isZoomCompatible(newZoom: int): Boolean
+		private function isZoomCompatible(newZoom: String): Boolean
 		{
 			var newCRS: String = container.crs;
 			var tilingInfo: TiledTilingInfo = m_cfg.getTiledTilingInfoForCRS(newCRS);
@@ -873,15 +1033,18 @@ package com.iblsoft.flexiweather.ogc.tiling
 				hideMap();
 				return false;
 			}
-			if (newZoom < tilingInfo.minimumZoomLevel || newZoom > tilingInfo.maximumZoomLevel)
-			{
-				hideMap();
-				return false;
-			}
+			
+			//TODO fix this after InteractiveLayerTiled is implemented
+//			if (newZoom < tilingInfo.minimumZoomLevel || newZoom > tilingInfo.maximumZoomLevel)
+//			{
+//				hideMap();
+//				return false;
+//			}
+			
 			return true;
 		}
 
-		private function notifyZoomLevelChange(zoomLevel: int): void
+		private function notifyZoomLevelChange(zoomLevel: String): void
 		{
 			var ilqe: InteractiveLayerQTTEvent = new InteractiveLayerQTTEvent(InteractiveLayerQTTEvent.ZOOM_LEVEL_CHANGED, true);
 			ilqe.zoomLevel = zoomLevel;
@@ -895,9 +1058,14 @@ package com.iblsoft.flexiweather.ogc.tiling
 		 **************************************************************************************************************************************/
 		override public function refresh(b_force: Boolean): void
 		{
-			findZoom();
-			super.refresh(b_force);
-			invalidateData(b_force);
+			if (_layerInitialized)
+			{
+				findZoom();
+				super.refresh(b_force);
+				invalidateData(b_force);
+			} else {
+				callLater(refresh, [b_force]);
+			}
 		}
 
 		/**************************************************************************************************************************************
@@ -1158,5 +1326,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			return "InteractiveLayerTiled " + name;
 		}
+		
+		
+		
 	}
 }

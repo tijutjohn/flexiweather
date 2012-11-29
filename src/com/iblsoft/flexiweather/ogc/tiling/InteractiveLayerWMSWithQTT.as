@@ -89,7 +89,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 		override protected function initializeLayer(): void
 		{
 			super.initializeLayer();
-			var tiledLayerConfig: QTTMSLayerConfiguration = new QTTMSLayerConfiguration(256);
+			var tiledLayerConfig: QTTMSLayerConfiguration = new QTTMSLayerConfiguration();
 			//			m_tiledLayer = new InteractiveLayerQTTMS(container, tiledLayerConfig,
 			//					'', null, null, cfg.minimumZoomLevel, cfg.maximumZoomLevel, cfg.tileSize);
 			m_tiledLayer = new InteractiveLayerQTTMS(container, tiledLayerConfig);
@@ -116,16 +116,18 @@ package com.iblsoft.flexiweather.ogc.tiling
 				return;
 			super.updateDisplayList(unscaledWidth, unscaledHeight);
 			m_tiledLayer.name = name + " (tiled)";
-			if (isTileable)
-			{
-				if (m_tiledLayer.zoomLevel == -1)
-				{
-					m_tiledLayer.width = container.width;
-					m_tiledLayer.height = container.height;
-					updateTiledLayerURLBase();
-					refresh(true);
-				}
-			}
+			
+			//TODO fix this after InteractiveLayerTiled is implemented
+//			if (isTileable)
+//			{
+//				if (m_tiledLayer.zoomLevel == -1)
+//				{
+//					m_tiledLayer.width = container.width;
+//					m_tiledLayer.height = container.height;
+//					updateTiledLayerURLBase();
+//					refresh(true);
+//				}
+//			}
 		}
 
 		override protected function onCapabilitiesUpdated(event: DataEvent = null): void
@@ -222,7 +224,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 		private function updateTiledLayerCRSs(): void
 		{
 			var a_layers: Array = getWMSLayers();
-			//var config:QTTMSLayerConfiguration = m_tiledLayer.configuration as QTTMSLayerConfiguration;
 			m_tiledLayer.clearCRSWithTilingExtents();
 			if (a_layers.length == 1)
 			{
@@ -236,9 +237,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 					{
 						var ti: CRSWithBBoxAndTilingInfo = CRSWithBBoxAndTilingInfo(crsWithBBox);
 						if (tileSize > 0)
-							m_tiledLayer.addCRSWithTilingExtent(WMS_TILING_URL_PATTERN, ti.crs, ti.tilingExtent, tileSize);
+							m_tiledLayer.addCRSWithTilingExtent(WMS_TILING_URL_PATTERN, ti.crs, ti.tilingExtent, tileSize, 1, 18);
 						else
-							m_tiledLayer.addCRSWithTilingExtent(WMS_TILING_URL_PATTERN, ti.crs, ti.tilingExtent);
+							m_tiledLayer.addCRSWithTilingExtent(WMS_TILING_URL_PATTERN, ti.crs, ti.tilingExtent, TileSize.SIZE_256, 1, 18);
 					}
 				}
 			}
@@ -513,7 +514,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			return qttViewProperties;
 		}
 
-		public function getTiledArea(viewBBox: BBox, zoomLevel: int, tileSize: int): TiledArea
+		public function getTiledArea(viewBBox: BBox, zoomLevel: String, tileSize: int): TiledArea
 		{
 			return tileLayer.getTiledArea(viewBBox, zoomLevel, tileSize);
 		}

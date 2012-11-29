@@ -17,6 +17,14 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		public var tileMatrixSetLink: TileMatrixSetLink;
 		public var ma_behaviours: Array = [];
 
+		/** Array of TiledTilingInfo instances */
+		private var _tilingCRSsAndExtents: Array = [];
+		
+		public function get tilingCRSsAndExtents(): Array
+		{
+			return _tilingCRSsAndExtents;
+		}
+		
 		public function TiledLayerConfiguration()
 		{
 		}
@@ -29,6 +37,23 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			return l;
 		}
 
+		public function removeAllTilingInfo(): void
+		{
+			_tilingCRSsAndExtents = [];
+		}
+		
+		/**
+		 * Add TiledTilingInfo into array of supported tilingInfo data for this configuration
+		 * @param tilingInfo
+		 *
+		 */
+		public function addTiledTilingInfo(tilingInfo: TiledTilingInfo): void
+		{
+			if (!tilingCRSsAndExtents)
+				_tilingCRSsAndExtents = [];
+			tilingCRSsAndExtents.push(tilingInfo);
+		}
+		
 		/**
 		 * Get TiledTilingInfo for given CRS
 		 *
@@ -38,17 +63,14 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		 */
 		public function getTiledTilingInfoForCRS(crs: String): TiledTilingInfo
 		{
-			//TODO implement TiledLayerConfiguration getTiledTilingInfoForCRS
-//			if (tilingCRSsAndExtents && tilingCRSsAndExtents.length > 0)
-//			{
-//				for each (var info: TiledTilingInfo in tilingCRSsAndExtents)
-//				{
-//					if (info.crsWithBBox && info.crsWithBBox.crs == crs)
-//					{
-//						return info;
-//					}
-//				}
-//			}
+			if (tilingCRSsAndExtents && tilingCRSsAndExtents.length > 0)
+			{
+				for each (var info: TiledTilingInfo in tilingCRSsAndExtents)
+				{
+					if (info.crsWithBBox && info.crsWithBBox.crs == crs)
+						return info;
+				}
+			}
 			return null;
 		}
 
@@ -57,6 +79,15 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			super.destroy();
 			//TODO implement destroy functionality
 			//destroy tileMatrixSetLink
+			
+			if (tilingCRSsAndExtents && tilingCRSsAndExtents.length > 0)
+			{
+				for each (var tiledTilingInfo: TiledTilingInfo in tilingCRSsAndExtents)
+				{
+					tiledTilingInfo.destroy();
+				}
+			}
+			
 			ma_behaviours = null;
 			super.destroy();
 		}
@@ -120,14 +151,14 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 
 		override public function toString(): String
 		{
-//			if (tilingCRSsAndExtents && tilingCRSsAndExtents.length > 0)
-//			{
-//				var tilingInfo: TiledTilingInfo = tilingCRSsAndExtents[0];
-//				if (tilingInfo)
-//				{
-//					return 'QTTMSLayerConfiguration urlPattern: ' + tilingInfo.urlPattern + ' CRS: ' + tilingInfo.crsWithBBox.crs + ' bbox: ' + tilingInfo.crsWithBBox.bbox.toBBOXString(); 
-//				}
-//			}
+			if (tilingCRSsAndExtents && tilingCRSsAndExtents.length > 0)
+			{
+				var tilingInfo: TiledTilingInfo = tilingCRSsAndExtents[0];
+				if (tilingInfo)
+				{
+					return 'QTTMSLayerConfiguration urlPattern: ' + tilingInfo.urlPattern + ' CRS: ' + tilingInfo.crsWithBBox.crs + ' bbox: ' + tilingInfo.crsWithBBox.bbox.toBBOXString(); 
+				}
+			}
 			return 'TiledLayerConfiguration with NO TILING info';
 		}
 	}

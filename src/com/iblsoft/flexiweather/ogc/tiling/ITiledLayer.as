@@ -11,6 +11,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 		 *
 		 */
 		function getTiledLayer(): InteractiveLayerTiled;
-		function getTiledArea(viewBBox: BBox, zoomLevel: int, tileSize: int): TiledArea;
+		function getTiledArea(viewBBox: BBox, zoomLevel: String, tileSize: int): TiledArea;
 	}
 }
