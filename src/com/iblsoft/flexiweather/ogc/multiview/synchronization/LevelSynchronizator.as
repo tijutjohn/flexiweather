@@ -115,7 +115,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 						var widget: InteractiveWidget = widgetsForSynchronisation.getItemAt(i) as InteractiveWidget;
 //						if (widget.id != synchronizeFromWidget.id)
 //						{
-							var level: String = (_levelValues[cnt] as GlobalVariableValue).label;
+							var level: String = ((_levelValues[cnt] as Object).level as GlobalVariableValue).label;
 							if (level)
 							{
 								if (widget.interactiveLayerMap.level != level)
