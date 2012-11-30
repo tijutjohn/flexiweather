@@ -226,7 +226,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 		{
 			m_extentBBox = new BBox(xmin, ymin, xmax, ymax);
 			for each (var currIW: InteractiveWidget in _interactiveWidgets.widgets)
-				currIW.setExtentBBOX(m_extentBBox, b_finalChange);
+				currIW.setExtentBBox(m_extentBBox, b_finalChange);
 		}
 		
 		public function setCRS(s_crs: String, b_finalChange: Boolean = true): void
@@ -760,13 +760,14 @@ package com.iblsoft.flexiweather.ogc.multiview
 		
 		private function rebuildGlobalVariables(changeDescription: String): void
 		{
+			var currWidget: InteractiveWidget
 			if (changeDescription != GlobalVariable.LEVEL)
 			{
 				if (!synchronizator.hasSynchronisedVariable(changeDescription))
 				{
 					var level: String = _selectedInteractiveWidget.interactiveLayerMap.level;
 					//synchronisator does not synchronize this global variable, so it's needs to be set (because it was changed)
-					for each (var currWidget: InteractiveWidget in _interactiveWidgets.widgets)
+					for each (currWidget in _interactiveWidgets.widgets)
 					{
 						if (_selectedInteractiveWidget == currWidget)
 						{
@@ -784,7 +785,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 				{
 					var frame: Date = _selectedInteractiveWidget.interactiveLayerMap.frame as Date;
 					//synchronisator does not synchronize this global variable, so it's needs to be set (because it was changed)
-					for each (var currWidget: InteractiveWidget in _interactiveWidgets.widgets)
+					for each (currWidget in _interactiveWidgets.widgets)
 					{
 						if (_selectedInteractiveWidget == currWidget)
 						{
@@ -875,7 +876,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 			if (m_extentBBox)
 			{
 				finalChange = (m_viewBBox == null)				
-				iw.setExtentBBOX(m_extentBBox, finalChange);
+				iw.setExtentBBox(m_extentBBox, finalChange);
 			}
 			if (m_viewBBox)
 				iw.setViewBBox(m_viewBBox, true);

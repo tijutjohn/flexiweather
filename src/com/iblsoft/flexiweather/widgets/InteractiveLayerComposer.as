@@ -119,12 +119,13 @@ package com.iblsoft.flexiweather.widgets
 			return;
 			
 			var total: int = m_layers.length;
-			for (var i: int = 0; i < total; i++)
+			var i: int;
+			for (i = 0; i < total; i++)
 			{
 				var l: InteractiveLayer = m_layers.getItemAt(i) as InteractiveLayer;
 				trace("\t Composer debugLayers m_layers["+i+"] = " + l.layerName);
 			}
-			for (var i: int = 0; i < numChildren; ++i)
+			for (i = 0; i < numChildren; ++i)
 			{
 				var ilI: InteractiveLayer = InteractiveLayer(getChildAt(i));
 				trace("\t't Composer debugLayers childAt["+i+"] = " + ilI.layerName);

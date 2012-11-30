@@ -14,6 +14,7 @@
     <classEntry path="com.iblsoft.flexiweather.events.InteractiveLayerMapEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.InteractiveLayerProgressEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.InteractiveLayerQTTEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.events.InteractiveLayerWMSEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.InteractiveWidgetEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.WFSCursorManagerEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.WFSCursorManagerTypes"/>
@@ -395,7 +396,6 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.GoogleMapLayerConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.GoogleMapsLayerOption"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.InteractiveLayerGoogleMaps"/>
-    <classEntry path="com.iblsoft.flexiweather.events.InteractiveLayerWMSEvent"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
