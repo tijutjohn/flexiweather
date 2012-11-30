@@ -2,6 +2,7 @@ package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
+	
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 
@@ -153,6 +154,26 @@ package com.iblsoft.flexiweather.ogc
 		public function intersects(other: BBox): Boolean
 		{
 			return intersected(other) != null;
+		}
+		
+		/**
+		 * Return coverage ratio of area intersection between 2 BBoxes. If whole "other" BBox is inside this BBox it returns 1  
+		 * @param other
+		 * @return 
+		 * 
+		 */		
+		public function coverageRatio(other: BBox): Number
+		{
+			var intersectedBBox: BBox = intersected(other);
+			
+			var otherBBoxArea: Number = other.width * other.height;
+			var intersectedBBoxArea: Number = intersectedBBox.width * intersectedBBox.height;
+			
+			var percentage: Number = intersectedBBoxArea / otherBBoxArea;
+			
+			trace(this + " intersectionPercentage from ["+other+"] => " + percentage);
+			return percentage;
+			
 		}
 
 		public function get isEmpty(): Boolean

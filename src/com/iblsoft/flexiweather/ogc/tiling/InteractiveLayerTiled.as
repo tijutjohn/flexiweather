@@ -35,6 +35,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import flash.text.TextField;
 	import flash.text.TextFormat;
 	
+	import mx.controls.Alert;
 	import mx.events.DynamicEvent;
 	import mx.events.FlexEvent;
 
@@ -946,6 +947,16 @@ package com.iblsoft.flexiweather.ogc.tiling
 //			
 			if (tileMatrixSetLink && tileMatrixSetLink.tileMatrixSet)
 			{
+				var tileMatrix: TileMatrix;
+				var tilingExtent: BBox;
+				var coverageRatio: Number;
+				var tileWidth: int;
+				var tileHeight: int;
+				
+				var tileMatrixPixelWidth: Number;
+				var tileMatrixPixelHeight: Number;
+				
+				var dist: Number;
 				
 				var viewBBoxPixelWidth: Number = viewBBox.width / width;
 				var viewBBoxPixelHeight: Number = viewBBox.height / height;
@@ -958,32 +969,91 @@ package com.iblsoft.flexiweather.ogc.tiling
 					var bestZoomMatrix: TileMatrix;
 					
 					var aspectRatioDistance: Number = Number.MAX_VALUE;
+					var bestSemicoveredTileSets: Array = [];
+					var bestSemicoveredTileSetRatio: Number = 0;
 					
-					for each (var tileMatrix: TileMatrix in tileMatrices)
+					for each (tileMatrix in tileMatrices)
 					{
-						var tileWidth: int = tileMatrix.tileWidth;
-						var tileHeight: int = tileMatrix.tileHeight;
-					
-						var tilingExtent: BBox = tileMatrix.extent;
-				
-						var tileMatrixPixelWidth: Number = tilingExtent.width / tileMatrix.matrixWidth / tileMatrix.tileWidth;
-						var tileMatrixPixelHeight: Number = tilingExtent.height / tileMatrix.matrixHeight / tileMatrix.tileHeight;
-						
-						var dist: Number = Point.distance(vBBoxPoint, new Point(tileMatrixPixelWidth, tileMatrixPixelHeight));
+						tilingExtent = tileMatrix.extent;
+						coverageRatio = tilingExtent.coverageRatio(viewBBox);
 						
 						trace("InteractiveLayerTiled findZoom ["+tileMatrix.matrixWidth+","+tileMatrix.matrixHeight+"] viewBBox ["+viewBBoxPixelWidth+","+viewBBoxPixelHeight+"]  tileMatrix ["+tileMatrixPixelWidth+","+tileMatrixPixelHeight+"]");
-						if (dist < aspectRatioDistance)
+						
+						if (coverageRatio == 1)
 						{
-							aspectRatioDistance = dist;
-							bestZoomMatrix = tileMatrix;
+							tileWidth = tileMatrix.tileWidth;
+							tileHeight = tileMatrix.tileHeight;
+
+							tileMatrixPixelWidth = tilingExtent.width / tileMatrix.matrixWidth / tileMatrix.tileWidth;
+							tileMatrixPixelHeight = tilingExtent.height / tileMatrix.matrixHeight / tileMatrix.tileHeight;
+							
+							dist = Point.distance(vBBoxPoint, new Point(tileMatrixPixelWidth, tileMatrixPixelHeight));
+							if (dist < aspectRatioDistance)
+							{
+								aspectRatioDistance = dist;
+								bestZoomMatrix = tileMatrix;
+							}
+						} else {
+							trace("not whole tileMatrix ["+tilingExtent+"] extent is inside viewBBox ["+viewBBox+"]");
+							if (coverageRatio > 0)
+							{
+								if (coverageRatio > bestSemicoveredTileSetRatio) {
+									bestSemicoveredTileSetRatio = coverageRatio;
+									bestSemicoveredTileSets = [tileMatrix];
+								} else if (coverageRatio == bestSemicoveredTileSetRatio) {
+									bestSemicoveredTileSets.push(tileMatrix);
+								}
+							}
 						}
-//						trace("InteractiveLayerTiled findZoom dist: " + dist + " aspectRatioDistance: " + aspectRatioDistance);
+						trace("InteractiveLayerTiled findZoom dist: " + dist + " aspectRatioDistance: " + aspectRatioDistance + " intersectedPercentage: " + coverageRatio);
 //						if (bestZoomMatrix)
 //							trace("\tBest zoom: " + bestZoomMatrix.id);
 					}
 				}
 			}
 
+			if (!bestZoomMatrix)
+			{
+				if (bestSemicoveredTileSets && bestSemicoveredTileSets.length > 0)
+				{
+					if (bestSemicoveredTileSets.length == 1)
+					{
+						bestZoomMatrix = bestSemicoveredTileSets[0] as TileMatrix;
+					} else {
+						
+						trace("There are more tile sets with bestSemicoveredTileSetRatio = " + bestSemicoveredTileSetRatio + ". Find best one now");
+						aspectRatioDistance = Number.MAX_VALUE;
+						
+						for each (tileMatrix in bestSemicoveredTileSets)
+						{
+							tilingExtent = tileMatrix.extent;
+							
+							tileWidth = tileMatrix.tileWidth;
+							tileHeight = tileMatrix.tileHeight;
+							
+							tileMatrixPixelWidth = tilingExtent.width / tileMatrix.matrixWidth / tileMatrix.tileWidth;
+							tileMatrixPixelHeight = tilingExtent.height / tileMatrix.matrixHeight / tileMatrix.tileHeight;
+							
+							dist = Point.distance(vBBoxPoint, new Point(tileMatrixPixelWidth, tileMatrixPixelHeight));
+							
+							trace("\tInteractiveLayerTiled findZoom ["+tileMatrix.matrixWidth+","+tileMatrix.matrixHeight+"] viewBBox ["+viewBBoxPixelWidth+","+viewBBoxPixelHeight+"]  tileMatrix ["+tileMatrixPixelWidth+","+tileMatrixPixelHeight+"]");
+							
+							if (dist < aspectRatioDistance)
+							{
+								aspectRatioDistance = dist;
+								bestZoomMatrix = tileMatrix;
+							}
+							trace("\tInteractiveLayerTiled findZoom dist: " + dist + " aspectRatioDistance: " + aspectRatioDistance + " intersectedPercentage: " + coverageRatio);
+							//						if (bestZoomMatrix)
+							//							trace("\tBest zoom: " + bestZoomMatrix.id);
+						}
+					}
+				} else {
+					trace("Didn find any tile set which covers at least something from viewBBox");
+				}
+			} else {
+			}
+			
 			if (bestZoomMatrix)
 			{
 				mi_zoom = bestZoomMatrix.id;
@@ -991,19 +1061,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 				m_tilingUtils.onAreaChanged(container.crs, bestZoomMatrix.extent);
 				trace(this + " Best zoom is: " + bestZoomMatrix.id);
 			}
-			
-//			var newZoomLevel2: Number = 1;
-//			if (tilingExtent)
-//			{
-//				var test: Number = (tilingExtent.width * width) / (viewBBox.width * 256);
-//				newZoomLevel2 = Math.log(test) * Math.LOG2E;
-//				//zoom level must be alway 0 or more
-//				newZoomLevel2 = Math.max(0, newZoomLevel2);
-//			}
-//			
-//			mi_zoom = Math.round(newZoomLevel2);
 		}
 
+		
 		public function checkZoom(): void
 		{
 			if (layerInitialized)
