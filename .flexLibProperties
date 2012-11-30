@@ -396,6 +396,16 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.GoogleMapLayerConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.GoogleMapsLayerOption"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.InteractiveLayerGoogleMaps"/>
+    <classEntry path="com.tests.FlexiWeatherMappingSuite"/>
+    <classEntry path="com.tests.TilingSuite"/>
+    <classEntry path="com.tests.WMTSSuite"/>
+    <classEntry path="com.tests.interactiveWidget.IWMapFunctions"/>
+    <classEntry path="com.tests.interactiveWidget.MapBBoxToProjectionExtentParts"/>
+    <classEntry path="com.tests.interactiveWidget.MapBBoxToViewReflections"/>
+    <classEntry path="com.tests.utils.TilingUtilsTest"/>
+    <classEntry path="com.tests.utils.URLUtilsTest"/>
+    <classEntry path="com.tests.wmts.InteractiveLayerTiledTest"/>
+    <classEntry path="com.utils.ObjectSorter"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
