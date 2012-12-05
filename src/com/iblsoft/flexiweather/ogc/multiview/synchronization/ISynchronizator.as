@@ -1,12 +1,20 @@
 package com.iblsoft.flexiweather.ogc.multiview.synchronization
 {
 	import com.iblsoft.flexiweather.ogc.ISynchronisedObject;
+	import com.iblsoft.flexiweather.ogc.multiview.data.MultiViewConfiguration;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	
+	import flash.events.IEventDispatcher;
 	
 	import mx.collections.ArrayCollection;
 
-	public interface ISynchronizator
+	public interface ISynchronizator extends IEventDispatcher
 	{
+		function canCreateMap(iw: InteractiveWidget): Boolean;
+		function createMap(iw: InteractiveWidget): void;
+		
+		function updateMapAction(iw: InteractiveWidget, position: int, configuration: MultiViewConfiguration): void;
+		
 		function synchronizeWidgets(synchronizeFromWidget: InteractiveWidget, widgetsForSynchronisation: ArrayCollection, preferredSelectedIndex: int = -1): void;
 		function get labelString():String;
 		function set viewData(data: Array): void;

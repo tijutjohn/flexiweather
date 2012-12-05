@@ -406,6 +406,7 @@
     <classEntry path="com.tests.utils.URLUtilsTest"/>
     <classEntry path="com.tests.wmts.InteractiveLayerTiledTest"/>
     <classEntry path="com.utils.ObjectSorter"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.InteractiveLayerMapLayersInitializationWatcher"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

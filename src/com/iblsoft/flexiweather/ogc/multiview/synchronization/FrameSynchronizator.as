@@ -2,14 +2,18 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 {
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
+	import com.iblsoft.flexiweather.ogc.multiview.data.MultiViewConfiguration;
 	import com.iblsoft.flexiweather.plugins.IConsole;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	
 	import flash.events.DataEvent;
+	import flash.events.EventDispatcher;
+	
 	import mx.collections.ArrayCollection;
 	import mx.utils.ArrayUtil;
 
-	public class FrameSynchronizator implements ISynchronizator
+	public class FrameSynchronizator extends EventDispatcher implements ISynchronizator
 	{
 		public static var debugConsole: IConsole;
 		private var _timeDifference: Number;
@@ -81,6 +85,21 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			return false
 		}
 
+		public function canCreateMap(iw: InteractiveWidget): Boolean
+		{
+			return false;
+		}
+		
+		public function createMap(iw: InteractiveWidget): void
+		{
+			
+		}
+		
+		public function updateMapAction(iw: InteractiveWidget, position: int, configuration: MultiViewConfiguration): void
+		{
+			
+		}
+		
 		public function synchronizeWidgets(synchronizeFromWidget: InteractiveWidget, widgetsForSynchronisation: ArrayCollection, preferredSelectedIndex: int = -1): void
 		{
 			debug("FrameSychronizator synchronizeWidgets", 'Info', 'FrameSychronizator');

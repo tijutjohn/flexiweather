@@ -2,14 +2,19 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 {
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
+	import com.iblsoft.flexiweather.ogc.multiview.data.MultiViewConfiguration;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	
+	import flash.events.EventDispatcher;
+	import flash.utils.Dictionary;
 	
 	import mx.collections.ArrayCollection;
 	import mx.utils.ArrayUtil;
 	
-	public class MapSynchronizator implements ISynchronizator
+	public class MapSynchronizator extends EventDispatcher implements ISynchronizator
 	{
-		private var timeDifference: Number = 3;
+
+		protected var _widgetsMapDictionary: Dictionary = new Dictionary();
 		
 		public function get willSynchronisePrimaryLayer(): Boolean
 		{
@@ -39,6 +44,43 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		{
 		}
 		
+		public function canCreateMap(iw: InteractiveWidget): Boolean
+		{
+			return false;
+		}
+		
+		public function createMap(iw: InteractiveWidget): void
+		{
+			
+		}
+		
+		public function updateMapAction(iw: InteractiveWidget, position: int, configuration: MultiViewConfiguration): void
+		{
+			if (configuration && configuration.synchronizators && configuration.synchronizators.length > 0)
+			{
+				if (configuration.customData && configuration.customData.hasOwnProperty('dataProvider'))
+				{
+					var dp: ArrayCollection = configuration.customData.dataProvider as ArrayCollection;
+					if (dp && dp.length > 0 && dp.length > position)
+					{
+						var synchronizator: ISynchronizator = configuration.synchronizators[0] as ISynchronizator;
+						if (synchronizator is MapSynchronizator)
+						{
+							var mapSynchronizator: MapSynchronizator = synchronizator as MapSynchronizator;
+							var obj: Object = dp.getItemAt(position) as Object;
+							if (obj && obj.hasOwnProperty('fullPath'))
+							{
+								var fullPath: String = (dp.getItemAt(position) as Object).fullPath;
+								_widgetsMapDictionary[iw] = {action: 'loadMap', path: fullPath}
+								return;
+							}
+						}
+					}
+				}
+			}
+			_widgetsMapDictionary[iw] = {action: 'copyMap'};
+		}
+			
 		public function synchronizeWidgets(synchronizeFromWidget:InteractiveWidget, widgetsForSynchronisation:ArrayCollection, preferredSelectedIndex: int = -1):void
 		{
 //			trace("\nFrameSychronizator synchronizeWidgets");

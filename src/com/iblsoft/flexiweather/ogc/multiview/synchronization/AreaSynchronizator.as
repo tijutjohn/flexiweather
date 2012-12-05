@@ -1,12 +1,16 @@
 package com.iblsoft.flexiweather.ogc.multiview.synchronization
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.ogc.multiview.data.MultiViewConfiguration;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	
+	import flash.events.EventDispatcher;
 	import flash.utils.clearTimeout;
 	import flash.utils.setTimeout;
+	
 	import mx.collections.ArrayCollection;
 
-	public class AreaSynchronizator implements ISynchronizator
+	public class AreaSynchronizator extends EventDispatcher implements ISynchronizator
 	{
 		private var _areaChangeTimeout: Number;
 
@@ -38,6 +42,21 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		{
 		}
 
+		public function canCreateMap(iw: InteractiveWidget): Boolean
+		{
+			return false;
+		}
+		
+		public function createMap(iw: InteractiveWidget): void
+		{
+			
+		}
+		
+		public function updateMapAction(iw: InteractiveWidget, position: int, configuration: MultiViewConfiguration): void
+		{
+			
+		}
+		
 		public function synchronizeWidgets(synchronizeFromWidget: InteractiveWidget, widgetsForSynchronisation: ArrayCollection, preferredSelectedIndex: int = -1): void
 		{
 			if (_areaChangeTimeout > 0)

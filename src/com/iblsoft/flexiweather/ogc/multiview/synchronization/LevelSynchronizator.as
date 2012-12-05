@@ -3,12 +3,15 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariableValue;
+	import com.iblsoft.flexiweather.ogc.multiview.data.MultiViewConfiguration;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	
+	import flash.events.EventDispatcher;
 	
 	import mx.collections.ArrayCollection;
 	import mx.utils.ArrayUtil;
 	
-	public class LevelSynchronizator implements ISynchronizator
+	public class LevelSynchronizator extends EventDispatcher implements ISynchronizator
 	{
 		public function get labelString(): String
 		{
@@ -43,6 +46,21 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		}
 		
 		private function getLevelValue(position: int): void
+		{
+			
+		}
+		
+		public function canCreateMap(iw: InteractiveWidget): Boolean
+		{
+			return false;
+		}
+		
+		public function createMap(iw: InteractiveWidget): void
+		{
+			
+		}
+		
+		public function updateMapAction(iw: InteractiveWidget, position: int, configuration: MultiViewConfiguration): void
 		{
 			
 		}
