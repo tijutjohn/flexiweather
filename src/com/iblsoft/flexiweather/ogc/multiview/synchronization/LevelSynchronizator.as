@@ -115,17 +115,24 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 						var widget: InteractiveWidget = widgetsForSynchronisation.getItemAt(i) as InteractiveWidget;
 //						if (widget.id != synchronizeFromWidget.id)
 //						{
-							var level: String = ((_levelValues[cnt] as Object).level as GlobalVariableValue).label;
-							if (level)
+							if (_levelValues.length > cnt && _levelValues[cnt])
 							{
-								if (widget.interactiveLayerMap.level != level)
+								var levelObject: Object = _levelValues[cnt] as Object;
+								if (levelObject && levelObject.hasOwnProperty('level') && levelObject.level is GlobalVariableValue)
 								{
-									trace("LevelSychronizator synchroniseWidWidgets syncWidget["+synchronizeFromWidgetPosition+"] setLevel: " + level + " for widget: " + widget.id + " i: " + i);
-									widget.interactiveLayerMap.setLevel(level);
-								} else {
-									trace("LevelSychronizator synchroniseWidWidgets level fro widget ["+cnt+"] is already set to " + level + " Do not do anything!");
+									var level: String = (levelObject.level as GlobalVariableValue).label;
+									if (level)
+									{
+										if (widget.interactiveLayerMap.level != level)
+										{
+											trace("LevelSychronizator synchroniseWidWidgets syncWidget["+synchronizeFromWidgetPosition+"] setLevel: " + level + " for widget: " + widget.id + " i: " + i);
+											widget.interactiveLayerMap.setLevel(level);
+										} else {
+											trace("LevelSychronizator synchroniseWidWidgets level fro widget ["+cnt+"] is already set to " + level + " Do not do anything!");
+										}
+										
+									}
 								}
-								
 							}
 //						}
 						cnt++;

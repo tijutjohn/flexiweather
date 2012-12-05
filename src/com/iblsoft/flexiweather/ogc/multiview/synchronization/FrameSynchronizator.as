@@ -33,7 +33,8 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 
 		public function set customData(data: Object): void
 		{
-			timeDifference = data.timeDifference;
+			if (data && data.hasOwnProperty("timeDifference"))
+				timeDifference = data.timeDifference;
 		}
 
 		public function get customData(): Object
