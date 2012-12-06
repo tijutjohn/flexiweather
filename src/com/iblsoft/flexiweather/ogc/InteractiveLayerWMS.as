@@ -272,7 +272,7 @@ package com.iblsoft.flexiweather.ogc
 
 		override public function get visible(): Boolean
 		{
-			trace(this + "  get visible = " + super.visible);
+//			trace(this + "  get visible = " + super.visible);
 			return super.visible;
 		}
 		
@@ -282,7 +282,7 @@ package com.iblsoft.flexiweather.ogc
 			{
 				super.visible = b_visible;
 				
-				trace(this + "  visible = " + b_visible + " / " + visible);
+//				trace(this + "  visible = " + b_visible + " / " + visible);
 			}
 		}
 		

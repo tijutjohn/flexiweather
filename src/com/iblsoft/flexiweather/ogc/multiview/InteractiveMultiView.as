@@ -295,7 +295,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 						ac.addItem(iw);
 						_widgetsCountToBeReady.addItem(iw);
 					}
-					if (cnt == newConfiguration.selectedIndex)
+					if (newConfiguration.customData && cnt == newConfiguration.customData.selectedIndex)
 					{
 						selectedInteractiveWidget = iw;
 					}
@@ -1256,7 +1256,10 @@ package com.iblsoft.flexiweather.ogc.multiview
 			if (!interactiveWidget)
 				interactiveWidget = selectedInteractiveWidget;
 			debug("synchronizeWidgets " + interactiveWidget.id, "Info", "InteractiveMultiView");
-			synchronizator.synchronizeWidgets(interactiveWidget, _interactiveWidgets.widgets, _configuration.selectedIndex);
+			var selectedIndex: int = -1;
+			if (_configuration && _configuration.customData && _configuration.customData.hasOwnProperty('selectedIndex'))
+				selectedIndex = _configuration.customData.selectedIndex;
+			synchronizator.synchronizeWidgets(interactiveWidget, _interactiveWidgets.widgets, selectedIndex);
 		}
 
 		private function registerSynchronizator(synchronizator: ISynchronizator): void

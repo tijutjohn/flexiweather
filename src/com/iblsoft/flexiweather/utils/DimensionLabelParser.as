@@ -13,9 +13,9 @@ package com.iblsoft.flexiweather.utils
 		{
 		}
 
-		public function parseLabel(label: String, layerComposer: InteractiveLayerMap): String
+		public function parseLabel(label: String, layerMap: InteractiveLayerMap): String
 		{
-			if (layerComposer && !layerComposer.visible)
+			if (layerMap && !layerMap.visible)
 				return 'No data';
 			if (label && label.indexOf('<') >= 0)
 			{
@@ -76,11 +76,14 @@ package com.iblsoft.flexiweather.utils
 						var useUTC: Boolean = true;
 						if (attrs['tz'])
 							useUTC = (attrs['tz'] as String).toLowerCase() == 'utc';
-						if (tagName.toLowerCase() == GlobalVariable.FRAME)
+						if (tagName.toLowerCase() == 'mapname')
+						{
+							replacedString = layerMap.mapName;
+						} else if (tagName.toLowerCase() == GlobalVariable.FRAME)
 						{
 							//run + forecast
-							var run: Object = getWMSDimensionValue(layerComposer, layerID, 'RUN');
-							var forecast: Object = getWMSDimensionValue(layerComposer, layerID, 'FORECAST');
+							var run: Object = getWMSDimensionValue(layerMap, layerID, 'RUN');
+							var forecast: Object = getWMSDimensionValue(layerMap, layerID, 'FORECAST');
 							if (run && forecast)
 							{
 								var runDate: Date = run.data as Date
@@ -92,7 +95,7 @@ package com.iblsoft.flexiweather.utils
 						}
 						else if (tagName.toLowerCase() == GlobalVariable.LEVEL)
 						{
-							var elevation: Object = getWMSDimensionValue(layerComposer, layerID, 'ELEVATION');
+							var elevation: Object = getWMSDimensionValue(layerMap, layerID, 'ELEVATION');
 							if (elevation)
 							{
 								var level: String = elevation.data as String;
@@ -100,7 +103,7 @@ package com.iblsoft.flexiweather.utils
 							}
 						}
 						else
-							replacedString = formatWMSDimensionValue(getWMSDimensionValue(layerComposer, layerID, tagName.toUpperCase()), format, useUTC);
+							replacedString = formatWMSDimensionValue(getWMSDimensionValue(layerMap, layerID, tagName.toUpperCase()), format, useUTC);
 						if (start > pos)
 						{
 							output += label.substring(pos, start);

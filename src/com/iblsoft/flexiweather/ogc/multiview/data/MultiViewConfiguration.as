@@ -5,11 +5,6 @@ package com.iblsoft.flexiweather.ogc.multiview.data
 		public var rows: int;
 		public var columns: int;
 		
-		/**
-		 * If selectesIndex == -1, there is no selection 
-		 */		
-		public var selectedIndex: int;
-		
 		public var synchronizators: Array;
 		
 		/**

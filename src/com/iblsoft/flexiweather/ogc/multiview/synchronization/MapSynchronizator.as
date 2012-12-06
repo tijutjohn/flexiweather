@@ -38,7 +38,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		
 		public function get labelString(): String
 		{
-			return "<frame format='%H:%M %d.%m.%Y' tz='UTC'/>";
+			return "<mapName/>";
 		}
 		public function MapSynchronizator()
 		{
@@ -83,59 +83,37 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			
 		public function synchronizeWidgets(synchronizeFromWidget:InteractiveWidget, widgetsForSynchronisation:ArrayCollection, preferredSelectedIndex: int = -1):void
 		{
-//			trace("\nFrameSychronizator synchronizeWidgets");
-			var primaryLayer: InteractiveLayerMSBase = synchronizeFromWidget.interactiveLayerMap.getPrimaryLayer();
-			if (primaryLayer)
-			{
-				var variables: Array = primaryLayer.getSynchronisedVariables();
-				var frames: Array = primaryLayer.getSynchronisedVariableValuesList(GlobalVariable.FRAME);
+			//there is no synchronizing needed for this syncrhonizator, all is done by AreaSynchronizator
 			
-				var synchronizeFromWidgetPosition: int = getWidgetPosition(synchronizeFromWidget, widgetsForSynchronisation);
-				
-				var currFrame: Date = primaryLayer.getSynchronisedVariableValue(GlobalVariable.FRAME) as Date;
-				var currFramePosition: int = getFramePosition(currFrame, frames);
-				
-//				trace("curr frame: " + currFrame.toTimeString() + " currFramePosition: " + currFramePosition);
-				if (currFramePosition > 0)
-					frames = frames.slice(Math.max(0, currFramePosition - synchronizeFromWidgetPosition), frames.length);
-				
-				
-				if (synchronizeFromWidgetPosition > -1)
+//			trace("\nFrameSychronizator synchronizeWidgets");
+			
+			var cnt: int = 0;
+			var total: int = widgetsForSynchronisation.length;
+			for (var i: int = 0; i < total; i++)
+			{
+				var widget: InteractiveWidget = widgetsForSynchronisation.getItemAt(i) as InteractiveWidget;
+				var widgetMapObject: Object = _widgetsMapDictionary[widget];
+				if (!widgetMapObject)
 				{
-					var cnt: int = 0;
-					var total: int = widgetsForSynchronisation.length;
-					for (var i: int = 0; i < total; i++)
-					{
-						var widget: InteractiveWidget = widgetsForSynchronisation.getItemAt(i) as InteractiveWidget;
-						if (widget.id != synchronizeFromWidget.id)
-						{
-							var framePos: int =  i- synchronizeFromWidgetPosition + currFramePosition;
-							if (framePos >= 0)
-							{
-								var frame: Date = getFrame(cnt, frames);
-								if (frame)
-								{
-//									trace("FrameSynchronizator synchroniseWidWidgets syncWidget["+synchronizeFromWidgetPosition+"] setFrame: " + frame.toTimeString() + " for widget: " + widget.id + " i: " + i + " currFrame: " + currFramePosition + " framePos: " + framePos);
-									widget.interactiveLayerMap.setFrame(frame);
-	//								var currPrimaryLayer: InteractiveLayerMSBase = widget.interactiveLayerMap.getPrimaryLayer();
-									
-	//								if (currPrimaryLayer)
-	//								{
-	//									currPrimaryLayer.se(GlobalVariable.FRAME, frame);
-	//								}
-								}
-							}
-						}
-						cnt++;
-					}
+					dataForWidgetUnvailable(widget);
+				} else {
+					dataForWidgetAvailable(widget);
 				}
 			}
+			
 		}
 		
-		private function noDataForWidget(widget: InteractiveWidget): void
-	 	{
-		 
-	 	}
+		private function dataForWidgetAvailable(widget: InteractiveWidget): void
+		{
+			trace("\t FrameSynchronizator dataForWidgetAvailable " + widget.id);
+			widget.enabled = true;
+		}
+		
+		private function dataForWidgetUnvailable(widget: InteractiveWidget): void
+		{
+			trace("\t FrameSynchronizator dataForWidgetUnvailable" + widget.id);
+			widget.enabled = false;
+		}
 		
 		private function getFrame(position: int, frames: Array): Date
 		{

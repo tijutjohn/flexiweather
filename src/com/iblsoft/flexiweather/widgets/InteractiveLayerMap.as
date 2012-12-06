@@ -68,6 +68,11 @@ package com.iblsoft.flexiweather.widgets
 		private var _periodicTimer: Timer;
 		private var _dateFormat: String;
 
+		/**
+		 * Name of map. 
+		 */		
+		public var mapName: String;
+		
 		public function get dateFormat(): String
 		{
 			return _dateFormat;
