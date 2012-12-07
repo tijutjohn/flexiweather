@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
+	import com.iblsoft.flexiweather.ogc.events.FeatureEvent;
 	import com.iblsoft.flexiweather.ogc.kml.features.KMLFeature;
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
@@ -115,14 +116,21 @@ package com.iblsoft.flexiweather.ogc
 		
 		protected function onFeatureAdded(feature: FeatureBase): void
 		{
+			feature.addEventListener(FeatureEvent.PRESENCE_IN_VIEW_BBOX_CHANGED, onFeaturePresenceInViewBBoxIsChanged);
 			invalidateDynamicPart();
 		}
 		
 		protected function onFeatureRemoved(feature: FeatureBase): void
 		{
+			feature.removeEventListener(FeatureEvent.PRESENCE_IN_VIEW_BBOX_CHANGED, onFeaturePresenceInViewBBoxIsChanged);
 			invalidateDynamicPart();
 		}
 		
+		private function onFeaturePresenceInViewBBoxIsChanged(event: FeatureEvent): void
+		{
+			var feature: FeatureBase = event.target as FeatureBase;
+			feature.visible = event.insideViewBBox;
+		}
 		public function removeAllFeatures(): void
 		{
 			var i_count: int = featuresContainer.numChildren;

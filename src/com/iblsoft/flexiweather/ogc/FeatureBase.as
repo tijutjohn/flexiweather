@@ -145,6 +145,14 @@ package com.iblsoft.flexiweather.ogc
 					for (var i: uint = 0; i < total; ++i)
 					{
 						var c: Coord = m_coordinates[i];
+						if (iw.coordInside(c))
+						{
+							//							trace("Coord is cinside");
+							featureIsInside = true;
+						} else {
+							
+							//							trace("Coord is not inside");
+						}
 						pt = iw.coordToPoint(c);
 						m_points.addItem(pt);
 					}
