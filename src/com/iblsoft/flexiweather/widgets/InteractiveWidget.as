@@ -490,15 +490,12 @@ package com.iblsoft.flexiweather.widgets
 
 		private var _oldViewBBox: BBox = new BBox(0,0,0,0);
 		
-        protected function onAreaChanged(b_finalChange: Boolean): void
-        {
-        	if (_oldViewBBox.equals(m_viewBBox))
+		protected function onAreaChanged(b_finalChange: Boolean): void
+		{
+			if (_oldViewBBox.equals(m_viewBBox))
 			{
 				if (!b_finalChange)
-				{
-//					trace("IWidget onAreaChanged oldView equals to new one: b_finalChange: " + b_finalChange);
 					return;
-				}
 			}
 			
             for(var i: int = 0; i < m_layerContainer.numElements; ++i) {
@@ -522,13 +519,10 @@ package com.iblsoft.flexiweather.widgets
 		}
         
 		/** Converts screen point (pixels) into Coord with current CRS. */ 
-        public function pointToCoord(x: Number, y: Number): Coord
-        {
-        	return new Coord(
-	        		ms_crs,
-	        		x * m_viewBBox.width / (width - 1) + m_viewBBox.xMin,
-	        		(height - 1 - y) * m_viewBBox.height / (height - 1) + m_viewBBox.yMin)
-        }
+		public function pointToCoord(x: Number, y: Number): Coord
+		{
+			return new Coord(ms_crs, x * m_viewBBox.width / (width - 1) + m_viewBBox.xMin, (height - 1 - y) * m_viewBBox.height / (height - 1) + m_viewBBox.yMin)
+		}
 
         public function coordInside(c: Coord): Boolean
 		{
@@ -538,41 +532,33 @@ package com.iblsoft.flexiweather.widgets
 			}
 			
 			return m_viewBBox.coordInside(c);
-			
 		}
-		/** Converts Coord into screen point (pixels) with current CRS. */ 
-        public function coordToPoint(c: Coord): Point
-        {
+
+		/** Converts Coord into screen point (pixels) with current CRS. */
+		public function coordToPoint(c: Coord): Point
+		{
 			var ptInOurCRS: Point;
-        	if(Projection.equalCRSs(c.crs, ms_crs)) {
+			if (Projection.equalCRSs(c.crs, ms_crs))
 				ptInOurCRS = c;
-        	}
-        	else {
-				if(m_crsProjection == null) {
-					trace("InteractiveWidget.coordToPoint(): Unknown IW projection for CRS=" + ms_crs);
+			else
+			{
+				if (m_crsProjection == null)
 					return null;
-				}
 				var sourceProjection: Projection = Projection.getByCRS(c.crs);
-				if(sourceProjection == null) {
-					trace("InteractiveWidget.coordToPoint(): Unknown projection for CRS=" + c.crs);
+				if (sourceProjection == null)
 					return null;
-				}
 				var laLoPtRad: Point = sourceProjection.prjXYToLaLoPt(c.x, c.y);
 				if (laLoPtRad)
 					ptInOurCRS = m_crsProjection.laLoPtToPrjPt(laLoPtRad);
-				else
-					trace("InteractiveWidget.coordToPoint(): laLoPtRad is null");
 			}
 			if (ptInOurCRS && m_viewBBox)
 			{
 				var pX: Number = (ptInOurCRS.x - m_viewBBox.xMin) * (width - 1) / m_viewBBox.width;
 				var pY: Number = height - 1 - (ptInOurCRS.y - m_viewBBox.yMin) * (height - 1) / m_viewBBox.height;
-				
-				var p: Point = new Point(pX, pY)
-				return p;
+				return new Point(pX, pY);
 			}
 			return null;
-        }
+		}
 		
 		/**
 		 * Splits coordinates of BBox (in the currently used CRS) into partial sub-BBoxes of the
@@ -582,19 +568,24 @@ package com.iblsoft.flexiweather.widgets
 		 * one to the left (east hemisphere) and on the righ (west hemisphere). If the view is zoomed
 		 * out enough even multiple reflection of the part can be seen.
 		 **/
-		public function mapBBoxToProjectionExtentParts(bbox: BBox): Array
+		public function mapBBoxToProjectionExtentParts(bbox: BBox, vBBox: BBox = null): Array
 		{
-			var a: Array = [];
-			if(m_crsProjection.wrapsHorizontally) {
-				var testExtentBBox: BBox = m_crsProjection.extentBBox;
+			if (!vBBox)
+				vBBox = m_crsProjection.extentBBox;
+			var aNew: Array = [];
+			if (m_crsProjection.wrapsHorizontally)
+			{
 				var f_crsExtentBBoxWidth: Number = m_crsProjection.extentBBox.width;
-				for(var i: int = 0; i < 10; i++) {
+				/*
+				var testExtentBBox: BBox = m_crsProjection.extentBBox;
+				for(var i: int = 0; i < 10; i++)
+				{
 					var i_delta: int = (i & 1 ? 1 : -1) * ((i + 1) >> 1); // generates sequence 0, 1, -1, 2, -2, ..., 5, -5
 //					trace("\t mapBBoxToViewParts delta: " + i_delta);
 					var reflectedBBox: BBox = bbox.translated(f_crsExtentBBoxWidth * i_delta, 0)
 					var intersectionOfReflectedBBoxWithCRSExtentBBox: BBox =
 							reflectedBBox.intersected(m_crsProjection.extentBBox);
-					
+
 //					trace("\t mapBBoxToViewParts ............reflectedBBox: " + reflectedBBox);
 //					trace("\t mapBBoxToViewParts inters. of reflected BBox: " + intersectionOfReflectedBBoxWithCRSExtentBBox);
 					if(intersectionOfReflectedBBoxWithCRSExtentBBox && intersectionOfReflectedBBoxWithCRSExtentBBox.width > 0 && intersectionOfReflectedBBoxWithCRSExtentBBox.height > 0) {
@@ -609,111 +600,196 @@ package com.iblsoft.flexiweather.widgets
 //							trace("InteractiveWidget.mapBBoxToViewParts(): reflected "
 //								+ i_delta + " part " + intersectionOfReflectedBBoxWithCRSExtentBBox.toString());
 							a.push(intersectionOfReflectedBBoxWithCRSExtentBBox);
-						} 
+						}
+					}
+				}
+				*/
+				//NEW SOLUTION
+				var extentBBoxWest: Number = vBBox.xMin;
+				var extentBBoxEast: Number = vBBox.xMax;
+				var bboxWest: Number = bbox.xMin;
+				var bboxEast: Number = bbox.xMax;
+				var bboxNorth: Number = Math.min(vBBox.yMax, bbox.yMax);
+				var bboxSouth: Number = Math.max(vBBox.yMin, bbox.yMin);
+				var partWidth: Number;
+				var bSearching: Boolean = true;
+				while (bSearching)
+				{
+					if ((bboxEast - bboxWest) > f_crsExtentBBoxWidth)
+					{
+						// BBox is wider than Extent
+						aNew.push(new BBox(extentBBoxWest, bboxSouth, extentBBoxEast, bboxNorth));
+						bSearching = false;
+					}
+					else if (bboxWest >= extentBBoxWest && bboxEast <= extentBBoxEast)
+					{
+						//BBox is narrower than Extent
+						aNew.push(new BBox(bboxWest, bboxSouth, bboxEast, bboxNorth));
+						bSearching = false;
+					}
+					else if (bboxWest < extentBBoxWest && bboxEast <= extentBBoxEast && bboxEast >= extentBBoxWest)
+					{
+						//BBox is partlt in Extent, west side is outside of Extent
+						aNew.push(new BBox(extentBBoxWest, bboxSouth, bboxEast, bboxNorth));
+						partWidth = extentBBoxWest - bboxWest;
+						aNew.push(new BBox(extentBBoxEast - partWidth, bboxSouth, extentBBoxEast, bboxNorth));
+						bSearching = false;
+					}
+					else if (bboxWest > extentBBoxWest && bboxWest <= extentBBoxEast && bboxEast > extentBBoxEast)
+					{
+						//BBox is partlt in Extent, east side is outside of Extent
+						aNew.push(new BBox(bboxWest, bboxSouth, extentBBoxEast, bboxNorth));
+						partWidth = bboxEast - extentBBoxEast;
+						aNew.push(new BBox(extentBBoxWest, bboxSouth, extentBBoxWest + partWidth, bboxNorth));
+						bSearching = false;
+					}
+					else
+					{
+						var delta: int;
+						if (bboxWest > extentBBoxEast)
+						{
+							//BBOx is outsite extent at right side
+							delta = Math.ceil((bboxWest - extentBBoxEast) / f_crsExtentBBoxWidth);
+							bboxWest -= delta * f_crsExtentBBoxWidth;
+							bboxEast -= delta * f_crsExtentBBoxWidth;
+						}
+						else
+						{
+							//BBOx is outsite extent at left side
+							delta = Math.ceil((extentBBoxWest - bboxEast) / f_crsExtentBBoxWidth);
+							bboxWest += delta * f_crsExtentBBoxWidth;
+							bboxEast += delta * f_crsExtentBBoxWidth;
+						}
 					}
 				}
 			}
-			if(a.length == 0) {
+			if (aNew.length == 0)
+			{
 				var primaryPartBBox: BBox = bbox;
 				primaryPartBBox = primaryPartBBox.intersected(m_crsProjection.extentBBox);
-				if(primaryPartBBox == null) // no intersection!
+				if (primaryPartBBox == null) // no intersection!
 					primaryPartBBox = bbox; // just keep the current view BBox and let's see what server returns
-				a.push(primaryPartBBox);
-//				trace("InteractiveWidget.mapBBoxToViewParts(): primary part only " + primaryPartBBox.toString());
+				aNew.push(primaryPartBBox);
 			}
-			return a;
-		}
-
-		/**
-		 * Returns array of object pairs {point: reflected point, reflection: reflection delta} 
-		 * Input point is x,y coordinate and not pixel position.
-		 * @param point
-		 * @param startDelta if you want generate reflections delta from different delta than 0, set startDelta to you start delta. E.g if startDelta = 5, generated deltas will be 5,6,-6,7,-7...
-		 * @return 
-		 * 
-		 */		
-		public function mapCoordInCRSToViewReflections(point: Point,  startDelta: int = 0): Array
-		{
-			if (!point)
-				return [];
-			
-			if(m_crsProjection.wrapsHorizontally) {
-				var f_crsExtentBBoxWidth: Number = m_crsProjection.extentBBox.width;
-				
-				var a: Array = [];
-				for(var i: int = 0; i < 5; i++) {
-					var i_delta: int = startDelta + (i & 1 ? 1 : -1) * ((i + 1) >> 1); // generates sequence 0, 1, -1, 2, -2, ..., 5, -5
-					var p: Point = new Point(point.x + f_crsExtentBBoxWidth * i_delta, point.y)
-					a.push({point: p, reflection: i_delta});				
-				}
-				return a;
-			}
-			
-			return [{point: point, reflection: 0}];
-		}
-		
-		/**
-		 * Similar function to function mapCoordInCRSToViewReflections, but you can set deltas manually
-		 * 
-		 * @param point
-		 * @param deltas
-		 * @return 
-		 * 
-		 */		
-		public function mapCoordInCRSToViewReflectionsForDeltas(point: Point,  deltas: Array): Array
-		{
-			if (!point)
-				return [];
-			
-			if(m_crsProjection.wrapsHorizontally) {
-				var f_crsExtentBBoxWidth: Number = m_crsProjection.extentBBox.width;
-				
-				var a: Array = [];
-				for each(var i_delta: int in deltas) {
-					var p: Point = new Point(point.x + f_crsExtentBBoxWidth * i_delta, point.y)
-					a.push({point: p, reflection: i_delta});				
-				}
-				return a;
-			}
-			
-			return [{point: point, reflection: 0}];
+			return aNew;
 		}
 
 		/**
 		 * Converts coordinates of BBox (in the currently used CRS) into its visual reflections
 		 * if the IW's View BBox is bigger than extent BBox of the Projection.
 		 * Then at certain zoom-out distance the same BBox may appear multiple times withing the View.
-		 * Visualy this looks like multiple reflection of the same BBox in the View.   
+		 * Visualy this looks like multiple reflection of the same BBox in the View.
 		 **/
-		public function mapBBoxToViewReflections(bbox: BBox, returnIntersectedBBox: Boolean = false): Array
+		public function mapBBoxToViewReflections(bbox: BBox, returnIntersectedBBox: Boolean = false, vBBox: BBox = null): Array
 		{
 			var f_crsExtentBBoxWidth: Number = m_crsProjection.extentBBox.width;
 			var intersectedBBox: BBox;
-			
-			if(!m_crsProjection.wrapsHorizontally) {
-				//trace("InteractiveWidget.mapBBoxToViewReflections(): mapping to primary part "
-				//		+ bbox.toString());
+			if (!vBBox)
+				vBBox = m_viewBBox;
+			if (!m_crsProjection.wrapsHorizontally)
+			{
 				if (!returnIntersectedBBox)
 					return [bbox];
-				else {
-					intersectedBBox = bbox.intersected(m_viewBBox);
-					if(intersectedBBox == null)
+				else
+				{
+					intersectedBBox = bbox.intersected(vBBox);
+					if (intersectedBBox == null)
 						return [];
 					else
 						return [intersectedBBox];
 				}
 			}
-			else {
+			else
+			{
 				var a: Array = [];
-				for(var i: int = 0; i < 11; i++) {
+				//NEW SOLUTION
+				var aNew: Array = [];
+				var viewBBoxWest: Number = vBBox.xMin;
+				var viewBBoxEast: Number = vBBox.xMax;
+				var bboxWest: Number = bbox.xMin;
+				var bboxEast: Number = bbox.xMax;
+				var bboxNorth: Number = bbox.yMax;
+				var bboxSouth: Number = bbox.yMin;
+				if (returnIntersectedBBox)
+				{
+					bboxNorth = Math.min(vBBox.yMax, bbox.yMax);
+					bboxSouth = Math.max(vBBox.yMin, bbox.yMin);
+				}
+				var westPoint: Point = new Point(bboxWest, 0);
+				var eastPoint: Point = new Point(bboxEast, 0);
+				var westReflections: Array = mapCoordInCRSToViewReflections(westPoint, vBBox);
+				var eastReflections: Array = mapCoordInCRSToViewReflections(eastPoint, vBBox);
+				var p: Number = 0;
+				var px: Number;
+				var nextX: Number;
+				var currWest: Number = viewBBoxWest;
+				var lastEast: Number = viewBBoxEast;
+				var reflectionObject: Object;
+				if (westReflections && westReflections.length > 0)
+				{
+					p = westReflections[0].point.x;
+					if (p != bboxWest)
+					{
+						bboxWest = p;
+						bboxEast = bboxWest + bbox.width;
+					}
+				}
+				if (eastReflections && eastReflections.length > 0)
+				{
+					p = eastReflections[0].point.x;
+					if (p != bboxEast)
+					{
+						bboxEast = p;
+						bboxWest = bboxEast - bbox.width;
+					}
+				}
+				var bSearching: Boolean = true;
+				while (bSearching)
+				{
+					if ((bboxEast - bboxWest) > f_crsExtentBBoxWidth)
+					{
+						// BBox is wider than Extent
+						if (returnIntersectedBBox)
+							aNew.push(new BBox(Math.max(viewBBoxWest, bboxWest), bboxSouth, Math.min(viewBBoxEast, bboxEast), bboxNorth));
+						else
+							aNew.push(new BBox(bboxWest, bboxSouth, bboxEast, bboxNorth));
+					}
+					else if (bboxWest >= viewBBoxWest && bboxEast <= viewBBoxEast)
+					{
+						// BBox is narrower than Extent
+						aNew.push(new BBox(bboxWest, bboxSouth, bboxEast, bboxNorth));
+					}
+					else if (bboxWest < viewBBoxWest && bboxEast <= viewBBoxEast && bboxEast >= viewBBoxWest)
+					{
+						// BBox is partly in Extent, west side is outside of Extent
+						if (returnIntersectedBBox)
+							aNew.push(new BBox(viewBBoxWest, bboxSouth, bboxEast, bboxNorth));
+						else
+							aNew.push(new BBox(bboxWest, bboxSouth, bboxEast, bboxNorth));
+					}
+					else if (bboxWest > viewBBoxWest && bboxWest <= viewBBoxEast && bboxEast > viewBBoxEast)
+					{
+						//BBox is partlt in Extent, east side is outside of Extent
+						if (returnIntersectedBBox)
+							aNew.push(new BBox(bboxWest, bboxSouth, viewBBoxEast, bboxNorth));
+						else
+							aNew.push(new BBox(bboxWest, bboxSouth, bboxEast, bboxNorth));
+					}
+					bboxWest += f_crsExtentBBoxWidth;
+					bboxEast += f_crsExtentBBoxWidth;
+					if (bboxWest > viewBBoxEast)
+						bSearching = false;
+				}
+				//OLD SOLUTION
+				for (var i: int = 0; i < 11; i++)
+				{
 					var i_delta: int = (i & 1 ? 1 : -1) * ((i + 1) >> 1); // generates sequence 0, 1, -1, 2, -2, ..., 5, -5
 					var reflectedBBox: BBox = bbox.translated(f_crsExtentBBoxWidth * i_delta, 0)
-						
-					intersectedBBox = reflectedBBox.intersected(m_viewBBox); 
-					if(intersectedBBox) {
-//						trace("InteractiveWidget.mapBBoxToViewReflections(): mapping to reflection "
-//							+ i_delta + " into " + reflectedBBox.toString());
-						
+					intersectedBBox = reflectedBBox.intersected(vBBox);
+					if (intersectedBBox && intersectedBBox.surface == 0)
+						intersectedBBox = null;
+					if (intersectedBBox)
+					{
 						if (!returnIntersectedBBox)
 							a.push(reflectedBBox);
 						else
@@ -722,8 +798,94 @@ package com.iblsoft.flexiweather.widgets
 				}
 				return a;
 			}
-		}			
+		}
 
+		public function mapCoordToViewReflections(coord: Coord, vBBox: BBox = null): Array
+		{
+			if (coord.crs != crs)
+				coord = coord.convertToProjection(m_crsProjection);
+			return mapCoordInCRSToViewReflections(new Point(coord.x, coord.y), vBBox);
+		}
+
+		/**
+		 * Returns array of object pairs {point: reflected point, reflection: reflection delta}
+		 * Input point is x,y coordinate and not pixel position.
+		 * @param point Point which will be reflected
+		 * @param vBBox if you want to return reflections for different view BBox than InteractiveWidget.viewBBox
+		 * @return
+		 *
+		 */
+		public function mapCoordInCRSToViewReflections(point: Point, vBBox: BBox = null): Array
+		{
+			if (!point)
+				return [];
+			if (m_crsProjection.wrapsHorizontally)
+			{
+				var extentBox: BBox = m_crsProjection.extentBBox;
+				var f_crsExtentBBoxWidth: Number = m_crsProjection.extentBBox.width;
+				if (!vBBox)
+					vBBox = m_viewBBox;
+//				var viewBBoxWest: Number = m_viewBBox.xMin;
+//				var viewBBoxEast: Number = m_viewBBox.xMax;
+				var viewBBoxWest: Number = vBBox.xMin;
+				var viewBBoxEast: Number = vBBox.xMax;
+				var extentBBoxWest: Number = extentBox.xMin;
+				var extentBBoxEast: Number = extentBox.xMax;
+				var px: Number = point.x;
+				var py: Number = point.y;
+				var refCount: int;
+				var reflectionX: Number;
+				if (px >= viewBBoxWest)
+				{
+					refCount = int((px - viewBBoxWest) / f_crsExtentBBoxWidth);
+					reflectionX = px - refCount * f_crsExtentBBoxWidth;
+				}
+				else
+				{
+					refCount = Math.ceil(Math.abs((px - viewBBoxWest) / f_crsExtentBBoxWidth));
+					reflectionX = px + refCount * f_crsExtentBBoxWidth;
+				}
+				var i_delta: int = int((reflectionX - extentBBoxWest) / f_crsExtentBBoxWidth);
+				var a: Array = [];
+				while (reflectionX <= viewBBoxEast && reflectionX >= viewBBoxWest)
+				{
+					var p: Point = new Point(reflectionX, py);
+					a.push({point: p, reflection: i_delta});
+					reflectionX += f_crsExtentBBoxWidth;
+					i_delta++;
+				}
+				return a;
+			}
+			return [{point: point, reflection: 0}];
+		}
+
+		/**
+		 * Similar function to function mapCoordInCRSToViewReflections, but you can set deltas manually
+		 *
+		 * @param point
+		 * @param deltas
+		 * @return
+		 *
+		 */
+		public function mapCoordInCRSToViewReflectionsForDeltas(point: Point, deltas: Array): Array
+		{
+			if (!point)
+				return [];
+			if (m_crsProjection.wrapsHorizontally)
+			{
+				var f_crsExtentBBoxWidth: Number = m_crsProjection.extentBBox.width;
+				var reflections: Array = mapCoordInCRSToViewReflections(point, m_crsProjection.extentBBox);
+				var pX0: Number = reflections[0].point.x;
+				var a: Array = [];
+				for each (var i_delta: int in deltas)
+				{
+					var p: Point = new Point(pX0 + f_crsExtentBBoxWidth * i_delta, point.y)
+					a.push({point: p, reflection: i_delta});
+				}
+				return a;
+			}
+			return [{point: point, reflection: 0}];
+		}
         // Mouse events handling
 
         protected function onMouseDown(event: MouseEvent): void
@@ -875,9 +1037,11 @@ package com.iblsoft.flexiweather.widgets
 				dispatchEvent(new Event("crsChanged"));
 			}
 		}
-		
+
 		public function getCRSProjection(): Projection
-		{ return m_crsProjection; }
+		{
+			return m_crsProjection;
+		}
 		
 		public function setViewBBoxRaw(xmin: Number, ymin: Number, xmax: Number, ymax: Number, b_finalChange: Boolean): void
 		{
@@ -1229,88 +1393,54 @@ package com.iblsoft.flexiweather.widgets
 		 * @return 
 		 * 
 		 */		
-		public function drawPolyline(g: ICurveRenderer,  coords: Array, b_closed: Boolean = false): Array
+public function drawPolyline(g: ICurveRenderer, coords: Array, b_closed: Boolean = false): Array
 		{
 			var features: Array = m_featureSplitter.splitCoordPolyLineToArrayOfPointPolyLines(coords, b_closed);
-			
-//			trace("\n\n IW drawPolyline features: " + features.length);
 			var p: Point;
-			
 			var oldPoint: Point;
-			
 			for each (var mPoints: Array in features)
 			{
 				var total: int = mPoints.length;
 				if (total > 0)
 				{
 					p = mPoints[0] as Point;
-
 					oldPoint = p;
-					
-//					trace("\t drawPolyline start ["+p.x+","+p.y+"]");
 					g.start(p.x, p.y);
 					g.moveTo(p.x, p.y);
-					
-					for (var i: int = 1; i < mPoints.length; i++){
+					for (var i: int = 1; i < mPoints.length; i++)
+					{
 						p = mPoints[i] as Point;
-						
 						if (!lineIsOutside(p, oldPoint))
-						{
 							g.lineTo(p.x, p.y);
-//						} else {
-//							trace("IW drawPolyline do not draw line, it's outside, p1: " + p + " p2: " + oldPoint);
-						}
-						
-//						trace("\t drawPolyline lineTo ["+p.x+","+p.y+"]");
-						
 						oldPoint = p;
 					}
-					
 					g.finish(p.x, p.y);
-//					trace("\t drawPolyline finish ["+p.x+","+p.y+"]");
 				}
 			}
-			
-//			trace("END OF drawPolyline\n\n");
-			
 			return features;
 		}
-		
-		public function drawHermitSpline(g: ICurveRenderer, 
-										 _coords: Array, 
-										 _closed: Boolean = false, 
-										 _drawHiddenHitMask: Boolean = false,  // PREPARED PARAMETER FOR DRAWING HIT MASK AREA
-										 _step: Number = 0.01): Array
+
+		public function drawHermitSpline(g: ICurveRenderer, _coords: Array, _closed: Boolean = false, _drawHiddenHitMask: Boolean = false, // PREPARED PARAMETER FOR DRAWING HIT MASK AREA
+				_step: Number = 0.01): Array
 		{
 			var features: Array = m_featureSplitter.splitCoordHermitSplineToArrayOfPointPolyLines(_coords, _closed);
-			
-			//			trace("\n\n IW drawPolyline features: " + features.length);
 			var p: Point;
-			
 			for each (var mPoints: Array in features)
 			{
 				var total: int = mPoints.length;
 				if (total > 0)
 				{
 					p = mPoints[0] as Point;
-					
-					//					trace("\t drawPolyline start ["+p.x+","+p.y+"]");
 					g.start(p.x, p.y);
 					g.moveTo(p.x, p.y);
-					
-					for (var i: int = 1; i < mPoints.length; i++){
+					for (var i: int = 1; i < mPoints.length; i++)
+					{
 						p = mPoints[i] as Point;
 						g.lineTo(p.x, p.y);
-						//						trace("\t drawPolyline lineTo ["+p.x+","+p.y+"]");
 					}
-					
 					g.finish(p.x, p.y);
-					//					trace("\t drawPolyline finish ["+p.x+","+p.y+"]");
 				}
 			}
-			
-			//			trace("END OF drawPolyline\n\n");
-			
 			return features;
 		}
 		
