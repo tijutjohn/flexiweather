@@ -23,7 +23,7 @@ package com.iblsoft.flexiweather.ogc
 		private var ma_queryFeatures: ArrayCollection = new ArrayCollection();
 		private var md_queryParametersGET: Array = new Array();
 		
-		private var m_wfsLoader: WFSLoader;
+		protected var m_wfsLoader: WFSLoader;
 		
 		public function InteractiveLayerWFS(
 				container: InteractiveWidget,
