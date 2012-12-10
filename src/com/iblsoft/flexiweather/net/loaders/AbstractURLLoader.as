@@ -629,6 +629,9 @@ package com.iblsoft.flexiweather.net.loaders
 			var urlRequest: URLRequest = disconnectURLLoader(urlLoader);
 			if (urlRequest == null)
 				return;
+			
+			debug(this + " onDataComplete: " + urlRequest.url);
+			
 			if (urlLoader.associatedData && urlLoader.associatedData.hasOwnProperty("uniURLLoaderBasicAuthInfo") && urlLoader.associatedData.uniURLLoaderBasicAuthInfo == 'first message')
 			{
 				var domain: String = getDomain(urlRequest);
@@ -737,7 +740,7 @@ package com.iblsoft.flexiweather.net.loaders
 
 		protected function dispatchResult(result: Object, urlRequest: URLRequest, associatedData: Object): void
 		{
-			var e: UniURLLoaderEvent = new UniURLLoaderEvent(UniURLLoaderEvent.DATA_LOADED, result, urlRequest, associatedData, false, true);
+			var e: UniURLLoaderEvent = new UniURLLoaderEvent(UniURLLoaderEvent.DATA_LOADED, result, urlRequest, associatedData, true, true);
 			dispatchEvent(e);
 		}
 
@@ -792,6 +795,7 @@ package com.iblsoft.flexiweather.net.loaders
 		{
 			if (debugConsole)
 				debugConsole.print(txt, 'Info', 'UniURLLoader');
+			trace(this + ": " + txt);
 		}
 
 		override public function toString(): String
