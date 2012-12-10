@@ -1,16 +1,19 @@
 package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
+	import com.iblsoft.flexiweather.ogc.events.FeatureEvent;
 	import com.iblsoft.flexiweather.ogc.kml.features.KMLFeature;
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerPan;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	
 	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
 	import flash.display.Sprite;
 	import flash.display.Stage;
 	import flash.events.Event;
+	
 	import mx.collections.ArrayCollection;
 
 	public class InteractiveLayerFeatureBase extends InteractiveDataLayer
