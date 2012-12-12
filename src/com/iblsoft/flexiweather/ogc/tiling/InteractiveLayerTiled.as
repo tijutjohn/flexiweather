@@ -18,6 +18,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import com.iblsoft.flexiweather.ogc.preload.IPreloadableLayer;
 	import com.iblsoft.flexiweather.plugins.IConsole;
 	import com.iblsoft.flexiweather.proj.Coord;
+	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
@@ -955,10 +956,37 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			return mi_zoom;
 		}
-
+		
+		public function normalizedBBoxToExtent(bbox: BBox, extentBBox: BBox):  BBox
+		{
+			var f_crsExtentBBoxWidth: Number = extentBBox.width;
+			//				var viewBBoxWest: Number = m_viewBBox.xMin;
+			//				var viewBBoxEast: Number = m_viewBBox.xMax;
+			var viewBBoxWest: Number = bbox.xMin;
+			var viewBBoxEast: Number = bbox.xMax;
+			var extentBBoxWest: Number = extentBBox.xMin;
+			var extentBBoxEast: Number = extentBBox.xMax;
+			
+			var refCount: int = 0;
+			var reflectionX: Number;
+			
+			var newBBox: BBox;
+			if (viewBBoxWest > extentBBoxEast)
+			{
+				refCount = Math.ceil(viewBBoxWest / f_crsExtentBBoxWidth);
+			} else if (viewBBoxEast < extentBBoxWest) {
+				refCount = Math.ceil(viewBBoxWest / f_crsExtentBBoxWidth);
+			}
+			newBBox = new BBox(viewBBoxWest - refCount * f_crsExtentBBoxWidth, bbox.yMin, viewBBoxEast - refCount * f_crsExtentBBoxWidth, bbox.yMax);
+			return newBBox;
+		}
+		
 		protected function findZoom(): void
 		{
 			var tileMatrixSetLink: TileMatrixSetLink = getTileMatrixSetLinkForCRS(container.crs);
+			
+			var projection: Projection = Projection.getByCRS(container.crs);
+			var crsExtent: BBox = projection.extentBBox;
 			
 			//TODO how to get tiling extent from TileMatrixSetLink
 			
@@ -966,6 +994,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 //			m_tilingUtils.onAreaChanged(container.crs, tilingExtent);
 			var viewBBox: BBox = container.getViewBBox();
 //			
+			viewBBox = normalizedBBoxToExtent(viewBBox, crsExtent);
+			var parts: Array = container.mapBBoxToProjectionExtentParts(viewBBox);
+			
 			if (tileMatrixSetLink && tileMatrixSetLink.tileMatrixSet)
 			{
 				var tileMatrix: TileMatrix;
@@ -996,7 +1027,13 @@ package com.iblsoft.flexiweather.ogc.tiling
 					for each (tileMatrix in tileMatrices)
 					{
 						tilingExtent = tileMatrix.extent;
-						coverageRatio = tilingExtent.coverageRatio(viewBBox);
+						
+						var tempCoverageRation: Number = 0;
+						for each (var vBBox: BBox in parts)
+						{
+							tempCoverageRation += tilingExtent.coverageRatio(vBBox);
+						}
+						coverageRatio = tempCoverageRation / parts.length
 						
 						
 						if (coverageRatio == 1)

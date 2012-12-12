@@ -158,23 +158,23 @@ package com.iblsoft.flexiweather.ogc
 		
 		/**
 		 * Return coverage ratio of area intersection between 2 BBoxes. If whole "other" BBox is inside this BBox it returns 1  
-		 * @param other
+		 * @param other - other BBox must be normalized (moved to extent BBox of its projection)
 		 * @return 
 		 * 
 		 */		
 		public function coverageRatio(other: BBox): Number
 		{
 			var intersectedBBox: BBox = intersected(other);
-			
 			var otherBBoxArea: Number = other.width * other.height;
 			var intersectedBBoxArea: Number = intersectedBBox.width * intersectedBBox.height;
 			
 			var percentage: Number = intersectedBBoxArea / otherBBoxArea;
 			
-			trace(this + " intersectionPercentage from ["+other+"] => " + percentage);
+//			trace(this + " intersectionPercentage from ["+other+"] => " + percentage);
 			return percentage;
 			
 		}
+		
 
 		public function get isEmpty(): Boolean
 		{

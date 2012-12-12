@@ -242,7 +242,7 @@ package com.iblsoft.flexiweather.net.loaders
 						var varValue: String = valArr.join('=');
 						if (urlRequest.hasOwnProperty(varName))
 						{
-							trace("variable already exists in request variables ["+varName+"]: oldValue " + urlRequest[varName] + " newValue: " + varValue);
+							debug("variable already exists in request variables ["+varName+"]: oldValue " + urlRequest[varName] + " newValue: " + varValue);
 						} else {
 							urlRequest.data[varName] = varValue;
 						}
@@ -795,7 +795,6 @@ package com.iblsoft.flexiweather.net.loaders
 		{
 			if (debugConsole)
 				debugConsole.print(txt, 'Info', 'UniURLLoader');
-			trace(this + ": " + txt);
 		}
 
 		override public function toString(): String
