@@ -156,13 +156,27 @@ package com.iblsoft.flexiweather.widgets
 			super(container);
 		}
 
-		override protected function initializeLayer(): void
+		override protected function initializeLayerAfterAddToStage(): void
 		{
-			super.initializeLayer();
+			super.initializeLayerAfterAddToStage();
+			
+			initializeLayerProperties();
+		}
+		
+		private function initializeLayerProperties(): void
+		{
 			setStatus(STATE_EMPTY);
+			
+			m_loader = new WMSImageLoader();
+			
 			m_loader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onDataLoaded);
 			m_loader.addEventListener(ProgressEvent.PROGRESS, onDataProgress);
 			m_loader.addEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onDataLoadFailed);
+		}
+		
+		override protected function initializeLayer(): void
+		{
+			super.initializeLayer();
 		}
 
 		override public function destroy(): void

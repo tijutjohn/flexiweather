@@ -120,9 +120,20 @@ package com.iblsoft.flexiweather.ogc
 			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
 		}
 
+		override protected function initializeLayerAfterAddToStage(): void
+		{
+			super.initializeLayerAfterAddToStage();
+			
+			initializeLayerProperties();
+		}
+		
 		override protected function initializeLayer(): void
 		{
 			super.initializeLayer();
+		}
+		
+		private function initializeLayerProperties(): void
+		{
 			ma_preloadingWMSViewProperties = [];
 			ma_preloadedWMSViewProperties = [];
 			m_currentWMSViewProperties = new WMSViewProperties();

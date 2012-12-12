@@ -37,13 +37,20 @@ package com.iblsoft.flexiweather.ogc
 	[Event(name = "wmsStyleChanged", type = "fcom.iblsoft.flexiweather.events.InteractiveLayerWMSEvent")]
 	public class InteractiveLayerWMS extends InteractiveLayerMSBase implements ISynchronisedObject, Serializable, IConfigurableLayer, ICachedLayer
 	{
-		protected var m_autoRefreshTimer: Timer = new Timer(5000);
+		protected var m_autoRefreshTimer: Timer;
 
 		public function InteractiveLayerWMS(container: InteractiveWidget, cfg: WMSLayerConfiguration)
 		{
 			super(container, cfg);
 		}
 
+		override protected function initializeLayerAfterAddToStage(): void
+		{
+			super.initializeLayerAfterAddToStage();
+			
+			initializeLayerProperties();
+		}
+		
 		/**
 		 * Override this function and add functionality, which needs to be done when layer is created
 		 *
@@ -51,6 +58,11 @@ package com.iblsoft.flexiweather.ogc
 		override protected function initializeLayer(): void
 		{
 			super.initializeLayer();
+		}
+		
+		private function initializeLayerProperties(): void
+		{
+			m_autoRefreshTimer = new Timer(5000); 
 			m_autoRefreshTimer.addEventListener(TimerEvent.TIMER_COMPLETE, autoRefreshTimerCompleted);
 			m_autoRefreshTimer.repeatCount = 1;
 			if (container.wmsCacheManager)

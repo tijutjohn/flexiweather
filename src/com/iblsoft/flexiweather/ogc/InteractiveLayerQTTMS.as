@@ -158,9 +158,20 @@ package com.iblsoft.flexiweather.ogc
 //			return null;
 //		}
 		
+		override protected function initializeLayerAfterAddToStage(): void
+		{
+			super.initializeLayerAfterAddToStage();
+			
+			initializeLayerProperties();
+		}
+		
 		override protected function initializeLayer(): void
 		{
 			super.initializeLayer();
+		}
+		
+		private function initializeLayerProperties(): void
+		{
 //			m_tilingUtils = new TilingUtils();
 //			m_tilingUtils.minimumZoom = 0;
 //			m_tilingUtils.maximumZoom = 10;

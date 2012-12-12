@@ -86,9 +86,20 @@ package com.iblsoft.flexiweather.ogc.tiling
 			super(container, cfg);
 		}
 
+		override protected function initializeLayerAfterAddToStage(): void
+		{
+			super.initializeLayerAfterAddToStage();
+			
+			initializeLayerProperties();
+		}
+		
 		override protected function initializeLayer(): void
 		{
 			super.initializeLayer();
+		}
+		
+		private function initializeLayerProperties(): void
+		{
 			var tiledLayerConfig: QTTMSLayerConfiguration = new QTTMSLayerConfiguration();
 			//			m_tiledLayer = new InteractiveLayerQTTMS(container, tiledLayerConfig,
 			//					'', null, null, cfg.minimumZoomLevel, cfg.maximumZoomLevel, cfg.tileSize);

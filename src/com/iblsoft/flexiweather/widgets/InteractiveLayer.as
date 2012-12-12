@@ -6,6 +6,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.proj.Coord;
 	
 	import flash.display.Graphics;
+	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.geom.Rectangle;
 	
@@ -139,8 +140,16 @@ package com.iblsoft.flexiweather.widgets
 			uid = 'interactiveLayer' + InteractiveLayer.ID;
 			this.container = container;
 			addEventListener(FlexEvent.CREATION_COMPLETE, onLayerCreationComplete);
+			addEventListener(Event.ADDED_TO_STAGE, onLayerAddedToStage);
 		}
 
+		private function onLayerAddedToStage(event: Event): void
+		{
+			removeEventListener(Event.ADDED_TO_STAGE, onLayerAddedToStage);
+			trace("onLayerAddedToStage");
+			initializeLayerAfterAddToStage();
+		}
+		
 		private function onLayerCreationComplete(event: FlexEvent): void
 		{
 			removeEventListener(FlexEvent.CREATION_COMPLETE, onLayerCreationComplete);
@@ -148,13 +157,21 @@ package com.iblsoft.flexiweather.widgets
 		}
 
 		/**
+		 * Override this function and add functionality, which needs to be done when layer is added to display list
+		 *
+		 */
+		protected function initializeLayerAfterAddToStage(): void
+		{
+			_layerInitialized = true;
+			callLater(notifyLayerInitialized);
+		}
+		
+		/**
 		 * Override this function and add functionality, which needs to be done when layer is created
 		 *
 		 */
 		protected function initializeLayer(): void
 		{
-			_layerInitialized = true;
-			callLater(notifyLayerInitialized);
 		}
 
 		protected function notifyLayerInitialized(): void
@@ -216,7 +233,10 @@ package com.iblsoft.flexiweather.widgets
 		 **/
 		public function destroy(): void
 		{
+			_layerInitialized = false;
 			m_layerWasDestroyed = true;
+			
+			addEventListener(Event.ADDED_TO_STAGE, onLayerAddedToStage, false, 0, true);
 		}
 
 		public function isDynamicPartInvalid(): Boolean
