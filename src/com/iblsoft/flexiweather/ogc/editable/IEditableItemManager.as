@@ -1,5 +1,7 @@
 package com.iblsoft.flexiweather.ogc.editable
 {
+	import flash.events.MouseEvent;
+
 	public interface IEditableItemManager
 	{
 		function addEditableItem(item: IEditableItem): void;
@@ -10,7 +12,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		function setMouseClickCapture(item: IMouseEditableItem): void;
 		function releaseMouseClickCapture(item: IMouseEditableItem): void;
 
-		function selectItem(item: ISelectableItem, dispatchChangeEvent: Boolean = true): void;
+		function selectItem(item: ISelectableItem, mouseEvent: MouseEvent = null, dispatchChangeEvent: Boolean = true): void;
 		
 		function doHitTest(
 				f_stageX: Number, f_stageY: Number,

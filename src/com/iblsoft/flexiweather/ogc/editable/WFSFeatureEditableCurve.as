@@ -7,6 +7,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.utils.CurveLineSegmentRenderer;
 	
 	import flash.display.Sprite;
+	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	
 	import mx.collections.ArrayCollection;
@@ -107,7 +108,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		}
 */
 		// IMouseEditableItem implementation
-		public function onMouseMove(pt: Point): Boolean
+		public function onMouseMove(pt: Point, event: MouseEvent): Boolean
 		{
 			if ((mi_editMode == WFSFeatureEditableMode.ADD_POINTS_ON_CURVE) && (selected)){
 				var minIndex: uint = 0;
@@ -140,19 +141,19 @@ package com.iblsoft.flexiweather.ogc.editable
 			return(Math.abs(p.length));
 		}
 
-		public function onMouseClick(pt: Point): Boolean
+		public function onMouseClick(pt: Point, event: MouseEvent): Boolean
 		{
 			if(selected)
 				return true;
 			return false;
 		}
 
-		public function onMouseDoubleClick(pt: Point): Boolean
+		public function onMouseDoubleClick(pt: Point, event: MouseEvent): Boolean
 		{
 			return false;
 		}
 
-		public function onMouseDown(pt: Point): Boolean
+		public function onMouseDown(pt: Point, event: MouseEvent): Boolean
 		{
 			if(!selected || justSelectable)
 				return false;
@@ -236,10 +237,10 @@ package com.iblsoft.flexiweather.ogc.editable
 						newPoint = (reflectionDictionary.getReflection(0) as WFSEditableReflectionData).moveablePoints[i_best] as IMouseEditableItem;
 						if (newPoint)
 						{
-							newPoint.onMouseDown(pt);
+							newPoint.onMouseDown(pt, event);
 							if(!b_keepDrag) {
-								newPoint.onMouseUp(pt);
-								newPoint.onMouseClick(pt);
+								newPoint.onMouseUp(pt, event);
+								newPoint.onMouseClick(pt, event);
 							}
 						}
 					}
@@ -250,7 +251,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			}
 		}
 
-		public function onMouseUp(pt: Point): Boolean
+		public function onMouseUp(pt: Point, event: MouseEvent): Boolean
 		{
 			return false;
 		}

@@ -526,7 +526,7 @@ package com.iblsoft.flexiweather.net.loaders
 			//			Log.getLogger('UniURLLoader').info("load " + urlRequest.url + " data:" + urlRequest.data);
 			urlLoader.load(urlRequest);
 			
-			debug("Load URL: " + urlRequest.url);
+//			debug("Load URL: " + urlRequest.url);
 			
 			var backgroundJob: BackgroundJob = null;
 			if(s_backgroundJobName != null)

@@ -890,12 +890,17 @@ package com.iblsoft.flexiweather.widgets
 
         protected function onMouseDown(event: MouseEvent): void
         {
+			trace(this + " onMouseDown \n\n");
             for(var i: int = m_layerContainer.numElements - 1; i >= 0; --i) {
             	var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
+				trace("\t " + this + " onMouseDown test layer: " + l);
             	if(!l.enabled)
             		continue;
             	if(l.onMouseDown(event))
-            		break; 
+				{
+					trace("\t " + this + " onMouseDown MOUSE DOWN ON layer: " + l);
+            		break;
+				}
             }
 			postUserActionUpdate();			
         }

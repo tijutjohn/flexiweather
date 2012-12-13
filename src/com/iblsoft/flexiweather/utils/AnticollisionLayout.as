@@ -325,7 +325,7 @@ package com.iblsoft.flexiweather.utils
 							
 							if (lo.displacementMode == AnticollisionDisplacementMode.DISPLACE_AUTOMATIC)
 							{
-								trace("\n DISPLACE_AUTOMATIC");
+//								trace("\n DISPLACE_AUTOMATIC");
 								outterCycle:
 								for(var i_displace: int = 1; i_displace < 20; ++i_displace) 
 								{
@@ -347,7 +347,7 @@ package com.iblsoft.flexiweather.utils
 										}
 									}
 								}
-								trace("END OF DISPLACE_AUTOMATIC \n");
+//								trace("END OF DISPLACE_AUTOMATIC \n");
 							} else if (lo.displacementMode == AnticollisionDisplacementMode.DISPLACE_AUTOMATIC_SIMPLE) {
 								
 								var dist: int = 100;
