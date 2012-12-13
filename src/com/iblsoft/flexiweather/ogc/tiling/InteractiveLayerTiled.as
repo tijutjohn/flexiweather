@@ -393,6 +393,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 			var viewBBox: BBox = container.getViewBBox();
 			updateCurrentWMSViewProperties();
 			tiledAreaChanged(newCRS, newBBox);
+			
+			var zoomChanged: Boolean = false;
 			if (b_finalChange || mi_zoom == null)
 			{
 				var i_oldZoom: String = mi_zoom;
@@ -401,28 +403,36 @@ package com.iblsoft.flexiweather.ogc.tiling
 					return;
 				if (mi_zoom != i_oldZoom)
 				{
+					zoomChanged = true;
 					//TODO how to solve  
-					notifyZoomLevelChange(mi_zoom);
+//					notifyZoomLevelChange(mi_zoom);
 					
 					//quick fix 
-					callLater(invalidateCacheAfterZoomLevelChange, [newCRS, viewBBox]);
+//					callLater(invalidateCacheAfterZoomLevelChange, [newCRS, viewBBox]);
+					m_cache.invalidate(newCRS, viewBBox);
+					invalidateData(false);
 				} else {
 					invalidateData(false);
 				}
 			}
 			else
 				invalidateDynamicPart();
+			
+			if (zoomChanged)
+			{
+				notifyZoomLevelChange(mi_zoom);
+			}
 		}
 
-		private function invalidateCacheAfterZoomLevelChange(crs: String, viewBBox: BBox): void
-		{
-			if (m_cache) {
-				m_cache.invalidate(crs, viewBBox);
-				invalidateData(false);
-			} else
-				callLater(invalidateCacheAfterZoomLevelChange, [crs, viewBBox]);
-				
-		}
+//		private function invalidateCacheAfterZoomLevelChange(crs: String, viewBBox: BBox): void
+//		{
+//			if (m_cache) {
+//				m_cache.invalidate(crs, viewBBox);
+//				invalidateData(false);
+//			} else
+//				callLater(invalidateCacheAfterZoomLevelChange, [crs, viewBBox]);
+//				
+//		}
 		/**************************************************************************************************************************************
 		 *
 		 * 		Drawing functionality
