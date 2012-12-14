@@ -123,7 +123,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		}
 
 		// IMouseEditableItem implementation
-		public function onMouseMove(pt: Point): Boolean
+		public function onMouseMove(pt: Point, event: MouseEvent): Boolean
 		{
 			if (!mb_dragging)
 				return false;
@@ -139,12 +139,12 @@ package com.iblsoft.flexiweather.ogc.editable
 			return true;
 		}
 
-		public function onMouseClick(pt: Point): Boolean
+		public function onMouseClick(pt: Point, event: MouseEvent): Boolean
 		{
 			return false;
 		}
 
-		public function onMouseDoubleClick(pt: Point): Boolean
+		public function onMouseDoubleClick(pt: Point, event: MouseEvent): Boolean
 		{
 			m_feature.deselect();
 			if (m_feature is IClosableCurve && m_feature.coordinates.length > 2)
@@ -159,7 +159,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			return true;
 		}
 
-		public function onMouseDown(pt: Point): Boolean
+		public function onMouseDown(pt: Point, event: MouseEvent): Boolean
 		{
 			m_editableItemManager.setMouseMoveCapture(this);
 			m_editableItemManager.setMouseClickCapture(this);
@@ -174,7 +174,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			return true;
 		}
 
-		public function onMouseUp(pt: Point): Boolean
+		public function onMouseUp(pt: Point, event: MouseEvent): Boolean
 		{
 			if (!mb_dragging)
 				return false;

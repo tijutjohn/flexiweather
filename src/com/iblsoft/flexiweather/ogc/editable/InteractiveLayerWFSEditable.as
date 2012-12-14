@@ -14,10 +14,10 @@ package com.iblsoft.flexiweather.ogc.editable
 	import mx.events.PropertyChangeEvent;
 	import mx.events.PropertyChangeEventKind;
 
-	[Event(name = "selectionChange", type = "mx.events.PropertyChangeEvent")]
+	[Event(name = "wfsEditableSelectionChange", type = "mx.events.PropertyChangeEvent")]
 	public class InteractiveLayerWFSEditable extends InteractiveLayerWFS implements IHighlightableItemManager, ISelectableItemManager, IEditableItemManager
 	{
-		public static const SELECTION_CHANGE: String = "selectionChange";
+		public static const SELECTION_CHANGE: String = "wfsEditableSelectionChange";
 		protected var ma_items: ArrayCollection = new ArrayCollection();
 		protected var m_highlightedItem: IHighlightableItem = null;
 		protected var m_selectedItem: ISelectableItem = null;
@@ -128,8 +128,13 @@ package com.iblsoft.flexiweather.ogc.editable
 		}
 
 		// ISelectableEditableItemManager implementation
-		public function selectItem(sItem: ISelectableItem, dispatchChangeEvent: Boolean = true): void
+		public function selectItem(sItem: ISelectableItem, mouseEvent: MouseEvent = null, dispatchChangeEvent: Boolean = true): void
 		{
+			if (sItem)
+			{
+				trace(this + " selectItem: " + sItem);
+				
+			}
 			if (sItem != null && sItem.selected)
 				return;
 			for each (var item: IEditableItem in ma_items)
@@ -149,7 +154,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				if (dispatchChangeEvent)
 				{
 					dispatchEvent(new PropertyChangeEvent(
-							SELECTION_CHANGE, false, false,
+							SELECTION_CHANGE, true, false,
 							PropertyChangeEventKind.UPDATE, "selectedItem",
 							oldSItem, m_selectedItem, this));
 				}
@@ -174,7 +179,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			if (item != null)
 				removeEditableItem(item);
 			dispatchEvent(new PropertyChangeEvent(
-					SELECTION_CHANGE, false, false,
+					SELECTION_CHANGE, true, false,
 					PropertyChangeEventKind.UPDATE, "selectedItem",
 					oldSItem, null, this));
 		}
@@ -195,8 +200,8 @@ package com.iblsoft.flexiweather.ogc.editable
 					if (o != null && !ScreenUtils.isVisible(o))
 						continue;
 				}
-//				trace("doHitTest name: " + item['name'] + " edit: " + item.editPriority + " mode: " + item['editmode']);
-				if (item.hitTestPoint(f_stageX, f_stageY, true))
+//				trace("doHitTest name: " + item['name'] + " edit: " + item.editPriority);
+				if(item.hitTestPoint(f_stageX, f_stageY, true))
 					a.push(item);
 			}
 			a.sortOn("editPriority");
@@ -205,21 +210,17 @@ package com.iblsoft.flexiweather.ogc.editable
 
 		override public function onMouseMove(event: MouseEvent): Boolean
 		{
-			if (event.ctrlKey || event.shiftKey)
+			if(event.ctrlKey || event.shiftKey)
 				return false;
-			if (m_mouseMoveCapturingItem != null)
-			{
+			if(m_mouseMoveCapturingItem != null)
 				//if(m_mouseMoveCapturingItem.onMouseMove(new Point(event.localX, event.localY)))
-				if (m_mouseMoveCapturingItem.onMouseMove(new Point(DisplayObject(event.currentTarget).mouseX, DisplayObject(event.currentTarget).mouseY)))
-				{
+				if(m_mouseMoveCapturingItem.onMouseMove(new Point(DisplayObject(event.currentTarget).mouseX, DisplayObject(event.currentTarget).mouseY), event)){
 					event.updateAfterEvent();
 					return true;
 				}
-			}
 			// highlighting
 			var l_hitItems: Array = doHitTest(event.stageX, event.stageY, IHighlightableItem);
-			for each (var hItem: IHighlightableItem in l_hitItems)
-			{
+			for each(var hItem: IHighlightableItem in l_hitItems) {
 				highlightItem(hItem);
 				return true;
 			}
@@ -229,49 +230,50 @@ package com.iblsoft.flexiweather.ogc.editable
 
 		override public function onMouseClick(event: MouseEvent): Boolean
 		{
-			if (event.ctrlKey || event.shiftKey)
+			if(event.ctrlKey || event.shiftKey)
 				return false;
-			if (m_mouseClickCapturingItem != null)
-			{
+			if(m_mouseClickCapturingItem != null)
 				//if(m_mouseClickCapturingItem.onMouseClick(new Point(event.localX, event.localY)))
-				if (m_mouseClickCapturingItem.onMouseClick(new Point(DisplayObject(event.currentTarget).mouseX, DisplayObject(event.currentTarget).mouseY)))
-					return true;
-			}
-			if (m_highlightedItem != null)
-			{
-				var mItem: IMouseEditableItem = m_highlightedItem as IMouseEditableItem;
-				if (mItem != null)
+				if(m_mouseClickCapturingItem.onMouseClick(new Point(DisplayObject(event.currentTarget).mouseX, DisplayObject(event.currentTarget).mouseY), event))
 				{
+					trace("\t " + this + " m_mouseClickCapturingItem.onMouseClick");
+					return true;
+				}
+			if(m_highlightedItem != null) {
+				var mItem: IMouseEditableItem = m_highlightedItem as IMouseEditableItem;
+				if(mItem != null) {
 					//if(mItem.onMouseClick(new Point(event.localX, event.localY)))
-					if (mItem.onMouseClick(new Point(DisplayObject(event.currentTarget).mouseX, DisplayObject(event.currentTarget).mouseY)))
+					if(mItem.onMouseClick(new Point(DisplayObject(event.currentTarget).mouseX, DisplayObject(event.currentTarget).mouseY), event))
+					{
+						trace("\t " + this + " mItem.onMouseClick");
 						return true;
+					}
 				}
 			}
+			
 			// selecting
 			var l_hitItems: Array = doHitTest(event.stageX, event.stageY, ISelectableItem);
-			for each (var sItem: ISelectableItem in l_hitItems)
-			{
-				selectItem(sItem);
+			for each(var sItem: ISelectableItem in l_hitItems) {
+				trace("\t " + this + " doHitTest.onMouseClick");
+				selectItem(sItem, event);
 				return true;
 			}
+			
 			return false;
 		}
 
 		override public function onMouseDoubleClick(event: MouseEvent): Boolean
 		{
-			if (event.ctrlKey || event.shiftKey)
+			if(event.ctrlKey || event.shiftKey)
 				return false;
-			if (m_mouseClickCapturingItem != null)
-			{
+			if(m_mouseClickCapturingItem != null)
 				//if(m_mouseClickCapturingItem.onMouseDoubleClick(new Point(event.localX, event.localY)))
-				if (m_mouseClickCapturingItem.onMouseDoubleClick(new Point(DisplayObject(event.currentTarget).mouseX, DisplayObject(event.currentTarget).mouseY)))
+				if(m_mouseClickCapturingItem.onMouseDoubleClick(new Point(DisplayObject(event.currentTarget).mouseX, DisplayObject(event.currentTarget).mouseY), event))
 					return true;
-			}
 			var l_hitItems: Array = doHitTest(event.stageX, event.stageY, IMouseEditableItem);
-			for each (var mItem: IMouseEditableItem in l_hitItems)
-			{
+			for each(var mItem: IMouseEditableItem in l_hitItems) {
 				//if(mItem.onMouseDoubleClick(new Point(event.localX, event.localY)))
-				if (mItem.onMouseDoubleClick(new Point(DisplayObject(event.currentTarget).mouseX, DisplayObject(event.currentTarget).mouseY)))
+				if(mItem.onMouseDoubleClick(new Point(DisplayObject(event.currentTarget).mouseX, DisplayObject(event.currentTarget).mouseY), event))
 					return true;
 			}
 			return false;
@@ -279,38 +281,41 @@ package com.iblsoft.flexiweather.ogc.editable
 
 		override public function onMouseDown(event: MouseEvent): Boolean
 		{
-			if (event.ctrlKey || event.shiftKey)
+			if(event.ctrlKey || event.shiftKey)
 				return false;
-			if (m_mouseClickCapturingItem != null)
-			{
+			if(m_mouseClickCapturingItem != null)
 				//if(m_mouseClickCapturingItem.onMouseDown(new Point(event.localX, event.localY)))
-				if (m_mouseClickCapturingItem.onMouseDown(new Point(DisplayObject(event.currentTarget).mouseX, DisplayObject(event.currentTarget).mouseY)))
+				if(m_mouseClickCapturingItem.onMouseDown(new Point(DisplayObject(event.currentTarget).mouseX, DisplayObject(event.currentTarget).mouseY), event))
+				{
+					trace("\t " + this + " m_mouseClickCapturingItem.onMouseDown");
 					return true;
-			}
+				}
 			var l_hitItems: Array = doHitTest(event.stageX, event.stageY, IMouseEditableItem);
-			for each (var mItem: IMouseEditableItem in l_hitItems)
-			{
+			for each(var mItem: IMouseEditableItem in l_hitItems) {
 				//if(mItem.onMouseDown(new Point(event.localX, event.localY)))
-				if (mItem.onMouseDown(new Point(DisplayObject(event.currentTarget).mouseX, DisplayObject(event.currentTarget).mouseY)))
+				if(mItem.onMouseDown(new Point(DisplayObject(event.currentTarget).mouseX, DisplayObject(event.currentTarget).mouseY), event))
+				{
+					trace("\t " + this + " mItem.onMouseDown");
 					return true;
+				}
 			}
+			
+			trace("\t " + this + " nothing down");
 			selectItem(null);
+			
 			return false;
 		}
 
 		override public function onMouseUp(event: MouseEvent): Boolean
 		{
-			if (event.ctrlKey || event.shiftKey)
+			if(event.ctrlKey || event.shiftKey)
 				return false;
-			if (m_mouseClickCapturingItem != null)
-			{
-				if (m_mouseClickCapturingItem.onMouseUp(new Point(event.localX, event.localY)))
+			if(m_mouseClickCapturingItem != null)
+				if(m_mouseClickCapturingItem.onMouseUp(new Point(event.localX, event.localY), event))
 					return true;
-			}
 			var l_hitItems: Array = doHitTest(event.stageX, event.stageY, IMouseEditableItem);
-			for each (var mItem: IMouseEditableItem in l_hitItems)
-			{
-				if (mItem.onMouseUp(new Point(event.localX, event.localY)))
+			for each(var mItem: IMouseEditableItem in l_hitItems) {
+				if(mItem.onMouseUp(new Point(event.localX, event.localY), event))
 					return true;
 			}
 			return false;
@@ -331,6 +336,11 @@ package com.iblsoft.flexiweather.ogc.editable
 		public function get editingComponentsContainer(): Sprite
 		{
 			return m_editingComponentsContainer;
+		}
+		
+		override public function toString(): String
+		{
+			return "InteractiveLayerWFSEditable: " + name + ", " + id + " ";
 		}
 	}
 }

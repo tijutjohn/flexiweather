@@ -88,11 +88,11 @@ package com.iblsoft.flexiweather.ogc
 //				trace("point updated: " + (changeEvent.oldValue as Point) + " to " + (changeEvent.newValue as Point));
 			}
 			if (event.kind == CollectionEventKind.RESET)
-				trace("RESET");
-			if (event.kind == CollectionEventKind.MOVE)
-				trace("MOVE");
-			if (event.kind == CollectionEventKind.REFRESH)
-				trace("REFRESH");
+//				trace("RESET");
+//			if (event.kind == CollectionEventKind.MOVE)
+//				trace("MOVE");
+//			if (event.kind == CollectionEventKind.REFRESH)
+//				trace("REFRESH");
 			if (event.kind == CollectionEventKind.REPLACE)
 			{
 				changeEvent = event.items[0] as PropertyChangeEvent;
@@ -186,6 +186,19 @@ package com.iblsoft.flexiweather.ogc
 			return m_points;
 		}
 
+		public function getAveragePoint():Point
+		{
+			var ret:Point = new Point();
+			for (var i:int = 0; i < m_points.source.length; i++) {
+				ret.x = ret.x + m_points[i].x;
+				ret.y = ret.y + m_points[i].y;
+			}
+			ret.x = ret.x / m_points.source.length;
+			ret.y = ret.y / m_points.source.length;
+			
+			return ret;
+		}
+		
 		public function getPoint(i_pointIndex: uint): Point
 		{
 			if (m_points && m_points.length > i_pointIndex)
@@ -289,7 +302,7 @@ package com.iblsoft.flexiweather.ogc
 			// assume we use smooth curve be default
 			return createSmoothLineSegmentApproximation();
 		}
-
+		
 		public function createStraightLineSegmentApproximation(b_useCoordinates: Boolean = true): Array
 		{
 			var l: Array = [];

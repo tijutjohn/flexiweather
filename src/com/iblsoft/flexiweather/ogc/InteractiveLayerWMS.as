@@ -132,7 +132,9 @@ package com.iblsoft.flexiweather.ogc
 		override public function setConfiguration(cfg: WMSLayerConfiguration): void
 		{
 			super.setConfiguration(cfg);
-			m_autoRefreshTimer.stop();
+			if (m_autoRefreshTimer)
+				m_autoRefreshTimer.stop();
+			
 			if (m_cfg.autoRefreshPeriod > 0)
 				m_autoRefreshTimer.delay = m_cfg.autoRefreshPeriod * 1000.0;
 		}

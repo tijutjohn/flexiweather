@@ -478,7 +478,7 @@ package com.iblsoft.flexiweather.net.loaders
 			}
 			UniURLLoaderManager.instance.addLoaderRequest(urlRequest);
 			urlLoader.load(urlRequest);
-			debug("Load URL: " + urlRequest.url);
+//			debug("Load URL: " + urlRequest.url);
 			var backgroundJob: BackgroundJob = null;
 			if (s_backgroundJobName != null)
 				backgroundJob = BackgroundJobManager.getInstance().startJob(s_backgroundJobName);
@@ -793,6 +793,7 @@ package com.iblsoft.flexiweather.net.loaders
 
 		protected function debug(txt: String): void
 		{
+			trace(this + ": " + txt);
 			if (debugConsole)
 				debugConsole.print(txt, 'Info', 'UniURLLoader');
 		}

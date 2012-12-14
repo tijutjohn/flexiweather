@@ -468,9 +468,9 @@ package com.iblsoft.flexiweather.widgets
 			l.removeEventListener(InteractiveDataLayer.LOADING_STARTED, onLayerLoadingStart);
 			if (l.parent == m_layerContainer)
 			{
-				l.container = null;
 				m_layerContainer.removeElement(l);
 				l.destroy();
+				l.container = null;
 			}
 			notifyWidgetChanged('removeLayer', this);
 		}
@@ -616,8 +616,8 @@ package com.iblsoft.flexiweather.widgets
 		{
 			onAreaChanged(b_finalChange);
 		}
-		private var _oldViewBBox: BBox = new BBox(0, 0, 0, 0);
-
+		private var _oldViewBBox: BBox = new BBox(0,0,0,0);
+		
 		protected function onAreaChanged(b_finalChange: Boolean): void
 		{
 			if (_oldViewBBox.equals(m_viewBBox))
@@ -693,7 +693,7 @@ package com.iblsoft.flexiweather.widgets
 			}
 			return null;
 		}
-
+		
 		/**
 		 * Splits coordinates of BBox (in the currently used CRS) into partial sub-BBoxes of the
 		 * IW's View BBox, which are visible.

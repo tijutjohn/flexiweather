@@ -88,7 +88,7 @@ package com.iblsoft.flexiweather.ogc
 				url.data = new URLVariables();
 			url.data['SERVICE'] = 'WFS';
 			url.data['VERSION'] = version.toString();
-			url.data['REQUEST'] = 'version';
+			url.data['REQUEST'] = 'GetFeature';
 			for (var s_param: String in md_queryParametersGET)
 			{
 				var s_value: String = md_queryParametersGET[s_param];
@@ -246,20 +246,24 @@ package com.iblsoft.flexiweather.ogc
 		// event handlers
 		protected function onRefreshDataLoaded(event: UniURLLoaderEvent): void
 		{
-			trace(this + "onRefreshDataLoaded");
 			m_wfsLoader.removeEventListener(UniURLLoaderEvent.DATA_LOADED, onRefreshDataLoaded);
-			var xml: XML = event.result as XML;
+			
+			var xml: XML = event.result as XML;			
 			if (xml == null)
 				return; // TODO: do some error handling
-			var object: Object = createRefreshedFeaturesFromXML(xml);
+			
+			var object: Object = createRefreshedFeaturesFromXML( xml );
+			
 			var refreshEvent: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.FEATURES_LOADED);
 			refreshEvent.refreshFeaturesObject = object;
 			dispatchEvent(refreshEvent);
+
 		}
 
 		override protected function onDataLoaded(event: UniURLLoaderEvent): void
 		{
 			m_wfsLoader.removeEventListener(UniURLLoaderEvent.DATA_LOADED, onDataLoaded);
+
 			var xml: XML = event.result as XML;
 			if (xml == null)
 				return; // TODO: do some error handling

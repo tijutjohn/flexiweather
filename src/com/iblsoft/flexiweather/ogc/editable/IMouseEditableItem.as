@@ -5,10 +5,10 @@ package com.iblsoft.flexiweather.ogc.editable
 
 	public interface IMouseEditableItem extends IEditableItem
 	{
-		function onMouseMove(pt: Point): Boolean;
-		function onMouseClick(pt: Point): Boolean;
-		function onMouseDoubleClick(pt: Point): Boolean;
-		function onMouseDown(pt: Point): Boolean;
-		function onMouseUp(pt: Point): Boolean;
+		function onMouseMove(pt: Point, event: MouseEvent): Boolean;
+		function onMouseClick(pt: Point, event: MouseEvent): Boolean;
+		function onMouseDoubleClick(pt: Point, event: MouseEvent): Boolean;
+		function onMouseDown(pt: Point, event: MouseEvent): Boolean;
+		function onMouseUp(pt: Point, event: MouseEvent): Boolean;
 	}
 }

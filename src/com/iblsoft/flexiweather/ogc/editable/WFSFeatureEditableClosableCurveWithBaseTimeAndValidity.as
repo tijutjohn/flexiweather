@@ -10,7 +10,10 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.utils.CubicBezier;
+	
+	import flash.events.MouseEvent;
 	import flash.geom.Point;
+	
 	import mx.collections.ArrayCollection;
 
 	public class WFSFeatureEditableClosableCurveWithBaseTimeAndValidity extends WFSFeatureEditableCurveWithBaseTimeAndValidity implements IClosableCurve
@@ -120,7 +123,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		/**
 		 *
 		 */
-		override public function onMouseMove(pt: Point): Boolean
+		override public function onMouseMove(pt: Point, event: MouseEvent): Boolean
 		{
 			if ((mi_editMode == WFSFeatureEditableMode.ADD_POINTS_ON_CURVE)
 					|| (mi_editMode == WFSFeatureEditableMode.ADD_POINTS_WITH_MOVE_POINTS)
@@ -134,7 +137,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				else
 					removeCustomCursor();
 			}
-			return (super.onMouseMove(pt));
+			return (super.onMouseMove(pt, event));
 		}
 
 		protected function removeCustomCursor(): void
@@ -150,7 +153,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		/**
 		 *
 		 */
-		override public function onMouseDown(pt: Point): Boolean
+		override public function onMouseDown(pt: Point, event: MouseEvent): Boolean
 		{
 			var useThisOverride: Boolean = false;
 			var stagePt: Point = localToGlobal(pt);
@@ -196,11 +199,11 @@ package com.iblsoft.flexiweather.ogc.editable
 						insertPointBefore(i_best, pt);
 //						MoveablePoint(ml_movablePoints[i_best]).onMouseDown(pt);
 						var newPoint: MoveablePoint = (ml_movablePoints.getReflection(0) as WFSEditableReflectionData).moveablePoints[i_best] as MoveablePoint;
-						newPoint.onMouseDown(pt);
+						newPoint.onMouseDown(pt, event);
 						if (!b_keepDrag)
 						{
-							newPoint.onMouseUp(pt);
-							newPoint.onMouseClick(pt);
+							newPoint.onMouseUp(pt, event);
+							newPoint.onMouseClick(pt, event);
 						}
 						return (true);
 					}
@@ -224,7 +227,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			if (useThisOverride)
 				return true;
 			else
-				return (super.onMouseDown(pt));
+				return (super.onMouseDown(pt, event));
 		}
 	}
 }
