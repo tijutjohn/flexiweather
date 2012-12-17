@@ -318,7 +318,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 			invalidateDisplayList();
 			if (_widgetsCountToBeReady.length == 0)
 			{
-				var synchronizator: ISynchronizator = getConfigurationSynchronizator(newConfiguration);	
+				synchronizator = getConfigurationSynchronizator(newConfiguration);	
 				notifyWidgetsReady(synchronizator);
 			}
 		}
