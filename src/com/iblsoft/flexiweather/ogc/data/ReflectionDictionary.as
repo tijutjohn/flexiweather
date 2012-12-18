@@ -85,7 +85,8 @@ package com.iblsoft.flexiweather.ogc.data
 			re.reflection = reflection;
 			dispatchEvent(re);
 		}
-		private function createReflection( reflections: int ): ReflectionData
+		
+		protected function createReflection( reflections: int ): ReflectionData
 		{
 			if (!_dictionary[reflections])
 			{

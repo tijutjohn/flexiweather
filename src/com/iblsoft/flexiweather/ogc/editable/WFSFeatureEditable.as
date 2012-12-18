@@ -69,9 +69,6 @@ package com.iblsoft.flexiweather.ogc.editable
 			for (var i: int = 0; i < total; i++)
 			{
 				var coord: Coord = coordinates[i] as Coord;
-//				if (coord.crs != crs)
-//					coord = coord.convertToProjection(master.container.getCRSProjection());
-//					trace("Problem with Coord... not same as InteractiveWidget coord");
 				var pointReflections: Array = master.container.mapCoordToViewReflections(coord);
 				var reflectionsCount: int = pointReflections.length;
 				for (var j: int = 0; j < reflectionsCount; j++)

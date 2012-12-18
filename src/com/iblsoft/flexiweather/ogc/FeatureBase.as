@@ -8,8 +8,10 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.utils.CurveLineSegment;
 	import com.iblsoft.flexiweather.utils.CurveLineSegmentRenderer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	
 	import flash.display.Sprite;
 	import flash.geom.Point;
+	
 	import mx.collections.ArrayCollection;
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
@@ -133,9 +135,15 @@ package com.iblsoft.flexiweather.ogc
 			{
 				mb_pointsDirty = false;
 				initializePoints();
+				
+				/**
+				 * this function needs also check all coordinates reflection, because feature can be displayed in other reflections (and this algorithm without reflection would dispatch that feature is outside of view BBox
+				 */
 				if (m_coordinates.length)
 				{
 					var iw: InteractiveWidget = m_master.container;
+//					var viewBBox: BBox = iw.getViewBBox();
+					
 					var total: int = m_coordinates.length;
 					var oldPoint: Point;
 					var oldCoordNotInside: Coord;
@@ -145,14 +153,23 @@ package com.iblsoft.flexiweather.ogc
 					for (var i: uint = 0; i < total; ++i)
 					{
 						var c: Coord = m_coordinates[i];
-						if (iw.coordInside(c))
+						
+						var reflectedCoords: Array = iw.mapCoordToViewReflections(c);
+						
+						for each (var currCoordObject: Object in reflectedCoords)
 						{
-							//							trace("Coord is cinside");
-							featureIsInside = true;
-						} else {
+							var currPoint: Point = (currCoordObject.point as Point)
+							var currCoord: Coord = new Coord(c.crs, currPoint.x, currPoint.y);
 							
-							//							trace("Coord is not inside");
+							if (iw.coordInside(currCoord))
+							{
+								//							trace("Coord is cinside");
+								featureIsInside = true;
+							} else {
+								//							trace("Coord is not inside");
+							}
 						}
+						
 						pt = iw.coordToPoint(c);
 						m_points.addItem(pt);
 					}
