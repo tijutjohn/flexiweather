@@ -116,7 +116,8 @@ package com.iblsoft.flexiweather.proj
 				if (laLoPtRad)
 				{
 					var proj1Point: Point = projection.laLoPtToPrjPt(laLoPtRad);
-					return new Coord(projection.crs, proj1Point.x, proj1Point.y);
+					if (proj1Point)
+						return new Coord(projection.crs, proj1Point.x, proj1Point.y);
 				}
 				
 				return null;

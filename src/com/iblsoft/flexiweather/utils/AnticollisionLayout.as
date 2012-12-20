@@ -479,9 +479,30 @@ package com.iblsoft.flexiweather.utils
 			return mb_dirty;
 		}
 		
+		private var _layoutInvalid: Boolean;
+		
+		protected function invalidateLayout(): void
+		{
+			_layoutInvalid = true;
+			
+			if (!hasEventListener(Event.ENTER_FRAME))
+				addEventListener(Event.ENTER_FRAME, onInvalidationEnterFrame);
+		}
+		
+		private function onInvalidationEnterFrame(event: Event): void
+		{
+			removeEventListener(Event.ENTER_FRAME, onInvalidationEnterFrame);
+			
+			if (_layoutInvalid)
+			{
+				update();
+				_layoutInvalid = false;
+			}
+		}
 		public function setDirty(): void
 		{
 			mb_dirty = true;
+			invalidateLayout();
 		}
 		
 		// helpers

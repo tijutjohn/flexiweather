@@ -530,8 +530,10 @@ package com.iblsoft.flexiweather.widgets
 				//same projectsion
 				c = c.convertToProjection(m_crsProjection);
 			}
+			if (c)
+				return m_viewBBox.coordInside(c);
 			
-			return m_viewBBox.coordInside(c);
+			return false;
 		}
 
 		/** Converts Coord into screen point (pixels) with current CRS. */
