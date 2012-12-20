@@ -168,8 +168,14 @@ package com.iblsoft.flexiweather.ogc.editable
 				(mi_editMode == WFSFeatureEditableMode.ADD_POINTS_WITH_MOVE_POINTS)){
 				// don't do anything if this click is on MoveablePoint belonging to this curve
 				
+				var reflectionID: int = 0;
+				
+				var clickedMoveablePoint: MoveablePoint = event.target as MoveablePoint;
+				if (clickedMoveablePoint)
+					reflectionID = clickedMoveablePoint.reflection;
+				
 				//FIXME fix snap for reflection from which point is dragged
-				var reflectionData: WFSEditableReflectionData = (reflectionDictionary.getReflection(0) as WFSEditableReflectionData);
+				var reflectionData: WFSEditableReflectionData = (reflectionDictionary.getReflection(reflectionID) as WFSEditableReflectionData);
 				var moveablePoints: Array = [];
 				if (reflectionData)
 					moveablePoints = reflectionData.moveablePoints;

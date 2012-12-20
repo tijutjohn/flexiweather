@@ -58,6 +58,11 @@ package com.iblsoft.flexiweather.ogc.data
 			_coords.splice(pointer, 1);
 		}
 		
+		public function updateCoordAt(coord: Coord, position: int): void
+		{
+			addCoordAt(coord, position);
+		}
+		
 		public function addCoordAt(coord: Coord, position: int): void
 		{
 			_coords[position] = coord;

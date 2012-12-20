@@ -100,6 +100,13 @@ package com.iblsoft.flexiweather.ogc.data
 			return getReflection( reflections );
 		}
 		
+		public function updateReflectedCoordAt(coord: Coord, position: int, reflections: int, reflectionDelta: int): void
+		{
+			var reflection: ReflectionData = createReflection( reflections );
+			reflection.reflectionDelta = reflectionDelta;
+			reflection.updateCoordAt(coord, position);
+			
+		}
 		public function addReflectedCoordAt(coord: Coord, position: int, reflections: int, reflectionDelta: int): void
 		{
 			var reflection: ReflectionData = createReflection( reflections );

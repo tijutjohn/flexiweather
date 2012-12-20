@@ -187,11 +187,11 @@ package com.iblsoft.flexiweather.widgets
 			
 			if ((currTime - m_lastResizeTime) >= resizeMinimumTime)
 			{
-				trace("go autolayout: time diff: "+(currTime - m_lastResizeTime) +" ms");
+//				trace("go autolayout: time diff: "+(currTime - m_lastResizeTime) +" ms");
 				m_lastResizeTime = currTime;
 				autoLayoutViewBBox(m_viewBBox, true, true);
 			} else {
-				trace("on parent resize: wait at least "+(currTime - m_lastResizeTime) +" ms");
+//				trace("on parent resize: wait at least "+(currTime - m_lastResizeTime) +" ms");
 				//uto layout but do not load layers (finalUpdate = false)
 				autoLayoutViewBBox(m_viewBBox, false, true);
 				
@@ -890,15 +890,15 @@ package com.iblsoft.flexiweather.widgets
 
         protected function onMouseDown(event: MouseEvent): void
         {
-			trace(this + " onMouseDown \n\n");
+//			trace(this + " onMouseDown \n\n");
             for(var i: int = m_layerContainer.numElements - 1; i >= 0; --i) {
             	var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
-				trace("\t " + this + " onMouseDown test layer: " + l);
+//				trace("\t " + this + " onMouseDown test layer: " + l);
             	if(!l.enabled)
             		continue;
             	if(l.onMouseDown(event))
 				{
-					trace("\t " + this + " onMouseDown MOUSE DOWN ON layer: " + l);
+//					trace("\t " + this + " onMouseDown MOUSE DOWN ON layer: " + l);
             		break;
 				}
             }
