@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.net.loaders
 {
 	import com.iblsoft.flexiweather.net.UniURLLoaderFormat;
+	
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
 
@@ -11,7 +12,7 @@ package com.iblsoft.flexiweather.net.loaders
 			super();
 			allowedFormats = [UniURLLoaderFormat.TEXT_FORMAT];
 		}
-
+		
 		override protected function decodeResult(rawData: ByteArray, urlLoader: URLLoaderWithAssociatedData, urlRequest: URLRequest, resultCallback: Function, errorCallback: Function): void
 		{
 			var data: String = cloneByteArrayToString(rawData);

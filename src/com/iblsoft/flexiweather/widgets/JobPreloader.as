@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.widgets
 {
 	import flash.display.DisplayObject;
+	
 	import mx.core.UIComponent;
 
 	public dynamic class JobPreloader extends UIComponent implements JobProgressIndicator
@@ -9,8 +10,8 @@ package com.iblsoft.flexiweather.widgets
 		{
 			super();
 		}
-
-		public function updateUI(i_jobsDone: int, i_maxJobs: int): void
+		
+		public function updateUI(i_jobsDone: int, i_maxJobs: int):void
 		{
 		}
 

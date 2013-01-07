@@ -5,10 +5,12 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
 	import com.iblsoft.flexiweather.net.loaders.XMLLoader;
 	import com.iblsoft.flexiweather.utils.HTMLUtils;
+	
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
+	
 	import mx.utils.ObjectUtil;
-
+	
 	public class WMSFeatureInfoLoader extends UniURLLoader
 	{
 		public function WMSFeatureInfoLoader()
@@ -16,28 +18,31 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 			super();
 			allowedFormats = [UniURLLoaderFormat.XML_FORMAT, UniURLLoaderFormat.HTML_FORMAT];
 		}
-
+		
 		override protected function decodeResult(rawData: ByteArray, urlLoader: URLLoaderWithAssociatedData, urlRequest: URLRequest, resultCallback: Function, errorCallback: Function): void
 		{
 			trace("WMSFeatureInfoLoader: " + rawData);
+			
 			//for now WMS Feature Info Loader check just is data is valid XML
+			
 			var data: String = cloneByteArrayToString(rawData);
-			var validXML: Boolean = XMLLoader.isValidXML(data);
+			
+			var validXML: Boolean = XMLLoader.isValidXML(data); 
+			
 			if (validXML)
 			{
 				resultCallback(XMLLoader.getXML(data), urlRequest, urlLoader.associatedData);
 				return;
 			}
+			
 			if (data)
 			{
-				var validHTML: Boolean = HTMLUtils.isHTMLFormat(data);
+				var validHTML: Boolean = HTMLUtils.isHTMLFormat(data); 
 				if (validHTML)
 				{
 					resultCallback(data, urlRequest, urlLoader.associatedData);
 					return;
-				}
-				else
-				{
+				} else {
 					//check some html tags, very weak check
 					var str: String = data as String;
 					var htmlPos: int = str.indexOf('<html');
@@ -60,6 +65,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 					}
 				}
 			}
+			
 			errorCallback("WFS Feature Info Loader error: Result is not in expected format", rawData, urlRequest, urlLoader.associatedData);
 		}
 	}

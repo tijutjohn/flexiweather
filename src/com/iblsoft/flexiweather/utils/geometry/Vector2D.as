@@ -9,17 +9,15 @@ package com.iblsoft.flexiweather.utils.geometry
 			super(x, y);
 		}
 
-		/**
+		/** 
 		 * Returns scalar product of "this . v"
-		 **/
+		 **/ 
 		public function dot(v: Vector2D): Number
 		{
 			return x * v.x + y * v.y;
 		}
-
+		
 		public function times(f_scale: Number): Vector2D
-		{
-			return new Vector2D(x * f_scale, y * f_scale);
-		}
+		{ return new Vector2D(x * f_scale, y * f_scale); }
 	}
 }

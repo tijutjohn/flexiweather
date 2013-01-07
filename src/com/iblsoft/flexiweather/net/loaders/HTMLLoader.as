@@ -1,8 +1,10 @@
 package com.iblsoft.flexiweather.net.loaders
 {
 	import com.iblsoft.flexiweather.utils.HTMLUtils;
+	
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
+	
 	import mx.utils.ObjectUtil;
 
 	public class HTMLLoader extends XMLLoader
@@ -11,26 +13,28 @@ package com.iblsoft.flexiweather.net.loaders
 		{
 			super();
 		}
-
+		
 		override protected function decodeResult(rawData: ByteArray, urlLoader: URLLoaderWithAssociatedData, urlRequest: URLRequest, resultCallback: Function, errorCallback: Function): void
 		{
-			if (HTMLLoader.isValidHTML(rawData))
+			if ( HTMLLoader.isValidHTML(rawData) )
 			{
 				var htmlSource: String = getHTMLSource(data);
 				resultCallback(htmlSource, urlRequest, urlLoader.associatedData);
-			}
-			else
+			} else {
 				errorCallback("HTML Loader error: Expected HTML", rawData, urlRequest, urlLoader.associatedData);
+			}
 		}
-
+		
 		public static function isValidHTML(data: Object): Boolean
 		{
+			
 			var htmlSource: String = getHTMLSource(data);
-			var validHTML: Boolean = HTMLUtils.isHTMLFormat(htmlSource);
+			
+			var validHTML: Boolean = HTMLUtils.isHTMLFormat(htmlSource); 
 			if (validHTML)
-				return true;
-			else
 			{
+				return true;
+			} else {
 				//check some html tags, very weak check
 				var htmlPos: int = htmlSource.indexOf('<html');
 				if (htmlPos >= 0)
@@ -43,7 +47,9 @@ package com.iblsoft.flexiweather.net.loaders
 						{
 							var bodyEndPos: int = htmlSource.indexOf('</body', bodyPos + 4);
 							if (bodyEndPos > bodyPos)
+							{
 								return true;
+							}
 						}
 					}
 				}
@@ -51,21 +57,26 @@ package com.iblsoft.flexiweather.net.loaders
 			var xml: XML = XMLLoader.getXML(data);
 			if (xml)
 				return true;
+			
 			return false;
 		}
-
+		
 		public static function getHTMLSource(data: Object): String
 		{
 			if (data is XML)
 				return (data as XML).toXMLString();
+			
 			if (data is ByteArray)
 			{
 				var clonedBA: ByteArray = ObjectUtil.clone(data) as ByteArray;
 				return clonedBA.readUTFBytes(clonedBA.length);
 			}
 			if (data is String)
+			{
 				return data as String;
+			}
 			return null;
+			
 		}
 	}
 }

@@ -1,23 +1,17 @@
 package com.iblsoft.flexiweather.widgets
 {
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
-	import com.iblsoft.flexiweather.events.InteractiveLayerWMSEvent;
 	import com.iblsoft.flexiweather.events.InteractiveWidgetEvent;
 	import com.iblsoft.flexiweather.ogc.BBox;
-	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
-	import com.iblsoft.flexiweather.ogc.cache.WMSCacheKey;
-	import com.iblsoft.flexiweather.ogc.cache.WMSCacheManager;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
+	import com.iblsoft.flexiweather.utils.AnticollisionLayout;
 	import com.iblsoft.flexiweather.utils.CubicBezier;
 	import com.iblsoft.flexiweather.utils.ICurveRenderer;
-	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayout;
 	import com.iblsoft.flexiweather.utils.wfs.FeatureSplitter;
 	
 	import flash.display.DisplayObject;
 	import flash.display.GradientType;
-	import flash.display.Graphics;
-	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
@@ -30,11 +24,8 @@ package com.iblsoft.flexiweather.widgets
 	import flash.utils.getTimer;
 	import flash.utils.setTimeout;
 	
-	import mx.containers.Canvas;
 	import mx.core.IVisualElement;
 	import mx.core.UIComponent;
-	import mx.core.mx_internal;
-	import mx.events.DynamicEvent;
 	import mx.events.FlexEvent;
 	import mx.events.ResizeEvent;
 	
@@ -42,118 +33,65 @@ package com.iblsoft.flexiweather.widgets
 	import spark.components.SkinnableContainer;
 	import spark.events.ElementExistenceEvent;
 
-	[Event(name = "viewBBoxChanged", type = "flash.events.Event")]
+	[Event (name="viewBBoxChanged", type="flash.events.Event")]
+	
 	/**
-	 * Dispatched, when all layers which were loaded at once are loaded.
-	 */
-	[Event(name = "allDataLayersLoaded", type = "com.iblsoft.flexiweather.events.InteractiveWidgetEvent")]
-	[Event(name = "dataLayerLoadingStarted", type = "com.iblsoft.flexiweather.events.InteractiveWidgetEvent")]
-	[Event(name = "dataLayerLoadingFinished", type = "com.iblsoft.flexiweather.events.InteractiveWidgetEvent")]
-	[Event(name = "areaChanged", type = "com.iblsoft.flexiweather.events.InteractiveWidgetEvent")]
-	[Event(name = "anticollisionUpdated", type = "flash.events.Event")]
-	[Event(name = "zoomLevelChanged", type = "com.iblsoft.flexiweather.events.InteractiveLayerQTTEvent")]
-	/**
-	 *  Dispatched by the component when user click on InteractiveWidget
-	 *
-	 *  @eventType com.iblsoft.flexiweather.events.InteractiveWidgetEvent.WIDGET_SELECTED
-	 *
-	 *  @langversion 3.0
-	 *  @playerversion Flash 9
-	 *  @playerversion AIR 1.1
-	 *  @productversion Flex 3
-	 */
-	[Event(name = "widgetSelected", type = "com.iblsoft.flexiweather.events.InteractiveWidgetEvent")]
+	 * Dispatched, when all layers which were loaded at once are loaded. 
+	 */	
+	[Event (name="allDataLayersLoaded", type="com.iblsoft.flexiweather.events.InteractiveWidgetEvent")]
+	[Event (name="dataLayerLoadingStarted", type="com.iblsoft.flexiweather.events.InteractiveWidgetEvent")]
+	[Event (name="dataLayerLoadingFinished", type="com.iblsoft.flexiweather.events.InteractiveWidgetEvent")]
+	[Event (name="areaChanged", type="com.iblsoft.flexiweather.events.InteractiveWidgetEvent")]
+	[Event (name="anticollisionUpdated", type="flash.events.Event")]
+	[Event (name="zoomLevelChanged", type="com.iblsoft.flexiweather.events.InteractiveLayerQTTEvent")]
+	
 	public class InteractiveWidget extends Group
 	{
 		public static const VIEW_BBOX_CHANGED: String = 'viewBBoxChanged';
-		private var ms_crs: String = Projection.CRS_EPSG_GEOGRAPHIC;
+		
+        private var ms_crs: String = Projection.CRS_EPSG_GEOGRAPHIC;
 		private var m_crsProjection: Projection = Projection.getByCRS(ms_crs);
-		private var m_viewBBox: BBox = new BBox(-180, -90, 180, 90);
-		private var m_extentBBox: BBox = new BBox(-180, -90, 180, 90);
-		private var mb_orderingLayers: Boolean = false;
+        private var m_viewBBox: BBox = new BBox(-180, -90, 180, 90);
+        private var m_extentBBox: BBox = new BBox(-180, -90, 180, 90);
+        private var mb_orderingLayers: Boolean = false;
+
 		private var mb_autoLayout: Boolean = false;
-		private var mb_backgroundChessBoard: Boolean = true;
+
+		private var mb_backgroundChessBoard: Boolean = false;
+
 		private var m_resizeTimer: Timer;
-		private var m_layerBackground: UIComponent;
+		
 		private var m_layerContainer: Group = new Group();
+
 		private var m_layerLayoutParent: UIComponent;
+		
 		private var m_lastResizeTime: Number;
-		private var m_wmsCacheManager: WMSCacheManager;
+		
+		
 		/**
 		 * anticollision layout for Labels
 		 */
-		private var m_labelLayout: AnticollisionLayout = new AnticollisionLayout('Label Layout');
+		private var m_labelLayout: AnticollisionLayout = new AnticollisionLayout();
+		
 		/**
 		 * anticollision layout for Labels
 		 */
-		private var m_objectLayout: AnticollisionLayout = new AnticollisionLayout('Object Layout');
+		private var m_objectLayout: AnticollisionLayout = new AnticollisionLayout();
+		
 		/**
-		 * Set it to true when you want suspend anticaollision processing (e.g. user is dragging map)
-		 */
+		 * Set it to true when you want suspend anticaollision processing (e.g. user is dragging map) 
+		 */		
 		private var m_suspendAnticollisionProcessing: Boolean;
-		private var _enableMouseClick: Boolean;
-		private var _enableMouseMove: Boolean;
-		private var _enableMouseWheel: Boolean;
-		private var _enableGestures: Boolean;
-
-		override public function set enabled(value: Boolean): void
-		{
-			super.enabled = value;
-//			trace("\t\t InteractiveWidget ["+id+"] enabled = " + value);
-			invalidateDisplayList();
-		}
-
-		public function get enableMouseClick(): Boolean
-		{
-			return _enableMouseClick;
-		}
-
-		public function set enableMouseClick(value: Boolean): void
-		{
-			_enableMouseClick = value;
-		}
-
-		public function get enableMouseMove(): Boolean
-		{
-			return _enableMouseMove;
-		}
-
-		public function set enableMouseMove(value: Boolean): void
-		{
-			_enableMouseMove = value;
-		}
-
-		public function get enableMouseWheel(): Boolean
-		{
-			return _enableMouseWheel;
-		}
-
-		public function set enableMouseWheel(value: Boolean): void
-		{
-			_enableMouseWheel = value;
-		}
-
-		public function get enableGestures(): Boolean
-		{
-			return _enableGestures;
-		}
-
-		public function set enableGestures(value: Boolean): void
-		{
-			_enableGestures = value;
-		}
-
-		public function InteractiveWidget()
-		{
+		
+		public function InteractiveWidget() {
 			super();
-			enableGestures = true;
-			enableMouseClick = true;
-			enableMouseMove = true;
-			enableMouseWheel = true;
+			
 			mouseEnabled = true;
 			mouseFocusEnabled = true;
 			doubleClickEnabled = true;
+
 			clipAndEnableScrolling = true;
+			
 			m_layerContainer.x = m_layerContainer.y = 0;
 			addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
 			addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
@@ -164,11 +102,12 @@ package com.iblsoft.flexiweather.widgets
 			addEventListener(MouseEvent.ROLL_OVER, onMouseRollOver);
 			addEventListener(MouseEvent.ROLL_OUT, onMouseRollOut);
 			addEventListener(ResizeEvent.RESIZE, onResized);
+			
 			addEventListener(ElementExistenceEvent.ELEMENT_ADD, onElementAdd);
 			addEventListener(FlexEvent.CREATION_COMPLETE, onWidgetCreationComplete);
 			m_lastResizeTime = getTimer();
 		}
-
+		
 		public function destroy(): void
 		{
 			removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
@@ -180,148 +119,143 @@ package com.iblsoft.flexiweather.widgets
 			removeEventListener(MouseEvent.ROLL_OVER, onMouseRollOver);
 			removeEventListener(MouseEvent.ROLL_OUT, onMouseRollOut);
 			removeEventListener(ResizeEvent.RESIZE, onResized);
+			
 			removeEventListener(ElementExistenceEvent.ELEMENT_ADD, onElementAdd);
 			removeEventListener(FlexEvent.CREATION_COMPLETE, onWidgetCreationComplete);
+			
 			m_labelLayout.destroy();
 			m_objectLayout.destroy();
-			if (m_resizeTimer)
+			
+			if(m_resizeTimer)
 			{
 				m_resizeTimer.stop();
 				m_resizeTimer.removeEventListener(TimerEvent.TIMER_COMPLETE, afterDelayedResize);
 			}
+			
 			m_featureSplitter.destroy();
 		}
 
-		override protected function createChildren(): void
+		override protected function createChildren():void
 		{
 			super.createChildren();
-			m_layerBackground = new UIComponent();
+			
 			m_layerLayoutParent = new UIComponent();
+			
 			m_featureSplitter = new FeatureSplitter(this);
 		}
-
-		override protected function childrenCreated(): void
+		
+		override protected function childrenCreated():void
 		{
 			super.childrenCreated();
-			addElement(m_layerBackground);
+			
 			addElement(m_layerContainer);
 			addElement(m_layerLayoutParent);
 			m_layerLayoutParent.addChild(m_labelLayout);
+			
+			debugWidget();
+			debugLayers();
 		}
-
-		override protected function commitProperties(): void
+		
+		override protected function commitProperties():void
 		{
 			super.commitProperties();
+			
 			if (mb_autoLayoutChanged)
 			{
 				var widgetParent: Group = parent as Group;
 				if (widgetParent)
 				{
 					if (mb_autoLayout)
+					{
 						widgetParent.addEventListener(ResizeEvent.RESIZE, onParentResize);
-					else
+					} else {
 						widgetParent.removeEventListener(ResizeEvent.RESIZE, onParentResize);
+					}
 				}
 			}
-			
-			if (_layersOrderChanged)
-			{
-				orderLayers();
-				_layersOrderChanged = false;
-			}
 		}
+			
 		private var _resizeInterval: Number;
-
 		private function onParentResize(event: ResizeEvent): void
 		{
 			clearTimeout(_resizeInterval);
+			
 			//wait 1 second before resing (if there is another resize event)
 			var resizeMinimumTime: Number = 1000; //1000ms
+			
 			var currTime: Number = getTimer();
+			
 			if ((currTime - m_lastResizeTime) >= resizeMinimumTime)
 			{
+//				trace("go autolayout: time diff: "+(currTime - m_lastResizeTime) +" ms");
 				m_lastResizeTime = currTime;
 				autoLayoutViewBBox(m_viewBBox, true, true);
-			}
-			else
-			{
+			} else {
+//				trace("on parent resize: wait at least "+(currTime - m_lastResizeTime) +" ms");
 				//uto layout but do not load layers (finalUpdate = false)
 				autoLayoutViewBBox(m_viewBBox, false, true);
+				
 				_resizeInterval = setTimeout(autoLayoutViewBBox, (currTime - m_lastResizeTime), m_viewBBox, true, true);
 			}
 		}
-
+		
 		/**
-		 * All elements, which are InteractiveLayer, added before CREATION_COMPLETE (check @onElementAdd function) are stored
-		 * and in this function are added as new layer.
+		 * All elements, which are InteractiveLayer, added before CREATION_COMPLETE (check @onElementAdd function) are stored 
+		 * and in this function are added as new layer. 
 		 * This fix added InteractiveLayer through MXML. (like InteractiveLayerZoom and InteractiveLayerPan and similar interactice layers)
-		 *
+		 * 
 		 * @param event
-		 *
-		 */
+		 * 
+		 */		
 		private function onWidgetCreationComplete(event: FlexEvent): void
 		{
+//			trace("InteractiveWdiget was fully created. Default mxmlContent layers: " + _mxmlContentElements.length);
 			for each (var layer: InteractiveLayer in _mxmlContentElements)
 			{
 				addLayer(layer);
 			}
 		}
+		
 		private var _mxmlContentElements: Array = [];
-
+		
 		/**
-		 * This function is called when new element is added to widget. All elements, which are InteractiveLayer,
-		 * added before CREATION_COMPLETE are stored and in function onWidgetCreationComplete are added as new layer.
+		 * This function is called when new element is added to widget. All elements, which are InteractiveLayer, 
+		 * added before CREATION_COMPLETE are stored and in function onWidgetCreationComplete are added as new layer. 
 		 * This fix added InteractiveLayer through MXML. (like InteractiveLayerZoom and InteractiveLayerPan and similar interactice layers)
-		 *
+		 * 
 		 * @param event
-		 *
-		 */
+		 * 
+		 */		
 		private function onElementAdd(event: ElementExistenceEvent): void
 		{
+//			trace("onElementAdd");
+			
 			if (event.element is InteractiveLayer)
 			{
 				_mxmlContentElements.push(event.element as InteractiveLayer);
-				(event.element as InteractiveLayer).container = this;
+//				addLayer(event.element as InteractiveLayer);
 			}
 		}
-
+		
 		public function get numLayers(): int
 		{
 			if (m_layerContainer)
+			{
 				return m_layerContainer.numElements;
+			}
 			return 0;
 		}
-
-		/**
-		 * Function returns first layer of requested type
-		 *
-		 * @param classType
-		 * @return
-		 *
-		 */
-		public function getLayerByType(classType: Class): InteractiveLayer
-		{
-			var total: int = m_layerContainer.numElements;
-			for (var i: int = 0; i < total; i++)
-			{
-				var l: InteractiveLayer = m_layerContainer.getElementAt(i) as InteractiveLayer;
-				if (l && l is classType)
-					return l;
-			}
-			return null;
-		}
-
 		public function getLayerAt(position: int): InteractiveLayer
 		{
 			if (position < m_layerContainer.numElements)
+			{
 				return m_layerContainer.getElementAt(position) as InteractiveLayer;
+			}
 			return null;
 		}
-
-		public override function addElement(element: IVisualElement): IVisualElement
+		public override function addElement(element:IVisualElement):IVisualElement
 		{
-			if (element is InteractiveLayer)
-			{
+			if(element is InteractiveLayer) {
 				// InteractiveLayer based child are added to m_layerContainer
 				InteractiveLayer(element).container = this; // this also ensures that child is InteractiveLayer
 				element.width = width;
@@ -333,11 +267,10 @@ package com.iblsoft.flexiweather.widgets
 			else
 				return super.addElement(element);
 		}
-
-		public override function addElementAt(element: IVisualElement, index: int): IVisualElement
+		
+		public override function addElementAt(element:IVisualElement, index:int):IVisualElement
 		{
-			if (element is InteractiveLayer)
-			{
+			if(element is InteractiveLayer) {
 				// InteractiveLayer based child are added to m_layerContainer
 				InteractiveLayer(element).container = this; // this also ensures that element is InteractiveLayer
 				element.x = x;
@@ -345,140 +278,72 @@ package com.iblsoft.flexiweather.widgets
 				element.width = width;
 				element.height = height;
 				var o: IVisualElement = m_layerContainer.addElementAt(element, index);
-				invalidateLayersOrder();
+				orderLayers();
 				return o;
 			}
 			else
 				return super.addElementAt(element, index);
 		}
-		private var m_layersLoading: int = 0;
 
-		private function onLayerLoadingStart(event: InteractiveLayerEvent): void
+		private var m_layersLoading: int = 0;
+		private function onLayerLoadingStart( event: InteractiveLayerEvent): void
 		{
 			m_layersLoading++;
+			
 			var ile: InteractiveWidgetEvent = new InteractiveWidgetEvent(InteractiveWidgetEvent.DATA_LAYER_LOADING_STARTED);
 			ile.layersLoading = m_layersLoading;
 			dispatchEvent(ile);
+			
+//			trace("IW onLayerLoadingStart " + event.interactiveLayer.name + " m_layersLoading: " + m_layersLoading);
 		}
-
-		private function onLayerLoaded(event: InteractiveLayerEvent): void
+		private function onLayerLoaded( event: InteractiveLayerEvent): void
 		{
 			m_layersLoading--;
+//			trace("IW onLayerLoaded " + event.interactiveLayer.name + " layers currently loading: " + m_layersLoading);
+			
 			var ile: InteractiveWidgetEvent
 			ile = new InteractiveWidgetEvent(InteractiveWidgetEvent.DATA_LAYER_LOADING_FINISHED);
 			ile.layersLoading = m_layersLoading;
 			dispatchEvent(ile);
+			
 			if (m_layersLoading <= 0)
 			{
+//				trace("\t IW ALL layers are loaded");
 				ile = new InteractiveWidgetEvent(InteractiveWidgetEvent.ALL_DATA_LAYERS_LOADED);
 				dispatchEvent(ile);
 			}
 		}
-
-		private function onLayerInInteractiveLayerMapAdded(event: DynamicEvent): void
-		{
-			trace("\t" + this + " onLayerInInteractiveLayerMapAdded \n");
-			notifyWidgetChanged('layerAddedInInteractiveLayerMap', this);
-		}
-
-		private function onLayerInInteractiveLayerMapRemoved(event: DynamicEvent): void
-		{
-			trace(this + " onLayerInInteractiveLayerMapRemoved");
-			notifyWidgetChanged('layerRemovedInInteractiveLayerMap', this);
-		}
-
-		private function onLayerChangedInInteractiveLayerMap(event: Event): void
-		{
-			if (event.type == InteractiveLayerWMSEvent.WMS_STYLE_CHANGED)
-				notifyWidgetChanged('wmsStyle', event.target);
-			if (event.type == InteractiveLayerEvent.VISIBILITY_CHANGED)
-				notifyWidgetChanged('visible', event.target);
-		}
 		
-		private function registerInteractiveLayerMap(ilm: InteractiveLayerMap): void
-		{
-			trace(this + " registerInteractiveLayerMap");
-			if (ilm)
-			{
-				ilm.addEventListener(InteractiveLayerEvent.VISIBILITY_CHANGED, onLayerChangedInInteractiveLayerMap);
-				ilm.addEventListener(InteractiveLayerWMSEvent.WMS_STYLE_CHANGED, onLayerChangedInInteractiveLayerMap);
-				
-				ilm.addEventListener(InteractiveLayerMap.TIME_AXIS_ADDED, onLayerInInteractiveLayerMapAdded);
-				ilm.addEventListener(InteractiveLayerMap.TIME_AXIS_REMOVED, onLayerInInteractiveLayerMapRemoved);
-			}
-		}
-
-		private function unregisterInteractiveLayerMap(ilm: InteractiveLayerMap): void
-		{
-			trace(this + " unregisterInteractiveLayerMap");
-			if (ilm)
-			{
-//				ilm.addEventListener(InteractiveLayerMap.TIME_AXIS_UPDATED, onTimeAxisUpdated);
-				ilm.removeEventListener(InteractiveLayerEvent.VISIBILITY_CHANGED, onLayerChangedInInteractiveLayerMap);
-				ilm.removeEventListener(InteractiveLayerMap.TIME_AXIS_ADDED, onLayerInInteractiveLayerMapAdded);
-				ilm.removeEventListener(InteractiveLayerMap.TIME_AXIS_REMOVED, onLayerInInteractiveLayerMapRemoved);
-			}
-		}
-
-		private function setInteractiveLayerMap(ilm: InteractiveLayerMap): void
-		{
-			unregisterInteractiveLayerMap(m_interactiveLayerMap);
-			m_interactiveLayerMap = ilm;
-			registerInteractiveLayerMap(m_interactiveLayerMap);
-			notifyInteractiveLayerMapChanged();
-		}
-
-		private function notifyInteractiveLayerMapChanged(): void
-		{
-			dispatchEvent(new Event('interactiveLayerMapChanged'));
-		}
-		private var _tempLayersForInteractiveLayerMap: Array;
-
 		public function addLayer(l: InteractiveLayer, index: int = -1): void
 		{
 			l.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onLayerLoaded);
 			l.addEventListener(InteractiveDataLayer.LOADING_STARTED, onLayerLoadingStart);
-			l.addEventListener(InteractiveLayerEvent.LAYER_INITIALIZED, onLayerInitialized);
-//			var bAddLayer: Boolean = false;
-			//all map data layer have to go to interactiveLayerMap, all others just to interactiveWidget
-			if (l is InteractiveLayerMap)
-				setInteractiveLayerMap(l as InteractiveLayerMap);
-			l.container = this;
+			
 			if (index >= 0)
 				addElementAt(l, index);
 			else
 				addElement(l);
-			//all other functionality will be done after layer will be initialized in onLayerInitialized function
-		}
-
-		private function onLayerInitialized(event: InteractiveLayerEvent): void
-		{
-			var l: InteractiveLayer = event.target as InteractiveLayer;
+			
 			//when new layer is added to container, call onAreaChange to notify layer, that layer is already added to container, so it can render itself
 			l.onAreaChanged(true);
-			invalidateLayersOrder();
-			notifyWidgetChanged('addLayer', this);
+			
+			orderLayers();
 		}
-
+		
 		public function removeLayer(l: InteractiveLayer, b_destroy: Boolean = false): void
 		{
-			if (l is InteractiveLayerMap && m_interactiveLayerMap == l)
-				setInteractiveLayerMap(null);
 			l.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onLayerLoaded);
 			l.removeEventListener(InteractiveDataLayer.LOADING_STARTED, onLayerLoadingStart);
-			if (l.parent == m_layerContainer)
-			{
+			
+			if(l.parent == m_layerContainer) {
 				m_layerContainer.removeElement(l);
 				l.destroy();
-				l.container = null;
 			}
-			notifyWidgetChanged('removeLayer', this);
 		}
-
+		
 		public function removeAllLayers(): void
 		{
-			while (m_layerContainer.numElements)
-			{
+			while(m_layerContainer.numElements) {
 				var i: int = m_layerContainer.numElements - 1;
 				var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
 				l.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onLayerLoaded);
@@ -488,134 +353,141 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 		
-		private var _layersOrderChanged: Boolean;
-		public function invalidateLayersOrder(): void
+		public function debugWidget(): void
 		{
-			if (!_layersOrderChanged)
+			var total: int = numChildren;
+			for (var i: int = 0; i < total; i++)
 			{
-				_layersOrderChanged = true;
-				invalidateProperties();
+				var child: DisplayObject = getChildAt(i);
+				trace("\t Widget debugWidget child DO: " + i + ": " + child.name + " parent: " + child.parent);
+					
+			}
+			total = numElements;
+			for (i = 0; i < total; i++)
+			{
+				var childVE: IVisualElement = getElementAt(i);
+				trace("\t Widget debugWidget element DO: " + i + " parent: " + childVE.parent);
 			}
 		}
-
-		private function orderLayers(): void
+		public function debugLayers(): void
 		{
-			if (mb_orderingLayers)
-				return;
-			
-			mb_orderingLayers = true;
-			try
+			var total: int = m_layerContainer.numChildren;
+			for (var i: int = 0; i < total; i++)
 			{
+				var child: DisplayObject = m_layerContainer.getChildAt(i);
+				if (child is InteractiveLayer)
+				{
+					var layer: InteractiveLayer = InteractiveLayer(child); 
+					trace("\t Widget debugLayers child layer: " + i + ": " + layer.name + " parent: " + layer.parent);
+				} else {
+					trace("\t Widget debugLayers child DO: " + i + ": " + child.name + " parent: " + child.parent);
+					
+				}
+			}
+			total = m_layerContainer.numElements;
+			for (i = 0; i < total; i++)
+			{
+				var childVE: IVisualElement = m_layerContainer.getElementAt(i);
+				if (childVE is InteractiveLayer)
+				{
+					layer = InteractiveLayer(childVE); 
+					trace("\t Widget debugLayers element layer: " + i + ": " + layer.name + " parent: " + layer.parent);
+				} else {
+					trace("\t Widget debugLayers element DO: " + i + " parent: " + childVE.parent);
+				}
+			}
+		}
+		
+		public function orderLayers(): void
+		{
+//			trace("Widget orderLayers");
+//			debugWidget();
+//			debugLayers();
+			if(mb_orderingLayers)
+				return;
+			mb_orderingLayers = true;
+			try {
 				// stable-sort interactive layers in ma_layers according to their zOrder property
 				var displayObject: DisplayObject;
-				for (var i: int = 0; i < m_layerContainer.numElements; ++i)
-				{
+				
+				for(var i: int = 0; i < m_layerContainer.numElements; ++i) {
 					displayObject = m_layerContainer.getElementAt(i) as DisplayObject;
-					var ilI: InteractiveLayer = InteractiveLayer(displayObject);
-					for (var j: int = i + 1; j < m_layerContainer.numElements; ++j)
-					{
+					var ilI: InteractiveLayer = InteractiveLayer(displayObject); 
+//					trace("\t I zOrder: ["+ilI.zOrder+"] ["+displayObject+"] ilI ["+ilI+"] contains: " + m_layerContainer.contains(ilI));
+					for(var j: int = i + 1; j < m_layerContainer.numElements; ++j) {
 						displayObject = m_layerContainer.getElementAt(j) as DisplayObject;
 						var ilJ: InteractiveLayer = InteractiveLayer(displayObject);
-						if (ilJ.zOrder < ilI.zOrder)
-						{
+//						trace("\t\t I zOrder: ["+ilJ.zOrder+"] ["+displayObject+"] ilI ["+ilJ+"] contains: " + m_layerContainer.contains(ilJ));
+						if(ilJ.zOrder < ilI.zOrder) {
 							// swap Ith and Jth layer, we know that J > I
+//							trace('\t\t\t[IW.orderLayers] ... swapping ' + ilJ.name + ' with ' + ilI.name);
 							m_layerContainer.swapElements(ilJ, ilI);
+//							trace('\t\t\t[IW.orderLayers] swap is OK');
 						}
 					}
 				}
+			} catch (error: Error) {
+				trace("IW.orderLayer catch: " + error.message);
 			}
-			catch (error: Error)
-			{
-				trace("InteractiveLayer.orderLayer: catch: " + error.message);
-			}
-			finally
-			{
+			finally {
+//				debugLayers();
 				mb_orderingLayers = false;
 			}
-			if (interactiveLayerMap)
-				interactiveLayerMap.invalidateLayersOrder();
-		}
-		private var _disableUI: UIComponent;
-
-		private function drawDisabledState(): void
-		{
-			if (!_disableUI)
-			{
-				_disableUI = new Group();
-				addElement(_disableUI);
-			}
-			_disableUI.includeInLayout = true;
-			_disableUI.visible = true;
-			var g: Graphics = _disableUI.graphics;
-			g.clear();
-			g.beginFill(0);
-			g.drawRect(0, 0, unscaledWidth, unscaledHeight);
-			g.endFill()
 		}
 
-		override protected function updateDisplayList(unscaledWidth: Number, unscaledHeight: Number): void
-		{
-			if (isNaN(unscaledWidth) || isNaN(unscaledHeight))
-			{
-				//when user press Cancel on printing interactiveWidget, both sizes was NaN
-				return;
-			}
+        override protected function updateDisplayList(
+            	unscaledWidth: Number, unscaledHeight: Number): void
+        {
+            if (isNaN(unscaledWidth) || isNaN(unscaledHeight))
+            {
+            	//when user press Cancel on printing interactiveWidget, both sizes was NaN
+            	return;
+            }
+
 			m_layerContainer.width = width;
 			m_layerContainer.height = height;
-			if (m_labelLayout.m_placementBitmap == null)
-				m_labelLayout.setBoundary(new Rectangle(0, 0, width, height));
-			var g: Graphics = m_layerBackground.graphics;
-			g.clear();
-			if (!enabled)
-			{
-				drawDisabledState();
-				return;
-			}
-			else
-			{
-				if (_disableUI)
-				{
-					_disableUI.includeInLayout = false;
-					_disableUI.visible = false;
-				}
-			}
+			
+			if(m_labelLayout.m_placementBitmap == null)
+				m_labelLayout.setBoundary(new Rectangle(0, 0, width, height)); 
+			
 			anticollisionUpdate();
-			if (mb_backgroundChessBoard)
-			{
+
+			graphics.clear();
+
+			if(mb_backgroundChessBoard) {
 				var i_squareSize: uint = 10;
 				var i_row: uint = 0;
-				for (var y: uint = 0; y < height; y += i_squareSize, ++i_row)
-				{
+				for(var y: uint = 0; y < height; y += i_squareSize, ++i_row) {
 					var b_flag: Boolean = (i_row & 1) != 0;
-					for (var x: uint = 0; x < width; x += i_squareSize)
-					{
-						g.beginFill(b_flag ? 0xc0c0c0 : 0x808080);
-						g.drawRect(x, y, i_squareSize, i_squareSize);
-						g.endFill();
+					for(var x: uint = 0; x < width; x += i_squareSize) {
+						graphics.beginFill(b_flag ? 0xc0c0c0 : 0x808080);
+						graphics.drawRect(x, y, i_squareSize, i_squareSize);
+						graphics.endFill();
 						b_flag = !b_flag;
 					}
 				}
 			}
-			else
-			{
+			else {
 				var matrix: Matrix = new Matrix();
 				matrix.rotate(90);
-				g.beginGradientFill(GradientType.LINEAR, [0xAAAAAA, 0xFFFFFF], [1, 1], [0, 255], matrix);
-				g.drawRect(0, 0, width, height);
-				g.endFill();
+				graphics.beginGradientFill(GradientType.LINEAR, [0xAAAAAA, 0xFFFFFF], [1, 1], [0, 255], matrix);
+				graphics.drawRect(0, 0, width, height);
+				graphics.endFill();
 			}
-			//TODO: uncomment next if statement if you want display label layout placement bitmap
-			if (m_labelLayout.m_placementBitmap)
-				m_labelLayout.drawDebugPlacementBitmap(g);
-			if (m_objectLayout.m_placementBitmap)
-				m_objectLayout.drawDebugPlacementBitmap(g);
-			super.updateDisplayList(unscaledWidth, unscaledHeight);
-		}
+
+			// DEBUG: display label layout placement bitmap
+//			graphics.beginBitmapFill(m_labelLayout.m_placementBitmap);
+//			graphics.drawRect(0, 0, m_labelLayout.m_placementBitmap.width, m_labelLayout.m_placementBitmap.height);
+//			graphics.endFill();
+
+            super.updateDisplayList(unscaledWidth, unscaledHeight);
+        }
 
 		protected function signalAreaChanged(b_finalChange: Boolean): void
 		{
 			onAreaChanged(b_finalChange);
 		}
+
 		private var _oldViewBBox: BBox = new BBox(0,0,0,0);
 		
 		protected function onAreaChanged(b_finalChange: Boolean): void
@@ -625,47 +497,43 @@ package com.iblsoft.flexiweather.widgets
 				if (!b_finalChange)
 					return;
 			}
-			for (var i: int = 0; i < m_layerContainer.numElements; ++i)
-			{
-				var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
-				if (l.onAreaChanged(b_finalChange))
-					break;
-				if (!l.isDynamicPartInvalid())
-					l.invalidateDynamicPart();
-			}
-			setAnticollisionLayoutsDirty();
+			
+            for(var i: int = 0; i < m_layerContainer.numElements; ++i) {
+            	var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
+            	if(l.onAreaChanged(b_finalChange))
+            		break;
+            	if(!l.isDynamicPartInvalid())
+            		l.invalidateDynamicPart();
+            }
+			m_labelLayout.setDirty();
+			
 			_oldViewBBox = m_viewBBox.clone();
+			
 			//dispatch area change event
 			dispatchEvent(new InteractiveWidgetEvent(InteractiveWidgetEvent.AREA_CHANGED));
-		}
-
-		private function setAnticollisionLayoutsDirty(): void
-		{
-			m_objectLayout.areaChanged(m_viewBBox);
-			m_objectLayout.setDirty();
-			m_labelLayout.areaChanged(m_viewBBox);
-			m_labelLayout.setDirty();
-		}
-
+        }
+		
 		internal function onLayerVisibilityChanged(layer: InteractiveLayer): void
 		{
-			setAnticollisionLayoutsDirty();
+			m_labelLayout.setDirty();
 		}
-
-		/** Converts screen point (pixels) into Coord with current CRS. */
+        
+		/** Converts screen point (pixels) into Coord with current CRS. */ 
 		public function pointToCoord(x: Number, y: Number): Coord
 		{
 			return new Coord(ms_crs, x * m_viewBBox.width / (width - 1) + m_viewBBox.xMin, (height - 1 - y) * m_viewBBox.height / (height - 1) + m_viewBBox.yMin)
 		}
 
-		public function coordInside(c: Coord): Boolean
+        public function coordInside(c: Coord): Boolean
 		{
-			if (!Projection.equalCRSs(c.crs, ms_crs))
-			{
+			if(!Projection.equalCRSs(c.crs, ms_crs)) {
 				//same projectsion
 				c = c.convertToProjection(m_crsProjection);
 			}
-			return m_viewBBox.coordInside(c);
+			if (c)
+				return m_viewBBox.coordInside(c);
+			
+			return false;
 		}
 
 		/** Converts Coord into screen point (pixels) with current CRS. */
@@ -1020,226 +888,156 @@ package com.iblsoft.flexiweather.widgets
 			}
 			return [{point: point, reflection: 0}];
 		}
-		private var mb_listenForChanges: Boolean;
+        // Mouse events handling
 
-		[Bindable(event = "listeningForChangesChanged")]
-		public function get listeningForChanges(): Boolean
-		{
-			return mb_listenForChanges;
-		}
-
-		public function startListenForChanges(): void
-		{
-			if (!mb_listenForChanges)
-			{
-				mb_listenForChanges = true;
-				dispatchEvent(new Event("listeningForChangesChanged"));
-			}
-		}
-
-		public function stopListenForChanges(): void
-		{
-			if (mb_listenForChanges)
-			{
-				mb_listenForChanges = false;
-				dispatchEvent(new Event("listeningForChangesChanged"));
-			}
-		}
-
-		/**
-		 * InteractiveWidget needs to call this function is anything, what needs to be synchronized was changed
-		 *
-		 */
-		public function notifyWidgetChanged(change: String, objectChanged: Object): void
-		{
-			if (mb_listenForChanges)
-			{
-				var iwe: InteractiveWidgetEvent = new InteractiveWidgetEvent(InteractiveWidgetEvent.WIDGET_CHANGED);
-				iwe.changeDescription = change;
-				iwe.data = objectChanged;
-				dispatchEvent(iwe);
-			}
-		}
-
-		private function notifyWidgetSelected(): void
-		{
-			dispatchEvent(new InteractiveWidgetEvent(InteractiveWidgetEvent.WIDGET_SELECTED));
-		}
-
-		// Mouse events handling
-		protected function onMouseDown(event: MouseEvent): void
-		{
-			if (!_enableMouseClick)
-				return;
-			for (var i: int = m_layerContainer.numElements - 1; i >= 0; --i)
-			{
-				var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
-				if (!l.enabled)
-					continue;
-				if (l.onMouseDown(event))
+        protected function onMouseDown(event: MouseEvent): void
+        {
+//			trace(this + " onMouseDown \n\n");
+            for(var i: int = m_layerContainer.numElements - 1; i >= 0; --i) {
+            	var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
+//				trace("\t " + this + " onMouseDown test layer: " + l);
+            	if(!l.enabled)
+            		continue;
+            	if(l.onMouseDown(event))
 				{
-					notifyWidgetSelected();
-					break;
+//					trace("\t " + this + " onMouseDown MOUSE DOWN ON layer: " + l);
+            		break;
 				}
-			}
-			postUserActionUpdate();
-		}
+            }
+			postUserActionUpdate();			
+        }
 
-		protected function onMouseUp(event: MouseEvent): void
-		{
-			if (!_enableMouseClick)
-				return;
-			for (var i: int = m_layerContainer.numElements - 1; i >= 0; --i)
-			{
-				var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
-				if (!l.enabled)
-					continue;
-				if (l.onMouseUp(event))
-					break;
-			}
-			postUserActionUpdate();
-		}
+        protected function onMouseUp(event: MouseEvent): void
+        {
+            for(var i: int = m_layerContainer.numElements - 1; i >= 0; --i) {
+            	var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
+            	if(!l.enabled)
+            		continue;
+            	if(l.onMouseUp(event))
+            		break; 
+            }
+			postUserActionUpdate();			
+        }
 
-		protected function onMouseMove(event: MouseEvent): void
-		{
-			if (!_enableMouseMove)
-				return;
-			for (var i: int = m_layerContainer.numElements - 1; i >= 0; --i)
-			{
-				var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
-				if (!l.enabled)
-					continue;
-				if (l.onMouseMove(event))
-					break;
-			}
-			postUserActionUpdate();
-		}
+        protected function onMouseMove(event: MouseEvent): void
+        {
+            for(var i: int = m_layerContainer.numElements - 1; i >= 0; --i) {
+            	var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
+            	if(!l.enabled)
+            		continue;
+            	if(l.onMouseMove(event))
+            		break; 
+            }
+			postUserActionUpdate();			
+        }
 
-		protected function onMouseWheel(event: MouseEvent): void
-		{
-			for (var i: int = m_layerContainer.numElements - 1; i >= 0; --i)
-			{
-				var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
-				if (!l.enabled)
-					continue;
-				if (l.onMouseWheel(event))
-					break;
-			}
-			postUserActionUpdate();
-		}
+        protected function onMouseWheel(event: MouseEvent): void
+        {
+            for(var i: int = m_layerContainer.numElements - 1; i >= 0; --i) {
+            	var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
+            	if(!l.enabled)
+            		continue;
+            	if(l.onMouseWheel(event))
+            		break; 
+            }
+			postUserActionUpdate();			
+        }
+        
+        protected function onMouseClick(event: MouseEvent): void
+        {
+            for(var i: int = m_layerContainer.numElements - 1; i >= 0; --i) {
+            	var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
+            	if(!l.enabled)
+            		continue;
+            	if(l.onMouseClick(event))
+            		break; 
+            }
+			postUserActionUpdate();			
+        }
 
-		protected function onMouseClick(event: MouseEvent): void
-		{
-			if (!_enableMouseClick)
-				return;
-			for (var i: int = m_layerContainer.numElements - 1; i >= 0; --i)
-			{
-				var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
-				if (!l.enabled)
-					continue;
-				if (l.onMouseClick(event))
-				{
-					notifyWidgetSelected();
-					break;
-				}
-			}
-			postUserActionUpdate();
-		}
+        protected function onMouseDoubleClick(event: MouseEvent): void
+        {
+            for(var i: int = m_layerContainer.numElements - 1; i >= 0; --i) {
+            	var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
+            	if(!l.enabled)
+            		continue;
+            	if(l.onMouseDoubleClick(event))
+            		break; 
+            }
+			postUserActionUpdate();			
+        }
 
-		protected function onMouseDoubleClick(event: MouseEvent): void
-		{
-			if (!_enableMouseClick)
-				return;
-			for (var i: int = m_layerContainer.numElements - 1; i >= 0; --i)
-			{
-				var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
-				if (!l.enabled)
-					continue;
-				if (l.onMouseDoubleClick(event))
-				{
-					notifyWidgetSelected();
-					break;
-				}
-			}
-			postUserActionUpdate();
-		}
+        protected function onMouseRollOver(event: MouseEvent): void
+        {
+            for(var i: int = m_layerContainer.numElements - 1; i >= 0; --i) {
+            	var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
+            	if(!l.enabled)
+            		continue;
+            	if(l.onMouseRollOver(event))
+            		break; 
+            }
+			postUserActionUpdate();			
+        }
 
-		protected function onMouseRollOver(event: MouseEvent): void
-		{
-			for (var i: int = m_layerContainer.numElements - 1; i >= 0; --i)
-			{
-				var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
-				if (!l.enabled)
-					continue;
-				if (l.onMouseRollOver(event))
-					break;
-			}
-			postUserActionUpdate();
-		}
-
-		protected function onMouseRollOut(event: MouseEvent): void
-		{
-			for (var i: int = m_layerContainer.numElements - 1; i >= 0; --i)
-			{
-				var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
-				if (!l.enabled)
-					continue;
-				if (l.onMouseRollOut(event))
-					break;
-			}
-			postUserActionUpdate();
-		}
-
-		protected function onResized(Event: ResizeEvent): void
-		{
+        protected function onMouseRollOut(event: MouseEvent): void
+        {
+            for(var i: int = m_layerContainer.numElements - 1; i >= 0; --i) {
+            	var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
+            	if(!l.enabled)
+            		continue;
+            	if(l.onMouseRollOut(event))
+            		break; 
+            }
+			postUserActionUpdate();			
+        }
+        
+        protected function onResized(Event: ResizeEvent): void
+        {
 			m_labelLayout.setBoundary(new Rectangle(0, 0, width, height));
-			if (!m_resizeTimer)
-			{
-				m_resizeTimer = new Timer(500, 1);
-				m_resizeTimer.addEventListener(TimerEvent.TIMER_COMPLETE, afterDelayedResize);
-			}
-			m_resizeTimer.stop();
-			m_resizeTimer.start();
-		}
-
-		private function afterDelayedResize(event: TimerEvent = null): void
-		{
+			if(!m_resizeTimer)
+        	{
+        		m_resizeTimer = new Timer(500, 1);
+        		m_resizeTimer.addEventListener(TimerEvent.TIMER_COMPLETE, afterDelayedResize);
+        	}
+        	m_resizeTimer.stop();
+        	m_resizeTimer.start();
+        }
+        
+        private function afterDelayedResize(event: TimerEvent = null): void
+        {
 //        	setViewBBox(m_viewBBox, true); // set the view bbox to update the aspects 
-			setViewBBox(m_viewBBox, false); // set the view bbox to update the aspects 
-			for (var i: int = 0; i < m_layerContainer.numElements; ++i)
-			{
-				var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
-				l.width = width;
-				l.height = height;
-				l.onContainerSizeChanged();
-				if (!l.isDynamicPartInvalid())
-					l.invalidateDynamicPart();
-			}
-			scrollRect = new Rectangle(0, 0, width, height);
+        	setViewBBox(m_viewBBox, false); // set the view bbox to update the aspects 
+            for(var i: int = 0; i < m_layerContainer.numElements; ++i) {
+            	var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
+            	l.width = width;
+            	l.height = height;
+            	l.onContainerSizeChanged();
+            	if(!l.isDynamicPartInvalid())
+            		l.invalidateDynamicPart();
+            }
+            scrollRect = new Rectangle(0, 0, width, height);
 			postUserActionUpdate();
 		}
-
+		
 		private function postUserActionUpdate(): void
 		{
-			for (var i: int = 0; i < m_layerContainer.numElements; ++i)
-			{
+			for(var i: int = 0; i < m_layerContainer.numElements; ++i) {
 				var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
-				if (l.isDynamicPartInvalid())
+				if(l.isDynamicPartInvalid())
 					l.validateNow();
 			}
+			
 			anticollisionUpdate();
 		}
-
+		
 		// Getters & setters
-		public function getCRS(): String
-		{
-			return ms_crs;
-		}
 
+		public function getCRS(): String
+		{ return ms_crs; }
+		
 		public function setCRS(s_crs: String, b_finalChange: Boolean = true): void
 		{
-			if (ms_crs != s_crs)
-			{
+			if(ms_crs != s_crs) {
 				ms_crs = s_crs;
 				m_crsProjection = Projection.getByCRS(s_crs);
 				signalAreaChanged(b_finalChange);
@@ -1247,24 +1045,11 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 
-		public function setCRSExtentAndViewBBox(s_crs: String, extentBBox: BBox = null, viewBBox: BBox = null, b_finalChange: Boolean = true): void
-		{
-			setCRS(s_crs, false);
-			if (extentBBox == null)
-				extentBBox = getCRSProjection().extentBBox;
-			if (extentBBox == null)
-				throw new Error("CRS " + s_crs + " does not have specified extent");
-			setExtentBBox(extentBBox);
-			if (viewBBox == null)
-				viewBBox = extentBBox;
-			setViewBBox(viewBBox, b_finalChange);
-		}
-
 		public function getCRSProjection(): Projection
 		{
 			return m_crsProjection;
 		}
-
+		
 		public function setViewBBoxRaw(xmin: Number, ymin: Number, xmax: Number, ymax: Number, b_finalChange: Boolean): void
 		{
 			setViewBBox(new BBox(xmin, ymin, xmax, ymax), b_finalChange);
@@ -1273,7 +1058,7 @@ package com.iblsoft.flexiweather.widgets
 		public function isCRSWrappingOverXAxis(): Boolean
 		{
 			m_crsProjection = Projection.getByCRS(ms_crs);
-			return m_crsProjection.wrapsHorizontally;
+			return m_crsProjection.wrapsHorizontally; 
 		}
 
 		public function getMapScale(): Number
@@ -1282,296 +1067,340 @@ package com.iblsoft.flexiweather.widgets
 			var h: int = height;
 			var bbox: BBox = m_viewBBox;
 			var prj: Projection = m_crsProjection;
+			
 			var dpi: int = Capabilities.screenDPI;
 			var maxDistanceOnEarthInKm: Number = bbox.getBBoxMaximumDistance(crs);
 			var screenDistanceInPixels: Number = Math.sqrt(w * w + h * h);
 			var screenDistanceInInches: Number = screenDistanceInPixels / dpi;
+			
 			var screenDistanceInKm: Number = screenDistanceInInches * 2.54 * 0.00001;
+			
 			var scale: Number = screenDistanceInKm / maxDistanceOnEarthInKm;
+				
 			return scale;
+			
 		}
-
+		
 		/**
-		 * Set center of  View BBox without changing zoom.
-		 * @param coord	Coording to center map on.
-		 */
-		public function centerViewBBoxTo(coord: Coord): void
+		 * Set center fo ViewBBox without changing zoom 
+		 * @param coord
+		 * 
+		 */		
+		public function setCenter(coord: Coord): void
 		{
 			var newViewBBox: BBox;
+			
 			var b_changeZoom: Boolean = false;
 			var oldBox: BBox = getViewBBox();
+			
 			var ptInOurCRS: Point;
-			if (!Projection.equalCRSs(coord.crs, ms_crs))
-			{
+			if(!Projection.equalCRSs(coord.crs, ms_crs)) {
 				//need to convert coord to current interactive widget coordinate
 				var sourceProjection: Projection = Projection.getByCRS(coord.crs);
 				var laLoPtRad: Point = sourceProjection.prjXYToLaLoPt(coord.x, coord.y);
 				if (laLoPtRad)
 					ptInOurCRS = m_crsProjection.laLoPtToPrjPt(laLoPtRad);
-			}
-			else
+			} else {
 				ptInOurCRS = new Point(coord.x, coord.y);
-			//clone old bbox, because size of new box will be same, just center will be moved
+			}
+			//clone olf bbox, because size of new box will be same, just center will be moved
 			newViewBBox = oldBox.clone();
 			var oldCenter: Point = newViewBBox.center;
 			newViewBBox = newViewBBox.translated(ptInOurCRS.x - oldCenter.x, ptInOurCRS.y - oldCenter.y)
+			
 			setViewBBox(newViewBBox, true);
 		}
-
-		//[Deprecated(replacement=centerViewTo]
-		public function setCenter(coord: Coord): void
-		{
-			centerViewBBoxTo(coord);
-		}
-
 		/**
 		 * Set View bounding box for all layers
-		 *
+		 *  
 		 * @param bbox - new bounding box to be changed to
 		 * @param b_finalChange - false if it is change in some running action (like user has draging map or zooming in or out). If action is finished, set b_finalChange = true
 		 * @param b_negotiateBBox - if bounding box needs to be negotiated (because some layers e.g. google can not set any bounding box (because of zoom)
 		 * @param b_changeZoom - This is temporary argument, just for Google Maps fix of scaling maps on Map PAN
-		 */
-		public function setViewBBox(bbox: BBox, b_finalChange: Boolean, b_negotiateBBox: Boolean = true): void
-		{
+		 */		
+        public function setViewBBox(bbox: BBox, b_finalChange: Boolean, b_negotiateBBox: Boolean = true): void
+        {
 			var b_changeZoom: Boolean = true;
 			var oldBox: BBox = getViewBBox();
+			
 			var bboxWidthDiff: int = Math.abs(bbox.width - oldBox.width);
 			var bboxHeightDiff: int = Math.abs(bbox.height - oldBox.height);
+			
+//			trace("InteractiveWidget.setViewBBox DIFF " + bboxWidthDiff + " , " + bboxHeightDiff);
 			if (bboxHeightDiff == 0 && bboxWidthDiff == 0)
+			{
 				b_changeZoom = false;
-			// aspect is the > 1 if bbox is wider than higher
-			// this is the aspect ratio we want to maintain
-			var f_extentAspect: Number = 1; //m_extentBBox.width / m_extentBBox.height;
-			var f_bboxCenterX: Number = bbox.xMin + bbox.width / 2.0;
-			var f_bboxCenterY: Number = bbox.yMin + bbox.height / 2.0;
-			// this is the aspect ratio of currently requeste bbox
-			var f_bboxApect: Number = bbox.width / bbox.height;
-			var f_componentAspect: Number = width / height;
+			}
+			
+//			trace("InteractiveWidget.setViewBBox (bbox: " +  bbox+") final change: " + b_finalChange);
+        	// aspect is the bigger the bbox is wider than higher
+        	
+        	// this is the aspect ratio we want to maintain
+        	var f_extentAspect: Number = 1; //m_extentBBox.width / m_extentBBox.height;
+        	
+        	var f_bboxCenterX: Number = bbox.xMin + bbox.width / 2.0; 
+        	var f_bboxCenterY: Number = bbox.yMin + bbox.height / 2.0;
+        	
+        	// this is the aspect ratio of currently requeste bbox
+        	var f_bboxApect: Number = bbox.width / bbox.height;
+        	var f_componentAspect: Number = width / height;
 			if (isNaN(f_componentAspect))
 				f_componentAspect = 1;
-			var f_newBBoxWidth: Number;
-			var f_newBBoxHeight: Number;
+				
+
+        	var f_newBBoxWidth: Number;
+        	var f_newBBoxHeight: Number;
+        	
 			if (!mb_autoLayout)
 			{
-				if (f_bboxApect < f_extentAspect)
-				{
-					// extent looks wider 
-					f_newBBoxWidth = f_componentAspect * f_extentAspect * bbox.height;
-					f_newBBoxHeight = bbox.height;
-				}
-				else
-				{
-					// extent looks higher
-					f_newBBoxWidth = bbox.width;
-					f_newBBoxHeight = bbox.width / f_extentAspect / f_componentAspect;
-				}
-				// uncomment this if statement, if you want enable unzoom to see more reflections
-				//			if (!isCRSWrappingOverXAxis())
-				//			{
-				if (f_newBBoxHeight > m_extentBBox.height)
-				{
-					f_newBBoxHeight = m_extentBBox.height;
-					f_newBBoxWidth = f_componentAspect * f_extentAspect * f_newBBoxHeight;
-				}
-				if (f_newBBoxWidth > m_extentBBox.width)
-				{
-					f_newBBoxWidth = m_extentBBox.width;
-					f_newBBoxHeight = f_newBBoxWidth / f_componentAspect / f_extentAspect;
-				}
-				//			}
-				if (isNaN(f_newBBoxHeight))
-					trace("InteractiveWidget.isVisible.setViewBBox: f_newBBoxHeight is NaN");
-				var viewBBox: Rectangle = new Rectangle(f_bboxCenterX - f_newBBoxWidth / 2.0, f_bboxCenterY - f_newBBoxHeight / 2.0, f_newBBoxWidth, f_newBBoxHeight);
-				//check if view BBox is not outside extent BBox
-				if (viewBBox.y < m_extentBBox.yMin)
-					viewBBox.offset(0, -viewBBox.y + m_extentBBox.yMin);
-				if (viewBBox.bottom > m_extentBBox.yMax)
-					viewBBox.offset(0, -viewBBox.bottom + m_extentBBox.yMax);
-				if (!isCRSWrappingOverXAxis())
-				{
-					if (viewBBox.x < m_extentBBox.xMin)
-						viewBBox.offset(-viewBBox.x + m_extentBBox.xMin, 0);
-					if (viewBBox.right > m_extentBBox.xMax)
-						viewBBox.offset(-viewBBox.right + m_extentBBox.xMax, 0);
-				}
-				var newBBox: BBox = BBox.fromRectangle(viewBBox);
-				/*
-	//	        if(!m_viewBBox.equals(newBBox)) {
-					m_viewBBox = newBBox;
-					signalAreaChanged(b_finalChange);
-	//	        }
-				*/
-				if (b_negotiateBBox)
-					negotiateBBox(newBBox, b_finalChange, b_changeZoom);
-				else
-					setViewBBoxAfterNegotiation(newBBox, b_finalChange);
-			}
-			else
+	        	
+        	if(f_bboxApect < f_extentAspect) {
+        		// extent looks wider 
+        		f_newBBoxWidth = f_componentAspect * f_extentAspect * bbox.height;
+        		f_newBBoxHeight = bbox.height;
+        	}
+        	else {
+        		// extent looks higher
+        		f_newBBoxWidth =  bbox.width;
+        		f_newBBoxHeight = bbox.width / f_extentAspect / f_componentAspect;
+        	}
+        	
+			// uncomment this if statement, if you want enable unzoom to see more reflections
+//			if (!isCRSWrappingOverXAxis())
+//			{
+	        	if(f_newBBoxHeight > m_extentBBox.height) {
+	        		f_newBBoxHeight = m_extentBBox.height;
+	        		f_newBBoxWidth = f_componentAspect * f_extentAspect * f_newBBoxHeight;
+	        	}
+	        	if(f_newBBoxWidth > m_extentBBox.width) {
+	        		f_newBBoxWidth = m_extentBBox.width;
+	        		f_newBBoxHeight = f_newBBoxWidth / f_componentAspect / f_extentAspect;
+	        	}
+//			}
+			if (isNaN(f_newBBoxHeight))
 			{
+				trace("stop f_newBBoxHeight is NaN");
+			}
+        	var viewBBox: Rectangle = new Rectangle(
+	        		f_bboxCenterX - f_newBBoxWidth / 2.0,
+	        		f_bboxCenterY - f_newBBoxHeight / 2.0,
+	        		f_newBBoxWidth,
+	        		f_newBBoxHeight);
+			
+			//check if view BBox is not outside extent BBox
+	        if(viewBBox.y < m_extentBBox.yMin)
+	        	viewBBox.offset(0, -viewBBox.y + m_extentBBox.yMin);
+	        if(viewBBox.bottom > m_extentBBox.yMax)
+	        	viewBBox.offset(0, -viewBBox.bottom + m_extentBBox.yMax);
+			
+			if (!isCRSWrappingOverXAxis())
+			{
+		        if(viewBBox.x < m_extentBBox.xMin)
+		        	viewBBox.offset(-viewBBox.x + m_extentBBox.xMin, 0);
+		        if(viewBBox.right > m_extentBBox.xMax)
+		        	viewBBox.offset(-viewBBox.right + m_extentBBox.xMax, 0);
+			}
+			
+	        var newBBox: BBox = BBox.fromRectangle(viewBBox);
+			
+			/*
+//	        if(!m_viewBBox.equals(newBBox)) {
+		        m_viewBBox = newBBox;
+	        	signalAreaChanged(b_finalChange);
+//	        }
+			*/
+			
+			if (b_negotiateBBox)
+				negotiateBBox(newBBox, b_finalChange, b_changeZoom);
+			else
+				setViewBBoxAfterNegotiation(newBBox, b_finalChange);
+
+				
+				
+			} else {
 				//auto layout in widget parent
 				autoLayoutViewBBox(bbox, b_finalChange, true);
 			}
-		}
+			
+
+        }
+		
 		private var _oldWidgetWidth: Number = 0;
 		private var _oldWidgetHeight: Number = 0;
-
-		private function autoLayoutViewBBox(bbox: BBox, b_finalChange: Boolean, b_setViewBBox: Boolean = false): void
+		
+		private function autoLayoutViewBBox(bbox: BBox, b_finalChange:Boolean, b_setViewBBox: Boolean = false): void
 		{
+			trace("autoLayoutViewBBox: " + bbox.toBBOXString() + " b_finalChange: " + b_finalChange);
 			//auto layout in widget parent
-			var widgetParent: Group = parent as Group;
-			if (widgetParent)
-			{
+				var widgetParent: Group = parent as Group; 
+				if (widgetParent)
+				{
 				var f_bboxApect: Number = bbox.width / bbox.height;
-				var parentWidth: Number = widgetParent.width;
-				var parentHeight: Number = widgetParent.height;
-				var f_parentAspect: Number = parentWidth / parentHeight;
-				var widgetXPosition: Number = 0;
-				var widgetYPosition: Number = 0;
-				var widgetWidth: Number = parentWidth;
-				var widgetHeight: Number = parentHeight;
-				if (f_bboxApect < f_parentAspect)
-				{
-					// extent looks wider 
-					widgetWidth = widgetHeight * f_bboxApect;
-					widgetXPosition = (parentWidth - widgetWidth) / 2;
-				}
-				else
-				{
-					// extent looks higher
-					widgetHeight = widgetWidth / f_bboxApect;
-					widgetYPosition = (parentHeight - widgetHeight) / 2;
-				}
+				
+					var parentWidth: Number = widgetParent.width;
+					var parentHeight: Number = widgetParent.height;
+					var f_parentAspect: Number = parentWidth / parentHeight;
+					
+					var widgetXPosition: Number = 0;
+					var widgetYPosition: Number = 0;
+					var widgetWidth: Number = parentWidth;
+					var widgetHeight: Number = parentHeight;
+					
+					if(f_bboxApect < f_parentAspect) {
+						// extent looks wider 
+						widgetWidth = widgetHeight * f_bboxApect;
+						widgetXPosition = (parentWidth - widgetWidth) / 2;
+					}
+					else {
+						// extent looks higher
+						widgetHeight = widgetWidth / f_bboxApect;
+						widgetYPosition = (parentHeight - widgetHeight) / 2;
+					}
+					
 				//check if change in width and height is higher than 1px
 				var widthDiff: Number = Math.abs(_oldWidgetWidth - widgetWidth);
 				var heightDiff: Number = Math.abs(_oldWidgetHeight - widgetHeight);
+				
 				if (widgetWidth > 1 || widgetHeight > 1)
 				{
 					this.width = widgetWidth;
 					this.height = widgetHeight;
 					this.x = widgetXPosition;
 					this.y = widgetYPosition;
+					
 					_oldWidgetWidth = widgetWidth;
 					_oldWidgetHeight = widgetHeight;
+					
 					if (b_setViewBBox)
-						setViewBBoxAfterNegotiation(bbox, b_finalChange);
+					setViewBBoxAfterNegotiation(bbox, b_finalChange);
+				} else {
+					trace("InteractiveWidget setViewBBox is too small: " + widthDiff + " , " + heightDiff);
 				}
-				else
-					trace("InteractiveWidget.autoLayoutViewBBox(): View BBox is too small: " + widthDiff + " , " + heightDiff);
 			}
-		}
-
+        }
+		
+		
 		private function negotiateBBox(newBBox: BBox, b_finalChange: Boolean, b_changeZoom: Boolean = true): void
 		{
+//			trace("\n *****************************************************************************");
+//			trace("\t IWidget negotiateBBox newBBox at startup: :" + newBBox.toLaLoString(ms_crs));
+//			trace("\t IWidget negotiateBBox newBBox at startup: :" + newBBox);
 			var latestBBox: BBox;
-			for (var i: int = 0; i < m_layerContainer.numElements; ++i)
-			{
+			for(var i: int = 0; i < m_layerContainer.numElements; ++i) {
+				
 				var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
+				
 				latestBBox = l.negotiateBBox(newBBox, b_changeZoom);
 				if (!latestBBox.equals(newBBox))
-					trace("InteractiveWidget.negotiateBBox(): bbox changed by layer " + l.layerName);
+				{
+					trace("WARNING: bbox changed by layer " + l.layerName);
+				}
 				newBBox = latestBBox;
+//				if (newBBox) {
+//					trace("\t\t IWidget negotiateBBox newBBox :" + newBBox.toLaLoString(ms_crs));
+//					trace("\t\t IWidget negotiateBBox newBBox :" + newBBox);
+//				} else 
+//					trace("\t\t IWidget negotiateBBox newBBox IS NULL");
+					
 			}
+//			trace("IWidget negotiateBBox newBBox at end: :" + newBBox.toLaLoString(ms_crs));
+//			trace("IWidget negotiateBBox newBBox at end: :" + newBBox);
+			
 			setViewBBoxAfterNegotiation(newBBox, b_finalChange);
+//			trace("*****************************************************************************\n");
 		}
-
+		
+		
 		private function setViewBBoxAfterNegotiation(newBBox: BBox, b_finalChange: Boolean): void
 		{
 			//dispath view bbox changed event to notify about change
+			
 			m_viewBBox = newBBox;
+			
+//			trace("IW setViewBBoxAfterNegotiation: " + m_viewBBox);
 			dispatchEvent(new Event(VIEW_BBOX_CHANGED));
+			
 			signalAreaChanged(b_finalChange);
 		}
+		
 
-		public function setExtentBBox(bbox: BBox, b_finalChange: Boolean = true): void
+		public function setExtentBBOX(bbox: BBox, b_finalChange: Boolean = true): void
 		{
 			m_extentBBox = bbox;
 			setViewBBox(m_extentBBox, b_finalChange); // this calls signalAreaChanged()
 		}
-
-		[Deprecated(replacement = setExtentBBox)]
-		public function setExtentBBOX(bbox: BBox, b_finalChange: Boolean = true): void
-		{
-			setExtentBBox(bbox, b_finalChange);
-		}
-
-		public function setExtentBBoxRaw(xmin: Number, ymin: Number, xmax: Number, ymax: Number, b_finalChange: Boolean = true): void
-		{
-			setExtentBBox(new BBox(xmin, ymin, xmax, ymax), b_finalChange);
-		}
-
-		[Deprecated(replacement = setExtentBBoxRaw)]
+		
 		public function setExtentBBOXRaw(xmin: Number, ymin: Number, xmax: Number, ymax: Number, b_finalChange: Boolean = true): void
 		{
-			setExtentBBoxRaw(xmin, ymin, xmax, ymax, b_finalChange);
+			setExtentBBOX(new BBox(xmin, ymin, xmax, ymax), b_finalChange);
 		}
-
+		
 		public function setViewFullExtent(): void
 		{
 			setViewBBox(m_extentBBox, true);
 		}
-
+		
 		public function getExtentBBox(): BBox
 		{
 			return m_extentBBox;
 		}
-
+		
 		public function getViewBBox(): BBox
-		{
-			return m_viewBBox;
-		}
-
+		{ return m_viewBBox; }
+		
 		public function invalidate(): void
 		{
 			signalAreaChanged(true);
 		}
+
 		//*****************************************************************************************
-		// Drawing of splitted features
+		//		Drawing splitted features
 		//*****************************************************************************************
 		private var m_featureSplitter: FeatureSplitter;
-
-		public function getSplineReflections(coords: Array, b_closed: Boolean = false): Array
+		
+		public function getSplineReflections( coords: Array, b_closed: Boolean = false): Array
 		{
 			var features: Array = m_featureSplitter.splitCoordHermitSplineToArrayOfPointPolyLines(coords, b_closed);
+			
 			return features;
 		}
 
 		/**
 		 * Get reflections of polyline. If you want to draw all polyline reflections with sa ICurveRenderers, use  drawPolyline function instead
-		 *
+		 * 
 		 * @param coords
 		 * @param b_closed
-		 * @return
-		 *
-		 */
-		public function getPolylineReflections(coords: Array, b_closed: Boolean = false): Array
+		 * @return 
+		 * 
+		 */		
+		public function getPolylineReflections( coords: Array, b_closed: Boolean = false): Array
 		{
 			var features: Array = m_featureSplitter.splitCoordPolyLineToArrayOfPointPolyLines(coords, b_closed);
+			
 			return features;
 		}
-
+		
 		public function pointIsOutside(p: Point): Boolean
 		{
 			if (p.x < 0 || p.x > width)
 				return true;
 			if (p.y < 0 || p.y > height)
 				return true;
+			
 			return false;
 		}
-
 		public function lineIsOutside(p1: Point, p2: Point): Boolean
 		{
 			return pointIsOutside(p1) && pointIsOutside(p2);
 		}
-
 		/**
 		 * Draw polyline with given curve renderer. If you just want all polyline reflections without drawing it, use getPolylineReflections function instead
 		 * @param g
 		 * @param coords
-		 * @return
-		 *
-		 */
-		public function drawPolyline(g: ICurveRenderer, coords: Array, b_closed: Boolean = false): Array
+		 * @return 
+		 * 
+		 */		
+public function drawPolyline(g: ICurveRenderer, coords: Array, b_closed: Boolean = false): Array
 		{
 			var features: Array = m_featureSplitter.splitCoordPolyLineToArrayOfPointPolyLines(coords, b_closed);
 			var p: Point;
@@ -1621,131 +1450,110 @@ package com.iblsoft.flexiweather.widgets
 			}
 			return features;
 		}
-
+		
 		//*****************************************************************************************
-		// AntiCollision functionality
+		//		AntiCollision functionality
 		//*****************************************************************************************
 		public function moveAnticollisionLayoutToTop(): void
 		{
+			trace("moveAnticollisionLayoutToTop");
+			trace("widget");
+			debugWidget();
+			trace("layers");
+			debugLayers();
+			
 			removeElement(m_layerLayoutParent);
 			addElement(m_layerLayoutParent);
+			
+			trace("layers");
+			debugLayers();
+			trace("widget");
+			debugWidget();
+			
+			trace("anti: " + m_layerLayoutParent.parent);
 		}
 
 		private function anticollisionUpdate(): void
 		{
 			if (!m_suspendAnticollisionProcessing)
 			{
-				if (m_labelLayout.needsUpdate())
+				if(m_labelLayout.needsUpdate())
 				{
 					notifyAnticollisionUpdate();
 					m_labelLayout.update();
 				}
-				if (m_objectLayout.needsUpdate())
+				if(m_objectLayout.needsUpdate())
 				{
 					notifyAnticollisionUpdate();
 					m_objectLayout.update();
 				}
 			}
+			
 		}
-
+		
 		private function notifyAnticollisionUpdate(): void
 		{
 			dispatchEvent(new Event(AnticollisionLayout.ANTICOLLISTION_UPDATED));
 		}
-
-		public function get suspendAnticollisionProcessing(): Boolean
-		{
-			return m_suspendAnticollisionProcessing;
-		}
-
-		public function set suspendAnticollisionProcessing(value: Boolean): void
-		{
-			if (m_suspendAnticollisionProcessing != value)
+		
+		public function get suspendAnticollisionProcessing():Boolean
+		{ return m_suspendAnticollisionProcessing; }
+		
+		public function set suspendAnticollisionProcessing(value:Boolean):void
+		{ 
+			m_suspendAnticollisionProcessing = value; 
+			if (m_labelLayout)
 			{
-				m_suspendAnticollisionProcessing = value;
-				if (m_objectLayout)
-				{
-					// set suspendAnticollisionProcessing to AnticollisionLayout as well (there is timer for auto update, which needs to be suspended)
-					m_objectLayout.suspendAnticollisionProcessing = value;
-				}
-				if (m_labelLayout)
-				{
-					// set suspendAnticollisionProcessing to AnticollisionLayout as well (there is timer for auto update, which needs to be suspended)
-					m_labelLayout.suspendAnticollisionProcessing = value;
-				}
-				anticollisionUpdate();
+				// set suspendAnticollisionProcessing to AnticollisionLayout as well (there is timer for auto update, which needs to be suspended)
+				m_labelLayout.suspendAnticollisionProcessing = value;
 			}
+			anticollisionUpdate();
 		}
-
 		//*****************************************************************************************
-		// Getters & setters
+		//		End of AntiCollision functionality
 		//*****************************************************************************************
+		// getters & setters
+		
 		[Bindable(event = "crsChanged")]
 		public function get crs(): String
-		{
-			return getCRS();
-		}
-
+		{ return getCRS(); }
+		
 		[Bindable(event = "crsChanged")]
 		public function set srs(s_crs: String): void
-		{
-			return setCRS(s_crs, true);
-		}
-
+		{ return setCRS(s_crs, true); }
+			
 		public function set backgroundChessBoard(b: Boolean): void
 		{
 			mb_backgroundChessBoard = b;
-			invalidateDisplayList();
-		}
-		private var m_interactiveLayerMap: InteractiveLayerMap;
-
-		[Bindable(event = "interactiveLayerMapChanged")]
-		public function get interactiveLayerMap(): InteractiveLayerMap
-		{
-			return m_interactiveLayerMap;
+			invalidateDisplayList();			
 		}
 
 		public function get layerContainer(): Group
 		{
 			return m_layerContainer;
 		}
-
-		public function get wmsCacheManager(): WMSCacheManager
-		{
-			return m_wmsCacheManager;
-		}
-
-		public function set wmsCacheManager(value: WMSCacheManager): void
-		{
-			m_wmsCacheManager = value;
-		}
-
+		
 		public function get labelLayout(): AnticollisionLayout
-		{
-			return m_labelLayout;
-		}
-
+		{ return m_labelLayout; }
+		
 		public function get objectLayout(): AnticollisionLayout
-		{
-			return m_objectLayout;
-		}
-
+		{ return m_objectLayout; }
+	
 		override public function toString(): String
 		{
-			return "InteractiveWidget [" + id + "] ";
+			return "InteractiveWidget ";
 		}
+		
 		private var mb_autoLayoutChanged: Boolean;
-
 		public function set autoLayoutInParent(value: Boolean): void
-		{
-			mb_autoLayout = value;
+		{ 
+			mb_autoLayout = value; 
 			mb_autoLayoutChanged = true;
 			invalidateProperties();
 		}
-
+		
 		public function get autoLayoutInParent(): Boolean
-		{
-			return mb_autoLayout;
-		}
+		{ return mb_autoLayout; }
+		
 	}
 }

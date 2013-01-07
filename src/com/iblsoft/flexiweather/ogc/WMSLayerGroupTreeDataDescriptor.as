@@ -10,35 +10,23 @@ package com.iblsoft.flexiweather.ogc
 		}
 
 		public function getChildren(node: Object, model: Object = null): ICollectionView
-		{
-			return node is WMSLayerGroup ? WMSLayerGroup(node).ma_layers : null;
-		}
-
+		{ return node is WMSLayerGroup ? WMSLayerGroup(node).ma_layers : null; }
+		
 		public function hasChildren(node: Object, model: Object = null): Boolean
-		{
-			return node is WMSLayerGroup && WMSLayerGroup(node).ma_layers.length > 0;
-		}
-
+		{ return node is WMSLayerGroup && WMSLayerGroup(node).ma_layers.length > 0; } 
+		
 		public function isBranch(node: Object, model: Object = null): Boolean
-		{
-			return node is WMSLayerGroup;
-		}
-
+		{ return node is WMSLayerGroup; }
+		
 		public function getData(node: Object, model: Object = null): Object
-		{
-			return node;
-		}
-
+		{ return node; }
+		
 		public function addChildAt(parent: Object, newChild: Object,
-				index: int, model: Object = null): Boolean
-		{
-			return false;
-		}
-
+			index: int, model: Object = null): Boolean
+		{ return false; }
+		
 		public function removeChildAt(parent: Object, child: Object,
-				index: int, model: Object = null): Boolean
-		{
-			return false;
-		}
+			index: int, model: Object = null): Boolean
+		{ return false; }
 	}
 }

@@ -12,6 +12,7 @@ package com.iblsoft.flexiweather.utils
 			super(x1, y1, x2, y2);
 			mi_originatingSegmentIndex = i_originatingSegmentIndex;
 		}
+	
 		public var mi_originatingSegmentIndex: uint;
 	}
 }

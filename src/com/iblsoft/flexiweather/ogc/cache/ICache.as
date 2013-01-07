@@ -1,34 +1,42 @@
 package com.iblsoft.flexiweather.ogc.cache
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
-	import com.iblsoft.flexiweather.ogc.data.viewProperties.IViewProperties;
+	import com.iblsoft.flexiweather.ogc.data.IViewProperties;
+	
 	import flash.display.Bitmap;
 	import flash.display.DisplayObject;
 	import flash.net.URLRequest;
-
+	
 	public interface ICache
 	{
 		/**
-		 * Debug function for getting information about cache
-		 * @return
-		 *
-		 */
+		 * Debug function for getting information about cache 
+		 * @return 
+		 * 
+		 */		
 		function debugCache(): String;
+		
 		function destroyCache(): void;
 		/**
-		 * Clear whole cache
-		 *
-		 */
+		 * Clear whole cache 
+		 * 
+		 */		
 		function clearCache(): void;
+		
 		function setAnimationModeEnable(value: Boolean): void;
 		function invalidate(s_crs: String, bbox: BBox, validity: Date = null): void;
+
 		function addCacheNoDataItem(viewProperties: IViewProperties): void
-		function addCacheItem(img: DisplayObject, viewProperties: IViewProperties, associatedData: Object): void
+		function addCacheItem(img: DisplayObject, viewProperties: IViewProperties): void
+
 		function deleteCacheItem(cacheItem: CacheItem, b_disposeDisplayed: Boolean = false): Boolean
 		function deleteCacheItemByKey(s_key: String, b_disposeDisplayed: Boolean = false): Boolean
+			
 		function isItemCached(viewProperties: IViewProperties, b_checkNoDataCache: Boolean = false): Boolean;
+		
 		function getCacheItemsCount(): int;
 		function getCacheItems(): Array;
+		
 		function getCacheItem(viewProperties: IViewProperties): CacheItem;
 		function getCacheItemBitmap(viewProperties: IViewProperties): DisplayObject;
 	}

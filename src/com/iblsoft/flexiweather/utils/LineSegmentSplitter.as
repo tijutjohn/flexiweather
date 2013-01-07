@@ -8,7 +8,7 @@ package com.iblsoft.flexiweather.utils
 		public function LineSegmentSplitter()
 		{
 		}
-
+		
 		public function splitLineSegment(segment: LineSegment, projection: Projection): Array
 		{
 			return [];

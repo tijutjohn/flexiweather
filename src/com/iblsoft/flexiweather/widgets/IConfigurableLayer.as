@@ -1,9 +1,9 @@
 package com.iblsoft.flexiweather.widgets
 {
-	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.ILayerConfiguration;
 
 	public interface IConfigurableLayer
 	{
-		function get configuration(): ILayerConfiguration;
+		function get configuration(): ILayerConfiguration;		
 	}
 }

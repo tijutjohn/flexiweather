@@ -8,20 +8,17 @@ package com.iblsoft.flexiweather.utils
 		public function HTMLUtils()
 		{
 		}
-
+		
 		public static function createHTMLTextFlow(txt: String): TextFlow
 		{
 			return TextConverter.importToFlow(txt, TextConverter.TEXT_FIELD_HTML_FORMAT);
 		}
-
+		
 		public static function isHTMLFormat(s_data: String): Boolean
 		{
-			try
-			{
+			try {
 				var x: XML = new XML(s_data);
-			}
-			catch (error: Error)
-			{
+			} catch (error: Error) {
 				//it's not XML format, so it can not be HTML format
 				return false;
 			}
@@ -36,7 +33,7 @@ package com.iblsoft.flexiweather.utils
 			}
 			return head && body;
 		}
-
+		
 		public static function isHTML401Unauthorized(s_data: String): Boolean
 		{
 			var isHTML: Boolean = isHTMLFormat(s_data);
@@ -46,6 +43,7 @@ package com.iblsoft.flexiweather.utils
 				return false
 			}
 			var x: XML = new XML(s_data);
+			
 			var head: Boolean;
 			var body: Boolean;
 			for each (var node: XML in x.children())
@@ -60,44 +58,57 @@ package com.iblsoft.flexiweather.utils
 							if (headChildNode.name().localName == 'title')
 							{
 								var titleString: String = headChildNode.text();
+								
 								var is401: Boolean = titleString.indexOf('401') >= 0;
 								var isAuthorizationRelated: Boolean = titleString.toLocaleLowerCase().indexOf('authoriza') >= 0;
 								var isUnauthorized: Boolean = titleString.toLocaleLowerCase().indexOf('unauthorized') >= 0;
+								
 								return is401 && (isUnauthorized || isAuthorizationRelated);
 							}
 						}
 					}
 				}
+				
 			}
 			return false;
 		}
-
+		
 		public static function fixFeatureInfoHTML(s: String): String
 		{
 			var originalHTML: String = s;
+			
 			s = s.replace(/<table>/g, "<table><br/>");
 			s = s.replace(/<\/table>/g, "</table><br/>");
 			s = s.replace(/<tr>/g, "<tr><br/>");
 			s = s.replace(/<td>/g, "<td>&nbsp;");
+			
 			s = s.replace(/<small>/g, "<p>");
+			
 			s = s.replace(/<\/small>/g, "</p>");
+			
 			//TODO this needs to be fixed on server
 			s = s.replace(/<small\/>/g, "</p>");
+			
 			//remove <p></p>
 			s = s.replace(/<p><\/p>/g, "");
+			
 			s = HTMLUtils.removeTag('<nobr>', s);
 			s = HTMLUtils.removeTag('<\/nobr>', s);
+			
 			s = s.substring(s.indexOf('<body'), s.length);
 			//find closest >, which close <body tag
 			var bodyTagClose: int = s.indexOf('>') + 1;
-			s = s.substring(bodyTagClose, s.indexOf('</html>'));
+			
+			s = s.substring(bodyTagClose ,s.indexOf('</html>'));
 			//remove body
-			s = s.substring(0, s.indexOf('</body>'));
+			s = s.substring(0,s.indexOf('</body>'));
+			
 			trace("from: " + originalHTML);
 			trace("to: " + s);
+			
 			return s;
 		}
-
+		
 		public static function removeTag(tag: String, s: String): String
 		{
 			var reg: RegExp = new RegExp(tag, 'g');

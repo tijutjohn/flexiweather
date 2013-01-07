@@ -6,6 +6,6 @@ package com.iblsoft.flexiweather.plugins.data
 	{
 		public var bytesLoaded: int;
 		public var bytesTotal: int;
-		public var module: ModuleLoader;
+		public var module: ModuleLoader;	
 	}
 }

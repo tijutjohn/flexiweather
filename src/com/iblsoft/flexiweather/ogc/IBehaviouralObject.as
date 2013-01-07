@@ -1,6 +1,5 @@
 package com.iblsoft.flexiweather.ogc
 {
-
 	public interface IBehaviouralObject
 	{
 		function setBehaviourString(s_behaviourId: String, s_value: String): void;

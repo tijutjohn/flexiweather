@@ -5,12 +5,12 @@ package com.iblsoft.flexiweather.ogc
 	
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
-
+	
 	/**
 	 * Representation of a contants (non-changable) rectangular 2D bounding box.
 	 * Intanstances can be safely stored in container or passed to external code without
 	 * worrying that anybody else will modify them (comparing to flash.geom.Rectangle).
-	 * This class provides basic rectangle manipulation methods.
+	 * This class provides basic rectangle manipulation methods. 
 	 **/
 	public class BBox
 	{
@@ -27,26 +27,22 @@ package com.iblsoft.flexiweather.ogc
 			mf_xMax = f_xMax;
 			mf_yMax = f_yMax;
 		}
-
+		
 		public function equals(other: BBox): Boolean
 		{
-			if (other == null)
+			if(other == null)
 				return false;
 			return mf_xMin == other.mf_xMin
 					&& mf_yMin == other.mf_yMin
 					&& mf_xMax == other.mf_xMax
-					&& mf_yMax == other.mf_yMax;
+					&& mf_yMax == other.mf_yMax; 
 		}
-
+		
 		public function toRectangle(): Rectangle
-		{
-			return new Rectangle(mf_xMin, mf_yMin, mf_xMax - mf_xMin, mf_yMax - mf_yMin);
-		}
+		{ return new Rectangle(mf_xMin, mf_yMin, mf_xMax - mf_xMin, mf_yMax - mf_yMin); }
 
 		public static function fromRectangle(r: Rectangle): BBox
-		{
-			return new BBox(r.x, r.y, r.x + r.width, r.y + r.height);
-		}
+		{ return new BBox(r.x, r.y, r.x + r.width, r.y + r.height); }
 
 		/** <BoundingBox minx="-180" miny="-90" maxx="180" maxy="90" ... /> */
 		public static function fromXML_WMS(xml: XML): BBox
@@ -64,30 +60,34 @@ package com.iblsoft.flexiweather.ogc
 		public function forProjection(crs: String): BBox
 		{
 			var prj: Projection = Projection.getByCRS(crs);
-			if (prj == null)
+			if(prj == null)
 				return null;
 			var minLalo: Coord = prj.prjXYToLaLoCoord(mf_xMin, mf_yMin);
 			var maxLalo: Coord = prj.prjXYToLaLoCoord(mf_xMax, mf_yMax);
+			
 			var bbox: BBox = new BBox(minLalo.x, minLalo.y, maxLalo.x, maxLalo.y);
 			return bbox;
 		}
-
+		
 		public function getBBoxMaximumDistance(crs: String): Number
 		{
 			var prj: Projection = Projection.getByCRS(crs);
-			if (prj == null)
+			if(prj == null)
 				return Number.MAX_VALUE;
 			var minLalo: Coord = prj.prjXYToLaLoCoord(mf_xMin, mf_yMin);
 			var maxLalo: Coord = prj.prjXYToLaLoCoord(mf_xMax, mf_yMax);
+			
 			return minLalo.distanceTo(maxLalo);
 		}
-
+		
 		public function coordInside(coord: Coord): Boolean
 		{
 			if (coord.x >= mf_xMin && coord.x <= mf_xMax && coord.y >= mf_yMin && coord.y <= mf_yMax)
 				return true;
+			
 			return false;
 		}
+
 
 		public function toBBOXString(): String
 		{
@@ -102,11 +102,12 @@ package com.iblsoft.flexiweather.ogc
 
 		public function scaled(sx: Number, sy: Number): BBox
 		{
-			var p: Point = center;
+			var p: Point =  center;
 			var rect: Rectangle = toRectangle();
+			
 			return new BBox(p.x - rect.width * sx / 2, p.y - rect.height * sy / 2, p.x + rect.width * sx / 2, p.y + rect.height * sy / 2);
 		}
-
+		
 		public function translated(dx: Number, dy: Number): BBox
 		{
 			return new BBox(mf_xMin + dx, mf_yMin + dy, mf_xMax + dx, mf_yMax + dy);
@@ -138,15 +139,15 @@ package com.iblsoft.flexiweather.ogc
 		public function intersected(other: BBox): BBox
 		{
 			var intersected: BBox = new BBox(mf_xMin, mf_yMin, mf_xMax, mf_yMax);
-			if (other.mf_xMin > intersected.mf_xMin)
+			if(other.mf_xMin > intersected.mf_xMin)
 				intersected.mf_xMin = other.mf_xMin;
-			if (other.mf_xMax < intersected.mf_xMax)
+			if(other.mf_xMax < intersected.mf_xMax)
 				intersected.mf_xMax = other.mf_xMax;
-			if (other.mf_yMin > intersected.mf_yMin)
+			if(other.mf_yMin > intersected.mf_yMin)
 				intersected.mf_yMin = other.mf_yMin;
-			if (other.mf_yMax < intersected.mf_yMax)
+			if(other.mf_yMax < intersected.mf_yMax)
 				intersected.mf_yMax = other.mf_yMax;
-			if (intersected.mf_xMin > intersected.mf_xMax || intersected.mf_yMin > intersected.mf_yMax)
+			if(intersected.mf_xMin > intersected.mf_xMax || intersected.mf_yMin > intersected.mf_yMax)
 				return null;
 			return intersected;
 		}
@@ -156,71 +157,37 @@ package com.iblsoft.flexiweather.ogc
 			return intersected(other) != null;
 		}
 		
-		/**
-		 * Return coverage ratio of area intersection between 2 BBoxes. If whole "other" BBox is inside this BBox it returns 1  
-		 * @param other - other BBox must be normalized (moved to extent BBox of its projection)
-		 * @return 
-		 * 
-		 */		
-		public function coverageRatio(other: BBox): Number
-		{
-			var intersectedBBox: BBox = intersected(other);
-			var otherBBoxArea: Number = other.width * other.height;
-			var intersectedBBoxArea: Number = intersectedBBox.width * intersectedBBox.height;
-			
-			var percentage: Number = intersectedBBoxArea / otherBBoxArea;
-			
-//			trace(this + " intersectionPercentage from ["+other+"] => " + percentage);
-			return percentage;
-			
-		}
-		
-
 		public function get isEmpty(): Boolean
 		{
 			return width == 0 || height == 0;
 		}
-
+		
 		public function get surface(): Number
-		{
-			return width * height;
-		}
-
+		{ return width * height; }
+		
 		public function get xMin(): Number
-		{
-			return mf_xMin;
-		}
+		{ return mf_xMin; }
 
 		public function get yMin(): Number
-		{
-			return mf_yMin;
-		}
+		{ return mf_yMin; }
 
 		public function get xMax(): Number
-		{
-			return mf_xMax;
-		}
+		{ return mf_xMax; }
 
 		public function get yMax(): Number
-		{
-			return mf_yMax;
-		}
+		{ return mf_yMax; }
 
 		public function get width(): Number
-		{
-			return mf_xMax - mf_xMin;
-		}
+		{ return mf_xMax - mf_xMin; }
 
 		public function get height(): Number
-		{
-			return mf_yMax - mf_yMin;
-		}
-
+		{ return mf_yMax - mf_yMin; }
+		
 		public function toString(): String
 		{
 			return 'BBox ' + xMin + ", " + yMin + ", " + xMax + ", " + yMax;
 		}
-
+		
 		public function clone(): BBox
 		{
 			var bbox: BBox = new BBox(xMin, yMin, xMax, yMax);

@@ -11,12 +11,12 @@ package com.iblsoft.flexiweather.ogc.kml.data
 		{
 			super(iw);
 		}
-
+		
 		override protected function createNewReflectionData(): ReflectionData
 		{
 			return new KMLReflectionData(_iw);
 		}
-
+		
 		public function updateKMLFeature(feature: KMLFeature): void
 		{
 			for each (var reflection: KMLReflectionData in _dictionary)

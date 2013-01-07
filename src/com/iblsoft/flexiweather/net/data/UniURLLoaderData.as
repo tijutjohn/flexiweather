@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.net.data
 {
 	import com.iblsoft.flexiweather.net.loaders.AbstractURLLoader;
+	
 	import flash.net.URLRequest;
 
 	public class UniURLLoaderData
@@ -9,7 +10,7 @@ package com.iblsoft.flexiweather.net.data
 		public var loader: AbstractURLLoader;
 		public var associatedData: Object;
 		public var backgroundJobName: String;
-
+		
 		public function UniURLLoaderData(request: URLRequest, loader: AbstractURLLoader, associatedData: Object, backgroundJobName: String)
 		{
 			this.request = request;
@@ -17,7 +18,7 @@ package com.iblsoft.flexiweather.net.data
 			this.associatedData = associatedData;
 			this.backgroundJobName = backgroundJobName;
 		}
-
+		
 		public function destroy(): void
 		{
 			request = null;
@@ -28,10 +29,10 @@ package com.iblsoft.flexiweather.net.data
 			}
 			associatedData = null;
 		}
-
+		
 		public function toString(): String
 		{
-			var str: String = "UniURLLoaderData: ";
+			var str: String =  "UniURLLoaderData: ";
 			if (request)
 				str += " Request: " + request.url;
 			if (loader)
@@ -40,11 +41,12 @@ package com.iblsoft.flexiweather.net.data
 			{
 				for each (var name: String in associatedData)
 				{
-					str += "\t" + name + " = " + associatedData[name];
+					str += "\t" + name + " = " + associatedData[name]; 
 				}
 			}
 			if (backgroundJobName)
 				str += " backgroundJobName: " + backgroundJobName;
+			
 			return str;
 		}
 	}

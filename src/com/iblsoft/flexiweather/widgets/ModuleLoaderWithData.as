@@ -5,11 +5,12 @@ package com.iblsoft.flexiweather.widgets
 	public class ModuleLoaderWithData extends ModuleLoader
 	{
 		public var associatedData: Object;
-
+		
 		public function ModuleLoaderWithData(data: Object = null)
 		{
 			super();
 			associatedData = data;
 		}
+		
 	}
 }

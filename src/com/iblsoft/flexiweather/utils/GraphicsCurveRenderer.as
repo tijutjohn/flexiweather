@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.utils
 {
 	import flash.display.Graphics;
+	
 	import mx.controls.NumericStepper;
 
 	/**
@@ -12,7 +13,7 @@ package com.iblsoft.flexiweather.utils
 		protected var m_lastX: Number = 0;
 		protected var m_lastY: Number = 0;
 		protected var mi_recursionDepth: uint = 0;
-
+		
 		public function GraphicsCurveRenderer(graphics: Graphics)
 		{
 			m_graphics = graphics;
@@ -20,16 +21,18 @@ package com.iblsoft.flexiweather.utils
 
 		public final function start(x: Number, y: Number): void
 		{
-			if (mi_recursionDepth == 0)
+			if(mi_recursionDepth == 0) {
 				started(x, y);
+			}
 			++mi_recursionDepth;
 		}
 
 		public final function finish(x: Number, y: Number): void
 		{
 			--mi_recursionDepth;
-			if (mi_recursionDepth == 0)
+			if(mi_recursionDepth == 0) {
 				finished(x, y);
+			}
 		}
 
 		public function moveTo(x: Number, y: Number): void
@@ -52,13 +55,11 @@ package com.iblsoft.flexiweather.utils
 			m_lastX = anchorX;
 			m_lastY = anchorY;
 		}
-
+		
 		public function started(x: Number, y: Number): void
-		{
-		}
+		{}
 
 		public function finished(x: Number, y: Number): void
-		{
-		}
+		{}
 	}
 }

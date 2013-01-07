@@ -1,6 +1,5 @@
 package com.iblsoft.flexiweather.ogc
 {
-
 	public class Version
 	{
 		internal var _v1: int;
@@ -13,7 +12,7 @@ package com.iblsoft.flexiweather.ogc
 			_v2 = v2;
 			_v3 = v3;
 		}
-
+		
 		public function equals(v1: int, v2: int, v3: int): Boolean
 		{
 			return _v1 == v1 && _v2 == v2 && _v3 == v3;
@@ -26,17 +25,17 @@ package com.iblsoft.flexiweather.ogc
 
 		public function isLessThan(v1: int, v2: int, v3: int): Boolean
 		{
-			if (_v1 < v1)
+			if(_v1 < v1)
 				return true;
-			if (_v1 > v1)
+			if(_v1 > v1)
 				return false;
-			if (_v2 < v2)
+			if(_v2 < v2)
 				return true;
-			if (_v2 > v2)
+			if(_v2 > v2)
 				return false;
-			if (_v3 < v3)
+			if(_v3 < v3)
 				return true;
-			if (_v3 > v3)
+			if(_v3 > v3)
 				return false;
 			return false;
 		}
@@ -50,11 +49,11 @@ package com.iblsoft.flexiweather.ogc
 		{
 			return _v1 + "." + _v2 + "." + _v3;
 		}
-
+		
 		public static function fromString(s: String): Version
 		{
 			var a: Array = s.match(/\A(\d+)\.(\d+)\.(\d+)\Z/);
-			if (a == null)
+			if(a == null)
 				return new Version(0, 0, 0);
 			return new Version(int(a[1]), int(a[2]), int(a[3]));
 		}

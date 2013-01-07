@@ -1,6 +1,5 @@
 package com.iblsoft.flexiweather.ogc.editable
 {
-
 	public interface IEditableItem
 	{
 		function onRegisteredAsEditableItem(eim: IEditableItemManager): void;

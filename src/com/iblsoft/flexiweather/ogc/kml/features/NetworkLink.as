@@ -9,23 +9,30 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		private var _flyToView: int;
 		private var _link: Link;
 		private var _container: Container;
+		
 		private var _contentKML: KML;
-
-		public function NetworkLink(kml: KML, s_namespace: String, s_xml: XMLList)
+		
+		public function NetworkLink(kml:KML, s_namespace:String, s_xml:XMLList)
 		{
 			super(kml, s_namespace, s_xml);
-			var kmlns: Namespace = new Namespace(s_namespace);
+			
+			var kmlns:Namespace = new Namespace(s_namespace);
+			
 			_container = new Container(null, s_namespace, null);
+			
 			this._refreshVisibility = ParsingTools.nanCheck(this.xml.kmlns::refreshVisibility);
 			this._flyToView = ParsingTools.nanCheck(this.xml.kmlns::flyToView);
-			if (ParsingTools.nullCheck(this.xml.kmlns::Link))
+			if (ParsingTools.nullCheck(this.xml.kmlns::Link)) {
 				this._link = new Link(s_namespace, this.xml.kmlns::Link);
+			}
 		}
-
-		public override function cleanup(): void
+		
+		public override function cleanup():void
 		{
 			super.cleanup();
+			
 			trace("NetworkLink cleanup");
+			
 			if (_link)
 			{
 				_link.cleanupKML();
@@ -37,7 +44,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				_container = null;
 			}
 		}
-
+		
 		public function addLoadedKML(kml: KML): void
 		{
 			_contentKML = kml;
@@ -56,17 +63,16 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			}
 			kml.resourceManager.debugCache("AFter NetworkLink add loaded KML");
 		}
-
+		
 		public function get contentKML(): KML
 		{
 			return _contentKML;
 		}
-
 		public function get container(): Container
 		{
 			return _container;
 		}
-
+		
 		public function get refreshInterval(): int
 		{
 			if (_link && _link.refreshMode == LinkRefreshMode.ON_INTERVAL)
@@ -75,22 +81,22 @@ package com.iblsoft.flexiweather.ogc.kml.features
 //				return 10;
 				return _link.refreshInterval;
 			}
+			
 			return 0;
 		}
-
 		public function get refreshVisibility(): int
 		{
 			return _refreshVisibility;
 		}
-
 		public function get flyToView(): int
 		{
 			return _flyToView;
 		}
-
 		public function get link(): Link
 		{
 			return _link;
 		}
+		
+		
 	}
 }
