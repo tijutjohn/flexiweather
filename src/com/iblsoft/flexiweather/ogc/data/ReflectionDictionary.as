@@ -83,7 +83,7 @@ package com.iblsoft.flexiweather.ogc.data
 			dispatchEvent(re);
 		}
 
-		private function createReflection(reflections: int): ReflectionData
+		protected function createReflection(reflections: int): ReflectionData
 		{
 			if (!_dictionary[reflections])
 			{
@@ -96,6 +96,13 @@ package com.iblsoft.flexiweather.ogc.data
 			return getReflection(reflections);
 		}
 
+		public function updateReflectedCoordAt(coord: Coord, position: int, reflections: int, reflectionDelta: int): void
+		{
+			var reflection: ReflectionData = createReflection( reflections );
+			reflection.reflectionDelta = reflectionDelta;
+			reflection.updateCoordAt(coord, position);
+			
+		}
 		public function addReflectedCoordAt(coord: Coord, position: int, reflections: int, reflectionDelta: int): void
 		{
 			var reflection: ReflectionData = createReflection(reflections);

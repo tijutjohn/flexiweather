@@ -8,6 +8,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	import flash.display.Sprite;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
+
 	import mx.collections.ArrayCollection;
 
 	public class WFSFeatureEditableCurve extends WFSFeatureEditable implements IMouseEditableItem
@@ -20,8 +21,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		override public function toInsertGML(xmlInsert: XML): void
 		{
 			super.toInsertGML(xmlInsert);
-			var line: XML = <gml:LineString xmlns:gml="http://www.opengis.net/gml"></gml:LineString>
-					;
+			var line: XML = <gml:LineString xmlns:gml="http://www.opengis.net/gml"></gml:LineString>;
 			line.appendChild(GMLUtils.encodeGML3Coordinates2D(getEffectiveCoordinates()));
 			addInsertGMLProperty(xmlInsert, null, "curve", line);
 		}
@@ -29,8 +29,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		override public function toUpdateGML(xmlUpdate: XML): void
 		{
 			super.toUpdateGML(xmlUpdate);
-			var line: XML = <gml:LineString xmlns:gml="http://www.opengis.net/gml"></gml:LineString>
-					;
+			var line: XML = <gml:LineString xmlns:gml="http://www.opengis.net/gml"></gml:LineString>;
 			line.appendChild(GMLUtils.encodeGML3Coordinates2D(getEffectiveCoordinates()));
 			addUpdateGMLProperty(xmlUpdate, null, "curve", line);
 		}
@@ -162,8 +161,14 @@ package com.iblsoft.flexiweather.ogc.editable
 			if ((mi_editMode == WFSFeatureEditableMode.MOVE_POINTS) || (mi_editMode == WFSFeatureEditableMode.ADD_POINTS_WITH_MOVE_POINTS))
 			{
 				// don't do anything if this click is on MoveablePoint belonging to this curve
+				var reflectionID: int = 0;
+				
+				var clickedMoveablePoint: MoveablePoint = event.target as MoveablePoint;
+				if (clickedMoveablePoint)
+					reflectionID = clickedMoveablePoint.reflection;
+				
 				//FIXME fix snap for reflection from which point is dragged
-				var reflectionData: WFSEditableReflectionData = (reflectionDictionary.getReflection(0) as WFSEditableReflectionData);
+				var reflectionData: WFSEditableReflectionData = (reflectionDictionary.getReflection(reflectionID) as WFSEditableReflectionData);
 				var moveablePoints: Array = [];
 				if (reflectionData)
 					moveablePoints = reflectionData.moveablePoints;

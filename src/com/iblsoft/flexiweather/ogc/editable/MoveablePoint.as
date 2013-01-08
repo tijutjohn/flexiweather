@@ -34,6 +34,11 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			_mi_pointIndex = value;
 		}
+		public function get reflection(): uint
+		{
+			return mi_reflection;
+		}
+		
 		protected var mi_reflection: uint;
 		protected var mi_reflectionDelta: int;
 		protected var m_pt: Point;
