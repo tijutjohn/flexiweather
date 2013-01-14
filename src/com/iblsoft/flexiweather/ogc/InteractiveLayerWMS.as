@@ -133,10 +133,12 @@ package com.iblsoft.flexiweather.ogc
 		{
 			super.setConfiguration(cfg);
 			if (m_autoRefreshTimer)
+			{
 				m_autoRefreshTimer.stop();
 			
-			if (m_cfg.autoRefreshPeriod > 0)
-				m_autoRefreshTimer.delay = m_cfg.autoRefreshPeriod * 1000.0;
+				if (m_cfg.autoRefreshPeriod > 0)
+					m_autoRefreshTimer.delay = m_cfg.autoRefreshPeriod * 1000.0;
+			}
 		}
 
 		override protected function onCurrentWMSDataLoadingStarted(event: InteractiveLayerEvent): void
