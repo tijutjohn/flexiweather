@@ -331,6 +331,8 @@
     <classEntry path="com.iblsoft.flexiweather.utils.IObjectPoolObject"/>
     <classEntry path="com.iblsoft.flexiweather.utils.ISO8601Parser"/>
     <classEntry path="com.iblsoft.flexiweather.utils.LineSegmentSplitter"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.LoggingUtils"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.LoggingUtilsEvent"/>
     <classEntry path="com.iblsoft.flexiweather.utils.NumberUtils"/>
     <classEntry path="com.iblsoft.flexiweather.utils.ObjectPool"/>
     <classEntry path="com.iblsoft.flexiweather.utils.Operators"/>
@@ -407,8 +409,6 @@
     <classEntry path="com.tests.utils.URLUtilsTest"/>
     <classEntry path="com.tests.wmts.InteractiveLayerTiledTest"/>
     <classEntry path="com.utils.ObjectSorter"/>
-    <classEntry path="com.iblsoft.flexiweather.utils.LoggingUtils"/>
-    <classEntry path="com.iblsoft.flexiweather.utils.LoggingUtilsEvent"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

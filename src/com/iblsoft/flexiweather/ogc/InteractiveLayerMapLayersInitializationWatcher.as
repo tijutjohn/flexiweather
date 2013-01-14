@@ -36,8 +36,11 @@ package com.iblsoft.flexiweather.ogc
 			LoggingUtils.dispatchLogEvent(this,this + "onMapFromXMLReady");
 			var layer: InteractiveLayer;
 			_mapLayersInitializing = 0;
+			
+			var cnt: int = 0;
 			for each (layer in layers)
 			{
+				LoggingUtils.dispatchLogEvent(this, "ILMIW layers["+cnt+"] " + layer);
 				if (layer)
 				{
 					layer.addEventListener(InteractiveLayerEvent.LAYER_INITIALIZED, onLayerInitialized);
@@ -53,7 +56,7 @@ package com.iblsoft.flexiweather.ogc
 					{
 						configuration = (layer as IConfigurableLayer).configuration;
 					}
-					LoggingUtils.dispatchLogEvent(this,"InteractiveMultiView onMapFromXMLReady addLayer: " + layer.name + " | " + layer.id);
+					LoggingUtils.dispatchLogEvent(this,"onMapFromXMLReady addLayer: " + layer.name + " | " + layer.id);
 					interactiveLayerMap.addLayer(layer);
 				}
 				else

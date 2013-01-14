@@ -19,6 +19,8 @@ package com.iblsoft.flexiweather.ogc.managers
 		private var ma_services: ArrayCollection = new ArrayCollection();
 		private var m_timer: Timer = new Timer(500);
 
+		private var m_servicesUpdating: int;
+		
 		public function OGCServiceConfigurationManager()
 		{
 			if (sm_instance != null)
@@ -144,6 +146,8 @@ package com.iblsoft.flexiweather.ogc.managers
 		{
 			_currentServices = currServices;
 			stopAllRunningServices();
+			
+			m_servicesUpdating = 0;
 			var i_currentFlashStamp: int = getTimer();
 //			for each(var osc: OGCServiceConfiguration in ma_services) 
 			for each (var oscName: String in currServices)
@@ -162,6 +166,7 @@ package com.iblsoft.flexiweather.ogc.managers
 					{
 						var wmsServiceConfiguration: WMSServiceConfiguration = osc as WMSServiceConfiguration;
 						_runningServices.push(wmsServiceConfiguration);
+						m_servicesUpdating++;
 						wmsServiceConfiguration.addEventListener(WMSServiceConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
 					}
 					osc.update();
@@ -172,7 +177,18 @@ package com.iblsoft.flexiweather.ogc.managers
 
 		private function onCapabilitiesUpdated(event: DataEvent): void
 		{
+			trace("onCapabilitiesUpdated");
 			dispatchEvent(new Event(WMSServiceConfiguration.CAPABILITIES_UPDATED));
+			m_servicesUpdating--;
+			if (m_servicesUpdating == 0)
+			{
+				allCapabilitiesAreUpdated();
+			}
+		}
+		
+		private function allCapabilitiesAreUpdated(): void
+		{
+			dispatchEvent(new Event(WMSServiceConfiguration.ALL_CAPABILITIES_UPDATED));
 		}
 
 		protected function onTimer(event: TimerEvent): void

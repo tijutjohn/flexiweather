@@ -208,6 +208,7 @@ package com.iblsoft.flexiweather.widgets
 				for (var i: int = total; i >= 0; i--)
 				{
 					wrapper = wrappers.getItemAt(i) as LayerSerializationWrapper;
+					debug("InteractiveLayerMap serialize wrapper: " + wrapper);
 					layer = wrapper.m_layer;
 					if (layer is InteractiveLayerMSBase)
 					{
@@ -216,6 +217,7 @@ package com.iblsoft.flexiweather.widgets
 							setPrimaryLayer(layer as InteractiveLayerMSBase);
 						}
 					}
+					debug("InteractiveLayerMap serialize add layer: " + layer + " name: " + layer.name);
 					newLayers.push(layer);
 				}
 				var de: DynamicEvent = new DynamicEvent(LAYERS_SERIALIZED_AND_READY);
@@ -316,7 +318,7 @@ package com.iblsoft.flexiweather.widgets
 		override protected function commitProperties(): void
 		{
 			super.commitProperties();
-//			debug("InteractiveLayerMap commitProperties: _frameInvalidated: " + _frameInvalidated + " _levelInvalidated: " + _levelInvalidated);
+			debug("InteractiveLayerMap commitProperties: _frameInvalidated: " + _frameInvalidated + " _levelInvalidated: " + _levelInvalidated);
 			if (_frameInvalidated)
 			{
 				_frameInvalidated = false;
@@ -347,7 +349,7 @@ package com.iblsoft.flexiweather.widgets
 		override protected function layerAdded(layer: InteractiveLayer): void
 		{
 			super.layerAdded(layer);
-//				debug(this + " ADD LAYER: " + l.toString());
+				debug(this + " ADD LAYER: " + layer.toString());
 			if (layer)
 			{
 				var dynamicEvent: DynamicEvent = new DynamicEvent(TIME_AXIS_ADDED);
@@ -1005,7 +1007,7 @@ package com.iblsoft.flexiweather.widgets
 			
 			if (debugConsole)
 				debugConsole.print(str, type, tag);
-//			trace(tag + "| " + type + "| " + str);
+			trace(tag + "| " + type + "| " + str);
 		}
 	}
 }
@@ -1034,6 +1036,11 @@ class LayerSerializationWrapper implements Serializable
 			
 			LoggingUtils.dispatchLogEvent(map, "LayerSerializationWrapper s_layerName: " + s_layerName + " s_layerType: " + s_layerType);
 			var config: ILayerConfiguration = LayerConfigurationManager.getInstance().getLayerConfigurationByLabel(s_layerType);
+			if (config)
+				LoggingUtils.dispatchLogEvent(map, "LayerSerializationWrapper config: " + config.label);
+			
+				LoggingUtils.dispatchLogEvent(map, "LayerSerializationWrapper config: NULL " );
+				
 			m_layer = config.createInteractiveLayer(m_iw);
 			m_layer.layerName = s_layerName;
 			if (m_layer is Serializable)
@@ -1051,5 +1058,13 @@ class LayerSerializationWrapper implements Serializable
 				(m_layer as Serializable).serialize(storage);
 			}
 		}
+	}
+	
+	public function toString(): String
+	{
+		if (m_layer)
+			return "LayerSerializationWrapper: " + m_layer.name;
+		
+			return "LayerSerializationWrapper: Layer undefined";
 	}
 }
