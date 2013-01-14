@@ -19,13 +19,16 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.utils.DateUtils;
 	import com.iblsoft.flexiweather.utils.HTMLUtils;
 	import com.iblsoft.flexiweather.utils.ISO8601Parser;
+	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.utils.XMLStorage;
+	
 	import flash.events.DataEvent;
 	import flash.events.Event;
 	import flash.events.TimerEvent;
 	import flash.utils.Timer;
+	
 	import mx.collections.ArrayCollection;
 	import mx.controls.Alert;
 	import mx.events.CollectionEvent;
@@ -194,6 +197,7 @@ package com.iblsoft.flexiweather.widgets
 			var layer: InteractiveLayer;
 			debug("InteractiveLayerMap [IW: " + container.id + "] serialize loading: " + storage.isLoading());
 			LayerSerializationWrapper.m_iw = container;
+			LayerSerializationWrapper.map = this;
 			if (storage.isLoading())
 			{
 				wrappers = new ArrayCollection();
@@ -997,6 +1001,8 @@ package com.iblsoft.flexiweather.widgets
 
 		private function debug(str: String, type: String = "Info", tag: String = "InteractiveLayerMap"): void
 		{
+			LoggingUtils.dispatchLogEvent(this, str);
+			
 			if (debugConsole)
 				debugConsole.print(str, type, tag);
 //			trace(tag + "| " + type + "| " + str);
@@ -1005,15 +1011,18 @@ package com.iblsoft.flexiweather.widgets
 }
 import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
 import com.iblsoft.flexiweather.ogc.managers.LayerConfigurationManager;
+import com.iblsoft.flexiweather.utils.LoggingUtils;
 import com.iblsoft.flexiweather.utils.Serializable;
 import com.iblsoft.flexiweather.utils.Storage;
 import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
 import com.iblsoft.flexiweather.widgets.InteractiveLayer;
+import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
 import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 
 class LayerSerializationWrapper implements Serializable
 {
 	public var m_layer: InteractiveLayer;
+	public static var map: InteractiveLayerMap;
 	public static var m_iw: InteractiveWidget;
 
 	public function serialize(storage: Storage): void
@@ -1022,6 +1031,8 @@ class LayerSerializationWrapper implements Serializable
 		{
 			var s_layerName: String = storage.serializeString("layer-name", null, null)
 			var s_layerType: String = storage.serializeString("layer-type", null, s_layerName);
+			
+			LoggingUtils.dispatchLogEvent(map, "LayerSerializationWrapper s_layerName: " + s_layerName + " s_layerType: " + s_layerType);
 			var config: ILayerConfiguration = LayerConfigurationManager.getInstance().getLayerConfigurationByLabel(s_layerType);
 			m_layer = config.createInteractiveLayer(m_iw);
 			m_layer.layerName = s_layerName;

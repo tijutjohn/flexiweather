@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<flexLibProperties includeAllClasses="false" useMultiPlatformConfig="false" version="1">
+<flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="1">
   <includeClasses>
     <classEntry path="com.iblsoft.flexiweather.components.IndexRetainingDropDownList"/>
     <classEntry path="com.iblsoft.flexiweather.components.MultiSelectionButtonBar"/>
@@ -54,6 +54,7 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.ISynchronisedObject"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.InteractiveLayerMapLayersInitializationWatcher"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.InteractiveLayerQTTMS"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.InteractiveLayerWFS"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.InteractiveLayerWMS"/>
@@ -406,7 +407,8 @@
     <classEntry path="com.tests.utils.URLUtilsTest"/>
     <classEntry path="com.tests.wmts.InteractiveLayerTiledTest"/>
     <classEntry path="com.utils.ObjectSorter"/>
-    <classEntry path="com.iblsoft.flexiweather.ogc.InteractiveLayerMapLayersInitializationWatcher"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.LoggingUtils"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.LoggingUtilsEvent"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

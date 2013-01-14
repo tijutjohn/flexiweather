@@ -2,12 +2,15 @@ package com.iblsoft.flexiweather.ogc
 {
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
+	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
 	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
+	
+	import mx.events.DynamicEvent;
 
 	public class InteractiveLayerMapLayersInitializationWatcher extends EventDispatcher
 	{
@@ -30,7 +33,7 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function onMapFromXMLReady(interactiveLayerMap: InteractiveLayerMap, layers: Array): void
 		{
-			trace(this + "onMapFromXMLReady");
+			LoggingUtils.dispatchLogEvent(this,this + "onMapFromXMLReady");
 			var layer: InteractiveLayer;
 			_mapLayersInitializing = 0;
 			for each (layer in layers)
@@ -50,12 +53,12 @@ package com.iblsoft.flexiweather.ogc
 					{
 						configuration = (layer as IConfigurableLayer).configuration;
 					}
-					trace("InteractiveMultiView onMapFromXMLReady addLayer: " + layer.name + " | " + layer.id);
+					LoggingUtils.dispatchLogEvent(this,"InteractiveMultiView onMapFromXMLReady addLayer: " + layer.name + " | " + layer.id);
 					interactiveLayerMap.addLayer(layer);
 				}
 				else
 				{
-					trace("onMapFromXMLReady: Layer not exists")
+					LoggingUtils.dispatchLogEvent(this,"onMapFromXMLReady: Layer not exists")
 				}
 			}
 			//			listLayers.executeBindings();
@@ -64,13 +67,14 @@ package com.iblsoft.flexiweather.ogc
 			{
 				//we need to set b_force parameter to force to be able to get cached bitmaps
 				l.refresh(false);
+				LoggingUtils.dispatchLogEvent(this,"refresh['false'] layer: " + l.name);
 			}
 		}
 		
 		private function onLayerInitialized(event: InteractiveLayerEvent): void
 		{
 			_mapLayersInitializing--;
-			trace(this + "onLayerInitialized _mapLayersInitializing: " + _mapLayersInitializing);
+			LoggingUtils.dispatchLogEvent(this,this + "onLayerInitialized _mapLayersInitializing: " + _mapLayersInitializing);
 			if (_mapLayersInitializing == 0)
 			{
 				dispatchEvent(new Event(MAP_LAYERS_INITIALIZED));
