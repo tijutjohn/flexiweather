@@ -2,9 +2,11 @@ package com.iblsoft.flexiweather.widgets
 {
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
+	
+	import flash.events.Event;
+	import flash.events.EventDispatcher;
 
-	[Bindable]
-	public class MapTimelineConfiguration implements Serializable
+	public class MapTimelineConfiguration extends EventDispatcher implements Serializable
 	{
 		public static const ANIMATION_TYPE_TO_LAST_FRAME: String = 'to-last-frame';
 		public static const ANIMATION_TYPE_FROM_FIRST_FRAME: String = 'from-first-frame';
@@ -13,15 +15,24 @@ package com.iblsoft.flexiweather.widgets
 		public static const ANIMATION_TYPE_FULL: String = 'full';
 		public static const ANIMATION_TYPE_USER: String = 'user';
 		private var _mapVisibleUnderTimeline: Boolean = true;
+	
+		[Bindable]
 		public var timelineVisibleAtStartup: Boolean;
+		[Bindable]
 		public var currentTimeFormat: String = '%H:%M %d.%m.%Y';
+		[Bindable]
 		public var dateFormat: String = '%d-%m';
+		[Bindable]
 		public var timeFormat: String = '%HZ';
-		public var duration: int = 1000;
+		[Bindable]
 		public var durationStep: int = 100;
+		[Bindable]
 		public var minDuration: int = 100;
+		[Bindable]
 		public var maxDuration: int = 5000;
+		[Bindable]
 		public var animationExtent: String;
+		[Bindable]
 		public var animationType: String;
 
 		public function MapTimelineConfiguration()
@@ -29,6 +40,20 @@ package com.iblsoft.flexiweather.widgets
 			super();
 			animationType = ANIMATION_TYPE_FULL;
 			animationExtent = 'PT1H';
+		}
+
+		private var _duration: int = 1000;
+
+		[Bindable (event="durationChanged")]
+		public function get duration():int
+		{
+			return _duration;
+		}
+
+		public function set duration(value:int):void
+		{
+			_duration = value;
+			dispatchEvent(new Event("durationChanged"));
 		}
 
 		public function get mapVisibleUnderTimeline(): Boolean

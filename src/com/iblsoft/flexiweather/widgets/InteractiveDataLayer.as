@@ -7,8 +7,11 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
 	import com.iblsoft.flexiweather.ogc.ExceptionUtils;
 	import com.iblsoft.flexiweather.ogc.net.loaders.WMSImageLoader;
+	import com.iblsoft.flexiweather.utils.LoggingUtils;
+	
 	import flash.events.Event;
 	import flash.events.ProgressEvent;
+	
 	import mx.events.DynamicEvent;
 
 	[Event(name = "loadingStarted", type = "com.iblsoft.flexiweather.events.InteractiveLayerEvent")]
@@ -196,6 +199,7 @@ package com.iblsoft.flexiweather.widgets
 		public function set invalidateDataFlag(value: Boolean): void
 		{
 			_invalidateDataFlag = value;
+			LoggingUtils.dispatchLogEvent(this, "**** invalidateDataFlag _invalidateDataFlag: " + _invalidateDataFlag + " ["+this+"]", true);
 		}
 		private var _invalidateDataForceUpdateFlag: Boolean;
 
@@ -209,20 +213,22 @@ package com.iblsoft.flexiweather.widgets
 		{
 			invalidateDataFlag = true;
 			_invalidateDataForceUpdateFlag = _invalidateDataForceUpdateFlag || b_forceUpdate;
-//			trace("**** invalidateData _invalidateDataForceUpdateFlag: " + _invalidateDataForceUpdateFlag + " (b_forceUpdate = " + b_forceUpdate + ") ["+this+"]");
+			LoggingUtils.dispatchLogEvent(this, "**** invalidateData _invalidateDataForceUpdateFlag: " + _invalidateDataForceUpdateFlag + " (b_forceUpdate = " + b_forceUpdate + ") ["+this+"]", true);
 			invalidateProperties();
 		}
 
 		protected function updateData(b_forceUpdate: Boolean): void
 		{
+			LoggingUtils.dispatchLogEvent(this, "*** updateData b_forceUpdate: " + b_forceUpdate + " ["+this+"]", true);
 		}
 
 		override protected function commitProperties(): void
 		{
 			super.commitProperties();
-//			trace("*** commitProperties _invalidateDataForceUpdateFlag: " + _invalidateDataForceUpdateFlag + " ["+this+"]");
+			LoggingUtils.dispatchLogEvent(this, "*** commitProperties _invalidateDataForceUpdateFlag: " + _invalidateDataForceUpdateFlag + " _invalidateDataFlag: " + _invalidateDataFlag + " ["+this+"]", true);
 			if (_invalidateDataFlag)
 			{
+				LoggingUtils.dispatchLogEvent(this, "\t*** commitProperties calling : updateData(" + _invalidateDataForceUpdateFlag + ") ["+this+"]", true);
 				updateData(_invalidateDataForceUpdateFlag);
 				invalidateDataFlag = false;
 			}

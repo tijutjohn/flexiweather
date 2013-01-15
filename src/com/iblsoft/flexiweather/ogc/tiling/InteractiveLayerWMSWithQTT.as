@@ -20,6 +20,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.TiledViewProperties;
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.WMSViewProperties;
 	import com.iblsoft.flexiweather.ogc.preload.IPreloadableLayer;
+	import com.iblsoft.flexiweather.utils.LoggingUtils;
+	import com.iblsoft.flexiweather.utils.LoggingUtilsEvent;
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
@@ -284,6 +286,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		override protected function updateData(b_forceUpdate: Boolean): void
 		{
+			LoggingUtils.dispatchLogEvent(this, "WMSWithQTT updateData b_forceUpdate: " + b_forceUpdate + " _layerInitialized: " + _layerInitialized + " capabilitiesReady: " + capabilitiesReady + " visible: " + visible);
+			
 			if (!_layerInitialized)
 				return;
 			//we need to postpone updateData if capabilities was not received, otherwise we do not know, if layes is tileable or not

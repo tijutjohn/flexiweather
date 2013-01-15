@@ -349,7 +349,9 @@ package com.iblsoft.flexiweather.widgets
 		override protected function layerAdded(layer: InteractiveLayer): void
 		{
 			super.layerAdded(layer);
-				debug(this + " ADD LAYER: " + layer.toString());
+			
+			debug(this + " ADD LAYER: " + layer.toString());
+			
 			if (layer)
 			{
 				var dynamicEvent: DynamicEvent = new DynamicEvent(TIME_AXIS_ADDED);
@@ -1038,7 +1040,7 @@ class LayerSerializationWrapper implements Serializable
 			var config: ILayerConfiguration = LayerConfigurationManager.getInstance().getLayerConfigurationByLabel(s_layerType);
 			if (config)
 				LoggingUtils.dispatchLogEvent(map, "LayerSerializationWrapper config: " + config.label);
-			
+			else
 				LoggingUtils.dispatchLogEvent(map, "LayerSerializationWrapper config: NULL " );
 				
 			m_layer = config.createInteractiveLayer(m_iw);

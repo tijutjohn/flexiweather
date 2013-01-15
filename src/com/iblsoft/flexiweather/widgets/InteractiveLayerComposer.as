@@ -7,6 +7,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration;
+	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.widgets.googlemaps.InteractiveLayerGoogleMaps;
@@ -108,7 +109,7 @@ package com.iblsoft.flexiweather.widgets
 			if (container)
 				l.container = container;
 			
-			trace("Composer addLayer: " + l.layerName + " at 0");
+			LoggingUtils.dispatchLogEvent(this, "Composer addLayer: " + l.layerName + " at 0", true);
 			m_layers.addItemAt(l, 0);
 			//wait for layer is initialized. Function "layerAdded" will be called
 			debugLayers();
@@ -123,12 +124,12 @@ package com.iblsoft.flexiweather.widgets
 			for (i = 0; i < total; i++)
 			{
 				var l: InteractiveLayer = m_layers.getItemAt(i) as InteractiveLayer;
-				trace("\t Composer debugLayers m_layers["+i+"] = " + l.layerName);
+				LoggingUtils.dispatchLogEvent(this,"\t Composer debugLayers m_layers["+i+"] = " + l.layerName, true);
 			}
 			for (i = 0; i < numChildren; ++i)
 			{
 				var ilI: InteractiveLayer = InteractiveLayer(getChildAt(i));
-				trace("\t't Composer debugLayers childAt["+i+"] = " + ilI.layerName);
+				LoggingUtils.dispatchLogEvent(this,"\t't Composer debugLayers childAt["+i+"] = " + ilI.layerName, true);
 			}
 		}
 
@@ -141,6 +142,7 @@ package com.iblsoft.flexiweather.widgets
 
 		protected function layerAdded(layer: InteractiveLayer): void
 		{
+			LoggingUtils.dispatchLogEvent(this,"\t Composer layerAdded: " + layer.layerName, true);
 			bindSubLayer(layer);
 			notifyLayersChanged(layer);
 			//when new layer is added to container, call onAreaChange to notify layer, that layer is already added to container, so it can render itself

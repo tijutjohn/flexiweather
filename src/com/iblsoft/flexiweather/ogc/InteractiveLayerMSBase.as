@@ -30,6 +30,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.utils.Duration;
 	import com.iblsoft.flexiweather.utils.ISO8601Parser;
+	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.widgets.BackgroundJob;
 	import com.iblsoft.flexiweather.widgets.GlowLabel;
 	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
@@ -118,6 +119,8 @@ package com.iblsoft.flexiweather.ogc
 			super(container);
 			m_cfg = cfg;
 			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
+			
+			LoggingUtils.dispatchLogEvent(this, "InteractiveLayerMSBase constructor", true);
 		}
 
 		override protected function initializeLayerAfterAddToStage(): void
@@ -125,15 +128,18 @@ package com.iblsoft.flexiweather.ogc
 			super.initializeLayerAfterAddToStage();
 			
 			initializeLayerProperties();
+			LoggingUtils.dispatchLogEvent(this, "InteractiveLayerMSBase initializeLayerAfterAddToStage", true);
 		}
 		
 		override protected function initializeLayer(): void
 		{
 			super.initializeLayer();
+			LoggingUtils.dispatchLogEvent(this, "InteractiveLayerMSBase initializeLayer", true);
 		}
 		
 		private function initializeLayerProperties(): void
 		{
+			LoggingUtils.dispatchLogEvent(this, "InteractiveLayerMSBase initializeLayerProperties", true);
 			ma_preloadingWMSViewProperties = [];
 			ma_preloadedWMSViewProperties = [];
 			m_currentWMSViewProperties = new WMSViewProperties();
@@ -563,10 +569,10 @@ package com.iblsoft.flexiweather.ogc
 
 		override protected function updateData(b_forceUpdate: Boolean): void
 		{
+			LoggingUtils.dispatchLogEvent(this, "MSBase updateData capabilitiesReady: " + capabilitiesReady + " layerWasDestroyed: " + layerWasDestroyed + " _layerInitialized: " + _layerInitialized, true);
 			if (!_layerInitialized)
 				return;
 			//we need to postpone updateData if capabilities was not received, otherwise we do not know, if layes is tileable or not
-//			trace("MSBase updateData capabilitiesReady: " + capabilitiesReady + " layerWasDestroyed: " + layerWasDestroyed);
 			if (!capabilitiesReady)
 			{
 				waitForCapabilities();
@@ -738,6 +744,7 @@ package com.iblsoft.flexiweather.ogc
 
 		private function updateCurrentWMSViewProperties(): void
 		{
+			LoggingUtils.dispatchLogEvent(this, "MSBase updateCurrentWMSViewProperties currentViewProperties: " + currentViewProperties + " container: " + container, true);
 			if (currentViewProperties && container)
 			{
 				m_currentWMSViewProperties.crs = container.crs;
@@ -747,6 +754,7 @@ package com.iblsoft.flexiweather.ogc
 
 		override public function onAreaChanged(b_finalChange: Boolean): void
 		{
+			LoggingUtils.dispatchLogEvent(this, "MSBase onAreaChanged b_finalChange: " + b_finalChange, true);
 			super.onAreaChanged(b_finalChange);
 			updateCurrentWMSViewProperties();
 		}
@@ -759,6 +767,7 @@ package com.iblsoft.flexiweather.ogc
 
 		override public function refresh(b_force: Boolean): void
 		{
+			LoggingUtils.dispatchLogEvent(this, "MSBase refresh b_force: " + b_force, true);
 			super.refresh(b_force);
 			invalidateData(b_force);
 			//rerender legend

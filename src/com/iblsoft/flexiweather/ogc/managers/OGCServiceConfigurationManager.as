@@ -1,16 +1,20 @@
 package com.iblsoft.flexiweather.ogc.managers
 {
-	import com.iblsoft.flexiweather.ogc.configuration.services.OGCServiceConfiguration;
 	import com.iblsoft.flexiweather.ogc.Version;
+	import com.iblsoft.flexiweather.ogc.configuration.services.OGCServiceConfiguration;
 	import com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceConfiguration;
+	import com.iblsoft.flexiweather.utils.LoggingUtils;
+	import com.iblsoft.flexiweather.utils.LoggingUtilsEvent;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
+	
 	import flash.events.DataEvent;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.TimerEvent;
 	import flash.utils.Timer;
 	import flash.utils.getTimer;
+	
 	import mx.collections.ArrayCollection;
 
 	public class OGCServiceConfigurationManager extends EventDispatcher implements Serializable
@@ -152,6 +156,7 @@ package com.iblsoft.flexiweather.ogc.managers
 //			for each(var osc: OGCServiceConfiguration in ma_services) 
 			for each (var oscName: String in currServices)
 			{
+//				LoggingUtils.dispatchLogEvent(this, "update ["+b_force+"] oscName: " + oscName, true);
 				var osc: OGCServiceConfiguration = getServiceByName(oscName);
 				if (osc)
 				{
@@ -167,8 +172,10 @@ package com.iblsoft.flexiweather.ogc.managers
 						var wmsServiceConfiguration: WMSServiceConfiguration = osc as WMSServiceConfiguration;
 						_runningServices.push(wmsServiceConfiguration);
 						m_servicesUpdating++;
+						LoggingUtils.dispatchLogEvent(this, "update addEventListener oscName: " + oscName, true);
 						wmsServiceConfiguration.addEventListener(WMSServiceConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
 					}
+					LoggingUtils.dispatchLogEvent(this, "update update oscName: " + oscName, true);
 					osc.update();
 					osc.mi_lastUpdateFlashStamp = i_currentFlashStamp;
 				}

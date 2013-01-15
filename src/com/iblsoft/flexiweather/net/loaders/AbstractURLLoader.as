@@ -11,6 +11,7 @@ package com.iblsoft.flexiweather.net.loaders
 	import com.iblsoft.flexiweather.net.managers.UniURLLoaderManager;
 	import com.iblsoft.flexiweather.plugins.IConsole;
 	import com.iblsoft.flexiweather.proj.Coord;
+	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.utils.URLUtils;
 	import com.iblsoft.flexiweather.widgets.BackgroundJob;
 	import com.iblsoft.flexiweather.widgets.BackgroundJobManager;
@@ -18,6 +19,7 @@ package com.iblsoft.flexiweather.net.loaders
 	import com.iblsoft.flexiweather.widgets.basicauth.controls.IBasicAuthCredentialsPopup;
 	import com.iblsoft.flexiweather.widgets.basicauth.data.BasicAuthAccount;
 	import com.iblsoft.flexiweather.widgets.basicauth.events.BasicAuthEvent;
+	
 	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
@@ -34,6 +36,7 @@ package com.iblsoft.flexiweather.net.loaders
 	import flash.net.URLVariables;
 	import flash.utils.ByteArray;
 	import flash.utils.Dictionary;
+	
 	import mx.controls.Alert;
 	import mx.core.ClassFactory;
 	import mx.core.FlexGlobals;
@@ -45,6 +48,7 @@ package com.iblsoft.flexiweather.net.loaders
 	import mx.utils.Base64Encoder;
 	import mx.utils.ObjectUtil;
 	import mx.utils.URLUtil;
+	
 	import spark.components.TitleWindow;
 
 	public class AbstractURLLoader extends EventDispatcher implements IURLLoaderBasicAuth
@@ -420,6 +424,9 @@ package com.iblsoft.flexiweather.net.loaders
 		{
 			checkRequestData(urlRequest);
 			checkRequestBaseURL(urlRequest);
+			
+			LoggingUtils.dispatchLogEvent(this, "AbstractLoader load: " + urlRequest.url);
+			
 			// if there is no associatedDat, add empty one
 			if (!associatedData)
 			{
