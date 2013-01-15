@@ -73,7 +73,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				mb_pointsDirty = true;
 			if (mb_pointsDirty)
 			{
-				var iw: InteractiveWidget = m_master.container;
+//				var iw: InteractiveWidget = m_master.container;
 				var c: Coord;
 				var coord: Object;
 				var geometryCoordinates: Coordinates;

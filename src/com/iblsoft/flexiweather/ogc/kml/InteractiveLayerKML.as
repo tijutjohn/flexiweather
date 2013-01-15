@@ -33,6 +33,7 @@ package com.iblsoft.flexiweather.ogc.kml
 	import com.iblsoft.flexiweather.utils.ProfilerUtils;
 	import com.iblsoft.flexiweather.utils.ScreenUtils;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
@@ -43,6 +44,7 @@ package com.iblsoft.flexiweather.ogc.kml
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
+	
 	import mx.controls.Alert;
 	import mx.core.ClassFactory;
 	import mx.core.EventPriority;
@@ -59,6 +61,18 @@ package com.iblsoft.flexiweather.ogc.kml
 	 */
 	public class InteractiveLayerKML extends InteractiveLayerFeatureBase
 	{
+		
+		override public function set visible(b_visible:Boolean):void
+		{
+			super.visible = b_visible;
+			
+//			if (b_visible)
+//			{
+				//if layer is displayed again, do full update to recalculate position
+				update(FeatureUpdateContext.fullUpdate());
+//			}
+		}
+			
 		public var kmzFile: KMZFile;
 		public var itemRenderer: Class;
 		private var _itemRendererInstance: IKMLRenderer;
@@ -452,6 +466,10 @@ package com.iblsoft.flexiweather.ogc.kml
 
 		public function update(changeFlag: FeatureUpdateContext): void
 		{
+			//do not anything if layer is not visiblit
+			if (!visible)
+				return;
+			
 			m_boundaryRect = new Rectangle(0, 0, width, height);
 			var time: int;
 			if (changeFlag.fullUpdateNeeded && _syncManagerFullUpdate)
@@ -498,7 +516,7 @@ package com.iblsoft.flexiweather.ogc.kml
 //			}
 			feature.featureScale = kmlFeatureScaleX;
 			feature.update(changeFlag);
-			feature.visible = true; //getAbsoluteVisibility(feature);
+			feature.visible = visible; //  true; //getAbsoluteVisibility(feature);
 //			if (feature is Container)
 //			{
 //				trace("\t updateFeature call updateForFeature: " + (feature as Container).firstFeature);

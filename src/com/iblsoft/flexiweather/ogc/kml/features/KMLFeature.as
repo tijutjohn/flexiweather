@@ -29,6 +29,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayout;
 	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayoutObject;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.Sprite;
@@ -39,6 +40,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import flash.net.URLRequest;
 	import flash.utils.Dictionary;
 	import flash.utils.getTimer;
+	
 	import mx.states.OverrideBase;
 	import mx.utils.object_proxy;
 
@@ -164,6 +166,13 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			super(s_namespace, null, null);
 			_kml = kml;
 			_xmlList = s_xml;
+			addEventListener(Event.ENTER_FRAME, initializeOnNextFrame);
+		}
+		
+		private function initializeOnNextFrame(event: Event): void
+		{
+			
+			removeEventListener(Event.ENTER_FRAME, initializeOnNextFrame);
 			init();
 		}
 		private var _iconState: String;

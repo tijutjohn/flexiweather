@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="1">
+<flexLibProperties includeAllClasses="false" useMultiPlatformConfig="false" version="1">
   <includeClasses>
     <classEntry path="com.iblsoft.flexiweather.components.IndexRetainingDropDownList"/>
     <classEntry path="com.iblsoft.flexiweather.components.MultiSelectionButtonBar"/>
@@ -40,6 +40,7 @@
     <classEntry path="com.iblsoft.flexiweather.net.loaders.TextLoader"/>
     <classEntry path="com.iblsoft.flexiweather.net.loaders.URLLoaderWithAssociatedData"/>
     <classEntry path="com.iblsoft.flexiweather.net.loaders.UniURLLoader"/>
+    <classEntry path="com.iblsoft.flexiweather.net.loaders.WFSLoader"/>
     <classEntry path="com.iblsoft.flexiweather.net.loaders.XMLLoader"/>
     <classEntry path="com.iblsoft.flexiweather.net.managers.UniURLLoaderBasicAuthManager"/>
     <classEntry path="com.iblsoft.flexiweather.net.managers.UniURLLoaderManager"/>
@@ -81,6 +82,7 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.cache.WMSTileCache"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.cache.WMSTileCacheKey"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.cache.event.WMSCacheEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.configuration.AnimationConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.configuration.AreaConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.configuration.MapConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.configuration.ProjectionConfiguration"/>
@@ -206,6 +208,7 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.managers.NetworkLinkManager"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.renderer.DefaultKMLRenderer"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.renderer.IKMLRenderer"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.managers.AnimationConfigurationManager"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.managers.AreaConfigurationManager"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.managers.BaseConfigurationManager"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.managers.GlobalVariablesManager"/>
