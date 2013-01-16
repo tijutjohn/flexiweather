@@ -137,10 +137,8 @@ package com.iblsoft.flexiweather.ogc.kml.data
 			for (var i: int = 0; i < zipFile.entries.length; i++)
 			{
 				var entry: ZipEntry = zipFile.entries[i];
-				trace(entry.name);
 				// extract the entry's data from the zip
 				var data: ByteArray = zipFile.getInput(entry);
-//				trace(data.toString());
 				var name: String = entry.name;
 				if (name.indexOf(".kml") > 0)
 				{

@@ -277,7 +277,6 @@ package com.iblsoft.flexiweather.ogc
 			super.onAreaChanged(b_finalChange);
 			if (b_finalChange)
 			{
-				//				trace("WMS onAreaChanged ms_imageCRS: " + ms_imageCRS + " m_imageBBox: " + m_imageBBox);
 				_invalidateCacheAfterImageLoad = true;
 				//				m_cache.invalidate(ms_imageCRS, m_imageBBox);
 				invalidateData(false);
@@ -288,7 +287,6 @@ package com.iblsoft.flexiweather.ogc
 
 		override public function get visible(): Boolean
 		{
-//			trace(this + "  get visible = " + super.visible);
 			return super.visible;
 		}
 		
@@ -298,14 +296,11 @@ package com.iblsoft.flexiweather.ogc
 			{
 				super.visible = b_visible;
 				
-//				trace(this + "  visible = " + b_visible + " / " + visible);
 			}
 		}
 		
 		override public function clone(): InteractiveLayer
 		{
-			trace(this + " clone: visible: " + visible + " zOrder: " + zOrder);
-			
 			var newLayer: InteractiveLayerWMS = new InteractiveLayerWMS(container, m_cfg);
 			updatePropertyForCloneLayer(newLayer);
 			return newLayer;

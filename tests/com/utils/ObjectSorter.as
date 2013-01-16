@@ -29,8 +29,6 @@ package com.utils
 		static public function sortBBoxesArray(arr: Array): void
 		{
 			arr.sort(ObjectSorter.compareBBoxes);
-			
-			trace(arr);
 		}
 	}
 }

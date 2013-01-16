@@ -153,10 +153,6 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		public function addImagePart(imagePart: ImagePart): void
 		{
 			ma_imageParts.addItem(imagePart);
-//			if (parentLayer)
-//				trace("WMSViewProperties.addImagePart: " + ma_imageParts.length + " ["+parentLayer+"]");
-//			else
-//				trace("WMSViewProperties.addImagePart: " + ma_imageParts.length + " ["+this+"]");
 		}
 
 		public function setConfiguration(cfg: ILayerConfiguration): void
@@ -359,10 +355,6 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		public function getWMSDimensionsValues(s_dimName: String, b_intersection: Boolean = true): Array
 		{
 			var a_dimValues: Array;
-			if (s_dimName == 'ELEVATION')
-			{
-				trace("WMSViewProperties: check ELEVATION getWMSDimensionsValues function");
-			}
 			var wmsLayers: Array = getWMSLayers();
 			for each (var layer: WMSLayer in wmsLayers)
 			{
@@ -381,7 +373,6 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					}
 				}
 			}
-			//debug("getWMSDimensionsValues ["+s_dimName+"] = " +createDimensionsValuesString(a_dimValues));
 			return a_dimValues;
 		}
 
@@ -394,7 +385,6 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		{
 			var run: String = getWMSDimensionValue('RUN');
 			var forecast: String = getWMSDimensionValue('FORECAST');
-			//			debug('run: ' + run + ' forecast: ' + forecast);
 			return new Date();
 		}
 
@@ -619,7 +609,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 						}
 						else
 						{
-							debug("PROBLEM: InteractiveLayerMSBase getSynchronisedVariableValuesList time.data is not Date: " + time.data);
+							trace("PROBLEM: InteractiveLayerMSBase getSynchronisedVariableValuesList time.data is not Date: " + time.data);
 						}
 					}
 					//sort forecast by Date
@@ -645,7 +635,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 						}
 						else
 						{
-							debug("PROBLEM: InteractiveLayerMSBase getSynchronisedVariableValuesList forecast.data is not Number: " + forecast.data);
+							trace("PROBLEM: InteractiveLayerMSBase getSynchronisedVariableValuesList forecast.data is not Number: " + forecast.data);
 						}
 					}
 					//sort forecast by Duration
@@ -851,7 +841,6 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 			newViewProperties.setViewBBox(_viewBBox);
 			var styleName: String = getWMSStyleName(0)
 			newViewProperties.setWMSStyleName(0, styleName);
-//			debug("\n\n CLONE InteractiveLayerWMS ["+newViewProperties.name+"] alpha: " + newViewProperties.alpha + " zOrder: " +  newViewProperties.zOrder);
 			//clone all dimensions
 			var dimNames: Array = getWMSDimensionsNames();
 			for each (var dimName: String in dimNames)
@@ -859,14 +848,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 				var value: String = getWMSDimensionValue(dimName);
 				newViewProperties.setWMSDimensionValue(dimName, value);
 			}
-//			debug("OLD: " + name + " label: " + id);
 			return newViewProperties;
-		}
-
-		private function debug(str: String): void
-		{
-			return;
-			trace(str);
 		}
 
 		private function notifyEvent(event: Event): void

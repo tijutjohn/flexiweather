@@ -58,7 +58,6 @@ package com.iblsoft.flexiweather.components
 						calculatedWidth = size.width;
 					}
 				}
-				trace("findLongestTypicalItem: " + calculatedWidth);
 				if (longestItem)
 					typicalItem = longestItem;
 			}

@@ -56,7 +56,6 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		public function clone(): IViewProperties
 		{
 			var qttTile: TiledTileViewProperties = new TiledTileViewProperties(qttViewProperties);
-			trace("QTTTileViewProperties clone: " + qttViewProperties.specialCacheStrings[0]);
 			qttTile.tileIndex = tileIndex;
 			qttTile.updateCycleAge = updateCycleAge;
 			qttTile.url = url;

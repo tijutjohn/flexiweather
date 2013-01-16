@@ -149,7 +149,6 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				var imgTest: DisplayObject = wmsCache.getCacheItemBitmap(wmsViewProperties);
 				if (isItemLoading)
 				{
-					trace(" updateDataPart  isItemLoading = true [" + this + "/" + wmsViewProperties.parentLayer + "]");
 					m_wmsViewProperties = wmsViewProperties;
 					m_imagePart = imagePart;
 					var cacheItem: CacheItem = wmsCache.getCacheItem(wmsViewProperties);
@@ -197,7 +196,6 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 
 		private function onCacheItemLoaded(event: WMSCacheEvent): void
 		{
-//			trace("\n\n" + this + " onCacheItemLoaded");
 			var wmsCache: WMSCache = event.target as WMSCache;
 			var item: CacheItem = event.item;
 			wmsCache.removeEventListener(WMSCacheEvent.ITEM_ADDED, onCacheItemLoaded);
@@ -271,10 +269,6 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 						var currImagePart: ImagePart = imageParts.getItemAt(i) as ImagePart;
 						if (imagePart.intersectsOrHasDifferentCRS(currImagePart))
 						{
-							//						trace("InteractiveLayerWMS.updateDataPart(): removing old " + i + " part "
-							//							+ ImagePart(ma_imageParts[i]).ms_imageCRS + ": "
-							//							+ ImagePart(ma_imageParts[i]).m_imageBBox.toString()
-							//							+ " will remain " + (ma_imageParts.length - 1) + " part(s)");
 							imageParts.removeItemAt(i);
 							total--;
 						}
@@ -300,9 +294,6 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				//		super.onDataLoaded(event);
 				var wmsViewProperties: WMSViewProperties = event.associatedData.wmsViewProperties as WMSViewProperties;
 				var imagePart: ImagePart = event.associatedData.requestedImagePart;
-				//			trace("InteractiveLayerWMS.onDataLoaded(): received part "
-				//					+ imagePart.ms_imageCRS + ": "
-				//					+ imagePart.m_imageBBox.toString());
 				var wmsCache: WMSCache = m_layer.getCache() as WMSCache;
 				/* FIXME:
 				if (_invalidateCacheAfterImageLoad)
@@ -410,7 +401,6 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 
 		private function invalidateDynamicPart(b_invalid: Boolean = true): void
 		{
-//			trace("\t MSBaseLoader invalidateDynamicPart: " + id);
 			var de: DynamicEvent = new DynamicEvent("invalidateDynamicPart");
 			de["invalid"] = b_invalid;
 			dispatchEvent(de);

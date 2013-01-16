@@ -57,7 +57,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		protected function onDataProgress(event: ProgressEvent): void
 		{
-			//			trace(this + " onDataProgress: " + event.bytesLoaded + " / " + event.bytesTotal);
 		}
 
 		protected function onDataLoaded(event: UniURLLoaderEvent): void

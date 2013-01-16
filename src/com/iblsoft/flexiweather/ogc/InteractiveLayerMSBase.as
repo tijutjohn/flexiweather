@@ -387,7 +387,6 @@ package com.iblsoft.flexiweather.ogc
 		{
 //			var wmsViewProperties: WMSViewProperties = event.target as WMSViewProperties;
 //			wmsViewProperties.removeEventListener(InteractiveDataLayer.LOADING_STARTED, onPreloadingWMSDataLoadingStarted);
-//			trace("\t onPreloadingWMSDataLoadingStarted wmsData: " + wmsViewProperties);
 		}
 
 		protected function onPreloadingWMSDataLoadingFinished(event: InteractiveLayerEvent): void
@@ -397,7 +396,6 @@ package com.iblsoft.flexiweather.ogc
 			var wmsViewProperties: WMSViewProperties = event.data.wmsViewProperties as WMSViewProperties;
 			wmsViewProperties.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
 //			debug("onPreloadingWMSDataLoadingFinished wmsData: " + wmsViewProperties);
-//			trace("\t onPreloadingWMSDataLoadingFinished PRELOADED: " + ma_preloadedWMSViewProperties.length + " , PRELAODING: " + ma_preloadingWMSViewProperties.length);
 			//remove wmsViewProperties from array of currently preloading wms view properties
 			var total: int = ma_preloadingWMSViewProperties.length;
 			for (var i: int = 0; i < total; i++)
@@ -434,26 +432,22 @@ package com.iblsoft.flexiweather.ogc
 
 		protected function onWMSViewPropertiesDataInvalidateDynamicPart(event: DynamicEvent): void
 		{
-			trace("onWMSViewPropertiesDataInvalidateDynamicPart");
 		}
 
 		protected function onCurrentWMSDataInvalidateDynamicPart(event: DynamicEvent): void
 		{
-//			trace("\t onCurrentWMSDataInvalidateDynamicPart ["+this+"]");
 			invalidateDynamicPart(event['invalid']);
 		}
 		protected var _currentWMSDataLoadingStarted: Boolean;
 
 		protected function onCurrentWMSDataLoadingStarted(event: InteractiveLayerEvent): void
 		{
-//			trace("\t onCurrentWMSDataLoadingStarted ["+name+"]");
 			_currentWMSDataLoadingStarted = true;
 			notifyLoadingStart(false);
 		}
 
 		protected function onCurrentWMSDataProgress(event: InteractiveLayerProgressEvent): void
 		{
-//			trace("\t onCurrentWMSDataProgress ["+name+"]");
 			notifyProgress(event.loaded, event.total, event.units);
 		}
 
@@ -467,7 +461,6 @@ package com.iblsoft.flexiweather.ogc
 		}
 		protected function onCurrentWMSDataLoadingFinished(event: InteractiveLayerEvent): void
 		{
-//			trace("\t onCurrentWMSDataLoadingFinished ["+name+"]");
 			var loader: MSBaseLoader = event.target as MSBaseLoader;
 			removeLoaderListeners(loader);
 			notifyLoadingFinished();
@@ -475,7 +468,6 @@ package com.iblsoft.flexiweather.ogc
 		}
 		protected function onCurrentWMSDataLoadingFinishedFromCache(event: InteractiveLayerEvent): void
 		{
-//			trace("\t onCurrentWMSDataLoadingFinished ["+name+"]");
 			var loader: MSBaseLoader = event.target as MSBaseLoader;
 			removeLoaderListeners(loader);
 			notifyLoadingFinishedFromCache();
@@ -588,7 +580,6 @@ package com.iblsoft.flexiweather.ogc
 				}
 				updateCurrentWMSViewProperties();
 				var loader: IWMSViewPropertiesLoader = getWMSViewPropertiesLoader();
-//				trace("\n\n ***** updateData loader: "+ (loader as MSBaseLoader).id + " ["+this+"]");
 				loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
 				loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
 				loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onCurrentWMSDataLoadingFinishedFromCache);
@@ -674,7 +665,6 @@ package com.iblsoft.flexiweather.ogc
 				return;
 			if (!layerWasDestroyed)
 			{
-//				trace("\n DRAW ["+ this+"]");
 				super.draw(graphics);
 				var imageParts: ArrayCollection = m_currentWMSViewProperties.imageParts;
 				if (container.height <= 0)
@@ -682,8 +672,6 @@ package com.iblsoft.flexiweather.ogc
 				if (container.width <= 0)
 					return;
 				var s_currentCRS: String = m_currentWMSViewProperties.crs;
-//				if (imageParts)
-//					trace("\t DRAW currentViewBBox=" + container.getViewBBox().toString() + " imageParts: " + imageParts.length);
 				for each (var imagePart: ImagePart in imageParts)
 				{
 					// Check if CRS of the image part == current CRS of the container
@@ -728,16 +716,13 @@ package com.iblsoft.flexiweather.ogc
 					container.coordToPoint(new Coord(s_imageCRS, imageBBox.xMax, imageBBox.yMin));
 			ptImageEndPoint.x += 1;
 			ptImageEndPoint.y += 1;
-//			trace("\t DRAWIMAGEPARTASBITMAP(): image-w=" + image.width + " image-h=" + image.height + " ["+this+"]");
 			var ptImageSize: Point = ptImageEndPoint.subtract(ptImageStartPoint);
 			ptImageSize.x = int(Math.round(ptImageSize.x));
 			ptImageSize.y = int(Math.round(ptImageSize.y));
 			var matrix: Matrix = new Matrix();
 			matrix.scale(ptImageSize.x / image.width, ptImageSize.y / image.height);
-			//			trace("InteractiveLayerWMS.draw(): scale-x=" + matrix.a + " scale-y=" + matrix.d);
 			matrix.translate(ptImageStartPoint.x, ptImageStartPoint.y);
 			graphics.beginBitmapFill(image.bitmapData, matrix, true, true);
-			//			trace("InteractiveLayerWMS.draw(): x=" + ptImageStartPoint.x + " y=" + ptImageStartPoint.y + " w=" + ptImageSize.x + " h=" + ptImageSize.y);
 			graphics.drawRect(ptImageStartPoint.x, ptImageStartPoint.y, ptImageSize.x, ptImageSize.y);
 			graphics.endFill();
 		}
@@ -1549,7 +1534,6 @@ package com.iblsoft.flexiweather.ogc
 
 		protected function debug(str: String): void
 		{
-//			trace("InteractiveLayerMSBase: " + str);
 		}
 
 		public function get configuration(): ILayerConfiguration

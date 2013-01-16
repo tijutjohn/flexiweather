@@ -121,7 +121,6 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 //					var currFrame: Date = primaryLayer.getSynchronisedVariableValue(GlobalVariable.FRAME) as Date;
 //					var currFramePosition: int = getFramePosition(currFrame, frames);
 //					
-//	//				trace("curr frame: " + currFrame.toTimeString() + " currFramePosition: " + currFramePosition);
 //					if (currFramePosition > 0)
 //						frames = frames.slice(Math.max(0, currFramePosition - synchronizeFromWidgetPosition), frames.length);
 					var cnt: int = 0;

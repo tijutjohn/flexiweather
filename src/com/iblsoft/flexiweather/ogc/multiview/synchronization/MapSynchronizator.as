@@ -85,8 +85,6 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		{
 			//there is no synchronizing needed for this syncrhonizator, all is done by AreaSynchronizator
 			
-//			trace("\nFrameSychronizator synchronizeWidgets");
-			
 			var cnt: int = 0;
 			var total: int = widgetsForSynchronisation.length;
 			for (var i: int = 0; i < total; i++)
@@ -105,13 +103,11 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		
 		private function dataForWidgetAvailable(widget: InteractiveWidget): void
 		{
-			trace("\t FrameSynchronizator dataForWidgetAvailable " + widget.id);
 			widget.enabled = true;
 		}
 		
 		private function dataForWidgetUnvailable(widget: InteractiveWidget): void
 		{
-			trace("\t FrameSynchronizator dataForWidgetUnvailable" + widget.id);
 			widget.enabled = false;
 		}
 		

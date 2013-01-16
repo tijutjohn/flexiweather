@@ -44,19 +44,16 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		override public function set x(value: Number): void
 		{
 			super.x = value;
-			trace("Placemark : " + name + " X pos [" + x + "," + y + "]");
 		}
 
 		override public function set y(value: Number): void
 		{
 			super.y = value;
-			trace("Placemark : " + name + " Y  pos [" + x + "," + y + "]");
 		}
 
 		override public function set visible(value: Boolean): void
 		{
 			super.visible = value;
-//			trace("Placemark : " + name + " visible = " + value);
 		}
 
 		override public function getPoints(): ArrayCollection
@@ -71,8 +68,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 
 		override public function get coordinates(): Array
 		{
-			if (_geometry is Polygon)
-				trace("get Placemark Polygon coordinates");
 			return m_coordinates.toArray();
 		}
 
@@ -95,7 +90,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 
 		private function onPresenceInViewBBoxChanged(event: FeatureEvent): void
 		{
-			trace(this + " presence changed: " + event.insideViewBBox);
 			var labelLayout: AnticollisionLayout = master.container.labelLayout;
 //			if (event.insideViewBBox)
 //			{
@@ -108,7 +102,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		public override function cleanup(): void
 		{
 			super.cleanup();
-			trace("Placemark cleanup");
 			var totalReflections: int = kmlReflectionDictionary.totalReflections;
 			var kmlSprite: KMLSprite;
 			for (var i: int = 0; i < totalReflections; i++)
@@ -148,12 +141,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		{
 			super.parseKML(s_namespace, kmlParserManager);
 			var time: int = startProfileTimer();
-			if (name && name.length > 0)
-			{
-//				createKMLLabel();
-				if (name == '4808A')
-					trace("Placemark stop");
-			}
 			createIcon();
 			var kmlns: Namespace = new Namespace(s_namespace);
 			// Features are: <Point>, <LineString>, <LinearRing>, <Polygon>, <MultiGeometry>, <Model>
@@ -238,8 +225,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			}
 			if (currGeometry is MultiGeometry)
 			{
-				//TODO update coordinates in MultiGeometry items
-				trace("TODO update coordinates in MultiGeometry items");
 				var multigeometry: MultiGeometry = currGeometry as MultiGeometry;
 				for each (var geometryItem: Geometry in multigeometry.geometries)
 				{
@@ -253,18 +238,12 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			var kmlSprite: KMLSprite = parent as KMLSprite;
 			if (kmlSprite && !kmlSprite.kmlLabel)
 				kmlSprite.kmlLabel = super.createKMLLabel(kmlSprite);
-			//			trace("\t Placemark createKMLLabel ["+kmlSprite.kmlLabel.id+"]: " + kmlSprite.kmlLabel.text);
 			return kmlSprite.kmlLabel;
 		}
 
 		/** Called after the feature is added to master or after any change (e.g. area change). */
 		override public function update(changeFlag: FeatureUpdateContext): void
 		{
-//			trace("Placemark update: " + name);
-//			if (name)
-//			{
-//				trace("Placemark with name: " + name);
-//			}
 			if (!m_master)
 				return;
 			if (kmlLabel)
@@ -328,13 +307,8 @@ package com.iblsoft.flexiweather.ogc.kml.features
 							{
 								createKMLLabel(kmlSprite);
 								kmlSprite.kmlLabel.text = name;
-//								trace("\t Placemark createKMLLabel and change name ["+kmlSprite.kmlLabel.id+"]: " + kmlSprite.kmlLabel.text);
 								labelsCreation = true;
 							}
-//							trace("Placemark ["+i+"/"+name+"] label: " + kmlSprite.kmlLabel.text + " position: " + iconPoint);
-//							trace("\tPlacemark ["+i+"/"+name+"] ["+kmlSprite.x + "/"+kmlSprite.y+"] kmlSprite.kmlLabel.anticollisionLayoutObject: " + (kmlSprite.kmlLabel.anticollisionLayoutObject != null) + " isInside: " + labelLayout.isObjectInside(kmlSprite.kmlLabel) + " visible: " + kmlSprite.kmlLabel.visible);
-//							if (kmlSprite.kmlLabel.textfield)
-//								trace("text: " + kmlSprite.kmlLabel.text + " tf: " + kmlSprite.kmlLabel.textfield.text);
 							if (kmlSprite.kmlLabel && !kmlSprite.kmlLabel.visible)
 								kmlSprite.kmlLabel.visible = true;
 							if (master && kmlSprite.kmlLabel && !kmlSprite.kmlLabel.anticollisionLayoutObject)

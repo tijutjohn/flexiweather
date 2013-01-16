@@ -70,7 +70,6 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (!enabled)
 				return;
-//			trace("onGesturePan: phase: " + event.phase + " -> " + event.offsetX + " , " + event.offsetY);
 			var b_finalChange: Boolean = event.phase == GesturePhase.END;
 			doRealPan(event.offsetX, event.offsetY, b_finalChange);
 		}
@@ -81,7 +80,6 @@ package com.iblsoft.flexiweather.widgets
 				return;
 			if (mb_requireShiftKey)
 				return;
-//			trace("onGestureSwipe: phase: " + event.phase + " -> " + event.offsetX + " , " + event.offsetY);
 			var b_finalChange: Boolean = event.phase == GesturePhase.END;
 			doRealPan(event.offsetX, event.offsetY, b_finalChange);
 		}
@@ -194,8 +192,6 @@ package com.iblsoft.flexiweather.widgets
 			_moveInterval = setInterval(onMouseMoveDelay, 600);
 			if (_moveIntervalPoint)
 			{
-//				trace("onMouseMove target: " + event.target + " CURRENT TARGET: " + event.currentTarget);
-//				trace("onMouseMove target: " + event.localX +","+ event.localY);
 				if (doPanTo(_moveIntervalPoint, finalChange, 'onMouseMove'))
 					invalidateDynamicPart();
 			}
@@ -213,7 +209,6 @@ package com.iblsoft.flexiweather.widgets
 			_moveIntervalPoint = new Point(_oldMouseX, _oldMouseY);
 			if (_diffMouseX != 0 || _diffMouseY != 0)
 				clearInterval(_moveInterval);
-//			trace("\t enter frame  " + _moveIntervalPoint);
 		}
 
 		protected function doPanTo(p: Point, b_finalChange: Boolean, test: String): Boolean
@@ -221,7 +216,6 @@ package com.iblsoft.flexiweather.widgets
 			if (!_p && !_oldStartPoint)
 				return false;
 			var pDiff: Point = p.subtract(_p);
-//			trace("p diff ["+test+"]: " + pDiff + " p : " + p + " _p: " + _p);
 			_p = p;
 			if (Math.abs(pDiff.x) > 1 || Math.abs(pDiff.y) > 1 || b_finalChange)
 			{
@@ -267,14 +261,9 @@ package com.iblsoft.flexiweather.widgets
 			_diff.x = xDiff;
 			_diff.y = yDiff;
 			invalidateDynamicPart(true);
-//			debug("\ndoRealPan");
-//			debug("\t r: " + r);
 			var projection: Projection = container.getCRSProjection();
 			r = r.translated(-xDiff, yDiff);
 			var extentBBox: BBox = container.getExtentBBox();
-//			debug("\t projection:  " + projection.toString());
-//			debug("\t extentBBox:  " + extentBBox.toBBOXString());
-//			debug("\t xDiff:  " +xDiff + " , " + yDiff);
 			var allowHorizontalWrap: Boolean = allowWrapHorizontally();
 			if (allowHorizontalWrap && !extentBBox.contains(r) && xDiff != 0)
 			{
@@ -282,36 +271,28 @@ package com.iblsoft.flexiweather.widgets
 				while (extentBBox.translated(f_wrappingStep, 0).intersects(r))
 				{
 					extentBBox = extentBBox.translated(f_wrappingStep, 0);
-//					debug("\t\t intersected bbox: " + extentBBox.toBBOXString());
 					if (extentBBox.contains(r))
 					{
-//						debug("\t\t\t intersected bbox contains r: " + extentBBox.toBBOXString());
 						var a1: Array = container.mapBBoxToViewReflections(extentBBox);
 						var a2: Array = container.mapBBoxToViewReflections(r);
 						for (var i: int = 0; i < a1.length && i < a2.length; ++i)
 						{
-//							debug("\t\t\t a1["+i+"] " + a1[i] + " a2["+i+"] " + a2[i]);
 							if (projection.extentBBox.contains(a1[i]))
 							{
 								extentBBox = a1[i];
 								r = a2[i];
-//								debug("\t\t\t\t selected extent: " + extentBBox + " r: " + r);
 							}
 						}
-//						debug("\n setExtentBBox original: "  + extentBBox + "\n");
 						extentBBox = _wrapLimiter.moveViewBBoxBack(extentBBox);
-//						debug("\n setExtentBBox fixed offset back: "  + extentBBox + "\n");
 						container.setExtentBBox(extentBBox, false);
 						break;
 					}
 				}
 			}
-//			debug("\n setViewBBox original: "  + r + "\n");
 			//check if viewBBox wi ll be moved and in that case move extentBBox first
 			var moveX: Number = _wrapLimiter.getWrapMoveBackSize(r);
 			if (moveX != 0)
 				r = _wrapLimiter.moveViewBBoxBack(r);
-//			debug("\n setViewBBox fixed offset back: "  + r + "\n");
 			if (!allowHorizontalWrap)
 			{
 				if (r.xMin < extentBBox.xMin)
@@ -376,10 +357,6 @@ package com.iblsoft.flexiweather.widgets
 			console.print("\t size: " + _wrapLimiter.getWrapMoveBackSize(r), 'Info', 'Pan');
 		}
 
-		public function debug(str: String): void
-		{
-			trace(this + ": " + str);
-		}
 	}
 }
 import com.iblsoft.flexiweather.ogc.BBox;
@@ -472,8 +449,4 @@ class WrapLimiter
 		return bbox;
 	}
 
-	public function debug(str: String): void
-	{
-		trace("WrapLimiter: " + str);
-	}
 }

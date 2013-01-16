@@ -203,10 +203,6 @@ package com.iblsoft.flexiweather.ogc
 //		{
 //			var i_oldZoom: int = zoomLevel;
 //			findZoom();
-//			if (zoomLevel == 0)
-//			{
-//				trace("check zoom level 0");	
-//			}
 //			if (i_oldZoom != zoomLevel)
 //			{
 //				
@@ -229,7 +225,6 @@ package com.iblsoft.flexiweather.ogc
 		{
 			//			var wmsViewProperties: WMSViewProperties = event.target as WMSViewProperties;
 			//			wmsViewProperties.removeEventListener(InteractiveDataLayer.LOADING_STARTED, onPreloadingWMSDataLoadingStarted);
-			//			trace("\t onPreloadingWMSDataLoadingStarted wmsData: " + wmsViewProperties);
 
 		}
 		protected function onPreloadingWMSDataLoadingFinished(event: InteractiveLayerEvent): void
@@ -242,7 +237,6 @@ package com.iblsoft.flexiweather.ogc
 			{
 				qttViewProperties.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
 				//			debug("onPreloadingWMSDataLoadingFinished wmsData: " + wmsViewProperties);
-				//			trace("\t onPreloadingWMSDataLoadingFinished PRELOADED: " + ma_preloadedWMSViewProperties.length + " , PRELAODING: " + ma_preloadingWMSViewProperties.length);
 
 				//remove wmsViewProperties from array of currently preloading wms view properties
 				var total: int = ma_preloadingQTTViewProperties.length;
@@ -538,9 +532,6 @@ package com.iblsoft.flexiweather.ogc
 			var viewBBox: BBox = container.getViewBBox();
 
 			updateCurrentWMSViewProperties();
-
-//			trace("onAreaChanged newBBox: " + newBBox);
-//			trace("onAreaChanged viewBBox: " + viewBBox);
 
 			m_tilingUtils.onAreaChanged(newCRS, newBBox);
 

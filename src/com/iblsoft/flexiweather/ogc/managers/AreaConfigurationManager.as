@@ -46,7 +46,6 @@ package com.iblsoft.flexiweather.ogc.managers
 				if (s_key in AREAS_THUMBNAILS_CACHE)
 				{
 					bd = AREAS_THUMBNAILS_CACHE[s_key].image;
-//					trace("getAreaThumbnail: " + s_key + " AREAS_THUMBNAILS_CACHE[s_key].image: " + AREAS_THUMBNAILS_CACHE[s_key].image);
 				}
 			}
 			else
@@ -56,14 +55,11 @@ package com.iblsoft.flexiweather.ogc.managers
 					if (s_key in AREAS_THUMBNAILS_CACHE2)
 					{
 						bd = AREAS_THUMBNAILS_CACHE2[s_key].image;
-//						trace("getAreaThumbnail: " + s_key + " AREAS_THUMBNAILS_CACHE[s_key].image: " + AREAS_THUMBNAILS_CACHE2[s_key].image);
 					}
 				}
 			}
 			if (bd)
 				return new Bitmap(bd);
-//			if (s_key)
-//				trace("getAreaThumbnail null" );
 			return null;
 		}
 
@@ -77,7 +73,6 @@ package com.iblsoft.flexiweather.ogc.managers
 				AREAS_THUMBNAILS_CACHE[s_key] = {
 							image: bd
 						};
-//				trace("addAreaThumbnail: " + s_key + " size" + img.width + " , " + img.height + " AREAS_THUMBNAILS_CACHE[s_key]: " + AREAS_THUMBNAILS_CACHE[s_key]);
 			}
 			else
 			{
@@ -86,7 +81,6 @@ package com.iblsoft.flexiweather.ogc.managers
 					AREAS_THUMBNAILS_CACHE2[s_key] = {
 								image: bd
 							};
-//					trace("addAreaThumbnail2: " + s_key + " size" + img.width + " , " + img.height + " AREAS_THUMBNAILS_CACHE2[s_key]: " + AREAS_THUMBNAILS_CACHE2[s_key]);
 				}
 			}
 		}

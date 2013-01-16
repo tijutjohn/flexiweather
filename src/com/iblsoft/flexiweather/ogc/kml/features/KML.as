@@ -177,7 +177,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 						feature = (feature as NetworkLink).container;
 					var name: String = getKMLFeatureName(feature);
 					var obj: Object = {label: name, data: feature};
-//					trace("\n\t CREATE "  + obj.label);
 					if (feature is Container)
 					{
 						if (!obj.hasOwnProperty("children"))
@@ -185,20 +184,12 @@ package com.iblsoft.flexiweather.ogc.kml.features
 						var newObj: Object = addFeaturesToDataProvider(feature as Container, obj);
 						if (!isParentObjectInside((obj['children'] as Array), newObj))
 						{
-//							trace("\t\t ADD["+obj.label+"] " + newObj.label);
 							(obj['children'] as Array).push(newObj);
-//							trace("\t\t ADD["+obj.label+"] len: " + (obj['children'] as Array).length);
-//						} else {
-//							trace("\t\t ADD " + newObj.label + " IS ALREADY THERE ");
 						}
 					}
 					if (!isParentObjectInside((parentObject['children'] as Array), obj))
 					{
-//						trace("\t\t\t add to PARENT["+parentObject.label+"]: " + obj.label);
 						(parentObject['children'] as Array).push(obj);
-//						trace("\t\t\t add to PARENT["+parentObject.label+"] len: " + (parentObject['children'] as Array).length);
-//					} else {
-//						trace("\t\t\t add to PARENT: " + obj.label + " IS ALREADY THERE ");
 					}
 				}
 			}

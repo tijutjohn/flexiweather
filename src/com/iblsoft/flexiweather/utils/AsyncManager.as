@@ -103,7 +103,6 @@ package com.iblsoft.flexiweather.utils
 
 		protected function tick(): void
 		{
-//			trace("AsuncManager ["+_uid+"] tick "  + _stack.length);
 			if (_stack.length == 0)
 			{
 				stop();
@@ -111,7 +110,6 @@ package com.iblsoft.flexiweather.utils
 				return;
 			}
 			var total: int = Math.min(_stack.length, _maxCallsPerTick);
-//			trace("AsyncManager ["+_uid+"] onTimerEvent total: " + total + " / " + _stack.length);
 			if (total > 0)
 			{
 				for (var i: int = 0; i < total; i++)
@@ -148,11 +146,6 @@ package com.iblsoft.flexiweather.utils
 			{
 				_presence[obj] = true;
 				_stack.push({obj: obj, callback: callback, arguments: arguments});
-//				trace("AsuncManager ["+_uid+"] addCall "  + _stack.length);
-			}
-			else
-			{
-//				trace("AsyncManager ["+_uid+"] item was not added");
 			}
 		}
 	}

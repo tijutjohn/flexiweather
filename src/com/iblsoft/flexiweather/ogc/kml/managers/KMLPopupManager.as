@@ -54,7 +54,6 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 				//				var position: Point = new Point(feature.x + xDiff, feature.y + yDiff);
 				var position: Point = new Point(displaySprite.x + xDiff, displaySprite.y + yDiff);
 				var stagePosition: Point = stage.globalToLocal(featureParent.localToGlobal(position));
-				trace("KMLPopupManager stagePosition: " + stagePosition);
 				ScreenUtils.moveSpriteToButHideWhenNotFullOnScreen(popUp as DisplayObject, stagePosition);
 //				ScreenUtils.moveSpriteToButKeepFullyOnScreen(popUp as DisplayObject, stagePosition);
 			}
@@ -69,7 +68,6 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 				return window;
 			}
 			PopUpManager.addPopUp(popUp, parent);
-			trace("\n AddPopup for feature: " + feature);
 			feature.addEventListener(KMLFeatureEvent.KML_FEATURE_POSITION_CHANGE, onKMLFeaturePositionChange);
 			feature.addEventListener(KMLFeatureEvent.KML_FEATURE_VISIBILITY_CHANGE, onKMLFeatureVisibilityChange);
 			popUp.addEventListener(CloseEvent.CLOSE, onInfoWindowClose);

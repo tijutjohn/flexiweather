@@ -35,14 +35,10 @@ package com.iblsoft.flexiweather.utils
 			var id: int = _pool.indexOf(object);
 			if (id >= 0)
 			{
-				if (tracingEnabled)
-					trace("addObject object is already in pool");
 				return;
 			}
 			_cntAdd++;
 			_pool.push(object);
-			if (tracingEnabled)
-				trace("ObjectPool [" + name + "] length ADD : " + _pool.length + " total add: " + _cntAdd);
 		}
 
 		public function freeObject(object: Object): void
@@ -65,7 +61,6 @@ package com.iblsoft.flexiweather.utils
 				{
 					if ((obj as DisplayObject).parent)
 					{
-						trace("Stop: DisplayObject in pool has parent");
 						addObject(obj);
 						return null;
 					}
@@ -80,8 +75,6 @@ package com.iblsoft.flexiweather.utils
 							return null;
 					}
 				}
-				if (tracingEnabled)
-					trace("ObjectPool [" + name + "] length REMOVE: " + _pool.length + " total get: " + _cntGet);
 				return obj;
 			}
 			else
@@ -90,8 +83,6 @@ package com.iblsoft.flexiweather.utils
 				{
 					var newClass: ClassFactory = new ClassFactory(itemRenderer);
 					var object: Object = newClass.newInstance();
-					if (tracingEnabled)
-						trace("ObjectPool [" + name + "] new class creation length: " + _pool.length + " total get: " + _cntGet);
 					return object;
 				}
 			}

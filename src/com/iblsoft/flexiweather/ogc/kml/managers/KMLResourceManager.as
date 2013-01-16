@@ -71,7 +71,6 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 			if (debugConsole)
 			{
 				debugConsole.print("KMLResourceManager: " + txt, 'Info', 'KMLResourceManager');
-				trace("KMLResourceManager: " + txt);
 			}
 		}
 

@@ -26,13 +26,10 @@ package com.iblsoft.flexiweather.widgets
 
 		private function onChange(event: Event): void
 		{
-			trace("TextAreaWithEnter onChange");
-			trace(text);
 		}
 
 		private function onTextInput(event: TextEvent): void
 		{
-			trace("TextAreaWithEnter onTextInput");
 		}
 		private var _shiftPressed: Boolean;
 
@@ -70,7 +67,6 @@ package com.iblsoft.flexiweather.widgets
 					}
 					else
 					{
-						trace("ENTER (shift)");
 						textDisplay.text += '\r';
 //	             		textDisplay.validateNow();
 //	             		textDisplay.dispatchEvent( new Event( Event.CHANGE) );
@@ -80,13 +76,11 @@ package com.iblsoft.flexiweather.widgets
 					break;
 				}
 			}
-			trace("TextAreaWithEnter onKeyDown: " + event.keyCode + " SHIFT: " + event.shiftKey + " /_shiftPressed: " + _shiftPressed + " Ctrl: " + event.ctrlKey + " ALT: " + event.altKey);
 		}
 
 		override protected function keyUpHandler(event: KeyboardEvent): void
 		{
 			super.keyUpHandler(event);
-//			trace("TextAreaWithEnter onKeyUp: " + event.keyCode + " SHIFT: " + event.shiftKey);
 			switch (event.keyCode)
 			{
 				case Keyboard.SHIFT:

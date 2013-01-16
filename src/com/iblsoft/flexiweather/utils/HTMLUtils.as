@@ -93,8 +93,6 @@ package com.iblsoft.flexiweather.utils
 			s = s.substring(bodyTagClose, s.indexOf('</html>'));
 			//remove body
 			s = s.substring(0, s.indexOf('</body>'));
-			trace("from: " + originalHTML);
-			trace("to: " + s);
 			return s;
 		}
 

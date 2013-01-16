@@ -455,7 +455,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			{
 				if (mi_zoom == null)
 				{
-					trace("InteractiveLayerQTTMS.customDraw(): Isomething is wrong, tile zoom is null");
+					trace("InteractiveLayerQTTMS.customDraw(): Something is wrong, tile zoom is null");
 					return;
 				}
 				_debugDrawInfoArray = [];
@@ -467,8 +467,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 					trace("InteractiveLayerQTTMS.customDraw(): No tiling extent for CRS " + container.crs);
 					return;
 				}
-//				if (qttViewProperties.specialCacheStrings)
-//					trace("ILQTTMS customDraw " + qttViewProperties.toString() + " dim: " + qttViewProperties.specialCacheStrings[0]);
 				var wmsTileCache: WMSTileCache = m_cache as WMSTileCache;
 				var _specialCacheStrings: Array = qttViewProperties.specialCacheStrings;
 				var _currentValidityTime: Date = qttViewProperties.validity;
@@ -501,12 +499,10 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			var tileBBox: BBox = getGTileBBox(s_crs, tileIndex);
 			var reflectedTileBBoxes: Array = container.mapBBoxToViewReflections(tileBBox);
-			//			trace("\t\t customDraw tileBBox["+tileIndex.mi_tileCol + "_" + tileIndex.mi_tileRow + "_" + tileIndex.mi_tileZoom+"]: " + tileBBox);
 			if (reflectedTileBBoxes.length > 0)
 			{
 				for each (var reflectedTileBBox: BBox in reflectedTileBBoxes)
 				{
-					//					trace("\t\t customDraw reflected tileBBox["+tileIndex.mi_tileCol + "_" + tileIndex.mi_tileRow + "_" + tileIndex.mi_tileZoom+"]: " + reflectedTileBBox);
 					drawReflectedTile(tileIndex, reflectedTileBBox, s_crs, bitmapData, redrawBorder);
 				}
 			}
@@ -1103,8 +1099,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 								aspectRatioDistance = dist;
 								bestZoomMatrix = tileMatrix;
 							}
-							//						if (bestZoomMatrix)
-							//							trace("\tBest zoom: " + bestZoomMatrix.id);
 						}
 					}
 				} else {

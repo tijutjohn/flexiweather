@@ -92,7 +92,6 @@ package com.iblsoft.flexiweather.widgets
 				}
 				super.visible = b_visible;
 				
-				trace("InteractiveLayer " + name + "/" + id + "  visible = " + b_visible + " / " + visible);
 //				var ile: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.VISIBILITY_CHANGED);
 //				dispatchEvent(ile);
 //				if (container)
@@ -146,7 +145,6 @@ package com.iblsoft.flexiweather.widgets
 		private function onLayerAddedToStage(event: Event): void
 		{
 			removeEventListener(Event.ADDED_TO_STAGE, onLayerAddedToStage);
-			trace("onLayerAddedToStage");
 			initializeLayerAfterAddToStage();
 		}
 		
@@ -176,7 +174,6 @@ package com.iblsoft.flexiweather.widgets
 
 		protected function notifyLayerInitialized(): void
 		{
-			trace("\t" + this + " notifyLayerInitialized");
 			dispatchEvent(new InteractiveLayerEvent(InteractiveLayerEvent.LAYER_INITIALIZED, true));
 		}
 

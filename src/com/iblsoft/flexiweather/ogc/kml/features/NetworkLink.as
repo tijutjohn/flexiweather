@@ -25,7 +25,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		public override function cleanup(): void
 		{
 			super.cleanup();
-			trace("NetworkLink cleanup");
 			if (_link)
 			{
 				_link.cleanupKML();

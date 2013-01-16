@@ -257,12 +257,6 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 					if (overlay.overlayXY.yunits == 'pixels')
 						overlayPoint.y = icon.height - overlay.overlayXY.y;
 				}
-//				trace("ScreenOverlay image scale: " + sx + " , " + sy);
-//				trace("ScreenOverlay image pos: " + xDiff + " , " + yDiff);
-//				trace("ScreenOverlay image overlayPoint: " + overlayPoint);
-//				trace("ScreenOverlay size: " + overlay.size);
-//				trace("ScreenOverlay overlay: " + overlay.overlayXY);
-//				trace("ScreenOverlay screen: " + overlay.screenXY);
 				xDiff -= overlayPoint.x;
 				yDiff -= overlayPoint.y;
 				m.scale(sx, sy);
@@ -309,7 +303,6 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 					var sw: Point = points.getItemAt(3) as Point;
 //					feature.x = nw.x;
 //					feature.y = ne.y;
-//					trace("renderGroundOverlay overlay pos: ["+feature.x+","+feature.y+"]")
 					_container.labelLayout.updateObjectReferenceLocation(feature);
 				}
 				var resourceManager: KMLResourceManager = overlay.kml.resourceManager;
@@ -360,7 +353,6 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 //				overlay.x = nw.x;// + (ne.x - nw.x) / 2;
 //				overlay.y = ne.y;// + (se.y - ne.y) / 2;
 //				
-//				trace("renderGroundOverlayImage overlay pos: ["+overlay.x+","+overlay.y+"]")
 //				var widthOnMap: int = ne.x - nw.x;
 //				var heightOnMap: int = se.y - ne.y;
 //				
@@ -384,8 +376,6 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 //					xDiff = 0;//-0.5 * icon.width * sx;
 //					yDiff = 0;//-0.5 * icon.height * sy;
 //					
-//					trace("Ground overlay: scale ["+sx+","+sy+"] size ["+w+","+h+"]");
-//					
 //					gr.beginBitmapFill(icon, m);
 //					gr.drawRect(xDiff, yDiff, w, h);
 ////					gr.drawRect(0,0 , w, h);
@@ -393,7 +383,6 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 //				}
 				var kmlReflectionDictionary: KMLFeaturesReflectionDictionary = overlay.kmlReflectionDictionary;
 				var totalReflections: int = kmlReflectionDictionary.totalReflections;
-				trace("renderScreenOverlayImage feature position: [" + overlay.x + " , " + overlay.y + "]");
 				for (var i: int = 0; i < totalReflections; i++)
 				{
 					var kmlReflection: KMLReflectionData = kmlReflectionDictionary.getReflection(i) as KMLReflectionData;
@@ -426,7 +415,6 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 							m.scale(sx, sy);
 							xDiff = 0; //-0.5 * icon.width * sx;
 							yDiff = 0; //-0.5 * icon.height * sy;
-							trace("Ground overlay: scale [" + sx + "," + sy + "] size [" + w + "," + h + "]");
 							gr.beginBitmapFill(icon, m);
 							gr.drawRect(xDiff, yDiff, w, h);
 							gr.endFill();
@@ -636,14 +624,11 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 			}
 			else
 			{
-//				trace("no hotspot");
 				xDiff = scaleX * icon.width * -1;
 				yDiff = scaleY * icon.height * -1;
 			}
-//			trace("renderPlacemarkIcon diff ["+xDiff+","+yDiff+" ]");
 			var kmlReflectionDictionary: KMLFeaturesReflectionDictionary = placemark.kmlReflectionDictionary;
 			var totalReflections: int = kmlReflectionDictionary.totalReflections;
-//			trace("renderPlacemarkIcon feature position: [" + placemark.x + " , " + placemark.y + "]");
 			for (var i: int = 0; i < totalReflections; i++)
 			{
 				var kmlReflection: KMLReflectionData = kmlReflectionDictionary.getReflection(i) as KMLReflectionData;
@@ -660,7 +645,6 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 					kmlReflection.displaySprite.visible = true;
 					kmlReflection.displaySprite.x = iconPoint.x;
 					kmlReflection.displaySprite.y = iconPoint.y;
-//					trace("PlaceMarkIcon ["+placemark.x+","+placemark.y+"] iconPoint: ["+iconPoint.x+","+iconPoint.y+"]"); 
 					var m: Matrix = new Matrix();
 					m.scale(scaleX, scaleY);
 					m.translate(xDiff, yDiff);
@@ -792,7 +776,6 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 					{
 						var kmlReflection: KMLReflectionData = kmlReflectionDictionary.getReflection(i) as KMLReflectionData;
 						var iconPoint: Point = kmlReflection.points[0] as Point;
-//						trace("PlaceMarkIcon ["+placemark.x+","+placemark.y+"] iconPoint: ["+iconPoint.x+","+iconPoint.y+"]"); 
 						if (!kmlReflection.displaySprite)
 						{
 							kmlReflection.displaySprite = new KMLSprite(placemark, i);
@@ -890,18 +873,15 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 							var p0: Point = p.clone();
 							var sx: int = p.x;
 							var sy: int = p.y;
-							//					trace("\t drawPolyline start ["+p.x+","+p.y+"]");
 							g.start(p.x - sx, p.y - sy);
 							g.moveTo(p.x - sx, p.y - sy);
 							for (var pi: int = 1; pi < mPoints.length; pi++)
 							{
 								p = mPoints[pi] as Point;
 								g.lineTo(p.x - sx, p.y - sy);
-									//						trace("\t drawPolyline lineTo ["+p.x+","+p.y+"]");
 							}
 							g.lineTo(p0.x - sx, p0.y - sy);
 							g.finish(p0.x - sx, p0.y - sy);
-								//					trace("\t drawPolyline finish ["+p.x+","+p.y+"]");
 						}
 					}
 				}
@@ -983,7 +963,6 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 							}
 							g.lineTo(p0.x - sx, p0.y - sy);
 							g.finish(p0.x - sx, p0.y - sy);
-//							trace("\t renderLinearRing drawPolyline finish ["+p0.x+","+p0.y+"]");
 						}
 					}
 					if (fillExists)
@@ -1025,7 +1004,6 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 			{
 				label.x = x;
 				label.y = y;
-//				trace("KMLRenderer updateLabelPosition ["+label.x + ","+label.y+"]");
 				_container.labelLayout.updateObjectReferenceLocation(label);
 			}
 		}
@@ -1086,12 +1064,10 @@ class ObjectStyles
 					highlightStyleURL = (styleSelector as StyleMap).getStyleUrlByKey('highlight');
 					if (!normalStyle)
 					{
-//						trace("renderPlacemark styleSelector defined in way => StyleMap with styleUrl");
 						normalStyle = _feature.parentDocument.getStyleByID(styleURL);
 					}
 					if (!highlightStyle)
 					{
-//						trace("renderPlacemark highlight styleSelector defined in way => StyleMap with styleUrl");
 						highlightStyle = _feature.parentDocument.getStyleByID(highlightStyleURL);
 					}
 				}
@@ -1123,14 +1099,12 @@ class StylesDictionary
 
 	public function addResource(resource: StyleResource): void
 	{
-//		trace("\n StylesDictionary addResource: " + resource.key.toString());
 		var id: String = resource.key.toString();
 		_dictionary[id] = resource;
 	}
 
 	public function getResource(key: KMLResourceKey): StyleResource
 	{
-//		trace("\n StylesDictionary getResource: " + key.toString());
 		if (_dictionary)
 		{
 			var id: String = key.toString();

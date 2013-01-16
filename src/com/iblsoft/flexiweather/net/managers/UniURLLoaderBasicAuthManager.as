@@ -120,7 +120,6 @@ package com.iblsoft.flexiweather.net.managers
 		{
 			if (!name || !password)
 			{
-				trace("problem adding account");
 				return false;
 			}
 			//check if account does exists and add it if does not exists
@@ -181,43 +180,11 @@ package com.iblsoft.flexiweather.net.managers
 		 * 	Request functionality
 		 *
 		 *********************************************************************************************/
-		/*
-		public function getFirstRequestByDomain(domain: String): UniURLLoaderData
-		{
-			var domainRequests: Array = getDomainRequestArray(domain);
-			trace("getFirstRequestByDomain: ["+domain+"]:" + domainRequests);
-			if (domainRequests.length > 0)
-				return domainRequests.shift();
-
-			return null;
-
-		}
-
-		public function getFirstRequestByRequest(request: URLRequest): UniURLLoaderData
-		{
-			var domain: String = getDomain(request);
-			var domainRequests: Array = getDomainRequestArray(domain);
-			trace("getFirstRequestByRequest: ["+domain+"]:" + domainRequests);
-			for each (var data: UniURLLoaderData in domainRequests)
-			{
-				trace("\t " + data);
-			}
-			if (domainRequests.length > 0)
-				return domainRequests.shift();
-
-			return null;
-		}
-		*/
 		public function getRequestByURLWithRealm(request: URLRequest, realm: String): UniURLLoaderData
 		{
 			var domain: String = getDomain(request);
 			var domainRequests: Array = getRealmDomainRequestArray(domain);
-			trace("getRequestByURLWithRealm: [" + domain + "]:" + domainRequests);
 			var data: UniURLLoaderData;
-			for each (data in domainRequests)
-			{
-				trace("\t " + data);
-			}
 			var total: int = domainRequests.length;
 			var found: int = -1;
 			for (var i: int = 0; i < total; i++)
@@ -290,8 +257,6 @@ package com.iblsoft.flexiweather.net.managers
 				associatedData: Object = null,
 				backgroundJobName: String = null): UniURLLoaderData
 		{
-			if (request.url.indexOf('listAll') >= 0)
-				trace("check listAll request");
 			var domain: String = getDomain(request);
 			var domainRequests: Array = getRealmDomainRequestArray(domain);
 			var data: UniURLLoaderData = createRequest(request, loader, associatedData, backgroundJobName);
@@ -307,7 +272,6 @@ package com.iblsoft.flexiweather.net.managers
 		public function stopAllStoppedRequests(domain: String, realm: String): void
 		{
 			var domainRequests: Array = getRealmDomainRequestArray(domain);
-			trace("runAllStoppedRequests for [" + domainRequests + "] " + domainRequests.length);
 			if (domainRequests.length > 0)
 			{
 				var pos: int = domainRequests.length - 1;
@@ -337,7 +301,6 @@ package com.iblsoft.flexiweather.net.managers
 		{
 			var domain: String = getDomain(request);
 			var domainRequests: Array = getRealmDomainRequestArray(domain);
-			trace("runAllStoppedRequests for [" + domainRequests + "] " + domainRequests.length);
 			if (domainRequests.length > 0)
 			{
 				var realm: String = loggedBasicAccount.realm;

@@ -41,7 +41,6 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 
 		override public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer
 		{
-			trace("create new QTT layer: " + this);
 			var l: InteractiveLayerQTTMS = new InteractiveLayerQTTMS(iw, this);
 //			l.tilesProvider = new QTTTilesProvider();
 			l.name = label;
@@ -83,11 +82,6 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			try
 			{
 				storage.serializeNonpersistentArrayMap("behaviour", ma_behaviours, String, String);
-				trace("QTTMSLayerConfiguration ma_behaviours: ")
-				for (var k: String in ma_behaviours)
-				{
-					trace("QTTMSLayerConfiguration ma_behaviours[" + k + "] = " + ma_behaviours[k] + "<<");
-				}
 			}
 			catch (error: Error)
 			{

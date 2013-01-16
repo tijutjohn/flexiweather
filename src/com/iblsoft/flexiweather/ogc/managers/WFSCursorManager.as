@@ -26,7 +26,6 @@ package com.iblsoft.flexiweather.ogc.managers
 		{
 			WFSCursorManager.instance = this;
 			super();
-			trace('>>>>>>WFSCursorManager' + stage);
 			//mStage.addChild(this);
 			//stage.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
 			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
@@ -77,7 +76,6 @@ package com.iblsoft.flexiweather.ogc.managers
 		 */
 		protected function changeCursor(cursorType: int): void
 		{
-			trace('SETTINGS CURSOR ' + cursorType);
 			if (cursorType != actCursorType)
 			{
 				if (actCursor && (actCursor.parent))

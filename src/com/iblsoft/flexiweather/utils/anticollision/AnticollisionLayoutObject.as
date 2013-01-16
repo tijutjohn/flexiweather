@@ -39,13 +39,8 @@ package com.iblsoft.flexiweather.utils.anticollision
 		
 		public function set referenceLocation(value: Point): void
 		{
-			//			if (value.x == 0  && value.y == 0)
-			//			{
-			//				trace("referenceLocation is set to 0");
-			//			}
 			m_referenceLocation.x = value.x;
 			m_referenceLocation.y = value.y;
-			//			trace("LayoutObject m_referenceLocation " + value);
 		}
 		
 		public function get visible(): Boolean
@@ -55,7 +50,6 @@ package com.iblsoft.flexiweather.utils.anticollision
 
 		public function set visible(value: Boolean): void
 		{
-			trace(this);
 			_visible = value;
 			//set object visibility to save value
 			object.visible = value;

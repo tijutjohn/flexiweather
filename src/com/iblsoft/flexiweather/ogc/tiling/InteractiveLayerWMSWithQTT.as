@@ -66,7 +66,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 			var s_crs: String = container.getCRS();
 			var gtileBBoxForWholeCRS: BBox = m_tiledLayer.getGTileBBoxForWholeCRS(s_crs);
 			var isTileableForCRS: Boolean = m_cfg.isTileableForCRS(s_crs);
-//			trace("WMSWithQTT isTileable isTileableForCRS: " + isTileableForCRS + " gtileBBoxForWholeCRS: " + gtileBBoxForWholeCRS);
 			return gtileBBoxForWholeCRS || isTileableForCRS;
 		}
 
@@ -301,7 +300,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 				mb_updateAfterMakingVisible = true;
 				return;
 			}
-//			trace("WMSWithQTT updateData ["+name+"]");
 			var gr: Graphics = graphics;
 			if (isTileable)
 			{
@@ -403,7 +401,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 			if (b_frameChanged)
 			{
 				_currentValidityTime = getSynchronisedVariableValue(GlobalVariable.FRAME) as Date;
-				trace("setWMSDimensionValue _currentValidityTime : " + _currentValidityTime);
 				if (m_tiledLayer)
 					m_tiledLayer.setValidityTime(_currentValidityTime);
 			}
@@ -524,7 +521,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 					specialStringArr.push(str);
 				}
 			}
-//			trace("convertWMSViewPropertiesToQTTViewProperties " + str);
 			qttViewProperties.setSpecialCacheStrings(specialStringArr);
 			return qttViewProperties;
 		}
@@ -583,8 +579,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 		
 		override public function clone(): InteractiveLayer
 		{
-			trace(this + " clone: visible: " + visible + " zOrder: " + zOrder);
-			
 			var newLayer: InteractiveLayerWMSWithQTT = new InteractiveLayerWMSWithQTT(container, m_cfg as WMSWithQTTLayerConfiguration);
 			updatePropertyForCloneLayer(newLayer);
 //			newLayer.tileLayer.clone();

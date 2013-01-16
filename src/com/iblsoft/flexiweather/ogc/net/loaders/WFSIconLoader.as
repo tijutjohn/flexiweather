@@ -46,7 +46,6 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 			var b_alreadyLoaded: Boolean = iconExists(s_url);
 			var b_currentlyLoading: Boolean = iconIsLoading(s_url);
 			var d_assocData: IconAssociatedData;
-			trace("WFSIconLoader getIcon: " + s_iconName + " b_alreadyLoaded: " + b_alreadyLoaded + " b_currentlyLoading: " + b_currentlyLoading)
 			if (b_alreadyLoaded)
 			{
 				// HERE WE NEED INPLEMENT CHECK IF SOME SAME ICON IS NOT ALREADY LOADING
@@ -67,7 +66,6 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				var nRequest: URLRequest = new URLRequest(s_url);
 				md_loadingIcons[s_url] = [d_assocData];
 				ml_loader.load(nRequest, d_assocData);
-				trace('calling:' + nRequest.url);
 				return (false);
 			}
 		}
@@ -97,7 +95,6 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 			var s_url: String = d_assocData.url;
 			md_iconStorage[s_url] = evt.result;
 			var l_assocArray: Array = md_loadingIcons[s_url];
-			trace("WFSIConLoader onIconLoaded: len: " + l_assocArray.length);
 			for each (d_assocData in l_assocArray)
 			{
 				d_assocData.callbackFunction.apply(null, [evt.result]);
@@ -110,7 +107,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 		 */
 		protected function onIconLoadFailed(evt: UniURLLoaderErrorEvent): void
 		{
-			trace(evt.associatedData);
+			trace("WFSIconLoader onIconLoadFailed: " + evt.associatedData);
 		}
 	}
 }

@@ -73,7 +73,6 @@
 			 */
 			override protected function updateDisplayList(unscaledWidth: Number, unscaledHeight: Number): void
 			{
-				trace("KML InfoWindow Skin UDL");
 				border.visible = true;
 				if (getStyle("borderVisible") == true)
 				{

@@ -39,7 +39,6 @@ package com.iblsoft.flexiweather.proj
 
 		public static function isValidProjection(projection: Projection): Boolean
 		{
-//			trace("\n isValidProjection" + projection.crs + " valid");
 			if (projection && projection.m_proj)
 			{
 				if (projection.extentBBox && projection.extentBBox.center)
@@ -48,7 +47,6 @@ package com.iblsoft.flexiweather.proj
 						return false;
 					if (isNaN(projection.extentBBox.center.x) || isNaN(projection.extentBBox.center.y))
 						return false;
-//					trace("\t isValidProjection" + projection.crs + " valid");
 					return true;
 				}
 			}

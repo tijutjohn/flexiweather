@@ -130,11 +130,6 @@ package com.iblsoft.flexiweather.ogc.editable
 		// ISelectableEditableItemManager implementation
 		public function selectItem(sItem: ISelectableItem, mouseEvent: MouseEvent = null, dispatchChangeEvent: Boolean = true): void
 		{
-			if (sItem)
-			{
-				trace(this + " selectItem: " + sItem);
-				
-			}
 			if (sItem != null && sItem.selected)
 				return;
 			for each (var item: IEditableItem in ma_items)
@@ -200,7 +195,6 @@ package com.iblsoft.flexiweather.ogc.editable
 					if (o != null && !ScreenUtils.isVisible(o))
 						continue;
 				}
-//				trace("doHitTest name: " + item['name'] + " edit: " + item.editPriority);
 				if(item.hitTestPoint(f_stageX, f_stageY, true))
 					a.push(item);
 			}
@@ -236,7 +230,6 @@ package com.iblsoft.flexiweather.ogc.editable
 				//if(m_mouseClickCapturingItem.onMouseClick(new Point(event.localX, event.localY)))
 				if(m_mouseClickCapturingItem.onMouseClick(new Point(DisplayObject(event.currentTarget).mouseX, DisplayObject(event.currentTarget).mouseY), event))
 				{
-					trace("\t " + this + " m_mouseClickCapturingItem.onMouseClick");
 					return true;
 				}
 			if(m_highlightedItem != null) {
@@ -245,7 +238,6 @@ package com.iblsoft.flexiweather.ogc.editable
 					//if(mItem.onMouseClick(new Point(event.localX, event.localY)))
 					if(mItem.onMouseClick(new Point(DisplayObject(event.currentTarget).mouseX, DisplayObject(event.currentTarget).mouseY), event))
 					{
-						trace("\t " + this + " mItem.onMouseClick");
 						return true;
 					}
 				}
@@ -254,7 +246,6 @@ package com.iblsoft.flexiweather.ogc.editable
 			// selecting
 			var l_hitItems: Array = doHitTest(event.stageX, event.stageY, ISelectableItem);
 			for each(var sItem: ISelectableItem in l_hitItems) {
-				trace("\t " + this + " doHitTest.onMouseClick");
 				selectItem(sItem, event);
 				return true;
 			}
@@ -287,7 +278,6 @@ package com.iblsoft.flexiweather.ogc.editable
 				//if(m_mouseClickCapturingItem.onMouseDown(new Point(event.localX, event.localY)))
 				if(m_mouseClickCapturingItem.onMouseDown(new Point(DisplayObject(event.currentTarget).mouseX, DisplayObject(event.currentTarget).mouseY), event))
 				{
-					trace("\t " + this + " m_mouseClickCapturingItem.onMouseDown");
 					return true;
 				}
 			var l_hitItems: Array = doHitTest(event.stageX, event.stageY, IMouseEditableItem);
@@ -295,12 +285,10 @@ package com.iblsoft.flexiweather.ogc.editable
 				//if(mItem.onMouseDown(new Point(event.localX, event.localY)))
 				if(mItem.onMouseDown(new Point(DisplayObject(event.currentTarget).mouseX, DisplayObject(event.currentTarget).mouseY), event))
 				{
-					trace("\t " + this + " mItem.onMouseDown");
 					return true;
 				}
 			}
 			
-			trace("\t " + this + " nothing down");
 			selectItem(null);
 			
 			return false;

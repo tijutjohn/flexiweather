@@ -39,7 +39,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 
 		override public function parse(kmzFile: KMZFile = null): void
 		{
-//			trace("KML 2.2");
 			super.parse(kmzFile);
 			var kmlns: Namespace = new Namespace(_kmlNamespace);
 			// todo support other features
@@ -75,7 +74,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		{
 			_kmlParserManager.removeEventListener(AsyncManager.EMPTY, onKMLParserFinished);
 			_kmlParserManager.stop();
-//			trace("kml parser finished");	
 			notifyParsingFinished();
 		}
 
@@ -85,7 +83,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			if (_feature)
 			{
 				var txt: String = debugFeature(_feature, 1);
-				trace(txt);
 			}
 			else
 				trace("there is no main feature in this KML: " + _kmlSource);

@@ -252,7 +252,6 @@ package com.iblsoft.flexiweather.components.charts
 
 		public function refresh(b_redrawAll: Boolean = false): void
 		{
-			trace(this + "refresh " + _chartWidth + " , " + _chartHeight);
 			if (!_axisDrawn || b_redrawAll)
 				draw(_chartWidth, _chartHeight);
 			else
@@ -323,7 +322,6 @@ package com.iblsoft.flexiweather.components.charts
 		{
 			_chartWidth = w;
 			_chartHeight = h;
-			trace(this + "draw " + _chartWidth + " , " + _chartHeight);
 			drawBackround(w, h);
 			if (data)
 			{
@@ -338,7 +336,6 @@ package com.iblsoft.flexiweather.components.charts
 
 		private function drawSeries(w: int, h: int): void
 		{
-			trace(this + " drawSeries: " + w + " , " + h + " labels: " + _yAxisLabelsWidth + " , " + _xAxisLabelsHeight);
 			var gr: Graphics = _dataSprite.graphics;
 			gr.clear();
 			var i: int;
@@ -351,7 +348,6 @@ package com.iblsoft.flexiweather.components.charts
 			var xDiff: Number = chartW / (totalX - 1);
 			var max: Number = getMaximumYValue();
 			gr.lineStyle(_serieWidth, _serieColor);
-			trace("xDiff: " + xDiff + " totalX " + totalX + " chartW: " + chartW);
 			for (i = 0; i < totalX; i++)
 			{
 				var yValue: Number = yValues[i] as Number;
@@ -366,7 +362,6 @@ package com.iblsoft.flexiweather.components.charts
 
 		private function drawAxis(w: int, h: int): void
 		{
-			trace(this + "DRAW AXIS: " + w + " , " + h);
 			var gr: Graphics = _gridSprite.graphics;
 			gr.clear();
 			var i: int;
@@ -387,10 +382,10 @@ package com.iblsoft.flexiweather.components.charts
 			var stepsY: int = Math.min(10, totalY);
 			var xDiff: int = w / (stepsX - 1);
 			var yDiff: int = h / (stepsY - 1);
-			if (w > 0 && h > 0)
-				trace("stop");
-			else
+			
+			if (w == 0 && h == 0)
 				return;
+			
 			var chartW: int = w - _yAxisLabelsWidth;
 			var chartH: int = h - _xAxisLabelsHeight;
 			xDiff = chartW / (stepsX - 1);
@@ -471,7 +466,6 @@ package com.iblsoft.flexiweather.components.charts
 
 		private function drawLabels(w: int, h: int): void
 		{
-			trace(this + "DRAW LABELS: " + w + " , " + h);
 			_labelsSprite.graphics.clear();
 			_xAxisLabelsHeight = 0;
 			_yAxisLabelsWidth = 0;
@@ -496,9 +490,7 @@ package com.iblsoft.flexiweather.components.charts
 			var stepsY: int = Math.min(10, totalY);
 			var xDiff: int = w / (stepsX - 1);
 			var yDiff: int = h / (stepsY - 1);
-			if (w > 0 && h > 0)
-				trace("stop");
-			else
+			if (w == 0 && h == 0)
 				return;
 			//1st pass will find out X labels height 
 			for (i = 0; i < stepsX; i++)
@@ -572,11 +564,8 @@ package com.iblsoft.flexiweather.components.charts
 					tf = chartLabel.textField;
 					chartLabel.x = (xPos) - chartLabel.rotatedWidth / 2;
 					chartLabel.y = h - chartLabel.rotatedHeight / 2 + 1;
-					trace("X Label [" + tf.text + "] pos: " + chartLabel.x + " , " + chartLabel.y);
 					drawTextfieldBound(chartLabel);
 				}
-				else
-					trace("can not find label: " + xValue);
 			}
 			//2nd pass will draw Y axis grid
 			for (i = 0; i <= stepsY; i++)

@@ -167,7 +167,6 @@ package com.iblsoft.flexiweather.plugins.data
 			if (!isPluginModuleLoading(moduleInfo))
 			{
 				var url: String = moduleInfo.url;
-				trace("Load plugin from URL: " + url);
 				var pe: PluginEvent = new PluginEvent(PluginEvent.PLUGIN_MODULE_LOAD);
 				pe.url = url;
 				dispatchEvent(pe);
@@ -182,7 +181,6 @@ package com.iblsoft.flexiweather.plugins.data
 				infoLoading.info = moduleInfo;
 				infoLoading.loader = loader;
 				_pluginsInfoLoading.push(infoLoading);
-				trace("\n\t PLUGIN MANAGER load module : " + url);
 				loader.loadModule();
 				if (_pluginsInfoLoading.length == 1)
 					notifyStartLoading();
@@ -307,7 +305,6 @@ package com.iblsoft.flexiweather.plugins.data
 
 		private function createInfoPlugin(loader: ModuleLoader): void
 		{
-			trace(this + " createInfoPlugin");
 			var pluginInfo: IPluginInfo;
 			var info: ModuleInfo;
 			//find module info	
@@ -394,15 +391,12 @@ package com.iblsoft.flexiweather.plugins.data
 
 		public function createPluginFromParams(module: Module, types: Array, url: String): Boolean
 		{
-			trace(this + " createPluginFromParams type: " + types + " url: " + url);
 			if (_pluginFunction && _pluginFunction.length > 3)
 			{
 				if (types.length > 1)
 					trace("More types");
 				for each (var type: String in types)
 				{
-					if (type == 'debugConsole')
-						trace("stop, debug console is loading");
 					try
 					{
 						var createdPluginObj: Object = module[_pluginFunction](type);
@@ -477,7 +471,6 @@ package com.iblsoft.flexiweather.plugins.data
 					temp.push(moduleInfo);
 				}
 			}
-//			trace("notifyAllInfoPluginsAreLoaded OLD _pluginsInfo: " + _pluginsInfo.length + " new: " + temp.length);
 			if (_pluginsInfo.length != temp.length)
 				trace("_pluginsInfo items are not equal");
 //			_pluginsInfo = temp;
@@ -491,12 +484,10 @@ package com.iblsoft.flexiweather.plugins.data
 			var moduleLoader: ModuleLoader = loader as ModuleLoader;
 			loaders.removeModuleLoader(moduleLoader);
 			loadedLoaders.addModuleLoaderItem(moduleLoader, event.bytesLoaded, event.bytesTotal);
-			trace("\t PLUGIN MANAGER module IS LOADED and ready : " + loader.url);
 			// TODO: correctly create plugin or pluginInfo inside
 			createInfoPlugin(loader);
 			if (loader.associatedData)
 			{
-				trace("Module loader has data: " + loader.associatedData);
 				switch (loader.associatedData.action)
 				{
 					case PluginManager.ACTION_CALL_PLUGIN:

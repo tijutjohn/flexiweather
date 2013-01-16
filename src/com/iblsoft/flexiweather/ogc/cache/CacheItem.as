@@ -26,7 +26,6 @@ package com.iblsoft.flexiweather.ogc.cache
 
 		public function get displayed(): Boolean
 		{
-			//		trace(this + " GET displayed = " + _displayed);
 			return _displayed;
 		}
 
@@ -39,19 +38,13 @@ package com.iblsoft.flexiweather.ogc.cache
 
 		public function set displayed(value: Boolean): void
 		{
-			//		if (!value)
-			//		{
-			//			trace("WMSCHace displayed = " + value);
-			//		}
 			_displayed = value;
-			//		trace(this + " SET displayed = " + _displayed);
 		}
 
 		public function CacheItem()
 		{
 			CID++;
 			_id = CID;
-			//		trace("New " + this);
 		}
 
 		public function toString(): String

@@ -170,7 +170,6 @@ package com.iblsoft.flexiweather.ogc
 			
 			var percentage: Number = intersectedBBoxArea / otherBBoxArea;
 			
-//			trace(this + " intersectionPercentage from ["+other+"] => " + percentage);
 			return percentage;
 			
 		}

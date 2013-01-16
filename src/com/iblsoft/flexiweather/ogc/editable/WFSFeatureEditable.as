@@ -155,10 +155,8 @@ package com.iblsoft.flexiweather.ogc.editable
 						mp.setPoint(pt);
 					}
 				}
-//				trace("update i: " + i);
 //				//remove all unused  MoveablePoints (because coordinates was removed from feature)
 //				for(; i < reflection.moveablePoints.length; ++i) {
-//					trace("update check point for remove i: " + i);
 //					mp = reflection.moveablePoints[i] as MoveablePoint;
 //					if(mp && eim != null) {
 //						eim.removeEditableItem(mp);
@@ -306,14 +304,12 @@ package com.iblsoft.flexiweather.ogc.editable
 			var reflectionWidth: Number = 0;
 			if (i_reflectionDelta != 0)
 				reflectionWidth = master.container.getExtentBBox().width * i_reflectionDelta;
-//			trace("WFSFeatureEditable setPoint: " + i_pointIndex + " pt: " + pt + " reflection delta: " + i_reflectionDelta);
 			var c: Coord = m_master.container.pointToCoord(pt.x, pt.y);
 			//need to move coord to 0 reflection
 			c.x -= reflectionWidth;
 			//and cound correct point position for 0 reflection
 			m_points[i_pointIndex] = m_master.container.coordToPoint(c);
 			m_coordinates[i_pointIndex] = c;
-//			trace("setPoint delta["+i_reflectionDelta+"] point: " + pt + " 0coord: " + c + " 0pos: " + m_points[i_pointIndex]);
 			update(FeatureUpdateContext.fullUpdate());
 			modified = true;
 		}
@@ -396,7 +392,6 @@ package com.iblsoft.flexiweather.ogc.editable
 //			m_coordinates.addItemAt(m_master.container.pointToCoord(pt.x, pt.y), i_pointIndex);
 //			update(FeatureUpdateContext.fullUpdate());
 			modified = true;
-			trace("WFSFeatureEditable insertPointBefore i_pointIndex: " + i_pointIndex + " pt: " + pt);
 		}
 
 		public function removePoint(i_pointIndex: uint): void

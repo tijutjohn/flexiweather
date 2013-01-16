@@ -32,7 +32,6 @@ package com.iblsoft.flexiweather.widgets
 
 		private function clearOldState(): void
 		{
-//			trace("CLEAR OLD STATE");
 			var total: int = numChildren;
 			while (numChildren > 0)
 			{
@@ -118,7 +117,6 @@ package com.iblsoft.flexiweather.widgets
 		private function drawPlace(place: Object, xPos: Number = 0): void
 		{
 			var sprite: PlaceSprite = getNewPlaceSprite();
-//			trace("DRAW PLACE" + sprite)
 			var c: Coord;
 			var pt: Point;
 			if (place is InteractiveLayerPlace)
@@ -148,7 +146,6 @@ package com.iblsoft.flexiweather.widgets
 				str += object.parent.name + ' [' + object.parent.mouseEnabled + ',' + object.parent.mouseChildren + '] | ';
 				object = object.parent;
 			}
-			trace(str);
 		}
 
 		private function debugSprites(): void
@@ -167,13 +164,10 @@ package com.iblsoft.flexiweather.widgets
 				if (sprite)
 					str += 'On display list: ' + sprite + ' | ';
 			}
-			trace(str);
 		}
 
 		override public function onMouseClick(event: MouseEvent): Boolean
 		{
-			trace("\n\n**********************************");
-			trace('mouseClick' + event.target);
 			if (event.target is IconSprite)
 			{
 				//debugParent(event.target as DisplayObjectContainer, 'sprite');

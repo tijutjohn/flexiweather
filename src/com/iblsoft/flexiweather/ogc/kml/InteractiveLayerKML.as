@@ -181,7 +181,6 @@ package com.iblsoft.flexiweather.ogc.kml
 
 		private function onNetworkLinkLoadedAndParsed(event: KMLEvent): void
 		{
-			trace("	onNetworkLinkLoadedAndParsed ");
 			var kml: KML = event.kmlLayerConfiguration.kml as KML
 			parseKML(kml);
 		}
@@ -192,7 +191,6 @@ package com.iblsoft.flexiweather.ogc.kml
 			{
 				var featuresArray: Array = networkLink.container.features;
 				unloadFeatures(featuresArray);
-				trace("ILKML unloadNetworkLinkFeatures features: " + networkLink.container.features.length);
 //				kmlParsingFinished();
 				callLater(update, [FeatureUpdateContext.fullUpdate()]);
 			}
@@ -221,7 +219,6 @@ package com.iblsoft.flexiweather.ogc.kml
 			{
 				var currFeature: KMLFeature = kmlContainer.features.shift() as KMLFeature;
 				var isContainer: Boolean = canContainFeatures(currFeature);
-				trace("unloadNetworkLinkFeature " + currFeature.name + " isContainer: " + isContainer);
 				if (isContainer)
 					unloadContainerFeature(currFeature as Container)
 				unloadFeature(currFeature);
@@ -454,7 +451,6 @@ package com.iblsoft.flexiweather.ogc.kml
 		{
 			var startFeature: KMLFeature = feature
 			var nl: NetworkLink;
-//			trace("updateForFeature asyncManager: " + asyncManager.name + " fncName: updateFeature changeFlag: " + changeFlag.fullUpdateNeeded);
 			while (feature)
 			{
 				asyncManager.addCall(feature, updateFeature, [feature, changeFlag, asyncManager]);
@@ -480,7 +476,6 @@ package com.iblsoft.flexiweather.ogc.kml
 				}
 			}
 			
-//			trace("\n\nInteractiveLayerKML update");
 			m_boundaryRect = new Rectangle(0, 0, width, height);
 			var time: int;
 			if (changeFlag.fullUpdateNeeded && _syncManagerFullUpdate)
@@ -514,7 +509,6 @@ package com.iblsoft.flexiweather.ogc.kml
 
 		private function onFullUpdateFinished(event: Event): void
 		{
-//			trace("onFullUpdateFinished");
 //			hideLoadingPopup();
 		}
 
@@ -611,7 +605,6 @@ package com.iblsoft.flexiweather.ogc.kml
 				newScale = (0.8 - widthPercentage) * 1.667;
 			var changed: Boolean = (newScale != kmlFeatureScaleX);
 			kmlFeatureScaleX = newScale;
-//			trace("countKMLFeaturesZoomBasedOnViewBBox widthPercentage: " + widthPercentage + " kmlFeatureScaleX: " + kmlFeatureScaleX);
 			return changed;
 		}
 
@@ -647,7 +640,6 @@ package com.iblsoft.flexiweather.ogc.kml
 			if (updateFlag.anyChange)
 			{
 				update(updateFlag);
-//				trace("ILKML isUpdateNeeded: " + updateFlag.toString());
 			}
 			m_oldCRS = crs;
 			m_oldViewBBox = viewBBox;

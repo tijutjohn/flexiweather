@@ -98,7 +98,6 @@
 						}
 					}
 				}
-				trace("GoogleMapslayerOption SET layer selectMapTypeIndex: " + selectMapTypeIndex);
 			}
 
 			private function switchMapType(): void

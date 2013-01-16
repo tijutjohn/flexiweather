@@ -44,8 +44,6 @@ package com.iblsoft.flexiweather.utils
 						index = pos + 1;
 					}
 				} while (pos > -1)
-//				trace("start: " + startIndices);
-//				trace("end: " + endIndices);
 				if (startIndices.length != endIndices.length)
 				{
 					//outputText.text = "problem with parsing";
@@ -59,7 +57,6 @@ package com.iblsoft.flexiweather.utils
 						var start: int = startIndices[i];
 						var end: int = endIndices[i];
 						var tagString: String = label.substring(start, end + 2);
-//						trace('tagString: ' + tagString);
 						var tag: XML = new XML(tagString);
 						var tagName: String = tag.name();
 						var attributes: XMLList = tag.attributes();

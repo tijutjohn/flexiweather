@@ -101,10 +101,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			}
 			for each (i in this.xml.kmlns::Document)
 			{
-				trace("\n\n Document node: " + i.toXMLString() + "\n\n");
-//				folder = new Folder(XMLList(i));
 				document = new Document(kml, s_namespace, XMLList(i));
-//				addFeature(document);
 				kmlParserManager.addCall(document, document.parse, [s_namespace, kmlParserManager]);
 				kmlParserManager.addCall(document, addFeature, [document]);
 			}

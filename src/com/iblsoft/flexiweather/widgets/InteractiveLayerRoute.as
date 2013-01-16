@@ -267,7 +267,6 @@ package com.iblsoft.flexiweather.widgets
 
 		protected function onCoordsCollectionChanged(event: CollectionEvent): void
 		{
-			trace("onCoordsCollectionChanged: " + _ma_coords.length);
 			invalidateDynamicPart();
 		}
 

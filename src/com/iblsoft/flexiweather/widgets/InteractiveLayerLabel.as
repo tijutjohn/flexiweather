@@ -54,10 +54,8 @@ package com.iblsoft.flexiweather.widgets
 
 //		public function addSynchronisedVariable(synchronisedVariable: String): void
 //		{
-//			trace("InteractiveLayerLabel addSynchronisedVariable: " + synchronisedVariable);
 //			if (ArrayUtil.getItemIndex(synchronisedVariable, _synchronizedVariableNames) == -1)
 //			{
-//				trace("\tInteractiveLayerLabel addSynchronisedVariable: " + synchronisedVariable + " ADDED");
 //				_synchronizedVariableNames.push(synchronisedVariable);
 //				invalidateDynamicPart();
 //			} else {
@@ -116,7 +114,6 @@ package com.iblsoft.flexiweather.widgets
 			if (_synchronizator)
 			{
 				var labelText: String = dimensionLabelParser.parseLabel(_synchronizator.labelString, container.interactiveLayerMap);
-//				trace("InteractiveLayerLabel: " + labelText);
 				_label.text = labelText;
 				updateLabelStyles();
 			}
@@ -164,7 +161,6 @@ package com.iblsoft.flexiweather.widgets
 			}
 			if (w < 10 || h < 10)
 			{
-//				trace("InteractiveLayerLabel check this, size problem");
 				bkgColor = 0x880000;
 			}
 			if (_label)
@@ -172,7 +168,6 @@ package com.iblsoft.flexiweather.widgets
 				_label.x = paddingHorizontal;
 				_label.y = height - h + paddingVertical;
 			}
-//			trace("InteractiveLayerLabel size: " + width + " , " + height);
 			var gr: Graphics = graphics;
 			gr.clear();
 			gr.beginFill(0x000000);

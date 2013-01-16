@@ -35,7 +35,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		public override function cleanup(): void
 		{
 			super.cleanup();
-			trace("ScreenOverlay cleanup");
 			if (_overlayXY)
 				_overlayXY = null;
 			if (_screenXY)

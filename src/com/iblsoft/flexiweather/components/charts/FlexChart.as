@@ -275,7 +275,6 @@ package com.iblsoft.flexiweather.components.charts
 
 		private function onDataProviderChange(event: CollectionEvent): void
 		{
-//			trace("onDataProviderChange " + event.kind);
 			simpleChart.refresh();
 		}
 

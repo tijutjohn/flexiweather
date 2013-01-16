@@ -92,7 +92,6 @@ package com.iblsoft.flexiweather.widgets
 				_p = getMousePoint(event);
 				_r = new CustomRectangle(_p.x, _p.y, 0, 0);
 				_mouseDown = true;
-//	        	trace("onMouseDown " + _r);
 				invalidateDynamicPart();
 			}
 			else
@@ -203,7 +202,6 @@ package com.iblsoft.flexiweather.widgets
 			r.right = xMax;
 			r.bottom = yMax;
 			_selectedBBox = BBox.fromRectangle(r);
-//        	trace("AreaSelectorTool: viewBox r: " + r + " _r: " + _r);  
 			var topLeftCoord: Coord = findCoordinates(_selectedBBox.xMin, _selectedBBox.yMax);
 			var bottomRightCoord: Coord = findCoordinates(_selectedBBox.xMax, _selectedBBox.yMin);
 			var ile: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.AREA_CHANGED);
@@ -231,7 +229,6 @@ package com.iblsoft.flexiweather.widgets
 				_r.height = newHeight;
 				_r.x = newX;
 				_r.y = newY - _r.height;
-//	        	trace("updateRectangleFromViewBBox new Size: " + newWidth + " , " + newHeight);
 			}
 		}
 
@@ -242,11 +239,9 @@ package com.iblsoft.flexiweather.widgets
 ////				_projection.
 //
 //				var c: Coord = m_iw.pointToCoord(event.localX, event.localY).toLaLoCoord();
-//				trace(c != null ? c.toNiceString() : "?");
 //			}
 			var crs: String = container.getCRS();
 			var c: Coord = new Coord(crs, x, y).toLaLoCoord();
-//			trace("findCoordinates ["+x+","+y+"]: " + c.toString() + " nice: " + c.toNiceString());
 			return c;
 		}
 	}
@@ -329,8 +324,6 @@ class AreaRectangle extends UIComponent
 				rightX = Math.max(_r.x, _r.x + _r.width);
 				topY = Math.min(_r.y, _r.y + _r.height);
 				bottomY = Math.max(_r.y, _r.y + _r.height);
-//				trace("X: " + leftX + " , " + rightX);
-//				trace("Y: " + topY + " , " + bottomY);
 			}
 			var lineWidth: int = 5;
 			gr.beginFill(0, 0.5);
@@ -384,7 +377,6 @@ class AreaRectangle extends UIComponent
 	private function onSpriteDown(event: MouseEvent): void
 	{
 		isResizing = true;
-//		trace("onSpriteDown local: ["+event.localX+","+event.localY+"] stage: ["+event.stageX+","+event.stageY+"]");
 		_currentlyDraggedSprite = event.target as Sprite;
 		mouseEnabled = false;
 		enableSprites(false);
@@ -396,8 +388,6 @@ class AreaRectangle extends UIComponent
 	{
 		mouseEnabled = false;
 		enableSprites(false);
-//		trace("onSpriteMove : " + event.target + " curr: " + event.currentTarget);
-//		trace("onSpriteMove : " + event.localX + " , " + event.localY);
 		computeBoundingBox(event);
 	}
 
@@ -436,7 +426,6 @@ class AreaRectangle extends UIComponent
 				break;
 			}
 		}
-//		trace("onSpriteMove local: ["+event.localX+","+event.localY+"] stage: ["+event.stageX+","+event.stageY+"]");
 		updateRectangleOnDrag();
 		(this.parent as AreaSelectorTool).findAreaCoordinates();
 	}
@@ -447,13 +436,11 @@ class AreaRectangle extends UIComponent
 		_r.y = Math.min(topY, bottomY);
 		_r.width = Math.abs(leftX - rightX);
 		_r.height = Math.abs(topY - bottomY);
-//		trace("updateRectangleOnDrag: " + _r);
 		draw(null, true);
 	}
 
 	private function onSpriteUp(event: MouseEvent): void
 	{
-//		trace("onSpriteUp local: ["+event.localX+","+event.localY+"] stage: ["+event.stageX+","+event.stageY+"]");
 		stage.removeEventListener(MouseEvent.MOUSE_MOVE, onSpriteMove);
 		stage.removeEventListener(MouseEvent.MOUSE_UP, onSpriteUp);
 		computeBoundingBox(event);
@@ -463,9 +450,6 @@ class AreaRectangle extends UIComponent
 		mouseEnabled = true;
 		enableSprites(true);
 		//fix negative position
-//		trace("UP: " + x + " , " + y);
-//		trace("UP1: " + leftX + " , " + topY + " : " + rightX + " , " + bottomY);
-//		trace("UP2: " + _r.x + " , " + _r.y + " size: " + _r.width + " , " + _r.height);
 //		if (leftX < 0 || topY < 0)
 //		{
 //			

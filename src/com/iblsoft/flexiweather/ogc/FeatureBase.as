@@ -80,26 +80,15 @@ package com.iblsoft.flexiweather.ogc
 		
 		private function onPointsChanged(event: CollectionEvent): void
 		{
-//			trace("FeatureBase points changed: " + event.kind);
-			var changeEvent: PropertyChangeEvent
-//			if (event.kind == CollectionEventKind.ADD)
-//				trace("new Point added: " + (event.items[0] as Point));
-			if (event.kind == CollectionEventKind.UPDATE)
-			{
-				changeEvent = event.items[0] as PropertyChangeEvent;
-//				trace("point updated: " + (changeEvent.oldValue as Point) + " to " + (changeEvent.newValue as Point));
-			}
-			if (event.kind == CollectionEventKind.RESET)
-//				trace("RESET");
-//			if (event.kind == CollectionEventKind.MOVE)
-//				trace("MOVE");
-//			if (event.kind == CollectionEventKind.REFRESH)
-//				trace("REFRESH");
-			if (event.kind == CollectionEventKind.REPLACE)
-			{
-				changeEvent = event.items[0] as PropertyChangeEvent;
-//				trace("point replace: " + (changeEvent.oldValue as Point) + " to " + (changeEvent.newValue as Point));
-			}
+//			var changeEvent: PropertyChangeEvent
+//			if (event.kind == CollectionEventKind.UPDATE)
+//			{
+//				changeEvent = event.items[0] as PropertyChangeEvent;
+//			}
+//			if (event.kind == CollectionEventKind.REPLACE)
+//			{
+//				changeEvent = event.items[0] as PropertyChangeEvent;
+//			}
 		}
 		
 		public function addPointAt(point: Point, index: uint): void
@@ -114,7 +103,6 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function insertPointBefore(i_pointIndex: uint, pt: Point): void
 		{
-			trace("FeatureBase insertPointBefore i_pointIndex: " + i_pointIndex + " pt: " + pt);
 			m_points.addItemAt(pt, i_pointIndex);
 			m_coordinates.addItemAt(m_master.container.pointToCoord(pt.x, pt.y), i_pointIndex);
 			update(FeatureUpdateContext.fullUpdate());
@@ -163,10 +151,7 @@ package com.iblsoft.flexiweather.ogc
 							
 							if (iw.coordInside(currCoord))
 							{
-								//							trace("Coord is cinside");
 								featureIsInside = true;
-							} else {
-								//							trace("Coord is not inside");
 							}
 						}
 						
@@ -261,7 +246,6 @@ package com.iblsoft.flexiweather.ogc
 
 		protected function getExtentFromCoordinates(a_coordinates: Array): CRSWithBBox
 		{
-			trace("\n getExtentFromCoordinates");
 			var north: Number = Number.NEGATIVE_INFINITY;
 			var south: Number = Number.POSITIVE_INFINITY;
 			var east: Number = Number.NEGATIVE_INFINITY;
@@ -272,8 +256,6 @@ package com.iblsoft.flexiweather.ogc
 				south = Math.min(coord.y, south);
 				east = Math.max(coord.x, east);
 				west = Math.min(coord.x, west);
-				trace("\nFeatureBase coord: " + coord.toNiceString());
-				trace("FeatureBase WE: " + west + " / " + east + " NS: " + north + " / " + south);
 			}
 			var bbox2: BBox = new BBox(west, south, east, north);
 			//add 20% as padding
@@ -284,8 +266,6 @@ package com.iblsoft.flexiweather.ogc
 			north += nsPadding;
 			south -= nsPadding;
 			var bbox: BBox = new BBox(west, south, east, north);
-			trace("FeatureBase Before padding: " + bbox2.toBBOXString());
-			trace("FeatureBase  After padding: " + bbox.toBBOXString());
 			return new CRSWithBBox('CRS:84', bbox);
 		}
 

@@ -20,31 +20,22 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 		public function set kmlLabel(value: KMLLabel): void
 		{
 			_kmlLabel = value;
-//			if (value)
-//				trace("KMLSprite ["+_id+"] new label " + value.id + " text: " + value.text);
-//			else
-//				trace("KMLSprite ["+_id+"] NO label ");
 		}
 
 		override public function set visible(value: Boolean): void
 		{
 			super.visible = value;
-//			trace("KMLSprite.visible = " + value);
 		}
 
 		override public function set x(value: Number): void
 		{
 			super.x = value;
-//			if (reflection == 0)
-//				trace("KMLSprite.x = " + value);
 			_feature.notifyPositionChange();
 		}
 
 		override public function set y(value: Number): void
 		{
 			super.y = value;
-//			if (reflection == 0)
-//				trace("KMLSprite.y = " + value);
 			_feature.notifyPositionChange();
 		}
 		private static var uid: int = 0;

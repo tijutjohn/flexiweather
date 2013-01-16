@@ -56,12 +56,8 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			if (m_service != null)
 				m_service.removeEventListener(WMSServiceConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
 			ma_layerNames = null;
-			debugArray(ma_styleNames);
-			debugArray(ma_behaviours);
-			debugArray(ma_availableImageFormats);
 			if (_layerConfigurations && _layerConfigurations.length > 0)
 			{
-//				debugArray(_layerConfigurations); //WMSLayer
 				for each (var wmsLayer: WMSLayerBase in _layerConfigurations)
 				{
 					wmsLayer.destroy();
@@ -107,11 +103,6 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			try
 			{
 				storage.serializeNonpersistentArrayMap("behaviour", ma_behaviours, String, String);
-				trace("ma_behaviours: ")
-				for (var k: String in ma_behaviours)
-				{
-					trace("ma_behaviours[" + k + "] = " + ma_behaviours[k] + "<<");
-				}
 			}
 			catch (error: Error)
 			{
@@ -322,8 +313,6 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			{
 				for each (var layer: WMSLayer in _layerConfigurations)
 				{
-					//if (!layer)
-					//	trace("WMSLayerConfiguration.isTileableForCRS(): layer is NULL")
 					if (layer && layer.isTileableForCRS(crs))
 						return true;
 				}

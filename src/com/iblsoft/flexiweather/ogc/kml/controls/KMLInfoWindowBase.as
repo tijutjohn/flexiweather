@@ -16,13 +16,11 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 		override public function set y(value: Number): void
 		{
 			super.y = value;
-			trace("KMLInfoWindow y: " + value);
 		}
 
 		override public function set visible(value: Boolean): void
 		{
 			super.visible = value;
-			trace("KMLInfoWindow visible: " + value);
 		}
 
 		[Bindable]
@@ -112,7 +110,6 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 
 		private function createBorderPath(): String
 		{
-			trace("KIW cbt [" + id + "] size [" + width + "," + height + "]");
 			if (!contentGroup || (contentGroup.width == 00 && contentGroup.height == 0))
 			{
 				_waitForSize = true;
@@ -125,7 +122,6 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 			var w: int = contentGroup.width // + 2;
 			var h: int = contentGroup.height - 2;
 			var path: String = "m 0 0 l " + w + " 0 l 0 " + h + " l " + (-1 * arrRightParth) + " 0 m " + (-1 * arrowWidth) + " 0 l " + (-1 * arrLeft) + " 0 l 0 " + (-1 * h);
-			trace("KIW border path [" + id + "] => " + path);
 			if (_waitForSize)
 			{
 				_waitForSize = false;

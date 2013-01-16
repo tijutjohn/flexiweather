@@ -113,7 +113,6 @@ package com.iblsoft.flexiweather.syndication
 	{
 		  if (ParsingTools.nullCheck(x) == null)
 		  {
-			  trace('returning null');
 			  return null;
 		  }
 		  var geo:Geo = new Geo();

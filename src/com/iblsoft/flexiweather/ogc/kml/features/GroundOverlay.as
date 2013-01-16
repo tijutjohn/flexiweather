@@ -46,7 +46,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		public override function cleanup(): void
 		{
 			super.cleanup();
-			trace("GroundOverlay cleanup");
 			if (_latLonBox)
 			{
 				_latLonBox.cleanupKML();
@@ -135,7 +134,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 							kmlReflection.displaySprite.visible = true;
 							kmlReflection.displaySprite.x = nwPoint.x;
 							kmlReflection.displaySprite.y = nePoint.y;
-							trace("GroundOverlay updated position ["+kmlReflection.displaySprite.x+","+kmlReflection.displaySprite.y+"]");
 						}
 					} else {
 						if (kmlReflection.displaySprite)
@@ -147,7 +145,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 
 //				x = nwp.x;
 //				y = nep.y;
-				trace("roundOverlay update pos: ["+x+","+y+"]")
 //					_container.labelLayout.updateObjectReferenceLocation(this);
 			}
 			*/
@@ -165,7 +162,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		override public function set x(value: Number): void
 		{
 			super.x = value;
-			trace("groundOverlay: x: " + x);
 		}
 
 		public function get latLonBox(): LatLonBox

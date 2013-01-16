@@ -267,13 +267,11 @@ package com.iblsoft.flexiweather.utils.wfs
 			if (dist < m_projectionWidthHalf)
 			{
 				//drawing from A to B
-				trace("drawing from A to B");
 				coord1 = new Coord(crs, ax, ay);
 				coord2 = new Coord(crs, bx, by);
 			}
 			else
 			{
-				trace("drawing from B to A");
 				coord1 = new Coord(crs, ax + m_projectionWidth * changeDirection, ay);
 				coord2 = new Coord(crs, bx, by);
 				directionChanged = true;
@@ -282,9 +280,6 @@ package com.iblsoft.flexiweather.utils.wfs
 //			var currentViewBBox: BBox = m_iw.getViewBBox();
 //			var extendedBBox: BBox = m_iw.getExtentBBox();
 //			var parts: Array = m_iw.mapBBoxToProjectionExtentParts(currentViewBBox);
-			//				for each(var partBBoxToUpdate: BBox in parts) {
-			//					trace("visible parts: " + partBBoxToUpdate.toBBOXString());					
-			//				}
 		/*
 		var p1: Point = m_iw.coordToPoint(coord1);
 		var p2: Point = m_iw.coordToPoint(coord2);
@@ -319,8 +314,6 @@ package com.iblsoft.flexiweather.utils.wfs
 		private function movePointsToCorrectReflection(lastPoint: Point, p1: Point, p2: Point, crs84WidthInPixels: int): void
 		{
 			var crs84HalfWidthInPixels: int = crs84WidthInPixels / 2;
-			trace("\n\tmovePointsToCorrectReflection");
-			trace("\t\t p1: " + p1 + " p2: " + p2 + " lastPoint: " + lastPoint);
 			var posX: int = p1.x;
 			if ((lastPoint.x + crs84HalfWidthInPixels) < p1.x)
 			{
@@ -342,7 +335,6 @@ package com.iblsoft.flexiweather.utils.wfs
 					posX = p1.x;
 				}
 			}
-			trace("\t\t END p1: " + p1 + " p2: " + p2 + " lastPoint: " + lastPoint);
 		}
 
 		private function movePointsToScreen(p1: Point, p2: Point, crs84WidthInPixels: int): void

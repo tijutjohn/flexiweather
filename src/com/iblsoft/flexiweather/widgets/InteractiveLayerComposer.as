@@ -52,7 +52,6 @@ package com.iblsoft.flexiweather.widgets
 		private function onLayerLoadingFinished(event: InteractiveLayerEvent): void
 		{
 			var l: InteractiveLayer = event.interactiveLayer as InteractiveLayer;
-			trace("Composer onLayerLoadingFinished [" + l.toString() + "]");
 			for each (l in m_layers)
 			{
 				if (l is InteractiveDataLayer)
@@ -81,7 +80,6 @@ package com.iblsoft.flexiweather.widgets
 			}
 			for each (l in layers)
 			{
-				trace("Composer addLayers: addLayer: " + l.layerName);
 				addLayer(l);
 			}
 			
@@ -185,15 +183,6 @@ package com.iblsoft.flexiweather.widgets
 			try
 			{
 				var layer: InteractiveLayer;
-//				trace("************************************************************************************");
-//				trace("                InteractiveLayerComposer SORTING by ZORDER start state");
-//				trace("************************************************************************************");
-//				for (i = 0; i < numChildren; ++i)
-//				{
-//					layer = InteractiveLayer(getChildAt(i));
-//					trace("LAYER [" + i + "] = " + layer.name + " order: " + layer.zOrder);
-//				}
-//				trace("**********************************************")
 				// stable-sort interactive layers in ma_layers according to their zOrder property
 				for (var i: int = 0; i < numChildren; ++i)
 				{
@@ -201,30 +190,14 @@ package com.iblsoft.flexiweather.widgets
 					for (var j: int = i + 1; j < numChildren; ++j)
 					{
 						var ilJ: InteractiveLayer = InteractiveLayer(getChildAt(j));
-//						trace('[InteractiveLayerComposer.orderLayers] ... checking ' + ilJ.name + '['+ilJ.zOrder+'] with ' + ilI.name+'['+ilI.zOrder+']');
 						if (ilJ.zOrder < ilI.zOrder)
 						{
 							// swap Ith and Jth layer, we know that J > I
-//							trace('\t [InteractiveLayerComposer.orderLayers] ... swapping ' + ilJ.name + '['+ilJ.zOrder+'] with ' + ilI.name+'['+ilI.zOrder+']');
 							swapChildren(ilJ, ilI);
 							ilI = InteractiveLayer(getChildAt(i));
 						}
 					}
 				}
-//				trace("**********************************************")
-//				trace("                 SORTING by ZORDER end state");
-//				trace("**********************************************")
-//				for (i = 0; i < numChildren; ++i)
-//				{
-//					layer = InteractiveLayer(getChildAt(i));
-//					trace("LAYER [" + i + "] = " + layer.name + " order: " + layer.zOrder);
-//					
-//					if (i == 0 && layer.name.indexOf('Border') > 0)
-//					{
-//						trace("stop");
-//					}
-//				}
-//				trace("**********************************************")
 			}
 			finally
 			{
@@ -266,11 +239,9 @@ package com.iblsoft.flexiweather.widgets
 			{
 				for each (var layer: InteractiveLayer in m_layers)
 				{
-//					trace("\t InteractiveLayerCompose getLayerByID["+layerID+"] layer.id: " + layer.id + " name: " + layer.name + " label: " + layer.layerName);
 					if (layer is InteractiveLayerMSBase)
 					{
 						var config: WMSLayerConfiguration = (layer as InteractiveLayerMSBase).configuration as WMSLayerConfiguration;
-//						trace("\t InteractiveLayerCompose config: " + config.label);
 					}
 					if (layer.id && layer.id == layerID)
 						return layer;
@@ -336,7 +307,6 @@ package com.iblsoft.flexiweather.widgets
 		override public function negotiateBBox(newBBox: BBox, changeZoom: Boolean = true): BBox
 		{
 			var s_crs: String = container.getCRS();
-//			trace("\n\n\tInteractiveLayerComposer negotiateBBox newBBox at startup: :" + newBBox.toLaLoString(s_crs));
 			var latestBBox: BBox;
 			for (var i: int = 0; i < m_layers.length; ++i)
 			{
@@ -344,17 +314,13 @@ package com.iblsoft.flexiweather.widgets
 				latestBBox = l.negotiateBBox(newBBox, changeZoom);
 				if (!latestBBox.equals(newBBox))
 				{
-//					trace("WARNING: COMPOSER bbox changed by layer " + l.layerName);
 					if (l is InteractiveLayerGoogleMaps)
 					{
 						var viewBBox: BBox = (l as InteractiveLayerGoogleMaps).getViewBBox();
-//						trace("\t current view for google maps: " + viewBBox);
 					}
 				}
 				newBBox = latestBBox;
-//				trace("\tInteractiveLayerComposer negotiateBBox newBBox ["+i+"] :" + newBBox.toLaLoString(s_crs));
 			}
-//			trace("\tInteractiveLayerComposer negotiateBBox newBBox at end: :" + newBBox.toLaLoString(s_crs));
 			return newBBox;
 		}
 
@@ -412,7 +378,6 @@ package com.iblsoft.flexiweather.widgets
 							trace("onLayerCollectionChanged: Layer is null")
 						}
 					}
-//					trace("onLayerCollectionChanged reverse order");
 					notifyLayersChanged();
 					break;
 			}
@@ -463,14 +428,12 @@ package com.iblsoft.flexiweather.widgets
 		public function cloneLayersForComposer(composer: InteractiveLayerComposer): void
 		{
 			var total: int = layers.length;
-			trace("From composers: " + id + " ["+layers.length+"] to composer: " + composer.id + " ["+composer.layers.length+"]");	
 			var newLayers: Array = [];
 			
 			var newLayer: InteractiveLayer;
 			for (var i: int = 0; i < total; i++)
 			{
 				var l: InteractiveLayer = layers.getItemAt(i) as InteractiveLayer;
-				trace("\t cloneLayersForComposer layer: " + l.toString());
 				newLayer = l.clone();
 				newLayers.unshift(newLayer);
 			}

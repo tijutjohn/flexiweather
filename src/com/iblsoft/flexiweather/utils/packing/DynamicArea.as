@@ -19,8 +19,6 @@ package com.iblsoft.flexiweather.utils.packing
 
 		public function create(totalArea: Rectangle): void
 		{
-			if (totalArea.width == 0 || totalArea.height == 0)
-				trace("stop area is 0");
 			area = totalArea;
 			firstArea = new DynamicArea(this);
 			secondArea = new DynamicArea(this);

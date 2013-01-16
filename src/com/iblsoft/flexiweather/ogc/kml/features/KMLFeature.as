@@ -97,14 +97,12 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		override public function set x(value: Number): void
 		{
 			super.x = value;
-//			trace("feature: x: " + x);
 			notifyPositionChange();
 		}
 
 		override public function set y(value: Number): void
 		{
 			super.y = value;
-//			trace("feature: y: " + y);
 			notifyPositionChange();
 		}
 
@@ -328,8 +326,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				invisibleCoordsPositions = updateCoordsReflectionsForSpecifiedCoordinates(invisibleCoordsPositions, false);
 				if (invisibleCoordsPositions.length > 0)
 					trace("invisibleCoordsPositions should be empty now");
-					//			} else {
-//				trace("updateCoordsReflectionsForSpecifiedCoordinates correct, nothing needs to be added");
 			}
 		}
 
@@ -432,7 +428,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			//reuse KMLLabels
 			_kmlLabel = kml.resourceManager.getKMLLabel(this);
 			_kmlLabel.visible = true;
-			trace("\t KMLFeature createKMLLabel [" + _kmlLabel.id + "]: " + _kmlLabel.text);
 			_kmlLabel.reflection = (parent as KMLSprite).reflection;
 			return _kmlLabel;
 		}
@@ -449,14 +444,12 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			} else {
 				_listenersArray[type] = int(_listenersArray[type]) + 1;
 			}
-			trace("KMLFeature addEventListener ["+type+"]: " + _listenersArray[type]);
 		}
 
 		public override function removeEventListener(type:String, listener:Function, useCapture:Boolean=false):void
 		{
 			super.removeEventListener(type, listener, useCapture);
 
-			trace("KMLFeature removeEventListener ["+type+"]: " + _listenersArray[type]);
 			delete _listenersArray[type];
 		}
 		*/
@@ -546,9 +539,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				this._lookAt = new LookAt(ms_namespace, this.xml.kmlns::LookAt);
 			if (ParsingTools.nullCheck(this.xml.kmlns::Region))
 				this._region = new Region(ms_namespace, this.xml.kmlns::Region);
-			//			trace("Feature name: " + _name + " ID: " + _id);
-//			trace("\t description: " + _description);
-//			trace("\t snippet: " + _snippet);
 			dispatchEvent(new Event("nameChanged"));
 			/*
 			if (ParsingTools.nullCheck(_xmlList.atom::link) != null) {

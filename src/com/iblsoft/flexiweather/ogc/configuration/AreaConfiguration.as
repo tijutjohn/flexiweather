@@ -60,7 +60,6 @@ package com.iblsoft.flexiweather.ogc.configuration
 				url += "&BBOX=" + _thumbBBox.toBBOXString();
 			url += "&WIDTH=" + w + "&HEIGHT=" + h + "&FORMAT=image/png&TRANSPARENT=TRUE";
 			url = AbstractURLLoader.fromBaseURL(url);
-//			trace("AreaConfiguration icon ["+w+","+h+"] url : " + url);
 			return url;
 		}
 
@@ -125,12 +124,10 @@ package com.iblsoft.flexiweather.ogc.configuration
 		{
 			var rect: Rectangle = projection.bbox.toRectangle();
 			var aspectRatio: Number = rect.width / rect.height;
-//			trace("AREA ["+name+"] projection BBOX aspectRatio: " + aspectRatio);
 			if (_thumbBBox)
 			{
 				rect = _thumbBBox.toRectangle();
 				aspectRatio = rect.width / rect.height;
-//				trace("AREA ["+name+"] _thumbBBox aspectRatio: " + aspectRatio);
 			}
 		}
 

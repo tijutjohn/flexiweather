@@ -46,15 +46,9 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 		override public function serialize(storage: Storage): void
 		{
 			super.serialize(storage);
-			trace("GoogleMapLayerConfiguration serialize");
 			try
 			{
 				storage.serializeNonpersistentArrayMap("behaviour", ma_behaviours, String, String);
-				trace("GoogleMapLayerConfiguration ma_behaviours: ")
-				for (var k: String in ma_behaviours)
-				{
-					trace("GoogleMapLayerConfiguration ma_behaviours[" + k + "] = " + ma_behaviours[k] + "<<");
-				}
 			}
 			catch (error: Error)
 			{

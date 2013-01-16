@@ -52,7 +52,6 @@ package com.iblsoft.flexiweather.ogc.managers
 
 		public function destroy(): void
 		{
-			trace("OGCServiceConfigurationManager");
 			if (m_timer)
 			{
 				m_timer.stop();
@@ -184,7 +183,6 @@ package com.iblsoft.flexiweather.ogc.managers
 
 		private function onCapabilitiesUpdated(event: DataEvent): void
 		{
-			trace("onCapabilitiesUpdated");
 			dispatchEvent(new Event(WMSServiceConfiguration.CAPABILITIES_UPDATED));
 			m_servicesUpdating--;
 			if (m_servicesUpdating == 0)

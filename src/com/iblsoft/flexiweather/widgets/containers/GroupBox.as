@@ -124,7 +124,6 @@ package com.iblsoft.flexiweather.widgets.containers
 		override protected function attachSkin(): void
 		{
 			super.attachSkin();
-			trace("groupbox: attachskin");
 		}
 
 		/**

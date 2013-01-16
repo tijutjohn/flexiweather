@@ -27,13 +27,11 @@ package com.iblsoft.flexiweather.plugins.data
 
 		public function startModuleLoading(): void
 		{
-			trace("Module [" + url + "] starts loading");
 			_isLoading = true;
 		}
 
 		public function moduleIsLoadedAndReady(module: Module): void
 		{
-			trace("Module [" + url + "] is ready");
 			this.module = module;
 			_isLoading = false;
 			_isReady = true;

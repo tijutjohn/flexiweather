@@ -111,8 +111,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 			var baseURLPattern: String = m_layer.baseURLPatternForCRS(s_crs);
 			if (baseURLPattern)
 				loadRequests = prepareData(tiledViewProperties, tiledAreas, b_forceUpdate);
-			else
+			else {
 				trace("baseURLpattern is NULL");
+			}
 			loadAllData(tiledViewProperties, loadRequests);
 		}
 
@@ -351,7 +352,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		public function onTileLoadFailed(tileRequest: TiledTileRequest, associatedData: Object): void
 		{
-			//			trace("\t onTileLoadFailed : " + tileIndex);
 			tileLoadFailed();
 			//FIXME check if this is ServiceException "InvalidDimensionValue" and add information to cachec "somehow" to do not load it when looping animation
 			/**

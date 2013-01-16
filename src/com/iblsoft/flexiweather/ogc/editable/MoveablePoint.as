@@ -236,7 +236,6 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			if (!pt.equals(m_pt))
 			{
-//				trace("MoveablePoint setPoint: " + pt + " reflection: " + mi_reflection + " index: " + mi_pointIndex);
 				m_pt = pt;
 				update();
 			}

@@ -523,7 +523,6 @@ package com.iblsoft.flexiweather.utils
 					g.start(mPoints[i].x, mPoints[i].y);
 					g.moveTo(mPoints[i].x, mPoints[i].y);
 					actSegment = SPoint(mPoints[i]).segmentIndex;
-//					trace(SPoint(mPoints[i]).segmentIndex);
 				}
 			}
 			g.finish(mPoints[mPoints.length - 1].x, mPoints[mPoints.length - 1].y);
@@ -553,7 +552,6 @@ package com.iblsoft.flexiweather.utils
 					nMPoint.segmentIndex = i;
 					usePoints.push(nMPoint);
 				}
-					//trace('mPoints.push(new MPoint(new Point(' + Point(_points[i]).x + ', ' + Point(_points[i]).y + ')));');
 			}
 			if (_closed)
 			{
@@ -634,7 +632,6 @@ package com.iblsoft.flexiweather.utils
 					//if ((tDist >= 1.0) || (t >= (1.0 - _step))){
 					if (tDist >= 1.0)
 					{
-						//trace(new Point(drawPoint.x - x0, drawPoint.y - y0).length);
 						x0 = drawPoint.x;
 						y0 = drawPoint.y;
 						tmpRetPoint = new SPoint(drawPoint.x, drawPoint.y);

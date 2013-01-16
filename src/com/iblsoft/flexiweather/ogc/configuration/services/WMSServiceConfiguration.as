@@ -140,7 +140,6 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 				return;
 			}
 			mb_capabilitiesUpdated = true;
-//			trace("onCapabilitiesLoaded: " + event.request.url);
 			m_capabilitiesLoadJob.finish();
 			m_capabilitiesLoadJob = null;
 			if (event.result is XML)
@@ -176,7 +175,6 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 				for each (var currLayer: WMSLayerBase in m_layers.layers)
 				{
 					var crsColl: ArrayCollection = currLayer.crsWithBBoxes;
-//					trace("Layer: " + currLayer.ms_name + " crs: " + crsColl.length);	
 					var newBBox: BBox;
 					for each (var crs: CRSWithBBox in crsColl)
 					{

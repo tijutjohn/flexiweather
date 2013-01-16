@@ -139,7 +139,6 @@ package com.iblsoft.flexiweather.ogc
 			}
 			if (features && features.length > 0)
 			{
-				trace("after removing alll features, there are still features in features: " + features.length + " [" + this + "]")
 				features.removeAll();
 			}
 		}
@@ -317,7 +316,6 @@ class Screenshot extends UIComponent
 
 	public function create(layer: InteractiveLayerFeatureBase, w: int, h: int): void
 	{
-		trace("createScreenshot " + w + " , " + h);
 		_bd = new BitmapData(w, h, true, 0x00000000);
 		var clrTransform: ColorTransform = new ColorTransform(1, 0, 0);
 		_bd.draw(layer, null, clrTransform);

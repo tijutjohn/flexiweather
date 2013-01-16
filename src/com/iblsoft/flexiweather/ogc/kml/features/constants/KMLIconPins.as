@@ -81,7 +81,6 @@ package com.iblsoft.flexiweather.ogc.kml.features.constants
 
 		private function onKMLPinIconLoaded(event: UniURLLoaderEvent): void
 		{
-			trace("onKMLIconLoaded");
 			var loader: URLLoaderWithAssociatedData = event.target as URLLoaderWithAssociatedData;
 			var data: Object = event.associatedData;
 			var result: Bitmap = event.result as Bitmap;

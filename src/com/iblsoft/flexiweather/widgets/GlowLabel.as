@@ -101,7 +101,6 @@ package com.iblsoft.flexiweather.widgets
 		{
 //				var size: int = findFontSize(textField.width);
 
-//				trace("new size: " + size + " text: " + text);
 
 			var currFontSize: int = getStyle('fontSize');
 			if (currFontSize != size && size >= 8)
@@ -128,7 +127,6 @@ package com.iblsoft.flexiweather.widgets
 			textField.setTextFormat(format);
 			textField.text = text;
 
-//				trace("preferredWidth: " + preferredWidth + " (textField.textWidth: " + textField.textWidth + " textField.textHeight: " + textField.textHeight + " height: " + height);
 			if (textField.textWidth > preferredWidth || textField.textHeight > height)
 			{
 				ok = false;

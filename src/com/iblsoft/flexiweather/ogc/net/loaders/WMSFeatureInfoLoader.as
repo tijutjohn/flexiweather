@@ -19,7 +19,6 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 
 		override protected function decodeResult(rawData: ByteArray, urlLoader: URLLoaderWithAssociatedData, urlRequest: URLRequest, resultCallback: Function, errorCallback: Function): void
 		{
-			trace("WMSFeatureInfoLoader: " + rawData);
 			//for now WMS Feature Info Loader check just is data is valid XML
 			var data: String = cloneByteArrayToString(rawData);
 			var validXML: Boolean = XMLLoader.isValidXML(data);

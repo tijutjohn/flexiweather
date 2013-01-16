@@ -109,7 +109,6 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 		private function onKMLLoadFailed(event: UniURLLoaderErrorEvent): void
 		{
 			Alert.show("KMLLayerConfiguration: Loading of KML failed", "Loading failed", Alert.OK);
-			trace("load failed");
 		}
 
 		private function onKMLLoaded(event: UniURLLoaderEvent): void
@@ -208,7 +207,6 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 
 		override public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer
 		{
-//			trace("KMLLayerConfiguration create new KML layer: " + this);
 			//TODO need to check KML version from loaded KML
 			var l: InteractiveLayerKML = new InteractiveLayerKML(iw, _kml, new Version(2, 2, 0));
 			if (label)

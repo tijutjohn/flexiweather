@@ -34,7 +34,6 @@ package com.iblsoft.flexiweather.ogc.multiview.layouts
 		override public function updateDisplayList(unscaledWidth: Number, unscaledHeight: Number): void
 		{
 			super.updateDisplayList(unscaledWidth, unscaledHeight);
-			trace("MultiviewLayout updateDisplayList [" + unscaledWidth + "," + unscaledHeight + "]");
 		}
 
 		override protected function calculateDropIndex(x: Number, y: Number): int
@@ -102,8 +101,6 @@ package com.iblsoft.flexiweather.ogc.multiview.layouts
 			if (index > count)
 				index = count;
 			return index;
-			trace("MultiViewLayout dropIndex from [" + x + "," + y + "] = " + dropIndex);
-			return dropIndex;
 		}
 
 		override public function calculateDropLocation(dragEvent: DragEvent): DropLocation

@@ -72,8 +72,6 @@ package com.iblsoft.flexiweather.ogc.cache
 			{
 				cnt++;
 			}
-			if (cnt > 0)
-				trace("WMSCache there are some cached items");
 			md_cache = null;
 			md_noDataCache = null;
 			md_cacheLoading = null;
@@ -268,7 +266,6 @@ package com.iblsoft.flexiweather.ogc.cache
 			if (item)
 			{
 				var bmp: Bitmap = item.image as Bitmap;
-//				trace("WMSCache getCacheItemBitmap for " + item.cacheKey);
 				return new Bitmap(bmp.bitmapData.clone());
 			}
 			return null;
@@ -393,8 +390,6 @@ package com.iblsoft.flexiweather.ogc.cache
 
 		private function debug(str: String): void
 		{
-			return;
-			trace("WMSCache [" + name + "]: " + str);
 		}
 	}
 }

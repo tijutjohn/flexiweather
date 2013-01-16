@@ -34,7 +34,6 @@ package com.iblsoft.flexiweather.ogc.managers
 		public function serialize(storage: Storage): void
 		{
 			storage.serializeNonpersistentArrayCollection("projection", ma_projections, ProjectionConfiguration);
-			trace("pr: " + ma_projections);
 		}
 		private var ma_parsedProjectionsDictionary: Dictionary = new Dictionary();
 		private var ma_parsedProjections: ArrayCollection = new ArrayCollection();
@@ -47,18 +46,15 @@ package com.iblsoft.flexiweather.ogc.managers
 
 		public function addParsedProjectionByCRS(projection: ProjectionConfiguration): void
 		{
-//			trace("ProjectionConfigurationManager addParsedAreaByCRS: " + projection.crs);
 			//check if this is valid projection
 			var proj: Projection = Projection.getByCRS(projection.crs);
 			if (!proj || (proj && !Projection.isValidProjection(proj)))
 			{
 				//not valid projection, do not add it to parsed projections
-//				trace("not valid projection, do not add it to parsed projections");
 				return;
 			}
 			if (!projection.bbox || (projection.bbox && (projection.bbox.width == 0 || projection.bbox.width == 0)))
 			{
-//				trace("Projection " + projection.crs + " will not be added, problem with bbox");
 				return;
 			}
 			ma_parsedProjectionsDictionary[projection.crs] = projection;
@@ -105,10 +101,7 @@ package com.iblsoft.flexiweather.ogc.managers
 				ma_parsedProjections.addItem(projection);
 				addProj4Projection(projection);
 			}
-//			trace("ProjectionConfigurationManager initializeParsedAreas items: " + ma_parsedProjections.length);
-//			trace("getAreaXMLList ma_areas1: " + ma_areas.length);
 //			ArrayUtils.unionArrays(ma_areas.source, ma_parsedAreas.source, compareProjections);
-//			trace("getAreaXMLList ma_areas2: " + ma_areas.length);
 		}
 
 		public function addProjection(projection: ProjectionConfiguration): void

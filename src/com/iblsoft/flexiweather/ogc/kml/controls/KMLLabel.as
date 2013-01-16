@@ -38,7 +38,7 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 		{
 			super.visible = value;
 			
-			trace(this + " visible: " + value);
+//			trace(this + " visible: " + value);
 //			if (reflection == 0)
 //				trace("KMLLabel["+_id+"].visible = " + value);
 		}
@@ -46,15 +46,11 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 		override public function set x(value: Number): void
 		{
 			super.x = value;
-//			if (reflection == 0)
-//			trace(this + " x = " + value);
 		}
 
 		override public function set y(value: Number): void
 		{
 			super.y = value;
-//			if (reflection == 0)
-//				trace("KMLLabel["+_id+"].y = " + value);
 		}
 		private var _color: uint;
 		private var _scale: Number;
@@ -88,7 +84,6 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 		{
 			super();
 			_id = ++uid;
-//			trace("new KMLLabel["+_id+"]");
 			
 			kmlFeature = feature;
 			

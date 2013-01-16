@@ -42,7 +42,6 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		
 		public function LevelSynchronizator()
 		{
-			trace("new LevelSynchronizator");
 		}
 		
 		private function getLevelValue(position: int): void
@@ -114,7 +113,6 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		
 		public function synchronizeWidgets(synchronizeFromWidget:InteractiveWidget, widgetsForSynchronisation:ArrayCollection, preferredSelectedIndex: int = -1):void
 		{
-			trace("\nLevelSychronizator synchronizeWidgets");
 			if (_levelValues)
 			{
 				var levels: Array = _levelValues;
@@ -125,8 +123,6 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 				{
 					var cnt: int = 0;
 					var total: int = widgetsForSynchronisation.length;
-					if (total != _levelValues.length)
-						trace("LevelSynchronisation => widget count != _levelValues count");
 					
 					for (var i: int = 0; i < total; i++)
 					{
@@ -143,7 +139,6 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 									{
 										if (widget.interactiveLayerMap.level != level)
 										{
-											trace("LevelSychronizator synchroniseWidWidgets syncWidget["+synchronizeFromWidgetPosition+"] setLevel: " + level + " for widget: " + widget.id + " i: " + i);
 											widget.interactiveLayerMap.setLevel(level);
 										} else {
 											trace("LevelSychronizator synchroniseWidWidgets level fro widget ["+cnt+"] is already set to " + level + " Do not do anything!");

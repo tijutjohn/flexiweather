@@ -165,8 +165,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 
 		private function onMouseClick(event: MouseEvent): void
 		{
-			trace("target: " + event.target);
-			trace("currentTarget: " + event.currentTarget);
 			var displayObject: DisplayObject = event.target as DisplayObject
 			var ok: Boolean = true;
 			var iw: InteractiveWidget;
@@ -310,7 +308,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 //			cnt = 0;
 //			for each (var currIW: InteractiveWidget in ac)
 //			{
-//				trace("IW: " + currIW.id + " / " + currIW.name + " cnt: " + cnt);
 //				cnt++;
 //				currIW.interactiveLayerMap.invalidateProperties();
 //			}
@@ -340,7 +337,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 
 		private function onDataProviderChange(event: CollectionEvent): void
 		{
-			trace("\t" + this + "onDataProviderChange: " + event.kind);
 			if (event.items && event.items.length > 0)
 			{
 				var item: PropertyChangeEvent;
@@ -370,7 +366,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 
 		private function addWidgetsToDataProvider(items: Array): void
 		{
-			trace("\t\t" + this + "addWidgetsToDataProvider: ");
 			var iw: InteractiveWidget;
 			var item: PropertyChangeEvent;
 			for each (item in items)
@@ -591,7 +586,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 		
 		private function onMapFromXMLReady(event: DynamicEvent): void
 		{
-			trace("\n" + this + "onMapFromXMLReady");
 			var interactiveLayerMap: InteractiveLayerMap = event.target as InteractiveLayerMap;
 			interactiveLayerMap.removeEventListener(InteractiveLayerMap.LAYERS_SERIALIZED_AND_READY, onMapFromXMLReady);
 			var layers: Array = event['layers'] as Array;
@@ -628,7 +622,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 //		private function onLayerInitialized(event: InteractiveLayerEvent): void
 //		{
 //			_mapLayersInitializing--;
-//			trace("\t"+ this + "onLayerInitialized _mapLayersInitializing: " + _mapLayersInitializing);
 //			if (_mapLayersInitializing == 0)
 //			{
 //				notifyWidgetsMapLayersInitialized();
@@ -668,7 +661,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 		public function startWatchingChanges(bStartListenForWidgetChanges: Boolean = true): void
 		{
 			_watchChanges = true;
-			trace("InteractiveMultiView startWatchingChanges bStartListenForWidgetChanges:" + bStartListenForWidgetChanges);
 			if (bStartListenForWidgetChanges)
 			{
 				for each (var widget: InteractiveWidget in _interactiveWidgets.widgets)
@@ -682,7 +674,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 		public function stopWatchingChanges(bStopListenForWidgetChanges: Boolean = true): void
 		{
 			_watchChanges = false;
-			trace("InteractiveMultiView stopWatchingChanges	bStopListenForWidgetChanges: " + bStopListenForWidgetChanges);
 			if (bStopListenForWidgetChanges)
 			{
 				for each (var widget: InteractiveWidget in _interactiveWidgets.widgets)
@@ -702,7 +693,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 
 		private function onWidgetChanged(event: InteractiveWidgetEvent): void
 		{
-			trace("\n\nMultiView onWidgetChanged: " + event.changeDescription + " watchChanges: " + _watchChanges + "\n");
 			if (_watchChanges)
 			{
 				var iw: InteractiveWidget = event.target as InteractiveWidget;
@@ -770,7 +760,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 
 		private function rebuildWidgets(): void
 		{
-			trace("\n\nInteractiveMultiView rebuildWdigets");
 			//first loop will check how many widgets need to be changed
 			_widgetsWaitingForRebuild = 0;
 			for each (var currWidget: InteractiveWidget in _interactiveWidgets.widgets)
@@ -798,7 +787,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 					//wait for event, which id dispatched when map is rebuild and start listening for changes again
 					currWidget.addEventListener(InteractiveLayerMapEvent.MAP_LOADED, onWidgetMapRebuild);
 					currWidget.interactiveLayerMap.removeAllLayers();
-					trace("\t clone layers from composer: " + _selectedInteractiveWidget.interactiveLayerMap.id + " to composer: " + currWidget.interactiveLayerMap.id);
 					_selectedInteractiveWidget.interactiveLayerMap.cloneLayersForComposer(currWidget.interactiveLayerMap);
 				}
 			}
@@ -814,7 +802,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 			var widget: InteractiveWidget = event.currentTarget as InteractiveWidget;
 			widget.startListenForChanges();
 			_widgetsWaitingForRebuild--;
-			trace("\n" + this + " InteractiveMultiView onWidgetMapRebuild widget: " + widget.id + " _widgetsWaitingForRebuild: " + _widgetsWaitingForRebuild);
 			if (_widgetsWaitingForRebuild == 0)
 			{
 				//all widgets are rebuildt
@@ -829,7 +816,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 		private function registerInteractiveWidget(iw: InteractiveWidget): void
 		{
 			//TODO should be this done only if synchronization is ON?
-			trace("\n" + this + "registerInteractiveWidget: " + iw.id);
 			iw.enableMouseMove = true;
 			iw.enableMouseClick = false;
 			iw.enableMouseWheel = false;
@@ -851,7 +837,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 		 */
 		private function unregisterInteractiveWidget(iw: InteractiveWidget): void
 		{
-			trace("\n" + this + "unregisterInteractiveWidget: " + iw.id);
 			iw.enableMouseMove = true;
 			iw.enableMouseClick = true;
 			iw.enableMouseWheel = true;
@@ -866,7 +851,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 			unregisterSelectedInteractiveWidget();
 			if (_selectedInteractiveWidget)
 			{
-				trace("\n" + this + "registerInteractiveWidget: " + _selectedInteractiveWidget.id);
 				_selectedInteractiveWidget.enableMouseMove = true;
 				_selectedInteractiveWidget.enableMouseClick = true;
 				_selectedInteractiveWidget.enableMouseWheel = true;
@@ -895,7 +879,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 		{
 			if (_selectedInteractiveWidget)
 			{
-				trace("\n" + this + "unregisterSelectedInteractiveWidget: " + _selectedInteractiveWidget.id);
 				_selectedInteractiveWidget.enableMouseMove = true;
 				_selectedInteractiveWidget.enableMouseClick = false;
 				_selectedInteractiveWidget.enableMouseWheel = false;
@@ -1128,13 +1111,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 
 		private function debugWidgets(): void
 		{
-			return;
-			trace("\n debug widgets");
-			var cnt: int = 0;
-			for each (var currIW: InteractiveWidget in _interactiveWidgets.widgets)
-			{
-				trace("IW [" + cnt + "] width: " + currIW.width + ", height: " + currIW.height);
-			}
 		}
 
 		private function onAreaChanged(event: InteractiveWidgetEvent): void
@@ -1144,7 +1120,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 			if (widget && _selectedInteractiveWidget)
 			{
 				//TODO do not change it for selected widget, it was already changed
-				trace("IMV onAreaChanged " + widget.id + " > " + _selectedInteractiveWidget.id);
 				if (widget.id == _selectedInteractiveWidget.id)
 				{
 					var newCRS: String = widget.getCRS();
@@ -1366,7 +1341,6 @@ class WidgetCollection
 
 	public function addWidget(widget: InteractiveWidget): void
 	{
-		trace(this + "\t addWidget: " + widget.id);
 		_collection.addItem(widget);
 		_collection.refresh();
 	}

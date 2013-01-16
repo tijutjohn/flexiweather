@@ -64,10 +64,8 @@ package com.iblsoft.flexiweather.utils
 				{
 					for each (var obj: Object in arr)
 					{
-						trace("TreeUtils.getParent ARR, obj: " + obj.label);
 						if (obj == item)
 						{
-							trace("TreeUtils.getParent ARR, obj: " + obj.label + " PARENT FOUND: " + parent);
 							//item is found
 							return parent;
 						}
@@ -75,7 +73,6 @@ package com.iblsoft.flexiweather.utils
 						{
 							if (obj.hasOwnProperty("children"))
 							{
-								trace("TreeUtils.getParent ARR, obj: " + obj.label + " has children");
 								var parentItem: Object = getParent(item, obj.children, obj);
 								if (parentItem)
 									return parentItem;

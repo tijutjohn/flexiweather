@@ -54,8 +54,6 @@ package com.iblsoft.flexiweather.ogc.cache
 		override public function destroyCache(): void
 		{
 			super.destroyCache();
-			if (_items.length > 0)
-				trace("WMSTileCache: There are same cached items");
 			_items = null;
 		}
 
@@ -219,8 +217,6 @@ package com.iblsoft.flexiweather.ogc.cache
 				return false;
 			var s_key: String = getQTTTileViewCacheKey(qttTileViewProperties);
 			var isCached: Boolean = md_noDataCache[s_key] == true;
-			if (isCached)
-				trace("Debug");
 			return isCached;
 		}
 
@@ -264,8 +260,6 @@ package com.iblsoft.flexiweather.ogc.cache
 			var url: URLRequest = qttTileViewProperties.url;
 			var tileIndex: TileIndex = qttTileViewProperties.tileIndex;
 			var specialStrings: Array = parentQTT.specialCacheStrings;
-//			var viewPart: BBox = QTTTileViewProperties.viewPart;
-//			trace("WMSTileCache addCacheItem tileIndex: " + tileIndex.toString());
 			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, null, tileIndex, url, time, specialStrings);
 			var s_key: String = decodeURI(ck.toString());
 			var item: CacheItem = new CacheItem();
@@ -285,10 +279,8 @@ package com.iblsoft.flexiweather.ogc.cache
 			 * we need to delete cache item with same "key" before we add new item.
 			*/
 			var bWasDeleted: Boolean = deleteCacheItemByKey(s_key);
-//			debug("addCacheItem: " + s_key + " item was deleted: " + bWasDeleted);
 			md_cache[s_key] = item;
 			_items.push(s_key);
-//			trace("addCacheItem: debugCache: " + debugCache());
 			if (_items.length > maxCachedItems)
 			{
 				for each (var tiledAreaObj: Object in tiledAreas)
@@ -297,8 +289,6 @@ package com.iblsoft.flexiweather.ogc.cache
 					s_key = getCachedTileKeyOutsideTiledArea(tiledArea);
 				}
 				bWasDeleted = deleteCacheItemByKey(s_key);
-				debug("addCacheItem: REMOVE TILE : " + s_key + " item was deleted: " + bWasDeleted);
-				debug("addCacheItem: cache item removed: " + _items.length);
 			}
 		}
 
@@ -330,8 +320,6 @@ package com.iblsoft.flexiweather.ogc.cache
 
 		override public function deleteCacheItemByKey(s_key: String, b_disposeDisplayed: Boolean = false): Boolean
 		{
-			debug("deleteCacheItemByKey: " + s_key);
-//			trace("WMSTileCache deleteCacheItemByKey s_key: " +s_key);
 			var cacheItem: CacheItem = md_cache[s_key] as CacheItem;
 			// dispose bitmap data, just for bitmaps which are not currently displayed
 			if (cacheItem && (!cacheItem.displayed || (cacheItem.displayed && b_disposeDisplayed)))

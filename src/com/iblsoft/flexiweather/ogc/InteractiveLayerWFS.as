@@ -217,7 +217,6 @@ package com.iblsoft.flexiweather.ogc
 			//TODO should be check what was change and send correct FeatureUpdateChange, for now we're sending full update
 			for each (var f: WFSFeatureBase in features)
 			{
-				//trace("onAreaChanged ["+this+"] feature: " + f);
 				f.invalidatePoints();
 				f.update(FeatureUpdateContext.fullUpdate());
 			}
@@ -274,7 +273,6 @@ package com.iblsoft.flexiweather.ogc
 
 		public function importFeaturesFromXML(xml: XML): ArrayCollection
 		{
-			trace(this + "importFeaturesFromXML");
 			//do same as load features, just create them
 			return createFeaturesFromXML(xml, true);
 		}
@@ -385,7 +383,6 @@ package com.iblsoft.flexiweather.ogc
 					trace(e.getStackTrace());
 				}
 			}
-			trace("\nSTART saved: " + existingSavedFeatures.length + " existingRemovedFeatures: " + existingRemovedFeatures.length + " serverFeatures: " + serverFeatures.length);
 			var existingFeature: WFSFeatureEditable;
 			//all feature arrays are ready
 			while (serverFeatures.length > 0)
@@ -432,7 +429,6 @@ package com.iblsoft.flexiweather.ogc
 				}
 				else
 					addFeatureAfterLoad(feature, _features);
-				trace("saved: " + existingSavedFeatures.length + " existingRemovedFeatures: " + existingRemovedFeatures.length + " serverFeatures: " + serverFeatures.length);
 			}
 			if (existingSavedFeatures.length > 0)
 			{

@@ -14,9 +14,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 			{
 				trace("TileIndex.TileIndex(): Stop tileZoom not set");
 			}
-//			var _maxTilePos: int = 1 << (i_tileZoom + 1) - 1;
-//			if (i_tileRow > _maxTilePos || i_tileCol > _maxTilePos || i_tileCol < 0 || i_tileRow < 0)
-//				trace("TileIndex.TileIndex(): Stop, wrong tile for zoom: " + i_tileZoom);
 			mi_tileSize = i_tileSize;
 			mi_tileZoom = i_tileZoom;
 			mi_tileRow = i_tileRow;

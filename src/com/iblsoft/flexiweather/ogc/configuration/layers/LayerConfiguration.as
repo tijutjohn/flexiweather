@@ -21,17 +21,6 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		{
 		}
 
-		protected function debugArray(arr: Array): void
-		{
-			if (arr && arr.length > 0)
-			{
-				for each (var obj: Object in arr)
-				{
-					trace("WMSLayerConfig arr obj: " + obj);
-				}
-			}
-		}
-
 		public function serialize(storage: Storage): void
 		{
 			ms_label = storage.serializeString("label", ms_label);

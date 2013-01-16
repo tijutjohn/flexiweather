@@ -229,7 +229,6 @@ package com.iblsoft.flexiweather.symbology
 						setDefaultLineStyle(false);
 						m_graphics.lineTo(f_x, f_y);
 					}
-					trace('mi_counter:' + mi_counter);
 					if ((mi_counter % 6) == 2)
 						mp_fIcingPoint = new Point(f_x, f_y);
 					else if ((mi_counter % 6) == 3)

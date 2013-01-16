@@ -99,7 +99,6 @@ package com.iblsoft.flexiweather.widgets
 		override public function set enabled(value: Boolean): void
 		{
 			super.enabled = value;
-//			trace("\t\t InteractiveWidget ["+id+"] enabled = " + value);
 			invalidateDisplayList();
 		}
 
@@ -377,13 +376,11 @@ package com.iblsoft.flexiweather.widgets
 
 		private function onLayerInInteractiveLayerMapAdded(event: DynamicEvent): void
 		{
-			trace("\t" + this + " onLayerInInteractiveLayerMapAdded \n");
 			notifyWidgetChanged('layerAddedInInteractiveLayerMap', this);
 		}
 
 		private function onLayerInInteractiveLayerMapRemoved(event: DynamicEvent): void
 		{
-			trace(this + " onLayerInInteractiveLayerMapRemoved");
 			notifyWidgetChanged('layerRemovedInInteractiveLayerMap', this);
 		}
 
@@ -397,7 +394,6 @@ package com.iblsoft.flexiweather.widgets
 		
 		private function registerInteractiveLayerMap(ilm: InteractiveLayerMap): void
 		{
-			trace(this + " registerInteractiveLayerMap");
 			if (ilm)
 			{
 				ilm.addEventListener(InteractiveLayerEvent.VISIBILITY_CHANGED, onLayerChangedInInteractiveLayerMap);
@@ -410,7 +406,6 @@ package com.iblsoft.flexiweather.widgets
 
 		private function unregisterInteractiveLayerMap(ilm: InteractiveLayerMap): void
 		{
-			trace(this + " unregisterInteractiveLayerMap");
 			if (ilm)
 			{
 //				ilm.addEventListener(InteractiveLayerMap.TIME_AXIS_UPDATED, onTimeAxisUpdated);
@@ -718,13 +713,10 @@ package com.iblsoft.flexiweather.widgets
 				for(var i: int = 0; i < 10; i++)
 				{
 					var i_delta: int = (i & 1 ? 1 : -1) * ((i + 1) >> 1); // generates sequence 0, 1, -1, 2, -2, ..., 5, -5
-//					trace("\t mapBBoxToViewParts delta: " + i_delta);
 					var reflectedBBox: BBox = bbox.translated(f_crsExtentBBoxWidth * i_delta, 0)
 					var intersectionOfReflectedBBoxWithCRSExtentBBox: BBox =
 							reflectedBBox.intersected(m_crsProjection.extentBBox);
 
-//					trace("\t mapBBoxToViewParts ............reflectedBBox: " + reflectedBBox);
-//					trace("\t mapBBoxToViewParts inters. of reflected BBox: " + intersectionOfReflectedBBoxWithCRSExtentBBox);
 					if(intersectionOfReflectedBBoxWithCRSExtentBBox && intersectionOfReflectedBBoxWithCRSExtentBBox.width > 0 && intersectionOfReflectedBBoxWithCRSExtentBBox.height > 0) {
 						var b_foundEnvelopingBBox: Boolean = false;
 						for each(var otherBBox: BBox in a) {
@@ -734,8 +726,6 @@ package com.iblsoft.flexiweather.widgets
 							}
 						}
 						if(!b_foundEnvelopingBBox) {
-//							trace("InteractiveWidget.mapBBoxToViewParts(): reflected "
-//								+ i_delta + " part " + intersectionOfReflectedBBoxWithCRSExtentBBox.toString());
 							a.push(intersectionOfReflectedBBoxWithCRSExtentBBox);
 						}
 					}

@@ -28,7 +28,6 @@ package com.iblsoft.flexiweather.net.loaders
 				for (id in md_imageLoaders)
 				{
 					obj = md_imageLoaders[id];
-					trace(obj);
 				}
 			}
 			if (md_imageLoaderToRequestMap)
@@ -36,7 +35,6 @@ package com.iblsoft.flexiweather.net.loaders
 				for (id in md_imageLoaderToRequestMap)
 				{
 					obj = md_imageLoaderToRequestMap[id];
-					trace(obj);
 				}
 			}
 		}
