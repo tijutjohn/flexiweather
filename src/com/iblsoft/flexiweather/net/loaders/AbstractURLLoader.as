@@ -637,8 +637,6 @@ package com.iblsoft.flexiweather.net.loaders
 			if (urlRequest == null)
 				return;
 			
-			debug(this + " onDataComplete: " + urlRequest.url);
-			
 			if (urlLoader.associatedData && urlLoader.associatedData.hasOwnProperty("uniURLLoaderBasicAuthInfo") && urlLoader.associatedData.uniURLLoaderBasicAuthInfo == 'first message')
 			{
 				var domain: String = getDomain(urlRequest);

@@ -62,12 +62,14 @@ package com.iblsoft.flexiweather.ogc.kml
 	public class InteractiveLayerKML extends InteractiveLayerFeatureBase
 	{
 		
+		private var _visibilityChanged: Boolean;
 		override public function set visible(b_visible:Boolean):void
 		{
 			super.visible = b_visible;
 			
 //			if (b_visible)
 //			{
+				_visibilityChanged = true;
 				//if layer is displayed again, do full update to recalculate position
 				update(FeatureUpdateContext.fullUpdate());
 //			}
@@ -468,8 +470,17 @@ package com.iblsoft.flexiweather.ogc.kml
 		{
 			//do not anything if layer is not visiblit
 			if (!visible)
-				return;
+			{
+				if (_visibilityChanged)
+				{
+					trace("visibility was recently changed, need to make one update");
+				} else {
+//					trace("layer is not visible and update() call was at least one time perfomed from visibility change");
+					return;
+				}
+			}
 			
+//			trace("\n\nInteractiveLayerKML update");
 			m_boundaryRect = new Rectangle(0, 0, width, height);
 			var time: int;
 			if (changeFlag.fullUpdateNeeded && _syncManagerFullUpdate)
@@ -478,9 +489,12 @@ package com.iblsoft.flexiweather.ogc.kml
 				_syncManagerFullUpdate.stop();
 				_syncManagerFullUpdate.maxCallsPerTick = 30;
 				time = ProfilerUtils.startProfileTimer();
+				
 				updateForFeature(firstFeature as KMLFeature, changeFlag, _syncManagerFullUpdate);
+				
 				if (firstFeature)
 					(firstFeature as KMLFeature).debug("ILKML full update add calls: " + ProfilerUtils.stopProfileTimer(time) + " ms");
+				
 				if (_syncManagerFullUpdate.notEmpty)
 					_syncManagerFullUpdate.start();
 			}
@@ -517,6 +531,9 @@ package com.iblsoft.flexiweather.ogc.kml
 			feature.featureScale = kmlFeatureScaleX;
 			feature.update(changeFlag);
 			feature.visible = visible; //  true; //getAbsoluteVisibility(feature);
+			
+			if (_visibilityChanged)
+				_visibilityChanged = false;
 //			if (feature is Container)
 //			{
 //				trace("\t updateFeature call updateForFeature: " + (feature as Container).firstFeature);

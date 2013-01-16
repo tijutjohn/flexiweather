@@ -4,11 +4,13 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 	import com.iblsoft.flexiweather.ogc.kml.data.KMLResourceKey;
 	import com.iblsoft.flexiweather.ogc.kml.data.KMZFile;
 	import com.iblsoft.flexiweather.ogc.kml.events.KMLBitmapEvent;
+	import com.iblsoft.flexiweather.ogc.kml.features.KMLFeature;
 	import com.iblsoft.flexiweather.ogc.kml.features.constants.KMLIconPins;
 	import com.iblsoft.flexiweather.ogc.kml.features.styles.HotSpot;
 	import com.iblsoft.flexiweather.plugins.IConsole;
 	import com.iblsoft.flexiweather.plugins.IConsoleManager;
 	import com.iblsoft.flexiweather.utils.URLUtils;
+	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.events.Event;
@@ -277,13 +279,16 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 			}
 		}
 
-		public function getKMLLabel(): KMLLabel
+		public function getKMLLabel(feature: KMLFeature): KMLLabel
 		{
 			var label: KMLLabel;
 			if (reuseKMLLabels)
+			{
 				label = popKMLLabel();
+				label.kmlFeature = feature;
+			}
 			if (!label)
-				label = new KMLLabel();
+				label = new KMLLabel(feature);
 			return label;
 		}
 

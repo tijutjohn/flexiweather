@@ -112,6 +112,9 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		{
 			var oldValue: Boolean = super.visible;
 			super.visible = value;
+			
+			trace(this + " visible: " + value);
+			
 			if (value != oldValue)
 				notifyVisibilityChange();
 		}
@@ -427,12 +430,11 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		protected function createKMLLabel(parent: Sprite): KMLLabel
 		{
 			//reuse KMLLabels
-			_kmlLabel = kml.resourceManager.getKMLLabel();
+			_kmlLabel = kml.resourceManager.getKMLLabel(this);
 			_kmlLabel.visible = true;
 			trace("\t KMLFeature createKMLLabel [" + _kmlLabel.id + "]: " + _kmlLabel.text);
 			_kmlLabel.reflection = (parent as KMLSprite).reflection;
-//			parent.addChild(_kmlLabel);
-			return _kmlLabel
+			return _kmlLabel;
 		}
 
 		/*
@@ -670,15 +672,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			return null;
 		}
 
-		/**
-		 *	An array containing one or more link objects relating to this entry.
-		 */
-		/*
-		public function get link(): com.adobe.xml.syndication.atom.Link::Link
-		{
-		return this._link;
-		}
-		*/
 		public function changeVisibility(value: Boolean): void
 		{
 			if (this._visibility != value)

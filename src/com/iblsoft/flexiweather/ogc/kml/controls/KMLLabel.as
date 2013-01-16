@@ -1,7 +1,9 @@
 package com.iblsoft.flexiweather.ogc.kml.controls
 {
+	import com.iblsoft.flexiweather.ogc.kml.features.KMLFeature;
 	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayoutObject;
 	import com.iblsoft.flexiweather.utils.anticollision.IAnticollisionLayoutObject;
+	
 	import flash.display.Sprite;
 	import flash.filters.GlowFilter;
 	import flash.text.TextField;
@@ -17,6 +19,11 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 		public var reflection: uint;
 		private var _anticollisionLayoutObject: AnticollisionLayoutObject;
 
+		/**
+		 * Reference to KML feature label belongs to 
+		 */		
+		public var kmlFeature: KMLFeature;
+		
 		public function set anticollisionLayoutObject(object: AnticollisionLayoutObject): void
 		{
 			_anticollisionLayoutObject = object;
@@ -30,6 +37,8 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 		override public function set visible(value: Boolean): void
 		{
 			super.visible = value;
+			
+			trace(this + " visible: " + value);
 //			if (reflection == 0)
 //				trace("KMLLabel["+_id+"].visible = " + value);
 		}
@@ -38,7 +47,7 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 		{
 			super.x = value;
 //			if (reflection == 0)
-			trace("KMLLabel[" + _id + "].x = " + value + " _text: " + _text);
+//			trace(this + " x = " + value);
 		}
 
 		override public function set y(value: Number): void
@@ -75,11 +84,14 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 			return _id;
 		}
 
-		public function KMLLabel()
+		public function KMLLabel(feature: KMLFeature)
 		{
 			super();
 			_id = ++uid;
 //			trace("new KMLLabel["+_id+"]");
+			
+			kmlFeature = feature;
+			
 			mouseChildren = false;
 			mouseEnabled = false;
 			_scale = 1;
@@ -150,6 +162,11 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 				_txt.embedFonts = true;
 				_txt.setTextFormat(format);
 			}
+		}
+		
+		override public function toString(): String
+		{
+			return "KMLLabel ["+_id+"/"+text+"]: ";
 		}
 	}
 }

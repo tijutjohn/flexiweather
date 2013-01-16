@@ -5,6 +5,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 	import com.iblsoft.flexiweather.ogc.FeatureBase;
 	import com.iblsoft.flexiweather.ogc.kml.controls.KMLLabel;
 	import com.iblsoft.flexiweather.ogc.kml.controls.KMLSprite;
+	import com.iblsoft.flexiweather.ogc.kml.features.KMLFeature;
 	import com.iblsoft.flexiweather.ogc.kml.features.LineString;
 	import com.iblsoft.flexiweather.ogc.kml.features.LinearRing;
 	import com.iblsoft.flexiweather.ogc.kml.features.Placemark;
@@ -16,6 +17,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 	import com.iblsoft.flexiweather.utils.ProfilerUtils;
 	import com.iblsoft.flexiweather.utils.geometry.ILineSegmentApproximableBounds;
 	import com.iblsoft.flexiweather.utils.geometry.LineSegment;
+	
 	import flash.display.BitmapData;
 	import flash.display.BlendMode;
 	import flash.display.DisplayObject;
@@ -29,6 +31,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 	import flash.geom.Rectangle;
 	import flash.utils.Timer;
 	import flash.utils.getTimer;
+	
 	import mx.collections.ArrayCollection;
 	import mx.core.UIComponent;
 	import mx.utils.object_proxy;
@@ -323,8 +326,11 @@ package com.iblsoft.flexiweather.utils.anticollision
 					pass++;
 					if (lo.manageVisibilityWithAnchors)
 						lo.visible = true;
-					else
-						lo.visible = getAbsoluteVisibility(lo.object);
+					else {
+						var objectAbsoluteVisibility: Boolean = getAbsoluteVisibility(lo.object);
+						trace("ACL obj: " +  lo.object + " absolute visibility: " + objectAbsoluteVisibility);
+						lo.visible = objectAbsoluteVisibility;
+					}
 				}
 //				trace("ANTICOLLISION 1. time: " + ProfilerUtils.stopProfileTimer(currTime));
 //				currTime = ProfilerUtils.startProfileTimer();
@@ -579,6 +585,15 @@ package com.iblsoft.flexiweather.utils.anticollision
 		{
 			if (object == null)
 				return false;
+			
+			if (object is KMLLabel)
+			{
+				//if kml feature is not visible, label have to be invisible as well
+				var kmlFeature: KMLFeature = (object as KMLLabel).kmlFeature;
+				trace("getAbsoluteVisibility " + object + " kmlFeature: " + kmlFeature + " vis: " + kmlFeature.visible);
+				if (!kmlFeature.visible)
+					return false;
+			}
 			// check if at least part of object is within m_boundaryRect
 			var bounds: Rectangle = object.getBounds(this);
 			if (bounds.right < m_boundaryRect.left)

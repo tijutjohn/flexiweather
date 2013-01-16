@@ -1,5 +1,9 @@
 package com.iblsoft.flexiweather.utils.anticollision
 {
+	import com.iblsoft.flexiweather.ogc.kml.controls.KMLLabel;
+	import com.iblsoft.flexiweather.ogc.kml.events.KMLFeatureEvent;
+	import com.iblsoft.flexiweather.ogc.kml.features.KMLFeature;
+	
 	import flash.display.DisplayObject;
 	import flash.geom.Point;
 
@@ -28,6 +32,22 @@ package com.iblsoft.flexiweather.utils.anticollision
 		public var manageVisibilityWithAnchors: Boolean
 		private var _visible: Boolean;
 
+		public function get referenceLocation(): Point
+		{
+			return m_referenceLocation;
+		}
+		
+		public function set referenceLocation(value: Point): void
+		{
+			//			if (value.x == 0  && value.y == 0)
+			//			{
+			//				trace("referenceLocation is set to 0");
+			//			}
+			m_referenceLocation.x = value.x;
+			m_referenceLocation.y = value.y;
+			//			trace("LayoutObject m_referenceLocation " + value);
+		}
+		
 		public function get visible(): Boolean
 		{
 			return _visible;
@@ -35,7 +55,10 @@ package com.iblsoft.flexiweather.utils.anticollision
 
 		public function set visible(value: Boolean): void
 		{
+			trace(this);
 			_visible = value;
+			//set object visibility to save value
+			object.visible = value;
 		}
 
 		public function toString(): String
@@ -52,22 +75,29 @@ package com.iblsoft.flexiweather.utils.anticollision
 			this.object = object;
 			m_referenceLocation = new Point(object.x, object.y)
 			manageVisibilityWithAnchors = false;
+			
+			if (object is KMLLabel)
+			{
+				var kmlFeature: KMLFeature = (object as KMLLabel).kmlFeature;
+				kmlFeature.addEventListener(KMLFeatureEvent.KML_FEATURE_VISIBILITY_CHANGE, onKMLFeatureVisibilityChange);
+			}
+		}
+			
+		private function onKMLFeatureVisibilityChange(event: KMLFeatureEvent): void
+		{
+			var kmlFeature: KMLFeature = event.target as KMLFeature;
+			visible = kmlFeature.visible;
 		}
 
-		public function get referenceLocation(): Point
+		public function destroy(): void
 		{
-			return m_referenceLocation;
+			if (object is KMLLabel)
+			{
+				var kmlFeature: KMLFeature = (object as KMLLabel).kmlFeature;
+				kmlFeature.removeEventListener(KMLFeatureEvent.KML_FEATURE_VISIBILITY_CHANGE, onKMLFeatureVisibilityChange);
+			}
+			
 		}
-
-		public function set referenceLocation(value: Point): void
-		{
-//			if (value.x == 0  && value.y == 0)
-//			{
-//				trace("referenceLocation is set to 0");
-//			}
-			m_referenceLocation.x = value.x;
-			m_referenceLocation.y = value.y;
-//			trace("LayoutObject m_referenceLocation " + value);
-		}
+		
 	}
 }
