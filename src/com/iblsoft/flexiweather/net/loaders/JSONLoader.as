@@ -52,8 +52,22 @@ package com.iblsoft.flexiweather.net.loaders
 
 		static public function isValidJSON(data: Object): Boolean
 		{
+			if (data is ByteArray)
+			{
+				var clonedBA: ByteArray = ObjectUtil.clone(data) as ByteArray;
+				data = clonedBA.readUTFBytes(clonedBA.length);
+			}
 			var jsonObject: Object = getJSON(data);
-			return (jsonObject != null);
+			//return (jsonObject != null); // Note that this does not handle a valid JSON string "null" properly.
+			if (jsonObject != null)
+			{
+				return true;
+			}
+			if (data == "null")
+			{
+				return true;
+			}
+			return false;
 		}
 	}
 }
