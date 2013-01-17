@@ -14,5 +14,10 @@ package com.iblsoft.flexiweather.utils
 			
 			this.message = message;
 		}
+		
+		override public function clone(): Event
+		{
+			return new LoggingUtilsEvent(type, message, bubbles, cancelable);
+		}
 	}
 }

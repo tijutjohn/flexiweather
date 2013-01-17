@@ -285,8 +285,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		override protected function updateData(b_forceUpdate: Boolean): void
 		{
-			LoggingUtils.dispatchLogEvent(this, "WMSWithQTT updateData b_forceUpdate: " + b_forceUpdate + " _layerInitialized: " + _layerInitialized + " capabilitiesReady: " + capabilitiesReady + " visible: " + visible);
-			
 			if (!_layerInitialized)
 				return;
 			//we need to postpone updateData if capabilities was not received, otherwise we do not know, if layes is tileable or not

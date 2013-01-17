@@ -17,9 +17,9 @@ package com.iblsoft.flexiweather.ogc.managers
 
 	public class LayerConfigurationManager extends BaseConfigurationManager implements Serializable
 	{
-		public static const LAYERS_CHANGED: String = 'layers changed';
-		internal static var sm_instance: LayerConfigurationManager;
-		internal var ma_layers: ArrayCollection = new ArrayCollection();
+		public static const LAYERS_CONFIGURATIONS_CHANGED: String = 'layersConfigurationChanged';
+		public static var sm_instance: LayerConfigurationManager;
+		private var ma_layersConfigurations: ArrayCollection = new ArrayCollection();
 
 		public function LayerConfigurationManager()
 		{
@@ -40,17 +40,17 @@ package com.iblsoft.flexiweather.ogc.managers
 
 		public function serialize(storage: Storage): void
 		{
-			storage.serializePersistentArrayCollection("layer", ma_layers, LayerConfiguration);
+			storage.serializePersistentArrayCollection("layer", ma_layersConfigurations, LayerConfiguration);
 		}
 
 		public function getLayerConfigurationByLabel(lbl: String): ILayerConfiguration
 		{
-			if (ma_layers && ma_layers.length > 0)
+			if (ma_layersConfigurations && ma_layersConfigurations.length > 0)
 			{
-				for each (var layer: ILayerConfiguration in ma_layers)
+				for each (var layerConfiguration: ILayerConfiguration in ma_layersConfigurations)
 				{
-					if (layer.label == lbl)
-						return layer;
+					if (layerConfiguration.label == lbl)
+						return layerConfiguration;
 				}
 			}
 			return null;
@@ -63,23 +63,23 @@ package com.iblsoft.flexiweather.ogc.managers
 
 		public function addLayer(l: ILayerConfiguration): void
 		{
-			ma_layers.addItem(l);
+			ma_layersConfigurations.addItem(l);
 			notify();
 		}
 
 		public function removeLayer(l: ILayerConfiguration): void
 		{
-			var i: int = ma_layers.getItemIndex(l);
+			var i: int = ma_layersConfigurations.getItemIndex(l);
 			if (i >= 0)
 			{
-				ma_layers.removeItemAt(i);
+				ma_layersConfigurations.removeItemAt(i);
 				notify();
 			}
 		}
 
 		private function notify(): void
 		{
-			var event: Event = new Event(LAYERS_CHANGED);
+			var event: Event = new Event(LAYERS_CONFIGURATIONS_CHANGED);
 			dispatchEvent(event);
 		}
 
@@ -100,7 +100,7 @@ package com.iblsoft.flexiweather.ogc.managers
 
 		public function getMenuLayersXMLList(currentCRS: String = null, oldXMLList: XML = null): XMLList
 		{
-			if (ma_layers && ma_layers.length > 0)
+			if (ma_layersConfigurations && ma_layersConfigurations.length > 0)
 			{
 				groups = [];
 				submenuPos = 0;
@@ -130,9 +130,9 @@ package com.iblsoft.flexiweather.ogc.managers
 				var labelField: SortField = new SortField('label');
 				sort.fields = [labelField];
 				sort.compareFunction = sortArray;
-				ma_layers.sort = sort;
-				ma_layers.refresh();
-				for each (var layerConfig: LayerConfiguration in ma_layers)
+				ma_layersConfigurations.sort = sort;
+				ma_layersConfigurations.refresh();
+				for each (var layerConfig: LayerConfiguration in ma_layersConfigurations)
 				{
 					var lbl: String = layerConfig.label;
 					var folderName: String = '';
@@ -176,9 +176,9 @@ package com.iblsoft.flexiweather.ogc.managers
 		}
 
 		// getters & setters
-		public function get layers(): ArrayCollection
+		public function get layersConfigurations(): ArrayCollection
 		{
-			return ma_layers;
+			return ma_layersConfigurations;
 		}
 	}
 }

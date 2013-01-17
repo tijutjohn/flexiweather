@@ -33,14 +33,12 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function onMapFromXMLReady(interactiveLayerMap: InteractiveLayerMap, layers: Array): void
 		{
-			LoggingUtils.dispatchLogEvent(this,this + "onMapFromXMLReady");
 			var layer: InteractiveLayer;
 			_mapLayersInitializing = 0;
 			
 			var cnt: int = 0;
 			for each (layer in layers)
 			{
-				LoggingUtils.dispatchLogEvent(this, "ILMIW layers["+cnt+"] " + layer);
 				if (layer)
 				{
 					layer.addEventListener(InteractiveLayerEvent.LAYER_INITIALIZED, onLayerInitialized);
@@ -56,12 +54,10 @@ package com.iblsoft.flexiweather.ogc
 					{
 						configuration = (layer as IConfigurableLayer).configuration;
 					}
-					LoggingUtils.dispatchLogEvent(this,"onMapFromXMLReady addLayer: " + layer.name + " | " + layer.id);
 					interactiveLayerMap.addLayer(layer);
 				}
 				else
 				{
-					LoggingUtils.dispatchLogEvent(this,"onMapFromXMLReady: Layer not exists")
 				}
 			}
 			//			listLayers.executeBindings();
@@ -70,14 +66,12 @@ package com.iblsoft.flexiweather.ogc
 			{
 				//we need to set b_force parameter to force to be able to get cached bitmaps
 				l.refresh(false);
-				LoggingUtils.dispatchLogEvent(this,"refresh['false'] layer: " + l.name);
 			}
 		}
 		
 		private function onLayerInitialized(event: InteractiveLayerEvent): void
 		{
 			_mapLayersInitializing--;
-			LoggingUtils.dispatchLogEvent(this,this + "onLayerInitialized _mapLayersInitializing: " + _mapLayersInitializing);
 			if (_mapLayersInitializing == 0)
 			{
 				dispatchEvent(new Event(MAP_LAYERS_INITIALIZED));

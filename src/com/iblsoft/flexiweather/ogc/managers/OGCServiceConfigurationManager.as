@@ -155,7 +155,6 @@ package com.iblsoft.flexiweather.ogc.managers
 //			for each(var osc: OGCServiceConfiguration in ma_services) 
 			for each (var oscName: String in currServices)
 			{
-//				LoggingUtils.dispatchLogEvent(this, "update ["+b_force+"] oscName: " + oscName, true);
 				var osc: OGCServiceConfiguration = getServiceByName(oscName);
 				if (osc)
 				{
@@ -171,10 +170,8 @@ package com.iblsoft.flexiweather.ogc.managers
 						var wmsServiceConfiguration: WMSServiceConfiguration = osc as WMSServiceConfiguration;
 						_runningServices.push(wmsServiceConfiguration);
 						m_servicesUpdating++;
-						LoggingUtils.dispatchLogEvent(this, "update addEventListener oscName: " + oscName, true);
 						wmsServiceConfiguration.addEventListener(WMSServiceConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
 					}
-					LoggingUtils.dispatchLogEvent(this, "update update oscName: " + oscName, true);
 					osc.update();
 					osc.mi_lastUpdateFlashStamp = i_currentFlashStamp;
 				}
@@ -183,6 +180,9 @@ package com.iblsoft.flexiweather.ogc.managers
 
 		private function onCapabilitiesUpdated(event: DataEvent): void
 		{
+			var wmsServiceConfiguration: WMSServiceConfiguration = event.target as WMSServiceConfiguration;
+//			wmsServiceConfiguration.capabilitiesUpdated = true;
+			
 			dispatchEvent(new Event(WMSServiceConfiguration.CAPABILITIES_UPDATED));
 			m_servicesUpdating--;
 			if (m_servicesUpdating == 0)

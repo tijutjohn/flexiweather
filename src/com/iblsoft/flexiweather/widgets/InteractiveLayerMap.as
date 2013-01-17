@@ -1005,14 +1005,13 @@ package com.iblsoft.flexiweather.widgets
 
 		private function debug(str: String, type: String = "Info", tag: String = "InteractiveLayerMap"): void
 		{
-			LoggingUtils.dispatchLogEvent(this, str);
-			
 			if (debugConsole)
 				debugConsole.print(str, type, tag);
-			trace(tag + "| " + type + "| " + str);
+//			trace(tag + "| " + type + "| " + str);
 		}
 	}
 }
+import com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration;
 import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
 import com.iblsoft.flexiweather.ogc.managers.LayerConfigurationManager;
 import com.iblsoft.flexiweather.utils.LoggingUtils;
@@ -1036,13 +1035,7 @@ class LayerSerializationWrapper implements Serializable
 			var s_layerName: String = storage.serializeString("layer-name", null, null)
 			var s_layerType: String = storage.serializeString("layer-type", null, s_layerName);
 			
-			LoggingUtils.dispatchLogEvent(map, "LayerSerializationWrapper s_layerName: " + s_layerName + " s_layerType: " + s_layerType);
 			var config: ILayerConfiguration = LayerConfigurationManager.getInstance().getLayerConfigurationByLabel(s_layerType);
-			if (config)
-				LoggingUtils.dispatchLogEvent(map, "LayerSerializationWrapper config: " + config.label);
-			else
-				LoggingUtils.dispatchLogEvent(map, "LayerSerializationWrapper config: NULL " );
-				
 			m_layer = config.createInteractiveLayer(m_iw);
 			m_layer.layerName = s_layerName;
 			if (m_layer is Serializable)

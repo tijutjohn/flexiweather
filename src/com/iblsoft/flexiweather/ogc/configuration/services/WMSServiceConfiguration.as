@@ -12,11 +12,14 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 	import com.iblsoft.flexiweather.ogc.WMSLayerGroup;
 	import com.iblsoft.flexiweather.ogc.configuration.ProjectionConfiguration;
 	import com.iblsoft.flexiweather.ogc.managers.ProjectionConfigurationManager;
+	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.widgets.BackgroundJob;
 	import com.iblsoft.flexiweather.widgets.BackgroundJobManager;
+	
 	import flash.events.DataEvent;
 	import flash.net.URLRequest;
+	
 	import mx.collections.ArrayCollection;
 
 	public class WMSServiceConfiguration extends OGCServiceConfiguration
@@ -45,6 +48,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		public function WMSServiceConfiguration(s_url: String = null, version: Version = null)
 		{
 			super(s_url, "wms", version);
+			
 			m_capabilitiesLoader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onCapabilitiesLoaded);
 			m_capabilitiesLoader.addEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onCapabilitiesLoadFailed);
 		}
@@ -139,6 +143,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 				trace("ERROR m_capabilitiesLoadJob IS null")
 				return;
 			}
+			
 			mb_capabilitiesUpdated = true;
 			m_capabilitiesLoadJob.finish();
 			m_capabilitiesLoadJob = null;
@@ -199,6 +204,11 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		public function get rootLayerGroup(): WMSLayerGroup
 		{
 			return m_layers;
+		}
+		
+		override public function toString(): String
+		{
+			return "WMSServiceConfiguration " + id + " capabilitiesUpdated: " + capabilitiesUpdated;
 		}
 	}
 }

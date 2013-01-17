@@ -199,7 +199,6 @@ package com.iblsoft.flexiweather.widgets
 		public function set invalidateDataFlag(value: Boolean): void
 		{
 			_invalidateDataFlag = value;
-			LoggingUtils.dispatchLogEvent(this, "**** invalidateDataFlag _invalidateDataFlag: " + _invalidateDataFlag + " ["+this+"]", true);
 		}
 		private var _invalidateDataForceUpdateFlag: Boolean;
 
@@ -213,22 +212,18 @@ package com.iblsoft.flexiweather.widgets
 		{
 			invalidateDataFlag = true;
 			_invalidateDataForceUpdateFlag = _invalidateDataForceUpdateFlag || b_forceUpdate;
-			LoggingUtils.dispatchLogEvent(this, "**** invalidateData _invalidateDataForceUpdateFlag: " + _invalidateDataForceUpdateFlag + " (b_forceUpdate = " + b_forceUpdate + ") ["+this+"]", true);
 			invalidateProperties();
 		}
 
 		protected function updateData(b_forceUpdate: Boolean): void
 		{
-			LoggingUtils.dispatchLogEvent(this, "*** updateData b_forceUpdate: " + b_forceUpdate + " ["+this+"]", true);
 		}
 
 		override protected function commitProperties(): void
 		{
 			super.commitProperties();
-			LoggingUtils.dispatchLogEvent(this, "*** commitProperties _invalidateDataForceUpdateFlag: " + _invalidateDataForceUpdateFlag + " _invalidateDataFlag: " + _invalidateDataFlag + " ["+this+"]", true);
 			if (_invalidateDataFlag)
 			{
-				LoggingUtils.dispatchLogEvent(this, "\t*** commitProperties calling : updateData(" + _invalidateDataForceUpdateFlag + ") ["+this+"]", true);
 				updateData(_invalidateDataForceUpdateFlag);
 				invalidateDataFlag = false;
 			}

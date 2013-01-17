@@ -3,6 +3,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 	import com.iblsoft.flexiweather.ogc.Version;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
+	
 	import flash.events.EventDispatcher;
 	import flash.net.URLRequest;
 	import flash.net.URLVariables;
@@ -19,6 +20,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		// runtime variables
 		private var ms_baseURL: String;
 		private var m_data: URLVariables;
+		
 		public var mi_lastUpdateFlashStamp: int = -1000000;
 
 		public function OGCServiceConfiguration(s_url: String, s_service: String, version: Version)

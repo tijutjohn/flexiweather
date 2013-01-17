@@ -425,8 +425,6 @@ package com.iblsoft.flexiweather.net.loaders
 			checkRequestData(urlRequest);
 			checkRequestBaseURL(urlRequest);
 			
-			LoggingUtils.dispatchLogEvent(this, "AbstractLoader load: " + urlRequest.url);
-			
 			// if there is no associatedDat, add empty one
 			if (!associatedData)
 			{
