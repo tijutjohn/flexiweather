@@ -30,7 +30,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerPan;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerZoom;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
-	import com.iblsoft.flexiweather.widgets.MapTimelineConfiguration;
+	import com.iblsoft.flexiweather.ogc.configuration.MapTimelineConfiguration;
 	
 	import flash.display.DisplayObject;
 	import flash.display.Graphics;

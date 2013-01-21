@@ -33,6 +33,7 @@ package com.iblsoft.flexiweather.widgets
 	import mx.controls.Alert;
 	import mx.events.CollectionEvent;
 	import mx.events.DynamicEvent;
+	import com.iblsoft.flexiweather.ogc.configuration.MapTimelineConfiguration;
 
 	public class InteractiveLayerMap extends InteractiveLayerComposer implements Serializable
 	{

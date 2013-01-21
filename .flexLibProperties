@@ -71,6 +71,7 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.WMSLayerBase"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.WMSLayerGroup"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.WMSLayerGroupTreeDataDescriptor"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.animation.AnimationDirection"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.cache.CacheItem"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.cache.CacheItemMetadata"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.cache.CacheKey"/>
@@ -85,6 +86,7 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.configuration.AnimationConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.configuration.AreaConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.configuration.MapConfiguration"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.configuration.MapTimelineConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.configuration.ProjectionConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.configuration.layers.LayerConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.configuration.layers.OGCLayerConfiguration"/>
@@ -385,7 +387,6 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.JobPreloader"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.JobProgressIndicator"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.LabelJobProgressIndicator"/>
-    <classEntry path="com.iblsoft.flexiweather.widgets.MapTimelineConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.ModuleLoaderWithData"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.ProgressBarJobProgressIndicator"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.SimpleLayerBehaviourEditDialog"/>
