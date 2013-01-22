@@ -21,6 +21,8 @@ package com.iblsoft.flexiweather.plugins
 		public static const LAYER_BEHAVIOUR: String = "layerBehaviour";
 		public static const MENU_ITEM: String = "menuItem";
 		public static const SUBMENU_ITEM: String = "submenuItem";
+		public static const LOCAL_COMMUNICATION: String = "localCommunication";
+		
 		private var ms_abilityType: String;
 		private var m_classOrInstance: Object;
 		private var ms_id: String;
@@ -128,6 +130,14 @@ package com.iblsoft.flexiweather.plugins
 			return ability;
 		}
 
+		public static function localCommunication(classOrInstance: Object,
+				s_id: String, s_plugin_id: String = null): PluginAbility
+		{
+			var ability: PluginAbility = new PluginAbility(PluginAbility.LOCAL_COMMUNICATION, s_id, s_plugin_id, classOrInstance)
+			return ability;
+			
+		}
+		
 		public static function storage(classOrInstance: Object,
 				s_id: String, s_plugin_id: String = null): PluginAbility
 		{

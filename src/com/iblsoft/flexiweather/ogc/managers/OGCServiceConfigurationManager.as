@@ -139,6 +139,11 @@ package com.iblsoft.flexiweather.ogc.managers
 			_runningServices = [];
 		}
 
+		public function updateAllServices(): void
+		{
+			update(getAllServicesNames());
+		}
+		
 		/**
 		 * Update just services, which is in services argument, not all services stored in manager
 		 * @param services
