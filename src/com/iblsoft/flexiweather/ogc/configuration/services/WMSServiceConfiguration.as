@@ -41,8 +41,8 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		{
 			return _imageFormats;
 		}
-		public static const CAPABILITIES_UPDATED: String = "capabilitiesUpdated";
-		public static const ALL_CAPABILITIES_UPDATED: String = "allCapabilitiesUpdated";
+		public static const CAPABILITIES_UPDATED: String = "serviceCapabilitiesUpdated";
+		public static const ALL_CAPABILITIES_UPDATED: String = "allServicesCapabilitiesUpdated";
 
 		[Event(name = CAPABILITIES_UPDATED, type = "flash.events.DataEvent")]
 		public function WMSServiceConfiguration(s_url: String = null, version: Version = null)

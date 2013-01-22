@@ -36,6 +36,32 @@ package com.iblsoft.flexiweather.utils
 			}
 			return url;
 		}
+		
+		static public function getURLGetParameterValue(url: String, parameterName: String): String
+		{
+			url = encodeURI(url);
+			if (url.indexOf('&') > 0)
+			{
+				var arr: Array = url.split('?');
+				if (arr.length == 2)
+				{
+					var arr2: Array = (arr[1] as String).split('&');
+					for each (var parameter: String in arr2)
+					{
+						if (parameter.indexOf(parameterName) == 0)
+						{
+							var parameterArray: Array = parameter.split('=');
+							if (parameterArray.length == 2)
+							{
+								var parameterValue: String = parameterArray[1] as String;
+								return parameterValue;
+							}
+						}
+					}
+				}
+			}
+			return null;
+		}
 
 		/**
 		 * Function will join path parts. Check if there is "/" between and add it if it's missing

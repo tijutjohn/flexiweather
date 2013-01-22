@@ -183,7 +183,7 @@ package com.iblsoft.flexiweather.ogc.managers
 			var wmsServiceConfiguration: WMSServiceConfiguration = event.target as WMSServiceConfiguration;
 //			wmsServiceConfiguration.capabilitiesUpdated = true;
 			
-			dispatchEvent(new Event(WMSServiceConfiguration.CAPABILITIES_UPDATED));
+			dispatchEvent(new Event(WMSServiceConfiguration.CAPABILITIES_UPDATED, true));
 			m_servicesUpdating--;
 			if (m_servicesUpdating == 0)
 			{
@@ -193,7 +193,7 @@ package com.iblsoft.flexiweather.ogc.managers
 		
 		private function allCapabilitiesAreUpdated(): void
 		{
-			dispatchEvent(new Event(WMSServiceConfiguration.ALL_CAPABILITIES_UPDATED));
+			dispatchEvent(new Event(WMSServiceConfiguration.ALL_CAPABILITIES_UPDATED, true));
 		}
 
 		protected function onTimer(event: TimerEvent): void
