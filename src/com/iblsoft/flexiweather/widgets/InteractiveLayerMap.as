@@ -10,6 +10,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.SynchronisationRole;
 	import com.iblsoft.flexiweather.ogc.SynchronisedVariableChangeEvent;
 	import com.iblsoft.flexiweather.ogc.cache.ICache;
+	import com.iblsoft.flexiweather.ogc.configuration.MapTimelineConfiguration;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.ogc.managers.GlobalVariablesManager;
 	import com.iblsoft.flexiweather.ogc.tiling.ITiledLayer;
@@ -33,7 +34,6 @@ package com.iblsoft.flexiweather.widgets
 	import mx.controls.Alert;
 	import mx.events.CollectionEvent;
 	import mx.events.DynamicEvent;
-	import com.iblsoft.flexiweather.ogc.configuration.MapTimelineConfiguration;
 
 	public class InteractiveLayerMap extends InteractiveLayerComposer implements Serializable
 	{
@@ -660,6 +660,9 @@ package com.iblsoft.flexiweather.widgets
 
 		public function areFramesInsideTimePeriod(startDate: Date, endDate: Date): Boolean
 		{
+			if (!startDate || !endDate)
+				return false;
+				
 			var l_syncLayers: Array = [];
 			var l_timeAxis: Array = enumTimeAxis(l_syncLayers);
 			if (l_timeAxis == null) // no time axis
@@ -668,15 +671,18 @@ package com.iblsoft.flexiweather.widgets
 			var so: ISynchronisedObject;
 			for each (so in l_syncLayers)
 			{
-				var frame: Date = so.getSynchronisedVariableValue(GlobalVariable.FRAME) as Date;
-				if (frame == null)
-					continue;
-				for (i = 0; i < l_timeAxis.length; ++i)
+				if (so)
 				{
-					var currDate: Date = l_timeAxis[i] as Date;
-					if (startDate.time <= currDate.time && currDate.time <= endDate.time)
+					var frame: Date = so.getSynchronisedVariableValue(GlobalVariable.FRAME) as Date;
+					if (frame == null)
+						continue;
+					for (i = 0; i < l_timeAxis.length; ++i)
 					{
-						return true;
+						var currDate: Date = l_timeAxis[i] as Date;
+						if (startDate.time <= currDate.time && currDate.time <= endDate.time)
+						{
+							return true;
+						}
 					}
 				}
 			}
@@ -693,7 +699,9 @@ package com.iblsoft.flexiweather.widgets
 			var l_syncLayers: Array = [];
 			var l_timeAxis: Array = enumTimeAxis(l_syncLayers);
 			if (l_timeAxis == null) // no time axis
+			{
 				return null;
+			}
 			return l_timeAxis[0] as Date;
 		}
 
@@ -702,7 +710,9 @@ package com.iblsoft.flexiweather.widgets
 			var l_syncLayers: Array = [];
 			var l_timeAxis: Array = enumTimeAxis(l_syncLayers);
 			if (l_timeAxis == null) // no time axis
+			{
 				return null;
+			}
 			return l_timeAxis[l_timeAxis.length - 1] as Date;
 		}
 
@@ -711,7 +721,9 @@ package com.iblsoft.flexiweather.widgets
 			var l_syncLayers: Array = [];
 			var l_timeAxis: Array = enumTimeAxis(l_syncLayers);
 			if (l_timeAxis == null) // no time axis
+			{
 				return null;
+			}
 			var i: int;
 			var so: ISynchronisedObject;
 			var now: Date = DateUtils.convertToUTCDate(new Date());
@@ -819,6 +831,33 @@ package com.iblsoft.flexiweather.widgets
 				return l_timeAxis[index] as Date;
 			}
 			return null;
+		}
+		public function getFramePosition(frame: Date): int
+		{
+			var l_syncLayers: Array = [];
+			var l_timeAxis: Array = enumTimeAxis(l_syncLayers);
+			if (l_timeAxis == null) // no time axis
+				return -1;
+			
+			var total: int = l_timeAxis.length;
+			for (var i: int = 0; i < total; i++)
+			{
+				var currDate: Date = l_timeAxis[i] as Date;
+				if (currDate.time == frame.time)
+					return i;
+			}
+			
+			return -1;
+		}
+		
+		public function getFrames(): Array
+		{
+			var l_syncLayers: Array = [];
+			var l_timeAxis: Array = enumTimeAxis(l_syncLayers);
+			if (l_timeAxis == null) // no time axis
+				return null;
+			
+			return l_timeAxis;
 		}
 
 		public function setLevel(newLevel: String, b_nearrest: Boolean = true): Boolean
@@ -1004,6 +1043,11 @@ package com.iblsoft.flexiweather.widgets
 			return retStr;
 		}
 
+		private function log(str: String): void
+		{
+			LoggingUtils.dispatchLogEvent(this, " ILM: " + str);
+		}
+		
 		private function debug(str: String, type: String = "Info", tag: String = "InteractiveLayerMap"): void
 		{
 			if (debugConsole)
