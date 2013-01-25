@@ -20,6 +20,7 @@
     <classEntry path="com.iblsoft.flexiweather.events.WFSCursorManagerTypes"/>
     <classEntry path="com.iblsoft.flexiweather.events.WFSEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.WMSViewPropertiesEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.layouts.FlowLayout"/>
     <classEntry path="com.iblsoft.flexiweather.net.UniURLLoaderFormat"/>
     <classEntry path="com.iblsoft.flexiweather.net.data.UniURLLoaderData"/>
     <classEntry path="com.iblsoft.flexiweather.net.events.UniURLLoaderAuthorizationEvent"/>
@@ -335,6 +336,7 @@
     <classEntry path="com.iblsoft.flexiweather.utils.ICurveRenderer"/>
     <classEntry path="com.iblsoft.flexiweather.utils.IObjectPoolObject"/>
     <classEntry path="com.iblsoft.flexiweather.utils.ISO8601Parser"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.JavascriptUtils"/>
     <classEntry path="com.iblsoft.flexiweather.utils.LineSegmentSplitter"/>
     <classEntry path="com.iblsoft.flexiweather.utils.LoggingUtils"/>
     <classEntry path="com.iblsoft.flexiweather.utils.LoggingUtilsEvent"/>
