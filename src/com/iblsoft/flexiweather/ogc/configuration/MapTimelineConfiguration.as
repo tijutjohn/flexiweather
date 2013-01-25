@@ -111,12 +111,12 @@ package com.iblsoft.flexiweather.ogc.configuration
 		}
 
 		[Bindable (event=DURATION_CHANGED)]
-		public function get durationStep():int
+		public function get duration():int
 		{
 			return _duration;
 		}
 
-		public function set durationStep(value:int):void
+		public function set duration(value:int):void
 		{
 			_duration = value;
 			
@@ -124,6 +124,25 @@ package com.iblsoft.flexiweather.ogc.configuration
 			
 			var de: DynamicEvent = new DynamicEvent(DURATION_CHANGED);
 			de['value'] = _duration;
+			de['step'] = _durationStep;
+			dispatchEvent(de);
+		}
+		
+		[Bindable (event=DURATION_CHANGED)]
+		public function get durationStep():int
+		{
+			return _durationStep;
+		}
+
+		public function set durationStep(value:int):void
+		{
+			_durationStep = value;
+			
+			debug("DurationStep : " + value);
+			
+			var de: DynamicEvent = new DynamicEvent(DURATION_CHANGED);
+			de['value'] = _duration;
+			de['value'] = _durationStep;
 			dispatchEvent(de);
 		}
 
@@ -152,7 +171,7 @@ package com.iblsoft.flexiweather.ogc.configuration
 			currentTimeFormat = storage.serializeString("current-time-format", currentTimeFormat, '%H:%M %d.%m.%Y');
 			dateFormat = storage.serializeString("date-format", dateFormat, '%d-%m');
 			dateFormat = storage.serializeString("time-format", dateFormat, '%HZ');
-			durationStep = storage.serializeInt("duration", durationStep, 1000);
+			duration = storage.serializeInt("duration", duration, 1000);
 			durationStep = storage.serializeInt("duration-step", durationStep, 100);
 			minDuration = storage.serializeInt("min-duration", minDuration, 100);
 			maxDuration = storage.serializeInt("max-duration", maxDuration, 5000);
