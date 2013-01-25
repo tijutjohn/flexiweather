@@ -91,5 +91,31 @@ package com.iblsoft.flexiweather.layouts
 			//set final content size (needed for scrolling)
 			layoutTarget.setContentSize(maxWidth + _padding, maxHeight + _padding);
 		}
+		 
+		override public function measure():void
+		{
+			super.measure();
+			if (!target) return;
+			
+			var childrenCount:int = target.numElements;
+			
+			var currentElement:ILayoutElement;
+			var maxWidth:Number = 0;
+			var maxHeight:Number = 0;
+			var elementMaxX:Number;
+			var elementMaxY:Number;
+			
+			for(var i:int = 0; i< childrenCount; i++)
+			{    
+				currentElement = target.getElementAt(i);
+				elementMaxX = currentElement.getLayoutBoundsX() + currentElement.getPreferredBoundsWidth();
+				elementMaxY = currentElement.getLayoutBoundsY() + currentElement.getPreferredBoundsHeight();
+				if(maxWidth < elementMaxX) maxWidth = elementMaxX;
+				if(maxHeight < elementMaxY) maxHeight = elementMaxY;
+			}
+			target.measuredWidth = maxWidth;
+			target.measuredHeight = maxHeight;
+		}
 	}
+	
 }
