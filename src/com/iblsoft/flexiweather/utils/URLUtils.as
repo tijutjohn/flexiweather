@@ -40,23 +40,39 @@ package com.iblsoft.flexiweather.utils
 		static public function getURLGetParameterValue(url: String, parameterName: String): String
 		{
 			url = encodeURI(url);
-			if (url.indexOf('&') > 0)
+			if (url.indexOf('?') > 0)
 			{
 				var arr: Array = url.split('?');
 				if (arr.length == 2)
 				{
-					var arr2: Array = (arr[1] as String).split('&');
-					for each (var parameter: String in arr2)
+					var paramsString = arr[1] as String;
+					
+					if (url.indexOf('&') > 0)
 					{
-						if (parameter.indexOf(parameterName) == 0)
+						var arr2: Array = (arr[1] as String).split('&');
+						for each (var parameter: String in arr2)
 						{
-							var parameterArray: Array = parameter.split('=');
+							if (parameter.indexOf(parameterName) == 0)
+							{
+								var parameterArray: Array = parameter.split('=');
+								if (parameterArray.length == 2)
+								{
+									var parameterValue: String = parameterArray[1] as String;
+									return parameterValue;
+								}
+							}
+						}
+					} else {
+						if (paramsString.indexOf(parameterName) == 0)
+						{
+							var parameterArray: Array = paramsString.split('=');
 							if (parameterArray.length == 2)
 							{
 								var parameterValue: String = parameterArray[1] as String;
 								return parameterValue;
 							}
 						}
+						
 					}
 				}
 			}
