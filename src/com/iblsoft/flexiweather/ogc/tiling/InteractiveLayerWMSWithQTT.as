@@ -101,15 +101,23 @@ package com.iblsoft.flexiweather.ogc.tiling
 		
 		private function initializeLayerProperties(): void
 		{
+			m_tiledLayer = createTiledLayer();
+			
+			if (m_tiledLayer)
+			{
+				m_tiledLayer.addEventListener(InteractiveLayerTiled.UPDATE_TILING_PATTERN, onUpdateTilingPattern);
+				m_tiledLayer.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onAllTilesLoaded);
+				addChild(m_tiledLayer);
+				changeTiledLayerVisibility(false);
+				updateTiledLayerCRSs();
+			}
+		}
+		
+		protected function createTiledLayer(): InteractiveLayerQTTMS
+		{
 			var tiledLayerConfig: QTTMSLayerConfiguration = new QTTMSLayerConfiguration();
-			//			m_tiledLayer = new InteractiveLayerQTTMS(container, tiledLayerConfig,
-			//					'', null, null, cfg.minimumZoomLevel, cfg.maximumZoomLevel, cfg.tileSize);
-			m_tiledLayer = new InteractiveLayerQTTMS(container, tiledLayerConfig);
-			m_tiledLayer.addEventListener(InteractiveLayerTiled.UPDATE_TILING_PATTERN, onUpdateTilingPattern);
-			m_tiledLayer.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onAllTilesLoaded);
-			addChild(m_tiledLayer);
-			changeTiledLayerVisibility(false);
-			updateTiledLayerCRSs();
+			var tiledLayer: InteractiveLayerQTTMS = new InteractiveLayerQTTMS(container, tiledLayerConfig);
+			return tiledLayer;
 		}
 
 		override protected function createChildren(): void
