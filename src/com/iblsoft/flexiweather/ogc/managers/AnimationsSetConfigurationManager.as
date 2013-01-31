@@ -1,6 +1,6 @@
 package com.iblsoft.flexiweather.ogc.managers
 {
-	import com.iblsoft.flexiweather.ogc.configuration.AnimationConfiguration;
+	import com.iblsoft.flexiweather.ogc.configuration.AnimationSetConfiguration;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	
@@ -8,41 +8,41 @@ package com.iblsoft.flexiweather.ogc.managers
 	
 	import mx.collections.ArrayCollection;
 
-	public class AnimationConfigurationManager extends BaseConfigurationManager implements Serializable
+	public class AnimationsSetConfigurationManager extends BaseConfigurationManager implements Serializable
 	{
-		public static const ANIMATIONS_CHANGED: String = 'animationsChanged';
-		internal static var sm_instance: AnimationConfigurationManager;
-		internal var ma_animations: ArrayCollection = new ArrayCollection();
+		public static const ANIMATIONS_SETS_CHANGED: String = 'animationsChanged';
+		internal static var sm_instance: AnimationsSetConfigurationManager;
+		private var ma_animationsSets: ArrayCollection = new ArrayCollection();
 
 		// getters & setters
-		public function get animations(): ArrayCollection
+		public function get animationsSets(): ArrayCollection
 		{
-			return ma_animations;
+			return ma_animationsSets;
 		}
 
-		public function AnimationConfigurationManager()
+		public function AnimationsSetConfigurationManager()
 		{
 			if (sm_instance != null)
 				throw new Error("AnimationConfigurationManager can only be accessed through AnimationConfigurationManager.getInstance()");
 		}
 
-		public static function getInstance(): AnimationConfigurationManager
+		public static function getInstance(): AnimationsSetConfigurationManager
 		{
 			if (sm_instance == null)
-				sm_instance = new AnimationConfigurationManager();
+				sm_instance = new AnimationsSetConfigurationManager();
 			return sm_instance;
 		}
 
 		public function serialize(storage: Storage): void
 		{
-			storage.serializePersistentArrayCollection("animation", ma_animations, AnimationConfiguration);
+			storage.serializePersistentArrayCollection("animationSet", ma_animationsSets, AnimationSetConfiguration);
 		}
 
-		public function getLayerByLabel(lbl: String): AnimationConfiguration
+		public function getLayerByLabel(lbl: String): AnimationSetConfiguration
 		{
-			if (ma_animations && ma_animations.length > 0)
+			if (ma_animationsSets && ma_animationsSets.length > 0)
 			{
-				for each (var map: AnimationConfiguration in ma_animations)
+				for each (var map: AnimationSetConfiguration in ma_animationsSets)
 				{
 					if (map.label == lbl)
 						return map;
@@ -51,21 +51,21 @@ package com.iblsoft.flexiweather.ogc.managers
 			return null;
 		}
 
-		public function addAnimation(animation: AnimationConfiguration): void
+		public function addAnimationsSet(animationsSet: AnimationSetConfiguration): void
 		{
-			ma_animations.addItem(animation);
+			ma_animationsSets.addItem(animationsSet);
 			notify();
 		}
 
 		private function notify(): void
 		{
-			var event: Event = new Event(ANIMATIONS_CHANGED);
+			var event: Event = new Event(ANIMATIONS_SETS_CHANGED);
 			dispatchEvent(event);
 		}
 
-		public function getMapsXMLList(oldXMLList: XML = null): XMLList
+		public function getAnimationsSetsXMLList(oldXMLList: XML = null): XMLList
 		{
-			if (ma_animations && ma_animations.length > 0)
+			if (ma_animationsSets && ma_animationsSets.length > 0)
 			{
 				groups = [];
 				submenuPos = 0;
@@ -83,7 +83,7 @@ package com.iblsoft.flexiweather.ogc.managers
 					animationsXMLList = <menuitem label='Animations' data='animations' type='folder'/>;
 				}
 				var groupParentXML: XML;
-				for each (var animation: AnimationConfiguration in ma_animations)
+				for each (var animation: AnimationSetConfiguration in ma_animationsSets)
 				{
 					var lbl: String = animation.label;
 					lbl = fixLabel(lbl);
@@ -95,7 +95,7 @@ package com.iblsoft.flexiweather.ogc.managers
 						groupName = lbl.substring(0, lastPos);
 						lbl = lbl.substring(lastPos + 1, lbl.length);
 					}
-					var animationData: String = "animations." + animation.animationConfiguration.toXMLString(); //+area.projection.crs+","+area.projection.bbox.xMin+","+area.projection.bbox.yMin+","+area.projection.bbox.xMax+","+area.projection.bbox.yMax;
+					var animationData: String = "animations." + animation.animationsSetConfiguration.toXMLString(); //+area.projection.crs+","+area.projection.bbox.xMin+","+area.projection.bbox.yMin+","+area.projection.bbox.xMax+","+area.projection.bbox.yMax;
 					var mapXML: XML = <menuitem label={lbl} data={animationData} type='animation'/>
 					if (groupName && groupName.length > 0)
 					{
@@ -105,10 +105,10 @@ package com.iblsoft.flexiweather.ogc.managers
 					else
 						animationsXMLList.appendChild(mapXML);
 				}
-//				var areaCustom: XML = <menuitem label='Custom...' data='custom.area' type='action'/>;
-//				mapsXMLList.appendChild(areaCustom);
-				return animationsXMLList.children();
+				latestMenuItemsList = animationsXMLList.children(); 
+				return latestMenuItemsList;
 			}
+			latestMenuItemsList = null;
 			return null;
 		}
 	}

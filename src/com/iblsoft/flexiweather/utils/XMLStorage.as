@@ -22,6 +22,30 @@ package com.iblsoft.flexiweather.utils
 			}
 		}
 
+		public static function getXMLNode(xml: XML, nodeName: String): XML
+		{
+			var children: XMLList = xml.children();
+			for each (var node: XML in children)
+			{
+				if (node.localName() == nodeName)
+				{
+					return node;
+				}
+			}
+			return null;
+		}
+		
+		public static function addHeaderToXML(xml: XML): XML
+		{
+			if (xml)
+			{
+				var updatedXML: XML = <X-IBLSTORAGE version="1.1"/>;
+				updatedXML.appendChild(xml);
+				
+				return updatedXML;
+			}
+			return null;
+		}
 		override public function hasKey(s_key: String, i_index: uint /* = NONINDEXED*/): Boolean
 		{
 			if (isCurrentRoot())

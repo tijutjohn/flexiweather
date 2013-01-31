@@ -1,16 +1,20 @@
 package com.iblsoft.flexiweather.ogc.managers
 {
+	import com.iblsoft.flexiweather.ogc.configuration.AreaConfiguration;
+	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
+	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.events.Event;
 	import flash.utils.Dictionary;
+	
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
+	
 	import spark.collections.SortField;
-	import com.iblsoft.flexiweather.ogc.configuration.AreaConfiguration;
 
 	public class AreaConfigurationManager extends BaseConfigurationManager implements Serializable
 	{
@@ -194,9 +198,11 @@ package com.iblsoft.flexiweather.ogc.managers
 						areasXMLList.appendChild(areaXML);
 				}
 				areasXMLList.appendChild(getCustomArea());
-				return areasXMLList.children();
+				latestMenuItemsList = areasXMLList.children() 
+				return latestMenuItemsList;
 			}
-			return getNoAreasXMLList();
+			latestMenuItemsList = getNoAreasXMLList()
+			return latestMenuItemsList;
 		}
 
 		public function getNoAreasXMLList(): XMLList

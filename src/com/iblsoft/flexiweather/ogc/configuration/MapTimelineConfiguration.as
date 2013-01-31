@@ -69,8 +69,6 @@ package com.iblsoft.flexiweather.ogc.configuration
 		{
 			_animationType = value;
 			
-			debug("Type : " + value);
-			
 			var de: DynamicEvent = new DynamicEvent(TYPE_CHANGED);
 			de['value'] = _animationType;
 			dispatchEvent(de);
@@ -85,8 +83,6 @@ package com.iblsoft.flexiweather.ogc.configuration
 		public function set animationExtent(value:String):void
 		{
 			_animationExtent = value;
-			
-			debug("Extent : " + value);
 			
 			var de: DynamicEvent = new DynamicEvent(EXTENT_CHANGED);
 			de['value'] = _animationExtent;
@@ -103,8 +99,6 @@ package com.iblsoft.flexiweather.ogc.configuration
 		{
 			_animationDirection = value;
 			
-			debug("Direction : " + value);
-			
 			var de: DynamicEvent = new DynamicEvent(DIRECTION_CHANGED);
 			de['value'] = _animationDirection;
 			dispatchEvent(de);
@@ -119,8 +113,6 @@ package com.iblsoft.flexiweather.ogc.configuration
 		public function set duration(value:int):void
 		{
 			_duration = value;
-			
-			debug("Duration : " + value);
 			
 			var de: DynamicEvent = new DynamicEvent(DURATION_CHANGED);
 			de['value'] = _duration;
@@ -137,8 +129,6 @@ package com.iblsoft.flexiweather.ogc.configuration
 		public function set durationStep(value:int):void
 		{
 			_durationStep = value;
-			
-			debug("DurationStep : " + value);
 			
 			var de: DynamicEvent = new DynamicEvent(DURATION_CHANGED);
 			de['value'] = _duration;

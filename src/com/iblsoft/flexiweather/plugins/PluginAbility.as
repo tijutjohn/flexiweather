@@ -20,6 +20,7 @@ package com.iblsoft.flexiweather.plugins
 		public static const LAYER_OPTIONS_PROVIDER: String = "layerOptionsProvider";
 		public static const LAYER_BEHAVIOUR: String = "layerBehaviour";
 		public static const MENU_ITEM: String = "menuItem";
+		public static const MENU_ITEM_CLICK_LISTENER: String = "menuItemClickListener";
 		public static const SUBMENU_ITEM: String = "submenuItem";
 		public static const LOCAL_COMMUNICATION: String = "localCommunication";
 		
@@ -108,6 +109,17 @@ package com.iblsoft.flexiweather.plugins
 					.withMetadata("name", s_name);
 		}
 
+		/**
+		 * Plugin ability, which adds main menu item to main BrowsingWeather menu
+		 *  
+		 * @param classOrInstance
+		 * @param s_menu_id
+		 * @param s_name
+		 * @param i_priority
+		 * @param s_plugin_id
+		 * @return 
+		 * 
+		 */		
 		public static function menuItem(classOrInstance: Object,
 				s_menu_id: String, s_name: String, i_priority: int, s_plugin_id: String = null): PluginAbility
 		{
@@ -117,6 +129,45 @@ package com.iblsoft.flexiweather.plugins
 			return ability;
 		}
 
+		/**
+		 * Plugin ability, which adds listener to any main BrowsingWeather menu item click
+		 *   
+		 * @param classOrInstance
+		 * @param s_mainMenu_id
+		 * @param s_menu_id
+		 * @param s_name
+		 * @param i_priority
+		 * @param s_type
+		 * @param f_callback
+		 * @param s_plugin_id
+		 * @param s_menuString
+		 * @return 
+		 * 
+		 */		
+		public static function menuClickListener(classOrInstance: Object,
+				s_mainMenu_id: String,  s_itemIDSubstring: String, f_callback: Function, s_plugin_id: String = null): PluginAbility
+		{
+			var ability: PluginAbility = new PluginAbility(PluginAbility.MENU_ITEM_CLICK_LISTENER, s_mainMenu_id, s_plugin_id, classOrInstance)
+			ability.withMetadata("itemIDSubstring", s_itemIDSubstring);
+			ability.withMetadata("callback", f_callback);
+			return ability;
+		}
+		
+		/**
+		 * Plugin ability, which adds submenu item to main BrowsingWeather menu
+		 *  
+		 * @param classOrInstance
+		 * @param s_mainMenu_id
+		 * @param s_menu_id
+		 * @param s_name
+		 * @param i_priority
+		 * @param s_type
+		 * @param f_callback
+		 * @param s_plugin_id
+		 * @param s_menuString
+		 * @return 
+		 * 
+		 */		
 		public static function submenuItem(classOrInstance: Object,
 				s_mainMenu_id: String, s_menu_id: String, s_name: String, i_priority: int, s_type: String = '', f_callback: Function = null, s_plugin_id: String = null, s_menuString: String = ''): PluginAbility
 		{

@@ -106,8 +106,11 @@ package com.iblsoft.flexiweather.ogc.managers
 				}
 //				var areaCustom: XML = <menuitem label='Custom...' data='custom.area' type='action'/>;
 //				mapsXMLList.appendChild(areaCustom);
-				return mapsXMLList.children();
+				
+				latestMenuItemsList = mapsXMLList.children()
+				return latestMenuItemsList;
 			}
+			latestMenuItemsList = null;
 			return null;
 		}
 	}

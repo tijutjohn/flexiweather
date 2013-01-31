@@ -170,9 +170,12 @@ package com.iblsoft.flexiweather.ogc.managers
 				}
 				var layerCustom: XML = <menuitem label="Add custom layer..." data="map.add-layer-custom" type="action"/>
 				layersXMLList.appendChild(layerCustom);
-				return layersXMLList.children();
+				
+				latestMenuItemsList = layersXMLList.children();
+				return latestMenuItemsList;
 			}
-			return null;
+			latestMenuItemsList = null;
+			return latestMenuItemsList;
 		}
 
 		// getters & setters

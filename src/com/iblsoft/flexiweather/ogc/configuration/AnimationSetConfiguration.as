@@ -5,10 +5,10 @@ package com.iblsoft.flexiweather.ogc.configuration
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 
-	public class AnimationConfiguration extends EventDispatcher implements Serializable
+	public class AnimationSetConfiguration extends EventDispatcher implements Serializable
 	{
 		protected var ms_label: String;
-		protected var ms_animationConfiguration: XML;
+		protected var ms_animationsSetConfiguration: XML;
 
 		[Bindable(event = "labelChanged")]
 		public function get label(): String
@@ -23,18 +23,18 @@ package com.iblsoft.flexiweather.ogc.configuration
 		}
 
 		[Bindable(event = "animationChanged")]
-		public function get animationConfiguration(): XML
+		public function get animationsSetConfiguration(): XML
 		{
-			return ms_animationConfiguration;
+			return ms_animationsSetConfiguration;
 		}
 
-		public function set animationConfiguration(value: XML): void
+		public function set animationsSetConfiguration(value: XML): void
 		{
-			ms_animationConfiguration = value;
+			ms_animationsSetConfiguration = value;
 			dispatchEvent(new Event('animationChanged'));
 		}
 
-		public function AnimationConfiguration()
+		public function AnimationSetConfiguration()
 		{
 		}
 
@@ -42,9 +42,9 @@ package com.iblsoft.flexiweather.ogc.configuration
 		{
 			ms_label = storage.serializeString("label", ms_label);
 			if (storage.isLoading())
-				ms_animationConfiguration = new XML(storage.serializeString("map", ms_animationConfiguration));
+				ms_animationsSetConfiguration = new XML(storage.serializeString("animations-set", ms_animationsSetConfiguration));
 			else
-				storage.serializeString("animation", ms_animationConfiguration.toXMLString());
+				storage.serializeString("animations-set", ms_animationsSetConfiguration.toXMLString());
 		}
 	}
 }
