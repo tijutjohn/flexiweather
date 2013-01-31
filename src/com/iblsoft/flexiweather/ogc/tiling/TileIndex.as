@@ -10,10 +10,10 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		public function TileIndex(i_tileZoom: String = null, i_tileRow: int = 0, i_tileCol: int = 0, i_tileSize: int = 256)
 		{
-			if (i_tileZoom == null)
-			{
-				trace("TileIndex.TileIndex(): Stop tileZoom not set");
-			}
+//			if (i_tileZoom == null)
+//			{
+//				trace("TileIndex.TileIndex(): Stop tileZoom not set");
+//			}
 			mi_tileSize = i_tileSize;
 			mi_tileZoom = i_tileZoom;
 			mi_tileRow = i_tileRow;

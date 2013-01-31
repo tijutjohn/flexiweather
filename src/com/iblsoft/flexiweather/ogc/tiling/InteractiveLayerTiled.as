@@ -34,6 +34,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import flash.geom.Point;
 	import flash.net.URLRequest;
 	import flash.text.TextField;
+	import flash.text.TextFieldAutoSize;
 	import flash.text.TextFormat;
 	
 	import mx.controls.Alert;
@@ -643,12 +644,16 @@ package com.iblsoft.flexiweather.ogc.tiling
 			{
 				_tf.filters = [new GlowFilter(0xffffffff)];
 			}
-			var tfWidth: int = 100;
+			var tfWidth: int = 200;
 			var tfHeight: int = 30;
 			var format: TextFormat = _tf.getTextFormat();
-			format.size = 18;
+			format.size = 14;
+			format.align = TextFieldAutoSize.LEFT;
 			_tf.setTextFormat(format);
-			_tf.text = txt;
+			_tf.text = "test " + txt;
+			tfWidth = _tf.textWidth + 20;
+			tfHeight = _tf.textHeight;
+			
 			_tfBD = new BitmapData(tfWidth, tfHeight, true, 0);
 			_tfBD.draw(_tf);
 			var m: Matrix = new Matrix();

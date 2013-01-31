@@ -2,12 +2,13 @@ package com.iblsoft.flexiweather.ogc.cache
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.IViewProperties;
-	import com.iblsoft.flexiweather.ogc.data.viewProperties.TiledViewProperties;
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.TiledTileViewProperties;
+	import com.iblsoft.flexiweather.ogc.data.viewProperties.TiledViewProperties;
 	import com.iblsoft.flexiweather.ogc.tiling.TileIndex;
 	import com.iblsoft.flexiweather.ogc.tiling.TiledArea;
 	import com.iblsoft.flexiweather.plugins.IConsole;
 	import com.iblsoft.flexiweather.utils.ISO8601Parser;
+	
 	import flash.display.Bitmap;
 	import flash.display.DisplayObject;
 	import flash.events.TimerEvent;
@@ -145,6 +146,8 @@ package com.iblsoft.flexiweather.ogc.cache
 					continue;
 				if (cacheKey.validity && cacheKey.validity.time != validity.time)
 					continue;
+				if (cacheKey.validity)
+					trace("getTiles ["+cacheKey.m_tileIndex+"]: validity" + cacheKey.validity.toString()); 
 				if (!cacheKey.validity && validity)
 					continue;
 				if (cacheKey.m_tileIndex.mi_tileZoom != i_tileZoom)
@@ -190,11 +193,31 @@ package com.iblsoft.flexiweather.ogc.cache
 				cacheRecord.lastUsed = new Date();
 				a.push({
 							tileIndex: cacheKey.m_tileIndex,
-							image: cacheRecord.image
+							image: cacheRecord.image,
+							cacheKey: cacheKey
 						});
 			}
 			debug("GET TILES: " + a.length);
+			testingTilesValidity(a)
 			return a;
+		}
+		
+		private function testingTilesValidity(tiles: Array): void
+		{
+			var validity: Date;
+			for each (var tile: Object in tiles){
+				var tileIndex: TileIndex = tile.tileIndex as TileIndex;
+				var cacheKey: WMSTileCacheKey = tile.cacheKey as WMSTileCacheKey;
+				if (!validity)
+					validity = cacheKey.validity;
+				else {
+					if (validity.time != cacheKey.validity.time)
+					{
+						trace("WMSTileCache wrong validity: ");
+					}
+				}
+				
+			}
 		}
 
 		private function getQTTTileViewCacheKey(qttTileViewProperties: TiledTileViewProperties): String
@@ -426,6 +449,7 @@ package com.iblsoft.flexiweather.ogc.cache
 
 		protected function debug(txt: String): void
 		{
+			trace("WMSTileCache: " + txt);
 			if (debugConsole)
 				debugConsole.print("WMSTileCache: " + txt, 'Info', 'WMSTileCache');
 		}
