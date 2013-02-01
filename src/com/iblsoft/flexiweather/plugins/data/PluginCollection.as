@@ -561,10 +561,8 @@ package com.iblsoft.flexiweather.plugins.data
 		private function onModuleError(event: ModuleEvent): void
 		{
 			//FIXME this is quick test for solving .swf problems
-			event.preventDefault();
-			return;
-			
-			//Alert.show("Loading module: " + loader.url + "  error: " + event.errorText, "Module loading error ", Alert.OK);
+//			event.preventDefault();
+//			return;
 			
 			var loader: ModuleLoader = event.target as ModuleLoader;
 			Alert.show("Loading module: " + loader.url + "  error: " + event.errorText, "Module loading error ", Alert.OK);
