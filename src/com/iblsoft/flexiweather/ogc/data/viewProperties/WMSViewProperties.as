@@ -29,8 +29,11 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 
 	public class WMSViewProperties extends EventDispatcher implements IViewProperties, Serializable
 	{
-//		public var cache: ICache;
-//		
+		
+		//left and right time frame for animation synchronization (in minutes)
+		public static const FRAMES_SYNCHRONIZATION_LEFT_TIME_FRAME: int = 150; //2 hours and 30 minutes
+		public static const FRAMES_SYNCHRONIZATION_RIGHT_TIME_FRAME: int = 150; //2 hours and 30 minutes
+		
 		/**
 		 * this is just debug variable. Do not use it for implementation purpose, can be removed anytime.
 		 */
@@ -763,8 +766,9 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					var best: Date = null;
 					var required: Date = value as Date;
 					var requiredTime: Number = required.time;
-					var leftDist: Number = 1000 * 60 * 60 * 3;
-					var rightDist: Number = 1000 * 60 * 60 * 3;
+					//TODO here is frame synchronisation done, if you want to change left and right time frame, you can set it here
+					var leftDist: Number = 1000 * 60 * FRAMES_SYNCHRONIZATION_LEFT_TIME_FRAME;
+					var rightDist: Number = 1000 * 60 * FRAMES_SYNCHRONIZATION_RIGHT_TIME_FRAME;
 					for each (var i: Date in a)
 					{
 						if (i.time >= requiredTime - leftDist && i.time <= requiredTime + rightDist)

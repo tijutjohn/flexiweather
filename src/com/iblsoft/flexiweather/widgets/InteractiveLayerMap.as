@@ -28,6 +28,7 @@ package com.iblsoft.flexiweather.widgets
 	import flash.events.DataEvent;
 	import flash.events.Event;
 	import flash.events.TimerEvent;
+	import flash.utils.Dictionary;
 	import flash.utils.Timer;
 	
 	import mx.collections.ArrayCollection;
@@ -288,11 +289,29 @@ package com.iblsoft.flexiweather.widgets
 			notifyTimeAxisUpdate();
 		}
 
+		private var _firstDataReceived: Dictionary = new Dictionary();
+		
+		private function resynchronizeOnStart(event: SynchronisedVariableChangeEvent): void
+		{
+			var layer: InteractiveLayerMSBase = event.currentTarget as InteractiveLayerMSBase
+			trace("resynchronizeOnStart: " + layer);
+//			if (_firstDataReceived[layer])
+//			{
+//				if (!_firstDataReceived[layer].firstDataReceived)
+//				{
+//					_firstDataReceived[layer] = {firstDataReceived: true};
+//					resynchronize();
+//				}
+//			}
+		}
 		protected function onSynchronisedVariableChanged(event: SynchronisedVariableChangeEvent): void
 		{
 			notifyTimeAxisUpdate();
 			if (event.variableId == GlobalVariable.FRAME)
+			{
+				resynchronizeOnStart(event);
 				dispatchEvent(new Event(FRAME_VARIABLE_CHANGED));
+			}
 			if (event.variableId == GlobalVariable.LEVEL)
 				dispatchEvent(new Event(LEVEL_VARIABLE_CHANGED));
 		}
@@ -301,7 +320,10 @@ package com.iblsoft.flexiweather.widgets
 		{
 			notifyTimeAxisUpdate();
 			if (event.variableId == GlobalVariable.FRAME)
+			{
+				resynchronizeOnStart(event);
 				dispatchEvent(new Event(FRAME_VARIABLE_CHANGED));
+			}
 			if (event.variableId == GlobalVariable.LEVEL)
 				dispatchEvent(new Event(LEVEL_VARIABLE_CHANGED));
 		}
@@ -340,6 +362,11 @@ package com.iblsoft.flexiweather.widgets
 			if (l)
 			{
 				super.addLayer(l);
+				if (!_firstDataReceived[l])
+				{
+					_firstDataReceived[l] = {layer: l, firstDataReceived: false};
+				}
+				callLater(resynchronize);
 			}
 			else
 			{
@@ -882,6 +909,16 @@ package com.iblsoft.flexiweather.widgets
 			return true;
 		}
 
+		/**
+		 * This function should be called when InteractiveLayerMap needs to be synchronized again, e.g. new layer is added 
+		 * 
+		 */		
+		public function resynchronize(): void
+		{
+			if (frame)
+				setFrame(frame);
+		}
+		
 		public function setFrame(newFrame: Date, b_nearrest: Boolean = true): Boolean
 		{
 			for each (var l: InteractiveLayer in m_layers)
