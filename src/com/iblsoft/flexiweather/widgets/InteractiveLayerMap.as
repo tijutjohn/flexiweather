@@ -295,6 +295,8 @@ package com.iblsoft.flexiweather.widgets
 		{
 			var layer: InteractiveLayerMSBase = event.currentTarget as InteractiveLayerMSBase
 			trace("resynchronizeOnStart: " + layer);
+			resynchronize();
+			
 //			if (_firstDataReceived[layer])
 //			{
 //				if (!_firstDataReceived[layer].firstDataReceived)
@@ -309,7 +311,7 @@ package com.iblsoft.flexiweather.widgets
 			notifyTimeAxisUpdate();
 			if (event.variableId == GlobalVariable.FRAME)
 			{
-				resynchronizeOnStart(event);
+//				resynchronizeOnStart(event);
 				dispatchEvent(new Event(FRAME_VARIABLE_CHANGED));
 			}
 			if (event.variableId == GlobalVariable.LEVEL)

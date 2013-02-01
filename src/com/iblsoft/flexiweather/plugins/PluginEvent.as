@@ -5,6 +5,7 @@ package com.iblsoft.flexiweather.plugins
 
 	public class PluginEvent extends Event
 	{
+		public static const PLUGIN_CREATED: String = 'pluginCreated';
 		public static const PLUGIN_MODULE_LOADED: String = 'plugin module loaded';
 		public static const PLUGIN_MODULE_LOAD: String = 'plugin module load';
 		public static const PLUGIN_MODULES_PROGRESS: String = 'plugin modules progress';

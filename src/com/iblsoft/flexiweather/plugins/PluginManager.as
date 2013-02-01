@@ -87,6 +87,7 @@ package com.iblsoft.flexiweather.plugins
 			_plugins.addEventListener(PluginEvent.PLUGIN_MODULES_PROGRESS, onPluginModulesProgress);
 			_plugins.addEventListener(PluginEvent.PLUGIN_MODULE_LOAD, onPluginLoad);
 			_plugins.addEventListener(PluginEvent.PLUGIN_MODULE_LOADED, onPluginLoaded);
+			_plugins.addEventListener(PluginEvent.PLUGIN_CREATED, onPluginLoaded);
 			_pluginsInfo.addEventListener(START_LOADING, onStartLoading);
 			_pluginsInfo.addEventListener(STOP_LOADING, onStopLoading);
 			_pluginsInfo.addEventListener(ALL_PLUGINS_LOADED, onAllInfoPluginsLoaded);

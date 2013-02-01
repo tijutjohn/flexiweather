@@ -1359,7 +1359,10 @@ package com.iblsoft.flexiweather.ogc
 			_capabilitiesReady = true;
 			dispatchEvent(new GetCapabilitiesEvent(
 					GetCapabilitiesEvent.CAPABILITIES_RECEIVED));
-			checkPostponedUpdateDataCall();
+			
+			//dispatch also SynchronisedVariableChangeEvent events and do checkPostponedUpdateDataCall()
+			onCapabilitiesUpdated();
+//			checkPostponedUpdateDataCall();
 		}
 
 		protected function onCapabilitiesUpdated(event: DataEvent = null): void

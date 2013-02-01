@@ -10,9 +10,11 @@ package com.iblsoft.flexiweather.plugins.data
 	import com.iblsoft.flexiweather.plugins.PluginEvent;
 	import com.iblsoft.flexiweather.plugins.PluginManager;
 	import com.iblsoft.flexiweather.widgets.ModuleLoaderWithData;
+	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.system.ApplicationDomain;
+	
 	import mx.collections.ArrayCollection;
 	import mx.controls.Alert;
 	import mx.core.ClassFactory;
@@ -406,7 +408,10 @@ package com.iblsoft.flexiweather.plugins.data
 						trace("ERROR createPluginFromParams: " + error.message);
 					}
 					if (createdPluginObj)
+					{
 						updatePluginInModuleInfo(createdPluginObj, type, url, module);
+						notifyPluginIsCreated(createdPluginObj as IPlugin);
+					}
 					else
 						trace("PLUGIN WAS NOT CREATED");
 				}
@@ -417,6 +422,13 @@ package com.iblsoft.flexiweather.plugins.data
 			return false;
 		}
 
+		private function notifyPluginIsCreated(plugin: IPlugin): void
+		{
+			var event: PluginEvent = new PluginEvent(PluginEvent.PLUGIN_CREATED);
+			event.plugin = plugin;
+			dispatchEvent(event);
+		}
+		
 		private function notifyLoadingProgress(): void
 		{
 			var event: PluginEvent = new PluginEvent(PluginEvent.PLUGIN_MODULES_PROGRESS);
@@ -549,7 +561,7 @@ package com.iblsoft.flexiweather.plugins.data
 		private function onModuleError(event: ModuleEvent): void
 		{
 			var loader: ModuleLoader = event.target as ModuleLoader;
-			Alert.show(event.errorText, "Module loading error ", Alert.OK);
+			Alert.show("Loading module: " + loader.url + "  error: " + event.errorText, "Module loading error ", Alert.OK);
 			removeModuleListeners(loader);
 			loaders.removeModuleLoader(loader);
 		}
