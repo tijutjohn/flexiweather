@@ -1339,8 +1339,19 @@ class WidgetCollection
 		return null;
 	}
 
+	private function debugWidgetsIDs(): void
+	{
+		var cnt: int = 0;
+		for each (var widget: InteractiveWidget in _collection)
+		{
+			trace("WidgetCollection debugWidgetsIDs cnt: " + cnt + " widget: " + widget.id);
+			cnt++;
+		}
+	}
+	
 	public function addWidget(widget: InteractiveWidget): void
 	{
+		trace("WidgetCollection addWidget: " + widget.id);
 		_collection.addItem(widget);
 		_collection.refresh();
 	}

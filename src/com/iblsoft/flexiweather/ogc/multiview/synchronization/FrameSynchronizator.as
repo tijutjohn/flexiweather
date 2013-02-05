@@ -66,7 +66,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		{
 			if (debugConsole)
 				debugConsole.print(str, type, tag);
-//			trace(tag + "| " + type + "| " + str);
+			trace(tag + "| " + type + "| " + str);
 		}
 		private var tempData: Object;
 
@@ -192,6 +192,9 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			var frames: Array = primaryLayer.getSynchronisedVariableValuesList(GlobalVariable.FRAME);
 			var currFrame: Date = primaryLayer.getSynchronisedVariableValue(GlobalVariable.FRAME) as Date;
 			var currFramePosition: int = getFramePosition(currFrame, frames);
+			
+			trace("getFrames currFramePosition: " + currFramePosition);
+			
 			//update string values (+0h, +3h, +6h, +9h, +12h) to int values (0,3,6,9,12)
 //			updateFrameDistancesToInts();
 			//_frameDistance is array of frame distance as int values (+0h, +3h, +6h, +9h, +12h  etc)
@@ -376,8 +379,18 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			return -1;
 		}
 
+		private function debugWidgetsIDs(synchronizeFromWidget: InteractiveWidget, widgetsForSynchronisation: ArrayCollection): void
+		{
+			var cnt: int = 0;
+			for each (var widget: InteractiveWidget in widgetsForSynchronisation)
+			{
+				trace("debugWidgetsIDs cnt: " + cnt + " widget: " + widget.id + " synchronizeFromWidget.id: " + synchronizeFromWidget.id);
+				cnt++;
+			}
+		}
 		private function getWidgetPosition(synchronizeFromWidget: InteractiveWidget, widgetsForSynchronisation: ArrayCollection): int
 		{
+			debugWidgetsIDs(synchronizeFromWidget, widgetsForSynchronisation);
 			var cnt: int = 0;
 			for each (var widget: InteractiveWidget in widgetsForSynchronisation)
 			{
