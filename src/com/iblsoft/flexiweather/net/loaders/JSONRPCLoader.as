@@ -2,6 +2,7 @@ package com.iblsoft.flexiweather.net.loaders
 {
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
+	
 	import json.JParser;
 
 	/**
@@ -11,6 +12,7 @@ package com.iblsoft.flexiweather.net.loaders
 	 */
 	public class JSONRPCLoader extends JSONLoader
 	{
+		public static const ERROR_MESSAGE_MAXIMUM_LENGTH: int = 256;
 		public function JSONRPCLoader()
 		{
 			super();
@@ -29,8 +31,15 @@ package com.iblsoft.flexiweather.net.loaders
 					var isError: Boolean = JSONRPCLoader.isError(json);
 					if (!isError)
 						resultCallback(json['result'], urlRequest, urlLoader.associatedData);
-					else
-						errorCallback("JSON Loader error: Result is RPC strict JSON, but error was returned: " + json['error'], json['error'], urlRequest, urlLoader.associatedData);
+					else {
+						var error: Object = json['error'];
+						var errorMessage: String = (json['error'])['message'];
+						if (errorMessage.length > ERROR_MESSAGE_MAXIMUM_LENGTH)
+						{
+							errorMessage = errorMessage.substr(0, ERROR_MESSAGE_MAXIMUM_LENGTH - 3) + "...";
+						}
+						errorCallback("JSON Loader error: Result is RPC strict JSON, but error was returned: " + errorMessage, json['error'], urlRequest, urlLoader.associatedData);
+					}
 				}
 				else
 					errorCallback("JSON Loader error: Result is JSON, but it's not RPC strict", json['error'], urlRequest, urlLoader.associatedData);
