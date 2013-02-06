@@ -218,9 +218,14 @@ package com.iblsoft.flexiweather.ogc
 			loader.destroy();
 		}
 
+		private var _loader: MSBaseLoader;
 		protected function getWMSViewPropertiesLoader(): IWMSViewPropertiesLoader
 		{
-			return new MSBaseLoader(this);
+			if (!_loader)
+			{
+				_loader = new MSBaseLoader(this); 
+			}
+			return _loader; 
 		}
 
 		public function preload(viewProperties: IViewProperties): void
@@ -459,14 +464,14 @@ package com.iblsoft.flexiweather.ogc
 		protected function onCurrentWMSDataLoadingFinished(event: InteractiveLayerEvent): void
 		{
 			var loader: MSBaseLoader = event.target as MSBaseLoader;
-			removeLoaderListeners(loader);
+//			removeLoaderListeners(loader);
 			notifyLoadingFinished();
 			_currentWMSDataLoadingStarted = false;
 		}
 		protected function onCurrentWMSDataLoadingFinishedFromCache(event: InteractiveLayerEvent): void
 		{
 			var loader: MSBaseLoader = event.target as MSBaseLoader;
-			removeLoaderListeners(loader);
+//			removeLoaderListeners(loader);
 			notifyLoadingFinishedFromCache();
 			_currentWMSDataLoadingStarted = false;
 		}
@@ -575,13 +580,17 @@ package com.iblsoft.flexiweather.ogc
 					return;
 				}
 				updateCurrentWMSViewProperties();
-				var loader: IWMSViewPropertiesLoader = getWMSViewPropertiesLoader();
-				loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
-				loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
-				loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onCurrentWMSDataLoadingFinishedFromCache);
-				loader.addEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
-				loader.addEventListener("invalidateDynamicPart", onCurrentWMSDataInvalidateDynamicPart);
-				loader.updateWMSData(b_forceUpdate, m_currentWMSViewProperties, forcedLayerWidth, forcedLayerHeight);
+				
+				if (!_loader)
+				{
+					_loader = getWMSViewPropertiesLoader() as MSBaseLoader;
+					_loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
+					_loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
+					_loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onCurrentWMSDataLoadingFinishedFromCache);
+					_loader.addEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
+					_loader.addEventListener("invalidateDynamicPart", onCurrentWMSDataInvalidateDynamicPart);
+				}
+				_loader.updateWMSData(b_forceUpdate, m_currentWMSViewProperties, forcedLayerWidth, forcedLayerHeight);
 			}
 		}
 

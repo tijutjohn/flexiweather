@@ -1228,18 +1228,21 @@ package com.iblsoft.flexiweather.ogc.multiview
 
 		public function synchronizeWidgets(synchronizator: ISynchronizator, interactiveWidget: InteractiveWidget = null): void
 		{
-			synchronizator.invalidateSynchronizator();
-			
-			if (!interactiveWidget)
-			{
-				debug("synchronizeWidgets interactiveWidget is null, go with selected widget: " + selectedInteractiveWidget.id);
-				interactiveWidget = selectedInteractiveWidget;
+			if (_interactiveWidgets.widgets && _interactiveWidgets.widgets.length > 1)
+				{
+				synchronizator.invalidateSynchronizator();
+				
+				if (!interactiveWidget)
+				{
+					debug("synchronizeWidgets interactiveWidget is null, go with selected widget: " + selectedInteractiveWidget.id);
+					interactiveWidget = selectedInteractiveWidget;
+				}
+				debug("synchronizeWidgets " + interactiveWidget.id, "Info", "InteractiveMultiView");
+				var selectedIndex: int = -1;
+				if (_configuration && _configuration.customData && _configuration.customData.hasOwnProperty('selectedIndex'))
+					selectedIndex = _configuration.customData.selectedIndex;
+				synchronizator.synchronizeWidgets(interactiveWidget, _interactiveWidgets.widgets, selectedIndex);
 			}
-			debug("synchronizeWidgets " + interactiveWidget.id, "Info", "InteractiveMultiView");
-			var selectedIndex: int = -1;
-			if (_configuration && _configuration.customData && _configuration.customData.hasOwnProperty('selectedIndex'))
-				selectedIndex = _configuration.customData.selectedIndex;
-			synchronizator.synchronizeWidgets(interactiveWidget, _interactiveWidgets.widgets, selectedIndex);
 		}
 
 		private function registerSynchronizator(synchronizator: ISynchronizator): void

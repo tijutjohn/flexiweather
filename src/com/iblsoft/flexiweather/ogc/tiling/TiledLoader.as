@@ -38,7 +38,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 	public class TiledLoader extends EventDispatcher implements IWMSViewPropertiesLoader
 	{
-		private var mi_zoom: String;
+		private var _zoom: String;
 		private var m_layer: InteractiveLayerTiled;
 		private var mi_tilesCurrentlyLoading: int;
 		private var mi_tilesLoadingTotal: int;
@@ -47,6 +47,17 @@ package com.iblsoft.flexiweather.ogc.tiling
 		private var mi_updateCycleAge: uint = 0;
 		private var m_jobs: TileJobs;
 		private var _tilesProvider: ITilesProvider;
+
+
+		public function get zoom():String
+		{
+			return _zoom;
+		}
+
+		public function set zoom(value:String):void
+		{
+			_zoom = value;
+		}
 
 		public function get tilesProvider(): ITilesProvider
 		{
@@ -59,11 +70,10 @@ package com.iblsoft.flexiweather.ogc.tiling
 		}
 		private var _tiledViewProperties: TiledViewProperties;
 
-		public function TiledLoader(layer: InteractiveLayerTiled, zoom: String)
+		public function TiledLoader(layer: InteractiveLayerTiled)
 		{
 			super(null);
 			m_layer = layer;
-			mi_zoom = zoom;
 			mi_tilesLoadingTotal = 0;
 			m_jobs = new TileJobs();
 			tilesProvider = new TiledTilesProvider();
@@ -85,7 +95,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			var _tiledArea: TiledArea;
 			mi_totalVisibleTiles = 0;
 			
-			var tileMatrix: TileMatrix = m_layer.getTileMatrixForCRSAndZoom(s_crs, mi_zoom);
+			var tileMatrix: TileMatrix = m_layer.getTileMatrixForCRSAndZoom(s_crs, _zoom);
 			
 			//update CRS and extent BBox
 			m_layer.tiledAreaChanged(s_crs, m_layer.getGTileBBoxForWholeCRS(s_crs));
@@ -139,7 +149,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 				var reflectionVisibleParts: Array = container.mapBBoxToProjectionExtentParts(partReflection);
 				for each (var reflectionVisiblePart: BBox in reflectionVisibleParts)
 				{
-					_tiledArea = m_layer.getTiledArea(reflectionVisiblePart, mi_zoom, tileSize);
+					_tiledArea = m_layer.getTiledArea(reflectionVisiblePart, _zoom, tileSize);
 					if (_tiledArea)
 					{
 						tiledAreas.push({tiledArea: _tiledArea, viewPart: reflectionVisiblePart});
@@ -170,7 +180,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 				{
 					for (var i_col: uint = tiledArea.leftCol; i_col <= tiledArea.rightCol; ++i_col)
 					{
-						tileIndex = new TileIndex(mi_zoom, i_row, i_col);
+						tileIndex = new TileIndex(_zoom, i_row, i_col);
 						//check if tileIndex is already created from other tiledArea part
 						if (!tileIndicesMapper.tileIndexInside(tileIndex))
 						{

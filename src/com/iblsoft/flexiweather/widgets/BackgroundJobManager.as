@@ -1,8 +1,12 @@
 package com.iblsoft.flexiweather.widgets
 {
 	import com.iblsoft.flexiweather.events.BackgroundJobEvent;
+	
 	import flash.display.DisplayObject;
 	import flash.events.EventDispatcher;
+	import flash.events.TimerEvent;
+	import flash.utils.Timer;
+	
 	import mx.collections.ArrayCollection;
 	import mx.controls.ProgressBar;
 	import mx.controls.ProgressBarLabelPlacement;
@@ -11,6 +15,9 @@ package com.iblsoft.flexiweather.widgets
 	import mx.core.IVisualElement;
 	import mx.core.UIComponent;
 	import mx.events.ResizeEvent;
+	
+	import org.osmf.events.TimeEvent;
+	
 	import spark.components.Group;
 	import spark.components.VGroup;
 	import spark.components.supportClasses.GroupBase;
@@ -25,6 +32,7 @@ package com.iblsoft.flexiweather.widgets
 		internal var mi_jobsCount: int = 0;
 		internal var mi_jobsDone: int = 0;
 		private var ms_pendingJobsDescription: String;
+		private var m_clearTimer: Timer;
 
 		public function get pendingJobsDescription(): String
 		{
@@ -35,6 +43,11 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (sm_instance != null)
 				throw new Error("BackgroundJobManager can only be accessed through BackgroundJobManager.getInstance");
+			
+
+			m_clearTimer = new Timer(30000);
+			m_clearTimer.addEventListener(TimerEvent.TIMER, onClearTimerTick);
+			m_clearTimer.start();
 		}
 
 		public static function getInstance(): BackgroundJobManager
@@ -145,6 +158,16 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 
+		private function onClearTimerTick(event: TimerEvent): void
+		{
+			if (mi_jobsDone > 0)
+			{
+				mi_jobsCount -= mi_jobsDone;
+				mi_jobsDone = 0;
+				updateUI();
+			}
+		}
+		
 		private function noJobs(): void
 		{
 			ms_pendingJobsDescription = 'No pending jobs at all';

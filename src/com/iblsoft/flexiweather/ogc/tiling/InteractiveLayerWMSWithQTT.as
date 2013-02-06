@@ -284,10 +284,18 @@ package com.iblsoft.flexiweather.ogc.tiling
 				super.destroyWMSViewPropertiesPreloader(loader);
 		}
 
+		protected var _tiledLoader: TiledLoader;
 		override protected function getWMSViewPropertiesLoader(): IWMSViewPropertiesLoader
 		{
 			if (isTileable)
-				return new TiledLoader(m_tiledLayer, m_tiledLayer.zoomLevel);
+			{
+				if (!_tiledLoader)
+				{
+					_tiledLoader = new TiledLoader(m_tiledLayer); 
+				}
+				_tiledLoader.zoom = m_tiledLayer.zoomLevel;
+				return _tiledLoader;
+			} 
 			return super.getWMSViewPropertiesLoader();
 		}
 

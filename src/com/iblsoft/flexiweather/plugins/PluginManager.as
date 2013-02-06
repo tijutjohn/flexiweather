@@ -108,6 +108,17 @@ package com.iblsoft.flexiweather.plugins
 		}
 
 		/**
+		 * Returns true if plugin was registered (via addPluginInfo method)
+		 *  
+		 * @param type
+		 * @return 
+		 * 
+		 */		
+		public function pluginRegistered(type: String): Boolean
+		{
+			return _pluginsInfo.pluginRegistered(type);
+		}
+		/**
 		 * Add information about plugin.
 		 *
 		 * @param type Type of plugin
@@ -250,6 +261,7 @@ package com.iblsoft.flexiweather.plugins
 		 *******************************************************************/
 		public function loadPlugin(type: String, bLoadPluginInfoFirst: Boolean = false): void
 		{
+			trace("PluginManager loadPlugin: " + type);
 			_plugins.loadPlugin(type);
 		}
 

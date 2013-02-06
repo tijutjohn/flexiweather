@@ -23,6 +23,8 @@ package com.iblsoft.flexiweather.widgets
 	[Event(name = "stopPanning", type = "flash.events.Event")]
 	public class InteractiveLayerPan extends InteractiveLayer
 	{
+		public static const MOUSE_MOVE_DELAY: int = 600;
+		
 		public static const PAN: String = 'pan';
 		public static const START_PANNING: String = 'startPanning';
 		public static const STOP_PANNING: String = 'stopPanning';

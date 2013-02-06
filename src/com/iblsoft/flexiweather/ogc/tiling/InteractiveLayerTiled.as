@@ -259,9 +259,15 @@ package com.iblsoft.flexiweather.ogc.tiling
 		 * 		Loading data functionality
 		 *
 		 **************************************************************************************************************************************/
+		protected var _loader: TiledLoader;
 		protected function getWMSViewPropertiesLoader(): IWMSViewPropertiesLoader
 		{
-			return new TiledLoader(this, zoomLevel);
+			if (!_loader)
+			{
+				_loader = new TiledLoader(this); 
+			}
+			_loader.zoom = zoomLevel;
+			return _loader;
 		}
 
 		/**
