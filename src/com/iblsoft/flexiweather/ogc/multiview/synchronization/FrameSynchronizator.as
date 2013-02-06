@@ -13,7 +13,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 	import mx.collections.ArrayCollection;
 	import mx.utils.ArrayUtil;
 
-	public class FrameSynchronizator extends EventDispatcher implements ISynchronizator
+	public class FrameSynchronizator extends SynchronizatorBase implements ISynchronizator
 	{
 		public static var debugConsole: IConsole;
 		private var _timeDifference: Number;
@@ -29,30 +29,30 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			_timeDifference = value;
 		}
 
-		public function get willSynchronisePrimaryLayer(): Boolean
+		override public function get willSynchronisePrimaryLayer(): Boolean
 		{
 			return true;
 		}
 		private var _frameDistances: Array;
 
-		public function set customData(data: Object): void
+		override public function set customData(data: Object): void
 		{
 			if (data && data.hasOwnProperty("timeDifference"))
 				timeDifference = data.timeDifference;
 		}
 
-		public function get customData(): Object
+		override public function get customData(): Object
 		{
 			return {timeDifference: timeDifference};
 		}
 
-		public function set viewData(data: Array): void
+		override public function set viewData(data: Array): void
 		{
 			// Frame synchronizator does not need any data, so it's nothing done here
 			_frameDistances = data;
 		}
 
-		public function get labelString(): String
+		override public function get labelString(): String
 		{
 			return "<frame format='%H:%M %d.%m.%Y' tz='UTC'/>";
 		}
@@ -85,87 +85,97 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			return false
 		}
 
-		public function canCreateMap(iw: InteractiveWidget): Boolean
-		{
-			return false;
-		}
+		private var _lastSynchronizedFrame: Date;
 		
-		public function createMap(iw: InteractiveWidget): void
+		override public function isSynchronizedFor(synchronizedDate: Date): Boolean
 		{
+			var bNeeded: Boolean = false; 
+			bNeeded = bNeeded || (_lastSynchronizedFrame == null);
+			bNeeded = bNeeded || (_lastSynchronizedFrame != null && _lastSynchronizedFrame.time != synchronizedDate.time);
+			debug("FrameSychronizator isSynchronizedFor [" + synchronizedDate + "] -> " + bNeeded + " _lastSynchronizedFrame: " + _lastSynchronizedFrame);
 			
+			return bNeeded;
 		}
 		
-		public function updateMapAction(iw: InteractiveWidget, position: int, configuration: MultiViewConfiguration): void
+		override public function synchronizeWidgets(synchronizeFromWidget: InteractiveWidget, widgetsForSynchronisation: ArrayCollection, preferredSelectedIndex: int = -1): void
 		{
+			var synchronizedWidgetFrame: Date = synchronizeFromWidget.frame;
 			
-		}
-		
-		public function synchronizeWidgets(synchronizeFromWidget: InteractiveWidget, widgetsForSynchronisation: ArrayCollection, preferredSelectedIndex: int = -1): void
-		{
-			debug("FrameSychronizator synchronizeWidgets", 'Info', 'FrameSychronizator');
-			var primaryLayer: InteractiveLayerMSBase = synchronizeFromWidget.interactiveLayerMap.getPrimaryLayer();
-			if (primaryLayer)
+			if (!isSynchronizedFor(frame))
 			{
-				var synchronizeFromWidgetPosition: uint = getWidgetPosition(synchronizeFromWidget, widgetsForSynchronisation);
-				if (!framesTimeDifferencesSet)
+				debug("FrameSychronizator synchronizeWidgets for " + synchronizeFromWidget, 'Info', 'FrameSychronizator');
+				var primaryLayer: InteractiveLayerMSBase = synchronizeFromWidget.interactiveLayerMap.getPrimaryLayer();
+				if (primaryLayer)
 				{
-					//make frame synchronisation as frames go 
-					synchronizeFramesSequentialy(synchronizeFromWidget, widgetsForSynchronisation);
+					var synchronizeFromWidgetPosition: uint = getWidgetPosition(synchronizeFromWidget, widgetsForSynchronisation);
+					if (!framesTimeDifferencesSet)
+					{
+						//make frame synchronisation as frames go 
+						synchronizeFramesSequentialy(synchronizeFromWidget, widgetsForSynchronisation);
+					}
+					else
+					{
+	//					var variables: Array = primaryLayer.getSynchronisedVariables();
+	//					var frames: Array = primaryLayer.getSynchronisedVariableValuesList(GlobalVariable.FRAME);
+	//				
+	//					
+	//					var currFrame: Date = primaryLayer.getSynchronisedVariableValue(GlobalVariable.FRAME) as Date;
+	//					var currFramePosition: int = getFramePosition(currFrame, frames);
+	//					
+	//					if (currFramePosition > 0)
+	//						frames = frames.slice(Math.max(0, currFramePosition - synchronizeFromWidgetPosition), frames.length);
+						var cnt: int = 0;
+						var frames: Array = getFrames(primaryLayer, synchronizeFromWidgetPosition);
+						debug("FramSynchornisator frames: " + frames.length + " selected index: " + preferredSelectedIndex);
+						for each (var date: Date in frames)
+						{
+							if (date)
+								debug("\t frame[" + cnt + "] = " + date.toTimeString());
+							else
+								debug("\t frame[" + cnt + "] = NULL");
+							cnt++;
+						}
+						if (synchronizeFromWidgetPosition > -1)
+						{
+							cnt = 0
+							var total: int = widgetsForSynchronisation.length;
+							for (var i: int = 0; i < total; i++)
+							{
+								var widget: InteractiveWidget = widgetsForSynchronisation.getItemAt(i) as InteractiveWidget;
+	//							if (widget.id != synchronizeFromWidget.id)
+								var frame: Date = frames[i] as Date;
+								if (frame)
+								{
+									if (widget.interactiveLayerMap.frame && widget.interactiveLayerMap.frame.time != frame.time)
+									{
+										debug("Going to synchronise frame: " + frame.toTimeString() + " for widget: " + widget.id, 'Info', 'FrameSychronizator');
+										widget.interactiveLayerMap.setFrame(frame);
+										dataForWidgetAvailable(widget);
+									} else {
+										debug("Do not synchronise (same frames) frame: " + frame.toTimeString() + " for widget: " + widget.id, 'Info', 'FrameSychronizator');
+										
+									}
+								}
+								else
+								{
+									dataForWidgetUnvailable(widget);
+								}
+								cnt++;
+							}
+						}
+					}
+	
+					_lastSynchronizedFrame = synchronizedWidgetFrame;
+					_synchronizatorInvalid = false;
 				}
 				else
 				{
-//					var variables: Array = primaryLayer.getSynchronisedVariables();
-//					var frames: Array = primaryLayer.getSynchronisedVariableValuesList(GlobalVariable.FRAME);
-//				
-//					
-//					var currFrame: Date = primaryLayer.getSynchronisedVariableValue(GlobalVariable.FRAME) as Date;
-//					var currFramePosition: int = getFramePosition(currFrame, frames);
-//					
-//					if (currFramePosition > 0)
-//						frames = frames.slice(Math.max(0, currFramePosition - synchronizeFromWidgetPosition), frames.length);
-					var cnt: int = 0;
-					var frames: Array = getFrames(primaryLayer, synchronizeFromWidgetPosition);
-					debug("FramSynchornisator frames: " + frames.length + " selected index: " + preferredSelectedIndex);
-					for each (var date: Date in frames)
-					{
-						if (date)
-							debug("\t frame[" + cnt + "] = " + date.toTimeString());
-						else
-							debug("\t frame[" + cnt + "] = NULL");
-						cnt++;
-					}
-					if (synchronizeFromWidgetPosition > -1)
-					{
-						cnt = 0
-						var total: int = widgetsForSynchronisation.length;
-						for (var i: int = 0; i < total; i++)
-						{
-							var widget: InteractiveWidget = widgetsForSynchronisation.getItemAt(i) as InteractiveWidget;
-//							if (widget.id != synchronizeFromWidget.id)
-							var frame: Date = frames[i] as Date;
-							if (frame)
-							{
-								if (widget.interactiveLayerMap.frame && widget.interactiveLayerMap.frame.time != frame.time)
-								{
-									debug("Going to synchronise frame: " + frame.toTimeString() + " for widget: " + widget.id, 'Info', 'FrameSychronizator');
-									widget.interactiveLayerMap.setFrame(frame);
-									dataForWidgetAvailable(widget);
-								}
-							}
-							else
-							{
-								dataForWidgetUnvailable(widget);
-							}
-							cnt++;
-						}
-					}
+					tempData = {widget: synchronizeFromWidget, widgets: widgetsForSynchronisation, prefferedSelectedIndex: preferredSelectedIndex};
+					//wait for primary layer
+					synchronizeFromWidget.interactiveLayerMap.addEventListener(InteractiveLayerMap.PRIMARY_LAYER_CHANGED, waitForPrimaryLayer);
 				}
-			}
-			else
-			{
-				tempData = {widget: synchronizeFromWidget, widgets: widgetsForSynchronisation, prefferedSelectedIndex: preferredSelectedIndex};
-				//wait for primary layer
-				synchronizeFromWidget.interactiveLayerMap.addEventListener(InteractiveLayerMap.PRIMARY_LAYER_CHANGED, waitForPrimaryLayer);
+			} else {
+				debug("FrameSychronizator synchronizeWidgets not needed for " + synchronizedWidgetFrame, 'Info', 'FrameSychronizator');
 			}
 		}
 
@@ -384,7 +394,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			var cnt: int = 0;
 			for each (var widget: InteractiveWidget in widgetsForSynchronisation)
 			{
-				trace("debugWidgetsIDs cnt: " + cnt + " widget: " + widget.id + " synchronizeFromWidget.id: " + synchronizeFromWidget.id);
+				trace("debugWidgetsIDs cnt: " + cnt + " widget: " + widget.id + " synchronizeFromWidget.id: " + synchronizeFromWidget.id + " frame: " + widget.frame);
 				cnt++;
 			}
 		}
@@ -403,12 +413,12 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			return -1;
 		}
 
-		public function getSynchronisedVariables(): Array
+		override public function getSynchronisedVariables(): Array
 		{
 			return [GlobalVariable.FRAME];
 		}
 
-		public function hasSynchronisedVariable(s_variableId: String): Boolean
+		override public function hasSynchronisedVariable(s_variableId: String): Boolean
 		{
 			return s_variableId == GlobalVariable.FRAME;
 		}

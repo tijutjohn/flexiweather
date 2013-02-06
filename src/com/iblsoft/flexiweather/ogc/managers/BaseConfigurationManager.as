@@ -24,7 +24,7 @@ package com.iblsoft.flexiweather.ogc.managers
 		public function set latestMenuItemsList(value:XMLList):void
 		{
 			_latestMenuItemsList = value;
-			trace(this + " latestMenuItemsList: " + _latestMenuItemsList.toXMLString);
+//			trace(this + " latestMenuItemsList: " + _latestMenuItemsList.toXMLString);
 		}
 
 		protected function sortArray(item1: Object, item2: Object, array: Array = null): int

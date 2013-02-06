@@ -11,55 +11,31 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 	import mx.collections.ArrayCollection;
 	import mx.utils.ArrayUtil;
 	
-	public class LevelSynchronizator extends EventDispatcher implements ISynchronizator
+	public class LevelSynchronizator extends SynchronizatorBase implements ISynchronizator
 	{
-		public function get labelString(): String
+		override public function get labelString(): String
 		{
 			return '<level/>';
 		}
 		
 		private var _levelValues: Array;
 		
-		public function get willSynchronisePrimaryLayer(): Boolean
+		override public function get willSynchronisePrimaryLayer(): Boolean
 		{
 			return true;
 		}
 		
-		public function set viewData(data: Array): void
+		override public function set viewData(data: Array): void
 		{
 			_levelValues = data;
 		}
 		
-		public function set customData(data: Object): void
-		{
-			
-		}
-		
-		public function get customData(): Object
-		{
-			return {};
-		}
 		
 		public function LevelSynchronizator()
 		{
 		}
 		
 		private function getLevelValue(position: int): void
-		{
-			
-		}
-		
-		public function canCreateMap(iw: InteractiveWidget): Boolean
-		{
-			return false;
-		}
-		
-		public function createMap(iw: InteractiveWidget): void
-		{
-			
-		}
-		
-		public function updateMapAction(iw: InteractiveWidget, position: int, configuration: MultiViewConfiguration): void
 		{
 			
 		}
@@ -111,7 +87,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		}
 		*/
 		
-		public function synchronizeWidgets(synchronizeFromWidget:InteractiveWidget, widgetsForSynchronisation:ArrayCollection, preferredSelectedIndex: int = -1):void
+		override public function synchronizeWidgets(synchronizeFromWidget:InteractiveWidget, widgetsForSynchronisation:ArrayCollection, preferredSelectedIndex: int = -1):void
 		{
 			if (_levelValues)
 			{
@@ -195,12 +171,12 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			return -1;
 		}
 		
-		public function getSynchronisedVariables():Array
+		override public function getSynchronisedVariables():Array
 		{
 			return [GlobalVariable.LEVEL];
 		}
 		
-		public function hasSynchronisedVariable(s_variableId: String): Boolean
+		override public function hasSynchronisedVariable(s_variableId: String): Boolean
 		{
 			return s_variableId == GlobalVariable.LEVEL;
 		}

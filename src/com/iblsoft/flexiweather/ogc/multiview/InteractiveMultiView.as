@@ -1228,6 +1228,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 
 		public function synchronizeWidgets(synchronizator: ISynchronizator, interactiveWidget: InteractiveWidget = null): void
 		{
+			synchronizator.invalidateSynchronizator();
+			
 			if (!interactiveWidget)
 				interactiveWidget = selectedInteractiveWidget;
 			debug("synchronizeWidgets " + interactiveWidget.id, "Info", "InteractiveMultiView");
@@ -1277,12 +1279,15 @@ package com.iblsoft.flexiweather.ogc.multiview
 }
 import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
+import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
 import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
 import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+
 import flash.events.Event;
 import flash.events.EventDispatcher;
+
 import mx.collections.ArrayCollection;
 import mx.collections.Sort;
 import mx.collections.SortField;
@@ -1351,13 +1356,15 @@ class WidgetCollection
 	
 	public function addWidget(widget: InteractiveWidget): void
 	{
-		trace("WidgetCollection addWidget: " + widget.id);
+		trace("WidgetCollection addWidget: " + widget.id + " frame: " + widget.frame);
 		_collection.addItem(widget);
 		_collection.refresh();
+		debugWidgetsIDs();
 	}
 
 	private function sortWidgets(widget1: InteractiveWidget, widget2: InteractiveWidget): int
 	{
+		trace("sortWidgets : " + widget1.id + " and " + widget2.id);
 		if (widget1.id < widget2.id)
 			return -1;
 		if (widget1.id > widget2.id)

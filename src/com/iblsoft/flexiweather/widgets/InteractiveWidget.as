@@ -7,6 +7,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
 	import com.iblsoft.flexiweather.ogc.cache.WMSCacheKey;
 	import com.iblsoft.flexiweather.ogc.cache.WMSCacheManager;
+	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.CubicBezier;
@@ -142,6 +143,14 @@ package com.iblsoft.flexiweather.widgets
 			_enableGestures = value;
 		}
 
+		public function get frame(): Date
+		{
+			if (interactiveLayerMap && interactiveLayerMap.primaryLayer)
+			{
+				return interactiveLayerMap.primaryLayer.getSynchronisedVariableValue(GlobalVariable.FRAME) as Date;
+			}
+			return null;
+		}
 		public function InteractiveWidget()
 		{
 			super();

@@ -10,54 +10,15 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 	
 	import mx.collections.ArrayCollection;
 
-	public class AreaSynchronizator extends EventDispatcher implements ISynchronizator
+	public class AreaSynchronizator extends SynchronizatorBase implements ISynchronizator
 	{
 		private var _areaChangeTimeout: Number;
-
-		public function get willSynchronisePrimaryLayer(): Boolean
-		{
-			return false;
-		}
-
-		public function set viewData(data: Array): void
-		{
-			// Area synchronizator does not need any data, so it's nothing done here
-		}
-
-		public function set customData(data: Object): void
-		{
-		}
-
-		public function get customData(): Object
-		{
-			return {};
-		}
-
-		public function get labelString(): String
-		{
-			return '';
-		}
 
 		public function AreaSynchronizator()
 		{
 		}
 
-		public function canCreateMap(iw: InteractiveWidget): Boolean
-		{
-			return false;
-		}
-		
-		public function createMap(iw: InteractiveWidget): void
-		{
-			
-		}
-		
-		public function updateMapAction(iw: InteractiveWidget, position: int, configuration: MultiViewConfiguration): void
-		{
-			
-		}
-		
-		public function synchronizeWidgets(synchronizeFromWidget: InteractiveWidget, widgetsForSynchronisation: ArrayCollection, preferredSelectedIndex: int = -1): void
+		override public function synchronizeWidgets(synchronizeFromWidget: InteractiveWidget, widgetsForSynchronisation: ArrayCollection, preferredSelectedIndex: int = -1): void
 		{
 			if (_areaChangeTimeout > 0)
 			{
@@ -110,16 +71,6 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			}
 		}
 
-		public function getSynchronisedVariables(): Array
-		{
-			return [];
-		}
-
-		public function hasSynchronisedVariable(s_variableId: String): Boolean
-		{
-			return false;
-		}
-		
 		private function debug(str: String, type: String = "Info", tag: String = "AreaSynchronizator"): void
 		{
 			//			trace(tag + "| " + type + "| " + str);

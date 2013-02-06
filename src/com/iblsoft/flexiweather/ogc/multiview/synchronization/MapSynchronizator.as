@@ -11,32 +11,11 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 	import mx.collections.ArrayCollection;
 	import mx.utils.ArrayUtil;
 	
-	public class MapSynchronizator extends EventDispatcher implements ISynchronizator
+	public class MapSynchronizator extends SynchronizatorBase implements ISynchronizator
 	{
-
 		protected var _widgetsMapDictionary: Dictionary = new Dictionary();
 		
-		public function get willSynchronisePrimaryLayer(): Boolean
-		{
-			return false;
-		}
-		
-		public function set viewData(data: Array): void
-		{
-			// Map synchronizator does not need any data, so it's nothing done here
-		}
-		
-		public function set customData(data: Object): void
-		{
-			
-		}
-		
-		public function get customData(): Object
-		{
-			return {};
-		}
-		
-		public function get labelString(): String
+		override public function get labelString(): String
 		{
 			return "<mapName/>";
 		}
@@ -44,17 +23,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		{
 		}
 		
-		public function canCreateMap(iw: InteractiveWidget): Boolean
-		{
-			return false;
-		}
-		
-		public function createMap(iw: InteractiveWidget): void
-		{
-			
-		}
-		
-		public function updateMapAction(iw: InteractiveWidget, position: int, configuration: MultiViewConfiguration): void
+		override public function updateMapAction(iw: InteractiveWidget, position: int, configuration: MultiViewConfiguration): void
 		{
 			if (configuration && configuration.synchronizators && configuration.synchronizators.length > 0)
 			{
@@ -81,7 +50,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			_widgetsMapDictionary[iw] = {action: 'copyMap'};
 		}
 			
-		public function synchronizeWidgets(synchronizeFromWidget:InteractiveWidget, widgetsForSynchronisation:ArrayCollection, preferredSelectedIndex: int = -1):void
+		override public function synchronizeWidgets(synchronizeFromWidget:InteractiveWidget, widgetsForSynchronisation:ArrayCollection, preferredSelectedIndex: int = -1):void
 		{
 			//there is no synchronizing needed for this syncrhonizator, all is done by AreaSynchronizator
 			
@@ -151,12 +120,12 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			return -1;
 		}
 		
-		public function getSynchronisedVariables():Array
+		override public function getSynchronisedVariables():Array
 		{
 			return [GlobalVariable.FRAME];
 		}
 		
-		public function hasSynchronisedVariable(s_variableId: String): Boolean
+		override public function hasSynchronisedVariable(s_variableId: String): Boolean
 		{
 			return s_variableId == GlobalVariable.FRAME;
 		}

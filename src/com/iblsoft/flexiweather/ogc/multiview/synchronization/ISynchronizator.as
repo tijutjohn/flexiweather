@@ -10,6 +10,8 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 
 	public interface ISynchronizator extends IEventDispatcher
 	{
+		function invalidateSynchronizator(): void;
+		function isSynchronizedFor(synchronizedDate: Date): Boolean;
 		function canCreateMap(iw: InteractiveWidget): Boolean;
 		function createMap(iw: InteractiveWidget): void;
 		

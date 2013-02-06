@@ -27,8 +27,20 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		Storage.addChangedClass('com.iblsoft.flexiweather.ogc.WMSServiceConfiguration', 'com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceConfiguration', new Version(1, 6, 0));
 		private var m_capabilitiesLoader: XMLLoader = new XMLLoader();
 		private var m_capabilities: XML = null;
-		private var m_capabilitiesLoadJob: BackgroundJob = null;
+		private var _m_capabilitiesLoadJob: BackgroundJob = null;
 		private var mb_capabilitiesUpdated: Boolean;
+
+
+		public function get m_capabilitiesLoadJob():BackgroundJob
+		{
+			return _m_capabilitiesLoadJob;
+		}
+
+		public function set m_capabilitiesLoadJob(value:BackgroundJob):void
+		{
+			trace("WMSServiceConfiguration load job = " + value);
+			_m_capabilitiesLoadJob = value;
+		}
 
 		public function get capabilitiesUpdated(): Boolean
 		{
@@ -140,13 +152,15 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		{
 			if (!m_capabilitiesLoadJob)
 			{
-				trace("ERROR m_capabilitiesLoadJob IS null")
-				return;
+				trace("ERROR m_capabilitiesLoadJob IS null:" + id)
+//				return;
+			} else {
+				trace("m_capabilitiesLoadJob loaded:" + id);
+				m_capabilitiesLoadJob.finish();
+				m_capabilitiesLoadJob = null;
 			}
 			
 			mb_capabilitiesUpdated = true;
-			m_capabilitiesLoadJob.finish();
-			m_capabilitiesLoadJob = null;
 			if (event.result is XML)
 			{
 				var xml: XML = event.result as XML;
