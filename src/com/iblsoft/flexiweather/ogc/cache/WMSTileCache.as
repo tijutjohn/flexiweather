@@ -136,6 +136,9 @@ package com.iblsoft.flexiweather.ogc.cache
 		 */
 		public function getTiles(s_crs: String, i_tileZoom: String, specialStrings: Array, validity: Date): Array
 		{
+//			trace("getTiles for crs: " + s_crs + " zoom: " + i_tileZoom + " specialStrinds: " + specialStrings + " validity: " + validity);
+//			trace("getTiles cache size: " + cachedTilesCount);
+			
 			var a: Array = [];
 			for each (var cacheRecord: CacheItem in md_cache)
 			{
@@ -197,7 +200,7 @@ package com.iblsoft.flexiweather.ogc.cache
 							cacheKey: cacheKey
 						});
 			}
-			debug("GET TILES: " + a.length);
+//			debug("GET TILES: " + a.length);
 			testingTilesValidity(a)
 			return a;
 		}

@@ -5,6 +5,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.multiview.synchronization.ISynchronizator;
 	import com.iblsoft.flexiweather.utils.DimensionLabelParser;
 	import com.iblsoft.flexiweather.utils.ISO8601Parser;
+	
 	import flash.display.DisplayObjectContainer;
 	import flash.display.Graphics;
 	import flash.display.Sprite;
@@ -14,11 +15,13 @@ package com.iblsoft.flexiweather.widgets
 	import flash.text.TextField;
 	import flash.text.TextFormat;
 	import flash.text.TextFormatAlign;
+	
 	import mx.collections.ArrayCollection;
 	import mx.events.CollectionEvent;
 	import mx.events.DynamicEvent;
 	import mx.states.OverrideBase;
 	import mx.utils.ArrayUtil;
+	
 	import spark.components.Label;
 
 	public class InteractiveLayerLabel extends InteractiveLayer
@@ -107,6 +110,13 @@ package com.iblsoft.flexiweather.widgets
 			//clearOldState();
 		}
 
+		private function updateLayerLabel(text: String): void
+		{
+			var id: String = container.id;
+//			_label.text = "["+id+"]"+text;
+			_label.text = text;
+			updateLabelStyles();
+		}
 		override public function draw(graphics: Graphics): void
 		{
 			super.draw(graphics);
@@ -114,8 +124,7 @@ package com.iblsoft.flexiweather.widgets
 			if (_synchronizator)
 			{
 				var labelText: String = dimensionLabelParser.parseLabel(_synchronizator.labelString, container.interactiveLayerMap);
-				_label.text = labelText;
-				updateLabelStyles();
+				updateLayerLabel(labelText);
 			}
 			//we want to display info just from _synchronizedVariableName
 //			if (_synchronizedVariableNames && _synchronizedVariableNames.length > 0 && _primaryLayer)
@@ -136,8 +145,7 @@ package com.iblsoft.flexiweather.widgets
 //					}
 //				}
 //				
-//				_label.text = _currValue;
-//				updateLabelStyles();
+//				updateLayerLabel(_currValue);
 //				
 //			} else {
 //				trace("InteractiveLayerLabel synchro problem");
@@ -147,8 +155,7 @@ package com.iblsoft.flexiweather.widgets
 			if (_primaryLayer && _primaryLayer.status == InteractiveDataLayer.STATE_NO_DATA_AVAILABLE || labelText == '')
 			{
 				bkgColor = 0x880000;
-				_label.text = "No data";
-				updateLabelStyles();
+				updateLayerLabel("No data");
 			}
 			var w: int = 100;
 			var h: int = 25;
@@ -167,6 +174,8 @@ package com.iblsoft.flexiweather.widgets
 			{
 				_label.x = paddingHorizontal;
 				_label.y = height - h + paddingVertical;
+				_label.width = w;
+				_label.height = h;
 			}
 			var gr: Graphics = graphics;
 			gr.clear();

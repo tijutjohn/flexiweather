@@ -38,7 +38,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 
 		public function set m_capabilitiesLoadJob(value:BackgroundJob):void
 		{
-			trace("WMSServiceConfiguration load job = " + value);
+//			trace("WMSServiceConfiguration load job = " + value);
 			_m_capabilitiesLoadJob = value;
 		}
 
@@ -155,7 +155,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 				trace("ERROR m_capabilitiesLoadJob IS null:" + id)
 //				return;
 			} else {
-				trace("m_capabilitiesLoadJob loaded:" + id);
+//				trace("m_capabilitiesLoadJob loaded:" + id);
 				m_capabilitiesLoadJob.finish();
 				m_capabilitiesLoadJob = null;
 			}

@@ -244,17 +244,41 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 			notifyEvent(wvpe);
 		}
 
-		public function getWMSDimensionValue(s_dimName: String,
-				b_returnDefault: Boolean = false): String
+		private function isSupportedDimension(s_dimName: String): Boolean
 		{
-			if (s_dimName in md_dimensionValues)
-				return md_dimensionValues[s_dimName];
+			s_dimName = s_dimName.toLowerCase();
+			for (var currDimName: String in md_dimensionValues)
+			{
+				var currDimNameLowerCase: String = currDimName.toLowerCase();
+				if (currDimNameLowerCase == s_dimName)
+					return true;
+			}
+			return false;
+		}
+		private function getWMSDimensionValueInsensitive(s_dimName: String,
+				 b_returnDefault: Boolean = false): String
+		{
+			if (isSupportedDimension(s_dimName)) {
+				var s_dimNameLowerCase: String = s_dimName.toLowerCase();
+				for (var currDimName: String in md_dimensionValues)
+				{
+					var currDimNameLowerCase: String = currDimName.toLowerCase();
+					if (currDimNameLowerCase == s_dimNameLowerCase)
+						return md_dimensionValues[currDimName];
+				}
+			}
 			else
 			{
 				if (b_returnDefault)
 					return getWMSDimensionDefaultValue(s_dimName);
 				return null;
 			}
+			return null;
+		}
+		public function getWMSDimensionValue(s_dimName: String,
+				b_returnDefault: Boolean = false): String
+		{
+			return getWMSDimensionValueInsensitive(s_dimName, b_returnDefault);
 		}
 
 		public function supportWMSDimension(s_dimName: String): Boolean
@@ -306,7 +330,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 			{
 				for each (var dim: WMSDimension in layer.dimensions)
 				{
-					if (dim.name != s_dimName)
+					if (dim.name.toLowerCase() != s_dimName.toLowerCase())
 						continue;
 					if (dim.units == null)
 						continue;
@@ -335,7 +359,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 			{
 				for each (var dim: WMSDimension in layer.dimensions)
 				{
-					if (dim.name != s_dimName)
+					if (dim.name.toLowerCase() != s_dimName.toLowerCase())
 						continue;
 					if (dim.units == null)
 						continue;
@@ -363,7 +387,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 			{
 				for each (var dim: WMSDimension in layer.dimensions)
 				{
-					if (dim.name != s_dimName)
+					if (dim.name.toLowerCase() != s_dimName.toLowerCase())
 						continue;
 					if (a_dimValues == null)
 						a_dimValues = dim.values;

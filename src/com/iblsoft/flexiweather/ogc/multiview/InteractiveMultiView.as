@@ -274,14 +274,13 @@ package com.iblsoft.flexiweather.ogc.multiview
 				removeWidget(oldIW);
 			}
 			_widgetsCountToBeReady = new ArrayCollection();
-			
+			var newSelectedIndex: int = 0;
 			var synchronizator: ISynchronizator = getConfigurationSynchronizator(_configuration);
 			for (j = 0; j < newConfiguration.rows; j++)
 			{
 				for (i = 0; i < newConfiguration.columns; i++)
 				{
 					iw = _interactiveWidgets.getWidgetAt(cnt);
-					cnt++;
 					if (iw)
 					{
 						resetWidget(iw);
@@ -650,6 +649,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 				_selectedInteractiveWidget = value;
 				if (_selectedInteractiveWidget)
 				{
+					trace("selectedInteractiveWidget: " + _selectedInteractiveWidget.id);
 					registerSelectedInteractiveWidget();
 				}
 				dispatchEvent(new FlexEvent(FlexEvent.SELECTION_CHANGE));
@@ -1231,7 +1231,10 @@ package com.iblsoft.flexiweather.ogc.multiview
 			synchronizator.invalidateSynchronizator();
 			
 			if (!interactiveWidget)
+			{
+				debug("synchronizeWidgets interactiveWidget is null, go with selected widget: " + selectedInteractiveWidget.id);
 				interactiveWidget = selectedInteractiveWidget;
+			}
 			debug("synchronizeWidgets " + interactiveWidget.id, "Info", "InteractiveMultiView");
 			var selectedIndex: int = -1;
 			if (_configuration && _configuration.customData && _configuration.customData.hasOwnProperty('selectedIndex'))
@@ -1269,6 +1272,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 		{
 			if (debugConsole)
 				debugConsole.print(str, type, tag);
+			
+			trace(tag + "| " + type + "| " + str);
 		}
 
 		override public function toString(): String
@@ -1361,13 +1366,27 @@ class WidgetCollection
 		_collection.refresh();
 		debugWidgetsIDs();
 	}
+	
+	private function getWidgetNumberFromID(widget: InteractiveWidget): int
+	{
+		var idStart: String = 'm_iw';
+		if (widget.id != null && widget.id.indexOf(idStart) == 0)
+		{
+			var idStr: String = widget.id.substring(idStart.length, widget.id.length);
+			var id: int = parseInt(idStr);
+			return id;
+		}
+		return -1;
+	}
 
 	private function sortWidgets(widget1: InteractiveWidget, widget2: InteractiveWidget): int
 	{
-		trace("sortWidgets : " + widget1.id + " and " + widget2.id);
-		if (widget1.id < widget2.id)
+		var id1: int = getWidgetNumberFromID(widget1);
+		var id2: int = getWidgetNumberFromID(widget2);
+		trace("sortWidgets : " + widget1.id + "/"+id1+" and " + widget2.id+"/"+id2);
+		if (id1 < id2)
 			return -1;
-		if (widget1.id > widget2.id)
+		if (id1 > id2)
 			return 1;
 		return 0;
 	}

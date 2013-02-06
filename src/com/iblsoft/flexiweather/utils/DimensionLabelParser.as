@@ -81,6 +81,7 @@ package com.iblsoft.flexiweather.utils
 							//run + forecast
 							var run: Object = getWMSDimensionValue(layerMap, layerID, 'RUN');
 							var forecast: Object = getWMSDimensionValue(layerMap, layerID, 'FORECAST');
+							var time: Object = getWMSDimensionValue(layerMap, layerID, 'TIME');
 							if (run && forecast)
 							{
 								var runDate: Date = run.data as Date
@@ -88,6 +89,9 @@ package com.iblsoft.flexiweather.utils
 								runDate = new Date(runDate.time + forecastDuration.milisecondsTotal);
 								run.data = runDate
 								replacedString = formatWMSDimensionValue(run, format, useUTC);
+							} else if (time)
+							{
+								replacedString = formatWMSDimensionValue(time, format, useUTC);
 							}
 						}
 						else if (tagName.toLowerCase() == GlobalVariable.LEVEL)
@@ -141,6 +145,10 @@ package com.iblsoft.flexiweather.utils
 				interactiveLayer = layerComposer.getPrimaryLayer() as InteractiveLayerMSBase;
 			if (interactiveLayer)
 			{
+				if (dimensionName == "TIME")
+				{
+					trace("DLP check TIME value");
+				}
 				var value: String = interactiveLayer.getWMSDimensionValue(dimensionName, true);
 				if (value)
 				{

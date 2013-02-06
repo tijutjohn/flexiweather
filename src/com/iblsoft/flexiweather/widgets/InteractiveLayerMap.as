@@ -218,9 +218,9 @@ package com.iblsoft.flexiweather.widgets
 						{
 							setPrimaryLayer(layer as InteractiveLayerMSBase);
 						}
+						debug("InteractiveLayerMap serialize add layer: " + layer + " name: " + layer.name);
+						newLayers.push(layer);
 					}
-					debug("InteractiveLayerMap serialize add layer: " + layer + " name: " + layer.name);
-					newLayers.push(layer);
 				}
 				var de: DynamicEvent = new DynamicEvent(LAYERS_SERIALIZED_AND_READY);
 				de['layers'] = newLayers;
@@ -1106,6 +1106,8 @@ import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
 import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 
+import mx.controls.Alert;
+
 class LayerSerializationWrapper implements Serializable
 {
 	public var m_layer: InteractiveLayer;
@@ -1120,11 +1122,16 @@ class LayerSerializationWrapper implements Serializable
 			var s_layerType: String = storage.serializeString("layer-type", null, s_layerName);
 			
 			var config: ILayerConfiguration = LayerConfigurationManager.getInstance().getLayerConfigurationByLabel(s_layerType);
-			m_layer = config.createInteractiveLayer(m_iw);
-			m_layer.layerName = s_layerName;
-			if (m_layer is Serializable)
+			if (config == null)
 			{
-				(m_layer as Serializable).serialize(storage);
+				Alert.show("Can not recreate layer: " + s_layerName, "Load Map Error", Alert.OK);
+			} else {
+				m_layer = config.createInteractiveLayer(m_iw);
+				m_layer.layerName = s_layerName;
+				if (m_layer is Serializable)
+				{
+					(m_layer as Serializable).serialize(storage);
+				}
 			}
 		}
 		else
