@@ -77,6 +77,9 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 			++mi_updateCycleAge;
 			if (ma_requests.length > 0)
 			{
+				var wmsCache: WMSCache = m_layer.getCache() as WMSCache;
+				wmsCache.cacheItemLoadingCanceled(viewProperties);
+				
 				for each (var request: URLRequest in ma_requests)
 				{
 					m_loader.cancel(request);

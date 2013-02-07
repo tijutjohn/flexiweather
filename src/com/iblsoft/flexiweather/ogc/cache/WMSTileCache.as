@@ -255,6 +255,20 @@ package com.iblsoft.flexiweather.ogc.cache
 			md_noDataCache[s_key] = true;
 		}
 
+		override public function cacheItemLoadingCanceled(viewProperties: IViewProperties): void
+		{
+			if (!supportCaching)
+				return;
+			
+			var qttTileViewProperties: TiledTileViewProperties = viewProperties as TiledTileViewProperties;
+			if (!qttTileViewProperties)
+				return;
+			
+			var s_key: String = getQTTTileViewCacheKey(qttTileViewProperties);
+			
+			delete md_cacheLoading[s_key];
+		}
+			
 		override public function isItemCached(viewProperties: IViewProperties, b_checkNoDataCache: Boolean = true): Boolean
 		{
 			var qttTileViewProperties: TiledTileViewProperties = viewProperties as TiledTileViewProperties;

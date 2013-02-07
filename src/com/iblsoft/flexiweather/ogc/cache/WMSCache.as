@@ -328,6 +328,20 @@ package com.iblsoft.flexiweather.ogc.cache
 			dispatchEvent(wce);
 		}
 
+		public function cacheItemLoadingCanceled(viewProperties: IViewProperties): void
+		{
+			if (!supportCaching)
+				return;
+			
+			var wmsViewProperties: WMSViewProperties = viewProperties as WMSViewProperties;
+			if (!wmsViewProperties)
+				return;
+			
+			var s_key: String = qetWMSViewCacheKey(wmsViewProperties);
+			
+			delete md_cacheLoading[s_key];
+		}
+		
 		public function debugCache(): String
 		{
 			var str: String = 'WMSCache';
