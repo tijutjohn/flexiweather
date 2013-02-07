@@ -316,13 +316,17 @@ package com.iblsoft.flexiweather.ogc.tiling
 					mb_updateAfterMakingVisible = true;
 					return;
 				}
-				var loader: IWMSViewPropertiesLoader = getWMSViewPropertiesLoader();
-				loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
-				loader.addEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
-				loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
-				loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onCurrentWMSDataLoadingFinishedFromCache);
-				loader.addEventListener("invalidateDynamicPart", onCurrentWMSDataInvalidateDynamicPart);
-				loader.updateWMSData(b_forceUpdate, m_currentQTTViewProperties, forcedLayerWidth, forcedLayerHeight);
+				if (!_loader)
+				{
+					getWMSViewPropertiesLoader();
+					_loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
+					_loader.addEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
+					_loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
+					_loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onCurrentWMSDataLoadingFinishedFromCache);
+					_loader.addEventListener("invalidateDynamicPart", onCurrentWMSDataInvalidateDynamicPart);
+				}
+				_loader.zoom = zoomLevel; 
+				_loader.updateWMSData(b_forceUpdate, m_currentQTTViewProperties, forcedLayerWidth, forcedLayerHeight);
 			}
 		}
 		protected var _currentQTTDataLoadingStarted: Boolean;
@@ -341,7 +345,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 		protected function onCurrentWMSDataLoadingFinished(event: InteractiveLayerEvent): void
 		{
 			var loader: IWMSViewPropertiesLoader = event.target as IWMSViewPropertiesLoader;
-			destroyWMSViewPropertiesLoader(loader);
+//			destroyWMSViewPropertiesLoader(loader);
 			notifyLoadingFinished();
 			_currentQTTDataLoadingStarted = false;
 			invalidateDynamicPart(true);
@@ -350,7 +354,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 		protected function onCurrentWMSDataLoadingFinishedFromCache(event: InteractiveLayerEvent): void
 		{
 			var loader: IWMSViewPropertiesLoader = event.target as IWMSViewPropertiesLoader;
-			destroyWMSViewPropertiesLoader(loader);
+//			destroyWMSViewPropertiesLoader(loader);
 			notifyLoadingFinishedFromCache();
 			_currentQTTDataLoadingStarted = false;
 			invalidateDynamicPart(true);
@@ -1325,6 +1329,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 		override public function destroy(): void
 		{
 			super.destroy();
+			
+			destroyWMSViewPropertiesLoader(_loader);
 			
 			var qttViewProperties: TiledViewProperties;
 			if (ma_preloadingQTTViewProperties)
