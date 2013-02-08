@@ -218,14 +218,11 @@ package com.iblsoft.flexiweather.ogc
 			loader.destroy();
 		}
 
-		private var _loader: MSBaseLoader;
+		
 		protected function getWMSViewPropertiesLoader(): IWMSViewPropertiesLoader
 		{
-			if (!_loader)
-			{
-				_loader = new MSBaseLoader(this); 
-			}
-			return _loader; 
+			var loader: MSBaseLoader = _loader = new MSBaseLoader(this); 
+			return loader; 
 		}
 
 		public function preload(viewProperties: IViewProperties): void
@@ -561,6 +558,8 @@ package com.iblsoft.flexiweather.ogc
 			_updateDataWaiting = true;
 		}
 
+		private var _loader: MSBaseLoader;
+		
 		override protected function updateData(b_forceUpdate: Boolean): void
 		{
 			if (!_layerInitialized)
@@ -1335,7 +1334,7 @@ package com.iblsoft.flexiweather.ogc
 				}
 				else
 				{
-					setStatus(InteractiveDataLayer.STATE_DATA_LOADED);
+//					setStatus(InteractiveDataLayer.STATE_DATA_LOADED);
 				}
 				return bIsSyncronized;
 			} else {

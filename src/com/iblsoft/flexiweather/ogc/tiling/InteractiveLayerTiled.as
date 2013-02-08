@@ -259,15 +259,13 @@ package com.iblsoft.flexiweather.ogc.tiling
 		 * 		Loading data functionality
 		 *
 		 **************************************************************************************************************************************/
-		protected var _loader: TiledLoader;
+		
 		protected function getWMSViewPropertiesLoader(): IWMSViewPropertiesLoader
 		{
-			if (!_loader)
-			{
-				_loader = new TiledLoader(this); 
-			}
-			_loader.zoom = zoomLevel;
-			return _loader;
+			var loader: TiledLoader = new TiledLoader(this); 
+			loader.zoom = zoomLevel;
+			
+			return loader;
 		}
 
 		/**
@@ -288,6 +286,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 			dataLoader.load(urlRequest, associatedData, s_backgroundJobName);
 		}
 
+		protected var _loader: TiledLoader;
+		
 		/**
 		 * Instead of call updateData, call invalidateData() function. It works exactly as invalidateProperties, invalidateSize or invalidateDisplayList.
 		 * You can call as many times as you want invalidateData function and updateData will be called just once each frame (if neeeded)
@@ -318,7 +318,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 				}
 				if (!_loader)
 				{
-					getWMSViewPropertiesLoader();
+					_loader = getWMSViewPropertiesLoader() as TiledLoader;
 					_loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
 					_loader.addEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
 					_loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
@@ -762,6 +762,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 		 * 		Preloading View properties functionality
 		 *
 		 **************************************************************************************************************************************/
+		private var _preloader: TiledLoader;
+		
 		public function preload(viewProperties: IViewProperties): void
 		{
 			var qttViewProperties: TiledViewProperties = viewProperties as TiledViewProperties;
@@ -775,13 +777,16 @@ package com.iblsoft.flexiweather.ogc.tiling
 			}
 			ma_preloadingQTTViewProperties.push(qttViewProperties);
 			//FIXME loader needs to be destroyed, when data are loaded
-			var loader: IWMSViewPropertiesLoader = getWMSViewPropertiesLoader();
+			if (!_preloader)
+			{
+				_preloader = getWMSViewPropertiesLoader() as TiledLoader;
 			//			loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onPreloadingWMSDataLoadingStarted);
 			//			loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
 			//			loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onPreloadingWMSDataLoadingStarted);
-			loader.addEventListener("invalidateDynamicPart", onQTTViewPropertiesDataInvalidateDynamicPart);
-			loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
-			loader.updateWMSData(true, qttViewProperties, forcedLayerWidth, forcedLayerHeight);
+				_preloader.addEventListener("invalidateDynamicPart", onQTTViewPropertiesDataInvalidateDynamicPart);
+				_preloader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
+				_preloader.updateWMSData(true, qttViewProperties, forcedLayerWidth, forcedLayerHeight);
+			}
 		}
 
 		/**

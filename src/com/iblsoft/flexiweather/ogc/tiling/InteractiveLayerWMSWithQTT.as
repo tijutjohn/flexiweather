@@ -69,6 +69,17 @@ package com.iblsoft.flexiweather.ogc.tiling
 			return gtileBBoxForWholeCRS || isTileableForCRS;
 		}
 
+		[Bindable(event = "statusChanged")]
+		[Inspectable(enumeration = "empty,loading data,no data available,data loaded with errors")]
+		override public function get status(): String
+		{
+			if (isTileable && m_tiledLayer)
+			{
+				return m_tiledLayer.status;
+			}
+			return super.status;
+		}
+		
 		override public function set visible(b_visible: Boolean): void
 		{
 			super.visible = b_visible;

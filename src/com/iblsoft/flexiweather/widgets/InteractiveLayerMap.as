@@ -788,8 +788,10 @@ package com.iblsoft.flexiweather.widgets
 			for each (so in l_syncLayers)
 			{
 				var status: String = InteractiveDataLayer(so).status;
-				if (status == InteractiveDataLayer.STATE_LOADING_DATA)
+				if (status != InteractiveDataLayer.STATE_DATA_LOADED)
+				{
 					return false;
+				}
 			}
 			return true;
 		}
