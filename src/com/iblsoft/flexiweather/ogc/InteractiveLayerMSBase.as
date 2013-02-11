@@ -302,19 +302,23 @@ package com.iblsoft.flexiweather.ogc
 			//			var parts: Array = container.mapBBoxToViewParts(projection.extentBBox);
 //			var dimensions: Array = getDimensionForCache(wmsViewProperties);
 			var isCached: Boolean = true;
-			for each (var partBBoxToUpdate: BBox in parts)
+			if (parts.length > 0)
 			{
-				var isPartCached: Boolean = isPartCached(
-						wmsViewProperties,
-						partBBoxToUpdate,
-						uint(Math.round(partBBoxToUpdate.width / f_horizontalPixelSize)),
-						uint(Math.round(partBBoxToUpdate.height / f_verticalPixelSize))
-						);
-				if (!isPartCached)
-					return false;
+				for each (var partBBoxToUpdate: BBox in parts)
+				{
+					var isPartCached: Boolean = isPartCached(
+							wmsViewProperties,
+							partBBoxToUpdate,
+							uint(Math.round(partBBoxToUpdate.width / f_horizontalPixelSize)),
+							uint(Math.round(partBBoxToUpdate.height / f_verticalPixelSize))
+							);
+					if (!isPartCached)
+						return false;
+				}
+				//all parts are cached, so all WMS view properties are cached
+				return true;
 			}
-			//all parts are cached, so all WMS view properties are cached
-			return true;
+			return false;
 		}
 
 		/**

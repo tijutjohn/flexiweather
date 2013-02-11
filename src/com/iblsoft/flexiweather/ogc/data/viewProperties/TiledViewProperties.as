@@ -136,21 +136,25 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		public function isPreloaded(cache: WMSTileCache): Boolean
 		{
 			var isCached: Boolean = true;
-			for each (var qttTile: TiledTileViewProperties in ma_qttTiles)
+			if (ma_qttTiles.length > 0)
 			{
-				var isTileCached: Boolean = cache.getCacheItem(qttTile) != null;
-				if (!isTileCached)
-					return false;
+				for each (var qttTile: TiledTileViewProperties in ma_qttTiles)
+				{
+					var isTileCached: Boolean = cache.getCacheItem(qttTile) != null;
+					if (!isTileCached)
+						return false;
+				}
+				//all parts are cached, so all WMS view properties are cached
+				return true;
 			}
-			//all parts are cached, so all WMS view properties are cached
-			return true;
+			return false;
 		}
 
 		public function clone(): IViewProperties
 		{
 			var viewProperties: TiledViewProperties = new TiledViewProperties();
 			//FIXME implement QTTViewProperties clone() function
-			return viewProperties
+			return viewProperties;
 		}
 
 		override public function toString(): String

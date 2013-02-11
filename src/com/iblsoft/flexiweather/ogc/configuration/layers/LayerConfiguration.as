@@ -7,18 +7,26 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
+	
 	import spark.components.Group;
 
 	public class LayerConfiguration extends EventDispatcher implements Serializable, ILayerConfiguration
 	{
 		Storage.addChangedClass('com.iblsoft.flexiweather.ogc.LayerConfiguration', 'com.iblsoft.flexiweather.ogc.configuration.layers.LayerConfiguration', new Version(1, 6, 0));
+		
+		public static var id_max: uint;
+		
+		public var id: int;
+		
 		protected var ms_label: String;
 		protected var ms_previewURL: String = null;
 
 		public function LayerConfiguration()
 		{
+			id = id_max++;
 		}
 
 		public function serialize(storage: Storage): void
@@ -86,6 +94,11 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		public function createCustomLayerOption(layer: IConfigurableLayer): Group
 		{
 			return new Group();
+		}
+		
+		override public function toString(): String
+		{
+			return 'LayerConfiguration ['+id+']';
 		}
 	}
 }

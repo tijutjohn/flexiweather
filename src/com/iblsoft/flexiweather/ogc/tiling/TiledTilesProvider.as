@@ -187,7 +187,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			_tilesToBeLoaded--;
 			
-			trace("TiledTilesProvider onDataLoaded: " + _tilesToBeLoaded + " from " + _tilesTotal);
+//			trace("TiledTilesProvider onDataLoaded: " + _tilesToBeLoaded + " from " + _tilesTotal);
 			
 			var m_loader: WMSImageLoader = event.target as WMSImageLoader;
 //			removeEventListeners(m_loader);

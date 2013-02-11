@@ -777,6 +777,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			}
 			ma_preloadingQTTViewProperties.push(qttViewProperties);
 			//FIXME loader needs to be destroyed, when data are loaded
+/*			
 			if (!_preloader)
 			{
 				_preloader = getWMSViewPropertiesLoader() as TiledLoader;
@@ -785,8 +786,17 @@ package com.iblsoft.flexiweather.ogc.tiling
 			//			loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onPreloadingWMSDataLoadingStarted);
 				_preloader.addEventListener("invalidateDynamicPart", onQTTViewPropertiesDataInvalidateDynamicPart);
 				_preloader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
-				_preloader.updateWMSData(true, qttViewProperties, forcedLayerWidth, forcedLayerHeight);
 			}
+			_preloader.updateWMSData(true, qttViewProperties, forcedLayerWidth, forcedLayerHeight);
+*/
+			
+			var preloader: TiledLoader = getWMSViewPropertiesLoader() as TiledLoader;
+			//			loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onPreloadingWMSDataLoadingStarted);
+			//			loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
+			//			loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onPreloadingWMSDataLoadingStarted);
+			preloader.addEventListener("invalidateDynamicPart", onQTTViewPropertiesDataInvalidateDynamicPart);
+			preloader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
+			preloader.updateWMSData(true, qttViewProperties, forcedLayerWidth, forcedLayerHeight);
 		}
 
 		/**

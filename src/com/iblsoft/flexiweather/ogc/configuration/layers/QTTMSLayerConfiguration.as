@@ -121,9 +121,9 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			{
 				var tilingInfo: TiledTilingInfo = tilingCRSsAndExtents[0];
 				if (tilingInfo)
-					return 'QTTMSLayerConfiguration urlPattern: ' + tilingInfo.urlPattern + ' CRS: ' + tilingInfo.crsWithBBox.crs + ' bbox: ' + tilingInfo.crsWithBBox.bbox.toBBOXString();
+					return 'QTTMSLayerConfiguration ['+id+'] urlPattern: ' + tilingInfo.urlPattern + ' CRS: ' + tilingInfo.crsWithBBox.crs + ' bbox: ' + tilingInfo.crsWithBBox.bbox.toBBOXString();
 			}
-			return 'QTTMSLayerConfiguration with NO TILING info';
+			return 'QTTMSLayerConfiguration ['+id+'] with NO TILING info';
 		}
 	}
 }
