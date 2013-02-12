@@ -353,8 +353,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 			if (ma_requests.length == 0)
 			{
 				var imageParts: ArrayCollection = wmsViewProperties.imageParts;
-				var total: int = imageParts.length;
-				for (var i: int = 0; i < total; )
+				for (var i: int = 0; i < imageParts.length; )
 				{
 					var imagePart: ImagePart = imageParts.getItemAt(i) as ImagePart;
 					if (imagePart.mi_updateCycleAge < mi_updateCycleAge)
