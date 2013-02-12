@@ -95,6 +95,24 @@ package com.iblsoft.flexiweather.ogc
 		{
 			return m_currentWMSViewProperties;
 		}
+		
+		/**
+		 * Selected style name. It is stored in currentWMSViewProperties, but on save (serialize) it's stored in layer because of loading process should set correctly
+		 * stylename on layer initialization (which is asynchronous (see initializeLayerProperties() method)) 
+		 */		
+		protected var styleNameValue: String;
+		/**
+		 * Selected level value (ELEVATION). It is stored in currentWMSViewProperties, but on save (serialize) it's stored in layer because of loading process should set correctly
+		 * level on layer initialization (which is asynchronous (see initializeLayerProperties() method)) 
+		 */		
+		protected var level: String;
+		
+		/**
+		 * Selected synchronization role value. It is stored in currentWMSViewProperties, but on save (serialize) it's stored in layer because of loading process should set correctly
+		 *  synchronization role on layer initialization (which is asynchronous (see initializeLayerProperties() method)) 
+		 */		
+		protected var synchronizationRoleValue: String;
+		
 		/**
 		 * wms data which are already preloaded
 		 */
@@ -114,6 +132,9 @@ package com.iblsoft.flexiweather.ogc
 		public function InteractiveLayerMSBase(container: InteractiveWidget, cfg: WMSLayerConfiguration)
 		{
 			super(container);
+			
+			synchronizationRoleValue = SynchronisationRole.NONE;
+			
 			m_cfg = cfg;
 			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
 			
@@ -143,7 +164,7 @@ package com.iblsoft.flexiweather.ogc
 			m_currentWMSViewProperties.addEventListener(WMSViewPropertiesEvent.WMS_DIMENSION_VALUE_SET, onWMSDimensionValueSet);
 			m_featureInfoLoader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onFeatureInfoLoaded);
 			m_featureInfoLoader.addEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onFeatureInfoLoadFailed);
-			m_synchronisationRole = new SynchronisationRole();
+			m_synchronisationRole = new SynchronisationRole(synchronizationRoleValue);
 			setConfiguration(m_cfg);
 			//filters = [ new GlowFilter(0xffffe0, 0.8, 2, 2, 2) ];
 			createEffects();
@@ -152,9 +173,22 @@ package com.iblsoft.flexiweather.ogc
 //			setStyle('removedEffect', fadeOut);
 			setStyle('hideEffect', fadeOut);
 			
+			
+			//check if layers was created from serialization
+//			if (_unserializedWMSViewProperties)
+//			{
+//				m_currentWMSViewProperties = _unserializedWMSViewProperties.clone() as WMSViewProperties;
+//				_unserializedWMSViewProperties.destroy();
+//				_unserializedWMSViewProperties = null;
+//			}
 			// update current wms properties from temporary storage. That means that user set wms style, wms dimension value, custom parameter or configuration
 			// before layer was added to stage
 			_tempParameterStorage.updateCurrentWMSPropertiesFromStorage(m_currentWMSViewProperties);
+			
+			if (styleNameValue)
+				m_currentWMSViewProperties.setWMSStyleName(0, styleNameValue);
+			if (level)
+				m_currentWMSViewProperties.setWMSDimensionValue('elevation', level);
 		}
 		private var fadeIn: Fade;
 		private var fadeOut: Fade;

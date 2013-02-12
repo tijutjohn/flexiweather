@@ -7,8 +7,10 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.ogc.cache.ICache;
 	import com.iblsoft.flexiweather.ogc.cache.ICachedLayer;
 	import com.iblsoft.flexiweather.ogc.cache.WMSCache;
-	import com.iblsoft.flexiweather.ogc.data.viewProperties.IWMSViewPropertiesLoader;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.ogc.data.ImagePart;
+	import com.iblsoft.flexiweather.ogc.data.viewProperties.IWMSViewPropertiesLoader;
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.WMSViewProperties;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
@@ -21,6 +23,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.Graphics;
@@ -29,10 +32,10 @@ package com.iblsoft.flexiweather.ogc
 	import flash.geom.Point;
 	import flash.net.URLRequest;
 	import flash.utils.Timer;
+	
 	import mx.collections.ArrayCollection;
 	import mx.events.DynamicEvent;
 	import mx.logging.Log;
-	import com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration;
 
 	[Event(name = "wmsStyleChanged", type = "fcom.iblsoft.flexiweather.events.InteractiveLayerWMSEvent")]
 	public class InteractiveLayerWMS extends InteractiveLayerMSBase implements ISynchronisedObject, Serializable, IConfigurableLayer, ICachedLayer
@@ -91,42 +94,41 @@ package com.iblsoft.flexiweather.ogc
 			var styleName: String;
 			if (storage.isLoading())
 			{
-//				styleName = storage.serializeString("style-name", name);
-//				if (styleName)
-//					setWMSStyleName(0, styleName);
 				//TODO do we really need to add here 2nd parameter?
-				var primaryLayer: Boolean = storage.serializeBool("primary-layer", true);
-				if (primaryLayer)
-					synchronisationRole.setRole(SynchronisationRole.PRIMARY);
 				var newAlpha: Number = storage.serializeNumber("transparency", alpha);
 				if (newAlpha < 1)
 					alpha = newAlpha;
 				visible = storage.serializeBool("visible", visible, true);
 				synchroniseLevel = storage.serializeBool('synchroniseLevel', false);
-//				for each(s_dimName in getWMSDimensionsNames()) {
-//					var level: String = storage.serializeString(s_dimName, null, null);
-//					if (level)
-//						setWMSDimensionValue('ELEVATION', level );
-//				}
+				
+				
+				styleNameValue = storage.serializeString("style-name", styleNameValue, null);
+				level = storage.serializeString(GlobalVariable.LEVEL, level, null);
+				
+				var primaryLayer: Boolean = storage.serializeBool("primary-layer", true);
+				if (primaryLayer)
+					synchronizationRoleValue = SynchronisationRole.PRIMARY;
 			}
 			else
 			{
-//				styleName = getWMSStyleName(0);
-//				if (styleName)
-//					storage.serializeString("style-name", styleName, null);
-//				for each(s_dimName in getWMSDimensionsNames()) {
-//					if (s_dimName.toLowerCase() == 'elevation')
-//						storage.serializeString(GlobalVariable.LEVEL, getWMSDimensionValue(s_dimName), null);
-//				}
+				//get values from currentWMSViewProperties and store them in layer properties
+				styleNameValue = m_currentWMSViewProperties.getWMSStyleName(0);
+				level = m_currentWMSViewProperties.getWMSDimensionValue('elevation');
+				synchronizationRoleValue = m_synchronisationRole.role;
+				
 				if (alpha < 1)
 					storage.serializeNumber("transparency", alpha);
 				storage.serializeBool("visible", visible);
 				if (isPrimaryLayer())
 					storage.serializeBool("primary-layer", true);
+				
+				if (styleName)
+					storage.serializeString("style-name", styleNameValue, null);
+				if (level)
+					storage.serializeString(GlobalVariable.LEVEL, level, null);
+				
 				storage.serializeBool('synchroniseLevel', synchroniseLevel);
 			}
-			if (m_currentWMSViewProperties)
-				m_currentWMSViewProperties.serialize(storage);
 		}
 
 		override public function setConfiguration(cfg: WMSLayerConfiguration): void
