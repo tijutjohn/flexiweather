@@ -335,6 +335,18 @@ package com.iblsoft.flexiweather.widgets
 			dispatchEvent(event);
 		}
 
+		private var mb_preloading: Boolean;
+		protected var ma_preloadingBuffer: Array;
+		
+		public function get preloading(): Boolean
+		{
+			return mb_preloading;
+		}
+		protected function setPreloadingStatus(value: Boolean): void
+		{
+			mb_preloading = value;
+		}
+		
 		public function get dataLoader(): WMSImageLoader
 		{
 			return m_loader;

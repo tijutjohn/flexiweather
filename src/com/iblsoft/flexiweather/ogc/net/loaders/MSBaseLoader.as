@@ -56,12 +56,30 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 
 		public function destroy(): void
 		{
-			m_loader.removeEventListener(UniURLLoaderEvent.DATA_LOADED, onDataLoaded);
-			m_loader.removeEventListener(ProgressEvent.PROGRESS, onDataProgress);
-			m_loader.removeEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onDataLoadFailed);
-			m_loader = null;
+			if (m_loader)
+			{
+				m_loader.removeEventListener(UniURLLoaderEvent.DATA_LOADED, onDataLoaded);
+				m_loader.removeEventListener(ProgressEvent.PROGRESS, onDataProgress);
+				m_loader.removeEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onDataLoadFailed);
+				m_loader = null;
+			}
 		}
 
+		public function cancel(): void
+		{
+			if (ma_requests.length > 0)
+			{
+				var wmsCache: WMSCache = m_layer.getCache() as WMSCache;
+				wmsCache.cacheItemLoadingCanceled(m_wmsViewProperties);
+				
+				for each (var request: URLRequest in ma_requests)
+				{
+					m_loader.cancel(request);
+				}
+				ma_requests.removeAll();
+			}
+		}
+		
 		/**
 		 * Check if WMS data are cached (only if b_forceUpdate is true) and load any data parts which are missing.
 		 *
@@ -75,17 +93,10 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 			//check if data are not already cached
 			//			super.updateData(b_forceUpdate);
 			++mi_updateCycleAge;
-			if (ma_requests.length > 0)
-			{
-				var wmsCache: WMSCache = m_layer.getCache() as WMSCache;
-				wmsCache.cacheItemLoadingCanceled(viewProperties);
-				
-				for each (var request: URLRequest in ma_requests)
-				{
-					m_loader.cancel(request);
-				}
-				ma_requests.removeAll();
-			}
+			
+			//cancel all running requests
+			cancel();
+			
 			var i_width: int = int(m_layer.container.width);
 			var i_height: int = int(m_layer.container.height);
 			if (forcedLayerWidth > 0)
@@ -193,7 +204,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				addImagePart(wmsViewProperties, imagePart, img);
 				onFinishedRequest(wmsViewProperties, null);
 				invalidateDynamicPart();
-				notifyLoadingFinishedFromCache(null);
+				notifyLoadingFinishedFromCache({wmsViewProperties: wmsViewProperties});
 			}
 		}
 
@@ -314,8 +325,8 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 					wmsViewProperties.url = event.request;
 					wmsCache.addCacheItem(imagePart.m_image, wmsViewProperties, event.associatedData);
 					invalidateDynamicPart();
-					notifyLoadingFinishedFromCache(event.associatedData);
-					return;
+//					notifyLoadingFinished(event.associatedData);
+//					return;
 				}
 				else
 				{

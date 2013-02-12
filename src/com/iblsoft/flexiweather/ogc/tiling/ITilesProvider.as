@@ -12,6 +12,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 		 *
 		 */
 		function getTiles(tilesIndices: Array, callbackTileLoaded: Function, callbackTileLoadFailed: Function): void;
+		function cancel(): void;
 		function destroy(): void;
 	}
 }

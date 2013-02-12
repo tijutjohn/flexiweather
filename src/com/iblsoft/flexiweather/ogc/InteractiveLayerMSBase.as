@@ -96,10 +96,6 @@ package com.iblsoft.flexiweather.ogc
 			return m_currentWMSViewProperties;
 		}
 		/**
-		 * wms data which are currently preloading
-		 */
-		protected var ma_preloadingWMSViewProperties: Array;
-		/**
 		 * wms data which are already preloaded
 		 */
 		protected var ma_preloadedWMSViewProperties: Array;
@@ -137,7 +133,7 @@ package com.iblsoft.flexiweather.ogc
 		
 		private function initializeLayerProperties(): void
 		{
-			ma_preloadingWMSViewProperties = [];
+			ma_preloadingBuffer = [];
 			ma_preloadedWMSViewProperties = [];
 			m_currentWMSViewProperties = new WMSViewProperties();
 			m_currentWMSViewProperties.parentLayer = this;
@@ -211,20 +207,38 @@ package com.iblsoft.flexiweather.ogc
 //			wmsViewProperties.cache = m_cache;
 		}
 
-		protected function destroyWMSViewPropertiesPreloader(loader: IWMSViewPropertiesLoader): void
+		protected function destroyWMSViewPropertiesPreloader(): void
 		{
-			loader.removeEventListener("invalidateDynamicPart", onWMSViewPropertiesDataInvalidateDynamicPart);
-			loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
-			loader.destroy();
+			if (_preloader)
+			{
+				_preloader.removeEventListener("invalidateDynamicPart", onWMSViewPropertiesDataInvalidateDynamicPart);
+				_preloader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
+				_preloader.destroy();
+			}
 		}
 
 		
 		protected function getWMSViewPropertiesLoader(): IWMSViewPropertiesLoader
 		{
-			var loader: MSBaseLoader = _loader = new MSBaseLoader(this); 
+			var loader: MSBaseLoader = new MSBaseLoader(this); 
 			return loader; 
 		}
 
+		
+		private var _preloader: MSBaseLoader;
+		/**
+		 * Function will cancel all preloading immediately 
+		 * 
+		 */		
+		public function cancelPreload(): void
+		{
+			//FIXME cancel currently preloading request 
+			destroyPreloading();
+			
+			ma_preloadedWMSViewProperties = [];
+			ma_preloadingBuffer = [];
+		}
+		
 		public function preload(viewProperties: IViewProperties): void
 		{
 			var wmsViewProperties: WMSViewProperties = viewProperties as WMSViewProperties;
@@ -232,22 +246,32 @@ package com.iblsoft.flexiweather.ogc
 				return;
 			wmsViewProperties.name = name;
 			updateWMSViewPropertiesConfiguration(wmsViewProperties, m_cfg, m_cache);
-			//TODO should we check if CRS abd ViewBBOx is null and set it automatically to InteractiveWidget CRS and ViewBBox
+
 			if (!wmsViewProperties.crs)
 				wmsViewProperties.crs = container.getCRS();
 			if (!wmsViewProperties.getViewBBox())
 				wmsViewProperties.setViewBBox(container.getViewBBox());
-			if (ma_preloadingWMSViewProperties.length == 0)
+
+			if (!_preloader)
 			{
-				dispatchEvent(new InteractiveLayerEvent(InteractiveDataLayer.PRELOADING_STARTED, true));
+				_preloader = getWMSViewPropertiesLoader() as MSBaseLoader;
+				_preloader.addEventListener("invalidateDynamicPart", onWMSViewPropertiesDataInvalidateDynamicPart);
+				_preloader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onPreloadingWMSDataLoadingStarted);
+				_preloader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
+				_preloader.addEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onPreloadingWMSDataLoadingFinished);
+				
+				trace(this + " PRELOADER created: " + _preloader.id);
 			}
-			ma_preloadingWMSViewProperties.push(wmsViewProperties);
-			//FIXME loader needs to be destroyed, when data are loaded
-			var loader: IWMSViewPropertiesLoader = getWMSViewPropertiesLoader();
-			loader.addEventListener("invalidateDynamicPart", onWMSViewPropertiesDataInvalidateDynamicPart);
-			loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onPreloadingWMSDataLoadingStarted);
-			loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
-			loader.updateWMSData(true, wmsViewProperties, forcedLayerWidth, forcedLayerHeight);
+			
+			trace(this + " preload preloading: " + preloading);
+			if (!preloading)
+			{
+				setPreloadingStatus(true);
+				_preloader.updateWMSData(true, wmsViewProperties, forcedLayerWidth, forcedLayerHeight);
+			} else {
+				ma_preloadingBuffer.push(wmsViewProperties);
+				trace(this + " preload add to buffer: " + ma_preloadingBuffer.length);
+			}
 		}
 
 		public function isPreloadedMultiple(viewPropertiesArray: Array): Boolean
@@ -395,35 +419,26 @@ package com.iblsoft.flexiweather.ogc
 		protected function onPreloadingWMSDataLoadingFinished(event: InteractiveLayerEvent): void
 		{
 			var loader: IWMSViewPropertiesLoader = event.target as IWMSViewPropertiesLoader;
-			destroyWMSViewPropertiesPreloader(loader);
+//			destroyWMSViewPropertiesPreloader(loader);
 			var wmsViewProperties: WMSViewProperties = event.data.wmsViewProperties as WMSViewProperties;
 			wmsViewProperties.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
-//			debug("onPreloadingWMSDataLoadingFinished wmsData: " + wmsViewProperties);
-			//remove wmsViewProperties from array of currently preloading wms view properties
-			var total: int = ma_preloadingWMSViewProperties.length;
-			for (var i: int = 0; i < total; i++)
-			{
-				var currWMSViewProperties: WMSViewProperties = ma_preloadingWMSViewProperties[i] as WMSViewProperties;
-				if (currWMSViewProperties && currWMSViewProperties.equals(wmsViewProperties))
-				{
-					ma_preloadingWMSViewProperties.splice(i, 1);
-					break;
-				}
-			}
+			wmsViewProperties.removeEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onPreloadingWMSDataLoadingFinished);
+
 			//add wmsViewProperties to array of already preloaded wms view properties
 			ma_preloadedWMSViewProperties.push(wmsViewProperties);
-			notifyProgress(ma_preloadedWMSViewProperties.length, ma_preloadingWMSViewProperties.length + ma_preloadedWMSViewProperties.length, 'frames');
-			if (ma_preloadingWMSViewProperties.length == 0)
+			setPreloadingStatus(false);
+			
+			notifyProgress(ma_preloadedWMSViewProperties.length, ma_preloadingBuffer.length + ma_preloadedWMSViewProperties.length, 'frames');
+			
+			
+			if (ma_preloadingBuffer.length > 0)
 			{
-				//all wms view properties are preloaded, delete preloaded wms properties, bitmaps are stored in cache
-//				total = ma_preloadedWMSViewProperties.length;
-//				for (i = 0; i < total; i++)
-//				{
-//					currWMSViewProperties = ma_preloadedWMSViewProperties[i] as WMSViewProperties
-//					delete currWMSViewProperties;
-//				}
-				ma_preloadedWMSViewProperties = [];
-				//dispatch preloading finished to notify all about all WMSViewProperties are preloaded
+				//preload next frame
+				var newWMSViewProperties: WMSViewProperties = ma_preloadingBuffer.shift() as WMSViewProperties;
+				preload(newWMSViewProperties);
+			} else {
+				//all frames are preloaded
+				ma_preloadingBuffer = [];
 				dispatchEvent(new InteractiveLayerEvent(InteractiveDataLayer.PRELOADING_FINISHED, true));
 			}
 		}
@@ -435,6 +450,7 @@ package com.iblsoft.flexiweather.ogc
 
 		protected function onWMSViewPropertiesDataInvalidateDynamicPart(event: DynamicEvent): void
 		{
+			trace("onWMSViewPropertiesDataInvalidateDynamicPart");
 		}
 
 		protected function onCurrentWMSDataInvalidateDynamicPart(event: DynamicEvent): void
@@ -454,13 +470,17 @@ package com.iblsoft.flexiweather.ogc
 			notifyProgress(event.loaded, event.total, event.units);
 		}
 
-		private function removeLoaderListeners(loader: MSBaseLoader): void
+		private function destroyLoaderListeners(): void
 		{
-			loader.removeEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
-			loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
-			loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onCurrentWMSDataLoadingFinishedFromCache);
-			loader.removeEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
-			loader.removeEventListener("invalidateDynamicPart", onCurrentWMSDataInvalidateDynamicPart);
+			if (_loader)
+			{
+				_loader.removeEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
+				_loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
+				_loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onCurrentWMSDataLoadingFinishedFromCache);
+				_loader.removeEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
+				_loader.removeEventListener("invalidateDynamicPart", onCurrentWMSDataInvalidateDynamicPart);
+				_loader.destroy();
+			}
 		}
 		protected function onCurrentWMSDataLoadingFinished(event: InteractiveLayerEvent): void
 		{
@@ -592,21 +612,23 @@ package com.iblsoft.flexiweather.ogc
 					_loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onCurrentWMSDataLoadingFinishedFromCache);
 					_loader.addEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
 					_loader.addEventListener("invalidateDynamicPart", onCurrentWMSDataInvalidateDynamicPart);
+					
+					trace(this + " LOADER created: " + _loader.id);
 				}
 				_loader.updateWMSData(b_forceUpdate, m_currentWMSViewProperties, forcedLayerWidth, forcedLayerHeight);
 			}
 		}
 
-		override public function destroy(): void
+		private function destroyPreloading(): void
 		{
-			super.destroy();
 			var wmsViewProperties: WMSViewProperties;
-			if (ma_preloadingWMSViewProperties)
+			if (ma_preloadingBuffer)
 			{
-				for each (wmsViewProperties in ma_preloadingWMSViewProperties)
+				for each (wmsViewProperties in ma_preloadingBuffer)
 				{
 					wmsViewProperties.destroy();
 				}
+				ma_preloadingBuffer = null;
 			}
 			if (ma_preloadedWMSViewProperties)
 			{
@@ -614,9 +636,16 @@ package com.iblsoft.flexiweather.ogc
 				{
 					wmsViewProperties.destroy();
 				}
+				ma_preloadedWMSViewProperties = null;
 			}
-			ma_preloadingWMSViewProperties = null;
-			ma_preloadedWMSViewProperties = null;
+			destroyWMSViewPropertiesPreloader();
+			
+		}
+		
+		override public function destroy(): void
+		{
+			super.destroy();
+			var wmsViewProperties: WMSViewProperties;
 			if (md_customParameters)
 			{
 				md_customParameters = null;
@@ -638,6 +667,8 @@ package com.iblsoft.flexiweather.ogc
 				m_featureInfoLoader.removeEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onFeatureInfoLoadFailed);
 				m_featureInfoLoader = null;
 			}
+			destroyLoaderListeners();
+			destroyPreloading();
 			if (m_cfg)
 			{
 				//FIXME we neeed to check, if it's ok to destroy configuration (it should be done in LayerConfigurationManager on removeLayer action)

@@ -112,21 +112,27 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			return m_currentQTTViewProperties;
 		}
-		/**
-		 * wms data which are currently preloading
-		 */
-		protected var ma_preloadingQTTViewProperties: Array;
+		
 		/**
 		 * wms data which are already preloaded
 		 */
 		protected var ma_preloadedQTTViewProperties: Array;
 
+		/**
+		 * If you need InteractiveLayerTiled be dependent on capabilities, which are loaded by some provider outside of this class,
+		 * set onCapabilitiesDependent = true after creation of this layer and then each time capabitilities are ready set capabilitiesReady = true 
+		 */		
+		public var onCapabilitiesDependent: Boolean;
+		
+		public var capabilitiesReady: Boolean;
+		
 		public function InteractiveLayerTiled(container: InteractiveWidget = null, cfg: TiledLayerConfiguration = null)
 		{
 			super(container);
 			m_cfg = cfg;
 			
 			_tileMatrixSetLinks = new Array();
+			
 		}
 
 		/**************************************************************************************************************************************************
@@ -225,18 +231,21 @@ package com.iblsoft.flexiweather.ogc.tiling
 			
 			m_tilingUtils = new TilingUtils(this);
 			
-			ma_preloadingQTTViewProperties = [];
+			//preloading buffer, TiledViewProperties are stored inside
+			ma_preloadingBuffer = [];
+			
+			//buffer for already preloaded TiledViewProperties
 			ma_preloadedQTTViewProperties = [];
+			
 			m_currentQTTViewProperties = new TiledViewProperties();
 			m_currentQTTViewProperties.setConfiguration(m_cfg);
 			updateCurrentWMSViewProperties();
 			//			m_currentWMSViewProperties.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onCurrentWMSDataSynchronisedVariableChanged);
 			//			m_currentWMSViewProperties.addEventListener(WMSViewPropertiesEvent.WMS_DIMENSION_VALUE_SET, onWMSDimensionValueSet);
 			cache = new WMSTileCache();
-			//			_viewPartsReflections = new ViewPartReflectionsHelper(container);
 			
 			//TODO test
-			updateData(true);
+//			updateData(true);
 		}
 
 		/**
@@ -449,6 +458,10 @@ package com.iblsoft.flexiweather.ogc.tiling
 		 * 		Drawing functionality
 		 *
 		 **************************************************************************************************************************************/
+		override public function invalidateDisplayList():void
+		{
+			super.invalidateDisplayList();
+		}
 		override public function draw(graphics: Graphics): void
 		{
 			if (!_layerInitialized)
@@ -462,6 +475,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		private function customDraw(qttViewProperties: TiledViewProperties, graphics: Graphics, redrawBorder: Boolean = false): void
 		{
+			if (onCapabilitiesDependent && !capabilitiesReady)
+				return;
+			
 			if (!layerWasDestroyed)
 			{
 				if (mi_zoom == null)
@@ -764,6 +780,21 @@ package com.iblsoft.flexiweather.ogc.tiling
 		 **************************************************************************************************************************************/
 		private var _preloader: TiledLoader;
 		
+		/**
+		 * Function will cancel all preloading immediately 
+		 * 
+		 */		
+		public function cancelPreload(): void
+		{
+			//FIXME cancel currently preloading request
+			_preloader.cancel();
+			
+			//clear preloading buffer, but do not clear preloaded buffer, because just future preloads are canceled
+			ma_preloadingBuffer = [];
+			
+			setPreloadingStatus(false);
+		}
+		
 		public function preload(viewProperties: IViewProperties): void
 		{
 			var qttViewProperties: TiledViewProperties = viewProperties as TiledViewProperties;
@@ -771,32 +802,24 @@ package com.iblsoft.flexiweather.ogc.tiling
 				return;
 			qttViewProperties.name = name;
 			updateWMSViewPropertiesConfiguration(qttViewProperties, m_cfg, m_cache);
-			if (ma_preloadingQTTViewProperties.length == 0)
-			{
-				dispatchEvent(new InteractiveLayerEvent(InteractiveDataLayer.PRELOADING_STARTED, true));
-			}
-			ma_preloadingQTTViewProperties.push(qttViewProperties);
-			//FIXME loader needs to be destroyed, when data are loaded
-/*			
+			
 			if (!_preloader)
 			{
 				_preloader = getWMSViewPropertiesLoader() as TiledLoader;
-			//			loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onPreloadingWMSDataLoadingStarted);
-			//			loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
-			//			loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onPreloadingWMSDataLoadingStarted);
 				_preloader.addEventListener("invalidateDynamicPart", onQTTViewPropertiesDataInvalidateDynamicPart);
 				_preloader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
+				_preloader.addEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onPreloadingWMSDataLoadingFinishedFromCache);
 			}
-			_preloader.updateWMSData(true, qttViewProperties, forcedLayerWidth, forcedLayerHeight);
-*/
+			trace(this + " preload preloading: " + preloading);
+			if (!preloading)
+			{
+				setPreloadingStatus(true);
+				_preloader.updateWMSData(true, qttViewProperties, forcedLayerWidth, forcedLayerHeight);
+			} else {
+				ma_preloadingBuffer.push(qttViewProperties);
+				trace(this + " preload add to buffer: " + ma_preloadingBuffer.length);
+			}
 			
-			var preloader: TiledLoader = getWMSViewPropertiesLoader() as TiledLoader;
-			//			loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onPreloadingWMSDataLoadingStarted);
-			//			loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
-			//			loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onPreloadingWMSDataLoadingStarted);
-			preloader.addEventListener("invalidateDynamicPart", onQTTViewPropertiesDataInvalidateDynamicPart);
-			preloader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
-			preloader.updateWMSData(true, qttViewProperties, forcedLayerWidth, forcedLayerHeight);
 		}
 
 		/**
@@ -850,15 +873,29 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 		}
 
-		protected function onPreloadingWMSDataLoadingFinished(event: InteractiveLayerEvent): void
+		protected function onPreloadingWMSDataLoadingFinishedFromCache(event: InteractiveLayerEvent): void
 		{
+			trace("preloading from cache");
 			var loader: IWMSViewPropertiesLoader = event.target as IWMSViewPropertiesLoader;
-			destroyWMSViewPropertiesPreloader(loader);
+//			destroyWMSViewPropertiesPreloader(loader);
 			var qttViewProperties: TiledViewProperties = event.data as TiledViewProperties;
 			if (qttViewProperties)
 			{
 				qttViewProperties.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
+				qttViewProperties.removeEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onPreloadingWMSDataLoadingFinishedFromCache);
+			}
+		}
+		protected function onPreloadingWMSDataLoadingFinished(event: InteractiveLayerEvent): void
+		{
+			var loader: IWMSViewPropertiesLoader = event.target as IWMSViewPropertiesLoader;
+//			destroyWMSViewPropertiesPreloader(loader);
+			var qttViewProperties: TiledViewProperties = event.data as TiledViewProperties;
+			if (qttViewProperties)
+			{
+				qttViewProperties.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
+				qttViewProperties.removeEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onPreloadingWMSDataLoadingFinishedFromCache);
 				//remove wmsViewProperties from array of currently preloading wms view properties
+				/*
 				var total: int = ma_preloadingQTTViewProperties.length;
 				for (var i: int = 0; i < total; i++)
 				{
@@ -869,9 +906,25 @@ package com.iblsoft.flexiweather.ogc.tiling
 						break;
 					}
 				}
+				*/
 				//add wmsViewProperties to array of already preloaded wms view properties
 				ma_preloadedQTTViewProperties.push(qttViewProperties);
-				notifyProgress(ma_preloadedQTTViewProperties.length, ma_preloadingQTTViewProperties.length + ma_preloadedQTTViewProperties.length, 'frames');
+				setPreloadingStatus(false);
+				
+				//notify progress of preloaded frames
+				notifyProgress(ma_preloadedQTTViewProperties.length, ma_preloadingBuffer.length + ma_preloadedQTTViewProperties.length, 'frames');
+				
+				if (ma_preloadingBuffer.length > 0)
+				{
+					//preload next frame
+					var newQttViewProperties: TiledViewProperties = ma_preloadingBuffer.shift() as TiledViewProperties;
+					preload(newQttViewProperties);
+				} else {
+					//all frames are preloaded
+					ma_preloadedQTTViewProperties = [];
+					dispatchEvent(new InteractiveLayerEvent(InteractiveDataLayer.PRELOADING_FINISHED, true));
+				}
+				/*
 				if (ma_preloadingQTTViewProperties.length == 0)
 				{
 					//all wms view properties are preloaded, delete preloaded wms properties, bitmaps are stored in cache
@@ -885,6 +938,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 					//dispatch preloading finished to notify all about all WMSViewProperties are preloaded
 					dispatchEvent(new InteractiveLayerEvent(InteractiveDataLayer.PRELOADING_FINISHED, true));
 				}
+				*/
 			}
 		}
 
@@ -1019,6 +1073,12 @@ package com.iblsoft.flexiweather.ogc.tiling
 		
 		protected function findZoom(): void
 		{
+			if (!_layerInitialized)
+				return;
+			
+			if (onCapabilitiesDependent && !capabilitiesReady)
+				return;
+			
 			var tileMatrixSetLink: TileMatrixSetLink = getTileMatrixSetLinkForCRS(container.crs);
 			
 			var projection: Projection = Projection.getByCRS(container.crs);
@@ -1148,6 +1208,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 		
 		public function checkZoom(): void
 		{
+			if (onCapabilitiesDependent && !capabilitiesReady)
+				return;
+			
 			if (layerInitialized)
 			{
 				var i_oldZoom: String = mi_zoom;
@@ -1341,20 +1404,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 		 * 		Destroying layer functionality
 		 *
 		 **************************************************************************************************************************************/
-		override public function destroy(): void
+		private function destroyPreloading(): void
 		{
-			super.destroy();
-			
-			destroyWMSViewPropertiesLoader(_loader);
-			
 			var qttViewProperties: TiledViewProperties;
-			if (ma_preloadingQTTViewProperties)
-			{
-				for each (qttViewProperties in ma_preloadingQTTViewProperties)
-				{
-					qttViewProperties.destroy();
-				}
-			}
 			if (ma_preloadedQTTViewProperties)
 			{
 				for each (qttViewProperties in ma_preloadedQTTViewProperties)
@@ -1362,14 +1414,36 @@ package com.iblsoft.flexiweather.ogc.tiling
 					qttViewProperties.destroy();
 				}
 			}
-			ma_preloadingQTTViewProperties = null;
+			if (ma_preloadingBuffer)
+			{
+				for each (qttViewProperties in ma_preloadingBuffer)
+				{
+					qttViewProperties.destroy();
+				}
+			}
+			cancelPreload();
 			ma_preloadedQTTViewProperties = null;
+			ma_preloadingBuffer = null;
+			destroyWMSViewPropertiesPreloader();
+			
+		}
+		override public function destroy(): void
+		{
+			super.destroy();
+			
+			destroyWMSViewPropertiesLoader();
+			
+			var qttViewProperties: TiledViewProperties;
+			
 			if (m_currentQTTViewProperties)
 			{
 				m_currentQTTViewProperties.destroy();
 				m_currentQTTViewProperties = null;
 			}
+			
 			destroyCache();
+			destroyPreloading();
+			
 			m_cfg = null;
 			cache = null;
 			_tf = null;
@@ -1384,21 +1458,24 @@ package com.iblsoft.flexiweather.ogc.tiling
 			}
 		}
 
-		protected function destroyWMSViewPropertiesLoader(loader: IWMSViewPropertiesLoader): void
+		protected function destroyWMSViewPropertiesLoader(): void
 		{
-			loader.removeEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
-			loader.removeEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
-			loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
-			loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onCurrentWMSDataLoadingFinishedFromCache);
-			loader.removeEventListener("invalidateDynamicPart", onCurrentWMSDataInvalidateDynamicPart);
-			loader.destroy();
+			_loader.removeEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
+			_loader.removeEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
+			_loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
+			_loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onCurrentWMSDataLoadingFinishedFromCache);
+			_loader.removeEventListener("invalidateDynamicPart", onCurrentWMSDataInvalidateDynamicPart);
+			_loader.destroy();
 		}
 
-		protected function destroyWMSViewPropertiesPreloader(loader: IWMSViewPropertiesLoader): void
+		protected function destroyWMSViewPropertiesPreloader(): void
 		{
-			loader.removeEventListener("invalidateDynamicPart", onQTTViewPropertiesDataInvalidateDynamicPart);
-			loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
-			loader.destroy();
+			if (_preloader)
+			{
+				_preloader.removeEventListener("invalidateDynamicPart", onQTTViewPropertiesDataInvalidateDynamicPart);
+				_preloader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
+				_preloader.destroy();
+			}
 		}
 
 		public function getTiledLayer(): InteractiveLayerTiled

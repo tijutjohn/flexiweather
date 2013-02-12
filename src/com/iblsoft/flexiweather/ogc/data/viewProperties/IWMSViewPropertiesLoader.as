@@ -4,6 +4,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 
 	public interface IWMSViewPropertiesLoader extends IEventDispatcher
 	{
+		function cancel(): void;
 		function destroy(): void;
 		function updateWMSData(b_forceUpdate: Boolean, viewProperties: IViewProperties, forcedLayerWidth: Number, forcedLayerHeight: Number): void
 	}

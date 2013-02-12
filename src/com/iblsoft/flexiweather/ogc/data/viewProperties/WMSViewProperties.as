@@ -297,20 +297,25 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 
 		public function getWMSLayers(): Array
 		{
-			var a: Array = [];
-			for each (var s_layerName: String in m_cfg.layerNames)
+			if (m_cfg)
 			{
-				var layer: WMSLayer = m_cfg.service.getLayerByName(s_layerName);
-				if (layer != null)
-					a.push(layer);
+				var a: Array = [];
+				for each (var s_layerName: String in m_cfg.layerNames)
+				{
+					var layer: WMSLayer = m_cfg.service.getLayerByName(s_layerName);
+					if (layer != null)
+						a.push(layer);
+				}
+				return a;
 			}
-			return a;
+			return [];
 		}
 
 		public function getWMSDimensionsNames(): Array
 		{
+			var wmsLayers: Array = getWMSLayers();
 			var a_dimNames: Array = [];
-			for each (var layer: WMSLayer in getWMSLayers())
+			for each (var layer: WMSLayer in wmsLayers)
 			{
 				for each (var dim: WMSDimension in layer.dimensions)
 				{

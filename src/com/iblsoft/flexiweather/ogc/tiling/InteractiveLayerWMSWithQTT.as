@@ -128,6 +128,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			var tiledLayerConfig: QTTMSLayerConfiguration = new QTTMSLayerConfiguration();
 			var tiledLayer: InteractiveLayerQTTMS = new InteractiveLayerQTTMS(container, tiledLayerConfig);
+			tiledLayer.onCapabilitiesDependent = true;
+			tiledLayer.capabilitiesReady = capabilitiesReady;
+			
 			return tiledLayer;
 		}
 
@@ -165,7 +168,10 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			updateTiledLayerCRSs();
 			if (m_tiledLayer)
+			{
+				m_tiledLayer.capabilitiesReady = true;
 				m_tiledLayer.checkZoom();
+			}
 			super.onCapabilitiesUpdated(event);
 		}
 
@@ -244,11 +250,14 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			var crs: String = container.getCRS();
 			var config: QTTMSLayerConfiguration = m_tiledLayer.configuration as QTTMSLayerConfiguration;
+			
 			var tilingInfo: TiledTilingInfo = config.getTiledTilingInfoForCRS(crs);
 			if (!tilingInfo)
 				trace("updateTiledLayerURLBase problem with CRS");
-			else
-				tilingInfo.urlPattern = getFullURL() + WMS_TILING_URL_PATTERN;
+			else {
+				var fullURL: String = getFullURL();
+				tilingInfo.urlPattern = fullURL + WMS_TILING_URL_PATTERN;
+			}
 			//			qttViewProperties.setSpecialCacheStrings(ma_specialCacheStrings);
 		}
 
@@ -262,6 +271,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 				var tileSize: uint = 0;
 				if (m_cfg && m_cfg.hasOwnProperty('tileSize'))
 					tileSize = m_cfg['tileSize'] as uint;
+				
+				m_tiledLayer.clearCRSWithTilingExtents();
 				for each (var crsWithBBox: CRSWithBBox in l.crsWithBBoxes)
 				{
 					if (crsWithBBox is CRSWithBBoxAndTilingInfo)
@@ -273,6 +284,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 							m_tiledLayer.addCRSWithTilingExtent(WMS_TILING_URL_PATTERN, ti.crs, ti.tilingExtent, TileSize.SIZE_256, 1, 18);
 					}
 				}
+				
+				updateTiledLayerURLBase();
 			}
 		}
 
@@ -283,29 +296,27 @@ package com.iblsoft.flexiweather.ogc.tiling
 			super.destroy();
 		}
 
-		override protected function destroyWMSViewPropertiesPreloader(loader: IWMSViewPropertiesLoader): void
+		override protected function destroyWMSViewPropertiesPreloader(): void
 		{
-			if (loader is TiledLoader)
-			{
-				loader.removeEventListener("invalidateDynamicPart", onWMSViewPropertiesDataInvalidateDynamicPart);
-				loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
-				loader.destroy();
-			}
-			else
-				super.destroyWMSViewPropertiesPreloader(loader);
+			//FIXME fix InteractiveLayerWMSWithQTT destroyWMSViewPropertiesPreloader
+			
+//			if (loader is TiledLoader)
+//			{
+//				loader.removeEventListener("invalidateDynamicPart", onWMSViewPropertiesDataInvalidateDynamicPart);
+//				loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
+//				loader.destroy();
+//			}
+//			else
+				super.destroyWMSViewPropertiesPreloader();
 		}
 
-		protected var _tiledLoader: TiledLoader;
 		override protected function getWMSViewPropertiesLoader(): IWMSViewPropertiesLoader
 		{
 			if (isTileable)
 			{
-				if (!_tiledLoader)
-				{
-					_tiledLoader = new TiledLoader(m_tiledLayer); 
-				}
-				_tiledLoader.zoom = m_tiledLayer.zoomLevel;
-				return _tiledLoader;
+				var tiledLoader: TiledLoader = new TiledLoader(m_tiledLayer); 
+				tiledLoader.zoom = m_tiledLayer.zoomLevel;
+				return tiledLoader;
 			} 
 			return super.getWMSViewPropertiesLoader();
 		}
@@ -566,6 +577,11 @@ package com.iblsoft.flexiweather.ogc.tiling
 			layer.changeViewProperties(getViewPropertiesBasedOnIsTileable(viewProperties));
 		}
 
+		override public function cancelPreload():void
+		{
+			var layer: IPreloadableLayer = getPreloadableInteractiveLayerBaseOnIsTileable();
+			layer.cancelPreload();
+		}
 		override public function preload(viewProperties: IViewProperties): void
 		{
 			var layer: IPreloadableLayer = getPreloadableInteractiveLayerBaseOnIsTileable();

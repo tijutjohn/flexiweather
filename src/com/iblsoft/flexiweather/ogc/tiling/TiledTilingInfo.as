@@ -1,8 +1,8 @@
 package com.iblsoft.flexiweather.ogc.tiling
 {
+	import com.iblsoft.flexiweather.ogc.CRSWithBBox;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
-	import com.iblsoft.flexiweather.ogc.CRSWithBBox;
 
 	/**
 	 * QuadTree tiling info. There is stored urlPattern, crs, bbox and minimum and maximum zoom
@@ -11,6 +11,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 	 */
 	public class TiledTilingInfo implements Serializable
 	{
+		public static var id_max: int = 0;
+		public var id: int;
+		
 		private var _urlPattern: String;
 		private var _crsWithBBox: CRSWithBBox;
 		private var _minimumZoomLevel: uint = 0;
@@ -48,6 +51,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		public function TiledTilingInfo(_urlPattern: String = '', crsWithBBox: CRSWithBBox = null, tileSize: uint = 256)
 		{
+			id = id_max++;
 			urlPattern = _urlPattern;
 			_crsWithBBox = crsWithBBox;
 			this.tileSize = tileSize;
@@ -74,6 +78,11 @@ package com.iblsoft.flexiweather.ogc.tiling
 			minimumZoomLevel = storage.serializeUInt("minimum-zoom-level", minimumZoomLevel, 1);
 			maximumZoomLevel = storage.serializeUInt("maximum-zoom-level", maximumZoomLevel, 12);
 			tileSize = storage.serializeUInt("tile-size", tileSize, 0);
+		}
+		
+		public function toString(): String
+		{
+			return "TiledTilingInfo ["+id+"] pattern: " + _urlPattern;
 		}
 	}
 }

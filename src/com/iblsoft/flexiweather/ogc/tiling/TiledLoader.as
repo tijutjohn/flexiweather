@@ -84,6 +84,12 @@ package com.iblsoft.flexiweather.ogc.tiling
 			_tilesProvider.destroy();
 		}
 
+		public function cancel(): void
+		{
+			if (_tilesProvider)
+				_tilesProvider.cancel();
+		}
+			
 		public function updateWMSData(b_forceUpdate: Boolean, viewProperties: IViewProperties, forcedLayerWidth: Number, forcedLayerHeight: Number): void
 		{
 			var tiledViewProperties: TiledViewProperties = viewProperties as TiledViewProperties;
@@ -198,7 +204,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 								loadRequests.push({
 											qttTileViewProperties: qttTile,
 											requestedTiledArea: tiledArea,
-											requestedViewPart: viewPart
+											requestedViewPart: viewPart,
+											requestedTileIndex: tileIndex
 										});
 							}
 						}

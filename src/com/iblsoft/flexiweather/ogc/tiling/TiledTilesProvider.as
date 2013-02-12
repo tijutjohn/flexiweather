@@ -69,6 +69,10 @@ package com.iblsoft.flexiweather.ogc.tiling
 			return null;
 			
 		}
+		public function cancel(): void
+		{
+			cancelPreviousRequests();
+		}
 		
 		private function cancelPreviousRequests(): void
 		{

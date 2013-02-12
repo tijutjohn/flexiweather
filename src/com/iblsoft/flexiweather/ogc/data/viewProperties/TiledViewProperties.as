@@ -62,6 +62,9 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 
 		public function destroy(): void
 		{
+			if (!_tileIndicesMapper && !ma_qttTiles && !tiledAreas)
+				return;
+			
 			m_cfg = null;
 			_validity = null;
 			ma_specialCacheStrings = null;
@@ -136,7 +139,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		public function isPreloaded(cache: WMSTileCache): Boolean
 		{
 			var isCached: Boolean = true;
-			if (ma_qttTiles.length > 0)
+			if (ma_qttTiles && ma_qttTiles.length > 0)
 			{
 				for each (var qttTile: TiledTileViewProperties in ma_qttTiles)
 				{
