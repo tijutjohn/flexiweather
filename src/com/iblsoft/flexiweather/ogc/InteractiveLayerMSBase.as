@@ -262,8 +262,10 @@ package com.iblsoft.flexiweather.ogc
 		public function cancelPreload(): void
 		{
 			//FIXME cancel currently preloading request 
-			destroyPreloading();
+			if (_preloader)
+				_preloader.cancel();
 			
+			setPreloadingStatus(false);
 			ma_preloadedWMSViewProperties = [];
 			ma_preloadingBuffer = [];
 		}
@@ -348,6 +350,11 @@ package com.iblsoft.flexiweather.ogc
 				i_height = forcedLayerHeight;
 			var s_currentCRS: String = wmsViewProperties.crs;
 			var currentViewBBox: BBox = wmsViewProperties.getViewBBox();
+			
+			if (!currentViewBBox)
+			{
+				return false;
+			}
 			var f_horizontalPixelSize: Number = currentViewBBox.width / i_width;
 			var f_verticalPixelSize: Number = currentViewBBox.height / i_height;
 			var projection: Projection = Projection.getByCRS(s_currentCRS);

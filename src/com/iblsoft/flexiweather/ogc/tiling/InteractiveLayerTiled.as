@@ -787,7 +787,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 		public function cancelPreload(): void
 		{
 			//FIXME cancel currently preloading request
-			_preloader.cancel();
+			if (_preloader)
+				_preloader.cancel();
 			
 			//clear preloading buffer, but do not clear preloaded buffer, because just future preloads are canceled
 			ma_preloadingBuffer = [];
@@ -1424,7 +1425,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			cancelPreload();
 			ma_preloadedQTTViewProperties = null;
 			ma_preloadingBuffer = null;
-			destroyWMSViewPropertiesPreloader();
+			destroyPreloader();
 			
 		}
 		override public function destroy(): void
@@ -1460,15 +1461,18 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		protected function destroyWMSViewPropertiesLoader(): void
 		{
-			_loader.removeEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
-			_loader.removeEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
-			_loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
-			_loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onCurrentWMSDataLoadingFinishedFromCache);
-			_loader.removeEventListener("invalidateDynamicPart", onCurrentWMSDataInvalidateDynamicPart);
-			_loader.destroy();
+			if (_loader)
+			{
+				_loader.removeEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
+				_loader.removeEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
+				_loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
+				_loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onCurrentWMSDataLoadingFinishedFromCache);
+				_loader.removeEventListener("invalidateDynamicPart", onCurrentWMSDataInvalidateDynamicPart);
+				_loader.destroy();
+			}
 		}
 
-		protected function destroyWMSViewPropertiesPreloader(): void
+		protected function destroyPreloader(): void
 		{
 			if (_preloader)
 			{

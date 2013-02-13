@@ -6,23 +6,25 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.ExceptionUtils;
-	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.IWMSLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.cache.CacheItem;
 	import com.iblsoft.flexiweather.ogc.cache.WMSCache;
 	import com.iblsoft.flexiweather.ogc.cache.event.WMSCacheEvent;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.IWMSLayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.data.ImagePart;
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.IViewProperties;
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.IWMSViewPropertiesLoader;
-	import com.iblsoft.flexiweather.ogc.data.ImagePart;
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.WMSViewProperties;
 	import com.iblsoft.flexiweather.ogc.events.MSBaseLoaderEvent;
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
+	
 	import flash.display.Bitmap;
 	import flash.display.DisplayObject;
 	import flash.events.EventDispatcher;
 	import flash.events.ProgressEvent;
 	import flash.net.URLRequest;
+	
 	import mx.collections.ArrayCollection;
 	import mx.events.DynamicEvent;
 	import mx.logging.Log;
@@ -191,9 +193,18 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				ma_requests.addItem(request);
 				if (ma_requests.length == 1)
 					notifyLoadingStart(false);
+				
+				var forecast: Object = wmsViewProperties.getWMSDimensionValue('FORECAST');
+				var timeString: String = '';
+				
+				var jobName: String = "Rendering " + (m_layer.configuration as IWMSLayerConfiguration).layerNames.join("+");
+				if (forecast)
+				{
+					jobName += "["+forecast+"]";
+				}
 				m_loader.load(request,
 						{requestedImagePart: imagePart, wmsViewProperties: wmsViewProperties},
-						"Rendering " + (m_layer.configuration as IWMSLayerConfiguration).layerNames.join("+"));
+						jobName);
 				invalidateDynamicPart();
 				//			wmsCache.startImageLoading(s_currentCRS, currentViewBBox, request, dimensions);
 				wmsCache.startImageLoading(wmsViewProperties);

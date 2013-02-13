@@ -424,14 +424,17 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		{
 			var s: String = "";
 			var total: int = m_cfg.layerNames.length;
-			for (var i_subLayer: uint = 0; i_subLayer < total; ++i_subLayer)
+			if (ma_subLayerStyleNames)
 			{
-				if (i_subLayer > 0)
-					s += ",";
-				if (i_subLayer in ma_subLayerStyleNames)
-					s += ma_subLayerStyleNames[i_subLayer];
-				else if (i_subLayer in m_cfg.styleNames)
-					s += m_cfg.styleNames[i_subLayer];
+				for (var i_subLayer: uint = 0; i_subLayer < total; ++i_subLayer)
+				{
+					if (i_subLayer > 0)
+						s += ",";
+					if (i_subLayer in ma_subLayerStyleNames)
+						s += ma_subLayerStyleNames[i_subLayer];
+					else if (i_subLayer in m_cfg.styleNames)
+						s += m_cfg.styleNames[i_subLayer];
+				}
 			}
 			return s;
 		}
