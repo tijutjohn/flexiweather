@@ -92,6 +92,10 @@ package com.iblsoft.flexiweather.ogc
 			//super.serialize(storage);
 			var s_dimName: String;
 			var styleName: String;
+			
+			var styleNameValue: String;
+			var level: String;
+			
 			if (storage.isLoading())
 			{
 				//TODO do we really need to add here 2nd parameter?
@@ -102,8 +106,12 @@ package com.iblsoft.flexiweather.ogc
 				synchroniseLevel = storage.serializeBool('synchroniseLevel', false);
 				
 				
-				styleNameValue = storage.serializeString("style-name", styleNameValue, null);
-				level = storage.serializeString(GlobalVariable.LEVEL, level, null);
+				styleNameValue = storage.serializeString("style-name", "", null);
+				level = storage.serializeString(GlobalVariable.LEVEL, "", null);
+				if (styleNameValue)
+					_tempParameterStorage.setWMSStyleName(0, styleNameValue);
+				if (level)
+					_tempParameterStorage.setWMSDimensionValue('ELEVATION', level);
 				
 				var primaryLayer: Boolean = storage.serializeBool("primary-layer", true);
 				if (primaryLayer)
@@ -113,7 +121,7 @@ package com.iblsoft.flexiweather.ogc
 			{
 				//get values from currentWMSViewProperties and store them in layer properties
 				styleNameValue = m_currentWMSViewProperties.getWMSStyleName(0);
-				level = m_currentWMSViewProperties.getWMSDimensionValue('elevation');
+				level = m_currentWMSViewProperties.getWMSDimensionValue('ELEVATION');
 				synchronizationRoleValue = m_synchronisationRole.role;
 				
 				if (alpha < 1)
@@ -122,7 +130,7 @@ package com.iblsoft.flexiweather.ogc
 				if (isPrimaryLayer())
 					storage.serializeBool("primary-layer", true);
 				
-				if (styleName)
+				if (styleNameValue)
 					storage.serializeString("style-name", styleNameValue, null);
 				if (level)
 					storage.serializeString(GlobalVariable.LEVEL, level, null);

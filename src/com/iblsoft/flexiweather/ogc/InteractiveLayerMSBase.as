@@ -85,7 +85,7 @@ package com.iblsoft.flexiweather.ogc
 		protected var m_synchronisationRole: SynchronisationRole;
 		protected var m_cache: ICache;
 		
-		private var _tempParameterStorage: LayerTemporaryParameterStorage = new LayerTemporaryParameterStorage();
+		protected var _tempParameterStorage: LayerTemporaryParameterStorage = new LayerTemporaryParameterStorage();
 		/**
 		 * Currently displayed wms data
 		 */
@@ -100,12 +100,12 @@ package com.iblsoft.flexiweather.ogc
 		 * Selected style name. It is stored in currentWMSViewProperties, but on save (serialize) it's stored in layer because of loading process should set correctly
 		 * stylename on layer initialization (which is asynchronous (see initializeLayerProperties() method)) 
 		 */		
-		protected var styleNameValue: String;
+//		protected var styleNameValue: String;
 		/**
 		 * Selected level value (ELEVATION). It is stored in currentWMSViewProperties, but on save (serialize) it's stored in layer because of loading process should set correctly
 		 * level on layer initialization (which is asynchronous (see initializeLayerProperties() method)) 
 		 */		
-		protected var level: String;
+//		protected var level: String;
 		
 		/**
 		 * Selected synchronization role value. It is stored in currentWMSViewProperties, but on save (serialize) it's stored in layer because of loading process should set correctly
@@ -175,20 +175,15 @@ package com.iblsoft.flexiweather.ogc
 			
 			
 			//check if layers was created from serialization
-//			if (_unserializedWMSViewProperties)
-//			{
-//				m_currentWMSViewProperties = _unserializedWMSViewProperties.clone() as WMSViewProperties;
-//				_unserializedWMSViewProperties.destroy();
-//				_unserializedWMSViewProperties = null;
-//			}
 			// update current wms properties from temporary storage. That means that user set wms style, wms dimension value, custom parameter or configuration
 			// before layer was added to stage
+			// in _tempParameterStorage there are also store properties serialized from current WMSViewProperties
 			_tempParameterStorage.updateCurrentWMSPropertiesFromStorage(m_currentWMSViewProperties);
 			
-			if (styleNameValue)
-				m_currentWMSViewProperties.setWMSStyleName(0, styleNameValue);
-			if (level)
-				m_currentWMSViewProperties.setWMSDimensionValue('elevation', level);
+//			if (styleNameValue)
+//				m_currentWMSViewProperties.setWMSStyleName(0, styleNameValue);
+//			if (level)
+//				m_currentWMSViewProperties.setWMSDimensionValue('elevation', level);
 		}
 		private var fadeIn: Fade;
 		private var fadeOut: Fade;
@@ -1705,7 +1700,7 @@ class LayerTemporaryParameterStorage {
 			}
 			for (str in _dimension)
 			{
-				var s_dimName: String = _styles[str] as String;
+				var s_dimName: String = _dimension[str] as String;
 				currentWMSProperties.setWMSDimensionValue(str as String, s_dimName);
 			}
 			for (str in _customParameter)

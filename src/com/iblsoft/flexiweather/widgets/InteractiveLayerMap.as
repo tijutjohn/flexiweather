@@ -418,8 +418,11 @@ package com.iblsoft.flexiweather.widgets
 					if (synchronisableLevel && msBaseLayer.synchroniseLevel)
 					{
 						var globalLevel: String = level;
-						var bSynchronized: Boolean = so.synchroniseWith(GlobalVariable.FRAME, frame);
-						bSynchronized = bSynchronized || so.synchroniseWith(GlobalVariable.LEVEL, level);
+						var bSynchronized: Boolean;
+						if (frame)
+							bSynchronized = bSynchronized || so.synchroniseWith(GlobalVariable.FRAME, frame);
+						if (level)
+							bSynchronized = bSynchronized || so.synchroniseWith(GlobalVariable.LEVEL, level);
 						if (bSynchronized)
 						{
 							layer.refresh(false);
