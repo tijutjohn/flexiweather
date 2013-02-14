@@ -160,8 +160,14 @@ package com.iblsoft.flexiweather.widgets
 		 */
 		protected function initializeLayerAfterAddToStage(): void
 		{
+			callLater(delayedInitializeLayerAfterAddToStage);
+		}
+		
+		private function delayedInitializeLayerAfterAddToStage(): void
+		{
 			_layerInitialized = true;
-			callLater(notifyLayerInitialized);
+			notifyLayerInitialized();
+			
 		}
 		
 		/**

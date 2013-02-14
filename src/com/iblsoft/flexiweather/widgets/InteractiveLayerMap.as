@@ -192,6 +192,15 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 
+		private function onSerializedWMSLayerInitialized(event: InteractiveLayerEvent): void
+		{
+			var layer: InteractiveLayerMSBase = event.target as InteractiveLayerMSBase;
+			layer.removeEventListener(InteractiveLayerEvent.LAYER_INITIALIZED, onSerializedWMSLayerInitialized);
+			if (layer.isPrimaryLayer())
+			{
+				setPrimaryLayer(layer as InteractiveLayerMSBase);
+			}
+		}
 		override public function serialize(storage: Storage): void
 		{
 			var wrappers: ArrayCollection;
@@ -214,10 +223,8 @@ package com.iblsoft.flexiweather.widgets
 					layer = wrapper.m_layer;
 					if (layer is InteractiveLayerMSBase)
 					{
-						if ((layer as InteractiveLayerMSBase).isPrimaryLayer())
-						{
-							setPrimaryLayer(layer as InteractiveLayerMSBase);
-						}
+						layer.addEventListener(InteractiveLayerEvent.LAYER_INITIALIZED, onSerializedWMSLayerInitialized);
+						
 						debug("InteractiveLayerMap serialize add layer: " + layer + " name: " + layer.name);
 						newLayers.push(layer);
 					}

@@ -180,10 +180,6 @@ package com.iblsoft.flexiweather.ogc
 			// in _tempParameterStorage there are also store properties serialized from current WMSViewProperties
 			_tempParameterStorage.updateCurrentWMSPropertiesFromStorage(m_currentWMSViewProperties);
 			
-//			if (styleNameValue)
-//				m_currentWMSViewProperties.setWMSStyleName(0, styleNameValue);
-//			if (level)
-//				m_currentWMSViewProperties.setWMSDimensionValue('elevation', level);
 		}
 		private var fadeIn: Fade;
 		private var fadeOut: Fade;
@@ -1478,6 +1474,9 @@ package com.iblsoft.flexiweather.ogc
 			{
 				return m_synchronisationRole.isPrimary;
 			}
+			//check if synchronizationRoleValue is primary. This will take in account after serialization and before layer initialization
+//			if (synchronizationRoleValue == SynchronisationRole.PRIMARY)
+//				return true;
 			return false;
 		}
 
