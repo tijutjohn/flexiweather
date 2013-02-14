@@ -868,6 +868,9 @@ package com.iblsoft.flexiweather.widgets
 		}
 		public function getFramePosition(frame: Date): int
 		{
+			if (!frame)
+				return -1;
+			
 			var l_syncLayers: Array = [];
 			var l_timeAxis: Array = enumTimeAxis(l_syncLayers);
 			if (l_timeAxis == null) // no time axis
