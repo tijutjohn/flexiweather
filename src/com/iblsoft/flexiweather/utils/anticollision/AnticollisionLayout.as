@@ -549,8 +549,13 @@ package com.iblsoft.flexiweather.utils.anticollision
 				if (!kmlFeature.visible)
 					return false;
 			}
+			
 			// check if at least part of object is within m_boundaryRect
 			var bounds: Rectangle = object.getBounds(this);
+			
+			if (bounds.width == 0 && bounds.height == 0)
+				return true;
+				
 			if (bounds.right < m_boundaryRect.left)
 				return false;
 			if (bounds.left > m_boundaryRect.right)
