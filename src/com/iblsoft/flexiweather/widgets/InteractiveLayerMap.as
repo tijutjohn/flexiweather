@@ -3,6 +3,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.events.GetFeatureInfoEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerMapEvent;
+	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.ISynchronisedObject;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerQTTMS;
@@ -201,6 +202,141 @@ package com.iblsoft.flexiweather.widgets
 				setPrimaryLayer(layer as InteractiveLayerMSBase);
 			}
 		}
+		
+		/**
+		 * This method serialize map for storing single map layers with aditional info as animation setting and current area.
+		 * If you need serialized map without aditional information please use serialize method instead.
+		 *   
+		 * @param storage
+		 * 
+		 */		
+		public function serializeAnimatedMap(storage: Storage): void
+		{
+			var wrappers: ArrayCollection;
+			var wrapper: LayerSerializationWrapper;
+			var layer: InteractiveLayer;
+			debug("InteractiveLayerMap serializeAnimatedMap [IW: " + container.id + "] serialize loading: " + storage.isLoading());
+			LayerSerializationWrapper.m_iw = container;
+			LayerSerializationWrapper.map = this;
+			if (storage.isLoading())
+			{
+				wrappers = new ArrayCollection();
+				storage.serializeNonpersistentArrayCollection("layer", wrappers, LayerSerializationWrapper);
+				m_layers.removeAll();
+				var total: int = wrappers.length - 1;
+				var newLayers: Array = [];
+				for (var i: int = total; i >= 0; i--)
+				{
+					wrapper = wrappers.getItemAt(i) as LayerSerializationWrapper;
+					debug("InteractiveLayerMap serialize wrapper: " + wrapper);
+					layer = wrapper.m_layer;
+					if (layer is InteractiveLayerMSBase)
+					{
+						layer.addEventListener(InteractiveLayerEvent.LAYER_INITIALIZED, onSerializedWMSLayerInitialized);
+						
+						debug("InteractiveLayerMap serialize add layer: " + layer + " name: " + layer.name);
+						newLayers.push(layer);
+					}
+				}
+				var de: DynamicEvent = new DynamicEvent(LAYERS_SERIALIZED_AND_READY);
+				de['layers'] = newLayers;
+				dispatchEvent(de);
+				var globalFrame8601: String = storage.serializeString('global-frame', null);
+				var globalLevel: String = storage.serializeString('global-level', null);
+				if (globalVariablesManager)
+				{
+					if (globalFrame8601)
+						globalVariablesManager.frame = ISO8601Parser.stringToDate(globalFrame8601);
+					if (globalLevel)
+						globalVariablesManager.level = globalLevel;
+				}
+				
+				storage.serialize('animation', timelineConfiguration);
+				
+				storage.serializeWithCustomFunction('area', loadSerializedArea);
+				//set global vars
+			}
+			else
+			{
+				//create wrapper collection
+				wrappers = new ArrayCollection();
+				for each (layer in m_layers)
+				{
+					wrapper = new LayerSerializationWrapper();
+					wrapper.m_layer = layer;
+					wrappers.addItem(wrapper);
+				}
+				storage.serializeNonpersistentArrayCollection("layer", wrappers, LayerSerializationWrapper);
+				if (globalVariablesManager)
+				{
+					var frameDateString: String;
+					if (globalVariablesManager.frame)
+						frameDateString = ISO8601Parser.dateToString(globalVariablesManager.frame);
+					
+					
+					storage.serializeString('global-frame', frameDateString);
+					storage.serializeString('global-level', globalVariablesManager.level);
+				}
+				
+				storage.serialize('animation', timelineConfiguration);
+				storage.serializeWithCustomFunction('area', saveSerializedArea);
+				
+				debug("serializeAnimatedMap" + (storage as XMLStorage).xml);
+			}
+			
+			
+		}
+		
+		public function loadSerializedArea(storage: Storage): void
+		{
+			if (container)
+			{
+				var extentBBoxXMin: Number = storage.serializeNumber('extent-x-min', 0);
+				var extentBBoxXMax: Number = storage.serializeNumber('extent-x-max', 0);
+				var extentBBoxYMin: Number = storage.serializeNumber('extent-y-min', 0);
+				var extentBBoxYMax: Number = storage.serializeNumber('extent-y-max', 0);
+				
+				var viewBBoxXMin: Number = storage.serializeNumber('view-x-min', 0);
+				var viewBBoxXMax: Number = storage.serializeNumber('view-x-max', 0);
+				var viewBBoxYMin: Number = storage.serializeNumber('view-y-min', 0);
+				var viewBBoxYMax: Number = storage.serializeNumber('view-y-max', 0);
+				
+				var crs: String = storage.serializeString('crs', null);
+				var viewBBox: BBox = new BBox(viewBBoxXMin, viewBBoxYMin, viewBBoxXMax, viewBBoxYMax);
+				var extentBBox: BBox = new BBox(extentBBoxXMin, extentBBoxYMin, extentBBoxXMax, extentBBoxYMax);
+				
+				container.setExtentBBox(extentBBox, false);
+				container.setViewBBox(viewBBox, false);
+				container.setCRS(crs);
+			}
+			
+		}
+		public function saveSerializedArea(storage: Storage): void
+		{
+			var extentBBox: BBox = container.getExtentBBox();
+			var viewBBox: BBox = container.getViewBBox();
+			var crs: String = container.getCRS();
+			
+			storage.serializeNumber('extent-x-min', extentBBox.xMin);
+			storage.serializeNumber('extent-x-max', extentBBox.xMax);
+			storage.serializeNumber('extent-y-min', extentBBox.yMin);
+			storage.serializeNumber('extent-y-max', extentBBox.yMax);
+
+			storage.serializeNumber('view-x-min', viewBBox.xMin);
+			storage.serializeNumber('view-x-max', viewBBox.xMax);
+			storage.serializeNumber('view-y-min', viewBBox.yMin);
+			storage.serializeNumber('view-y-max', viewBBox.yMax);
+			
+			storage.serializeString('crs', crs);
+			
+		}
+		/**
+		 * This method serialize map for storing single map layers without any aditional info (e.g. animation data, area).
+		 * If you need serialized map with aditional information please use serializeAnimatedMap method instead.
+		 *   
+		 * @param storage
+		 * 
+		 */		
 		override public function serialize(storage: Storage): void
 		{
 			var wrappers: ArrayCollection;
