@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.ogc.configuration
 {
 	import com.iblsoft.flexiweather.ogc.animation.AnimationDirection;
+	import com.iblsoft.flexiweather.utils.ISO8601Parser;
 	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
@@ -48,6 +49,9 @@ package com.iblsoft.flexiweather.ogc.configuration
 		private var _animationExtent: String;
 		private var _animationType: String;
 		private var _animationDirection: String;
+		
+		private var _animationUserLeftLimit: Date;
+		private var _animationUserRightLimit: Date;
 
 		public function MapTimelineConfiguration()
 		{
@@ -83,6 +87,36 @@ package com.iblsoft.flexiweather.ogc.configuration
 		public function set animationExtent(value:String):void
 		{
 			_animationExtent = value;
+			
+			var de: DynamicEvent = new DynamicEvent(EXTENT_CHANGED);
+			de['value'] = _animationExtent;
+			dispatchEvent(de);
+		}
+		
+		[Bindable (event=EXTENT_CHANGED)]
+		public function get animationUserLeftLimit():Date
+		{
+			return _animationUserLeftLimit;
+		}
+
+		public function set animationUserLeftLimit(value: Date):void
+		{
+			_animationUserLeftLimit = value;
+			
+			var de: DynamicEvent = new DynamicEvent(EXTENT_CHANGED);
+			de['value'] = _animationExtent;
+			dispatchEvent(de);
+		}
+		
+		[Bindable (event=EXTENT_CHANGED)]
+		public function get animationUserRightLimit():Date
+		{
+			return _animationUserRightLimit;
+		}
+
+		public function set animationUserRightLimit(value:Date):void
+		{
+			_animationUserRightLimit = value;
 			
 			var de: DynamicEvent = new DynamicEvent(EXTENT_CHANGED);
 			de['value'] = _animationExtent;
@@ -146,9 +180,11 @@ package com.iblsoft.flexiweather.ogc.configuration
 			_mapVisibleUnderTimeline = value;
 		}
 
-		public function limitsChangedByUser(): void
+		public function limitsChangedByUser(animationDateFrom: Date, animationDateTo: Date): void
 		{
 			animationType = ANIMATION_TYPE_USER;
+			animationUserLeftLimit = animationDateFrom;
+			animationUserRightLimit = animationDateTo;
 		}
 
 		private function debug(str: String): void
@@ -165,8 +201,22 @@ package com.iblsoft.flexiweather.ogc.configuration
 			durationStep = storage.serializeInt("duration-step", durationStep, 100);
 			minDuration = storage.serializeInt("min-duration", minDuration, 100);
 			maxDuration = storage.serializeInt("max-duration", maxDuration, 5000);
-			animationExtent = storage.serializeString("animation-extent", animationExtent, null);
 			animationType = storage.serializeString("animation-type", animationType, null);
+			
+			if (animationType == ANIMATION_TYPE_USER)
+			{
+				if (storage.isLoading())
+				{
+					animationUserLeftLimit = ISO8601Parser.stringToDate(storage.serializeString("animation-user-left-limit", null, null));
+					animationUserRightLimit = ISO8601Parser.stringToDate(storage.serializeString("animation-user-right-limit", null, null));
+				} else {
+					storage.serializeString("animation-user-left-limit", ISO8601Parser.dateToString(animationUserLeftLimit), null);
+					storage.serializeString("animation-user-right-limit", ISO8601Parser.dateToString(animationUserRightLimit), null);
+				}
+			} else {
+				animationExtent = storage.serializeString("animation-extent", animationExtent, null);
+			}
+			
 			animationDirection = storage.serializeString("animation-direction", animationDirection, null);
 			mapVisibleUnderTimeline = storage.serializeBool("map-visible-under-timeline", mapVisibleUnderTimeline, true);
 			timelineVisibleAtStartup = storage.serializeBool("timeline-visible-at-startup", timelineVisibleAtStartup, true);

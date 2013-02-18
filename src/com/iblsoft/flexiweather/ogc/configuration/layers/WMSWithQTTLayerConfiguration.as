@@ -98,5 +98,10 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			}
 			return s_url;
 		}
+		
+		override public function toString(): String
+		{
+			return "WMSWithQTTLayerConfiguration";
+		}
 	}
 }

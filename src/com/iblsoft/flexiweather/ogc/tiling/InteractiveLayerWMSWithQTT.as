@@ -323,6 +323,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		override protected function updateData(b_forceUpdate: Boolean): void
 		{
+//			debug("updateDate["+b_forceUpdate+"] isTileable: " + isTileable + " _layerInitialized: " + _layerInitialized + " capabilitiesReady: " + capabilitiesReady + " visible: " + visible);
+			
 			if (!_layerInitialized)
 				return;
 			//we need to postpone updateData if capabilities was not received, otherwise we do not know, if layes is tileable or not
@@ -616,6 +618,11 @@ package com.iblsoft.flexiweather.ogc.tiling
 				if (cache)
 					cache.clearCache();
 			}
+		}
+		
+		override protected function debug(str: String): void
+		{
+			LoggingUtils.dispatchLogEvent(this, "WMSWithQTT: " + str);
 		}
 		
 		override public function clone(): InteractiveLayer

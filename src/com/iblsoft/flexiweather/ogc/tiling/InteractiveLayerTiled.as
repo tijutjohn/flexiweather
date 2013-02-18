@@ -19,6 +19,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import com.iblsoft.flexiweather.plugins.IConsole;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
+	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
@@ -305,6 +306,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 		 */
 		override protected function updateData(b_forceUpdate: Boolean): void
 		{
+//			debug("updateDate["+b_forceUpdate+"] _layerInitialized: " + _layerInitialized + " capabilitiesReady: " + capabilitiesReady + " visible: " + visible);
 			if (!_layerInitialized)
 				return;
 			if (!layerWasDestroyed)
@@ -1536,6 +1538,11 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			super.validateSize(b_recursive);
 			checkZoom();
+		}
+		
+		protected function debug(str: String): void
+		{
+			LoggingUtils.dispatchLogEvent(this, "Tiled: " + str);
 		}
 
 		override public function clone(): InteractiveLayer

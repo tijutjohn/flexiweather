@@ -78,6 +78,11 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			_ms_imageFormat = value;
 		}
 
+		override public function toString(): String
+		{
+			return "WMSLayerConfiguration";
+		}
+		
 		override public function serialize(storage: Storage): void
 		{
 			if (storage.isLoading() && m_service != null)

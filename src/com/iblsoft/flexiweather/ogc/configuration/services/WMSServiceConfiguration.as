@@ -94,6 +94,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 
 		public function queryCapabilities(): void
 		{
+//			LoggingUtils.dispatchLogEvent(this, 'WMSServiceConfiguration queryCapabilities: ' + fullURL);
 			var r: URLRequest = toGetCapabilitiesRequest();
 			m_capabilitiesLoader.load(r);
 			if (m_capabilitiesLoadJob != null)
@@ -159,6 +160,8 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 				m_capabilitiesLoadJob.finish();
 				m_capabilitiesLoadJob = null;
 			}
+			
+//			LoggingUtils.dispatchLogEvent(this, 'WMSServiceConfiguration onCapabilitiesLoaded: ' + fullURL);
 			
 			mb_capabilitiesUpdated = true;
 			if (event.result is XML)

@@ -31,11 +31,18 @@ package com.iblsoft.flexiweather.ogc
 			return "\InteractiveLayerMapLayersInitializationWatcher [" + id + "]: ";
 		}
 		
+		protected function debug(txt: String): void
+		{
+			trace("InteractiveLayerMapLayersInitializationWatcher: " + txt);
+			LoggingUtils.dispatchLogEvent(this, "InteractiveLayerMapLayersInitializationWatcher: " + txt);
+		}
+		
 		public function onMapFromXMLReady(interactiveLayerMap: InteractiveLayerMap, layers: Array): void
 		{
 			var layer: InteractiveLayer;
 			_mapLayersInitializing = 0;
 			
+//			debug("onMapFromXMLReady layers: " + layers.length);
 			var cnt: int = 0;
 			for each (layer in layers)
 			{
@@ -54,6 +61,7 @@ package com.iblsoft.flexiweather.ogc
 					{
 						configuration = (layer as IConfigurableLayer).configuration;
 					}
+//					debug("onMapFromXMLReady addLayer: " + layer + " configuration ["+configuration+"]: " + configuration.label);
 					interactiveLayerMap.addLayer(layer);
 				}
 				else
@@ -64,6 +72,7 @@ package com.iblsoft.flexiweather.ogc
 			//			player.timeAxis.executeBindings();
 			for each (var l: InteractiveLayer in interactiveLayerMap.layers)
 			{
+//				debug("onMapFromXMLReady l.refresh: " + l);
 				//we need to set b_force parameter to force to be able to get cached bitmaps
 				l.refresh(false);
 			}

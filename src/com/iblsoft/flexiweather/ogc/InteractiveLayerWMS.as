@@ -15,6 +15,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
+	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.widgets.BackgroundJob;
@@ -168,6 +169,8 @@ package com.iblsoft.flexiweather.ogc
 
 		override protected function updateData(b_forceUpdate: Boolean): void
 		{
+//			debug("updateDate["+b_forceUpdate+"] _layerInitialized: " + _layerInitialized + " capabilitiesReady: " + capabilitiesReady + " visible: " + visible);
+			
 			if (!_layerInitialized)
 				return;
 			super.updateData(b_forceUpdate);
@@ -307,6 +310,11 @@ package com.iblsoft.flexiweather.ogc
 				super.visible = b_visible;
 				
 			}
+		}
+		
+		override protected function debug(str: String): void
+		{
+			LoggingUtils.dispatchLogEvent(this, "WMS: " + str);
 		}
 		
 		override public function clone(): InteractiveLayer

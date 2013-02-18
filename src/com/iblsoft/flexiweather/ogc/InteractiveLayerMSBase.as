@@ -30,6 +30,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.utils.Duration;
 	import com.iblsoft.flexiweather.utils.ISO8601Parser;
+	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.widgets.BackgroundJob;
 	import com.iblsoft.flexiweather.widgets.GlowLabel;
 	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
@@ -618,6 +619,7 @@ package com.iblsoft.flexiweather.ogc
 		
 		override protected function updateData(b_forceUpdate: Boolean): void
 		{
+//			debug("updateDate["+b_forceUpdate+"] _layerInitialized: " + _layerInitialized + " capabilitiesReady: " + capabilitiesReady + " visible: " + visible);
 			if (!_layerInitialized)
 				return;
 			//we need to postpone updateData if capabilities was not received, otherwise we do not know, if layes is tileable or not
@@ -1422,6 +1424,7 @@ package com.iblsoft.flexiweather.ogc
 
 		protected function checkPostponedUpdateDataCall(): void
 		{
+//			debug("checkPostponedUpdateDataCall: _updateDataWaiting: " + _updateDataWaiting + " capabilitiesReady: " + capabilitiesReady);
 			if (_updateDataWaiting && capabilitiesReady)
 			{
 				_updateDataWaiting = false;
@@ -1431,6 +1434,7 @@ package com.iblsoft.flexiweather.ogc
 
 		protected function onCapabilitiesReceived(event: DataEvent): void
 		{
+//			debug("onCapabilitiesReceived");
 			_capabilitiesReady = true;
 			dispatchEvent(new GetCapabilitiesEvent(
 					GetCapabilitiesEvent.CAPABILITIES_RECEIVED));
@@ -1442,6 +1446,7 @@ package com.iblsoft.flexiweather.ogc
 
 		protected function onCapabilitiesUpdated(event: DataEvent = null): void
 		{
+//			debug("onCapabilitiesUpdated");
 			_capabilitiesReady = true;
 			dispatchEvent(new SynchronisedVariableChangeEvent(
 					SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, GlobalVariable.FRAME));
@@ -1608,6 +1613,7 @@ package com.iblsoft.flexiweather.ogc
 
 		protected function debug(str: String): void
 		{
+			LoggingUtils.dispatchLogEvent(this, "MSBase: " + str);
 		}
 
 		public function get configuration(): ILayerConfiguration
