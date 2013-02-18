@@ -220,6 +220,7 @@ package com.iblsoft.flexiweather.widgets
 			LayerSerializationWrapper.map = this;
 			if (storage.isLoading())
 			{
+				debug("serializeAnimatedMap : " + (storage as XMLStorage).xml.toXMLString());
 				wrappers = new ArrayCollection();
 				storage.serializeNonpersistentArrayCollection("layer", wrappers, LayerSerializationWrapper);
 				m_layers.removeAll();
@@ -251,9 +252,19 @@ package com.iblsoft.flexiweather.widgets
 						globalVariablesManager.level = globalLevel;
 				}
 				
-				storage.serialize('animation', timelineConfiguration);
+				try {
+					storage.serialize('animation', timelineConfiguration);
+				} catch (error: Error) {
+					debug("Problem to serialize 'animation' mode");
+				}
+					
 				
-				storage.serializeWithCustomFunction('area', loadSerializedArea);
+				try {
+					storage.serializeWithCustomFunction('area', loadSerializedArea);
+				} catch (error: Error) {
+					debug("Problem to serialize 'area' mode");
+				}
+					
 				//set global vars
 			}
 			else
@@ -1242,7 +1253,8 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (debugConsole)
 				debugConsole.print(str, type, tag);
-//			trace(tag + "| " + type + "| " + str);
+			trace(tag + "| " + type + "| " + str);
+			log(str);
 		}
 	}
 }
