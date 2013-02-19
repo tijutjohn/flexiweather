@@ -10,9 +10,11 @@ package com.iblsoft.flexiweather.ogc.managers
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
+	
 	import flash.events.DataEvent;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
+	
 	import mx.collections.ArrayCollection;
 
 	public class GlobalVariablesManager extends EventDispatcher
@@ -35,7 +37,13 @@ package com.iblsoft.flexiweather.ogc.managers
 		{
 			return _levels;
 		}
+		
 		private var _interactiveLayerMap: InteractiveLayerMap;
+		public function get interactiveLayerMap(): InteractiveLayerMap
+		{
+			return _interactiveLayerMap;
+		}
+		
 		private var _frame: Date;
 		private var _level: String;
 		private var _levelChanged: Boolean;
@@ -183,8 +191,23 @@ package com.iblsoft.flexiweather.ogc.managers
 
 		private function onInteractiveLayerFrameVariableChanged(event: Event = null): void
 		{
+			var framesChanged: Boolean;
+			
 			if (_interactiveLayerMap && _interactiveLayerMap.primaryLayer)
 			{
+				//check, if this is received from selected widget
+				if (event)
+				{
+					var eventILM: InteractiveLayerMap = event.target as InteractiveLayerMap;
+					
+					trace("GlobalVariablesManager onInteractiveLayerFrameVariableChanged from: " + eventILM + " current: " + _interactiveLayerMap)
+					if (eventILM != _interactiveLayerMap)
+					{
+						//Frame change was received from non-selected layer, ignore it
+						return;
+					}
+				}
+				
 				var framesObjects: Array = _interactiveLayerMap.primaryLayer.getSynchronisedVariableValuesList(GlobalVariable.FRAME);
 				var frames: Array = [];
 				for each (var frameVariable: Object in framesObjects)
@@ -198,22 +221,34 @@ package com.iblsoft.flexiweather.ogc.managers
 				var selectedFrame: Date = _interactiveLayerMap.frame;
 				if (!selectedFrame)
 					return;
+				
+				trace("GlobalVariablesManager onInteractiveLayerFrameVariableChanged selectedFrame: " + selectedFrame)
+				trace("GlobalVariablesManager onInteractiveLayerFrameVariableChanged _frame: " + _frame)
 				if (_frame)
 				{
 					if (_frame.time != selectedFrame.time)
 					{
 						//frame is changed
+						framesChanged = true;
 						notifySelectedFrameChanged(selectedFrame);
 					}
 //					else
 //						trace("Global frame is not changed, do not notify");
 				}
-				else
+				else {
+					framesChanged = true;
 					notifySelectedFrameChanged(selectedFrame);
+				}
 			}
-			else
+			else {
+				framesChanged = true;
 				_frames = new ArrayCollection();
-			dispatchEvent(new Event(FRAMES_CHANGED, true));
+			}
+			
+			if (framesChanged)
+			{
+				dispatchEvent(new Event(FRAMES_CHANGED, true));
+			}
 		}
 
 		private function notifySelectedFrameChanged(selectedFrame: Date): void
@@ -231,6 +266,11 @@ package com.iblsoft.flexiweather.ogc.managers
 			_level = selectedLevel;
 			var gvce: GlobalVariableChangeEvent = new GlobalVariableChangeEvent(GlobalVariableChangeEvent.DIMENSION_VALUE_CHANGED, GlobalVariable.LEVEL, selectedLevel);
 			dispatchEvent(gvce);
+		}
+		
+		override public function toString(): String
+		{
+			return "GlovalVariablesManager: " + _interactiveLayerMap;
 		}
 	}
 }

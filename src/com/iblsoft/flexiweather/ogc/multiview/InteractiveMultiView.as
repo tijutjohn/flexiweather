@@ -1229,7 +1229,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 		public function synchronizeWidgets(synchronizator: ISynchronizator, interactiveWidget: InteractiveWidget = null): void
 		{
 			if (_interactiveWidgets.widgets && _interactiveWidgets.widgets.length > 1)
-				{
+			{
 				synchronizator.invalidateSynchronizator();
 				
 				if (!interactiveWidget)

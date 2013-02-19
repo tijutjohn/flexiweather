@@ -253,6 +253,11 @@ package com.iblsoft.flexiweather.widgets
 				}
 				
 				try {
+					mapName = storage.serializeString('name', null);
+				} catch (error: Error) {
+					debug("Problem to serialize 'animation' mode");
+				}
+				try {
 					storage.serialize('animation', timelineConfiguration);
 				} catch (error: Error) {
 					debug("Problem to serialize 'animation' mode");
@@ -269,6 +274,12 @@ package com.iblsoft.flexiweather.widgets
 			}
 			else
 			{
+				var currentMapName: String = mapName;
+				if (!currentMapName)
+					currentMapName = "Map";
+				
+				storage.serializeString('name', currentMapName);
+				
 				//create wrapper collection
 				wrappers = new ArrayCollection();
 				for each (layer in m_layers)
