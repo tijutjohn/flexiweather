@@ -4,6 +4,7 @@ package com.iblsoft.flexiweather.utils
 	import flash.utils.Dictionary;
 	
 	import spark.components.TextArea;
+	import spark.formatters.DateTimeFormatter;
 	
 	public class LoggingUtils extends EventDispatcher
 	{
@@ -60,9 +61,20 @@ package com.iblsoft.flexiweather.utils
 			dispatcher.dispatchEvent(new LoggingUtilsEvent(LoggingUtilsEvent.LOG_ENTRY, message, bubbles, cancelable));
 		}
 		
+		static public function getTimestamp(): String
+		{
+			var time: Date = new Date();
+			var formatter: DateTimeFormatter = new DateTimeFormatter();
+			formatter.dateTimePattern = "[HH:mm:ss] ";
+			var formattedTime: String = formatter.format(time);
+			
+			return formattedTime;
+			
+		}
 		static public function logMessageIntoTextArea(textArea: TextArea, message: String): void
 		{
-			textArea.text = message + "\n" + textArea.text;
+			
+			textArea.text = getTimestamp() + message + "\n" + textArea.text;
 		}
 	}
 }
