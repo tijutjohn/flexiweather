@@ -23,7 +23,7 @@
 -->
 <s:SparkSkin xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
 		xmlns:fb="http://ns.adobe.com/flashbuilder/2009" blendMode="normal" mouseEnabled="false"
-		minWidth="76" minHeight="46" alpha.disabled="0.5">
+		minWidth="76" minHeight="46" alpha.disabled="0.5" xmlns:skins="com.iblsoft.flexiweather.widgets.containers.skins.*">
 	<fx:Metadata>
 		<![CDATA[ 
         /** 
@@ -37,9 +37,15 @@
 			import mx.core.FlexVersion;
 			/* Define the skin elements that should not be colorized.
 			For panel, border and title background are skinned, but the content area, background, border, and title text are not. */
-			static private const exclusions: Array = ["background", "titleDisplay", "contentGroup", "border", "titleBackground"];
+			static private const exclusions: Array = ["background", "titleDisplay", "contentGroup", "border"];
 			/* exclusions before Flex 4.5 for backwards-compatibility purposes */
 			static private const exclusions_4_0: Array = ["background", "titleDisplay", "contentGroup"];
+			
+			[Bindable]
+			protected var spaceFrom: Number;
+			
+			[Bindable]
+			protected var spaceTo: Number;
 
 			/**
 			 * @private
@@ -63,13 +69,12 @@
 				super.initializationComplete();
 				invalidateDisplayList();
 			}
-
+			
 			/**
 			 * @private
 			 */
 			override protected function updateDisplayList(unscaledWidth: Number, unscaledHeight: Number): void
 			{
-				titleBackground.top = 10;
 				if (getStyle("borderVisible") == true)
 				{
 					border.visible = true;
@@ -89,8 +94,9 @@
 				var titleWidth: int = titleDisplay.width;
 				var mostLeftPosition: int = Math.max(9, cr);
 				titleDisplay.left = mostLeftPosition + gap;
-				titleBackground.left = mostLeftPosition;
-				titleBackground.width = titleWidth + 2 * gap;
+				spaceFrom = mostLeftPosition;
+				spaceTo = mostLeftPosition + titleWidth + 2 * gap;
+				
 				if (cornerRadius != cr)
 				{
 					cornerRadius = cr;
@@ -101,7 +107,6 @@
 				titleDisplay.setStyle('color', getStyle("titleColor"));
 				borderStroke.color = getStyle("borderColor");
 				borderStroke.alpha = getStyle("borderAlpha");
-				titleBackgroundFill.color = bkgColor;
 				backgroundFill.color = getStyle("backgroundColor");
 				backgroundFill.alpha = getStyle("backgroundAlpha");
 				super.updateDisplayList(unscaledWidth, unscaledHeight);
@@ -116,6 +121,8 @@
 				target.topRightRadiusX = cornerRadius;
 				target.bottomLeftRadiusX = includeBottom ? cornerRadius : 0;
 				target.bottomRightRadiusX = includeBottom ? cornerRadius : 0;
+				target.radiusX = cornerRadius;
+				target.radiusY = cornerRadius;
 			}
 			private var cornerRadius: Number;
 		]]>
@@ -130,11 +137,11 @@
 	<s:Group left="0" right="0" top="0" bottom="0">
 
 		<!--- layer 1: border @private -->
-		<s:Rect id="border" left="0" right="0" top="10" bottom="0">
-			<s:stroke>
+		<skins:GroupBoxBorder spaceFrom="{spaceFrom}" spaceTo="{spaceTo}" id="border" left="0" right="0" top="10" bottom="0">
+			<skins:stroke>
 				<s:SolidColorStroke id="borderStroke" weight="1"/>
-			</s:stroke>
-		</s:Rect>
+			</skins:stroke>
+		</skins:GroupBoxBorder>
 
 		<!-- layer 2: background fill -->
 
@@ -144,13 +151,6 @@
 
 				<!--- Defines the TitleWindowSkin class's background fill. The default color is 0xFFFFFF. -->
 				<s:SolidColor id="backgroundFill" color="#FFFFFF"/>
-			</s:fill>
-		</s:Rect>
-		<s:Rect id="titleBackground" left="9" top="10" bottom="1">
-			<s:fill>
-
-				<!--- Defines the TitleWindowSkin class's background fill. The default color is 0xFFFFFF. -->
-				<s:SolidColor id="titleBackgroundFill" color="#FFFFFF"/>
 			</s:fill>
 		</s:Rect>
 

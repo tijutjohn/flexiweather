@@ -416,6 +416,7 @@
     <classEntry path="com.tests.wmts.InteractiveLayerTiledTest"/>
     <classEntry path="com.utils.ObjectSorter"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.multiview.synchronization.SynchronizatorBase"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.containers.skins.GroupBoxBorder"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
