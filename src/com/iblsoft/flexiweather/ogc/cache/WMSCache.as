@@ -266,7 +266,8 @@ package com.iblsoft.flexiweather.ogc.cache
 			if (item)
 			{
 				var bmp: Bitmap = item.image as Bitmap;
-				return new Bitmap(bmp.bitmapData.clone());
+				if (bmp && bmp.bitmapData)
+					return new Bitmap(bmp.bitmapData.clone());
 			}
 			return null;
 		}
