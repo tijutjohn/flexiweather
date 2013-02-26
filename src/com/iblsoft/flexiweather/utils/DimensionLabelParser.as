@@ -145,10 +145,6 @@ package com.iblsoft.flexiweather.utils
 				interactiveLayer = layerComposer.getPrimaryLayer() as InteractiveLayerMSBase;
 			if (interactiveLayer)
 			{
-				if (dimensionName == "TIME")
-				{
-					trace("DLP check TIME value");
-				}
 				var value: String = interactiveLayer.getWMSDimensionValue(dimensionName, true);
 				if (value)
 				{

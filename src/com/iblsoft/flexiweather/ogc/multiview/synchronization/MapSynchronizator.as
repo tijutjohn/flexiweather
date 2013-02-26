@@ -69,17 +69,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			}
 			
 		}
-		
-		private function dataForWidgetAvailable(widget: InteractiveWidget): void
-		{
-			widget.enabled = true;
-		}
-		
-		private function dataForWidgetUnvailable(widget: InteractiveWidget): void
-		{
-			widget.enabled = false;
-		}
-		
+
 		private function getFrame(position: int, frames: Array): Date
 		{
 			var cnt: int = 0;

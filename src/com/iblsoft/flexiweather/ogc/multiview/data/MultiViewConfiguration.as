@@ -10,12 +10,23 @@ package com.iblsoft.flexiweather.ogc.multiview.data
 		/**
 		 *  Data information for each view, if needed 
 		 */		
-		public var viewData: Array;
+		private var _viewData: Array;
 		
 		private var _customData: Object;
 		
 		public function MultiViewConfiguration()
 		{
+		}
+
+
+		public function get viewData():Array
+		{
+			return _viewData;
+		}
+
+		public function set viewData(value:Array):void
+		{
+			_viewData = value;
 		}
 
 		/**

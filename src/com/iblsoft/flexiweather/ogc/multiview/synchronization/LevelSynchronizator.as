@@ -100,6 +100,10 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 					var cnt: int = 0;
 					var total: int = widgetsForSynchronisation.length;
 					
+					var widgetsForSynchronizing: Array = [];
+					
+					var level: String;
+					
 					for (var i: int = 0; i < total; i++)
 					{
 						var widget: InteractiveWidget = widgetsForSynchronisation.getItemAt(i) as InteractiveWidget;
@@ -110,11 +114,14 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 								var levelObject: Object = _levelValues[cnt] as Object;
 								if (levelObject && levelObject.hasOwnProperty('level') && levelObject.level is GlobalVariableValue)
 								{
-									var level: String = (levelObject.level as GlobalVariableValue).label;
+									level = (levelObject.level as GlobalVariableValue).label;
 									if (level)
 									{
 										if (widget.interactiveLayerMap.level != level)
 										{
+											listenToWidgetSynchronization(widget);
+											widgetsForSynchronizing.push( {level: level, widget: widget } );
+											
 											widget.interactiveLayerMap.setLevel(level);
 										} else {
 											trace("LevelSychronizator synchroniseWidWidgets level fro widget ["+cnt+"] is already set to " + level + " Do not do anything!");
@@ -126,6 +133,18 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 //						}
 						cnt++;
 					}
+					
+					//2nd pass, change frames
+					for each (var obj: Object in widgetsForSynchronizing)
+					{
+						level = obj.level as String;
+						widget = obj.widget as InteractiveWidget;
+						
+						widget.interactiveLayerMap.setLevel(level);
+						dataForWidgetAvailable(widget);
+						
+					}
+					checkIfSynchronizationIsDone();
 				}
 			}
 		}

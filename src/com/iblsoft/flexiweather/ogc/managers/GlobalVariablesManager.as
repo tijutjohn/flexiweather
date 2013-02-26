@@ -200,7 +200,7 @@ package com.iblsoft.flexiweather.ogc.managers
 				{
 					var eventILM: InteractiveLayerMap = event.target as InteractiveLayerMap;
 					
-					trace("GlobalVariablesManager onInteractiveLayerFrameVariableChanged from: " + eventILM + " current: " + _interactiveLayerMap)
+//					trace("GlobalVariablesManager onInteractiveLayerFrameVariableChanged from: " + eventILM + " current: " + _interactiveLayerMap)
 					if (eventILM != _interactiveLayerMap)
 					{
 						//Frame change was received from non-selected layer, ignore it
@@ -222,8 +222,7 @@ package com.iblsoft.flexiweather.ogc.managers
 				if (!selectedFrame)
 					return;
 				
-				trace("GlobalVariablesManager onInteractiveLayerFrameVariableChanged selectedFrame: " + selectedFrame)
-				trace("GlobalVariablesManager onInteractiveLayerFrameVariableChanged _frame: " + _frame)
+				//trace("GlobalVariablesManager ["+_interactiveLayerMap+"] onInteractiveLayerFrameVariableChanged selectedFrame: " + selectedFrame + " _frame: " + _frame);
 				if (_frame)
 				{
 					if (_frame.time != selectedFrame.time)
@@ -270,7 +269,7 @@ package com.iblsoft.flexiweather.ogc.managers
 		
 		override public function toString(): String
 		{
-			return "GlovalVariablesManager: " + _interactiveLayerMap;
+			return "GlobalVariablesManager: " + _interactiveLayerMap;
 		}
 	}
 }

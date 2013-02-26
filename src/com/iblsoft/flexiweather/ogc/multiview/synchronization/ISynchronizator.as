@@ -10,6 +10,8 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 
 	public interface ISynchronizator extends IEventDispatcher
 	{
+		function initializeSynchronizator(): void;
+		
 		function invalidateSynchronizator(): void;
 		function isSynchronizedFor(synchronizedDate: Date): Boolean;
 		function canCreateMap(iw: InteractiveWidget): Boolean;
@@ -18,6 +20,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		function updateMapAction(iw: InteractiveWidget, position: int, configuration: MultiViewConfiguration): void;
 		
 		function synchronizeWidgets(synchronizeFromWidget: InteractiveWidget, widgetsForSynchronisation: ArrayCollection, preferredSelectedIndex: int = -1): void;
+		function notifySynchronizationDone(): void;
 		function get labelString():String;
 		function set viewData(data: Array): void;
 		function set customData(data: Object): void;

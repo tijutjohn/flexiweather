@@ -152,11 +152,21 @@ package com.iblsoft.flexiweather.widgets
 //			}
 			//draw label
 			var bkgColor: uint = 0x000000;
-			if (_primaryLayer && _primaryLayer.status == InteractiveDataLayer.STATE_NO_DATA_AVAILABLE || labelText == '')
+			
+			var dataAvailable: Boolean = true;
+			if (_primaryLayer) 
+			{
+				if (_primaryLayer.status == InteractiveDataLayer.STATE_NO_DATA_AVAILABLE)	dataAvailable = false;
+				if (!_primaryLayer.container.enabled) dataAvailable = false;
+			}
+			if (labelText == '') dataAvailable = false;
+			
+			if (!dataAvailable)
 			{
 				bkgColor = 0x880000;
 				updateLayerLabel("No data");
 			}
+			
 			var w: int = 100;
 			var h: int = 25;
 			var paddingHorizontal: int = 4;
