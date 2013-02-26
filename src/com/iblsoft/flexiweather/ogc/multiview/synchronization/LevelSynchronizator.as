@@ -121,8 +121,6 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 										{
 											listenToWidgetSynchronization(widget);
 											widgetsForSynchronizing.push( {level: level, widget: widget } );
-											
-											widget.interactiveLayerMap.setLevel(level);
 										} else {
 											trace("LevelSychronizator synchroniseWidWidgets level fro widget ["+cnt+"] is already set to " + level + " Do not do anything!");
 										}
@@ -146,6 +144,8 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 					}
 					checkIfSynchronizationIsDone();
 				}
+			} else {
+				checkIfSynchronizationIsDone();
 			}
 		}
 		

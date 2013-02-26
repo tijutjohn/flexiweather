@@ -26,12 +26,17 @@ package com.iblsoft.flexiweather.widgets
 
 		override protected function createChildren(): void
 		{
-			_northIndicator = new NorthIndicator();
+			super.createChildren();
+			
+			if (!_northIndicator)
+				_northIndicator = new NorthIndicator();
 		}
 
 		override protected function childrenCreated(): void
 		{
-			addChild(_northIndicator);
+			if (!_northIndicator.parent)
+				addChild(_northIndicator);
+			
 			mouseEnabled = false;
 			mouseChildren = false;
 		}
@@ -105,6 +110,8 @@ package com.iblsoft.flexiweather.widgets
 		override public function draw(graphics: Graphics): void
 		{
 			super.draw(graphics);
+			
+			trace("NorthIndicator: " + numChildren);
 			if (_northIndicator)
 			{
 				if (_indicatorPosition)

@@ -93,8 +93,8 @@ package com.iblsoft.flexiweather.widgets
 		[Bindable(event = LEVEL_VARIABLE_CHANGED)]
 		public function get level(): String
 		{
-//			var levelString: String = getSynchronizedLevelValue();
-			var levelString: String = _globalVariablesManager.level;
+			var levelString: String = getSynchronizedLevelValue();
+//			var levelString: String = _globalVariablesManager.level;
 			return levelString;
 		}
 
@@ -109,7 +109,6 @@ package com.iblsoft.flexiweather.widgets
 		[Bindable(event = FRAME_VARIABLE_CHANGED)]
 		public function get frameString(): String
 		{
-//			var frameDate: Date = getSynchronizedFrameValue();
 			if (dateFormat && dateFormat.length > 0)
 				return DateUtils.strftime(frame, dateFormat);
 			return frame.toString();
@@ -646,28 +645,14 @@ package com.iblsoft.flexiweather.widgets
 				return (primaryLayer as ISynchronisedObject).getSynchronisedVariableValue(GlobalVariable.FRAME) as Date;
 			return null;
 		}
-//		
-//		private function getSynchronizedLevelValue(): String
-//		{
-//			return getSynchronizedVariableValue(GlobalVariable.LEVEL) as String;	
-//		}
-//		
-//		private function getSynchronizedVariableValue(variable: String): Object
-//		{
-//			var l_syncLayers: Array = [];
-//			var l_timeAxis: Array = enumTimeAxis(l_syncLayers);
-//          	if(l_timeAxis == null) // no time axis
-//          		return null;
-//          		
-//			var so: ISynchronisedObject;
-//			
-//          	for each(so in l_syncLayers) 
-//          	{
-//          		var frame: Date = so.getSynchronisedVariableValue(variable) as Date;
-//          	}
-//
-//			return frame;
-//		}
+		
+		private function getSynchronizedLevelValue(): String
+		{
+			if (primaryLayer)
+				return (primaryLayer as ISynchronisedObject).getSynchronisedVariableValue(GlobalVariable.LEVEL) as String;
+			return null;
+		}
+
 		private var m_primaryLayer: InteractiveLayerMSBase;
 
 		[Bindable(event = PRIMARY_LAYER_CHANGED)]
