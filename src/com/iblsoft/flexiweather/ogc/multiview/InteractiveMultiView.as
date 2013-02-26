@@ -919,6 +919,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 		{
 			if (layer)
 			{
+				debug("startListenForSynchronisedVariableChange layer: " + layer);
 				layer.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, onSychronisedVariableChanged);
 				layer.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onSychronisedVariableChanged);
 			}
@@ -928,6 +929,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 		{
 			if (layer)
 			{
+				debug("stopListenForSynchronisedVariableChange layer: " + layer);
 				layer.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, onSychronisedVariableChanged);
 				layer.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onSychronisedVariableChanged);
 			}
@@ -1239,26 +1241,29 @@ package com.iblsoft.flexiweather.ogc.multiview
 					}
 				}
 				
-				if (isLayerInSelectedWidget(primaryLayer))
+				if (primaryLayer && isLayerInSelectedWidget(primaryLayer))
 					synchronizeWidgets(synchronizator, primaryLayer.container);
 			}
 		}
 
 		private function isLayerInSelectedWidget(layer: InteractiveLayerMSBase): Boolean
 		{
-			var layerWidget: InteractiveWidget = layer.container;
-			
-			if (layerWidget && selectedInteractiveWidget)
+			if (layer)
 			{
-				if (layerWidget != selectedInteractiveWidget)
+				var layerWidget: InteractiveWidget = layer.container;
+				
+				if (layerWidget && selectedInteractiveWidget)
 				{
-					debug("isLayerInSelectedWidget WIDGETS ARE NOT SAME!!: layer " + layerWidget.name + " selected: " + selectedInteractiveWidget.name);
-					return false;		
+					if (layerWidget != selectedInteractiveWidget)
+					{
+						debug("isLayerInSelectedWidget WIDGETS ARE NOT SAME!!: layer " + layerWidget.name + " selected: " + selectedInteractiveWidget.name);
+						return false;		
+					} else {
+						return true;
+					}
 				} else {
-					return true;
+					debug("isLayerInSelectedWidget NO Widgets to synchronize ");
 				}
-			} else {
-				debug("isLayerInSelectedWidget NO Widgets to synchronize ");
 			}
 			return false;
 		}
@@ -1318,6 +1323,9 @@ package com.iblsoft.flexiweather.ogc.multiview
 			synchronizator.removeEventListener(SynchronisationEvent.SYNCHRONISATION_DONE, onSynchronizationDone);
 			
 			var primaryLayer: InteractiveLayerMSBase = selectedInteractiveWidget.interactiveLayerMap.primaryLayer;
+			
+			debug("onSynchronizationDone primaryLayer: " + primaryLayer);
+			
 			startListenForSynchronisedVariableChange(primaryLayer);
 			enabled = true;
 		}
