@@ -121,7 +121,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 		public var selectedBorder: Rect;
 
 		[SkinPart(required = "true")]
-		public var disabledUI: Rect;
+		public var disabledUI: Group;
 
 		[Bindable(event = "interactiveLayerMapChanged")]
 		public function get interactiveLayerMap(): InteractiveLayerMap
@@ -605,6 +605,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 			_loadingMapsCount--;
 			if (_loadingMapsCount == 0)
 			{
+				startWatchingChanges();
 				notifyWidgetsMapLoaded();
 			}
 		}
@@ -684,32 +685,36 @@ package com.iblsoft.flexiweather.ogc.multiview
 			}
 		}
 
-		public function startWatchingChanges(bStartListenForWidgetChanges: Boolean = true): void
+		public function startWatchingChanges(bStartListenForWidgetChanges: Boolean = true, bInvalidateDisplayList: Boolean = true): void
 		{
 			_watchChanges = true;
 			if (bStartListenForWidgetChanges)
 			{
 				for each (var widget: InteractiveWidget in _interactiveWidgets.widgets)
 				{
-					widget.startListenForChanges();
+					widget.startListenForChanges(bInvalidateDisplayList);
 				}
 			}
 			dispatchEvent(new Event('watchChangesChanged'));
-			invalidateDisplayList();
+			
+			if (bInvalidateDisplayList)
+				invalidateDisplayList();
 		}
 
-		public function stopWatchingChanges(bStopListenForWidgetChanges: Boolean = true): void
+		public function stopWatchingChanges(bStopListenForWidgetChanges: Boolean = true, bInvalidateDisplayList: Boolean = true): void
 		{
 			_watchChanges = false;
 			if (bStopListenForWidgetChanges)
 			{
 				for each (var widget: InteractiveWidget in _interactiveWidgets.widgets)
 				{
-					widget.stopListenForChanges();
+					widget.stopListenForChanges(bInvalidateDisplayList);
 				}
 			}
 			dispatchEvent(new Event('watchChangesChanged'));
-			invalidateDisplayList();
+			
+			if (bInvalidateDisplayList)
+				invalidateDisplayList();
 		}
 		
 		private var _watchChanges: Boolean = true;
@@ -722,6 +727,10 @@ package com.iblsoft.flexiweather.ogc.multiview
 
 		private function onWidgetChanged(event: InteractiveWidgetEvent): void
 		{
+			//if there is single widget, it's not needed to do any rebuilding
+			if (_interactiveWidgets && _interactiveWidgets.widgets.length < 2)
+				return;
+			
 			if (_watchChanges)
 			{
 				var iw: InteractiveWidget = event.target as InteractiveWidget;

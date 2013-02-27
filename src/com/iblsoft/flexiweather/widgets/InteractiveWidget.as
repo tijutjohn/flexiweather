@@ -4,6 +4,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.events.InteractiveLayerWMSEvent;
 	import com.iblsoft.flexiweather.events.InteractiveWidgetEvent;
 	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
 	import com.iblsoft.flexiweather.ogc.cache.WMSCacheKey;
 	import com.iblsoft.flexiweather.ogc.cache.WMSCacheManager;
@@ -461,7 +462,11 @@ package com.iblsoft.flexiweather.widgets
 			//when new layer is added to container, call onAreaChange to notify layer, that layer is already added to container, so it can render itself
 			l.onAreaChanged(true);
 			invalidateLayersOrder();
-			notifyWidgetChanged('addLayer', this);
+			
+			if (l is InteractiveLayerMSBase)
+				notifyWidgetChanged('addLayer', this);
+			else
+				trace(this + " onLayerInitialized do not notify widget, because it's not WMS layer");
 		}
 
 		public function removeLayer(l: InteractiveLayer, b_destroy: Boolean = false): void
@@ -1030,23 +1035,27 @@ package com.iblsoft.flexiweather.widgets
 			return mb_listenForChanges;
 		}
 
-		public function startListenForChanges(): void
+		public function startListenForChanges(bInvalidateDisplayList: Boolean = true): void
 		{
 			if (!mb_listenForChanges)
 			{
 				mb_listenForChanges = true;
 				dispatchEvent(new Event("listeningForChangesChanged"));
-				invalidateDisplayList();
+				
+				if (bInvalidateDisplayList)
+					invalidateDisplayList();
 			}
 		}
 
-		public function stopListenForChanges(): void
+		public function stopListenForChanges(bInvalidateDisplayList: Boolean = true): void
 		{
 			if (mb_listenForChanges)
 			{
 				mb_listenForChanges = false;
 				dispatchEvent(new Event("listeningForChangesChanged"));
-				invalidateDisplayList();
+
+				if (bInvalidateDisplayList)
+					invalidateDisplayList();
 			}
 		}
 

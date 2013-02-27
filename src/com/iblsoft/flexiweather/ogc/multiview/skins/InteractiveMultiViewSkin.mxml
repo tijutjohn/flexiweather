@@ -23,8 +23,15 @@
 <s:Skin xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
 		xmlns:layouts="com.iblsoft.flexiweather.ogc.multiview.layouts.*"
 		xmlns:fb="http://ns.adobe.com/flashbuilder/2009">
+	
 	<fx:Metadata>[HostComponent("com.iblsoft.flexiweather.ogc.multiview.InteractiveMultiView")]</fx:Metadata>
+
+	<fx:Declarations>
+		<s:Fade id="fadeIn" alphaFrom="0" alphaTo="1" duration="700"/>
+		<s:Fade id="fadeOut" alphaFrom="1" alphaTo="0" duration="700"/>
+	</fx:Declarations>
 	<fx:Script fb:purpose="styling">
+
 		<![CDATA[
 			/**
 			 * @private
@@ -109,10 +116,13 @@
 		</s:stroke>
 	</s:Rect>
 	
-	<s:Rect id="disabledUI" left="0" right="0" top="0" bottom="0">
-		<s:fill>
-			<s:SolidColor color="0x000000" alpha="0.5"/>
-		</s:fill>
-	</s:Rect>
+	<s:Group id="disabledUI" showEffect="{fadeIn}" hideEffect="{fadeOut}">
+		<s:Rect left="0" right="0" top="0" bottom="0">
+			<s:fill>
+				<s:SolidColor color="0x000000" alpha="0.3"/>
+			</s:fill>
+		</s:Rect>
+		
+	</s:Group>
 	
 </s:Skin>
