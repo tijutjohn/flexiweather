@@ -17,6 +17,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 	import com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent;
 	import com.iblsoft.flexiweather.ogc.multiview.skins.InteractiveMultiViewSkin;
 	import com.iblsoft.flexiweather.ogc.multiview.synchronization.AreaSynchronizator;
+	import com.iblsoft.flexiweather.ogc.multiview.synchronization.GlobalFrameSynchronizator;
 	import com.iblsoft.flexiweather.ogc.multiview.synchronization.ISynchronizator;
 	import com.iblsoft.flexiweather.ogc.multiview.synchronization.MapSynchronizator;
 	import com.iblsoft.flexiweather.ogc.multiview.synchronization.events.SynchronisationEvent;
@@ -47,6 +48,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 	import mx.collections.ArrayCollection;
 	import mx.collections.IList;
 	import mx.controls.Alert;
+	import mx.core.UIComponent;
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
 	import mx.events.DynamicEvent;
@@ -109,10 +111,17 @@ package com.iblsoft.flexiweather.ogc.multiview
 			return _configuration != null
 		}
 		private var _widgetsCountToBeReady: ArrayCollection;
+		
 		private var _areaSynchronizator: AreaSynchronizator;
+		private var _globalFrameSynchronizator: GlobalFrameSynchronizator;
+		
+		
 		private var _cacheManager: WMSCacheManager;
 		[SkinPart(required = "true")]
 		public var selectedBorder: Rect;
+
+		[SkinPart(required = "true")]
+		public var disabledUI: Rect;
 
 		[Bindable(event = "interactiveLayerMapChanged")]
 		public function get interactiveLayerMap(): InteractiveLayerMap
@@ -124,9 +133,9 @@ package com.iblsoft.flexiweather.ogc.multiview
 
 		override public function set enabled(value:Boolean):void
 		{
-			super.enabled = value;
-			
 			trace("IMV enabled = " + value);
+			super.enabled = value;
+			invalidateDisplayList();
 		}
 		override public function set dataProvider(value: IList): void
 		{
@@ -152,6 +161,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 			setStyle('skinClass', InteractiveMultiViewSkin);
 			_cacheManager = new WMSCacheManager();
 			_areaSynchronizator = new AreaSynchronizator();
+			_globalFrameSynchronizator = new GlobalFrameSynchronizator();
 			addEventListener(MouseEvent.CLICK, onMouseClick);
 			dispatchEvent(new Event("interactiveWidgetsChanged"));
 		}
@@ -161,6 +171,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 			var config: MultiViewConfiguration = new MultiViewConfiguration();
 			config.columns = 1;
 			config.rows = 1;
+			config.customData = {selectedIndex: 0};
 			createInteractiveWidgetsFromConfiguration(config);
 		}
 
@@ -246,7 +257,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 		public function createInteractiveWidgetsFromConfiguration(newConfiguration: MultiViewConfiguration = null): void
 		{
 			enabled = true;
-			
 			
 			if (!newConfiguration)
 				newConfiguration = _configuration
@@ -685,6 +695,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 				}
 			}
 			dispatchEvent(new Event('watchChangesChanged'));
+			invalidateDisplayList();
 		}
 
 		public function stopWatchingChanges(bStopListenForWidgetChanges: Boolean = true): void
@@ -698,7 +709,9 @@ package com.iblsoft.flexiweather.ogc.multiview
 				}
 			}
 			dispatchEvent(new Event('watchChangesChanged'));
+			invalidateDisplayList();
 		}
+		
 		private var _watchChanges: Boolean = true;
 
 		[Bindable(event = "watchChangesChanged")]
@@ -718,6 +731,17 @@ package com.iblsoft.flexiweather.ogc.multiview
 				}
 				else
 				{
+					if (event.changeDescription == GlobalVariable.FRAME)
+					{
+						if (!synchronizator.hasSynchronisedVariable(GlobalVariable.FRAME))
+						{
+							// in case synchronizator is not synchronizing FRAME, global frame synchronizator will synchronize FRAME instead
+							enabled = false;
+							_globalFrameSynchronizator.addEventListener(SynchronisationEvent.SYNCHRONISATION_DONE, onGlobalFrameSynchronizationDone);
+							_globalFrameSynchronizator.synchronizeWidgets(_selectedInteractiveWidget, _interactiveWidgets.widgets);
+							return;
+						}
+					}
 					stopWatchingChanges();
 					rebuildWidgets();
 //					rebuildGlobalVariables(event.changeDescription);
@@ -730,6 +754,12 @@ package com.iblsoft.flexiweather.ogc.multiview
 			}
 		}
 
+		private function onGlobalFrameSynchronizationDone(event: SynchronisationEvent): void
+		{
+			enabled = true;
+			_globalFrameSynchronizator.removeEventListener(SynchronisationEvent.SYNCHRONISATION_DONE, onGlobalFrameSynchronizationDone);
+		}
+		
 		private function rebuildGlobalVariables(changeDescription: String): void
 		{
 			var currWidget: InteractiveWidget
@@ -1133,8 +1163,10 @@ package com.iblsoft.flexiweather.ogc.multiview
 				selectionB = unscaledHeight - (selectionT + selectedInteractiveWidget.height) - 1;
 				skin.invalidateDisplayList();
 			}
+			
+			disabledUI.includeInLayout = disabledUI.visible = !enabled || !_watchChanges;
 		}
-
+		
 		private function debugWidgets(): void
 		{
 		}

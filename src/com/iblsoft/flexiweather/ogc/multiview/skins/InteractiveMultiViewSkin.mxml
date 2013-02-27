@@ -84,6 +84,8 @@
 			<s:SolidColorStroke id="borderStroke" weight="1"/>
 		</s:stroke>
 	</s:Rect>
+	
+	
 
 	<!--
 	  Note: setting the minimum size to 0 here so that changes to the host component's
@@ -106,4 +108,11 @@
 			<s:SolidColorStroke id="selectedBorderStroke" weight="3"/>
 		</s:stroke>
 	</s:Rect>
+	
+	<s:Rect id="disabledUI" left="0" right="0" top="0" bottom="0">
+		<s:fill>
+			<s:SolidColor color="0x000000" alpha="0.5"/>
+		</s:fill>
+	</s:Rect>
+	
 </s:Skin>

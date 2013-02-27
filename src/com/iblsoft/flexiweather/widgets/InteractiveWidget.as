@@ -552,7 +552,7 @@ package com.iblsoft.flexiweather.widgets
 			_disableUI.visible = true;
 			var g: Graphics = _disableUI.graphics;
 			g.clear();
-			g.beginFill(0);
+			g.beginFill(0, 0.5);
 			g.drawRect(0, 0, unscaledWidth, unscaledHeight);
 			g.endFill()
 		}
@@ -570,10 +570,10 @@ package com.iblsoft.flexiweather.widgets
 				m_labelLayout.setBoundary(new Rectangle(0, 0, width, height));
 			var g: Graphics = m_layerBackground.graphics;
 			g.clear();
-			if (!enabled)
+			if (!enabled || !mb_listenForChanges)
 			{
 				drawDisabledState();
-				return;
+//				return;
 			}
 			else
 			{
@@ -1036,6 +1036,7 @@ package com.iblsoft.flexiweather.widgets
 			{
 				mb_listenForChanges = true;
 				dispatchEvent(new Event("listeningForChangesChanged"));
+				invalidateDisplayList();
 			}
 		}
 
@@ -1045,6 +1046,7 @@ package com.iblsoft.flexiweather.widgets
 			{
 				mb_listenForChanges = false;
 				dispatchEvent(new Event("listeningForChangesChanged"));
+				invalidateDisplayList();
 			}
 		}
 
