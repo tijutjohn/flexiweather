@@ -3,6 +3,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.ogc.multiview.data.MultiViewConfiguration;
+	import com.iblsoft.flexiweather.ogc.multiview.data.SynchronizationChangeType;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.events.EventDispatcher;
@@ -21,6 +22,14 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		}
 		public function MapSynchronizator()
 		{
+			super();
+			
+			registerChangeType(SynchronizationChangeType.MAP_LAYER_ADDED);
+			registerChangeType(SynchronizationChangeType.MAP_LAYER_REMOVED);
+			registerChangeType(SynchronizationChangeType.MAP_CHANGED);
+			registerChangeType(SynchronizationChangeType.WMS_STYLE_CHANGED);
+			registerChangeType(SynchronizationChangeType.ALPHA_CHANGED);
+			registerChangeType(SynchronizationChangeType.VISIBILITY_CHANGED);
 		}
 		
 		override public function updateMapAction(iw: InteractiveWidget, position: int, configuration: MultiViewConfiguration): void
@@ -52,7 +61,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			
 		override public function synchronizeWidgets(synchronizeFromWidget:InteractiveWidget, widgetsForSynchronisation:ArrayCollection, preferredSelectedIndex: int = -1):void
 		{
-			//there is no synchronizing needed for this syncrhonizator, all is done by AreaSynchronizator
+			//there is no synchronizing needed for this syncrhonizator, all is done by AreaSynchronizator anf GlobalFrameSynchronizator
 			
 			var cnt: int = 0;
 			var total: int = widgetsForSynchronisation.length;
@@ -117,7 +126,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		
 		override public function hasSynchronisedVariable(s_variableId: String): Boolean
 		{
-			return s_variableId == GlobalVariable.FRAME;
+			return false;
 		}
 	}
 }

@@ -14,11 +14,13 @@ package com.iblsoft.flexiweather.ogc.multiview
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.ogc.editable.IInteractiveLayerProvider;
 	import com.iblsoft.flexiweather.ogc.multiview.data.MultiViewConfiguration;
+	import com.iblsoft.flexiweather.ogc.multiview.data.SynchronizationChangeType;
 	import com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent;
 	import com.iblsoft.flexiweather.ogc.multiview.skins.InteractiveMultiViewSkin;
 	import com.iblsoft.flexiweather.ogc.multiview.synchronization.AreaSynchronizator;
 	import com.iblsoft.flexiweather.ogc.multiview.synchronization.GlobalFrameSynchronizator;
 	import com.iblsoft.flexiweather.ogc.multiview.synchronization.ISynchronizator;
+	import com.iblsoft.flexiweather.ogc.multiview.synchronization.MapLayersPropertiesSynchronizator;
 	import com.iblsoft.flexiweather.ogc.multiview.synchronization.MapSynchronizator;
 	import com.iblsoft.flexiweather.ogc.multiview.synchronization.events.SynchronisationEvent;
 	import com.iblsoft.flexiweather.plugins.IConsole;
@@ -114,6 +116,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 		
 		private var _areaSynchronizator: AreaSynchronizator;
 		private var _globalFrameSynchronizator: GlobalFrameSynchronizator;
+		private var _mapLayersPropertiesSynchronizator: MapLayersPropertiesSynchronizator;
 		
 		
 		private var _cacheManager: WMSCacheManager;
@@ -160,8 +163,11 @@ package com.iblsoft.flexiweather.ogc.multiview
 			_interactiveWidgets = new WidgetCollection();
 			setStyle('skinClass', InteractiveMultiViewSkin);
 			_cacheManager = new WMSCacheManager();
+			
 			_areaSynchronizator = new AreaSynchronizator();
 			_globalFrameSynchronizator = new GlobalFrameSynchronizator();
+			_mapLayersPropertiesSynchronizator = new MapLayersPropertiesSynchronizator();
+			
 			addEventListener(MouseEvent.CLICK, onMouseClick);
 			dispatchEvent(new Event("interactiveWidgetsChanged"));
 		}
@@ -740,21 +746,31 @@ package com.iblsoft.flexiweather.ogc.multiview
 				}
 				else
 				{
-					if (event.changeDescription == GlobalVariable.FRAME)
+					var changeCause: String = event.changeDescription;
+					
+					if (!synchronizator.isSynchronisingChangeType(SynchronizationChangeType.FRAME_CHANGED) && changeCause == SynchronizationChangeType.FRAME_CHANGED)
 					{
-						if (!synchronizator.hasSynchronisedVariable(GlobalVariable.FRAME))
-						{
-							// in case synchronizator is not synchronizing FRAME, global frame synchronizator will synchronize FRAME instead
-							enabled = false;
-							_globalFrameSynchronizator.addEventListener(SynchronisationEvent.SYNCHRONISATION_DONE, onGlobalFrameSynchronizationDone);
-							_globalFrameSynchronizator.synchronizeWidgets(_selectedInteractiveWidget, _interactiveWidgets.widgets);
+						// in case synchronizator is not synchronizing FRAME, global frame synchronizator will synchronize FRAME instead
+						enabled = false;
+						_globalFrameSynchronizator.addEventListener(SynchronisationEvent.SYNCHRONISATION_DONE, onGlobalFrameSynchronizationDone);
+						_globalFrameSynchronizator.synchronizeWidgets(_selectedInteractiveWidget, _interactiveWidgets.widgets);
+						return;
+					}
+					if (changeCause == SynchronizationChangeType.ALPHA_CHANGED || changeCause == SynchronizationChangeType.VISIBILITY_CHANGED)
+					{
+						if (!synchronizator.isSynchronisingChangeType(changeCause))
+						{	
+							_mapLayersPropertiesSynchronizator.synchronizeWidgets(_selectedInteractiveWidget, _interactiveWidgets.widgets);
 							return;
 						}
 					}
-					stopWatchingChanges();
-					rebuildWidgets();
-//					rebuildGlobalVariables(event.changeDescription);
-//					startWatchingChanges();
+					if (!synchronizator.isSynchronisingChangeType(changeCause))
+					{
+						stopWatchingChanges();
+						rebuildWidgets();
+					} else {
+						trace("onWidgetChanged: There were change : " + changeCause + " but synchronizator: "  + synchronizator.labelString + " already synchronize this");
+					}
 				}
 			}
 			else

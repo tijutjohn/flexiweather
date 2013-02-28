@@ -4,6 +4,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariableValue;
 	import com.iblsoft.flexiweather.ogc.multiview.data.MultiViewConfiguration;
+	import com.iblsoft.flexiweather.ogc.multiview.data.SynchronizationChangeType;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.events.EventDispatcher;
@@ -33,6 +34,9 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		
 		public function LevelSynchronizator()
 		{
+			super();
+			
+			registerChangeType(SynchronizationChangeType.LEVEL_CHANGED);
 		}
 		
 		private function getLevelValue(position: int): void

@@ -4,6 +4,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 	import com.iblsoft.flexiweather.ogc.SynchronisedVariableChangeEvent;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.ogc.multiview.data.MultiViewConfiguration;
+	import com.iblsoft.flexiweather.ogc.multiview.data.SynchronizationChangeType;
 	import com.iblsoft.flexiweather.plugins.IConsole;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
@@ -50,7 +51,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 
 		override public function set viewData(data: Array): void
 		{
-			if (data[0] == null || data[1] == null)
+			if (data && (data[0] == null || data[1] == null))
 				_frameStep = 0;
 			else
 				_frameStep = data[1].data - data[0].data;
@@ -63,7 +64,11 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 
 		public function FrameSynchronizator()
 		{
+			super();
+			
 			timeDifference = -1;
+			
+			registerChangeType(SynchronizationChangeType.FRAME_CHANGED);
 		}
 
 		private function debug(str: String, type: String = "Info", tag: String = "FrameSynchronizator"): void
@@ -189,7 +194,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 					}
 	
 					_lastSynchronizedFrame = synchronizedWidgetFrame;
-					_synchronizatorInvalid = false;
+					mb_synchronizatorInvalid = false;
 					debug("FramSynchronisator synchronizeWidgets _lastSynchronizedFrame: " + _lastSynchronizedFrame + "\n*******************\n");
 				}
 				else

@@ -12,6 +12,7 @@ package com.iblsoft.flexiweather.events
 		public static const LAYER_INITIALIZED: String = 'layerInitialized';
 		public static const FEATURES_LOADED: String = 'featuresLoaded';
 		public static const FEATURES_IMPORTED: String = 'featuresImported';
+		public static const ALPHA_CHANGED: String = 'alphaChanged';
 		public static const VISIBILITY_CHANGED: String = 'visibilityChanged';
 		public static const VISIBILITY_EFFECT_FINISHED: String = 'visibilityEffectFinished';
 		public static const LAYER_ROLL_OVER: String = 'layerRollOver';

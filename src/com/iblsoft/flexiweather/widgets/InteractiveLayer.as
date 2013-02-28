@@ -68,6 +68,14 @@ package com.iblsoft.flexiweather.widgets
 		}
 		public static var ID: int = 0;
 
+		override public function set alpha(value:Number):void
+		{
+			if (super.alpha != value)
+			{
+				super.alpha = value;
+				dispatchEvent(new InteractiveLayerEvent(InteractiveLayerEvent.ALPHA_CHANGED, true));
+			}
+		}
 		override public function get visible(): Boolean
 		{
 			return super.visible;

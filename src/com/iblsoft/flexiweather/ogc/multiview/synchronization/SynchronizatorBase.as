@@ -15,28 +15,33 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 	
 	public class SynchronizatorBase extends EventDispatcher implements ISynchronizator
 	{
+		private var ma_supportedChangeTypes: Array;
+		protected var md_synchronisationDictionary: Dictionary;
+		protected var mb_synchronizatorInvalid: Boolean;
+		
 		public function SynchronizatorBase()
 		{
-			_synchronizatorInvalid = true;
+			mb_synchronizatorInvalid = true;
+			ma_supportedChangeTypes = [];
 			initializeSynchronizator();
 		}
 		
-		protected var _synchronizatorInvalid: Boolean;
 		
 		public function initializeSynchronizator(): void
 		{
-			_synchronisationDictionary = new Dictionary();
+			md_synchronisationDictionary = new Dictionary();
+			ma_supportedChangeTypes
 		}
 	
 		public function invalidateSynchronizator():void
 		{
-			_synchronizatorInvalid = true;
+			mb_synchronizatorInvalid = true;
 		}
 		
 		
 		public function isSynchronizedFor(synchronizedDate: Date): Boolean
 		{
-			return _synchronizatorInvalid;
+			return mb_synchronizatorInvalid;
 		}
 		
 		public function canCreateMap(iw:InteractiveWidget):Boolean
@@ -62,14 +67,14 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		}
 		
 		
-		protected var _synchronisationDictionary: Dictionary;
+		
 		
 		protected function listenToWidgetSynchronization(widget: InteractiveWidget): void
 		{
 			var primaryLayer: InteractiveLayerMSBase = widget.interactiveLayerMap.primaryLayer;
 			if (primaryLayer)
 			{
-				_synchronisationDictionary[primaryLayer] = primaryLayer.container.id;
+				md_synchronisationDictionary[primaryLayer] = primaryLayer.container.id;
 				primaryLayer.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, onSychronisationDone);
 				primaryLayer.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onSychronisationDone);
 			}
@@ -80,7 +85,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			var layer: InteractiveLayerMSBase = event.target as InteractiveLayerMSBase;
 			if (layer)
 			{
-				delete _synchronisationDictionary[layer];
+				delete md_synchronisationDictionary[layer];
 				layer.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, onSychronisationDone);
 				layer.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onSychronisationDone);
 				checkIfSynchronizationIsDone();
@@ -89,7 +94,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		
 		protected function checkIfSynchronizationIsDone(): void
 		{
-			for (var layer: * in _synchronisationDictionary)
+			for (var layer: * in md_synchronisationDictionary)
 			{
 				if (layer)
 					return;
@@ -126,6 +131,26 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		public function getSynchronisedVariables(): Array
 		{
 			return [];
+		}
+		
+		protected function registerChangeType(s_changeType: String): void
+		{
+			if (ma_supportedChangeTypes.indexOf(s_changeType) < 0)
+				ma_supportedChangeTypes.push(s_changeType);
+		}
+		public function isSynchronisingChangeType(s_changeType: String): Boolean
+		{
+			if (ma_supportedChangeTypes && ma_supportedChangeTypes.length > 0)
+			{
+				for each (var currChangeType: String in ma_supportedChangeTypes)
+				{
+					if (currChangeType == s_changeType)
+					{
+						return true;
+					}
+				}
+			}
+			return false;
 		}
 		
 		public function hasSynchronisedVariable(s_variableId:String):Boolean

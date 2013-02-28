@@ -16,12 +16,14 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			var widgetsForSynchronizing: Array = [];
 			
 			var frame: Date = synchronizeFromWidget.frame;
+			if (!frame)
+				return;
 			
 			for each (var widget: InteractiveWidget in widgetsForSynchronisation)
 			{
 				if (widget.id != synchronizeFromWidget.id)
 				{
-					if (widget.frame.time != frame.time)
+					if (widget.frame && widget.frame.time != frame.time)
 					{
 						listenToWidgetSynchronization(widget);
 						widgetsForSynchronizing.push( { widget: widget } );

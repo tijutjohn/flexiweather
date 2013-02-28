@@ -33,6 +33,8 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		 */		
 		function get willSynchronisePrimaryLayer(): Boolean;
 		
+		function isSynchronisingChangeType(s_changeType: String): Boolean;
+		
 		function getSynchronisedVariables():Array;
 		function hasSynchronisedVariable(s_variableId: String): Boolean;
 	}

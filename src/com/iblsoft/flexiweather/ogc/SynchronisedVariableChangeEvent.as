@@ -11,8 +11,8 @@ package com.iblsoft.flexiweather.ogc
 
 		public function SynchronisedVariableChangeEvent(
 				s_type: String,
-				s_variableId: String
-				/*type:String, bubbles:Boolean=false, cancelable:Boolean=false*/)
+				s_variableId: String,
+				bubbles:Boolean=false, cancelable:Boolean=false)
 		{
 			super(s_type, bubbles, cancelable);
 			ms_variableId = s_variableId;

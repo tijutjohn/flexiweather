@@ -1228,7 +1228,7 @@ package com.iblsoft.flexiweather.ogc
 			if (m_cfg.dimensionForecastName != null && s_dimName == m_cfg.dimensionForecastName)
 			{
 				dispatchEvent(new SynchronisedVariableChangeEvent(
-						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.FRAME));
+						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.FRAME, true));
 			}
 			//if "time" changed, we need to update timeline, so we need to dispatch event
 			if (m_cfg.dimensionTimeName != null && s_dimName == m_cfg.dimensionTimeName)

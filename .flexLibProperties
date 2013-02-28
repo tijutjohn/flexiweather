@@ -417,6 +417,7 @@
     <classEntry path="com.utils.ObjectSorter"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.multiview.synchronization.SynchronizatorBase"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.skins.GroupBoxBorder"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.multiview.data.SynchronizationChangeType"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

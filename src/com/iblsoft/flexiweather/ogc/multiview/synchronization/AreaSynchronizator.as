@@ -106,7 +106,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		
 		override protected function listenToWidgetSynchronization(widget: InteractiveWidget): void
 		{
-			_synchronisationDictionary[widget] = widget.id;
+			md_synchronisationDictionary[widget] = widget.id;
 //			debug("[" + widget.id + "] listenToWidgetSynchronization");
 			widget.addEventListener(InteractiveWidgetEvent.AREA_CHANGED, onAreaSychronisationDone);
 		}
@@ -117,7 +117,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			if (widget)
 			{
 //				debug("[" + widget.id + "] onAreaSychronisationDone");
-				delete _synchronisationDictionary[widget];
+				delete md_synchronisationDictionary[widget];
 				widget.removeEventListener(InteractiveWidgetEvent.AREA_CHANGED, onAreaSychronisationDone);
 				checkIfSynchronizationIsDone();
 			}

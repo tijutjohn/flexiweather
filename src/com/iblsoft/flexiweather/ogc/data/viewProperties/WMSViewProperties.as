@@ -758,7 +758,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					{
 						setWMSDimensionValue(m_cfg.dimensionForecastName, ofExactForecast.value);
 						dispatchSynchronizedVariableChangeEvent(new SynchronisedVariableChangeEvent(
-								SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.FRAME));
+								SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.FRAME, false));
 						return true;
 					}
 				}
