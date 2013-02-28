@@ -576,35 +576,53 @@ package com.iblsoft.flexiweather.ogc.tiling
 		override public function changeViewProperties(viewProperties: IViewProperties): void
 		{
 			var layer: IPreloadableLayer = getPreloadableInteractiveLayerBaseOnIsTileable();
-			layer.changeViewProperties(getViewPropertiesBasedOnIsTileable(viewProperties));
+			if (layer == this)
+				return super.changeViewProperties(getViewPropertiesBasedOnIsTileable(viewProperties));
+					
+			return layer.changeViewProperties(getViewPropertiesBasedOnIsTileable(viewProperties));
 		}
 
 		override public function cancelPreload():void
 		{
 			var layer: IPreloadableLayer = getPreloadableInteractiveLayerBaseOnIsTileable();
-			layer.cancelPreload();
+			if (layer == this)
+				return super.cancelPreload();
+			
+			return layer.cancelPreload();
 		}
 		override public function preload(viewProperties: IViewProperties): void
 		{
 			var layer: IPreloadableLayer = getPreloadableInteractiveLayerBaseOnIsTileable();
-			layer.preload(getViewPropertiesBasedOnIsTileable(viewProperties));
+			if (layer == this)
+				return super.preload(getViewPropertiesBasedOnIsTileable(viewProperties));
+
+			return layer.preload(getViewPropertiesBasedOnIsTileable(viewProperties));
 		}
 
 		override public function preloadMultiple(viewPropertiesArray: Array): void
 		{
 			var layer: IPreloadableLayer = getPreloadableInteractiveLayerBaseOnIsTileable();
-			layer.preloadMultiple(convertViewPropertiesArray(viewPropertiesArray));
+			if (layer == this)
+				return super.preloadMultiple(convertViewPropertiesArray(viewPropertiesArray));
+
+			return layer.preloadMultiple(convertViewPropertiesArray(viewPropertiesArray));
 		}
 
 		override public function isPreloaded(viewProperties: IViewProperties): Boolean
 		{
-			var layer: IPreloadableLayer = getPreloadableInteractiveLayerBaseOnIsTileable();
+ 			var layer: IPreloadableLayer = getPreloadableInteractiveLayerBaseOnIsTileable();
+			if (layer == this)
+				return super.isPreloaded(getViewPropertiesBasedOnIsTileable(viewProperties));
+
 			return layer.isPreloaded(getViewPropertiesBasedOnIsTileable(viewProperties));
 		}
 
 		override public function isPreloadedMultiple(viewPropertiesArray: Array): Boolean
 		{
 			var layer: IPreloadableLayer = getPreloadableInteractiveLayerBaseOnIsTileable();
+			if (layer == this)
+				return super.isPreloadedMultiple(convertViewPropertiesArray(viewPropertiesArray));
+
 			return layer.isPreloadedMultiple(convertViewPropertiesArray(viewPropertiesArray));
 		}
 

@@ -582,7 +582,12 @@ package com.iblsoft.flexiweather.widgets
 				m_labelLayout.setBoundary(new Rectangle(0, 0, width, height));
 			var g: Graphics = m_layerBackground.graphics;
 			g.clear();
-			if (!enabled || !mb_listenForChanges)
+			
+			var bDrawDisableState: Boolean = !enabled;
+			if (_enableSynchronization)
+				bDrawDisableState = bDrawDisableState && !mb_listenForChanges;
+			
+			if (bDrawDisableState)
 			{
 				drawDisabledState();
 //				return;
@@ -591,6 +596,7 @@ package com.iblsoft.flexiweather.widgets
 			{
 				if (_disableUI)
 				{
+					_disableUI.graphics.clear();
 					_disableUI.includeInLayout = false;
 					_disableUI.visible = false;
 				}
@@ -1034,6 +1040,19 @@ package com.iblsoft.flexiweather.widgets
 			}
 			return [{point: point, reflection: 0}];
 		}
+		
+		private var _enableSynchronization: Boolean;
+		public function get enableSynchronization():Boolean
+		{
+			return _enableSynchronization;
+		}
+		
+		public function set enableSynchronization(value:Boolean):void
+		{
+			_enableSynchronization = value;
+		}
+
+		
 		private var mb_listenForChanges: Boolean;
 
 		[Bindable(event = "listeningForChangesChanged")]

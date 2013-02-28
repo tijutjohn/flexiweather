@@ -51,10 +51,15 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 
 		override public function set viewData(data: Array): void
 		{
-			if (data && (data[0] == null || data[1] == null))
-				_frameStep = 0;
-			else
-				_frameStep = data[1].data - data[0].data;
+			_frameStep = 0;
+			if (data)
+			{
+				if (data[0] == null || data[1] == null)
+					_frameStep = 0;
+				else
+					_frameStep = data[1].data - data[0].data;
+			}
+			
 		}
 
 		override public function get labelString(): String
