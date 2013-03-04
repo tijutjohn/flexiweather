@@ -48,6 +48,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			 */
 			
 			var crs: String = synchronizeFromWidget.getCRS();
+			var extentBBox: BBox = synchronizeFromWidget.getExtentBBox();
 			var viewBBox: BBox = synchronizeFromWidget.getViewBBox();
 			
 			var widgetsForSynchronizing: Array = [];
@@ -56,14 +57,16 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			{
 				if (widget.id != synchronizeFromWidget.id)
 				{
-//					debug("Widget [" + widget.id + "] " + widget.getViewBBox().toBBOXString() + " synchronized view bbox: " + viewBBox.toBBOXString());
 					var changeCRS: Boolean = widget.getCRS() != crs;
+					var changeExtentBBox: Boolean = !widget.getExtentBBox().equals(extentBBox);
 					var changeViewBBox: Boolean = !widget.getViewBBox().equals(viewBBox);
 					
+					debug("Widget [" + widget.id + "] " + widget.getViewBBox().toBBOXString() + " synchronized view bbox: " + viewBBox.toBBOXString());
+					debug("Widget [" + widget.id + "] changeCRS: " + changeCRS + " changeExtentBBox: " + changeExtentBBox + " changeViewBBox: " + changeViewBBox);
 					if (changeCRS || changeViewBBox)
 					{
 						listenToWidgetSynchronization(widget);
-						widgetsForSynchronizing.push( {changeCRS: changeCRS, changeViewBBox: changeViewBBox, widget: widget } );
+						widgetsForSynchronizing.push( {changeCRS: changeCRS, changeViewBBox: changeViewBBox, changeExtentBBox: changeExtentBBox, widget: widget } );
 					}
 				}
 //				else
@@ -77,27 +80,24 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			{
 				changeCRS = obj.changeCRS as Boolean;
 				changeViewBBox = obj.changeViewBBox as Boolean
+				changeExtentBBox = obj.changeExtentBBox as Boolean
 				widget = obj.widget as InteractiveWidget;
 				
 				if (changeCRS)
 				{
 //					debug("\tAreaSynchronizator [" + widget.id + "] changeAreaAfterDelay | change CRS to " + crs);
 					//if view box is not changed, CRS must be set as final
-					widget.setCRS(crs, !changeViewBBox);
+					widget.setCRS(crs, !changeViewBBox && !changeExtentBBox);
 				}
-//				else
-//				{
-//					debug("\tAreaSynchronizator [" + widget.id + "] changeAreaAfterDelay |  NOT changing CRS, CRSs are same");
-//				}
+				if (changeExtentBBox)
+				{
+					widget.setExtentBBoxRaw(extentBBox.xMin, extentBBox.yMin, extentBBox.xMax, extentBBox.yMax, !changeViewBBox);
+				}
 				if (changeViewBBox)
 				{
 //					debug("\tAreaSynchronizator [" + widget.id + "] changeAreaAfterDelay |  change viewBBox from " + widget.getViewBBox().toBBOXString() + " TO " + viewBBox.toBBOXString());
 					widget.setViewBBox(viewBBox, true);
 				}
-//				else
-//				{
-//					debug("\tAreaSynchronizator [" + widget.id + "] changeAreaAfterDelay |  NOT changing viewBBox, view boxes are same");
-//				}
 				
 			}
 			
@@ -125,7 +125,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 
 		private function debug(str: String, type: String = "Info", tag: String = "AreaSynchronizator"): void
 		{
-			//trace(tag + "| " + type + "| " + str);
+			trace(tag + "| " + type + "| " + str);
 		}
 	}
 }
