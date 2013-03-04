@@ -480,7 +480,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 		{
 			dispatchEvent(new InteractiveMultiViewEvent(InteractiveMultiViewEvent.MULTI_VIEW_READY));
 			//load maps from previous multiView state
-			callLater(loadMaps, [_serializedMapXML, synchronizator]);
+			callLater(loadMapsForAllWidgets, [_serializedMapXML, synchronizator]);
 //			startWatchingChanges();
 		}
 		private var _serializedMapXML: XML;
@@ -503,12 +503,31 @@ package com.iblsoft.flexiweather.ogc.multiview
 		 * @param mapXML
 		 *
 		 */
-		public function loadMap(mapXML: XML): void
+		public function loadMap(mapXML: XML, itemData: Object): void
 		{
-			loadMaps(mapXML);
+			if (synchronizator && !synchronizator.isSynchronisingChangeType(SynchronizationChangeType.MAP_LAYER_ADDED))
+				loadMapsForAllWidgets(mapXML);
+			else {
+				//load map just for currently selected widget
+				if (selectedInteractiveWidget) {
+					_loadingMapsCount = 1;
+					_initializingMapsCount = 1;
+					
+					
+					var position: int = _interactiveWidgets.getWidgetIndex(selectedInteractiveWidget);
+					
+					//update map configuration
+					
+					var dp: ArrayCollection = _configuration.customData.dataProvider as ArrayCollection;
+					dp.setItemAt(itemData, position);
+						
+					loadMapForWidget(selectedInteractiveWidget, mapXML, position);
+				}
+			}
+			
 		}
 
-		private function loadMaps(mapXML: XML, synchronizator: ISynchronizator = null): void
+		private function loadMapsForAllWidgets(mapXML: XML, synchronizator: ISynchronizator = null): void
 		{
 			if (mapXML)
 			{
@@ -521,6 +540,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 				var cnt: int = 0;
 				for each (var currIW: InteractiveWidget in _interactiveWidgets.widgets)
 				{
+					/*
 					if (_oldCRS)
 						currIW.setCRS(_oldCRS, false);
 					if (_oldExtentBBox)
@@ -540,8 +560,34 @@ package com.iblsoft.flexiweather.ogc.multiview
 						synchronizator.createMap(currIW);
 						
 					}
+					*/
+					
+					loadMapForWidget(currIW, mapXML, cnt);
 					cnt++;
 				}
+			}
+		}
+		
+		private function loadMapForWidget(widget: InteractiveWidget, mapXML: XML, position: int): void
+		{
+			if (_oldCRS)
+				widget.setCRS(_oldCRS, false);
+			if (_oldExtentBBox)
+				widget.setExtentBBox(_oldExtentBBox, false);
+			if (_oldViewBBox)
+				widget.setViewBBox(_oldViewBBox, true);
+			widget.stopListenForChanges();
+			
+			if (!synchronizator || !synchronizator.canCreateMap(widget))
+			{
+				createMapFromSerialization(widget, mapXML);
+				//						widget.interactiveLayerMap.addEventListener(InteractiveLayerMap.LAYERS_SERIALIZED_AND_READY, onMapFromXMLReady);
+				//						widget.interactiveLayerMap.serialize(_serializedMap);
+			} else {
+				synchronizator.updateMapAction(widget, position, _configuration);
+				synchronizator.addEventListener(SynchronisationEvent.MAP_READY, onSynchronizatorMapReady);
+				synchronizator.createMap(widget);
+				
 			}
 		}
 		
@@ -1511,6 +1557,11 @@ class WidgetCollection
 		_collection.addItem(widget);
 		_collection.refresh();
 		debugWidgetsIDs();
+	}
+	
+	public function getWidgetIndex(widget: InteractiveWidget): int
+	{
+		return _collection.getItemIndex(widget);
 	}
 	
 	private function getWidgetNumberFromID(widget: InteractiveWidget): int

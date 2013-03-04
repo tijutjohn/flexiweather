@@ -46,9 +46,14 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 						{
 							var mapSynchronizator: MapSynchronizator = synchronizator as MapSynchronizator;
 							var obj: Object = dp.getItemAt(position) as Object;
-							if (obj && obj.hasOwnProperty('fullPath'))
+							if (obj && (obj.hasOwnProperty('fullPath') || obj.hasOwnProperty('path')))
 							{
-								var fullPath: String = (dp.getItemAt(position) as Object).fullPath;
+								var fullPath: String;
+								if (obj.hasOwnProperty('fullPath'))
+									fullPath = (dp.getItemAt(position) as Object).fullPath;
+								else if (obj.hasOwnProperty('path'))
+									fullPath = (dp.getItemAt(position) as Object).path;
+									
 								_widgetsMapDictionary[iw] = {action: 'loadMap', path: fullPath}
 								return;
 							}
