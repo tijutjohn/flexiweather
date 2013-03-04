@@ -94,6 +94,13 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 
 		private var _lastSynchronizedFrame: Date;
 		
+		override public function initializeSynchronizator(): void
+		{
+			super.initializeSynchronizator();
+			
+			_lastSynchronizedFrame = null;
+		}
+		
 		override public function isSynchronizedFor(synchronizedDate: Date): Boolean
 		{
 			if (!synchronizedDate)
@@ -181,6 +188,8 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 										widgetsForSynchronizing.push( {frame: frame, widget: widget } );
 									} else {
 										debug("Do not synchronise (same frames) frame: " + frame.toTimeString() + " for widget: " + widget.id, 'Info', 'FrameSychronizator');
+										if (widget.interactiveLayerMap.frame)
+											dataForWidgetAvailable(widget);
 										
 									}
 								}

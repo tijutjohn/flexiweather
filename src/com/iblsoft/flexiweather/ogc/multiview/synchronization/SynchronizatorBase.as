@@ -161,6 +161,9 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		protected function dataForWidgetAvailable(widget: InteractiveWidget): void
 		{
 			widget.enabled = true;
+			var labelLayer: InteractiveLayerLabel = widget.getLayerByType(InteractiveLayerLabel) as InteractiveLayerLabel;
+			if (labelLayer)
+				labelLayer.invalidateDynamicPart();
 		}
 		
 		protected function dataForWidgetUnvailable(widget: InteractiveWidget): void
