@@ -518,6 +518,7 @@ package com.iblsoft.flexiweather.widgets
 			if (_levelInvalidated)
 			{
 				_levelInvalidated = false;
+				
 				//it will set level again. This is done by purpose when adding new layer, to synchronise level with newly added layer
 				setLevel(level);
 			}
@@ -1047,8 +1048,19 @@ package com.iblsoft.flexiweather.widgets
 			return l_timeAxis;
 		}
 
-		public function setLevel(newLevel: String, b_nearrest: Boolean = true): Boolean
+		/**
+		 * 
+		 * @param newLevel
+		 * @param b_nearrest
+		 * @param bGlobalValueChange
+		 * @return 
+		 * 
+		 */
+		public function setLevel(newLevel: String, b_nearrest: Boolean = true, bGlobalValueChange: Boolean = false): Boolean
 		{
+			if (bGlobalValueChange)
+				_globalVariablesManager.level = newLevel;
+			
 			for each (var l: InteractiveLayer in m_layers)
 			{
 				var so: ISynchronisedObject = l as ISynchronisedObject;
@@ -1056,6 +1068,13 @@ package com.iblsoft.flexiweather.widgets
 					continue;
 				if (!so.hasSynchronisedVariable(GlobalVariable.LEVEL))
 					continue;
+				
+				/**
+				 * if level change was cause by changing GLOBAL LEVEL, only layers which synchronize levels should synchronize levels
+				 */
+				if (bGlobalValueChange && !(l as InteractiveLayerMSBase).synchroniseLevel)
+					continue;
+				
 				var bSynchronized: Boolean = so.synchroniseWith(GlobalVariable.LEVEL, newLevel);
 				if (bSynchronized)
 				{
@@ -1079,8 +1098,11 @@ package com.iblsoft.flexiweather.widgets
 				setFrame(frame);
 		}
 		
-		public function setFrame(newFrame: Date, b_nearrest: Boolean = true): Boolean
+		public function setFrame(newFrame: Date, b_nearrest: Boolean = true, bGlobalValueChange: Boolean = true): Boolean
 		{
+			if (bGlobalValueChange)
+				_globalVariablesManager.frame = newFrame;
+			
 			for each (var l: InteractiveLayer in m_layers)
 			{
 				var so: ISynchronisedObject = l as ISynchronisedObject;
@@ -1089,6 +1111,8 @@ package com.iblsoft.flexiweather.widgets
 				if (!so.hasSynchronisedVariable(GlobalVariable.FRAME))
 					continue;
 //				debug(this + " setFrame try to synchronize: [" + newFrame.toTimeString() + "]  for " + l.name, 'Info', 'Layer Map');
+				
+				
 				var bSynchronized: Boolean = so.synchroniseWith(GlobalVariable.FRAME, newFrame);
 				if (bSynchronized)
 				{

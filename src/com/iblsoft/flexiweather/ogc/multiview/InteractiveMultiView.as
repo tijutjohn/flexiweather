@@ -519,7 +519,10 @@ package com.iblsoft.flexiweather.ogc.multiview
 					//update map configuration
 					
 					var dp: ArrayCollection = _configuration.customData.dataProvider as ArrayCollection;
-					dp.setItemAt(itemData, position);
+					if (dp)
+					{
+						dp.setItemAt(itemData, position);
+					}
 						
 					loadMapForWidget(selectedInteractiveWidget, mapXML, position);
 				}
