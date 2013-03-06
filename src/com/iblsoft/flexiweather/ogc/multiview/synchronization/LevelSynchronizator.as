@@ -52,66 +52,20 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			
 		}
 		
-		/*
-		public function synchronizeWidgets(synchronizeFromWidget:InteractiveWidget, widgetsForSynchronisation:ArrayCollection):void
+		override public function updateMapAction(widget: InteractiveWidget, position: int, configuration: MultiViewConfiguration): void
 		{
-			trace("\nLevelSychronizator synchronizeWidgets");
-			var primaryLayer: InteractiveLayerMSBase = synchronizeFromWidget.interactiveLayerMap.getPrimaryLayer();
-			if (primaryLayer)
-			{
-				var variables: Array = primaryLayer.getSynchronisedVariables();
-				var levels: Array = primaryLayer.getSynchronisedVariableValuesList(GlobalVariable.LEVEL);
-			
-				var synchronizeFromWidgetPosition: int = getWidgetPosition(synchronizeFromWidget, widgetsForSynchronisation);
-				
-				var currLevel: String = primaryLayer.getSynchronisedVariableValue(GlobalVariable.LEVEL) as String;
-				var currLevelPosition: int = getLevelPosition(currLevel, levels);
-				
-				trace("curr level: " + currLevel + " currLevelPosition: " + currLevelPosition);
-				if (currLevelPosition > 0)
-					levels = levels.slice(Math.max(0, currLevelPosition - synchronizeFromWidgetPosition), levels.length);
-				
-				
-				if (synchronizeFromWidgetPosition > -1)
-				{
-					var cnt: int = 0;
-					var total: int = widgetsForSynchronisation.length;
-					for (var i: int = 0; i < total; i++)
-					{
-						var widget: InteractiveWidget = widgetsForSynchronisation.getItemAt(i) as InteractiveWidget;
-						if (widget.id != synchronizeFromWidget.id)
-						{
-							var levelPos: int =  i- synchronizeFromWidgetPosition + currLevelPosition;
-							if (levelPos >= 0)
-							{
-								var level: String = getLevel(cnt, levels);
-								if (level)
-								{
-									trace("LevelSychronizator synchroniseWidWidgets syncWidget["+synchronizeFromWidgetPosition+"] setLevel: " + level + " for widget: " + widget.id + " i: " + i + " currLevel: " + currLevelPosition + " levelPos: " + levelPos);
-									widget.interactiveLayerMap.setLevel(level);
-								}
-							}
-						}
-						cnt++;
-					}
-				}
-			}
-		}
-		*/
-		
-		private function onWidgetLevelChanged(event: SynchronisedVariableChangeEvent): void
-		{
-			var widget: InteractiveWidget = event.target as InteractiveWidget;
-			
 			var infoObject: Object = _widgetDictionary[widget];
 			if (infoObject)
 			{
-				var position: int = infoObject.position;
+//				var position: int = infoObject.position;
 				//update level at this position
 				var oldObj: Object = _levelValues[position];
+				
+				_levelValues[position] = configuration.viewData[position]; 
 			}
 			
 		}
+		
 		override public function synchronizeWidgets(synchronizeFromWidget:InteractiveWidget, widgetsForSynchronisation:ArrayCollection, preferredSelectedIndex: int = -1):void
 		{
 			if (_levelValues)
@@ -140,7 +94,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 //						if (widget.id != synchronizeFromWidget.id)
 //						{
 						
-						widget.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onWidgetLevelChanged, false, 0, true);
+//						widget.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onWidgetLevelChanged, false, 0, true);
 						
 						
 						if (hasSynchronizableLevel)

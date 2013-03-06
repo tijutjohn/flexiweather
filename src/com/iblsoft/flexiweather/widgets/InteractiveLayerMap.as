@@ -40,22 +40,31 @@ package com.iblsoft.flexiweather.widgets
 	public class InteractiveLayerMap extends InteractiveLayerComposer implements Serializable
 	{
 		public static const TIMELINE_CONFIGURATION_CHANGE: String = "timelineConfigurationChange";
-		public static const LAYERS_SERIALIZED_AND_READY: String = "layersSerializedAndReady";
+		
 		[Event(name = LAYERS_SERIALIZED_AND_READY, type = "mx.events.DynamicEvent")]
-		public static const TIME_AXIS_UPDATED: String = "timeAxisUpdated";
+		public static const LAYERS_SERIALIZED_AND_READY: String = "layersSerializedAndReady";
+		
 		[Event(name = TIME_AXIS_UPDATED, type = "flash.events.DataEvent")]
-		public static const TIME_AXIS_ADDED: String = "timeAxisAdded";
+		public static const TIME_AXIS_UPDATED: String = "timeAxisUpdated";
+		
 		[Event(name = TIME_AXIS_ADDED, type = "mx.events.DynamicEvent")]
-		public static const TIME_AXIS_REMOVED: String = "timeAxisRemoved";
+		public static const TIME_AXIS_ADDED: String = "timeAxisAdded";
+		
 		[Event(name = TIME_AXIS_REMOVED, type = "mx.events.DynamicEvent")]
-		public static const PRIMARY_LAYER_CHANGED: String = "primaryLayerChanged";
+		public static const TIME_AXIS_REMOVED: String = "timeAxisRemoved";
+		
 		[Event(name = PRIMARY_LAYER_CHANGED, type = "flash.events.DataEvent")]
-		public static const FRAME_VARIABLE_CHANGED: String = "frameVariableChanged";
+		public static const PRIMARY_LAYER_CHANGED: String = "primaryLayerChanged";
+		
 		[Event(name = FRAME_VARIABLE_CHANGED, type = "mx.events.DynamicEvent")]
-		public static const LEVEL_VARIABLE_CHANGED: String = "levelVariableChanged";
+		public static const FRAME_VARIABLE_CHANGED: String = "frameVariableChanged";
+		
 		[Event(name = LEVEL_VARIABLE_CHANGED, type = "mx.events.DynamicEvent")]
-		public static const SYNCHRONISE_WITH: String = "synchroniseWith";
+		public static const LEVEL_VARIABLE_CHANGED: String = "levelVariableChanged";
+		
 		[Event(name = SYNCHRONISE_WITH, type = "mx.events.DynamicEvent")]
+		public static const SYNCHRONISE_WITH: String = "synchroniseWith";
+		
 		public static var debugConsole: IConsole;
 		private static var mapUID: int = 0;
 		public var mapID: int;

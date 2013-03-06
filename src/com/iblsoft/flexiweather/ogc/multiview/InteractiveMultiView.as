@@ -107,6 +107,11 @@ package com.iblsoft.flexiweather.ogc.multiview
 		}
 		private var _configuration: MultiViewConfiguration;
 
+		public function get configuration(): MultiViewConfiguration
+		{
+			return _configuration;
+		}
+		
 		[Bindable(event = "configurationChanged")]
 		public function get isMultiViewConfigured(): Boolean
 		{
@@ -498,6 +503,12 @@ package com.iblsoft.flexiweather.ogc.multiview
 			_serializedMapXML = _serializedMap.xml;
 		}
 
+		
+		public function getWidgetIndex(widget: InteractiveWidget): int
+		{
+			return _interactiveWidgets.getWidgetIndex(widget);
+		}
+		
 		/**
 		 * Load map for all widget at once
 		 * @param mapXML
