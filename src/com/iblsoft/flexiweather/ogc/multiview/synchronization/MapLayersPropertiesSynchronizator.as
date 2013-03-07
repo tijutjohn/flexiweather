@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc.multiview.synchronization
 {
+	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
@@ -39,6 +40,16 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 						
 						if (synchLayer.visible != currLayer.visible)
 							currLayer.visible = synchLayer.visible;
+						
+						if (synchLayer is InteractiveLayerMSBase)
+						{
+							var synchLayerMSBase: InteractiveLayerMSBase = synchLayer as InteractiveLayerMSBase;
+							var currLayerMSBase: InteractiveLayerMSBase = currLayer as InteractiveLayerMSBase;
+							
+							if (synchLayerMSBase.synchroniseLevel != currLayerMSBase.synchroniseLevel)
+								currLayerMSBase.synchroniseLevel = synchLayerMSBase.synchroniseLevel;
+							
+						}
 					}
 				}
 			}

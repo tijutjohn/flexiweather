@@ -11,6 +11,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.cache.WMSCacheManager;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.ogc.multiview.data.SynchronizationChangeType;
+	import com.iblsoft.flexiweather.ogc.multiview.synchronization.events.SynchronisationEvent;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.CubicBezier;
@@ -398,6 +399,8 @@ package com.iblsoft.flexiweather.widgets
 
 		private function onLayerChangedInInteractiveLayerMap(event: Event): void
 		{
+			if (event.type == SynchronisationEvent.START_GLOBAL_VARIABLE_SYNCHRONIZATION || event.type == SynchronisationEvent.STOP_GLOBAL_VARIABLE_SYNCHRONIZATION)
+				notifyWidgetChanged(SynchronizationChangeType.SYNCHRONIZE_LEVEL_CHANGED, event.target);
 			if (event.type == InteractiveLayerWMSEvent.WMS_STYLE_CHANGED)
 				notifyWidgetChanged(SynchronizationChangeType.WMS_STYLE_CHANGED, event.target);
 			if (event.type == InteractiveLayerEvent.ALPHA_CHANGED)
@@ -410,6 +413,8 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (ilm)
 			{
+				ilm.addEventListener(SynchronisationEvent.START_GLOBAL_VARIABLE_SYNCHRONIZATION, onLayerChangedInInteractiveLayerMap);
+				ilm.addEventListener(SynchronisationEvent.STOP_GLOBAL_VARIABLE_SYNCHRONIZATION, onLayerChangedInInteractiveLayerMap);
 				ilm.addEventListener(InteractiveLayerEvent.ALPHA_CHANGED, onLayerChangedInInteractiveLayerMap);
 				ilm.addEventListener(InteractiveLayerEvent.VISIBILITY_CHANGED, onLayerChangedInInteractiveLayerMap);
 				ilm.addEventListener(InteractiveLayerWMSEvent.WMS_STYLE_CHANGED, onLayerChangedInInteractiveLayerMap);
@@ -423,6 +428,8 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (ilm)
 			{
+				ilm.removeEventListener(SynchronisationEvent.START_GLOBAL_VARIABLE_SYNCHRONIZATION, onLayerChangedInInteractiveLayerMap);
+				ilm.removeEventListener(SynchronisationEvent.STOP_GLOBAL_VARIABLE_SYNCHRONIZATION, onLayerChangedInInteractiveLayerMap);
 				ilm.removeEventListener(InteractiveLayerEvent.ALPHA_CHANGED, onLayerChangedInInteractiveLayerMap);
 				ilm.removeEventListener(InteractiveLayerEvent.VISIBILITY_CHANGED, onLayerChangedInInteractiveLayerMap);
 				ilm.removeEventListener(InteractiveLayerWMSEvent.WMS_STYLE_CHANGED, onLayerChangedInInteractiveLayerMap);

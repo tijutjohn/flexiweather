@@ -816,7 +816,9 @@ package com.iblsoft.flexiweather.ogc.multiview
 						_globalFrameSynchronizator.synchronizeWidgets(_selectedInteractiveWidget, _interactiveWidgets.widgets);
 						return;
 					}
-					if (changeCause == SynchronizationChangeType.ALPHA_CHANGED || changeCause == SynchronizationChangeType.VISIBILITY_CHANGED)
+					if (changeCause == SynchronizationChangeType.ALPHA_CHANGED || 
+						changeCause == SynchronizationChangeType.VISIBILITY_CHANGED ||
+						changeCause == SynchronizationChangeType.SYNCHRONIZE_LEVEL_CHANGED)
 					{
 						if (!synchronizator.isSynchronisingChangeType(changeCause))
 						{	

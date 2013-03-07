@@ -5,6 +5,12 @@ package com.iblsoft.flexiweather.ogc.multiview.data
 		public static const FRAME_CHANGED: String = 'frameChanged';
 		public static const LEVEL_CHANGED: String = 'levelChanged';
 		public static const ALPHA_CHANGED: String = 'alphaChanged';
+		
+		/**
+		 * "synchronizeLevel" property of InteractiveLayerMSBase is changed 
+		 */		
+		public static const SYNCHRONIZE_LEVEL_CHANGED: String = 'synchronizeLevelChanged';
+		
 		public static const VISIBILITY_CHANGED: String = 'visibilityChanged';
 		public static const WMS_STYLE_CHANGED: String = 'wmsStyleChanged';
 		public static const MAP_CHANGED: String = 'mapChanged';

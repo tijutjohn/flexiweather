@@ -30,6 +30,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			registerChangeType(SynchronizationChangeType.WMS_STYLE_CHANGED);
 			registerChangeType(SynchronizationChangeType.ALPHA_CHANGED);
 			registerChangeType(SynchronizationChangeType.VISIBILITY_CHANGED);
+			registerChangeType(SynchronizationChangeType.SYNCHRONIZE_LEVEL_CHANGED);
 		}
 		
 		override public function updateMapAction(iw: InteractiveWidget, position: int, configuration: MultiViewConfiguration): void

@@ -18,5 +18,15 @@ package com.iblsoft.flexiweather.ogc.data
 		{
 			return label;
 		}
+		
+		public function clone(): Object
+		{
+			var variable: GlobalVariableValue = new GlobalVariableValue();
+			variable.data = data;
+			variable.value = value;
+			variable.label = label;
+			
+			return variable;
+		}
 	}
 }

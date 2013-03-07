@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc.multiview.synchronization
 {
+	import com.iblsoft.flexiweather.events.InteractiveWidgetEvent;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.SynchronisationRole;
 	import com.iblsoft.flexiweather.ogc.SynchronisedVariableChangeEvent;
@@ -94,7 +95,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 //						if (widget.id != synchronizeFromWidget.id)
 //						{
 						
-//						widget.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onWidgetLevelChanged, false, 0, true);
+						widget.addEventListener(InteractiveWidgetEvent.WIDGET_CHANGED, onWidgetSynchronizedLevelChanged, false, 0, true);
 						
 						
 						if (hasSynchronizableLevel)
@@ -141,6 +142,31 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 				}
 			} else {
 				checkIfSynchronizationIsDone();
+			}
+		}
+		
+		private function onWidgetSynchronizedLevelChanged(event: InteractiveWidgetEvent): void
+		{
+			if (event.changeDescription == SynchronizationChangeType.SYNCHRONIZE_LEVEL_CHANGED)
+			{
+				var widget: InteractiveWidget = event.target as InteractiveWidget;
+				var layers: ArrayCollection = widget.interactiveLayerMap.layers;
+				
+				var synchronizeLevel: Boolean = false;
+				
+				for each (var layer: InteractiveLayerMSBase in layers)
+				{
+					if (layer && layer.synchroniseLevel)
+					{
+						synchronizeLevel = true;
+						break;
+					}
+				}
+				
+				if (synchronizeLevel)
+					dataForWidgetAvailable(widget);
+				else
+					dataForWidgetUnvailable(widget);
 			}
 		}
 		
