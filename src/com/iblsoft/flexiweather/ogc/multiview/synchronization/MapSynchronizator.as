@@ -16,6 +16,35 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 	{
 		protected var _widgetsMapDictionary: Dictionary = new Dictionary();
 		
+		private var _synchronizeFrame: Boolean;
+		
+
+		public function get synchronizeFrame():Boolean
+		{
+			return _synchronizeFrame;
+		}
+
+		override public function set customData(data: Object):void
+		{
+			super.customData = data;
+			
+			if (data.hasOwnProperty('synchronizeFrame'))
+				synchronizeFrame = data.synchronizeFrame;
+		}
+		public function set synchronizeFrame(value:Boolean):void
+		{
+			if (_synchronizeFrame != value)
+			{
+				_synchronizeFrame = value;
+				if (_synchronizeFrame)
+				{
+					unregisterChangeType(SynchronizationChangeType.FRAME_CHANGED);
+				} else {
+					registerChangeType(SynchronizationChangeType.FRAME_CHANGED);
+				}
+			}
+		}
+
 		override public function get labelString(): String
 		{
 			return "<mapName/>";

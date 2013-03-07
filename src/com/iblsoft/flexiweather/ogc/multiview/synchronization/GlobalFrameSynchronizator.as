@@ -23,7 +23,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			{
 				if (widget.id != synchronizeFromWidget.id)
 				{
-					if (widget.frame && widget.frame.time != frame.time)
+					if (!widget.frame || (widget.frame && widget.frame.time != frame.time))
 					{
 						listenToWidgetSynchronization(widget);
 						widgetsForSynchronizing.push( { widget: widget } );

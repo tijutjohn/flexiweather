@@ -138,6 +138,17 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			if (ma_supportedChangeTypes.indexOf(s_changeType) < 0)
 				ma_supportedChangeTypes.push(s_changeType);
 		}
+		
+		protected function unregisterChangeType(s_changeType: String): void
+		{
+			var pos: int = ma_supportedChangeTypes.indexOf(s_changeType);
+			if (pos > -1)
+			{
+				ma_supportedChangeTypes.splice(pos, 1);
+			}
+			
+		}
+		
 		public function isSynchronisingChangeType(s_changeType: String): Boolean
 		{
 			if (ma_supportedChangeTypes && ma_supportedChangeTypes.length > 0)
