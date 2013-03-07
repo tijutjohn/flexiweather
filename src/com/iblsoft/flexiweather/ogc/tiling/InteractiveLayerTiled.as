@@ -555,7 +555,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			topLeftPoint = container.coordToPoint(new Coord(s_crs, tileBBox.xMin, tileBBox.yMax));
 			topRightPoint = container.coordToPoint(new Coord(s_crs, tileBBox.xMax, tileBBox.yMax));
 			bottomLeftPoint = container.coordToPoint(new Coord(s_crs, tileBBox.xMin, tileBBox.yMin));
-			if (!topRightPoint || !topLeftPoint)
+			if (!topRightPoint || !topLeftPoint || !bottomLeftPoint)
 				return;
 			var origNewWidth: Number = topRightPoint.x - topLeftPoint.x;
 			var origNewHeight: Number = bottomLeftPoint.y - topLeftPoint.y;
