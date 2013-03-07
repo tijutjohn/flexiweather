@@ -690,33 +690,39 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		public function exactlySynchroniseWith(s_variableId: String, value: Object): Boolean
 		{
 			var of: Object;
-			var ofExactForecast: Object = null;
+			
 			if (s_variableId == GlobalVariable.LEVEL)
 			{
 				if (m_cfg.dimensionVerticalLevelName != null)
 				{
+					var ofExactLevel: Object = null;
 					var level: String = value as String;
 					var l_levels: Array = getWMSDimensionsValues(m_cfg.dimensionVerticalLevelName);
-					ofExactForecast = null;
+					ofExactLevel = null;
+					
 					for each (of in l_levels)
 					{
 						if (of && of.data && (of.data as String) == level)
 						{
-							ofExactForecast = of;
+							ofExactLevel = of;
 							break;
 						}
 					}
-					if (ofExactForecast != null)
+					
+					if (ofExactLevel != null)
 					{
-						setWMSDimensionValue(m_cfg.dimensionVerticalLevelName, ofExactForecast.data as String);
+						setWMSDimensionValue(m_cfg.dimensionVerticalLevelName, ofExactLevel.data as String);
 						dispatchSynchronizedVariableChangeEvent(new SynchronisedVariableChangeEvent(
 								SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.LEVEL));
 						return true;
 					}
 				}
 			}
+			
+			
 			if (s_variableId == GlobalVariable.FRAME)
 			{
+				var ofExactForecast: Object = null;
 				if (m_cfg.dimensionTimeName != null)
 				{
 					var frame: Date = value as Date;
@@ -739,6 +745,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 						return true;
 					}
 				}
+				
 				else if (m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null)
 				{
 					var run: Date = ISO8601Parser.stringToDate(

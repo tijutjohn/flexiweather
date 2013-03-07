@@ -402,8 +402,6 @@ package com.iblsoft.flexiweather.widgets
 				var globalLevel: String = storage.serializeString('global-level', null);
 				if (globalVariablesManager)
 				{
-					if (globalFrame8601)
-						globalVariablesManager.frame = ISO8601Parser.stringToDate(globalFrame8601);
 					if (globalLevel)
 						globalVariablesManager.level = globalLevel;
 				}
@@ -425,7 +423,7 @@ package com.iblsoft.flexiweather.widgets
 					var frameDateString: String;
 					if (globalVariablesManager.frame)
 						frameDateString = ISO8601Parser.dateToString(globalVariablesManager.frame)
-					storage.serializeString('global-frame', frameDateString);
+//					storage.serializeString('global-frame', frameDateString);
 					storage.serializeString('global-level', globalVariablesManager.level);
 				}
 				debug("Map serialize: " + (storage as XMLStorage).xml);
@@ -1065,10 +1063,9 @@ package com.iblsoft.flexiweather.widgets
 		 * @return 
 		 * 
 		 */
-		public function setLevel(newLevel: String, b_nearrest: Boolean = true, bGlobalValueChange: Boolean = false): Boolean
+		public function setLevel(newLevel: String, b_nearrest: Boolean = true): Boolean
 		{
-			if (bGlobalValueChange)
-				_globalVariablesManager.level = newLevel;
+			_globalVariablesManager.level = newLevel;
 			
 			for each (var l: InteractiveLayer in m_layers)
 			{
@@ -1076,12 +1073,6 @@ package com.iblsoft.flexiweather.widgets
 				if (so == null)
 					continue;
 				if (!so.hasSynchronisedVariable(GlobalVariable.LEVEL))
-					continue;
-				
-				/**
-				 * if level change was cause by changing GLOBAL LEVEL, only layers which synchronize levels should synchronize levels
-				 */
-				if (bGlobalValueChange && !(l as InteractiveLayerMSBase).synchroniseLevel)
 					continue;
 				
 				var bSynchronized: Boolean = so.synchroniseWith(GlobalVariable.LEVEL, newLevel);

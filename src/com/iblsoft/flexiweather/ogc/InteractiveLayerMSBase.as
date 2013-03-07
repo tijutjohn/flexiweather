@@ -1352,7 +1352,16 @@ package com.iblsoft.flexiweather.ogc
 		public function hasSynchronisedVariable(s_variableId: String): Boolean
 		{
 			if (m_currentWMSViewProperties)
+			{
+				if (s_variableId == GlobalVariable.LEVEL)
+				{
+					var hasLevel: Boolean = m_currentWMSViewProperties.hasSynchronisedVariable(s_variableId);
+					hasLevel = hasLevel && synchroniseLevel;
+					return hasLevel;
+				}
+					
 				return m_currentWMSViewProperties.hasSynchronisedVariable(s_variableId);
+			}
 			return false;
 		}
 

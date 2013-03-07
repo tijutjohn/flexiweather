@@ -133,8 +133,14 @@ package com.iblsoft.flexiweather.ogc
 				
 				if (styleNameValue)
 					storage.serializeString("style-name", styleNameValue, null);
-				if (level)
+				
+				if (!synchroniseLevel)
+				{
+					if (!level)
+						level = m_currentWMSViewProperties.getWMSDimensionDefaultValue('ELEVATION');
+					
 					storage.serializeString(GlobalVariable.LEVEL, level, null);
+				}
 				
 				storage.serializeBool('synchroniseLevel', synchroniseLevel);
 			}
