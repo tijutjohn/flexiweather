@@ -55,9 +55,16 @@ package com.iblsoft.flexiweather.ogc.managers
 
 		public function set frame(value: Date): void
 		{
-			_frame = value;
-			notifySelectedFrameChanged(value);
-			onInteractiveLayerFrameVariableChanged();
+			var change: Boolean = !_frame;
+			if (frame && frame.time == value.time)
+				change = false;
+			
+			if (change)
+			{
+				_frame = value;
+				notifySelectedFrameChanged(value);
+				onInteractiveLayerFrameVariableChanged();
+			}
 		}
 
 		public function get level(): String
@@ -67,9 +74,12 @@ package com.iblsoft.flexiweather.ogc.managers
 
 		public function set level(value: String): void
 		{
-			_level = value;
-			_levelChanged = true;
-			onLevelVariableChanged();
+			if (_level != value)
+			{
+				_level = value;
+				_levelChanged = true;
+				onLevelVariableChanged();
+			}
 		}
 		/**
 		 * Should be one of SetOperationType constants

@@ -28,8 +28,10 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		{
 			super.customData = data;
 			
-			if (data.hasOwnProperty('synchronizeFrame'))
+			if (data && data.hasOwnProperty('synchronizeFrame'))
 				synchronizeFrame = data.synchronizeFrame;
+			else
+				synchronizeFrame = false;
 		}
 		public function set synchronizeFrame(value:Boolean):void
 		{

@@ -18,7 +18,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 	import com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent;
 	import com.iblsoft.flexiweather.ogc.multiview.skins.InteractiveMultiViewSkin;
 	import com.iblsoft.flexiweather.ogc.multiview.synchronization.AreaSynchronizator;
-	import com.iblsoft.flexiweather.ogc.multiview.synchronization.GlobalFrameSynchronizator;
+	import com.iblsoft.flexiweather.ogc.multiview.synchronization.GlobalVariablesSynchronizator;
 	import com.iblsoft.flexiweather.ogc.multiview.synchronization.ISynchronizator;
 	import com.iblsoft.flexiweather.ogc.multiview.synchronization.MapLayersPropertiesSynchronizator;
 	import com.iblsoft.flexiweather.ogc.multiview.synchronization.MapSynchronizator;
@@ -120,7 +120,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 		private var _widgetsCountToBeReady: ArrayCollection;
 		
 		private var _areaSynchronizator: AreaSynchronizator;
-		private var _globalFrameSynchronizator: GlobalFrameSynchronizator;
+		private var _globalFrameSynchronizator: GlobalVariablesSynchronizator;
 		private var _mapLayersPropertiesSynchronizator: MapLayersPropertiesSynchronizator;
 		
 		
@@ -170,7 +170,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 			_cacheManager = new WMSCacheManager();
 			
 			_areaSynchronizator = new AreaSynchronizator();
-			_globalFrameSynchronizator = new GlobalFrameSynchronizator();
+			_globalFrameSynchronizator = new GlobalVariablesSynchronizator();
 			_mapLayersPropertiesSynchronizator = new MapLayersPropertiesSynchronizator();
 			
 			addEventListener(MouseEvent.CLICK, onMouseClick);
@@ -529,12 +529,14 @@ package com.iblsoft.flexiweather.ogc.multiview
 					
 					//update map configuration
 					
-					var dp: ArrayCollection = _configuration.customData.dataProvider as ArrayCollection;
-					if (dp)
+					if (_configuration && _configuration.customData && _configuration.customData.hasOwnProperty('dataProvider'))
 					{
-						dp.setItemAt(itemData, position);
+						var dp: ArrayCollection = _configuration.customData.dataProvider as ArrayCollection;
+						if (dp)
+						{
+							dp.setItemAt(itemData, position);
+						}
 					}
-						
 					loadMapForWidget(selectedInteractiveWidget, mapXML, position);
 				}
 			}
@@ -864,7 +866,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 						}
 						else
 						{
-							currWidget.interactiveLayerMap.setLevel(level, true);
+							if (currWidget.interactiveLayerMap.level != level)
+								currWidget.interactiveLayerMap.setLevel(level, true);
 						}
 					}
 				}

@@ -398,12 +398,14 @@ package com.iblsoft.flexiweather.widgets
 				var de: DynamicEvent = new DynamicEvent(LAYERS_SERIALIZED_AND_READY);
 				de['layers'] = newLayers;
 				dispatchEvent(de);
-				var globalFrame8601: String = storage.serializeString('global-frame', null);
+//				var globalFrame8601: String = storage.serializeString('global-frame', null);
 				var globalLevel: String = storage.serializeString('global-level', null);
 				if (globalVariablesManager)
 				{
 					if (globalLevel)
 						globalVariablesManager.level = globalLevel;
+				} else {
+					trace("ILM serialize, problem to set global-level: " + globalLevel);
 				}
 					//set global vars
 			}
@@ -527,7 +529,7 @@ package com.iblsoft.flexiweather.widgets
 				_levelInvalidated = false;
 				
 				//it will set level again. This is done by purpose when adding new layer, to synchronise level with newly added layer
-				setLevel(level);
+				setLevel(_globalVariablesManager.level);
 			}
 		}
 
@@ -1065,7 +1067,6 @@ package com.iblsoft.flexiweather.widgets
 		 */
 		public function setLevel(newLevel: String, b_nearrest: Boolean = true): Boolean
 		{
-			_globalVariablesManager.level = newLevel;
 			
 			for each (var l: InteractiveLayer in m_layers)
 			{
@@ -1085,6 +1086,9 @@ package com.iblsoft.flexiweather.widgets
 					debug("InteractiveLayerMap setLevel [" + newLevel + "] LEVEL NOT FOUND for " + l.name);
 				}
 			}
+			
+			_globalVariablesManager.level = newLevel;
+			
 			return true;
 		}
 
