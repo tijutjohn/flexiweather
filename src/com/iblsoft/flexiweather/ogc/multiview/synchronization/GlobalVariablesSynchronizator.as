@@ -8,6 +8,9 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 
 	public class GlobalVariablesSynchronizator extends SynchronizatorBase
 	{
+		public var synchronizeFrame: Boolean;
+		public var synchronizeLevel: Boolean;
+		
 		public function GlobalVariablesSynchronizator()
 		{
 			super();
@@ -17,49 +20,71 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		{
 			var widgetsForSynchronizing: Array = [];
 			
-			var frame: Date = synchronizeFromWidget.frame;
-			if (!frame)
-				return;
+			var globalFrameForSynchronization: Date = synchronizeFromWidget.frame;
+			var globalLevelForSynchronisation: String = synchronizeFromWidget.interactiveLayerMap.level;
+
+			if (!synchronizeFrame)
+				globalFrameForSynchronization = null;
+			if (!synchronizeLevel)
+				globalLevelForSynchronisation = null;
 			
-			var level: String = synchronizeFromWidget.interactiveLayerMap.level;
+			if (!globalFrameForSynchronization && !globalLevelForSynchronisation)
+				return;
 			
 			for each (var widget: InteractiveWidget in widgetsForSynchronisation)
 			{
 				if (widget.id != synchronizeFromWidget.id)
 				{
 					var obj: Object = { widget: widget };
-					if (!widget.frame || (widget.frame && widget.frame.time != frame.time))
+					if (globalFrameForSynchronization)
 					{
-						listenToWidgetSynchronization(widget);
-						obj.frame = true;
-						widgetsForSynchronizing.push(obj);
-					}
-					var layers: ArrayCollection = widget.interactiveLayerMap.layers;
-					
-					for each (var layer: InteractiveLayerMSBase in layers)
-					{
-						if (layer && layer.synchroniseLevel)
+						if (!widget.frame || (widget.frame && widget.frame.time != globalFrameForSynchronization.time))
 						{
-							var config: WMSLayerConfiguration = layer.configuration as WMSLayerConfiguration;
-						
-							var levelObj: Object = layer.getWMSDimensionValue(config.dimensionVerticalLevelName);
-						
-//							if (layer.level  frame.time))
-//							{
-//								listenToWidgetSynchronization(widget);
-//								obj.frame = true;
-//							}
+							listenToWidgetSynchronization(widget);
+							obj.frame = true;
+							
 						}
 					}
+					
+					if (globalLevelForSynchronisation)
+					{
+						var widgetLevel: String = widget.interactiveLayerMap.level;
+						if (widgetLevel != globalLevelForSynchronisation)
+						{
+							listenToWidgetSynchronization(widget);
+							obj.level = true;
+						}
+					}
+					
+					if (obj.frame || obj.level)
+					{
+						widgetsForSynchronizing.push(obj);
+					}
+					
+//					var layers: ArrayCollection = widget.interactiveLayerMap.layers;
+//					
+//					for each (var layer: InteractiveLayerMSBase in layers)
+//					{
+//						if (layer && layer.synchroniseLevel)
+//						{
+//							var config: WMSLayerConfiguration = layer.configuration as WMSLayerConfiguration;
+//						
+//							var level: String = layer.getWMSDimensionValue(config.dimensionVerticalLevelName) as String;
+//						
+//						}
+//					}
 				}
 			}
 			
 			//2nd pass, change frames
-			for each (var obj: Object in widgetsForSynchronizing)
+			for each (obj in widgetsForSynchronizing)
 			{
 				widget = obj.widget as InteractiveWidget;
 				
-				widget.interactiveLayerMap.setFrame(frame);
+				if (obj.frame)
+					widget.interactiveLayerMap.setFrame(globalFrameForSynchronization);
+				if (obj.level)
+					widget.interactiveLayerMap.setLevel(globalLevelForSynchronisation);
 				
 			}
 			

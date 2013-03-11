@@ -19,6 +19,7 @@ package com.iblsoft.flexiweather.events
 		public static const LAYER_ROLL_OUT: String = 'layerRollOut';
 		public static const LEGENDS_AREA_UPDATED: String = 'legendsAreaUpdated';
 		public static const AREA_CHANGED: String = 'areaChanged';
+		
 		public var text: String;
 		public var interactiveLayer: InteractiveLayer;
 		public var point: Point;

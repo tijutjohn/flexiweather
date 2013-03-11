@@ -133,6 +133,11 @@ package com.iblsoft.flexiweather.ogc.managers
 			{
 				onInteractiveLayerFrameVariableChanged();
 				onLevelVariableChanged();
+			} else {
+				_frames = null;
+				_lastFrameNotified = null;
+				notifySelectedFrameChanged(null);
+				dispatchEvent(new Event(FRAMES_CHANGED, true));
 			}
 		}
 
@@ -219,20 +224,34 @@ package com.iblsoft.flexiweather.ogc.managers
 				}
 				
 				var framesObjects: Array = _interactiveLayerMap.primaryLayer.getSynchronisedVariableValuesList(GlobalVariable.FRAME);
-				var frames: Array = [];
+				var framesAC: ArrayCollection = new ArrayCollection();
 				for each (var frameVariable: Object in framesObjects)
 				{
 					if (frameVariable is GlobalVariableValue)
-						frames.push(frameVariable.data as Date);
+						framesAC.addItem(frameVariable.data as Date);
 					if (frameVariable is Date)
-						frames.push(frameVariable as Date);
+						framesAC.addItem(frameVariable as Date);
 				}
-				_frames = new ArrayCollection(frames);
+				
+				var collectionChanged: Boolean = !sameCollection(framesAC, _frames); 
+				if (collectionChanged)
+					_frames = framesAC;
+				else {
+					trace("GlobalVariablesManager ["+_interactiveLayerMap+"] _frames are same: ");
+				}
 				var selectedFrame: Date = _interactiveLayerMap.frame;
 				if (!selectedFrame)
 					return;
 				
-				//trace("GlobalVariablesManager ["+_interactiveLayerMap+"] onInteractiveLayerFrameVariableChanged selectedFrame: " + selectedFrame + " _frame: " + _frame);
+				if (_lastFrameNotified && _lastFrameNotified.time == selectedFrame.time)
+				{
+					//same time as last time
+					if (!collectionChanged)
+						return;
+				}
+				_lastFrameNotified = selectedFrame;
+				
+				trace("GlobalVariablesManager ["+_interactiveLayerMap+"] onInteractiveLayerFrameVariableChanged selectedFrame: " + selectedFrame + " _frame: " + _frame);
 				if (_frame)
 				{
 					if (_frame.time != selectedFrame.time)
@@ -259,15 +278,16 @@ package com.iblsoft.flexiweather.ogc.managers
 				dispatchEvent(new Event(FRAMES_CHANGED, true));
 			}
 		}
+		private var _lastFrameNotified: Date;
 
 		private function notifySelectedFrameChanged(selectedFrame: Date): void
 		{
-			if (selectedFrame)
-			{
+//			if (selectedFrame)
+//			{
 				_frame = selectedFrame;
 				var gvce: GlobalVariableChangeEvent = new GlobalVariableChangeEvent(GlobalVariableChangeEvent.DIMENSION_VALUE_CHANGED, GlobalVariable.FRAME, selectedFrame);
 				dispatchEvent(gvce);
-			}
+//			}
 		}
 
 		private function notifySelectedLevelChanged(selectedLevel: String): void
@@ -275,6 +295,33 @@ package com.iblsoft.flexiweather.ogc.managers
 			_level = selectedLevel;
 			var gvce: GlobalVariableChangeEvent = new GlobalVariableChangeEvent(GlobalVariableChangeEvent.DIMENSION_VALUE_CHANGED, GlobalVariable.LEVEL, selectedLevel);
 			dispatchEvent(gvce);
+		}
+		
+		private function sameCollection(collection1: ArrayCollection, collection2: ArrayCollection): Boolean
+		{
+			if (collection1 && collection2)
+			{
+				if (collection1.length != collection2.length)
+					return false;
+				
+				if (collection1.length > 0)
+				{
+					var total: int = collection1.length;
+					for (var i: int = 0; i < total; i++)
+					{
+						var val1: * = collection1.getItemAt(i);
+						var val2: * = collection2.getItemAt(i);
+						
+						if (val1.toString() != val2.toString())
+							return false;
+					}
+				} else {
+					return false;
+				}
+				
+				return true;
+			}
+			return false;
 		}
 		
 		override public function toString(): String

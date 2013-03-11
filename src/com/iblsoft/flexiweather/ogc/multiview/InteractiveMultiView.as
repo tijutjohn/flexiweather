@@ -713,15 +713,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 			callLater(startWatchingChanges);
 		}
 
-//		private function onLayerInitialized(event: InteractiveLayerEvent): void
-//		{
-//			_mapLayersInitializing--;
-//			if (_mapLayersInitializing == 0)
-//			{
-//				notifyWidgetsMapLayersInitialized();
-//				registerSelectedInteractiveWidget();
-//			}
-//		}
 		private function onWidgetSelected(event: InteractiveWidgetEvent): void
 		{
 			selectedInteractiveWidget = event.currentTarget as InteractiveWidget;
@@ -810,17 +801,31 @@ package com.iblsoft.flexiweather.ogc.multiview
 				{
 					var changeCause: String = event.changeDescription;
 					
-					if (!synchronizator.isSynchronisingChangeType(SynchronizationChangeType.FRAME_CHANGED) && changeCause == SynchronizationChangeType.FRAME_CHANGED)
+					//check global variable synchronizator
+					var globalFrameSynchronizationAllowed: Boolean = true;
+					var globalLevelSynchronizationAllowed: Boolean = true;
+					if (_configuration && _configuration.customData && _configuration.customData.synchronizeFrame)
+					{
+						globalFrameSynchronizationAllowed = _configuration.customData.synchronizeFrame
+					}
+					var needToSynchronizeGlobalFrame: Boolean = globalFrameSynchronizationAllowed && !synchronizator.isSynchronisingChangeType(SynchronizationChangeType.GLOBAL_FRAME_CHANGED) && changeCause == SynchronizationChangeType.GLOBAL_FRAME_CHANGED;
+					var needToSynchronizeGlobalLevel: Boolean = globalLevelSynchronizationAllowed && !synchronizator.isSynchronisingChangeType(SynchronizationChangeType.GLOBAL_LEVEL_CHANGED) && changeCause == SynchronizationChangeType.GLOBAL_LEVEL_CHANGED;
+					
+					if (needToSynchronizeGlobalFrame || needToSynchronizeGlobalLevel)
 					{
 						// in case synchronizator is not synchronizing FRAME, global frame synchronizator will synchronize FRAME instead
 						enabled = false;
+						_globalFrameSynchronizator.synchronizeFrame = needToSynchronizeGlobalFrame;
+						_globalFrameSynchronizator.synchronizeLevel = needToSynchronizeGlobalLevel;
+						
 						_globalFrameSynchronizator.addEventListener(SynchronisationEvent.SYNCHRONISATION_DONE, onGlobalFrameSynchronizationDone);
 						_globalFrameSynchronizator.synchronizeWidgets(_selectedInteractiveWidget, _interactiveWidgets.widgets);
 						return;
 					}
 					if (changeCause == SynchronizationChangeType.ALPHA_CHANGED || 
 						changeCause == SynchronizationChangeType.VISIBILITY_CHANGED ||
-						changeCause == SynchronizationChangeType.SYNCHRONIZE_LEVEL_CHANGED)
+						changeCause == SynchronizationChangeType.SYNCHRONIZE_LEVEL_CHANGED ||
+						changeCause == SynchronizationChangeType.LEVEL_CHANGED)
 					{
 						if (!synchronizator.isSynchronisingChangeType(changeCause))
 						{	
@@ -1063,7 +1068,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 			if (layerWidget && selectedInteractiveWidget)
 			{
 				var synchronizedVariable: String = event.variableId;
-				debug("onSychronisedVariableChanged synchronizedVariable: " + synchronizedVariable + " layer: " + layer);
+//				debug("onSychronisedVariableChanged synchronizedVariable: " + synchronizedVariable + " layer: " + layer);
 				if (_synchronizator && _synchronizator.hasSynchronisedVariable(synchronizedVariable))
 				{
 					synchronizeWidgets(_synchronizator, layerWidget);

@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.ogc.multiview.synchronization
 {
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
@@ -17,10 +18,6 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		override public function synchronizeWidgets(synchronizeFromWidget: InteractiveWidget, widgetsForSynchronisation: ArrayCollection, preferredSelectedIndex: int = -1): void
 		{
 			var widgetsForSynchronizing: Array = [];
-			
-			var frame: Date = synchronizeFromWidget.frame;
-			if (!frame)
-				return;
 			
 			var ilm: InteractiveLayerMap = synchronizeFromWidget.interactiveLayerMap;
 			for each (var widget: InteractiveWidget in widgetsForSynchronisation)
@@ -48,6 +45,25 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 							
 							if (synchLayerMSBase.synchroniseLevel != currLayerMSBase.synchroniseLevel)
 								currLayerMSBase.synchroniseLevel = synchLayerMSBase.synchroniseLevel;
+							
+							if (!currLayerMSBase.synchroniseLevel)
+							{
+								//check level
+								var currLayerWmsConfig: WMSLayerConfiguration = currLayerMSBase.configuration as WMSLayerConfiguration;
+								var synchLayerWmsConfig: WMSLayerConfiguration = synchLayerMSBase.configuration as WMSLayerConfiguration;
+								
+								if (currLayerWmsConfig.dimensionVerticalLevelName && synchLayerWmsConfig.dimensionVerticalLevelName)
+								{
+									var currLevel: String = currLayerMSBase.getWMSDimensionValue(currLayerWmsConfig.dimensionVerticalLevelName);
+									var synchLevel: String = synchLayerMSBase.getWMSDimensionValue(synchLayerWmsConfig.dimensionVerticalLevelName);
+										
+									if (currLevel !=synchLevel)
+									{
+										currLayerMSBase.setWMSDimensionValue(currLayerWmsConfig.dimensionVerticalLevelName, synchLevel);
+										currLayerMSBase.refresh(false);
+									}
+								}
+							}
 							
 						}
 					}

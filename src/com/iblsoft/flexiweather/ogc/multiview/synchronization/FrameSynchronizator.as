@@ -73,7 +73,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			
 			timeDifference = -1;
 			
-			registerChangeType(SynchronizationChangeType.FRAME_CHANGED);
+			registerChangeType(SynchronizationChangeType.GLOBAL_FRAME_CHANGED);
 		}
 
 		private function debug(str: String, type: String = "Info", tag: String = "FrameSynchronizator"): void

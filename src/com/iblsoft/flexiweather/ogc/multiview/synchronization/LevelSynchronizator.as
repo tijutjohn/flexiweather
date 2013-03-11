@@ -45,7 +45,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			
 			_widgetDictionary = new Dictionary(true);
 			
-			registerChangeType(SynchronizationChangeType.LEVEL_CHANGED);
+			registerChangeType(SynchronizationChangeType.GLOBAL_LEVEL_CHANGED);
 		}
 		
 		private function getLevelValue(position: int): void

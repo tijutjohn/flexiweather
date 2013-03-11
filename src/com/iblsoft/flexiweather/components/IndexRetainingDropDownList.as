@@ -8,10 +8,10 @@ package com.iblsoft.flexiweather.components
 	{
 		override public function set dataProvider(value: IList): void
 		{
-			var originalSelection: Object = this.selectedItem;
+//			var originalSelection: Object = this.selectedItem;
 			super.dataProvider = value;
-			var newIdx: int = getOriginalSelectionIndex(originalSelection);
-			this.selectedIndex = newIdx;
+//			var newIdx: int = getOriginalSelectionIndex(originalSelection);
+//			this.selectedIndex = newIdx;
 		}
 
 		override public function set selectedIndex(value: int): void

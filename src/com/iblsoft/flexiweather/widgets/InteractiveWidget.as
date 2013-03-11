@@ -401,8 +401,12 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (event.type == SynchronisationEvent.START_GLOBAL_VARIABLE_SYNCHRONIZATION || event.type == SynchronisationEvent.STOP_GLOBAL_VARIABLE_SYNCHRONIZATION)
 				notifyWidgetChanged(SynchronizationChangeType.SYNCHRONIZE_LEVEL_CHANGED, event.target);
+			
 			if (event.type == InteractiveLayerWMSEvent.WMS_STYLE_CHANGED)
 				notifyWidgetChanged(SynchronizationChangeType.WMS_STYLE_CHANGED, event.target);
+			if (event.type == InteractiveLayerWMSEvent.LEVEL_CHANGED)
+				notifyWidgetChanged(SynchronizationChangeType.LEVEL_CHANGED, event.target);
+			
 			if (event.type == InteractiveLayerEvent.ALPHA_CHANGED)
 				notifyWidgetChanged(SynchronizationChangeType.ALPHA_CHANGED, event.target);
 			if (event.type == InteractiveLayerEvent.VISIBILITY_CHANGED)
@@ -418,6 +422,7 @@ package com.iblsoft.flexiweather.widgets
 				ilm.addEventListener(InteractiveLayerEvent.ALPHA_CHANGED, onLayerChangedInInteractiveLayerMap);
 				ilm.addEventListener(InteractiveLayerEvent.VISIBILITY_CHANGED, onLayerChangedInInteractiveLayerMap);
 				ilm.addEventListener(InteractiveLayerWMSEvent.WMS_STYLE_CHANGED, onLayerChangedInInteractiveLayerMap);
+				ilm.addEventListener(InteractiveLayerWMSEvent.LEVEL_CHANGED, onLayerChangedInInteractiveLayerMap);
 				
 				ilm.addEventListener(InteractiveLayerMap.TIME_AXIS_ADDED, onLayerInInteractiveLayerMapAdded);
 				ilm.addEventListener(InteractiveLayerMap.TIME_AXIS_REMOVED, onLayerInInteractiveLayerMapRemoved);
@@ -433,6 +438,7 @@ package com.iblsoft.flexiweather.widgets
 				ilm.removeEventListener(InteractiveLayerEvent.ALPHA_CHANGED, onLayerChangedInInteractiveLayerMap);
 				ilm.removeEventListener(InteractiveLayerEvent.VISIBILITY_CHANGED, onLayerChangedInInteractiveLayerMap);
 				ilm.removeEventListener(InteractiveLayerWMSEvent.WMS_STYLE_CHANGED, onLayerChangedInInteractiveLayerMap);
+				ilm.removeEventListener(InteractiveLayerWMSEvent.LEVEL_CHANGED, onLayerChangedInInteractiveLayerMap);
 				
 				ilm.removeEventListener(InteractiveLayerMap.TIME_AXIS_ADDED, onLayerInInteractiveLayerMapAdded);
 				ilm.removeEventListener(InteractiveLayerMap.TIME_AXIS_REMOVED, onLayerInInteractiveLayerMapRemoved);

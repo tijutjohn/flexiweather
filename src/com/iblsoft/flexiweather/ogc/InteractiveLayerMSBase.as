@@ -1214,6 +1214,14 @@ package com.iblsoft.flexiweather.ogc
 		private function onWMSDimensionValueSet(event: WMSViewPropertiesEvent): void
 		{
 			afterWMSDimensionValueIsSet(event.dimension, event.value);
+			
+			dispatchEvent(event);
+			
+			if (event.dimension == (configuration as WMSLayerConfiguration).dimensionVerticalLevelName && !synchroniseLevel)
+			{
+				var ile:  InteractiveLayerEvent = new  InteractiveLayerEvent(InteractiveLayerWMSEvent.LEVEL_CHANGED, true);
+				dispatchEvent(ile);
+			}
 		}
 
 		protected function afterWMSDimensionValueIsSet(s_dimName: String, s_value: String): void
@@ -1235,6 +1243,15 @@ package com.iblsoft.flexiweather.ogc
 			{
 				dispatchEvent(new SynchronisedVariableChangeEvent(
 						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.FRAME));
+			}
+			//if "level" changed, we need to update timeline, so we need to dispatch event
+			if (m_cfg.dimensionVerticalLevelName != null && s_dimName == m_cfg.dimensionVerticalLevelName)
+			{
+				if (synchroniseLevel)
+				{
+					dispatchEvent(new SynchronisedVariableChangeEvent(
+						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.LEVEL));
+				}
 			}
 		}
 
