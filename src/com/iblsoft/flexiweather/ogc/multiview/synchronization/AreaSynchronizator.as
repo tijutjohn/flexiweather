@@ -16,6 +16,9 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 	{
 		private var _areaChangeTimeout: Number;
 
+		private var _oldCRS: String;
+		private var _oldViewBBox: BBox;
+		
 		public function AreaSynchronizator()
 		{
 		}
@@ -28,6 +31,16 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			}
 			var crs: String = synchronizeFromWidget.getCRS();
 			var viewBBox: BBox = synchronizeFromWidget.getViewBBox();
+			
+			if (_oldCRS && _oldViewBBox && crs == _oldCRS && viewBBox.equals(_oldViewBBox))
+			{
+				debug("\n\n AreaSynchronizator DO NOT synchronizeWidgets CRS: " + crs + " vievBBox: " + viewBBox.toBBOXString());
+				return;
+			}
+			
+			_oldCRS = crs;
+			_oldViewBBox = viewBBox;
+			
 			debug("\n\n AreaSynchronizator synchronizeWidgets CRS: " + crs + " vievBBox: " + viewBBox.toBBOXString());
 			_areaChangeTimeout = setTimeout(changeAreaAfterDelay, 2000, synchronizeFromWidget, widgetsForSynchronisation);
 		}

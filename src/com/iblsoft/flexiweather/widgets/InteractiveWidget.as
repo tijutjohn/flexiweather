@@ -655,8 +655,10 @@ package com.iblsoft.flexiweather.widgets
 		
 		protected function onAreaChanged(b_finalChange: Boolean): void
 		{
+			var areaChanged: Boolean = true;
 			if (_oldViewBBox.equals(m_viewBBox))
 			{
+				areaChanged = false;
 				if (!b_finalChange)
 					return;
 			}
@@ -670,8 +672,16 @@ package com.iblsoft.flexiweather.widgets
 			}
 			setAnticollisionLayoutsDirty();
 			_oldViewBBox = m_viewBBox.clone();
-			//dispatch area change event
-			dispatchEvent(new InteractiveWidgetEvent(InteractiveWidgetEvent.AREA_CHANGED));
+			
+			trace(this + " area: " + m_viewBBox.toBBOXString());
+			
+			if (areaChanged)
+			{
+				//dispatch area change event
+				dispatchEvent(new InteractiveWidgetEvent(InteractiveWidgetEvent.AREA_CHANGED));
+			} else {
+				trace(this + " onAreaChanged but are is not changed: " + m_viewBBox.toBBOXString());
+			}
 		}
 
 		private function setAnticollisionLayoutsDirty(): void
