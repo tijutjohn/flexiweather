@@ -948,10 +948,22 @@ package com.iblsoft.flexiweather.widgets
 			var i: int;
 			var so: ISynchronisedObject;
 			var i_currentIndex: int = -1;
-			for each (so in l_syncLayers)
+			
+			for each (var l: InteractiveDataLayer in m_layers)
 			{
-				var status: String = InteractiveDataLayer(so).status;
-				if (status != InteractiveDataLayer.STATE_DATA_LOADED)
+				var so: ISynchronisedObject = l as ISynchronisedObject;
+				if (so == null)
+					continue;
+				var variables: * = so.getSynchronisedVariables();
+				//debug("enumTimeAxis so: " + (so as Object).name + " synchro vars: " + test.toString());
+				if (variables == null)
+					continue;
+				if (variables.indexOf(GlobalVariable.FRAME) < 0)
+					continue;
+				
+				var status: String = l.status;
+				
+				if (l.visible && status != InteractiveDataLayer.STATE_DATA_LOADED)
 				{
 					return false;
 				}
