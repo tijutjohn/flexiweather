@@ -8,6 +8,6 @@ package com.iblsoft.flexiweather.plugins
 	public interface IInteractiveWidgetClient extends IAbility
 	{
 		function bind(iw: InteractiveWidget, layerComposer: InteractiveLayerMap): void;
-		function unbind(iw: InteractiveWidget, layerComposer: InteractiveLayerMap): void;
+		function unbind(iw: InteractiveWidget, layerComposer: InteractiveLayerMap, bDeleteLayer: Boolean = true): void;
 	}
 }

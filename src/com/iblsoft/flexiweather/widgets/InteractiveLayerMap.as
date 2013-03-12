@@ -951,15 +951,14 @@ package com.iblsoft.flexiweather.widgets
 			
 			for each (var l: InteractiveDataLayer in m_layers)
 			{
-				var so: ISynchronisedObject = l as ISynchronisedObject;
-				if (so == null)
-					continue;
-				var variables: * = so.getSynchronisedVariables();
-				//debug("enumTimeAxis so: " + (so as Object).name + " synchro vars: " + test.toString());
-				if (variables == null)
-					continue;
-				if (variables.indexOf(GlobalVariable.FRAME) < 0)
-					continue;
+//				var so: ISynchronisedObject = l as ISynchronisedObject;
+//				if (so == null)
+//					continue;
+//				var variables: * = so.getSynchronisedVariables();
+//				if (variables == null)
+//					continue;
+//				if (variables.indexOf(GlobalVariable.FRAME) < 0)
+//					continue;
 				
 				var status: String = l.status;
 				
