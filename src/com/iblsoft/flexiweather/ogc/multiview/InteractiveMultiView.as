@@ -1326,7 +1326,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 					}
 				}
 			}
-			synchronizeWidgets(_areaSynchronizator, event.target as InteractiveWidget);
+			synchronizeWidgets(_areaSynchronizator, event.target as InteractiveWidget, false);
 		}
 		private var _synchronizator: ISynchronizator;
 
@@ -1416,7 +1416,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 					startListenForSynchronisedVariableChange(layer);
 			}
 		}
-		public function synchronizeWidgets(synchronizator: ISynchronizator, interactiveWidget: InteractiveWidget): void
+		public function synchronizeWidgets(synchronizator: ISynchronizator, interactiveWidget: InteractiveWidget, bWaitForSynchronizationFinish: Boolean = true): void
 		{
 			if (!enabled)
 			{
@@ -1432,16 +1432,20 @@ package com.iblsoft.flexiweather.ogc.multiview
 				if (_configuration && _configuration.customData && _configuration.customData.hasOwnProperty('selectedIndex'))
 					selectedIndex = _configuration.customData.selectedIndex;
 				
-				//stop listening to changes and start after synchronization is done 
-				var primaryLayer: InteractiveLayerMSBase = selectedInteractiveWidget.interactiveLayerMap.primaryLayer;
-				stopListenForSynchronisedVariableChange(primaryLayer);
+				//stop listening to changes and start after synchronization is done
+				if (bWaitForSynchronizationFinish)
+				{
+					var primaryLayer: InteractiveLayerMSBase = selectedInteractiveWidget.interactiveLayerMap.primaryLayer;
+					stopListenForSynchronisedVariableChange(primaryLayer);
 				
-				//and wait for synchronization to be done
-				enabled = false;
-				synchronizator.addEventListener(SynchronisationEvent.SYNCHRONISATION_DONE, onSynchronizationDone);
+					//and wait for synchronization to be done
+					enabled = false;
+					synchronizator.addEventListener(SynchronisationEvent.SYNCHRONISATION_DONE, onSynchronizationDone);
+				} else {
+					trace(this + " do not wait for synchronization end");
+				}
+					
 				synchronizator.synchronizeWidgets(interactiveWidget, _interactiveWidgets.widgets, selectedIndex);
-			} else {
-				debug("synchronizeWidgets NO Widgets to synchronize ");
 			}
 		}
 		

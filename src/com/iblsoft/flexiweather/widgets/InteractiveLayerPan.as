@@ -251,6 +251,18 @@ package com.iblsoft.flexiweather.widgets
 		}
 		private var _diff: Point;
 
+		
+		/**
+		 * Panning function exposed 
+		 * @param xDiff
+		 * @param yDiff
+		 * 
+		 */		
+		public function doPan(xDiff: int, yDiff: int): void
+		{
+			doRealPan(xDiff, yDiff, true);
+		}
+		
 		private function doRealPan(xDiff: Number, yDiff: Number, b_finalChange: Boolean): void
 		{
 			var r: BBox = container.getViewBBox();
@@ -262,6 +274,10 @@ package com.iblsoft.flexiweather.widgets
 				_diff = new Point(xDiff, yDiff);
 			_diff.x = xDiff;
 			_diff.y = yDiff;
+			
+			if (xDiff == 0 && yDiff == 0)
+				return;
+			
 			invalidateDynamicPart(true);
 			var projection: Projection = container.getCRSProjection();
 			r = r.translated(-xDiff, yDiff);

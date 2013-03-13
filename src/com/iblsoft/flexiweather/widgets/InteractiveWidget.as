@@ -16,6 +16,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.CubicBezier;
 	import com.iblsoft.flexiweather.utils.ICurveRenderer;
+	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayout;
 	import com.iblsoft.flexiweather.utils.wfs.FeatureSplitter;
 	
@@ -486,7 +487,7 @@ package com.iblsoft.flexiweather.widgets
 			if (l is InteractiveLayerMSBase)
 				notifyWidgetChanged(SynchronizationChangeType.MAP_LAYER_ADDED, this);
 			else
-				trace(this + " onLayerInitialized do not notify widget, because it's not WMS layer");
+				debug(this + " onLayerInitialized do not notify widget, because it's not WMS layer");
 		}
 
 		public function removeLayer(l: InteractiveLayer, b_destroy: Boolean = false): void
@@ -555,7 +556,7 @@ package com.iblsoft.flexiweather.widgets
 			}
 			catch (error: Error)
 			{
-				trace("InteractiveLayer.orderLayer: catch: " + error.message);
+				debug("InteractiveLayer.orderLayer: catch: " + error.message);
 			}
 			finally
 			{
@@ -661,6 +662,8 @@ package com.iblsoft.flexiweather.widgets
 				areaChanged = false;
 				if (!b_finalChange)
 					return;
+				else
+					debug(this + " onAreaChanged: viewBbox is same, but finalChange = true"); 
 			}
 			for (var i: int = 0; i < m_layerContainer.numElements; ++i)
 			{
@@ -673,14 +676,14 @@ package com.iblsoft.flexiweather.widgets
 			setAnticollisionLayoutsDirty();
 			_oldViewBBox = m_viewBBox.clone();
 			
-			trace(this + " area: " + m_viewBBox.toBBOXString());
+			debug(this + " area: " + m_viewBBox.toBBOXString());
 			
 			if (areaChanged)
 			{
 				//dispatch area change event
 				dispatchEvent(new InteractiveWidgetEvent(InteractiveWidgetEvent.AREA_CHANGED));
 			} else {
-				trace(this + " onAreaChanged but are is not changed: " + m_viewBBox.toBBOXString());
+				debug(this + " onAreaChanged but are is not changed: " + m_viewBBox.toBBOXString());
 			}
 		}
 
@@ -1443,7 +1446,7 @@ package com.iblsoft.flexiweather.widgets
 				}
 				//			}
 				if (isNaN(f_newBBoxHeight))
-					trace("InteractiveWidget.isVisible.setViewBBox: f_newBBoxHeight is NaN");
+					debug("InteractiveWidget.isVisible.setViewBBox: f_newBBoxHeight is NaN");
 				var viewBBox: Rectangle = new Rectangle(f_bboxCenterX - f_newBBoxWidth / 2.0, f_bboxCenterY - f_newBBoxHeight / 2.0, f_newBBoxWidth, f_newBBoxHeight);
 				//check if view BBox is not outside extent BBox
 				if (viewBBox.y < m_extentBBox.yMin)
@@ -1519,7 +1522,7 @@ package com.iblsoft.flexiweather.widgets
 						setViewBBoxAfterNegotiation(bbox, b_finalChange);
 				}
 				else
-					trace("InteractiveWidget.autoLayoutViewBBox(): View BBox is too small: " + widthDiff + " , " + heightDiff);
+					debug("InteractiveWidget.autoLayoutViewBBox(): View BBox is too small: " + widthDiff + " , " + heightDiff);
 			}
 		}
 
@@ -1531,7 +1534,7 @@ package com.iblsoft.flexiweather.widgets
 				var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
 				latestBBox = l.negotiateBBox(newBBox, b_changeZoom);
 				if (!latestBBox.equals(newBBox))
-					trace("InteractiveWidget.negotiateBBox(): bbox changed by layer " + l.layerName);
+					debug("InteractiveWidget.negotiateBBox(): bbox changed by layer " + l.layerName);
 				newBBox = latestBBox;
 			}
 			setViewBBoxAfterNegotiation(newBBox, b_finalChange);
@@ -1736,6 +1739,15 @@ package com.iblsoft.flexiweather.widgets
 					m_labelLayout.suspendAnticollisionProcessing = value;
 				}
 				anticollisionUpdate();
+			}
+		}
+		
+		private function debug(str: String, type: String = "Info", tag: String = " InteractiveWidget"): void
+		{
+			if (id != null)
+			{
+				trace(tag + "| " + type + "| " + str);
+				LoggingUtils.dispatchLogEvent(this, tag + "| " + type + "| " + str);
 			}
 		}
 

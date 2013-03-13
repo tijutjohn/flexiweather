@@ -199,7 +199,7 @@ package com.iblsoft.flexiweather.widgets
 				if (mi_slideZoomStartY > 0)
 				{
 					var diff: Number = (event.localY - mi_slideZoomStartY);
-					onDeltaZoom(diff);
+					doDeltaZoom(diff);
 					mi_slideZoomStartY = event.localY;
 				}
 			}
@@ -238,10 +238,10 @@ package com.iblsoft.flexiweather.widgets
 		{
 			//if(!event.ctrlKey && mb_requireCtrlKey)
 			//	return false;
-			return onDeltaZoom(event.delta)
+			return doDeltaZoom(event.delta)
 		}
 
-		private function onDeltaZoom(delta: int): Boolean
+		public function doDeltaZoom(delta: int): Boolean
 		{
 			var bbox: Rectangle = container.getViewBBox().toRectangle();
 			var f_bboxCenterX: Number = bbox.x + bbox.width / 2.0;
