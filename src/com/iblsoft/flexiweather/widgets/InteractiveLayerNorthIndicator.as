@@ -111,7 +111,6 @@ package com.iblsoft.flexiweather.widgets
 		{
 			super.draw(graphics);
 			
-			trace("NorthIndicator: " + numChildren);
 			if (_northIndicator)
 			{
 				if (_indicatorPosition)

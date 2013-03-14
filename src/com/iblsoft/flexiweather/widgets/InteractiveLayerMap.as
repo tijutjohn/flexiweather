@@ -516,7 +516,6 @@ package com.iblsoft.flexiweather.widgets
 		override protected function commitProperties(): void
 		{
 			super.commitProperties();
-			debug("InteractiveLayerMap commitProperties: _frameInvalidated: " + _frameInvalidated + " _levelInvalidated: " + _levelInvalidated);
 			if (_frameInvalidated)
 			{
 				_frameInvalidated = false;
@@ -1288,8 +1287,8 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (debugConsole)
 				debugConsole.print(str, type, tag);
-			trace(tag + "| " + type + "| " + str);
-			log(str);
+//			trace(tag + "| " + type + "| " + str);
+//			log(str);
 		}
 	}
 }

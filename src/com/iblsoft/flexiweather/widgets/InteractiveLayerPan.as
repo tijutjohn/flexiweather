@@ -3,6 +3,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.plugins.IConsole;
 	import com.iblsoft.flexiweather.proj.Projection;
+	
 	import flash.display.Graphics;
 	import flash.events.Event;
 	import flash.events.GesturePhase;
@@ -12,7 +13,10 @@ package com.iblsoft.flexiweather.widgets
 	import flash.text.TextField;
 	import flash.ui.Multitouch;
 	import flash.utils.clearInterval;
+	import flash.utils.clearTimeout;
 	import flash.utils.setInterval;
+	import flash.utils.setTimeout;
+	
 	import mx.effects.Move;
 	import mx.effects.easing.Quadratic;
 	import mx.events.ChildExistenceChangedEvent;
@@ -41,10 +45,16 @@ package com.iblsoft.flexiweather.widgets
 		private var _animate: Move;
 		private var _wrapLimiter: WrapLimiter;
 
+		private var _doPanDelayed: DoPanDelay;
+		
 		public function InteractiveLayerPan(container: InteractiveWidget = null)
 		{
 			super(container);
+			
 			_type = PAN;
+			
+			_doPanDelayed = new DoPanDelay(doRealPan, 800);
+			
 			addEventListener(ChildExistenceChangedEvent.CHILD_ADD, onChildAdd);
 			waitForContainer();
 		}
@@ -249,8 +259,10 @@ package com.iblsoft.flexiweather.widgets
 			var withinTreshold: Boolean = Math.abs(100 - extentRatio) < percentageTreshold;
 			return projection.wrapsHorizontally && withinTreshold;
 		}
+		
+		
 		private var _diff: Point;
-
+		
 		
 		/**
 		 * Panning function exposed 
@@ -260,7 +272,7 @@ package com.iblsoft.flexiweather.widgets
 		 */		
 		public function doPan(xDiff: int, yDiff: int): void
 		{
-			doRealPan(xDiff, yDiff, true);
+			_doPanDelayed.doPan(xDiff, yDiff);
 		}
 		
 		private function doRealPan(xDiff: Number, yDiff: Number, b_finalChange: Boolean): void
@@ -275,8 +287,11 @@ package com.iblsoft.flexiweather.widgets
 			_diff.x = xDiff;
 			_diff.y = yDiff;
 			
-			if (xDiff == 0 && yDiff == 0)
-				return;
+//			if (xDiff == 0 && yDiff == 0)
+//			{
+//				trace("InteractiveLayerPan doRealPan: diff 0,0");
+//				return;
+//			}
 			
 			invalidateDynamicPart(true);
 			var projection: Projection = container.getCRSProjection();
@@ -381,6 +396,10 @@ import com.iblsoft.flexiweather.ogc.BBox;
 import com.iblsoft.flexiweather.proj.Projection;
 import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 
+import flash.utils.clearTimeout;
+import flash.utils.getTimer;
+import flash.utils.setTimeout;
+
 class WrapLimiter
 {
 	private var _container: InteractiveWidget;
@@ -467,4 +486,68 @@ class WrapLimiter
 		return bbox;
 	}
 
+}
+
+class DoPanDelay {
+
+	private var _doPanTimeOut: int
+	private var _doPanTime: Number;
+	private var _callback: Function;
+	private var _delayTime: int;
+	private var _xDiff: Number;
+	private var _yDiff: Number;
+	
+	public function DoPanDelay(callback: Function, delayTime: int): void
+	{
+		_callback = callback;
+		_delayTime = delayTime;
+		
+		_doPanTimeOut = 0;
+		_doPanTime = 0;
+		_xDiff = 0;
+		_yDiff = 0;
+	}
+
+	public function doPan(xDiff: Number, yDiff: Number): void
+	{
+		_xDiff += xDiff;
+		_yDiff += yDiff;
+		
+//		trace("DoPanDealy doPan ["+xDiff + ", " + yDiff + "] total ["+_xDiff + ", " + _yDiff + "]");
+		var timeDifference: Number = getTimer() - _doPanTime; 
+		if (timeDifference > _delayTime)
+		{
+			doPanDelayed();
+		} else {
+		
+			if (_xDiff != 0 || _yDiff != 0)
+			{
+//				trace("DoPanDealy doPan callback: FALSE");
+				_xDiff /= 2;
+				_yDiff /= 2;
+				_callback(_xDiff, _yDiff, false);
+			}
+			
+			if (_doPanTimeOut > 0)
+				clearTimeout(_doPanTimeOut);
+		
+			var timeToNextPan: Number = _delayTime - timeDifference;
+			_doPanTimeOut = setTimeout(doPanDelayed, timeToNextPan);
+		}
+	}
+		
+	private function doPanDelayed(): void
+	{
+		_doPanTimeOut = 0;
+		
+		if (_xDiff != 0 || _yDiff != 0)
+		{
+//			trace("DoPanDealy doPanDelayed callback: TRUE");
+			_callback(_xDiff, _yDiff, true);
+			_xDiff = 0;
+			_yDiff = 0;
+		}
+		
+		_doPanTime = getTimer();
+	}
 }

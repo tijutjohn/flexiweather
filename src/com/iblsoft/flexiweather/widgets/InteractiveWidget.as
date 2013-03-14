@@ -662,8 +662,6 @@ package com.iblsoft.flexiweather.widgets
 				areaChanged = false;
 				if (!b_finalChange)
 					return;
-				else
-					debug(this + " onAreaChanged: viewBbox is same, but finalChange = true"); 
 			}
 			for (var i: int = 0; i < m_layerContainer.numElements; ++i)
 			{
@@ -676,14 +674,14 @@ package com.iblsoft.flexiweather.widgets
 			setAnticollisionLayoutsDirty();
 			_oldViewBBox = m_viewBBox.clone();
 			
-			debug(this + " area: " + m_viewBBox.toBBOXString());
+//			debug(this + " area: " + m_viewBBox.toBBOXString());
 			
 			if (areaChanged)
 			{
 				//dispatch area change event
 				dispatchEvent(new InteractiveWidgetEvent(InteractiveWidgetEvent.AREA_CHANGED));
-			} else {
-				debug(this + " onAreaChanged but are is not changed: " + m_viewBBox.toBBOXString());
+//			} else {
+//				debug(this + " onAreaChanged but are is not changed: " + m_viewBBox.toBBOXString());
 			}
 		}
 
@@ -1399,6 +1397,9 @@ package com.iblsoft.flexiweather.widgets
 		 */
 		public function setViewBBox(bbox: BBox, b_finalChange: Boolean, b_negotiateBBox: Boolean = true): void
 		{
+			
+//			debug(this + " setViewBBox: " + bbox.toBBOXString() + " finalChange: " + b_finalChange + " , negotiate: " + b_negotiateBBox);
+			
 			var b_changeZoom: Boolean = true;
 			var oldBox: BBox = getViewBBox();
 			var bboxWidthDiff: int = Math.abs(bbox.width - oldBox.width);
@@ -1746,8 +1747,8 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (id != null)
 			{
-				trace(tag + "| " + type + "| " + str);
-				LoggingUtils.dispatchLogEvent(this, tag + "| " + type + "| " + str);
+//				trace(tag + "| " + type + "| " + str);
+//				LoggingUtils.dispatchLogEvent(this, tag + "| " + type + "| " + str);
 			}
 		}
 

@@ -3,6 +3,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
+	
 	import flash.display.Graphics;
 	import flash.display.Sprite;
 	import flash.events.Event;
@@ -15,6 +16,7 @@ package com.iblsoft.flexiweather.widgets
 	import flash.geom.Rectangle;
 	import flash.ui.Multitouch;
 	import flash.utils.Timer;
+	
 	import mx.events.DynamicEvent;
 	import mx.messaging.AbstractConsumer;
 
@@ -243,22 +245,36 @@ package com.iblsoft.flexiweather.widgets
 
 		public function doDeltaZoom(delta: int): Boolean
 		{
+//			trace("doDeltaZoom: " + delta);
 			var bbox: Rectangle = container.getViewBBox().toRectangle();
 			var f_bboxCenterX: Number = bbox.x + bbox.width / 2.0;
 			var f_bboxCenterY: Number = bbox.y + bbox.height / 2.0;
 			var f_width: Number = bbox.width;
 			var f_height: Number = bbox.height;
 			var b_changed: Boolean = false;
+			
+			var deltaAbs: int = Math.abs(delta);
+			if (deltaAbs > 25)
+				deltaAbs = 25;
+			
+			//it can vary from 0.75 to 0.25
+			var zoomChangeFromDelta: Number = 0.75 - 0.5* (deltaAbs / 25);
+			
+//			zoomChangeFromDelta = 0.75;
+			if (zoomChangeFromDelta > 1) zoomChangeFromDelta = 1;
+			if (zoomChangeFromDelta < 0.5) zoomChangeFromDelta = 0.5;
+			
+//			trace("doDeltaZoom: " + delta + " zoomChangeFromDelta: " + zoomChangeFromDelta);
 			if (delta > 0)
 			{
-				f_width *= 0.75;
-				f_height *= 0.75;
+				f_width *= zoomChangeFromDelta;
+				f_height *= zoomChangeFromDelta;
 				b_changed = true;
 			}
 			if (delta < 0)
 			{
-				f_width /= 0.75;
-				f_height /= 0.75;
+				f_width /= zoomChangeFromDelta;
+				f_height /= zoomChangeFromDelta;
 				b_changed = true;
 			}
 			if (b_changed)
