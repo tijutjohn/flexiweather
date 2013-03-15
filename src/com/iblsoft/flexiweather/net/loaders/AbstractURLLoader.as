@@ -678,7 +678,7 @@ package com.iblsoft.flexiweather.net.loaders
 			if (urlRequest == null)
 				return;
 			Log.getLogger("UniURLLoader").info("I/O error: " + event.text);
-			dispatchFault('UniURLLoader error: IO Error' + event.text, null, urlRequest, urlLoader.associatedData);
+			dispatchFault('UniURLLoader error: IO Error' + event.text, event.errorID, null, urlRequest, urlLoader.associatedData);
 		}
 
 		protected function onSecurityError(event: SecurityErrorEvent): void
@@ -696,7 +696,7 @@ package com.iblsoft.flexiweather.net.loaders
 			if (urlRequest == null)
 				return;
 			Log.getLogger("UniURLLoader").info("Security error: " + event.text);
-			dispatchFault("UniURLLoader SecurityError: " + event.text, null, urlRequest, urlLoader.associatedData);
+			dispatchFault("UniURLLoader SecurityError: " + event.text, event.errorID, null, urlRequest, urlLoader.associatedData);
 		}
 
 		private function loadCrossDomainProxyURLPattern(urlLoader: URLLoaderWithAssociatedData): void
@@ -747,9 +747,9 @@ package com.iblsoft.flexiweather.net.loaders
 			dispatchEvent(e);
 		}
 
-		protected function dispatchFault(errorString: String, rawData: Object, urlRequest: URLRequest, associatedData: Object): void
+		protected function dispatchFault(errorString: String, errorID: int, rawData: Object, urlRequest: URLRequest, associatedData: Object): void
 		{
-			dispatchEvent(new UniURLLoaderErrorEvent(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, rawData, urlRequest, associatedData, errorString, false, true));
+			dispatchEvent(new UniURLLoaderErrorEvent(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, rawData, urlRequest, associatedData, errorString, errorID, false, true));
 		}
 
 		protected function disconnectURLLoader(urlLoader: URLLoaderWithAssociatedData): URLRequest

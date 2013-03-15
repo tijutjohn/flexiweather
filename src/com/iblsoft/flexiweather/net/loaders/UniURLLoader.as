@@ -28,6 +28,9 @@ package com.iblsoft.flexiweather.net.loaders
 	*/
 	public class UniURLLoader extends ImageLoader
 	{
+		public static var INVALID_FORMAT: int = 1;
+		public static var MORE_FORMATS_ALLOWED: int = 2;
+
 		/**
 		 * Array of allowed formats which will be loaded into loader. If there will be loaded format, which will not be included in allowedFormats array
 		 * there will be FAIL dispatched.
@@ -116,7 +119,7 @@ package com.iblsoft.flexiweather.net.loaders
 					dispatchResult(rawData, urlRequest, urlLoader.associatedData);
 				}
 				else
-					dispatchFault('UniURLLoader: Invalid content. Any of allowed formats was found.', rawData, urlRequest, urlLoader.associatedData);
+					dispatchFault('UniURLLoader: Invalid content. Any of allowed formats was found.', INVALID_FORMAT, rawData, urlRequest, urlLoader.associatedData);
 			}
 			else
 			{
@@ -194,7 +197,7 @@ package com.iblsoft.flexiweather.net.loaders
 							formatsList += format + ", ";
 						}
 						//TODO for now Fault will be dispatch to let user or developer know, that there are more allowed formats detected
-						dispatchFault('UniURLLoader: More allowed formats detected. [' + formatsList + ']', rawData, urlRequest, urlLoader.associatedData);
+						dispatchFault('UniURLLoader: More allowed formats detected. [' + formatsList + ']', MORE_FORMATS_ALLOWED, rawData, urlRequest, urlLoader.associatedData);
 						return;
 					}
 				}
@@ -202,7 +205,7 @@ package com.iblsoft.flexiweather.net.loaders
 			debug("decodeResult Invalid content: " + validFormats);
 			//			
 			//dispatch fault, if any other format has not dispatched result
-			dispatchFault('UniURLLoader: Invalid content. Any of allowed formats was found.', rawData, urlRequest, urlLoader.associatedData);
+			dispatchFault('UniURLLoader: Invalid content. Any of allowed formats was found.', INVALID_FORMAT, rawData, urlRequest, urlLoader.associatedData);
 		}
 
 		/**
