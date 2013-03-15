@@ -49,6 +49,11 @@ package com.iblsoft.flexiweather.net.events
 			return m_errorString;
 		}
 
+		public function get errorID(): int
+		{
+			return m_errorID;
+		}
+
 		public function get result(): Object
 		{
 			return m_result;
