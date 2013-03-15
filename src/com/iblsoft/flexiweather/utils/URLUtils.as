@@ -44,9 +44,7 @@ package com.iblsoft.flexiweather.utils
 			{
 				var arr: Array = url.split('?');
 				if (arr.length == 2)
-				{
-					var paramsString = arr[1] as String;
-					
+				{					
 					if (url.indexOf('&') > 0)
 					{
 						var arr2: Array = (arr[1] as String).split('&');
@@ -57,19 +55,18 @@ package com.iblsoft.flexiweather.utils
 								var parameterArray: Array = parameter.split('=');
 								if (parameterArray.length == 2)
 								{
-									var parameterValue: String = parameterArray[1] as String;
-									return parameterValue;
+									return parameterArray[1] as String;
 								}
 							}
 						}
 					} else {
+						var paramsString: String = arr[1] as String;
 						if (paramsString.indexOf(parameterName) == 0)
 						{
-							var parameterArray: Array = paramsString.split('=');
-							if (parameterArray.length == 2)
+							var paramsStringArray: Array = paramsString.split('=');
+							if (paramsStringArray.length == 2)
 							{
-								var parameterValue: String = parameterArray[1] as String;
-								return parameterValue;
+								return paramsStringArray[1] as String;
 							}
 						}
 						
