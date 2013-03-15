@@ -43,6 +43,17 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 		public function getIcon(s_iconName: String, f_callbackObject: Object, f_callbackFunction: Function, s_folder: String = 'SIGWX', i_width: int = 24, i_height: int = 24): Boolean
 		{
 			var s_url: String = iconUrl(s_iconName, s_folder, i_width, i_height);
+			return getIconByURL(s_url, f_callbackObject, f_callbackFunction);
+		}
+		
+		public function getIconFromDocstorage(s_docstoragePath: String, f_callbackObject: Object, f_callbackFunction: Function, i_width: int = 24, i_height: int = 24): Boolean
+		{
+			var s_url: String = iconDocstorageUrl(s_docstoragePath, i_width, i_height);
+			return getIconByURL(s_url, f_callbackObject, f_callbackFunction);
+		}
+		
+		private function getIconByURL(s_url: String, f_callbackObject: Object, f_callbackFunction: Function ): Boolean
+		{			
 			var b_alreadyLoaded: Boolean = iconExists(s_url);
 			var b_currentlyLoading: Boolean = iconIsLoading(s_url);
 			var d_assocData: IconAssociatedData;
@@ -74,6 +85,14 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 		{
 			var url: String = '${BASE_URL}/ria/helpers/gpaint-macro/render/' + s_folder + '/' + s_iconName + '?width=' + i_width + '&height=' + i_height;
 			return url;
+		}
+		
+		private function iconDocstorageUrl(s_docstoragePath: String, i_width: int = 24, i_height: int = 24): String
+		{
+			//wms.iblsoft.com/ria/helpers/gpaint-macro/render?doc=doc%3aglobal/macros/SIGWX/hail&WIDTH=128&FORMAT=PNG
+			var s_url: String = '${BASE_URL}/ria/helpers/gpaint-macro/render?doc=' + encodeURIComponent(s_docstoragePath) + 
+				"&width=" + i_width + '&height=' + i_height;
+			return s_url;			
 		}
 
 		private function iconIsLoading(s_url: String): Boolean
