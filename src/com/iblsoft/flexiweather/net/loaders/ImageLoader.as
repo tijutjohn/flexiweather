@@ -1,10 +1,13 @@
 package com.iblsoft.flexiweather.net.loaders
 {
+	import com.iblsoft.flexiweather.net.loaders.errors.URLLoaderError;
+	
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
 	import flash.utils.Dictionary;
+	
 	import mx.utils.ObjectUtil;
 
 	public class ImageLoader extends AbstractURLLoader
@@ -47,7 +50,7 @@ package com.iblsoft.flexiweather.net.loaders
 				loadImage(rawData, urlLoader, urlRequest, resultCallback, errorCallback);
 				return;
 			}
-			errorCallback("Image Loader error: Expected Image", rawData, urlRequest, urlLoader.associatedData);
+			errorCallback("Image Loader error: Expected Image", URLLoaderError.UNSPECIFIED_ERROR, rawData, urlRequest, urlLoader.associatedData);
 		}
 
 		protected function loadImage(rawData: ByteArray, urlLoader: URLLoaderWithAssociatedData, urlRequest: URLRequest, resultCallback: Function, errorCallback: Function): void

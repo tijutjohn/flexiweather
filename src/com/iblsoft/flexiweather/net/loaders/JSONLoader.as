@@ -1,9 +1,13 @@
 package com.iblsoft.flexiweather.net.loaders
 {
 	import com.iblsoft.flexiweather.net.UniURLLoaderFormat;
+	import com.iblsoft.flexiweather.net.loaders.errors.URLLoaderError;
+	
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
+	
 	import json.JParser;
+	
 	import mx.utils.ObjectUtil;
 
 	public class JSONLoader extends UniURLLoader
@@ -24,7 +28,7 @@ package com.iblsoft.flexiweather.net.loaders
 				resultCallback(json, urlRequest, urlLoader.associatedData);
 			}
 			else
-				errorCallback("JSON Loader error: Expected JSON", rawData, urlRequest, urlLoader.associatedData);
+				errorCallback("JSON Loader error: Expected JSON", URLLoaderError.UNSPECIFIED_ERROR, rawData, urlRequest, urlLoader.associatedData);
 		}
 
 		static public function getJSON(data: Object): Object

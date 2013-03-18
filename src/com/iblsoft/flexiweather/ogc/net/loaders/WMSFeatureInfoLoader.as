@@ -4,9 +4,12 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 	import com.iblsoft.flexiweather.net.loaders.URLLoaderWithAssociatedData;
 	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
 	import com.iblsoft.flexiweather.net.loaders.XMLLoader;
+	import com.iblsoft.flexiweather.net.loaders.errors.URLLoaderError;
 	import com.iblsoft.flexiweather.utils.HTMLUtils;
+	
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
+	
 	import mx.utils.ObjectUtil;
 
 	public class WMSFeatureInfoLoader extends UniURLLoader
@@ -59,7 +62,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 					}
 				}
 			}
-			errorCallback("WFS Feature Info Loader error: Result is not in expected format", rawData, urlRequest, urlLoader.associatedData);
+			errorCallback("WFS Feature Info Loader error: Result is not in expected format", URLLoaderError.UNSPECIFIED_ERROR, rawData, urlRequest, urlLoader.associatedData);
 		}
 	}
 }

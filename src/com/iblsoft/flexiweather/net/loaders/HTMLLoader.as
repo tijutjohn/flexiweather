@@ -1,8 +1,11 @@
 package com.iblsoft.flexiweather.net.loaders
 {
+	import com.iblsoft.flexiweather.net.loaders.errors.URLLoaderError;
 	import com.iblsoft.flexiweather.utils.HTMLUtils;
+	
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
+	
 	import mx.utils.ObjectUtil;
 
 	public class HTMLLoader extends XMLLoader
@@ -20,7 +23,7 @@ package com.iblsoft.flexiweather.net.loaders
 				resultCallback(htmlSource, urlRequest, urlLoader.associatedData);
 			}
 			else
-				errorCallback("HTML Loader error: Expected HTML", rawData, urlRequest, urlLoader.associatedData);
+				errorCallback("HTML Loader error: Expected HTML", URLLoaderError.UNSPECIFIED_ERROR, rawData, urlRequest, urlLoader.associatedData);
 		}
 
 		public static function isValidHTML(data: Object): Boolean

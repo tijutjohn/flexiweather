@@ -1,5 +1,7 @@
 package com.iblsoft.flexiweather.net.loaders
 {
+	import com.iblsoft.flexiweather.net.loaders.errors.URLLoaderError;
+	
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
 	
@@ -34,18 +36,19 @@ package com.iblsoft.flexiweather.net.loaders
 					else {
 						var error: Object = json['error'];
 						var errorMessage: String = (json['error'])['message'];
+						var errorCode: int = (json['error'])['code'];
 						if (errorMessage.length > ERROR_MESSAGE_MAXIMUM_LENGTH)
 						{
 							errorMessage = errorMessage.substr(0, ERROR_MESSAGE_MAXIMUM_LENGTH - 3) + "...";
 						}
-						errorCallback("JSON Loader error: Result is RPC strict JSON, but error was returned: " + errorMessage, json['error'], urlRequest, urlLoader.associatedData);
+						errorCallback("JSON Loader error: Result is RPC strict JSON, but error was returned: " + errorMessage, errorCode, json['error'], urlRequest, urlLoader.associatedData);
 					}
 				}
 				else
-					errorCallback("JSON Loader error: Result is JSON, but it's not RPC strict", json['error'], urlRequest, urlLoader.associatedData);
+					errorCallback("JSON Loader error: Result is JSON, but it's not RPC strict", (json['error'])['code'], json['error'], urlRequest, urlLoader.associatedData);
 			}
 			else
-				errorCallback("JSON Loader error: Expected JSON", rawData, urlRequest, urlLoader.associatedData);
+				errorCallback("JSON Loader error: Expected JSON", URLLoaderError.UNSPECIFIED_ERROR, rawData, urlRequest, urlLoader.associatedData);
 		}
 
 		static public function isError(jsonObj: Object): Boolean

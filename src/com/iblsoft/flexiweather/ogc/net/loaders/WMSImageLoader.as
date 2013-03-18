@@ -5,8 +5,11 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 	import com.iblsoft.flexiweather.net.loaders.URLLoaderWithAssociatedData;
 	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
 	import com.iblsoft.flexiweather.net.loaders.XMLLoader;
+	import com.iblsoft.flexiweather.net.loaders.errors.URLLoaderError;
+	
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
+	
 	import mx.events.DynamicEvent;
 
 	public class WMSImageLoader extends ImageLoader
@@ -29,10 +32,10 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 			{
 //				resultCallback(new XML(cloneByteArrayToString(rawData)), urlRequest, urlLoader.associatedData);
 				//xml in WMS means error
-				errorCallback("WMS Image Loader error: XML is received", new XML(cloneByteArrayToString(rawData)), urlRequest, urlLoader.associatedData);
+				errorCallback("WMS Image Loader error: XML is received", URLLoaderError.UNSPECIFIED_ERROR, new XML(cloneByteArrayToString(rawData)), urlRequest, urlLoader.associatedData);
 				return;
 			}
-			errorCallback("WMS Image Loader error: Expected Image or XML", rawData, urlRequest, urlLoader.associatedData);
+			errorCallback("WMS Image Loader error: Expected Image or XML", URLLoaderError.UNSPECIFIED_ERROR, rawData, urlRequest, urlLoader.associatedData);
 		}
 
 		public static function isWMSServiceException(data: Object): Boolean

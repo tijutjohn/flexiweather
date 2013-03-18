@@ -1,9 +1,13 @@
 package com.iblsoft.flexiweather.net.loaders
 {
 	import com.iblsoft.flexiweather.net.UniURLLoaderFormat;
+	import com.iblsoft.flexiweather.net.loaders.errors.URLLoaderError;
+	
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
+	
 	import flashx.textLayout.debug.assert;
+	
 	import mx.utils.ObjectUtil;
 
 	public class XMLLoader extends UniURLLoader
@@ -22,7 +26,7 @@ package com.iblsoft.flexiweather.net.loaders
 				resultCallback(xml, urlRequest, urlLoader.associatedData);
 			}
 			else
-				errorCallback("XML Loader error: Expected XML", rawData, urlRequest, urlLoader.associatedData);
+				errorCallback("XML Loader error: Expected XML", URLLoaderError.UNSPECIFIED_ERROR, rawData, urlRequest, urlLoader.associatedData);
 		}
 
 		public static function getXML(data: Object): XML

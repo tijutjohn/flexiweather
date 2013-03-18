@@ -1,5 +1,7 @@
 package com.iblsoft.flexiweather.net.loaders
 {
+	import com.iblsoft.flexiweather.net.loaders.errors.URLLoaderError;
+	
 	import flash.events.IEventDispatcher;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
@@ -19,7 +21,7 @@ package com.iblsoft.flexiweather.net.loaders
 				resultCallback(xml, urlRequest, urlLoader.associatedData);
 			}
 			else
-				errorCallback("XML Loader error: Expected XML", rawData, urlRequest, urlLoader.associatedData);
+				errorCallback("XML Loader error: Expected XML", URLLoaderError.UNSPECIFIED_ERROR, rawData, urlRequest, urlLoader.associatedData);
 		}
 	}
 }
