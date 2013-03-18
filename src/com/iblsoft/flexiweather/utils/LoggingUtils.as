@@ -25,6 +25,7 @@ package com.iblsoft.flexiweather.utils
 		public function LoggingUtils()
 		{
 			_listeners = new Dictionary();
+			_errorListeners = new Dictionary();
 		}
 		
 		public function addErrorLogEntryListener(dispatcher: EventDispatcher): void
@@ -32,7 +33,7 @@ package com.iblsoft.flexiweather.utils
 			if (!hasLogEntryListener(dispatcher))
 			{
 				_errorListeners[dispatcher] = dispatcher;
-				dispatcher.addEventListener(LoggingUtilsErrorEvent.ERROR_LOG_ENTRY, redispatchEvent);
+				dispatcher.addEventListener(LoggingUtilsErrorEvent.ERROR_LOG_ENTRY, redispatchErrorEvent);
 			}
 			
 		}
@@ -45,6 +46,10 @@ package com.iblsoft.flexiweather.utils
 			}
 		}
 		
+		private function redispatchErrorEvent(event: LoggingUtilsErrorEvent): void
+		{
+			dispatchEvent(event);	
+		}
 		private function redispatchEvent(event: LoggingUtilsEvent): void
 		{
 			dispatchEvent(event);	

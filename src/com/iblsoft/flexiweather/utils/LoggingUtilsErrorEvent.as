@@ -13,6 +13,7 @@ package com.iblsoft.flexiweather.utils
 		{
 			super(type, bubbles, cancelable);
 			
+			this.errorObject = errorObject;
 			this.message = message;
 		}
 		

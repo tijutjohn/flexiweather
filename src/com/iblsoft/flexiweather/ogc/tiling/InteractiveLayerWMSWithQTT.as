@@ -21,7 +21,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.WMSViewProperties;
 	import com.iblsoft.flexiweather.ogc.preload.IPreloadableLayer;
 	import com.iblsoft.flexiweather.utils.LoggingUtils;
-	import com.iblsoft.flexiweather.utils.LoggingUtilsEvent;
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;

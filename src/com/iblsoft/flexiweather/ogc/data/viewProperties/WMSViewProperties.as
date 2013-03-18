@@ -774,6 +774,10 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 			return false;
 		}
 
+		protected function error(errorObject: Object, str: String): void
+		{
+			LoggingUtils.dispatchErrorEvent(this, errorObject, "WMSViewProperties: " + str);
+		}
 		protected function debug(str: String): void
 		{
 			LoggingUtils.dispatchLogEvent(this, "WMSViewProperties: " + str);
@@ -789,8 +793,9 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					a = getSynchronisedVariableValuesList(s_variableId);
 					if (a)
 						debug("synchroniseWith: " + s_variableId + ": " + a.length);
-					else
-						debug("synchroniseWith: " + s_variableId + ": NULL");
+					else {
+						error({object: this}, "synchroniseWith: " + s_variableId + " does not return any values list for variable: " + s_variableId + " for value: " + value.toString());
+					}
 					var bestLevel: String;
 					var requiredLevel: String = value as String;
 //					var leftDist: Number = 1000 * 60 * 60 * 3;

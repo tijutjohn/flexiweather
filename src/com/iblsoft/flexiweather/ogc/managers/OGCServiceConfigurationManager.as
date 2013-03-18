@@ -4,7 +4,6 @@ package com.iblsoft.flexiweather.ogc.managers
 	import com.iblsoft.flexiweather.ogc.configuration.services.OGCServiceConfiguration;
 	import com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceConfiguration;
 	import com.iblsoft.flexiweather.utils.LoggingUtils;
-	import com.iblsoft.flexiweather.utils.LoggingUtilsEvent;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	

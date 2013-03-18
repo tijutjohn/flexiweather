@@ -30,6 +30,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerComposer;
+	import com.iblsoft.flexiweather.widgets.InteractiveLayerCoordinate;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerLabel;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerPan;
@@ -162,6 +163,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 		private var m_viewBBox: BBox = new BBox(-180, -90, 180, 90);
 		private var m_extentBBox: BBox = new BBox(-180, -90, 180, 90);
 
+		private var m_widgetCommonLayers: Array;
+		
 		public function InteractiveMultiView()
 		{
 			super();
@@ -175,6 +178,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 			
 			addEventListener(MouseEvent.CLICK, onMouseClick);
 			dispatchEvent(new Event("interactiveWidgetsChanged"));
+			
+			m_widgetCommonLayers = [];
 		}
 
 		private function createDefaultConfiguration(): void
@@ -1009,6 +1014,18 @@ package com.iblsoft.flexiweather.ogc.multiview
 //					layerMap.addEventListener(InteractiveLayerMap.TIME_AXIS_REMOVED, onTimeAxisRemoved);
 					layerMap.invalidateTimeline();
 				}
+				
+				if (m_widgetCommonLayers && m_widgetCommonLayers.length > 0)
+				{
+					while (m_widgetCommonLayers.length > 0)
+					{
+						var layer: InteractiveLayer = m_widgetCommonLayers.shift() as InteractiveLayer;
+						
+						if (layer)
+							_selectedInteractiveWidget.addLayer(layer);
+						
+					}
+				}
 			}
 		}
 
@@ -1028,6 +1045,13 @@ package com.iblsoft.flexiweather.ogc.multiview
 				_selectedInteractiveWidget.removeEventListener(InteractiveLayerMap.PRIMARY_LAYER_CHANGED, onPrimaryLayerChanged);
 				_selectedInteractiveWidget.removeEventListener(ResizeEvent.RESIZE, onSelectedWidgetResize);
 				onPrimaryLayerChanged();
+				
+				var coordinateLayer: InteractiveLayerCoordinate = _selectedInteractiveWidget.getLayerByType(InteractiveLayerCoordinate) as InteractiveLayerCoordinate;
+				if (coordinateLayer)
+				{
+					_selectedInteractiveWidget.removeLayer(coordinateLayer);
+					m_widgetCommonLayers.push(coordinateLayer);
+				}
 			}
 		}
 		private var _previousPrimaryLayer: InteractiveLayerMSBase;
