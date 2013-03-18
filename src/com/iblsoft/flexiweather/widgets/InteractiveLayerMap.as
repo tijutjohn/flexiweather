@@ -247,17 +247,13 @@ package com.iblsoft.flexiweather.widgets
 						newLayers.push(layer);
 					}
 				}
-				var de: DynamicEvent = new DynamicEvent(LAYERS_SERIALIZED_AND_READY);
-				de['layers'] = newLayers;
-				dispatchEvent(de);
-				var globalFrame8601: String = storage.serializeString('global-frame', null);
 				var globalLevel: String = storage.serializeString('global-level', null);
 				if (globalVariablesManager)
 				{
-					if (globalFrame8601)
-						globalVariablesManager.frame = ISO8601Parser.stringToDate(globalFrame8601);
 					if (globalLevel)
 						globalVariablesManager.level = globalLevel;
+				} else {
+					trace("ILM serialize, problem to set global-level: " + globalLevel);
 				}
 				
 				try {
@@ -278,6 +274,10 @@ package com.iblsoft.flexiweather.widgets
 					debug("Problem to serialize 'area' mode");
 				}
 					
+				var de: DynamicEvent = new DynamicEvent(LAYERS_SERIALIZED_AND_READY);
+				de['layers'] = newLayers;
+				dispatchEvent(de);
+				
 				//set global vars
 			}
 			else
@@ -299,12 +299,10 @@ package com.iblsoft.flexiweather.widgets
 				storage.serializeNonpersistentArrayCollection("layer", wrappers, LayerSerializationWrapper);
 				if (globalVariablesManager)
 				{
-					var frameDateString: String;
-					if (globalVariablesManager.frame)
-						frameDateString = ISO8601Parser.dateToString(globalVariablesManager.frame);
-					
-					
-					storage.serializeString('global-frame', frameDateString);
+					//					var frameDateString: String;
+					//					if (globalVariablesManager.frame)
+					//						frameDateString = ISO8601Parser.dateToString(globalVariablesManager.frame)
+					//					storage.serializeString('global-frame', frameDateString);
 					storage.serializeString('global-level', globalVariablesManager.level);
 				}
 				
@@ -395,9 +393,6 @@ package com.iblsoft.flexiweather.widgets
 						newLayers.push(layer);
 					}
 				}
-				var de: DynamicEvent = new DynamicEvent(LAYERS_SERIALIZED_AND_READY);
-				de['layers'] = newLayers;
-				dispatchEvent(de);
 //				var globalFrame8601: String = storage.serializeString('global-frame', null);
 				var globalLevel: String = storage.serializeString('global-level', null);
 				if (globalVariablesManager)
@@ -407,7 +402,10 @@ package com.iblsoft.flexiweather.widgets
 				} else {
 					trace("ILM serialize, problem to set global-level: " + globalLevel);
 				}
-					//set global vars
+				
+				var de: DynamicEvent = new DynamicEvent(LAYERS_SERIALIZED_AND_READY);
+				de['layers'] = newLayers;
+				dispatchEvent(de);
 			}
 			else
 			{
@@ -422,9 +420,9 @@ package com.iblsoft.flexiweather.widgets
 				storage.serializeNonpersistentArrayCollection("layer", wrappers, LayerSerializationWrapper);
 				if (globalVariablesManager)
 				{
-					var frameDateString: String;
-					if (globalVariablesManager.frame)
-						frameDateString = ISO8601Parser.dateToString(globalVariablesManager.frame)
+//					var frameDateString: String;
+//					if (globalVariablesManager.frame)
+//						frameDateString = ISO8601Parser.dateToString(globalVariablesManager.frame)
 //					storage.serializeString('global-frame', frameDateString);
 					storage.serializeString('global-level', globalVariablesManager.level);
 				}
@@ -1087,13 +1085,14 @@ package com.iblsoft.flexiweather.widgets
 					continue;
 				
 				var bSynchronized: Boolean = so.synchroniseWith(GlobalVariable.LEVEL, newLevel);
+				debug("setLevel [" + newLevel + "] newLevel: " + newLevel + " for: " + l.name + " bSynchronized: " + bSynchronized);
 				if (bSynchronized)
 				{
 					l.refresh(false);
 				}
 				else
 				{
-					debug("InteractiveLayerMap setLevel [" + newLevel + "] LEVEL NOT FOUND for " + l.name);
+					error("InteractiveLayerMap setLevel [" + newLevel + "] LEVEL NOT FOUND for " + l.name);
 				}
 			}
 			
@@ -1278,17 +1277,17 @@ package com.iblsoft.flexiweather.widgets
 			return retStr;
 		}
 
-		private function log(str: String): void
+		private function error(str: String, type: String = "Error", tag: String = "InteractiveLayerMap"): void
 		{
-			LoggingUtils.dispatchLogEvent(this, " ILM: " + str);
+			trace(tag + "| " + type + "| " + str);
+			LoggingUtils.dispatchErrorEvent(this, "InteractiveLayerMap ", str);
 		}
-		
 		private function debug(str: String, type: String = "Info", tag: String = "InteractiveLayerMap"): void
 		{
 			if (debugConsole)
 				debugConsole.print(str, type, tag);
-//			trace(tag + "| " + type + "| " + str);
-//			log(str);
+			trace(tag + "| " + type + "| " + str);
+			LoggingUtils.dispatchLogEvent(this, " ILM: " + str);
 		}
 	}
 }

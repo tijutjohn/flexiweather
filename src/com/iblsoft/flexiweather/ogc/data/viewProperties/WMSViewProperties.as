@@ -15,6 +15,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.utils.Duration;
 	import com.iblsoft.flexiweather.utils.ISO8601Parser;
+	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	
@@ -773,6 +774,11 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 			return false;
 		}
 
+		protected function debug(str: String): void
+		{
+			LoggingUtils.dispatchLogEvent(this, "WMSViewProperties: " + str);
+		}
+		
 		public function synchroniseWith(s_variableId: String, value: Object): Boolean
 		{
 			var a: Array
@@ -781,6 +787,10 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 				if (!exactlySynchroniseWith(s_variableId, value))
 				{
 					a = getSynchronisedVariableValuesList(s_variableId);
+					if (a)
+						debug("synchroniseWith: " + s_variableId + ": " + a.length);
+					else
+						debug("synchroniseWith: " + s_variableId + ": NULL");
 					var bestLevel: String;
 					var requiredLevel: String = value as String;
 //					var leftDist: Number = 1000 * 60 * 60 * 3;

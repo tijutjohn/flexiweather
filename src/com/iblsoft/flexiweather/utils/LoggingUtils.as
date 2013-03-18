@@ -9,6 +9,7 @@ package com.iblsoft.flexiweather.utils
 	public class LoggingUtils extends EventDispatcher
 	{
 		private var _listeners: Dictionary;
+		private var _errorListeners: Dictionary;
 		
 		private static var _instance: LoggingUtils;
 		
@@ -26,6 +27,15 @@ package com.iblsoft.flexiweather.utils
 			_listeners = new Dictionary();
 		}
 		
+		public function addErrorLogEntryListener(dispatcher: EventDispatcher): void
+		{
+			if (!hasLogEntryListener(dispatcher))
+			{
+				_errorListeners[dispatcher] = dispatcher;
+				dispatcher.addEventListener(LoggingUtilsErrorEvent.ERROR_LOG_ENTRY, redispatchEvent);
+			}
+			
+		}
 		public function addLogEntryListener(dispatcher: EventDispatcher): void
 		{
 			if (!hasLogEntryListener(dispatcher))
@@ -40,6 +50,16 @@ package com.iblsoft.flexiweather.utils
 			dispatchEvent(event);	
 		}
 		
+		public function hasErrorLogEntryListener(dispatcher: EventDispatcher): Boolean
+		{
+			if (_errorListeners[dispatcher])
+			{
+				var ed: EventDispatcher = _errorListeners[dispatcher] as EventDispatcher;
+				if (ed && ed.hasEventListener(LoggingUtilsErrorEvent.ERROR_LOG_ENTRY))
+					return true;
+			}
+			return false;
+		}
 		public function hasLogEntryListener(dispatcher: EventDispatcher): Boolean
 		{
 			if (_listeners[dispatcher])
@@ -49,6 +69,17 @@ package com.iblsoft.flexiweather.utils
 					return true;
 			}
 			return false;
+		}
+		
+		static public function dispatchErrorEvent(dispatcher: EventDispatcher, errorObject: Object, message: String, bubbles: Boolean = false, cancelable: Boolean = false ): void
+		{
+			
+			var _logUtilsSingleton: LoggingUtils = LoggingUtils.instance;
+			
+			//listen to this dispatcher log entry event to redispatch them
+			_logUtilsSingleton.addErrorLogEntryListener(dispatcher);
+			
+			dispatcher.dispatchEvent(new LoggingUtilsEvent(LoggingUtilsErrorEvent.ERROR_LOG_ENTRY, errorObject, message, bubbles, cancelable));
 		}
 		
 		static public function dispatchLogEvent(dispatcher: EventDispatcher, message: String, bubbles: Boolean = false, cancelable: Boolean = false ): void

@@ -166,7 +166,7 @@ package com.iblsoft.flexiweather.ogc.configuration
 			
 			var de: DynamicEvent = new DynamicEvent(DURATION_CHANGED);
 			de['value'] = _duration;
-			de['value'] = _durationStep;
+			de['step'] = _durationStep;
 			dispatchEvent(de);
 		}
 

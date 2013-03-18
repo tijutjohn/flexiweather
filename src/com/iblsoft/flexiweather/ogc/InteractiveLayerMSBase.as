@@ -1431,6 +1431,7 @@ package com.iblsoft.flexiweather.ogc
 				{
 //					setStatus(InteractiveDataLayer.STATE_DATA_LOADED);
 				}
+				debug("synchroniseWith ["+s_variableId+"]/"+s_value + " synchronized: " + bIsSyncronized);
 				return bIsSyncronized;
 			} else {
 				_tempParameterStorage.synchroniseWith(s_variableId, s_value);
