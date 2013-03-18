@@ -79,7 +79,7 @@ package com.iblsoft.flexiweather.utils
 			//listen to this dispatcher log entry event to redispatch them
 			_logUtilsSingleton.addErrorLogEntryListener(dispatcher);
 			
-			dispatcher.dispatchEvent(new LoggingUtilsEvent(LoggingUtilsErrorEvent.ERROR_LOG_ENTRY, errorObject, message, bubbles, cancelable));
+			dispatcher.dispatchEvent(new LoggingUtilsErrorEvent(LoggingUtilsErrorEvent.ERROR_LOG_ENTRY, errorObject, message, bubbles, cancelable));
 		}
 		
 		static public function dispatchLogEvent(dispatcher: EventDispatcher, message: String, bubbles: Boolean = false, cancelable: Boolean = false ): void
