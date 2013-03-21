@@ -102,6 +102,7 @@ package com.iblsoft.flexiweather.widgets
 		private var _enableMouseWheel: Boolean;
 		private var _enableGestures: Boolean;
 
+
 		override public function set enabled(value: Boolean): void
 		{
 			super.enabled = value;
@@ -156,6 +157,7 @@ package com.iblsoft.flexiweather.widgets
 			}
 			return null;
 		}
+		
 		public function InteractiveWidget()
 		{
 			super();
@@ -1822,5 +1824,6 @@ package com.iblsoft.flexiweather.widgets
 		{
 			return mb_autoLayout;
 		}
+		
 	}
 }

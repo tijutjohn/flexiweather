@@ -15,6 +15,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 	import com.iblsoft.flexiweather.ogc.editable.IInteractiveLayerProvider;
 	import com.iblsoft.flexiweather.ogc.multiview.data.MultiViewConfiguration;
 	import com.iblsoft.flexiweather.ogc.multiview.data.SynchronizationChangeType;
+	import com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewChangeEvent;
 	import com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent;
 	import com.iblsoft.flexiweather.ogc.multiview.skins.InteractiveMultiViewSkin;
 	import com.iblsoft.flexiweather.ogc.multiview.synchronization.AreaSynchronizator;
@@ -89,7 +90,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 	 *  @productversion Flex 4
 	 */
 	[Style(name = "selectedBorderAlpha", type = "Number", inherit = "yes", theme = "spark, mobile", minValue = "0.0", maxValue = "1.0")]
-	[Event(name = "selectionChange", type = "mx.events.FlexEvent")]
+	[Event(name = "multiViewSelectionChange", type = "com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewChangeEvent")]
 	[Event(name = "multiViewReady", type = "com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent")]
 	[Event(name = "multiViewMapsLoadingStarted", type = "com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent")]
 	[Event(name = "multiViewMapsLoaded", type = "com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent")]
@@ -733,6 +734,11 @@ package com.iblsoft.flexiweather.ogc.multiview
 		{
 			if (value != _selectedInteractiveWidget)
 			{
+				
+				var imvce: InteractiveMultiViewChangeEvent = new InteractiveMultiViewChangeEvent(InteractiveMultiViewChangeEvent.SELECTION_CHANGE);
+				imvce.oldInteractiveWidget = _selectedInteractiveWidget;
+				
+				
 				if (_selectedInteractiveWidget)
 				{
 					unregisterSelectedInteractiveWidget();
@@ -743,6 +749,10 @@ package com.iblsoft.flexiweather.ogc.multiview
 					trace("selectedInteractiveWidget: " + _selectedInteractiveWidget.id);
 					registerSelectedInteractiveWidget();
 				}
+				
+				imvce.newInteractiveWidget = _selectedInteractiveWidget;
+				dispatchEvent(imvce);
+				
 				dispatchEvent(new FlexEvent(FlexEvent.SELECTION_CHANGE));
 				dispatchEvent(new Event("interactiveLayerMapChanged"));
 				invalidateDisplayList();
@@ -1003,7 +1013,9 @@ package com.iblsoft.flexiweather.ogc.multiview
 				_selectedInteractiveWidget.addEventListener(InteractiveWidgetEvent.WIDGET_CHANGED, onWidgetChanged);
 				_selectedInteractiveWidget.addEventListener(InteractiveWidgetEvent.AREA_CHANGED, onAreaChanged);
 				_selectedInteractiveWidget.addEventListener(InteractiveLayerMap.PRIMARY_LAYER_CHANGED, onPrimaryLayerChanged);
+				_selectedInteractiveWidget.addEventListener(InteractiveLayerMapEvent.LAYER_SELECTION_CHANGED, onMapLayerSelectionChanged);
 				_selectedInteractiveWidget.addEventListener(ResizeEvent.RESIZE, onSelectedWidgetResize);
+				
 				onPrimaryLayerChanged();
 				_selectedInteractiveWidget.startListenForChanges();
 				if (_selectedInteractiveWidget.interactiveLayerMap)
@@ -1042,6 +1054,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 				_selectedInteractiveWidget.enableMouseWheel = false;
 				_selectedInteractiveWidget.removeEventListener(InteractiveWidgetEvent.WIDGET_CHANGED, onWidgetChanged);
 				_selectedInteractiveWidget.removeEventListener(InteractiveWidgetEvent.AREA_CHANGED, onAreaChanged);
+				_selectedInteractiveWidget.removeEventListener(InteractiveLayerMapEvent.LAYER_SELECTION_CHANGED, onMapLayerSelectionChanged);
 				_selectedInteractiveWidget.removeEventListener(InteractiveLayerMap.PRIMARY_LAYER_CHANGED, onPrimaryLayerChanged);
 				_selectedInteractiveWidget.removeEventListener(ResizeEvent.RESIZE, onSelectedWidgetResize);
 				onPrimaryLayerChanged();
@@ -1054,6 +1067,13 @@ package com.iblsoft.flexiweather.ogc.multiview
 				}
 			}
 		}
+		
+		
+		private function onMapLayerSelectionChanged(event: InteractiveLayerMapEvent): void
+		{
+			trace("onMapLayerSelectionChanged selected index: " + selectedInteractiveWidget.interactiveLayerMap.selectedLayerIndex);	
+		}
+		
 		private var _previousPrimaryLayer: InteractiveLayerMSBase;
 
 		private function onPrimaryLayerChanged(event: DataEvent = null): void

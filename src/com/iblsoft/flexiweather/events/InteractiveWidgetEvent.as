@@ -17,6 +17,7 @@ package com.iblsoft.flexiweather.events
 		 */
 		public static const ALL_DATA_LAYERS_LOADED: String = 'allDataLayersLoaded';
 		public static const AREA_CHANGED: String = 'areaChanged';
+		
 		/**
 		 * Dispatch event in InteractiveWidget when user clicks inside InteractiveWidget
 		 */

@@ -144,12 +144,34 @@ package com.iblsoft.flexiweather.widgets
 		{
 			return _globalVariablesManager;
 		}
+		
+		private var m_selectedLayerIndex: int;
+		private var m_selectedLayerIndexChanged: Boolean
+		
+		public function get selectedLayerIndex():int
+		{
+			return m_selectedLayerIndex;
+		}
+		
+		public function set selectedLayerIndex(value:int):void
+		{
+			if (m_selectedLayerIndex != value)
+			{
+				m_selectedLayerIndex = value;
+				m_selectedLayerIndexChanged = true;
+				invalidateProperties();
+			}
+		}
 
 		public function InteractiveLayerMap(container: InteractiveWidget = null)
 		{
 			super(container);
+		
 			mapUID++;
 			mapID = mapUID;
+			
+			selectedLayerIndex = -1;
+			
 			timelineConfiguration = new MapTimelineConfiguration();
 			_globalVariablesManager = new GlobalVariablesManager();
 			_globalVariablesManager.registerInteractiveLayerMap(this);
@@ -247,6 +269,9 @@ package com.iblsoft.flexiweather.widgets
 						newLayers.push(layer);
 					}
 				}
+				
+				selectedLayerIndex = storage.serializeInt('selected-layer-index', m_selectedLayerIndex);
+				
 				var globalLevel: String = storage.serializeString('global-level', null);
 				if (globalVariablesManager)
 				{
@@ -304,6 +329,11 @@ package com.iblsoft.flexiweather.widgets
 					//						frameDateString = ISO8601Parser.dateToString(globalVariablesManager.frame)
 					//					storage.serializeString('global-frame', frameDateString);
 					storage.serializeString('global-level', globalVariablesManager.level);
+				}
+				
+				if (selectedLayerIndex > -1)
+				{
+					storage.serializeInt('selected-layer-index', m_selectedLayerIndex);
 				}
 				
 				storage.serialize('animation', timelineConfiguration);
@@ -393,7 +423,8 @@ package com.iblsoft.flexiweather.widgets
 						newLayers.push(layer);
 					}
 				}
-//				var globalFrame8601: String = storage.serializeString('global-frame', null);
+				selectedLayerIndex = storage.serializeInt('selected-layer-index', m_selectedLayerIndex);
+				
 				var globalLevel: String = storage.serializeString('global-level', null);
 				if (globalVariablesManager)
 				{
@@ -426,6 +457,12 @@ package com.iblsoft.flexiweather.widgets
 //					storage.serializeString('global-frame', frameDateString);
 					storage.serializeString('global-level', globalVariablesManager.level);
 				}
+				
+				if (selectedLayerIndex > -1)
+				{
+					storage.serializeInt('selected-layer-index', m_selectedLayerIndex);
+				}
+				
 				debug("Map serialize: " + (storage as XMLStorage).xml);
 			}
 		}
@@ -460,6 +497,29 @@ package com.iblsoft.flexiweather.widgets
 			notifyTimeAxisUpdate();
 		}
 
+		public function onLayerDeselected(layer: InteractiveLayer): void
+		{
+			selectedLayerIndex = -1;	
+		}
+		
+		public function onLayerSelected(layer: InteractiveLayer): void
+		{
+			var total: int = layers.length;
+			
+			for (var i: int = 0; i < total; i++)
+			{
+				var currLayer: InteractiveLayer = layers.getItemAt(i) as InteractiveLayer;
+				
+				if (currLayer == layer)
+				{
+					selectedLayerIndex = i;
+					return;
+				}
+			}
+			
+			selectedLayerIndex = -1;
+		}
+		
 		private var _firstDataReceived: Dictionary = new Dictionary();
 		
 		private function resynchronizeOnStart(event: SynchronisedVariableChangeEvent): void
@@ -528,6 +588,14 @@ package com.iblsoft.flexiweather.widgets
 				//it will set level again. This is done by purpose when adding new layer, to synchronise level with newly added layer
 				setLevel(_globalVariablesManager.level);
 			}
+			
+			if (m_selectedLayerIndexChanged)
+			{
+				var ilme: InteractiveLayerMapEvent = new InteractiveLayerMapEvent(InteractiveLayerMapEvent.LAYER_SELECTION_CHANGED, true);
+				dispatchEvent(ilme);
+				m_selectedLayerIndexChanged = false;
+			}
+				
 		}
 
 		override public function addLayer(l: InteractiveLayer): void
