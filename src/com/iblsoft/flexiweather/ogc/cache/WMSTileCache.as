@@ -24,7 +24,7 @@ package com.iblsoft.flexiweather.ogc.cache
 	{
 		private static var _uid: int = 0;
 		public static var debugConsole: IConsole;
-		public var maxCachedItems: int = 300;
+		public var maxCachedItems: int = 900;
 		/**
 		 * Expiration check interval. How ofter will be expiration checked
 		 */
@@ -253,6 +253,7 @@ package com.iblsoft.flexiweather.ogc.cache
 				return;
 			var s_key: String = getQTTTileViewCacheKey(qttTileViewProperties);
 			md_noDataCache[s_key] = true;
+			mi_noDataCacheItemsLength++;
 		}
 
 		override public function cacheItemLoadingCanceled(viewProperties: IViewProperties): void
@@ -267,6 +268,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			var s_key: String = getQTTTileViewCacheKey(qttTileViewProperties);
 			
 			delete md_cacheLoading[s_key];
+			mi_noDataCacheItemsLength--;
 		}
 			
 		override public function isItemCached(viewProperties: IViewProperties, b_checkNoDataCache: Boolean = true): Boolean
@@ -319,16 +321,21 @@ package com.iblsoft.flexiweather.ogc.cache
 			 * we need to delete cache item with same "key" before we add new item.
 			*/
 			var bWasDeleted: Boolean = deleteCacheItemByKey(s_key);
+			
+			//add item to cache
 			md_cache[s_key] = item;
 			_items.push(s_key);
+			
+			mi_cacheItemCount++;
+			
 			if (_items.length > maxCachedItems)
 			{
 				for each (var tiledAreaObj: Object in tiledAreas)
 				{
 					var tiledArea: TiledArea = tiledAreaObj.tiledArea as TiledArea;
 					s_key = getCachedTileKeyOutsideTiledArea(tiledArea);
+					bWasDeleted = deleteCacheItemByKey(s_key);
 				}
-				bWasDeleted = deleteCacheItemByKey(s_key);
 			}
 		}
 
@@ -367,6 +374,7 @@ package com.iblsoft.flexiweather.ogc.cache
 				disposeTileBitmap(s_key);
 				cacheItem.destroy();
 				cacheItem = null;
+				mi_cacheItemCount--;
 				delete md_cache[s_key];
 				return true;
 			}
@@ -470,6 +478,11 @@ package com.iblsoft.flexiweather.ogc.cache
 			trace("WMSTileCache: " + txt);
 			if (debugConsole)
 				debugConsole.print("WMSTileCache: " + txt, 'Info', 'WMSTileCache');
+		}
+		
+		override public function toString(): String
+		{
+			return "WMSTileCache: len: " + length + " noData len: " + noDataItemsLengths + " loading len: " + loadingItemsLength;
 		}
 	}
 }

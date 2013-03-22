@@ -27,10 +27,27 @@ package com.iblsoft.flexiweather.ogc.cache
 		private var mf_expirationTime: int = 0;
 		private var m_expirationTimer: Timer;
 		private var _animationModeEnabled: Boolean;
-		private var mi_cacheItemCount: int = 0;
+		
 		protected var md_cache: Dictionary = new Dictionary();
 		protected var md_noDataCache: Dictionary = new Dictionary();
 		protected var md_cacheLoading: Dictionary = new Dictionary();
+		
+		protected var mi_cacheItemCount: int = 0;
+		protected var mi_noDataCacheItemsLength: int = 0;
+		protected var mi_cacheLoadingItemsLength: int = 0;
+		
+		public function get length(): uint
+		{
+			return mi_cacheItemCount;			
+		}
+		public function get noDataItemsLengths(): uint
+		{
+			return mi_noDataCacheItemsLength;			
+		}
+		public function get loadingItemsLength(): uint
+		{
+			return mi_cacheLoadingItemsLength;			
+		}
 
 		public function clearCache(): void
 		{
@@ -41,6 +58,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			for (var s_key: String in md_cache)
 			{
 				delete md_noDataCache[s_key];
+				mi_noDataCacheItemsLength--;
 			}
 		}
 
@@ -75,6 +93,10 @@ package com.iblsoft.flexiweather.ogc.cache
 			md_cache = null;
 			md_noDataCache = null;
 			md_cacheLoading = null;
+			
+			mi_cacheItemCount = 0;
+			mi_cacheLoadingItemsLength = 0;
+			mi_noDataCacheItemsLength = 0;
 		}
 
 		private function startExpirationTimer(): void
@@ -155,9 +177,9 @@ package com.iblsoft.flexiweather.ogc.cache
 				{
 					//FIXME deleteCacheItemByKey - delete tile if it's not bitmap (e.g. AVM1Movie)
 				}
-				mi_cacheItemCount--;
 				cacheItem.destroy();
 				delete md_cache[s_key];
+				mi_cacheItemCount--;
 				return true;
 			}
 			else
@@ -165,11 +187,6 @@ package com.iblsoft.flexiweather.ogc.cache
 //				debug("\t deleteCacheItem: DO NOT DELETE IT " + cacheItem);
 			}
 			return false;
-		}
-
-		public function getCacheItemsCount(): int
-		{
-			return mi_cacheItemCount;
 		}
 
 		public function getCacheItems(): Array
@@ -287,6 +304,7 @@ package com.iblsoft.flexiweather.ogc.cache
 				return;
 			var s_key: String = qetWMSViewCacheKey(wmsViewProperties);
 			md_cacheLoading[s_key] = true;
+			mi_cacheLoadingItemsLength++;
 		}
 
 		public function addCacheNoDataItem(viewProperties: IViewProperties): void
@@ -298,6 +316,7 @@ package com.iblsoft.flexiweather.ogc.cache
 				return;
 			var s_key: String = qetWMSViewCacheKey(wmsViewProperties);
 			md_noDataCache[s_key] = true;
+			mi_noDataCacheItemsLength++;
 		}
 
 		public function addCacheItem(img: DisplayObject, viewProperties: IViewProperties, associatedData: Object): void
@@ -320,10 +339,15 @@ package com.iblsoft.flexiweather.ogc.cache
 			item.displayed = true;
 			item.lastUsed = new Date();
 			item.image = img;
+			
 			md_cache[s_key] = item;
 			mi_cacheItemCount++;
+			
 			debugCache();
+			
 			delete md_cacheLoading[s_key];
+			mi_cacheLoadingItemsLength--;
+			
 			var wce: WMSCacheEvent = new WMSCacheEvent(WMSCacheEvent.ITEM_ADDED, item);
 			wce.associatedData = associatedData;
 			dispatchEvent(wce);
@@ -341,6 +365,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			var s_key: String = qetWMSViewCacheKey(wmsViewProperties);
 			
 			delete md_cacheLoading[s_key];
+			mi_cacheLoadingItemsLength--;
 		}
 		
 		public function debugCache(): String
@@ -405,6 +430,11 @@ package com.iblsoft.flexiweather.ogc.cache
 
 		private function debug(str: String): void
 		{
+		}
+		
+		override public function toString(): String
+		{
+			return "WMSCache: len: " + length + " noData len: " + noDataItemsLengths + " loading len: " + loadingItemsLength;
 		}
 	}
 }

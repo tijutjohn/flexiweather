@@ -28,7 +28,7 @@ package com.iblsoft.flexiweather.ogc.cache
 		function deleteCacheItemByKey(s_key: String, b_disposeDisplayed: Boolean = false): Boolean
 		function isItemCached(viewProperties: IViewProperties, b_checkNoDataCache: Boolean = false): Boolean;
 		function cacheItemLoadingCanceled(viewProperties: IViewProperties): void
-		function getCacheItemsCount(): int;
+		function get length(): uint;
 		function getCacheItems(): Array;
 		function getCacheItem(viewProperties: IViewProperties): CacheItem;
 		function getCacheItemBitmap(viewProperties: IViewProperties): DisplayObject;
