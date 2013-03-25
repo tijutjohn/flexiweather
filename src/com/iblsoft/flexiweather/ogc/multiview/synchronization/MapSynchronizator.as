@@ -35,8 +35,6 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		}
 		public function set synchronizeFrame(value:Boolean):void
 		{
-			if (_synchronizeFrame != value)
-			{
 				_synchronizeFrame = value;
 				if (_synchronizeFrame)
 				{
@@ -44,7 +42,6 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 				} else {
 					registerChangeType(SynchronizationChangeType.GLOBAL_FRAME_CHANGED);
 				}
-			}
 		}
 
 		override public function get labelString(): String
