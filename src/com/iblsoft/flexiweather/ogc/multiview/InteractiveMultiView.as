@@ -490,10 +490,24 @@ package com.iblsoft.flexiweather.ogc.multiview
 		private function notifyWidgetsReady(synchronizator: ISynchronizator = null): void
 		{
 			dispatchEvent(new InteractiveMultiViewEvent(InteractiveMultiViewEvent.MULTI_VIEW_READY));
+			
+			var bGoingToSingleView: Boolean = true;
+			
+			if (configuration && configuration.synchronizators && configuration.synchronizators.length > 0)
+			{
+				bGoingToSingleView = false; 
+			}
 			//load maps from previous multiView state
-			callLater(loadMapsForAllWidgets, [_serializedMapXML, synchronizator]);
+			if (bGoingToSingleView)
+			{
+				//goig back to single view
+				callLater(loadMapsForAllWidgets, [_originalSingleViewMapXML, synchronizator]);
+			} else {
+				callLater(loadMapsForAllWidgets, [_serializedMapXML, synchronizator]);
+			}
 //			startWatchingChanges();
 		}
+		private var _originalSingleViewMapXML: XML;
 		private var _serializedMapXML: XML;
 		private var _oldCRS: String;
 		private var _oldViewBBox: BBox;
@@ -507,8 +521,26 @@ package com.iblsoft.flexiweather.ogc.multiview
 			_oldExtentBBox = widget.getExtentBBox().clone();
 			widget.interactiveLayerMap.serialize(_serializedMap);
 			_serializedMapXML = _serializedMap.xml;
+			
+			var bGoingFromSingleView: Boolean = true;
+			
+			if (configuration && configuration.synchronizators && configuration.synchronizators.length > 0)
+			{
+				bGoingFromSingleView = false; 
+			}
+			
+//			if (dataProvider && dataProvider.length == 1)
+			if (bGoingFromSingleView)
+			{
+				//switching from single view
+				saveSingleViewMap(_serializedMap.xml);
+			}
 		}
-
+		
+		private function saveSingleViewMap(_mapXML: XML): void
+		{
+			_originalSingleViewMapXML = _mapXML;
+		}
 		
 		public function getWidgetIndex(widget: InteractiveWidget): int
 		{
@@ -616,6 +648,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 		private function createMapFromSerialization(iw: InteractiveWidget, mapXML: XML): void
 		{
 			var _serializedMap: XMLStorage = new XMLStorage(mapXML);
+			iw.interactiveLayerMap.startMapLoading();
 			iw.interactiveLayerMap.addEventListener(InteractiveLayerMap.LAYERS_SERIALIZED_AND_READY, onMapFromXMLReady);
 			iw.interactiveLayerMap.serialize(_serializedMap);
 		}
@@ -705,6 +738,13 @@ package com.iblsoft.flexiweather.ogc.multiview
 
 		private function onMapLayersInitialized(event: Event): void
 		{
+			
+			var ilm: InteractiveLayerMap = (event.target as InteractiveLayerMapLayersInitializationWatcher).interactiveLayerMap;
+			if (ilm)
+			{
+				ilm.finishMapLoading();
+			}
+			
 			notifyWidgetsMapLayersInitialized();
 			_initializingMapsCount--;
 			if (_initializingMapsCount == 0)

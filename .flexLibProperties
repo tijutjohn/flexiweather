@@ -418,6 +418,12 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.multiview.synchronization.SynchronizatorBase"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.skins.GroupBoxBorder"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.multiview.data.SynchronizationChangeType"/>
+    <classEntry path="com.iblsoft.flexiweather.net.loaders.errors.URLLoaderError"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.errors.ErrorJournal"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.errors.ErrorJournalPopup"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.errors.ErrorJournalDataItem"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewChangeEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.synchronisation.SynchronisationResponse"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

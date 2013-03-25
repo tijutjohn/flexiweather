@@ -42,6 +42,8 @@ package com.iblsoft.flexiweather.ogc
 			var layer: InteractiveLayer;
 			_mapLayersInitializing = 0;
 			
+			this.interactiveLayerMap = interactiveLayerMap;
+			
 //			debug("onMapFromXMLReady layers: " + layers.length);
 			var cnt: int = 0;
 			for each (layer in layers)

@@ -23,6 +23,10 @@ package com.iblsoft.flexiweather.ogc.managers
 		public static const SELECTED_LEVEL_CHANGED: String = 'selectedLevelChanged';
 		public static const FRAMES_CHANGED: String = 'framesChanged';
 		public static const LEVELS_CHANGED: String = 'levelsChanged';
+		
+		public static var uid: int = 0;
+		public var id: int;
+		
 		private var _frames: ArrayCollection;
 		private var _levels: ArrayCollection;
 
@@ -69,11 +73,20 @@ package com.iblsoft.flexiweather.ogc.managers
 
 		public function get level(): String
 		{
+			trace(this + " get level:" +  _level);
 			return _level;
 		}
 
 		public function set level(value: String): void
 		{
+			trace(this + " level setter: old + " +  _level + " new: " + value);
+				
+			//debug
+			if (_level && _level == '900hPa' && value == '850hPa')
+			{
+				trace("Debug " + this);
+			}
+			
 			if (_level != value)
 			{
 				_level = value;
@@ -88,9 +101,20 @@ package com.iblsoft.flexiweather.ogc.managers
 
 		public function GlobalVariablesManager()
 		{
+			id = uid++;
+			
 			_operationType = SetOperationType.UNION;
 			_frames = new ArrayCollection();
 			_levels = new ArrayCollection();
+		}
+		
+		public function reinitialize(): void
+		{
+			if (_frames)
+				_frames.removeAll();
+			if (_levels)
+				_levels.removeAll();
+			checkGlobalVariableChange();
 		}
 
 		public function getDimensionDefaultValue(dimensionName: String): Object
@@ -129,15 +153,38 @@ package com.iblsoft.flexiweather.ogc.managers
 
 		private function checkGlobalVariableChange(): void
 		{
-			if (_interactiveLayerMap && _interactiveLayerMap.primaryLayer)
+			var bFramesExist: Boolean = true;
+			var bLevelsExist: Boolean = true;
+			
+			if (_interactiveLayerMap)
 			{
-				onInteractiveLayerFrameVariableChanged();
 				onLevelVariableChanged();
+				
+				if (_interactiveLayerMap.primaryLayer)
+					onInteractiveLayerFrameVariableChanged();
+				else {
+					bFramesExist = false;
+				}
 			} else {
+				bFramesExist = false;
+				bLevelsExist = false;
+			}
+			
+			if (!bFramesExist)
+			{
 				_frames = null;
 				_lastFrameNotified = null;
+				
+				//frames changed
 				notifySelectedFrameChanged(null);
 				dispatchEvent(new Event(FRAMES_CHANGED, true));
+			}
+			
+			if (!bLevelsExist)
+			{
+				//levels changed
+				notifyLevelsChanged();
+				notifySelectedLevelChanged(null);
 			}
 		}
 
@@ -173,11 +220,6 @@ package com.iblsoft.flexiweather.ogc.managers
 		{
 			if (_interactiveLayerMap)
 			{
-				if (_levelChanged)
-				{
-					_levelChanged = false;
-					notifySelectedLevelChanged(_level);
-				}
 				var _layerLevels: Array = [];
 				for each (var layer: InteractiveLayer in _interactiveLayerMap.layers)
 				{
@@ -199,9 +241,19 @@ package com.iblsoft.flexiweather.ogc.managers
 				_levels = new ArrayCollection(tempArr);
 				_levels.refresh();
 			}
-			else
-				_levels = new ArrayCollection();
-			dispatchEvent(new Event(LEVELS_CHANGED, true));
+			else 
+			{
+				if (!_levels)
+					_levels = new ArrayCollection();
+				else
+					_levels.removeAll();
+			}
+			notifyLevelsChanged();
+			if (_levelChanged)
+			{
+				_levelChanged = false;
+				notifySelectedLevelChanged(_level);
+			}
 		}
 
 		private function onInteractiveLayerFrameVariableChanged(event: Event = null): void
@@ -236,9 +288,9 @@ package com.iblsoft.flexiweather.ogc.managers
 				var collectionChanged: Boolean = !sameCollection(framesAC, _frames); 
 				if (collectionChanged)
 					_frames = framesAC;
-				else {
-					trace("GlobalVariablesManager ["+_interactiveLayerMap+"] _frames are same: ");
-				}
+//				else {
+//					trace("GlobalVariablesManager ["+_interactiveLayerMap+"] _frames are same: ");
+//				}
 				var selectedFrame: Date = _interactiveLayerMap.frame;
 				if (!selectedFrame)
 					return;
@@ -270,7 +322,10 @@ package com.iblsoft.flexiweather.ogc.managers
 			}
 			else {
 				framesChanged = true;
-				_frames = new ArrayCollection();
+				if (!_frames)
+					_frames = new ArrayCollection();
+				else
+					_frames.removeAll();
 			}
 			
 			if (framesChanged)
@@ -290,6 +345,10 @@ package com.iblsoft.flexiweather.ogc.managers
 //			}
 		}
 
+		private function notifyLevelsChanged(): void
+		{
+			dispatchEvent(new Event(LEVELS_CHANGED, true));
+		}
 		private function notifySelectedLevelChanged(selectedLevel: String): void
 		{
 			_level = selectedLevel;
@@ -326,7 +385,7 @@ package com.iblsoft.flexiweather.ogc.managers
 		
 		override public function toString(): String
 		{
-			return "GlobalVariablesManager: " + _interactiveLayerMap;
+			return "GlobalVariablesManager ["+id+"]: " + _interactiveLayerMap;
 		}
 	}
 }

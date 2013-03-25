@@ -25,6 +25,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.ogc.net.loaders.WMSFeatureInfoLoader;
 	import com.iblsoft.flexiweather.ogc.net.loaders.WMSImageLoader;
 	import com.iblsoft.flexiweather.ogc.preload.IPreloadableLayer;
+	import com.iblsoft.flexiweather.ogc.synchronisation.SynchronisationResponse;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
@@ -1398,16 +1399,16 @@ package com.iblsoft.flexiweather.ogc
 			return null;
 		}
 
-		public function synchroniseWith(s_variableId: String, s_value: Object): Boolean
+		public function synchroniseWith(s_variableId: String, s_value: Object): String
 		{
-			var bIsSyncronized: Boolean;
+			var sSynchronizeWithResponse: String;
 			if (isPreloadedWMSDimensionValue(s_variableId, s_value))
 			{
 				var viewProperties: WMSViewProperties = getPreloadedWMSDimensionValue(s_variableId, s_value);
 				if (viewProperties)
 				{
-					bIsSyncronized = viewProperties.synchroniseWith(s_variableId, s_value);
-					if (!bIsSyncronized)
+					sSynchronizeWithResponse = viewProperties.synchroniseWith(s_variableId, s_value);
+					if (!SynchronisationResponse.wasSynchronised(sSynchronizeWithResponse))
 					{
 						setStatus(InteractiveDataLayer.STATE_NO_DATA_AVAILABLE);
 						clear(graphics);
@@ -1416,13 +1417,13 @@ package com.iblsoft.flexiweather.ogc
 					{
 						setStatus(InteractiveDataLayer.STATE_DATA_LOADED);
 					}
-					return bIsSyncronized;
+					return sSynchronizeWithResponse;
 				}
 			}
 			if (m_currentWMSViewProperties)
 			{
-				bIsSyncronized = m_currentWMSViewProperties.synchroniseWith(s_variableId, s_value);
-				if (!bIsSyncronized)
+				sSynchronizeWithResponse = m_currentWMSViewProperties.synchroniseWith(s_variableId, s_value);
+				if (!SynchronisationResponse.wasSynchronised(sSynchronizeWithResponse))
 				{
 					setStatus(InteractiveDataLayer.STATE_NO_DATA_AVAILABLE);
 					clear(graphics);
@@ -1431,12 +1432,12 @@ package com.iblsoft.flexiweather.ogc
 				{
 //					setStatus(InteractiveDataLayer.STATE_DATA_LOADED);
 				}
-				debug("synchroniseWith ["+s_variableId+"]/"+s_value + " synchronized: " + bIsSyncronized);
-				return bIsSyncronized;
+				debug("synchroniseWith ["+s_variableId+"]/"+s_value + " synchronized: " + sSynchronizeWithResponse);
+				return sSynchronizeWithResponse;
 			} else {
 				_tempParameterStorage.synchroniseWith(s_variableId, s_value);
 			}
-			return false;
+			return SynchronisationResponse.SYNCHRONISATION_VALUE_NOT_FOUND;
 		}
 
 		override protected function onDataLoadFailed(event: UniURLLoaderErrorEvent): void
@@ -1640,7 +1641,8 @@ package com.iblsoft.flexiweather.ogc
 
 		protected function debug(str: String): void
 		{
-			LoggingUtils.dispatchLogEvent(this, "MSBase: " + str);
+//			LoggingUtils.dispatchLogEvent(this, "MSBase: " + str);
+			trace("MSBase: " + str);
 		}
 
 		public function get configuration(): ILayerConfiguration

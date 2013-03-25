@@ -412,10 +412,10 @@ package com.iblsoft.flexiweather.ogc.tiling
 			}
 		}
 
-		override public function synchroniseWith(s_variableId: String, value: Object): Boolean
+		override public function synchroniseWith(s_variableId: String, value: Object): String
 		{
-			var b: Boolean = super.synchroniseWith(s_variableId, value);
-			return b;
+			var s: String = super.synchroniseWith(s_variableId, value);
+			return s;
 		}
 
 		override public function setWMSDimensionValue(s_dimName: String, s_value: String): void

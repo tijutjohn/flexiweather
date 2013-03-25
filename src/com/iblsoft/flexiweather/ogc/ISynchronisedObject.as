@@ -21,7 +21,7 @@ package com.iblsoft.flexiweather.ogc
 		 */
 		function getSynchronisedVariableValuesList(s_variableId: String): Array;
 		/** Update layer object configuration so that variable s_variableId has value s_value. */
-		function synchroniseWith(s_variableId: String, value: Object): Boolean;
+		function synchroniseWith(s_variableId: String, value: Object): String;
 		/** Return information if object is primary layer */
 		function isPrimaryLayer(): Boolean;
 	}

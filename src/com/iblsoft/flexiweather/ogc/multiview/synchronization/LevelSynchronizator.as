@@ -135,6 +135,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 						level = obj.level as String;
 						widget = obj.widget as InteractiveWidget;
 						
+//						widget.interactiveLayerMap.globalVariablesManager.level = level;
 						widget.interactiveLayerMap.setLevel(level, true);
 						dataForWidgetAvailable(widget);
 						

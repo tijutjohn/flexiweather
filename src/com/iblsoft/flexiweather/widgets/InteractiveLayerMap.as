@@ -14,6 +14,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.configuration.MapTimelineConfiguration;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.ogc.managers.GlobalVariablesManager;
+	import com.iblsoft.flexiweather.ogc.synchronisation.SynchronisationResponse;
 	import com.iblsoft.flexiweather.ogc.tiling.ITiledLayer;
 	import com.iblsoft.flexiweather.plugins.IConsole;
 	import com.iblsoft.flexiweather.proj.Coord;
@@ -65,6 +66,9 @@ package com.iblsoft.flexiweather.widgets
 		[Event(name = SYNCHRONISE_WITH, type = "mx.events.DynamicEvent")]
 		public static const SYNCHRONISE_WITH: String = "synchroniseWith";
 		
+		public static const LOADING_STATUS_READY: String = 'loadingStatusReady';
+		public static const LOADING_STATUS_LOADING: String = 'loadingStatusLoading';
+		
 		public static var debugConsole: IConsole;
 		private static var mapUID: int = 0;
 		public var mapID: int;
@@ -83,6 +87,14 @@ package com.iblsoft.flexiweather.widgets
 		private var _periodicTimer: Timer;
 		private var _dateFormat: String;
 
+		
+		public var loadingStatus: String;
+		
+		public function get mapIsLoading(): Boolean
+		{
+			return loadingStatus == LOADING_STATUS_LOADING;
+		}
+		
 		/**
 		 * Name of map. 
 		 */		
@@ -162,6 +174,8 @@ package com.iblsoft.flexiweather.widgets
 				invalidateProperties();
 			}
 		}
+		
+		protected var _tempMapStorage: MapTemporaryParameterStorage = new MapTemporaryParameterStorage();
 
 		public function InteractiveLayerMap(container: InteractiveWidget = null)
 		{
@@ -388,6 +402,17 @@ package com.iblsoft.flexiweather.widgets
 			storage.serializeString('crs', crs);
 			
 		}
+		
+		public function startMapLoading(): void
+		{
+			loadingStatus = InteractiveLayerMap.LOADING_STATUS_LOADING;
+		}
+		public function finishMapLoading(): void
+		{
+			loadingStatus = InteractiveLayerMap.LOADING_STATUS_READY;
+			
+			_tempMapStorage.updateMapFromStorage(this, true);
+		}
 		/**
 		 * This method serialize map for storing single map layers without any aditional info (e.g. animation data, area).
 		 * If you need serialized map with aditional information please use serializeAnimatedMap method instead.
@@ -429,7 +454,10 @@ package com.iblsoft.flexiweather.widgets
 				if (globalVariablesManager)
 				{
 					if (globalLevel)
-						globalVariablesManager.level = globalLevel;
+					{
+//						globalVariablesManager.level = globalLevel;
+						setLevel(globalLevel);
+					}
 				} else {
 					trace("ILM serialize, problem to set global-level: " + globalLevel);
 				}
@@ -455,6 +483,10 @@ package com.iblsoft.flexiweather.widgets
 //					if (globalVariablesManager.frame)
 //						frameDateString = ISO8601Parser.dateToString(globalVariablesManager.frame)
 //					storage.serializeString('global-frame', frameDateString);
+					
+					var synchronizableLevel: String = level;
+					var globalLevel: String = globalVariablesManager.level;
+					
 					storage.serializeString('global-level', globalVariablesManager.level);
 				}
 				
@@ -478,6 +510,8 @@ package com.iblsoft.flexiweather.widgets
 		public function invalidateLevel(): void
 		{
 			_levelInvalidated = true;
+			
+			trace(this + " invalidateLevel: " + level);
 			invalidateProperties();
 		}
 
@@ -586,7 +620,9 @@ package com.iblsoft.flexiweather.widgets
 				_levelInvalidated = false;
 				
 				//it will set level again. This is done by purpose when adding new layer, to synchronise level with newly added layer
+				trace(this + " commitProperties: setLevel again: " + _globalVariablesManager.level);
 				setLevel(_globalVariablesManager.level);
+				trace(this + " commitProperties: setLevel set: " + _globalVariablesManager.level);
 			}
 			
 			if (m_selectedLayerIndexChanged)
@@ -646,10 +682,10 @@ package com.iblsoft.flexiweather.widgets
 				else
 				{
 					invalidateFrame();
-					if (synchronisableLevel && (layer as InteractiveLayerMSBase).synchroniseLevel)
-					{
-						invalidateLevel();
-					}
+//					if (synchronisableLevel && (layer as InteractiveLayerMSBase).synchroniseLevel)
+//					{
+//						invalidateLevel();
+//					}
 				}
 				if (layer is InteractiveLayerMSBase)
 				{
@@ -658,14 +694,20 @@ package com.iblsoft.flexiweather.widgets
 					{
 						var globalLevel: String = level;
 						var bSynchronized: Boolean;
-						if (frame)
-							bSynchronized = bSynchronized || so.synchroniseWith(GlobalVariable.FRAME, frame);
-						if (level)
-							bSynchronized = bSynchronized || so.synchroniseWith(GlobalVariable.LEVEL, level);
+						if (frame) {
+							var frameSynchronisationResponse: String = so.synchroniseWith(GlobalVariable.FRAME, frame);
+							bSynchronized = bSynchronized || SynchronisationResponse.wasSynchronised(frameSynchronisationResponse);
+						}
+						if (level) {
+							var levelSynchronisationResponse: String = so.synchroniseWith(GlobalVariable.LEVEL, level);
+							bSynchronized = bSynchronized || SynchronisationResponse.wasSynchronised(levelSynchronisationResponse);
+						}
 						if (bSynchronized)
 						{
 							layer.refresh(false);
 						}
+					} else {
+						invalidateLevel();
 					}
 				}
 			}
@@ -1070,7 +1112,7 @@ package com.iblsoft.flexiweather.widgets
 			var newFrame: Date = l_timeAxis[i_currentIndex];
 			for each (so in l_syncLayers)
 			{
-				if (so.synchroniseWith(GlobalVariable.FRAME, newFrame))
+				if (SynchronisationResponse.wasSynchronised(so.synchroniseWith(GlobalVariable.FRAME, newFrame)))
 					InteractiveLayer(so).refresh(false);
 			}
 			return true;
@@ -1143,7 +1185,17 @@ package com.iblsoft.flexiweather.widgets
 		 */
 		public function setLevel(newLevel: String, b_nearrest: Boolean = true): Boolean
 		{
+			if (newLevel == null)
+				return false;
 			
+			if (mapIsLoading)
+			{
+				_tempMapStorage.setLevel(newLevel, b_nearrest);
+				return false;
+			}
+			trace(this + " setLevel: " + newLevel + " nearest: " + b_nearrest);
+			
+			var bGlobalSynchronization: Boolean = false;
 			for each (var l: InteractiveLayer in m_layers)
 			{
 				var so: ISynchronisedObject = l as ISynchronisedObject;
@@ -1152,19 +1204,26 @@ package com.iblsoft.flexiweather.widgets
 				if (!so.hasSynchronisedVariable(GlobalVariable.LEVEL))
 					continue;
 				
-				var bSynchronized: Boolean = so.synchroniseWith(GlobalVariable.LEVEL, newLevel);
-				debug("setLevel [" + newLevel + "] newLevel: " + newLevel + " for: " + l.name + " bSynchronized: " + bSynchronized);
+				var bSynchronized: Boolean = SynchronisationResponse.wasSynchronised(so.synchroniseWith(GlobalVariable.LEVEL, newLevel));
+				
+				bGlobalSynchronization = bGlobalSynchronization || bSynchronized;
+				
+				debug("setLevel [" + newLevel + "] newLevel: " + newLevel + " for: " + l.name + " bSynchronized: " + bSynchronized + " bGlobalSynchronization: " + bGlobalSynchronization);
 				if (bSynchronized)
 				{
 					l.refresh(false);
 				}
 				else
 				{
-					error("InteractiveLayerMap setLevel [" + newLevel + "] LEVEL NOT FOUND for " + l.name);
+					error("InteractiveLayerMap setLevel [" + newLevel + "] NO SYNCHRONIZATION for " + l.name);
 				}
 			}
 			
-			_globalVariablesManager.level = newLevel;
+			if (bGlobalSynchronization)
+				_globalVariablesManager.level = newLevel;
+			else {
+				debug("!!setLevel, bGlobalSynchronization = false, do not set global variables manager level");
+			}
 			
 			return true;
 		}
@@ -1194,7 +1253,7 @@ package com.iblsoft.flexiweather.widgets
 //				debug(this + " setFrame try to synchronize: [" + newFrame.toTimeString() + "]  for " + l.name, 'Info', 'Layer Map');
 				
 				
-				var bSynchronized: Boolean = so.synchroniseWith(GlobalVariable.FRAME, newFrame);
+				var bSynchronized: Boolean = SynchronisationResponse.wasSynchronised(so.synchroniseWith(GlobalVariable.FRAME, newFrame));
 				if (bSynchronized)
 				{
 					l.refresh(false);
@@ -1370,6 +1429,8 @@ import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
 import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 
+import flash.utils.Dictionary;
+
 import mx.controls.Alert;
 
 class LayerSerializationWrapper implements Serializable
@@ -1417,4 +1478,34 @@ class LayerSerializationWrapper implements Serializable
 		
 			return "LayerSerializationWrapper: Layer undefined";
 	}
+}
+
+class MapTemporaryParameterStorage {
+	
+	private var _dimension: Dictionary = new Dictionary(true);
+	private var _customParameter: Dictionary = new Dictionary(true);
+	
+	public function MapTemporaryParameterStorage() {
+		
+	}
+	
+	public function updateMapFromStorage(map: InteractiveLayerMap, bEmptyStorage: Boolean = true): void
+	{
+		if (map)
+		{
+			if (_dimension['level'])
+			{
+				var levelObject: Object = _dimension['level'];
+				map.setLevel(levelObject.level);
+				
+				if (bEmptyStorage)
+					delete _dimension['level'];
+			}
+		}
+	}
+	public function setLevel(newLevel: String, b_nearrest: Boolean = true): void
+	{
+		_dimension['level'] = {level: newLevel, nearest: b_nearrest}
+	}
+	
 }
