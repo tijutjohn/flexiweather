@@ -2,17 +2,24 @@ package com.iblsoft.flexiweather.widgets
 {
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
+	import com.iblsoft.flexiweather.ogc.kml.features.Point;
 	import com.iblsoft.flexiweather.utils.packing.DynamicArea;
 	import com.iblsoft.flexiweather.utils.packing.PackingLayoutProperties;
 	import com.iblsoft.flexiweather.utils.packing.Padding;
+	
+	import flash.display.DisplayObject;
 	import flash.display.Graphics;
 	import flash.events.Event;
+	import flash.events.MouseEvent;
 	import flash.geom.Rectangle;
 	import flash.utils.Dictionary;
 	import flash.utils.setTimeout;
+	
 	import mx.collections.ArrayCollection;
+	import mx.core.IVisualElement;
 	import mx.logging.ILogger;
 	import mx.logging.Log;
+	
 	import spark.components.Group;
 
 	[Style(name = "horizontalGap", type = "Number", format = "Length", inherit = "no")]
@@ -59,6 +66,7 @@ package com.iblsoft.flexiweather.widgets
 		public static const LEGENDS_LOADING_FINISHED: String = 'legendsLoadingFinished';
 		public static const LEGENDS_LAYERING_STARTED: String = 'legendsLayeringStarted';
 		public static const LEGENDS_LAYERING_FINISHED: String = 'legendsLayeringFinished';
+		
 		internal var m_layers: ArrayCollection = new ArrayCollection();
 		private var _legendsLoadingCount: int;
 		private var _legendsAlreadyLoaded: int;
@@ -149,6 +157,28 @@ package com.iblsoft.flexiweather.widgets
 				m_layers.removeItemAt(i);
 				l.removeLegend(getGroupFromDictionary(l));
 				delete m_groupDictionary[l];
+			}
+		}
+		
+		private var _legendsInvalidated: Boolean;
+		
+		public function invalidateLayerLegend(l: InteractiveLayer): void
+		{
+			l.removeLegend(getGroupFromDictionary(l));
+			delete m_groupDictionary[l];
+		
+			_legendsInvalidated = true;
+			invalidateProperties();
+		}
+		
+		override protected function commitProperties():void
+		{
+			super.commitProperties();
+			
+			if (_legendsInvalidated)
+			{
+				repositionedLegends();
+				_legendsInvalidated = false;
 			}
 		}
 
@@ -1083,10 +1113,98 @@ package com.iblsoft.flexiweather.widgets
 //			draw(graphics);
 		}
 
+		private function getLegendImageFromGroup(currGroup: Group): InteractiveLayerLegendImage
+		{
+			var elements: int = currGroup.numElements;
+			var legend: InteractiveLayerLegendImage;
+			for (var i: int = 0; i < elements; i++)
+			{
+				var dObj: IVisualElement = currGroup.getElementAt(i);
+				trace(dObj);
+				
+				if (dObj is InteractiveLayerLegendImage)
+				{
+					legend = dObj as InteractiveLayerLegendImage;
+				}
+			}
+			return legend;
+		}
+		override public function onMouseClick(event: MouseEvent): Boolean
+		{
+			trace(this + "onMouseClick");
+			
+			var group: Group = event.target as Group;
+			if (group)
+			{
+				for each (var currGroup: Group in  m_groupDictionary)
+				{
+					var hit: Boolean = currGroup.hitTestPoint(event.stageX, event.stageY, true);
+					if (hit)
+					{
+						trace("Legend clicked");
+						var legend: InteractiveLayerLegendImage = getLegendImageFromGroup(currGroup);
+						var e: InteractiveLayerLegendEvent = new InteractiveLayerLegendEvent(InteractiveLayerLegendEvent.LEGEND_CLICK, legend);
+						dispatchEvent(e);
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+		
+		override public function onMouseRollOver(event: MouseEvent): Boolean
+		{
+			trace(this + "onMouseRollOver");
+			var group: Group = event.target as Group;
+			if (group)
+			{
+				for each (var currGroup: Group in  m_groupDictionary)
+				{
+					var hit: Boolean = currGroup.hitTestPoint(event.stageX, event.stageY, true);
+					if (hit)
+					{
+						trace("Legend clicked");
+						var legend: InteractiveLayerLegendImage = getLegendImageFromGroup(currGroup);
+						var e: InteractiveLayerLegendEvent = new InteractiveLayerLegendEvent(InteractiveLayerLegendEvent.LEGEND_ROLLOVER, legend);
+						dispatchEvent(e);
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+		
+		override public function onMouseRollOut(event: MouseEvent): Boolean
+		{
+			trace(this + "onMouseRollOut");
+			var group: Group = event.target as Group;
+			if (group)
+			{
+				for each (var currGroup: Group in  m_groupDictionary)
+				{
+					var hit: Boolean = currGroup.hitTestPoint(event.stageX, event.stageY, true);
+					if (hit)
+					{
+						trace("Legend clicked");
+						var legend: InteractiveLayerLegendImage = getLegendImageFromGroup(currGroup);
+						var e: InteractiveLayerLegendEvent = new InteractiveLayerLegendEvent(InteractiveLayerLegendEvent.LEGEND_ROLLOUT, legend);
+						dispatchEvent(e);
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+		
 		private function debug(str: String): void
 		{
 			return;
 			_logger.debug(str);
+		}
+		
+		override public function toString(): String
+		{
+			return "InteractiveLayerLegends: ";
 		}
 	}
 }

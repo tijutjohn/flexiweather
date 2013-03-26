@@ -37,6 +37,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
+	import com.iblsoft.flexiweather.widgets.InteractiveLayerLegendImage;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.display.AVM1Movie;
@@ -899,15 +900,6 @@ package com.iblsoft.flexiweather.ogc
 		 * @return
 		 *
 		 */
-//        override public function renderLegend(group: Group, callback: Function, legendScaleX: Number, legendScaleY: Number, labelAlign: String = 'left', useCache: Boolean = false, hintSize: Rectangle = null): Rectangle
-//        {
-//        	super.renderLegend(group, callback, legendScaleX, legendScaleY, labelAlign, useCache, hintSize);
-//        	
-//			if (m_currentWMSViewProperties)
-//        		return m_currentWMSViewProperties.renderLegend(group, callback, legendScaleX, legendScaleY, labelAlign, useCache, hintSize);
-//					
-//			return null;
-//        }
 		override public function renderLegend(group: Group, callback: Function, legendScaleX: Number, legendScaleY: Number, labelAlign: String = 'left', useCache: Boolean = false, hintSize: Rectangle = null): Rectangle
 		{
 			var styleName: String = getWMSStyleName(0);
@@ -1004,13 +996,13 @@ package com.iblsoft.flexiweather.ogc
 			labelHeight = label.measuredHeight;
 			label.setStyle('textAlign', labelAlign);
 			//add legend image
-			var image: Image;
+			var image: InteractiveLayerLegendImage;
 			if (group.numElements > 1)
 			{
 				var imageTest: IVisualElement = group.getElementAt(group.numElements - 1);
-				if (imageTest is Image)
+				if (imageTest is InteractiveLayerLegendImage)
 				{
-					image = imageTest as Image;
+					image = imageTest as InteractiveLayerLegendImage;
 					image.scaleX = image.scaleY = 1;
 					image.width = origWidth;
 					image.height = origHeight;
@@ -1018,12 +1010,37 @@ package com.iblsoft.flexiweather.ogc
 			}
 			if (!image)
 			{
-				image = new Image();
+				image = new InteractiveLayerLegendImage();
 				group.addElement(image);
 			}
+			
 			image.source = bitmap;
-			image.width = origWidth * legendScaleX;
-			image.height = origHeight * legendScaleY;
+			
+			image.originalWidth = bitmap.bitmapData.width;
+			image.originalHeight = bitmap.bitmapData.height;
+			//FIX for PZAG-637
+			origWidth = bitmap.bitmapData.width;
+			origHeight = bitmap.bitmapData.height;
+			
+			//check if legend is not bigger that container, otherwsie scale needs to be adjusted
+			var containerWidth: int = container.width;
+			var containerHeight: int = container.height;
+			
+			var expectedWidth: Number = origWidth * legendScaleX;
+			var expectedHeight: Number = origHeight * legendScaleY;
+			if (containerWidth < expectedWidth || containerHeight < expectedHeight)
+			{
+				var maxLegendSizeInContainer: Number = 0.8;
+				//choose correct scale
+				var newScale: Number = Math.min(containerWidth * maxLegendSizeInContainer / expectedWidth, containerHeight * maxLegendSizeInContainer / expectedHeight);
+				
+				expectedWidth = expectedWidth * newScale;
+				expectedHeight = expectedHeight * newScale;
+			}
+			
+			image.width = expectedWidth;
+			image.height = expectedHeight;
+			
 			//			image.scaleX = legendScaleX;
 			//			image.scaleY = legendScaleY;
 			image.y = labelHeight + gap;
