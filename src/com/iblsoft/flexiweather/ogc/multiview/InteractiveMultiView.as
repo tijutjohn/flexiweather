@@ -709,11 +709,14 @@ package com.iblsoft.flexiweather.ogc.multiview
 
 		private function onSynchronizatorMapReady(event: SynchronisationEvent): void
 		{
+			notifyWidgetsMapLayersInitialized();
+			
 			_loadingMapsCount--;
 			if (_loadingMapsCount == 0)
 			{
 				startWatchingChanges();
 				notifyWidgetsMapLoaded();
+				notifyAllWidgetsMapLayersInitialized();
 			}
 		}
 		
