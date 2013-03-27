@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.widgets
 {
+	import flash.display.Bitmap;
 	import flash.events.MouseEvent;
 	import flash.ui.Mouse;
 	
@@ -8,6 +9,7 @@ package com.iblsoft.flexiweather.widgets
 	[Event(name="click", type="flash.events.MouseEvent")]
 	public class InteractiveLayerLegendImage extends Image
 	{
+		public var title: String;
 		public var originalWidth: int;
 		public var originalHeight: int;
 		
@@ -36,6 +38,22 @@ package com.iblsoft.flexiweather.widgets
 		
 		private function onMouseClick(event: MouseEvent): void
 		{
+		}
+		
+		public function clone(): InteractiveLayerLegendImage
+		{
+			var source: Bitmap = this.source as Bitmap;
+			
+			if (source)
+			{
+				var image: InteractiveLayerLegendImage = new InteractiveLayerLegendImage();
+				image.source = new Bitmap(source.bitmapData.clone());
+				image.originalWidth = originalWidth;
+				image.originalHeight = originalHeight;
+				image.title = title;
+				return image;
+			}
+			return this;
 		}
 			
 		

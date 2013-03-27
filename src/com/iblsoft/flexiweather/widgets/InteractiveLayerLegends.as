@@ -348,6 +348,11 @@ package com.iblsoft.flexiweather.widgets
 						}
 						group = new Group();
 						addChild(group);
+						group.addEventListener(MouseEvent.CLICK, onLegendGroupClick);
+						group.addEventListener(MouseEvent.MOUSE_OVER, onLegendGroupRollover);
+						group.addEventListener(MouseEvent.ROLL_OVER, onLegendGroupRollover);
+						group.addEventListener(MouseEvent.MOUSE_OUT, onLegendGroupRollout);
+						group.addEventListener(MouseEvent.ROLL_OUT, onLegendGroupRollout);
 						group.visible = false;
 						addCanvasToDictionary(group, l);
 						debug("InteractieLayerLegends loadLegends renderLegend => LOAD");
@@ -364,6 +369,38 @@ package com.iblsoft.flexiweather.widgets
 			return legendsLoadingCount;
 		}
 
+		private function onLegendGroupClick(event: MouseEvent): void
+		{
+			var group: Group = event.target as Group;
+			if (group)
+			{
+				var legend: InteractiveLayerLegendImage = getLegendImageFromGroup(group);
+				trace("legend click");
+			}
+		}
+		private function onLegendGroupRollover(event: MouseEvent): void
+		{
+			var group: Group = event.target as Group;
+			if (group)
+			{
+				var legend: InteractiveLayerLegendImage = getLegendImageFromGroup(group);
+				var e: InteractiveLayerLegendEvent = new InteractiveLayerLegendEvent(InteractiveLayerLegendEvent.LEGEND_ROLLOVER, legend);
+				e.legendGroup = group;
+				dispatchEvent(e);
+			}
+		}
+		private function onLegendGroupRollout(event: MouseEvent): void
+		{
+			var group: Group = event.target as Group;
+			if (group)
+			{
+				var legend: InteractiveLayerLegendImage = getLegendImageFromGroup(group);
+				var e: InteractiveLayerLegendEvent = new InteractiveLayerLegendEvent(InteractiveLayerLegendEvent.LEGEND_ROLLOVER, legend);
+				e.legendGroup = group;
+				dispatchEvent(e);
+			}
+		}
+		
 		private function checkIfAllLegendsAreLoaded(): Boolean
 		{
 			var needLoading: Boolean;
@@ -1144,50 +1181,7 @@ package com.iblsoft.flexiweather.widgets
 						trace("Legend clicked");
 						var legend: InteractiveLayerLegendImage = getLegendImageFromGroup(currGroup);
 						var e: InteractiveLayerLegendEvent = new InteractiveLayerLegendEvent(InteractiveLayerLegendEvent.LEGEND_CLICK, legend);
-						dispatchEvent(e);
-						return true;
-					}
-				}
-			}
-			return false;
-		}
-		
-		override public function onMouseRollOver(event: MouseEvent): Boolean
-		{
-			trace(this + "onMouseRollOver");
-			var group: Group = event.target as Group;
-			if (group)
-			{
-				for each (var currGroup: Group in  m_groupDictionary)
-				{
-					var hit: Boolean = currGroup.hitTestPoint(event.stageX, event.stageY, true);
-					if (hit)
-					{
-						trace("Legend clicked");
-						var legend: InteractiveLayerLegendImage = getLegendImageFromGroup(currGroup);
-						var e: InteractiveLayerLegendEvent = new InteractiveLayerLegendEvent(InteractiveLayerLegendEvent.LEGEND_ROLLOVER, legend);
-						dispatchEvent(e);
-						return true;
-					}
-				}
-			}
-			return false;
-		}
-		
-		override public function onMouseRollOut(event: MouseEvent): Boolean
-		{
-			trace(this + "onMouseRollOut");
-			var group: Group = event.target as Group;
-			if (group)
-			{
-				for each (var currGroup: Group in  m_groupDictionary)
-				{
-					var hit: Boolean = currGroup.hitTestPoint(event.stageX, event.stageY, true);
-					if (hit)
-					{
-						trace("Legend clicked");
-						var legend: InteractiveLayerLegendImage = getLegendImageFromGroup(currGroup);
-						var e: InteractiveLayerLegendEvent = new InteractiveLayerLegendEvent(InteractiveLayerLegendEvent.LEGEND_ROLLOUT, legend);
+						e.legendGroup = currGroup;
 						dispatchEvent(e);
 						return true;
 					}

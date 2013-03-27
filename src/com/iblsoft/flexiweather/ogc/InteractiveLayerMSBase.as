@@ -1011,6 +1011,7 @@ package com.iblsoft.flexiweather.ogc
 			if (!image)
 			{
 				image = new InteractiveLayerLegendImage();
+				image.title = layerName;
 				group.addElement(image);
 			}
 			
