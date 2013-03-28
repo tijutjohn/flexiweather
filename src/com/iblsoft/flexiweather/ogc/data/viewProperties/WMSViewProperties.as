@@ -950,5 +950,18 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		{
 			dispatchEvent(event);
 		}
+		
+		override public function toString(): String
+		{
+			var tmp: String = "WMSViewProperties: ";
+			
+			var dimNames: Array = getWMSDimensionsNames();
+			for each (var dimName: String in dimNames)
+			{
+				var value: String = getWMSDimensionValue(dimName);
+				tmp += dimName + ": " + value;
+			}
+			return tmp;
+		}
 	}
 }

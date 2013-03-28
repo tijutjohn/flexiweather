@@ -355,7 +355,7 @@ package com.iblsoft.flexiweather.widgets
 						group.addEventListener(MouseEvent.ROLL_OUT, onLegendGroupRollout);
 						group.visible = false;
 						addCanvasToDictionary(group, l);
-						debug("InteractieLayerLegends loadLegends renderLegend => LOAD");
+						debug(" layer: " + l + "  loadLegends renderLegend => LOAD");
 						l.renderLegend(group, onLegendRendered, legendScaleX, legendScaleY, getStyle('labelAlign'));
 					}
 					else
@@ -1192,8 +1192,8 @@ package com.iblsoft.flexiweather.widgets
 		
 		private function debug(str: String): void
 		{
-			return;
-			_logger.debug(str);
+//			_logger.debug(str);
+			trace(this + str);
 		}
 		
 		override public function toString(): String
