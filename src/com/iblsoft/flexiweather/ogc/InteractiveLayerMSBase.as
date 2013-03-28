@@ -862,9 +862,9 @@ package com.iblsoft.flexiweather.ogc
 				while (group.numElements > 0)
 				{
 					var disp: UIComponent = group.getElementAt(0) as UIComponent;
-					if (disp is Image)
+					if (disp is InteractiveLayerLegendImage)
 					{
-						((disp as Image).source as Bitmap).bitmapData.dispose();
+						((disp as InteractiveLayerLegendImage).source as Bitmap).bitmapData.dispose();
 					}
 					group.removeElementAt(0);
 					disp = null;
@@ -939,6 +939,8 @@ package com.iblsoft.flexiweather.ogc
 				var legendLoader: MSBaseLoader = new MSBaseLoader(this);
 				var associatedData: Object = {wmsViewProperties: currentViewProperties, group: group, labelAlign: labelAlign, callback: callback, useCache: useCache, legendScaleX: legendScaleX, legendScaleY: legendScaleY, width: w, height: h};
 				legendLoader.addEventListener(MSBaseLoaderEvent.LEGEND_LOADED, onLegendLoaded);
+				
+				debug(" load legend for layer: " + this + " viewProperties: " + currentViewProperties);
 				legendLoader.loadLegend(url, associatedData);
 			}
 			else
