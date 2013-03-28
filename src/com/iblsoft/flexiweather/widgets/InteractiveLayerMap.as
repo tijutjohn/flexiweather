@@ -38,6 +38,8 @@ package com.iblsoft.flexiweather.widgets
 	import mx.events.CollectionEvent;
 	import mx.events.DynamicEvent;
 
+	[Event(name = "mapLoadingStarted", type = "com.iblsoft.flexiweather.events.InteractiveLayerMapEvent")]
+	[Event(name = "mapLoadingFinished", type = "com.iblsoft.flexiweather.events.InteractiveLayerMapEvent")]
 	public class InteractiveLayerMap extends InteractiveLayerComposer implements Serializable
 	{
 		public static const TIMELINE_CONFIGURATION_CHANGE: String = "timelineConfigurationChange";
@@ -406,12 +408,17 @@ package com.iblsoft.flexiweather.widgets
 		public function startMapLoading(): void
 		{
 			loadingStatus = InteractiveLayerMap.LOADING_STATUS_LOADING;
+			var ilme: InteractiveLayerMapEvent = new InteractiveLayerMapEvent(InteractiveLayerMapEvent.MAP_LOADING_STARTED);
+			dispatchEvent(ilme);
 		}
 		public function finishMapLoading(): void
 		{
 			loadingStatus = InteractiveLayerMap.LOADING_STATUS_READY;
 			
 			_tempMapStorage.updateMapFromStorage(this, true);
+			
+			var ilme: InteractiveLayerMapEvent = new InteractiveLayerMapEvent(InteractiveLayerMapEvent.MAP_LOADING_FINISHED);
+			dispatchEvent(ilme);
 		}
 		/**
 		 * This method serialize map for storing single map layers without any aditional info (e.g. animation data, area).

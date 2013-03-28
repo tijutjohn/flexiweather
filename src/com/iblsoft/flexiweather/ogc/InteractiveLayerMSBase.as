@@ -1232,6 +1232,15 @@ package com.iblsoft.flexiweather.ogc
 
 		private function onWMSDimensionValueSet(event: WMSViewPropertiesEvent): void
 		{
+			if (configuration is WMSLayerConfiguration)
+			{
+				var wmsLayerConfiguration: WMSLayerConfiguration = configuration as WMSLayerConfiguration;
+				if (wmsLayerConfiguration.legendIsDimensionDependant)
+				{
+					invalidateLegend();
+				}
+			}
+			
 			afterWMSDimensionValueIsSet(event.dimension, event.value);
 			
 			dispatchEvent(event);

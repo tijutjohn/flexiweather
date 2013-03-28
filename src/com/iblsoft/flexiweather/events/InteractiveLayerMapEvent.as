@@ -10,9 +10,13 @@ package com.iblsoft.flexiweather.events
 		[Event(name = LAST_FRAME_CHANGED, type = "com.iblsoft.flexiweather.events.InteractiveLayerMapEvent")]
 		public static const NOW_FRAME_CHANGED: String = "nowFrameChanged";
 		[Event(name = NOW_FRAME_CHANGED, type = "com.iblsoft.flexiweather.events.InteractiveLayerMapEvent")]
+		
 		public static const MAP_LOADED: String = "mapLoaded";
 		
 		public static const LAYER_SELECTION_CHANGED: String = "layerSelectionChanged";
+		
+		public static const MAP_LOADING_STARTED: String = "mapLoadingStarted";
+		public static const MAP_LOADING_FINISHED: String = "mapLoadingFinished";
 		
 		public var frameDate: Date;
 

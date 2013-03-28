@@ -10,15 +10,17 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 	import com.iblsoft.flexiweather.ogc.WMSLayer;
 	import com.iblsoft.flexiweather.ogc.WMSLayerBase;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.IWMSLayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceConfiguration;
 	import com.iblsoft.flexiweather.ogc.editable.IInteractiveLayerProvider;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	
 	import flash.events.DataEvent;
 	import flash.events.Event;
 	import flash.net.URLRequest;
+	
 	import mx.collections.ArrayCollection;
-	import com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceConfiguration;
 
 	public class WMSLayerConfiguration extends OGCLayerConfiguration implements IBehaviouralObject, IInteractiveLayerProvider, IWMSLayerConfiguration
 	{
@@ -121,6 +123,8 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 					"dimension-forecast-name", ms_dimensionForecastName, null);
 			ms_dimensionVerticalLevelName = storage.serializeString(
 					"dimension-level-name", ms_dimensionVerticalLevelName, null);
+			mb_legendIsDimensionDependant = storage.serializeBool(
+					"legend-dependant-on-dimension", mb_legendIsDimensionDependant, false);
 			ms_previewURL = storage.serializeString("preview-url", ms_previewURL, "<internal>");
 			mi_autoRefreshPeriod = storage.serializeInt(
 					"auto-refresh-period", mi_autoRefreshPeriod, 0);
@@ -431,6 +435,16 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			return ma_behaviours;
 		}
 
+		public function set legendIsDimensionDependant(b: Boolean): void
+		{
+			mb_legendIsDimensionDependant = b;
+		}
+
+		public function get legendIsDimensionDependant(): Boolean
+		{
+			return mb_legendIsDimensionDependant;
+		}
+		
 		public function set dimensionTimeName(s: String): void
 		{
 			ms_dimensionTimeName = s;
