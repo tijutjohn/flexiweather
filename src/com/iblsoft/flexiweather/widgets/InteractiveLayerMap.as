@@ -40,32 +40,32 @@ package com.iblsoft.flexiweather.widgets
 
 	[Event(name = "mapLoadingStarted", type = "com.iblsoft.flexiweather.events.InteractiveLayerMapEvent")]
 	[Event(name = "mapLoadingFinished", type = "com.iblsoft.flexiweather.events.InteractiveLayerMapEvent")]
+	[Event(name = "frameVariableChanged", type = "flash.events.Event")]
+	[Event(name = PRIMARY_LAYER_CHANGED, type = "flash.events.DataEvent")]
+	[Event(name = LAYERS_SERIALIZED_AND_READY, type = "mx.events.DynamicEvent")]
+	[Event(name = TIME_AXIS_UPDATED, type = "flash.events.DataEvent")]
+	[Event(name = TIME_AXIS_ADDED, type = "mx.events.DynamicEvent")]
+	[Event(name = LEVEL_VARIABLE_CHANGED, type = "mx.events.DynamicEvent")]
+	[Event(name = TIME_AXIS_REMOVED, type = "mx.events.DynamicEvent")]
+	[Event(name = SYNCHRONISE_WITH, type = "mx.events.DynamicEvent")]
 	public class InteractiveLayerMap extends InteractiveLayerComposer implements Serializable
 	{
 		public static const TIMELINE_CONFIGURATION_CHANGE: String = "timelineConfigurationChange";
 		
-		[Event(name = LAYERS_SERIALIZED_AND_READY, type = "mx.events.DynamicEvent")]
 		public static const LAYERS_SERIALIZED_AND_READY: String = "layersSerializedAndReady";
 		
-		[Event(name = TIME_AXIS_UPDATED, type = "flash.events.DataEvent")]
 		public static const TIME_AXIS_UPDATED: String = "timeAxisUpdated";
 		
-		[Event(name = TIME_AXIS_ADDED, type = "mx.events.DynamicEvent")]
 		public static const TIME_AXIS_ADDED: String = "timeAxisAdded";
 		
-		[Event(name = TIME_AXIS_REMOVED, type = "mx.events.DynamicEvent")]
 		public static const TIME_AXIS_REMOVED: String = "timeAxisRemoved";
 		
-		[Event(name = PRIMARY_LAYER_CHANGED, type = "flash.events.DataEvent")]
 		public static const PRIMARY_LAYER_CHANGED: String = "primaryLayerChanged";
 		
-		[Event(name = FRAME_VARIABLE_CHANGED, type = "mx.events.DynamicEvent")]
 		public static const FRAME_VARIABLE_CHANGED: String = "frameVariableChanged";
 		
-		[Event(name = LEVEL_VARIABLE_CHANGED, type = "mx.events.DynamicEvent")]
 		public static const LEVEL_VARIABLE_CHANGED: String = "levelVariableChanged";
 		
-		[Event(name = SYNCHRONISE_WITH, type = "mx.events.DynamicEvent")]
 		public static const SYNCHRONISE_WITH: String = "synchroniseWith";
 		
 		public static const LOADING_STATUS_READY: String = 'loadingStatusReady';

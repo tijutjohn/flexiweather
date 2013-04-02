@@ -222,6 +222,11 @@ package com.iblsoft.flexiweather.widgets
 			addElement(m_layerContainer);
 			addElement(m_layerLayoutParent);
 			m_layerLayoutParent.addChild(m_labelLayout);
+			
+			for each (var layer: InteractiveLayer in _mxmlContentElements)
+			{
+				addLayer(layer);
+			}
 		}
 
 		override protected function commitProperties(): void
@@ -276,10 +281,10 @@ package com.iblsoft.flexiweather.widgets
 		 */
 		private function onWidgetCreationComplete(event: FlexEvent): void
 		{
-			for each (var layer: InteractiveLayer in _mxmlContentElements)
-			{
-				addLayer(layer);
-			}
+//			for each (var layer: InteractiveLayer in _mxmlContentElements)
+//			{
+//				addLayer(layer);
+//			}
 		}
 		private var _mxmlContentElements: Array = [];
 
