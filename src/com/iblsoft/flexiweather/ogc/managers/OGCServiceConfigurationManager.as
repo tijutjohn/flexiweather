@@ -20,7 +20,7 @@ package com.iblsoft.flexiweather.ogc.managers
 	{
 		private static var sm_instance: OGCServiceConfigurationManager;
 		private var ma_services: ArrayCollection = new ArrayCollection();
-		private var m_timer: Timer = new Timer(500);
+		private var m_timer: Timer = new Timer(60000);
 
 		private var m_servicesUpdating: int;
 		
