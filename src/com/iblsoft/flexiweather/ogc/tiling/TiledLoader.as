@@ -499,5 +499,10 @@ package com.iblsoft.flexiweather.ogc.tiling
 			}
 			return url;
 		}
+		
+		override public function toString(): String
+		{
+			return "TiledLoader: Loading: " + mi_tilesCurrentlyLoading + " / " + mi_tilesLoadingTotal + " visible: " + mi_totalVisibleTiles;
+		}
 	}
 }

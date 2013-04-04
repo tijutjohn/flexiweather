@@ -22,6 +22,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 	
 	import mx.collections.ArrayCollection;
 
+	[Event(name = CAPABILITIES_UPDATED, type = "flash.events.DataEvent")]
 	public class WMSServiceConfiguration extends OGCServiceConfiguration
 	{
 		Storage.addChangedClass('com.iblsoft.flexiweather.ogc.WMSServiceConfiguration', 'com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceConfiguration', new Version(1, 6, 0));
@@ -56,7 +57,6 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		public static const CAPABILITIES_UPDATED: String = "serviceCapabilitiesUpdated";
 		public static const ALL_CAPABILITIES_UPDATED: String = "allServicesCapabilitiesUpdated";
 
-		[Event(name = CAPABILITIES_UPDATED, type = "flash.events.DataEvent")]
 		public function WMSServiceConfiguration(s_url: String = null, version: Version = null)
 		{
 			super(s_url, "wms", version);

@@ -16,6 +16,10 @@ package com.iblsoft.flexiweather.ogc.managers
 	
 	import mx.collections.ArrayCollection;
 
+	[Event (name="serviceCapabilitiesUpdated", type="flash.events.Event")]
+	
+	[Event (name="allServicesCapabilitiesUpdated", type="flash.events.Event")]
+	
 	public class OGCServiceConfigurationManager extends EventDispatcher implements Serializable
 	{
 		private static var sm_instance: OGCServiceConfigurationManager;

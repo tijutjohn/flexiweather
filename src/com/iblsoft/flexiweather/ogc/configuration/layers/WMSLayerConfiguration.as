@@ -280,6 +280,11 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			}
 			if (b_changed)
 			{
+				for (i = 0; i < a_layers.length; ++i)
+				{
+					layer = a_layers[i] as WMSLayer;
+					updateDimensions(layer);
+				}
 				_layerConfigurations = a_layers.toArray();
 				dispatchEvent(new DataEvent(CAPABILITIES_UPDATED));
 			}

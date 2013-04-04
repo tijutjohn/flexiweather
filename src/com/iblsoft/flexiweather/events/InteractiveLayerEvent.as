@@ -2,9 +2,11 @@ package com.iblsoft.flexiweather.events
 {
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
+	
 	import flash.events.Event;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
+	
 	import mx.collections.ArrayCollection;
 
 	public class InteractiveLayerEvent extends Event
@@ -34,6 +36,23 @@ package com.iblsoft.flexiweather.events
 		public function InteractiveLayerEvent(type: String, bubbles: Boolean = false, cancelable: Boolean = false)
 		{
 			super(type, bubbles, cancelable);
+		}
+		
+		override public function clone(): Event
+		{
+			var ile: InteractiveLayerEvent = new InteractiveLayerEvent(type, bubbles, cancelable);
+			ile.text = text;
+			ile.interactiveLayer = interactiveLayer;
+			ile.point = point;
+			ile.area = area;
+			ile.newFeaturesCount = newFeaturesCount;
+			ile.newFeatures = newFeatures;
+			ile.topLeftCoord = topLeftCoord;
+			ile.bottomRightCoord = bottomRightCoord;
+			ile.refreshFeaturesObject = refreshFeaturesObject;
+			ile.data = data;
+			
+			return ile;
 		}
 	}
 }
