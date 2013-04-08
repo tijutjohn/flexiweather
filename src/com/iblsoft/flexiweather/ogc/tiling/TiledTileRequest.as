@@ -1,7 +1,8 @@
 package com.iblsoft.flexiweather.ogc.tiling
 {
-	import flash.net.URLRequest;
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.TiledTileViewProperties;
+	
+	import flash.net.URLRequest;
 
 	public class TiledTileRequest
 	{
@@ -14,6 +15,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 		private var _jobName: String;
 		private var _qttTileViewProperties: TiledTileViewProperties;
 
+		public var callbackTileLoaded: Function;
+		public var callbackTileLoadFailed: Function;
+		
 		public function get jobName(): String
 		{
 			return _jobName;
@@ -29,5 +33,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 			_qttTileViewProperties = qttTileViewProperties;
 			_jobName = jobName;
 		}
+		
 	}
 }

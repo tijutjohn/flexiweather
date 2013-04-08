@@ -21,7 +21,10 @@ package com.iblsoft.flexiweather.ogc.cache
 			if (tileIndex != null)
 				key += "|" + tileIndex.toString();
 			if (m_validity != null)
-				key += "|validity:" + ISO8601Parser.dateToString(m_validity);
+			{
+				var timeStr: String = ISO8601Parser.dateToString(m_validity);
+				key += "|validity:" + timeStr;
+			}
 			var a: Array = []
 //			if(url.url != null) {
 //				key += url.url;

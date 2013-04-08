@@ -1,6 +1,5 @@
 package com.iblsoft.flexiweather.ogc.tiling
 {
-
 	public interface ITilesProvider
 	{
 		/**

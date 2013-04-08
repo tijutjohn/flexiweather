@@ -223,13 +223,26 @@ package com.iblsoft.flexiweather.ogc.cache
 			}
 		}
 
+		override public function getItemCacheKey(viewProperties: IViewProperties): String
+		{
+			var qttTileViewProperties: TiledTileViewProperties = viewProperties as TiledTileViewProperties;
+			if (!qttTileViewProperties)
+				return null;
+			
+			return getQTTTileViewCacheKey(qttTileViewProperties);
+		}
+		
 		private function getQTTTileViewCacheKey(qttTileViewProperties: TiledTileViewProperties): String
 		{
-			var parentQTT: TiledViewProperties = qttTileViewProperties.qttViewProperties;
-			var s_crs: String = parentQTT.crs as String;
-			var time: Date = parentQTT.validity;
+//			var parentQTT: TiledViewProperties = qttTileViewProperties.qttViewProperties;
+//			var s_crs: String = parentQTT.crs as String;
+//			var time: Date = parentQTT.validity;
+//			var specialStrings: Array = parentQTT.specialCacheStrings as Array;
+			var s_crs: String = qttTileViewProperties.crs as String;
+			var time: Date = qttTileViewProperties.validity;
+			var specialStrings: Array = qttTileViewProperties.specialCacheStrings as Array;
+			
 			var tileIndex: TileIndex = qttTileViewProperties.tileIndex as TileIndex;
-			var specialStrings: Array = parentQTT.specialCacheStrings as Array;
 			var url: URLRequest = qttTileViewProperties.url;
 			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, null, tileIndex, url, time, specialStrings);
 			var s_key: String = ck.toString();
@@ -246,16 +259,31 @@ package com.iblsoft.flexiweather.ogc.cache
 			return isCached;
 		}
 
-		override public function addCacheNoDataItem(viewProperties: IViewProperties): void
+		/**
+		 * function will notify cache that image is loading, but not loaded yet.
+		 * It will be used for not to load same request ,if it is already loaing.
+		 * @param s_crs
+		 * @param bbox
+		 * @param url
+		 *
+		 */
+		override public function startImageLoading(viewProperties: IViewProperties): void
 		{
 			var qttTileViewProperties: TiledTileViewProperties = viewProperties as TiledTileViewProperties;
 			if (!qttTileViewProperties)
 				return;
 			var s_key: String = getQTTTileViewCacheKey(qttTileViewProperties);
-			md_noDataCache[s_key] = true;
-			mi_noDataCacheItemsLength++;
+			
+			debug(this + " start iamge loading: " + s_key);
+			md_cacheLoading[s_key] = true;
+			mi_cacheLoadingItemsLength++;
 		}
-
+		
+		/**
+		 * Function needs to be called when item loading is cancelled 
+		 * @param viewProperties
+		 * 
+		 */		
 		override public function cacheItemLoadingCanceled(viewProperties: IViewProperties): void
 		{
 			if (!supportCaching)
@@ -267,8 +295,22 @@ package com.iblsoft.flexiweather.ogc.cache
 			
 			var s_key: String = getQTTTileViewCacheKey(qttTileViewProperties);
 			
+			
 			delete md_cacheLoading[s_key];
+			mi_cacheLoadingItemsLength--;
 			mi_noDataCacheItemsLength--;
+			
+			trace(this + "cacheItemLoadingCanceled: " + s_key);
+		}
+		
+		override public function addCacheNoDataItem(viewProperties: IViewProperties): void
+		{
+			var qttTileViewProperties: TiledTileViewProperties = viewProperties as TiledTileViewProperties;
+			if (!qttTileViewProperties)
+				return;
+			var s_key: String = getQTTTileViewCacheKey(qttTileViewProperties);
+			md_noDataCache[s_key] = true;
+			mi_noDataCacheItemsLength++;
 		}
 			
 		override public function isItemCached(viewProperties: IViewProperties, b_checkNoDataCache: Boolean = true): Boolean
@@ -279,12 +321,13 @@ package com.iblsoft.flexiweather.ogc.cache
 			var s_key: String = getQTTTileViewCacheKey(qttTileViewProperties);
 			var item: CacheItem = md_cache[s_key] as CacheItem;
 			debug("isTileCached check  for null: " + (item != null) + " KEY: " + s_key);
-			if (b_checkNoDataCache && !item)
+			var bItemCached: Boolean = item != null || md_cacheLoading[s_key];
+			if (b_checkNoDataCache && !bItemCached)
 			{
 				//check also NoData cache
 				return isNoDataItemCached(qttTileViewProperties);
 			}
-			return item != null;
+			return bItemCached;
 		}
 
 //		public function addTile(img: Bitmap, s_crs: String, tileIndex: TileIndex, url: URLRequest, specialStrings: Array, tiledArea: TiledArea, viewPart: BBox, time: Date): void
@@ -294,14 +337,23 @@ package com.iblsoft.flexiweather.ogc.cache
 			var qttTileViewProperties: TiledTileViewProperties = viewProperties as TiledTileViewProperties;
 			if (!qttTileViewProperties)
 				return;
-			var parentQTT: TiledViewProperties = qttTileViewProperties.qttViewProperties;
-			var s_crs: String = parentQTT.crs as String;
-			var bbox: BBox = parentQTT.getViewBBox() as BBox;
-			var time: Date = parentQTT.validity;
-			var tiledAreas: Array = parentQTT.tiledAreas;
+			
+//			var parentQTT: TiledViewProperties = qttTileViewProperties.qttViewProperties;
+			
+//			var s_crs: String = parentQTT.crs as String;
+//			var bbox: BBox = parentQTT.getViewBBox() as BBox;
+//			var time: Date = parentQTT.validity;
+//			var tiledAreas: Array = parentQTT.tiledAreas;
+//			var specialStrings: Array = parentQTT.specialCacheStrings;
+			var s_crs: String = qttTileViewProperties.crs as String;
+			var bbox: BBox = qttTileViewProperties.getViewBBox() as BBox;
+			var time: Date = qttTileViewProperties.validity;
+			var tiledAreas: Array = qttTileViewProperties.tiledAreas;
+			var specialStrings: Array = qttTileViewProperties.specialCacheStrings;
+			
 			var url: URLRequest = qttTileViewProperties.url;
 			var tileIndex: TileIndex = qttTileViewProperties.tileIndex;
-			var specialStrings: Array = parentQTT.specialCacheStrings;
+			
 			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, null, tileIndex, url, time, specialStrings);
 			var s_key: String = decodeURI(ck.toString());
 			var item: CacheItem = new CacheItem();
@@ -327,6 +379,13 @@ package com.iblsoft.flexiweather.ogc.cache
 			_items.push(s_key);
 			
 			mi_cacheItemCount++;
+			
+			
+			delete md_cacheLoading[s_key];
+			mi_cacheLoadingItemsLength--;
+			
+//			trace(this + "add item: " + s_key);
+//			trace(this + "delete from loading items: " + s_key);
 			
 			if (_items.length > maxCachedItems)
 			{
@@ -474,15 +533,14 @@ package com.iblsoft.flexiweather.ogc.cache
 
 		protected function debug(txt: String): void
 		{
-			return;
-			trace("WMSTileCache: " + txt);
+//			trace("WMSTileCache: " + txt);
 			if (debugConsole)
 				debugConsole.print("WMSTileCache: " + txt, 'Info', 'WMSTileCache');
 		}
 		
 		override public function toString(): String
 		{
-			return "WMSTileCache: len: " + length + " noData len: " + noDataItemsLengths + " loading len: " + loadingItemsLength;
+			return "WMSTileCache: | len: " + length + " | noData len: " + noDataItemsLengths + " | loading len: " + loadingItemsLength + " | >> ";
 		}
 	}
 }

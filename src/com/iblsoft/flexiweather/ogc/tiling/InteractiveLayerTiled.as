@@ -19,6 +19,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import com.iblsoft.flexiweather.plugins.IConsole;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
+	import com.iblsoft.flexiweather.utils.ISO8601Parser;
 	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
@@ -515,7 +516,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 					if (tileIndex)
 					{
 						_debugDrawInfoArray.push(tileIndex);
-						drawTile(tileIndex, s_crs, t_tile.image.bitmapData, redrawBorder);
+						drawTile(tileIndex, s_crs, t_tile.image.bitmapData, redrawBorder, qttViewProperties);
 					}
 				}
 				//FIXME change this, now there can be more tiledArea
@@ -524,7 +525,16 @@ package com.iblsoft.flexiweather.ogc.tiling
 			}
 		}
 
-		private function drawTile(tileIndex: TileIndex, s_crs: String, bitmapData: BitmapData, redrawBorder: Boolean = false): void
+		/**
+		 * 
+		 * @param tileIndex
+		 * @param s_crs
+		 * @param bitmapData
+		 * @param redrawBorder
+		 * @param qttViewProperties - just for debuggin purposes
+		 * 
+		 */
+		private function drawTile(tileIndex: TileIndex, s_crs: String, bitmapData: BitmapData, redrawBorder: Boolean = false, qttViewProperties: TiledViewProperties = null): void
 		{
 			var tileBBox: BBox = getGTileBBox(s_crs, tileIndex);
 			var reflectedTileBBoxes: Array = container.mapBBoxToViewReflections(tileBBox);
@@ -532,12 +542,12 @@ package com.iblsoft.flexiweather.ogc.tiling
 			{
 				for each (var reflectedTileBBox: BBox in reflectedTileBBoxes)
 				{
-					drawReflectedTile(tileIndex, reflectedTileBBox, s_crs, bitmapData, redrawBorder);
+					drawReflectedTile(tileIndex, reflectedTileBBox, s_crs, bitmapData, redrawBorder, qttViewProperties);
 				}
 			}
 		}
 
-		private function drawReflectedTile(tileIndex: TileIndex, tileBBox: BBox, s_crs: String, bitmapData: BitmapData, redrawBorder: Boolean = false): void
+		private function drawReflectedTile(tileIndex: TileIndex, tileBBox: BBox, s_crs: String, bitmapData: BitmapData, redrawBorder: Boolean = false, qttViewProperties: TiledViewProperties = null): void
 		{
 			var matrix: Matrix;
 			var topLeftCoord: Coord;
@@ -579,9 +589,15 @@ package com.iblsoft.flexiweather.ogc.tiling
 			}
 			if (drawDebugText)
 			{
+				var txt2: String = '';
+				if (qttViewProperties && qttViewProperties.validity)
+				{
+					txt2 = "Validity: " + ISO8601Parser.dateToString(qttViewProperties.validity);
+				}
 				drawText(tileIndex.mi_tileZoom + ", "
 						+ tileIndex.mi_tileCol + ", "
 						+ tileIndex.mi_tileRow,
+						txt2,
 						graphics, new Point(xx + 10, yy + 5));
 			}
 			tileScaleX = sx;
@@ -664,26 +680,49 @@ package com.iblsoft.flexiweather.ogc.tiling
 			}
 		}
 		private var _tf: TextField = new TextField();
+		private var _tf2: TextField = new TextField();
 		private var _tfBD: BitmapData;
 
-		private function drawText(txt: String, gr: Graphics, pos: Point): void
+		private function drawText(txt: String, txt2: String,  gr: Graphics, pos: Point): void
 		{
 			if (!_tf.filters || !_tf.filters.length)
 			{
 				_tf.filters = [new GlowFilter(0xffffffff)];
 			}
+			if (!_tf2.filters || !_tf2.filters.length)
+			{
+				_tf2.filters = [new GlowFilter(0xffffffff)];
+			}
 			var tfWidth: int = 200;
 			var tfHeight: int = 30;
-			var format: TextFormat = _tf.getTextFormat();
-			format.size = 14;
-			format.align = TextFieldAutoSize.LEFT;
-			_tf.setTextFormat(format);
-			_tf.text = "test " + txt;
-			tfWidth = _tf.textWidth + 20;
-			tfHeight = _tf.textHeight;
 			
-			_tfBD = new BitmapData(tfWidth, tfHeight, true, 0);
+			var format: TextFormat = _tf.getTextFormat();
+			format.size = 24;
+			format.align = TextFieldAutoSize.LEFT;
+			
+			var format2: TextFormat = _tf2.getTextFormat();
+			format2.size = 20;
+			format2.align = TextFieldAutoSize.LEFT;
+			
+			_tf.text = txt;
+			_tf.setTextFormat(format);
+			
+			_tf2.text = txt2;
+			_tf2.setTextFormat(format2);
+
+			_tf.width = _tf.textWidth + 20;
+			_tf2.width = _tf2.textWidth + 20;
+			
+			tfWidth = Math.max(_tf.textWidth + 20, _tf2.textWidth + 20);
+			tfHeight = _tf.textHeight + _tf2.textHeight + 5;
+			
+			var mTf2: Matrix = new Matrix();
+			mTf2.translate(0, _tf.textHeight + 3);
+			
+			_tfBD = new BitmapData(tfWidth, tfHeight, true, 0x88ffffff);
 			_tfBD.draw(_tf);
+			_tfBD.draw(_tf2, mTf2);
+			
 			var m: Matrix = new Matrix();
 			m.translate(pos.x, pos.y)
 			gr.lineStyle(0, 0, 0);
@@ -1450,6 +1489,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			m_cfg = null;
 			cache = null;
 			_tf = null;
+			_tf2 = null;
 			if (_debugDrawInfoArray && _debugDrawInfoArray.length > 0)
 			{
 				while (_debugDrawInfoArray.length > 0)

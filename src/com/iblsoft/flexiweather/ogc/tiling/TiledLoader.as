@@ -76,7 +76,10 @@ package com.iblsoft.flexiweather.ogc.tiling
 			m_layer = layer;
 			mi_tilesLoadingTotal = 0;
 			m_jobs = new TileJobs();
-			tilesProvider = new TiledTilesProvider();
+			
+			var tiledCache: WMSTileCache = m_layer.getCache() as WMSTileCache;
+			
+			tilesProvider = new TiledTilesProvider(tiledCache);
 		}
 
 		public function destroy(): void
@@ -190,19 +193,28 @@ package com.iblsoft.flexiweather.ogc.tiling
 						//check if tileIndex is already created from other tiledArea part
 						if (!tileIndicesMapper.tileIndexInside(tileIndex))
 						{
-							var qttTile: TiledTileViewProperties = new TiledTileViewProperties(qttViewProperties);
+							var qttTileViewProperties: TiledTileViewProperties = new TiledTileViewProperties(qttViewProperties);
+							
+							
+							qttTileViewProperties.crs = qttViewProperties.crs;
+							qttTileViewProperties.setValidityTime(qttViewProperties.validity);
+							qttTileViewProperties.setViewBBox(qttViewProperties.getViewBBox());
+							qttTileViewProperties.setSpecialCacheStrings(qttViewProperties.specialCacheStrings);
+							qttTileViewProperties.tiledAreas = qttViewProperties.tiledAreas;
+							
+							
 							tileIndicesMapper.addTileIndex(tileIndex, viewPart);
 							request = new URLRequest(getExpandedURL(tileIndex, s_crs));
 							// need to convert ${BASE_URL} because it's used in cachKey
 							request.url = AbstractURLLoader.fromBaseURL(request.url);
-							qttTile.url = request;
-							qttTile.tileIndex = tileIndex;
-							qttTile.updateCycleAge = mi_updateCycleAge;
-							if (!tiledCache.isItemCached(qttTile) || b_forceUpdate)
+							qttTileViewProperties.url = request;
+							qttTileViewProperties.tileIndex = tileIndex;
+							qttTileViewProperties.updateCycleAge = mi_updateCycleAge;
+							if (!tiledCache.isItemCached(qttTileViewProperties) || b_forceUpdate)
 							{
-								qttViewProperties.addTileProperties(qttTile);
+								qttViewProperties.addTileProperties(qttTileViewProperties);
 								loadRequests.push({
-											qttTileViewProperties: qttTile,
+											qttTileViewProperties: qttTileViewProperties,
 											requestedTiledArea: tiledArea,
 											requestedViewPart: viewPart,
 											requestedTileIndex: tileIndex
@@ -223,15 +235,28 @@ package com.iblsoft.flexiweather.ogc.tiling
 				{
 					notifyLoadingStart();
 					dispatchEvent(new InteractiveLayerQTTEvent(InteractiveLayerQTTEvent.TILES_LOADING_STARTED, true));
+					
+					var tiledCache: WMSTileCache = m_layer.getCache() as WMSTileCache;
+					
 					loadRequests.sort(sortTiles);
 					var bkJobManager: BackgroundJobManager = BackgroundJobManager.getInstance();
 					var jobName: String;
 					mi_tilesCurrentlyLoading = loadRequests.length;
 					mi_tilesLoadingTotal += loadRequests.length;
 					var data: Array = [];
+					
+					var validity: Date = qttViewProperties.validity;
+					var validityString: String;
+					if (validity)
+					{
+						validityString = ISO8601Parser.dateToString(validity);
+					}
 					for each (var requestObj: Object in loadRequests)
 					{
-						jobName = "Rendering tile " + requestObj.requestedTileIndex + " for layer: " + m_layer.name;
+						if (validity)
+							jobName = "Rendering tile " + requestObj.requestedTileIndex + " with validity: " + validityString + " for layer: " + m_layer.name;
+						else
+							jobName = "Rendering tile " + requestObj.requestedTileIndex + " for layer: " + m_layer.name;
 						// this already cancel previou job for current tile
 //						m_jobs.addNewTileJobRequest(requestObj.requestedTileIndex.mi_tileCol, requestObj.requestedTileIndex.mi_tileRow, dataLoader, requestObj.request);
 //						var assocData: Object = {
@@ -243,8 +268,14 @@ package com.iblsoft.flexiweather.ogc.tiling
 //							validity: qttTileViewProperties.qttViewProperties.validity,
 //							updateCycleAge: mi_updateCycleAge
 //						};
+						
+						
 						var qttTileViewProperties: TiledTileViewProperties = requestObj.qttTileViewProperties;
 						qttTileViewProperties.updateCycleAge = mi_updateCycleAge;
+						
+						
+						tiledCache.startImageLoading(qttTileViewProperties);
+						
 						var item: TiledTileRequest = new TiledTileRequest(qttTileViewProperties, jobName);
 						data.push(item);
 //						item.associatedData = assocData;

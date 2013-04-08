@@ -40,11 +40,11 @@ package com.iblsoft.flexiweather.ogc.cache
 		{
 			return mi_cacheItemCount;			
 		}
-		public function get noDataItemsLengths(): uint
+		public function get noDataItemsLengths(): int
 		{
 			return mi_noDataCacheItemsLength;			
 		}
-		public function get loadingItemsLength(): uint
+		public function get loadingItemsLength(): int
 		{
 			return mi_cacheLoadingItemsLength;			
 		}
@@ -55,10 +55,13 @@ package com.iblsoft.flexiweather.ogc.cache
 			{
 				deleteCacheItem(cacheItem, true);
 			}
-			for (var s_key: String in md_cache)
+			for (var s_key: String in md_noDataCache)
 			{
-				delete md_noDataCache[s_key];
-				mi_noDataCacheItemsLength--;
+				if (md_noDataCache[s_key])
+				{
+					delete md_noDataCache[s_key];
+					mi_noDataCacheItemsLength--;
+				}
 			}
 		}
 
@@ -199,6 +202,15 @@ package com.iblsoft.flexiweather.ogc.cache
 			return arr;
 		}
 
+		public function getItemCacheKey(viewProperties: IViewProperties): String
+		{
+			var wmsViewProperties: WMSViewProperties = viewProperties as WMSViewProperties;
+			if (!wmsViewProperties)
+				return null;
+			
+			return qetWMSViewCacheKey(wmsViewProperties);
+		}
+		
 		private function getKey(s_crs: String, bbox: BBox, url: URLRequest, dimensions: Array, validity: Date = null): String
 		{
 			var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url, dimensions, validity);
@@ -345,8 +357,13 @@ package com.iblsoft.flexiweather.ogc.cache
 			
 			debugCache();
 			
-			delete md_cacheLoading[s_key];
-			mi_cacheLoadingItemsLength--;
+			if (md_cacheLoading[s_key])
+			{
+				delete md_cacheLoading[s_key];
+				mi_cacheLoadingItemsLength--;
+//			} else {
+//				trace("addCacheItem: Can not delete item from 'loading cache' for key: " + s_key);
+			}
 			
 			var wce: WMSCacheEvent = new WMSCacheEvent(WMSCacheEvent.ITEM_ADDED, item);
 			wce.associatedData = associatedData;
@@ -364,8 +381,13 @@ package com.iblsoft.flexiweather.ogc.cache
 			
 			var s_key: String = qetWMSViewCacheKey(wmsViewProperties);
 			
-			delete md_cacheLoading[s_key];
-			mi_cacheLoadingItemsLength--;
+			if (s_key && md_cacheLoading[s_key])
+			{
+				delete md_cacheLoading[s_key];
+				mi_cacheLoadingItemsLength--;
+//			} else {
+//				trace("cacheItemLoadingCanceled: Can not delete item from 'loading cache' for key: " + s_key);
+			}
 		}
 		
 		public function debugCache(): String

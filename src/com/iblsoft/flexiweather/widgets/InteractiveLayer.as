@@ -171,10 +171,13 @@ package com.iblsoft.flexiweather.widgets
 			callLater(delayedInitializeLayerAfterAddToStage);
 		}
 		
-		private function delayedInitializeLayerAfterAddToStage(): void
+		protected function delayedInitializeLayerAfterAddToStage(): void
 		{
-			_layerInitialized = true;
-			notifyLayerInitialized();
+			if (!_layerInitialized)
+			{
+				_layerInitialized = true;
+				notifyLayerInitialized();
+			}
 			
 		}
 		

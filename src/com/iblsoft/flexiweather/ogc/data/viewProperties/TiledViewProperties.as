@@ -21,6 +21,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		
 		protected var m_cfg: ILayerConfiguration;
 		public var tiledAreas: Array;
+		
 		private var _validity: Date;
 
 		public function get validity(): Date

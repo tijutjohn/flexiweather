@@ -115,6 +115,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			
 			if (m_tiledLayer)
 			{
+				m_tiledLayer.addEventListener(InteractiveLayerEvent.LAYER_INITIALIZED, onTiledLayerInitialized);
 				m_tiledLayer.addEventListener(InteractiveLayerTiled.UPDATE_TILING_PATTERN, onUpdateTilingPattern);
 				m_tiledLayer.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onAllTilesLoaded);
 				addChild(m_tiledLayer);
@@ -634,6 +635,41 @@ package com.iblsoft.flexiweather.ogc.tiling
 				var cache: ICache = cachedLayer.getCache();
 				if (cache)
 					cache.clearCache();
+			}
+		}
+		
+		private function onTiledLayerInitialized(event: InteractiveLayerEvent): void
+		{
+			event.stopImmediatePropagation();
+			event.stopPropagation();
+			
+			m_tiledLayer.removeEventListener(InteractiveLayerEvent.LAYER_INITIALIZED, onTiledLayerInitialized);
+			notifyLayerInitializedIfBothLayersAreInitialized();
+		}
+		override protected function delayedInitializeLayerAfterAddToStage():void
+		{
+			if (!_layerInitialized)
+			{
+				trace(this + " delayedInitializeLayerAfterAddToStage");
+				_layerInitialized = true;
+				notifyLayerInitializedIfBothLayersAreInitialized();
+			} else {
+				trace(this + " delayedInitializeLayerAfterAddToStage ALREADY INITIALIZED");
+				
+			}
+		}
+		
+		private function notifyLayerInitializedIfBothLayersAreInitialized(): void
+		{
+			if (layerInitialized)
+			{
+				if (m_tiledLayer)
+				{
+					if (m_tiledLayer.layerInitialized)
+						notifyLayerInitialized();
+				} else {
+					notifyLayerInitialized();
+				}
 			}
 		}
 		
