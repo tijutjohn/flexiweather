@@ -321,7 +321,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 				if (_selectedInteractiveWidget == oldIW)
 				{
 					oldSelectedIW = _selectedInteractiveWidget;
-//					selectedInteractiveWidget = null;
+					selectedInteractiveWidget = null;
 				}
 				removeWidget(oldIW);
 			}
@@ -351,8 +351,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 					if (newConfiguration.customData && cnt == newConfiguration.customData.selectedIndex)
 					{
 						//selection change only if all wdiget are initialized, otherwise it must be notified after all widget will be initialized
-						m_selectedWidgetAfterWidgetInitialization = iw;
-//						selectedInteractiveWidget = iw;
+//						m_selectedWidgetAfterWidgetInitialization = iw;
+						selectedInteractiveWidget = iw;
 					}
 					cnt++;
 				}
@@ -368,8 +368,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 			
 //			if (multiViewInitialized)
 //			{
-				selectedInteractiveWidget = m_selectedWidgetAfterWidgetInitialization;
-				m_selectedWidgetAfterWidgetInitialization = null;
+//				selectedInteractiveWidget = m_selectedWidgetAfterWidgetInitialization;
+//				m_selectedWidgetAfterWidgetInitialization = null;
 //			}
 		}
 		
@@ -1612,6 +1612,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 	}
 }
 import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
+import com.iblsoft.flexiweather.events.InteractiveWidgetEvent;
 import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
 import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
@@ -1626,10 +1627,11 @@ import mx.collections.ArrayCollection;
 import mx.collections.Sort;
 import mx.collections.SortField;
 
-class WidgetCollection
+class WidgetCollection extends EventDispatcher
 {
 	private var _collection: ArrayCollection;
 
+	[Bindable (event="widgetsChanged")]
 	public function get widgets(): ArrayCollection
 	{
 		return _collection;
@@ -1668,7 +1670,10 @@ class WidgetCollection
 	public function removeWidget(widget: InteractiveWidget): void
 	{
 		if (widgetExists(widget))
+		{
+			widget.removeEventListener(InteractiveWidgetEvent.WIDGET_SELECTED, onWidgetSelected);
 			_collection.removeItemAt(_collection.getItemIndex(widget));
+		}
 	}
 
 	public function getWidgetAt(position: int): InteractiveWidget
@@ -1691,9 +1696,20 @@ class WidgetCollection
 	public function addWidget(widget: InteractiveWidget): void
 	{
 //		trace("WidgetCollection addWidget: " + widget.id + " frame: " + widget.frame);
+		widget.addEventListener(InteractiveWidgetEvent.WIDGET_SELECTED, onWidgetSelected);
 		_collection.addItem(widget);
 		_collection.refresh();
 		debugWidgetsIDs();
+	}
+	
+	private function onWidgetSelected(event: InteractiveWidgetEvent): void
+	{
+		notifyWidgetsChanged();
+	}
+	
+	private function notifyWidgetsChanged(): void
+	{
+		dispatchEvent(new Event("widgetsChanged"));
 	}
 	
 	public function getWidgetIndex(widget: InteractiveWidget): int
