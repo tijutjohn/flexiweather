@@ -11,6 +11,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 	import com.iblsoft.flexiweather.ogc.WMSLayerBase;
 	import com.iblsoft.flexiweather.ogc.WMSLayerGroup;
 	import com.iblsoft.flexiweather.ogc.configuration.ProjectionConfiguration;
+	import com.iblsoft.flexiweather.ogc.managers.OGCServiceConfigurationManager;
 	import com.iblsoft.flexiweather.ogc.managers.ProjectionConfigurationManager;
 	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.utils.Storage;
@@ -94,7 +95,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 
 		public function queryCapabilities(): void
 		{
-//			LoggingUtils.dispatchLogEvent(this, 'WMSServiceConfiguration queryCapabilities: ' + fullURL);
+//			trace(this + ' queryCapabilities: ' + fullURL);
 			var r: URLRequest = toGetCapabilitiesRequest();
 			m_capabilitiesLoader.load(r);
 			if (m_capabilitiesLoadJob != null)
@@ -164,6 +165,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 //			LoggingUtils.dispatchLogEvent(this, 'WMSServiceConfiguration onCapabilitiesLoaded: ' + fullURL);
 			
 			mb_capabilitiesUpdated = true;
+//			trace(this + " onCapabilitiesLoaded");
 			if (event.result is XML)
 			{
 				var xml: XML = event.result as XML;
@@ -225,7 +227,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		
 		override public function toString(): String
 		{
-			return "WMSServiceConfiguration " + id + " capabilitiesUpdated: " + capabilitiesUpdated;
+			return "WMSServiceConfiguration " + id + " / " + fullURL + " capabilitiesUpdated: " + capabilitiesUpdated;
 		}
 	}
 }

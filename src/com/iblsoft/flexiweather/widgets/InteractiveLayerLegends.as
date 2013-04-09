@@ -375,7 +375,6 @@ package com.iblsoft.flexiweather.widgets
 			if (group)
 			{
 				var legend: InteractiveLayerLegendImage = getLegendImageFromGroup(group);
-				trace("legend click");
 			}
 		}
 		private function onLegendGroupRollover(event: MouseEvent): void
@@ -1157,7 +1156,6 @@ package com.iblsoft.flexiweather.widgets
 			for (var i: int = 0; i < elements; i++)
 			{
 				var dObj: IVisualElement = currGroup.getElementAt(i);
-				trace(dObj);
 				
 				if (dObj is InteractiveLayerLegendImage)
 				{
@@ -1168,8 +1166,6 @@ package com.iblsoft.flexiweather.widgets
 		}
 		override public function onMouseClick(event: MouseEvent): Boolean
 		{
-			trace(this + "onMouseClick");
-			
 			var group: Group = event.target as Group;
 			if (group)
 			{
@@ -1178,7 +1174,6 @@ package com.iblsoft.flexiweather.widgets
 					var hit: Boolean = currGroup.hitTestPoint(event.stageX, event.stageY, true);
 					if (hit)
 					{
-						trace("Legend clicked");
 						var legend: InteractiveLayerLegendImage = getLegendImageFromGroup(currGroup);
 						var e: InteractiveLayerLegendEvent = new InteractiveLayerLegendEvent(InteractiveLayerLegendEvent.LEGEND_CLICK, legend);
 						e.legendGroup = currGroup;
@@ -1193,7 +1188,7 @@ package com.iblsoft.flexiweather.widgets
 		private function debug(str: String): void
 		{
 //			_logger.debug(str);
-			trace(this + str);
+//			trace(this + str);
 		}
 		
 		override public function toString(): String

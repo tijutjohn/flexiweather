@@ -66,9 +66,9 @@ package com.iblsoft.flexiweather.plugins.data
 
 		public function pluginRegistered(type: String): Boolean
 		{
-			trace(_pluginInfoModules);
-			trace(_pluginsInfo);
-			trace(_pluginsInfoLoading);
+//			trace(_pluginInfoModules);
+//			trace(_pluginsInfo);
+//			trace(_pluginsInfoLoading);
 			
 			return true;
 		}
@@ -178,8 +178,6 @@ package com.iblsoft.flexiweather.plugins.data
 			if (!isPluginModuleLoading(moduleInfo))
 			{
 				var url: String = moduleInfo.url;
-				
-				trace("PluginCollection loadPluginModule: " + url);
 				
 				var pe: PluginEvent = new PluginEvent(PluginEvent.PLUGIN_MODULE_LOAD);
 				pe.url = url;
@@ -407,8 +405,6 @@ package com.iblsoft.flexiweather.plugins.data
 		{
 			if (_pluginFunction && _pluginFunction.length > 3)
 			{
-				if (types.length > 1)
-					trace("More types");
 				for each (var type: String in types)
 				{
 					try

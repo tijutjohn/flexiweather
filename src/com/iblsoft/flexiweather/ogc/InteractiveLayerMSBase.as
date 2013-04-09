@@ -12,6 +12,8 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.ogc.cache.WMSCache;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.configuration.services.OGCServiceConfiguration;
+	import com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceConfiguration;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariableValue;
 	import com.iblsoft.flexiweather.ogc.data.ImagePart;
@@ -20,6 +22,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.WMSViewProperties;
 	import com.iblsoft.flexiweather.ogc.events.GetCapabilitiesEvent;
 	import com.iblsoft.flexiweather.ogc.events.MSBaseLoaderEvent;
+	import com.iblsoft.flexiweather.ogc.managers.OGCServiceConfigurationManager;
 	import com.iblsoft.flexiweather.ogc.multiview.synchronization.events.SynchronisationEvent;
 	import com.iblsoft.flexiweather.ogc.net.loaders.MSBaseLoader;
 	import com.iblsoft.flexiweather.ogc.net.loaders.WMSFeatureInfoLoader;
@@ -139,6 +142,23 @@ package com.iblsoft.flexiweather.ogc
 			synchronizationRoleValue = SynchronisationRole.NONE;
 			
 			m_cfg = cfg;
+			
+			if (m_cfg && m_cfg.service)
+			{
+				//update service from OGCServiceConfigurationManager
+				var serviceManager: OGCServiceConfigurationManager = OGCServiceConfigurationManager.getInstance();
+				var existingService: OGCServiceConfiguration = serviceManager.getServiceByName(m_cfg.service.baseURL);
+				
+				var wmsService: WMSServiceConfiguration = existingService as WMSServiceConfiguration; 
+				
+				if (wmsService && wmsService.capabilitiesUpdated)
+				{
+					trace("OGCServiceConfigurationManager found same service with capabilities already updated");
+					m_cfg.service = wmsService;
+				}
+			}
+			
+			
 			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
 			
 		}
@@ -534,6 +554,7 @@ package com.iblsoft.flexiweather.ogc
 
 		public function setConfiguration(cfg: WMSLayerConfiguration): void
 		{
+//			debug("setConfiguration : cap received: " + cfg.capabilitiesReceived + " / " + cfg);
 			if (m_cfg != null)
 			{
 				m_cfg.removeEventListener(WMSLayerConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
@@ -547,6 +568,12 @@ package com.iblsoft.flexiweather.ogc
 				m_currentWMSViewProperties.setConfiguration(cfg);
 				if (name)
 					m_currentWMSViewProperties.name = name;
+			}
+			
+			if (m_cfg.capabilitiesReceived)
+			{
+				//if capabilities was already received before layer was created, we can call onCapabilitiesUpdated right here
+				callLater(onCapabilitiesUpdated);
 			}
 			checkPostponedUpdateDataCall();
 		}
@@ -1503,7 +1530,7 @@ package com.iblsoft.flexiweather.ogc
 
 		protected function onCapabilitiesUpdated(event: DataEvent = null): void
 		{
-//			debug("onCapabilitiesUpdated");
+//			debug("MSBAse onCapabilitiesUpdated");
 			_capabilitiesReady = true;
 			dispatchEvent(new SynchronisedVariableChangeEvent(
 					SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, GlobalVariable.FRAME));
@@ -1671,7 +1698,7 @@ package com.iblsoft.flexiweather.ogc
 		protected function debug(str: String): void
 		{
 //			LoggingUtils.dispatchLogEvent(this, "MSBase: " + str);
-			trace("MSBase: " + str);
+			trace("MSBase: ["+this+"] " + str);
 		}
 
 		public function get configuration(): ILayerConfiguration

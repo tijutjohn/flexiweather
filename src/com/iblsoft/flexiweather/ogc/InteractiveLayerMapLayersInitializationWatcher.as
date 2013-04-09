@@ -14,8 +14,6 @@ package com.iblsoft.flexiweather.ogc
 
 	public class InteractiveLayerMapLayersInitializationWatcher extends EventDispatcher
 	{
-		public static const MAP_LAYERS_INITIALIZED: String = 'mapLayersInitialized';
-		
 		private static var uid: int = 0;
 		public var id: int;
 		private var _mapLayersInitializing: int;
@@ -85,7 +83,8 @@ package com.iblsoft.flexiweather.ogc
 			_mapLayersInitializing--;
 			if (_mapLayersInitializing == 0)
 			{
-				dispatchEvent(new Event(MAP_LAYERS_INITIALIZED));
+//				dispatchEvent(new Event(MAP_LAYERS_INITIALIZED));
+				interactiveLayerMap.notifyAllLayersAreInitialized();
 			}
 		}
 	}

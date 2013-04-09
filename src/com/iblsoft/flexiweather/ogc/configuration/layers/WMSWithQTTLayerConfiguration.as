@@ -14,6 +14,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 	public class WMSWithQTTLayerConfiguration extends WMSLayerConfiguration implements IBehaviouralObject
 	{
 		Storage.addChangedClass('com.iblsoft.flexiweather.ogc.WMSWithQTTLayerConfiguration', 'com.iblsoft.flexiweather.ogc.configuration.layers.WMSWithQTTLayerConfiguration', new Version(1, 6, 0));
+		
 		private var _avoidTiling: Boolean;
 		public var minimumZoomLevel: uint = 1;
 		public var maximumZoomLevel: uint = 12;
@@ -101,7 +102,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		
 		override public function toString(): String
 		{
-			return "WMSWithQTTLayerConfiguration";
+			return "WMSWithQTTLayerConfiguration " + id + " ["+m_service+"] ";
 		}
 	}
 }

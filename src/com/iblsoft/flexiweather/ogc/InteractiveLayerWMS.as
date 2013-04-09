@@ -148,6 +148,7 @@ package com.iblsoft.flexiweather.ogc
 
 		override public function setConfiguration(cfg: WMSLayerConfiguration): void
 		{
+//			debug("setConfiguration : cap received: " + cfg.capabilitiesReceived);
 			super.setConfiguration(cfg);
 			if (m_autoRefreshTimer)
 			{
@@ -320,6 +321,7 @@ package com.iblsoft.flexiweather.ogc
 		
 		override protected function debug(str: String): void
 		{
+			trace(this + " WMS: " + str);
 			LoggingUtils.dispatchLogEvent(this, "WMS: " + str);
 		}
 		

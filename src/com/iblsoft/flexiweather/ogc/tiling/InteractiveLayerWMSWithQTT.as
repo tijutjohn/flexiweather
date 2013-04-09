@@ -650,7 +650,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			if (!_layerInitialized)
 			{
-				trace(this + " delayedInitializeLayerAfterAddToStage");
 				_layerInitialized = true;
 				notifyLayerInitializedIfBothLayersAreInitialized();
 			} else {
@@ -675,7 +674,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 		
 		override protected function debug(str: String): void
 		{
-			LoggingUtils.dispatchLogEvent(this, "WMSWithQTT: " + str);
+			trace(this + " WMSWithQTT: " + str);
+//			LoggingUtils.dispatchLogEvent(this, "WMSWithQTT: " + str);
 		}
 		
 		override public function clone(): InteractiveLayer

@@ -48,6 +48,7 @@ package com.iblsoft.flexiweather.widgets
 	[Event(name = LEVEL_VARIABLE_CHANGED, type = "mx.events.DynamicEvent")]
 	[Event(name = TIME_AXIS_REMOVED, type = "mx.events.DynamicEvent")]
 	[Event(name = SYNCHRONISE_WITH, type = "mx.events.DynamicEvent")]
+	[Event(name = MAP_LAYERS_INITIALIZED, type = "flash.events.Event")]
 	public class InteractiveLayerMap extends InteractiveLayerComposer implements Serializable
 	{
 		public static const TIMELINE_CONFIGURATION_CHANGE: String = "timelineConfigurationChange";
@@ -70,6 +71,8 @@ package com.iblsoft.flexiweather.widgets
 		
 		public static const LOADING_STATUS_READY: String = 'loadingStatusReady';
 		public static const LOADING_STATUS_LOADING: String = 'loadingStatusLoading';
+		
+		public static const MAP_LAYERS_INITIALIZED: String = 'mapLayersInitialized';
 		
 		public static var debugConsole: IConsole;
 		private static var mapUID: int = 0;
@@ -522,6 +525,11 @@ package com.iblsoft.flexiweather.widgets
 			invalidateProperties();
 		}
 
+		public function notifyAllLayersAreInitialized(): void
+		{
+			dispatchEvent(new Event(MAP_LAYERS_INITIALIZED));
+		}
+			
 		private function notifyTimeAxisUpdate(): void
 		{
 			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));

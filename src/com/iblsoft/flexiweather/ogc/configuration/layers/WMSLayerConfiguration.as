@@ -22,9 +22,15 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 	
 	import mx.collections.ArrayCollection;
 
+	[Event(name = CAPABILITIES_UPDATED, type = "flash.events.DataEvent")]
+	[Event(name = CAPABILITIES_RECEIVED, type = "flash.events.DataEvent")]
 	public class WMSLayerConfiguration extends OGCLayerConfiguration implements IBehaviouralObject, IInteractiveLayerProvider, IWMSLayerConfiguration
 	{
 		Storage.addChangedClass('com.iblsoft.flexiweather.ogc.WMSLayerConfiguration', 'com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration', new Version(1, 6, 0));
+
+		public static const CAPABILITIES_UPDATED: String = "capabilitiesUpdated";
+		public static const CAPABILITIES_RECEIVED: String = "capabilitiesReceived";
+
 		private var ma_layerNames: Array = [];
 		private var ma_styleNames: Array = [];
 		private var ma_behaviours: Array = [];
@@ -38,26 +44,45 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		private var mi_autoRefreshPeriod: uint = 0;
 		// runtime variables
 		private var _layerConfigurations: Array;
-		public static const CAPABILITIES_UPDATED: String = "capabilitiesUpdated";
-		public static const CAPABILITIES_RECEIVED: String = "capabilitiesReceived";
 
-		[Event(name = CAPABILITIES_UPDATED, type = "flash.events.DataEvent")]
-		[Event(name = CAPABILITIES_RECEIVED, type = "flash.events.DataEvent")]
+		private var mb_capabilitiesReceived: Boolean;
+		public function get capabilitiesReceived(): Boolean
+		{
+			return mb_capabilitiesReceived;
+		}
+		
 		public function WMSLayerConfiguration(service: WMSServiceConfiguration = null, a_layerNames: Array = null)
 		{
 			super(service);
+			
+			mb_capabilitiesReceived = false;
+			
 			if (a_layerNames != null)
 				ma_layerNames = a_layerNames;
-			if (m_service != null)
-				m_service.addEventListener(WMSServiceConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated)
+			
+			registerService();
+			
 			onCapabilitiesUpdated(null);
 		}
 
+		protected function registerService(): void
+		{
+			if (m_service)
+				m_service.addEventListener(WMSServiceConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated)
+		}
+		
+		protected function unregisterService(): void
+		{
+			if (m_service)
+				m_service.removeEventListener(WMSServiceConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated)
+		}
+		
 		override public function destroy(): void
 		{
-			if (m_service != null)
-				m_service.removeEventListener(WMSServiceConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
+			unregisterService();
+			
 			ma_layerNames = null;
+			
 			if (_layerConfigurations && _layerConfigurations.length > 0)
 			{
 				for each (var wmsLayer: WMSLayerBase in _layerConfigurations)
@@ -82,7 +107,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 
 		override public function toString(): String
 		{
-			return "WMSLayerConfiguration";
+			return "WMSLayerConfiguration " + id + " ["+m_service+"]";
 		}
 		
 		override public function serialize(storage: Storage): void
@@ -90,7 +115,13 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			if (storage.isLoading() && m_service != null)
 				m_service.removeEventListener(WMSServiceConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated)
 			super.serialize(storage);
-			m_service.addEventListener(WMSServiceConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated)
+			
+			if (storage.isLoading())
+			{
+				m_service.addEventListener(WMSServiceConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
+//				trace(this + " serialized");
+			}
+			
 			try
 			{
 				storage.serializeNonpersistentArray("layer-name", ma_layerNames, String);
@@ -237,6 +268,9 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 
 		protected function onCapabilitiesUpdated(event: Event): void
 		{
+			if (!m_service)
+				return;
+			
 			var layer: WMSLayer
 			var layerConf: WMSLayer
 			var a_layers: ArrayCollection = new ArrayCollection();
@@ -286,9 +320,20 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 					updateDimensions(layer);
 				}
 				_layerConfigurations = a_layers.toArray();
+				if (_layerConfigurations.length > 0)
+				{
+					mb_capabilitiesReceived = true;
+				}
 				dispatchEvent(new DataEvent(CAPABILITIES_UPDATED));
 			}
+			if (_layerConfigurations.length > 0)
+			{
+				mb_capabilitiesReceived = true;
+			}
 			dispatchEvent(new DataEvent(CAPABILITIES_RECEIVED));
+			
+//			trace(this + " onCapabilitiesUpdated ");
+			
 		}
 
 		private function updateDimensions(layer: WMSLayer): void
@@ -432,7 +477,11 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 
 		public function set service(service: WMSServiceConfiguration): void
 		{
+			unregisterService();
+			
 			m_service = service;
+			
+			registerService();
 		}
 
 		public function get behaviours(): Array
