@@ -20,6 +20,10 @@ package com.iblsoft.flexiweather.widgets
 	[Event(name = "layerInitialized", type = "com.iblsoft.flexiweather.events.InteractiveLayerEvent")]
 	public class InteractiveLayer extends UIComponent
 	{
+		private static var layerUID: int = 0;
+		protected var m_layerID: int;
+		
+		
 		protected var m_layerWasDestroyed: Boolean;
 		protected var _type: String;
 
@@ -137,6 +141,8 @@ package com.iblsoft.flexiweather.widgets
 
 		public function InteractiveLayer(container: InteractiveWidget = null)
 		{
+			m_layerID = layerUID++;
+			
 			super();
 			mouseEnabled = false;
 			mouseFocusEnabled = false;

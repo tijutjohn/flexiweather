@@ -180,7 +180,8 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 								frame = frames[i] as Date;
 								if (frame)
 								{
-									if (widget.interactiveLayerMap.frame && widget.interactiveLayerMap.frame.time != frame.time)
+									var currWidgetFrame: Date = widget.interactiveLayerMap.frame; 
+									if (!currWidgetFrame || (currWidgetFrame && currWidgetFrame.time != frame.time))
 									{
 										debug("Going to synchronise frame: " + frame.toTimeString() + " for widget: " + widget.id, 'Info', 'FrameSychronizator');
 										

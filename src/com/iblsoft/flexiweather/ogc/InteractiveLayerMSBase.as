@@ -143,6 +143,8 @@ package com.iblsoft.flexiweather.ogc
 			
 			m_cfg = cfg;
 			
+			trace("new InteractiveLayerMSBASE: " + m_layerID);
+			
 			if (m_cfg && m_cfg.service)
 			{
 				//update service from OGCServiceConfigurationManager
@@ -153,7 +155,7 @@ package com.iblsoft.flexiweather.ogc
 				
 				if (wmsService && wmsService.capabilitiesUpdated)
 				{
-					trace("OGCServiceConfigurationManager found same service with capabilities already updated");
+//					trace("OGCServiceConfigurationManager found same service with capabilities already updated");
 					m_cfg.service = wmsService;
 				}
 			}
