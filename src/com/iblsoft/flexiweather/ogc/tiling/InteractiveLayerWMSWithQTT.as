@@ -302,7 +302,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			
 //			if (loader is TiledLoader)
 //			{
-//				loader.removeEventListener("invalidateDynamicPart", onWMSViewPropertiesDataInvalidateDynamicPart);
+//				loader.removeEventListener(InteractiveLayerEvent.INVALIDATE_DYNAMIC_PART, onWMSViewPropertiesDataInvalidateDynamicPart);
 //				loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
 //				loader.destroy();
 //			}
@@ -375,6 +375,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		override public function draw(graphics: Graphics): void
 		{
+//			debug("draw");
 			if (isTileable)
 			{
 				updateTiledLayerURLBase();
@@ -471,11 +472,11 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		override public function toString(): String
 		{
-			var retStr: String = "InteractiveLayerWMSWithQTT " + name + " isTileable: " + isTileable + " / IW: " + container.id;
-//			if (m_tiledLayer)
-//			{
-//				retStr += "\n\t\t" + m_tiledLayer;
-//			}
+			var retStr: String = "InteractiveLayerWMSWithQTT " + name + " / layerID: " + m_layerID + " isTileable: " + isTileable + " / IW: " + container.id;
+			if (m_tiledLayer)
+			{
+				retStr += "\n\t\t" + m_tiledLayer;
+			}
 			return retStr;
 		}
 

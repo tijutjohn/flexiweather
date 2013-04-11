@@ -111,7 +111,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			var oldValue: Boolean = super.visible;
 			super.visible = value;
 			
-			trace(this + " visible: " + value);
+//			trace(this + " visible: " + value);
 			
 			if (value != oldValue)
 				notifyVisibilityChange();

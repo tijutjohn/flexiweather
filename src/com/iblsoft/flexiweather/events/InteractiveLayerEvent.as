@@ -22,6 +22,8 @@ package com.iblsoft.flexiweather.events
 		public static const LEGENDS_AREA_UPDATED: String = 'legendsAreaUpdated';
 		public static const AREA_CHANGED: String = 'areaChanged';
 		
+		public static const INVALIDATE_DYNAMIC_PART: String = 'invalidateDynamicPart';
+		
 		public var text: String;
 		public var interactiveLayer: InteractiveLayer;
 		public var point: Point;

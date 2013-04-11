@@ -143,8 +143,6 @@ package com.iblsoft.flexiweather.ogc
 			
 			m_cfg = cfg;
 			
-			trace("new InteractiveLayerMSBASE: " + m_layerID);
-			
 			if (m_cfg && m_cfg.service)
 			{
 				//update service from OGCServiceConfigurationManager
@@ -261,7 +259,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			if (_preloader)
 			{
-				_preloader.removeEventListener("invalidateDynamicPart", onWMSViewPropertiesDataInvalidateDynamicPart);
+				_preloader.removeEventListener(InteractiveLayerEvent.INVALIDATE_DYNAMIC_PART, onWMSViewPropertiesDataInvalidateDynamicPart);
 				_preloader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
 				_preloader.destroy();
 			}
@@ -307,7 +305,7 @@ package com.iblsoft.flexiweather.ogc
 			if (!_preloader)
 			{
 				_preloader = getWMSViewPropertiesLoader() as MSBaseLoader;
-				_preloader.addEventListener("invalidateDynamicPart", onWMSViewPropertiesDataInvalidateDynamicPart);
+				_preloader.addEventListener(InteractiveLayerEvent.INVALIDATE_DYNAMIC_PART, onWMSViewPropertiesDataInvalidateDynamicPart);
 				_preloader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onPreloadingWMSDataLoadingStarted);
 				_preloader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
 				_preloader.addEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onPreloadingWMSDataLoadingFinished);
@@ -535,7 +533,7 @@ package com.iblsoft.flexiweather.ogc
 				_loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
 				_loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onCurrentWMSDataLoadingFinishedFromCache);
 				_loader.removeEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
-				_loader.removeEventListener("invalidateDynamicPart", onCurrentWMSDataInvalidateDynamicPart);
+				_loader.removeEventListener(InteractiveLayerEvent.INVALIDATE_DYNAMIC_PART, onCurrentWMSDataInvalidateDynamicPart);
 				_loader.destroy();
 			}
 		}
@@ -676,7 +674,7 @@ package com.iblsoft.flexiweather.ogc
 					_loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
 					_loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onCurrentWMSDataLoadingFinishedFromCache);
 					_loader.addEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
-					_loader.addEventListener("invalidateDynamicPart", onCurrentWMSDataInvalidateDynamicPart);
+					_loader.addEventListener(InteractiveLayerEvent.INVALIDATE_DYNAMIC_PART, onCurrentWMSDataInvalidateDynamicPart);
 					
 					trace(this + " LOADER created: " + _loader.id);
 				}
@@ -765,6 +763,7 @@ package com.iblsoft.flexiweather.ogc
 
 		public override function draw(graphics: Graphics): void
 		{
+			debug(" draw");
 			if (!m_currentWMSViewProperties)
 				return;
 			if (!layerWasDestroyed)
@@ -814,6 +813,7 @@ package com.iblsoft.flexiweather.ogc
 
 		private function drawImagePartAsBitmap(graphics: Graphics, image: Bitmap, s_imageCRS: String, imageBBox: BBox): void
 		{
+			debug("drawImagePartAsBitmap");
 			var ptImageStartPoint: Point =
 					container.coordToPoint(new Coord(s_imageCRS, imageBBox.xMin, imageBBox.yMax));
 			var ptImageEndPoint: Point =
@@ -1742,7 +1742,7 @@ package com.iblsoft.flexiweather.ogc
 
 		override public function toString(): String
 		{
-			return "InteractiveLayerMSBase " + name + " / IW: " + container.id;
+			return "InteractiveLayerMSBase " + name + " / LayerID: " + m_layerID + " IW: " + container.id;
 		}
 
 		private function destroyCache(): void

@@ -92,6 +92,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 	[Style(name = "selectedBorderAlpha", type = "Number", inherit = "yes", theme = "spark, mobile", minValue = "0.0", maxValue = "1.0")]
 	[Event(name = "multiViewSelectionChange", type = "com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewChangeEvent")]
 	[Event(name = "multiViewReady", type = "com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent")]
+	[Event(name = "multiViewRefreshed", type = "com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent")]
+	[Event(name = "multiViewBeforeRefresh", type = "com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent")]
 	[Event(name = "multiViewMapsLoadingStarted", type = "com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent")]
 	[Event(name = "multiViewMapsLoaded", type = "com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent")]
 	[Event(name = "multiViewSingleMapLayersInitialized", type = "com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent")]
@@ -719,14 +721,30 @@ package com.iblsoft.flexiweather.ogc.multiview
 //		}
 		public function refresh(b_force: Boolean): void
 		{
+			dispatchEvent(new InteractiveMultiViewEvent(InteractiveMultiViewEvent.MULTI_VIEW_BEFORE_REFRESH));
+			
+			stopWatchingChanges(true);
+			
 			if (selectedInteractiveWidget)
+			{
+				selectedInteractiveWidget.interactiveLayerMap.addEventListener(InteractiveLayerMapEvent.MAP_REFRESHED, onSelectedWidgetMapRefreshed);
 				selectedInteractiveWidget.interactiveLayerMap.refresh(b_force);
+			}
 			
 //			for each (var iw: InteractiveWidget in _interactiveWidgets.widgets)
 //			{
 //				iw.interactiveLayerMap.refresh(b_force);
 //			}
 		}
+		
+		private function onSelectedWidgetMapRefreshed(event: InteractiveLayerMapEvent): void
+		{
+			var ilm: InteractiveLayerMap = event.target as InteractiveLayerMap;
+			dispatchEvent(new InteractiveMultiViewEvent(InteractiveMultiViewEvent.MULTI_VIEW_REFRESHED));
+			
+			startWatchingChanges(true);
+		}
+		
 		private var _mapLayersWatchers: Dictionary = new Dictionary(true);
 
 		private function onSynchronizatorMapReady(event: SynchronisationEvent): void

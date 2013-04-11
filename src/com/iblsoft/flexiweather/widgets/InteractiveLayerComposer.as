@@ -21,6 +21,8 @@ package com.iblsoft.flexiweather.widgets
 	import mx.events.FlexEvent;
 
 	[Event(name = "mapLoaded", type = "com.iblsoft.flexiweather.events.InteractiveLayerMapEvent")]
+	[Event(name = "mapBeforeRefresh", type = "com.iblsoft.flexiweather.events.InteractiveLayerMapEvent")]
+	[Event(name = "mapRefreshed", type = "com.iblsoft.flexiweather.events.InteractiveLayerMapEvent")]
 	public class InteractiveLayerComposer extends InteractiveDataLayer implements Serializable
 	{
 		public static const LAYERS_CHANGED: String = 'layersChanged';
@@ -320,13 +322,43 @@ package com.iblsoft.flexiweather.widgets
 			return newBBox;
 		}
 
+		private var _refreshingLayersCount: int;
+		
 		// data refreshing
 		override public function refresh(b_force: Boolean): void
 		{
+			if (_refreshingLayersCount > 0)
+			{
+				//there is not finished refreshing
+				trace("there is not finished refreshing");
+			}
+			
+			_refreshingLayersCount = m_layers.length;
+			
+			dispatchEvent(new InteractiveLayerMapEvent(InteractiveLayerMapEvent.BEFORE_REFRESH, true));
+				
 			super.refresh(b_force);
+			
 			for each (var l: InteractiveLayer in m_layers)
 			{
+				l.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onRefreshLayerLoadingFinished);
+				l.addEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onRefreshLayerLoadingFinished);
 				l.refresh(b_force);
+			}
+		}
+		
+		private function onRefreshLayerLoadingFinished(event: InteractiveLayerEvent): void
+		{
+			var l: InteractiveLayer = event.target as InteractiveLayer;
+			l.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onRefreshLayerLoadingFinished);
+			l.removeEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onRefreshLayerLoadingFinished);
+			
+			_refreshingLayersCount--;
+			
+			if (_refreshingLayersCount == 0)
+			{
+				//refreshing is finished
+				dispatchEvent(new InteractiveLayerMapEvent(InteractiveLayerMapEvent.MAP_REFRESHED, true));
 			}
 		}
 
@@ -400,6 +432,15 @@ package com.iblsoft.flexiweather.widgets
 		public function get layers(): ArrayCollection
 		{
 			return m_layers;
+		}
+		[Bindable(event = "layersChanged")]
+		public function get layersIDs(): String
+		{
+			var layersIDs: String = '';
+			for each (var layer: InteractiveLayer in m_layers)
+				layersIDs += layer.layerID + ", ";
+				
+			return layersIDs;
 		}
 
 		/**

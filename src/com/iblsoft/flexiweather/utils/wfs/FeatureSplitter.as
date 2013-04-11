@@ -4,7 +4,9 @@ package com.iblsoft.flexiweather.utils.wfs
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	
 	import flash.geom.Point;
+	import flash.geom.Rectangle;
 	import flash.utils.Dictionary;
 
 	public class FeatureSplitter
@@ -52,16 +54,16 @@ package com.iblsoft.flexiweather.utils.wfs
 			return nearestPoint;
 		}
 
-		public function splitCoordHermitSplineToArrayOfPointPolyLines(coords: Array, b_closed: Boolean): Array
+		public function splitCoordHermitSplineToArrayOfPointPolyLines(coords: Array, bClosed: Boolean, bPolygon: Boolean = false): Array
 		{
 			// let's draw Hermit Spline in CRS:84
 //			return [];
-			return splitCoordPolyLineToArrayOfPointPolyLines(coords, b_closed);
+			return splitCoordPolyLineToArrayOfPointPolyLines(coords, bClosed, bPolygon);
 		}
 		private var m_projectionWidth: Number;
 		private var m_projectionWidthHalf: Number;
 
-		public function splitCoordPolyLineToArrayOfPointPolyLines(coords: Array, b_closed: Boolean): Array
+		public function splitCoordPolyLineToArrayOfPointPolyLines(coords: Array, bClosed: Boolean, bPolygon: Boolean = false): Array
 		{
 			if (coords.length == 0)
 				return [];
@@ -97,7 +99,7 @@ package com.iblsoft.flexiweather.utils.wfs
 				p1 = new Point(c2.x, c2.y);
 				_points.push(p1);
 			}
-			if (b_closed)
+			if (bClosed)
 			{
 				c1 = coords[0] as Coord;
 				c2 = c1.convertToProjection(projection);
@@ -132,7 +134,7 @@ package com.iblsoft.flexiweather.utils.wfs
 				for (i = 0; i < 5; i++)
 				{
 					var i_delta: int = (i & 1 ? 1 : -1) * ((i + 1) >> 1); // generates sequence 0, 1, -1, 2, -2, ..., 5, -5
-					polygons = convertToScreenPoints(shiftCoords(points, i_delta));
+					polygons = convertToScreenPoints(shiftCoords(points, i_delta), bPolygon);
 					for each (polygon in polygons)
 					{
 						resultArr.push(polygon);
@@ -147,45 +149,7 @@ package com.iblsoft.flexiweather.utils.wfs
 				}
 			}
 			return resultArr;
-		/*
-					//get reflected features
-
-					var polygonsDict: Dictionary = new Dictionary();
-
-					for each (var coordPointForReflection: Point in points)
-					{
-
-						var pointReflections: Array = m_iw.mapCoordInCRSToViewReflections(coordPointForReflection);
-						var reflectionsCount: int = pointReflections.length;
-
-						var arr: Array = [];
-
-						for (var j: int = 0; j < reflectionsCount; j++)
-						{
-							var pointReflectedObject: Object = pointReflections[j];
-
-							var reflection: int = pointReflectedObject.reflection;
-							if (!polygonsDict[reflection])
-							{
-								polygonsDict[reflection] = [];
-							}
-
-							var pointReflected: flash.geom.Point = pointReflectedObject.point as flash.geom.Point;
-							var coordReflected: Coord = new Coord(crs, pointReflected.x, pointReflected.y);
-							polygonsDict[reflection].push(m_iw.coordToPoint(coordReflected));
-		//					if (!currentViewBBox.coordInside(coordReflected))
-		//					{
-		//						//there is at least
-		//						break;
-		//					}
-						}
-					}
-
-					for each (var arr: Array in polygonsDict)
-					{
-						resultArr.push(arr);
-					}
-					*/
+		
 		}
 
 		/**
@@ -194,31 +158,246 @@ package com.iblsoft.flexiweather.utils.wfs
 		 * @param shiftSize
 		 * @return
 		 */
-		private function convertToScreenPoints(coords: Array): Array
+		private function convertToScreenPoints(coords: Array, bPolygon: Boolean = false): Array
 		{
 			var arr: Array = [];
 			var total: int = coords.length;
 			var crs: String = m_iw.getCRS();
-			var currentPolygon: Array = [];
-			for (var i: int = 0; i < total; i++)
+			var i: int;
+			
+			var padding: int = 0;
+			var viewPolygon: Array = [new Point(padding, padding), new Point(m_iw.width - padding, padding), new Point(m_iw.width - padding, m_iw.height - padding), new Point(padding, m_iw.height - padding)];
+			var polygon: Array = [];
+			
+			for (i = 0; i < total; i++)
 			{
 				var p: Point = coords[i] as Point;
 				var screenPoint: Point = m_iw.coordToPoint(new Coord(crs, p.x, p.y));
-				if (m_iw.pointIsOutside(screenPoint))
+				polygon.push(screenPoint);
+			}
+			
+			if (bPolygon)
+			{
+				
+				//polygon clipping
+				var clippedPolygon: Array = polygonClipppingSutherlandHodgman(polygon, viewPolygon);
+				arr.push(clippedPolygon);
+				
+			} else {
+
+				//line clipping
+				var viewRect: Rectangle = new Rectangle(padding, padding, m_iw.width - 2 * padding, m_iw.height - 2 * padding);
+				var lastPoint: Point;
+				var polyline: Array = [];
+				
+				for (i = 1; i < total; i++)
 				{
-					if (currentPolygon.length > 0)
+					var p1: Point = polygon[i - 1] as Point;
+					var p2: Point = polygon[i] as Point;
+					
+					var line: Array = lineClippingCohenSutherland(p1, p2, viewRect);
+					
+					if (line)
 					{
-						arr.push(currentPolygon);
-						currentPolygon = [];
+						if (!lastPoint)
+						{
+							polyline.push(line[0] as Point);
+							polyline.push(line[1] as Point);
+						} else {
+							if ((line[0] as Point).equals(lastPoint))
+							{
+								//same point, so it's same polyline
+								polyline.push(line[1] as Point);
+							} else {
+								
+								//completly new line, previous last point is different
+								arr.push(polyline);
+								polyline = [];
+								polyline.push(line[0] as Point);
+								polyline.push(line[1] as Point);
+							}
+						}
+						lastPoint = line[1] as Point;
+					} else {
+						
+						if (lastPoint)
+						{
+							polyline.push(lastPoint);
+							lastPoint = null;
+							
+							arr.push(polyline);
+							polyline = [];
+						}
 					}
 				}
-				else
-					currentPolygon.push(screenPoint);
+				arr.push(polyline);
 			}
-			arr.push(currentPolygon);
+
 			return arr;
 		}
 
+		private function intersection(s: Point, e: Point, cp1: Point, cp2: Point): Point
+		{
+			var dc: Point = new Point( cp1.x - cp2.x, cp1.y - cp2.y);
+			var dp: Point = new Point( s.x - e.x, s.y - e.y );
+			
+			var n1: Number = cp1.x * cp2.y - cp1.y * cp2.x;
+			var n2: Number = s.x * e.y - s.y * e.x;
+			var n3: Number = 1 / (dc.x * dp.y - dc.y * dp.x);
+				
+			return new Point((n1*dp.x - n2*dc.x) * n3, (n1*dp.y - n2*dc.y) * n3);
+		}
+		private function inside(p: Point, cp1: Point, cp2: Point): Boolean 
+		{
+			return (cp2.x-cp1.x)*(p.y-cp1.y) > (cp2.y-cp1.y)*(p.x-cp1.x);
+		}
+		
+		public static const INSIDE: int = 0; // 0000
+		public static const LEFT: int = 1;   // 0001
+		public static const RIGHT: int = 2;  // 0010
+		public static const BOTTOM: int = 4; // 0100
+		public static const TOP: int = 8;    // 1000
+		
+		private function computeOutCode(p: Point, view: Rectangle): int
+		{
+			var code: int;
+			
+			code = INSIDE;          // initialised as being inside of clip window
+			
+			if (p.x < view.left)           // to the left of clip window
+				code |= LEFT;
+			else if (p.x > view.right)      // to the right of clip window
+				code |= RIGHT;
+			if (p.y < view.top)           // below the clip window
+				code |= BOTTOM;
+			else if (p.y > view.bottom)      // above the clip window
+				code |= TOP;
+			
+			return code;
+		}
+		
+		/**
+		 * Implementation of Cohen Sutherland algorithm for line clipping
+		 *  
+		 * @param p1 - line start point
+		 * @param p2 - line end point
+		 * @param view - clipping view (mostly widget view)
+		 * @return - Array of 2 points of clipped line or null if line is outside of view
+		 * 
+		 */		
+		private function lineClippingCohenSutherland(p1: Point, p2: Point, view: Rectangle): Array
+		{
+			// compute outcodes for P0, P1, and whatever point lies outside the clip rectangle
+			var outcode0: int = computeOutCode(p1, view);
+			var outcode1: int = computeOutCode(p2, view);
+			var accept: Boolean = false;
+			
+			var x0: Number = p1.x;
+			var y0: Number = p1.y;
+			var x1: Number = p2.x;
+			var y1: Number = p2.y;
+			
+			var xmin: Number = view.left;
+			var xmax: Number = view.right;
+			var ymin: Number = view.top;
+			var ymax: Number = view.bottom;
+			
+			while (true) {
+				if (!(outcode0 | outcode1)) { // Bitwise OR is 0. Trivially accept and get out of loop
+					accept = true;
+					break;
+				} else if (outcode0 & outcode1) { // Bitwise AND is not 0. Trivially reject and get out of loop
+					break;
+				} else {
+					// failed both tests, so calculate the line segment to clip
+					// from an outside point to an intersection with clip edge
+					var x: Number;
+					var y: Number;
+					
+					// At least one endpoint is outside the clip rectangle; pick it.
+					var outcodeOut: int = outcode0 ? outcode0 : outcode1;
+					
+					// Now find the intersection point;
+					// use formulas y = y0 + slope * (x - x0), x = x0 + (1 / slope) * (y - y0)
+					if (outcodeOut & TOP) {           // point is above the clip rectangle
+						x = x0 + (x1 - x0) * (ymax - y0) / (y1 - y0);
+						y = ymax;
+					} else if (outcodeOut & BOTTOM) { // point is below the clip rectangle
+						x = x0 + (x1 - x0) * (ymin - y0) / (y1 - y0);
+						y = ymin;
+					} else if (outcodeOut & RIGHT) {  // point is to the right of clip rectangle
+						y = y0 + (y1 - y0) * (xmax - x0) / (x1 - x0);
+						x = xmax;
+					} else if (outcodeOut & LEFT) {   // point is to the left of clip rectangle
+						y = y0 + (y1 - y0) * (xmin - x0) / (x1 - x0);
+						x = xmin;
+					}
+					
+					// Now we move outside point to intersection point to clip
+					// and get ready for next pass.
+					if (outcodeOut == outcode0) {
+						x0 = x;
+						y0 = y;
+						outcode0 = computeOutCode(new Point(x0, y0), view);
+					} else {
+						x1 = x;
+						y1 = y;
+						outcode1 = computeOutCode(new Point(x1, y1), view);
+					}
+				}
+			}
+			if (accept) {
+				// Following functions are left for implementation by user based on
+				// their platform (OpenGL/graphics.h etc.)
+//				DrawRectangle(xmin, ymin, xmax, ymax);
+				return [new Point(x0, y0), new Point(x1, y1)];
+			}
+			
+			return null;
+		}
+		
+		private function polygonClipppingSutherlandHodgman(subjectPolygon: Array, clipPolygon: Array): Array 
+		{
+			var cp1: Point;
+			var cp2: Point;
+			var s: Point;
+			var e: Point;
+			
+			var inputList: Array;
+			var outputList: Array = subjectPolygon;
+			cp1 = clipPolygon[clipPolygon.length-1];
+			
+//			var j: Point;
+			
+			for each (cp2 in clipPolygon) 
+			{
+//				cp2 = j;
+				inputList = outputList;
+				
+				outputList = [];
+				s = inputList[inputList.length - 1]; //last on the input list
+				for each (e in inputList) {
+//					var e = inputList[i];
+					if (inside(e, cp1, cp2)) 
+					{
+						if (!inside(s, cp1, cp2)) 
+						{
+							outputList.push(intersection(s, e, cp1, cp2));
+						}
+						outputList.push(e);
+					}
+					else if (inside(s, cp1, cp2)) {
+						outputList.push(intersection(s, e, cp1, cp2));
+					}
+					s = e;
+				}
+				cp1 = cp2;
+			}
+			return outputList;
+		}
+		
+		
+		
 		/**
 		 * Shift coordinates in array of projection extent width multiplies "shiftSize"
 		 * @param coords

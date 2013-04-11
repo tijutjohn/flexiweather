@@ -514,8 +514,9 @@ package com.iblsoft.flexiweather.ogc.kml
 
 		private function updateFeature(feature: KMLFeature, changeFlag: FeatureUpdateContext, asyncManager: AsyncManager): void
 		{
+//			trace("**********************************************************************************");
 //			trace("updateFeature: " + feature.name + " isFullUpdate: " + changeFlag.fullUpdateNeeded);
-			var viewBBox: BBox = container.getViewBBox();
+//			var viewBBox: BBox = container.getViewBBox();
 //			if (viewBBox.pointInside(feature.x, feature.y))
 //			{
 //				

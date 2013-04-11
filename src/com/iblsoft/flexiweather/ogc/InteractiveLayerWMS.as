@@ -334,7 +334,7 @@ package com.iblsoft.flexiweather.ogc
 
 		override public function toString(): String
 		{
-			 return "InteractiveLayerWMS " + name + " / " + container + " >> " + currentViewProperties;
+			 return "InteractiveLayerWMS " + name + " / LayerID: " + m_layerID + " " + container + " >> " + currentViewProperties;
 		}
 	}
 }

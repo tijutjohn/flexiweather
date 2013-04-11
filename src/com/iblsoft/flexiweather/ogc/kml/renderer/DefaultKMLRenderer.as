@@ -847,7 +847,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 			if (coords && coords.length > 1)
 			{
 				g = new GraphicsCurveRenderer(gr);
-				var features: Array = m_featureSplitter.splitCoordPolyLineToArrayOfPointPolyLines(coords, false);
+				var features: Array = m_featureSplitter.splitCoordPolyLineToArrayOfPointPolyLines(coords, false, true);
 				var kmlReflectionDictionary: KMLFeaturesReflectionDictionary = placemark.kmlReflectionDictionary;
 				var totalReflections: int = kmlReflectionDictionary.totalReflections;
 				for (var i: int = 0; i < totalReflections; i++)
@@ -924,7 +924,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 			{
 				var g: GraphicsCurveRenderer;
 				g = new GraphicsCurveRenderer(gr);
-				var features: Array = m_featureSplitter.splitCoordPolyLineToArrayOfPointPolyLines(coords, false);
+				var features: Array = m_featureSplitter.splitCoordPolyLineToArrayOfPointPolyLines(coords, false, fillExists);
 				var kmlReflectionDictionary: KMLFeaturesReflectionDictionary = placemark.kmlReflectionDictionary;
 				var totalReflections: int = kmlReflectionDictionary.totalReflections;
 				for (var i: int = 0; i < totalReflections; i++)

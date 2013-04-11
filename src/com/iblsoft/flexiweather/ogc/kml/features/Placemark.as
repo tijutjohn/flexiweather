@@ -188,8 +188,8 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				var linearRing: LinearRing = (geometry as Polygon).outerBoundaryIs.linearRing;
 				return linearRing.coordinatesPoints;
 			}
-			if (geometry is MultiGeometry)
-				trace("what should be returned for multigeometry???");
+//			if (geometry is MultiGeometry)
+//				trace("what should be returned for multigeometry???");
 			return coordinates;
 		}
 

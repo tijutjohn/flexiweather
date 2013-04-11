@@ -312,7 +312,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 						lo.visible = true;
 					else {
 						var objectAbsoluteVisibility: Boolean = getAbsoluteVisibility(lo.object);
-						trace("ACL obj: " +  lo.object + " absolute visibility: " + objectAbsoluteVisibility);
+//						trace("ACL obj: " +  lo.object + " absolute visibility: " + objectAbsoluteVisibility);
 						lo.visible = objectAbsoluteVisibility;
 					}
 				}
@@ -545,7 +545,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 			{
 				//if kml feature is not visible, label have to be invisible as well
 				var kmlFeature: KMLFeature = (object as KMLLabel).kmlFeature;
-				trace("getAbsoluteVisibility " + object + " kmlFeature: " + kmlFeature + " vis: " + kmlFeature.visible);
+//				trace("getAbsoluteVisibility " + object + " kmlFeature: " + kmlFeature + " vis: " + kmlFeature.visible);
 				if (!kmlFeature.visible)
 					return false;
 			}

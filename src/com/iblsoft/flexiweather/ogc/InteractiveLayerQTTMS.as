@@ -69,7 +69,6 @@ package com.iblsoft.flexiweather.ogc
 	
 	import spark.primitives.Graphic;
 
-	[Event(name = 'drawTiles', type = '')]
 	/**
 	 * Generic Quad Tree (like Google Maps) tiling layer
 	 **/
@@ -177,7 +176,7 @@ package com.iblsoft.flexiweather.ogc
 		
 		override public function toString(): String
 		{
-			return "InteractiveLayerQTTMS " + name;
+			return "InteractiveLayerQTTMS " + name + " / " + layerID;
 		}
 	}
 }

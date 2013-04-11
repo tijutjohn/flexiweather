@@ -1619,7 +1619,7 @@ package com.iblsoft.flexiweather.widgets
 		 */
 		public function getPolylineReflections(coords: Array, b_closed: Boolean = false): Array
 		{
-			var features: Array = m_featureSplitter.splitCoordPolyLineToArrayOfPointPolyLines(coords, b_closed);
+			var features: Array = m_featureSplitter.splitCoordPolyLineToArrayOfPointPolyLines(coords, b_closed, false);
 			return features;
 		}
 
@@ -1646,7 +1646,7 @@ package com.iblsoft.flexiweather.widgets
 		 */
 		public function drawPolyline(g: ICurveRenderer, coords: Array, b_closed: Boolean = false): Array
 		{
-			var features: Array = m_featureSplitter.splitCoordPolyLineToArrayOfPointPolyLines(coords, b_closed);
+			var features: Array = m_featureSplitter.splitCoordPolyLineToArrayOfPointPolyLines(coords, b_closed, false);
 			var p: Point;
 			var oldPoint: Point;
 			for each (var mPoints: Array in features)

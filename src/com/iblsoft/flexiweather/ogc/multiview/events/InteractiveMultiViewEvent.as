@@ -14,6 +14,10 @@ package com.iblsoft.flexiweather.ogc.multiview.events
         
 		public static const MULTI_VIEW_ALL_MAPS_LAYERS_INITIALIZED:String = 'multiViewAllMapsLayersInitialized';
 
+        public static const MULTI_VIEW_BEFORE_REFRESH:String = 'multiViewBeforeRefresh';
+        
+		public static const MULTI_VIEW_REFRESHED:String = 'multiViewRefreshed';
+		
 		public function InteractiveMultiViewEvent(type:String, bubbles:Boolean = false, cancelable:Boolean = false)
         {
             super(type, bubbles, cancelable);

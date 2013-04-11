@@ -22,7 +22,10 @@ package com.iblsoft.flexiweather.widgets
 	{
 		private static var layerUID: int = 0;
 		protected var m_layerID: int;
-		
+		public function get layerID(): int
+		{
+			return m_layerID;
+		}
 		
 		protected var m_layerWasDestroyed: Boolean;
 		protected var _type: String;
@@ -230,7 +233,8 @@ package com.iblsoft.flexiweather.widgets
 
 		override protected function updateDisplayList(unscaledWidth: Number, unscaledHeight: Number): void
 		{
-//			Log.getLogger("InteractiveLayer").info("updateDisplayList unscaledWidth: " + unscaledWidth + " unscaledHeight: " + unscaledHeight);
+//			trace(this + " updateDisplayList unscaledWidth: " + unscaledWidth + " unscaledHeight: " + unscaledHeight);
+			
 			graphics.clear();
 			draw(graphics);
 		}
@@ -335,6 +339,7 @@ package com.iblsoft.flexiweather.widgets
 		// data refreshing
 		public function refresh(b_force: Boolean): void
 		{
+			trace(this + " refresh");
 		}
 
 		// feature info
@@ -437,7 +442,7 @@ package com.iblsoft.flexiweather.widgets
 
 		override public function toString(): String
 		{
-			return "InteractiveLayer " + name + " / " + id;
+			return "InteractiveLayer " + name + " / " + m_layerID;
 		}
 	}
 }

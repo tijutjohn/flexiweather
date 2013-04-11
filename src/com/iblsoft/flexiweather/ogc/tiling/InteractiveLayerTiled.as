@@ -335,7 +335,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 					_loader.addEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
 					_loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
 					_loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onCurrentWMSDataLoadingFinishedFromCache);
-					_loader.addEventListener("invalidateDynamicPart", onCurrentWMSDataInvalidateDynamicPart);
+					_loader.addEventListener(InteractiveLayerEvent.INVALIDATE_DYNAMIC_PART, onCurrentWMSDataInvalidateDynamicPart);
 				}
 				_loader.zoom = zoomLevel; 
 				_loader.updateWMSData(b_forceUpdate, m_currentQTTViewProperties, forcedLayerWidth, forcedLayerHeight);
@@ -467,6 +467,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 		}
 		override public function draw(graphics: Graphics): void
 		{
+//			debug("draw");
 			if (!_layerInitialized)
 				return;
 			super.draw(graphics);
@@ -848,7 +849,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			if (!_preloader)
 			{
 				_preloader = getWMSViewPropertiesLoader() as TiledLoader;
-				_preloader.addEventListener("invalidateDynamicPart", onQTTViewPropertiesDataInvalidateDynamicPart);
+				_preloader.addEventListener(InteractiveLayerEvent.INVALIDATE_DYNAMIC_PART, onQTTViewPropertiesDataInvalidateDynamicPart);
 				_preloader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
 				_preloader.addEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onPreloadingWMSDataLoadingFinishedFromCache);
 			}
@@ -1509,7 +1510,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 				_loader.removeEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
 				_loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
 				_loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onCurrentWMSDataLoadingFinishedFromCache);
-				_loader.removeEventListener("invalidateDynamicPart", onCurrentWMSDataInvalidateDynamicPart);
+				_loader.removeEventListener(InteractiveLayerEvent.INVALIDATE_DYNAMIC_PART, onCurrentWMSDataInvalidateDynamicPart);
 				_loader.destroy();
 			}
 		}
@@ -1518,7 +1519,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			if (_preloader)
 			{
-				_preloader.removeEventListener("invalidateDynamicPart", onQTTViewPropertiesDataInvalidateDynamicPart);
+				_preloader.removeEventListener(InteractiveLayerEvent.INVALIDATE_DYNAMIC_PART, onQTTViewPropertiesDataInvalidateDynamicPart);
 				_preloader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
 				_preloader.destroy();
 			}
@@ -1596,7 +1597,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		override public function toString(): String
 		{
-			return "InteractiveLayerTiled " + name;
+			return "InteractiveLayerTiled " + name + " / layerID: " + m_layerID;
 		}
 		
 		

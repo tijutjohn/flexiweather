@@ -425,6 +425,7 @@ package com.iblsoft.flexiweather.net.loaders
 			checkRequestData(urlRequest);
 			checkRequestBaseURL(urlRequest);
 			
+//			trace(this + " load: " + urlRequest.url);
 			// if there is no associatedDat, add empty one
 			if (!associatedData)
 			{

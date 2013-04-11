@@ -511,7 +511,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		private function invalidateDynamicPart(b_invalid: Boolean = true): void
 		{
-			var de: DynamicEvent = new DynamicEvent("invalidateDynamicPart");
+			var de: DynamicEvent = new DynamicEvent(InteractiveLayerEvent.INVALIDATE_DYNAMIC_PART);
 			de["invalid"] = b_invalid;
 			dispatchEvent(de);
 		}
