@@ -51,6 +51,11 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 			return _tileIndicesMapper;
 		}
 		private var ma_qttTiles: Array;
+		
+		public function get tiles(): Array
+		{
+			return ma_qttTiles;
+		}
 
 		public function TiledViewProperties()
 		{

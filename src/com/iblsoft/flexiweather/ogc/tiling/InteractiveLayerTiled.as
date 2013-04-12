@@ -29,6 +29,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
+	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
 	import flash.display.Graphics;
@@ -41,6 +42,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import flash.text.TextFieldAutoSize;
 	import flash.text.TextFormat;
 	
+	import mx.collections.ArrayCollection;
 	import mx.controls.Alert;
 	import mx.events.DynamicEvent;
 	import mx.events.FlexEvent;
@@ -143,6 +145,17 @@ package com.iblsoft.flexiweather.ogc.tiling
 			
 			_tileMatrixSetLinks = new Array();
 			
+		}
+		
+		override protected function commitProperties():void
+		{
+			super.commitProperties();
+			
+			if (_cacheIsUpdated)
+			{
+				_cacheIsUpdated = false;
+				invalidateDynamicPart();
+			}
 		}
 
 		/**************************************************************************************************************************************************
@@ -1593,6 +1606,49 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			var key: String = event.item.cacheKey.key;
 			var image: DisplayObject = event.item.image;
+			
+			var cache: WMSTileCache = getCache() as WMSTileCache;
+			var bitmapFound: Boolean;
+			
+			//check if this Bitmap is used in this layer
+			var tiles: Array = m_currentQTTViewProperties.tiles;
+			for each (var tileViewProperties: TiledTileViewProperties in tiles)
+			{
+				if (tileViewProperties.bitmap)
+				{
+					var currBitmap: Bitmap = tileViewProperties.bitmap;
+					if (image == currBitmap)
+					{
+						//listen when same cache item will be added
+						tileViewProperties.bitmapIsOk = false;
+						bitmapFound = true;
+					}
+				}
+			}
+			if (bitmapFound)
+				cache.addEventListener(WMSCacheEvent.ITEM_ADDED, onDeleteCacheItemAdded);
+		}
+		
+		private var _cacheIsUpdated: Boolean;
+		private function onDeleteCacheItemAdded(event: WMSCacheEvent): void
+		{
+			//update imagePart
+			var tiles: Array = m_currentQTTViewProperties.tiles;
+			var cacheKey: String = event.item.cacheKey.key;
+			for each (var tileViewProperties: TiledTileViewProperties in tiles)
+			{
+				if (tileViewProperties.bitmap)
+				{
+					if (!tileViewProperties.cacheKey || tileViewProperties.cacheKey == cacheKey)
+					{
+						tileViewProperties.bitmap = event.item.image as Bitmap;
+						tileViewProperties.bitmapIsOk = true;
+						tileViewProperties.cacheKey = cacheKey;
+					}
+				}
+			}
+			_cacheIsUpdated = true;
+			invalidateProperties();
 		}
 		
 		protected function debug(str: String): void

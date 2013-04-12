@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.ogc.cache
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.ogc.cache.event.WMSCacheEvent;
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.IViewProperties;
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.TiledTileViewProperties;
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.TiledViewProperties;
@@ -330,21 +331,12 @@ package com.iblsoft.flexiweather.ogc.cache
 			return bItemCached;
 		}
 
-//		public function addTile(img: Bitmap, s_crs: String, tileIndex: TileIndex, url: URLRequest, specialStrings: Array, tiledArea: TiledArea, viewPart: BBox, time: Date): void
-//		override public function addCacheItem(img: Bitmap, s_crs: String, bbox: BBox, url: URLRequest, associatedCacheData: Object = null): void
 		override public function addCacheItem(img: DisplayObject, viewProperties: IViewProperties, associatedData: Object): void
 		{
 			var qttTileViewProperties: TiledTileViewProperties = viewProperties as TiledTileViewProperties;
 			if (!qttTileViewProperties)
 				return;
 			
-//			var parentQTT: TiledViewProperties = qttTileViewProperties.qttViewProperties;
-			
-//			var s_crs: String = parentQTT.crs as String;
-//			var bbox: BBox = parentQTT.getViewBBox() as BBox;
-//			var time: Date = parentQTT.validity;
-//			var tiledAreas: Array = parentQTT.tiledAreas;
-//			var specialStrings: Array = parentQTT.specialCacheStrings;
 			var s_crs: String = qttTileViewProperties.crs as String;
 			var bbox: BBox = qttTileViewProperties.getViewBBox() as BBox;
 			var time: Date = qttTileViewProperties.validity;
@@ -372,7 +364,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			/**
 			 * we need to delete cache item with same "key" before we add new item.
 			*/
-			var bWasDeleted: Boolean = deleteCacheItemByKey(s_key);
+			var bWasDeleted: Boolean = deleteCacheItemByKey(s_key, true);
 			
 			//add item to cache
 			md_cache[s_key] = item;
@@ -380,6 +372,9 @@ package com.iblsoft.flexiweather.ogc.cache
 			
 			mi_cacheItemCount++;
 			
+			var wce: WMSCacheEvent = new WMSCacheEvent(WMSCacheEvent.ITEM_ADDED, item, true);
+			wce.associatedData = associatedData;
+			dispatchEvent(wce);
 			
 			delete md_cacheLoading[s_key];
 			mi_cacheLoadingItemsLength--;
@@ -430,6 +425,8 @@ package com.iblsoft.flexiweather.ogc.cache
 			// dispose bitmap data, just for bitmaps which are not currently displayed
 			if (cacheItem && (!cacheItem.displayed || (cacheItem.displayed && b_disposeDisplayed)))
 			{
+				notifyBitmapDelete(cacheItem);
+				
 				disposeTileBitmap(s_key);
 				cacheItem.destroy();
 				cacheItem = null;

@@ -156,7 +156,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			return false;
 		}
 
-		private function notifyBitmapDelete(cacheItem: CacheItem): void
+		protected function notifyBitmapDelete(cacheItem: CacheItem): void
 		{
 			dispatchEvent( new WMSCacheEvent(WMSCacheEvent.BEFORE_DELETE, cacheItem, true) );
 		}

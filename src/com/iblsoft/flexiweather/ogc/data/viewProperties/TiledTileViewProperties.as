@@ -11,6 +11,9 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 	{
 		// loaded bitmap for this tileIndex
 		public var bitmap: Bitmap;
+		public var bitmapIsOk: Boolean;
+		public var cacheKey: String;
+		
 		public var tileIndex: TileIndex;
 		public var updateCycleAge: uint;
 		private var m_qttViewProperties: TiledViewProperties;
