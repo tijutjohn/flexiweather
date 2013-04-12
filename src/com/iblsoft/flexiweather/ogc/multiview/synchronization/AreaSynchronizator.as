@@ -199,7 +199,6 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 					widget.setViewBBox(viewBBox, bFinalChange);
 				}
 				
-				trace("changeCRS: " + changeCRS + "/" + changeCRSNow + " changeExtentBBox: " + changeExtentBBox + "/" + changeExtentBBoxNow + " changeViewBBox: " + changeViewBBox + "/" + bFinalChange);
 				
 			}
 			
@@ -230,7 +229,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 
 		private function debug(str: String, type: String = "Info", tag: String = "AreaSynchronizator"): void
 		{
-			trace(tag + "| " + type + "| " + str);
+//			trace(tag + "| " + type + "| " + str);
 		}
 	}
 }

@@ -520,8 +520,6 @@ package com.iblsoft.flexiweather.widgets
 		public function invalidateLevel(): void
 		{
 			_levelInvalidated = true;
-			
-			trace(this + " invalidateLevel: " + level);
 			invalidateProperties();
 		}
 
@@ -574,7 +572,6 @@ package com.iblsoft.flexiweather.widgets
 		private function resynchronizeOnStart(event: SynchronisedVariableChangeEvent): void
 		{
 			var layer: InteractiveLayerMSBase = event.currentTarget as InteractiveLayerMSBase
-			trace("resynchronizeOnStart: " + layer);
 			resynchronize();
 			
 //			if (_firstDataReceived[layer])
@@ -635,9 +632,7 @@ package com.iblsoft.flexiweather.widgets
 				_levelInvalidated = false;
 				
 				//it will set level again. This is done by purpose when adding new layer, to synchronise level with newly added layer
-				trace(this + " commitProperties: setLevel again: " + _globalVariablesManager.level);
 				setLevel(_globalVariablesManager.level);
-				trace(this + " commitProperties: setLevel set: " + _globalVariablesManager.level);
 			}
 			
 			if (m_selectedLayerIndexChanged)
@@ -1208,7 +1203,6 @@ package com.iblsoft.flexiweather.widgets
 				_tempMapStorage.setLevel(newLevel, b_nearrest);
 				return false;
 			}
-			trace(this + " setLevel: " + newLevel + " nearest: " + b_nearrest);
 			
 			var bGlobalSynchronization: Boolean = false;
 			for each (var l: InteractiveLayer in m_layers)
@@ -1428,8 +1422,8 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (debugConsole)
 				debugConsole.print(str, type, tag);
-			trace(tag + "| " + type + "| " + str);
-			LoggingUtils.dispatchLogEvent(this, " ILM: " + str);
+//			trace(tag + "| " + type + "| " + str);
+//			LoggingUtils.dispatchLogEvent(this, " ILM: " + str);
 		}
 	}
 }

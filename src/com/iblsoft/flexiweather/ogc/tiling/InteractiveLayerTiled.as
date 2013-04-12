@@ -9,6 +9,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import com.iblsoft.flexiweather.ogc.cache.ICache;
 	import com.iblsoft.flexiweather.ogc.cache.ICachedLayer;
 	import com.iblsoft.flexiweather.ogc.cache.WMSTileCache;
+	import com.iblsoft.flexiweather.ogc.cache.event.WMSCacheEvent;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.TiledLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.IViewProperties;
@@ -29,6 +30,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.display.BitmapData;
+	import flash.display.DisplayObject;
 	import flash.display.Graphics;
 	import flash.events.Event;
 	import flash.filters.GlowFilter;
@@ -70,7 +72,13 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		public function set cache(value: WMSTileCache): void
 		{
+			if (m_cache)
+				m_cache.removeEventListener(WMSCacheEvent.BEFORE_DELETE , onBeforeCacheItemDeleted);
+			
 			m_cache = value;
+			
+			if (m_cache)
+				m_cache.addEventListener(WMSCacheEvent.BEFORE_DELETE , onBeforeCacheItemDeleted);
 		}
 		public function get cache(): WMSTileCache
 		{
@@ -1364,8 +1372,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 		 * @return
 		 *
 		 */
-		private function isPartCached(qttViewProperties: TiledViewProperties, s_currentCRS: String, currentViewBBox: BBox, i_width: uint, i_height: uint): Boolean
-		{
+//		private function isPartCached(qttViewProperties: TiledViewProperties, s_currentCRS: String, currentViewBBox: BBox, i_width: uint, i_height: uint): Boolean
+//		{
 			/**
 			 * this is how you can find properties for cache metadata
 			 *
@@ -1397,8 +1405,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 			return true;
 			}
 			*/
-			return false;
-		}
+//			return false;
+//		}
 
 		/**
 		 * Removed all cached tiles except tiles valid for specified time
@@ -1579,6 +1587,12 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			super.validateSize(b_recursive);
 			checkZoom();
+		}
+		
+		protected function onBeforeCacheItemDeleted(event: WMSCacheEvent): void
+		{
+			var key: String = event.item.cacheKey.key;
+			var image: DisplayObject = event.item.image;
 		}
 		
 		protected function debug(str: String): void

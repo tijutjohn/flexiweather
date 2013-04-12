@@ -73,20 +73,11 @@ package com.iblsoft.flexiweather.ogc.managers
 
 		public function get level(): String
 		{
-			trace(this + " get level:" +  _level);
 			return _level;
 		}
 
 		public function set level(value: String): void
 		{
-			trace(this + " level setter: old + " +  _level + " new: " + value);
-				
-			//debug
-			if (_level && _level == '900hPa' && value == '850hPa')
-			{
-				trace("Debug " + this);
-			}
-			
 			if (_level != value)
 			{
 				_level = value;
@@ -303,7 +294,7 @@ package com.iblsoft.flexiweather.ogc.managers
 				}
 				_lastFrameNotified = selectedFrame;
 				
-				trace("GlobalVariablesManager ["+_interactiveLayerMap+"] onInteractiveLayerFrameVariableChanged selectedFrame: " + selectedFrame + " _frame: " + _frame);
+//				trace("GlobalVariablesManager ["+_interactiveLayerMap+"] onInteractiveLayerFrameVariableChanged selectedFrame: " + selectedFrame + " _frame: " + _frame);
 				if (_frame)
 				{
 					if (_frame.time != selectedFrame.time)

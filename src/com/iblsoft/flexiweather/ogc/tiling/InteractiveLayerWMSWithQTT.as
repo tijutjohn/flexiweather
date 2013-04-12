@@ -84,9 +84,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 			super.visible = b_visible;
 			if (m_tiledLayer) {
 				m_tiledLayer.visible = b_visible;
-				trace(this + " visible = " + b_visible + " / " + visible + " / " + m_tiledLayer.visible);
-			} else {
-				trace(this + " visible = " + b_visible + " / " + visible);
+//				trace(this + " visible = " + b_visible + " / " + visible + " / " + m_tiledLayer.visible);
+//			} else {
+//				trace(this + " visible = " + b_visible + " / " + visible);
 			}
 		}
 
@@ -675,7 +675,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 		
 		override protected function debug(str: String): void
 		{
-			trace(this + " WMSWithQTT: " + str);
+//			trace(this + " WMSWithQTT: " + str);
 //			LoggingUtils.dispatchLogEvent(this, "WMSWithQTT: " + str);
 		}
 		

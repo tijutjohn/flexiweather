@@ -8,6 +8,7 @@ package com.iblsoft.flexiweather.ogc.data
 
 	public class ImagePart
 	{
+		public var ms_cacheKey: String;
 		public var mi_updateCycleAge: uint;
 //		public var m_image: Bitmap = null;
 		public var m_image: DisplayObject = null;

@@ -10,6 +10,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.ogc.cache.ICache;
 	import com.iblsoft.flexiweather.ogc.cache.ICachedLayer;
 	import com.iblsoft.flexiweather.ogc.cache.WMSCache;
+	import com.iblsoft.flexiweather.ogc.cache.event.WMSCacheEvent;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.configuration.services.OGCServiceConfiguration;
@@ -309,18 +310,14 @@ package com.iblsoft.flexiweather.ogc
 				_preloader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onPreloadingWMSDataLoadingStarted);
 				_preloader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
 				_preloader.addEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onPreloadingWMSDataLoadingFinished);
-				
-				trace(this + " PRELOADER created: " + _preloader.id);
 			}
 			
-			trace(this + " preload preloading: " + preloading);
 			if (!preloading)
 			{
 				setPreloadingStatus(true);
 				_preloader.updateWMSData(true, wmsViewProperties, forcedLayerWidth, forcedLayerHeight);
 			} else {
 				ma_preloadingBuffer.push(wmsViewProperties);
-				trace(this + " preload add to buffer: " + ma_preloadingBuffer.length);
 			}
 		}
 
@@ -430,12 +427,6 @@ package com.iblsoft.flexiweather.ogc
 			wmsViewProperties.updateDimensionsInURLRequest(request);
 			wmsViewProperties.updateCustomParametersInURLRequest(request);
 			var wmsCache: WMSCache = getCache() as WMSCache;
-			//			var img: Bitmap = null;
-//			var itemMetadata: CacheItemMetadata = new CacheItemMetadata();
-//			itemMetadata.crs = s_currentCRS;
-//			itemMetadata.bbox = currentViewBBox;
-//			itemMetadata.url = request;
-//			itemMetadata.dimensions = dimensions;
 			wmsViewProperties.url = request;
 			var isCached: Boolean = wmsCache.isItemCached(wmsViewProperties)
 			var imgTest: DisplayObject = wmsCache.getCacheItemBitmap(wmsViewProperties);
@@ -505,7 +496,6 @@ package com.iblsoft.flexiweather.ogc
 
 		protected function onWMSViewPropertiesDataInvalidateDynamicPart(event: DynamicEvent): void
 		{
-			trace("onWMSViewPropertiesDataInvalidateDynamicPart");
 		}
 
 		protected function onCurrentWMSDataInvalidateDynamicPart(event: DynamicEvent): void
@@ -675,8 +665,6 @@ package com.iblsoft.flexiweather.ogc
 					_loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onCurrentWMSDataLoadingFinishedFromCache);
 					_loader.addEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
 					_loader.addEventListener(InteractiveLayerEvent.INVALIDATE_DYNAMIC_PART, onCurrentWMSDataInvalidateDynamicPart);
-					
-					trace(this + " LOADER created: " + _loader.id);
 				}
 				_loader.updateWMSData(b_forceUpdate, m_currentWMSViewProperties, forcedLayerWidth, forcedLayerHeight);
 			}
@@ -763,7 +751,6 @@ package com.iblsoft.flexiweather.ogc
 
 		public override function draw(graphics: Graphics): void
 		{
-			debug(" draw");
 			if (!m_currentWMSViewProperties)
 				return;
 			if (!layerWasDestroyed)
@@ -813,7 +800,6 @@ package com.iblsoft.flexiweather.ogc
 
 		private function drawImagePartAsBitmap(graphics: Graphics, image: Bitmap, s_imageCRS: String, imageBBox: BBox): void
 		{
-			debug("drawImagePartAsBitmap");
 			var ptImageStartPoint: Point =
 					container.coordToPoint(new Coord(s_imageCRS, imageBBox.xMin, imageBBox.yMax));
 			var ptImageEndPoint: Point =
@@ -936,7 +922,7 @@ package com.iblsoft.flexiweather.ogc
 				styleName = '';
 			var style: Object = getWMSStyleObject(0, styleName);
 			var legendObject: Object = style.legend;
-			debug("MSBAse renderLegend style: " + style.legend);
+//			debug("MSBAse renderLegend style: " + style.legend);
 			var w: int = legendObject.width;
 			var h: int = legendObject.height;
 			if (hintSize)
@@ -944,13 +930,13 @@ package com.iblsoft.flexiweather.ogc
 				w = hintSize.width;
 				h = hintSize.height;
 			}
-			debug("renderLegend url: " + legendObject.url + " scale [" + legendScaleX + "," + legendScaleY + "]");
+//			debug("renderLegend url: " + legendObject.url + " scale [" + legendScaleX + "," + legendScaleY + "]");
 			if (!useCache || (useCache && !isLegendCachedBySize(w, h)))
 			{
 				var url: URLRequest = m_cfg.toGetLegendRequest(
 						w, h,
 						style.name);
-				debug("LEGEND URL1: " + url.url);
+//				debug("LEGEND URL1: " + url.url);
 				if (!(url.url.indexOf('${BASE_URL}') == 0))
 				{
 					url = new URLRequest(legendObject.url);
@@ -1077,9 +1063,9 @@ package com.iblsoft.flexiweather.ogc
 			//			image.scaleY = legendScaleY;
 			image.y = labelHeight + gap;
 			label.width = image.width;
-			debug("\n\t createLegend legendScaleX: " + legendScaleX + " legendScaleY: " + legendScaleY);
-			debug("t createLegend image: " + image.width + " , " + image.height);
-			debug("t createLegend image scale: " + image.scaleX + " , " + image.scaleY);
+//			debug("\n\t createLegend legendScaleX: " + legendScaleX + " legendScaleY: " + legendScaleY);
+//			debug("t createLegend image: " + image.width + " , " + image.height);
+//			debug("t createLegend image scale: " + image.scaleX + " , " + image.scaleY);
 			group.width = image.width;
 			group.height = image.height + labelHeight + gap;
 			if (callback != null)
@@ -1700,7 +1686,7 @@ package com.iblsoft.flexiweather.ogc
 		protected function debug(str: String): void
 		{
 //			LoggingUtils.dispatchLogEvent(this, "MSBase: " + str);
-			trace("MSBase: ["+this+"] " + str);
+//			trace("MSBase: ["+this+"] " + str);
 		}
 
 		public function get configuration(): ILayerConfiguration
@@ -1740,6 +1726,50 @@ package com.iblsoft.flexiweather.ogc
 			dispatchEvent(se);
 		}
 
+		protected function onBeforeCacheItemDeleted(event: WMSCacheEvent): void
+		{
+			var key: String = event.item.cacheKey.key;
+			var image: DisplayObject = event.item.image;
+			
+			var cache: WMSCache = getCache() as WMSCache;
+			
+			//check if this Bitmap is used in this layer
+			var imageParts: ArrayCollection = m_currentWMSViewProperties.imageParts;
+			for each (var imagePart: ImagePart in imageParts)
+			{
+				if (imagePart.isBitmap)
+				{
+					var currImage: DisplayObject = imagePart.m_image;
+					if (image == currImage)
+					{
+						//listen when same cache item will be added
+						imagePart.mb_imageOK = false;
+						cache.addEventListener(WMSCacheEvent.ITEM_ADDED, onDeleteCacheItemAdded);
+					}
+				}
+			}
+		}
+		
+		private function onDeleteCacheItemAdded(event: WMSCacheEvent): void
+		{
+			//update imagePart
+			var imageParts: ArrayCollection = m_currentWMSViewProperties.imageParts;
+			var cacheKey: String = event.item.cacheKey.key;
+			for each (var imagePart: ImagePart in imageParts)
+			{
+				if (imagePart.isBitmap)
+				{
+					if (!imagePart.ms_cacheKey || imagePart.ms_cacheKey == cacheKey)
+					{
+						imagePart.m_image = event.item.image;
+						imagePart.mb_imageOK = true;
+						imagePart.ms_cacheKey = cacheKey;
+					}
+				}
+			}
+			invalidateDynamicPart();
+		}
+		
 		override public function toString(): String
 		{
 			return "InteractiveLayerMSBase " + name + " / LayerID: " + m_layerID + " IW: " + container.id;
@@ -1749,6 +1779,8 @@ package com.iblsoft.flexiweather.ogc
 		{
 			if (m_cache)
 				m_cache.destroyCache();
+			
+			m_cache.removeEventListener(WMSCacheEvent.BEFORE_DELETE , onBeforeCacheItemDeleted);
 			m_cache = null;
 		}
 

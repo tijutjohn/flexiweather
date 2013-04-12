@@ -4,6 +4,7 @@ package com.iblsoft.flexiweather.ogc.cache
 	import com.iblsoft.flexiweather.ogc.cache.event.WMSCacheEvent;
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.IViewProperties;
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.WMSViewProperties;
+	
 	import flash.display.Bitmap;
 	import flash.display.DisplayObject;
 	import flash.events.EventDispatcher;
@@ -155,6 +156,10 @@ package com.iblsoft.flexiweather.ogc.cache
 			return false;
 		}
 
+		private function notifyBitmapDelete(cacheItem: CacheItem): void
+		{
+			dispatchEvent( new WMSCacheEvent(WMSCacheEvent.BEFORE_DELETE, cacheItem, true) );
+		}
 		/**
 		 * Delete cached item
 		 *
@@ -165,14 +170,15 @@ package com.iblsoft.flexiweather.ogc.cache
 		 */
 		public function deleteCacheItemByKey(s_key: String, b_disposeDisplayed: Boolean = false): Boolean
 		{
-//			return;
 			var cacheItem: CacheItem = md_cache[s_key] as CacheItem;
 			// dispose bitmap data, just for bitmaps which are not currently displayed
 			if (cacheItem && (!cacheItem.displayed || (cacheItem.displayed && b_disposeDisplayed)))
 			{
+				
+				notifyBitmapDelete(cacheItem);
 				if (cacheItem.image is Bitmap)
 				{
-//				debug("\t deleteCacheItem " + cacheItem);
+//					debug("\t deleteCacheItem " + cacheItem);
 					var bmp: Bitmap = cacheItem.image as Bitmap;
 					bmp.bitmapData.dispose();
 				}
@@ -365,7 +371,7 @@ package com.iblsoft.flexiweather.ogc.cache
 //				trace("addCacheItem: Can not delete item from 'loading cache' for key: " + s_key);
 			}
 			
-			var wce: WMSCacheEvent = new WMSCacheEvent(WMSCacheEvent.ITEM_ADDED, item);
+			var wce: WMSCacheEvent = new WMSCacheEvent(WMSCacheEvent.ITEM_ADDED, item, true);
 			wce.associatedData = associatedData;
 			dispatchEvent(wce);
 		}

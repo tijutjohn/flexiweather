@@ -2,11 +2,13 @@ package com.iblsoft.flexiweather.ogc.cache
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.IViewProperties;
+	
 	import flash.display.Bitmap;
 	import flash.display.DisplayObject;
+	import flash.events.IEventDispatcher;
 	import flash.net.URLRequest;
 
-	public interface ICache
+	public interface ICache extends IEventDispatcher
 	{
 		/**
 		 * Debug function for getting information about cache

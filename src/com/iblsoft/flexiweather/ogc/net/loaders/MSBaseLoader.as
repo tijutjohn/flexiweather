@@ -144,12 +144,16 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 					m_layer.getWMSStyleListString());
 			if (!request)
 				return;
+			
 			wmsViewProperties.updateDimensionsInURLRequest(request);
 			wmsViewProperties.updateCustomParametersInURLRequest(request);
 			wmsViewProperties.url = request;
+			
 			var img: DisplayObject = null;
 			var wmsCache: WMSCache = m_layer.getCache() as WMSCache;
+			var cacheItem: CacheItem;
 			var imagePart: ImagePart = new ImagePart();
+			
 			imagePart.mi_updateCycleAge = mi_updateCycleAge;
 			imagePart.ms_imageCRS = wmsViewProperties.crs;
 			imagePart.m_imageBBox = currentViewBBox;
@@ -167,7 +171,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				{
 					m_wmsViewProperties = wmsViewProperties;
 					m_imagePart = imagePart;
-					var cacheItem: CacheItem = wmsCache.getCacheItem(wmsViewProperties);
+					cacheItem = wmsCache.getCacheItem(wmsViewProperties);
 					wmsCache.addEventListener(WMSCacheEvent.ITEM_ADDED, onCacheItemLoaded);
 					return;
 				}
@@ -212,7 +216,12 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 			else
 			{
 				//image is cached
-				addImagePart(wmsViewProperties, imagePart, img);
+				cacheItem = wmsCache.getCacheItem(wmsViewProperties);
+				var key: String;
+				if (cacheItem && cacheItem.cacheKey)
+					key = cacheItem.cacheKey.key;
+				
+				addImagePart(wmsViewProperties, imagePart, img, key);
 				onFinishedRequest(wmsViewProperties, null);
 				invalidateDynamicPart();
 				notifyLoadingFinishedFromCache({wmsViewProperties: wmsViewProperties});
@@ -223,23 +232,15 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 		{
 			var wmsCache: WMSCache = event.target as WMSCache;
 			var item: CacheItem = event.item;
-			wmsCache.removeEventListener(WMSCacheEvent.ITEM_ADDED, onCacheItemLoaded);
-			//		super.onDataLoaded(event);
 			var wmsViewProperties: WMSViewProperties = m_wmsViewProperties;
+			
+			wmsCache.removeEventListener(WMSCacheEvent.ITEM_ADDED, onCacheItemLoaded);
+			
 			var imagePart: ImagePart = m_imagePart;
 			var result: * = item.image;
-//			event.associatedData.result = result;
 			imagePart.mi_updateCycleAge = mi_updateCycleAge;
-			addImagePart(wmsViewProperties, imagePart, result);
-//				wmsViewProperties.url = event.request;
-//				wmsCache.addCacheItem( item.image, wmsViewProperties);
-//				invalidateDynamicPart();
-//			var bFinishedAll: Boolean = onFinishedRequest(wmsViewProperties, event.request);
-//			if (bFinishedAll)
-//			{
-//				//notify layer that data was loaded
-//				notifyLoadingFinished(event.associatedData);	
-//			}
+			addImagePart(wmsViewProperties, imagePart, result, item.cacheKey.key);
+			
 			onFinishedRequest(m_wmsViewProperties, null);
 			invalidateDynamicPart();
 			
@@ -277,7 +278,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 			dispatchEvent(e);
 		}
 
-		private function addImagePart(wmsViewProperties: WMSViewProperties, imagePart: ImagePart, img: DisplayObject): void
+		private function addImagePart(wmsViewProperties: WMSViewProperties, imagePart: ImagePart, img: DisplayObject, cacheKey: String): void
 		{
 			//image is cached
 			var imageParts: ArrayCollection = wmsViewProperties.imageParts;
@@ -286,6 +287,8 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				// found in the cache
 				imagePart.m_image = img;
 				imagePart.mb_imageOK = true;
+				imagePart.ms_cacheKey = cacheKey;
+				
 				var total: int = imageParts.length;
 				if (total > 0)
 				{
@@ -331,13 +334,16 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				event.associatedData.result = result;
 				if (result is DisplayObject)
 				{
+					var cacheItem: CacheItem = wmsCache.getCacheItem(wmsViewProperties);
+					var key: String;
+					if (cacheItem && cacheItem.cacheKey)
+						key = cacheItem.cacheKey.key;
+					
 					imagePart.mi_updateCycleAge = mi_updateCycleAge;
-					addImagePart(wmsViewProperties, imagePart, result);
+					addImagePart(wmsViewProperties, imagePart, result, key);
 					wmsViewProperties.url = event.request;
 					wmsCache.addCacheItem(imagePart.m_image, wmsViewProperties, event.associatedData);
 					invalidateDynamicPart();
-//					notifyLoadingFinished(event.associatedData);
-//					return;
 				}
 				else
 				{
@@ -418,6 +424,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				var imagePart: ImagePart = event.associatedData.requestedImagePart;
 				imagePart.m_image = null;
 				imagePart.mb_imageOK = false;
+				imagePart.ms_cacheKey = null;
 				invalidateDynamicPart();
 				onFinishedRequest(wmsViewProperties, event.request);
 			}

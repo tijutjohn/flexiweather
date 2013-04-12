@@ -152,7 +152,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 
 		override public function set enabled(value:Boolean):void
 		{
-			trace("IMV enabled = " + value);
 			super.enabled = value;
 			invalidateDisplayList();
 		}
@@ -836,7 +835,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 				_selectedInteractiveWidget = value;
 				if (_selectedInteractiveWidget)
 				{
-					trace("selectedInteractiveWidget: " + _selectedInteractiveWidget.id);
 					registerSelectedInteractiveWidget();
 				}
 				
@@ -1161,7 +1159,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 		
 		private function onMapLayerSelectionChanged(event: InteractiveLayerMapEvent): void
 		{
-			trace("onMapLayerSelectionChanged selected index: " + selectedInteractiveWidget.interactiveLayerMap.selectedLayerIndex);	
+//			trace("onMapLayerSelectionChanged selected index: " + selectedInteractiveWidget.interactiveLayerMap.selectedLayerIndex);	
 		}
 		
 		private var _previousPrimaryLayer: InteractiveLayerMSBase;
@@ -1619,8 +1617,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 			if (debugConsole)
 				debugConsole.print(str, type, tag);
 			
-			trace(tag + "| " + type + "| " + str);
-			LoggingUtils.dispatchLogEvent(this, tag + "| " + type + "| " + str);
+//			trace(tag + "| " + type + "| " + str);
+//			LoggingUtils.dispatchLogEvent(this, tag + "| " + type + "| " + str);
 		}
 
 		override public function toString(): String
@@ -1703,6 +1701,7 @@ class WidgetCollection extends EventDispatcher
 
 	private function debugWidgetsIDs(): void
 	{
+		return;
 		var cnt: int = 0;
 		for each (var widget: InteractiveWidget in _collection)
 		{

@@ -7,6 +7,8 @@ package com.iblsoft.flexiweather.ogc.cache.event
 	public class WMSCacheEvent extends Event
 	{
 		public static const ITEM_ADDED: String = 'itemAdded';
+		public static const BEFORE_DELETE: String = 'beforeDelete';
+		
 		public var item: CacheItem;
 
 		public var associatedData: Object;

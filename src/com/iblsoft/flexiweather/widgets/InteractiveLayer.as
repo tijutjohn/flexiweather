@@ -339,7 +339,6 @@ package com.iblsoft.flexiweather.widgets
 		// data refreshing
 		public function refresh(b_force: Boolean): void
 		{
-			trace(this + " refresh");
 		}
 
 		// feature info

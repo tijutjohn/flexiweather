@@ -241,7 +241,6 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 			else
 				delete md_dimensionValues[s_dimName];
 			
-			trace("WMSViewProperties: " + s_dimName + " value: " + s_value);
 			
 			var wvpe: WMSViewPropertiesEvent = new WMSViewPropertiesEvent(WMSViewPropertiesEvent.WMS_DIMENSION_VALUE_SET);
 			wvpe.dimension = s_dimName;
@@ -808,7 +807,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		}
 		protected function debug(str: String): void
 		{
-			LoggingUtils.dispatchLogEvent(this, "WMSViewProperties: " + str);
+//			LoggingUtils.dispatchLogEvent(this, "WMSViewProperties: " + str);
 		}
 		
 		public function synchroniseWith(s_variableId: String, value: Object): String

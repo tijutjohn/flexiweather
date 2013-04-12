@@ -80,7 +80,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		{
 			if (debugConsole)
 				debugConsole.print(str, type, tag);
-			trace(tag + "| " + type + "| " + str);
+//			trace(tag + "| " + type + "| " + str);
 		}
 		private var tempData: Object;
 
@@ -284,7 +284,8 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 				var synchronizeFromWidgetPosition: int = getWidgetPosition(synchronizeFromWidget, widgetsForSynchronisation);
 				var currFrame: Date = primaryLayer.getSynchronisedVariableValue(GlobalVariable.FRAME) as Date;
 				var currFramePosition: int = getFramePosition(currFrame, frames);
-				debug("FrameSynchronizator synchronizeFramesSequentialy: curr frame: " + currFrame.toTimeString() + " currFramePosition: " + currFramePosition);
+				if (currFrame)
+					debug("FrameSynchronizator synchronizeFramesSequentialy: curr frame: " + currFrame.toTimeString() + " currFramePosition: " + currFramePosition);
 				if (currFramePosition > 0)
 				{
 					var sliceFrom: int = Math.max(0, currFramePosition - synchronizeFromWidgetPosition);

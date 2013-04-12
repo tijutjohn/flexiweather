@@ -7,6 +7,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.ogc.cache.ICache;
 	import com.iblsoft.flexiweather.ogc.cache.ICachedLayer;
 	import com.iblsoft.flexiweather.ogc.cache.WMSCache;
+	import com.iblsoft.flexiweather.ogc.cache.event.WMSCacheEvent;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.ogc.data.ImagePart;
@@ -76,6 +77,7 @@ package com.iblsoft.flexiweather.ogc
 				m_cache = new WMSCache();
 				(m_cache as WMSCache).name = m_cfg.label + " cache";
 			}
+			m_cache.addEventListener(WMSCacheEvent.BEFORE_DELETE , onBeforeCacheItemDeleted);
 		}
 
 		override public function destroy(): void
@@ -321,8 +323,8 @@ package com.iblsoft.flexiweather.ogc
 		
 		override protected function debug(str: String): void
 		{
-			trace(this + " WMS: " + str);
-			LoggingUtils.dispatchLogEvent(this, "WMS: " + str);
+//			trace(this + " WMS: " + str);
+//			LoggingUtils.dispatchLogEvent(this, "WMS: " + str);
 		}
 		
 		override public function clone(): InteractiveLayer
