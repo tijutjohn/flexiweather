@@ -130,7 +130,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 					for each (var format: XML in formatsXML)
 					{
 						var imageFormat: String = format.valueOf();
-						if (imageFormat && (imageFormat.indexOf('png') >= 0 || imageFormat.indexOf('jpg') >= 0 || imageFormat.indexOf('jpeg') >= 0))
+						if (imageFormat && (imageFormat.indexOf('png') >= 0 || imageFormat.indexOf('jpg') >= 0 || imageFormat.indexOf('jpeg') >= 0 || imageFormat.indexOf('x-shockwave-flash') >= 0))
 						{
 							if (!imageFormatExist(imageFormat))
 								_imageFormats.push(imageFormat);

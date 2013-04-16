@@ -5,7 +5,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers.interfaces
 
 	public interface IWMSLayerConfiguration extends ILayerConfiguration
 	{
-		function toGetMapRequest(s_crs: String, s_bbox: String, i_width: int, i_height: int, s_stylesList: String, s_layersOverride: String = null): URLRequest;
+		function toGetMapRequest(s_crs: String, s_bbox: String, i_width: int, i_height: int, s_stylesList: String, s_printQuality: String, s_layersOverride: String = null): URLRequest;
 		function get layerNames(): Array;
 		function set layerNames(value: Array): void;
 		function get service(): WMSServiceConfiguration;

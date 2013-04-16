@@ -1403,6 +1403,19 @@ package com.iblsoft.flexiweather.widgets
 			return retStr;
 		}
 
+		
+		public function changePrintQuality(printQuality: String): void
+		{
+			for each (var layer: InteractiveLayer in m_layers)
+			{
+				layer.printQuality = printQuality;
+			}
+			
+			refresh(false);
+		}
+		
+		
+		
 		override public function toString(): String
 		{
 			var retStr: String = "InteractiveLayerMap [" + mapID + "] ";

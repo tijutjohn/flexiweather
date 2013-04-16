@@ -22,6 +22,7 @@ package com.iblsoft.flexiweather.widgets
 	{
 		private static var layerUID: int = 0;
 		protected var m_layerID: int;
+
 		public function get layerID(): int
 		{
 			return m_layerID;
@@ -44,10 +45,12 @@ package com.iblsoft.flexiweather.widgets
 		protected var m_legendCallBack: Function;
 		protected var m_legendGroup: Group;
 		protected var m_legendLabelAlign: String;
+		
 		[Bindable]
 		public var layerName: String;
 		private var _forcedLayerWidth: int = 0;
 
+		
 		public function get forcedLayerWidth(): int
 		{
 			return _forcedLayerWidth;
@@ -142,6 +145,31 @@ package com.iblsoft.flexiweather.widgets
 			return _layerInitialized;
 		}
 
+		
+		/**
+		 * One of InteractiveLayerPrintQuality constants 
+		 */		
+		private var _printQuality: String;
+		
+		public function get printQuality():String
+		{
+			return _printQuality;
+		}
+		
+		public function set printQuality(value:String):void
+		{
+			_printQuality = value;
+		}
+		
+		/**
+		 * Return true of layer supports vector data (can load them and display them) 
+		 * @return 
+		 * 
+		 */		
+		public function get supportsVectorData(): Boolean
+		{
+			return false;
+		}
 		public function InteractiveLayer(container: InteractiveWidget = null)
 		{
 			m_layerID = layerUID++;
@@ -159,6 +187,7 @@ package com.iblsoft.flexiweather.widgets
 			addEventListener(Event.ADDED_TO_STAGE, onLayerAddedToStage);
 		}
 
+		
 		private function onLayerAddedToStage(event: Event): void
 		{
 			removeEventListener(Event.ADDED_TO_STAGE, onLayerAddedToStage);

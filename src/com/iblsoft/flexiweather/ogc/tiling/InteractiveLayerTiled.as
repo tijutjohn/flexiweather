@@ -359,7 +359,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 					_loader.addEventListener(InteractiveLayerEvent.INVALIDATE_DYNAMIC_PART, onCurrentWMSDataInvalidateDynamicPart);
 				}
 				_loader.zoom = zoomLevel; 
-				_loader.updateWMSData(b_forceUpdate, m_currentQTTViewProperties, forcedLayerWidth, forcedLayerHeight);
+				_loader.updateWMSData(b_forceUpdate, m_currentQTTViewProperties, forcedLayerWidth, forcedLayerHeight, printQuality);
 			}
 		}
 		protected var _currentQTTDataLoadingStarted: Boolean;
@@ -878,7 +878,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			if (!preloading)
 			{
 				setPreloadingStatus(true);
-				_preloader.updateWMSData(true, qttViewProperties, forcedLayerWidth, forcedLayerHeight);
+				_preloader.updateWMSData(true, qttViewProperties, forcedLayerWidth, forcedLayerHeight, printQuality);
 			} else {
 				ma_preloadingBuffer.push(qttViewProperties);
 				trace(this + " preload add to buffer: " + ma_preloadingBuffer.length);

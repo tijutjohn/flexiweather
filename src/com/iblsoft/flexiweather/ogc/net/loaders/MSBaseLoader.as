@@ -89,7 +89,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 		 * @param b_forceUpdate if TRUE, data is forced to load even if they are cached
 		 *
 		 */
-		public function updateWMSData(b_forceUpdate: Boolean, viewProperties: IViewProperties, forcedLayerWidth: Number, forcedLayerHeight: Number): void
+		public function updateWMSData(b_forceUpdate: Boolean, viewProperties: IViewProperties, forcedLayerWidth: Number, forcedLayerHeight: Number, printQuality: String): void
 		{
 			m_wmsViewProperties = viewProperties as WMSViewProperties;
 			//check if data are not already cached
@@ -120,6 +120,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 						partBBoxToUpdate,
 						uint(Math.round(partBBoxToUpdate.width / f_horizontalPixelSize)),
 						uint(Math.round(partBBoxToUpdate.height / f_verticalPixelSize)),
+						printQuality,
 						b_forceUpdate);
 			}
 		}
@@ -136,11 +137,12 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 		 * @param b_forceUpdate if TRUE, data is forced to load even if they are cached
 		 *
 		 */
-		private function updateDataPart(wmsViewProperties: WMSViewProperties, currentViewBBox: BBox, i_width: uint, i_height: uint, b_forceUpdate: Boolean): void
+		private function updateDataPart(wmsViewProperties: WMSViewProperties, currentViewBBox: BBox, i_width: uint, i_height: uint, s_printQuality: String, b_forceUpdate: Boolean): void
 		{
 			var request: URLRequest = (m_layer.configuration as IWMSLayerConfiguration).toGetMapRequest(
 					wmsViewProperties.crs, currentViewBBox.toBBOXString(),
 					i_width, i_height,
+					s_printQuality,
 					m_layer.getWMSStyleListString());
 			if (!request)
 				return;

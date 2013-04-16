@@ -136,6 +136,23 @@ package com.iblsoft.flexiweather.ogc
 		}
 		private var _updateDataWaiting: Boolean;
 
+		override public function get supportsVectorData(): Boolean
+		{
+			if (m_cfg && m_cfg.service && m_cfg.service.imageFormats)
+			{
+				var imageFormats: Array = m_cfg.service.imageFormats;
+				if (imageFormats.length > 0)
+				{
+					for each (var format: String in imageFormats)
+					{
+						if (format.indexOf('x-shockwave-flash') >= 0)
+							return true;
+					}
+				}
+			}
+			return false;
+		}
+		
 		public function InteractiveLayerMSBase(container: InteractiveWidget, cfg: WMSLayerConfiguration)
 		{
 			super(container);
@@ -315,7 +332,7 @@ package com.iblsoft.flexiweather.ogc
 			if (!preloading)
 			{
 				setPreloadingStatus(true);
-				_preloader.updateWMSData(true, wmsViewProperties, forcedLayerWidth, forcedLayerHeight);
+				_preloader.updateWMSData(true, wmsViewProperties, forcedLayerWidth, forcedLayerHeight, printQuality);
 			} else {
 				ma_preloadingBuffer.push(wmsViewProperties);
 			}
@@ -421,6 +438,7 @@ package com.iblsoft.flexiweather.ogc
 			var request: URLRequest = m_cfg.toGetMapRequest(
 					wmsViewProperties.crs, currentViewBBox.toBBOXString(),
 					i_width, i_height,
+					printQuality,
 					getWMSStyleListString());
 			if (!request)
 				return false;
@@ -598,6 +616,7 @@ package com.iblsoft.flexiweather.ogc
 			var request: URLRequest = m_cfg.toGetMapRequest(
 					container.getCRS(), container.getViewBBox().toBBOXString(),
 					width, height,
+					printQuality,
 					getWMSStyleListString());
 			if (!request)
 				return null;
@@ -666,7 +685,7 @@ package com.iblsoft.flexiweather.ogc
 					_loader.addEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
 					_loader.addEventListener(InteractiveLayerEvent.INVALIDATE_DYNAMIC_PART, onCurrentWMSDataInvalidateDynamicPart);
 				}
-				_loader.updateWMSData(b_forceUpdate, m_currentWMSViewProperties, forcedLayerWidth, forcedLayerHeight);
+				_loader.updateWMSData(b_forceUpdate, m_currentWMSViewProperties, forcedLayerWidth, forcedLayerHeight, printQuality);
 			}
 		}
 

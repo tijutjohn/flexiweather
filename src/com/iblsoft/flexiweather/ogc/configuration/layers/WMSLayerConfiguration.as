@@ -15,6 +15,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	import com.iblsoft.flexiweather.widgets.data.InteractiveLayerPrintQuality;
 	
 	import flash.events.DataEvent;
 	import flash.events.Event;
@@ -39,7 +40,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		private var ms_dimensionRunName: String = null;
 		private var ms_dimensionForecastName: String = null;
 		private var ms_dimensionVerticalLevelName: String = null;
-		private var _ms_imageFormat: String = null;
+		private var ms_imageFormat: String = null;
 		private var mb_legendIsDimensionDependant: Boolean;
 		private var mi_autoRefreshPeriod: uint = 0;
 		// runtime variables
@@ -93,16 +94,6 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 				_layerConfigurations = null;
 			}
 			super.destroy();
-		}
-
-		public function get ms_imageFormat(): String
-		{
-			return _ms_imageFormat;
-		}
-
-		public function set ms_imageFormat(value: String): void
-		{
-			_ms_imageFormat = value;
 		}
 
 		override public function toString(): String
@@ -198,6 +189,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		public function toGetMapRequest(
 				s_crs: String, s_bbox: String,
 				i_width: int, i_height: int,
+				s_printQuality: String, 
 				s_stylesList: String,
 				s_layersOverride: String = null): URLRequest
 		{
@@ -214,11 +206,29 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			r.data.HEIGHT = i_height;
 			if (s_stylesList != null)
 				r.data.STYLES = s_stylesList;
-			r.data.FORMAT = getCurrentImageFormat();
+			if (s_printQuality == InteractiveLayerPrintQuality.HIGH_QUALITY)
+				r.data.FORMAT = getVectorImageFormat();
+			else
+				r.data.FORMAT = getCurrentImageFormat();
 			r.data.TRANSPARENT = "TRUE";
 			return r;
 		}
 
+		private function getVectorImageFormat(): String
+		{
+			if (service && service.imageFormats)
+			{
+				var formats: Array = service.imageFormats;
+				for each (var currFormat: String in formats)
+				{
+					if (currFormat.indexOf('x-shockwave-flash') >= 0)
+					{
+						return currFormat;
+					}
+				}
+			}
+			return getCurrentImageFormat();
+		}
 		private function getCurrentImageFormat(): String
 		{
 			var format: String = ms_imageFormat;

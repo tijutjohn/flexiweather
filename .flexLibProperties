@@ -413,6 +413,7 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.GroupVBox"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.skins.GroupBoxBorder"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.skins.GroupBoxSkin"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.data.InteractiveLayerPrintQuality"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.errors.ErrorJournal"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.errors.ErrorJournalDataItem"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.errors.ErrorJournalPopup"/>
