@@ -478,8 +478,9 @@ package com.iblsoft.flexiweather.plugins.data
 				plugin = getPlugin(type);
 				moduleInfo = getModuleInfo(type);
 				module = moduleInfo.module;
-				if (!plugin && !pluginInfo && !module)
-					trace("notifyAllInfoPluginsAreLoaded: NO PLUGIN !!!");
+				if (!plugin && !pluginInfo && !module) {
+//					trace("notifyAllInfoPluginsAreLoaded: NO PLUGIN !!!");
+				} 
 				else
 				{
 					moduleInfo = new ModuleInfo();
