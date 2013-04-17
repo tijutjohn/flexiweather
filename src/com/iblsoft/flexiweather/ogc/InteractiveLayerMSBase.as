@@ -832,7 +832,7 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 
-		private function removeVectorDatIna(): void
+		private function removeVectorData(): void
 		{
 			//remove previous instances
 			if (_vectorParent && _vectorParent.numChildren > 0)
