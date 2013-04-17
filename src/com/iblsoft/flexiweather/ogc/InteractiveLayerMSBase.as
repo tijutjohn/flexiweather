@@ -43,6 +43,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerLegendImage;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	import com.iblsoft.flexiweather.widgets.data.InteractiveLayerPrintQuality;
 	
 	import flash.display.AVM1Movie;
 	import flash.display.Bitmap;
@@ -152,6 +153,8 @@ package com.iblsoft.flexiweather.ogc
 			}
 			return false;
 		}
+		
+		private var _vectorParent: UIComponent;
 		
 		public function InteractiveLayerMSBase(container: InteractiveWidget, cfg: WMSLayerConfiguration)
 		{
@@ -765,6 +768,7 @@ package com.iblsoft.flexiweather.ogc
 			{
 				super.draw(graphics);
 				graphics.clear();
+				removeVectorData();
 			}
 		}
 
@@ -805,16 +809,55 @@ package com.iblsoft.flexiweather.ogc
 			}
 			if (image is AVM1Movie)
 			{
-				//				drawImagePartAsSWF(image as Bitmap, s_imageCRS, imageBBox);
-				//TODO we can get bitmap from avm1movie
-				var bd: BitmapData = new BitmapData(image.width, image.height, true, 0x00ff0000);
-				bd.draw(image);
-				drawImagePartAsBitmap(graphics, new Bitmap(bd), s_imageCRS, imageBBox);
+				
+				/**
+				 * As we agreed with Jozef, if AVM1Movie was received as data, there can be 2 different modes of rendering
+				 * 
+				 * 	1) printQuality == high (it's for vector printing) => will be added as avm1movie and it's not cached
+				 *  2) printQuality == normal && imageFormat == x-shockwave-flash => will be added as bitmap and will be cached
+				 */
+				
+				if (printQuality == InteractiveLayerPrintQuality.HIGH_QUALITY)
+				{
+					drawImagePartAsSWF(image as AVM1Movie, s_imageCRS, imageBBox);
+				} else {
+					
+					removeVectorData();
+					
+					//TODO cache bitmap
+					var bd: BitmapData = new BitmapData(image.width, image.height, true, 0x00ff0000);
+					bd.draw(image);
+					drawImagePartAsBitmap(graphics, new Bitmap(bd), s_imageCRS, imageBBox);
+				}
 			}
 		}
 
-		private function drawImagePartAsSWF(image: Bitmap, s_imageCRS: String, imageBBox: BBox): void
+		private function removeVectorDatIna(): void
 		{
+			//remove previous instances
+			if (_vectorParent && _vectorParent.numChildren > 0)
+			{
+				var total: int = _vectorParent.numChildren;
+				for (var i: int = 0; i < total; i++)
+				{
+					var dispObject: DisplayObject = _vectorParent.removeChildAt(0);
+					dispObject = null;
+				}
+			}
+			
+		}
+		private function drawImagePartAsSWF(image: AVM1Movie, s_imageCRS: String, imageBBox: BBox): void
+		{
+			if (!_vectorParent)
+			{
+				_vectorParent = new UIComponent();
+				addChild(_vectorParent);
+			}
+			
+			removeVectorData();
+			
+			var movieObject: DisplayObject = image.parent; 
+			_vectorParent.addChild(movieObject);
 		}
 
 		private function drawImagePartAsBitmap(graphics: Graphics, image: Bitmap, s_imageCRS: String, imageBBox: BBox): void

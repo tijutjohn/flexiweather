@@ -1411,7 +1411,7 @@ package com.iblsoft.flexiweather.widgets
 				layer.printQuality = printQuality;
 			}
 			
-			refresh(false);
+			refresh(true);
 		}
 		
 		
