@@ -95,7 +95,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 //						if (widget.id != synchronizeFromWidget.id)
 //						{
 						
-						widget.addEventListener(InteractiveWidgetEvent.WIDGET_CHANGED, onWidgetSynchronizedLevelChanged, false, 0, true);
+						widget.addEventListener(InteractiveWidgetEvent.WIDGET_CHANGED, onWidgetChanged, false, 0, true);
 						
 						
 						if (hasSynchronizableLevel)
@@ -147,28 +147,34 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			}
 		}
 		
-		private function onWidgetSynchronizedLevelChanged(event: InteractiveWidgetEvent): void
+		private function onWidgetChanged(event: InteractiveWidgetEvent): void
 		{
-			if (event.changeDescription == SynchronizationChangeType.SYNCHRONIZE_LEVEL_CHANGED)
+			switch (event.changeDescription)
 			{
-				var widget: InteractiveWidget = event.target as InteractiveWidget;
-				var layers: ArrayCollection = widget.interactiveLayerMap.layers;
-				
-				var synchronizeLevel: Boolean = false;
-				
-				for each (var layer: InteractiveLayerMSBase in layers)
+				case SynchronizationChangeType.SYNCHRONIZE_LEVEL_CHANGED:
+				case SynchronizationChangeType.MAP_CHANGED:
+				case SynchronizationChangeType.MAP_LAYER_ADDED:
+				case SynchronizationChangeType.MAP_LAYER_REMOVED:
 				{
-					if (layer && layer.synchroniseLevel)
+					var widget: InteractiveWidget = event.target as InteractiveWidget;
+					var layers: ArrayCollection = widget.interactiveLayerMap.layers;
+					
+					var synchronizeLevel: Boolean = false;
+					
+					for each (var layer: InteractiveLayerMSBase in layers)
 					{
-						synchronizeLevel = true;
-						break;
+						if (layer && layer.synchroniseLevel)
+						{
+							synchronizeLevel = true;
+							break;
+						}
 					}
+					
+					if (synchronizeLevel)
+						dataForWidgetAvailable(widget);
+					else
+						dataForWidgetUnvailable(widget);
 				}
-				
-				if (synchronizeLevel)
-					dataForWidgetAvailable(widget);
-				else
-					dataForWidgetUnvailable(widget);
 			}
 		}
 		

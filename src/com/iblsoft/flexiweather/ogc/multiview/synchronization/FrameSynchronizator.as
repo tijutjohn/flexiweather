@@ -1,11 +1,13 @@
 package com.iblsoft.flexiweather.ogc.multiview.synchronization
 {
+	import com.iblsoft.flexiweather.events.InteractiveWidgetEvent;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.SynchronisedVariableChangeEvent;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.ogc.multiview.data.MultiViewConfiguration;
 	import com.iblsoft.flexiweather.ogc.multiview.data.SynchronizationChangeType;
 	import com.iblsoft.flexiweather.plugins.IConsole;
+	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
@@ -177,6 +179,8 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 							{
 								var widget: InteractiveWidget = widgetsForSynchronisation.getItemAt(i) as InteractiveWidget;
 								
+								widget.addEventListener(InteractiveWidgetEvent.WIDGET_CHANGED, onWidgetChanged, false, 0, true);
+								
 								frame = frames[i] as Date;
 								if (frame)
 								{
@@ -249,6 +253,45 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			}
 		}
 
+		private function onWidgetChanged(event: InteractiveWidgetEvent): void
+		{
+			switch (event.changeDescription)
+			{
+				case SynchronizationChangeType.SYNCHRONIZE_LEVEL_CHANGED:
+				case SynchronizationChangeType.MAP_CHANGED:
+				case SynchronizationChangeType.MAP_LAYER_ADDED:
+				case SynchronizationChangeType.MAP_LAYER_REMOVED:
+				{
+					var widget: InteractiveWidget = event.target as InteractiveWidget;
+					var layers: ArrayCollection = widget.interactiveLayerMap.layers;
+					
+					var synchronizeFrame: Boolean;
+					
+					for each (var layer: InteractiveLayer in layers)
+					{
+						if (layer is InteractiveLayerMSBase)
+						{
+							var synchroVars: Array = (layer as InteractiveLayerMSBase).getSynchronisedVariables();
+							for each (var s_synchroVarName: String in synchroVars)
+							{
+								switch (s_synchroVarName.toLowerCase())
+								{
+									case GlobalVariable.FRAME:
+										synchronizeFrame = true;
+										break;
+								}
+							}
+						}
+					}
+					
+					if (synchronizeFrame)
+						dataForWidgetAvailable(widget);
+					else
+						dataForWidgetUnvailable(widget);
+				}
+			}
+		}
+		
 		/**
 		 * Return frames (Date) arary of needed frames for synchronisation
 		 *
