@@ -6,6 +6,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.events.WMSViewPropertiesEvent;
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderErrorEvent;
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
+	import com.iblsoft.flexiweather.net.loaders.LoaderWithAssociatedData;
 	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
 	import com.iblsoft.flexiweather.ogc.cache.ICache;
 	import com.iblsoft.flexiweather.ogc.cache.ICachedLayer;
@@ -766,7 +767,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			if (!layerWasDestroyed)
 			{
-				super.draw(graphics);
+				super.clear(graphics);
 				graphics.clear();
 				removeVectorData();
 			}
@@ -822,8 +823,6 @@ package com.iblsoft.flexiweather.ogc
 					drawImagePartAsSWF(image as AVM1Movie, s_imageCRS, imageBBox);
 				} else {
 					
-					removeVectorData();
-					
 					//TODO cache bitmap
 					var bd: BitmapData = new BitmapData(image.width, image.height, true, 0x00ff0000);
 					bd.draw(image);
@@ -832,6 +831,11 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 
+		private function removeBitmapData(): void
+		{
+			
+		}
+		
 		private function removeVectorData(): void
 		{
 			//remove previous instances
@@ -841,6 +845,12 @@ package com.iblsoft.flexiweather.ogc
 				for (var i: int = 0; i < total; i++)
 				{
 					var dispObject: DisplayObject = _vectorParent.removeChildAt(0);
+					var loader: LoaderWithAssociatedData = dispObject as LoaderWithAssociatedData;
+					var assocData: Object = loader.associatedData;
+					assocData.requestedImagePart = null;
+					assocData.result = null;
+					assocData.wmsViewProperties = null;
+					loader.unload();
 					dispObject = null;
 				}
 			}
@@ -854,14 +864,21 @@ package com.iblsoft.flexiweather.ogc
 				addChild(_vectorParent);
 			}
 			
-			removeVectorData();
+//			removeVectorData();
+			
+			//clear bitmap data
+			graphics.clear();
 			
 			var movieObject: DisplayObject = image.parent; 
-			_vectorParent.addChild(movieObject);
+			if (movieObject)
+				_vectorParent.addChild(movieObject);
 		}
 
 		private function drawImagePartAsBitmap(graphics: Graphics, image: Bitmap, s_imageCRS: String, imageBBox: BBox): void
 		{
+			
+			removeVectorData();
+			
 			var ptImageStartPoint: Point =
 					container.coordToPoint(new Coord(s_imageCRS, imageBBox.xMin, imageBBox.yMax));
 			var ptImageEndPoint: Point =

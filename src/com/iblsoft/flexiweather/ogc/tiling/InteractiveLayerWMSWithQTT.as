@@ -373,6 +373,23 @@ package com.iblsoft.flexiweather.ogc.tiling
 				super.renderPreview(graphics, f_width, f_height);
 		}
 
+		
+		/**
+		 * Call this function if you want clear layer graphics
+		 * @param graphics
+		 *
+		 */
+		public override function clear(graphics: Graphics): void
+		{
+			if (isTileable)
+			{
+				m_tiledLayer.clear(graphics);
+			}
+			else
+			{
+				super.clear(graphics);
+			}
+		}
 		override public function draw(graphics: Graphics): void
 		{
 //			debug("draw");

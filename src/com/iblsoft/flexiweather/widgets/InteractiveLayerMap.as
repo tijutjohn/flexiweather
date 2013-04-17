@@ -438,6 +438,8 @@ package com.iblsoft.flexiweather.widgets
 			debug("InteractiveLayerMap [IW: " + container.id + "] serialize loading: " + storage.isLoading());
 			LayerSerializationWrapper.m_iw = container;
 			LayerSerializationWrapper.map = this;
+			var globalLevel: String;
+			
 			if (storage.isLoading())
 			{
 				wrappers = new ArrayCollection();
@@ -460,7 +462,7 @@ package com.iblsoft.flexiweather.widgets
 				}
 				selectedLayerIndex = storage.serializeInt('selected-layer-index', m_selectedLayerIndex);
 				
-				var globalLevel: String = storage.serializeString('global-level', null);
+				globalLevel = storage.serializeString('global-level', null);
 				if (globalVariablesManager)
 				{
 					if (globalLevel)
@@ -495,7 +497,7 @@ package com.iblsoft.flexiweather.widgets
 //					storage.serializeString('global-frame', frameDateString);
 					
 					var synchronizableLevel: String = level;
-					var globalLevel: String = globalVariablesManager.level;
+					globalLevel = globalVariablesManager.level;
 					
 					storage.serializeString('global-level', globalVariablesManager.level);
 				}
@@ -1414,6 +1416,16 @@ package com.iblsoft.flexiweather.widgets
 			refresh(true);
 		}
 		
+		
+		public function isInitialized(): Boolean
+		{
+			for each (var layer: InteractiveLayer in m_layers)
+			{
+				if (!layer.layerInitialized)
+					return false;
+			}
+			return true;
+		}
 		
 		
 		override public function toString(): String

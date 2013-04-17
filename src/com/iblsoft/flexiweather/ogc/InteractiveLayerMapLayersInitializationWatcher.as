@@ -35,6 +35,41 @@ package com.iblsoft.flexiweather.ogc
 			LoggingUtils.dispatchLogEvent(this, "InteractiveLayerMapLayersInitializationWatcher: " + txt);
 		}
 		
+		/**
+		 * This method will check all layers in interactiveLayerMap and waits for their initialization. 
+		 * If you need all add layers to interactiveLayerMap and check if they are initialized, please check onMapFromXMLReady() method
+		 * @param interactiveLayerMap
+		 * 
+		 * @see onMapFromXMLReady
+		 */	
+		public function waitForLayersInitializations(interactiveLayerMap: InteractiveLayerMap): void
+		{
+			var layer: InteractiveLayer;
+			_mapLayersInitializing = 0;
+			
+			this.interactiveLayerMap = interactiveLayerMap;
+			
+			//			debug("onMapFromXMLReady layers: " + layers.length);
+			var cnt: int = 0;
+			for each (layer in interactiveLayerMap.layers)
+			{
+				if (layer && !layer.layerInitialized)
+				{
+					layer.addEventListener(InteractiveLayerEvent.LAYER_INITIALIZED, onLayerInitialized);
+					_mapLayersInitializing++;
+				}
+			}
+		}
+		
+		
+		/**
+		 * This method will add all layers to interactiveLayerMap and waits for their initialization. 
+		 * If you need just check if all already added layers from interactiveLayerMap are initialized, please check waitForLayersInitializations() method
+		 * @param interactiveLayerMap
+		 * @param layers
+		 * 
+		 * @see waitForLayersInitializations
+		 */		
 		public function onMapFromXMLReady(interactiveLayerMap: InteractiveLayerMap, layers: Array): void
 		{
 			var layer: InteractiveLayer;
