@@ -90,13 +90,44 @@ package com.iblsoft.flexiweather.ogc.multiview
 	 *  @productversion Flex 4
 	 */
 	[Style(name = "selectedBorderAlpha", type = "Number", inherit = "yes", theme = "spark, mobile", minValue = "0.0", maxValue = "1.0")]
+	
+	/**
+	 * Dispatch when selection is changed inside multi view 
+	 */	
 	[Event(name = "multiViewSelectionChange", type = "com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewChangeEvent")]
+	
+	/**
+	 * dispatched when all interactive widgets are created and added into multi view, but be aware that maps are not loaded or initialized 
+	 */	
 	[Event(name = "multiViewReady", type = "com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent")]
+	
+	/**
+	 * Dispatched when all maps are refreshed
+	 */	
 	[Event(name = "multiViewRefreshed", type = "com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent")]
+	
+	/**
+	 * Dispatched before refresh is going to be performed on multi view 
+	 */	
 	[Event(name = "multiViewBeforeRefresh", type = "com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent")]
+
+	/**
+	 * Dispatched when maps starts loading data
+	 */	
 	[Event(name = "multiViewMapsLoadingStarted", type = "com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent")]
+	
+	/**
+	 * Dispatched when all maps inside multi view have layers loaded but not initialized 
+	 */	
 	[Event(name = "multiViewMapsLoaded", type = "com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent")]
+	
+	/**
+	 * Dispatched after any map has layers loaded and initialized 
+	 */	
 	[Event(name = "multiViewSingleMapLayersInitialized", type = "com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent")]
+	/**
+	 * Dispatched when all maps inside multi view have layers loaded and initialized 
+	 */	
 	[Event(name = "multiViewAllMapsLayersInitialized", type = "com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent")]
 	public class InteractiveMultiView extends SkinnableDataContainer
 	{
@@ -1525,8 +1556,11 @@ package com.iblsoft.flexiweather.ogc.multiview
 		private function waitForSynchronisedVariableChange(event: SynchronisedVariableChangeEvent): void
 		{
 			var primaryLayer: InteractiveLayerMSBase = selectedInteractiveWidget.interactiveLayerMap.primaryLayer;
-			primaryLayer.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, waitForSynchronisedVariableChange);
-			primaryLayer.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, waitForSynchronisedVariableChange);
+			if (primaryLayer)
+			{
+				primaryLayer.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, waitForSynchronisedVariableChange);
+				primaryLayer.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, waitForSynchronisedVariableChange);
+			}
 //			startListenForSynchronisedVariableChange(primaryLayer);
 		}
 
