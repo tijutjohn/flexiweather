@@ -533,31 +533,27 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 			if (geometry != null)
 			{
 				var placemarkStyles: ObjectStyles = new ObjectStyles(placemark);
-				if (geometry is com.iblsoft.flexiweather.ogc.kml.features.Point)
+				if (geometry is com.iblsoft.flexiweather.ogc.kml.features.Point) {
 					renderPoint(placemark, placemarkStyles.normalStyle, placemarkStyles.highlightStyle);
-				else
-				{
-					if (geometry is LineString)
-					{
-//						renderLineString(placemark.graphics, placemark.getPoints(), placemark.kmlLabel, placemarkStyles.normalStyle);
-//						renderLineString(placemark.graphics, placemark.coordinates, placemark.kmlLabel, placemarkStyles.normalStyle);
-						renderLineString(placemark, placemarkStyles.normalStyle);
-					}
-					else
-					{
-						if (geometry is LinearRing)
-							renderLinearRing(placemark, placemark.graphics, geometry as LinearRing, placemark.kmlLabel, placemarkStyles.normalStyle);
-						else
-						{
-							if (geometry is Polygon)
-								renderPolygon(placemark, placemark.graphics, geometry as Polygon, placemark.kmlLabel, placemarkStyles.normalStyle);
-							else
-							{
-								if (geometry is MultiGeometry)
-									renderMultiGeometry(placemark, geometry as MultiGeometry);
-							}
-						}
-					}
+				} else if (geometry is LineString) {
+					
+//					renderLineString(placemark.graphics, placemark.getPoints(), placemark.kmlLabel, placemarkStyles.normalStyle);
+//					renderLineString(placemark.graphics, placemark.coordinates, placemark.kmlLabel, placemarkStyles.normalStyle);
+					
+					renderLineString(placemark, placemarkStyles.normalStyle);
+					
+				} else if (geometry is LinearRing) {
+					
+					renderLinearRing(placemark, placemark.graphics, geometry as LinearRing, placemark.kmlLabel, placemarkStyles.normalStyle);
+					
+				} else if (geometry is Polygon) {
+					
+					renderPolygon(placemark, placemark.graphics, geometry as Polygon, placemark.kmlLabel, placemarkStyles.normalStyle);
+					
+				} else if (geometry is MultiGeometry) {
+
+					renderMultiGeometry(placemark, geometry as MultiGeometry);
+					
 				}
 			}
 //			debug("Render placemark time: " + stopProfileTimer(time));
@@ -643,8 +639,11 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 					}
 					var gr: Graphics = kmlReflection.displaySprite.graphics;
 					kmlReflection.displaySprite.visible = true;
-					kmlReflection.displaySprite.x = iconPoint.x;
-					kmlReflection.displaySprite.y = iconPoint.y;
+					if (iconPoint)
+					{
+						kmlReflection.displaySprite.x = iconPoint.x;
+						kmlReflection.displaySprite.y = iconPoint.y;
+					}
 					var m: Matrix = new Matrix();
 					m.scale(scaleX, scaleY);
 					m.translate(xDiff, yDiff);
@@ -924,6 +923,8 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 			{
 				var g: GraphicsCurveRenderer;
 				g = new GraphicsCurveRenderer(gr);
+				
+				var firstPointsArray: Array = m_featureSplitter.convertCoordinatesToScreenPointsWithoutClipping(new Array(coords[0]), false, fillExists);
 				var features: Array = m_featureSplitter.splitCoordPolyLineToArrayOfPointPolyLines(coords, false, fillExists);
 				var kmlReflectionDictionary: KMLFeaturesReflectionDictionary = placemark.kmlReflectionDictionary;
 				var totalReflections: int = kmlReflectionDictionary.totalReflections;
@@ -945,24 +946,36 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 					if (i < features.length)
 					{
 						var mPoints: Array = features[i] as Array;
+						var firstPoint: Array = firstPointsArray[i] as Array;
 						g = new GraphicsCurveRenderer(gr);
 						var total: int = mPoints.length;
+						
+						trace(this + " renderPolygon points: " + total + " coords: " + coords.length);
 						if (total > 0)
 						{
-							p = mPoints[0] as Point;
-							var p0: Point = p.clone();
-							var sx: int = p.x;
-							var sy: int = p.y;
-							var cnt: int = 0;
-							g.start(p.x - sx, p.y - sy);
-							g.moveTo(p.x - sx, p.y - sy);
-							for (var pi: int = 1; pi < mPoints.length; pi++)
+							p = firstPoint[0] as Point;
+							trace(this + " renderPolygon p0: " + p);
+							if (p)
 							{
-								p = mPoints[pi] as Point;
-								g.lineTo(p.x - sx, p.y - sy);
+								var p0: Point = p.clone();
+								var sx: int = p.x;
+								var sy: int = p.y;
+								var cnt: int = 0;
+								g.start(p.x - sx, p.y - sy);
+								g.moveTo(p.x - sx, p.y - sy);
+								for (var pi: int = 1; pi < mPoints.length; pi++)
+								{
+									p = mPoints[pi] as Point;
+									g.lineTo(p.x - sx, p.y - sy);
+								}
+								g.lineTo(p0.x - sx, p0.y - sy);
+								g.finish(p0.x - sx, p0.y - sy);
+							} else {
+								trace("there is problem with first point of LinearRing");
 							}
-							g.lineTo(p0.x - sx, p0.y - sy);
-							g.finish(p0.x - sx, p0.y - sy);
+						} else {
+							
+							trace(this + " renderPolygon no points: " + p);
 						}
 					}
 					if (fillExists)

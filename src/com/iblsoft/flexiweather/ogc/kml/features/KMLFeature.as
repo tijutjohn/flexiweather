@@ -29,7 +29,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayout;
 	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayoutObject;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
-
+	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.Sprite;
@@ -341,7 +341,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			for each (var i: int in coords)
 			{
 				var coord: Coord = currCoordinates[i] as Coord;
-				var coordPointForReflection: flash.geom.Point = new flash.geom.Point;
+				var coordPointForReflection: flash.geom.Point = new flash.geom.Point();
 				if (coord.crs != crs)
 				{
 					//conver to InteractiveWidget CRS
@@ -366,6 +366,34 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				}
 			}
 			return invisibleCoords;
+		}
+		
+		protected function getReflectedCoordinate(coord: Coord): Dictionary
+		{
+			var iw: InteractiveWidget = master.container;
+			var crs: String = iw.getCRS();
+			var projection: Projection = iw.getCRSProjection();
+			var coordPointForReflection: flash.geom.Point = new flash.geom.Point();
+			if (coord.crs != crs)
+			{
+				//conver to InteractiveWidget CRS
+				coordPointForReflection = coord.convertToProjection(projection);
+			}
+			else
+				coordPointForReflection = new flash.geom.Point(coord.x, coord.y);
+			
+			var pointReflections: Array = iw.mapCoordInCRSToViewReflectionsForDeltas(coordPointForReflection, [0,1,-1,2,-2,3,-3]);
+			var reflectionsCount: int = pointReflections.length;
+			
+			var reflections: Dictionary = new Dictionary();
+			for (var j: int = 0; j < reflectionsCount; j++)
+			{
+				var pointReflectedObject: Object = pointReflections[j];
+				var pointReflected: flash.geom.Point = pointReflectedObject.point as flash.geom.Point;
+				var coordReflected: Coord = new Coord(crs, pointReflected.x, pointReflected.y);
+				reflections[pointReflectedObject.reflection] = {coord: coordReflected, point: iw.coordToPoint(coordReflected), reflection: pointReflectedObject.reflection};
+			}
+			return reflections;
 		}
 
 		/**

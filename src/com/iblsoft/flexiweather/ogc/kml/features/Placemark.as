@@ -21,9 +21,12 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import com.iblsoft.flexiweather.utils.geometry.ILineSegmentApproximableBounds;
 	import com.iblsoft.flexiweather.utils.geometry.LineSegment;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.geom.Point;
+	import flash.utils.Dictionary;
+	
 	import mx.collections.ArrayCollection;
 	import mx.states.OverrideBase;
 
@@ -183,52 +186,112 @@ package com.iblsoft.flexiweather.ogc.kml.features
 
 		override protected function get currentCoordinates(): Array
 		{
-			if (geometry is Polygon)
-			{
-				var linearRing: LinearRing = (geometry as Polygon).outerBoundaryIs.linearRing;
-				return linearRing.coordinatesPoints;
-			}
+//			if (geometry is Polygon)
+//			{
+//				var linearRing: LinearRing = (geometry as Polygon).outerBoundaryIs.linearRing;
+//				return linearRing.coordinatesPoints;
+//			}
 //			if (geometry is MultiGeometry)
+//			{
 //				trace("what should be returned for multigeometry???");
+//				var multiGeometry: MultiGeometry = geometry as MultiGeometry;
+//				var multiGeometryCoordinates: Array = [];
+//				for each (var geometryItem: Geometry in multiGeometry.geometries)
+//				{
+//					var currCoordinates: Array; 
+//					if (geometryItem.hasOwnProperty("coordinates"))
+//					{
+//						if (geometryItem['coordinates'] is Array)
+//							currCoordinates = geometryItem['coordinates'] as Array;
+//						else if (geometryItem['coordinates'] is Coordinates) {
+//							currCoordinates = (geometryItem['coordinates'] as Coordinates).coordsList;
+//						}
+//							
+//					}
+//					else if (geometryItem is Polygon) {
+//						var linearRing: LinearRing = (geometryItem as Polygon).outerBoundaryIs.linearRing;
+//						currCoordinates = linearRing.coordinatesPoints;
+//					}
+//					
+//					for each (var coordinate: * in currCoordinates)
+//						multiGeometryCoordinates.push(coordinate);
+//				}
+//				return multiGeometryCoordinates;
+//			}
 			return coordinates;
 		}
 
-		protected function updateGeometryCoordinates(currGeometry: Geometry): void
+		protected function updateGeometryCoordinates(currGeometry: Geometry, partOfMultiGeometry: Boolean = false): void
 		{
 			var arr: Array;
 			var origCoords: Array;
+			var coordsTemp: Array;					
 			if (currGeometry is com.iblsoft.flexiweather.ogc.kml.features.Point)
 			{
 				origCoords = coordinates;
 				arr = updateCoordinates(currGeometry as com.iblsoft.flexiweather.ogc.kml.features.Point);
 				ArrayUtils.unionArrays(origCoords, arr);
-				coordinates = origCoords;
+				if (!partOfMultiGeometry)
+					coordinates = origCoords;
+				else {
+					coordsTemp = coordinates;
+					ArrayUtils.unionArrays(coordsTemp, origCoords);
+					coordinates = coordsTemp;
+				}
 			}
 			if (currGeometry is LineString)
 			{
 				origCoords = coordinates;
 				arr = updateCoordinates(currGeometry as LineString);
 				ArrayUtils.unionArrays(origCoords, arr);
-				coordinates = origCoords;
+				
+				if (!partOfMultiGeometry)
+					coordinates = origCoords;
+				else {
+					coordsTemp = coordinates;
+					ArrayUtils.unionArrays(coordsTemp, origCoords);
+					coordinates = coordsTemp;
+				}
 			}
 			if (currGeometry is LinearRing)
 			{
 				origCoords = coordinates;
 				arr = updateCoordinates(currGeometry as LinearRing);
 				ArrayUtils.unionArrays(origCoords, arr);
-				coordinates = origCoords;
+				if (!partOfMultiGeometry)
+					coordinates = origCoords;
+				else {
+					coordsTemp = coordinates;
+					ArrayUtils.unionArrays(coordsTemp, origCoords);
+					coordinates = coordsTemp;
+				}
 			}
 			if (currGeometry is Polygon)
 			{
 				var linearRing: LinearRing = (currGeometry as Polygon).outerBoundaryIs.linearRing;
 				linearRing.coordinatesPoints = updateCoordinates(linearRing, true);
+				
+				if (!partOfMultiGeometry)
+					coordinates = linearRing.coordinatesPoints;
+				else {
+					coordsTemp = coordinates;
+					ArrayUtils.unionArrays(coordsTemp, linearRing.coordinatesPoints);
+					coordinates = coordsTemp;
+				}
 			}
 			if (currGeometry is MultiGeometry)
 			{
 				var multigeometry: MultiGeometry = currGeometry as MultiGeometry;
+				coordinates = [];
 				for each (var geometryItem: Geometry in multigeometry.geometries)
 				{
-					updateGeometryCoordinates(geometryItem)
+					updateGeometryCoordinates(geometryItem, true);
+				}
+				
+				if (partOfMultiGeometry) {
+					coordsTemp = coordinates;
+					ArrayUtils.unionArrays(coordsTemp, linearRing.coordinatesPoints);
+					coordinates = coordsTemp;
 				}
 			}
 		}
@@ -242,6 +305,11 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		}
 
 		/** Called after the feature is added to master or after any change (e.g. area change). */
+		/**
+		 * 
+		 * @param changeFlag
+		 * 
+		 */
 		override public function update(changeFlag: FeatureUpdateContext): void
 		{
 			if (!m_master)
@@ -290,13 +358,18 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				var labelLayout: AnticollisionLayout = master.container.labelLayout;
 				var labelsCreation: Boolean;
 				var kmlSprite: KMLSprite;
+				
+				//we need to get reflections of first point in coordinate (it ca be hidden and in that way, there will be problems to find first point (to set correct position)
+				var firstPointReflections: Dictionary = getReflectedCoordinate(coordinates[0] as Coord);
+				
 				for (var i: int = 0; i < totalReflections; i++)
 				{
 					var removeLabel: Boolean = false;
 					var kmlReflection: KMLReflectionData = kmlReflectionDictionary.getReflection(i) as KMLReflectionData;
 					if (kmlReflection.points && kmlReflection.points.length > 0)
 					{
-						var iconPoint: flash.geom.Point = kmlReflection.points[0] as flash.geom.Point;
+//						var iconPoint: flash.geom.Point = kmlReflection.points[0] as flash.geom.Point;
+						var iconPoint: flash.geom.Point = firstPointReflections[kmlReflection.reflectionDelta].point as flash.geom.Point;
 						if (kmlReflection.displaySprite && iconPoint && featureScale > 0)
 						{
 							kmlSprite = kmlReflection.displaySprite as KMLSprite;

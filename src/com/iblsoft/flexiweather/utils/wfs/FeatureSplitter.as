@@ -63,7 +63,7 @@ package com.iblsoft.flexiweather.utils.wfs
 		private var m_projectionWidth: Number;
 		private var m_projectionWidthHalf: Number;
 
-		public function splitCoordPolyLineToArrayOfPointPolyLines(coords: Array, bClosed: Boolean, bPolygon: Boolean = false): Array
+		public function splitCoordPolyLineToArrayOfPointPolyLines(coords: Array, bClosed: Boolean, bPolygon: Boolean = false, bClipping: Boolean = true): Array
 		{
 			if (coords.length == 0)
 				return [];
@@ -72,25 +72,95 @@ package com.iblsoft.flexiweather.utils.wfs
 			var projection: Projection = m_iw.getCRSProjection()
 			m_projectionWidth = projection.extentBBox.width;
 			m_projectionWidthHalf = m_projectionWidth / 2;
-			var points: Array = [];
-			/**
-			 * moveDirection = 0 => do not do any change
-			 * moveDirection = 1 => move 1 projection width to the right
-			 * moveDirection = -1 => move 1 projection width to the left
-			 */
-			var moveDirection: int = 0;
-			var moveCount: int;
-			var lastPoint: Point;
-			var lastCoord: Coord;
+			
+			var _points: Array = convertCoordsToPoints(coords, projection, bClosed);
+			var points: Array = createPoints(_points);
+			var resultArr: Array = createScreenPoints(points, projection, bPolygon, bClipping);
+			
+			return resultArr;
+		
+		}
+
+		/**
+		 * Use this method for converting coordinates to screen points in same way as  splitCoordPolyLineToArrayOfPointPolyLines method but without clipping
+		 * 
+		 * @param coords
+		 * @param bClosed
+		 * @param bPolygon
+		 * @return 
+		 * 
+		 */		
+		public function convertCoordinatesToScreenPointsWithoutClipping(coords: Array, bClosed: Boolean, bPolygon: Boolean = false): Array
+		{
+			var projection: Projection = m_iw.getCRSProjection();
+			m_projectionWidth = projection.extentBBox.width;
+			m_projectionWidthHalf = m_projectionWidth / 2;
+			
+			var _points: Array = convertCoordsToPoints(coords, projection, bClosed);
+			var points: Array = createPoints(_points);
+			var resultArr: Array = createScreenPoints(points, projection, bPolygon, false);
+			
+			return resultArr;
+		}
+		
+		private function createScreenPoints(points: Array, projection: Projection, bPolygon: Boolean = false, bClipping: Boolean = true): Array
+		{
+			var resultArr: Array = [];
+			var polygons: Array;
+			var polygon: Array;
 			var i: int;
-			var p1: Point;
-			var p2: Point;
+			
+			if (projection.wrapsHorizontally)
+			{
+				for (i = 0; i < 5; i++)
+				{
+					var i_delta: int = (i & 1 ? 1 : -1) * ((i + 1) >> 1); // generates sequence 0, 1, -1, 2, -2, ..., 5, -5
+					polygons = convertToScreenPoints(shiftCoords(points, i_delta), bPolygon, bClipping);
+					for each (polygon in polygons)
+					{
+						resultArr.push(polygon);
+					}
+				}
+			} else {
+				// projection does not wrap around
+				polygons = convertToScreenPoints(points, bPolygon, bClipping);
+				for each (polygon in polygons)
+				{
+					resultArr.push(polygon);
+				}
+			}
+			return resultArr;
+		}
+		
+		private function createPoints(_points: Array): Array
+		{
+			var points: Array = [];
+			
+			var currPoint: Point = _points[0] as Point;
+			var nextPoint: Point;
+			var currPos: int = 1;
+			var nearestPoint: Point;
+			points.push(currPoint);
+			var total: int = _points.length;
+			while (currPos < total)
+			{
+				nextPoint = _points[currPos] as Point;
+				nextPoint = getNextPoint(currPoint, nextPoint);
+				points.push(nextPoint);
+				currPoint = nextPoint;
+				currPos++;
+			}
+			return points;
+		}
+		
+		private function convertCoordsToPoints(coords: Array, projection: Projection, bClosed: Boolean): Array
+		{
+			var i: int;
 			var c1: Coord;
 			var c2: Coord;
-			var crs: String = projection.crs;
-			var currentViewBBox: BBox = m_iw.getViewBBox();
-			var extendedBBox: BBox = m_iw.getExtentBBox();
-			var parts: Array = m_iw.mapBBoxToProjectionExtentParts(currentViewBBox);
+			var p1: Point;
+			var p2: Point;
+			var total: int = coords.length;
 			var _points: Array = [];
 			for (i = 0; i < total; i++)
 			{
@@ -106,59 +176,16 @@ package com.iblsoft.flexiweather.utils.wfs
 				p1 = new Point(c2.x, c2.y);
 				_points.push(p1);
 			}
-//			for (i = 0; i < total; i++)
-//			{
-//				p1 = coords[i] as Point;
-//				_points.push(p1);
-//			}
-			var currPoint: Point = _points[0] as Point;
-			var nextPoint: Point;
-			var currPos: int = 1;
-			var nearestPoint: Point;
-			points.push(currPoint);
-			total = _points.length;
-			while (currPos < total)
-			{
-				nextPoint = _points[currPos] as Point;
-//				splitPointLineToArrayOfPointPolyLines(crs, currPoint, nextPoint);
-				nextPoint = getNextPoint(currPoint, nextPoint);
-				points.push(nextPoint);
-				currPoint = nextPoint;
-				currPos++;
-			}
-			var resultArr: Array = [];
-			var polygons: Array;
-			var polygon: Array;
-			if (projection.wrapsHorizontally)
-			{
-				for (i = 0; i < 5; i++)
-				{
-					var i_delta: int = (i & 1 ? 1 : -1) * ((i + 1) >> 1); // generates sequence 0, 1, -1, 2, -2, ..., 5, -5
-					polygons = convertToScreenPoints(shiftCoords(points, i_delta), bPolygon);
-					for each (polygon in polygons)
-					{
-						resultArr.push(polygon);
-					}
-				}
-			} else {
-				// projection does not wrap around
-				polygons = convertToScreenPoints(points);
-				for each (polygon in polygons)
-				{
-					resultArr.push(polygon);
-				}
-			}
-			return resultArr;
-		
+			
+			return _points;
 		}
-
 		/**
 		 * Convert arrray of coordinates to screen points
-		 * @param coords
+		 * @param coords - coords in lat lon. Array consist points as Point.
 		 * @param shiftSize
 		 * @return
 		 */
-		private function convertToScreenPoints(coords: Array, bPolygon: Boolean = false): Array
+		private function convertToScreenPoints(coords: Array, bPolygon: Boolean = false, bClipping: Boolean = true): Array
 		{
 			var arr: Array = [];
 			var total: int = coords.length;
@@ -178,59 +205,67 @@ package com.iblsoft.flexiweather.utils.wfs
 			
 			if (bPolygon)
 			{
-				
-				//polygon clipping
-				var clippedPolygon: Array = polygonClipppingSutherlandHodgman(polygon, viewPolygon);
-				arr.push(clippedPolygon);
-				
+				if (bClipping)
+				{
+					//polygon clipping
+					var clippedPolygon: Array = polygonClipppingSutherlandHodgman(polygon, viewPolygon);
+					arr.push(clippedPolygon);
+				} else {
+					arr.push(polygon);
+				}
 			} else {
 
-				//line clipping
-				var viewRect: Rectangle = new Rectangle(padding, padding, m_iw.width - 2 * padding, m_iw.height - 2 * padding);
-				var lastPoint: Point;
-				var polyline: Array = [];
-				
-				for (i = 1; i < total; i++)
+				if (bClipping)
 				{
-					var p1: Point = polygon[i - 1] as Point;
-					var p2: Point = polygon[i] as Point;
+					//line clipping
+					var viewRect: Rectangle = new Rectangle(padding, padding, m_iw.width - 2 * padding, m_iw.height - 2 * padding);
+					var lastPoint: Point;
+					var polyline: Array = [];
 					
-					var line: Array = lineClippingCohenSutherland(p1, p2, viewRect);
-					
-					if (line)
+					for (i = 1; i < total; i++)
 					{
-						if (!lastPoint)
+						var p1: Point = polygon[i - 1] as Point;
+						var p2: Point = polygon[i] as Point;
+						
+						var line: Array = lineClippingCohenSutherland(p1, p2, viewRect);
+						
+						if (line)
 						{
-							polyline.push(line[0] as Point);
-							polyline.push(line[1] as Point);
-						} else {
-							if ((line[0] as Point).equals(lastPoint))
+							if (!lastPoint)
 							{
-								//same point, so it's same polyline
-								polyline.push(line[1] as Point);
-							} else {
-								
-								//completly new line, previous last point is different
-								arr.push(polyline);
-								polyline = [];
 								polyline.push(line[0] as Point);
 								polyline.push(line[1] as Point);
+							} else {
+								if ((line[0] as Point).equals(lastPoint))
+								{
+									//same point, so it's same polyline
+									polyline.push(line[1] as Point);
+								} else {
+									
+									//completly new line, previous last point is different
+									arr.push(polyline);
+									polyline = [];
+									polyline.push(line[0] as Point);
+									polyline.push(line[1] as Point);
+								}
+							}
+							lastPoint = line[1] as Point;
+						} else {
+							
+							if (lastPoint)
+							{
+								polyline.push(lastPoint);
+								lastPoint = null;
+								
+								arr.push(polyline);
+								polyline = [];
 							}
 						}
-						lastPoint = line[1] as Point;
-					} else {
-						
-						if (lastPoint)
-						{
-							polyline.push(lastPoint);
-							lastPoint = null;
-							
-							arr.push(polyline);
-							polyline = [];
-						}
 					}
+					arr.push(polyline);
+				} else {
+					arr.push(polygon);
 				}
-				arr.push(polyline);
 			}
 
 			return arr;
