@@ -13,9 +13,20 @@ package com.iblsoft.flexiweather.ogc.multiview.data
 		public static const GLOBAL_LEVEL_CHANGED: String = 'globalLevelChanged';
 		
 		/**
+		 * Global run is changed 
+		 */		
+		public static const GLOBAL_RUN_CHANGED: String = 'globalRunChanged';
+		
+		
+		/**
 		 * Layer level (not global level) is changed 
 		 */		
 		public static const LEVEL_CHANGED: String = 'levelChanged';
+		
+		/**
+		 * Layer run (not global run) is changed 
+		 */		
+		public static const RUN_CHANGED: String = 'runChanged';
 		
 		/**
 		 * Alpha is changed 

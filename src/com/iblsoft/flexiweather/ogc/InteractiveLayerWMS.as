@@ -106,7 +106,8 @@ package com.iblsoft.flexiweather.ogc
 				if (newAlpha < 1)
 					alpha = newAlpha;
 				visible = storage.serializeBool("visible", visible, true);
-				synchroniseLevel = storage.serializeBool('synchroniseLevel', false);
+				synchroniseLevel = storage.serializeBool('synchronise-level', false);
+				synchroniseRun = storage.serializeBool('synchronise-run', false);
 				
 				
 				styleNameValue = storage.serializeString("style-name", "", null);
@@ -144,7 +145,8 @@ package com.iblsoft.flexiweather.ogc
 					storage.serializeString(GlobalVariable.LEVEL, level, null);
 				}
 				
-				storage.serializeBool('synchroniseLevel', synchroniseLevel);
+				storage.serializeBool('synchronise-level', synchroniseLevel);
+				storage.serializeBool('synchronise-run', synchroniseRun);
 			}
 		}
 

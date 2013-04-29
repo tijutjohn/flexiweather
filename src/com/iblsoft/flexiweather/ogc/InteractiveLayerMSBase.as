@@ -91,6 +91,7 @@ package com.iblsoft.flexiweather.ogc
 		protected var md_customParameters: Dictionary = new Dictionary();
 		protected var ma_subLayerStyleNames: Array = [];
 		protected var mb_synchroniseLevel: Boolean;
+		protected var mb_synchroniseRun: Boolean;
 		protected var m_synchronisationRole: SynchronisationRole;
 		protected var m_cache: ICache;
 		
@@ -1346,6 +1347,11 @@ package com.iblsoft.flexiweather.ogc
 				var ile:  InteractiveLayerEvent = new  InteractiveLayerEvent(InteractiveLayerWMSEvent.LEVEL_CHANGED, true);
 				dispatchEvent(ile);
 			}
+			if (event.dimension == (configuration as WMSLayerConfiguration).dimensionRunName && !synchroniseRun)
+			{
+				var ile2:  InteractiveLayerEvent = new  InteractiveLayerEvent(InteractiveLayerWMSEvent.RUN_CHANGED, true);
+				dispatchEvent(ile2);
+			}
 		}
 
 		protected function afterWMSDimensionValueIsSet(s_dimName: String, s_value: String): void
@@ -1353,6 +1359,8 @@ package com.iblsoft.flexiweather.ogc
 			// if "run" changed, then even time axis changes
 			if (m_cfg.dimensionRunName != null && s_dimName == m_cfg.dimensionRunName)
 			{
+				dispatchEvent(new SynchronisedVariableChangeEvent(
+						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, GlobalVariable.RUN));
 				dispatchEvent(new SynchronisedVariableChangeEvent(
 						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, GlobalVariable.FRAME));
 			}
@@ -1500,6 +1508,12 @@ package com.iblsoft.flexiweather.ogc
 					hasLevel = hasLevel && synchroniseLevel;
 					return hasLevel;
 				}
+				if (s_variableId == GlobalVariable.RUN)
+				{
+					var hasRun: Boolean = m_currentWMSViewProperties.hasSynchronisedVariable(s_variableId);
+					hasRun = hasRun && synchroniseRun;
+					return hasRun;
+				}
 					
 				return m_currentWMSViewProperties.hasSynchronisedVariable(s_variableId);
 			}
@@ -1605,6 +1619,11 @@ package com.iblsoft.flexiweather.ogc
 			{
 				dispatchEvent(new SynchronisedVariableChangeEvent(
 						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, GlobalVariable.LEVEL));
+			}
+			if (mb_synchroniseRun)
+			{
+				dispatchEvent(new SynchronisedVariableChangeEvent(
+						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, GlobalVariable.RUN));
 			}
 			checkPostponedUpdateDataCall();
 		}
@@ -1743,6 +1762,11 @@ package com.iblsoft.flexiweather.ogc
 			if (layer is InteractiveLayerMSBase)
 			{
 				var newLayer: InteractiveLayerMSBase = layer as InteractiveLayerMSBase;
+				newLayer.synchroniseRun = synchroniseRun;
+				if (synchroniseRun)
+				{
+					newLayer.synchroniseWith(GlobalVariable.RUN, getSynchronisedVariableValue(GlobalVariable.RUN));
+				}
 				newLayer.synchroniseLevel = synchroniseLevel;
 				if (synchroniseLevel)
 				{
@@ -1778,6 +1802,20 @@ package com.iblsoft.flexiweather.ogc
 			return m_synchronisationRole;
 		}
 
+		public function get synchroniseRun(): Boolean
+		{
+			return mb_synchroniseRun;
+		}
+
+		public function set synchroniseRun(value: Boolean): void
+		{
+			if (mb_synchroniseRun != value)
+			{
+				mb_synchroniseRun = value;
+				notifySynchronizationChange(GlobalVariable.RUN, getSynchronisedVariableValue(GlobalVariable.RUN), mb_synchroniseRun);
+			}
+		}
+		
 		public function get synchroniseLevel(): Boolean
 		{
 			return mb_synchroniseLevel;

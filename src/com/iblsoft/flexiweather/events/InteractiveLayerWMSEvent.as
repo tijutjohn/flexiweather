@@ -6,6 +6,7 @@ package com.iblsoft.flexiweather.events
 	{
 		public static const WMS_STYLE_CHANGED: String = 'wmsStyleChanged';
 		public static const LEVEL_CHANGED: String = 'levelChanged';
+		public static const RUN_CHANGED: String = 'runChanged';
 		
 		public function InteractiveLayerWMSEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false)
 		{

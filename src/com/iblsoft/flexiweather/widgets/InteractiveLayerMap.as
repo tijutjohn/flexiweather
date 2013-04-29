@@ -26,6 +26,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.utils.XMLStorage;
+	import com.iblsoft.flexiweather.widgets.data.InteractiveLayerMapSaveSettings;
 	
 	import flash.events.DataEvent;
 	import flash.events.Event;
@@ -46,6 +47,7 @@ package com.iblsoft.flexiweather.widgets
 	[Event(name = TIME_AXIS_UPDATED, type = "flash.events.DataEvent")]
 	[Event(name = TIME_AXIS_ADDED, type = "mx.events.DynamicEvent")]
 	[Event(name = LEVEL_VARIABLE_CHANGED, type = "mx.events.DynamicEvent")]
+	[Event(name = RUN_VARIABLE_CHANGED, type = "mx.events.DynamicEvent")]
 	[Event(name = TIME_AXIS_REMOVED, type = "mx.events.DynamicEvent")]
 	[Event(name = SYNCHRONISE_WITH, type = "mx.events.DynamicEvent")]
 	[Event(name = MAP_LAYERS_INITIALIZED, type = "flash.events.Event")]
@@ -64,6 +66,8 @@ package com.iblsoft.flexiweather.widgets
 		public static const PRIMARY_LAYER_CHANGED: String = "primaryLayerChanged";
 		
 		public static const FRAME_VARIABLE_CHANGED: String = "frameVariableChanged";
+		
+		public static const RUN_VARIABLE_CHANGED: String = "runVariableChanged";
 		
 		public static const LEVEL_VARIABLE_CHANGED: String = "levelVariableChanged";
 		
@@ -116,6 +120,14 @@ package com.iblsoft.flexiweather.widgets
 			dispatchEvent(new Event(FRAME_VARIABLE_CHANGED));
 		}
 
+		[Bindable(event = RUN_VARIABLE_CHANGED)]
+		public function get run(): Date
+		{
+			var runDate: Date = getSynchronizedRunValue();
+//			var runString: String = _globalVariablesManager.run;
+			return runDate;
+		}
+		
 		[Bindable(event = LEVEL_VARIABLE_CHANGED)]
 		public function get level(): String
 		{
@@ -259,7 +271,7 @@ package com.iblsoft.flexiweather.widgets
 		 * @param storage
 		 * 
 		 */		
-		public function serializeAnimatedMap(storage: Storage): void
+		public function serializeMapWithCustomSettings(storage: Storage): void
 		{
 			var wrappers: ArrayCollection;
 			var wrapper: LayerSerializationWrapper;
@@ -343,10 +355,14 @@ package com.iblsoft.flexiweather.widgets
 				storage.serializeNonpersistentArrayCollection("layer", wrappers, LayerSerializationWrapper);
 				if (globalVariablesManager)
 				{
-					//					var frameDateString: String;
-					//					if (globalVariablesManager.frame)
-					//						frameDateString = ISO8601Parser.dateToString(globalVariablesManager.frame)
-					//					storage.serializeString('global-frame', frameDateString);
+//					if (settings.saveFrame)
+//					{
+//						var frameDateString: String;
+//						if (globalVariablesManager.frame)
+//							frameDateString = ISO8601Parser.dateToString(globalVariablesManager.frame);
+//						storage.serializeString('global-frame', frameDateString);
+//						storage.serializeString('run', frameDateString);
+//					}
 					storage.serializeString('global-level', globalVariablesManager.level);
 				}
 				
@@ -511,6 +527,7 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 		private var _frameInvalidated: Boolean;
+		private var _runInvalidated: Boolean;
 		private var _levelInvalidated: Boolean;
 
 		public function invalidateFrame(): void
@@ -519,6 +536,11 @@ package com.iblsoft.flexiweather.widgets
 			invalidateProperties();
 		}
 
+		public function invalidateRun(): void
+		{
+			_runInvalidated = true;
+			invalidateProperties();
+		}
 		public function invalidateLevel(): void
 		{
 			_levelInvalidated = true;
@@ -629,6 +651,13 @@ package com.iblsoft.flexiweather.widgets
 				if (frame)
 					setFrame(frame);
 			}
+			if (_runInvalidated)
+			{
+				_runInvalidated = false;
+				
+				//it will set run again. This is done by purpose when adding new layer, to synchronise level with newly added layer
+				setRun(_globalVariablesManager.run);
+			}
 			if (_levelInvalidated)
 			{
 				_levelInvalidated = false;
@@ -676,12 +705,14 @@ package com.iblsoft.flexiweather.widgets
 				dynamicEvent['layer'] = layer;
 				dispatchEvent(dynamicEvent);
 				var synchronisableFrame: Boolean = false;
+				var synchronisableRun: Boolean = false;
 				var synchronisableLevel: Boolean = false;
 				var so: ISynchronisedObject = layer as ISynchronisedObject;
 				//need to wait when synchronizaed variables will be update (set FRAME and LEVEL)
 				if (so && so.getSynchronisedVariables())
 				{
 					synchronisableFrame = so.getSynchronisedVariables().indexOf(GlobalVariable.FRAME) >= 0;
+					synchronisableRun = so.getSynchronisedVariables().indexOf(GlobalVariable.RUN) >= 0;
 					synchronisableLevel = so.getSynchronisedVariables().indexOf(GlobalVariable.LEVEL) >= 0;
 				}
 				if (getPrimaryLayer() == null)
@@ -702,6 +733,29 @@ package com.iblsoft.flexiweather.widgets
 				if (layer is InteractiveLayerMSBase)
 				{
 					var msBaseLayer: InteractiveLayerMSBase = layer as InteractiveLayerMSBase;
+					
+					//TODO check that frame is synchronized twice (for RUN and LEVEL as well)
+					if (synchronisableRun && msBaseLayer.synchroniseRun)
+					{
+						var globalRun: Date = run;
+						var bSynchronized: Boolean;
+						if (frame) {
+							var frameSynchronisationResponse: String = so.synchroniseWith(GlobalVariable.FRAME, frame);
+							bSynchronized = bSynchronized || SynchronisationResponse.wasSynchronised(frameSynchronisationResponse);
+						}
+						if (run) {
+							var runSynchronisationResponse: String = so.synchroniseWith(GlobalVariable.RUN, run);
+							bSynchronized = bSynchronized || SynchronisationResponse.wasSynchronised(runSynchronisationResponse);
+						}
+						if (bSynchronized)
+						{
+							layer.refresh(false);
+						}
+					} else {
+						invalidateRun();
+					}
+					
+					
 					if (synchronisableLevel && msBaseLayer.synchroniseLevel)
 					{
 						var globalLevel: String = level;
@@ -772,6 +826,13 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (primaryLayer)
 				return (primaryLayer as ISynchronisedObject).getSynchronisedVariableValue(GlobalVariable.FRAME) as Date;
+			return null;
+		}
+		
+		private function getSynchronizedRunValue(): Date
+		{
+			if (primaryLayer)
+				return (primaryLayer as ISynchronisedObject).getSynchronisedVariableValue(GlobalVariable.RUN) as Date;
 			return null;
 		}
 		
@@ -1187,6 +1248,61 @@ package com.iblsoft.flexiweather.widgets
 			return l_timeAxis;
 		}
 
+		public function setRun(newRun: Date, b_nearrest: Boolean = true): Boolean
+		{
+			if (newRun == null)
+				return false;
+			
+			if (mapIsLoading)
+			{
+				_tempMapStorage.setRun(newRun, b_nearrest);
+				return false;
+			}
+			
+			
+			//we need to remember old frame and synchronize frame after RUN is synchronized
+			var oldFrame: Date = frame;
+			
+			
+			var bGlobalSynchronization: Boolean = false;
+			for each (var l: InteractiveLayer in m_layers)
+			{
+				var so: ISynchronisedObject = l as ISynchronisedObject;
+				if (so == null)
+					continue;
+				if (!so.hasSynchronisedVariable(GlobalVariable.RUN))
+					continue;
+				
+				var bSynchronized: Boolean = SynchronisationResponse.wasSynchronised(so.synchroniseWith(GlobalVariable.RUN, newRun));
+				
+				bGlobalSynchronization = bGlobalSynchronization || bSynchronized;
+				
+				debug("setRun [" + newRun + "] newRun: " + newRun + " for: " + l.name + " bSynchronized: " + bSynchronized + " bGlobalSynchronization: " + bGlobalSynchronization);
+				if (bSynchronized)
+				{
+					l.refresh(false);
+				}
+				else
+				{
+					error("InteractiveLayerMap setRun [" + newRun + "] NO SYNCHRONIZATION for " + l.name);
+				}
+			}
+			
+			if (bGlobalSynchronization)
+				_globalVariablesManager.run = newRun;
+			else {
+				debug("!!setRun, bGlobalSynchronization = false, do not set global variables manager run");
+			}
+			
+			
+			//now synchronize frame to same frame as it was synchronized before
+			setFrame(oldFrame);
+			
+			
+			return true;
+		}
+		
+		
 		/**
 		 * 
 		 * @param newLevel
@@ -1527,6 +1643,14 @@ class MapTemporaryParameterStorage {
 	{
 		if (map)
 		{
+			if (_dimension['run'])
+			{
+				var runObject: Object = _dimension['run'];
+				map.setRun(runObject.run);
+				
+				if (bEmptyStorage)
+					delete _dimension['run'];
+			}
 			if (_dimension['level'])
 			{
 				var levelObject: Object = _dimension['level'];
@@ -1537,9 +1661,13 @@ class MapTemporaryParameterStorage {
 			}
 		}
 	}
+	public function setRun(newRun: Date, b_nearrest: Boolean = true): void
+	{
+		_dimension['run'] = {run: newRun, nearest: b_nearrest};
+	}
 	public function setLevel(newLevel: String, b_nearrest: Boolean = true): void
 	{
-		_dimension['level'] = {level: newLevel, nearest: b_nearrest}
+		_dimension['level'] = {level: newLevel, nearest: b_nearrest};
 	}
 	
 }

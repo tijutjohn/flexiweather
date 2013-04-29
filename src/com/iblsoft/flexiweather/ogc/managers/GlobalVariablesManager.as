@@ -22,6 +22,7 @@ package com.iblsoft.flexiweather.ogc.managers
 		public static const SELECTED_FRAME_CHANGED: String = 'selectedFrameChanged';
 		public static const SELECTED_LEVEL_CHANGED: String = 'selectedLevelChanged';
 		public static const FRAMES_CHANGED: String = 'framesChanged';
+		public static const RUNS_CHANGED: String = 'runsChanged';
 		public static const LEVELS_CHANGED: String = 'levelsChanged';
 		
 		public static var uid: int = 0;
@@ -29,6 +30,7 @@ package com.iblsoft.flexiweather.ogc.managers
 		
 		private var _frames: ArrayCollection;
 		private var _levels: ArrayCollection;
+		private var _runs: ArrayCollection;
 
 		[Bindable(event = FRAMES_CHANGED)]
 		public function get frames(): ArrayCollection
@@ -36,6 +38,12 @@ package com.iblsoft.flexiweather.ogc.managers
 			return _frames;
 		}
 
+		[Bindable(event = LEVELS_CHANGED)]
+		public function get runs(): ArrayCollection
+		{
+			return _runs;
+		}
+		
 		[Bindable(event = LEVELS_CHANGED)]
 		public function get levels(): ArrayCollection
 		{
@@ -50,7 +58,10 @@ package com.iblsoft.flexiweather.ogc.managers
 		
 		private var _frame: Date;
 		private var _level: String;
+		private var _run: Date;
+		
 		private var _levelChanged: Boolean;
+		private var _runChanged: Boolean;
 
 		public function get frame(): Date
 		{
@@ -71,6 +82,20 @@ package com.iblsoft.flexiweather.ogc.managers
 			}
 		}
 
+		public function get run(): Date
+		{
+			return _run;
+		}
+
+		public function set run(value: Date): void
+		{
+			if (_run != value)
+			{
+				_run = value;
+				_runChanged = true;
+				onRunVariableChanged();
+			}
+		}
 		public function get level(): String
 		{
 			return _level;
@@ -96,6 +121,7 @@ package com.iblsoft.flexiweather.ogc.managers
 			
 			_operationType = SetOperationType.UNION;
 			_frames = new ArrayCollection();
+			_runs = new ArrayCollection();
 			_levels = new ArrayCollection();
 		}
 		
@@ -103,6 +129,8 @@ package com.iblsoft.flexiweather.ogc.managers
 		{
 			if (_frames)
 				_frames.removeAll();
+			if (_runs)
+				_runs.removeAll();
 			if (_levels)
 				_levels.removeAll();
 			checkGlobalVariableChange();
@@ -207,6 +235,47 @@ package com.iblsoft.flexiweather.ogc.managers
 			}
 		}
 
+		private function onRunVariableChanged(event: Event = null): void
+		{
+			if (_interactiveLayerMap)
+			{
+				var _layerRuns: Array = [];
+				for each (var layer: InteractiveLayer in _interactiveLayerMap.layers)
+				{
+					if (layer is InteractiveLayerMSBase)
+					{
+						var layerMSBase: InteractiveLayerMSBase = layer as InteractiveLayerMSBase;
+						if (layerMSBase.synchroniseRun)
+						{
+							var _layerRunsNew: Array = layerMSBase.getSynchronisedVariableValuesList(GlobalVariable.RUN);
+							ArrayUtils.unionArrays(_layerRuns, _layerRunsNew);
+						}
+					}
+				}
+				var tempArr: Array = [];
+				for each (var globalLevelVariable: GlobalVariableValue in _layerRuns)
+				{
+					tempArr.push(globalLevelVariable.data as String);
+				}
+				_runs = new ArrayCollection(tempArr);
+				_runs.refresh();
+			}
+			else 
+			{
+				if (!_runs)
+					_runs = new ArrayCollection();
+				else
+					_runs.removeAll();
+			}
+			notifyRunsChanged();
+			if (_runChanged)
+			{
+				_runChanged = false;
+				notifySelectedRunChanged(_run);
+			}
+		}
+		
+		
 		private function onLevelVariableChanged(event: Event = null): void
 		{
 			if (_interactiveLayerMap)
@@ -336,9 +405,19 @@ package com.iblsoft.flexiweather.ogc.managers
 //			}
 		}
 
+		private function notifyRunsChanged(): void
+		{
+			dispatchEvent(new Event(RUNS_CHANGED, true));
+		}
 		private function notifyLevelsChanged(): void
 		{
 			dispatchEvent(new Event(LEVELS_CHANGED, true));
+		}
+		private function notifySelectedRunChanged(selectedRun: Date): void
+		{
+			_run = selectedRun;
+			var gvce: GlobalVariableChangeEvent = new GlobalVariableChangeEvent(GlobalVariableChangeEvent.DIMENSION_VALUE_CHANGED, GlobalVariable.RUN, selectedRun);
+			dispatchEvent(gvce);
 		}
 		private function notifySelectedLevelChanged(selectedLevel: String): void
 		{
