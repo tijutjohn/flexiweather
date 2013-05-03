@@ -613,10 +613,17 @@ package com.iblsoft.flexiweather.widgets
 			if (event.variableId == GlobalVariable.FRAME)
 			{
 //				resynchronizeOnStart(event);
+				periodicCheck();
 				dispatchEvent(new Event(FRAME_VARIABLE_CHANGED));
 			}
 			if (event.variableId == GlobalVariable.LEVEL)
 				dispatchEvent(new Event(LEVEL_VARIABLE_CHANGED));
+			
+			if (event.variableId == GlobalVariable.RUN)
+			{
+				periodicCheck();
+				dispatchEvent(new Event(RUN_VARIABLE_CHANGED));
+			}
 		}
 
 		protected function onSynchronisedVariableDomainChanged(event: SynchronisedVariableChangeEvent): void
@@ -625,10 +632,17 @@ package com.iblsoft.flexiweather.widgets
 			if (event.variableId == GlobalVariable.FRAME)
 			{
 				resynchronizeOnStart(event);
+				periodicCheck();
 				dispatchEvent(new Event(FRAME_VARIABLE_CHANGED));
 			}
 			if (event.variableId == GlobalVariable.LEVEL)
 				dispatchEvent(new Event(LEVEL_VARIABLE_CHANGED));
+			
+			if (event.variableId == GlobalVariable.RUN)
+			{
+				periodicCheck();
+				dispatchEvent(new Event(RUN_VARIABLE_CHANGED));
+			}
 		}
 
 		public function getLayersOrderString(): String
