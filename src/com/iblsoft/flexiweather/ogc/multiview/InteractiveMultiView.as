@@ -937,19 +937,23 @@ package com.iblsoft.flexiweather.ogc.multiview
 					
 					//check global variable synchronizator
 					var globalFrameSynchronizationAllowed: Boolean = true;
+					var globalRunSynchronizationAllowed: Boolean = true;
 					var globalLevelSynchronizationAllowed: Boolean = true;
 					if (_configuration && _configuration.customData && _configuration.customData.synchronizeFrame)
 					{
 						globalFrameSynchronizationAllowed = _configuration.customData.synchronizeFrame
 					}
 					var needToSynchronizeGlobalFrame: Boolean = globalFrameSynchronizationAllowed && !synchronizator.isSynchronisingChangeType(SynchronizationChangeType.GLOBAL_FRAME_CHANGED) && changeCause == SynchronizationChangeType.GLOBAL_FRAME_CHANGED;
+					var needToSynchronizeGlobalRun: Boolean = globalRunSynchronizationAllowed && !synchronizator.isSynchronisingChangeType(SynchronizationChangeType.GLOBAL_RUN_CHANGED) && changeCause == SynchronizationChangeType.GLOBAL_RUN_CHANGED;
 					var needToSynchronizeGlobalLevel: Boolean = globalLevelSynchronizationAllowed && !synchronizator.isSynchronisingChangeType(SynchronizationChangeType.GLOBAL_LEVEL_CHANGED) && changeCause == SynchronizationChangeType.GLOBAL_LEVEL_CHANGED;
 					
-					if (needToSynchronizeGlobalFrame || needToSynchronizeGlobalLevel)
+					if (needToSynchronizeGlobalFrame || needToSynchronizeGlobalRun || needToSynchronizeGlobalLevel)
 					{
 						// in case synchronizator is not synchronizing FRAME, global frame synchronizator will synchronize FRAME instead
 						enabled = false;
+						debug("onWidgetChanged enabled: " + enabled);
 						_globalFrameSynchronizator.synchronizeFrame = needToSynchronizeGlobalFrame;
+						_globalFrameSynchronizator.synchronizeRun = needToSynchronizeGlobalRun;
 						_globalFrameSynchronizator.synchronizeLevel = needToSynchronizeGlobalLevel;
 						
 						_globalFrameSynchronizator.addEventListener(SynchronisationEvent.SYNCHRONISATION_DONE, onGlobalFrameSynchronizationDone);
@@ -959,6 +963,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 					if (changeCause == SynchronizationChangeType.ALPHA_CHANGED || 
 						changeCause == SynchronizationChangeType.VISIBILITY_CHANGED ||
 						changeCause == SynchronizationChangeType.SYNCHRONIZE_LEVEL_CHANGED ||
+						changeCause == SynchronizationChangeType.SYNCHRONIZE_RUN_CHANGED ||
+						changeCause == SynchronizationChangeType.RUN_CHANGED ||
 						changeCause == SynchronizationChangeType.LEVEL_CHANGED)
 					{
 						if (!synchronizator.isSynchronisingChangeType(changeCause))
@@ -985,6 +991,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 		private function onGlobalFrameSynchronizationDone(event: SynchronisationEvent): void
 		{
 			enabled = true;
+			debug("onGlobalFrameSynchronizationDone enabled: " + enabled);
 			_globalFrameSynchronizator.removeEventListener(SynchronisationEvent.SYNCHRONISATION_DONE, onGlobalFrameSynchronizationDone);
 		}
 		
@@ -1035,6 +1042,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 
 		private function rebuildWidgets(): void
 		{
+			trace("\t rebuildWidgets");
 			//first loop will check how many widgets need to be changed
 			_widgetsWaitingForRebuild = 0;
 			for each (var currWidget: InteractiveWidget in _interactiveWidgets.widgets)
@@ -1600,7 +1608,9 @@ package com.iblsoft.flexiweather.ogc.multiview
 					stopListenForSynchronisedVariableChange(primaryLayer);
 				
 					//and wait for synchronization to be done
+					
 					enabled = false;
+					debug("synchronizeWidgets enabled: " + enabled);
 					synchronizator.addEventListener(SynchronisationEvent.SYNCHRONISATION_DONE, onSynchronizationDone);
 //				} else {
 //					trace(this + " do not wait for synchronization end");
@@ -1618,6 +1628,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 			
 			startListenForSynchronisedVariableChange(primaryLayer);
 			enabled = true;
+			debug("onSynchronizationDone enabled: " + enabled);
 		}
 
 		private function registerSynchronizator(synchronizator: ISynchronizator): void
@@ -1651,7 +1662,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 			if (debugConsole)
 				debugConsole.print(str, type, tag);
 			
-//			trace(tag + "| " + type + "| " + str);
+			trace(tag + "| " + type + "| " + str);
 //			LoggingUtils.dispatchLogEvent(this, tag + "| " + type + "| " + str);
 		}
 

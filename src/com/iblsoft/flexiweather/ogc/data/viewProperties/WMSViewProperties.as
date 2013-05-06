@@ -604,6 +604,9 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 
 		public function getSynchronisedVariableValue(s_variableId: String): Object
 		{
+			var runValue: String;
+			var run: Date;
+			
 			if (s_variableId == GlobalVariable.FRAME)
 			{
 				if (m_cfg.dimensionTimeName != null)
@@ -616,14 +619,14 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 				}
 				else if (m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null)
 				{
-					var runValue: String = getWMSDimensionValue(m_cfg.dimensionRunName, true);
+					runValue = getWMSDimensionValue(m_cfg.dimensionRunName, true);
 					var forecastValue: String = getWMSDimensionValue(m_cfg.dimensionForecastName, true);
 					if (!runValue)
 						runValue = getWMSDimensionDefaultValue(m_cfg.dimensionRunName);
 					if (!forecastValue)
 						forecastValue = getWMSDimensionDefaultValue(m_cfg.dimensionForecastName);
 					
-					var run: Date = ISO8601Parser.stringToDate(runValue);
+					run = ISO8601Parser.stringToDate(runValue);
 					var forecast: Duration = ISO8601Parser.stringToDuration(forecastValue);
 					
 					if (run != null && forecast != null)
@@ -635,11 +638,11 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 			{
 				if (m_cfg.dimensionRunName != null)
 				{
-					var runValue: String = getWMSDimensionValue(m_cfg.dimensionRunName, true);
+					runValue = getWMSDimensionValue(m_cfg.dimensionRunName, true);
 					if (!runValue)
 						runValue = getWMSDimensionDefaultValue(m_cfg.dimensionRunName);
 					
-					var run: Date = ISO8601Parser.stringToDate(runValue);
+					run = ISO8601Parser.stringToDate(runValue);
 					
 					if (run != null)
 						return run;
@@ -678,27 +681,26 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 				{
 					//TODO check if getSynchronisedVariableValuesList RUN return everything correctly
 					var l_runs: Array = getWMSDimensionsValues(m_cfg.dimensionRunName);
-					var l_resultRuns: Array = [];
-//					for each (var forecast: Object in l_forecasts)
-					for each (var runObj: Object in l_runs)
-					{
-						if (runObj && (runObj.data is Duration))
-						{
-							l_resultRuns.push(new Date(runObj.time));
-						}
-						else
-						{
-							trace("PROBLEM: InteractiveLayerMSBase getSynchronisedVariableValuesList run.data is not Number: " + runObj.data);
-						}
-					}
-					
-//					//sort forecast by Duration
-//					if (l_forecasts && l_forecasts.length > 0)
+//					var l_resultRuns: Array = [];
+//					for each (var runObj: Object in l_runs)
+//					{
+//						if (runObj && (runObj.data is Date))
+//						{
+//							l_resultRuns.push(runObj.data);
+//						}
+//						else
+//						{
+//							trace("PROBLEM: InteractiveLayerMSBase getSynchronisedVariableValuesList run.data is not Number: " + runObj.data);
+//						}
+//					}
+//					
+//					//sort l_resultRuns by Date
+//					if (l_resultRuns && l_resultRuns.length > 0)
 //					{
 //						//sort Duration
-//						l_forecasts.sort(sortDurations);
+//						l_resultRuns.sort(sortDates);
 //					}
-					return l_resultRuns;
+					return l_runs;
 				}
 				else
 					return [];
@@ -811,10 +813,10 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					var currentRun: Date = ISO8601Parser.stringToDate(
 						getWMSDimensionValue(m_cfg.dimensionRunName, true));
 					
-					var forecast: Duration = new Duration(((value as Date).time - run.time) / 1000.0);
+//					var forecast: Duration = new Duration(((value as Date).time - run.time) / 1000.0);
 					
 					var l_runs: Array = getWMSDimensionsValues(m_cfg.dimensionRunName);
-					var l_forecasts: Array = getWMSDimensionsValues(m_cfg.dimensionForecastName);
+//					var l_forecasts: Array = getWMSDimensionsValues(m_cfg.dimensionForecastName);
 					ofExactRun = null;
 					for each (of in l_runs)
 					{

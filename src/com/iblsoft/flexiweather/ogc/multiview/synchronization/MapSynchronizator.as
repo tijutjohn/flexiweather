@@ -35,13 +35,13 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		}
 		public function set synchronizeFrame(value:Boolean):void
 		{
-				_synchronizeFrame = value;
-				if (_synchronizeFrame)
-				{
-					unregisterChangeType(SynchronizationChangeType.GLOBAL_FRAME_CHANGED);
-				} else {
-					registerChangeType(SynchronizationChangeType.GLOBAL_FRAME_CHANGED);
-				}
+			_synchronizeFrame = value;
+			if (_synchronizeFrame)
+			{
+				unregisterChangeType(SynchronizationChangeType.GLOBAL_FRAME_CHANGED);
+			} else {
+				registerChangeType(SynchronizationChangeType.GLOBAL_FRAME_CHANGED);
+			}
 		}
 
 		override public function get labelString(): String
@@ -58,6 +58,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			registerChangeType(SynchronizationChangeType.WMS_STYLE_CHANGED);
 			registerChangeType(SynchronizationChangeType.ALPHA_CHANGED);
 			registerChangeType(SynchronizationChangeType.VISIBILITY_CHANGED);
+			registerChangeType(SynchronizationChangeType.SYNCHRONIZE_RUN_CHANGED);
 			registerChangeType(SynchronizationChangeType.SYNCHRONIZE_LEVEL_CHANGED);
 		}
 		

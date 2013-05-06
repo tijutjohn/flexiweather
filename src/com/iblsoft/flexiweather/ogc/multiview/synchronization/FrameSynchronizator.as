@@ -108,6 +108,9 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			if (!synchronizedDate)
 				return false;
 			
+			if (mb_synchronizatorInvalid)
+				return false;
+			
 			var bNeeded: Boolean = false; 
 			bNeeded = bNeeded || (_lastSynchronizedFrame == null);
 			bNeeded = bNeeded || (_lastSynchronizedFrame != null && _lastSynchronizedFrame.time != synchronizedDate.time);
@@ -258,6 +261,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			switch (event.changeDescription)
 			{
 				case SynchronizationChangeType.SYNCHRONIZE_LEVEL_CHANGED:
+				case SynchronizationChangeType.SYNCHRONIZE_RUN_CHANGED:
 				case SynchronizationChangeType.MAP_CHANGED:
 				case SynchronizationChangeType.MAP_LAYER_ADDED:
 				case SynchronizationChangeType.MAP_LAYER_REMOVED:

@@ -1765,7 +1765,8 @@ package com.iblsoft.flexiweather.ogc
 				newLayer.synchroniseRun = synchroniseRun;
 				if (synchroniseRun)
 				{
-					newLayer.synchroniseWith(GlobalVariable.RUN, getSynchronisedVariableValue(GlobalVariable.RUN));
+					var run: Date = getSynchronisedVariableValue(GlobalVariable.RUN) as Date;
+					newLayer.synchroniseWith(GlobalVariable.RUN, run);
 				}
 				newLayer.synchroniseLevel = synchroniseLevel;
 				if (synchroniseLevel)
@@ -1958,8 +1959,9 @@ class LayerTemporaryParameterStorage {
 			}
 			for (str in _synchroniseVariablesDictionary)
 			{
-				var s_variableId: String = _synchroniseVariablesDictionary[str] as String;
-				currentWMSProperties.synchroniseWith(str as String, s_variableId);
+				var value: Object = _synchroniseVariablesDictionary[str] as Object;
+				if (value)
+					currentWMSProperties.synchroniseWith(str as String, value);
 			}
 		}
 	}

@@ -19,5 +19,11 @@ package com.iblsoft.flexiweather.utils
 				return false;
 			return o1.label == o2.label;
 		}
+		public static function equalsByDates(d1: Date, d2: Date): Boolean
+		{
+			if (!(d1 is Date) || !(d2 is Date))
+				return false;
+			return d1.time == d2.time;
+		}
 	}
 }

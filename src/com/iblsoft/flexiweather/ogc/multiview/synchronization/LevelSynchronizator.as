@@ -152,6 +152,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			switch (event.changeDescription)
 			{
 				case SynchronizationChangeType.SYNCHRONIZE_LEVEL_CHANGED:
+				case SynchronizationChangeType.SYNCHRONIZE_RUN_CHANGED:
 				case SynchronizationChangeType.MAP_CHANGED:
 				case SynchronizationChangeType.MAP_LAYER_ADDED:
 				case SynchronizationChangeType.MAP_LAYER_REMOVED:

@@ -43,6 +43,11 @@ package com.iblsoft.flexiweather.ogc.multiview.data
 		 */		
 		public static const SYNCHRONIZE_LEVEL_CHANGED: String = 'synchronizeLevelChanged';
 		
+		/**
+		 * "synchronizeRun" property of InteractiveLayerMSBase is changed 
+		 */		
+		public static const SYNCHRONIZE_RUN_CHANGED: String = 'synchronizeRunChanged';
+		
 		public static const WMS_STYLE_CHANGED: String = 'wmsStyleChanged';
 		public static const MAP_CHANGED: String = 'mapChanged';
 		public static const MAP_LAYER_ADDED: String = 'mapLayerAdded';

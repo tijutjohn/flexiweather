@@ -9,6 +9,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 	public class GlobalVariablesSynchronizator extends SynchronizatorBase
 	{
 		public var synchronizeFrame: Boolean;
+		public var synchronizeRun: Boolean;
 		public var synchronizeLevel: Boolean;
 		
 		public function GlobalVariablesSynchronizator()
@@ -21,14 +22,17 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			var widgetsForSynchronizing: Array = [];
 			
 			var globalFrameForSynchronization: Date = synchronizeFromWidget.frame;
+			var globalRunForSynchronisation: Date = synchronizeFromWidget.interactiveLayerMap.run;
 			var globalLevelForSynchronisation: String = synchronizeFromWidget.interactiveLayerMap.level;
 
 			if (!synchronizeFrame)
 				globalFrameForSynchronization = null;
+			if (!synchronizeRun)
+				globalRunForSynchronisation = null;
 			if (!synchronizeLevel)
 				globalLevelForSynchronisation = null;
 			
-			if (!globalFrameForSynchronization && !globalLevelForSynchronisation)
+			if (!globalFrameForSynchronization && !globalRunForSynchronisation && !globalLevelForSynchronisation)
 				return;
 			
 			for each (var widget: InteractiveWidget in widgetsForSynchronisation)
@@ -46,6 +50,16 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 						}
 					}
 					
+					if (globalRunForSynchronisation)
+					{
+						var widgetRun: Date = widget.interactiveLayerMap.run;
+						if (widgetRun != globalRunForSynchronisation)
+						{
+							listenToWidgetSynchronization(widget);
+							obj.run = true;
+						}
+					}
+					
 					if (globalLevelForSynchronisation)
 					{
 						var widgetLevel: String = widget.interactiveLayerMap.level;
@@ -56,23 +70,10 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 						}
 					}
 					
-					if (obj.frame || obj.level)
+					if (obj.frame || obj.level || obj.run)
 					{
 						widgetsForSynchronizing.push(obj);
 					}
-					
-//					var layers: ArrayCollection = widget.interactiveLayerMap.layers;
-//					
-//					for each (var layer: InteractiveLayerMSBase in layers)
-//					{
-//						if (layer && layer.synchroniseLevel)
-//						{
-//							var config: WMSLayerConfiguration = layer.configuration as WMSLayerConfiguration;
-//						
-//							var level: String = layer.getWMSDimensionValue(config.dimensionVerticalLevelName) as String;
-//						
-//						}
-//					}
 				}
 			}
 			
@@ -83,6 +84,8 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 				
 				if (obj.frame)
 					widget.interactiveLayerMap.setFrame(globalFrameForSynchronization);
+				if (obj.run)
+					widget.interactiveLayerMap.setRun(globalRunForSynchronisation);
 				if (obj.level)
 					widget.interactiveLayerMap.setLevel(globalLevelForSynchronisation);
 				
