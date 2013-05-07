@@ -1622,7 +1622,10 @@ package com.iblsoft.flexiweather.ogc.multiview
 		
 		private function onSynchronizationDone(event: SynchronisationEvent): void
 		{
-			synchronizator.removeEventListener(SynchronisationEvent.SYNCHRONISATION_DONE, onSynchronizationDone);
+			var currSynchronizator: ISynchronizator = event.target as ISynchronizator;
+			if (currSynchronizator)
+				currSynchronizator.removeEventListener(SynchronisationEvent.SYNCHRONISATION_DONE, onSynchronizationDone);
+			
 			
 			var primaryLayer: InteractiveLayerMSBase = selectedInteractiveWidget.interactiveLayerMap.primaryLayer;
 			

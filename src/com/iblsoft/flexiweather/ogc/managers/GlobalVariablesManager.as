@@ -21,7 +21,9 @@ package com.iblsoft.flexiweather.ogc.managers
 	public class GlobalVariablesManager extends EventDispatcher
 	{
 		public static const SELECTED_FRAME_CHANGED: String = 'selectedFrameChanged';
+		public static const SELECTED_RUN_CHANGED: String = 'selectedRunChanged';
 		public static const SELECTED_LEVEL_CHANGED: String = 'selectedLevelChanged';
+		
 		public static const FRAMES_CHANGED: String = 'framesChanged';
 		public static const RUNS_CHANGED: String = 'runsChanged';
 		public static const LEVELS_CHANGED: String = 'levelsChanged';
@@ -95,6 +97,7 @@ package com.iblsoft.flexiweather.ogc.managers
 				_run = value;
 				_runChanged = true;
 				onRunVariableChanged();
+				onInteractiveLayerFrameVariableChanged();
 			}
 		}
 		public function get level(): String
@@ -247,6 +250,7 @@ package com.iblsoft.flexiweather.ogc.managers
 					if (event.type == SynchronisationEvent.START_GLOBAL_VARIABLE_SYNCHRONIZATION)
 						run = event.globalVariableValue as Date;
 					onRunVariableChanged();
+					onInteractiveLayerFrameVariableChanged();
 					break;
 				}
 				case GlobalVariable.FRAME:
