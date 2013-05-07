@@ -24,5 +24,11 @@ package com.iblsoft.flexiweather.ogc
 		function synchroniseWith(s_variableId: String, value: Object): String;
 		/** Return information if object is primary layer */
 		function isPrimaryLayer(): Boolean;
+		
+		function get synchroniseRun(): Boolean;
+		function set synchroniseRun(value: Boolean): void;
+		
+		function get synchroniseLevel(): Boolean;
+		function set synchroniseLevel(value: Boolean): void;
 	}
 }

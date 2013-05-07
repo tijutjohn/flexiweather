@@ -937,6 +937,71 @@ package com.iblsoft.flexiweather.widgets
 			}
 			return l_timeAxis;
 		}
+		
+		public function enumRuns(l_syncLayers: Array = null): Array
+		{
+			if (l_syncLayers == null)
+				l_syncLayers = [];
+			var l_timeAxis: Array = null;
+			for each (var l: InteractiveLayer in m_layers)
+			{
+				var so: ISynchronisedObject = l as ISynchronisedObject;
+				if (so == null)
+					continue;
+				var test: * = so.getSynchronisedVariables();
+				//debug("enumTimeAxis so: " + (so as Object).name + " synchro vars: " + test.toString());
+				if (test == null)
+					continue;
+				if (so.getSynchronisedVariables().indexOf(GlobalVariable.RUN) < 0)
+					continue;
+//				if (!so.isPrimaryLayer())
+				if (!so.synchroniseRun)
+					continue;
+				var l_runs: Array = so.getSynchronisedVariableValuesList(GlobalVariable.RUN);
+				if (l_runs == null)
+					continue;
+				l_syncLayers.push(so);
+				if (l_timeAxis == null)
+					l_timeAxis = l_runs;
+				else {
+//					ArrayUtils.unionArrays(l_timeAxis, l_runs);
+					ArrayUtils.intersectedArrays(l_timeAxis, l_runs);
+				}
+			}
+			return l_timeAxis;
+		}
+		public function enumLevels(l_syncLayers: Array = null): Array
+		{
+			if (l_syncLayers == null)
+				l_syncLayers = [];
+			var l_timeAxis: Array = null;
+			for each (var l: InteractiveLayer in m_layers)
+			{
+				var so: ISynchronisedObject = l as ISynchronisedObject;
+				if (so == null)
+					continue;
+				var test: * = so.getSynchronisedVariables();
+				//debug("enumTimeAxis so: " + (so as Object).name + " synchro vars: " + test.toString());
+				if (test == null)
+					continue;
+				if (so.getSynchronisedVariables().indexOf(GlobalVariable.LEVEL) < 0)
+					continue;
+//				if (!so.isPrimaryLayer())
+				if (!so.synchroniseLevel)
+					continue;
+				var l_levels: Array = so.getSynchronisedVariableValuesList(GlobalVariable.LEVEL);
+				if (l_levels == null)
+					continue;
+				l_syncLayers.push(so);
+				if (l_timeAxis == null)
+					l_timeAxis = l_levels;
+				else {
+//					ArrayUtils.unionArrays(l_timeAxis, l_levels);
+					ArrayUtils.intersectedArrays(l_timeAxis, l_levels);
+				}
+			}
+			return l_timeAxis;
+		}
 
 		public function getDimensionDefaultValue(dimName: String): Object
 		{
@@ -1260,6 +1325,25 @@ package com.iblsoft.flexiweather.widgets
 				return null;
 			
 			return l_timeAxis;
+		}
+		
+		public function getRuns(): Array
+		{
+			var l_syncLayers: Array = [];
+			var l_runs: Array = enumRuns(l_syncLayers);
+			if (l_runs == null)
+				return null;
+			
+			return l_runs;
+		}
+		public function getLevels(): Array
+		{
+			var l_syncLayers: Array = [];
+			var l_levels: Array = enumLevels(l_syncLayers);
+			if (l_levels == null)
+				return null;
+			
+			return l_levels;
 		}
 
 		public function setRun(newRun: Date, b_nearrest: Boolean = true): Boolean
