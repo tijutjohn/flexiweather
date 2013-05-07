@@ -1852,17 +1852,20 @@ package com.iblsoft.flexiweather.ogc
 			var cache: WMSCache = getCache() as WMSCache;
 			
 			//check if this Bitmap is used in this layer
-			var imageParts: ArrayCollection = m_currentWMSViewProperties.imageParts;
-			for each (var imagePart: ImagePart in imageParts)
+			if (m_currentWMSViewProperties)
 			{
-				if (imagePart.isBitmap)
+				var imageParts: ArrayCollection = m_currentWMSViewProperties.imageParts;
+				for each (var imagePart: ImagePart in imageParts)
 				{
-					var currImage: DisplayObject = imagePart.m_image;
-					if (image == currImage)
+					if (imagePart.isBitmap)
 					{
-						//listen when same cache item will be added
-						imagePart.mb_imageOK = false;
-						cache.addEventListener(WMSCacheEvent.ITEM_ADDED, onDeleteCacheItemAdded);
+						var currImage: DisplayObject = imagePart.m_image;
+						if (image == currImage)
+						{
+							//listen when same cache item will be added
+							imagePart.mb_imageOK = false;
+							cache.addEventListener(WMSCacheEvent.ITEM_ADDED, onDeleteCacheItemAdded);
+						}
 					}
 				}
 			}
@@ -1871,21 +1874,24 @@ package com.iblsoft.flexiweather.ogc
 		private function onDeleteCacheItemAdded(event: WMSCacheEvent): void
 		{
 			//update imagePart
-			var imageParts: ArrayCollection = m_currentWMSViewProperties.imageParts;
-			var cacheKey: String = event.item.cacheKey.key;
-			for each (var imagePart: ImagePart in imageParts)
+			if (m_currentWMSViewProperties)
 			{
-				if (imagePart.isBitmap)
+				var imageParts: ArrayCollection = m_currentWMSViewProperties.imageParts;
+				var cacheKey: String = event.item.cacheKey.key;
+				for each (var imagePart: ImagePart in imageParts)
 				{
-					if (!imagePart.ms_cacheKey || imagePart.ms_cacheKey == cacheKey)
+					if (imagePart.isBitmap)
 					{
-						imagePart.m_image = event.item.image;
-						imagePart.mb_imageOK = true;
-						imagePart.ms_cacheKey = cacheKey;
+						if (!imagePart.ms_cacheKey || imagePart.ms_cacheKey == cacheKey)
+						{
+							imagePart.m_image = event.item.image;
+							imagePart.mb_imageOK = true;
+							imagePart.ms_cacheKey = cacheKey;
+						}
 					}
 				}
+				invalidateDynamicPart();
 			}
-			invalidateDynamicPart();
 		}
 		
 		override public function toString(): String
