@@ -867,8 +867,12 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 				
 				else if (m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null)
 				{
-					var run: Date = ISO8601Parser.stringToDate(
-							getWMSDimensionValue(m_cfg.dimensionRunName, true));
+					var runString: String = getWMSDimensionValue(m_cfg.dimensionRunName, true);
+					if (runString)
+					{
+						trace("Can not find RUN!");
+						var run: Date = ISO8601Parser.stringToDate(runString);
+					}
 					var forecast: Duration = new Duration(((value as Date).time - run.time) / 1000.0);
 					var l_forecasts: Array = getWMSDimensionsValues(m_cfg.dimensionForecastName);
 					ofExactForecast = null;

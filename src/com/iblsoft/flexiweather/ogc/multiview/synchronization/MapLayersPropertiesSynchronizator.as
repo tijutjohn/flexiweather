@@ -20,6 +20,10 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			var widgetsForSynchronizing: Array = [];
 			
 			var ilm: InteractiveLayerMap = synchronizeFromWidget.interactiveLayerMap;
+			
+			var currLayerWmsConfig: WMSLayerConfiguration;
+			var synchLayerWmsConfig: WMSLayerConfiguration;
+			
 			for each (var widget: InteractiveWidget in widgetsForSynchronisation)
 			{
 				if (widget.id != synchronizeFromWidget.id)
@@ -43,21 +47,48 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 							var synchLayerMSBase: InteractiveLayerMSBase = synchLayer as InteractiveLayerMSBase;
 							var currLayerMSBase: InteractiveLayerMSBase = currLayer as InteractiveLayerMSBase;
 							
+							// check synchronization of global RUN
+							if (synchLayerMSBase.synchroniseRun != currLayerMSBase.synchroniseRun)
+								currLayerMSBase.synchroniseRun = synchLayerMSBase.synchroniseRun;
+							
+							
+//							if (!currLayerMSBase.synchroniseRun)
+							if (currLayerMSBase.synchroniseRun)
+							{
+								//check run
+								currLayerWmsConfig = currLayerMSBase.configuration as WMSLayerConfiguration;
+								synchLayerWmsConfig = synchLayerMSBase.configuration as WMSLayerConfiguration;
+								
+								if (currLayerWmsConfig.dimensionRunName && synchLayerWmsConfig.dimensionRunName)
+								{
+									var currRun: String = currLayerMSBase.getWMSDimensionValue(currLayerWmsConfig.dimensionRunName);
+									var synchRun: String = synchLayerMSBase.getWMSDimensionValue(synchLayerWmsConfig.dimensionRunName);
+									
+									if (currRun != synchRun)
+									{
+										currLayerMSBase.setWMSDimensionValue(currLayerWmsConfig.dimensionRunName, synchRun);
+										currLayerMSBase.refresh(false);
+									}
+								}
+							}
+							
+							// check synchronization of global LEVEL
 							if (synchLayerMSBase.synchroniseLevel != currLayerMSBase.synchroniseLevel)
 								currLayerMSBase.synchroniseLevel = synchLayerMSBase.synchroniseLevel;
 							
-							if (!currLayerMSBase.synchroniseLevel)
+//							if (!currLayerMSBase.synchroniseLevel)
+							if (currLayerMSBase.synchroniseLevel)
 							{
 								//check level
-								var currLayerWmsConfig: WMSLayerConfiguration = currLayerMSBase.configuration as WMSLayerConfiguration;
-								var synchLayerWmsConfig: WMSLayerConfiguration = synchLayerMSBase.configuration as WMSLayerConfiguration;
+								currLayerWmsConfig = currLayerMSBase.configuration as WMSLayerConfiguration;
+								synchLayerWmsConfig = synchLayerMSBase.configuration as WMSLayerConfiguration;
 								
 								if (currLayerWmsConfig.dimensionVerticalLevelName && synchLayerWmsConfig.dimensionVerticalLevelName)
 								{
 									var currLevel: String = currLayerMSBase.getWMSDimensionValue(currLayerWmsConfig.dimensionVerticalLevelName);
 									var synchLevel: String = synchLayerMSBase.getWMSDimensionValue(synchLayerWmsConfig.dimensionVerticalLevelName);
 										
-									if (currLevel !=synchLevel)
+									if (currLevel != synchLevel)
 									{
 										currLayerMSBase.setWMSDimensionValue(currLayerWmsConfig.dimensionVerticalLevelName, synchLevel);
 										currLayerMSBase.refresh(false);

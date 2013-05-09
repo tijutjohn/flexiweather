@@ -455,6 +455,7 @@ package com.iblsoft.flexiweather.widgets
 			LayerSerializationWrapper.m_iw = container;
 			LayerSerializationWrapper.map = this;
 			var globalLevel: String;
+			var globalRun: String;
 			
 			if (storage.isLoading())
 			{
@@ -479,12 +480,17 @@ package com.iblsoft.flexiweather.widgets
 				selectedLayerIndex = storage.serializeInt('selected-layer-index', m_selectedLayerIndex);
 				
 				globalLevel = storage.serializeString('global-level', null);
+				globalRun = storage.serializeString('global-run', null);
 				if (globalVariablesManager)
 				{
 					if (globalLevel)
 					{
-//						globalVariablesManager.level = globalLevel;
 						setLevel(globalLevel);
+					}
+					if (globalRun)
+					{
+						var globalRunDate: Date = ISO8601Parser.stringToDate(globalRun);
+						setRun(globalRunDate);
 					}
 				} else {
 					trace("ILM serialize, problem to set global-level: " + globalLevel);
@@ -516,6 +522,12 @@ package com.iblsoft.flexiweather.widgets
 					globalLevel = globalVariablesManager.level;
 					
 					storage.serializeString('global-level', globalVariablesManager.level);
+					var runString: String = null;
+					var synchronizableRun: Date = globalVariablesManager.run;
+					if (synchronizableRun)
+						runString = ISO8601Parser.dateToString(synchronizableRun);
+					
+					storage.serializeString('global-run', runString);
 				}
 				
 				if (selectedLayerIndex > -1)
@@ -1394,7 +1406,8 @@ package com.iblsoft.flexiweather.widgets
 			
 			
 			//now synchronize frame to same frame as it was synchronized before
-			setFrame(oldFrame);
+			if (oldFrame)
+				setFrame(oldFrame);
 			
 			
 			return true;
