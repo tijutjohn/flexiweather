@@ -950,10 +950,20 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 						g = new GraphicsCurveRenderer(gr);
 						var total: int = mPoints.length;
 						
+						
+						
+						//TODO how to find first point correctly
+						
+						
+						
+						
 						trace(this + " renderPolygon points: " + total + " coords: " + coords.length);
 						if (total > 0)
 						{
 							p = firstPoint[0] as Point;
+							if (p.x > -1000 && p.x < 2700)
+								trace("KML Start render polygon");
+							
 							trace(this + " renderPolygon p0: " + p);
 							if (p)
 							{

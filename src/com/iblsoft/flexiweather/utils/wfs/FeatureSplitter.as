@@ -273,6 +273,13 @@ package com.iblsoft.flexiweather.utils.wfs
 
 		private function intersection(s: Point, e: Point, cp1: Point, cp2: Point): Point
 		{
+//			var dc = [ cp1[0] - cp2[0], cp1[1] - cp2[1] ],
+//				dp = [ s[0] - e[0], s[1] - e[1] ],
+//				n1 = cp1[0] * cp2[1] - cp1[1] * cp2[0],
+//				n2 = s[0] * e[1] - s[1] * e[0], 
+//				n3 = 1.0 / (dc[0] * dp[1] - dc[1] * dp[0]);
+//			return [(n1*dp[0] - n2*dc[0]) * n3, (n1*dp[1] - n2*dc[1]) * n3];
+			
 			var dc: Point = new Point( cp1.x - cp2.x, cp1.y - cp2.y);
 			var dp: Point = new Point( s.x - e.x, s.y - e.y );
 			
@@ -284,6 +291,7 @@ package com.iblsoft.flexiweather.utils.wfs
 		}
 		private function inside(p: Point, cp1: Point, cp2: Point): Boolean 
 		{
+//			return (cp2[0]-cp1[0])*(p[1]-cp1[1]) > (cp2[1]-cp1[1])*(p[0]-cp1[0]);
 			return (cp2.x-cp1.x)*(p.y-cp1.y) > (cp2.y-cp1.y)*(p.x-cp1.x);
 		}
 		
@@ -402,17 +410,14 @@ package com.iblsoft.flexiweather.utils.wfs
 			var outputList: Array = subjectPolygon;
 			cp1 = clipPolygon[clipPolygon.length-1];
 			
-//			var j: Point;
-			
 			for each (cp2 in clipPolygon) 
 			{
-//				cp2 = j;
 				inputList = outputList;
 				
 				outputList = [];
 				s = inputList[inputList.length - 1]; //last on the input list
-				for each (e in inputList) {
-//					var e = inputList[i];
+				for each (e in inputList) 
+				{
 					if (inside(e, cp1, cp2)) 
 					{
 						if (!inside(s, cp1, cp2)) 
@@ -427,6 +432,77 @@ package com.iblsoft.flexiweather.utils.wfs
 					s = e;
 				}
 				cp1 = cp2;
+			}
+			
+			
+//			var outputList = subjectPolygon;
+//			cp1 = clipPolygon[clipPolygon.length-1];
+//			for (j in clipPolygon) {
+//				var cp2 = clipPolygon[j];
+//				var inputList = outputList;
+//				outputList = [];
+//				s = inputList[inputList.length - 1]; //last on the input list
+//				for (i in inputList) {
+//					var e = inputList[i];
+//					if (inside(e)) {
+//						if (!inside(s)) {
+//							outputList.push(intersection());
+//						}
+//						outputList.push(e);
+//					}
+//					else if (inside(s)) {
+//						outputList.push(intersection());
+//					}
+//					s = e;
+//				}
+//				cp1 = cp2;
+//			}
+			
+//			trace("polygonClipppingSutherlandHodgman: subjectPolygon: " + subjectPolygon.length + " outputList: " + outputList.length);
+			if (outputList.length)// > 0 && subjectPolygon.length != outputList.length)
+			{
+				
+				
+				var str: String = '';
+				var p: Point;
+				var clipped: Boolean = false
+
+//				var firstPoint: Point = outputList[0] as Point;
+//				var lastPoint: Point = outputList[outputList.length - 1] as Point;
+//				if (firstPoint.x != lastPoint.x || firstPoint.y != lastPoint.y)
+//				{
+//					outputList.push(firstPoint);
+//				}
+				
+				str = '';
+				for each (p in outputList)
+				{
+					if (p.x > -1000 && p.x < 2700)
+						str += "["+int(p.x)+","+int(p.y)+"], ";
+				}
+				if (str.length != 0)
+					clipped = true;
+				
+				if (clipped)
+				{
+					trace("\nClipped: " + str);
+					trace("outputList: " + str);
+					str = '';
+					for each (p in subjectPolygon)
+					{
+						if (p.x > -1000 && p.x < 2700)
+							str += "["+int(p.x)+","+int(p.y)+"], ";
+					}
+					trace("subjectPolygon: " + str);
+					str = '';
+					for each (p in clipPolygon)
+					{
+						if (p.x > -1000 && p.x < 2700)
+							str += "["+int(p.x)+","+int(p.y)+"], ";
+					}
+					trace("clipPolygon: " + str);
+				
+				}
 			}
 			return outputList;
 		}
