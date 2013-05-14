@@ -6,8 +6,7 @@ package com.iblsoft.flexiweather.components.charts
 	import flash.text.TextField;
 	import flash.text.TextFormat;
 	import flash.text.TextFormatAlign;
-	import mx.charts.chartClasses.ChartLabel;
-
+	
 	/**
 	 * Simple chart is class for display simple line chart. It can be used in pure AS3 project
 	 *
@@ -16,6 +15,15 @@ package com.iblsoft.flexiweather.components.charts
 	 */
 	public class SimpleChart extends Sprite
 	{
+		private var _labelYAxisPadding: int = 10;
+		private var _labelXAxisPadding: int = 5;
+		
+		private var _leftPadding: int = 20;
+		private var _bottomPadding: int = 20;
+		private var _rightPadding: int = 20;
+		private var _topPadding: int = 20;
+		
+		
 		private var _chartWidth: int;
 		private var _chartHeight: int;
 		private var _dataSprite: Sprite;
@@ -44,6 +52,16 @@ package com.iblsoft.flexiweather.components.charts
 		private var _serieColor: uint;
 		private var _serieWidth: int;
 
+		public function updatePadding(left: int, right: int, top: int, bottom: int): void
+		{
+			_leftPadding = left;
+			_rightPadding = right;
+			_topPadding = top ;
+			_bottomPadding = bottom;
+			
+			refresh(true);
+			
+		}
 		public function get backgroundColor(): uint
 		{
 			return _backgroundColor;
@@ -328,31 +346,67 @@ package com.iblsoft.flexiweather.components.charts
 				invalidateLabels();
 				//labels needs to be drawn before axis to find out what space are reserved for labels
 				drawLabels(w, h);
-				drawAxis(w, h);
+				
+				customDrawAxes(w, h, _gridSprite.graphics);
+				drawAxes(w, h);
+				
 				drawSeries(w, h);
 				_axisDrawn = true;
 			}
 		}
 
+		private function get chartXSteps(): int
+		{
+			var xValues: Array = getXFieldValues();
+			var totalX: int = xValues.length;
+			
+			var stepsX: int = Math.min(10, totalX);
+			
+			return stepsX;
+		}
+		
+		private function getChartAreaWidth(w: int): int
+		{
+			return  w - (_leftPadding + _rightPadding);
+		}
+		private function getChartAreaheight(h: int): int
+		{
+			return  h - (_topPadding + _bottomPadding);
+		}
+		
 		private function drawSeries(w: int, h: int): void
 		{
 			var gr: Graphics = _dataSprite.graphics;
 			gr.clear();
 			var i: int;
-			var chartW: int = w - _yAxisLabelsWidth;
-			var chartH: int = h - _xAxisLabelsHeight;
+			var chartW: int = getChartAreaWidth(w);
+			var chartH: int = getChartAreaheight(h);
+			
 			var xValues: Array = getXFieldValues();
 			var yValues: Array = getYFieldValues();
-			var totalX: int = xValues.length;
 			var totalY: int = yValues.length;
+			var totalX: int = xValues.length;
 			var xDiff: Number = chartW / (totalX - 1);
 			var max: Number = getMaximumYValue();
+			
+			var xPos: int;
+			var xValue: Number;
+			
+			var stepsX: int = Math.min(totalX, chartW); //chartXSteps;
+			
 			gr.lineStyle(_serieWidth, _serieColor);
 			for (i = 0; i < totalX; i++)
 			{
 				var yValue: Number = yValues[i] as Number;
-				var xPos: int = _yAxisLabelsWidth + xDiff * i;
-				var yPos: Number = chartH - (chartH * yValue / max);
+				
+				if (i == 0)
+					xValue = 0;
+				else
+					xValue = int(totalX * i / stepsX);
+				xPos = _leftPadding + (chartW * xValue / totalX);
+				
+				var yPos: Number = _topPadding + chartH - (chartH * yValue / max);
+//				trace("drawSeries["+i+"] value: [0 , " + yValue + "]" + " Pos: [" + xPos + " , " + yPos + "]");
 				if (i == 0)
 					gr.moveTo(xPos, yPos);
 				else
@@ -360,7 +414,12 @@ package com.iblsoft.flexiweather.components.charts
 			}
 		}
 
-		private function drawAxis(w: int, h: int): void
+		public function customDrawAxes(w: int, h: int, gr: Graphics): void
+		{
+			
+		}
+		
+		private function drawAxes(w: int, h: int): void
 		{
 			var gr: Graphics = _gridSprite.graphics;
 			gr.clear();
@@ -386,11 +445,19 @@ package com.iblsoft.flexiweather.components.charts
 			if (w == 0 && h == 0)
 				return;
 			
-			var chartW: int = w - _yAxisLabelsWidth;
-			var chartH: int = h - _xAxisLabelsHeight;
+			trace("DrawAxis _xAxisLabelsHeight: " + _xAxisLabelsHeight + " _yAxisLabelsWidth: " + _yAxisLabelsWidth);
+			
+//			var chartW: int = w - _yAxisLabelsWidth;
+//			var chartH: int = h - _xAxisLabelsHeight;
+			var chartW: int = w - (_leftPadding + _rightPadding);
+			var chartH: int = h - (_topPadding + _bottomPadding);
+			
+			
+			
 			xDiff = chartW / (stepsX - 1);
 			yDiff = chartH / (stepsY - 1);
 			gr.lineStyle(1, _gridColor, _gridAlpha);
+			
 			//draw X axis grid
 			for (i = 0; i < stepsX; i++)
 			{
@@ -398,9 +465,15 @@ package com.iblsoft.flexiweather.components.charts
 					xValue = 0;
 				else
 					xValue = int(totalX * i / stepsX);
-				xPos = w - (w * xValue / totalX);
-				gr.moveTo(xPos, 0);
-				gr.lineTo(xPos, chartH);
+//				xPos = w - (w * xValue / totalX);
+				xPos = _leftPadding + (chartW * xValue / totalX);
+				
+				gr.moveTo(xPos, _topPadding);
+				gr.lineTo(xPos, _topPadding + chartH);
+				
+//				if (i == 0)
+//					trace("drawAxis["+i+"] value: [" + xValue + ", 0]" + " Pos: [" + xPos + " , " + chartH + "]");
+				
 			}
 			//draw Y axis grid
 			for (i = 0; i <= stepsY; i++)
@@ -409,17 +482,23 @@ package com.iblsoft.flexiweather.components.charts
 					yValue = 0;
 				else
 					yValue = maxY * i / stepsY;
-				yPos = chartH - (chartH * yValue / maxY);
-				gr.moveTo(_yAxisLabelsWidth, yPos);
-				gr.lineTo(w, yPos);
+				yPos = _topPadding + chartH - (chartH * yValue / maxY);
+
+				gr.moveTo(_leftPadding, yPos);
+				gr.lineTo(_leftPadding + chartW, yPos);
 			}
 			//main axis
 			var gr2: Graphics = _axisSprite.graphics;
 			gr2.clear();
 			gr2.lineStyle(_axisWidth, _axisColor);
-			gr2.moveTo(_yAxisLabelsWidth, 0);
-			gr2.lineTo(_yAxisLabelsWidth, chartH);
-			gr2.lineTo(w, chartH);
+//			gr2.moveTo(_yAxisLabelsWidth, 0);
+//			gr2.lineTo(_yAxisLabelsWidth, chartH);
+			gr2.moveTo(_leftPadding, _topPadding);
+			gr2.lineTo(_leftPadding, _topPadding + chartH);
+			gr2.lineTo(_leftPadding + chartW, _topPadding + chartH);
+			
+//			if (i == 0)
+//				trace("drawAxis["+i+"] value: [" + xValue + ", 0]" + " Pos: [" + _yAxisLabelsWidth + " , " + chartH + "]");
 		}
 
 		private function getLabel(rotation: Number): ChartLabel
@@ -459,7 +538,7 @@ package com.iblsoft.flexiweather.components.charts
 		{
 			var gr: Graphics = graphics;
 			gr.clear();
-			gr.beginFill(0x000000);
+			gr.beginFill(0x000000, 0.5);
 			gr.drawRect(0, 0, w, h);
 			gr.endFill();
 		}
@@ -492,6 +571,9 @@ package com.iblsoft.flexiweather.components.charts
 			var yDiff: int = h / (stepsY - 1);
 			if (w == 0 && h == 0)
 				return;
+			
+			
+			
 			//1st pass will find out X labels height 
 			for (i = 0; i < stepsX; i++)
 			{
@@ -499,7 +581,11 @@ package com.iblsoft.flexiweather.components.charts
 					xValue = 0;
 				else
 					xValue = int(totalX * i / stepsX);
-				xPos = w - (w * xValue / totalX);
+				
+//				xPos = w - (w * xValue / totalX);
+//				xPos = (chartW * xValue / totalX);
+				
+				
 				var valueObj: Object = xValues[xValue];
 				if (_labelFunction != null)
 					valueObj = _labelFunction(valueObj);
@@ -509,6 +595,9 @@ package com.iblsoft.flexiweather.components.charts
 					xLabel = (valueObj as int).toString();
 				chartLabel = getLabel(_xLabelsRotation);
 				tf = chartLabel.textField;
+				
+//				trace("drawLabels i: " + i + " label: " + xLabel + " xPos: " + xPos);
+				
 				tf.text = xLabel;
 				format = tf.getTextFormat();
 				format.color = _labelsColor;
@@ -520,7 +609,7 @@ package com.iblsoft.flexiweather.components.charts
 //				chartLabel.x = xDiff * i - chartLabel.rotatedWidth / 2;
 //				chartLabel.y = h - 3 - chartLabel.rotatedHeight;
 				_xLabelsList.addChartLabel(chartLabel);
-				_xAxisLabelsHeight = Math.max(_xAxisLabelsHeight, chartLabel.rotatedHeight + 6 + _axisWidth);
+				_xAxisLabelsHeight = Math.max(_xAxisLabelsHeight, chartLabel.rotatedHeight + _labelXAxisPadding + _axisWidth);
 			}
 			//1st pass will find out Y labels width
 			for (i = 0; i <= stepsY; i++)
@@ -529,7 +618,9 @@ package com.iblsoft.flexiweather.components.charts
 					yValue = 0;
 				else
 					yValue = maxY * i / stepsY;
-				yPos = h - (h * yValue / maxY);
+//				yPos = h - (h * yValue / maxY);
+//				yPos = chartH - (chartH * yValue / maxY);
+				
 				chartLabel = getLabel(_yLabelsRotation);
 				tf = chartLabel.textField;
 				tf.text = int(yValue).toString();
@@ -543,10 +634,14 @@ package com.iblsoft.flexiweather.components.charts
 //				chartLabel.x = tf.textWidth - tf.width;
 //				chartLabel.y = yPos - tf.textHeight / 2;
 				_yLabelsList.addChartLabel(chartLabel);
-				_yAxisLabelsWidth = Math.max(_yAxisLabelsWidth, chartLabel.rotatedWidth + 5 + _axisWidth);
+				_yAxisLabelsWidth = Math.max(_yAxisLabelsWidth, chartLabel.rotatedWidth + _labelYAxisPadding + _axisWidth);
 			}
-			var chartW: int = w - _yAxisLabelsWidth;
-			var chartH: int = h - _xAxisLabelsHeight;
+//			var chartW: int = w - _yAxisLabelsWidth;
+//			var chartH: int = h - _xAxisLabelsHeight;
+			
+			var chartW: int = w - (_leftPadding + _rightPadding);
+			var chartH: int = h - (_topPadding + _bottomPadding);
+			
 			xDiff = chartW / (stepsX - 1);
 			yDiff = chartH / (stepsY - 1);
 			//2nd pass will draw X axis grid
@@ -556,14 +651,17 @@ package com.iblsoft.flexiweather.components.charts
 					xValue = 0;
 				else
 					xValue = int(totalX * i / stepsX);
-				xPos = w - (w * xValue / totalX);
+				xPos = _leftPadding + chartW - (chartW * xValue / totalX);
+//				xPos = chartW - (chartW * xValue / totalX);
+				
+				
 				valueObj = xValues[xValue];
 				chartLabel = _xLabelsList.getChartLabel(xValue);
 				if (chartLabel)
 				{
 					tf = chartLabel.textField;
 					chartLabel.x = (xPos) - chartLabel.rotatedWidth / 2;
-					chartLabel.y = h - chartLabel.rotatedHeight / 2 + 1;
+					chartLabel.y = _topPadding + chartH + chartLabel.rotatedHeight / 2 + _labelXAxisPadding;
 					drawTextfieldBound(chartLabel);
 				}
 			}
@@ -574,16 +672,17 @@ package com.iblsoft.flexiweather.components.charts
 					yValue = 0;
 				else
 					yValue = maxY * i / stepsY;
-				yPos = chartH - (chartH * yValue / maxY);
+				yPos = _topPadding + chartH - (chartH * yValue / maxY);
 				chartLabel = _yLabelsList.getChartLabel(i);
 				if (chartLabel)
 				{
 					tf = chartLabel.textField;
-					chartLabel.x = _yAxisLabelsWidth - chartLabel.rotatedWidth / 2 - 5;
+					chartLabel.x = _leftPadding - chartLabel.rotatedWidth / 2 - _labelYAxisPadding;
 					chartLabel.y = yPos - chartLabel.rotatedHeight / 2;
 					drawTextfieldBound(chartLabel);
 				}
 			}
+			
 		}
 
 		private function drawTextfieldBound(chartLabel: ChartLabel): void
@@ -639,7 +738,11 @@ class ChartLabel extends Sprite
 
 	public function get rotatedWidth(): Number
 	{
-		var r: Rectangle = fitRect(_tf.textWidth, _tf.textHeight, Math.PI / 180 * rotation);
+		var rot: Number = rotation;
+		if (isNaN(rot))
+			rot = 0;
+		
+		var r: Rectangle = fitRect(_tf.textWidth, _tf.textHeight, Math.PI / 180 * rot);
 		if (isNaN(r.width))
 			return 0;
 		return r.width;
@@ -647,7 +750,11 @@ class ChartLabel extends Sprite
 
 	public function get rotatedHeight(): Number
 	{
-		var r: Rectangle = fitRect(_tf.textWidth, _tf.textHeight, Math.PI / 180 * rotation);
+		var rot: Number = rotation;
+		if (isNaN(rot))
+			rot = 0;
+		
+		var r: Rectangle = fitRect(_tf.textWidth, _tf.textHeight, Math.PI / 180 * rot);
 		if (isNaN(r.height))
 			return 0;
 		return r.height;
