@@ -1611,22 +1611,24 @@ package com.iblsoft.flexiweather.ogc.tiling
 			var bitmapFound: Boolean;
 			
 			//check if this Bitmap is used in this layer
-			var tiles: Array = m_currentQTTViewProperties.tiles;
-			for each (var tileViewProperties: TiledTileViewProperties in tiles)
-			{
-				if (tileViewProperties.bitmap)
-				{
-					var currBitmap: Bitmap = tileViewProperties.bitmap;
-					if (image == currBitmap)
-					{
-						//listen when same cache item will be added
-						tileViewProperties.bitmapIsOk = false;
-						bitmapFound = true;
-					}
-				}
-			}
-			if (bitmapFound)
-				cache.addEventListener(WMSCacheEvent.ITEM_ADDED, onDeleteCacheItemAdded);
+            if (m_currentQTTViewProperties) {
+                var tiles: Array = m_currentQTTViewProperties.tiles;
+                for each (var tileViewProperties: TiledTileViewProperties in tiles)
+                {
+                    if (tileViewProperties.bitmap)
+                    {
+                        var currBitmap: Bitmap = tileViewProperties.bitmap;
+                        if (image == currBitmap)
+                        {
+                            //listen when same cache item will be added
+                            tileViewProperties.bitmapIsOk = false;
+                            bitmapFound = true;
+                        }
+                    }
+                }
+                if (bitmapFound)
+                    cache.addEventListener(WMSCacheEvent.ITEM_ADDED, onDeleteCacheItemAdded);
+            }
 		}
 		
 		private var _cacheIsUpdated: Boolean;
