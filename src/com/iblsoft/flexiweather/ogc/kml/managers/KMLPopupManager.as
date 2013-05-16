@@ -4,15 +4,19 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 	import com.iblsoft.flexiweather.ogc.kml.events.KMLFeatureEvent;
 	import com.iblsoft.flexiweather.ogc.kml.features.KMLFeature;
 	import com.iblsoft.flexiweather.utils.ScreenUtils;
+	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	
 	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
 	import flash.display.Sprite;
 	import flash.display.Stage;
 	import flash.geom.Point;
 	import flash.utils.Dictionary;
+	
 	import mx.controls.IFlexContextMenu;
 	import mx.core.IFlexDisplayObject;
 	import mx.events.CloseEvent;
+	import mx.events.ResizeEvent;
 	import mx.managers.PopUpManager;
 
 	public class KMLPopupManager
@@ -41,6 +45,7 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 				popUp.visible = false;
 				return;
 			}
+			var windObject: Object = getDictionaryItemForPopUp(popUp);
 			popUp.visible = true;
 			var featureParent: DisplayObjectContainer = feature.parent;
 			var stage: Stage = feature.stage;
@@ -50,16 +55,21 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 //				var yDiff: int = -1 * (popUp.height + feature.kmlIcon.height);
 				var yDiff: int = -1 * (popUp.height + displaySprite.height);
 				if (popUp is KMLInfoWindow)
-					xDiff = -1 * (popUp as KMLInfoWindow).arrowPointerX
+					xDiff = -1 * (popUp as KMLInfoWindow).arrowPointerX;
 				//				var position: Point = new Point(feature.x + xDiff, feature.y + yDiff);
+						
 				var position: Point = new Point(displaySprite.x + xDiff, displaySprite.y + yDiff);
 				var stagePosition: Point = stage.globalToLocal(featureParent.localToGlobal(position));
-				ScreenUtils.moveSpriteToButHideWhenNotFullOnScreen(popUp as DisplayObject, stagePosition);
+//				trace("centerPopUpOnFeature popup: " + popUp.width + " , " + popUp.height);
+//				trace("centerPopUpOnFeature displaySprite: " + displaySprite.x + " , " + displaySprite.y);
+//				trace("centerPopUpOnFeature yDiff: " + xDiff + " , " + yDiff);
+//				trace("centerPopUpOnFeature position: " + position + " stagePosition: " + stagePosition);
+				ScreenUtils.moveSpriteToButHideWhenNotFullOnScreen(popUp as DisplayObject, stagePosition, windObject.container);
 //				ScreenUtils.moveSpriteToButKeepFullyOnScreen(popUp as DisplayObject, stagePosition);
 			}
 		}
 
-		public function addPopUp(popUp: IFlexDisplayObject, parent: DisplayObject, feature: KMLFeature): IFlexDisplayObject
+		public function addPopUp(popUp: IFlexDisplayObject, parent: DisplayObject, feature: KMLFeature, container: InteractiveWidget): IFlexDisplayObject
 		{
 			var window: IFlexDisplayObject = getPopUpForFeature(feature);
 			if (window)
@@ -70,8 +80,9 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 			PopUpManager.addPopUp(popUp, parent);
 			feature.addEventListener(KMLFeatureEvent.KML_FEATURE_POSITION_CHANGE, onKMLFeaturePositionChange);
 			feature.addEventListener(KMLFeatureEvent.KML_FEATURE_VISIBILITY_CHANGE, onKMLFeatureVisibilityChange);
+			popUp.addEventListener(ResizeEvent.RESIZE, onPopupResize);
 			popUp.addEventListener(CloseEvent.CLOSE, onInfoWindowClose);
-			windowsDictionary[popUp] = {feature: feature, window: popUp};
+			windowsDictionary[popUp] = {feature: feature, window: popUp, container: container};
 			return popUp;
 		}
 
@@ -84,6 +95,8 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 				var window: IFlexDisplayObject = winObject.window as IFlexDisplayObject;
 				if (window == popUp)
 				{
+					if (window.hasEventListener(ResizeEvent.RESIZE))
+						window.addEventListener(ResizeEvent.RESIZE, onPopupResize);
 					if (window.hasEventListener(CloseEvent.CLOSE))
 						window.removeEventListener(CloseEvent.CLOSE, onInfoWindowClose);
 					var feature: KMLFeature = winObject.feature as KMLFeature;
@@ -94,6 +107,18 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 			}
 		}
 
+		private function getDictionaryItemForPopUp(popUp: IFlexDisplayObject): Object
+		{
+			for each (var winObject: Object in windowsDictionary)
+			{
+				var window: IFlexDisplayObject = winObject.window as IFlexDisplayObject;
+				if (window == popUp)
+				{
+					return winObject;
+				}
+			}
+			return null;
+		}
 		private function getFeatureForPopUp(popUp: IFlexDisplayObject): KMLFeature
 		{
 			for each (var winObject: Object in windowsDictionary)
@@ -141,6 +166,13 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 			bringToFront(window);
 		}
 
+		private function onPopupResize(event: ResizeEvent): void
+		{
+			var window: IFlexDisplayObject = event.target as IFlexDisplayObject;
+			centerPopUpOnFeature(window);
+			bringToFront(window);
+		}
+		
 		private function onKMLFeaturePositionChange(event: KMLFeatureEvent): void
 		{
 			var window: IFlexDisplayObject = getPopUpForFeature(event.kmlFeature);

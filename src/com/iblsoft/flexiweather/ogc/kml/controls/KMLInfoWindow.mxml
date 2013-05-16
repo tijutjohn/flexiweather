@@ -11,9 +11,14 @@
 	<controls:layout>
 		<s:VerticalLayout paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10"/>
 	</controls:layout>
-	<s:Label text="{feature.name}" width="100%"/>
-	<s:TextArea id="textArea" width="100%" enabled="true" editable="false" borderAlpha="0"/>
+	
+	<s:Label text="{feature.name}" width="100%" styleName="kmlInfoWindowHeadline"/>
+	
+	
+	<s:TextArea id="textArea" width="100%" enabled="true" editable="false" borderAlpha="0" styleName="kmlInfoWindowTextArea"/>
+	
 	<s:HGroup width="100%" horizontalAlign="right">
-		<s:Button label="Close" click="close()"/>
+		<s:Button label="Close" click="close()" styleName="kmlInfoWindowCloseButton"/>
 	</s:HGroup>
+	
 </controls:KMLInfoWindowBase>

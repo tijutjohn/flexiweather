@@ -1,12 +1,18 @@
 package com.iblsoft.flexiweather.utils
 {
+	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	
 	import flash.display.DisplayObject;
 	import flash.display.Sprite;
 	import flash.display.Stage;
 	import flash.filters.BitmapFilter;
 	import flash.geom.Point;
+	import flash.geom.Rectangle;
+	
 	import mx.core.FlexGlobals;
 	import mx.core.UIComponent;
+	
+	import spark.primitives.Rect;
 
 	public class ScreenUtils
 	{
@@ -26,36 +32,104 @@ package com.iblsoft.flexiweather.utils
 			return 0;
 		}
 
-		public static function moveSpriteToButHideWhenNotFullOnScreen(c: DisplayObject, pt: Point): void
+		public static function moveSpriteToButHideWhenNotFullOnScreen(c: DisplayObject, pt: Point, container: InteractiveWidget = null): void
 		{
-			var f_sw: Number = FlexGlobals.topLevelApplication.screen.width;
-			var f_sh: Number = FlexGlobals.topLevelApplication.screen.height;
+			trace("moveSpriteToButHideWhenNotFullOnScreen: " + pt);
+			
+			var f_screenTop: Number;
+			var f_screenLeft: Number;
+			var f_screenRight: Number;
+			var f_screenBottom: Number;
+			
+			if (!container)
+			{
+				f_screenTop = 0;
+				f_screenLeft = 0;
+				f_screenRight = FlexGlobals.topLevelApplication.screen.width;
+				f_screenBottom = FlexGlobals.topLevelApplication.screen.height;
+			} else {
+				var topLeft: Point = new Point(0,0);
+				var bottomRight: Point = new Point(container.width, container.height);
+				
+				var tl: Point = container.localToGlobal(topLeft);
+				var br: Point = container.localToGlobal(bottomRight);
+				
+				trace("moveSpriteToButHideWhenNotFullOnScreen: " + topLeft + " , " + tl);
+				trace("moveSpriteToButHideWhenNotFullOnScreen: " + bottomRight + " , " + br);
+				
+				f_screenLeft = tl.x;
+				f_screenTop = tl.y;
+				f_screenRight = br.x;
+				f_screenBottom = br.y;
+			}
+			
 			c.x = pt.x;
 			c.y = pt.y;
 			c.visible = true;
-			if (c.x + c.width > f_sw)
+			
+			var xOutside: int = -2000;
+			
+			if (c.x + c.width > f_screenRight)
+			{
+				c.x = xOutside;
 				c.visible = false;
-			if (c.y + c.height > f_sh)
+			}
+			if (c.y + c.height > f_screenBottom)
+			{
+				c.x = xOutside;
 				c.visible = false;
-			if (c.x < 0)
+			}
+			if (c.x < f_screenLeft)
+			{
+				c.x = xOutside;
 				c.visible = false;
-			if (c.y < 0)
+			}
+			if (c.y < f_screenTop)
+			{
+				c.x = xOutside;
 				c.visible = false;
+			}
 		}
 
-		public static function moveSpriteToButKeepFullyOnScreen(c: DisplayObject, pt: Point): void
+		public static function moveSpriteToButKeepFullyOnScreen(c: DisplayObject, pt: Point, container: InteractiveWidget = null): void
 		{
-			var f_sw: Number = FlexGlobals.topLevelApplication.screen.width;
-			var f_sh: Number = FlexGlobals.topLevelApplication.screen.height;
+			var f_screenTop: Number;
+			var f_screenLeft: Number;
+			var f_screenRight: Number;
+			var f_screenBottom: Number;
+			
+			if (!container)
+			{
+				f_screenTop = 0;
+				f_screenLeft = 0;
+				f_screenRight = FlexGlobals.topLevelApplication.screen.width;
+				f_screenBottom = FlexGlobals.topLevelApplication.screen.height;
+			} else {
+				var topLeft: Point = new Point(0,0);
+				var bottomRight: Point = new Point(container.width, container.height);
+				
+				var tl: Point = container.localToGlobal(topLeft);
+				var br: Point = container.localToGlobal(bottomRight);
+				
+				trace("moveSpriteToButKeepFullyOnScreen: " + topLeft + " , " + tl);
+				trace("moveSpriteToButKeepFullyOnScreen: " + bottomRight + " , " + br);
+				
+				f_screenLeft = tl.x;
+				f_screenTop = tl.y;
+				f_screenRight = br.x;
+				f_screenBottom = br.y;
+			}
+			
+			
 			c.x = pt.x;
 			c.y = pt.y;
-			if (c.x + c.width > f_sw)
-				c.x = f_sw - c.width;
-			if (c.y + c.height > f_sh)
-				c.y = f_sh - c.height;
-			if (c.x < 0)
+			if (c.x + c.width > f_screenRight)
+				c.x = f_screenRight - c.width;
+			if (c.y + c.height > f_screenBottom)
+				c.y = f_screenBottom - c.height;
+			if (c.x < f_screenLeft)
 				c.x = 0;
-			if (c.y < 0)
+			if (c.y < f_screenTop)
 				c.y = 0;
 		}
 

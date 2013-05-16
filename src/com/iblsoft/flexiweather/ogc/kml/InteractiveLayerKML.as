@@ -442,7 +442,7 @@ package com.iblsoft.flexiweather.ogc.kml
 			{
 				infoWindow = new KMLInfoWindow();
 				infoWindow.feature = feature;
-				infoWindow = kmlPM.addPopUp(infoWindow, FlexGlobals.topLevelApplication as DisplayObject, feature) as KMLInfoWindow;
+				infoWindow = kmlPM.addPopUp(infoWindow, FlexGlobals.topLevelApplication as DisplayObject, feature, this.container) as KMLInfoWindow;
 			}
 			kmlPM.centerPopUpOnFeature(infoWindow);
 		}
