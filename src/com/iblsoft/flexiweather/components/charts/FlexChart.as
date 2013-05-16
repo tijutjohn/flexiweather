@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.components.charts
 {
 	import com.iblsoft.flexiweather.ogc.kml.features.Point;
+	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	
 	import flash.display.Graphics;
 	import flash.display.Sprite;
@@ -69,12 +70,12 @@ package com.iblsoft.flexiweather.components.charts
 		private var _labelsColor: uint;
 		private var _xLabelsRotation: Number;
 		private var _yLabelsRotation: Number;
-		private var _serieColor: uint;
-		private var _serieWidth: int;
+//		private var _serieColor: uint;
+//		private var _serieWidth: int;
 		
 		
 		public var xField: String;
-		public var yField: String;
+		public var yFields: Array;
 
 		private var _labelFunction: Function;
 		private var _labelFunctionChanged: Boolean;
@@ -305,51 +306,41 @@ package com.iblsoft.flexiweather.components.charts
 		}
 
 		
-		[Bindable(event = "serieColorChanged")]
-		public function get serieColor(): uint
-		{
-			return _serieColor;
-		}
+//		[Bindable(event = "serieColorChanged")]
+//		public function get serieColor(): uint
+//		{
+//			return _serieColor;
+//		}
+//
+//		public function set serieColor(value: uint): void
+//		{
+//			if (_serieColor != value)
+//			{
+//				_serieColor = value;
+//				invalidateStyle();
+//				notify("serieColorChanged");
+//			}
+//		}
 
-		public function set serieColor(value: uint): void
-		{
-			if (_serieColor != value)
-			{
-				_serieColor = value;
-				invalidateStyle();
-				notify("serieColorChanged");
-			}
-		}
-
-		[Bindable(event = "serieWidthChanged")]
-		public function get serieWidth(): int
-		{
-			return _serieWidth;
-		}
-
-		public function set serieWidth(value: int): void
-		{
-			if (serieWidth != value)
-			{
-				_serieWidth = value;
-				invalidateStyle();
-				notify("serieWidthChanged");
-			}
-		}
-//		protected var simpleChart: SimpleChart;
+//		[Bindable(event = "serieWidthChanged")]
+//		public function get serieWidth(): int
+//		{
+//			return _serieWidth;
+//		}
+//
+//		public function set serieWidth(value: int): void
+//		{
+//			if (serieWidth != value)
+//			{
+//				_serieWidth = value;
+//				invalidateStyle();
+//				notify("serieWidthChanged");
+//			}
+//		}
 
 		public function FlexChart()
 		{
 			super();
-			_backgroundColor = 0x000000;
-			_axisColor = 0xcccccc;
-			_axisWidth = 2;
-			_gridColor = 0x333333;
-			_gridAlpha = 1;
-			_labelsColor = 0xffffff;
-			_serieColor = 0xaa0000;
-			_serieWidth = 2;
-			
 			
 			_unusedLabels = [];
 			_usedLabels = [];
@@ -369,8 +360,6 @@ package com.iblsoft.flexiweather.components.charts
 			_gridColor = 0x333333;
 			_gridAlpha = 1;
 			_labelsColor = 0xffffff;
-			_serieColor = 0xaa0000;
-			_serieWidth = 2;
 		}
 
 //		private function invalidateStyle(): void
@@ -550,21 +539,32 @@ package com.iblsoft.flexiweather.components.charts
 				drawSeries();
 		}
 		
-		public function getValue(xValue: Object): Number
+		public function getValueForSerie(xValue: Object, serie: ChartSerie): Number
 		{
 			if (data && data.length > 0)
 			{
 				for each (var currItem: Object in data)
 				{
-					if (currItem.hasOwnProperty(xField))
+					if (currItem.hasOwnProperty(serie.field))
 					{
-						var value: Object = currItem[xField];
+						var value: Object = currItem[serie.field];
 						if (value == xValue)
-							return currItem[yField];
+							return currItem[serie.field];
 					}
 				}
 			}
 			return 0;
+		}
+		
+		private function getYFieldMaximumValue(): Number
+		{
+			var value: Number = Number.NEGATIVE_INFINITY;
+			
+			for each (var serie: ChartSerie in yFields)
+			{
+				value = Math.max(value, serie.maximumValue);
+			}
+			return value;
 		}
 		
 		private function getXFieldValues(): Array
@@ -585,30 +585,29 @@ package com.iblsoft.flexiweather.components.charts
 		
 		private function getYFieldValues(): Array
 		{
+			var values: Array = [];
+			for each (var serie: ChartSerie in yFields)
+			{
+				ArrayUtils.unionArrays(values, serie.data);
+			}
+			return values;
+		}
+		private function getYFieldValuesForSerie(serie: ChartSerie): Array
+		{
 			if (data && data.length > 0)
 			{
 				var values: Array = []
 				var item: Object;
 				for each (var currItem: Object in data)
 				{
-					if (currItem && currItem.hasOwnProperty(yField))
-						values.push(currItem[yField]);
+					if (currItem && currItem.hasOwnProperty(serie.field))
+						values.push(currItem[serie.field]);
 				}
 				return values;
 			}
 			return null;
 		}
 		
-		private function getMaximumYValue(): Number
-		{
-			var yValues: Array = getYFieldValues();
-			var max: Number = Number.NEGATIVE_INFINITY;
-			for each (var yValue: Number in yValues)
-			{
-				max = Math.max(max, yValue);
-			}
-			return max;
-		}
 		
 		public function draw(): void
 		{
@@ -655,12 +654,12 @@ package com.iblsoft.flexiweather.components.charts
 		private var totalYAxis: int;
 		
 		private var xValues: Array;
-		private var yValues: Array;
 		private var totalX: int;
-		private var totalY: int;
 		
+//		private var yValues: Array;
+//		private var totalY: int;
+//		private var yMaximumValue: Number;
 		
-		private var yMaximumValue: Number;
 		private var chartWidth: Number;
 		private var chartHeight: Number;
 		
@@ -671,43 +670,110 @@ package com.iblsoft.flexiweather.components.charts
 			totalXAxis = xAxisValues.length;
 			
 			xValues = getXFieldValues();
-			yValues = getYFieldValues();
-			totalY = yValues.length;
 			totalX = xValues.length;
-			yMaximumValue = getMaximumYValue();
+			
+			for each (var serie: ChartSerie in yFields)
+			{
+				serie.data = getYFieldValuesForSerie(serie);
+			}
 		}
 		
 		private function drawSeries(): void
 		{
+			trace("\n\n DRAW SERIE: " + totalX + " chart: " + chartWidth);
+			
 			var gr: Graphics = _dataSprite.graphics;
 			gr.clear();
-			var i: int;
 			
-			var xDiff: Number = chartWidth / (totalX - 1);
-			
-			var xPos: int;
-			var xValue: Number;
-			
-			var stepsX: int = Math.min(totalX, chartWidth); //chartXSteps;
-			
-			gr.lineStyle(_serieWidth, _serieColor);
-			for (i = 0; i < totalX; i++)
+			for each (var serie: ChartSerie in yFields)
 			{
-				var yValue: Number = yValues[i] as Number;
+				gr.lineStyle(serie.lineWidth, serie.color);
 				
-				if (i == 0)
-					xValue = 0;
-				else
-					xValue = int(totalX * i / stepsX);
-				xPos = _leftPadding + (chartWidth * xValue / totalX);
+				var i: int;
+				var xPos: int;
+				var xValue: Number;
 				
-				var yPos: Number = _topPadding + chartHeight - (chartHeight * yValue / yMaximumValue);
-				//				trace("drawSeries["+i+"] value: [0 , " + yValue + "]" + " Pos: [" + xPos + " , " + yPos + "]");
-				if (i == 0)
-					gr.moveTo(xPos, yPos);
-				else
-					gr.lineTo(xPos, yPos);
+				var xDiff: Number = chartWidth / (totalX - 1);
+				var stepsX: int = Math.min(totalX, chartWidth); //chartXSteps;
+			
+				var yValues: Array = serie.data;
+				var yMaximumValue: Number = serie.maximumValue;
+				
+				if (totalX < chartWidth)
+				{
+					
+					trace("draw uncondesed graph");
+					for (i = 0; i < totalX; i++)
+					{
+						var yValue: Number = yValues[i] as Number;
+						
+						if (i == 0)
+							xValue = 0;
+						else
+							xValue = int(totalX * i / stepsX);
+						xPos = _leftPadding + (chartWidth * xValue / totalX);
+						
+						var yPos: Number = _topPadding + chartHeight - (chartHeight * yValue / yMaximumValue);
+						
+						trace("drawSeries uncondensed["+i+"] value: [" + yValue + "]" + " Pos: [" + xPos + " , " + yPos + "] chart ["+_leftPadding+","+(_leftPadding+chartWidth)+"]");
+						
+						if (i == 0)
+							gr.moveTo(xPos, yPos);
+						else
+							gr.lineTo(xPos, yPos);
+					}
+					trace("drawSeries END of uncondensed["+i+"] chart ["+_leftPadding+","+(_leftPadding+chartWidth)+"]");
+				} else {
+					//there are more points than width (in pixel) of chart, so points must be condensed
+					trace("draw condesed graph");
+					var pointCounter: int = 0;
+					var pixelPosition: int = 0;
+					var pixelValues: Array = [];
+					
+					var pointsPerPixel: int = int(chartWidth / totalX);
+					pointsPerPixel = Math.max(1, pointsPerPixel);
+					
+					
+					while (pointCounter < totalX)
+					{
+						yValue = yValues[pointCounter] as Number;
+						pixelValues.push(yValue);
+						pointCounter++;
+						if (pointCounter >= pointsPerPixel)
+						{
+							pixelPosition++;
+							var yValueAverage: Number = averageValues(pixelValues);
+							
+							xPos = _leftPadding + pixelPosition;
+							yPos = _topPadding + chartHeight - (chartHeight * yValueAverage / yMaximumValue);
+							
+							trace("drawSeries condensed["+pixelPosition+"] value: [" + yValueAverage + "]" + " Pos: [" + xPos + " , " + yPos + "] chart ["+_leftPadding+","+(_leftPadding+chartWidth)+"]");
+							
+							if (pointCounter == 0)
+								gr.moveTo(xPos, yPos);
+							else
+								gr.lineTo(xPos, yPos);
+							
+							pixelValues = [];
+						}
+					}
+					trace("drawSeries END of condensed["+pixelPosition+"] chart ["+_leftPadding+","+(_leftPadding+chartWidth)+"]");
+				}
 			}
+		}
+		
+		private function averageValues(pixelValues: Array): Number
+		{
+			if (pixelValues && pixelValues.length > 0)
+			{
+				var value: Number = 0;
+				for each (var currValue: Number in pixelValues)
+				{
+					value += currValue;
+				}
+				return value / pixelValues.length;
+			}
+			return 0;
 		}
 		
 //		protected function moveTo(x: Number, y: Number): void
@@ -767,6 +833,8 @@ package com.iblsoft.flexiweather.components.charts
 				return;
 			
 			trace("DrawAxis _xAxisLabelsHeight: " + _xAxisLabelsHeight + " _yAxisLabelsWidth: " + _yAxisLabelsWidth);
+			
+			var yMaximumValue: Number = getYFieldMaximumValue();
 			
 			xDiff = chartWidth / (stepsX - 1);
 			yDiff = chartHeight / (stepsY - 1);
@@ -889,6 +957,8 @@ package com.iblsoft.flexiweather.components.charts
 			
 			if (chartWidth == 0 && chartHeight == 0)
 				return;
+			
+			var yMaximumValue: Number = getYFieldMaximumValue();
 			
 			//1st pass will find out X labels height 
 			for (i = 0; i < totalXAxis; i++)
