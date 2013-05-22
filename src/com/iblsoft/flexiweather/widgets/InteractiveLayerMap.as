@@ -764,7 +764,7 @@ package com.iblsoft.flexiweather.widgets
 					if (synchronisableRun && msBaseLayer.synchroniseRun)
 					{
 						var globalRun: Date = run;
-						var bSynchronized: Boolean;
+						var bSynchronized: Boolean = false;
 						if (frame) {
 							var frameSynchronisationResponse: String = so.synchroniseWith(GlobalVariable.FRAME, frame);
 							bSynchronized = bSynchronized || SynchronisationResponse.wasSynchronised(frameSynchronisationResponse);
@@ -785,9 +785,9 @@ package com.iblsoft.flexiweather.widgets
 					if (synchronisableLevel && msBaseLayer.synchroniseLevel)
 					{
 						var globalLevel: String = level;
-						var bSynchronized: Boolean;
+						bSynchronized = false;
 						if (frame) {
-							var frameSynchronisationResponse: String = so.synchroniseWith(GlobalVariable.FRAME, frame);
+							frameSynchronisationResponse = so.synchroniseWith(GlobalVariable.FRAME, frame);
 							bSynchronized = bSynchronized || SynchronisationResponse.wasSynchronised(frameSynchronisationResponse);
 						}
 						if (level) {

@@ -3,13 +3,13 @@ package com.iblsoft.flexiweather.components.charts
 	public class ChartSerie
 	{
 		private var _field: String;
+		private var _label: String;
 		private var _color: uint;
 		private var _chartType: String;
 		private var _lineWidth: int;
 		private var _data: Array;
 		private var _maximumValue: Number;
-		
-
+		private var _visible: Boolean;
 
 		public function get color():uint
 		{
@@ -51,6 +51,15 @@ package com.iblsoft.flexiweather.components.charts
 		{
 			return _field;
 		}
+		public function get label(): String
+		{
+			return _label;
+		}
+		
+		public function get visible(): Boolean
+		{
+			return _visible;
+		}
 		
 		/**
 		 * 
@@ -60,20 +69,37 @@ package com.iblsoft.flexiweather.components.charts
 		 * @param lineWidth
 		 * 
 		 */
-		public function ChartSerie(field: String, color: uint = 0xffffff, chartType: String = 'line', lineWidth: int = 2)
+		public function ChartSerie(field: String, label: String, color: uint = 0xffffff, chartType: String = 'line', lineWidth: int = 2)
 		{
 			_field = field;
 			_color = color;
+			_label = label;
 			_chartType = chartType;
 			_lineWidth = lineWidth;
+			_visible = true;
 		}
 		
 		public function findMaximum(): void
 		{
 			var max: Number = Number.NEGATIVE_INFINITY;
-			for each (var yValue: Number in data)
+			var yValue: Number;
+			
+			if (data[0] is Number)
 			{
-				max = Math.max(max, yValue);
+				for each (yValue in data)
+				{
+					max = Math.max(max, yValue);
+				}
+			} else if (data[0] is Array) {
+				
+				for each (var yValueArr: Array in data)
+				{
+					for each (yValue in yValueArr)
+					{
+						max = Math.max(max, yValue);
+					}
+				}
+				
 			}
 			_maximumValue = max;
 		}

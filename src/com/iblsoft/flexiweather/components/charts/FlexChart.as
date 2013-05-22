@@ -21,6 +21,8 @@ package com.iblsoft.flexiweather.components.charts
 	 */
 	public class FlexChart extends UIComponent
 	{
+		public var verticalParts: int = 20;
+		
 		private var _labelYAxisPadding: int = 10;
 		private var _labelXAxisPadding: int = 5;
 		
@@ -28,7 +30,9 @@ package com.iblsoft.flexiweather.components.charts
 		private var _bottomPadding: int = 20;
 		private var _rightPadding: int = 20;
 		private var _topPadding: int = 20;
+		private var _legendPadding: int = 0;
 		
+
 		public function get paddingLeft(): int
 		{
 			return _leftPadding;
@@ -73,10 +77,25 @@ package com.iblsoft.flexiweather.components.charts
 //		private var _serieColor: uint;
 //		private var _serieWidth: int;
 		
+		private var _chartLegend: FlexChartLegend;
 		
 		public var xField: String;
-		public var yFields: Array;
-
+		private var _yFields: Array;
+		public function get yFields():Array
+		{
+			return _yFields;
+		}
+		
+		public function set yFields(value:Array):void
+		{
+			_yFields = value;
+			if (_chartLegend)
+			{
+				_chartLegend.yFields = value;
+			}
+		}
+		
+		
 		private var _labelFunction: Function;
 		private var _labelFunctionChanged: Boolean;
 		
@@ -172,8 +191,7 @@ package com.iblsoft.flexiweather.components.charts
 			_topPadding = top ;
 			_bottomPadding = bottom;
 			
-			refresh(true);
-			
+			invalidateDisplayList();
 		}
 
 		[Bindable(event = "backgroundColorChanged")]
@@ -284,7 +302,7 @@ package com.iblsoft.flexiweather.components.charts
 			if (_xLabelsRotation != value)
 			{
 				_xLabelsRotation = value;
-				invalidateStyle();
+				invalidateLabels();
 				notify("labelsRotationChanged");
 			}
 		}
@@ -300,7 +318,7 @@ package com.iblsoft.flexiweather.components.charts
 			if (_yLabelsRotation != value)
 			{
 				_yLabelsRotation = value;
-				invalidateStyle();
+				invalidateLabels();
 				notify("labelsRotationChanged");
 			}
 		}
@@ -375,22 +393,15 @@ package com.iblsoft.flexiweather.components.charts
 	
 		private function onDataProviderChange(event: CollectionEvent): void
 		{
-			refresh();
+			trace("FlexChart onDataProviderChange");
+			_dataProviderChanged = true;
+			invalidateProperties();
 		}
 
 		override protected function commitProperties(): void
 		{
 			super.commitProperties();
-			if (_labelXAxisFunctionChanged)
-			{
-//				refresh();
-				_labelXAxisFunctionChanged = false;
-			}
-			if (_labelFunctionChanged)
-			{
-				refresh();
-				_labelFunctionChanged = false;
-			}
+			
 			if (_xAxisDataProviderChanged)
 			{
 				if (dataProvider)
@@ -405,6 +416,7 @@ package com.iblsoft.flexiweather.components.charts
 			}
 			if (_dataProviderChanged)
 			{
+				trace("FlexChart commitProperties _dataProviderChanged");
 				if (dataProvider)
 					data = dataProvider.source;
 				else
@@ -420,50 +432,42 @@ package com.iblsoft.flexiweather.components.charts
 				recountChartProperties();
 				_dataUpdated = false;
 			}
-//			if (_styleChanged && simpleChart)
+			
+			if (_labelXAxisFunctionChanged)
+			{
+				drawLabels();
+				_labelXAxisFunctionChanged = false;
+			}
+			if (_labelFunctionChanged)
+			{
+				drawLabels();
+				_labelFunctionChanged = false;
+			}
+			
 			if (_styleChanged)
 			{
-//				simpleChart.backgroundColor = _backgroundColor;
-//				simpleChart.gridColor = _gridColor;
-//				simpleChart.gridAlpha = _gridAlpha;
-//				simpleChart.axisColor = _axisColor;
-//				simpleChart.axisWidth = _axisWidth;
-//				simpleChart.labelsColor = _labelsColor;
-//				simpleChart.xLabelsRotation = _xLabelsRotation;
-//				simpleChart.yLabelsRotation = _yLabelsRotation;
-//				simpleChart.serieColor = _serieColor;
-//				simpleChart.serieWidth = _serieWidth;
-				
 				refresh(true);
 				_styleChanged = false;
 			}
-//			if (simpleChart)
-//				simpleChart.name = name;
 		}
 
 		override protected function createChildren(): void
 		{
 			super.createChildren();
-//			simpleChart = new SimpleChart();
-//			addChild(simpleChart);
-//			simpleChart.xField = xField;
-//			simpleChart.yField = yField;
-//			simpleChart.x = 0;
-//			simpleChart.y = 0;
-//			simpleChart.draw(width, height);
+			
+			_chartLegend = new FlexChartLegend();
 		}
 
 		override protected function childrenCreated(): void
 		{
 			super.childrenCreated();
-		}
-
-//		public function updatePadding(left: int, right: int, top: int, bottom: int): void
-//		{
-//			if (simpleChart)
-//				simpleChart.updatePadding(left, right, top, bottom);
 			
-//		}
+			addChild(_chartLegend);
+			if (_yFields)
+			{
+				_chartLegend.yFields = _yFields;
+			}
+		}
 		
 		override protected function updateDisplayList(unscaledWidth: Number, unscaledHeight: Number): void
 		{
@@ -476,19 +480,12 @@ package com.iblsoft.flexiweather.components.charts
 			
 			
 			chartWidth = getChartAreaWidth(unscaledWidth);
-			chartHeight = getChartAreaheight(unscaledHeight);
+			chartHeight = getChartAreaHeight(unscaledHeight);
 			
-//			if (simpleChart)
-//				simpleChart.draw(unscaledWidth, unscaledHeight);
-			
+			trace("updateDisplayList ["+unscaledWidth+","+unscaledHeight+"]");	
+			trace("chart size ["+chartWidth+","+chartHeight+"]");	
 			draw();
 		}
-		
-//		protected function customDrawAxes(w: int, h: int, gr: Graphics): void
-//		{
-//			if (simpleChart)
-//				simpleChart.customDrawAxes(w, h, gr);
-//		}
 
 		private function notify(type: String): void
 		{
@@ -564,6 +561,14 @@ package com.iblsoft.flexiweather.components.charts
 			{
 				value = Math.max(value, serie.maximumValue);
 			}
+			
+			//rounding
+			value = updateYFieldMaximumValue(value);
+			return value;
+		}
+		
+		protected function updateYFieldMaximumValue(value: Number): Number
+		{
 			return value;
 		}
 		
@@ -616,8 +621,12 @@ package com.iblsoft.flexiweather.components.charts
 				
 			if (data)
 			{
+				var _chartLegendWidth: int = 60; //_chartLegend.width;
+				_chartLegend.x = _leftPadding + chartWidth / 2 - _chartLegendWidth / 2; 
+				_chartLegend.y = 10;
+				
 				drawBackround();
-				invalidateLabels();
+//				invalidateLabels();
 				//labels needs to be drawn before axis to find out what space are reserved for labels
 				drawLabels();
 				
@@ -626,6 +635,7 @@ package com.iblsoft.flexiweather.components.charts
 				
 				drawSeries();
 				_axisDrawn = true;
+				
 			}
 		}
 		
@@ -643,9 +653,18 @@ package com.iblsoft.flexiweather.components.charts
 		{
 			return  w - (_leftPadding + _rightPadding);
 		}
-		protected function getChartAreaheight(h: int): int
+		protected function getChartAreaHeight(h: int): int
 		{
-			return  h - (_topPadding + _bottomPadding);
+			var areaHeight: Number =  h - (_topPadding + _bottomPadding);
+			if (_chartLegend)
+			{
+				trace("items: " + _chartLegend.items.length);
+				
+				_legendPadding = _chartLegend.items.length * 20;//_chartLegend.height;
+				areaHeight -= _legendPadding;
+			}
+			
+			return areaHeight;
 		}
 		
 		private var xAxisValues: Array;
@@ -676,14 +695,105 @@ package com.iblsoft.flexiweather.components.charts
 			{
 				serie.data = getYFieldValuesForSerie(serie);
 			}
+			
+			trace("FlexChart recountChartProperties totalX: " + totalX + " totalXAxis: " + totalXAxis + " serie: " + serie.data.length);
 		}
 		
+		private var _currentDrawnSerie: ChartSerie;
+		private var _currentDrawnPosition: int;
+		
+		private function getChartYValue(value: Number, maxValue: Number): Number
+		{
+			var yPos: Number = _topPadding + _legendPadding + chartHeight - (chartHeight * value / maxValue);
+			return yPos;
+		}
+		
+		
+		
+		private var startX: Number;
+		private var endX: Number;
+		private var endY: Number;
+		private var stopDrawing: Boolean;
+		
+		private function drawSeriePoint(serie: ChartSerie, position: int,  xValue: Number, yValue: Number, xPos: Number, yPos: Number, yPosMax: Number): void
+		{
+			var pointLineHalfLine: Number = 3;
+			
+			var gr: Graphics = _dataSprite.graphics;
+			
+			if (serie.chartType == ChartType.LINE_FILL)
+			{
+				if (yValue != 0 && yValue != 99999 && !isNaN(yValue))
+				{
+					if (position == 0 || stopDrawing) {
+						
+						gr.beginFill(serie.color, 0.5);
+						
+						startX = xPos;
+						
+						gr.moveTo(xPos, yPosMax);
+					}
+					gr.lineTo(xPos, yPos);
+					
+					endX = xPos;
+					endY = yPos;
+					stopDrawing = false;
+					
+				} else {
+					
+					stopDrawing = true;
+					
+					gr.lineTo(endX, endY);
+					gr.lineTo(endX, yPosMax);
+					gr.lineTo(startX, yPosMax);
+					gr.endFill();
+					
+				}
+				
+			} else if (serie.chartType == ChartType.LINE)
+			{
+				//								trace("drawSeries uncondensed["+i+"] value: [" + yValue + "]" + " Pos: [" + xPos + " , " + yPos + "] chart ["+_leftPadding+","+(_leftPadding+chartWidth)+"]");
+				if (yValue != 0 && yValue != 99999 && !isNaN(yValue))
+				{
+					if (position == 0 || stopDrawing)
+						gr.moveTo(xPos, yPos);
+					else
+						gr.lineTo(xPos, yPos);
+					stopDrawing = false;
+				} else {
+					stopDrawing = true;
+				}
+			} else if (serie.chartType == ChartType.POINT) {
+				
+				if (yValue != 0 && yValue != 99999 && !isNaN(yValue))
+				{
+					//									trace("POINT uncondensed: ["+xPos+","+yPos+"]["+j+"]");
+					
+//					gr.moveTo(xPos, yPos - pointLineHalfLine);
+//					gr.lineTo(xPos, yPos + pointLineHalfLine);
+					
+					gr.beginFill(serie.color, 0.5);
+					gr.lineStyle(0, serie.color);
+					gr.drawCircle(xPos, yPos, serie.lineWidth);
+					gr.endFill();
+					stopDrawing = false;
+				} else {
+					stopDrawing = true;
+				}
+			}
+			if (isNaN(yValue))
+			{
+				trace("null yValue");
+			}
+		}
 		private function drawSeries(): void
 		{
 			trace("\n\n DRAW SERIE: " + totalX + " chart: " + chartWidth);
 			
 			var gr: Graphics = _dataSprite.graphics;
 			gr.clear();
+			
+			var yMaximumValue: Number = getYFieldMaximumValue();
 			
 			for each (var serie: ChartSerie in yFields)
 			{
@@ -697,35 +807,59 @@ package com.iblsoft.flexiweather.components.charts
 				var stepsX: int = Math.min(totalX, chartWidth); //chartXSteps;
 			
 				var yValues: Array = serie.data;
-				var yMaximumValue: Number = serie.maximumValue;
+				var yValue: Number;
+				var yPosMax: Number = getChartYValue(yMaximumValue, yMaximumValue);
 				
 				if (totalX < chartWidth)
 				{
+					stopDrawing = true;
 					
-					trace("draw uncondesed graph");
+//					trace("draw uncondesed graph");
 					for (i = 0; i < totalX; i++)
 					{
-						var yValue: Number = yValues[i] as Number;
+						var valuesForDraw: int = 1;
+						var isArray: Boolean = false;
+						if (yValues[i] is Array)
+						{
+							valuesForDraw = (yValues[i] as Array).length;
+							isArray = true;
+						} else {
+							yValue = yValues[i] as Number;
+						}
 						
-						if (i == 0)
-							xValue = 0;
-						else
-							xValue = int(totalX * i / stepsX);
-						xPos = _leftPadding + (chartWidth * xValue / totalX);
 						
-						var yPos: Number = _topPadding + chartHeight - (chartHeight * yValue / yMaximumValue);
+						for (var j: int = 0; j < valuesForDraw; j++)
+						{
+							if (isArray)
+							{
+								yValue = yValues[i][j];
+							}
 						
-						trace("drawSeries uncondensed["+i+"] value: [" + yValue + "]" + " Pos: [" + xPos + " , " + yPos + "] chart ["+_leftPadding+","+(_leftPadding+chartWidth)+"]");
-						
-						if (i == 0)
-							gr.moveTo(xPos, yPos);
-						else
-							gr.lineTo(xPos, yPos);
+							
+							if (i == 0)
+								xValue = 0;
+							else
+								xValue = int(totalX * i / stepsX);
+							xPos = _leftPadding + (chartWidth * xValue / totalX);
+							
+							var yPos: Number = getChartYValue(yValue, yMaximumValue);
+							
+							
+							drawSeriePoint(serie, i, xValue, yValue, xPos, yPos, yPosMax);
+						}
 					}
-					trace("drawSeries END of uncondensed["+i+"] chart ["+_leftPadding+","+(_leftPadding+chartWidth)+"]");
+					
+					if (serie.chartType == ChartType.LINE_FILL)
+					{
+						gr.lineTo(endX, endY);
+						gr.lineTo(endX, yPosMax);
+						gr.lineTo(startX, yPosMax);
+						gr.endFill();
+					}
+//					trace("drawSeries END of uncondensed["+i+"] chart ["+_leftPadding+","+(_leftPadding+chartWidth)+"]");
 				} else {
 					//there are more points than width (in pixel) of chart, so points must be condensed
-					trace("draw condesed graph");
+//					trace("draw condesed graph");
 					var pointCounter: int = 0;
 					var pixelPosition: int = 0;
 					var pixelValues: Array = [];
@@ -733,10 +867,18 @@ package com.iblsoft.flexiweather.components.charts
 					var pointsPerPixel: int = int(chartWidth / totalX);
 					pointsPerPixel = Math.max(1, pointsPerPixel);
 					
+					stopDrawing = true;
+					var previousPointWasDrawn: Boolean;
 					
 					while (pointCounter < totalX)
 					{
-						yValue = yValues[pointCounter] as Number;
+						if (yValues[i] is Array)
+						{
+							yValue = yValues[pointCounter][0];
+						} else {
+							yValue = yValues[pointCounter] as Number;
+						}
+						
 						pixelValues.push(yValue);
 						pointCounter++;
 						if (pointCounter >= pointsPerPixel)
@@ -745,19 +887,36 @@ package com.iblsoft.flexiweather.components.charts
 							var yValueAverage: Number = averageValues(pixelValues);
 							
 							xPos = _leftPadding + pixelPosition;
-							yPos = _topPadding + chartHeight - (chartHeight * yValueAverage / yMaximumValue);
+							yPos = _topPadding + _legendPadding + chartHeight - (chartHeight * yValueAverage / yMaximumValue);
 							
-							trace("drawSeries condensed["+pixelPosition+"] value: [" + yValueAverage + "]" + " Pos: [" + xPos + " , " + yPos + "] chart ["+_leftPadding+","+(_leftPadding+chartWidth)+"]");
-							
-							if (pointCounter == 0)
-								gr.moveTo(xPos, yPos);
-							else
-								gr.lineTo(xPos, yPos);
+							drawSeriePoint(serie, pointCounter, xValue, yValue, xPos, yPos, yPosMax);
 							
 							pixelValues = [];
+							previousPointWasDrawn = true;
+						} else {
+							previousPointWasDrawn = false;
 						}
 					}
-					trace("drawSeries END of condensed["+pixelPosition+"] chart ["+_leftPadding+","+(_leftPadding+chartWidth)+"]");
+					
+					if (!previousPointWasDrawn)
+					{
+						//drawLastPoint
+						var yValueAverage: Number = averageValues(pixelValues);
+						
+						xPos = _leftPadding + pixelPosition;
+						yPos = _topPadding + _legendPadding + chartHeight - (chartHeight * yValueAverage / yMaximumValue);
+						
+						drawSeriePoint(serie, pointCounter, xValue, yValue, xPos, yPos, yPosMax);
+					}
+					
+					if (serie.chartType == ChartType.LINE_FILL)
+					{
+						gr.lineTo(endX, endY);
+						gr.lineTo(endX, yPosMax);
+						gr.lineTo(startX, yPosMax);
+						gr.endFill();
+					}
+//					trace("drawSeries END of condensed["+pixelPosition+"] chart ["+_leftPadding+","+(_leftPadding+chartWidth)+"]");
 				}
 			}
 		}
@@ -808,13 +967,13 @@ package com.iblsoft.flexiweather.components.charts
 			var gr: Graphics = _gridSprite.graphics;
 			gr.clear();
 			var i: int;
-			var xValues: Array = getXFieldValues();
-			var yValues: Array = getYFieldValues();
-			if (!xValues || !yValues)
+//			var xValues: Array = getXFieldValues();
+//			var yValues: Array = getYFieldValues();
+			if (!xValues)
 				return;
 			
 //			var totalX: int = xValues.length;
-			var totalY: int = yValues.length;
+//			var totalY: int = yValues.length;
 			var xLabel: String;
 			var xValue: Number;
 			var xPos: Number;
@@ -823,7 +982,7 @@ package com.iblsoft.flexiweather.components.charts
 			var yPos: Number;
 			
 			var stepsX: int = totalXAxis;
-			var stepsY: int = Math.min(10, totalY);
+			var stepsY: int = verticalParts
 			
 			
 			var xDiff: int = chartWidth / (stepsX - 1);
@@ -850,8 +1009,8 @@ package com.iblsoft.flexiweather.components.charts
 				//				xPos = w - (w * xValue / totalX);
 				xPos = _leftPadding + (chartWidth * xValue / totalX);
 				
-				gr.moveTo(xPos, _topPadding);
-				gr.lineTo(xPos, _topPadding + chartHeight);
+				gr.moveTo(xPos, _topPadding + _legendPadding);
+				gr.lineTo(xPos, _topPadding + _legendPadding + chartHeight);
 				
 				//				if (i == 0)
 				//					trace("drawAxis["+i+"] value: [" + xValue + ", 0]" + " Pos: [" + xPos + " , " + chartHeight + "]");
@@ -864,7 +1023,7 @@ package com.iblsoft.flexiweather.components.charts
 					yValue = 0;
 				else
 					yValue = yMaximumValue * i / stepsY;
-				yPos = _topPadding + chartHeight - (chartHeight * yValue / yMaximumValue);
+				yPos = _topPadding + _legendPadding + chartHeight - (chartHeight * yValue / yMaximumValue);
 				
 				gr.moveTo(_leftPadding, yPos);
 				gr.lineTo(_leftPadding + chartWidth, yPos);
@@ -875,9 +1034,9 @@ package com.iblsoft.flexiweather.components.charts
 			gr2.lineStyle(_axisWidth, _axisColor);
 			//			gr2.moveTo(_yAxisLabelsWidth, 0);
 			//			gr2.lineTo(_yAxisLabelsWidth, chartH);
-			gr2.moveTo(_leftPadding, _topPadding);
-			gr2.lineTo(_leftPadding, _topPadding + chartHeight);
-			gr2.lineTo(_leftPadding + chartWidth, _topPadding + chartHeight);
+			gr2.moveTo(_leftPadding, _topPadding + _legendPadding);
+			gr2.lineTo(_leftPadding, _topPadding + _legendPadding + chartHeight);
+			gr2.lineTo(_leftPadding + chartWidth, _topPadding + _legendPadding + chartHeight);
 			
 			//			if (i == 0)
 			//				trace("drawAxis["+i+"] value: [" + xValue + ", 0]" + " Pos: [" + _yAxisLabelsWidth + " , " + chartHeight + "]");
@@ -900,12 +1059,14 @@ package com.iblsoft.flexiweather.components.charts
 		
 		private function invalidateLabels(): void
 		{
-			for each (var tf: ChartLabel in _usedLabels)
-			{
-				if (tf.parent == _labelsSprite)
-					_labelsSprite.removeChild(tf);
-				_unusedLabels.push(tf);
-			}
+			_labelFunctionChanged = true;
+//			for each (var tf: ChartLabel in _usedLabels)
+//			{
+//				if (tf.parent == _labelsSprite)
+//					_labelsSprite.removeChild(tf);
+//				_unusedLabels.push(tf);
+//			}
+			invalidateProperties();
 		}
 		
 		private function createLabel(): ChartLabel
@@ -920,9 +1081,10 @@ package com.iblsoft.flexiweather.components.charts
 		{
 			var gr: Graphics = graphics;
 			gr.clear();
-			gr.beginFill(0x000000, 0.5);
-			gr.drawRect(0, 0, chartWidth, chartHeight);
-			gr.endFill();
+			gr.lineStyle(1, 0x555555);
+//			gr.beginFill(0x000000, 0.5);
+			gr.drawRect(_leftPadding, _topPadding + _legendPadding, chartWidth, chartHeight);
+//			gr.endFill();
 		}
 		
 		private function drawLabels(): void
@@ -931,12 +1093,14 @@ package com.iblsoft.flexiweather.components.charts
 			_xAxisLabelsHeight = 0;
 			_yAxisLabelsWidth = 0;
 			var i: int;
-			var xValues: Array = getXFieldValues();
-			var yValues: Array = getYFieldValues();
-			if (!xValues || !yValues)
+//			var xValues: Array = getXFieldValues();
+//			var yValues: Array = getYFieldValues();
+			if (!xValues)
 				return;
 //			var totalX: int = xValues.length;
-			var totalY: int = yValues.length;
+//			var totalY: int = yValues.length;
+			
+			
 			var tf: TextField;
 			var chartLabel: ChartLabel;
 			var format: TextFormat;
@@ -948,8 +1112,9 @@ package com.iblsoft.flexiweather.components.charts
 			var yPos: Number;
 			
 			
+			
 			var stepsX: int = totalXAxis;
-			var stepsY: int = Math.min(10, totalY);
+			var stepsY: int = verticalParts;
 			
 			var xDiff: int = chartWidth / (stepsX - 1);
 			var yDiff: int = chartHeight / (stepsY - 1);
@@ -960,13 +1125,13 @@ package com.iblsoft.flexiweather.components.charts
 			
 			var yMaximumValue: Number = getYFieldMaximumValue();
 			
+			//**************************************************************
+			// 1st pass
+			//**************************************************************
+
 			//1st pass will find out X labels height 
 			for (i = 0; i < totalXAxis; i++)
 			{
-//				if (i == 0)
-//					xValue = 0;
-//				else
-//					xValue = int(totalX * i / stepsX);
 				
 				var valueObj: Object = xAxisValues[i];
 				if (_labelXAxisFunction != null)
@@ -977,89 +1142,89 @@ package com.iblsoft.flexiweather.components.charts
 					xLabel = valueObj as String;
 				else if (valueObj is Number)
 					xLabel = (valueObj as int).toString();
-				
-				
-				chartLabel = getLabel(_xLabelsRotation);
-				tf = chartLabel.textField;
-				
 				//				trace("drawLabels i: " + i + " label: " + xLabel + " xPos: " + xPos);
 				
-				if (!xLabel)
+				if (!_xLabelsList.chartLabelAtExists(i))
 				{
-					trace("Text is NULL");
+					chartLabel = getLabel(xLabelsRotation);
+					tf = chartLabel.textField;
+					tf.text = xLabel;
+					format = tf.getTextFormat();
+					format.color = _labelsColor;
+					format.align = 'left';
+					format.font = 'defaultFontMX';
+					tf.embedFonts = true;
+					tf.setTextFormat(format);
+					chartLabel.updatePosition();
+					_xLabelsList.addChartLabelAt(chartLabel, i);
+				} else {
+					chartLabel = _xLabelsList.getChartLabelAt(i);
 				}
-				tf.text = xLabel;
-				format = tf.getTextFormat();
-				format.color = _labelsColor;
-				format.align = 'left';
-				format.font = 'defaultFontMX';
-				tf.embedFonts = true;
-				tf.setTextFormat(format);
-				chartLabel.updatePosition();
-				_xLabelsList.addChartLabel(chartLabel);
 				_xAxisLabelsHeight = Math.max(_xAxisLabelsHeight, chartLabel.rotatedHeight + _labelXAxisPadding + _axisWidth);
 			}
 			//1st pass will find out Y labels width
 			for (i = 0; i <= stepsY; i++)
 			{
-				if (i == 0)
-					yValue = 0;
-				else
-					yValue = yMaximumValue * i / stepsY;
-				
-				chartLabel = getLabel(_yLabelsRotation);
-				tf = chartLabel.textField;
-				tf.text = int(yValue).toString();
-				format = tf.getTextFormat();
-				format.color = _labelsColor;
-				format.align = 'left';
-				format.font = 'defaultFontMX';
-				tf.embedFonts = true;
-				tf.setTextFormat(format);
-				chartLabel.updatePosition();
-				_yLabelsList.addChartLabel(chartLabel);
+				yValue = yMaximumValue * i / stepsY;
+					
+				if (!_yLabelsList.chartLabelAtExists(i))
+				{
+					chartLabel =  getLabel(yLabelsRotation);
+					tf = chartLabel.textField;
+					
+					tf.text = int(yValue).toString();
+					
+					format = tf.getTextFormat();
+					format.color = _labelsColor;
+					format.align = 'left';
+					format.font = 'defaultFontMX';
+					tf.embedFonts = true;
+					tf.setTextFormat(format);
+					chartLabel.updatePosition();
+					_yLabelsList.addChartLabelAt(chartLabel, i);
+				} else {
+					chartLabel = getLabel(_yLabelsRotation);
+				}
 				_yAxisLabelsWidth = Math.max(_yAxisLabelsWidth, chartLabel.rotatedWidth + _labelYAxisPadding + _axisWidth);
 			}
 			
-			xDiff = chartWidth / (totalXAxis - 1);
-			yDiff = chartHeight / (stepsY - 1);
 			
+			//**************************************************************
+			// 2nd pass
+			//**************************************************************
+			
+//			xDiff = chartWidth / (totalXAxis - 1);
+//			yDiff = chartHeight / (stepsY - 1);
 			
 			
 			//2nd pass will draw X axis grid
 			for (i = 0; i < totalXAxis; i++)
 			{
-//				if (i == 0)
-//					xValue = 0;
-//				else
-//					xValue = int(totalXAxis * i / i);
-				
-//				xPos = _leftPadding + chartWidth - (chartWidth * xValue / totalXAxis);
 				xPos = _leftPadding + i * xDiff;
 				
 				
 				valueObj = xAxisValues[i];
-				chartLabel = _xLabelsList.getChartLabel(i);
-				if (chartLabel)
+				if (_xLabelsList.chartLabelAtExists(i))
 				{
+					chartLabel = _xLabelsList.getChartLabelAt(i);
 					tf = chartLabel.textField;
+					tf.rotation = xLabelsRotation;
 					chartLabel.x = (xPos) - chartLabel.rotatedWidth / 2;
-					chartLabel.y = _topPadding + chartHeight + chartLabel.rotatedHeight / 2 + _labelXAxisPadding;
+					chartLabel.y = _topPadding + _legendPadding + chartHeight + chartLabel.rotatedHeight / 2 + _labelXAxisPadding;
 					drawTextfieldBound(chartLabel);
 				}
 			}
 			//2nd pass will draw Y axis grid
 			for (i = 0; i <= stepsY; i++)
 			{
-				if (i == 0)
-					yValue = 0;
-				else
-					yValue = yMaximumValue * i / stepsY;
-				yPos = _topPadding + chartHeight - (chartHeight * yValue / yMaximumValue);
-				chartLabel = _yLabelsList.getChartLabel(i);
-				if (chartLabel)
+				yValue = yMaximumValue * i / stepsY;
+					
+				yPos = _topPadding + _legendPadding + chartHeight - (chartHeight * yValue / yMaximumValue);
+				if (_yLabelsList.chartLabelAtExists(i))
 				{
+					chartLabel = _yLabelsList.getChartLabelAt(i);
 					tf = chartLabel.textField;
+					tf.rotation = yLabelsRotation;
 					chartLabel.x = _leftPadding - chartLabel.rotatedWidth / 2 - _labelYAxisPadding;
 					chartLabel.y = yPos - chartLabel.rotatedHeight / 2;
 					drawTextfieldBound(chartLabel);
@@ -1092,6 +1257,8 @@ import flash.display.Graphics;
 import flash.display.Sprite;
 import flash.geom.Rectangle;
 import flash.text.TextField;
+
+import mx.charts.chartClasses.ChartLabel;
 
 class ChartLabel extends Sprite
 {
@@ -1182,21 +1349,35 @@ class ChartLabelList
 		_list = new Array();
 	}
 	
-	public function getChartLabel(nr: int): ChartLabel
+	public function getChartLabelAt(nr: int): ChartLabel
 	{
-		if (_name == "x")
-			trace("ChartLabelList getChartLabel["+nr+"] total: " + _list.length);
+		if (_list && _list[nr] is ChartLabel)
+		{
+			return (_list[nr] as ChartLabel);
+		}
+		return null;
+	}
+	public function chartLabelAtExists(nr: int): Boolean
+	{
+//		if (_name == "x")
+//			trace("ChartLabelList getChartLabel["+nr+"] total: " + _list.length);
 		
-		if (_list && _list.length > nr)
-			return _list.shift() as ChartLabel;
-		return null
+		if (_list)
+		{
+			return (_list[nr] is ChartLabel);
+		}
+		return false
 	}
 	
-	public function addChartLabel(tf: ChartLabel): void
+	public function addChartLabelAt(tf: ChartLabel, position: int): void
 	{
-		_list.push(tf);
-		
-		if (_name == "x")
-			trace("ChartLabelList addChartLabel: " + _list.length);
+		_list[position] = tf;
 	}
+//	public function addChartLabel(tf: ChartLabel): void
+//	{
+//		_list.push(tf);
+		
+//		if (_name == "x")
+//			trace("ChartLabelList addChartLabel: " + _list.length);
+//	}
 }
