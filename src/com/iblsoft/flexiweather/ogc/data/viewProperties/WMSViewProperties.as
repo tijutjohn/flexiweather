@@ -808,8 +808,6 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					
 				if (m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null)
 				{
-					var run: Date = value as Date;
-					
 					var currentRun: Date = ISO8601Parser.stringToDate(
 						getWMSDimensionValue(m_cfg.dimensionRunName, true));
 					
@@ -820,7 +818,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					ofExactRun = null;
 					for each (of in l_runs)
 					{
-						if (of && of.data && (of.data).time == run.time)
+						if (of && of.data && (of.data).time == (value as Date).time)
 						{
 							ofExactRun = of;
 							break;
@@ -907,7 +905,6 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		
 		public function synchroniseWith(s_variableId: String, value: Object): String
 		{
-			var a: Array
 			if (s_variableId == GlobalVariable.LEVEL)
 			{
 				var levelStr: String = value as String;
@@ -921,7 +918,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 				
 				if (!exactlySynchroniseWith(s_variableId, value))
 				{
-					a = getSynchronisedVariableValuesList(s_variableId);
+					var a: Array = getSynchronisedVariableValuesList(s_variableId);
 					if (a)
 						debug("synchroniseWith: " + s_variableId + ": " + a.length);
 					else {
@@ -944,28 +941,26 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 				}
 			}
 			
+			var leftDist: Number = 1000 * 60 * FRAMES_SYNCHRONIZATION_LEFT_TIME_FRAME;
+			var rightDist: Number = 1000 * 60 * FRAMES_SYNCHRONIZATION_RIGHT_TIME_FRAME;
 			if (s_variableId == GlobalVariable.RUN)
 			{
 				if (!exactlySynchroniseWith(s_variableId, value))
 				{
-					a = getSynchronisedVariableValuesList(s_variableId);
-					var best: Date = null;
-					var required: Date = value as Date;
-					var requiredTime: Number = required.time;
+					var bestRun: Date = null;
+					var requiredRun: Number = (value as Date).time;
 					//TODO here is frame synchronisation done, if you want to change left and right time frame, you can set it here
-					var leftDist: Number = 1000 * 60 * FRAMES_SYNCHRONIZATION_LEFT_TIME_FRAME;
-					var rightDist: Number = 1000 * 60 * FRAMES_SYNCHRONIZATION_RIGHT_TIME_FRAME;
-					for each (var i: Date in a)
+					for each (var run: Date in getSynchronisedVariableValuesList(s_variableId))
 					{
-						if (i.time >= requiredTime - leftDist && i.time <= requiredTime + rightDist)
+						if (run.time >= requiredRun - leftDist && run.time <= requiredRun + rightDist)
 						{
-							if (best == null || Math.abs(best.time - requiredTime) > Math.abs(i.time - requiredTime))
-								best = i;
+							if (bestRun == null || Math.abs(bestRun.time - requiredRun) > Math.abs(run.time - requiredRun))
+								bestRun = run;
 						}
 					}
-					if (best == null)
+					if (bestRun == null)
 						return SynchronisationResponse.SYNCHRONISATION_VALUE_NOT_FOUND;
-					return exactlySynchroniseWith(s_variableId, best);
+					return exactlySynchroniseWith(s_variableId, bestRun);
 				}
 			}
 			
@@ -973,24 +968,20 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 			{
 				if (!exactlySynchroniseWith(s_variableId, value))
 				{
-					a = getSynchronisedVariableValuesList(s_variableId);
-					var best: Date = null;
-					var required: Date = value as Date;
-					var requiredTime: Number = required.time;
+					var bestFrame: Date = null;
+					var requiredFrame: Number = (value as Date).time;
 					//TODO here is frame synchronisation done, if you want to change left and right time frame, you can set it here
-					var leftDist: Number = 1000 * 60 * FRAMES_SYNCHRONIZATION_LEFT_TIME_FRAME;
-					var rightDist: Number = 1000 * 60 * FRAMES_SYNCHRONIZATION_RIGHT_TIME_FRAME;
-					for each (var i: Date in a)
+					for each (var frame: Date in getSynchronisedVariableValuesList(s_variableId))
 					{
-						if (i.time >= requiredTime - leftDist && i.time <= requiredTime + rightDist)
+						if (frame.time >= requiredFrame - leftDist && frame.time <= requiredFrame + rightDist)
 						{
-							if (best == null || Math.abs(best.time - requiredTime) > Math.abs(i.time - requiredTime))
-								best = i;
+							if (bestFrame == null || Math.abs(bestFrame.time - requiredFrame) > Math.abs(frame.time - requiredFrame))
+								bestFrame = frame;
 						}
 					}
-					if (best == null)
+					if (bestFrame == null)
 						return SynchronisationResponse.SYNCHRONISATION_VALUE_NOT_FOUND;
-					return exactlySynchroniseWith(s_variableId, best);
+					return exactlySynchroniseWith(s_variableId, bestFrame);
 				}
 			}
 			return exactlySynchroniseWith(s_variableId, value);
