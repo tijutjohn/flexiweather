@@ -808,6 +808,7 @@ package com.iblsoft.flexiweather.components.charts
 			
 				var yValues: Array = serie.data;
 				var yValue: Number;
+				var yValueAverage: Number;
 				var yPosMax: Number = getChartYValue(yMaximumValue, yMaximumValue);
 				
 				if (totalX < chartWidth)
@@ -884,7 +885,7 @@ package com.iblsoft.flexiweather.components.charts
 						if (pointCounter >= pointsPerPixel)
 						{
 							pixelPosition++;
-							var yValueAverage: Number = averageValues(pixelValues);
+							yValueAverage = averageValues(pixelValues);
 							
 							xPos = _leftPadding + pixelPosition;
 							yPos = _topPadding + _legendPadding + chartHeight - (chartHeight * yValueAverage / yMaximumValue);
@@ -901,7 +902,7 @@ package com.iblsoft.flexiweather.components.charts
 					if (!previousPointWasDrawn)
 					{
 						//drawLastPoint
-						var yValueAverage: Number = averageValues(pixelValues);
+						yValueAverage = averageValues(pixelValues);
 						
 						xPos = _leftPadding + pixelPosition;
 						yPos = _topPadding + _legendPadding + chartHeight - (chartHeight * yValueAverage / yMaximumValue);
