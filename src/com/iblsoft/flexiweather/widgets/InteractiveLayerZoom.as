@@ -12,14 +12,10 @@ package com.iblsoft.flexiweather.widgets
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
 	import flash.events.TransformGestureEvent;
-	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.ui.Multitouch;
 	import flash.utils.Timer;
 	
-	import mx.events.DynamicEvent;
-	import mx.messaging.AbstractConsumer;
-
 	public class InteractiveLayerZoom extends InteractiveLayer
 	{
 		public static const ZOOM: String = 'zoom';
@@ -54,6 +50,14 @@ package com.iblsoft.flexiweather.widgets
 			m_delayBeforeLoadChanged = true;
 			invalidateProperties();
 		}
+
+        protected function turnOnZoomSprite():void {
+            mb_showSlideZoomingSprite = true;
+        }
+
+        protected function turnOffZoomSprite():void {
+            mb_showSlideZoomingSprite = false;
+        }
 
 		public function InteractiveLayerZoom(container: InteractiveWidget = null)
 		{
@@ -128,7 +132,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (!mb_showSlideZoomingSprite && event.ctrlKey)
 			{
-				mb_showSlideZoomingSprite = true;
+                turnOnZoomSprite();
 				invalidateDisplayList();
 			}
 		}
@@ -137,7 +141,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (mb_showSlideZoomingSprite && !event.ctrlKey)
 			{
-				mb_showSlideZoomingSprite = false;
+				turnOffZoomSprite();
 				invalidateDisplayList();
 				//automatically after CtrlKey is Up, update data
 				onMouseWheelTimer();
@@ -154,11 +158,15 @@ package com.iblsoft.flexiweather.widgets
 				mi_slideZoomStartY = event.localY;
 			else
 			{
-				m_areaZoomingRectangle = new Rectangle(event.localX, event.localY, 0, 0);
-				invalidateDynamicPart();
+				initializeRectangle(event.localX, event.localY);
 			}
 			return true;
 		}
+
+        protected function initializeRectangle(x:Number, y:Number):void {
+            m_areaZoomingRectangle = new Rectangle(x, y, 0, 0);
+            invalidateDynamicPart();
+        }
 
 		override public function onMouseUp(event: MouseEvent): Boolean
 		{
@@ -168,27 +176,30 @@ package com.iblsoft.flexiweather.widgets
 				mi_slideZoomStartY = -1;
 			else
 			{
-				//create new rectangle from old one with correct left, top, right, bottom properties (it matters on direction of draggine when zoom rectange is created
-				m_areaZoomingRectangle = new Rectangle(Math.min(m_areaZoomingRectangle.left, m_areaZoomingRectangle.right), Math.min(m_areaZoomingRectangle.top, m_areaZoomingRectangle.bottom), Math.abs(m_areaZoomingRectangle.left - m_areaZoomingRectangle.right), Math.abs(m_areaZoomingRectangle.top - m_areaZoomingRectangle.bottom));
-				if ((m_areaZoomingRectangle.width) > 5 && (m_areaZoomingRectangle.height) > 5)
-				{
-					var r: Rectangle = container.getViewBBox().toRectangle();
-					var w: Number = container.width;
-					var h: Number = container.height;
-					var bW: Number = r.width;
-					var bH: Number = r.height;
-					r.width = bW / w * m_areaZoomingRectangle.width;
-					r.height = bH / h * m_areaZoomingRectangle.height;
-					r.x = r.x + m_areaZoomingRectangle.x / w * bW;
-					r.y = r.y + (h - m_areaZoomingRectangle.bottom) / h * bH;
-//					container.setViewBBox(BBox.fromRectangle(r), true);
-					setViewBBoxFromRectangle(BBox.fromRectangle(r), true);
-				}
-				m_areaZoomingRectangle = null;
-				invalidateDynamicPart();
+				finalizeRectangle();
 			}
 			return true;
 		}
+
+        protected function finalizeRectangle():void {
+            //create new rectangle from old one with correct left, top, right, bottom properties (it matters on direction of draggine when zoom rectange is created
+            m_areaZoomingRectangle = new Rectangle(Math.min(m_areaZoomingRectangle.left, m_areaZoomingRectangle.right), Math.min(m_areaZoomingRectangle.top, m_areaZoomingRectangle.bottom), Math.abs(m_areaZoomingRectangle.left - m_areaZoomingRectangle.right), Math.abs(m_areaZoomingRectangle.top - m_areaZoomingRectangle.bottom));
+            if ((m_areaZoomingRectangle.width) > 5 && (m_areaZoomingRectangle.height) > 5)
+            {
+                var r: Rectangle = container.getViewBBox().toRectangle();
+                var w: Number = container.width;
+                var h: Number = container.height;
+                var bW: Number = r.width;
+                var bH: Number = r.height;
+                r.width = bW / w * m_areaZoomingRectangle.width;
+                r.height = bH / h * m_areaZoomingRectangle.height;
+                r.x = r.x + m_areaZoomingRectangle.x / w * bW;
+                r.y = r.y + (h - m_areaZoomingRectangle.bottom) / h * bH;
+                setViewBBoxFromRectangle(BBox.fromRectangle(r), true);
+            }
+            m_areaZoomingRectangle = null;
+            invalidateDynamicPart();
+        }
 
 		override public function onMouseMove(event: MouseEvent): Boolean
 		{
