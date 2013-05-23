@@ -30,6 +30,17 @@ package com.iblsoft.flexiweather.widgets
 		private var m_delayBeforeLoad: int
 		private var m_delayBeforeLoadChanged: Boolean;
 
+
+		public function get minimimMapScale():Number
+		{
+			return _minimimMapScale;
+		}
+
+		public function set minimimMapScale(value:Number):void
+		{
+			_minimimMapScale = value;
+		}
+
 		override public function set enabled(value:Boolean):void
 		{
 			super.enabled = value;
@@ -275,7 +286,7 @@ package com.iblsoft.flexiweather.widgets
 			if (zoomChangeFromDelta > 1) zoomChangeFromDelta = 1;
 			if (zoomChangeFromDelta < 0.5) zoomChangeFromDelta = 0.5;
 			
-//			trace("doDeltaZoom: " + delta + " zoomChangeFromDelta: " + zoomChangeFromDelta);
+			trace("doDeltaZoom: " + delta + " zoomChangeFromDelta: " + zoomChangeFromDelta);
 			if (delta > 0)
 			{
 				f_width *= zoomChangeFromDelta;
@@ -295,12 +306,14 @@ package com.iblsoft.flexiweather.widgets
 				m_wheelZoomTimer.start();
 				// do only non-final area change
 				var r: Rectangle = new Rectangle(f_bboxCenterX - f_width / 2.0, f_bboxCenterY - f_height / 2.0, f_width, f_height);
-				setViewBBoxFromRectangle(BBox.fromRectangle(r), false);
-//				container.setViewBBox(BBox.fromRectangle(r), false);
-				invalidateDynamicPart();
-				// but start timer to defer final zoom change, but only if final change
-				// doesn't occur in between (initiated by someone else)
-				mb_finalChangeOccuredAfterWheelZoom = false;
+				var viewBBoxUpdated: Boolean = setViewBBoxFromRectangle(BBox.fromRectangle(r), false, delta < 0);
+				if (viewBBoxUpdated)
+				{
+					invalidateDynamicPart();
+					// but start timer to defer final zoom change, but only if final change
+					// doesn't occur in between (initiated by someone else)
+					mb_finalChangeOccuredAfterWheelZoom = false;
+				} 
 			}
 			return true;
 		}
@@ -370,22 +383,27 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 
+		private var _minimimMapScale: Number = 20000;
+		
 		/**
 		 * One common function for setting viewBBox from Rectangle with check for projection which allows horizontal wrap to do not allow zoom outside extent.
 		 * @param r
 		 * @param b_finalChange
 		 *
 		 */
-		private function setViewBBoxFromRectangle(viewBBox: BBox, b_finalChange: Boolean): void
+		private function setViewBBoxFromRectangle(viewBBox: BBox, b_finalChange: Boolean, bZoomOutAction: Boolean = false): Boolean
 		{
 			//check max distance of viewBBox
 			var maxDistance: Number = viewBBox.getBBoxMaximumDistance(container.getCRS());
 			var mapScale: Number = container.getMapScale();
-			if (mapScale > 1)
+			var mapScaleRatio: Number = 1 / mapScale;
+			if (mapScaleRatio < minimimMapScale && !bZoomOutAction)
 			{
 				//do not support map scale more than 1:1
-				trace("do not support map scale more than 1:1");
-				return;
+				trace("do not support map scale more than 1:"+_minimimMapScale + " mapScaleRatio: " + mapScaleRatio);
+				return false;
+			} else {
+				trace("current map scale [min: "+minimimMapScale+"]: " + mapScale + " , " + (1/mapScale) + " bZoomOutAction: " + bZoomOutAction);
 			}
 			var extentBBox: BBox = container.getExtentBBox();
 			var allowHorizontalWrap: Boolean = allowWrapHorizontally();
@@ -404,6 +422,8 @@ package com.iblsoft.flexiweather.widgets
 				}
 			}
 			container.setViewBBox(viewBBox, b_finalChange);
+			
+			return true;
 		}
 
 		private function extentRatio(): Number
