@@ -79,6 +79,14 @@ package com.iblsoft.flexiweather.components.charts
 			_visible = true;
 		}
 		
+		public function getValue(valueObject: Object): Number
+		{
+			if (_field)
+				return valueObject[_field];
+			
+			return valueObject as Number;
+		}
+			
 		public function findMaximum(): void
 		{
 			var max: Number = Number.NEGATIVE_INFINITY;

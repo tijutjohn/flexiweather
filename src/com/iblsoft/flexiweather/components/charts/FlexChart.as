@@ -702,8 +702,9 @@ package com.iblsoft.flexiweather.components.charts
 		private var _currentDrawnSerie: ChartSerie;
 		private var _currentDrawnPosition: int;
 		
-		private function getChartYValue(value: Number, maxValue: Number): Number
+		protected function getChartYValue(serie: ChartSerie, valueObject: Object, maxValue: Number): Number
 		{
+			var value: Number = serie.getValue(valueObject);
 			var yPos: Number = _topPadding + _legendPadding + chartHeight - (chartHeight * value / maxValue);
 			return yPos;
 		}
@@ -715,15 +716,15 @@ package com.iblsoft.flexiweather.components.charts
 		private var endY: Number;
 		private var stopDrawing: Boolean;
 		
-		private function drawSeriePoint(serie: ChartSerie, position: int,  xValue: Number, yValue: Number, xPos: Number, yPos: Number, yPosMax: Number): void
+		protected function drawSeriePoint(gr: Graphics, serie: ChartSerie, position: int,  xValue: Number, yValue: Object, xPos: Number, yPos: Number, yPosMax: Number): void
 		{
 			var pointLineHalfLine: Number = 3;
 			
-			var gr: Graphics = _dataSprite.graphics;
+			var yValueNumber: Number = yValue as Number;
 			
 			if (serie.chartType == ChartType.LINE_FILL)
 			{
-				if (yValue != 0 && yValue != 99999 && !isNaN(yValue))
+				if (yValueNumber != 0 && yValueNumber != 99999 && !isNaN(yValueNumber))
 				{
 					if (position == 0 || stopDrawing) {
 						
@@ -753,7 +754,7 @@ package com.iblsoft.flexiweather.components.charts
 			} else if (serie.chartType == ChartType.LINE)
 			{
 				//								trace("drawSeries uncondensed["+i+"] value: [" + yValue + "]" + " Pos: [" + xPos + " , " + yPos + "] chart ["+_leftPadding+","+(_leftPadding+chartWidth)+"]");
-				if (yValue != 0 && yValue != 99999 && !isNaN(yValue))
+				if (yValueNumber != 0 && yValueNumber != 99999 && !isNaN(yValueNumber))
 				{
 					if (position == 0 || stopDrawing)
 						gr.moveTo(xPos, yPos);
@@ -765,7 +766,7 @@ package com.iblsoft.flexiweather.components.charts
 				}
 			} else if (serie.chartType == ChartType.POINT) {
 				
-				if (yValue != 0 && yValue != 99999 && !isNaN(yValue))
+				if (yValueNumber != 0 && yValueNumber != 99999 && !isNaN(yValueNumber))
 				{
 					//									trace("POINT uncondensed: ["+xPos+","+yPos+"]["+j+"]");
 					
@@ -781,7 +782,7 @@ package com.iblsoft.flexiweather.components.charts
 					stopDrawing = true;
 				}
 			}
-			if (isNaN(yValue))
+			if (isNaN(yValueNumber))
 			{
 				trace("null yValue");
 			}
@@ -809,7 +810,7 @@ package com.iblsoft.flexiweather.components.charts
 				var yValues: Array = serie.data;
 				var yValue: Number;
 				var yValueAverage: Number;
-				var yPosMax: Number = getChartYValue(yMaximumValue, yMaximumValue);
+				var yPosMax: Number = getChartYValue(serie, yMaximumValue, yMaximumValue);
 				
 				if (totalX < chartWidth)
 				{
@@ -825,7 +826,7 @@ package com.iblsoft.flexiweather.components.charts
 							valuesForDraw = (yValues[i] as Array).length;
 							isArray = true;
 						} else {
-							yValue = yValues[i] as Number;
+							yValue = yValues[i];
 						}
 						
 						
@@ -843,10 +844,10 @@ package com.iblsoft.flexiweather.components.charts
 								xValue = int(totalX * i / stepsX);
 							xPos = _leftPadding + (chartWidth * xValue / totalX);
 							
-							var yPos: Number = getChartYValue(yValue, yMaximumValue);
+							var yPos: Number = getChartYValue(serie, yValue, yMaximumValue);
 							
 							
-							drawSeriePoint(serie, i, xValue, yValue, xPos, yPos, yPosMax);
+							drawSeriePoint(gr, serie, i, xValue, yValue, xPos, yPos, yPosMax);
 						}
 					}
 					
@@ -890,7 +891,7 @@ package com.iblsoft.flexiweather.components.charts
 							xPos = _leftPadding + pixelPosition;
 							yPos = _topPadding + _legendPadding + chartHeight - (chartHeight * yValueAverage / yMaximumValue);
 							
-							drawSeriePoint(serie, pointCounter, xValue, yValue, xPos, yPos, yPosMax);
+							drawSeriePoint(gr, serie, pointCounter, xValue, yValue, xPos, yPos, yPosMax);
 							
 							pixelValues = [];
 							previousPointWasDrawn = true;
@@ -907,7 +908,7 @@ package com.iblsoft.flexiweather.components.charts
 						xPos = _leftPadding + pixelPosition;
 						yPos = _topPadding + _legendPadding + chartHeight - (chartHeight * yValueAverage / yMaximumValue);
 						
-						drawSeriePoint(serie, pointCounter, xValue, yValue, xPos, yPos, yPosMax);
+						drawSeriePoint(gr, serie, pointCounter, xValue, yValue, xPos, yPos, yPosMax);
 					}
 					
 					if (serie.chartType == ChartType.LINE_FILL)
