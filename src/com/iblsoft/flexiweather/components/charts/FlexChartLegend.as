@@ -10,8 +10,16 @@ package com.iblsoft.flexiweather.components.charts
 	import spark.components.VGroup;
 	import spark.primitives.Line;
 	
+	[Event(name="serieVisibilityChange", type="com.iblsoft.flexiweather.components.charts.FlexChartLegendEvent")]
 	public class FlexChartLegend extends Group
 	{
+		[Bindable]
+		public var color: uint = 0xffffff;
+		[Bindable]
+		public var backgroundColor: uint = 0x000000;
+		[Bindable]
+		public var backgroundAlpha: Number = 0;
+		
 		private var _yFields: Array;
 		private var _yFieldsChanged: Boolean;
 		
@@ -71,6 +79,7 @@ package com.iblsoft.flexiweather.components.charts
 							for (i = ic; i < yfc; i++)
 							{
 								item = new ItemGroup();
+								item.addEventListener(FlexChartLegendEvent.SERIE_VISIBILITY_CHANGE, redispatchVisibilityChange);
 								addElement(item);
 								_items.push(item);
 								
@@ -79,6 +88,7 @@ package com.iblsoft.flexiweather.components.charts
 							for (i = 0; i < (ic - yfc); i++)
 							{
 								item = _items.shift();
+								item.removeEventListener(FlexChartLegendEvent.SERIE_VISIBILITY_CHANGE, redispatchVisibilityChange);
 								removeElement(item);
 							}
 						}
@@ -89,6 +99,11 @@ package com.iblsoft.flexiweather.components.charts
 			}
 		}
 		
+		private function redispatchVisibilityChange(event: FlexChartLegendEvent): void
+		{
+			dispatchEvent(event);
+		}
+		
 		override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void
 		{
 			super.updateDisplayList(unscaledWidth, unscaledHeight);
@@ -96,8 +111,8 @@ package com.iblsoft.flexiweather.components.charts
 			var gr: Graphics = graphics;
 			
 			gr.clear();
-			gr.lineStyle(1, 0x888888);
-			gr.beginFill(0x333333, 0.7);
+//			gr.lineStyle(1, 0x888888);
+			gr.beginFill(backgroundColor, backgroundAlpha);
 			gr.drawRect(0, 0, unscaledWidth, unscaledHeight);
 			gr.endFill();
 		}
@@ -108,6 +123,8 @@ package com.iblsoft.flexiweather.components.charts
 			for each (var serie: ChartSerie in _yFields)
 			{
 				var item: ItemGroup = _items[cnt] as ItemGroup;
+				item.color = color;
+				item.serie = serie;
 				item.y = cnt * 20;
 				item.update(serie);
 				cnt++;
@@ -117,11 +134,13 @@ package com.iblsoft.flexiweather.components.charts
 	}
 }
 import com.iblsoft.flexiweather.components.charts.ChartSerie;
+import com.iblsoft.flexiweather.components.charts.FlexChartLegendEvent;
 
 import flash.display.CapsStyle;
 import flash.display.Graphics;
 import flash.display.JointStyle;
 import flash.display.LineScaleMode;
+import flash.events.Event;
 
 import flashx.textLayout.formats.VerticalAlign;
 
@@ -135,15 +154,21 @@ import spark.primitives.Line;
 
 class ItemGroup extends Group
 {
-	private var _label: Label;
+	public var serie: ChartSerie;
+	
+//	private var _label: Label;
 	private var _ui: UIComponent;
 	private var _checkBox: CheckBox;
+	public var color: uint;
 	
+	public function ItemGroup()
+	{
+	}
 	override protected function createChildren():void
 	{
 		super.createChildren();
 		
-		_label = new Label();
+//		_label = new Label();
 		_ui = new UIComponent();
 		_checkBox = new CheckBox();
 	}
@@ -153,7 +178,7 @@ class ItemGroup extends Group
 		super.childrenCreated();
 		
 		addElement(_checkBox);
-		addElement(_label);
+//		addElement(_label);
 		addElement(_ui);
 	}
 	
@@ -162,31 +187,46 @@ class ItemGroup extends Group
 	{
 		super.measure();
 		
-		measuredWidth = _label.getExplicitOrMeasuredWidth() + _checkBox.getExplicitOrMeasuredWidth() + 50;
+		measuredWidth = _checkBox.getExplicitOrMeasuredWidth() + 50;
 		measuredHeight = 20;
 	}
+	
+	private function onCheckBoxChange(event: Event): void
+	{
+		var fcle: FlexChartLegendEvent = new FlexChartLegendEvent(FlexChartLegendEvent.SERIE_VISIBILITY_CHANGE);
+		fcle.serie = serie;
+		fcle.visibility = _checkBox.selected;
+		
+		dispatchEvent(fcle);
+	}
+	
 	public function update(serie: ChartSerie): void
 	{
-		if (_label)
+		if (_checkBox)
 		{
-			_label.text = serie.label;
+			_checkBox.label = serie.label;
+			_checkBox.setStyle('color', color);
 			var gr: Graphics = _ui.graphics;
 			gr.lineStyle(5, serie.color, 1, true, LineScaleMode.NONE, CapsStyle.SQUARE, JointStyle.MITER);
-			gr.moveTo(0,15);
-			gr.lineTo(50,15);
+			gr.moveTo(0,10);
+			gr.lineTo(50,10);
 			
 			_checkBox.selected = serie.visible;
 			
-			_label.width = 100;
-			_label.height = 20;
-			_label.setStyle('verticalAlign', VerticalAlign.BOTTOM);
+//			_label.width = 100;
+//			_label.height = 20;
+//			_label.setStyle('verticalAlign', VerticalAlign.BOTTOM);
 			
 			_checkBox.x = 0;
-			_checkBox.y = 20 - _checkBox.height;
-			_label.x = _checkBox.width + 5;
-			_ui.x = _label.x + _label.width + 5;
+//			_checkBox.y = 20 - _checkBox.height;
+			_checkBox.validateNow();
 			
-			trace("ItemGroup: ["+serie.label+"]" + _label.x + " , " + _ui.x);
+			_checkBox.addEventListener(Event.CHANGE, onCheckBoxChange);
+			
+//			_label.x = _checkBox.width + 5;
+			_ui.x = 120; //_checkBox.x + _checkBox.width + 5;
+			
+//			trace("ItemGroup: ["+serie.label+"]" + _label.x + " , " + _ui.x);
 			
 		} else {
 			callLater(update, [serie]);

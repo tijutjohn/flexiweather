@@ -58,7 +58,6 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 			var b_currentlyLoading: Boolean = iconIsLoading(s_url);
 			var d_assocData: IconAssociatedData;
 			
-			trace("WFSIconLoader:b_alreadyLoaded: " + b_alreadyLoaded + "  b_currentlyLoading: " + b_currentlyLoading + " s_url: " + s_url);
 			if (b_alreadyLoaded)
 			{
 				// HERE WE NEED INPLEMENT CHECK IF SOME SAME ICON IS NOT ALREADY LOADING

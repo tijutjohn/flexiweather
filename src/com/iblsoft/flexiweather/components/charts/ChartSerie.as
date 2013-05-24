@@ -11,20 +11,36 @@ package com.iblsoft.flexiweather.components.charts
 		private var _maximumValue: Number;
 		private var _visible: Boolean;
 
+
 		public function get color():uint
 		{
 			return _color;
+		}
+		public function set color(value:uint):void
+		{
+			_color = value;
 		}
 
 		public function get chartType():String
 		{
 			return _chartType;
 		}
+		public function set chartType(value:String):void
+		{
+			_chartType = value;
+		}
 
 		public function get lineWidth():int
 		{
 			return _lineWidth;
 		}
+		public function set lineWidth(value:int):void
+		{
+			_lineWidth = value;
+		}
+
+
+
 
 		public function get maximumValue():Number
 		{
@@ -60,6 +76,13 @@ package com.iblsoft.flexiweather.components.charts
 		{
 			return _visible;
 		}
+		public function set visible(value: Boolean): void
+		{
+			if (_visible != value)
+			{
+				_visible = value;
+			}
+		}
 		
 		/**
 		 * 
@@ -81,7 +104,10 @@ package com.iblsoft.flexiweather.components.charts
 		
 		public function getValue(valueObject: Object): Number
 		{
-			if (_field)
+			if (!valueObject)
+				return 0;
+			
+			if (_field && !(valueObject is Number))
 				return valueObject[_field];
 			
 			return valueObject as Number;
