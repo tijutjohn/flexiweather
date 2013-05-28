@@ -118,22 +118,31 @@ package com.iblsoft.flexiweather.components.charts
 			var max: Number = Number.NEGATIVE_INFINITY;
 			var yValue: Number;
 			
-			if (data[0] is Number)
+			var firstItem: Object;
+			if (data && data.length > 0)
+				firstItem = data[0];
+			
+			if (firstItem)
 			{
-				for each (yValue in data)
+				if (data[0] is Number)
 				{
-					max = Math.max(max, yValue);
-				}
-			} else if (data[0] is Array) {
-				
-				for each (var yValueArr: Array in data)
-				{
-					for each (yValue in yValueArr)
+					for each (yValue in data)
 					{
 						max = Math.max(max, yValue);
 					}
+				} else if (data[0] is Array) {
+					
+					for each (var yValueArr: Array in data)
+					{
+						for each (yValue in yValueArr)
+						{
+							max = Math.max(max, yValue);
+						}
+					}
+					
 				}
-				
+			} else {
+				firstItem = 0;
 			}
 			_maximumValue = max;
 		}
