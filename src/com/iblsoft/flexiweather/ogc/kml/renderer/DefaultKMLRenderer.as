@@ -30,6 +30,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 	import com.iblsoft.flexiweather.utils.GraphicsCurveRenderer;
 	import com.iblsoft.flexiweather.utils.wfs.FeatureSplitter;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	
 	import flash.display.BitmapData;
 	import flash.display.Graphics;
 	import flash.display.Sprite;
@@ -39,6 +40,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 	import flash.geom.Point;
 	import flash.utils.Dictionary;
 	import flash.utils.getTimer;
+	
 	import mx.collections.ArrayCollection;
 
 	/**
@@ -949,35 +951,32 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 						var firstPoint: Array = firstPointsArray[i] as Array;
 						g = new GraphicsCurveRenderer(gr);
 						var total: int = mPoints.length;
-						
-						
-						
-						//TODO how to find first point correctly
-						
-						
-						
-						
-						trace(this + " renderPolygon points: " + total + " coords: " + coords.length);
+//						trace("\n\n"+this + " renderPolygon points: " + total + " coords: " + coords.length);
 						if (total > 0)
 						{
-							p = firstPoint[0] as Point;
-							if (p.x > -1000 && p.x < 2700)
-								trace("KML Start render polygon");
+							p = mPoints[0] as Point;
 							
-							trace(this + " renderPolygon p0: " + p);
+//							trace(" renderPolygon parent: " + kmlReflection.displaySprite.x + " , " + kmlReflection.displaySprite.y);
+//							trace(this + " renderPolygon p0: " + p + " points: " + mPoints.length);
 							if (p)
 							{
 								var p0: Point = p.clone();
-								var sx: int = p.x;
-								var sy: int = p.y;
+								var fPoint: Point = firstPoint[0] as Point;
+								var sx: int = fPoint.x;
+								var sy: int = fPoint.y;
 								var cnt: int = 0;
+//								trace("\t start point sx"+sx+", sy: " + sy);
+//								trace("\t start point moveTo("+(p.x-sx)+", "+(p.y - sy)+") ["+p.x+","+p.y+"]");
 								g.start(p.x - sx, p.y - sy);
 								g.moveTo(p.x - sx, p.y - sy);
 								for (var pi: int = 1; pi < mPoints.length; pi++)
 								{
 									p = mPoints[pi] as Point;
 									g.lineTo(p.x - sx, p.y - sy);
+//									trace("\t forlopp point lineTo("+(p.x-sx)+", "+(p.y - sy)+") ["+p.x+","+p.y+"]");
 								}
+//								trace("\t end point lineTo("+(p0.x-sx)+", "+(p0.y - sy)+") ["+p0.x+","+p0.y+"]");
+//								trace("\t end point finish("+(p0.x-sx)+", "+(p0.y - sy)+") ["+p0.x+","+p0.y+"]");
 								g.lineTo(p0.x - sx, p0.y - sy);
 								g.finish(p0.x - sx, p0.y - sy);
 							} else {

@@ -328,7 +328,7 @@ package com.iblsoft.flexiweather.utils.wfs
 		 * @return - Array of 2 points of clipped line or null if line is outside of view
 		 * 
 		 */		
-		private function lineClippingCohenSutherland(p1: Point, p2: Point, view: Rectangle): Array
+		public function lineClippingCohenSutherland(p1: Point, p2: Point, view: Rectangle): Array
 		{
 			// compute outcodes for P0, P1, and whatever point lies outside the clip rectangle
 			var outcode0: int = computeOutCode(p1, view);
@@ -399,7 +399,7 @@ package com.iblsoft.flexiweather.utils.wfs
 			return null;
 		}
 		
-		private function polygonClipppingSutherlandHodgman(subjectPolygon: Array, clipPolygon: Array): Array 
+		public function polygonClipppingSutherlandHodgman(subjectPolygon: Array, clipPolygon: Array): Array 
 		{
 			var cp1: Point;
 			var cp2: Point;
@@ -483,26 +483,26 @@ package com.iblsoft.flexiweather.utils.wfs
 				if (str.length != 0)
 					clipped = true;
 				
-				if (clipped)
-				{
-					trace("\nClipped: " + str);
-					trace("outputList: " + str);
-					str = '';
-					for each (p in subjectPolygon)
-					{
-						if (p.x > -1000 && p.x < 2700)
-							str += "["+int(p.x)+","+int(p.y)+"], ";
-					}
-					trace("subjectPolygon: " + str);
-					str = '';
-					for each (p in clipPolygon)
-					{
-						if (p.x > -1000 && p.x < 2700)
-							str += "["+int(p.x)+","+int(p.y)+"], ";
-					}
-					trace("clipPolygon: " + str);
-				
-				}
+//				if (clipped)
+//				{
+//					trace("\nClipped: " + str);
+//					trace("outputList: " + str);
+//					str = '';
+//					for each (p in subjectPolygon)
+//					{
+//						if (p.x > -1000 && p.x < 2700)
+//							str += "["+int(p.x)+","+int(p.y)+"], ";
+//					}
+//					trace("subjectPolygon: " + str);
+//					str = '';
+//					for each (p in clipPolygon)
+//					{
+//						if (p.x > -1000 && p.x < 2700)
+//							str += "["+int(p.x)+","+int(p.y)+"], ";
+//					}
+//					trace("clipPolygon: " + str);
+//				
+//				}
 			}
 			return outputList;
 		}
