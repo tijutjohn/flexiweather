@@ -731,7 +731,37 @@ package com.iblsoft.flexiweather.widgets
 			
 			return false;
 		}
-
+		
+		public function coordToPointClosestTo(c: Coord, referencePoint: Point): Point
+		{
+			var p: Point = coordToPoint(c);
+			if (m_crsProjection.wrapsHorizontally)
+			{
+				var f_crsExtentBBoxWidth: Number = m_crsProjection.extentBBox.width;
+				
+				var c1: Coord = new Coord(crs, c.x + f_crsExtentBBoxWidth, c.y);
+				var p1: Point = coordToPoint(c1);
+				var pixelsWidth: int = Math.abs(c1.x - c.x);
+				
+				var maxDistance: Number = Point.distance(p, referencePoint);
+				var selectedPoint: Point = p;
+				for(var i: int = 0; i < 10; i++)
+				{
+					var i_delta: int = (i & 1 ? 1 : -1) * ((i + 1) >> 1);
+					
+					var currPoint: Point = new Point(p.x + i * pixelsWidth, p.y);
+					var dist: Number = Point.distance(p, currPoint);
+					if (dist < maxDistance)
+					{
+						maxDistance = dist;
+						selectedPoint = p;;
+					}
+				}
+				return selectedPoint;
+			}
+			return p;
+		}
+			
 		/** Converts Coord into screen point (pixels) with current CRS. */
 		public function coordToPoint(c: Coord): Point
 		{

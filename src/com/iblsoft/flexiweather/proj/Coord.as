@@ -2,6 +2,7 @@ package com.iblsoft.flexiweather.proj
 {
 	import flash.geom.Point;
 	import flash.geom.Vector3D;
+	
 	import mx.formatters.NumberFormatter;
 
 	public class Coord extends Point
@@ -59,15 +60,76 @@ package com.iblsoft.flexiweather.proj
 
 		public static function interpolateGreatArc(c1: Coord, c2: Coord, distanceValidator: Function): Array
 		{
+			var origC1: Coord = c1.cloneCoord();
+			var origC2: Coord = c2.cloneCoord();
+			
+			if (c1.x < -180 && c2.x < 0 && c2.x > -180)
+				trace("check interpolation");
+			
 			var lp1: Coord = c1.toLaLoCoord();
 			var lp2: Coord = c2.toLaLoCoord();
 			var a: Array = [c1];
 			var projection: Projection = Projection.getByCRS(c1.crs);
+			c1 = c1.convertToProjection(projection);
 			c2 = c2.convertToProjection(projection);
 			bisectGreatArc(lp1, c1, lp2, c2, a, projection, distanceValidator);
+			
+			a = checkGreatArcDatelineCrosscheck(origC1, origC2, a);
+			
 			return a;
 		}
-
+		private static function checkGreatArcDatelineCrosscheck(c1: Coord, c2: Coord, greatArcArray: Array): Array
+		{
+			var result: Array = [];
+			var c: Coord;
+			var pointer: int = 0;
+			var total: int = greatArcArray.length - 1;
+			if (c1.x < c2.x)
+			{
+				c = c1;
+				result.push(c);
+				while (pointer < total)
+				{
+					pointer++;
+					var currCoord: Coord = greatArcArray[pointer] as Coord;
+					var dist: Number = Math.abs(c.x - currCoord.x);
+					if (dist > 180)
+					{
+						trace("1 c.x: " + c.x + " , currCorrd:.x " + currCoord.x); 
+						if (c.x < 0 && currCoord.x > 0)
+							currCoord.x -= 360;
+						else if (c.x > 0 && currCoord.x < 0)
+							currCoord.x += 360;
+					}
+					result.push(currCoord);
+					
+					c = currCoord;
+				}
+			} else {
+				pointer = total;
+				c = c2;
+				result.push(c);
+				while (pointer > 0)
+				{
+					pointer--;
+					var currCoord: Coord = greatArcArray[pointer] as Coord;
+					var dist: Number = Math.abs(c.x - currCoord.x);
+					if (dist > 180)
+					{
+						trace("2 c.x: " + c.x + " , currCorrd:.x " + currCoord.x); 
+						if (c.x < 0 && currCoord.x > 0)
+							currCoord.x -= 360;
+						else if (c.x > 0 && currCoord.x < 0)
+							currCoord.x += 360;
+					}
+					result.push(currCoord);
+					c = currCoord;
+				}
+				
+			}
+			
+			return result;
+		}
 		private static function bisectGreatArc(lp1: Coord, c1: Coord, lp2: Coord, c2: Coord, a: Array, projection: Projection, distanceValidator: Function): void
 		{
 			var toRadians: Function = function(degree: Number): Number

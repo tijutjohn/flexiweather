@@ -2,12 +2,14 @@ package com.iblsoft.flexiweather.widgets
 {
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
+	
 	import flash.display.Graphics;
 	import flash.display.JointStyle;
 	import flash.display.LineScaleMode;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
+	
 	import mx.collections.ArrayCollection;
 	import mx.events.CollectionEvent;
 	import mx.events.FlexEvent;
@@ -273,11 +275,17 @@ package com.iblsoft.flexiweather.widgets
 		protected function drawLineSegment(c1: Coord, c2: Coord): void
 		{
 			if (_drawMode == DRAW_MODE_PLAIN)
-				drawCoordsPath([c1, c2]);
+				drawCoordsPath([c1, c2], c1, c2);
 			else if (_drawMode == DRAW_MODE_GREAT_ARC)
 			{
 				var coords: Array = Coord.interpolateGreatArc(c1, c2, distanceValidator);
-				drawCoordsPath(coords);
+				
+				//debug coords:
+//				for each (var currCoord: Coord in coords)
+//				{
+//					trace("\t route coord: " + currCoord.toString());
+//				}
+				drawCoordsPath(coords, c1, c2);
 			}
 		}
 
@@ -303,6 +311,7 @@ package com.iblsoft.flexiweather.widgets
 				{
 					var c1: Coord = _ma_coords.getItemAt(pointer) as Coord;
 					var c2: Coord = _ma_coords.getItemAt(pointer + 1) as Coord;
+//					trace("Route c1: " + c1.toString() + " , c2: " + c2.toString());
 					drawLineSegment(c1, c2);
 					pointer++;
 				}
@@ -332,7 +341,7 @@ package com.iblsoft.flexiweather.widgets
 			dispatchEvent(new Event(ROUTE_CHANGED));
 		}
 
-		private function drawCoordsPath(coordsForDrawing: Array): void
+		private function drawCoordsPath(coordsForDrawing: Array, firstCoord: Coord, lastCoord: Coord): void
 		{
 			var ptPrev: Point;
 			var pt: Point;
@@ -351,10 +360,13 @@ package com.iblsoft.flexiweather.widgets
 			var ptDiffY: Number;
 			var ptPerpX: Number;
 			var ptPerpY: Number;
+			
+			trace("drawCoordsPath: " + firstCoord.toString() + " last: " + lastCoord.toString());
 			for (var i: int = 0; i < total; i++)
 			{
 				var c: Coord = coordsForDrawing[i] as Coord;
 				pt = container.coordToPoint(c);
+//				pt = container.coordToPointClosestTo(c);
 				if (ptPrev != null)
 				{
 					ptX = pt.x;
