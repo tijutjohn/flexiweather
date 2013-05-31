@@ -1,7 +1,11 @@
 package com.iblsoft.flexiweather.widgets
 {
+	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
+	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionDictionary;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
+	import com.iblsoft.flexiweather.utils.draw.FillStyle;
+	import com.iblsoft.flexiweather.utils.draw.LineStyle;
 	
 	import flash.display.Graphics;
 	import flash.display.JointStyle;
@@ -124,13 +128,28 @@ package com.iblsoft.flexiweather.widgets
 		public static const ROUTE_CHANGED: String = 'routeChanged';
 		public static const DRAW_MODE_PLAIN: String = 'plain';
 		public static const DRAW_MODE_GREAT_ARC: String = 'greatArc';
+		
 		private var _ma_coords: ArrayCollection;
+		private var _ma_points: ArrayCollection;
+		
 		protected var m_highlightedCoord: Coord = null;
 		protected var m_selectedCoord: Coord = null;
 //		protected var m_highlightedLineFrom: Coord = null;
 		public static const CHANGE: String = "interactiveLayerRouteChanged";
 		private var _drawMode: String;
 
+		override public function set container(value:InteractiveWidget):void
+		{
+			super.container = value;
+			
+			if (value)
+			{
+				reflectionDictionary = new WFSEditableReflectionDictionary(value);		
+			}
+		}
+		
+		private var reflectionDictionary: WFSEditableReflectionDictionary;
+		
 		public function InteractiveLayerRoute(container: InteractiveWidget = null)
 		{
 			//this must be null 
@@ -150,7 +169,9 @@ package com.iblsoft.flexiweather.widgets
 			setStyle("placemarkHighlightFillAlpha", 1.0);
 			setStyle("placemarkBorderThickness", 1);
 			setStyle("placemarkRadius", 5);
+			
 			coords = new ArrayCollection();
+			_ma_points = new ArrayCollection();
 		}
 
 		public function changeDrawMode(value: String): void
@@ -163,6 +184,12 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 
+		[Bindable(event = "pointsChanged")]
+		public function get points(): ArrayCollection
+		{
+			return _ma_points;
+		}
+		
 		[Bindable(event = "coordsChanged")]
 		public function get coords(): ArrayCollection
 		{
@@ -186,6 +213,7 @@ package com.iblsoft.flexiweather.widgets
 		public function clearRoute(): void
 		{
 			_ma_coords.removeAll();
+			_ma_points.removeAll();
 			invalidateDynamicPart();
 		}
 
@@ -272,12 +300,16 @@ package com.iblsoft.flexiweather.widgets
 			invalidateDynamicPart();
 		}
 
+		private var _mapScale: Number;
+		private var _pixelDistance: Number;
 		protected function drawLineSegment(c1: Coord, c2: Coord): void
 		{
 			if (_drawMode == DRAW_MODE_PLAIN)
 				drawCoordsPath([c1, c2], c1, c2);
 			else if (_drawMode == DRAW_MODE_GREAT_ARC)
 			{
+				_mapScale = container.getMapScale();
+				_pixelDistance = container.getPixelDistance();
 				var coords: Array = Coord.interpolateGreatArc(c1, c2, distanceValidator);
 				
 				//debug coords:
@@ -294,12 +326,33 @@ package com.iblsoft.flexiweather.widgets
 			c1 = c1.toLaLoCoord();
 			c2 = c2.toLaLoCoord();
 			var dist: Number = c1.distanceTo(c2);
-			return (dist < 100);
+			
+			var maxDist: Number = (1/ _mapScale) / 100000;
+			if (maxDist > 100)
+				maxDist = 100;
+			
+			trace("distanceValidator: maxDist: " + maxDist + " _mapScale: " + (1/ _mapScale));
+//			return (dist < 100);
+			return (dist < maxDist);
 		}
 
 		override public function draw(graphics: Graphics): void
 		{
 			super.draw(graphics);
+			
+			updateCoordsReflections();
+			var reflectionsTotal: int = reflectionDictionary.totalReflections;
+			var i: int;
+			for (var r: int = 0; r < reflectionsTotal; r++)
+			{
+				var reflection: WFSEditableReflectionData = reflectionDictionary.getReflection(r) as WFSEditableReflectionData;
+				var pTotal: int = reflection.points.length;
+				for (i = 0; i < pTotal; ++i)
+				{
+					var pt: Point = reflection.points[i] as Point;
+				}
+			}
+			
 			_drawMode = getStyle('drawMode');
 			if (!_drawMode)
 				_drawMode == DRAW_MODE_GREAT_ARC;
@@ -315,36 +368,116 @@ package com.iblsoft.flexiweather.widgets
 					drawLineSegment(c1, c2);
 					pointer++;
 				}
-				var i_pointColor: uint = uint(getStyle("placemarkBorderColor"));
-				var f_pointAlpha: uint = Number(getStyle("placemarkAlpha"));
-				var i_pointFillColor: uint = uint(getStyle("placemarkFillColor"));
-				var f_pointFillAlpha: uint = Number(getStyle("placemarkFillAlpha"));
-				var i_pointHighlightFillColor: uint = uint(getStyle("placemarkHighlightFillColor"));
-				var f_pointHighlightFillAlpha: uint = Number(getStyle("placemarkHighlightFillAlpha"));
-				var f_pointBorder: uint = Number(getStyle("placemarkBorderThickness"));
-				var f_pointRadius: uint = Number(getStyle("placemarkRadius"));
+				
 			}
-			var pt: Point;
-			for each (var c: Coord in _ma_coords)
-			{
-				pt = container.coordToPoint(c);
-				graphics.beginFill(m_highlightedCoord != c ? i_pointFillColor : i_pointHighlightFillColor, f_pointFillAlpha);
-				graphics.lineStyle(f_pointBorder, i_pointColor, f_pointAlpha);
-				graphics.drawCircle(pt.x, pt.y, f_pointRadius);
-				graphics.endFill();
-			}
+			
+			//draw points
+			drawDraggablePoints();
+			
 			notifyRouteChanged();
 		}
 
+		private function drawDraggablePoints(): void
+		{
+			
+			var pt: Point;
+			for each (var c: Coord in _ma_coords)
+			{
+//				pt = container.coordToPoint(c);
+				container.drawGeoSprite(c, drawDraggablePoint);
+			}
+		}
+		
+		public function drawDraggablePoint(c: Coord, x: int, y: int): void
+		{
+			var i_pointColor: uint = uint(getStyle("placemarkBorderColor"));
+			var f_pointAlpha: uint = Number(getStyle("placemarkAlpha"));
+			var i_pointFillColor: uint = uint(getStyle("placemarkFillColor"));
+			var f_pointFillAlpha: uint = Number(getStyle("placemarkFillAlpha"));
+			var i_pointHighlightFillColor: uint = uint(getStyle("placemarkHighlightFillColor"));
+			var f_pointHighlightFillAlpha: uint = Number(getStyle("placemarkHighlightFillAlpha"));
+			var f_pointBorder: uint = Number(getStyle("placemarkBorderThickness"));
+			var f_pointRadius: uint = Number(getStyle("placemarkRadius"));
+			
+			graphics.beginFill(m_highlightedCoord != c ? i_pointFillColor : i_pointHighlightFillColor, f_pointFillAlpha);
+			graphics.lineStyle(f_pointBorder, i_pointColor, f_pointAlpha);
+			graphics.drawCircle(x, y, f_pointRadius);
+			graphics.endFill();
+			
+		}
 		private function notifyRouteChanged(): void
 		{
 			dispatchEvent(new Event(ROUTE_CHANGED));
 		}
 
+		private function updateCoordsReflections(): void
+		{
+//			var total: int = _ma_coords.length;
+//			var crs: String = container.getCRS();
+//			for (var i: int = 0; i < total; i++)
+//			{
+//				var coord: Coord = _ma_coords[i] as Coord;
+//				var pointReflections: Array = container.mapCoordToViewReflections(coord);
+//				var reflectionsCount: int = pointReflections.length;
+//				for (var j: int = 0; j < reflectionsCount; j++)
+//				{
+//					var pointReflectedObject: Object = pointReflections[j];
+//					var pointReflected: Point = pointReflectedObject.point;
+//					var coordReflected: Coord = new Coord(crs, pointReflected.x, pointReflected.y);
+//					reflectionDictionary.addReflectedCoordAt(coordReflected, i, j, pointReflectedObject.reflection);
+//				}
+//			}
+			
+			
+			
+			if (_ma_coords.length)
+			{
+				trace("\n\n updateCoordsReflections: " );
+				var iw: InteractiveWidget = container;
+				//					var viewBBox: BBox = iw.getViewBBox();
+				
+				var total: int = _ma_coords.length;
+				var oldPoint: Point;
+				var oldCoordNotInside: Coord;
+				var previousPointVisible: Boolean;
+				var pt: Point;
+				var featureIsInside: Boolean = false;
+				
+				_ma_points.removeAll();
+				
+				for (var i: uint = 0; i < total; ++i)
+				{
+					var c: Coord = _ma_coords[i];
+					
+					var reflectedCoords: Array = iw.mapCoordToViewReflections(c);
+					
+					for each (var currCoordObject: Object in reflectedCoords)
+					{
+						var currPoint: Point = (currCoordObject.point as Point)
+						var currCoord: Coord = new Coord(c.crs, currPoint.x, currPoint.y);
+						
+//						if (iw.coordInside(currCoord))
+//						{
+//							featureIsInside = true;
+//						}
+					}
+					
+					pt = iw.coordToPoint(c);
+					trace("update Point: " + pt + " coord: " + c.toString() + " reflectedCoords: " + reflectedCoords.length);
+					_ma_points.addItem(pt);
+				}
+				
+				dispatchEvent(new Event("pointsChanged"));
+			}
+		}
+		
 		private function drawCoordsPath(coordsForDrawing: Array, firstCoord: Coord, lastCoord: Coord): void
 		{
 			var ptPrev: Point;
 			var pt: Point;
+			
+			var previousPoint: Point;
+			
 			var i_routeBorderThickness: uint = uint(getStyle("routeBorderThickness"));
 			var i_routeThickness: uint = uint(getStyle("routeThickness"));
 			var i_routeColor: uint = uint(getStyle("routeBorderColor"));
@@ -361,60 +494,96 @@ package com.iblsoft.flexiweather.widgets
 			var ptPerpX: Number;
 			var ptPerpY: Number;
 			
+			var previousCoord: Coord;
+			
+			
+			//var pointReflections: Array = container.mapCoordToViewReflections(c);
+			
+			
 			trace("drawCoordsPath: " + firstCoord.toString() + " last: " + lastCoord.toString());
 			for (var i: int = 0; i < total; i++)
 			{
 				var c: Coord = coordsForDrawing[i] as Coord;
-				pt = container.coordToPoint(c);
-//				pt = container.coordToPointClosestTo(c);
+//				if (!pt)
+				if (c) {
+					pt = container.coordToPoint(c);
+					
+					if (!previousCoord)
+						previousCoord = c;
+					
+					if (!ptPrev)
+						ptPrev = pt;
+					
+				} else {
+					ptPrev = null;
+					pt = null;
+					previousCoord = null;
+				}
+//				else
+//					pt = container.coordToPointClosestTo(c, pt);
+				
 				if (ptPrev != null)
 				{
 					ptX = pt.x;
 					ptY = pt.y;
 					//border
-					graphics.beginFill(i_routeColor, f_routeAlpha);
-					graphics.lineStyle(i_routeThickness + 2 * i_routeBorderThickness, i_routeColor, f_routeAlpha, false, LineScaleMode.NORMAL, null, JointStyle.MITER);
-					graphics.moveTo(ptPrev.x, ptPrev.y);
-					graphics.lineTo(ptX, ptY);
-					graphics.endFill();
-					var ptDiff: Point = pt.subtract(ptPrev);
-					ptDiff.normalize(15);
-					ptDiffX = ptDiff.x;
-					ptDiffY = ptDiff.y;
-					var ptDiff2: Point = new Point(ptDiffX, ptDiffY);
-					ptDiff2.normalize(8);
-					ptDiff2X = ptDiff2.x;
-					ptDiff2Y = ptDiff2.y;
-					var ptPerp: Point = new Point(ptDiffY, -ptDiffX);
-					ptPerp.normalize(5);
-					ptPerpX = ptPerp.x;
-					ptPerpY = ptPerp.y;
-					if (i == (total - 1))
-					{
-						graphics.beginFill(i_routeFillColor, f_routeFillAlpha);
-						graphics.moveTo(ptX - ptDiff2X, ptY - ptDiff2Y);
-						graphics.lineTo(ptX + ptPerpX - ptDiffX, ptY + ptPerpY - ptDiffY);
-						graphics.lineTo(ptX - ptPerpX - ptDiffX, ptY - ptPerpY - ptDiffY);
-						graphics.lineTo(ptX - ptDiff2X, ptY - ptDiff2Y);
-						graphics.endFill();
-					}
+					
+					var drawArrow: Boolean = (i == (total - 1));
+					
+//					graphics.beginFill(i_routeColor, f_routeAlpha);
+					var lineStyle: LineStyle = new LineStyle(i_routeThickness + 2 * i_routeBorderThickness, i_routeColor, f_routeAlpha, false, LineScaleMode.NORMAL, null, JointStyle.MITER);
+					var fillStyle: FillStyle = new FillStyle(i_routeColor, f_routeAlpha);
+					
+					var lineStyle2: LineStyle = new LineStyle(i_routeThickness, i_routeFillColor, f_routeFillAlpha, false, LineScaleMode.NORMAL, null, JointStyle.MITER);
+					var fillStyle2: FillStyle = new FillStyle(i_routeFillColor, f_routeFillAlpha);
+					
+					var routeLineRenderer: RouteCurveRenderer = new RouteCurveRenderer(graphics, drawArrow ? RouteCurveRenderer.ROUTE_NORMAL_ARROW : RouteCurveRenderer.ROUTE_NORMAL, lineStyle, fillStyle, null, fillStyle2);
+					container.drawPolyline(routeLineRenderer, [previousCoord, c]);
+
+//					graphics.beginFill(i_routeColor, f_routeAlpha);
+//					graphics.lineStyle(i_routeThickness + 2 * i_routeBorderThickness, i_routeColor, f_routeAlpha, false, LineScaleMode.NORMAL, null, JointStyle.MITER);
+//					graphics.moveTo(ptPrev.x, ptPrev.y);
+//					graphics.lineTo(ptX, ptY);
+//					graphics.endFill();
+					
+					
+//					if (i == (total - 1))
+//					{
+//						routeLineRenderer.changeStyle(RouteCurveRenderer.ROUTE_ARROW, null, fillStyle2);
+//						container.drawPolyline(routeLineRenderer, [c]);
+						
+//					}
+					
 					//fill route
-					graphics.beginFill(i_routeFillColor, f_routeFillAlpha);
-					graphics.lineStyle(i_routeThickness, i_routeFillColor, f_routeFillAlpha, false, LineScaleMode.NORMAL, null, JointStyle.MITER);
-					graphics.moveTo(ptPrev.x, ptPrev.y);
-					graphics.lineTo(ptX, ptY);
-					graphics.endFill();
-					if (i == (total - 1))
-					{
+					
+					routeLineRenderer.changeStyle(drawArrow ? RouteCurveRenderer.ROUTE_FILL_ARROW : RouteCurveRenderer.ROUTE_FILL, lineStyle2, fillStyle2);
+					routeLineRenderer.arrowStyle(null, fillStyle2);
+					container.drawPolyline(routeLineRenderer, [previousCoord, c]);
+					
+					
+//					graphics.beginFill(i_routeFillColor, f_routeFillAlpha);
+//					graphics.lineStyle(i_routeThickness, i_routeFillColor, f_routeFillAlpha, false, LineScaleMode.NORMAL, null, JointStyle.MITER);
+//					graphics.moveTo(ptPrev.x, ptPrev.y);
+//					graphics.lineTo(ptX, ptY);
+//					graphics.endFill();
+					
+//					if (i == (total - 1))
+//					{
 						//end arrow fill
-						graphics.beginFill(i_routeFillColor, f_routeFillAlpha);
-						graphics.moveTo(ptX - ptDiff2X, ptY - ptDiff2Y);
-						graphics.lineTo(ptX + ptPerpX - ptDiffX, ptY + ptPerpY - ptDiffY);
-						graphics.lineTo(ptX - ptPerpX - ptDiffX, ptY - ptPerpY - ptDiffY);
-						graphics.lineTo(ptX - ptDiff2X, ptY - ptDiff2Y);
-						graphics.endFill();
-					}
+//						routeLineRenderer.changeStyle(RouteCurveRenderer.ROUTE_ARROW_FILL, null, fillStyle2);
+//						var routeArrowFillRenderer: RouteCurveRenderer = new RouteCurveRenderer(graphics, RouteCurveRenderer.ROUTE_ARROW_FILL, null, fillStyle2);
+//						container.drawPolyline(routeLineRenderer, [c]);
+						
+//						graphics.beginFill(i_routeFillColor, f_routeFillAlpha);
+//						graphics.moveTo(ptX - ptDiff2X, ptY - ptDiff2Y);
+//						graphics.lineTo(ptX + ptPerpX - ptDiffX, ptY + ptPerpY - ptDiffY);
+//						graphics.lineTo(ptX - ptPerpX - ptDiffX, ptY - ptPerpY - ptDiffY);
+//						graphics.lineTo(ptX - ptDiff2X, ptY - ptDiff2Y);
+//						graphics.endFill();
+//					}
+					
 				}
+				previousCoord = c;
 				ptPrev = pt;
 			}
 		}

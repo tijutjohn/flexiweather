@@ -58,13 +58,13 @@ package com.iblsoft.flexiweather.proj
 			return Math.sqrt(dx * dx + dy * dy);
 		}
 
-		public static function interpolateGreatArc(c1: Coord, c2: Coord, distanceValidator: Function): Array
+		public static function interpolateGreatArc(c1: Coord, c2: Coord, distanceValidator: Function, bIncludeDiscontinuation: Boolean = false): Array
 		{
 			var origC1: Coord = c1.cloneCoord();
 			var origC2: Coord = c2.cloneCoord();
 			
-			if (c1.x < -180 && c2.x < 0 && c2.x > -180)
-				trace("check interpolation");
+//			if (c1.x < -180 && c2.x < 0 && c2.x > -180)
+//				trace("check interpolation");
 			
 			var lp1: Coord = c1.toLaLoCoord();
 			var lp2: Coord = c2.toLaLoCoord();
@@ -72,65 +72,30 @@ package com.iblsoft.flexiweather.proj
 			var projection: Projection = Projection.getByCRS(c1.crs);
 			c1 = c1.convertToProjection(projection);
 			c2 = c2.convertToProjection(projection);
-			bisectGreatArc(lp1, c1, lp2, c2, a, projection, distanceValidator);
 			
-			a = checkGreatArcDatelineCrosscheck(origC1, origC2, a);
+			var t1: Coord = convertCoordOnSphere(c1, projection);
+			var t2: Coord = convertCoordOnSphere(c2, projection);
 			
+//			bisectGreatArc(lp1, c1, lp2, c2, a, projection, distanceValidator);
+			bisectGreatArc(lp1, t1, lp2, t2, a, projection, distanceValidator, bIncludeDiscontinuation);
+			
+//			var checkedArray: Array = checkGreatArcDatelineCrosscheck(origC1, origC2, a);
+			
+//			var total: int = a.length;
+//			for (var i: int = 0; i < total; i++)
+//			{
+//				var interpolatedCoord: Coord = a[i] as Coord;
+//				var fixedCoord: Coord = checkedArray[i] as Coord;
+				
+//				trace("interpolateGreatArc ["+interpolatedCoord.toString()+"]");
+//				trace("interpolateGreatArc ["+interpolatedCoord.toString()+"] fixed: ["+fixedCoord.toString()+"]");
+//			}
+//			trace("interpolateGreatArc orig " + c1.toString() + " , " + c2.toString());
+//			trace("interpolateGreatArc converted " + t1.toString() + " , " + t2.toString());
 			return a;
 		}
-		private static function checkGreatArcDatelineCrosscheck(c1: Coord, c2: Coord, greatArcArray: Array): Array
-		{
-			var result: Array = [];
-			var c: Coord;
-			var pointer: int = 0;
-			var total: int = greatArcArray.length - 1;
-			if (c1.x < c2.x)
-			{
-				c = c1;
-				result.push(c);
-				while (pointer < total)
-				{
-					pointer++;
-					var currCoord: Coord = greatArcArray[pointer] as Coord;
-					var dist: Number = Math.abs(c.x - currCoord.x);
-					if (dist > 180)
-					{
-						trace("1 c.x: " + c.x + " , currCorrd:.x " + currCoord.x); 
-						if (c.x < 0 && currCoord.x > 0)
-							currCoord.x -= 360;
-						else if (c.x > 0 && currCoord.x < 0)
-							currCoord.x += 360;
-					}
-					result.push(currCoord);
-					
-					c = currCoord;
-				}
-			} else {
-				pointer = total;
-				c = c2;
-				result.push(c);
-				while (pointer > 0)
-				{
-					pointer--;
-					var currCoord: Coord = greatArcArray[pointer] as Coord;
-					var dist: Number = Math.abs(c.x - currCoord.x);
-					if (dist > 180)
-					{
-						trace("2 c.x: " + c.x + " , currCorrd:.x " + currCoord.x); 
-						if (c.x < 0 && currCoord.x > 0)
-							currCoord.x -= 360;
-						else if (c.x > 0 && currCoord.x < 0)
-							currCoord.x += 360;
-					}
-					result.push(currCoord);
-					c = currCoord;
-				}
-				
-			}
-			
-			return result;
-		}
-		private static function bisectGreatArc(lp1: Coord, c1: Coord, lp2: Coord, c2: Coord, a: Array, projection: Projection, distanceValidator: Function): void
+		
+		public static function convertCoordOnSphere(coord: Coord, projection: Projection): Coord
 		{
 			var toRadians: Function = function(degree: Number): Number
 			{
@@ -142,7 +107,45 @@ package com.iblsoft.flexiweather.proj
 				var toDegConst: Number = 180 / Math.PI;
 				return radians * toDegConst;
 			}
-			var v: Vector3D
+			var lp1X: Number = toRadians(coord.x);
+			var lp1Y: Number = toRadians(coord.y);
+			var x1: Number = Math.cos(lp1Y) * Math.cos(lp1X);
+			var y1: Number = Math.cos(lp1Y) * Math.sin(lp1X);
+			var z1: Number = Math.sin(lp1Y)
+			
+			var l: Number = Math.sqrt(x1 * x1 + y1 * y1 + z1 * z1);
+			x1 /= l;
+			y1 /= l;
+			z1 /= l;
+			var lpM: Coord = new Coord(Projection.CRS_GEOGRAPHIC, toDegrees(Math.atan2(y1, x1)), toDegrees(Math.atan2(z1, Math.sqrt(x1 * x1 + y1 * y1))));
+			var cM: Coord = lpM.convertToProjection(projection);
+			
+			return cM;
+		}
+		private static function bisectGreatArc(lp1: Coord, c1: Coord, lp2: Coord, c2: Coord, a: Array, projection: Projection, distanceValidator: Function, bIncludeDiscontinuation: Boolean): void
+		{
+			var toRadians: Function = function(degree: Number): Number
+			{
+				var toRadConst: Number = Math.PI / 180;
+				return degree * toRadConst;
+			}
+			var toDegrees: Function = function(radians: Number): Number
+			{
+				var toDegConst: Number = 180 / Math.PI;
+				return radians * toDegConst;
+			}
+				
+			var isDiscontinuation: Function = function(coords: Array, coord: Coord): Boolean
+			{
+				var lastCoord: Coord = coords[coords.length - 1] as Coord;	
+				if (coord.x < 0 && lastCoord.x >= 0)
+					return true;
+				if (coord.x > 0 && lastCoord.x <= 0)
+					return true;
+				
+				return false;
+			}
+				
 			var lp1X: Number = toRadians(lp1.x);
 			var lp1Y: Number = toRadians(lp1.y);
 			var lp2X: Number = toRadians(lp2.x);
@@ -153,8 +156,6 @@ package com.iblsoft.flexiweather.proj
 			var x2: Number = Math.cos(lp2Y) * Math.cos(lp2X);
 			var y2: Number = Math.cos(lp2Y) * Math.sin(lp2X);
 			var z2: Number = Math.sin(lp2Y);
-//			var p1: Vector3D = new Vector3D(x1, y1, z1);
-//			var p2: Vector3D = new Vector3D(x2, y2, z2);
 			var xTotal: Number = x1 + x2;
 			var yTotal: Number = y1 + y2;
 			var zTotal: Number = z1 + z2;
@@ -162,27 +163,31 @@ package com.iblsoft.flexiweather.proj
 			xTotal /= l;
 			yTotal /= l;
 			zTotal /= l;
-//			xTotal = toDegrees(xTotal);
-//			yTotal = toDegrees(yTotal);
-//			zTotal = toDegrees(zTotal);
-//			var pTotal: Vector3D = p1.add(p2);
-//			pTotal.normalize();
 			var lpM: Coord = new Coord(Projection.CRS_GEOGRAPHIC, toDegrees(Math.atan2(yTotal, xTotal)), toDegrees(Math.atan2(zTotal, Math.sqrt(xTotal * xTotal + yTotal * yTotal))));
 			var cM: Coord = lpM.convertToProjection(projection);
-//			var lpM2: Coord = new Coord(Projection.CRS_GEOGRAPHIC, Math.atan2(pTotal.y, pTotal.x), Math.atan2(pTotal.z, Math.sqrt(pTotal.x * pTotal.x + pTotal.y * pTotal.y)));
-//			var cM2: Coord = lpM2.convertToProjection(projection);
+			
+			
+//			trace("bisectGreatArc c1: " + c1.toString() + " cM: " + cM.toString() + " c2: " + c2.toString());
+			
 			if (!distanceValidator(c1, cM))
 			{
-				bisectGreatArc(lp1, c1, lpM, cM, a, projection, distanceValidator);
+				bisectGreatArc(lp1, c1, lpM, cM, a, projection, distanceValidator, bIncludeDiscontinuation);
 			}
-			else
+			else {
+				if (isDiscontinuation(a, cM))
+					a.push(null);
 				a.push(cM);
+			}
+			
 			if (!distanceValidator(c2, cM))
 			{
-				bisectGreatArc(lpM, cM, lp2, c2, a, projection, distanceValidator);
+				bisectGreatArc(lpM, cM, lp2, c2, a, projection, distanceValidator, bIncludeDiscontinuation);
 			}
-			else
+			else {
+				if (isDiscontinuation(a, c2))
+					a.push(null);
 				a.push(c2);
+			}
 		}
 
 		public function equalsCoord(c: Coord): Boolean

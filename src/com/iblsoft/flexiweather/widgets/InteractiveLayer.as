@@ -23,6 +23,19 @@ package com.iblsoft.flexiweather.widgets
 		private static var layerUID: int = 0;
 		protected var m_layerID: int;
 
+
+		private var _container: InteractiveWidget;
+		
+		public function get container():InteractiveWidget
+		{
+			return _container;
+		}
+
+		public function set container(value:InteractiveWidget):void
+		{
+			_container = value;
+		}
+
 		public function get layerID(): int
 		{
 			return m_layerID;
@@ -39,7 +52,9 @@ package com.iblsoft.flexiweather.widgets
 		{
 			return _type;
 		}
-		public var container: InteractiveWidget;
+		
+		
+		
 		private var mb_dynamicPartInvalid: Boolean = false;
 		private var mi_zOrder: int = 0;
 		protected var m_legendCallBack: Function;

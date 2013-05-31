@@ -74,7 +74,8 @@ package com.iblsoft.flexiweather.utils.wfs
 			m_projectionWidthHalf = m_projectionWidth / 2;
 			
 			var _points: Array = convertCoordsToPoints(coords, projection, bClosed);
-			var points: Array = createPoints(_points);
+			var points: Array = _points;
+//			var points: Array = createPoints(_points);
 			var resultArr: Array = createScreenPoints(points, projection, bPolygon, bClipping);
 			
 			return resultArr;

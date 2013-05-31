@@ -18,6 +18,8 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.utils.ICurveRenderer;
 	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayout;
+	import com.iblsoft.flexiweather.utils.draw.FillStyle;
+	import com.iblsoft.flexiweather.utils.draw.LineStyle;
 	import com.iblsoft.flexiweather.utils.wfs.FeatureSplitter;
 	
 	import flash.display.DisplayObject;
@@ -732,6 +734,13 @@ package com.iblsoft.flexiweather.widgets
 			return false;
 		}
 		
+		/**
+		 * Convert coordinate to Point on screen, but returns reflected point closest to the reference point
+		 * @param c
+		 * @param referencePoint
+		 * @return 
+		 * 
+		 */		
 		public function coordToPointClosestTo(c: Coord, referencePoint: Point): Point
 		{
 			var p: Point = coordToPoint(c);
@@ -741,7 +750,7 @@ package com.iblsoft.flexiweather.widgets
 				
 				var c1: Coord = new Coord(crs, c.x + f_crsExtentBBoxWidth, c.y);
 				var p1: Point = coordToPoint(c1);
-				var pixelsWidth: int = Math.abs(c1.x - c.x);
+				var pixelsWidth: int = Math.abs(p1.x - p.x);
 				
 				var maxDistance: Number = Point.distance(p, referencePoint);
 				var selectedPoint: Point = p;
@@ -749,12 +758,12 @@ package com.iblsoft.flexiweather.widgets
 				{
 					var i_delta: int = (i & 1 ? 1 : -1) * ((i + 1) >> 1);
 					
-					var currPoint: Point = new Point(p.x + i * pixelsWidth, p.y);
-					var dist: Number = Point.distance(p, currPoint);
+					var currPoint: Point = new Point(p.x + i_delta * pixelsWidth, p.y);
+					var dist: Number = Point.distance(referencePoint, currPoint);
 					if (dist < maxDistance)
 					{
 						maxDistance = dist;
-						selectedPoint = p;;
+						selectedPoint = currPoint;
 					}
 				}
 				return selectedPoint;
@@ -762,7 +771,12 @@ package com.iblsoft.flexiweather.widgets
 			return p;
 		}
 			
-		/** Converts Coord into screen point (pixels) with current CRS. */
+		/**
+		 * Converts Coord into screen point (pixels) with current CRS.
+		 * @param c
+		 * @return 
+		 * 
+		 */		
 		public function coordToPoint(c: Coord): Point
 		{
 			var ptInOurCRS: Point;
@@ -1077,6 +1091,8 @@ package com.iblsoft.flexiweather.widgets
 					reflectionX += f_crsExtentBBoxWidth;
 					i_delta++;
 				}
+				if (a.length > 1)
+					trace("mapCoordInCRSToViewReflections");
 				return a;
 			}
 			return [{point: point, reflection: 0}];
@@ -1384,6 +1400,20 @@ package com.iblsoft.flexiweather.widgets
 			return m_crsProjection.wrapsHorizontally;
 		}
 
+		public function getPixelDistance(): Number
+		{
+			var w: int = width;
+			var h: int = height;
+			var bbox: BBox = m_viewBBox;
+			var prj: Projection = m_crsProjection;
+			var dpi: int = Capabilities.screenDPI;
+//			var maxDistanceOnEarthInKm: Number = bbox.getBBoxMaximumDistance(crs);
+			var screenDistanceInPixels: Number = Math.sqrt(w * w + h * h);
+			var screenDistanceInInches: Number = screenDistanceInPixels / dpi;
+			var screenDistanceInMeters: Number = screenDistanceInInches * 2.54 * 0.01;
+			
+			return screenDistanceInMeters / w;
+		}
 		public function getMapScale(): Number
 		{
 			var w: int = width;
@@ -1675,6 +1705,39 @@ package com.iblsoft.flexiweather.widgets
 			return pointIsOutside(p1) && pointIsOutside(p2);
 		}
 
+		public function placeGeoSprite(coord: Coord, spriteCreator: Function): void
+		{
+			var features: Array = m_featureSplitter.splitCoordPolyLineToArrayOfPointPolyLines([coord], false, false, false);
+			var p: Point;
+			var oldPoint: Point;
+			for each (var mPoints: Array in features)
+			{
+				var total: int = mPoints.length;
+				if (total > 0)
+				{
+					p = mPoints[0] as Point;
+					var sprite: Sprite = spriteCreator(coord);
+					
+					sprite.x = p.x;
+					sprite.y = p.y;
+				}
+			}
+		}
+		public function drawGeoSprite(coord: Coord, spriteCreator: Function): void
+		{
+			var features: Array = m_featureSplitter.splitCoordPolyLineToArrayOfPointPolyLines([coord], false, false, false);
+			var p: Point;
+			var oldPoint: Point;
+			for each (var mPoints: Array in features)
+			{
+				var total: int = mPoints.length;
+				if (total > 0)
+				{
+					p = mPoints[0] as Point;
+					var sprite: Sprite = spriteCreator(coord, p.x, p.y);
+				}
+			}
+		}
 		/**
 		 * Draw polyline with given curve renderer. If you just want all polyline reflections without drawing it, use getPolylineReflections function instead
 		 * @param g
@@ -1684,7 +1747,7 @@ package com.iblsoft.flexiweather.widgets
 		 */
 		public function drawPolyline(g: ICurveRenderer, coords: Array, b_closed: Boolean = false): Array
 		{
-			var features: Array = m_featureSplitter.splitCoordPolyLineToArrayOfPointPolyLines(coords, b_closed, false);
+			var features: Array = m_featureSplitter.splitCoordPolyLineToArrayOfPointPolyLines(coords, b_closed, false, false);
 			var p: Point;
 			var oldPoint: Point;
 			for each (var mPoints: Array in features)
@@ -1704,6 +1767,48 @@ package com.iblsoft.flexiweather.widgets
 						oldPoint = p;
 					}
 					g.finish(p.x, p.y);
+				}
+			}
+			return features;
+		}
+		
+		public function drawStyledPolyline(fromCoord: Coord, toCoord: Coord, graphics: Graphics, lineStyle: LineStyle = null, fillStyle: FillStyle = null): Array
+		{
+			var features: Array = m_featureSplitter.splitCoordPolyLineToArrayOfPointPolyLines([fromCoord, toCoord], false, false, false);
+//			trace("drawStyledPolyline features: " + features.length);
+			var p: Point;
+			var oldPoint: Point;
+			for each (var mPoints: Array in features)
+			{
+				var total: int = mPoints.length;
+				if (total > 0)
+				{
+					p = mPoints[0] as Point;
+					oldPoint = p;
+					if (lineStyle)
+					{
+						graphics.lineStyle(lineStyle.thickness, lineStyle.color, lineStyle.alpha, lineStyle.pixelHinting, lineStyle.scaleMode, lineStyle.caps, lineStyle.joints, lineStyle.miterLimit );
+//						graphics.lineStyle(1, uint(Math.random()*255*255*255)); //lineStyle.alpha, lineStyle.pixelHinting, lineStyle.scaleMode, lineStyle.caps, lineStyle.joints, lineStyle.miterLimit );
+					}
+					if (fillStyle)
+						graphics.beginFill(fillStyle.color, fillStyle.alpha);
+					
+//					g.start(p.x, p.y);
+					graphics.moveTo(int(p.x), int(p.y));
+//					trace("\ndrawStyledPolyline moveTo("+int(p.x)+", "+p.y+")");
+					for (var i: int = 1; i < mPoints.length; i++)
+					{
+						p = mPoints[i] as Point;
+//						if (!lineIsOutside(p, oldPoint))
+//						{
+//							trace("drawStyledPolyline lineTo("+p.x+", "+p.y+")");
+							graphics.lineTo(int(p.x), int(p.y));
+//						}
+						oldPoint = p;
+					}
+					if (fillStyle)
+						graphics.endFill();
+//					g.finish(p.x, p.y);
 				}
 			}
 			return features;
