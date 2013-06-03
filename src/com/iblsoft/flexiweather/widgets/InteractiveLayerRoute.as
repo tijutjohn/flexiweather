@@ -327,12 +327,17 @@ package com.iblsoft.flexiweather.widgets
 			c2 = c2.toLaLoCoord();
 			var dist: Number = c1.distanceTo(c2);
 			
-			var maxDist: Number = (1/ _mapScale) / 100000;
-			if (maxDist > 100)
-				maxDist = 100;
+			var maxDist: Number;
 			
-			trace("distanceValidator: maxDist: " + maxDist + " _mapScale: " + (1/ _mapScale));
-//			return (dist < 100);
+			maxDist = 100;
+			
+//			maxDist = (1/ _mapScale) / 100000;
+//			if (maxDist > 100)
+//				maxDist = 100;
+//			if (maxDist < 5)
+//				maxDist = 5;
+			
+//			trace("distanceValidator: maxDist: " + maxDist + " _mapScale: " + (1/ _mapScale));
 			return (dist < maxDist);
 		}
 
