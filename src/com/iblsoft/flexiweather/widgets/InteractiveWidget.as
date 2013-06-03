@@ -1754,10 +1754,13 @@ package com.iblsoft.flexiweather.widgets
 				if (total > 0)
 				{
 					p = mPoints[0] as Point;
+					if (total > 2)
+						trace("Stop drawPolyline");
+					
 					oldPoint = p;
 					g.start(p.x, p.y);
 					g.moveTo(p.x, p.y);
-					for (var i: int = 1; i < mPoints.length; i++)
+					for (var i: int = 1; i < total; i++)
 					{
 						p = mPoints[i] as Point;
 						if (!lineIsOutside(p, oldPoint))

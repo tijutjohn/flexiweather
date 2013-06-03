@@ -24,13 +24,17 @@ package com.iblsoft.flexiweather.widgets
 		
 		private var mi_routeType: uint;
 		
-		private var mi_lastOneMoreX: int;
-		private var mi_lastOneMoreY: int;
+		private var mi_startX: Number;
+		private var mi_startY: Number;
 		
+//		private var mi_lastOneMoreX: Number;
+//		private var mi_lastOneMoreY: Number;
+		
+		private var _pointsCount: int = 0;
 		public function RouteCurveRenderer(graphics:Graphics, i_routeType: uint, lineStyle: LineStyle = null, fillSyle: FillStyle = null, arrowLineStyle: LineStyle = null, arrowFillStyle: FillStyle = null )
 		{
 			super(graphics);
-			
+//			trace("new RouteCurveRenderer");
 			changeStyle(i_routeType, lineStyle, fillSyle);
 			arrowStyle(arrowLineStyle, arrowFillStyle);
 		}
@@ -50,7 +54,20 @@ package com.iblsoft.flexiweather.widgets
 		
 		override public function started(x: Number, y: Number): void
 		{
-//			trace("Route renderer started: " + mi_recursionDepth);
+//			switch(mi_routeType)
+//			{
+//				case ROUTE_NORMAL_ARROW:
+//				case ROUTE_FILL_ARROW:
+//				trace("\tRoute renderer started: ["+x+","+y+"]");
+//			}
+			
+			_pointsCount = 0;
+			m_lastX = x;
+			m_lastY = y;
+			
+			mi_startX = x;
+			mi_startY = y;
+			
 			if (m_lineStyle)
 				m_graphics.lineStyle(m_lineStyle.thickness, m_lineStyle.color, m_lineStyle.alpha, m_lineStyle.pixelHinting, m_lineStyle.scaleMode, m_lineStyle.caps, m_lineStyle.joints, m_lineStyle.miterLimit );
 			
@@ -58,16 +75,32 @@ package com.iblsoft.flexiweather.widgets
 				m_graphics.beginFill(m_fillStyle.color, m_fillStyle.alpha);
 		}
 		
-		override public function lineTo(x:Number, y:Number):void
+//		override public function moveTo(x:Number, y:Number):void
+//		{
+//			mi_lastOneMoreX = m_lastX;
+//			mi_lastOneMoreY = m_lastY;
+//			
+//			super.moveTo(x, y);
+//		}
+//		override public function lineTo(x:Number, y:Number):void
+//		{
+//			_pointsCount++;
+//			mi_lastOneMoreX = m_lastX;
+//			mi_lastOneMoreY = m_lastY;
+//			
+//			super.lineTo(x, y);
+//			
+//			switch(mi_routeType)
+//			{
+//				case ROUTE_NORMAL_ARROW:
+//				case ROUTE_FILL_ARROW:
+//				trace("\t\t Routerenderer lineTo  ["+x+","+y+"] last ["+m_lastX+","+m_lastY+"] last-1 ["+mi_lastOneMoreX+","+mi_lastOneMoreY+"]");
+//			}
+//		}
+		private function drawArrow(x: Number, y: Number, prevX: Number, prevY: Number): void
 		{
-			mi_lastOneMoreX = m_lastX;
-			mi_lastOneMoreY = m_lastY;
-			
-			super.lineTo(x, y);
-		}
-		private function drawArrow(x: Number, y: Number): void
-		{
-			if (isNaN(mi_lastOneMoreX))
+//			if (isNaN(mi_lastOneMoreX))
+			if (isNaN(prevX))
 				return;
 				
 			var ptDiffX: int;
@@ -78,10 +111,8 @@ package com.iblsoft.flexiweather.widgets
 			var ptPerpY: int;
 			
 			var pt: Point = new Point(x,y);
-//			var ptPrev: Point =  new Point(x, y + 5);
-			var ptPrev: Point =  new Point(mi_lastOneMoreX, mi_lastOneMoreY);
+			var ptPrev: Point =  new Point(prevX, prevY);
 			
-//			trace("Route renderer drawArrow: " + mi_recursionDepth + " ["+pt+"] last ["+ptPrev+"]");
 			
 			var ptDiff: Point = pt.subtract(ptPrev);
 			ptDiff.normalize(15);
@@ -113,7 +144,6 @@ package com.iblsoft.flexiweather.widgets
 		
 		override public function finished(x: Number, y: Number): void
 		{
-//			trace("Route renderer finished: " + mi_recursionDepth + " ["+x+","+y+"] last ["+m_lastX+","+m_lastY+"]");
 			
 			if (m_fillStyle)
 				m_graphics.endFill();
@@ -124,7 +154,9 @@ package com.iblsoft.flexiweather.widgets
 			{
 				case ROUTE_NORMAL_ARROW:
 				case ROUTE_FILL_ARROW:
-					drawArrow(x, y);
+//					trace("\tRouterenderer finished: type: " + mi_routeType + " ["+x+","+y+"] start ["+mi_startX+","+mi_startY+"] last ["+m_lastX+","+m_lastY+"] last-1 ["+mi_lastOneMoreX+","+mi_lastOneMoreY+"]");
+					drawArrow(x, y, mi_startX, mi_startY);
+					break;
 			}
 		}
 	}

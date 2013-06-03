@@ -14,6 +14,7 @@ package com.iblsoft.flexiweather.widgets
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
+	import flash.utils.getTimer;
 	
 	import mx.collections.ArrayCollection;
 	import mx.events.CollectionEvent;
@@ -335,6 +336,8 @@ package com.iblsoft.flexiweather.widgets
 		private var _pixelDistance: Number;
 		protected function drawLineSegment(c1: Coord, c2: Coord): void
 		{
+//			trace("drawLineSegment " + c1.toString() + " , " + c2.toString());
+			
 			if (_drawMode == DRAW_MODE_PLAIN)
 				drawCoordsPath([c1, c2], c1, c2);
 			
@@ -363,13 +366,13 @@ package com.iblsoft.flexiweather.widgets
 			
 			maxDist = 100;
 			
-//			maxDist = (1/ _mapScale) / 100000;
-//			if (maxDist > 100)
-//				maxDist = 100;
-//			if (maxDist < 5)
-//				maxDist = 5;
+			maxDist = (1/ _mapScale) / 200000;
+			if (maxDist > 500)
+				maxDist = 500;
+			if (maxDist < 50)
+				maxDist = 50;
 			
-//			trace("distanceValidator: maxDist: " + maxDist + " _mapScale: " + (1/ _mapScale));
+			trace("distanceValidator: maxDist: " + maxDist + " _mapScale: " + (1/ _mapScale));
 			return (dist < maxDist);
 		}
 
@@ -377,19 +380,21 @@ package com.iblsoft.flexiweather.widgets
 		{
 			super.draw(graphics);
 			
-			updateCoordsReflections();
-			var reflectionsTotal: int = reflectionDictionary.totalReflections;
-			var i: int;
-			for (var r: int = 0; r < reflectionsTotal; r++)
-			{
-				var reflection: WFSEditableReflectionData = reflectionDictionary.getReflection(r) as WFSEditableReflectionData;
-				var pTotal: int = reflection.points.length;
-				for (i = 0; i < pTotal; ++i)
-				{
-					var pt: Point = reflection.points[i] as Point;
-				}
-			}
+//			updateCoordsReflections();
+//			var reflectionsTotal: int = reflectionDictionary.totalReflections;
+//			var i: int;
+//			for (var r: int = 0; r < reflectionsTotal; r++)
+//			{
+//				var reflection: WFSEditableReflectionData = reflectionDictionary.getReflection(r) as WFSEditableReflectionData;
+//				var pTotal: int = reflection.points.length;
+//				for (i = 0; i < pTotal; ++i)
+//				{
+//					var pt: Point = reflection.points[i] as Point;
+//				}
+//			}
 			
+			trace("\n\n *******************************************************************************************\n\n");
+			var time:  Number = getTimer();
 			_drawMode = getStyle('drawMode');
 			if (!_drawMode)
 				_drawMode == DRAW_MODE_GREAT_ARC;
@@ -401,7 +406,7 @@ package com.iblsoft.flexiweather.widgets
 				{
 					var c1: Coord = _ma_coords.getItemAt(pointer) as Coord;
 					var c2: Coord = _ma_coords.getItemAt(pointer + 1) as Coord;
-//					trace("Route c1: " + c1.toString() + " , c2: " + c2.toString());
+//					trace("\nRoute draw c1: " + c1.toString() + " , c2: " + c2.toString());
 					drawLineSegment(c1, c2);
 					pointer++;
 				}
@@ -412,6 +417,8 @@ package com.iblsoft.flexiweather.widgets
 			drawDraggablePoints();
 			
 			notifyRouteChanged();
+			trace("Time draw: " + (getTimer() - time) + "ms");
+			trace("\n\n *******************************************************************************************\n\n");
 		}
 
 		private function drawDraggablePoints(): void
@@ -519,7 +526,15 @@ package com.iblsoft.flexiweather.widgets
 			//var pointReflections: Array = container.mapCoordToViewReflections(c);
 			
 			
-//			trace("drawCoordsPath: " + firstCoord.toString() + " last: " + lastCoord.toString());
+//			trace("\ndrawCoordsPath: " + firstCoord.toString() + " last: " + lastCoord.toString());
+			var lineStyle: LineStyle = new LineStyle(i_routeThickness + 2 * i_routeBorderThickness, i_routeColor, f_routeAlpha, false, LineScaleMode.NORMAL, null, JointStyle.MITER);
+			var fillStyle: FillStyle = new FillStyle(i_routeColor, f_routeAlpha);
+			
+			var lineStyle2: LineStyle = new LineStyle(i_routeThickness, i_routeFillColor, f_routeFillAlpha, false, LineScaleMode.NORMAL, null, JointStyle.MITER);
+			var fillStyle2: FillStyle = new FillStyle(i_routeFillColor, f_routeFillAlpha);
+			
+			var routeLineRenderer: RouteCurveRenderer = new RouteCurveRenderer(graphics, RouteCurveRenderer.ROUTE_NORMAL, lineStyle, fillStyle, null, fillStyle2);
+			
 			for (var i: int = 0; i < total; i++)
 			{
 				var c: Coord = coordsForDrawing[i] as Coord;
@@ -538,31 +553,23 @@ package com.iblsoft.flexiweather.widgets
 					pt = null;
 					previousCoord = null;
 				}
-//				else
-//					pt = container.coordToPointClosestTo(c, pt);
 				
 				if (ptPrev != null)
 				{
 					ptX = pt.x;
 					ptY = pt.y;
-					//border
 					
 					var drawArrow: Boolean = (i == (total - 1));
-					
-//					graphics.beginFill(i_routeColor, f_routeAlpha);
-					var lineStyle: LineStyle = new LineStyle(i_routeThickness + 2 * i_routeBorderThickness, i_routeColor, f_routeAlpha, false, LineScaleMode.NORMAL, null, JointStyle.MITER);
-					var fillStyle: FillStyle = new FillStyle(i_routeColor, f_routeAlpha);
-					
-					var lineStyle2: LineStyle = new LineStyle(i_routeThickness, i_routeFillColor, f_routeFillAlpha, false, LineScaleMode.NORMAL, null, JointStyle.MITER);
-					var fillStyle2: FillStyle = new FillStyle(i_routeFillColor, f_routeFillAlpha);
-					
-					var routeLineRenderer: RouteCurveRenderer = new RouteCurveRenderer(graphics, drawArrow ? RouteCurveRenderer.ROUTE_NORMAL_ARROW : RouteCurveRenderer.ROUTE_NORMAL, lineStyle, fillStyle, null, fillStyle2);
+
+					//border
+//					var routeLineRenderer: RouteCurveRenderer = new RouteCurveRenderer(graphics, drawArrow ? RouteCurveRenderer.ROUTE_NORMAL_ARROW : RouteCurveRenderer.ROUTE_NORMAL, lineStyle, fillStyle, null, fillStyle2);
+					routeLineRenderer.changeStyle(drawArrow ? RouteCurveRenderer.ROUTE_NORMAL_ARROW : RouteCurveRenderer.ROUTE_NORMAL, lineStyle, fillStyle);
+//					routeLineRenderer.arrowStyle(null, fillStyle2);
 					container.drawPolyline(routeLineRenderer, [previousCoord, c]);
 
 					//fill route
-					
 					routeLineRenderer.changeStyle(drawArrow ? RouteCurveRenderer.ROUTE_FILL_ARROW : RouteCurveRenderer.ROUTE_FILL, lineStyle2, fillStyle2);
-					routeLineRenderer.arrowStyle(null, fillStyle2);
+//					routeLineRenderer.arrowStyle(null, fillStyle2);
 					container.drawPolyline(routeLineRenderer, [previousCoord, c]);
 					
 				}
