@@ -1091,8 +1091,6 @@ package com.iblsoft.flexiweather.widgets
 					reflectionX += f_crsExtentBBoxWidth;
 					i_delta++;
 				}
-				if (a.length > 1)
-					trace("mapCoordInCRSToViewReflections");
 				return a;
 			}
 			return [{point: point, reflection: 0}];
