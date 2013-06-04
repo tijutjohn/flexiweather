@@ -18,8 +18,10 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.utils.ICurveRenderer;
 	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayout;
+	import com.iblsoft.flexiweather.utils.draw.DrawMode;
 	import com.iblsoft.flexiweather.utils.draw.FillStyle;
 	import com.iblsoft.flexiweather.utils.draw.LineStyle;
+	import com.iblsoft.flexiweather.utils.geometry.LineSegment;
 	import com.iblsoft.flexiweather.utils.wfs.FeatureSplitter;
 	
 	import flash.display.DisplayObject;
@@ -1736,6 +1738,139 @@ package com.iblsoft.flexiweather.widgets
 				}
 			}
 		}
+			
+		public function distanceValidator(c1: Coord, c2: Coord): Boolean
+		{
+			var _mapScale: Number = getMapScale();
+			c1 = c1.toLaLoCoord();
+			c2 = c2.toLaLoCoord();
+			var dist: Number = c1.distanceTo(c2);
+			
+			var maxDist: Number;
+			
+			maxDist = 100;
+			
+			var maxDistConst: int = 200000;
+//			var maxDistConst: int = 70000;
+			
+			maxDist = (1/ _mapScale) / maxDistConst;
+			if (maxDist > 1000)
+				maxDist = 1000;
+			if (maxDist < 100)
+				maxDist = 100;
+			
+						trace("distanceValidator: maxDist: " + maxDist + " _mapScale: " + (1/ _mapScale));
+			return (dist < maxDist);
+		}
+		
+		/**
+		 * 
+		 * @param g
+		 * @param coordFrom
+		 * @param coordTo
+		 * @param drawMode
+		 * @param b_closed
+		 * @return 
+		 * 
+		 */		
+		public function drawGeoline(g: ICurveRenderer, coordFrom: Coord, coordTo: Coord, drawMode: String, b_closed: Boolean = false): void
+		{
+			var coords: Array;
+			
+			var projection: Projection = getCRSProjection();
+			var extent: BBox = getExtentBBox();
+			
+			//move coords into extent
+			coordFrom = Coord.convertCoordOnSphere(coordFrom, projection);
+			coordTo = Coord.convertCoordOnSphere(coordTo, projection);
+			
+			if (drawMode == DrawMode.GREAT_ARC)
+			{
+//				var _mapScale: Number = getMapScale();
+//				_pixelDistance = container.getPixelDistance();
+				coords = Coord.interpolateGreatArc(coordFrom, coordTo, distanceValidator);
+				
+//				drawCoordsPath(coords, c1, c2);
+			} else if (drawMode == DrawMode.PLAIN) {
+				
+				if (projection.wrapsHorizontally) {
+					
+					if (Math.abs(coordFrom.x - coordTo.x) > extent.width / 2)
+					{
+						var line1: LineSegment;
+						var line2: LineSegment = new LineSegment(180,-90,180,90);
+						if (coordFrom.x > coordTo.x)
+							line1 = new LineSegment(coordFrom.x, coordFrom.y, coordTo.x + 360, coordTo.y);
+						else {
+							line1 = new LineSegment(coordTo.x, coordTo.y, coordFrom.x + 360, coordFrom.y);
+						}
+						
+						var intersection: Point = line1.intersectionWithLineSegment(line2);
+						var intersectionCoordLeft: Coord = new Coord(coordFrom.crs, intersection.x - 0.00001, intersection.y);
+						var intersectionCoordRight: Coord = new Coord(coordFrom.crs, intersection.x + 0.00001, intersection.y);
+						intersectionCoordRight = Coord.convertCoordOnSphere(intersectionCoordRight, projection)
+						if (coordFrom.x > coordTo.x)
+							coords = [coordFrom, intersectionCoordLeft, null, intersectionCoordRight, coordTo];
+						else
+							coords = [coordTo, intersectionCoordLeft, null, intersectionCoordRight, coordFrom];
+						
+					} else {
+						coords = [coordFrom, coordTo];
+					}
+				} else {
+					coords = [coordFrom, coordTo];
+				}
+			}
+			//debug coords:
+			//				for each (var currCoord: Coord in coords)
+			//				{
+			//					trace("\t route coord: " + currCoord.toString());
+			//				}
+			
+			var previousCoord: Coord;
+			
+			var total: int = coords.length;
+			for (var i: int = 0; i < total; i++)
+			{
+				var c: Coord = coords[i] as Coord;
+				//				if (!pt)
+				if (c) {
+//					pt = container.coordToPoint(c);
+					
+					if (!previousCoord)
+						previousCoord = c;
+					
+//					if (!ptPrev)
+//						ptPrev = pt;
+					
+				} else {
+//					ptPrev = null;
+//					pt = null;
+					previousCoord = null;
+				}
+				
+				if (previousCoord != null)
+				{
+//					ptX = pt.x;
+//					ptY = pt.y;
+					
+					var drawArrow: Boolean = (i == (total - 1));
+					
+					drawPolyline(g, [previousCoord, c]);
+					
+					//border
+//					routeLineRenderer.changeStyle(drawArrow ? RouteCurveRenderer.ROUTE_NORMAL_ARROW : RouteCurveRenderer.ROUTE_NORMAL, lineStyle, fillStyle);
+//					container.drawPolyline(routeLineRenderer, [previousCoord, c]);
+//					
+//					//fill route
+//					routeLineRenderer.changeStyle(drawArrow ? RouteCurveRenderer.ROUTE_FILL_ARROW : RouteCurveRenderer.ROUTE_FILL, lineStyle2, fillStyle2);
+//					container.drawPolyline(routeLineRenderer, [previousCoord, c]);
+					
+				}
+				previousCoord = c;
+//				ptPrev = pt;
+			}
+		}
 		/**
 		 * Draw polyline with given curve renderer. If you just want all polyline reflections without drawing it, use getPolylineReflections function instead
 		 * @param g
@@ -1743,6 +1878,7 @@ package com.iblsoft.flexiweather.widgets
 		 * @return
 		 *
 		 */
+		[Deprecated(replacement = drawGeoline)]
 		public function drawPolyline(g: ICurveRenderer, coords: Array, b_closed: Boolean = false): Array
 		{
 			var features: Array = m_featureSplitter.splitCoordPolyLineToArrayOfPointPolyLines(coords, b_closed, false, false);

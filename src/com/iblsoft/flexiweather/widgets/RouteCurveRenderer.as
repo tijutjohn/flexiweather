@@ -27,18 +27,35 @@ package com.iblsoft.flexiweather.widgets
 		private var mi_startX: Number;
 		private var mi_startY: Number;
 		
+		private var _allPoints: Array;
+		
 //		private var mi_lastOneMoreX: Number;
 //		private var mi_lastOneMoreY: Number;
 		
 		private var _pointsCount: int = 0;
-		public function RouteCurveRenderer(graphics:Graphics, i_routeType: uint, lineStyle: LineStyle = null, fillSyle: FillStyle = null, arrowLineStyle: LineStyle = null, arrowFillStyle: FillStyle = null )
+		
+		private var _traceString: String;
+		private var _wasLineTo: Boolean;
+		
+		public function RouteCurveRenderer(graphics:Graphics, lineStyle: LineStyle = null, fillStyle: FillStyle = null, arrowLineStyle: LineStyle = null, arrowFillStyle: FillStyle = null )
 		{
 			super(graphics);
 //			trace("new RouteCurveRenderer");
-			changeStyle(i_routeType, lineStyle, fillSyle);
+			changeStyle(ROUTE_NORMAL, lineStyle, fillStyle);
 			arrowStyle(arrowLineStyle, arrowFillStyle);
 		}
 		
+
+		public function get routeType():uint
+		{
+			return mi_routeType;
+		}
+
+		public function set routeType(value:uint):void
+		{
+			mi_routeType = value;
+		}
+
 		public function arrowStyle(lineStyle: LineStyle = null, fillSyle: FillStyle = null): void
 		{
 			m_arrowLineStyle = lineStyle;
@@ -49,54 +66,59 @@ package com.iblsoft.flexiweather.widgets
 		{
 			m_lineStyle = lineStyle;
 			m_fillStyle = fillSyle;
-			mi_routeType = i_routeType;
+			routeType = i_routeType;
 		}
 		
 		override public function started(x: Number, y: Number): void
 		{
-//			switch(mi_routeType)
-//			{
-//				case ROUTE_NORMAL_ARROW:
-//				case ROUTE_FILL_ARROW:
-//				trace("\tRoute renderer started: ["+x+","+y+"]");
-//			}
+			_traceString = '';
+			_wasLineTo = false;
 			
-			_pointsCount = 0;
-			m_lastX = x;
-			m_lastY = y;
-			
-			mi_startX = x;
-			mi_startY = y;
-			
-			if (m_lineStyle)
-				m_graphics.lineStyle(m_lineStyle.thickness, m_lineStyle.color, m_lineStyle.alpha, m_lineStyle.pixelHinting, m_lineStyle.scaleMode, m_lineStyle.caps, m_lineStyle.joints, m_lineStyle.miterLimit );
-			
-			if (m_fillStyle)
-				m_graphics.beginFill(m_fillStyle.color, m_fillStyle.alpha);
+			if (mi_routeType == ROUTE_NORMAL)
+			{
+				_pointsCount = 0;
+				m_lastX = x;
+				m_lastY = y;
+				
+				mi_startX = x;
+				mi_startY = y;
+				
+				_allPoints = [];
+				
+				if (m_lineStyle)
+					m_graphics.lineStyle(m_lineStyle.thickness, m_lineStyle.color, m_lineStyle.alpha, m_lineStyle.pixelHinting, m_lineStyle.scaleMode, m_lineStyle.caps, m_lineStyle.joints, m_lineStyle.miterLimit );
+				
+				if (m_fillStyle)
+					m_graphics.beginFill(m_fillStyle.color, m_fillStyle.alpha);
+				
+			} else if  (mi_routeType == ROUTE_FILL) {
+				
+				if (m_arrowLineStyle)
+					m_graphics.lineStyle(m_arrowLineStyle.thickness, m_arrowLineStyle.color, m_arrowLineStyle.alpha, m_arrowLineStyle.pixelHinting, m_arrowLineStyle.scaleMode, m_arrowLineStyle.caps, m_arrowLineStyle.joints, m_arrowLineStyle.miterLimit );
+				
+				if (m_arrowFillStyle)
+					m_graphics.beginFill(m_arrowFillStyle.color, m_arrowFillStyle.alpha);
+			}
 		}
 		
-//		override public function moveTo(x:Number, y:Number):void
-//		{
-//			mi_lastOneMoreX = m_lastX;
-//			mi_lastOneMoreY = m_lastY;
-//			
-//			super.moveTo(x, y);
-//		}
-//		override public function lineTo(x:Number, y:Number):void
-//		{
-//			_pointsCount++;
-//			mi_lastOneMoreX = m_lastX;
-//			mi_lastOneMoreY = m_lastY;
-//			
-//			super.lineTo(x, y);
-//			
-//			switch(mi_routeType)
-//			{
-//				case ROUTE_NORMAL_ARROW:
-//				case ROUTE_FILL_ARROW:
-//				trace("\t\t Routerenderer lineTo  ["+x+","+y+"] last ["+m_lastX+","+m_lastY+"] last-1 ["+mi_lastOneMoreX+","+mi_lastOneMoreY+"]");
-//			}
-//		}
+		override public function moveTo(x:Number, y:Number):void
+		{
+			if (mi_routeType == ROUTE_NORMAL)
+				_allPoints.push(new Point(x, y));
+			
+			_traceString += "moveTo("+x+","+y+") mi_routeType: " + mi_routeType + " _allPoints: " + _allPoints.length+"\n";
+			super.moveTo(x, y);
+		}
+		override public function lineTo(x:Number, y:Number):void
+		{
+			if (mi_routeType == ROUTE_NORMAL)
+				_allPoints.push(new Point(x, y));
+			
+			_wasLineTo = true;
+			_traceString += "lineTo("+x+","+y+") mi_routeType: " + mi_routeType + " _allPoints: " + _allPoints.length+"\n";
+			super.lineTo(x, y);
+		}
+		
 		private function drawArrow(x: Number, y: Number, prevX: Number, prevY: Number): void
 		{
 //			if (isNaN(mi_lastOneMoreX))
@@ -144,11 +166,23 @@ package com.iblsoft.flexiweather.widgets
 		
 		override public function finished(x: Number, y: Number): void
 		{
+			_traceString += "finished("+x+","+y+") mi_routeType: " + mi_routeType + " _allPoints: " + _allPoints.length+"\n";
+			if (_wasLineTo)
+				trace(_traceString);
 			
-			if (m_fillStyle)
-				m_graphics.endFill();
+//			trace("finished("+x+","+y+")");
+			if (mi_routeType == ROUTE_NORMAL)
+			{
+				
+				if (m_fillStyle)
+					m_graphics.endFill();
+				
+			} else if (mi_routeType == ROUTE_FILL) {
 			
-			
+				if (m_arrowFillStyle)
+					m_graphics.endFill();
+			}
+
 			
 			switch(mi_routeType)
 			{
@@ -157,6 +191,40 @@ package com.iblsoft.flexiweather.widgets
 //					trace("\tRouterenderer finished: type: " + mi_routeType + " ["+x+","+y+"] start ["+mi_startX+","+mi_startY+"] last ["+m_lastX+","+m_lastY+"] last-1 ["+mi_lastOneMoreX+","+mi_lastOneMoreY+"]");
 					drawArrow(x, y, mi_startX, mi_startY);
 					break;
+			}
+			
+			if (mi_routeType == ROUTE_NORMAL)
+			{
+				if (_allPoints.length > 0)
+				{
+					if (_allPoints.length > 1)
+					{
+						trace("debug");
+					}
+					routeType = ROUTE_FILL;
+					var currPoint: Point = _allPoints.shift() as Point;
+					started(currPoint.x, currPoint.y)
+					var cnt: int = 0;
+					while (currPoint)
+					{
+						if (cnt == 0)
+							moveTo(currPoint.x, currPoint.y);
+						else
+							lineTo(currPoint.x, currPoint.y);
+						
+						if (_allPoints.length == 0)
+						{
+							finished(currPoint.x, currPoint.y);
+						}
+						
+						cnt++;
+						currPoint = _allPoints.shift() as Point;
+					}
+					
+					routeType = ROUTE_NORMAL;
+					
+				}
+				
 			}
 		}
 	}

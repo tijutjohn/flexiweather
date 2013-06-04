@@ -5,8 +5,10 @@ package com.iblsoft.flexiweather.plugins
 	import com.iblsoft.flexiweather.plugins.data.ModuleItem;
 	import com.iblsoft.flexiweather.plugins.data.PluginCollection;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
+	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
+	
 	import mx.core.ClassFactory;
 	import mx.events.ModuleEvent;
 	import mx.modules.Module;
@@ -231,6 +233,15 @@ package com.iblsoft.flexiweather.plugins
 
 		private function onPluginInfoLoaded(event: PluginEvent): void
 		{
+			if (event.pluginInfo && event.pluginInfo is IPluginInfo)
+			{
+				event.pluginInfo.manager = this;
+			}
+			if (event.plugin && event.plugin is IPluginInfo)
+			{
+				(event.plugin as IPluginInfo).manager = this;
+			}
+			
 			dispatchEvent(event);
 			var item: ModuleItem = _modules.getModuleItemByURL(event.url);
 			if (item)

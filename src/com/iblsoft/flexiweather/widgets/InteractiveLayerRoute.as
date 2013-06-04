@@ -5,6 +5,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionDictionary;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
+	import com.iblsoft.flexiweather.utils.draw.DrawMode;
 	import com.iblsoft.flexiweather.utils.draw.FillStyle;
 	import com.iblsoft.flexiweather.utils.draw.LineStyle;
 	
@@ -128,8 +129,6 @@ package com.iblsoft.flexiweather.widgets
 	public class InteractiveLayerRoute extends InteractiveLayer
 	{
 		public static const ROUTE_CHANGED: String = 'routeChanged';
-		public static const DRAW_MODE_PLAIN: String = 'plain';
-		public static const DRAW_MODE_GREAT_ARC: String = 'greatArc';
 		
 		private var _ma_coords: ArrayCollection;
 		private var _ma_points: ArrayCollection;
@@ -156,7 +155,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			//this must be null 
 			super(container);
-			changeDrawMode(DRAW_MODE_GREAT_ARC);
+			changeDrawMode(DrawMode.GREAT_ARC);
 			setStyle("routeThickness", 1);
 			setStyle("routeBorderThickness", 1);
 			setStyle("routeBorderColor", 0x000000);
@@ -334,28 +333,8 @@ package com.iblsoft.flexiweather.widgets
 
 		private var _mapScale: Number;
 		private var _pixelDistance: Number;
-		protected function drawLineSegment(c1: Coord, c2: Coord): void
-		{
-//			trace("drawLineSegment " + c1.toString() + " , " + c2.toString());
-			
-			if (_drawMode == DRAW_MODE_PLAIN)
-				drawCoordsPath([c1, c2], c1, c2);
-			
-			else if (_drawMode == DRAW_MODE_GREAT_ARC)
-			{
-				_mapScale = container.getMapScale();
-				_pixelDistance = container.getPixelDistance();
-				var coords: Array = Coord.interpolateGreatArc(c1, c2, distanceValidator);
-				
-				//debug coords:
-//				for each (var currCoord: Coord in coords)
-//				{
-//					trace("\t route coord: " + currCoord.toString());
-//				}
-				drawCoordsPath(coords, c1, c2);
-			}
-		}
-
+		
+/*
 		public function distanceValidator(c1: Coord, c2: Coord): Boolean
 		{
 			c1 = c1.toLaLoCoord();
@@ -369,37 +348,47 @@ package com.iblsoft.flexiweather.widgets
 			maxDist = (1/ _mapScale) / 200000;
 			if (maxDist > 500)
 				maxDist = 500;
-			if (maxDist < 50)
-				maxDist = 50;
+			if (maxDist < 100)
+				maxDist = 100;
 			
-			trace("distanceValidator: maxDist: " + maxDist + " _mapScale: " + (1/ _mapScale));
+//			trace("distanceValidator: maxDist: " + maxDist + " _mapScale: " + (1/ _mapScale));
 			return (dist < maxDist);
 		}
-
+*/
 		override public function draw(graphics: Graphics): void
 		{
 			super.draw(graphics);
-			
-//			updateCoordsReflections();
-//			var reflectionsTotal: int = reflectionDictionary.totalReflections;
-//			var i: int;
-//			for (var r: int = 0; r < reflectionsTotal; r++)
-//			{
-//				var reflection: WFSEditableReflectionData = reflectionDictionary.getReflection(r) as WFSEditableReflectionData;
-//				var pTotal: int = reflection.points.length;
-//				for (i = 0; i < pTotal; ++i)
-//				{
-//					var pt: Point = reflection.points[i] as Point;
-//				}
-//			}
 			
 			trace("\n\n *******************************************************************************************\n\n");
 			var time:  Number = getTimer();
 			_drawMode = getStyle('drawMode');
 			if (!_drawMode)
-				_drawMode == DRAW_MODE_GREAT_ARC;
+				_drawMode == DrawMode.GREAT_ARC;
+			
+			
 			if (_ma_coords.length > 1)
 			{
+				
+				var i_routeBorderThickness: uint = uint(getStyle("routeBorderThickness"));
+				var i_routeThickness: uint = uint(getStyle("routeThickness"));
+				var i_routeColor: uint = uint(getStyle("routeBorderColor"));
+				var f_routeAlpha: uint = Number(getStyle("routeBorderAlpha"));
+				
+				var i_routeFillColor: uint = uint(getStyle("routeFillColor"));
+				var f_routeFillAlpha: uint = Number(getStyle("routeFillAlpha"));
+				
+				var previousCoord: Coord;
+				
+//				i_routeBorderThickness = 5;
+				
+				var lineStyle: LineStyle = new LineStyle(i_routeThickness + 2 * i_routeBorderThickness, i_routeColor, f_routeAlpha, false, LineScaleMode.NORMAL, null, JointStyle.MITER);
+				var fillStyle: FillStyle = new FillStyle(i_routeColor, f_routeAlpha);
+				
+				var lineStyle2: LineStyle = new LineStyle(i_routeThickness, i_routeFillColor, f_routeFillAlpha, false, LineScaleMode.NORMAL, null, JointStyle.MITER);
+				var fillStyle2: FillStyle = new FillStyle(i_routeFillColor, f_routeFillAlpha);
+				
+				var routeLineRenderer: RouteCurveRenderer = new RouteCurveRenderer(graphics, lineStyle, fillStyle, lineStyle2, fillStyle2);
+				
 				var pointer: int = 0;
 				var total: int = _ma_coords.length - 1;
 				while (pointer < total)
@@ -407,7 +396,8 @@ package com.iblsoft.flexiweather.widgets
 					var c1: Coord = _ma_coords.getItemAt(pointer) as Coord;
 					var c2: Coord = _ma_coords.getItemAt(pointer + 1) as Coord;
 //					trace("\nRoute draw c1: " + c1.toString() + " , c2: " + c2.toString());
-					drawLineSegment(c1, c2);
+//					drawLineSegment(c1, c2);
+					container.drawGeoline(routeLineRenderer, c1, c2, _drawMode);
 					pointer++;
 				}
 				
@@ -453,131 +443,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			dispatchEvent(new Event(ROUTE_CHANGED));
 		}
-
-		private function updateCoordsReflections(): void
-		{
-//			if (_ma_coords.length)
-//			{
-//				trace("\n\n updateCoordsReflections: " );
-//				var iw: InteractiveWidget = container;
-//				//					var viewBBox: BBox = iw.getViewBBox();
-//				
-//				var total: int = _ma_coords.length;
-//				var oldPoint: Point;
-//				var oldCoordNotInside: Coord;
-//				var previousPointVisible: Boolean;
-//				var pt: Point;
-//				var featureIsInside: Boolean = false;
-//				
-//				_ma_points.removeAll();
-//				
-//				for (var i: uint = 0; i < total; ++i)
-//				{
-//					var c: Coord = _ma_coords[i];
-//					
-//					var reflectedCoords: Array = iw.mapCoordToViewReflections(c);
-//					
-//					for each (var currCoordObject: Object in reflectedCoords)
-//					{
-//						var currPoint: Point = (currCoordObject.point as Point)
-//						var currCoord: Coord = new Coord(c.crs, currPoint.x, currPoint.y);
-//						
-////						if (iw.coordInside(currCoord))
-////						{
-////							featureIsInside = true;
-////						}
-//					}
-//					
-//					pt = iw.coordToPoint(c);
-//					trace("update Point: " + pt + " coord: " + c.toString() + " reflectedCoords: " + reflectedCoords.length);
-//					_ma_points.addItem(pt);
-//				}
-//				
-//				dispatchEvent(new Event("pointsChanged"));
-//			}
-		}
-		
-		private function drawCoordsPath(coordsForDrawing: Array, firstCoord: Coord, lastCoord: Coord): void
-		{
-			var ptPrev: Point;
-			var pt: Point;
 			
-			var previousPoint: Point;
-			
-			var i_routeBorderThickness: uint = uint(getStyle("routeBorderThickness"));
-			var i_routeThickness: uint = uint(getStyle("routeThickness"));
-			var i_routeColor: uint = uint(getStyle("routeBorderColor"));
-			var f_routeAlpha: uint = Number(getStyle("routeBorderAlpha"));
-			var i_routeFillColor: uint = uint(getStyle("routeFillColor"));
-			var f_routeFillAlpha: uint = Number(getStyle("routeFillAlpha"));
-			var total: int = coordsForDrawing.length;
-			var ptX: Number;
-			var ptY: Number;
-			var ptDiff2X: Number;
-			var ptDiff2Y: Number;
-			var ptDiffX: Number;
-			var ptDiffY: Number;
-			var ptPerpX: Number;
-			var ptPerpY: Number;
-			
-			var previousCoord: Coord;
-			
-			
-			//var pointReflections: Array = container.mapCoordToViewReflections(c);
-			
-			
-//			trace("\ndrawCoordsPath: " + firstCoord.toString() + " last: " + lastCoord.toString());
-			var lineStyle: LineStyle = new LineStyle(i_routeThickness + 2 * i_routeBorderThickness, i_routeColor, f_routeAlpha, false, LineScaleMode.NORMAL, null, JointStyle.MITER);
-			var fillStyle: FillStyle = new FillStyle(i_routeColor, f_routeAlpha);
-			
-			var lineStyle2: LineStyle = new LineStyle(i_routeThickness, i_routeFillColor, f_routeFillAlpha, false, LineScaleMode.NORMAL, null, JointStyle.MITER);
-			var fillStyle2: FillStyle = new FillStyle(i_routeFillColor, f_routeFillAlpha);
-			
-			var routeLineRenderer: RouteCurveRenderer = new RouteCurveRenderer(graphics, RouteCurveRenderer.ROUTE_NORMAL, lineStyle, fillStyle, null, fillStyle2);
-			
-			for (var i: int = 0; i < total; i++)
-			{
-				var c: Coord = coordsForDrawing[i] as Coord;
-//				if (!pt)
-				if (c) {
-					pt = container.coordToPoint(c);
-					
-					if (!previousCoord)
-						previousCoord = c;
-					
-					if (!ptPrev)
-						ptPrev = pt;
-					
-				} else {
-					ptPrev = null;
-					pt = null;
-					previousCoord = null;
-				}
-				
-				if (ptPrev != null)
-				{
-					ptX = pt.x;
-					ptY = pt.y;
-					
-					var drawArrow: Boolean = (i == (total - 1));
-
-					//border
-//					var routeLineRenderer: RouteCurveRenderer = new RouteCurveRenderer(graphics, drawArrow ? RouteCurveRenderer.ROUTE_NORMAL_ARROW : RouteCurveRenderer.ROUTE_NORMAL, lineStyle, fillStyle, null, fillStyle2);
-					routeLineRenderer.changeStyle(drawArrow ? RouteCurveRenderer.ROUTE_NORMAL_ARROW : RouteCurveRenderer.ROUTE_NORMAL, lineStyle, fillStyle);
-//					routeLineRenderer.arrowStyle(null, fillStyle2);
-					container.drawPolyline(routeLineRenderer, [previousCoord, c]);
-
-					//fill route
-					routeLineRenderer.changeStyle(drawArrow ? RouteCurveRenderer.ROUTE_FILL_ARROW : RouteCurveRenderer.ROUTE_FILL, lineStyle2, fillStyle2);
-//					routeLineRenderer.arrowStyle(null, fillStyle2);
-					container.drawPolyline(routeLineRenderer, [previousCoord, c]);
-					
-				}
-				previousCoord = c;
-				ptPrev = pt;
-			}
-		}
-
 		protected function getHitCoord(ptHit: Point): Coord
 		{
 			var cBest: Coord = null;

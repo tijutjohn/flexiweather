@@ -63,12 +63,8 @@ package com.iblsoft.flexiweather.proj
 			var origC1: Coord = c1.cloneCoord();
 			var origC2: Coord = c2.cloneCoord();
 			
-//			if (c1.x < -180 && c2.x < 0 && c2.x > -180)
-//				trace("check interpolation");
-			
 			var lp1: Coord = c1.toLaLoCoord();
 			var lp2: Coord = c2.toLaLoCoord();
-			var a: Array = [c1];
 			var projection: Projection = Projection.getByCRS(c1.crs);
 			c1 = c1.convertToProjection(projection);
 			c2 = c2.convertToProjection(projection);
@@ -76,19 +72,21 @@ package com.iblsoft.flexiweather.proj
 			var t1: Coord = convertCoordOnSphere(c1, projection);
 			var t2: Coord = convertCoordOnSphere(c2, projection);
 			
-//			bisectGreatArc(lp1, c1, lp2, c2, a, projection, distanceValidator);
+			var a: Array = [t1];
+			
 			bisectGreatArc(lp1, t1, lp2, t2, a, projection, distanceValidator, bIncludeDiscontinuation);
 			
-//			var checkedArray: Array = checkGreatArcDatelineCrosscheck(origC1, origC2, a);
-			
 //			var total: int = a.length;
+//			trace("\n\ninterpolateGreatArc");
 //			for (var i: int = 0; i < total; i++)
 //			{
 //				var interpolatedCoord: Coord = a[i] as Coord;
-//				var fixedCoord: Coord = checkedArray[i] as Coord;
-				
-//				trace("interpolateGreatArc ["+interpolatedCoord.toString()+"]");
-//				trace("interpolateGreatArc ["+interpolatedCoord.toString()+"] fixed: ["+fixedCoord.toString()+"]");
+////				var fixedCoord: Coord = checkedArray[i] as Coord;
+//				if (interpolatedCoord)
+//					trace("interpolateGreatArc ["+interpolatedCoord.toString()+"]");
+//				else
+//					trace("interpolateGreatArc [NULL]");
+////				trace("interpolateGreatArc ["+interpolatedCoord.toString()+"] fixed: ["+fixedCoord.toString()+"]");
 //			}
 //			trace("interpolateGreatArc orig " + c1.toString() + " , " + c2.toString());
 //			trace("interpolateGreatArc converted " + t1.toString() + " , " + t2.toString());
@@ -122,8 +120,14 @@ package com.iblsoft.flexiweather.proj
 			
 			return cM;
 		}
-		private static function bisectGreatArc(lp1: Coord, c1: Coord, lp2: Coord, c2: Coord, a: Array, projection: Projection, distanceValidator: Function, bIncludeDiscontinuation: Boolean): void
+		private static function bisect2GreatArc(sp1: SpherePointWithLalo, sp2: SpherePointWithLalo, a: Array, projection: Projection): Array
 		{
+			var distance: Function = function(sp1: SpherePointWithLalo, sp2: SpherePointWithLalo): Number
+			{
+				var dist: Number = sp1.x * sp2.x + sp1.y * sp2.y + sp1.z * sp2.z;
+				dist = Math.acos(dist);
+				return dist;
+			}
 			var toRadians: Function = function(degree: Number): Number
 			{
 				var toRadConst: Number = Math.PI / 180;
@@ -135,15 +139,81 @@ package com.iblsoft.flexiweather.proj
 				return radians * toDegConst;
 			}
 				
-			var isDiscontinuation: Function = function(coords: Array, coord: Coord): Boolean
-			{
-				var lastCoord: Coord = coords[coords.length - 1] as Coord;	
-				if (coord.x < 0 && lastCoord.x >= 0)
-					return true;
-				if (coord.x > 0 && lastCoord.x <= 0)
-					return true;
+			var max: Number = 0.000001;
+			var signsChange: Boolean = sp1.signsAreSame(sp2);
+			var currentDistance: Number = distance(sp1, sp2);
+			trace("currentDistance: " + currentDistance);
 				
-				return false;
+			if (currentDistance < max && !signsChange)
+			{
+				return [sp1, sp2];
+			}
+			if (signsChange)
+			{
+				return null;
+			}
+			
+			
+			var lp1X: Number = toRadians(sp1.longitude);
+			var lp1Y: Number = toRadians(sp1.latitude);
+			var lp2X: Number = toRadians(sp2.longitude);
+			var lp2Y: Number = toRadians(sp2.latitude);
+			
+			var x1: Number = Math.cos(lp1Y) * Math.cos(lp1X);
+			var y1: Number = Math.cos(lp1Y) * Math.sin(lp1X);
+			var z1: Number = Math.sin(lp1Y);
+			
+			var x2: Number = Math.cos(lp2Y) * Math.cos(lp2X);
+			var y2: Number = Math.cos(lp2Y) * Math.sin(lp2X);
+			var z2: Number = Math.sin(lp2Y);
+			
+			var xTotal: Number = x1 + x2;
+			var yTotal: Number = y1 + y2;
+			var zTotal: Number = z1 + z2;
+			
+			var l: Number = Math.sqrt(xTotal * xTotal + yTotal * yTotal + zTotal * zTotal);
+			
+			xTotal /= l;
+			yTotal /= l;
+			zTotal /= l;
+			
+			var lpM: Coord = new Coord(Projection.CRS_GEOGRAPHIC, toDegrees(Math.atan2(yTotal, xTotal)), toDegrees(Math.atan2(zTotal, Math.sqrt(xTotal * xTotal + yTotal * yTotal))));
+			var cM: Coord = lpM.convertToProjection(projection);
+			
+			var c: SpherePointWithLalo = new SpherePointWithLalo(xTotal, yTotal, zTotal, cM.x, cM.y);
+			
+			var points: Array;
+			
+			points = bisect2GreatArc(sp1, c, a, projection);
+			if (points)  
+				return points;
+			
+			points = bisect2GreatArc(c, sp2, a, projection);
+			if (points)  
+				return points;
+			
+			return null;
+		}
+		
+		private static function areSameSigns(c1: Coord, c2: Coord): Boolean
+		{
+			if (c1.x < 0 && c2.x > 0)	return false;
+			if (c1.x > 0 && c2.x < 0)	return false;
+			
+			return true;
+		}
+		
+		private static function bisectGreatArc(lp1: Coord, c1: Coord, lp2: Coord, c2: Coord, a: Array, projection: Projection, distanceValidator: Function, bIncludeDiscontinuation: Boolean): void
+		{
+			var toRadians: Function = function(degree: Number): Number
+			{
+				var toRadConst: Number = Math.PI / 180;
+				return degree * toRadConst;
+			}
+			var toDegrees: Function = function(radians: Number): Number
+			{
+				var toDegConst: Number = 180 / Math.PI;
+				return radians * toDegConst;
 			}
 				
 			var lp1X: Number = toRadians(lp1.x);
@@ -166,26 +236,105 @@ package com.iblsoft.flexiweather.proj
 			var lpM: Coord = new Coord(Projection.CRS_GEOGRAPHIC, toDegrees(Math.atan2(yTotal, xTotal)), toDegrees(Math.atan2(zTotal, Math.sqrt(xTotal * xTotal + yTotal * yTotal))));
 			var cM: Coord = lpM.convertToProjection(projection);
 			
+			var points: Array;
 			
 //			trace("bisectGreatArc c1: " + c1.toString() + " cM: " + cM.toString() + " c2: " + c2.toString());
-			
-			if (!distanceValidator(c1, cM))
+			if (!areSameSigns(c1, cM))
 			{
-				bisectGreatArc(lp1, c1, lpM, cM, a, projection, distanceValidator, bIncludeDiscontinuation);
-			}
-			else {
-				if (isDiscontinuation(a, cM))
+				var sp1: SpherePointWithLalo = new SpherePointWithLalo(x1, y1, z1, c1.x, c1.y);
+				var spM1: SpherePointWithLalo = new SpherePointWithLalo(xTotal, yTotal, zTotal, cM.x, cM.y);
+				
+				//do bisect2
+				points = bisect2GreatArc(sp1, spM1, a, projection);
+				if (points && points.length == 2)
+				{
+					var spLeft1: SpherePointWithLalo = points[0] as SpherePointWithLalo;
+					var spRight1: SpherePointWithLalo = points[1] as SpherePointWithLalo;
+					var cLeft1: Coord = new Coord(c1.crs, spLeft1.longitude, spLeft1.latitude);
+					var cRight1: Coord = new Coord(c2.crs, spRight1.longitude, spRight1.latitude);
+					
+					
+					
+					if (!distanceValidator(c1, cLeft1)) {
+						
+						var lLeft1: Coord = cLeft1.toLaLoCoord();
+						bisectGreatArc(lp1, c1, lLeft1, cLeft1, a, projection, distanceValidator, bIncludeDiscontinuation);
+						
+					} else {
+						a.push(cLeft1);
+					}
+					
+					a.push(cLeft1);
 					a.push(null);
+					a.push(cRight1);
+					
+					if (!distanceValidator(cRight1, cM)) {
+						
+						var lRight1: Coord = cRight1.toLaLoCoord();
+						bisectGreatArc(lRight1, cRight1, lpM, cM, a, projection, distanceValidator, bIncludeDiscontinuation);
+						
+					} else {
+						a.push(cM);
+					}
+					
+				}
+				
+			} else if (!distanceValidator(c1, cM)) {
+				
+				bisectGreatArc(lp1, c1, lpM, cM, a, projection, distanceValidator, bIncludeDiscontinuation);
+				
+			} else {
+//				if (isDiscontinuation(a, cM))
+//					a.push(null);
 				a.push(cM);
 			}
 			
-			if (!distanceValidator(c2, cM))
+			if (!areSameSigns(c2, cM))
+			{
+				var sp2: SpherePointWithLalo = new SpherePointWithLalo(x2, y2, z2, c2.x, c2.y);
+				var spM2: SpherePointWithLalo = new SpherePointWithLalo(xTotal, yTotal, zTotal, cM.x, cM.y);
+				
+				//do bisect2
+				points = bisect2GreatArc(spM2, sp2, a, projection);
+				if (points && points.length == 2)
+				{
+					var spLeft2: SpherePointWithLalo = points[0] as SpherePointWithLalo;
+					var spRight2: SpherePointWithLalo = points[1] as SpherePointWithLalo;
+					var cLeft2: Coord = new Coord(c1.crs, spLeft2.longitude, spLeft2.latitude);
+					var cRight2: Coord = new Coord(c2.crs, spRight2.longitude, spRight2.latitude);
+					
+					if (!distanceValidator(cM, cLeft2)) {
+						
+						var lLeft2: Coord = cLeft2.toLaLoCoord();
+						bisectGreatArc(lpM, cM, lLeft2, cLeft2, a, projection, distanceValidator, bIncludeDiscontinuation);
+						
+					} else {
+						a.push(cLeft2);
+					}
+					
+					a.push(cLeft2);
+					a.push(null);
+					a.push(cRight2);
+					
+					
+					if (!distanceValidator(cRight2, c2)) {
+						
+						var lRight2: Coord = cRight2.toLaLoCoord();
+						bisectGreatArc(lRight2, cRight2, lp2, c2, a, projection, distanceValidator, bIncludeDiscontinuation);
+						
+					} else {
+						a.push(c2);
+					}
+					
+				}
+				
+			} else if (!distanceValidator(c2, cM))
 			{
 				bisectGreatArc(lpM, cM, lp2, c2, a, projection, distanceValidator, bIncludeDiscontinuation);
 			}
 			else {
-				if (isDiscontinuation(a, c2))
-					a.push(null);
+//				if (isDiscontinuation(a, c2))
+//					a.push(null);
 				a.push(c2);
 			}
 		}
@@ -291,5 +440,31 @@ package com.iblsoft.flexiweather.proj
 			// IN THE FUTURE, WE NEED TO MAKE REAL CONVERSION FROM CRS TO CRS:84
 			return (new Coord(crs, x, y));
 		}
+	}
+}
+
+class SpherePointWithLalo
+{
+	public var x: Number;
+	public var y: Number;
+	public var z: Number;
+	public var latitude: Number;
+	public var longitude: Number;
+	
+	public function SpherePointWithLalo(x: Number, y: Number, z: Number, longitude: Number, latitude: Number)
+	{
+		this.x = x;
+		this.y = y;
+		this.z = z;
+		this.latitude = latitude;
+		this.longitude = longitude;
+	}
+	
+	public function signsAreSame(sp: SpherePointWithLalo): Boolean
+	{
+		if (longitude < 0 && sp.longitude > 0)	return false;
+		if (longitude > 0 && sp.longitude < 0)	return false;
+		
+		return true;
 	}
 }
