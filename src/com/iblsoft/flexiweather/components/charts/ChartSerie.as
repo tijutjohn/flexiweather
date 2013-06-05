@@ -102,6 +102,42 @@ package com.iblsoft.flexiweather.components.charts
 			_visible = true;
 		}
 		
+		public function averageValues(pixelValues: Array): Number
+		{
+			if (pixelValues && pixelValues.length > 0)
+			{
+				var value: Number = 0;
+				var counted: int = 0;
+				for each (var currValueObj: Object in pixelValues)
+				{
+					var currValue: Number = getValue(currValueObj);
+					if (isNaN(currValue))
+					{
+						trace("check average");	
+					}
+					if (isValidValue(currValue))
+					{
+						value += currValue;
+						counted++;
+					}
+				}
+				if (counted > 0)
+					return value / counted;
+			}
+			return 0;
+		}
+		
+		public function isValidValue(value: Object): Boolean
+		{
+			if (value is Number)
+			{
+				var val: Number = value as Number;
+				return (val != 0 && val != 99999 && !isNaN(val))
+			}
+			
+			return false;
+		}
+		
 		public function getValue(valueObject: Object): Number
 		{
 			if (!valueObject)

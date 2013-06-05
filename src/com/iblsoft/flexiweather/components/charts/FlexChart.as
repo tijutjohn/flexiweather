@@ -795,7 +795,7 @@ package com.iblsoft.flexiweather.components.charts
 			
 			if (serie.chartType == ChartType.LINE_FILL)
 			{
-				if (yValueNumber != 0 && yValueNumber != 99999 && !isNaN(yValueNumber))
+				if (serie.isValidValue(yValueNumber))
 				{
 					if (position == 0 || stopDrawing) {
 						
@@ -825,7 +825,7 @@ package com.iblsoft.flexiweather.components.charts
 			} else if (serie.chartType == ChartType.LINE)
 			{
 				//								trace("drawSeries uncondensed["+i+"] value: [" + yValue + "]" + " Pos: [" + xPos + " , " + yPos + "] chart ["+_leftPadding+","+(_leftPadding+chartWidth)+"]");
-				if (yValueNumber != 0 && yValueNumber != 99999 && !isNaN(yValueNumber))
+				if (serie.isValidValue(yValueNumber))
 				{
 					if (position == 0 || stopDrawing)
 						gr.moveTo(xPos, yPos);
@@ -837,7 +837,7 @@ package com.iblsoft.flexiweather.components.charts
 				}
 			} else if (serie.chartType == ChartType.POINT) {
 				
-				if (yValueNumber != 0 && yValueNumber != 99999 && !isNaN(yValueNumber))
+				if (serie.isValidValue(yValueNumber))
 				{
 					//									trace("POINT uncondensed: ["+xPos+","+yPos+"]["+j+"]");
 					
@@ -941,12 +941,12 @@ package com.iblsoft.flexiweather.components.charts
 						var pixelPosition: int = 0;
 						var pixelValues: Array = [];
 						
-						var pointsPerPixel: int = int(chartWidth / totalX);
+						var pointsPerPixel: Number = Number(totalX / chartWidth);
 						pointsPerPixel = Math.max(1, pointsPerPixel);
 						
 						stopDrawing = true;
 						var previousPointWasDrawn: Boolean;
-						
+						var nextPixelPosition: Number = 1 * pointsPerPixel;
 						while (pointCounter < totalX)
 						{
 							if (yValues[i] is Array)
@@ -958,10 +958,10 @@ package com.iblsoft.flexiweather.components.charts
 							
 							pixelValues.push(yValue);
 							pointCounter++;
-							if (pointCounter >= pointsPerPixel)
+							if (pointCounter >= nextPixelPosition)
 							{
 								pixelPosition++;
-								yValueAverage = averageValues(pixelValues);
+								yValueAverage = averageValues(serie, pixelValues);
 								
 								xPos = _leftPadding + pixelPosition;
 								yPos = _topPadding + _legendPadding + chartHeight - (chartHeight * yValueAverage / yMaximumValue);
@@ -970,6 +970,7 @@ package com.iblsoft.flexiweather.components.charts
 								
 								pixelValues = [];
 								previousPointWasDrawn = true;
+								nextPixelPosition = (pixelPosition * pointsPerPixel);
 							} else {
 								previousPointWasDrawn = false;
 							}
@@ -978,7 +979,7 @@ package com.iblsoft.flexiweather.components.charts
 						if (!previousPointWasDrawn)
 						{
 							//drawLastPoint
-							yValueAverage = averageValues(pixelValues);
+							yValueAverage = averageValues(serie, pixelValues);
 							
 							xPos = _leftPadding + pixelPosition;
 							yPos = _topPadding + _legendPadding + chartHeight - (chartHeight * yValueAverage / yMaximumValue);
@@ -994,18 +995,9 @@ package com.iblsoft.flexiweather.components.charts
 			}
 		}
 		
-		private function averageValues(pixelValues: Array): Number
+		protected function averageValues(serie: ChartSerie, pixelValues: Array): Number
 		{
-			if (pixelValues && pixelValues.length > 0)
-			{
-				var value: Number = 0;
-				for each (var currValue: Number in pixelValues)
-				{
-					value += currValue;
-				}
-				return value / pixelValues.length;
-			}
-			return 0;
+			return serie.averageValues(pixelValues);
 		}
 		
 //		protected function moveTo(x: Number, y: Number): void
