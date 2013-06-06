@@ -702,8 +702,6 @@ package com.iblsoft.flexiweather.components.charts
 			var areaHeight: Number =  h - (_topPadding + _bottomPadding);
 			if (_chartLegend)
 			{
-				trace("items: " + _chartLegend.items.length);
-				
 				if (displayLegend)
 				{
 					_legendPadding = _chartLegend.items.length * 20;//_chartLegend.height;
@@ -889,9 +887,16 @@ package com.iblsoft.flexiweather.components.charts
 					var yValues: Array = serie.data;
 					var yValue: Object;
 					var yValueAverage: Number;
+					var yValueMinimumMaximum: Array;
 					
 					var yPosMax: Number = getChartYValue(serie, yMaximumValue, yMaximumValue);
+					var valuesForDraw: int;
+					var isArray: Boolean;
 					
+					if (xValues.length != yValues.length)
+					{
+						trace("ATTENTION, xValues and yValues array has different items length");
+					}
 					if (totalX < chartWidth)
 					{
 						stopDrawing = true;
@@ -899,8 +904,8 @@ package com.iblsoft.flexiweather.components.charts
 	//					trace("draw uncondesed graph");
 						for (i = 0; i < totalX; i++)
 						{
-							var valuesForDraw: int = 1;
-							var isArray: Boolean = false;
+							valuesForDraw = 1;
+							isArray = false;
 							if (yValues[i] is Array)
 							{
 								valuesForDraw = (yValues[i] as Array).length;
@@ -944,47 +949,82 @@ package com.iblsoft.flexiweather.components.charts
 						var pointsPerPixel: Number = Number(totalX / chartWidth);
 						pointsPerPixel = Math.max(1, pointsPerPixel);
 						
+						var j: int;
+						
 						stopDrawing = true;
 						var previousPointWasDrawn: Boolean;
 						var nextPixelPosition: Number = 1 * pointsPerPixel;
 						while (pointCounter < totalX)
 						{
-							if (yValues[i] is Array)
+							valuesForDraw = 1;
+							isArray = false;
+							if (yValues[pointCounter] is Array)
 							{
-								yValue = yValues[pointCounter][0];
+								valuesForDraw = (yValues[pointCounter] as Array).length;
+								isArray = true;
 							} else {
 								yValue = yValues[pointCounter];
 							}
 							
-							pixelValues.push(yValue);
+							
 							pointCounter++;
+							
 							if (pointCounter >= nextPixelPosition)
 							{
 								pixelPosition++;
-								yValueAverage = averageValues(serie, pixelValues);
+								
 								
 								xPos = _leftPadding + pixelPosition;
-								yPos = _topPadding + _legendPadding + chartHeight - (chartHeight * yValueAverage / yMaximumValue);
 								
-								drawSeriePoint(gr, serie, pointCounter, xValue, yValue, xPos, yPos, yPosMax);
-								
-								pixelValues = [];
 								previousPointWasDrawn = true;
 								nextPixelPosition = (pixelPosition * pointsPerPixel);
 							} else {
 								previousPointWasDrawn = false;
 							}
+							
+							
+							for (j = 0; j < valuesForDraw; j++)
+							{
+								if (isArray)
+								{
+									yValue = yValues[pointCounter - 1][j];
+								}
+								
+								if (!pixelValues[j])
+									pixelValues[j] = [];
+								
+								(pixelValues[j] as Array).push(yValue);
+								
+								if (previousPointWasDrawn)
+								{
+									yValueAverage = averageValues(serie, pixelValues[j]);
+									yPos = _topPadding + _legendPadding + chartHeight - (chartHeight * yValueAverage / yMaximumValue);
+									drawSeriePoint(gr, serie, pointCounter, xValue, yValue, xPos, yPos, yPosMax);
+									
+									pixelValues[j] = [];
+									
+								} else {
+									
+								}
+							}
+							
 						}
 						
 						if (!previousPointWasDrawn)
 						{
-							//drawLastPoint
-							yValueAverage = averageValues(serie, pixelValues);
+							for (j = 0; j < valuesForDraw; j++)
+							{
+								//drawLastPoint
+								yValueAverage = averageValues(serie, pixelValues[j]);
+								yValueMinimumMaximum = getMinimumMaximumValues(serie, pixelValues[j]);
 							
-							xPos = _leftPadding + pixelPosition;
-							yPos = _topPadding + _legendPadding + chartHeight - (chartHeight * yValueAverage / yMaximumValue);
+								trace("condensed min: " + yValueMinimumMaximum[0] + " average: " + yValueAverage + " max: " + yValueMinimumMaximum[1]);
 							
-							drawSeriePoint(gr, serie, pointCounter, xValue, yValue, xPos, yPos, yPosMax);
+								xPos = _leftPadding + pixelPosition;
+								yPos = _topPadding + _legendPadding + chartHeight - (chartHeight * yValueAverage / yMaximumValue);
+							
+								drawSeriePoint(gr, serie, pointCounter, xValue, yValue, xPos, yPos, yPosMax);
+							}
 						}
 						
 						finishDrawSerie(gr, serie);
@@ -998,6 +1038,10 @@ package com.iblsoft.flexiweather.components.charts
 		protected function averageValues(serie: ChartSerie, pixelValues: Array): Number
 		{
 			return serie.averageValues(pixelValues);
+		}
+		protected function getMinimumMaximumValues(serie: ChartSerie, pixelValues: Array): Array
+		{
+			return serie.getMinimumMaximumValues(pixelValues);
 		}
 		
 //		protected function moveTo(x: Number, y: Number): void

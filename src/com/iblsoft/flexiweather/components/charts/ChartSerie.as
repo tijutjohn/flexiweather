@@ -102,27 +102,58 @@ package com.iblsoft.flexiweather.components.charts
 			_visible = true;
 		}
 		
+		public function getMinimumMaximumValues(pixelValues: Array): Array
+		{
+			if (pixelValues && pixelValues.length > 0)
+			{
+				var minimum: Number = Number.POSITIVE_INFINITY;
+				var maximum: Number = Number.NEGATIVE_INFINITY;
+				
+				for each (var currValueObj: Object in pixelValues)
+				{
+					if (isValidValue(currValueObj))
+					{
+						var currValue: Number = getValue(currValueObj);
+						if (currValue < minimum)
+							minimum = currValue;
+						
+						if (currValue > maximum)
+							maximum = currValue;
+					}
+				}
+				return [minimum, maximum];
+			}
+			return [0,0];
+		}
+		
 		public function averageValues(pixelValues: Array): Number
 		{
 			if (pixelValues && pixelValues.length > 0)
 			{
+//				if (_label == "Clouds")
+//				{
+//					trace("check Clouds average");
+//				}
 				var value: Number = 0;
 				var counted: int = 0;
 				for each (var currValueObj: Object in pixelValues)
 				{
-					var currValue: Number = getValue(currValueObj);
-					if (isNaN(currValue))
+					if (isValidValue(currValueObj))
 					{
-						trace("check average");	
-					}
-					if (isValidValue(currValue))
-					{
+//						if (_label == "Clouds")
+//						{
+//							trace("check Clouds average");
+//						}
+						var currValue: Number = getValue(currValueObj);
 						value += currValue;
 						counted++;
 					}
 				}
 				if (counted > 0)
+				{
+//					trace("averageValues: " + value + " from " + counted + " values");
 					return value / counted;
+				}
 			}
 			return 0;
 		}
