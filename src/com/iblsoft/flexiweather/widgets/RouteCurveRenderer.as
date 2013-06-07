@@ -24,10 +24,11 @@ package com.iblsoft.flexiweather.widgets
 		
 		private var mi_routeType: uint;
 		
-		private var mi_startX: Number;
-		private var mi_startY: Number;
+		private var mi_previousX: Number;
+		private var mi_previousY: Number;
 		
 		private var _allPoints: Array;
+		private var _logPoints: Boolean;
 		
 //		private var mi_lastOneMoreX: Number;
 //		private var mi_lastOneMoreY: Number;
@@ -74,53 +75,63 @@ package com.iblsoft.flexiweather.widgets
 			_traceString = '';
 			_wasLineTo = false;
 			
+			_traceString += "started("+x+","+y+") mi_routeType: " + mi_routeType +"\n";
+			
 			if (mi_routeType == ROUTE_NORMAL)
 			{
 				_pointsCount = 0;
 				m_lastX = x;
 				m_lastY = y;
 				
-				mi_startX = x;
-				mi_startY = y;
-				
+				_logPoints = true;
 				_allPoints = [];
 				
 				if (m_lineStyle)
 					m_graphics.lineStyle(m_lineStyle.thickness, m_lineStyle.color, m_lineStyle.alpha, m_lineStyle.pixelHinting, m_lineStyle.scaleMode, m_lineStyle.caps, m_lineStyle.joints, m_lineStyle.miterLimit );
 				
-				if (m_fillStyle)
-					m_graphics.beginFill(m_fillStyle.color, m_fillStyle.alpha);
+//				if (m_fillStyle)
+//					m_graphics.beginFill(m_fillStyle.color, m_fillStyle.alpha);
 				
 			} else if  (mi_routeType == ROUTE_FILL) {
 				
+				_logPoints = false;
 				if (m_arrowLineStyle)
 					m_graphics.lineStyle(m_arrowLineStyle.thickness, m_arrowLineStyle.color, m_arrowLineStyle.alpha, m_arrowLineStyle.pixelHinting, m_arrowLineStyle.scaleMode, m_arrowLineStyle.caps, m_arrowLineStyle.joints, m_arrowLineStyle.miterLimit );
 				
-				if (m_arrowFillStyle)
-					m_graphics.beginFill(m_arrowFillStyle.color, m_arrowFillStyle.alpha);
+//				if (m_arrowFillStyle)
+//					m_graphics.beginFill(m_arrowFillStyle.color, m_arrowFillStyle.alpha);
 			}
 		}
 		
 		override public function moveTo(x:Number, y:Number):void
 		{
-			if (mi_routeType == ROUTE_NORMAL)
-				_allPoints.push(new Point(x, y));
+			mi_previousX = m_lastX;
+			mi_previousY = m_lastY;
 			
-			_traceString += "moveTo("+x+","+y+") mi_routeType: " + mi_routeType + " _allPoints: " + _allPoints.length+"\n";
+			if (_logPoints)
+				_allPoints.push([0, new Point(x, y)]);
+			
+//			_traceString += "moveTo("+x+","+y+") mi_routeType: " + mi_routeType + " _allPoints: " + _allPoints.length+"\n";
 			super.moveTo(x, y);
 		}
 		override public function lineTo(x:Number, y:Number):void
 		{
-			if (mi_routeType == ROUTE_NORMAL)
-				_allPoints.push(new Point(x, y));
+			if (_logPoints)
+				_allPoints.push([1, new Point(x, y)]);
+			
+			mi_previousX = m_lastX;
+			mi_previousY = m_lastY;
 			
 			_wasLineTo = true;
-			_traceString += "lineTo("+x+","+y+") mi_routeType: " + mi_routeType + " _allPoints: " + _allPoints.length+"\n";
+//			_traceString += "lineTo("+x+","+y+") mi_routeType: " + mi_routeType + " _allPoints: " + _allPoints.length+"\n";
+//			_traceString += "lineTo("+x+","+y+") mi_previousX: " + mi_previousX + ", " + mi_previousY + " mi_previousX: " + mi_previousX + ", " + mi_previousY + "\n";
 			super.lineTo(x, y);
 		}
 		
 		private function drawArrow(x: Number, y: Number, prevX: Number, prevY: Number): void
 		{
+			_traceString += "drawArrow("+x+","+y+")\n";
+			
 //			if (isNaN(mi_lastOneMoreX))
 			if (isNaN(prevX))
 				return;
@@ -149,50 +160,75 @@ package com.iblsoft.flexiweather.widgets
 			ptPerpX = ptPerp.x;
 			ptPerpY = ptPerp.y;
 			
-			if (m_arrowLineStyle)
-				m_graphics.lineStyle(m_arrowLineStyle.thickness, m_arrowLineStyle.color, m_arrowLineStyle.alpha, m_arrowLineStyle.pixelHinting, m_arrowLineStyle.scaleMode, m_arrowLineStyle.caps, m_arrowLineStyle.joints, m_arrowLineStyle.miterLimit );
+			if (mi_routeType == ROUTE_NORMAL)
+			{
+				if (m_lineStyle)
+					m_graphics.lineStyle(m_lineStyle.thickness, m_lineStyle.color, m_lineStyle.alpha, m_lineStyle.pixelHinting, m_lineStyle.scaleMode, m_lineStyle.caps, m_lineStyle.joints, m_lineStyle.miterLimit );
+				
+				if (m_fillStyle)
+					m_graphics.beginFill(m_fillStyle.color, m_fillStyle.alpha);
+				
+			} else if  (mi_routeType == ROUTE_FILL) {
+				
+				if (m_arrowLineStyle)
+					m_graphics.lineStyle(m_arrowLineStyle.thickness, m_arrowLineStyle.color, m_arrowLineStyle.alpha, m_arrowLineStyle.pixelHinting, m_arrowLineStyle.scaleMode, m_arrowLineStyle.caps, m_arrowLineStyle.joints, m_arrowLineStyle.miterLimit );
+				
+				if (m_arrowFillStyle)
+					m_graphics.beginFill(m_arrowFillStyle.color, m_arrowFillStyle.alpha);
+			}
 			
-			if (m_arrowFillStyle)
-				m_graphics.beginFill(m_arrowFillStyle.color, m_arrowFillStyle.alpha);
 			
 			moveTo(x - ptDiff2X, y - ptDiff2Y);
 			lineTo(x + ptPerpX - ptDiffX, y + ptPerpY - ptDiffY);
 			lineTo(x - ptPerpX - ptDiffX, y - ptPerpY - ptDiffY);
 			lineTo(x - ptDiff2X, y - ptDiff2Y);
 			
-			if (m_arrowFillStyle)
-				m_graphics.endFill();
+			if (mi_routeType == ROUTE_NORMAL)
+			{
+				if (m_fillStyle)
+					m_graphics.endFill();
+				
+			} else if (mi_routeType == ROUTE_FILL) {
+				
+				if (m_arrowFillStyle)
+					m_graphics.endFill();
+			}
+			
 		}
 		
 		override public function finished(x: Number, y: Number): void
 		{
-			_traceString += "finished("+x+","+y+") mi_routeType: " + mi_routeType + " _allPoints: " + _allPoints.length+"\n";
-			if (_wasLineTo)
-				trace(_traceString);
+			_logPoints = false;
+			
 			
 //			trace("finished("+x+","+y+")");
 			if (mi_routeType == ROUTE_NORMAL)
 			{
 				
-				if (m_fillStyle)
-					m_graphics.endFill();
+//				if (m_fillStyle)
+//					m_graphics.endFill();
 				
 			} else if (mi_routeType == ROUTE_FILL) {
 			
-				if (m_arrowFillStyle)
-					m_graphics.endFill();
+//				if (m_arrowFillStyle)
+//					m_graphics.endFill();
 			}
 
 			
-			switch(mi_routeType)
-			{
-				case ROUTE_NORMAL_ARROW:
-				case ROUTE_FILL_ARROW:
+			_traceString += "finished("+x+","+y+") mi_routeType: " + mi_routeType + " _allPoints: " + _allPoints.length+"\n";
+//			switch(mi_routeType)
+//			{
+//				case ROUTE_NORMAL_ARROW:
+//				case ROUTE_FILL_ARROW:
 //					trace("\tRouterenderer finished: type: " + mi_routeType + " ["+x+","+y+"] start ["+mi_startX+","+mi_startY+"] last ["+m_lastX+","+m_lastY+"] last-1 ["+mi_lastOneMoreX+","+mi_lastOneMoreY+"]");
-					drawArrow(x, y, mi_startX, mi_startY);
-					break;
-			}
+					drawArrow(x, y, mi_previousX, mi_previousY);
+//					break;
+//			}
 			
+					
+//			if (_wasLineTo)
+//				trace(_traceString);
+					
 			if (mi_routeType == ROUTE_NORMAL)
 			{
 				if (_allPoints.length > 0)
@@ -202,14 +238,16 @@ package com.iblsoft.flexiweather.widgets
 						trace("debug");
 					}
 					routeType = ROUTE_FILL;
-					var currPoint: Point = _allPoints.shift() as Point;
+					var currPointArr: Array = _allPoints.shift() as Array;
+					var type: int = currPointArr[0];
+					var currPoint: Point = currPointArr[1] as Point;
 					started(currPoint.x, currPoint.y)
 					var cnt: int = 0;
 					while (currPoint)
 					{
-						if (cnt == 0)
+						if (type == 0)
 							moveTo(currPoint.x, currPoint.y);
-						else
+						else if (type == 1)
 							lineTo(currPoint.x, currPoint.y);
 						
 						if (_allPoints.length == 0)
@@ -218,7 +256,15 @@ package com.iblsoft.flexiweather.widgets
 						}
 						
 						cnt++;
-						currPoint = _allPoints.shift() as Point;
+						
+						currPointArr = _allPoints.shift() as Array;
+						if (currPointArr)
+						{
+							type = currPointArr[0];
+							currPoint = currPointArr[1] as Point;
+						} else {
+							currPoint = null;
+						}
 					}
 					
 					routeType = ROUTE_NORMAL;

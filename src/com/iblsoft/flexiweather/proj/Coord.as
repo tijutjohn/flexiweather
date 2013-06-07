@@ -142,7 +142,7 @@ package com.iblsoft.flexiweather.proj
 			var max: Number = 0.000001;
 			var signsChange: Boolean = sp1.signsAreSame(sp2);
 			var currentDistance: Number = distance(sp1, sp2);
-			trace("currentDistance: " + currentDistance);
+//			trace("currentDistance: " + currentDistance);
 				
 			if (currentDistance < max && !signsChange)
 			{

@@ -35,6 +35,7 @@ package com.iblsoft.flexiweather.widgets
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.system.Capabilities;
+	import flash.utils.Dictionary;
 	import flash.utils.Timer;
 	import flash.utils.clearTimeout;
 	import flash.utils.getTimer;
@@ -1039,6 +1040,45 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 
+		public function mapLineCoordToViewReflections(coordFrom: Coord, coordTo: Coord, vBBox: BBox = null): Array
+		{
+			if (!coordFrom || !coordTo)
+				return [];
+			
+			var point: Point = new Point(coordFrom.x, coordFrom.y);
+			var pointTo: Point = new Point(coordTo.x, coordTo.y);
+			if (m_crsProjection.wrapsHorizontally)
+			{
+				if (coordFrom.x > coordTo.x)
+				{
+					var px: Number = coordFrom.x;
+					var py: Number = coordFrom.y;
+					
+					coordFrom = new Coord(coordFrom.crs, px, py);
+				}
+				
+				point = new Point(coordFrom.x, coordFrom.y);
+				
+				var diffX: Number = coordTo.x - coordFrom.x;
+				var diffY: Number = coordTo.y - coordFrom.y;
+				
+				var f_crsExtentBBoxWidth: Number = m_crsProjection.extentBBox.width;
+				var reflections: Array = mapCoordInCRSToViewReflections(point, m_crsProjection.extentBBox);
+				var pX0: Number = reflections[0].point.x;
+				var a: Array = [];
+				for(var i: int = 0; i < 10; i++)
+				{
+					var i_delta: int = (i & 1 ? 1 : -1) * ((i + 1) >> 1); // generates sequence 0, 1, -1, 2, -2, ..., 5, -5
+					var pFrom: Point = new Point(pX0 + f_crsExtentBBoxWidth * i_delta, point.y);
+					var pTo: Point = new Point(pFrom.x + diffX, pFrom.y + diffY);
+					
+					a.push({pointFrom: pFrom, pointTo: pTo, reflection: i_delta});
+				}
+				return a;
+			}
+			return [{pointFrom: point,  pointTo: pointTo, reflection: 0}];
+		}
+		
 		public function mapCoordToViewReflections(coord: Coord, vBBox: BBox = null): Array
 		{
 			if (coord.crs != crs)
@@ -1759,7 +1799,7 @@ package com.iblsoft.flexiweather.widgets
 			if (maxDist < 100)
 				maxDist = 100;
 			
-						trace("distanceValidator: maxDist: " + maxDist + " _mapScale: " + (1/ _mapScale));
+//			trace("distanceValidator: maxDist: " + maxDist + " _mapScale: " + (1/ _mapScale));
 			return (dist < maxDist);
 		}
 		
@@ -1773,9 +1813,10 @@ package com.iblsoft.flexiweather.widgets
 		 * @return 
 		 * 
 		 */		
-		public function drawGeoline(g: ICurveRenderer, coordFrom: Coord, coordTo: Coord, drawMode: String, b_closed: Boolean = false): void
+		private function _drawGeoLine(g: ICurveRenderer, coordFrom: Coord, coordTo: Coord, drawMode: String, d_reflectionToSegmentPoints: Dictionary): void
 		{
 			var coords: Array;
+			var c: Coord;
 			
 			var projection: Projection = getCRSProjection();
 			var extent: BBox = getExtentBBox();
@@ -1786,15 +1827,10 @@ package com.iblsoft.flexiweather.widgets
 			
 			if (drawMode == DrawMode.GREAT_ARC)
 			{
-//				var _mapScale: Number = getMapScale();
-//				_pixelDistance = container.getPixelDistance();
 				coords = Coord.interpolateGreatArc(coordFrom, coordTo, distanceValidator);
-				
-//				drawCoordsPath(coords, c1, c2);
-			} else if (drawMode == DrawMode.PLAIN) {
-				
+			}
+			else if (drawMode == DrawMode.PLAIN) {
 				if (projection.wrapsHorizontally) {
-					
 					if (Math.abs(coordFrom.x - coordTo.x) > extent.width / 2)
 					{
 						var line1: LineSegment;
@@ -1808,12 +1844,29 @@ package com.iblsoft.flexiweather.widgets
 						var intersection: Point = line1.intersectionWithLineSegment(line2);
 						var intersectionCoordLeft: Coord = new Coord(coordFrom.crs, intersection.x - 0.00001, intersection.y);
 						var intersectionCoordRight: Coord = new Coord(coordFrom.crs, intersection.x + 0.00001, intersection.y);
-						intersectionCoordRight = Coord.convertCoordOnSphere(intersectionCoordRight, projection)
-						if (coordFrom.x > coordTo.x)
-							coords = [coordFrom, intersectionCoordLeft, null, intersectionCoordRight, coordTo];
-						else
-							coords = [coordTo, intersectionCoordLeft, null, intersectionCoordRight, coordFrom];
+						intersectionCoordRight = Coord.convertCoordOnSphere(intersectionCoordRight, projection);
 						
+						var bisectedCoordsLeft: Array;
+						var bisectedCoordsRight: Array;
+						
+						
+						if (coordFrom.x > coordTo.x) 
+						{
+							coords = [coordFrom, intersectionCoordLeft, null, intersectionCoordRight, coordTo];
+						} else {
+							coords = [coordTo, intersectionCoordLeft, null, intersectionCoordRight, coordFrom];
+						}
+						
+						//debug coords:
+//						var t1: String = '';
+//						for each (var currCoord: Coord in coords)
+//						{
+//							if (currCoord)
+//								t1 += "coord: " + currCoord.x + ", ";
+//							else
+//								t1 += "null, ";
+//						}
+//						trace("PLAIN: " + t1);
 					} else {
 						coords = [coordFrom, coordTo];
 					}
@@ -1821,56 +1874,123 @@ package com.iblsoft.flexiweather.widgets
 					coords = [coordFrom, coordTo];
 				}
 			}
-			//debug coords:
-			//				for each (var currCoord: Coord in coords)
-			//				{
-			//					trace("\t route coord: " + currCoord.toString());
-			//				}
+
+			// coords can now contain null to mark point of discontinuity if line crosses dateline or projection boundaries
 			
-			var previousCoord: Coord;
+			var i_part: int = 0;
+			var continousParts: Array = [[]];
+			for each (c in coords) {
+				if(!c) {
+					continousParts.push([]);
+					i_part = continousParts.length - 1;
+				}
+				else {
+					continousParts[i_part].push(c);
+				}
+			}
 			
-			var total: int = coords.length;
-			for (var i: int = 0; i < total; i++)
+			var reflections: Array;
+			
+			for each(var part: Array in continousParts)
 			{
-				var c: Coord = coords[i] as Coord;
-				//				if (!pt)
-				if (c) {
-//					pt = container.coordToPoint(c);
-					
-					if (!previousCoord)
-						previousCoord = c;
-					
-//					if (!ptPrev)
-//						ptPrev = pt;
-					
-				} else {
-//					ptPrev = null;
-//					pt = null;
-					previousCoord = null;
-				}
-				
-				if (previousCoord != null)
+				var prevC: Coord = null;
+				for each(c in part) 
 				{
-//					ptX = pt.x;
-//					ptY = pt.y;
-					
-					var drawArrow: Boolean = (i == (total - 1));
-					
-					drawPolyline(g, [previousCoord, c]);
-					
-					//border
-//					routeLineRenderer.changeStyle(drawArrow ? RouteCurveRenderer.ROUTE_NORMAL_ARROW : RouteCurveRenderer.ROUTE_NORMAL, lineStyle, fillStyle);
-//					container.drawPolyline(routeLineRenderer, [previousCoord, c]);
-//					
-//					//fill route
-//					routeLineRenderer.changeStyle(drawArrow ? RouteCurveRenderer.ROUTE_FILL_ARROW : RouteCurveRenderer.ROUTE_FILL, lineStyle2, fillStyle2);
-//					container.drawPolyline(routeLineRenderer, [previousCoord, c]);
-					
+					if (prevC)
+					{
+						if (c)
+						{
+//							trace("mapLineCoordToViewReflections : " + prevC.toString() + " , " + c.toString());
+							reflections = mapLineCoordToViewReflections(prevC, c, m_crsProjection.extentBBox);
+							for each(var o: Object in reflections) {
+								var s_reflectionId: String = String(o.reflection);
+								var reflectedSegmentPoints: Array = d_reflectionToSegmentPoints[s_reflectionId];
+								if(reflectedSegmentPoints == null) {
+									reflectedSegmentPoints = [];
+									d_reflectionToSegmentPoints[s_reflectionId] = reflectedSegmentPoints;
+								}
+								reflectedSegmentPoints.push(coordToPoint(new Coord(ms_crs, o.pointFrom.x, o.pointFrom.y)));
+								reflectedSegmentPoints.push(coordToPoint(new Coord(ms_crs, o.pointTo.x, o.pointTo.y)));
+//								d_reflectionToSegmentPoints[s_reflectionId].push(coordToPoint(new Coord(ms_crs, o.pointFrom.x, o.pointFrom.y)));
+//								d_reflectionToSegmentPoints[s_reflectionId].push(coordToPoint(new Coord(ms_crs, o.pointTo.x, o.pointTo.y)));
+								if (drawMode == DrawMode.PLAIN) 
+								{
+									reflectedSegmentPoints.push(null);
+//									d_reflectionToSegmentPoints[s_reflectionId].push(null);
+								}
+							}
+						}
+					}
+					prevC = c;
 				}
-				previousCoord = c;
-//				ptPrev = pt;
+				for(s_reflectionId in d_reflectionToSegmentPoints) {
+					reflectedSegmentPoints = d_reflectionToSegmentPoints[s_reflectionId];
+					if(reflectedSegmentPoints.length > 0 && reflectedSegmentPoints[reflectedSegmentPoints.length - 1] != null)
+						reflectedSegmentPoints.push(null);
+				}
+			}
+			
+			
+		}
+		
+		private function _drawReflectedSegmentPoints(g: ICurveRenderer, d_reflectionToSegmentPoints: Dictionary): void
+		{
+			for (var l_reflections: String in d_reflectionToSegmentPoints) {
+				var b_first: Boolean = true;
+				var ptPrev: Point = null;
+				var ptLast: Point = null;
+				
+				var l_reflectedSegmentPoints: Array = d_reflectionToSegmentPoints[l_reflections];
+				
+				var str: String = '\nReflection: ' + l_reflections + ': ';
+				for each(var pt: Point in l_reflectedSegmentPoints) {
+					if(!pt) {
+						ptPrev = null;
+						str += 'null, ';
+					}
+					else {
+						str += pt.x + ', ';
+						
+						if(b_first) {
+							g.start(pt.x, pt.y);
+							b_first = false;
+						}
+						if(ptPrev)
+							g.lineTo(pt.x, pt.y);
+						else
+							g.moveTo(pt.x, pt.y);
+						ptLast = ptPrev = pt;
+					}
+				}
+//				trace(str);
+				if(ptLast)
+					g.finish(ptLast.x, ptLast.y);
 			}
 		}
+
+		public function drawGeoLine(g: ICurveRenderer, coordFrom: Coord, coordTo: Coord, drawMode: String): void
+		{
+			var d_reflectionToSegmentPoints: Dictionary = new Dictionary();
+			_drawGeoLine(g, coordFrom, coordTo, drawMode, d_reflectionToSegmentPoints);
+			_drawReflectedSegmentPoints(g, d_reflectionToSegmentPoints);
+		}
+
+		public function drawGeoPolyLine(g: ICurveRenderer, coords: Array, drawMode: String): void
+		{
+			var d_reflectionToSegmentPoints: Dictionary = new Dictionary();
+			var cPrev: Coord = null;
+			var total: int = coords.length;
+			var cnt: int = 0;
+			for each (var c: Coord in coords) {
+				if(cPrev) {
+					_drawGeoLine(g, cPrev, c, drawMode, d_reflectionToSegmentPoints);
+				}
+				cPrev = c;
+				cnt++;
+			}
+			_drawReflectedSegmentPoints(g, d_reflectionToSegmentPoints);
+		}
+		
 		/**
 		 * Draw polyline with given curve renderer. If you just want all polyline reflections without drawing it, use getPolylineReflections function instead
 		 * @param g
@@ -1890,8 +2010,6 @@ package com.iblsoft.flexiweather.widgets
 				if (total > 0)
 				{
 					p = mPoints[0] as Point;
-					if (total > 2)
-						trace("Stop drawPolyline");
 					
 					oldPoint = p;
 					g.start(p.x, p.y);

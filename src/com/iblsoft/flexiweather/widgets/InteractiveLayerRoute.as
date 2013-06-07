@@ -389,17 +389,18 @@ package com.iblsoft.flexiweather.widgets
 				
 				var routeLineRenderer: RouteCurveRenderer = new RouteCurveRenderer(graphics, lineStyle, fillStyle, lineStyle2, fillStyle2);
 				
-				var pointer: int = 0;
-				var total: int = _ma_coords.length - 1;
-				while (pointer < total)
-				{
-					var c1: Coord = _ma_coords.getItemAt(pointer) as Coord;
-					var c2: Coord = _ma_coords.getItemAt(pointer + 1) as Coord;
-//					trace("\nRoute draw c1: " + c1.toString() + " , c2: " + c2.toString());
-//					drawLineSegment(c1, c2);
-					container.drawGeoline(routeLineRenderer, c1, c2, _drawMode);
-					pointer++;
-				}
+				container.drawGeoPolyLine(routeLineRenderer, _ma_coords.source, _drawMode);
+				
+				
+//				var pointer: int = 0;
+//				var total: int = _ma_coords.length - 1;
+//				while (pointer < total)
+//				{
+//					var c1: Coord = _ma_coords.getItemAt(pointer) as Coord;
+//					var c2: Coord = _ma_coords.getItemAt(pointer + 1) as Coord;
+//					container.drawGeoline(routeLineRenderer, c1, c2, _drawMode);
+//					pointer++;
+//				}
 				
 			}
 			
