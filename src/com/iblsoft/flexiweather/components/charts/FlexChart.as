@@ -892,6 +892,7 @@ package com.iblsoft.flexiweather.components.charts
 					var yPosMax: Number = getChartYValue(serie, yMaximumValue, yMaximumValue);
 					var valuesForDraw: int;
 					var isArray: Boolean;
+					var j: int;
 					
 					if (xValues.length != yValues.length)
 					{
@@ -915,7 +916,7 @@ package com.iblsoft.flexiweather.components.charts
 							}
 							
 							
-							for (var j: int = 0; j < valuesForDraw; j++)
+							for (j = 0; j < valuesForDraw; j++)
 							{
 								if (isArray)
 								{
@@ -948,9 +949,7 @@ package com.iblsoft.flexiweather.components.charts
 						
 						var pointsPerPixel: Number = Number(totalX / chartWidth);
 						pointsPerPixel = Math.max(1, pointsPerPixel);
-						
-						var j: int;
-						
+												
 						stopDrawing = true;
 						var previousPointWasDrawn: Boolean;
 						var nextPixelPosition: Number = 1 * pointsPerPixel;
