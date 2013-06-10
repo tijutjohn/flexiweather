@@ -1,5 +1,7 @@
 package com.iblsoft.flexiweather.utils.geometry
 {
+	import com.iblsoft.flexiweather.ogc.BBox;
+	
 	import flash.geom.Point;
 	import flash.sampler.NewObjectSample;
 
@@ -49,6 +51,93 @@ package com.iblsoft.flexiweather.utils.geometry
 			return new Point(this.x1 + adx * r, this.y1 + ady * r);
 		}
 
+		public function isInsideBox(bbox: BBox): Boolean
+		{
+			var left: Number = Math.min(x1, x2);
+			var right: Number = Math.max(x1, x2);
+			var top: Number = Math.min(y1, y2);
+			var bottom: Number = Math.max(y1, y2);
+			
+			if (left >= bbox.xMin && right <= bbox.xMax && top >= bbox.yMin && bottom <= bbox.yMax)
+				return true;
+
+			return false;
+		}
+		
+		public function isIntersectedBox(verticalLine1: LineSegment, verticalLine2: LineSegment, horizontalLine1: LineSegment, horizontalLine2: LineSegment): Boolean
+		{
+			if (_intersectedWithVerticalLine(verticalLine1))
+				return true;
+			if (_intersectedWithVerticalLine(verticalLine2))
+				return true;
+			if (_intersectedWithHorizontalLine(horizontalLine1))
+				return true;
+			if (_intersectedWithHorizontalLine(horizontalLine2))
+				return true;
+			
+			return false;
+		}
+		
+		
+		public function _intersectedWithVerticalLine(verticalLine: LineSegment): Boolean
+		{
+			if (verticalLine.x1 != verticalLine.x2)
+			{
+				trace("There is no vertical line");
+				return false;
+			}
+			
+			var xCorrect: Boolean = false;
+			if (x1 <= verticalLine.x1 && x2 >= verticalLine.x1)
+			{
+				xCorrect = true;
+			} else if (x2 <= verticalLine.x1 && x1 >= verticalLine.x1) {
+				xCorrect = true;
+			}
+			
+			if (xCorrect)
+			{
+				var verticalTop: Number = Math.min(verticalLine.y1, verticalLine.y2);
+				var verticalBottom: Number = Math.max(verticalLine.y1, verticalLine.y2);
+				
+				if (y1 >= verticalTop && y1 <= verticalBottom)
+					return true;
+				if (y2 >= verticalTop && y2 <= verticalBottom)
+					return true;
+			}
+			
+			return false;
+		}
+		public function _intersectedWithHorizontalLine(horizontalLine: LineSegment): Boolean
+		{
+			if (horizontalLine.y1 != horizontalLine.y2)
+			{
+				trace("There is no horizontal line");
+				return false;
+			}
+			
+			var yCorrect: Boolean = false;
+			if (y1 <= horizontalLine.y1 && y2 >= horizontalLine.y1)
+			{
+				yCorrect = true;
+			} else if (y2 <= horizontalLine.y1 && y1 >= horizontalLine.y1) {
+				yCorrect = true;
+			}
+			
+			if (yCorrect)
+			{
+				var verticalLeft: Number = Math.min(horizontalLine.x1, horizontalLine.x2);
+				var verticalRight: Number = Math.max(horizontalLine.x1, horizontalLine.x2);
+				
+				if (x1 >= verticalLeft && x1 <= verticalRight)
+					return true;
+				if (x2 >= verticalLeft && x2 <= verticalRight)
+					return true;
+			}
+			
+			return false;
+		}
+		
 		/**
 		 * Returns coordinates of closest point on the line segment.
 		 **/
@@ -133,6 +222,11 @@ package com.iblsoft.flexiweather.utils.geometry
 		public function get directionVector(): Vector2D
 		{
 			return new Vector2D(x2 - x1, y2 - y1);
+		}
+		
+		public function toString(): String
+		{
+			return "LineString: [" + x1 + ", " + y1+"] [" + x2 + ", " + y2+"]";
 		}
 	}
 }

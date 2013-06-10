@@ -1890,7 +1890,14 @@ package com.iblsoft.flexiweather.widgets
 			}
 			
 			var reflections: Array;
+			var projectionExtent: BBox = m_crsProjection.extentBBox;
 			
+			var viewBBoxWestLine: LineSegment = new LineSegment(m_viewBBox.xMin, m_viewBBox.yMin, m_viewBBox.xMin, m_viewBBox.yMax);
+			var viewBBoxEastLine: LineSegment = new LineSegment(m_viewBBox.xMax, m_viewBBox.yMin, m_viewBBox.xMax, m_viewBBox.yMax);
+			var viewBBoxNorthLine: LineSegment = new LineSegment(m_viewBBox.xMin, m_viewBBox.yMin, m_viewBBox.xMax, m_viewBBox.yMin);
+			var viewBBoxSouthLine: LineSegment = new LineSegment(m_viewBBox.xMin, m_viewBBox.yMax, m_viewBBox.xMax, m_viewBBox.yMax);
+			
+			var line: LineSegment;
 			for each(var part: Array in continousParts)
 			{
 				var prevC: Coord = null;
@@ -1901,22 +1908,35 @@ package com.iblsoft.flexiweather.widgets
 						if (c)
 						{
 //							trace("mapLineCoordToViewReflections : " + prevC.toString() + " , " + c.toString());
-							reflections = mapLineCoordToViewReflections(prevC, c, m_crsProjection.extentBBox);
-							for each(var o: Object in reflections) {
+							
+							//find reflections of line defined by coords prevC and c in projection extent
+							reflections = mapLineCoordToViewReflections(prevC, c, projectionExtent);
+							
+							for each(var o: Object in reflections) 
+							{
 								var s_reflectionId: String = String(o.reflection);
 								var reflectedSegmentPoints: Array = d_reflectionToSegmentPoints[s_reflectionId];
-								if(reflectedSegmentPoints == null) {
+								
+								if(reflectedSegmentPoints == null) 
+								{
 									reflectedSegmentPoints = [];
 									d_reflectionToSegmentPoints[s_reflectionId] = reflectedSegmentPoints;
 								}
-								reflectedSegmentPoints.push(coordToPoint(new Coord(ms_crs, o.pointFrom.x, o.pointFrom.y)));
-								reflectedSegmentPoints.push(coordToPoint(new Coord(ms_crs, o.pointTo.x, o.pointTo.y)));
-//								d_reflectionToSegmentPoints[s_reflectionId].push(coordToPoint(new Coord(ms_crs, o.pointFrom.x, o.pointFrom.y)));
-//								d_reflectionToSegmentPoints[s_reflectionId].push(coordToPoint(new Coord(ms_crs, o.pointTo.x, o.pointTo.y)));
-								if (drawMode == DrawMode.PLAIN) 
+								
+								line = new LineSegment(o.pointFrom.x, o.pointFrom.y, o.pointTo.x, o.pointTo.y);
+								if (line.isInsideBox(m_viewBBox) || line.isIntersectedBox(viewBBoxWestLine, viewBBoxEastLine, viewBBoxNorthLine, viewBBoxSouthLine))
 								{
-									reflectedSegmentPoints.push(null);
-//									d_reflectionToSegmentPoints[s_reflectionId].push(null);
+									//check if line is intersect vieBBox
+									reflectedSegmentPoints.push(coordToPoint(new Coord(ms_crs, o.pointFrom.x, o.pointFrom.y)));
+									reflectedSegmentPoints.push(coordToPoint(new Coord(ms_crs, o.pointTo.x, o.pointTo.y)));
+								
+									if (drawMode == DrawMode.PLAIN) 
+									{
+										reflectedSegmentPoints.push(null);
+	//									d_reflectionToSegmentPoints[s_reflectionId].push(null);
+									}
+//								} else {
+//									trace("There is no intersection with current viewBBox: " + line);
 								}
 							}
 						}
@@ -1932,6 +1952,8 @@ package com.iblsoft.flexiweather.widgets
 			
 			
 		}
+		
+		
 		
 		private function _drawReflectedSegmentPoints(g: ICurveRenderer, d_reflectionToSegmentPoints: Dictionary): void
 		{
