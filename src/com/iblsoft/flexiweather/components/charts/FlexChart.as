@@ -141,9 +141,24 @@ package com.iblsoft.flexiweather.components.charts
 		}
 		
 		private var _labelXAxisFunction: Function;
-		private var _labelXAxisFunctionChanged: Boolean;
+		private var _labelYAxisFunction: Function;
+		private var _labelAxisFunctionChanged: Boolean;
 		
-		[Bindable(event = "labelXAxisFunctionChanged")]
+		[Bindable(event = "labelAxisFunctionChanged")]
+		public function get labelYAxisFunction(): Function
+		{
+			return _labelYAxisFunction;
+		}
+
+		public function set labelYAxisFunction(value: Function): void
+		{
+			_labelYAxisFunction = value;
+			_labelAxisFunctionChanged = true;
+			invalidateProperties();
+			dispatchEvent(new Event("labelAxisFunctionChanged"));
+		}
+		
+		[Bindable(event = "labelAxisFunctionChanged")]
 		public function get labelXAxisFunction(): Function
 		{
 			return _labelXAxisFunction;
@@ -152,9 +167,9 @@ package com.iblsoft.flexiweather.components.charts
 		public function set labelXAxisFunction(value: Function): void
 		{
 			_labelXAxisFunction = value;
-			_labelXAxisFunctionChanged = true;
+			_labelAxisFunctionChanged = true;
 			invalidateProperties();
-			dispatchEvent(new Event("labelXAxisFunctionChanged"));
+			dispatchEvent(new Event("labelAxisFunctionChanged"));
 		}
 
 		private var _dataProvider: ArrayCollection;
@@ -467,10 +482,10 @@ package com.iblsoft.flexiweather.components.charts
 				_dataUpdated = false;
 			}
 			
-			if (_labelXAxisFunctionChanged)
+			if (_labelAxisFunctionChanged)
 			{
 				drawLabels();
-				_labelXAxisFunctionChanged = false;
+				_labelAxisFunctionChanged = false;
 			}
 			if (_labelFunctionChanged)
 			{
@@ -856,6 +871,10 @@ package com.iblsoft.flexiweather.components.charts
 				trace("null yValue");
 			}
 		}
+		protected function drawCustomSeries(): void
+		{
+			
+		}
 		protected function drawSeries(): void
 		{
 //			trace("\n\n DRAW SERIE: " + totalX + " chart: " + chartWidth);
@@ -867,13 +886,20 @@ package com.iblsoft.flexiweather.components.charts
 			
 			var yMaximumValue: Number = getYFieldMaximumValue();
 			
+			drawCustomSeries();
+			
 			for each (var serie: ChartSerie in yFields)
 			{
 				if (serie.visible)
 				{
+//					if (serie.data.length != 300)
+//					{
+//						trace("check serie["+serie.name+"]: " + serie.data.length);
+//					}
 					gr.lineStyle(serie.lineWidth, serie.color);
 					
 					var i: int;
+					var j: int;
 					var xPos: int;
 					var xValue: Number;
 					
@@ -892,7 +918,6 @@ package com.iblsoft.flexiweather.components.charts
 					var yPosMax: Number = getChartYValue(serie, yMaximumValue, yMaximumValue);
 					var valuesForDraw: int;
 					var isArray: Boolean;
-					var j: int;
 					
 					if (xValues.length != yValues.length)
 					{
@@ -949,7 +974,7 @@ package com.iblsoft.flexiweather.components.charts
 						
 						var pointsPerPixel: Number = Number(totalX / chartWidth);
 						pointsPerPixel = Math.max(1, pointsPerPixel);
-												
+						
 						stopDrawing = true;
 						var previousPointWasDrawn: Boolean;
 						var nextPixelPosition: Number = 1 * pointsPerPixel;
@@ -1215,8 +1240,6 @@ package com.iblsoft.flexiweather.components.charts
 			var yValue: Number;
 			var yPos: Number;
 			
-			
-			
 			var stepsX: int = totalXAxis;
 			var stepsY: int = verticalParts;
 			
@@ -1271,6 +1294,9 @@ package com.iblsoft.flexiweather.components.charts
 			{
 				yValue = yMaximumValue * i / stepsY;
 					
+				if (_labelYAxisFunction != null)
+					yValue = _labelYAxisFunction(yValue);
+				
 				if (!_yLabelsList.chartLabelAtExists(i))
 				{
 					chartLabel =  getLabel(yLabelsRotation);
