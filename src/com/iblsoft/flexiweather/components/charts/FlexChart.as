@@ -628,7 +628,7 @@ package com.iblsoft.flexiweather.components.charts
 			return value;
 		}
 		
-		private function getXFieldValues(): Array
+		protected function getXFieldValues(): Array
 		{
 			if (dataProvider && dataProvider.length > 0)
 			{
@@ -875,6 +875,51 @@ package com.iblsoft.flexiweather.components.charts
 		{
 			
 		}
+		
+		protected function getXPositionForValue(xValue: Object, field: String = null): Number
+		{
+			var minXValue: Number;
+			var maxXValue: Number;
+			
+			var xValues: Array = getXFieldValues();
+			var totalX: int = xValues.length;
+			
+			var position: int = -1;
+			var xValueNumber: Number = xValue[field];
+			var cnt: int = 0;
+			for each (var currXValue: Object in xValues)
+			{
+				if (currXValue && currXValue.hasOwnProperty(field))
+				{
+					var currValue: Number = currXValue[field] as Number;
+					if (currValue == xValue)
+					{
+						position = cnt;
+						break;
+					}
+				}
+				cnt++;
+			}
+			
+			var xPos: Number;
+			var stepsX: int = Math.min(totalX, chartWidth);
+			
+			if (totalX < chartWidth)
+			{
+//				if (position == 0)
+//					xValue = 0;
+//				else
+//					xValue = int(totalX * position / stepsX);
+				xPos = _leftPadding + (chartWidth * position / totalX);
+			} else {
+				
+				xPos = 0;
+				
+			}
+			return xPos;
+				
+		}
+		
 		protected function drawSeries(): void
 		{
 //			trace("\n\n DRAW SERIE: " + totalX + " chart: " + chartWidth);
