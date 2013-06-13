@@ -913,7 +913,10 @@ package com.iblsoft.flexiweather.components.charts
 				xPos = _leftPadding + (chartWidth * position / totalX);
 			} else {
 				
-				xPos = 0;
+				var pointsPerPixel: Number = Number(totalX / chartWidth);
+				pointsPerPixel = Math.max(1, pointsPerPixel);
+				
+				xPos = _leftPadding + (chartWidth * (position / pointsPerPixel) / totalX);
 				
 			}
 			return xPos;
