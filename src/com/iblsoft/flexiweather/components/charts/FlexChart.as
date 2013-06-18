@@ -857,7 +857,7 @@ package com.iblsoft.flexiweather.components.charts
 //					gr.moveTo(xPos, yPos - pointLineHalfLine);
 //					gr.lineTo(xPos, yPos + pointLineHalfLine);
 					
-					gr.beginFill(serie.color, 1);
+					gr.beginFill(serie.getColorForYValue(yValueNumber), 1);
 					gr.lineStyle(0, serie.color,0);
 					gr.drawCircle(xPos, yPos, serie.lineWidth);
 					gr.endFill();

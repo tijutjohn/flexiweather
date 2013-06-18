@@ -2,6 +2,8 @@ package com.iblsoft.flexiweather.components.charts
 {
 	public class ChartSerie
 	{
+		public var colorData: Array;
+		
 		private var _field: String;
 		private var _label: String;
 		private var _color: uint;
@@ -212,6 +214,26 @@ package com.iblsoft.flexiweather.components.charts
 				firstItem = 0;
 			}
 			_maximumValue = max;
+		}
+		
+		public function getColorForYValue(value: int): uint
+		{
+			if (!colorData)
+				return color;
+			
+			var previousColorMinimumValue: int = 0;
+			var currentColorMaximumValue: int = 0;
+			
+			for (var i: int = 0; i < colorData.length; i++)
+			{
+				currentColorMaximumValue = colorData[i].toValue;
+				if (value >= previousColorMinimumValue && value <= currentColorMaximumValue)
+					return colorData[i].color;
+				
+				previousColorMinimumValue = currentColorMaximumValue;
+			}
+			
+			return color;	
 		}
 	}
 }
