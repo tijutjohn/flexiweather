@@ -231,7 +231,7 @@ package com.iblsoft.flexiweather.plugins
 			return _pluginsInfo.getAllPlugins();
 		}
 
-		private function onPluginInfoLoaded(event: PluginEvent): void
+		private function updatePluginManager(event: PluginEvent): void
 		{
 			if (event.pluginInfo && event.pluginInfo is IPluginInfo)
 			{
@@ -241,7 +241,10 @@ package com.iblsoft.flexiweather.plugins
 			{
 				(event.plugin as IPluginInfo).manager = this;
 			}
-			
+		}
+		private function onPluginInfoLoaded(event: PluginEvent): void
+		{
+			updatePluginManager(event);			
 			dispatchEvent(event);
 			var item: ModuleItem = _modules.getModuleItemByURL(event.url);
 			if (item)
@@ -335,6 +338,7 @@ package com.iblsoft.flexiweather.plugins
 
 		private function onPluginLoaded(event: PluginEvent): void
 		{
+			updatePluginManager(event);
 			dispatchEvent(event);
 			var item: ModuleItem = _modules.getModuleItemByURL(event.url)
 			if (item)
