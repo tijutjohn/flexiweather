@@ -105,6 +105,9 @@ package com.iblsoft.flexiweather.proj
 				var toDegConst: Number = 180 / Math.PI;
 				return radians * toDegConst;
 			}
+				
+			coord = coord.toLaLoCoord();
+			
 			var lp1X: Number = toRadians(coord.x);
 			var lp1Y: Number = toRadians(coord.y);
 			var x1: Number = Math.cos(lp1Y) * Math.cos(lp1X);
@@ -252,8 +255,6 @@ package com.iblsoft.flexiweather.proj
 					var spRight1: SpherePointWithLalo = points[1] as SpherePointWithLalo;
 					var cLeft1: Coord = new Coord(c1.crs, spLeft1.longitude, spLeft1.latitude);
 					var cRight1: Coord = new Coord(c2.crs, spRight1.longitude, spRight1.latitude);
-					
-					
 					
 					if (!distanceValidator(c1, cLeft1)) {
 						

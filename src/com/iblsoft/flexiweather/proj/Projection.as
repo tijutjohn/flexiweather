@@ -2,9 +2,12 @@ package com.iblsoft.flexiweather.proj
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.configuration.ProjectionConfiguration;
+	
 	import flash.geom.Point;
 	import flash.utils.Dictionary;
+	
 	import mx.logging.Log;
+	
 	import org.openscales.proj4as.ProjPoint;
 	import org.openscales.proj4as.ProjProjection;
 
@@ -127,6 +130,31 @@ package com.iblsoft.flexiweather.proj
 			return other.laLoPtToPrjPt(ptInLaLo);
 		}
 
+		public function moveCoordToExtent(coord: Coord): Coord
+		{
+			if (coord.x >= m_extentBBox.xMin && coord.x <= m_extentBBox.xMax)
+			{
+				return coord;
+			}
+			
+			var cx: Number = coord.x;
+			
+			if (cx < m_extentBBox.xMin)
+			{
+				cx += Math.ceil((m_extentBBox.xMin - cx) / m_extentBBox.width) * m_extentBBox.width;
+			}
+				
+				
+			cx = cx % m_extentBBox.width;
+			if (m_extentBBox.xMin < 0 && cx > m_extentBBox.xMax)
+				cx -= m_extentBBox.width;
+			
+				
+			if (cx != coord.x)
+				coord = new Coord(coord.crs, cx, coord.y);
+			
+			return coord;
+		}
 		/**
 		 * Converts [x,y] coordinates in this projections into to LaLo cordinates in radians.
 		 **/
@@ -195,6 +223,24 @@ package com.iblsoft.flexiweather.proj
 		public function laLoPtToPrjPt(laLoPtRad: Point): Point
 		{
 			return laLoToPrjPt(laLoPtRad.x, laLoPtRad.y);
+		}
+		
+		/**
+		 * Alternative to laLoToPrjPt() accepting Coord object as the input.
+		 * 
+		 * @param laLoCoord - lalo coord input
+		 * @return - Coord in this projection
+		 * 
+		 */		
+		public function laLoCoordToPrjCoord(laLoCoord: Coord): Coord
+		{
+			if (laLoCoord)
+			{
+				var toRadiansConst: Number = Math.PI / 180;
+				var p: Point = laLoToPrjPt(laLoCoord.x * toRadiansConst, laLoCoord.y * toRadiansConst);
+				return new Coord(crs, p.x, p.y);
+			}
+			return null;
 		}
 
 		public static function equalCRSs(s_crs1: String, s_crs2: String): Boolean
