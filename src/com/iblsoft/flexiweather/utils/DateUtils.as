@@ -326,6 +326,18 @@ package com.iblsoft.flexiweather.utils
 		{
 			return Math.abs(date1.time - date2.time);
 		}
+		/**
+		 * Return time "distance" between 2 dates
+		 * @param date1
+		 * @param date2
+		 * @return
+		 *
+		 */
+		public static function getDatesDistanceInMinutes(date1: Date, date2: Date): Number
+		{
+			var minute: Number = 60 * 1000;
+			return getDatesDistance(date1, date2) / minute;
+		}
 
 		public static function getTommorow(): Date
 		{
