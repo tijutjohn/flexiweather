@@ -1079,6 +1079,59 @@ package com.iblsoft.flexiweather.widgets
 			return [{pointFrom: point,  pointTo: pointTo, reflection: 0}];
 		}
 		
+		public function mapRectangleCoordToViewReflections(coordTopLeft: Coord, coordBottomLeft: Coord, coordTopRight: Coord, coordBottomRight: Coord, vBBox: BBox = null): Array
+		{
+			if (!coordTopLeft || !coordBottomLeft || !coordTopRight || !coordBottomRight)
+				return [];
+			
+			var pointTopLeft: Point = new Point(coordTopLeft.x, coordTopLeft.y);
+			var pointBottomLeft: Point = new Point(coordBottomLeft.x, coordBottomLeft.y);
+			var pointTopRight: Point = new Point(coordTopRight.x, coordTopRight.y);
+			var pointBottomRight: Point = new Point(coordBottomRight.x, coordBottomRight.y);
+			
+			if (m_crsProjection.wrapsHorizontally)
+			{
+//				if (coordLeft.x > coordTop.x)
+//				{
+//					var px: Number = coordLeft.x;
+//					var py: Number = coordLeft.y;
+//					
+//					coordLeft = new Coord(coordLeft.crs, px, py);
+//				}
+//				
+//				pointLeft = new Point(coordLeft.x, coordLeft.y);
+				
+				var diffX: Number = coordTopRight.x - coordTopLeft.x;
+//				var diffY: Number = coordBottomRight.y - coordTopRight.y;
+				
+				var f_crsExtentBBoxWidth: Number = m_crsProjection.extentBBox.width;
+				var reflections: Array = mapCoordInCRSToViewReflections(pointTopLeft, m_crsProjection.extentBBox);
+				var pX0: Number = reflections[0].point.x;
+				var a: Array = [];
+				for(var i: int = 0; i < 10; i++)
+				{
+					var i_delta: int = (i & 1 ? 1 : -1) * ((i + 1) >> 1); // generates sequence 0, 1, -1, 2, -2, ..., 5, -5
+					var pTopLeft: Point = new Point(pX0 + f_crsExtentBBoxWidth * i_delta, pointTopLeft.y);
+					var pBottomLeft: Point = new Point(pTopLeft.x, pointBottomLeft.y);
+					var pTopRight: Point = new Point(pTopLeft.x + diffX, pointTopRight.y);
+					var pBottomRight: Point = new Point(pBottomLeft.x + diffX, pointBottomRight.y);
+					
+					a.push({pointTopLeft: pTopLeft, 
+							pointTopRight: pTopRight, 
+							pointBottomLeft: pBottomLeft, 
+							pointBottomRight: pBottomRight, 
+							reflection: i_delta}
+						);
+				}
+				return a;
+			}
+			return [{pointTopLeft: pointTopLeft,   
+					 pointTopRight: pointTopRight, 
+					 pointBottomLeft: pointBottomLeft, 
+					 pointBottomRight: pointBottomRight, 
+					 reflection: 0}];
+		}
+		
 		public function mapCoordToViewReflections(coord: Coord, vBBox: BBox = null): Array
 		{
 			if (coord.crs != crs)

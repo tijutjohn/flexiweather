@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc.kml.features
 {
+	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
 	import com.iblsoft.flexiweather.ogc.kml.InteractiveLayerKML;
@@ -8,8 +9,11 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import com.iblsoft.flexiweather.ogc.kml.interfaces.IKMLLabeledFeature;
 	import com.iblsoft.flexiweather.ogc.kml.renderer.IKMLRenderer;
 	import com.iblsoft.flexiweather.proj.Coord;
+	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	
 	import flash.geom.Point;
+	
 	import mx.collections.ArrayCollection;
 
 	/**
@@ -53,16 +57,76 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			}
 		}
 
-//		override public function getCenter(): Coord
-//		{
-//			var coord: Coord;
-//			var lat: Number = latLonBox.north + (latLonBox.south - latLonBox.north)/2 
-//			var lon: Number = latLonBox.west + (latLonBox.east - latLonBox.west)/2 
-//			
-//			coord = new Coord('CRS:84', lat, lon);
-//			
-//			return coord;
-//		}
+		override protected function updateCoordsReflections( bCheckCoordIsInside: Boolean = true): void
+		{
+			//FIXME need to chack correct coordinate e.g. for Placemark Polygon
+			_kmlReflectionDictionary.cleanup();
+//			var reflectionIDs: Array = _kmlReflectionDictionary.reflectionIDs;
+//			var currCoordinates: Array = currentCoordinates;
+//			var total: int = currentCoordinates.length;
+//			var coordsPosition: Array = [];
+//			for (var i: int = 0; i < total; i++)
+//			{
+//				coordsPosition.push(i);
+//			}
+			
+//			var coordsArray: Array = []; //coordinates;
+			var nw: Coord = new Coord("CRS:84", _latLonBox.west, _latLonBox.north);
+//			coordsArray.push(nw);
+			var ne: Coord = new Coord("CRS:84", _latLonBox.east, _latLonBox.north);
+//			coordsArray.push(ne);
+			var se: Coord = new Coord("CRS:84", _latLonBox.east, _latLonBox.south);
+//			coordsArray.push(se);
+			var sw: Coord = new Coord("CRS:84", _latLonBox.west, _latLonBox.south);
+//			coordsArray.push(sw);
+			
+			updateGroundOverlayCoordsReflections(nw, sw, ne, se);
+		}
+		
+		private function updateGroundOverlayCoordsReflections(coordTopLeft: Coord, coordBottomLeft: Coord, coordTopRight: Coord, coordBottomRight: Coord): void
+		{
+			var iw: InteractiveWidget = master.container;
+			var crs: String = iw.getCRS();
+			var projection: Projection = iw.getCRSProjection();
+			var viewBBox: BBox = iw.getViewBBox();
+			var currCoordinates: Array = currentCoordinates;
+			//			var visibleCoords: int = 0;
+			var invisibleCoords: Array = [];
+				
+				var pointReflections: Array = iw.mapRectangleCoordToViewReflections(coordTopLeft, coordBottomLeft, coordTopRight, coordBottomRight);
+				
+				var reflectionsCount: int = pointReflections.length;
+				for (var j: int = 0; j < reflectionsCount; j++)
+				{
+					var pointReflectedObject: Object = pointReflections[j];
+					
+					var reflectedRectangle: BBox = new BBox(pointReflectedObject.pointTopLeft.x, pointReflectedObject.pointBottomLeft.y, pointReflectedObject.pointBottomRight.x, pointReflectedObject.pointTopRight.y);
+					
+					var reflectionInsideViewBBox: Boolean = viewBBox.contains(reflectedRectangle);
+					var reflectionIntersectedViewBBox: Boolean = viewBBox.intersects(reflectedRectangle);
+					
+					if (!reflectionInsideViewBBox && !reflectionIntersectedViewBBox)
+					{
+						continue;
+					}
+					
+					var pointTopLeftReflected: flash.geom.Point = pointReflectedObject.pointTopLeft as flash.geom.Point;
+					var pointTopRightReflected: flash.geom.Point = pointReflectedObject.pointTopRight as flash.geom.Point;
+					var pointBottomLeftReflected: flash.geom.Point = pointReflectedObject.pointBottomLeft as flash.geom.Point;
+					var pointBottomRightReflected: flash.geom.Point = pointReflectedObject.pointBottomRight as flash.geom.Point;
+					
+					var coordTopLeftReflected: Coord = new Coord(crs, pointTopLeftReflected.x, pointTopLeftReflected.y);
+					var coordTopRightReflected: Coord = new Coord(crs, pointTopRightReflected.x, pointTopRightReflected.y);
+					var coordBottomLeftReflected: Coord = new Coord(crs, pointBottomLeftReflected.x, pointBottomLeftReflected.y);
+					var coordBottomRightReflected: Coord = new Coord(crs, pointBottomRightReflected.x, pointBottomRightReflected.y);
+					
+					_kmlReflectionDictionary.addReflectedCoordAt(coordTopLeftReflected, 0, j, pointReflectedObject.reflection);
+					_kmlReflectionDictionary.addReflectedCoordAt(coordTopRightReflected, 1, j, pointReflectedObject.reflection);
+					_kmlReflectionDictionary.addReflectedCoordAt(coordBottomRightReflected, 2, j, pointReflectedObject.reflection);
+					_kmlReflectionDictionary.addReflectedCoordAt(coordBottomLeftReflected, 3, j, pointReflectedObject.reflection);
+				}
+		}
+		
 		/** Called after the feature is added to master or after any change (e.g. area change). */
 		override public function update(changeFlag: FeatureUpdateContext): void
 		{
@@ -75,7 +139,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				mb_pointsDirty = true;
 			if (mb_pointsDirty)
 			{
-//				var iw: InteractiveWidget = m_master.container;
 				var c: Coord;
 				var coord: Object;
 				var geometryCoordinates: Coordinates;
@@ -97,68 +160,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			var reflection: KMLReflectionData = _kmlReflectionDictionary.getReflection(0) as KMLReflectionData;
 			var renderer: IKMLRenderer = (master as InteractiveLayerKML).itemRendererInstance;
 			renderer.render(this, master.container);
-			/*
-			if (changeFlag.fullUpdateNeeded)
-			{
-				renderer.render(this, master.container);
-			} else {
-				if (changeFlag.significantlyChanged || changeFlag.viewBBoxSizeChanged)
-				{
-					renderer.render(this, master.container);
-				}
-			}
-
-			var points: ArrayCollection = getPoints();
-			if (points.length != 4)
-			{
-				trace("we expect 4 points in GroundLevel");
-			} else {
-
-				var totalReflections: int = kmlReflectionDictionary.totalReflections;
-
-//				var nwp: flash.geom.Point = points.getItemAt(0) as flash.geom.Point;
-//				var nep: flash.geom.Point = points.getItemAt(1) as flash.geom.Point;
-//				var nwpCoord: Coord = coordinates[0] as Coord;
-//				var nepCoord: Coord = coordinates[1] as Coord;
-//
-//				var nwpReflections: Array = master.container.mapCoordInCRSToViewReflections(new flash.geom.Point(nwpCoord.x, nwpCoord.y));
-//				var nepReflections: Array = master.container.mapCoordInCRSToViewReflections(new flash.geom.Point(nepCoord.x, nepCoord.y));
-
-				for (var i: int = 0; i < totalReflections; i++)
-				{
-					var kmlReflection: KMLReflectionData = kmlReflectionDictionary.getReflection(i) as KMLReflectionData;
-					if (kmlReflection.points && kmlReflection.points.length > 0)
-					{
-						var nwPoint: flash.geom.Point = kmlReflection.points[0] as flash.geom.Point;
-						var nePoint: flash.geom.Point = kmlReflection.points[1] as flash.geom.Point;
-
-						if (kmlReflection.displaySprite)
-						{
-							kmlReflection.displaySprite.visible = true;
-							kmlReflection.displaySprite.x = nwPoint.x;
-							kmlReflection.displaySprite.y = nePoint.y;
-						}
-					} else {
-						if (kmlReflection.displaySprite)
-							kmlReflection.displaySprite.visible = false;
-					}
-
-				}
-
-
-//				x = nwp.x;
-//				y = nep.y;
-//					_container.labelLayout.updateObjectReferenceLocation(this);
-			}
-			*/
-//			var points: ArrayCollection = getPoints();
-//			if (points.length >= 2)
-//			{
-//				var nwp: flash.geom.Point = points.getItemAt(0) as flash.geom.Point;
-//				var nep: flash.geom.Point = points.getItemAt(1) as flash.geom.Point;
-//				x = nwp.x;
-//				y = nep.y;
-//			}
 			super.update(changeFlag);
 		}
 

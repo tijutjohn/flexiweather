@@ -329,7 +329,14 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			}
 		}
 
-		private function updateCoordsReflectionsForSpecifiedCoordinates(coords: Array, bCheckCoordIsInside: Boolean): Array
+		protected function mapCoordInCRSToViewReflections(p: flash.geom.Point): Array
+		{
+			var iw: InteractiveWidget = master.container;
+			var pointReflections: Array = iw.mapCoordInCRSToViewReflections(p);
+			return pointReflections;
+		}
+		
+		protected function updateCoordsReflectionsForSpecifiedCoordinates(coords: Array, bCheckCoordIsInside: Boolean): Array
 		{
 			var iw: InteractiveWidget = master.container;
 			var crs: String = iw.getCRS();
@@ -349,7 +356,9 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				}
 				else
 					coordPointForReflection = new flash.geom.Point(coord.x, coord.y);
-				var pointReflections: Array = iw.mapCoordInCRSToViewReflections(coordPointForReflection);
+				
+				var pointReflections: Array = mapCoordInCRSToViewReflections(coordPointForReflection);
+				
 				var reflectionsCount: int = pointReflections.length;
 				for (var j: int = 0; j < reflectionsCount; j++)
 				{
