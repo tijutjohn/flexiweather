@@ -332,6 +332,24 @@ package com.iblsoft.flexiweather.components.charts
 				notify("labelsColorChanged");
 			}
 		}
+		
+		private var _headlineColor: uint;
+		
+		[Bindable(event = "headlineColorChanged")]
+		public function get headlineColor():uint
+		{
+			return _headlineColor;
+		}
+		
+		public function set headlineColor(value:uint):void
+		{
+			if (_headlineColor != value)
+			{
+				_headlineColor = value;
+				invalidateStyle();
+				notify("headlineColorChanged");
+			}
+		}
 
 		[Bindable(event = "labelsRotationChanged")]
 		public function get xLabelsRotation(): Number
