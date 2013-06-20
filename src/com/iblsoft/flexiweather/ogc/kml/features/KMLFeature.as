@@ -304,7 +304,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 //			updateCoordsReflections();
 		}
 
-		protected function updateCoordsReflections(): void
+		protected function updateCoordsReflections( bCheckCoordIsInside: Boolean = true): void
 		{
 			//FIXME need to chack correct coordinate e.g. for Placemark Polygon
 			_kmlReflectionDictionary.cleanup();
@@ -316,7 +316,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			{
 				coordsPosition.push(i);
 			}
-			var invisibleCoordsPositions: Array = updateCoordsReflectionsForSpecifiedCoordinates(coordsPosition, true);
+			var invisibleCoordsPositions: Array = updateCoordsReflectionsForSpecifiedCoordinates(coordsPosition, bCheckCoordIsInside);
 			if (invisibleCoordsPositions.length > 0 && invisibleCoordsPositions.length < total)
 			{
 				/**

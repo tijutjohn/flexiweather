@@ -66,6 +66,9 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		/** Called after the feature is added to master or after any change (e.g. area change). */
 		override public function update(changeFlag: FeatureUpdateContext): void
 		{
+			if (!kmlReflectionDictionary)
+				return;
+			
 			if (kmlLabel)
 				kmlLabel.text = name;
 			if (changeFlag.anyChange)
@@ -89,7 +92,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				coordsArray.push(sw);
 				coordinates = coordsArray;
 			}
-			updateCoordsReflections();
+			updateCoordsReflections( false );
 			_kmlReflectionDictionary.updateKMLFeature(this);
 			var reflection: KMLReflectionData = _kmlReflectionDictionary.getReflection(0) as KMLReflectionData;
 			var renderer: IKMLRenderer = (master as InteractiveLayerKML).itemRendererInstance;

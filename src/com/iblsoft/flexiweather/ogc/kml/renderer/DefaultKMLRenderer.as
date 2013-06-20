@@ -394,35 +394,40 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 						var nePoint: flash.geom.Point = kmlReflection.points[1] as flash.geom.Point;
 						var sePoint: flash.geom.Point = kmlReflection.points[2] as flash.geom.Point;
 						var swPoint: flash.geom.Point = kmlReflection.points[3] as flash.geom.Point;
-						var widthOnMap: int = nePoint.x - nwPoint.x;
-						var heightOnMap: int = sePoint.y - nePoint.y;
-						//render ground overlay image
-						var sx: Number = widthOnMap / icon.width;
-						var sy: Number = heightOnMap / icon.height;
-						var w: int = icon.width * sx;
-						var h: int = icon.height * sy;
-						if (!kmlReflection.displaySprite)
+						if (nwPoint && nePoint && sePoint && swPoint)
 						{
-							kmlReflection.displaySprite = new KMLSprite(overlay);
-							overlay.addChild(kmlReflection.displaySprite);
+							var widthOnMap: int = nePoint.x - nwPoint.x;
+							var heightOnMap: int = sePoint.y - nePoint.y;
+							//render ground overlay image
+							var sx: Number = widthOnMap / icon.width;
+							var sy: Number = heightOnMap / icon.height;
+							var w: int = icon.width * sx;
+							var h: int = icon.height * sy;
+							if (!kmlReflection.displaySprite)
+							{
+								kmlReflection.displaySprite = new KMLSprite(overlay);
+								overlay.addChild(kmlReflection.displaySprite);
+							}
+							kmlReflection.displaySprite.visible = true;
+							gr = kmlReflection.displaySprite.graphics;
+							gr.clear();
+							kmlReflection.displaySprite.x = nwPoint.x;
+							kmlReflection.displaySprite.y = nePoint.y;
+							if (overlay.isActive(w, h))
+							{
+								var m: Matrix = new Matrix();
+								m.scale(sx, sy);
+								xDiff = 0; //-0.5 * icon.width * sx;
+								yDiff = 0; //-0.5 * icon.height * sy;
+								gr.beginBitmapFill(icon, m);
+								gr.drawRect(xDiff, yDiff, w, h);
+								gr.endFill();
+							}
+							else
+								trace("Groundoverlay is not active");
+						} else {
+							trace("GroundOverlay is not fully visible");
 						}
-						kmlReflection.displaySprite.visible = true;
-						gr = kmlReflection.displaySprite.graphics;
-						gr.clear();
-						kmlReflection.displaySprite.x = nwPoint.x;
-						kmlReflection.displaySprite.y = nePoint.y;
-						if (overlay.isActive(w, h))
-						{
-							var m: Matrix = new Matrix();
-							m.scale(sx, sy);
-							xDiff = 0; //-0.5 * icon.width * sx;
-							yDiff = 0; //-0.5 * icon.height * sy;
-							gr.beginBitmapFill(icon, m);
-							gr.drawRect(xDiff, yDiff, w, h);
-							gr.endFill();
-						}
-						else
-							trace("Groundoverlay is not active");
 					}
 					else
 					{
