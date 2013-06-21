@@ -3,6 +3,7 @@ package com.iblsoft.flexiweather.ogc.data
 	import com.iblsoft.flexiweather.ogc.events.ReflectionEvent;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	
 	import flash.events.EventDispatcher;
 	import flash.utils.Dictionary;
 
@@ -71,6 +72,15 @@ package com.iblsoft.flexiweather.ogc.data
 			notifyCollectionChange(ReflectionEvent.REMOVE_REFLECTION, reflection);
 		}
 
+		public function getReflectionByReflectionID(reflectionID: int): ReflectionData
+		{
+			for each (var reflectionData: ReflectionData in _dictionary)
+			{
+				if (reflectionData.reflectionDelta == reflectionID)
+					return reflectionData;
+			}
+			return null;
+		}
 		public function getReflection(reflections: int): ReflectionData
 		{
 			return _dictionary[reflections] as ReflectionData;
@@ -83,6 +93,11 @@ package com.iblsoft.flexiweather.ogc.data
 			dispatchEvent(re);
 		}
 
+		public function testCreateReflection(reflections: int): ReflectionData
+		{
+			return createReflection(reflections);
+		}
+		
 		protected function createReflection(reflections: int): ReflectionData
 		{
 			if (!_dictionary[reflections])
