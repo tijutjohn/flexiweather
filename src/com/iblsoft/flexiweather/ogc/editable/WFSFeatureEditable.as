@@ -10,6 +10,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithReflection;
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureBase;
 	import com.iblsoft.flexiweather.proj.Coord;
+	import com.iblsoft.flexiweather.proj.Projection;
 	
 	import flash.display.Sprite;
 	import flash.events.KeyboardEvent;
@@ -130,29 +131,32 @@ package com.iblsoft.flexiweather.ogc.editable
 			for (var r: int = 0; r < reflectionsTotal; r++)
 			{
 				var reflection: WFSEditableReflectionData = reflectionDictionary.getReflection(r) as WFSEditableReflectionData;
-				var pTotal: int = reflection.points.length;
-				for (i = 0; i < pTotal; ++i)
+				if (reflection)
 				{
-					var pt: Point = reflection.points[i] as Point;
-					if (i >= reflection.moveablePoints.length)
+					var pTotal: int = reflection.points.length;
+					for (i = 0; i < pTotal; ++i)
 					{
-						//add new MovablePoint (new point was added, so we need to create Movable point for it
-						mp = new MoveablePoint(this, i, r, reflection.reflectionDelta);
-						reflection.addMoveablePoint(mp, i);
-						m_editableSprite.addChild(mp);
-						if (eim != null)
-							eim.addEditableItem(mp);
-						addMoveablePointListeners(mp);
-						continue;
-					}
-					mp = reflection.moveablePoints[i] as MoveablePoint;
-					if (pt == null || mp == null)
-						continue; // TODO: check for CRS
-					var p: Point = mp.getPoint()
-					if (p && !p.equals(pt))
-					{
-						// reuse MoveablePoint instance, just change it's location 
-						mp.setPoint(pt);
+						var pt: Point = reflection.points[i] as Point;
+						if (i >= reflection.moveablePoints.length)
+						{
+							//add new MovablePoint (new point was added, so we need to create Movable point for it
+							mp = new MoveablePoint(this, i, r, reflection.reflectionDelta);
+							reflection.addMoveablePoint(mp, i);
+							m_editableSprite.addChild(mp);
+							if (eim != null)
+								eim.addEditableItem(mp);
+							addMoveablePointListeners(mp);
+							continue;
+						}
+						mp = reflection.moveablePoints[i] as MoveablePoint;
+						if (pt == null || mp == null)
+							continue; // TODO: check for CRS
+						var p: Point = mp.getPoint()
+						if (p && !p.equals(pt))
+						{
+							// reuse MoveablePoint instance, just change it's location 
+							mp.setPoint(pt);
+						}
 					}
 				}
 //				//remove all unused  MoveablePoints (because coordinates was removed from feature)
@@ -178,15 +182,18 @@ package com.iblsoft.flexiweather.ogc.editable
 			for (var r: int = 0; r < reflectionsTotal; r++)
 			{
 				var reflection: WFSEditableReflectionData = reflectionDictionary.getReflection(r) as WFSEditableReflectionData;
-				var mp: MoveablePoint = reflection.moveablePoints[i] as MoveablePoint;
-				removeMoveablePointListeners(mp);
-				if (mp && eim != null)
+				if (reflection)
 				{
-					eim.removeEditableItem(mp);
-						// ADD CHECK ABOUT SELECTED MOVEABLE POINT
+					var mp: MoveablePoint = reflection.moveablePoints[i] as MoveablePoint;
+					removeMoveablePointListeners(mp);
+					if (mp && eim != null)
+					{
+						eim.removeEditableItem(mp);
+							// ADD CHECK ABOUT SELECTED MOVEABLE POINT
+					}
+					m_editableSprite.removeChild(mp);
+					reflection.removeItemAt(i);
 				}
-				m_editableSprite.removeChild(mp);
-				reflection.removeItemAt(i);
 			}
 		}
 
@@ -207,9 +214,12 @@ package com.iblsoft.flexiweather.ogc.editable
 			for (var i: int = 0; i < reflectionsTotal; i++)
 			{
 				var reflection: WFSEditableReflectionData = reflectionDictionary.getReflection(i) as WFSEditableReflectionData;
-				for each (var mp: MoveablePoint in reflection.moveablePoints)
+				if (reflection)
 				{
-					m_editableSprite.removeChild(mp);
+					for each (var mp: MoveablePoint in reflection.moveablePoints)
+					{
+						m_editableSprite.removeChild(mp);
+					}
 				}
 			}
 			reflectionDictionary.cleanup();
@@ -306,7 +316,11 @@ package com.iblsoft.flexiweather.ogc.editable
 				reflectionWidth = master.container.getExtentBBox().width * i_reflectionDelta;
 			var c: Coord = m_master.container.pointToCoord(pt.x, pt.y);
 			//need to move coord to 0 reflection
-			c.x -= reflectionWidth;
+			
+			var projection: Projection = m_master.container.getCRSProjection();
+			c = projection.moveCoordToExtent(c);
+//			c.x -= reflectionWidth;
+			
 			//and cound correct point position for 0 reflection
 			m_points[i_pointIndex] = m_master.container.coordToPoint(c);
 			m_coordinates[i_pointIndex] = c;
@@ -339,31 +353,39 @@ package com.iblsoft.flexiweather.ogc.editable
 			for (i = 0; i < reflectionsTotal; i++)
 			{
 				reflection = ml_movablePoints.getReflection(i) as WFSEditableReflectionData;
-				for each (var mp: MoveablePoint in reflection.moveablePoints)
+				if (reflection)
 				{
-					mp.selected = false;
+					for each (var mp: MoveablePoint in reflection.moveablePoints)
+					{
+						mp.selected = false;
+					}
 				}
 			}
 			if ((i_pointIndex >= 0) && (i_pointIndex < m_points.length))
 			{ // IF SELECTED POINT IS IN m_points RANGE
 				reflection = reflectionDictionary.getReflection(i_reflection) as WFSEditableReflectionData;
-				// SELECT NEW
-				var selPoint: MoveablePoint = reflection.moveablePoints[i_pointIndex];
-				if (selPoint)
+				if (reflection)
 				{
-					selPoint.selected = true;
-					mi_actSelectedMoveablePointIndex = i_pointIndex;
-					mi_actSelectedMoveablePointReflectionIndex = i_reflection;
-					
-					var mpe: MoveablePointEvent = new MoveablePointEvent(MoveablePointEvent.MOVEABLE_POINT_SELECTION_CHANGE, true);
-					mpe.feature = this;
-					mpe.point = selPoint;
-					mpe.x = selPoint.x;
-					mpe.y = selPoint.y;
-					dispatchEvent(mpe);
-				}
-				else
-				{
+					// SELECT NEW
+					var selPoint: MoveablePoint = reflection.moveablePoints[i_pointIndex];
+					if (selPoint)
+					{
+						selPoint.selected = true;
+						mi_actSelectedMoveablePointIndex = i_pointIndex;
+						mi_actSelectedMoveablePointReflectionIndex = i_reflection;
+						
+						var mpe: MoveablePointEvent = new MoveablePointEvent(MoveablePointEvent.MOVEABLE_POINT_SELECTION_CHANGE, true);
+						mpe.feature = this;
+						mpe.point = selPoint;
+						mpe.x = selPoint.x;
+						mpe.y = selPoint.y;
+						dispatchEvent(mpe);
+					} else
+					{
+						mi_actSelectedMoveablePointIndex = -1;
+						mi_actSelectedMoveablePointReflectionIndex = -1;
+					}
+				} else {
 					mi_actSelectedMoveablePointIndex = -1;
 					mi_actSelectedMoveablePointReflectionIndex = -1;
 				}
@@ -438,9 +460,12 @@ package com.iblsoft.flexiweather.ogc.editable
 			for (var i: int = 0; i < reflectionsTotal; i++)
 			{
 				var reflection: WFSEditableReflectionData = reflectionDictionary.getReflection(i) as WFSEditableReflectionData;
-				for each (var mp: MoveablePoint in reflection.moveablePoints)
+				if (reflection)
 				{
-					m_editableItemManager.addEditableItem(mp);
+					for each (var mp: MoveablePoint in reflection.moveablePoints)
+					{
+						m_editableItemManager.addEditableItem(mp);
+					}
 				}
 			}
 		}
@@ -451,9 +476,12 @@ package com.iblsoft.flexiweather.ogc.editable
 			for (var i: int = 0; i < reflectionsTotal; i++)
 			{
 				var reflection: WFSEditableReflectionData = reflectionDictionary.getReflection(i) as WFSEditableReflectionData;
-				for each (var mp: MoveablePoint in reflection.moveablePoints)
+				if (reflection)
 				{
-					eim.removeEditableItem(mp);
+					for each (var mp: MoveablePoint in reflection.moveablePoints)
+					{
+						eim.removeEditableItem(mp);
+					}
 				}
 			}
 		}

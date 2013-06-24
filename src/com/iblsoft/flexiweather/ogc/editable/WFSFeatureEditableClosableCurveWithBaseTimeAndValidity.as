@@ -161,15 +161,21 @@ package com.iblsoft.flexiweather.ogc.editable
 					|| (mi_editMode == WFSFeatureEditableMode.ADD_POINTS_WITH_MOVE_POINTS)
 					&& selected)
 			{
+				var reflection: WFSEditableReflectionData;
+				
 				if (mb_closed)
 				{
 					// don't do anything if this click is on MoveablePoint belonging to this curve
 					//FIXME fix this for all reflections
-					var moveablePoints: Array = (ml_movablePoints.getReflection(0) as WFSEditableReflectionData).moveablePoints;
-					for each (var mp: MoveablePoint in moveablePoints)
+					reflection = ml_movablePoints.getReflection(0) as WFSEditableReflectionData;
+					var moveablePoints: Array = reflection.moveablePoints;
+					if (moveablePoints)
 					{
-						if (mp.hitTestPoint(stagePt.x, stagePt.y, true))
-							return false;
+						for each (var mp: MoveablePoint in moveablePoints)
+						{
+							if (mp.hitTestPoint(stagePt.x, stagePt.y, true))
+								return false;
+						}
 					}
 					var a: ArrayCollection = getPoints();
 					var i_best: int = -1;
@@ -198,14 +204,20 @@ package com.iblsoft.flexiweather.ogc.editable
 					{
 						insertPointBefore(i_best, pt);
 //						MoveablePoint(ml_movablePoints[i_best]).onMouseDown(pt);
-						var newPoint: MoveablePoint = (ml_movablePoints.getReflection(0) as WFSEditableReflectionData).moveablePoints[i_best] as MoveablePoint;
-						newPoint.onMouseDown(pt, event);
-						if (!b_keepDrag)
+						reflection = ml_movablePoints.getReflection(0) as WFSEditableReflectionData;
+						if (reflection)
+							var newPoint: MoveablePoint = reflection.moveablePoints[i_best] as MoveablePoint;
+						if (newPoint)
 						{
-							newPoint.onMouseUp(pt, event);
-							newPoint.onMouseClick(pt, event);
+							newPoint.onMouseDown(pt, event);
+							if (!b_keepDrag)
+							{
+								newPoint.onMouseUp(pt, event);
+								newPoint.onMouseClick(pt, event);
+							}
+							return (true);
 						}
-						return (true);
+						return (false);
 					}
 					else
 						return (false);
