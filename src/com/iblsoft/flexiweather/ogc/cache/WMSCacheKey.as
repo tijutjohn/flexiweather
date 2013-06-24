@@ -46,8 +46,6 @@ package com.iblsoft.flexiweather.ogc.cache
 					s = obj.name;
 					if (type == 'url')
 						key += "|URL=" + s;
-					if (type == 'url')
-						key += "|" + s + "=" + url.data[s];
 					if (type == 'data')
 						key += "|" + s + "=" + url.data[s];
 					if (type == 'get')
