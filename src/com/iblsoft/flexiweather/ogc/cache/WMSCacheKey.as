@@ -18,6 +18,9 @@ package com.iblsoft.flexiweather.ogc.cache
 			var obj: Object;
 			if (url != null)
 			{
+				
+				a.push({type:'url', name: url.url});
+				
 				for (s in url.data)
 				{
 					a.push({type: 'data', name: s});
@@ -41,6 +44,10 @@ package com.iblsoft.flexiweather.ogc.cache
 				{
 					type = obj.type as String;
 					s = obj.name;
+					if (type == 'url')
+						key += "|URL=" + s;
+					if (type == 'url')
+						key += "|" + s + "=" + url.data[s];
 					if (type == 'data')
 						key += "|" + s + "=" + url.data[s];
 					if (type == 'get')
