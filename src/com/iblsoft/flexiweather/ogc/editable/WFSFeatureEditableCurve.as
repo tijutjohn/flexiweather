@@ -169,9 +169,11 @@ package com.iblsoft.flexiweather.ogc.editable
 				
 				//FIXME fix snap for reflection from which point is dragged
 				var reflectionData: WFSEditableReflectionData = (reflectionDictionary.getReflection(reflectionID) as WFSEditableReflectionData);
+				
 				var moveablePoints: Array = [];
 				if (reflectionData)
 					moveablePoints = reflectionData.moveablePoints;
+				
 				for each (var mpSprite: Sprite in moveablePoints)
 				{
 					if (mpSprite.hitTestPoint(stagePt.x, stagePt.y, true))
@@ -237,7 +239,10 @@ package com.iblsoft.flexiweather.ogc.editable
 					if (i_best < reflectionDictionary.totalMoveablePoints)
 					{
 						//FIXME... question is if this needs to be done for 1 reflection or for all reflections
-						newPoint = (reflectionDictionary.getReflection(0) as WFSEditableReflectionData).moveablePoints[i_best] as IMouseEditableItem;
+						var reflection: WFSEditableReflectionData = ml_movablePoints.getReflection(0) as WFSEditableReflectionData;
+						if (reflection)
+							newPoint = reflection.moveablePoints[i_best] as IMouseEditableItem;
+						
 						if (newPoint)
 						{
 							newPoint.onMouseDown(pt, event);

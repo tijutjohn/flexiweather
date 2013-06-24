@@ -308,9 +308,11 @@ package com.iblsoft.flexiweather.ogc
 			}
 			if (bRemoveOld)
 			{
+//				removeAllFeatures();
 				for each (var oldFeature: WFSFeatureBase in features)
 				{
 					featuresContainer.removeChild(oldFeature);
+					oldFeature.cleanup();
 					onFeatureRemoved(oldFeature);
 				}
 				features = a_features;
