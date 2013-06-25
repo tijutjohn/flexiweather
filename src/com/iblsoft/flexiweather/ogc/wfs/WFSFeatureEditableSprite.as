@@ -23,6 +23,11 @@ package com.iblsoft.flexiweather.ogc.wfs
 			_feature = feature;
 		}
 
+		public function clear(): void
+		{
+			graphics.clear();
+		}
+		
 		public function getLineSegmentApproximationOfBounds(): Array
 		{
 			return [];
