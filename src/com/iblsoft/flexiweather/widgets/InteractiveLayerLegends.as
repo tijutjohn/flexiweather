@@ -20,8 +20,6 @@ package com.iblsoft.flexiweather.widgets
 	import mx.logging.ILogger;
 	import mx.logging.Log;
 	
-	import spark.components.Group;
-
 	[Style(name = "horizontalGap", type = "Number", format = "Length", inherit = "no")]
 	[Style(name = "verticalGap", type = "Number", format = "Length", inherit = "no")]
 	[Style(name = "labelAlign", type = "String", enumeration = "left,center,right", inherit = "no")]
@@ -236,7 +234,7 @@ package com.iblsoft.flexiweather.widgets
 			_legends = new Array();
 		}
 
-		private function addCanvasToDictionary(group: Group, layer: InteractiveLayer): void
+		private function addCanvasToDictionary(group: InteractiveLayerLegendGroup, layer: InteractiveLayer): void
 		{
 			if (!group)
 				debug("addCanvasToDictionary cnv IS NULL ");
@@ -250,7 +248,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (layer && layer.hasLegend() && layer.visible)
 			{
-				var cnv: Group = getGroupFromDictionary(layer);
+				var cnv: InteractiveLayerLegendGroup = getGroupFromDictionary(layer);
 				var oldScaleX: Number = 1;
 				var oldScaleY: Number = 1;
 				var oldScaleObj: Object = _scaleDict[cnv];
@@ -270,9 +268,9 @@ package com.iblsoft.flexiweather.widgets
 			return null;
 		}
 
-		private function getGroupFromDictionary(layer: InteractiveLayer): Group
+		private function getGroupFromDictionary(layer: InteractiveLayer): InteractiveLayerLegendGroup
 		{
-			var grp: Group = m_groupDictionary[layer];
+			var grp: InteractiveLayerLegendGroup = m_groupDictionary[layer];
 			return grp;
 		}
 
@@ -294,7 +292,7 @@ package com.iblsoft.flexiweather.widgets
 			var _tmpExistedCanvases: int = 0;
 			var _tmpLegendsToBeLoaded: int = 0;
 			var l: InteractiveLayer;
-			var group: Group;
+			var group: InteractiveLayerLegendGroup;
 			//find total count of layers for which legend should be rendered
 			var _tempCanvases: Array = [];
 			for each (l in m_layers)
@@ -346,7 +344,7 @@ package com.iblsoft.flexiweather.widgets
 							_legendsAreLoading = true;
 							notify(LEGENDS_LOADING_STARTED);
 						}
-						group = new Group();
+						group = new InteractiveLayerLegendGroup();
 						addChild(group);
 						group.addEventListener(MouseEvent.CLICK, onLegendGroupClick);
 						group.addEventListener(MouseEvent.MOUSE_OVER, onLegendGroupRollover);
@@ -371,7 +369,7 @@ package com.iblsoft.flexiweather.widgets
 
 		private function onLegendGroupClick(event: MouseEvent): void
 		{
-			var group: Group = event.target as Group;
+			var group: InteractiveLayerLegendGroup = event.target as InteractiveLayerLegendGroup;
 			if (group)
 			{
 				var legend: InteractiveLayerLegendImage = getLegendImageFromGroup(group);
@@ -379,7 +377,7 @@ package com.iblsoft.flexiweather.widgets
 		}
 		private function onLegendGroupRollover(event: MouseEvent): void
 		{
-			var group: Group = event.target as Group;
+			var group: InteractiveLayerLegendGroup = event.target as InteractiveLayerLegendGroup;
 			if (group)
 			{
 				var legend: InteractiveLayerLegendImage = getLegendImageFromGroup(group);
@@ -390,7 +388,7 @@ package com.iblsoft.flexiweather.widgets
 		}
 		private function onLegendGroupRollout(event: MouseEvent): void
 		{
-			var group: Group = event.target as Group;
+			var group: InteractiveLayerLegendGroup = event.target as InteractiveLayerLegendGroup;
 			if (group)
 			{
 				var legend: InteractiveLayerLegendImage = getLegendImageFromGroup(group);
@@ -404,7 +402,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			var needLoading: Boolean;
 			var l: InteractiveLayer;
-			var group: Group;
+			var group: InteractiveLayerLegendGroup;
 			for each (l in m_layers)
 			{
 				debug("LEGENDS checkIfAllLegendsAreLoaded l: " + l.name);
@@ -689,7 +687,7 @@ package com.iblsoft.flexiweather.widgets
 			var _currentArea: DynamicArea = new DynamicArea(null);
 			_currentArea.area = new Rectangle(0, 0, maxWidth, maxHeight);
 			_topArea = _currentArea;
-			var cnv: Group = getGroupFromDictionary(l);
+			var cnv: InteractiveLayerLegendGroup = getGroupFromDictionary(l);
 			var rect: Rectangle = getRectangleFromLayer(l);
 			if (rect)
 			{
@@ -722,7 +720,7 @@ package com.iblsoft.flexiweather.widgets
 			{
 				if (l.hasLegend())
 				{
-					var canvas: Group = getGroupFromDictionary(l);
+					var canvas: InteractiveLayerLegendGroup = getGroupFromDictionary(l);
 					if (canvas)
 					{
 						canvas.visible = l.visible;
@@ -801,7 +799,7 @@ package com.iblsoft.flexiweather.widgets
 //			if (true)
 			if (l.hasLegend())
 			{
-				var canvas: Group = getGroupFromDictionary(l);
+				var canvas: InteractiveLayerLegendGroup = getGroupFromDictionary(l);
 				if (canvas)
 				{
 					canvas.visible = l.visible;
@@ -978,7 +976,7 @@ package com.iblsoft.flexiweather.widgets
 			{
 				if (l.hasLegend())
 				{
-					var canvas: Group = getGroupFromDictionary(l);
+					var canvas: InteractiveLayerLegendGroup = getGroupFromDictionary(l);
 					if (canvas)
 						canvas.visible = l.visible;
 					else
@@ -1130,7 +1128,7 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 
-		private function onLegendRendered(cnv: Group): void
+		private function onLegendRendered(cnv: InteractiveLayerLegendGroup): void
 		{
 			legendsLoadingCount--;
 			debug("\n\nonLegendRendered  legendsToBeRendered: " + legendsLoadingCount + " canvas: " + cnv.width + ", " + cnv.height + " Position: " + cnv.x + " , " + cnv.y);
@@ -1149,7 +1147,7 @@ package com.iblsoft.flexiweather.widgets
 //			draw(graphics);
 		}
 
-		private function getLegendImageFromGroup(currGroup: Group): InteractiveLayerLegendImage
+		private function getLegendImageFromGroup(currGroup: InteractiveLayerLegendGroup): InteractiveLayerLegendImage
 		{
 			var elements: int = currGroup.numElements;
 			var legend: InteractiveLayerLegendImage;
@@ -1166,10 +1164,10 @@ package com.iblsoft.flexiweather.widgets
 		}
 		override public function onMouseClick(event: MouseEvent): Boolean
 		{
-			var group: Group = event.target as Group;
+			var group: InteractiveLayerLegendGroup = event.target as InteractiveLayerLegendGroup;
 			if (group)
 			{
-				for each (var currGroup: Group in  m_groupDictionary)
+				for each (var currGroup: InteractiveLayerLegendGroup in  m_groupDictionary)
 				{
 					var hit: Boolean = currGroup.hitTestPoint(event.stageX, event.stageY, true);
 					if (hit)

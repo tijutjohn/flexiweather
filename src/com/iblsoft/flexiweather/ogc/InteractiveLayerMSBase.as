@@ -1696,16 +1696,28 @@ package com.iblsoft.flexiweather.ogc
 		{
 			fadeIn.removeEventListener(EffectEvent.EFFECT_END, onFadeInEnd);
 			fadeIn.removeEventListener(EffectEvent.EFFECT_START, onEffectFadeInStart);
-			fadeIn = null;
+//			fadeIn = null;
 			callLater(delayedEffectEnd);
+			
+//			if (!fadeOut.hasEventListener(EffectEvent.EFFECT_START))
+//			{
+				fadeOut.addEventListener(EffectEvent.EFFECT_START, onEffectFadeOutStart);
+				fadeOut.addEventListener(EffectEvent.EFFECT_END, onFadeOutEnd);
+//			}
 		}
 
 		private function onFadeOutEnd(event: EffectEvent): void
 		{
 			fadeOut.removeEventListener(EffectEvent.EFFECT_START, onEffectFadeOutStart);
 			fadeOut.removeEventListener(EffectEvent.EFFECT_END, onFadeOutEnd);
-			fadeOut = null;
+//			fadeOut = null;
 			callLater(delayedEffectEnd);
+			
+//			if (!fadeIn.hasEventListener(EffectEvent.EFFECT_START))
+//			{
+				fadeIn.addEventListener(EffectEvent.EFFECT_START, onEffectFadeInStart);
+				fadeIn.addEventListener(EffectEvent.EFFECT_END, onFadeInEnd);
+//			}
 		}
 
 		private function delayedEffectEnd(): void
