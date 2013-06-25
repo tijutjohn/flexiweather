@@ -185,6 +185,9 @@ package com.iblsoft.flexiweather.ogc.editable
 					if (b_curveHit)
 					{
 						// add point between 2 points
+						//add first point at the end to check possibility to insert point between last and first point
+						a.addItem((a.getItemAt(0) as Point).clone());
+						
 						for (var i: int = 1; i < a.length; ++i)
 						{
 							var ptPrev: Point = Point(a[i - 1]);
@@ -199,6 +202,9 @@ package com.iblsoft.flexiweather.ogc.editable
 								f_bestDistance = f_distance;
 							}
 						}
+						
+						//remove last point as we have added it just for this test
+						a.removeItemAt(a.length - 1);
 					}
 					if (i_best != -1)
 					{

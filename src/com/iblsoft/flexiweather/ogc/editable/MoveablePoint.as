@@ -70,12 +70,6 @@ package com.iblsoft.flexiweather.ogc.editable
 				this.x = m_pt.x;
 				this.y = m_pt.y;
 			}
-		/*graphics.clear();
-
-		graphics.lineStyle(mb_highlighted ? 4 : 2, 0x000000);
-		graphics.beginFill(mb_selected ? 0x00ff00 : 0xffff00, 0.8);
-		graphics.drawCircle(m_pt.x, m_pt.y, mb_highlighted ? 7 : 5);
-		graphics.endFill();*/
 		}
 
 		protected function draw(): void
@@ -83,7 +77,6 @@ package com.iblsoft.flexiweather.ogc.editable
 			graphics.clear();
 			graphics.lineStyle(mb_highlighted ? 4 : 2, 0x000000);
 			graphics.beginFill(mb_selected ? 0x00ff00 : 0xffff00, 0.8);
-			//graphics.drawCircle(m_pt.x, m_pt.y, mb_highlighted ? 7 : 5);
 			var i_resize: uint = 0;
 			if (Capabilities.touchscreenType == TouchscreenType.FINGER)
 				i_resize = 10;
@@ -202,7 +195,7 @@ package com.iblsoft.flexiweather.ogc.editable
 						if (f_dist < 5)
 						{
 							closableCurve.closeCurve();
-							m_feature.removePoint(m_feature.getPoints().length - 1);
+							m_feature.removePointAt(m_feature.getPoints().length - 1);
 						}
 					}
 				}

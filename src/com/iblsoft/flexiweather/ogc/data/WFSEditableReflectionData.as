@@ -35,13 +35,26 @@ package com.iblsoft.flexiweather.ogc.data
 		override public function removeItemAt(pointer: int): void
 		{
 			super.removeItemAt(pointer);
-			_moveablePoints.splice(pointer, 1);
+			
+			var mp: MoveablePoint;
+			
+			var removedPoints: Array = _moveablePoints.splice(pointer, 1);
+			if (removedPoints && removedPoints.length > 0)
+			{
+				mp = removedPoints[0] as MoveablePoint;
+				if (mp.parent)
+				{
+					mp.parent.removeChild(mp);
+				}
+			} else {
+				trace("WFSEditableReflectionData: cannot find point for removing");
+			}
 //			_annotations.splice(pointer, 1);
 			//update pointIndex of moveable points after remove point
 			var total: int = _moveablePoints.length;
 			for (var i: int = pointer; i < total; i++)
 			{
-				var mp: MoveablePoint = _moveablePoints[i] as MoveablePoint;
+				mp = _moveablePoints[i] as MoveablePoint;
 				mp.pointIndex--;
 			}
 		}

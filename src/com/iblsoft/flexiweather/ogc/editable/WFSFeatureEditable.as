@@ -134,6 +134,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				if (reflection)
 				{
 					var pTotal: int = reflection.points.length;
+					trace("FeatureEditable upate: pTotal: " + pTotal); 
 					for (i = 0; i < pTotal; ++i)
 					{
 						var pt: Point = reflection.points[i] as Point;
@@ -159,42 +160,8 @@ package com.iblsoft.flexiweather.ogc.editable
 						}
 					}
 				}
-//				//remove all unused  MoveablePoints (because coordinates was removed from feature)
-//				for(; i < reflection.moveablePoints.length; ++i) {
-//					mp = reflection.moveablePoints[i] as MoveablePoint;
-//					if(mp && eim != null) {
-//						eim.removeEditableItem(mp);
-//						// ADD CHECK ABOUT SELECTED MOVEABLE POINT
-//					}
-//					m_editableSprite.removeChild(mp);
-//				}
-//				while(reflection.points.length < reflection.moveablePoints.length) {
-//					reflection.moveablePoints.pop();
-//				}
 			}
 			editableSpriteVisible(mb_selected);
-		}
-
-		private function removeMoveablePointAt(i: int): void
-		{
-			var reflectionsTotal: int = reflectionDictionary.totalReflections;
-			var eim: IEditableItemManager = master as IEditableItemManager;
-			for (var r: int = 0; r < reflectionsTotal; r++)
-			{
-				var reflection: WFSEditableReflectionData = reflectionDictionary.getReflection(r) as WFSEditableReflectionData;
-				if (reflection)
-				{
-					var mp: MoveablePoint = reflection.moveablePoints[i] as MoveablePoint;
-					removeMoveablePointListeners(mp);
-					if (mp && eim != null)
-					{
-						eim.removeEditableItem(mp);
-							// ADD CHECK ABOUT SELECTED MOVEABLE POINT
-					}
-					m_editableSprite.removeChild(mp);
-					reflection.removeItemAt(i);
-				}
-			}
 		}
 
 		protected function editableSpriteVisible(bool: Boolean): void
@@ -416,7 +383,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			modified = true;
 		}
 
-		public function removePoint(i_pointIndex: uint): void
+		public function removePointAt(i_pointIndex: uint): void
 		{
 			m_points.removeItemAt(i_pointIndex);
 			m_coordinates.removeItemAt(i_pointIndex);
@@ -427,6 +394,31 @@ package com.iblsoft.flexiweather.ogc.editable
 				selectPreviousMoveablePoint();
 			}
 			update(FeatureUpdateContext.fullUpdate());
+		}
+		
+		private function removeMoveablePointAt(i: int): void
+		{
+			var reflectionsTotal: int = reflectionDictionary.totalReflections;
+			var eim: IEditableItemManager = master as IEditableItemManager;
+			for (var r: int = 0; r < reflectionsTotal; r++)
+			{
+				var reflection: WFSEditableReflectionData = reflectionDictionary.getReflection(r) as WFSEditableReflectionData;
+				if (reflection)
+				{
+					var mp: MoveablePoint = reflection.moveablePoints[i] as MoveablePoint;
+					if (mp)
+					{
+						removeMoveablePointListeners(mp);
+						if (mp && eim != null)
+						{
+							eim.removeEditableItem(mp);
+							// ADD CHECK ABOUT SELECTED MOVEABLE POINT
+						}
+						m_editableSprite.removeChild(mp);
+					}
+					reflection.removeItemAt(i);
+				}
+			}
 		}
 
 		public function deselect(): void
@@ -574,8 +566,17 @@ package com.iblsoft.flexiweather.ogc.editable
 			{
 				if (mb_selected && (mi_actSelectedMoveablePointIndex > -1) && (m_points.length > 1) && (mi_actSelectedMoveablePointIndex < m_points.length))
 				{
-					m_points.removeItemAt(mi_actSelectedMoveablePointIndex);
-					update(FeatureUpdateContext.fullUpdate());
+//					removeMoveablePointAt(mi_actSelectedMoveablePointIndex);
+//					
+//					ml_movablePoints.removeReflectedCoordAt(mi_actSelectedMoveablePointIndex);
+//					m_points.removeItemAt(mi_actSelectedMoveablePointIndex);
+//					
+//					trace("FeatureEditable m_points: " + m_points.length + " ml_movablePoints: " + ml_movablePoints.totalMoveablePoints);
+//					
+//					update(FeatureUpdateContext.fullUpdate());
+					
+					removePointAt(mi_actSelectedMoveablePointIndex);
+					
 					if ((mi_actSelectedMoveablePointIndex >= 0) && (mi_actSelectedMoveablePointIndex < m_points.length))
 						selectMoveablePoint(mi_actSelectedMoveablePointIndex, mi_actSelectedMoveablePointReflectionIndex);
 					else if (mi_actSelectedMoveablePointIndex >= m_points.length)

@@ -118,6 +118,13 @@ package com.iblsoft.flexiweather.ogc.data
 			reflection.updateCoordAt(coord, position);
 			
 		}
+		public function removeReflectedCoordAt(position: int): void
+		{
+			for each (var reflection: ReflectionData in _dictionary)
+			{
+				reflection.removeItemAt(position);
+			}
+		}
 		public function addReflectedCoordAt(coord: Coord, position: int, reflections: int, reflectionDelta: int): void
 		{
 			var reflection: ReflectionData = createReflection(reflections);
