@@ -75,6 +75,17 @@ package com.iblsoft.flexiweather.utils.anticollision
 		private var _layoutName: String;
 		private var _updateLocationDictionary: UpdateLocationDictionary;
 
+		override public function set visible(value:Boolean):void
+		{
+			if (super.visible != value)
+			{
+				super.visible = value;
+				
+				onVisibilityChanged();
+				
+			}
+		}
+		
 		public function AnticollisionLayout(layoutName: String)
 		{
 			super();
@@ -96,6 +107,17 @@ package com.iblsoft.flexiweather.utils.anticollision
 				m_placementBitmap = null;
 			}
 		}
+		
+		private function onVisibilityChanged(): void
+		{
+			var currObjects: Array = ma_layoutObjects.source;
+			var lo: AnticollisionLayoutObject;
+			for each (lo in currObjects)
+			{
+				lo.visible = visible;
+			}
+		}
+		
 		private var _areaChangedScheduled: Boolean;
 		private var _areaChangedScheduledBBox: BBox;
 

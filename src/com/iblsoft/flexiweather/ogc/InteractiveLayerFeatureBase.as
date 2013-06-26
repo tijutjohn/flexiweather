@@ -124,6 +124,16 @@ package com.iblsoft.flexiweather.ogc
 			var feature: FeatureBase = event.target as FeatureBase;
 			feature.visible = event.insideViewBBox;
 		}
+		public function updateAllFeatures(): void
+		{
+			var i_count: int = featuresContainer.numChildren;
+			for (var i: int = i_count - 1; i >= 0; --i)
+			{
+				var feature: FeatureBase = featuresContainer.getChildAt(i) as FeatureBase;
+				feature.update(FeatureUpdateContext.fullUpdate());
+			}
+		}
+		
 		public function removeAllFeatures(): void
 		{
 			var i_count: int = featuresContainer.numChildren;

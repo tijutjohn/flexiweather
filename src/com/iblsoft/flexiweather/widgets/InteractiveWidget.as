@@ -2199,6 +2199,28 @@ package com.iblsoft.flexiweather.widgets
 			dispatchEvent(new Event(AnticollisionLayout.ANTICOLLISTION_UPDATED));
 		}
 
+		private var _anticollisionVisible: Boolean;
+		public function get anticollisionVisible(): Boolean
+		{
+			return _anticollisionVisible;
+		}
+		
+		public function set anticollisionVisible(value: Boolean): void
+		{
+			if (_anticollisionVisible != value)
+			{
+				_anticollisionVisible = value;
+				if (m_objectLayout)
+				{
+					m_objectLayout.visible = value;
+				}
+				if (m_labelLayout)
+				{
+					m_labelLayout.visible = value;
+				}
+			}
+		}
+		
 		public function get suspendAnticollisionProcessing(): Boolean
 		{
 			return m_suspendAnticollisionProcessing;
