@@ -916,7 +916,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 				if (levelStr == currentLevel)
 					return SynchronisationResponse.ALREADY_SYNCHRONISED;
 				
-				if (!exactlySynchroniseWith(s_variableId, value))
+				if (!SynchronisationResponse.wasSynchronised( exactlySynchroniseWith(s_variableId, value)))
 				{
 					var a: Array = getSynchronisedVariableValuesList(s_variableId);
 					if (a)
@@ -945,7 +945,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 			var rightDist: Number = 1000 * 60 * FRAMES_SYNCHRONIZATION_RIGHT_TIME_FRAME;
 			if (s_variableId == GlobalVariable.RUN)
 			{
-				if (!exactlySynchroniseWith(s_variableId, value))
+				if (!SynchronisationResponse.wasSynchronised( exactlySynchroniseWith(s_variableId, value)))
 				{
 					var bestRun: Date = null;
 					var requiredRun: Number = (value as Date).time;
@@ -966,7 +966,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 			
 			if (s_variableId == GlobalVariable.FRAME)
 			{
-				if (!exactlySynchroniseWith(s_variableId, value))
+				if ( !SynchronisationResponse.wasSynchronised( exactlySynchroniseWith(s_variableId, value) ))
 				{
 					var bestFrame: Date = null;
 					var requiredFrame: Number = (value as Date).time;
