@@ -338,30 +338,34 @@ package com.iblsoft.flexiweather.ogc.tiling
 				mb_updateAfterMakingVisible = true;
 				return;
 			}
-			var gr: Graphics = graphics;
-			if (isTileable)
+			
+			if (status != STATE_NO_SYNCHRONISATION_DATA_AVAILABLE)
 			{
-				if (!visible)
+				var gr: Graphics = graphics;
+				if (isTileable)
 				{
+					if (!visible)
+					{
+						m_autoRefreshTimer.reset();
+						return;
+					}
+					//FIXME needs to move to QTTLoader
+					updateTiledLayerURLBase();
+					if (m_tiledLayer.currentQTTViewProperties)
+					{
+						m_tiledLayer.currentQTTViewProperties.crs = container.getCRS();
+						m_tiledLayer.currentQTTViewProperties.setViewBBox(container.getViewBBox());
+					}
+					m_tiledLayer.invalidateData(b_forceUpdate);
+					changeTiledLayerVisibility(true);
 					m_autoRefreshTimer.reset();
-					return;
 				}
-				//FIXME needs to move to QTTLoader
-				updateTiledLayerURLBase();
-				if (m_tiledLayer.currentQTTViewProperties)
+				else
 				{
-					m_tiledLayer.currentQTTViewProperties.crs = container.getCRS();
-					m_tiledLayer.currentQTTViewProperties.setViewBBox(container.getViewBBox());
+					changeTiledLayerVisibility(false);
+					//we call super.updateData only in case of non tile
+					super.updateData(b_forceUpdate);
 				}
-				m_tiledLayer.invalidateData(b_forceUpdate);
-				changeTiledLayerVisibility(true);
-				m_autoRefreshTimer.reset();
-			}
-			else
-			{
-				changeTiledLayerVisibility(false);
-				//we call super.updateData only in case of non tile
-				super.updateData(b_forceUpdate);
 			}
 		}
 

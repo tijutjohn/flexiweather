@@ -127,7 +127,7 @@ package com.iblsoft.flexiweather.widgets
 		/**
 		 * STATE_NO_DATA_AVAILABLE.
 		 */
-		public static const STATE_NO_DATA_AVAILABLE: String = 'no data available';
+		public static const STATE_NO_SYNCHRONISATION_DATA_AVAILABLE: String = 'no data available';
 		/**
 		 * Layer state where some of data are loaded, but some data are not loaded because of error. E.g. Loading 50 tiles, but some tiles are not loaded (no returned from server).
 		 * Also IOErrors belong here.

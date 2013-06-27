@@ -673,24 +673,27 @@ package com.iblsoft.flexiweather.ogc
 			}
 			if (!layerWasDestroyed)
 			{
-				super.updateData(b_forceUpdate);
-				if (!visible)
+				if (status != STATE_NO_SYNCHRONISATION_DATA_AVAILABLE)
 				{
-					mb_updateAfterMakingVisible = true;
-					return;
+					super.updateData(b_forceUpdate);
+					if (!visible)
+					{
+						mb_updateAfterMakingVisible = true;
+						return;
+					}
+					updateCurrentWMSViewProperties();
+					
+					if (!_loader)
+					{
+						_loader = getWMSViewPropertiesLoader() as MSBaseLoader;
+						_loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
+						_loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
+						_loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onCurrentWMSDataLoadingFinishedFromCache);
+						_loader.addEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
+						_loader.addEventListener(InteractiveLayerEvent.INVALIDATE_DYNAMIC_PART, onCurrentWMSDataInvalidateDynamicPart);
+					}
+					_loader.updateWMSData(b_forceUpdate, m_currentWMSViewProperties, forcedLayerWidth, forcedLayerHeight, printQuality);
 				}
-				updateCurrentWMSViewProperties();
-				
-				if (!_loader)
-				{
-					_loader = getWMSViewPropertiesLoader() as MSBaseLoader;
-					_loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
-					_loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
-					_loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onCurrentWMSDataLoadingFinishedFromCache);
-					_loader.addEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
-					_loader.addEventListener(InteractiveLayerEvent.INVALIDATE_DYNAMIC_PART, onCurrentWMSDataInvalidateDynamicPart);
-				}
-				_loader.updateWMSData(b_forceUpdate, m_currentWMSViewProperties, forcedLayerWidth, forcedLayerHeight, printQuality);
 			}
 		}
 
@@ -918,6 +921,13 @@ package com.iblsoft.flexiweather.ogc
 			invalidateData(false);
 		}
 
+		public function refreshForSynchronisation(b_force: Boolean): void
+		{
+			setStatus(STATE_EMPTY);
+			invalidateData(b_force);
+			
+		}
+		
 		override public function refresh(b_force: Boolean): void
 		{
 			super.refresh(b_force);
@@ -1522,7 +1532,7 @@ package com.iblsoft.flexiweather.ogc
 
 		public function getSynchronisedVariableValue(s_variableId: String): Object
 		{
-			if (status == InteractiveDataLayer.STATE_DATA_LOADED_WITH_ERRORS || status == InteractiveDataLayer.STATE_NO_DATA_AVAILABLE)
+			if (status == InteractiveDataLayer.STATE_DATA_LOADED_WITH_ERRORS || status == InteractiveDataLayer.STATE_NO_SYNCHRONISATION_DATA_AVAILABLE)
 				return null;
 			if (m_currentWMSViewProperties)
 				return m_currentWMSViewProperties.getSynchronisedVariableValue(s_variableId);
@@ -1547,7 +1557,7 @@ package com.iblsoft.flexiweather.ogc
 					sSynchronizeWithResponse = viewProperties.synchroniseWith(s_variableId, s_value);
 					if (!SynchronisationResponse.wasSynchronised(sSynchronizeWithResponse))
 					{
-						setStatus(InteractiveDataLayer.STATE_NO_DATA_AVAILABLE);
+						setStatus(InteractiveDataLayer.STATE_NO_SYNCHRONISATION_DATA_AVAILABLE);
 						clear(graphics);
 					}
 					else
@@ -1562,7 +1572,7 @@ package com.iblsoft.flexiweather.ogc
 				sSynchronizeWithResponse = m_currentWMSViewProperties.synchroniseWith(s_variableId, s_value);
 				if (!SynchronisationResponse.wasSynchronised(sSynchronizeWithResponse))
 				{
-					setStatus(InteractiveDataLayer.STATE_NO_DATA_AVAILABLE);
+					setStatus(InteractiveDataLayer.STATE_NO_SYNCHRONISATION_DATA_AVAILABLE);
 					clear(graphics);
 				}
 				else
@@ -1643,6 +1653,15 @@ package com.iblsoft.flexiweather.ogc
 			m_featureInfoCallBack = null;
 		}
 
+		public function get isReadyForSynchronisation(): Boolean
+		{
+			if (m_cfg)
+			{
+				return m_cfg.capabilitiesReceived;
+			}
+			return false;
+		}
+		
 		public function isPrimaryLayer(): Boolean
 		{
 			if (m_synchronisationRole)

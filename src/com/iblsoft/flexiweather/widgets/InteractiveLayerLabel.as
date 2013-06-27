@@ -156,7 +156,7 @@ package com.iblsoft.flexiweather.widgets
 			var dataAvailable: Boolean = true;
 			if (_primaryLayer) 
 			{
-				if (_primaryLayer.status == InteractiveDataLayer.STATE_NO_DATA_AVAILABLE)	dataAvailable = false;
+				if (_primaryLayer.status == InteractiveDataLayer.STATE_NO_SYNCHRONISATION_DATA_AVAILABLE)	dataAvailable = false;
 				if (!_primaryLayer.container.enabled) dataAvailable = false;
 			}
 			if (labelText == '') dataAvailable = false;

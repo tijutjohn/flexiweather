@@ -130,6 +130,11 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 
+		protected function invalidateAreaForLayer(layer: InteractiveLayer): void
+		{
+			layer.onAreaChanged(true);
+		}
+		
 		private function onLayerInitialized(event: InteractiveLayerEvent): void
 		{
 			var l: InteractiveLayer = event.target as InteractiveLayer;
@@ -141,8 +146,11 @@ package com.iblsoft.flexiweather.widgets
 		{
 			bindSubLayer(layer);
 			notifyLayersChanged(layer);
+			
+			//TODO we need to check if layer is synchronizable and call this when it will be ready for synchronization
+			
 			//when new layer is added to container, call onAreaChange to notify layer, that layer is already added to container, so it can render itself
-			layer.onAreaChanged(true);
+//			invalidateAreaForLayer(layer);
 		}
 
 		override public function invalidateDynamicPart(b_invalid: Boolean = true): void

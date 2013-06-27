@@ -734,17 +734,27 @@ package com.iblsoft.flexiweather.widgets
 				var synchronisableRun: Boolean = false;
 				var synchronisableLevel: Boolean = false;
 				var so: ISynchronisedObject = layer as ISynchronisedObject;
+				var isReadyForSynchronisation: Boolean = true;
 				//need to wait when synchronizaed variables will be update (set FRAME and LEVEL)
-				if (so && so.getSynchronisedVariables())
+				if (so)
 				{
-					synchronisableFrame = so.getSynchronisedVariables().indexOf(GlobalVariable.FRAME) >= 0;
-					synchronisableRun = so.getSynchronisedVariables().indexOf(GlobalVariable.RUN) >= 0;
-					synchronisableLevel = so.getSynchronisedVariables().indexOf(GlobalVariable.LEVEL) >= 0;
+					isReadyForSynchronisation = so.isReadyForSynchronisation;
+					
+					if (so.getSynchronisedVariables())
+					{
+						synchronisableFrame = so.getSynchronisedVariables().indexOf(GlobalVariable.FRAME) >= 0;
+						synchronisableRun = so.getSynchronisedVariables().indexOf(GlobalVariable.RUN) >= 0;
+						synchronisableLevel = so.getSynchronisedVariables().indexOf(GlobalVariable.LEVEL) >= 0;
+					}
 				}
+				
 				if (getPrimaryLayer() == null)
 				{
 					if (!so || !synchronisableFrame)
+					{
+						invalidateAreaForLayer(layer);
 						return;
+					}
 					//this layer can be primary layer and there is no primary layer set, set this one as primaty layer	
 					setPrimaryLayer(layer as InteractiveLayerMSBase);
 				}
@@ -802,12 +812,22 @@ package com.iblsoft.flexiweather.widgets
 						invalidateLevel();
 					}
 				}
+				
+				
+				if (so && isReadyForSynchronisation && so.isPrimaryLayer())
+				{
+					invalidateAreaForLayer(layer);
+				}
+					
+					
 			}
 			else
 			{
 				debug("Layer is null, do not add it to InteractiveLayerMap");
 			}
 		}
+		
+		
 
 		/**
 		 * Function find first suitable layer, which can primary layer (can have frames)
@@ -1488,13 +1508,14 @@ package com.iblsoft.flexiweather.widgets
 					continue;
 				if (!so.hasSynchronisedVariable(GlobalVariable.FRAME))
 					continue;
-//				debug(this + " setFrame try to synchronize: [" + newFrame.toTimeString() + "]  for " + l.name, 'Info', 'Layer Map');
+				debug(this + " setFrame try to synchronize: [" + newFrame.toTimeString() + "]  for " + l.name, 'Info', 'Layer Map');
 				
 				
 				var bSynchronized: Boolean = SynchronisationResponse.wasSynchronised(so.synchroniseWith(GlobalVariable.FRAME, newFrame));
 				if (bSynchronized)
 				{
-					l.refresh(false);
+//					l.refresh(false);
+					so.refreshForSynchronisation(false);
 				}
 				else
 				{

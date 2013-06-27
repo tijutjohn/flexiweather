@@ -333,33 +333,36 @@ package com.iblsoft.flexiweather.ogc.tiling
 				return;
 			if (!layerWasDestroyed)
 			{
-				super.updateData(b_forceUpdate);
-				if (_avoidTiling)
+				if (status != STATE_NO_SYNCHRONISATION_DATA_AVAILABLE)
 				{
-					//tiling for this layer is for now avoided, do not update data
-					return;
+					super.updateData(b_forceUpdate);
+					if (_avoidTiling)
+					{
+						//tiling for this layer is for now avoided, do not update data
+						return;
+					}
+					if (mi_zoom == null)
+					{
+						// wrong zoom, do not continue
+						return;
+					}
+					if (!visible)
+					{
+						mb_updateAfterMakingVisible = true;
+						return;
+					}
+					if (!_loader)
+					{
+						_loader = getWMSViewPropertiesLoader() as TiledLoader;
+						_loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
+						_loader.addEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
+						_loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
+						_loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onCurrentWMSDataLoadingFinishedFromCache);
+						_loader.addEventListener(InteractiveLayerEvent.INVALIDATE_DYNAMIC_PART, onCurrentWMSDataInvalidateDynamicPart);
+					}
+					_loader.zoom = zoomLevel; 
+					_loader.updateWMSData(b_forceUpdate, m_currentQTTViewProperties, forcedLayerWidth, forcedLayerHeight, printQuality);
 				}
-				if (mi_zoom == null)
-				{
-					// wrong zoom, do not continue
-					return;
-				}
-				if (!visible)
-				{
-					mb_updateAfterMakingVisible = true;
-					return;
-				}
-				if (!_loader)
-				{
-					_loader = getWMSViewPropertiesLoader() as TiledLoader;
-					_loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
-					_loader.addEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
-					_loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
-					_loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onCurrentWMSDataLoadingFinishedFromCache);
-					_loader.addEventListener(InteractiveLayerEvent.INVALIDATE_DYNAMIC_PART, onCurrentWMSDataInvalidateDynamicPart);
-				}
-				_loader.zoom = zoomLevel; 
-				_loader.updateWMSData(b_forceUpdate, m_currentQTTViewProperties, forcedLayerWidth, forcedLayerHeight, printQuality);
 			}
 		}
 		protected var _currentQTTDataLoadingStarted: Boolean;
@@ -767,7 +770,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			if (!width || !height)
 				return;
-			if (status == InteractiveDataLayer.STATE_DATA_LOADED_WITH_ERRORS || status == InteractiveDataLayer.STATE_NO_DATA_AVAILABLE)
+			if (status == InteractiveDataLayer.STATE_DATA_LOADED_WITH_ERRORS || status == InteractiveDataLayer.STATE_NO_SYNCHRONISATION_DATA_AVAILABLE)
 			{
 				drawNoDataPreview(graphics, f_width, f_height);
 				return;

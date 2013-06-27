@@ -184,7 +184,9 @@ package com.iblsoft.flexiweather.ogc
 			
 			if (!_layerInitialized)
 				return;
-			super.updateData(b_forceUpdate);
+			if (status != STATE_NO_SYNCHRONISATION_DATA_AVAILABLE)
+				super.updateData(b_forceUpdate);
+			
 			if (!visible)
 			{
 				m_autoRefreshTimer.reset();
@@ -224,7 +226,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			if (!width || !height)
 				return;
-			if (status == InteractiveDataLayer.STATE_DATA_LOADED_WITH_ERRORS || status == InteractiveDataLayer.STATE_NO_DATA_AVAILABLE)
+			if (status == InteractiveDataLayer.STATE_DATA_LOADED_WITH_ERRORS || status == InteractiveDataLayer.STATE_NO_SYNCHRONISATION_DATA_AVAILABLE)
 			{
 				drawNoDataPreview(graphics, f_width, f_height);
 				return;
