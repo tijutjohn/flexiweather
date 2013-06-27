@@ -165,13 +165,16 @@ package com.iblsoft.flexiweather.ogc
 		public function coverageRatio(other: BBox): Number
 		{
 			var intersectedBBox: BBox = intersected(other);
-			var otherBBoxArea: Number = other.width * other.height;
-			var intersectedBBoxArea: Number = intersectedBBox.width * intersectedBBox.height;
-			
-			var percentage: Number = intersectedBBoxArea / otherBBoxArea;
-			
-			return percentage;
-			
+			if (intersectedBBox)
+			{
+				var otherBBoxArea: Number = other.width * other.height;
+				var intersectedBBoxArea: Number = intersectedBBox.width * intersectedBBox.height;
+				
+				var percentage: Number = intersectedBBoxArea / otherBBoxArea;
+				
+				return percentage;
+			}
+			return 0;
 		}
 		
 
