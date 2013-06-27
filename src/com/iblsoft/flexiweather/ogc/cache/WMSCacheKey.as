@@ -1,15 +1,21 @@
 package com.iblsoft.flexiweather.ogc.cache
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
+	
 	import flash.net.URLRequest;
 
 	public class WMSCacheKey extends CacheKey
 	{
 		public var dimensions: Array;
 
-		public function WMSCacheKey(s_crs: String, bbox: BBox, url: URLRequest, dimensions: Array, validity: Date = null)
+		public function WMSCacheKey(s_crs: String, bbox: BBox, url: URLRequest, dimensions: Array, validity: Date = null, serviceBaseURL: String = null)
 		{
 			super(s_crs, bbox, url, validity);
+			
+			if (!serviceBaseURL)
+			{
+				trace("Check missing serviceBaseURL");
+			}
 			this.dimensions = dimensions;
 			key = s_crs + "|" + bbox.toBBOXString();
 			var a: Array = [];
@@ -18,8 +24,11 @@ package com.iblsoft.flexiweather.ogc.cache
 			var obj: Object;
 			if (url != null)
 			{
-				
-				a.push({type:'url', name: url.url});
+				if (serviceBaseURL)
+				{
+//					a.push({type:'url', name: url.url});
+					a.push({type:'url', name: serviceBaseURL});
+				}
 				
 				for (s in url.data)
 				{

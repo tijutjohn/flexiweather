@@ -217,9 +217,9 @@ package com.iblsoft.flexiweather.ogc.cache
 			return qetWMSViewCacheKey(wmsViewProperties);
 		}
 		
-		private function getKey(s_crs: String, bbox: BBox, url: URLRequest, dimensions: Array, validity: Date = null): String
+		private function getKey(s_crs: String, bbox: BBox, url: URLRequest, dimensions: Array, validity: Date = null, wmsViewProperties: WMSViewProperties = null): String
 		{
-			var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url, dimensions, validity);
+			var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url, dimensions, validity, wmsViewProperties.m_cfg.service.baseURL);
 			var s_key: String = ck.toString();
 			return s_key;
 		}
@@ -231,7 +231,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			var url: URLRequest = wmsViewProperties.url;
 			var dimensions: Array = wmsViewProperties.dimensions;
 			var validity: Date = wmsViewProperties.validity;
-			var s_key: String = getKey(s_crs, bbox, url, dimensions, validity);
+			var s_key: String = getKey(s_crs, bbox, url, dimensions, validity, wmsViewProperties);
 			return s_key;
 		}
 
@@ -276,6 +276,11 @@ package com.iblsoft.flexiweather.ogc.cache
 				if (md_noDataCache && md_noDataCache[s_key])
 					return true;
 			}
+			
+			var temp: String = debugCache();
+			trace("isItemCached for " + s_key);
+			trace(temp);
+			
 			return md_cache[s_key] || md_cacheLoading[s_key];
 		}
 
@@ -349,7 +354,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			var url: URLRequest = wmsViewProperties.url;
 			var dimensions: Array = wmsViewProperties.dimensions;
 			var validity: Date = wmsViewProperties.validity;
-			var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url, dimensions, validity);
+			var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url, dimensions, validity, wmsViewProperties.m_cfg.service.baseURL);
 			var s_key: String = qetWMSViewCacheKey(wmsViewProperties);
 			var b_deleted: Boolean = deleteCacheItemByKey(s_key, true);
 			var item: CacheItem = new CacheItem();
@@ -401,11 +406,14 @@ package com.iblsoft.flexiweather.ogc.cache
 			var str: String = 'WMSCache';
 			str += '\t cache items count: ' + mi_cacheItemCount;
 			var cnt: int = 0;
+			var keys: String = '';
 			for (var s_key: String in md_cache)
 			{
 				cnt++;
+				keys += s_key+"\n";
 			}
 			str += '\t cache items count [dictionary]: ' + cnt;
+			str += '\n'+keys;
 			return str;
 		}
 
