@@ -1,6 +1,5 @@
 package com.iblsoft.flexiweather.widgets
 {
-	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.events.GetFeatureInfoEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerMapEvent;
@@ -1296,7 +1295,7 @@ package com.iblsoft.flexiweather.widgets
 				
 				var status: String = l.status;
 				
-				if (l.visible && status != InteractiveDataLayer.STATE_DATA_LOADED)
+				if (l.visible && status != InteractiveDataLayer.STATE_DATA_LOADED && status != InteractiveDataLayer.STATE_NO_SYNCHRONISATION_DATA_AVAILABLE)
 				{
 					return false;
 				}
@@ -1738,7 +1737,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (debugConsole)
 				debugConsole.print(str, type, tag);
-//			trace(tag + "| " + type + "| " + str);
+			trace(tag + "| " + type + "| " + str);
 //			LoggingUtils.dispatchLogEvent(this, " ILM: " + str);
 		}
 	}
