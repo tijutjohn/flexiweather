@@ -141,6 +141,7 @@ package com.iblsoft.flexiweather.ogc.cache
 //			trace("getTiles cache size: " + cachedTilesCount);
 			
 			var a: Array = [];
+			
 			for each (var cacheRecord: CacheItem in md_cache)
 			{
 				var cacheKey: WMSTileCacheKey = cacheRecord.cacheKey as WMSTileCacheKey;
@@ -148,7 +149,7 @@ package com.iblsoft.flexiweather.ogc.cache
 					continue;
 				if (cacheKey.crs != s_crs)
 					continue;
-				if (cacheKey.validity && cacheKey.validity.time != validity.time)
+				if (cacheKey.validity && validity && cacheKey.validity.time != validity.time)
 					continue;
 //				if (cacheKey.validity)
 //					trace("getTiles ["+cacheKey.m_tileIndex+"]: validity" + cacheKey.validity.toString()); 

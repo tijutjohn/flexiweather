@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.widgets
 {
+	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.events.GetFeatureInfoEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerMapEvent;
@@ -726,13 +727,7 @@ package com.iblsoft.flexiweather.widgets
 			
 			if (layer)
 			{
-				var dynamicEvent: DynamicEvent = new DynamicEvent(TIME_AXIS_ADDED);
-//				debug("InteractiveLayerMap addlayer: " + l.name);
-				dynamicEvent['layer'] = layer;
-				dispatchEvent(dynamicEvent);
-				var synchronisableFrame: Boolean = false;
-				var synchronisableRun: Boolean = false;
-				var synchronisableLevel: Boolean = false;
+				
 				var so: ISynchronisedObject = layer as ISynchronisedObject;
 				var isReadyForSynchronisation: Boolean = true;
 				//need to wait when synchronizaed variables will be update (set FRAME and LEVEL)
@@ -740,86 +735,16 @@ package com.iblsoft.flexiweather.widgets
 				{
 					isReadyForSynchronisation = so.isReadyForSynchronisation;
 					
-					if (so.getSynchronisedVariables())
+					if (isReadyForSynchronisation)
 					{
-						synchronisableFrame = so.getSynchronisedVariables().indexOf(GlobalVariable.FRAME) >= 0;
-						synchronisableRun = so.getSynchronisedVariables().indexOf(GlobalVariable.RUN) >= 0;
-						synchronisableLevel = so.getSynchronisedVariables().indexOf(GlobalVariable.LEVEL) >= 0;
-					}
-				}
-				
-				if (getPrimaryLayer() == null)
-				{
-					if (!so || !synchronisableFrame)
-					{
-						invalidateAreaForLayer(layer);
-						return;
-					}
-					//this layer can be primary layer and there is no primary layer set, set this one as primaty layer	
-					setPrimaryLayer(layer as InteractiveLayerMSBase);
-				}
-				else
-				{
-					invalidateFrame();
-//					if (synchronisableLevel && (layer as InteractiveLayerMSBase).synchroniseLevel)
-//					{
-//						invalidateLevel();
-//					}
-				}
-				if (layer is InteractiveLayerMSBase)
-				{
-					var msBaseLayer: InteractiveLayerMSBase = layer as InteractiveLayerMSBase;
-					
-					//TODO check that frame is synchronized twice (for RUN and LEVEL as well)
-					if (synchronisableRun && msBaseLayer.synchroniseRun)
-					{
-						var globalRun: Date = run;
-						var bSynchronized: Boolean = false;
-						if (frame) {
-							var frameSynchronisationResponse: String = so.synchroniseWith(GlobalVariable.FRAME, frame);
-							bSynchronized = bSynchronized || SynchronisationResponse.wasSynchronised(frameSynchronisationResponse);
-						}
-						if (run) {
-							var runSynchronisationResponse: String = so.synchroniseWith(GlobalVariable.RUN, run);
-							bSynchronized = bSynchronized || SynchronisationResponse.wasSynchronised(runSynchronisationResponse);
-						}
-						if (bSynchronized)
-						{
-							layer.refresh(false);
-						}
+						layerSynchronisationReady(layer);
 					} else {
-						invalidateRun();
+						waitForLayerSynchronisationReady(layer);
 					}
-					
-					
-					if (synchronisableLevel && msBaseLayer.synchroniseLevel)
-					{
-						var globalLevel: String = level;
-						bSynchronized = false;
-						if (frame) {
-							frameSynchronisationResponse = so.synchroniseWith(GlobalVariable.FRAME, frame);
-							bSynchronized = bSynchronized || SynchronisationResponse.wasSynchronised(frameSynchronisationResponse);
-						}
-						if (level) {
-							var levelSynchronisationResponse: String = so.synchroniseWith(GlobalVariable.LEVEL, level);
-							bSynchronized = bSynchronized || SynchronisationResponse.wasSynchronised(levelSynchronisationResponse);
-						}
-						if (bSynchronized)
-						{
-							layer.refresh(false);
-						}
-					} else {
-						invalidateLevel();
-					}
-				}
-				
-				
-				if (so && isReadyForSynchronisation && so.isPrimaryLayer())
-				{
+				} else {
+					addLayerToTimeAxis(layer);
 					invalidateAreaForLayer(layer);
 				}
-					
-					
 			}
 			else
 			{
@@ -827,7 +752,125 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 		
+		private function waitForLayerSynchronisationReady(layer: InteractiveLayer): void
+		{
+			var checker: LayerSynchronisationStatusChecker = new LayerSynchronisationStatusChecker(layer as ISynchronisedObject);
+			checker.addEventListener(LayerSynchronisationStatusChecker.LAYER_READY, onLayerSynchronisedIsReady);
+		}
+		private function onLayerSynchronisedIsReady(event: Event): void
+		{
+			var checker: LayerSynchronisationStatusChecker = event.target as LayerSynchronisationStatusChecker;
+			layerSynchronisationReady(checker.layer as InteractiveLayer);
+		}
 		
+		private function addLayerToTimeAxis(layer: InteractiveLayer): void
+		{
+			var dynamicEvent: DynamicEvent = new DynamicEvent(TIME_AXIS_ADDED);
+			dynamicEvent['layer'] = layer;
+			dispatchEvent(dynamicEvent);
+		}
+		
+		private function layerSynchronisationReady(layer: InteractiveLayer): void
+		{
+			var synchronisableFrame: Boolean = false;
+			var synchronisableRun: Boolean = false;
+			var synchronisableLevel: Boolean = false;
+			var so: ISynchronisedObject = layer as ISynchronisedObject;
+			var isReadyForSynchronisation: Boolean = true;
+			
+			addLayerToTimeAxis(layer);
+			
+			//need to wait when synchronizaed variables will be update (set FRAME and LEVEL)
+			if (so)
+			{
+				isReadyForSynchronisation = so.isReadyForSynchronisation;
+				
+				var synchronisedVariables: Array = so.getSynchronisedVariables();
+				if (synchronisedVariables)
+				{
+					synchronisableFrame = synchronisedVariables.indexOf(GlobalVariable.FRAME) >= 0;
+					synchronisableRun = synchronisedVariables.indexOf(GlobalVariable.RUN) >= 0;
+					synchronisableLevel = synchronisedVariables.indexOf(GlobalVariable.LEVEL) >= 0;
+				}
+			}
+			
+			if (getPrimaryLayer() == null && isReadyForSynchronisation)
+			{
+				if (!so || !synchronisableFrame)
+				{
+					invalidateAreaForLayer(layer);
+					return;
+				}
+				//this layer can be primary layer and there is no primary layer set, set this one as primaty layer	
+				setPrimaryLayer(layer as InteractiveLayerMSBase);
+			}
+			else
+			{
+				invalidateFrame();
+				//					if (synchronisableLevel && (layer as InteractiveLayerMSBase).synchroniseLevel)
+				//					{
+				//						invalidateLevel();
+				//					}
+			}
+			if (layer is InteractiveLayerMSBase)
+			{
+				var msBaseLayer: InteractiveLayerMSBase = layer as InteractiveLayerMSBase;
+				
+				//TODO check that frame is synchronized twice (for RUN and LEVEL as well)
+				if (synchronisableRun && msBaseLayer.synchroniseRun)
+				{
+					var globalRun: Date = run;
+					var bSynchronized: Boolean = false;
+					if (frame) {
+						var frameSynchronisationResponse: String = so.synchroniseWith(GlobalVariable.FRAME, frame);
+						bSynchronized = bSynchronized || SynchronisationResponse.wasSynchronised(frameSynchronisationResponse);
+					}
+					if (run) {
+						var runSynchronisationResponse: String = so.synchroniseWith(GlobalVariable.RUN, run);
+						bSynchronized = bSynchronized || SynchronisationResponse.wasSynchronised(runSynchronisationResponse);
+					}
+					if (bSynchronized)
+					{
+						layer.refresh(false);
+					}
+				} else {
+					invalidateRun();
+				}
+				
+				
+				if (synchronisableLevel && msBaseLayer.synchroniseLevel)
+				{
+					var globalLevel: String = level;
+					bSynchronized = false;
+					if (frame) {
+						frameSynchronisationResponse = so.synchroniseWith(GlobalVariable.FRAME, frame);
+						bSynchronized = bSynchronized || SynchronisationResponse.wasSynchronised(frameSynchronisationResponse);
+					}
+					if (level) {
+						var levelSynchronisationResponse: String = so.synchroniseWith(GlobalVariable.LEVEL, level);
+						bSynchronized = bSynchronized || SynchronisationResponse.wasSynchronised(levelSynchronisationResponse);
+					}
+					if (bSynchronized)
+					{
+						layer.refresh(false);
+					}
+				} else {
+					invalidateLevel();
+				}
+			}
+			
+			
+			if (so && isReadyForSynchronisation && so.isPrimaryLayer())
+			{
+				invalidateAreaForLayer(layer);
+			}
+			
+			//wms layers without any dimension
+			if (so && isReadyForSynchronisation && synchronisedVariables.length == 0)
+			{
+				invalidateAreaForLayer(layer);
+			}
+		}
 
 		/**
 		 * Function find first suitable layer, which can primary layer (can have frames)
@@ -1700,6 +1743,7 @@ package com.iblsoft.flexiweather.widgets
 		}
 	}
 }
+import com.iblsoft.flexiweather.ogc.ISynchronisedObject;
 import com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration;
 import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
 import com.iblsoft.flexiweather.ogc.managers.LayerConfigurationManager;
@@ -1711,7 +1755,11 @@ import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
 import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 
+import flash.events.Event;
+import flash.events.EventDispatcher;
+import flash.events.TimerEvent;
 import flash.utils.Dictionary;
+import flash.utils.Timer;
 
 import mx.controls.Alert;
 
@@ -1802,4 +1850,42 @@ class MapTemporaryParameterStorage {
 		_dimension['level'] = {level: newLevel, nearest: b_nearrest};
 	}
 	
+}
+
+class LayerSynchronisationStatusChecker extends EventDispatcher
+{
+	public static const LAYER_READY: String = 'layerReady';
+
+	public function get layer(): ISynchronisedObject
+	{
+		return m_layer;
+	}
+	
+	private var m_layer: ISynchronisedObject;
+	private var m_timer: Timer;
+	
+	public function LayerSynchronisationStatusChecker(layer: ISynchronisedObject)
+	{
+		m_layer = layer;
+		initializeTimer();
+	}
+	
+	private function initializeTimer(): void
+	{
+		m_timer = new Timer(100);
+		m_timer.addEventListener(TimerEvent.TIMER, onTimerTick);
+		m_timer.start();
+	}
+	
+	private function onTimerTick(event: TimerEvent): void
+	{
+		if (m_layer.isReadyForSynchronisation)
+		{
+			m_timer.stop();
+			m_timer.removeEventListener(TimerEvent.TIMER, onTimerTick);
+			m_timer = null;
+			
+			dispatchEvent(new Event(LAYER_READY));
+		}
+	}
 }

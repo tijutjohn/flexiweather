@@ -163,5 +163,10 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		{
 			return ms_service.toUpperCase();
 		}
+		
+		override public function toString(): String
+		{
+			return "OGCServiceConfiguration: " + id + " - " + fullURL;
+		}
 	}
 }
