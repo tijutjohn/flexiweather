@@ -277,9 +277,9 @@ package com.iblsoft.flexiweather.ogc.cache
 					return true;
 			}
 			
-			var temp: String = debugCache();
-			trace("isItemCached for " + s_key);
-			trace(temp);
+//			var temp: String = debugCache();
+//			trace("isItemCached for " + s_key);
+//			trace(temp);
 			
 			return md_cache[s_key] || md_cacheLoading[s_key];
 		}
