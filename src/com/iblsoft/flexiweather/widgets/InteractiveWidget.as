@@ -552,6 +552,33 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 
+		private function debugLayers(): void
+		{
+			var total: int = m_layerContainer.numElements;
+			if (total > 1)
+			{
+				trace("******************************************************");
+				trace("IW debug layers");
+				var displayObject: DisplayObject;
+				var layerObject: DisplayObject;
+				for (var i: int = 0; i < total; ++i)
+				{
+					displayObject = m_layerContainer.getElementAt(i) as DisplayObject;
+					trace("\tIW["+i+"] " + displayObject);
+					
+					if (displayObject is InteractiveLayerMap)
+					{
+						var im: InteractiveLayerMap = displayObject as InteractiveLayerMap;
+						var totalMapLayers: int = im.numChildren;
+						for (var j: int = 0; j < totalMapLayers; j++)
+						{
+							layerObject = im.getLayerAt(j) as DisplayObject;
+							trace("\tIW["+i+"] " + layerObject + " parent: " + layerObject.parent);
+						}
+					}
+				}
+			}
+		}
 		private function orderLayers(): void
 		{
 			if (mb_orderingLayers)
@@ -573,6 +600,7 @@ package com.iblsoft.flexiweather.widgets
 						if (ilJ.zOrder < ilI.zOrder)
 						{
 							// swap Ith and Jth layer, we know that J > I
+							trace("\nswap layers " + ilJ.name + " , " + ilI.name);
 							m_layerContainer.swapElements(ilJ, ilI);
 						}
 					}
@@ -588,6 +616,8 @@ package com.iblsoft.flexiweather.widgets
 			}
 			if (interactiveLayerMap)
 				interactiveLayerMap.invalidateLayersOrder();
+			
+			debugLayers();
 		}
 		private var _disableUI: UIComponent;
 
@@ -1068,17 +1098,20 @@ package com.iblsoft.flexiweather.widgets
 				
 				var f_crsExtentBBoxWidth: Number = m_crsProjection.extentBBox.width;
 				var reflections: Array = mapCoordInCRSToViewReflections(point, m_crsProjection.extentBBox);
-				var pX0: Number = reflections[0].point.x;
-				var a: Array = [];
-				for(var i: int = 0; i < 10; i++)
+				if (reflections && reflections.length > 0)
 				{
-					var i_delta: int = (i & 1 ? 1 : -1) * ((i + 1) >> 1); // generates sequence 0, 1, -1, 2, -2, ..., 5, -5
-					var pFrom: Point = new Point(pX0 + f_crsExtentBBoxWidth * i_delta, point.y);
-					var pTo: Point = new Point(pFrom.x + diffX, pFrom.y + diffY);
-					
-					a.push({pointFrom: pFrom, pointTo: pTo, reflection: i_delta});
+					var pX0: Number = reflections[0].point.x;
+					var a: Array = [];
+					for(var i: int = 0; i < 10; i++)
+					{
+						var i_delta: int = (i & 1 ? 1 : -1) * ((i + 1) >> 1); // generates sequence 0, 1, -1, 2, -2, ..., 5, -5
+						var pFrom: Point = new Point(pX0 + f_crsExtentBBoxWidth * i_delta, point.y);
+						var pTo: Point = new Point(pFrom.x + diffX, pFrom.y + diffY);
+						
+						a.push({pointFrom: pFrom, pointTo: pTo, reflection: i_delta});
+					}
+					return a;
 				}
-				return a;
 			}
 			return [{pointFrom: point,  pointTo: pointTo, reflection: 0}];
 		}
@@ -2211,16 +2244,19 @@ package com.iblsoft.flexiweather.widgets
 		
 		public function set anticollisionVisible(value: Boolean): void
 		{
-			if (_anticollisionVisible != value)
+			if (!m_suspendAnticollisionProcessing)
 			{
-				_anticollisionVisible = value;
-				if (m_objectLayout)
+				if (_anticollisionVisible != value)
 				{
-					m_objectLayout.visible = value;
-				}
-				if (m_labelLayout)
-				{
-					m_labelLayout.visible = value;
+					_anticollisionVisible = value;
+					if (m_objectLayout)
+					{
+						m_objectLayout.visible = value;
+					}
+					if (m_labelLayout)
+					{
+						m_labelLayout.visible = value;
+					}
 				}
 			}
 		}

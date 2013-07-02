@@ -77,12 +77,14 @@ package com.iblsoft.flexiweather.utils.anticollision
 
 		override public function set visible(value:Boolean):void
 		{
-			if (super.visible != value)
+			if (!m_suspendAnticollisionProcessing)
 			{
-				super.visible = value;
-				
-				onVisibilityChanged();
-				
+				if (super.visible != value)
+				{
+					super.visible = value;
+					
+					onVisibilityChanged();
+				}
 			}
 		}
 		
