@@ -23,7 +23,7 @@ package com.iblsoft.flexiweather.utils
 
 		public function finish(x: Number, y: Number): void
 		{
-			++mi_originatingSegmentIndex;
+//			++mi_originatingSegmentIndex;
 		}
 
 		public function moveTo(x: Number, y: Number): void
@@ -34,9 +34,11 @@ package com.iblsoft.flexiweather.utils
 
 		public function lineTo(x: Number, y: Number): void
 		{
+			
 			ml_segments.push(new CurveLineSegment(mi_originatingSegmentIndex, m_lastX, m_lastY, x, y));
 			m_lastX = x;
 			m_lastY = y;
+			mi_originatingSegmentIndex++;
 		}
 
 		public function curveTo(controlX: Number, controlY: Number, anchorX: Number, anchorY: Number): void
