@@ -2,6 +2,7 @@ package com.iblsoft.flexiweather.symbology
 {
 	import com.iblsoft.flexiweather.utils.CubicBezier;
 	import com.iblsoft.flexiweather.utils.DistanceMarkingCurveRenderer;
+	
 	import flash.display.CapsStyle;
 	import flash.display.Graphics;
 	import flash.display.LineScaleMode;
@@ -47,6 +48,19 @@ package com.iblsoft.flexiweather.symbology
 		protected var mf_lastPaternRatio: Number = 0;
 		protected var mp_fIcingPoint: Point;
 
+		public function get color(): uint
+		{
+			return mi_color;
+		}
+		
+		public function set color(value: uint): void
+		{
+			if (value != mi_color) 
+			{
+				mi_color = value;
+			}
+		}
+		
 		public function set thickness(value: Number): void
 		{
 			mf_thickness = value;
