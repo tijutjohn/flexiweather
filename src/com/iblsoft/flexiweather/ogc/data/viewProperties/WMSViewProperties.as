@@ -868,7 +868,6 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					var runString: String = getWMSDimensionValue(m_cfg.dimensionRunName, true);
 					if (runString)
 					{
-						trace("Can not find RUN!");
 						var run: Date = ISO8601Parser.stringToDate(runString);
 					}
 					var forecast: Duration = new Duration(((value as Date).time - run.time) / 1000.0);
