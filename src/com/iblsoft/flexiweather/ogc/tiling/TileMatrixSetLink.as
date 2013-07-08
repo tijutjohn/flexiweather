@@ -9,5 +9,10 @@ package com.iblsoft.flexiweather.ogc.tiling
 		public function TileMatrixSetLink()
 		{
 		}
+		
+		public function toString(): String
+		{
+			return "TileMatrixSetLink tileMatrixSet: " + tileMatrixSet + " tileMatrixSetLimitsArray: " + tileMatrixSetLimitsArray;
+		}
 	}
 }

@@ -19,5 +19,10 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			_tileMatrixLimits.push(limit);
 		}
+		
+		public function toString(): String
+		{
+			return "TileMatrixSetLimits: _tileMatrixLimits: " + _tileMatrixLimits.length;
+		}
 	}
 }

@@ -254,11 +254,14 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 
-		private function onSerializedWMSLayerInitialized(event: InteractiveLayerEvent): void
+		private function onSerializedLayerInitialized(event: InteractiveLayerEvent): void
 		{
-			var layer: InteractiveLayerMSBase = event.target as InteractiveLayerMSBase;
-			layer.removeEventListener(InteractiveLayerEvent.LAYER_INITIALIZED, onSerializedWMSLayerInitialized);
-			if (layer.isPrimaryLayer())
+			var layer: InteractiveLayer = event.target as InteractiveLayer;
+			layer.removeEventListener(InteractiveLayerEvent.LAYER_INITIALIZED, onSerializedLayerInitialized);
+			
+			var msBaselayer: InteractiveLayerMSBase = layer as InteractiveLayerMSBase;
+			
+			if (msBaselayer && msBaselayer.isPrimaryLayer())
 			{
 				setPrimaryLayer(layer as InteractiveLayerMSBase);
 			}
@@ -292,9 +295,9 @@ package com.iblsoft.flexiweather.widgets
 					wrapper = wrappers.getItemAt(i) as LayerSerializationWrapper;
 					debug("InteractiveLayerMap serialize wrapper: " + wrapper);
 					layer = wrapper.m_layer;
-					if (layer is InteractiveLayerMSBase)
+					if (layer is InteractiveLayer)
 					{
-						layer.addEventListener(InteractiveLayerEvent.LAYER_INITIALIZED, onSerializedWMSLayerInitialized);
+						layer.addEventListener(InteractiveLayerEvent.LAYER_INITIALIZED, onSerializedLayerInitialized);
 						
 						debug("InteractiveLayerMap serialize add layer: " + layer + " name: " + layer.name);
 						newLayers.push(layer);
@@ -469,9 +472,9 @@ package com.iblsoft.flexiweather.widgets
 					wrapper = wrappers.getItemAt(i) as LayerSerializationWrapper;
 					debug("InteractiveLayerMap serialize wrapper: " + wrapper);
 					layer = wrapper.m_layer;
-					if (layer is InteractiveLayerMSBase)
+					if (layer is InteractiveLayer)
 					{
-						layer.addEventListener(InteractiveLayerEvent.LAYER_INITIALIZED, onSerializedWMSLayerInitialized);
+						layer.addEventListener(InteractiveLayerEvent.LAYER_INITIALIZED, onSerializedLayerInitialized);
 						
 						debug("InteractiveLayerMap serialize add layer: " + layer + " name: " + layer.name);
 						newLayers.push(layer);

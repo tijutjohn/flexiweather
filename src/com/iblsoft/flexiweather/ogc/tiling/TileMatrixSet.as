@@ -16,5 +16,10 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			tileMatrices.push(matrix);
 		}
+		
+		public function toString(): String
+		{
+			return "TileMatrixSet: " + id + " crs: " + supportedCRS + " matrices: " + tileMatrices.length;
+		}
 	}
 }
