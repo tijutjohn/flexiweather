@@ -84,7 +84,8 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 				debugConsole.print(str, type, tag);
 //			trace(tag + "| " + type + "| " + str);
 		}
-		private var tempData: Object;
+		
+		private var tempDataDictionary: Dictionary = new Dictionary();
 
 		private function get framesTimeDifferencesSet(): Boolean
 		{
@@ -135,7 +136,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 					if (!framesTimeDifferencesSet)
 					{
 						//make frame synchronisation as frames go 
-						synchronizeFramesSequentialy(synchronizeFromWidget, widgetsForSynchronisation);
+						synchronizeFramesSequentialy(synchronizeFromWidget, widgetsForSynchronisation, preferredSelectedIndex);
 					}
 					else
 					{
@@ -221,7 +222,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 				}
 				else
 				{
-					tempData = {widget: synchronizeFromWidget, widgets: widgetsForSynchronisation, prefferedSelectedIndex: preferredSelectedIndex};
+					tempDataDictionary[synchronizeFromWidget.interactiveLayerMap] = {widget: synchronizeFromWidget, widgets: widgetsForSynchronisation, prefferedSelectedIndex: preferredSelectedIndex};
 					//wait for primary layer
 					synchronizeFromWidget.interactiveLayerMap.addEventListener(InteractiveLayerMap.PRIMARY_LAYER_CHANGED, waitForPrimaryLayer);
 				}
@@ -248,11 +249,17 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		
 		private function waitForPrimaryLayer(event: DataEvent): void
 		{
-			if (tempData)
+			if (tempDataDictionary)
 			{
-				var synchronizeFromWidget: InteractiveWidget = tempData.widget as InteractiveWidget;
-				synchronizeFromWidget.interactiveLayerMap.removeEventListener(InteractiveLayerMap.PRIMARY_LAYER_CHANGED, waitForPrimaryLayer);
-				synchronizeWidgets(synchronizeFromWidget, tempData.widgets as ArrayCollection, tempData.prefferedSelectedIndex as int);
+				var ilm: InteractiveLayerMap = event.target as InteractiveLayerMap; 
+				var tempData: Object = tempDataDictionary[ilm];
+				
+				if (tempData)
+				{
+					var synchronizeFromWidget: InteractiveWidget = tempData.widget as InteractiveWidget;
+					synchronizeFromWidget.interactiveLayerMap.removeEventListener(InteractiveLayerMap.PRIMARY_LAYER_CHANGED, waitForPrimaryLayer);
+					synchronizeWidgets(synchronizeFromWidget, tempData.widgets as ArrayCollection, tempData.prefferedSelectedIndex as int);
+				}
 			}
 		}
 
@@ -321,7 +328,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			return synchronisedFrames;
 		}
 
-		private function synchronizeFramesSequentialy(synchronizeFromWidget: InteractiveWidget, widgetsForSynchronisation: ArrayCollection): void
+		private function synchronizeFramesSequentialy(synchronizeFromWidget: InteractiveWidget, widgetsForSynchronisation: ArrayCollection, preferredSelectedIndex: int = -1): void
 		{
 			var primaryLayer: InteractiveLayerMSBase = synchronizeFromWidget.interactiveLayerMap.getPrimaryLayer();
 			if (primaryLayer)
@@ -361,10 +368,34 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 								var frame: Date = getFrame(framePos, frames);
 								if (frame)
 								{
-									debug("\t FrameSynchronizator synchronizeFramesSequentialy: widget: " + widget.id + " framePos: " + framePos + " frame: " + frame.toTimeString());
+									var bSynchronizeWidget: Boolean = false;
 									
-									listenToWidgetSynchronization(widget);
-									widgetsForSynchronizing.push( {frame: frame, widget: widget } );
+									var currWidgetPrimaryLayer: InteractiveLayerMSBase = widget.interactiveLayerMap.getPrimaryLayer();
+									if (currWidgetPrimaryLayer)
+									{
+										var currWidgetFrame: Date = currWidgetPrimaryLayer.getSynchronisedVariableValue(GlobalVariable.FRAME) as Date;
+										if (currWidgetFrame.time != frame.time)
+										{
+											bSynchronizeWidget = true;		
+										}
+									} else {
+										bSynchronizeWidget = false;
+										
+										//wait for primary layer
+										tempDataDictionary[widget.interactiveLayerMap] = {widget: widget, widgets: widgetsForSynchronisation, prefferedSelectedIndex: preferredSelectedIndex};
+										synchronizeFromWidget.interactiveLayerMap.addEventListener(InteractiveLayerMap.PRIMARY_LAYER_CHANGED, waitForPrimaryLayer);
+										continue;
+									}
+										
+									if (bSynchronizeWidget)
+									{
+										debug("\t FrameSynchronizator synchronizeFramesSequentialy: widget: " + widget.id + " framePos: " + framePos + " frame: " + frame.toTimeString());
+										
+										listenToWidgetSynchronization(widget);
+										widgetsForSynchronizing.push( {frame: frame, widget: widget } );
+									} else {
+										debug("\t FrameSynchronizator synchronizeFramesSequentialy: widget: " + widget.id + " frame: " + frame.toTimeString() + " is already set");										
+									}
 									
 								}
 								else
