@@ -95,7 +95,14 @@
 				var mostLeftPosition: int = Math.max(9, cr);
 				titleDisplay.left = mostLeftPosition + gap;
 				spaceFrom = mostLeftPosition;
-				spaceTo = mostLeftPosition + titleWidth + 2 * gap;
+				if (titleWidth > 0)
+				{
+					spaceTo = mostLeftPosition + titleWidth + 2 * gap;
+				}
+				else
+				{
+					spaceTo = mostLeftPosition;
+				}
 				
 				if (cornerRadius != cr)
 				{
