@@ -4,6 +4,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 	import com.iblsoft.flexiweather.ogc.SynchronisedVariableChangeEvent;
 	import com.iblsoft.flexiweather.ogc.multiview.data.MultiViewConfiguration;
 	import com.iblsoft.flexiweather.ogc.multiview.synchronization.events.SynchronisationEvent;
+	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerLabel;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
@@ -38,6 +39,16 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			mb_synchronizatorInvalid = true;
 		}
 		
+		public function closeSynchronizator(): void
+		{
+			for (var layer: * in md_synchronisationDictionary)
+			{
+				if (layer)
+				{
+					removeListenersOnSynchronisationDone(layer);
+				}
+			}
+		}
 		
 		public function isSynchronizedFor(synchronizedDate: Date): Boolean
 		{
@@ -74,6 +85,19 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			var primaryLayer: InteractiveLayerMSBase = widget.interactiveLayerMap.primaryLayer;
 			if (primaryLayer)
 			{
+				trace("listenToWidgetSynchronization ADDING LAYER ["+primaryLayer.layerID+"]");
+				var bFound: Boolean = false;
+				for each (var layer: InteractiveLayer in widget.interactiveLayerMap.layers)
+				{
+					trace("\tlistenToWidgetSynchronization["+primaryLayer.layerID+"]: layer" + layer.layerID);
+					if (layer.layerID == primaryLayer.layerID)
+						bFound = true;
+					
+				}
+				if (!bFound)
+				{
+					trace("PRIMARY LAYER WAS NOT FOUND");
+				}
 				md_synchronisationDictionary[primaryLayer] = primaryLayer.container.id;
 				primaryLayer.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, onSychronisationDone);
 				primaryLayer.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onSychronisationDone);
@@ -85,11 +109,16 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			var layer: InteractiveLayerMSBase = event.target as InteractiveLayerMSBase;
 			if (layer)
 			{
-				delete md_synchronisationDictionary[layer];
-				layer.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, onSychronisationDone);
-				layer.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onSychronisationDone);
+				removeListenersOnSynchronisationDone(layer);
 				checkIfSynchronizationIsDone();
 			}
+		}
+		
+		private function removeListenersOnSynchronisationDone(layer: InteractiveLayerMSBase): void
+		{
+			delete md_synchronisationDictionary[layer];
+			layer.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, onSychronisationDone);
+			layer.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onSychronisationDone);
 		}
 		
 		protected function checkIfSynchronizationIsDone(): void
@@ -183,6 +212,19 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			var labelLayer: InteractiveLayerLabel = widget.getLayerByType(InteractiveLayerLabel) as InteractiveLayerLabel;
 			if (labelLayer)
 				labelLayer.invalidateDynamicPart();
+		}
+		
+		public function getLayersWaitingForSynchronisation(): Array
+		{
+			var retArray: Array = []
+			if (md_synchronisationDictionary)
+			{
+				for (var layer: *  in md_synchronisationDictionary)
+				{
+					retArray.push(layer);	
+				}
+			}
+			return retArray;
 		}
 	}
 }

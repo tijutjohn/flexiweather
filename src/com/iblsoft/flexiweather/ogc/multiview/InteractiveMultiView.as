@@ -137,10 +137,29 @@ package com.iblsoft.flexiweather.ogc.multiview
 		/**
 		 * This will be set to true after all InteractiveWidget inside multi view will be initialized (all layers loaded and initiliazed 
 		 */		
-		public var multiViewInitialized: Boolean;
+		private var _multiViewInitialized: Boolean;
 		
 		private var _selectedInteractiveWidget: InteractiveWidget;
 		private var _interactiveWidgets: WidgetCollection;
+
+
+		public function get multiViewInitialized():Boolean
+		{
+			return _multiViewInitialized;
+		}
+
+		public function set multiViewInitialized(value:Boolean):void
+		{
+			if (_multiViewInitialized != value)
+			{
+				_multiViewInitialized = value;
+				if (!value)
+				{
+					closeOldMultiView();
+					enabled = true;
+				}
+			}
+		}
 
 		[Bindable(event = "interactiveWidgetsChanged")]
 		public function get interactiveWidgets(): WidgetCollection
@@ -183,8 +202,15 @@ package com.iblsoft.flexiweather.ogc.multiview
 
 		override public function set enabled(value:Boolean):void
 		{
-			super.enabled = value;
-			invalidateDisplayList();
+			if (super.enabled != value)
+			{
+				if (!value)
+				{
+					trace(this + " check disable state");
+				}
+				super.enabled = value;
+				invalidateDisplayList();
+			}
 		}
 		override public function set dataProvider(value: IList): void
 		{
@@ -302,6 +328,13 @@ package com.iblsoft.flexiweather.ogc.multiview
 			dispatchEvent(new Event("configurationChanged"));
 		}
 
+		private function closeOldMultiView(): void
+		{
+			if (synchronizator)
+			{
+				synchronizator.closeSynchronizator();
+			}
+		}
 
 		/**
 		 * Create all Interactive Widget from configuration. This is optional method, you can set your dataProvider from outside of multi view.
@@ -312,8 +345,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 		 */
 		public function createInteractiveWidgetsFromConfiguration(newConfiguration: MultiViewConfiguration = null): void
 		{
-			enabled = true;
-			
 			multiViewInitialized = false;
 			
 			if (!newConfiguration)
@@ -1673,12 +1704,39 @@ package com.iblsoft.flexiweather.ogc.multiview
 		{
 			return 'InteractiveMultiView: ';
 		}
+		
+		/****************************
+		 * 
+		 * 	Debug console commands
+		 * 
+		 ****************************/
+		
+		public function consoleSynchronisation(): void
+		{
+			if (debugConsole)
+			{
+				
+				debugConsole.print("MultiView enabled = "+enabled, "Info", "MultiView");
+				var layers: Array = synchronizator.getLayersWaitingForSynchronisation();
+				if (layers.length == 0)
+				{
+					debugConsole.print("All layers are synchronised", "Info", "MultiView");
+				} else {
+					debugConsole.print("Layers waiting for synchronisation", "Info", "MultiView");
+					for each (var layer: InteractiveLayer in layers)
+					{
+						debugConsole.print(layer.toString(), "Info", "MultiView");
+					}
+				}
+			}
+		}
 	}
 }
 import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 import com.iblsoft.flexiweather.events.InteractiveWidgetEvent;
 import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
 import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
+import com.iblsoft.flexiweather.ogc.multiview.synchronization.SynchronizatorBase;
 import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
 import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;

@@ -13,6 +13,9 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		function initializeSynchronizator(): void;
 		
 		function invalidateSynchronizator(): void;
+		
+		function closeSynchronizator(): void;
+		
 		function isSynchronizedFor(synchronizedDate: Date): Boolean;
 		function canCreateMap(iw: InteractiveWidget): Boolean;
 		function createMap(iw: InteractiveWidget): void;
@@ -37,5 +40,8 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		
 		function getSynchronisedVariables():Array;
 		function hasSynchronisedVariable(s_variableId: String): Boolean;
+		
+		//debug methods
+		function getLayersWaitingForSynchronisation(): Array;
 	}
 }

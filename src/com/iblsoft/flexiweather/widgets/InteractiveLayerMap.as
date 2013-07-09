@@ -1553,7 +1553,7 @@ package com.iblsoft.flexiweather.widgets
 					continue;
 				if (!so.hasSynchronisedVariable(GlobalVariable.FRAME))
 					continue;
-				debug(this + " setFrame try to synchronize: [" + newFrame.toTimeString() + "]  for " + l.name, 'Info', 'Layer Map');
+//				debug(this + " setFrame try to synchronize: [" + newFrame.toTimeString() + "]  for " + l.name, 'Info', 'Layer Map');
 				
 				
 				var bSynchronized: Boolean = SynchronisationResponse.wasSynchronised(so.synchroniseWith(GlobalVariable.FRAME, newFrame));
@@ -1721,13 +1721,18 @@ package com.iblsoft.flexiweather.widgets
 		}
 		
 		
+		public function toStringWithLayers(): String
+		{
+			var retStr: String = "InteractiveLayerMap [" + mapID + "] ";
+			for each (var l: InteractiveLayer in layers)
+			{
+				retStr += "\n\t"+l;
+			}
+			return retStr;
+		}
 		override public function toString(): String
 		{
 			var retStr: String = "InteractiveLayerMap [" + mapID + "] ";
-//			for each (var l: InteractiveLayer in layers)
-//			{
-//				retStr += "\n\t"+l;
-//			}
 			return retStr;
 		}
 

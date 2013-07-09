@@ -82,7 +82,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		{
 			if (debugConsole)
 				debugConsole.print(str, type, tag);
-//			trace(tag + "| " + type + "| " + str);
+			trace(tag + "| " + type + "| " + str);
 		}
 		
 		private var tempDataDictionary: Dictionary = new Dictionary();
@@ -338,8 +338,8 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 				var synchronizeFromWidgetPosition: int = getWidgetPosition(synchronizeFromWidget, widgetsForSynchronisation);
 				var currFrame: Date = primaryLayer.getSynchronisedVariableValue(GlobalVariable.FRAME) as Date;
 				var currFramePosition: int = getFramePosition(currFrame, frames);
-				if (currFrame)
-					debug("FrameSynchronizator synchronizeFramesSequentialy: curr frame: " + currFrame.toTimeString() + " currFramePosition: " + currFramePosition);
+//				if (currFrame)
+//					debug("FrameSynchronizator synchronizeFramesSequentialy: curr frame: " + currFrame.toTimeString() + " currFramePosition: " + currFramePosition);
 				if (currFramePosition > 0)
 				{
 					var sliceFrom: int = Math.max(0, currFramePosition - synchronizeFromWidgetPosition);
@@ -347,7 +347,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 					frames = frames.slice(sliceFrom, sliceTo);
 					
 					currFramePosition -= sliceFrom;
-					debug("FrameSynchronizator synchronizeFramesSequentialy: sliceFrom: " + sliceFrom + " sliceTo: " + sliceTo);
+//					debug("FrameSynchronizator synchronizeFramesSequentialy: sliceFrom: " + sliceFrom + " sliceTo: " + sliceTo);
 				}
 				if (synchronizeFromWidgetPosition > -1)
 				{
@@ -362,7 +362,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 						if (widget.id != synchronizeFromWidget.id)
 						{
 							var framePos: int = i - synchronizeFromWidgetPosition + currFramePosition;
-							debug("\t FrameSynchronizator synchronizeFramesSequentialy: widget: " + widget.id + " framePos: " + framePos);
+//							debug("\t FrameSynchronizator synchronizeFramesSequentialy: widget: " + widget.id + " framePos: " + framePos);
 							if (framePos >= 0)
 							{
 								var frame: Date = getFrame(framePos, frames);
@@ -374,7 +374,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 									if (currWidgetPrimaryLayer)
 									{
 										var currWidgetFrame: Date = currWidgetPrimaryLayer.getSynchronisedVariableValue(GlobalVariable.FRAME) as Date;
-										if (currWidgetFrame.time != frame.time)
+										if (currWidgetFrame && currWidgetFrame.time != frame.time)
 										{
 											bSynchronizeWidget = true;		
 										}
@@ -389,7 +389,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 										
 									if (bSynchronizeWidget)
 									{
-										debug("\t FrameSynchronizator synchronizeFramesSequentialy: widget: " + widget.id + " framePos: " + framePos + " frame: " + frame.toTimeString());
+//										debug("\t FrameSynchronizator synchronizeFramesSequentialy: widget: " + widget.id + " framePos: " + framePos + " frame: " + frame.toTimeString());
 										
 										listenToWidgetSynchronization(widget);
 										widgetsForSynchronizing.push( {frame: frame, widget: widget } );
