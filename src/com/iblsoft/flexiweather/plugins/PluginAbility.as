@@ -39,11 +39,11 @@ package com.iblsoft.flexiweather.plugins
 		}
 
 		public static function action(classOrInstance: Object,
-				s_id: String, s_plugin_id: String, s_name: String, b_exclusive: Boolean, icon: Class): PluginAbility
+				s_id: String, s_plugin_id: String, s_name: String, s_buttonType: String, icon: Class): PluginAbility
 		{
 			return new PluginAbility(PluginAbility.ACTION, s_id, s_plugin_id, classOrInstance)
 					.withMetadata("name", s_name)
-					.withMetadata("exclusive", b_exclusive)
+					.withMetadata("buttonType", s_buttonType)
 					.withMetadata("icon", icon);
 		}
 
