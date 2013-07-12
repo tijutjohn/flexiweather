@@ -125,4 +125,9 @@
 		
 	</s:Group>
 	
+	<s:Button id="closeButton" label="X" top="10" right="10" width="20" height="20" 
+			  visible="{hostComponent.closeButtonVisible}"
+			  includeInLayout="{hostComponent.closeButtonVisible}"
+			  click="{hostComponent.closeMultiView()}"/>
+	
 </s:Skin>

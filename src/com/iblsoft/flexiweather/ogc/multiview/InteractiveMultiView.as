@@ -60,6 +60,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 	import mx.events.PropertyChangeEvent;
 	import mx.events.ResizeEvent;
 	
+	import spark.components.Button;
 	import spark.components.Group;
 	import spark.components.SkinnableContainer;
 	import spark.components.SkinnableDataContainer;
@@ -97,6 +98,10 @@ package com.iblsoft.flexiweather.ogc.multiview
 	[Event(name = "multiViewSelectionChange", type = "com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewChangeEvent")]
 	
 	/**
+	 * dispatched when multi view should be closed
+	 */	
+	[Event(name = "closeMultiView", type = "com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent")]
+	/**
 	 * dispatched when all interactive widgets are created and added into multi view, but be aware that maps are not loaded or initialized 
 	 */	
 	[Event(name = "multiViewReady", type = "com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent")]
@@ -133,7 +138,12 @@ package com.iblsoft.flexiweather.ogc.multiview
 	{
 		public static var debugConsole: IConsole;
 		
+		[SkinPart (required="true")]
+		public var closeButton: Button;
 		
+		[Bindable]
+		public var closeButtonVisible: Boolean;
+			
 		/**
 		 * This will be set to true after all InteractiveWidget inside multi view will be initialized (all layers loaded and initiliazed 
 		 */		
@@ -394,6 +404,10 @@ package com.iblsoft.flexiweather.ogc.multiview
 			
 			if (synchronizator)
 				synchronizator.initializeSynchronizator();
+			
+			//setting close buttons visibility
+			closeButtonVisible = (newConfiguration.rows * newConfiguration.columns) > 1;
+			
 			
 			for (j = 0; j < newConfiguration.rows; j++)
 			{
@@ -1691,6 +1705,15 @@ package com.iblsoft.flexiweather.ogc.multiview
 			}
 		}
 
+		/**
+		 * Handle will be execuate whn Close button from skin will be clicked 
+		 * 
+		 */		
+		public function closeMultiView(): void
+		{
+			dispatchEvent(new InteractiveMultiViewEvent(InteractiveMultiViewEvent.CLOSE_MULTI_VIEW));
+		}
+		
 		private function debug(str: String, type: String = "Info", tag: String = " InteractiveMultiView"): void
 		{
 			if (debugConsole)

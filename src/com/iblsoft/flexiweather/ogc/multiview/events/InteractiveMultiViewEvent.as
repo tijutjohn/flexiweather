@@ -4,6 +4,8 @@ package com.iblsoft.flexiweather.ogc.multiview.events
 
     public class InteractiveMultiViewEvent extends Event
     {
+        public static const CLOSE_MULTI_VIEW:String = 'closeMultiView';
+		
         public static const MULTI_VIEW_READY:String = 'multiViewReady';
 
         public static const MULTI_VIEW_MAPS_LOADING_STARTED:String = 'multiViewMapsLoadingStarted';
