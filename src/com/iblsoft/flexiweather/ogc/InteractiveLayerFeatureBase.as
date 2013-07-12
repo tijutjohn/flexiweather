@@ -124,6 +124,14 @@ package com.iblsoft.flexiweather.ogc
 			var feature: FeatureBase = event.target as FeatureBase;
 			feature.visible = event.insideViewBBox;
 		}
+		
+		override public function onAreaChanged(b_finalChange:Boolean):void
+		{
+			super.onAreaChanged(b_finalChange);
+			
+			updateAllFeatures();
+		}
+		
 		public function updateAllFeatures(): void
 		{
 			var i_count: int = featuresContainer.numChildren;

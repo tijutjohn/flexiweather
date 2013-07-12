@@ -523,7 +523,8 @@ package com.iblsoft.flexiweather.widgets
 			if (l.parent == m_layerContainer)
 			{
 				m_layerContainer.removeElement(l);
-				l.destroy();
+				if (b_destroy)
+					l.destroy();
 				l.container = null;
 			}
 			notifyWidgetChanged(SynchronizationChangeType.MAP_LAYER_REMOVED, this);
@@ -554,6 +555,7 @@ package com.iblsoft.flexiweather.widgets
 
 		private function debugLayers(): void
 		{
+			return;
 			var total: int = m_layerContainer.numElements;
 			if (total > 1)
 			{
@@ -600,7 +602,7 @@ package com.iblsoft.flexiweather.widgets
 						if (ilJ.zOrder < ilI.zOrder)
 						{
 							// swap Ith and Jth layer, we know that J > I
-							trace("\nswap layers " + ilJ.name + " , " + ilI.name);
+//							trace("\nswap layers " + ilJ.name + " , " + ilI.name);
 							m_layerContainer.swapElements(ilJ, ilI);
 						}
 					}
@@ -834,6 +836,7 @@ package com.iblsoft.flexiweather.widgets
 			{
 				var pX: Number = (ptInOurCRS.x - m_viewBBox.xMin) * (width - 1) / m_viewBBox.width;
 				var pY: Number = height - 1 - (ptInOurCRS.y - m_viewBBox.yMin) * (height - 1) / m_viewBBox.height;
+				trace("coorToPoint: " + c.toLaLoCoord() + " to point: " + pX + " , " + pY + " m_viewBBox: " + m_viewBBox.toBBOXString()); 
 				return new Point(pX, pY);
 			}
 			return null;
@@ -2181,6 +2184,11 @@ package com.iblsoft.flexiweather.widgets
 			return features;
 		}
 
+		public function getHermitSpline(_coords: Array, _closed: Boolean = false, _step: Number = 0.01): Array
+		{
+			var features: Array = m_featureSplitter.splitCoordHermitSplineToArrayOfPointPolyLines(_coords, _closed);
+			return features;
+		}
 		public function drawHermitSpline(g: ICurveRenderer, _coords: Array, _closed: Boolean = false, _drawHiddenHitMask: Boolean = false, // PREPARED PARAMETER FOR DRAWING HIT MASK AREA
 				_step: Number = 0.01): Array
 		{
