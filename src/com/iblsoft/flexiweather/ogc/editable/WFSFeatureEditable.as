@@ -119,6 +119,47 @@ package com.iblsoft.flexiweather.ogc.editable
 			dispatchEvent(event);
 		}
 
+		override protected function notifyCoordinateInside(coord: Coord, coordIndex: uint): void
+		{
+			super.notifyCoordinateInside(coord, coordIndex);
+			
+			changeMoveablePointVisibility(coord, coordIndex, true);
+		}
+		
+		override protected function notifyCoordinateOutside(coord: Coord, coordIndex: uint): void
+		{
+			super.notifyCoordinateOutside(coord, coordIndex);
+		
+			changeMoveablePointVisibility(coord, coordIndex, false);
+		}
+		
+		private function changeMoveablePointVisibility(coord: Coord, coordIndex: uint, visible: Boolean): void
+		{
+			//hide correct moveable points
+			
+			var mp: MoveablePoint;
+			var i: uint;
+			
+			var reflectionsTotal: int = reflectionDictionary.totalReflections;
+			for (var r: int = 0; r < reflectionsTotal; r++)
+			{
+				var reflection: WFSEditableReflectionData = reflectionDictionary.getReflection(r) as WFSEditableReflectionData;
+				if (reflection)
+				{
+					var pTotal: int = reflection.points.length;
+					//					trace("FeatureEditable upate: pTotal: " + pTotal);
+					if (coordIndex < pTotal)
+					{
+						mp = reflection.moveablePoints[coordIndex] as MoveablePoint;
+						if (mp.visible != visible)
+						{
+							mp.visible = visible;
+						}
+					}
+				}
+			}
+		}
+		
 		override public function update(changeFlag: FeatureUpdateContext): void
 		{
 			super.update(changeFlag);
@@ -134,7 +175,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				if (reflection)
 				{
 					var pTotal: int = reflection.points.length;
-					trace("FeatureEditable upate: pTotal: " + pTotal); 
+//					trace("FeatureEditable upate: pTotal: " + pTotal); 
 					for (i = 0; i < pTotal; ++i)
 					{
 						var pt: Point = reflection.points[i] as Point;
@@ -153,6 +194,7 @@ package com.iblsoft.flexiweather.ogc.editable
 						if (pt == null || mp == null)
 							continue; // TODO: check for CRS
 						var p: Point = mp.getPoint()
+						trace("WFSFeatureEditable update: pt: " + pt + " p: " + p + " for reflection r: " + r);
 						if (p && !p.equals(pt))
 						{
 							// reuse MoveablePoint instance, just change it's location 

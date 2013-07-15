@@ -157,11 +157,22 @@ package com.iblsoft.flexiweather.ogc
 							if (iw.coordInside(currCoord))
 							{
 								featureIsInside = true;
+								notifyCoordinateInside(c, i);
+							} else {
+								trace("coord is outside");
+								notifyCoordinateOutside(c, i);
 							}
 						}
-						
+							
 						pt = iw.coordToPoint(c);
 						m_points.addItem(pt);
+						
+						if (reflectedCoords && reflectedCoords.length == 0)
+						{
+							//coordinates has no reflection, has to be hiden
+							trace("coordinates has no reflection, has to be hiden");
+							notifyCoordinateOutside(c, i);
+						}
 					}
 					if (featureIsInViewBBox != featureIsInside)
 					{
@@ -175,6 +186,21 @@ package com.iblsoft.flexiweather.ogc
 		}
 		public var featureIsInViewBBox: Boolean;
 
+		protected function notifyCoordinateInside(coord: Coord, coordIndex: uint): void
+		{
+			var event: FeatureEvent = new FeatureEvent(FeatureEvent.COORDINATE_VISIBLE, true);
+			event.coordinate = coord;
+			event.coordinateIndex = coordIndex;
+			dispatchEvent(event);
+		}
+		
+		protected function notifyCoordinateOutside(coord: Coord, coordIndex: uint): void
+		{
+			var event: FeatureEvent = new FeatureEvent(FeatureEvent.COORDINATE_INVISIBLE, true);
+			event.coordinate = coord;
+			event.coordinateIndex = coordIndex;
+			dispatchEvent(event);
+		}
 		/** Called internally before the feature is removed from the master. */
 		public function cleanup(): void
 		{
