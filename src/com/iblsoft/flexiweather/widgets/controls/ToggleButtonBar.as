@@ -111,6 +111,7 @@ package com.iblsoft.flexiweather.widgets.controls
 				
 				if (renderer is ToggleButtonBarButton)
 				{
+					ToggleButtonBarButton(renderer).toolTip = data.tooltip;
 					ToggleButtonBarButton(renderer).type = data.type;
 					ToggleButtonBarButton(renderer).enabled = data.enabled;
 				}
