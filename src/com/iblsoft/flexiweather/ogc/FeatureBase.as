@@ -61,6 +61,11 @@ package com.iblsoft.flexiweather.ogc
 		protected var m_points: ArrayCollection = new ArrayCollection();
 		protected var mb_pointsDirty: Boolean = false;
 
+		override public function set visible(value:Boolean):void
+		{
+			super.visible = value;
+		}
+		
 		public function FeatureBase(s_namespace: String, s_typeName: String, s_featureId: String)
 		{
 			super();
@@ -147,7 +152,7 @@ package com.iblsoft.flexiweather.ogc
 						for each (var currCoordObject: Object in reflectedCoords)
 						{
 							var currPoint: Point = (currCoordObject.point as Point)
-							var currCoord: Coord = new Coord(c.crs, currPoint.x, currPoint.y);
+							var currCoord: Coord = new Coord(iw.crs, currPoint.x, currPoint.y);
 							
 							if (iw.coordInside(currCoord))
 							{
