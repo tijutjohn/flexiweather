@@ -68,7 +68,7 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 		override public function renderPreview(f_width: Number, f_height: Number, iw: InteractiveWidget = null): void
 		{
 			if (!iw)
-				iw = new InteractiveWidget();
+				iw = new InteractiveWidget(true);
 			var lGoogleMaps: InteractiveLayerGoogleMaps = createInteractiveLayer(iw) as InteractiveLayerGoogleMaps;
 			lGoogleMaps.renderPreview(lGoogleMaps.graphics, f_width, f_height);
 		}
