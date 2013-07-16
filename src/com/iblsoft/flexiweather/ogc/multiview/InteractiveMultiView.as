@@ -912,6 +912,10 @@ package com.iblsoft.flexiweather.ogc.multiview
 				if (_selectedInteractiveWidget)
 				{
 					registerSelectedInteractiveWidget();
+					if (imvce.oldInteractiveWidget)
+					{
+						imvce.oldInteractiveWidget.moveAnticollisionLayoutsObjects(_selectedInteractiveWidget);
+					}
 				}
 				
 				imvce.newInteractiveWidget = _selectedInteractiveWidget;
@@ -1719,7 +1723,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 			if (debugConsole)
 				debugConsole.print(str, type, tag);
 			
-			trace(tag + "| " + type + "| " + str);
+//			trace(tag + "| " + type + "| " + str);
 //			LoggingUtils.dispatchLogEvent(this, tag + "| " + type + "| " + str);
 		}
 

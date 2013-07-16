@@ -119,7 +119,7 @@ package com.iblsoft.flexiweather.ogc.managers
 							;
 				}
 				var groupParentXML: XML;
-				var iw: InteractiveWidget = new InteractiveWidget();
+				var iw: InteractiveWidget = new InteractiveWidget(true);
 				iw.width = 150;
 				iw.height = 100;
 				var lWMS: InteractiveLayerWMS;

@@ -55,7 +55,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		override public function renderPreview(f_width: Number, f_height: Number, iw: InteractiveWidget = null): void
 		{
 			if (!iw)
-				iw = new InteractiveWidget();
+				iw = new InteractiveWidget(true);
 			var lWMSWithQTT: InteractiveLayerWMSWithQTT = createInteractiveLayer(iw) as InteractiveLayerWMSWithQTT;
 			lWMSWithQTT.renderPreview(lWMSWithQTT.graphics, f_width, f_height);
 		}
@@ -65,7 +65,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			var s_url: String = '';
 			if (ms_previewURL == null || ms_previewURL.length == 0)
 			{
-				var iw: InteractiveWidget = new InteractiveWidget();
+				var iw: InteractiveWidget = new InteractiveWidget(true);
 				var lWMSWithQTT: InteractiveLayerWMSWithQTT = createInteractiveLayer(iw) as InteractiveLayerWMSWithQTT;
 				var lCfg: WMSWithQTTLayerConfiguration = new WMSWithQTTLayerConfiguration();
 				lCfg.avoidTiling = true;

@@ -27,7 +27,7 @@ package com.iblsoft.flexiweather.widgets
 	[Event(name = "stopPanning", type = "flash.events.Event")]
 	public class InteractiveLayerPan extends InteractiveLayer
 	{
-		public static const MOUSE_MOVE_DELAY: int = 600;
+		public static const MOUSE_MOVE_DELAY: int = 1500;
 		
 		public static const PAN: String = 'pan';
 		public static const START_PANNING: String = 'startPanning';
@@ -53,7 +53,7 @@ package com.iblsoft.flexiweather.widgets
 			
 			_type = PAN;
 			
-			_doPanDelayed = new DoPanDelay(doRealPan, 800);
+			_doPanDelayed = new DoPanDelay(doRealPan, MOUSE_MOVE_DELAY);
 			
 			addEventListener(ChildExistenceChangedEvent.CHILD_ADD, onChildAdd);
 			waitForContainer();
@@ -201,7 +201,7 @@ package com.iblsoft.flexiweather.widgets
 				_moveIntervalPoint = new Point(event.localX, event.localY);
 			}
 			clearInterval(_moveInterval);
-			_moveInterval = setInterval(onMouseMoveDelay, 600);
+			_moveInterval = setInterval(onMouseMoveDelay, MOUSE_MOVE_DELAY);
 			if (_moveIntervalPoint)
 			{
 				if (doPanTo(_moveIntervalPoint, finalChange, 'onMouseMove'))

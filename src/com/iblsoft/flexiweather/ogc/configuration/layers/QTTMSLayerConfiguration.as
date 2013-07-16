@@ -94,7 +94,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		override public function renderPreview(f_width: Number, f_height: Number, iw: InteractiveWidget = null): void
 		{
 			if (!iw)
-				iw = new InteractiveWidget();
+				iw = new InteractiveWidget(true);
 			var l: InteractiveLayerQTTMS = createInteractiveLayer(iw) as InteractiveLayerQTTMS;
 			l.renderPreview(l.graphics, f_width, f_height);
 		}

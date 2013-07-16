@@ -90,14 +90,17 @@ package com.iblsoft.flexiweather.widgets
 		private var m_layerLayoutParent: UIComponent;
 		private var m_lastResizeTime: Number;
 		private var m_wmsCacheManager: WMSCacheManager;
+		
 		/**
 		 * anticollision layout for Labels
 		 */
-		private var m_labelLayout: AnticollisionLayout = new AnticollisionLayout('Label Layout');
+		private var m_labelLayout: AnticollisionLayout;
+		
 		/**
 		 * anticollision layout for Labels
 		 */
-		private var m_objectLayout: AnticollisionLayout = new AnticollisionLayout('Object Layout');
+		private var m_objectLayout: AnticollisionLayout;
+		
 		/**
 		 * Set it to true when you want suspend anticaollision processing (e.g. user is dragging map)
 		 */
@@ -107,6 +110,10 @@ package com.iblsoft.flexiweather.widgets
 		private var _enableMouseWheel: Boolean;
 		private var _enableGestures: Boolean;
 
+		/**
+		 * Helper variable, if usedForIcon == true, it's used for interactive icon (e.g. menu icon) 
+		 */		
+		public var usedForIcon: Boolean;
 
 		override public function set enabled(value: Boolean): void
 		{
@@ -163,9 +170,15 @@ package com.iblsoft.flexiweather.widgets
 			return null;
 		}
 		
-		public function InteractiveWidget()
+		public function InteractiveWidget(bUsedForIcon: Boolean = false)
 		{
 			super();
+		
+			usedForIcon = bUsedForIcon;
+			
+			m_labelLayout = new AnticollisionLayout('Label Layout', this);
+			m_objectLayout = new AnticollisionLayout('Object Layout', this);
+			
 			enableGestures = true;
 			enableMouseClick = true;
 			enableMouseMove = true;
@@ -757,7 +770,11 @@ package com.iblsoft.flexiweather.widgets
 		/** Converts screen point (pixels) into Coord with current CRS. */
 		public function pointToCoord(x: Number, y: Number): Coord
 		{
-			return new Coord(ms_crs, x * m_viewBBox.width / (width - 1) + m_viewBBox.xMin, (height - 1 - y) * m_viewBBox.height / (height - 1) + m_viewBBox.yMin)
+			var cx: Number = x * m_viewBBox.width / (width - 1) + m_viewBBox.xMin;
+			var cy: Number = (height - 1 - y) * m_viewBBox.height / (height - 1) + m_viewBBox.yMin;
+//			trace("pointToCoord: ["+width+","+height+"] = viewBBox ["+m_viewBBox.width+","+m_viewBBox.height+"]");
+//			trace("pointToCoord: ["+x+","+y+"] = crs: " + ms_crs + " ["+cx+","+cy+"]");
+			return new Coord(ms_crs, cx , cy);
 		}
 
 		public function coordInside(c: Coord): Boolean
@@ -836,7 +853,7 @@ package com.iblsoft.flexiweather.widgets
 			{
 				var pX: Number = (ptInOurCRS.x - m_viewBBox.xMin) * (width - 1) / m_viewBBox.width;
 				var pY: Number = height - 1 - (ptInOurCRS.y - m_viewBBox.yMin) * (height - 1) / m_viewBBox.height;
-				trace("coorToPoint: " + c.toLaLoCoord() + " to point: " + pX + " , " + pY + " m_viewBBox: " + m_viewBBox.toBBOXString()); 
+//				trace("coorToPoint: " + c.toLaLoCoord() + " to point: " + pX + " , " + pY + " m_viewBBox: " + m_viewBBox.toBBOXString()); 
 				return new Point(pX, pY);
 			}
 			return null;
@@ -2216,6 +2233,12 @@ package com.iblsoft.flexiweather.widgets
 		//*****************************************************************************************
 		// AntiCollision functionality
 		//*****************************************************************************************
+		public function moveAnticollisionLayoutsObjects(widget: InteractiveWidget): void
+		{
+			m_labelLayout.moveObjectIntoAnticollisionLayout(widget.labelLayout);
+			m_objectLayout.moveObjectIntoAnticollisionLayout(widget.objectLayout);
+		}
+		
 		public function moveAnticollisionLayoutToTop(): void
 		{
 			removeElement(m_layerLayoutParent);

@@ -37,7 +37,9 @@ package com.iblsoft.flexiweather.widgets
 	import mx.collections.ArrayCollection;
 	import mx.controls.Alert;
 	import mx.events.CollectionEvent;
+	import mx.events.CollectionEventKind;
 	import mx.events.DynamicEvent;
+	import mx.events.PropertyChangeEvent;
 
 	[Event(name = "mapLoadingStarted", type = "com.iblsoft.flexiweather.events.InteractiveLayerMapEvent")]
 	[Event(name = "mapLoadingFinished", type = "com.iblsoft.flexiweather.events.InteractiveLayerMapEvent")]
@@ -580,7 +582,20 @@ package com.iblsoft.flexiweather.widgets
 		override protected function onLayerCollectionChanged(event: CollectionEvent): void
 		{
 			super.onLayerCollectionChanged(event);
-			notifyTimeAxisUpdate();
+			
+			var bNotifyTimeAxisUpdate: Boolean = true;
+			
+			if (event.kind == CollectionEventKind.UPDATE)
+			{
+				if (event.items.length == 1)
+				{
+					var pce: PropertyChangeEvent = event.items[0] as PropertyChangeEvent;
+					if (!pce.newValue && !pce.oldValue)
+						bNotifyTimeAxisUpdate = false;
+				}
+			}
+			if (bNotifyTimeAxisUpdate)
+				notifyTimeAxisUpdate();
 		}
 
 		public function onLayerDeselected(layer: InteractiveLayer): void
@@ -1745,7 +1760,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (debugConsole)
 				debugConsole.print(str, type, tag);
-			trace(tag + "| " + type + "| " + str);
+//			trace(tag + "| " + type + "| " + str);
 //			LoggingUtils.dispatchLogEvent(this, " ILM: " + str);
 		}
 	}

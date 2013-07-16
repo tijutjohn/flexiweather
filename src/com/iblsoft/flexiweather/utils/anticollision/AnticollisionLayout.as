@@ -17,6 +17,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 	import com.iblsoft.flexiweather.utils.ProfilerUtils;
 	import com.iblsoft.flexiweather.utils.geometry.ILineSegmentApproximableBounds;
 	import com.iblsoft.flexiweather.utils.geometry.LineSegment;
+	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.display.BitmapData;
 	import flash.display.BlendMode;
@@ -88,9 +89,17 @@ package com.iblsoft.flexiweather.utils.anticollision
 			}
 		}
 		
-		public function AnticollisionLayout(layoutName: String)
+		public function AnticollisionLayout(layoutName: String, parent: DisplayObject)
 		{
 			super();
+			
+			if (parent && parent is InteractiveWidget)
+			{
+				if (!(parent as InteractiveWidget).usedForIcon)
+				{
+					trace("new AnticollisionLayout is created");
+				}
+			}
 			_layoutName = layoutName;
 			_updateLocationDictionary = new UpdateLocationDictionary(this);
 			m_drawAnnotationAnchor = true;
@@ -278,6 +287,33 @@ package com.iblsoft.flexiweather.utils.anticollision
 			if (lo == null)
 				return null;
 			return lo.referenceLocation;
+		}
+		
+		public function moveObjectIntoAnticollisionLayout(layout: AnticollisionLayout): void
+		{
+			if (layout)
+			{
+				var lo: AnticollisionLayoutObject
+				for (var i: int = 0; i < ma_layoutObjects.length; i++)
+				{
+					lo = ma_layoutObjects[i];
+					if (lo.name == "Obstacle")
+					{
+						layout.addObstacle(lo.object);
+					} else {
+						layout.addObject(lo.object, lo.objectsToAnchor, lo.reflectionID, lo.displacementMode, lo.managedChild);
+					}
+					
+				}
+				for (var i: int = 0; i < ma_layoutObjects.length; i++)
+				{
+					lo = ma_layoutObjects[0];
+					removeObject(lo.object);
+				}
+				trace("ma_layoutObjects: " + ma_layoutObjects.length);
+				setDirty();
+				updateLayoutObjectsLength();
+			}
 		}
 
 		public function reset(): void

@@ -414,7 +414,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			var s_url: String = '';
 			if (ms_previewURL == null || ms_previewURL.length == 0)
 			{
-				var iw: InteractiveWidget = new InteractiveWidget();
+				var iw: InteractiveWidget = new InteractiveWidget(true);
 				var lWMS: InteractiveLayerWMS = createInteractiveLayer(iw) as InteractiveLayerWMS;
 				if (lWMS != null)
 				{
@@ -450,7 +450,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		override public function renderPreview(f_width: Number, f_height: Number, iw: InteractiveWidget = null): void
 		{
 			if (!iw)
-				iw = new InteractiveWidget();
+				iw = new InteractiveWidget(true);
 			var lWMS: InteractiveLayerWMS = createInteractiveLayer(iw) as InteractiveLayerWMS;
 			lWMS.renderPreview(lWMS.graphics, f_width, f_height);
 		}
