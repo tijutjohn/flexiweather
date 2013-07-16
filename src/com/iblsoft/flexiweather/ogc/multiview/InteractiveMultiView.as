@@ -684,8 +684,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 				stopWatchingChanges();
 				notifyWidgetsMapsLoadingStarted();
 //				var _serializedMap: XMLStorage = new XMLStorage(mapXML);
-				_loadingMapsCount = _interactiveWidgets.widgets.length;
-				_initializingMapsCount = _interactiveWidgets.widgets.length;
+				_loadingMapsCount = 0;// _interactiveWidgets.widgets.length;
+				_initializingMapsCount = 0; //_interactiveWidgets.widgets.length;
 				
 				var cnt: int = 0;
 				for each (var currIW: InteractiveWidget in _interactiveWidgets.widgets)
@@ -712,10 +712,43 @@ package com.iblsoft.flexiweather.ogc.multiview
 					}
 					*/
 					
-					loadMapForWidget(currIW, mapXML, cnt);
-					cnt++;
+					if (getMapInfoForPosition(cnt))
+					{
+						_loadingMapsCount++;
+						_initializingMapsCount++;
+						loadMapForWidget(currIW, mapXML, cnt);
+						cnt++;
+					}
 				}
 			}
+		}
+		
+		private function getMapInfoForPosition(position: int): Boolean
+		{
+			if (_configuration && _configuration.synchronizators && _configuration.synchronizators.length > 0)
+			{
+				if (_configuration.customData && _configuration.customData.hasOwnProperty('dataProvider'))
+				{
+					var dp: ArrayCollection = _configuration.customData.dataProvider as ArrayCollection;
+					if (dp && dp.length > 0 && dp.length > position)
+					{
+						var synchronizator: ISynchronizator = _configuration.synchronizators[0] as ISynchronizator;
+						if (synchronizator is MapSynchronizator)
+						{
+							var mapSynchronizator: MapSynchronizator = synchronizator as MapSynchronizator;
+							var obj: Object = dp.getItemAt(position) as Object;
+							if (obj && (obj.hasOwnProperty('fullPath') || obj.hasOwnProperty('path')))
+							{
+								return true;
+							} else {
+								return false;
+							}
+								
+						}
+					}
+				}
+			}
+			return true;
 		}
 		
 		private function loadMapForWidget(widget: InteractiveWidget, mapXML: XML, position: int): void
