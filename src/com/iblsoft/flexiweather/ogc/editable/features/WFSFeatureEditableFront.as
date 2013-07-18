@@ -7,7 +7,10 @@ package com.iblsoft.flexiweather.ogc.editable.features
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.symbology.FrontCurveRenderer;
 	import com.iblsoft.flexiweather.utils.CubicBezier;
+	import com.iblsoft.flexiweather.utils.draw.DrawMode;
+	
 	import flash.geom.Point;
+	
 	import mx.collections.ArrayCollection;
 
 	/**
@@ -27,9 +30,39 @@ package com.iblsoft.flexiweather.ogc.editable.features
 		{
 			super.update(changeFlag);
 			graphics.clear();
-			var i_color: uint = 0x00000;
-			var i_colorSecondary: uint = 0x00000;
-			var i_markType: uint = 0;
+			
+			updateFrontProperties();
+				
+			var a_points: ArrayCollection = getPoints();
+			if (a_points.length > 1)
+			{
+				var splinePoints: Array = CubicBezier.calculateHermitSpline(a_points.toArray(), false);
+				var coords: Array = [];
+				//what is the best way to check in which projection was front created? For now we check CRS of first coordinate
+				var crs: String = (coordinates[0] as Coord).crs;
+				//convert points to Coords
+				for each (var p: Point in splinePoints)
+				{
+					coords.push(master.container.pointToCoord(p.x, p.y));
+				}
+				if (master)
+				{
+					master.container.drawGeoPolyLine(getFontCurveRenderer, coords, DrawMode.PLAIN);
+//					var featureReflections: Array = master.container.drawPolyline(new FrontCurveRenderer(graphics, i_color, i_colorSecondary, i_markType),
+//							coords);
+				}
+//				createHitMask(featureReflections);
+			}
+//			else
+//				renderFallbackGraphics(i_color);
+		}
+		
+		private var i_color: uint = 0x00000;
+		private var i_colorSecondary: uint = 0x00000;
+		private var i_markType: uint = 0;
+		
+		private function updateFrontProperties(): void
+		{
 			if (type.substr(0, 4) == FrontType.WARM)
 			{
 				if (useMonochrome)
@@ -99,33 +132,11 @@ package com.iblsoft.flexiweather.ogc.editable.features
 					i_color = 0xE4DD0F;
 				i_markType = 1;
 			}
-			var a_points: ArrayCollection = getPoints();
-			if (a_points.length > 1)
-			{
-				//CubicBezier.curveThroughPoints(
-				//		new FrontCurveRenderer(graphics, i_color, i_colorSecondary, i_markType),
-				//		a_points.toArray());
-//				m_curvePoints = CubicBezier.drawHermitSpline(new FrontCurveRenderer(graphics, i_color, i_colorSecondary, i_markType),
-//							a_points.toArray());
-				var splinePoints: Array = CubicBezier.calculateHermitSpline(a_points.toArray(), false);
-				var coords: Array = [];
-				//what is the best way to check in which projection was front created? For now we check CRS of first coordinate
-				var crs: String = (coordinates[0] as Coord).crs;
-				//convert points to Coords
-				for each (var p: Point in splinePoints)
-				{
-					coords.push(master.container.pointToCoord(p.x, p.y));
-				}
-				if (master)
-				{
-//					m_iw.drawPolyline(new FrontCurveRenderer(canvas.graphics, 0x880000, 0x0000ff, FrontCurveRenderer.MARK_WARM), coords);
-					var featureReflections: Array = master.container.drawPolyline(new FrontCurveRenderer(graphics, i_color, i_colorSecondary, i_markType),
-							coords);
-				}
-				createHitMask(featureReflections);
-			}
-			else
-				renderFallbackGraphics(i_color);
+		}
+		public function getFontCurveRenderer(reflection: String): FrontCurveRenderer
+		{
+			updateFrontProperties();
+			return new FrontCurveRenderer(graphics, i_color, i_colorSecondary, i_markType);
 		}
 	}
 }
