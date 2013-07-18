@@ -140,6 +140,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 	{
 		public static var debugConsole: IConsole;
 		
+		public var usePreloader: Boolean;
+		
 		[SkinPart (required="true")]
 		public var closeButton: Button;
 		
@@ -464,14 +466,18 @@ package com.iblsoft.flexiweather.ogc.multiview
 		
 		private function getPreloaderLayer(): InteractiveLayerPreloader
 		{
-			if (_preloaders.length > 0)
+			if (usePreloader)
 			{
-				return _preloaders.shift();
-			}
-			
-			var preloader: InteractiveLayerPreloader = new InteractiveLayerPreloader();
-			
-			return preloader;
+				if (_preloaders.length > 0)
+				{
+					return _preloaders.shift();
+				}
+				
+				var preloader: InteractiveLayerPreloader = new InteractiveLayerPreloader();
+				
+				return preloader;
+			} 
+			return null;
 		}
 		
 		private function createInteractiveWidget(): InteractiveWidget
@@ -486,7 +492,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 			iw.addLayer(mapLabel);
 			iw.addLayer(layerMap);
 			//add preloader
-			iw.addLayer(getPreloaderLayer());
+			if (usePreloader)
+				iw.addLayer(getPreloaderLayer());
 			return iw;
 		}
 

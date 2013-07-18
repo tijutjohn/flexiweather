@@ -435,6 +435,13 @@ package com.iblsoft.flexiweather.widgets
 			var ilme: InteractiveLayerMapEvent = new InteractiveLayerMapEvent(InteractiveLayerMapEvent.MAP_LOADING_STARTED);
 			dispatchEvent(ilme);
 		}
+		public function progressMapLoading(loadedLayers: uint, totalLayers: uint): void
+		{
+			var ilme: InteractiveLayerMapEvent = new InteractiveLayerMapEvent(InteractiveLayerMapEvent.MAP_LOADING_PROGRESS);
+			ilme.loadedLayers = loadedLayers;
+			ilme.totalLayers = totalLayers;
+			dispatchEvent(ilme);
+		}
 		public function finishMapLoading(): void
 		{
 			loadingStatus = InteractiveLayerMap.LOADING_STATUS_READY;
@@ -566,11 +573,13 @@ package com.iblsoft.flexiweather.widgets
 
 		public function notifyAllLayersAreInitialized(): void
 		{
+			trace("\n" + this + " notifyAllLayersAreInitialized");
 			dispatchEvent(new Event(MAP_LAYERS_INITIALIZED));
 		}
 			
 		private function notifyTimeAxisUpdate(): void
 		{
+			trace("\n" + this + " notifyTimeAxisUpdate");
 			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
 		}
 
