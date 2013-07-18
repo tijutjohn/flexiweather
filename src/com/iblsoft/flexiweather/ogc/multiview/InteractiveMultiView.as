@@ -35,6 +35,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerLabel;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerPan;
+	import com.iblsoft.flexiweather.widgets.InteractiveLayerPreloader;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerZoom;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
@@ -52,6 +53,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 	import mx.collections.ArrayCollection;
 	import mx.collections.IList;
 	import mx.controls.Alert;
+	import mx.controls.ProgressBar;
 	import mx.core.UIComponent;
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
@@ -151,7 +153,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 		
 		private var _selectedInteractiveWidget: InteractiveWidget;
 		private var _interactiveWidgets: WidgetCollection;
-
 
 		public function get multiViewInitialized():Boolean
 		{
@@ -454,6 +455,25 @@ package com.iblsoft.flexiweather.ogc.multiview
 		
 		private static var WIDGET_UI: int = 0;
 
+		
+		private var _preloaders: Array = [];
+		private function disposeMultiViewPreloaderLayer(preloader: InteractiveLayerPreloader): void
+		{
+			_preloaders.push(preloader);	
+		}
+		
+		private function getPreloaderLayer(): InteractiveLayerPreloader
+		{
+			if (_preloaders.length > 0)
+			{
+				return _preloaders.shift();
+			}
+			
+			var preloader: InteractiveLayerPreloader = new InteractiveLayerPreloader();
+			
+			return preloader;
+		}
+		
 		private function createInteractiveWidget(): InteractiveWidget
 		{
 			var id: int = WIDGET_UI++
@@ -465,6 +485,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 			var layerMap: InteractiveLayerMap = new InteractiveLayerMap(iw);
 			iw.addLayer(mapLabel);
 			iw.addLayer(layerMap);
+			//add preloader
+			iw.addLayer(getPreloaderLayer());
 			return iw;
 		}
 
@@ -761,6 +783,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 				widget.setViewBBox(_oldViewBBox, true);
 			widget.stopListenForChanges();
 			
+			updatePreloaderLabel(widget, "Loading map...", 1, 4);
+			
 			if (!synchronizator || !synchronizator.canCreateMap(widget))
 			{
 				createMapFromSerialization(widget, mapXML);
@@ -782,6 +806,16 @@ package com.iblsoft.flexiweather.ogc.multiview
 			iw.interactiveLayerMap.serialize(_serializedMap);
 		}
 
+		private function updatePreloaderLabel(widget: InteractiveWidget, label: String, loaded:  Number = 0, total: Number = 1): void
+		{
+			var preloader: InteractiveLayerPreloader = widget.getLayerByType(InteractiveLayerPreloader) as InteractiveLayerPreloader;
+			if (preloader)
+			{
+				preloader.visible = true;
+				preloader.setLabel(label);
+				preloader.setProgress(loaded, total);
+			}
+		}
 //		public function removeAllLayers(removeLayerCallback: Function = null): void
 //		{
 //			for each (var iw: InteractiveWidget in _interactiveWidgets.widgets)
@@ -855,8 +889,59 @@ package com.iblsoft.flexiweather.ogc.multiview
 		
 		private var _mapLayersWatchers: Dictionary = new Dictionary(true);
 
+		private function hidePreloader(widget: InteractiveWidget): void
+		{
+			trace("hidePreloaded");
+			var preloader: InteractiveLayerPreloader = widget.getLayerByType(InteractiveLayerPreloader) as InteractiveLayerPreloader;
+			if (preloader)
+			{
+//				widget.removeLayer(preloader);
+				preloader.visible = false;
+			}
+		}
+		
+		public function mapIsReady(widget: InteractiveWidget): void
+		{
+			if (widget)
+			{
+				updatePreloaderLabel(widget, "Map initialized.", 100, 100);
+				setTimeout(hidePreloader, 2000, widget);
+			}
+		}
+		
+		
+		
+		private function onMapLayersInitialized(event: Event): void
+		{
+			
+			var ilm: InteractiveLayerMap = event.target as InteractiveLayerMap;
+			if (ilm)
+			{
+				ilm.finishMapLoading();
+			}
+			
+			var widget: InteractiveWidget = ilm.container as InteractiveWidget;
+			mapIsReady(widget);
+			
+			notifyWidgetsMapLayersInitialized();
+			_initializingMapsCount--;
+			if (_initializingMapsCount == 0)
+			{
+				setTimeout(allWidgetsMapLayersAreInitialized, 2000);
+			}
+		}
+		
+		/**
+		 * Used for MapSynchronizator 
+		 * @param event
+		 * 
+		 */		
 		private function onSynchronizatorMapReady(event: SynchronisationEvent): void
 		{
+			trace("onSynchronizatorMapReady");
+			var widget: InteractiveWidget = event.widget;
+			mapIsReady(widget);
+			
 			notifyWidgetsMapLayersInitialized();
 			
 			_loadingMapsCount--;
@@ -884,23 +969,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 			if (_loadingMapsCount == 0)
 			{
 				notifyWidgetsMapLoaded();
-			}
-		}
-
-		private function onMapLayersInitialized(event: Event): void
-		{
-			
-			var ilm: InteractiveLayerMap = event.target as InteractiveLayerMap;
-			if (ilm)
-			{
-				ilm.finishMapLoading();
-			}
-			
-			notifyWidgetsMapLayersInitialized();
-			_initializingMapsCount--;
-			if (_initializingMapsCount == 0)
-			{
-				setTimeout(allWidgetsMapLayersAreInitialized, 2000);
 			}
 		}
 

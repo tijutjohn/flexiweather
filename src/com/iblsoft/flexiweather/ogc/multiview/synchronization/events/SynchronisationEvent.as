@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.ogc.multiview.synchronization.events
 {
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
+	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.events.Event;
 
@@ -17,6 +18,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization.events
 		public var globalVariableValue: Object;
 
 		public var layer: InteractiveLayerMSBase;
+		public var widget: InteractiveWidget;
 		
 		public function SynchronisationEvent(type: String, bubbles: Boolean = false, cancelable: Boolean = false)
 		{
@@ -29,6 +31,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization.events
 			se.globalVariable = globalVariable;
 			se.globalVariableValue = globalVariableValue;
 			se.layer = layer;
+			se.widget = widget;
 			
 			return se;
 		}
