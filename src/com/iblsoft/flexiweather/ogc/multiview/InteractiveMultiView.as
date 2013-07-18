@@ -911,6 +911,17 @@ package com.iblsoft.flexiweather.ogc.multiview
 		
 		
 		
+		private function onMapLayersProgress(event: InteractiveLayerMapEvent): void
+		{
+			var ilm: InteractiveLayerMap = event.target as InteractiveLayerMap;
+			var widget: InteractiveWidget = ilm.container as InteractiveWidget;
+			
+			if (widget)
+			{
+				updatePreloaderLabel(widget, "Map layers loaded: " + event.loadedLayers + "/" + event.totalLayers, event.loadedLayers, event.totalLayers);
+			}
+		}
+		
 		private function onMapLayersInitialized(event: Event): void
 		{
 			
@@ -918,7 +929,16 @@ package com.iblsoft.flexiweather.ogc.multiview
 			if (ilm)
 			{
 				ilm.finishMapLoading();
+				ilm.removeEventListener(InteractiveLayerMap.MAP_LAYERS_INITIALIZED, onMapLayersInitialized);
+				ilm.removeEventListener(InteractiveLayerMapEvent.MAP_LOADING_PROGRESS, onMapLayersProgress);
+				
+				var watcher: InteractiveLayerMapLayersInitializationWatcher = _mapLayersWatchers[ilm] as InteractiveLayerMapLayersInitializationWatcher;
+				if (watcher)
+					delete _mapLayersWatchers[ilm];
 			}
+			
+			
+			
 			
 			var widget: InteractiveWidget = ilm.container as InteractiveWidget;
 			mapIsReady(widget);
@@ -964,6 +984,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 			}
 			var watcher: InteractiveLayerMapLayersInitializationWatcher = _mapLayersWatchers[interactiveLayerMap] as InteractiveLayerMapLayersInitializationWatcher;
 			interactiveLayerMap.addEventListener(InteractiveLayerMap.MAP_LAYERS_INITIALIZED, onMapLayersInitialized);
+			interactiveLayerMap.addEventListener(InteractiveLayerMapEvent.MAP_LOADING_PROGRESS, onMapLayersProgress);
 			watcher.onMapFromXMLReady(interactiveLayerMap, layers);
 			_loadingMapsCount--;
 			if (_loadingMapsCount == 0)

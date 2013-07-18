@@ -16,12 +16,16 @@ package com.iblsoft.flexiweather.events
 		public static const LAYER_SELECTION_CHANGED: String = "layerSelectionChanged";
 		
 		public static const MAP_LOADING_STARTED: String = "mapLoadingStarted";
+		public static const MAP_LOADING_PROGRESS: String = "mapLoadingProgress";
 		public static const MAP_LOADING_FINISHED: String = "mapLoadingFinished";
 		
 		public static const BEFORE_REFRESH: String = "mapBeforeRefresh";
 		public static const MAP_REFRESHED: String = "mapRefreshed";
 		
 		public var frameDate: Date;
+		
+		public var loadedLayers: uint;
+		public var totalLayers: uint;
 
 		public function InteractiveLayerMapEvent(type: String, bubbles: Boolean = false, cancelable: Boolean = false)
 		{

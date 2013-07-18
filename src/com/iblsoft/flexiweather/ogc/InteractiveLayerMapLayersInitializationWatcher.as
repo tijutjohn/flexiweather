@@ -116,9 +116,12 @@ package com.iblsoft.flexiweather.ogc
 		private function onLayerInitialized(event: InteractiveLayerEvent): void
 		{
 			_mapLayersInitializing--;
+			
+			var totalLayers: uint = interactiveLayerMap.layers.length;
+			interactiveLayerMap.progressMapLoading(totalLayers - _mapLayersInitializing, totalLayers);
+			
 			if (_mapLayersInitializing == 0)
 			{
-//				dispatchEvent(new Event(MAP_LAYERS_INITIALIZED));
 				interactiveLayerMap.notifyAllLayersAreInitialized();
 			}
 		}
