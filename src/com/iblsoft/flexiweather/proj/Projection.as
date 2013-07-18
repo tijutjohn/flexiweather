@@ -211,7 +211,11 @@ package com.iblsoft.flexiweather.proj
 				f_longitudeRad *= 180.0 / Math.PI;
 				f_latitudeRad *= 180.0 / Math.PI;
 			}
-			var ptDest: ProjPoint = m_proj.forward(new ProjPoint(f_longitudeRad, f_latitudeRad));
+			try {
+				var ptDest: ProjPoint = m_proj.forward(new ProjPoint(f_longitudeRad, f_latitudeRad));
+			} catch (error: Error) {
+				return null;
+			}
 			if (ptDest == null)
 				return null;
 			return new Point(ptDest.x, ptDest.y);

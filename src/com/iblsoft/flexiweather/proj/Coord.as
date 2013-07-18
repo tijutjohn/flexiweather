@@ -183,17 +183,20 @@ package com.iblsoft.flexiweather.proj
 			var lpM: Coord = new Coord(Projection.CRS_GEOGRAPHIC, toDegrees(Math.atan2(yTotal, xTotal)), toDegrees(Math.atan2(zTotal, Math.sqrt(xTotal * xTotal + yTotal * yTotal))));
 			var cM: Coord = lpM.convertToProjection(projection);
 			
-			var c: SpherePointWithLalo = new SpherePointWithLalo(xTotal, yTotal, zTotal, cM.x, cM.y);
-			
-			var points: Array;
-			
-			points = bisect2GreatArc(sp1, c, a, projection);
-			if (points)  
-				return points;
-			
-			points = bisect2GreatArc(c, sp2, a, projection);
-			if (points)  
-				return points;
+			if (cM)
+			{
+				var c: SpherePointWithLalo = new SpherePointWithLalo(xTotal, yTotal, zTotal, cM.x, cM.y);
+				
+				var points: Array;
+				
+				points = bisect2GreatArc(sp1, c, a, projection);
+				if (points)  
+					return points;
+				
+				points = bisect2GreatArc(c, sp2, a, projection);
+				if (points)  
+					return points;
+			}
 			
 			return null;
 		}
@@ -412,7 +415,10 @@ package com.iblsoft.flexiweather.proj
 				return null;
 			}
 			var p: Point = projection.laLoToPrjPt(toRad(x), toRad(y));
-			return new Coord(projection.crs, p.x, p.y);
+			if (p)
+				return new Coord(projection.crs, p.x, p.y);
+			
+			return null;
 		}
 
 		override public function toString(): String
@@ -433,9 +439,7 @@ package com.iblsoft.flexiweather.proj
 			return new Coord(s_src, f_x, f_y);
 		}
 
-		/**
-		 *
-		 */
+		[Deprecated(replacement = toLaLoCoord)]
 		public function toCRS84(): Coord
 		{
 			// IN THE FUTURE, WE NEED TO MAKE REAL CONVERSION FROM CRS TO CRS:84

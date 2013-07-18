@@ -258,16 +258,10 @@ package com.iblsoft.flexiweather.widgets
 
 		private function updateCoordToExtent(c: Coord): Coord
 		{
-			var cx: Number = c.x;
-			cx = cx % 360;
-			if (cx > 180)
-				cx -= 360;
-			
-			if (cx != c.x)
-				c = new Coord(c.crs, cx, c.y);
-			
-			return c;
+			var projection: Projection = container.getCRSProjection();
+			return projection.moveCoordToExtent(c);
 		}
+		
 		override public function onMouseMove(event: MouseEvent): Boolean
 		{
 			if (event.shiftKey || event.ctrlKey)
@@ -331,36 +325,12 @@ package com.iblsoft.flexiweather.widgets
 			invalidateDynamicPart();
 		}
 
-		private var _mapScale: Number;
-		private var _pixelDistance: Number;
-		
-/*
-		public function distanceValidator(c1: Coord, c2: Coord): Boolean
-		{
-			c1 = c1.toLaLoCoord();
-			c2 = c2.toLaLoCoord();
-			var dist: Number = c1.distanceTo(c2);
-			
-			var maxDist: Number;
-			
-			maxDist = 100;
-			
-			maxDist = (1/ _mapScale) / 200000;
-			if (maxDist > 500)
-				maxDist = 500;
-			if (maxDist < 100)
-				maxDist = 100;
-			
-//			trace("distanceValidator: maxDist: " + maxDist + " _mapScale: " + (1/ _mapScale));
-			return (dist < maxDist);
-		}
-*/
 		override public function draw(graphics: Graphics): void
 		{
 			super.draw(graphics);
 			
-			trace("\n\n *******************************************************************************************\n\n");
-			var time:  Number = getTimer();
+//			trace("\n\n *******************************************************************************************\n\n");
+//			var time:  Number = getTimer();
 			_drawMode = getStyle('drawMode');
 			if (!_drawMode)
 				_drawMode == DrawMode.GREAT_ARC;
@@ -368,48 +338,35 @@ package com.iblsoft.flexiweather.widgets
 			
 			if (_ma_coords.length > 1)
 			{
-				
-				var i_routeBorderThickness: uint = uint(getStyle("routeBorderThickness"));
-				var i_routeThickness: uint = uint(getStyle("routeThickness"));
-				var i_routeColor: uint = uint(getStyle("routeBorderColor"));
-				var f_routeAlpha: uint = Number(getStyle("routeBorderAlpha"));
-				
-				var i_routeFillColor: uint = uint(getStyle("routeFillColor"));
-				var f_routeFillAlpha: uint = Number(getStyle("routeFillAlpha"));
-				
-				var previousCoord: Coord;
-				
-//				i_routeBorderThickness = 5;
-				
-				var lineStyle: LineStyle = new LineStyle(i_routeThickness + 2 * i_routeBorderThickness, i_routeColor, f_routeAlpha, false, LineScaleMode.NORMAL, null, JointStyle.MITER);
-				var fillStyle: FillStyle = new FillStyle(i_routeColor, f_routeAlpha);
-				
-				var lineStyle2: LineStyle = new LineStyle(i_routeThickness, i_routeFillColor, f_routeFillAlpha, false, LineScaleMode.NORMAL, null, JointStyle.MITER);
-				var fillStyle2: FillStyle = new FillStyle(i_routeFillColor, f_routeFillAlpha);
-				
-				var routeLineRenderer: RouteCurveRenderer = new RouteCurveRenderer(graphics, lineStyle, fillStyle, lineStyle2, fillStyle2);
-				
-				container.drawGeoPolyLine(routeLineRenderer, _ma_coords.source, _drawMode);
-				
-				
-//				var pointer: int = 0;
-//				var total: int = _ma_coords.length - 1;
-//				while (pointer < total)
-//				{
-//					var c1: Coord = _ma_coords.getItemAt(pointer) as Coord;
-//					var c2: Coord = _ma_coords.getItemAt(pointer + 1) as Coord;
-//					container.drawGeoline(routeLineRenderer, c1, c2, _drawMode);
-//					pointer++;
-//				}
-				
+				container.drawGeoPolyLine(getRouteRenderer, _ma_coords.source, _drawMode);
 			}
 			
 			//draw points
 			drawDraggablePoints();
 			
 			notifyRouteChanged();
-			trace("Time draw: " + (getTimer() - time) + "ms");
-			trace("\n\n *******************************************************************************************\n\n");
+//			trace("Time draw: " + (getTimer() - time) + "ms");
+//			trace("\n\n *******************************************************************************************\n\n");
+		}
+		
+		public function getRouteRenderer(reflectionString: String): RouteCurveRenderer
+		{
+			var i_routeBorderThickness: uint = uint(getStyle("routeBorderThickness"));
+			var i_routeThickness: uint = uint(getStyle("routeThickness"));
+			var i_routeColor: uint = uint(getStyle("routeBorderColor"));
+			var f_routeAlpha: uint = Number(getStyle("routeBorderAlpha"));
+			
+			var i_routeFillColor: uint = uint(getStyle("routeFillColor"));
+			var f_routeFillAlpha: uint = Number(getStyle("routeFillAlpha"));
+			
+			var lineStyle: LineStyle = new LineStyle(i_routeThickness + 2 * i_routeBorderThickness, i_routeColor, f_routeAlpha, false, LineScaleMode.NORMAL, null, JointStyle.MITER);
+			var fillStyle: FillStyle = new FillStyle(i_routeColor, f_routeAlpha);
+			
+			var lineStyle2: LineStyle = new LineStyle(i_routeThickness, i_routeFillColor, f_routeFillAlpha, false, LineScaleMode.NORMAL, null, JointStyle.MITER);
+			var fillStyle2: FillStyle = new FillStyle(i_routeFillColor, f_routeFillAlpha);
+			
+			var routeLineRenderer: RouteCurveRenderer = new RouteCurveRenderer(graphics, lineStyle, fillStyle, lineStyle2, fillStyle2);
+			return routeLineRenderer;
 		}
 
 		private function drawDraggablePoints(): void

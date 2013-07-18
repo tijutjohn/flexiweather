@@ -1923,7 +1923,7 @@ package com.iblsoft.flexiweather.widgets
 		 * @return 
 		 * 
 		 */		
-		private function _drawGeoLine(g: ICurveRenderer, coordFrom: Coord, coordTo: Coord, drawMode: String, d_reflectionToSegmentPoints: Dictionary): void
+		private function _drawGeoLine(coordFrom: Coord, coordTo: Coord, drawMode: String, d_reflectionToSegmentPoints: Dictionary): void
 		{
 			var coords: Array;
 			var c: Coord;
@@ -1931,18 +1931,25 @@ package com.iblsoft.flexiweather.widgets
 			var projection: Projection = getCRSProjection();
 			var extent: BBox = getExtentBBox();
 			
+			var originalCRS: String = coordFrom.crs;
+			
+			
 			//move coords into extent
 			coordFrom = Coord.convertCoordOnSphere(coordFrom, projection);
 			coordTo = Coord.convertCoordOnSphere(coordTo, projection);
 			
+			
 			if (drawMode == DrawMode.GREAT_ARC)
 			{
 				coords = Coord.interpolateGreatArc(coordFrom, coordTo, distanceValidator);
+				trace(coords);
 			}
 			else if (drawMode == DrawMode.PLAIN) {
 				if (projection.wrapsHorizontally) {
 					if (Math.abs(coordFrom.x - coordTo.x) > extent.width / 2)
 					{
+						coordFrom = coordFrom.toLaLoCoord();
+						coordTo = coordTo.toLaLoCoord();
 						var line1: LineSegment;
 						var line2: LineSegment = new LineSegment(180,-90,180,90);
 						if (coordFrom.x > coordTo.x)
@@ -1967,16 +1974,13 @@ package com.iblsoft.flexiweather.widgets
 							coords = [coordTo, intersectionCoordLeft, null, intersectionCoordRight, coordFrom];
 						}
 						
-						//debug coords:
-//						var t1: String = '';
-//						for each (var currCoord: Coord in coords)
-//						{
-//							if (currCoord)
-//								t1 += "coord: " + currCoord.x + ", ";
-//							else
-//								t1 += "null, ";
-//						}
-//						trace("PLAIN: " + t1);
+						var tempCoords: Array = coords;
+						coords = [];
+						for each (c in tempCoords)
+						{
+							coords.push(projection.laLoCoordToPrjCoord(c));
+						}
+						
 					} else {
 						coords = [coordFrom, coordTo];
 					}
@@ -1985,6 +1989,8 @@ package com.iblsoft.flexiweather.widgets
 				}
 			}
 
+			//convert coords back to origin projection
+			
 			// coords can now contain null to mark point of discontinuity if line crosses dateline or projection boundaries
 			
 			var i_part: int = 0;
@@ -2065,16 +2071,19 @@ package com.iblsoft.flexiweather.widgets
 		
 		
 		
-		private function _drawReflectedSegmentPoints(g: ICurveRenderer, d_reflectionToSegmentPoints: Dictionary): void
+		private function _drawReflectedSegmentPoints(rendererCreator: Function, d_reflectionToSegmentPoints: Dictionary): void
 		{
-			for (var l_reflections: String in d_reflectionToSegmentPoints) {
+			for (var l_reflectionStr: String in d_reflectionToSegmentPoints) {
 				var b_first: Boolean = true;
 				var ptPrev: Point = null;
 				var ptLast: Point = null;
 				
-				var l_reflectedSegmentPoints: Array = d_reflectionToSegmentPoints[l_reflections];
+				var l_reflectedSegmentPoints: Array = d_reflectionToSegmentPoints[l_reflectionStr];
 				
-				var str: String = '\nReflection: ' + l_reflections + ': ';
+				var g: ICurveRenderer = rendererCreator(l_reflectionStr);
+				
+//				trace("_drawReflectedSegmentPoints: l_reflectionStr: " + l_reflectedSegmentPoints.length + " points");
+				var str: String = '\nReflection: ' + l_reflectionStr + ': ';
 				for each(var pt: Point in l_reflectedSegmentPoints) {
 					if(!pt) {
 						ptPrev = null;
@@ -2100,14 +2109,14 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 
-		public function drawGeoLine(g: ICurveRenderer, coordFrom: Coord, coordTo: Coord, drawMode: String): void
+		public function drawGeoLine(rendererCreator: Function, coordFrom: Coord, coordTo: Coord, drawMode: String): void
 		{
 			var d_reflectionToSegmentPoints: Dictionary = new Dictionary();
-			_drawGeoLine(g, coordFrom, coordTo, drawMode, d_reflectionToSegmentPoints);
-			_drawReflectedSegmentPoints(g, d_reflectionToSegmentPoints);
+			_drawGeoLine(coordFrom, coordTo, drawMode, d_reflectionToSegmentPoints);
+			_drawReflectedSegmentPoints(rendererCreator, d_reflectionToSegmentPoints);
 		}
 
-		public function drawGeoPolyLine(g: ICurveRenderer, coords: Array, drawMode: String): void
+		public function drawGeoPolyLine(rendererCreator: Function, coords: Array, drawMode: String): void
 		{
 			var d_reflectionToSegmentPoints: Dictionary = new Dictionary();
 			var cPrev: Coord = null;
@@ -2115,12 +2124,12 @@ package com.iblsoft.flexiweather.widgets
 			var cnt: int = 0;
 			for each (var c: Coord in coords) {
 				if(cPrev) {
-					_drawGeoLine(g, cPrev, c, drawMode, d_reflectionToSegmentPoints);
+					_drawGeoLine(cPrev, c, drawMode, d_reflectionToSegmentPoints);
 				}
 				cPrev = c;
 				cnt++;
 			}
-			_drawReflectedSegmentPoints(g, d_reflectionToSegmentPoints);
+			_drawReflectedSegmentPoints(rendererCreator, d_reflectionToSegmentPoints);
 		}
 		
 		/**
