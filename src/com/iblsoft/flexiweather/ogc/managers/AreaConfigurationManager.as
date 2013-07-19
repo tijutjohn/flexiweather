@@ -216,7 +216,7 @@ package com.iblsoft.flexiweather.ogc.managers
 
 		private function getCustomArea(): XML
 		{
-			var areaCustom: XML = <menuitem label='Custom...' data='custom.area' type='action'/>
+			var areaCustom: XML = <menuitem label='Add custom area...' data='custom.area' type='action'/>
 					;
 			return areaCustom;
 		}
