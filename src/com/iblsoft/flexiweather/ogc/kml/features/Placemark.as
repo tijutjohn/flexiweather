@@ -165,7 +165,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		{
 			super.setMaster(master);
 //			master.container.labelLayout.addObstacle(this);
-//			var lo: AnticollisionLayoutObject = master.container.labelLayout.addObject(kmlLabel, [this], AnticollisionLayout.DISPLACE_HIDE);
+//			var lo: AnticollisionLayoutObject = master.container.labelLayout.addObject(kmlLabel, master, [this], AnticollisionLayout.DISPLACE_HIDE);
 //			lo.anchorColor = 0x888888;
 //			lo.anchorAlpha = 0.5;
 //			lo.displacementMode = AnticollisionLayout.DISPLACE_AUTOMATIC_SIMPLE;
@@ -175,7 +175,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		master.container.labelLayout.addObstacle(this);
 		if (kmlLabel)
 		{
-			var lo: AnticollisionLayoutObject = master.container.labelLayout.addObject(kmlLabel, [this], AnticollisionLayout.DISPLACE_HIDE);
+			var lo: AnticollisionLayoutObject = master.container.labelLayout.addObject(kmlLabel, master, [this], AnticollisionLayout.DISPLACE_HIDE);
 			lo.anchorColor = 0x888888;
 			lo.anchorAlpha = 0.5;
 			lo.displacementMode = AnticollisionLayout.DISPLACE_AUTOMATIC_SIMPLE;
@@ -427,7 +427,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			super.addLabelToAnticollisionLayout(kmlLabel);
 			var labelLayout: AnticollisionLayout = master.container.labelLayout;
 //			var anticollisionLayoutObject: AnticollisionLayoutObject = labelLayout.addObject(kmlSprite.kmlLabel, [], i, AnticollisionDisplayMode.HIDE_IF_OCCUPIED);
-			var anticollisionLayoutObject: AnticollisionLayoutObject = labelLayout.addObject(kmlLabel, [], 0, AnticollisionDisplayMode.HIDE_IF_OCCUPIED);
+			var anticollisionLayoutObject: AnticollisionLayoutObject = labelLayout.addObject(kmlLabel, null, [], 0, AnticollisionDisplayMode.HIDE_IF_OCCUPIED);
 //			kmlSprite.anticollisionLayoutObject = anticollisionLayoutObject;
 //			kmlSprite.kmlLabel.anticollisionLayoutObject = anticollisionLayoutObject;
 			kmlLabel.anticollisionLayoutObject = anticollisionLayoutObject;

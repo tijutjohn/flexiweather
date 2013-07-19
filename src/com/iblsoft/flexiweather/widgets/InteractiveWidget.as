@@ -2254,6 +2254,13 @@ package com.iblsoft.flexiweather.widgets
 			addElement(m_layerLayoutParent);
 		}
 
+		public function anticollisionForcedUpdate(): void
+		{
+			notifyAnticollisionUpdate();
+			m_labelLayout.update();
+			notifyAnticollisionUpdate();
+			m_objectLayout.update();
+		}
 		private function anticollisionUpdate(): void
 		{
 			if (!m_suspendAnticollisionProcessing)

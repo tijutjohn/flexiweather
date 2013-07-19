@@ -374,7 +374,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 									if (currWidgetPrimaryLayer)
 									{
 										var currWidgetFrame: Date = currWidgetPrimaryLayer.getSynchronisedVariableValue(GlobalVariable.FRAME) as Date;
-										if (currWidgetFrame && currWidgetFrame.time != frame.time)
+										if (!widget.enabled || (currWidgetFrame && currWidgetFrame.time != frame.time))
 										{
 											bSynchronizeWidget = true;		
 										}

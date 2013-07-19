@@ -3,6 +3,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 	import com.iblsoft.flexiweather.ogc.kml.controls.KMLLabel;
 	import com.iblsoft.flexiweather.ogc.kml.events.KMLFeatureEvent;
 	import com.iblsoft.flexiweather.ogc.kml.features.KMLFeature;
+	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	
 	import flash.display.DisplayObject;
 	import flash.geom.Point;
@@ -21,6 +22,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 //		{
 //			_object = value;
 //		}
+		public var layer: InteractiveLayer;
 		public var managedChild: Boolean;
 		public var displacementMode: String;
 		private var m_referenceLocation: Point;
@@ -53,6 +55,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 			_visible = value;
 			//set object visibility to save value
 			object.visible = value;
+			trace(this + " VISIBLE CHANGED");
 		}
 
 		public function toString(): String
@@ -60,10 +63,11 @@ package com.iblsoft.flexiweather.utils.anticollision
 			return "ALO [" + name + "] " + object + " visible: " + visible;
 		}
 
-		public function AnticollisionLayoutObject(object: DisplayObject, b_managedChild: Boolean, i_displacementMode: String)
+		public function AnticollisionLayoutObject(object: DisplayObject, l_layer: InteractiveLayer, b_managedChild: Boolean, i_displacementMode: String)
 		{
 			managedChild = b_managedChild;
 			displacementMode = i_displacementMode;
+			layer = l_layer;
 //			_object = object;
 //			m_referenceLocation = new Point(_object.x, _object.y)
 			this.object = object;

@@ -17,6 +17,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 	import com.iblsoft.flexiweather.utils.ProfilerUtils;
 	import com.iblsoft.flexiweather.utils.geometry.ILineSegmentApproximableBounds;
 	import com.iblsoft.flexiweather.utils.geometry.LineSegment;
+	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.display.BitmapData;
@@ -189,10 +190,10 @@ package com.iblsoft.flexiweather.utils.anticollision
 		 * Basically this means that all other objects will be displaced so that they don't
 		 * overlap with this one.
 		 **/
-		public function addObstacle(object: DisplayObject): void
+		public function addObstacle(object: DisplayObject, parentLayer: InteractiveLayer): void
 		{
 			setDirty();
-			var lo: AnticollisionLayoutObject = new AnticollisionLayoutObject(object, false, AnticollisionDisplayMode.FIXED);
+			var lo: AnticollisionLayoutObject = new AnticollisionLayoutObject(object, parentLayer, false, AnticollisionDisplayMode.FIXED);
 			lo.name = "Obstacle";
 			ma_layoutObjects.addItem(lo);
 			updateLayoutObjectsLength();
@@ -218,12 +219,12 @@ package com.iblsoft.flexiweather.utils.anticollision
 		 * Add a displaceble object to the layout. By default any displace is allowed
 		 * and object is added as the child to the layout.
 		 **/
-		public function addObject(object: DisplayObject, a_anchors: Array = null, i_reflection: int = 0, i_displacementMode: String = AnticollisionDisplayMode.DISPLACE_AROUND, b_addAsChild: Boolean = true): AnticollisionLayoutObject
+		public function addObject(object: DisplayObject, parentLayer: InteractiveLayer, a_anchors: Array = null, i_reflection: int = 0, i_displacementMode: String = AnticollisionDisplayMode.DISPLACE_AROUND, b_addAsChild: Boolean = true): AnticollisionLayoutObject
 		{
 			setDirty();
 			if (b_addAsChild)
 				addChild(object);
-			var lo: AnticollisionLayoutObject = new AnticollisionLayoutObject(object, b_addAsChild, i_displacementMode);
+			var lo: AnticollisionLayoutObject = new AnticollisionLayoutObject(object, parentLayer, b_addAsChild, i_displacementMode);
 			lo.name = "Object" + i_reflection;
 			lo.objectsToAnchor = a_anchors;
 			lo.reflectionID = i_reflection;
@@ -299,9 +300,9 @@ package com.iblsoft.flexiweather.utils.anticollision
 					lo = ma_layoutObjects[i];
 					if (lo.name == "Obstacle")
 					{
-						layout.addObstacle(lo.object);
+						layout.addObstacle(lo.object, lo.layer);
 					} else {
-						layout.addObject(lo.object, lo.objectsToAnchor, lo.reflectionID, lo.displacementMode, lo.managedChild);
+						layout.addObject(lo.object, lo.layer, lo.objectsToAnchor, lo.reflectionID, lo.displacementMode, lo.managedChild);
 					}
 					
 				}
@@ -368,12 +369,22 @@ package com.iblsoft.flexiweather.utils.anticollision
 				for each (lo in currObjects)
 				{
 					pass++;
-					if (lo.manageVisibilityWithAnchors)
-						lo.visible = true;
-					else {
-						var objectAbsoluteVisibility: Boolean = getAbsoluteVisibility(lo.object);
-//						trace("ACL obj: " +  lo.object + " absolute visibility: " + objectAbsoluteVisibility);
-						lo.visible = objectAbsoluteVisibility;
+					if (lo.manageVisibilityWithAnchors) {
+						if (lo.layer)
+						{
+							lo.visible = lo.layer.visible;
+						} else {
+							lo.visible = true;
+						}
+					} else {
+						if (lo.layer)
+						{
+							lo.visible = lo.layer.visible
+						} else {
+							var objectAbsoluteVisibility: Boolean = getAbsoluteVisibility(lo.object);
+	//						trace("ACL obj: " +  lo.object + " absolute visibility: " + objectAbsoluteVisibility);
+							lo.visible = objectAbsoluteVisibility;
+						}
 					}
 				}
 //				currTime = ProfilerUtils.startProfileTimer();
@@ -397,6 +408,13 @@ package com.iblsoft.flexiweather.utils.anticollision
 									if (lo.visible)
 									{
 										lo.visible = false;
+										b_change = true;
+									}
+								} else if (loAnchored.visible)
+								{
+									if (!lo.visible)
+									{
+										lo.visible = true;
 										b_change = true;
 									}
 								}
