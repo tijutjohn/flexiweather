@@ -215,6 +215,18 @@ package com.iblsoft.flexiweather.utils.anticollision
 			return false;
 		}
 
+		public function setObjectVisibility(object: DisplayObject, visible: Boolean): void
+		{
+			for each (var lo: AnticollisionLayoutObject in ma_layoutObjects)
+			{
+				if (lo.object == object)
+				{
+					lo.visible = visible;
+					lo.object.visible = visible;
+					return;
+				}
+			}
+		}
 		/**
 		 * Add a displaceble object to the layout. By default any displace is allowed
 		 * and object is added as the child to the layout.
@@ -369,22 +381,27 @@ package com.iblsoft.flexiweather.utils.anticollision
 				for each (lo in currObjects)
 				{
 					pass++;
-					if (lo.manageVisibilityWithAnchors) {
+					if (lo.manageVisibilityWithAnchors) 
+					{
+						var newVisibility: Boolean;
+						if (lo.objectsToAnchor.length > 0)
+						{
+							newVisibility = (lo.objectsToAnchor[0] as DisplayObject).visible;
+						}
+						
 						if (lo.layer)
 						{
-							lo.visible = lo.layer.visible;
-						} else {
-							lo.visible = true;
+							newVisibility = newVisibility && lo.layer.visible;
 						}
+						lo.visible = newVisibility;
 					} else {
-						if (lo.layer)
-						{
-							lo.visible = lo.layer.visible
-						} else {
-							var objectAbsoluteVisibility: Boolean = getAbsoluteVisibility(lo.object);
+						var objectAbsoluteVisibility: Boolean = getAbsoluteVisibility(lo.object);
 	//						trace("ACL obj: " +  lo.object + " absolute visibility: " + objectAbsoluteVisibility);
-							lo.visible = objectAbsoluteVisibility;
+						if (lo.layer && objectAbsoluteVisibility)
+						{
+							objectAbsoluteVisibility = lo.layer.visible;
 						}
+						lo.visible = objectAbsoluteVisibility;
 					}
 				}
 //				currTime = ProfilerUtils.startProfileTimer();

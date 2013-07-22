@@ -250,6 +250,17 @@ package com.iblsoft.flexiweather.widgets
 		override protected function commitProperties(): void
 		{
 			super.commitProperties();
+			
+			if (_forceAnticollisionUpdate)
+			{
+				notifyAnticollisionUpdate();
+				m_labelLayout.update();
+				notifyAnticollisionUpdate();
+				m_objectLayout.update();
+				
+				_forceAnticollisionUpdate = false;
+			}
+			
 			if (mb_autoLayoutChanged)
 			{
 				var widgetParent: Group = parent as Group;
@@ -2254,12 +2265,18 @@ package com.iblsoft.flexiweather.widgets
 			addElement(m_layerLayoutParent);
 		}
 
+		private var _forceAnticollisionUpdate: Boolean;
+		
+		public function anticollisionObjectVisible(object: DisplayObject, visible: Boolean): void
+		{
+			m_labelLayout.setObjectVisibility(object, visible);
+			m_objectLayout.setObjectVisibility(object, visible);
+		}
+		
 		public function anticollisionForcedUpdate(): void
 		{
-			notifyAnticollisionUpdate();
-			m_labelLayout.update();
-			notifyAnticollisionUpdate();
-			m_objectLayout.update();
+			_forceAnticollisionUpdate = true;
+			invalidateProperties();
 		}
 		private function anticollisionUpdate(): void
 		{

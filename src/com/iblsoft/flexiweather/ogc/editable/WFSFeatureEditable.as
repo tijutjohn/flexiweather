@@ -11,7 +11,9 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureBase;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
+	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
+	import flash.display.DisplayObject;
 	import flash.display.Sprite;
 	import flash.events.KeyboardEvent;
 	import flash.filters.GlowFilter;
@@ -36,6 +38,16 @@ package com.iblsoft.flexiweather.ogc.editable
 		protected var mi_actSelectedMoveablePointReflectionIndex: int = -1;
 		protected var m_firstInit: Boolean = true;
 
+		override public function set visible(value:Boolean):void
+		{
+			super.visible = value;
+			
+			var iw: InteractiveWidget = m_master.container;
+			iw.anticollisionObjectVisible(getAnticollisionObject, value);
+			iw.anticollisionObjectVisible(getAnticollisionObstacle, value);
+			iw.anticollisionForcedUpdate();
+		}
+		
 		public function get selectedMoveablePointIndex(): int
 		{
 			return mi_actSelectedMoveablePointIndex;
@@ -233,6 +245,15 @@ package com.iblsoft.flexiweather.ogc.editable
 			}
 			reflectionDictionary.cleanup();
 		}
+		
+		public function get getAnticollisionObject(): DisplayObject
+		{
+			return null;
+		}
+		public function get getAnticollisionObstacle(): DisplayObject
+		{
+			return null;
+		}
 
 		public function renderFallbackGraphics(i_preferredColor: uint = 0x5A90B1): void
 		{
@@ -324,6 +345,8 @@ package com.iblsoft.flexiweather.ogc.editable
 			if (i_reflectionDelta != 0)
 				reflectionWidth = master.container.getExtentBBox().width * i_reflectionDelta;
 			var c: Coord = m_master.container.pointToCoord(pt.x, pt.y);
+			
+			trace("WFSFEatureEditable setPoint : from pt: " + pt + " to c: " + c.toLaLoCoord());
 			//need to move coord to 0 reflection
 			
 			var projection: Projection = m_master.container.getCRSProjection();
@@ -331,8 +354,14 @@ package com.iblsoft.flexiweather.ogc.editable
 //			c.x -= reflectionWidth;
 			
 			//and cound correct point position for 0 reflection
-			m_points[i_pointIndex] = m_master.container.coordToPoint(c);
+			var newPt: Point = m_master.container.coordToPoint(c);
+			m_points[i_pointIndex] = newPt;
 			m_coordinates[i_pointIndex] = c;
+			
+			trace("WFSFEatureEditable setPoint : from c: " + c.toLaLoCoord() + " to pt: " + newPt + " old pt: " + pt);
+			if (newPt.x != pt.x)
+				trace("check this");
+			
 			update(FeatureUpdateContext.fullUpdate());
 			modified = true;
 		}
@@ -644,7 +673,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			if (useMonochrome)
 				clr = monochromeColor;
-			else if (master.useMonochrome)
+			else if (master && master.useMonochrome)
 				clr = master.monochromeColor;
 			return clr;
 		}
