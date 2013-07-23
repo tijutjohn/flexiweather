@@ -179,10 +179,9 @@ package com.iblsoft.flexiweather.proj
 				return null;
 			
 			var origPoint: ProjPoint = new ProjPoint(f_prjX, f_prjY);
-			trace(" origPoint: " + origPoint);
+//			trace(" origPoint: " + origPoint);
 			var ptDest: ProjPoint = m_proj.inverse(origPoint);
-			
-			trace(" dest: " + ptDest);
+//			trace(" dest: " + ptDest);
 			if (ptDest == null)
 				return null;
 			if (m_proj.projParams.units == "degrees")
