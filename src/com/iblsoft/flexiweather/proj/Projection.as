@@ -30,8 +30,18 @@ package com.iblsoft.flexiweather.proj
 
 		public function Projection(s_crs: String, extentBBox: BBox, b_wrapsHorizontally: Boolean): void
 		{
+//			if (s_crs.indexOf("PROJ4:proj=stere +lat_0=90 +lon") >= 0)
+//			{
+//				trace("PROJ4:proj=stere +lat_0=90 +lon");
+//				var obj: Object = ProjProjection.defs;
+//				for (var key: String in obj)
+//				{
+//					var proj: String = ProjProjection.defs[key];
+//					trace(key + " = " + proj);
+//				}
+//			}
 			// internally the proj4as creates a dictionary cache of CRS -> ProjProjection pairs
-			m_proj = ProjProjection.getProjProjection(s_crs);
+			m_proj = ProjProjection.getProjProjection(s_crs.toUpperCase());
 			if (m_proj == null)
 				Log.getLogger("Projection").error("Unknown CRS '" + s_crs + "'");
 			if (extentBBox == null)
@@ -107,6 +117,11 @@ package com.iblsoft.flexiweather.proj
 				s_crs: String, s_proj4String: String,
 				crsExtentBBox: BBox = null, b_crsWrapsHorizontally: Boolean = false): void
 		{
+			s_crs = s_crs.toUpperCase();
+			while(s_crs.search(" ") != -1)
+			{
+				s_crs = (s_crs as String).replace(" ", "");
+			}
 			ProjProjection.defs[s_crs] = s_proj4String;
 			md_crsToDetails[s_crs] = {
 						extentBBox: crsExtentBBox,
@@ -162,7 +177,12 @@ package com.iblsoft.flexiweather.proj
 		{
 			if (m_proj == null)
 				return null;
-			var ptDest: ProjPoint = m_proj.inverse(new ProjPoint(f_prjX, f_prjY));
+			
+			var origPoint: ProjPoint = new ProjPoint(f_prjX, f_prjY);
+			trace(" origPoint: " + origPoint);
+			var ptDest: ProjPoint = m_proj.inverse(origPoint);
+			
+			trace(" dest: " + ptDest);
 			if (ptDest == null)
 				return null;
 			if (m_proj.projParams.units == "degrees")
