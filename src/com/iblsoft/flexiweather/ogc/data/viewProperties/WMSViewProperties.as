@@ -711,11 +711,13 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 				{
 					var l_times: Array = getWMSDimensionsValues(m_cfg.dimensionTimeName);
 					var l_resultTimes: Array = [];
+					var l_resultTimes2: Array = [];
 					for each (var time: Object in l_times)
 					{
 						if (time.data is Date)
 						{
-							l_resultTimes.push(time.data);
+//							l_resultTimes.push(time.data);
+							l_resultTimes2.push((time.data as Date).time);
 						}
 						else
 						{
@@ -723,12 +725,19 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 						}
 					}
 					//sort forecast by Date
-					if (l_resultTimes && l_resultTimes.length > 0)
+					if (l_resultTimes2 && l_resultTimes2.length > 0)
 					{
 						//sort Duration
-						l_resultTimes.sort(sortDates);
+//						l_resultTimes.sort(sortDates);
+						l_resultTimes2.sort(sortTimes);
+						
+						for each (var sortedTime: Number in l_resultTimes2)
+						{
+							l_resultTimes.push(new Date(sortedTime));
+						}
 					}
 					return l_resultTimes;
+					
 				}
 				else if (m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null)
 				{
@@ -991,7 +1000,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 			dispatchEvent(event);
 		}
 
-		public static function sortDates(obj1: Object, obj2: Object): int
+		public static function sortDatesOld(obj1: Object, obj2: Object): int
 		{
 			var date1: Date = obj1 as Date;
 			var date2: Date = obj2 as Date;
@@ -1008,6 +1017,37 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					if (dSec1 < dSec2)
 						return -1;
 				}
+			}
+			return 0;
+		}
+		public static function sortDates(obj1: Object, obj2: Object): int
+		{
+			if (obj1 && obj2)
+			{
+				var dSec1: Number = obj1['time'];
+				var dSec2: Number = obj2['time'];
+				if (dSec1 > dSec2)
+				{
+					return 1;
+				}
+				else
+				{
+					if (dSec1 < dSec2)
+						return -1;
+				}
+			}
+			return 0;
+		}
+		public static function sortTimes(time1: Number, time2: Number): int
+		{
+			if (time1 > time2)
+			{
+				return 1;
+			}
+			else
+			{
+				if (time1 < time2)
+					return -1;
 			}
 			return 0;
 		}

@@ -159,6 +159,8 @@ package com.iblsoft.flexiweather.ogc.managers
 			if (_interactiveLayerMap)
 			{
 				//unregister old map
+				_interactiveLayerMap.removeEventListener(InteractiveLayerMap.TIMELINE_FRAMES_ENUMERATED, onInteractiveLayerMapFramesEnumerated);
+			
 				_interactiveLayerMap.removeEventListener(InteractiveLayerMap.FRAME_VARIABLE_CHANGED, onInteractiveLayerFrameVariableChanged);
 				_interactiveLayerMap.removeEventListener(InteractiveLayerMap.LEVEL_VARIABLE_CHANGED, onLevelVariableChanged);
 				_interactiveLayerMap.removeEventListener(InteractiveLayerMap.RUN_VARIABLE_CHANGED, onRunVariableChanged);
@@ -168,6 +170,8 @@ package com.iblsoft.flexiweather.ogc.managers
 			}
 			
 			_interactiveLayerMap = interactiveMap;
+			
+			_interactiveLayerMap.addEventListener(InteractiveLayerMap.TIMELINE_FRAMES_ENUMERATED, onInteractiveLayerMapFramesEnumerated);
 			
 			_interactiveLayerMap.addEventListener(InteractiveLayerMap.FRAME_VARIABLE_CHANGED, onInteractiveLayerFrameVariableChanged);
 			_interactiveLayerMap.addEventListener(InteractiveLayerMap.LEVEL_VARIABLE_CHANGED, onLevelVariableChanged);
@@ -351,6 +355,35 @@ package com.iblsoft.flexiweather.ogc.managers
 			}
 		}
 
+		private var _cachedFrames: Array;
+		private var _timelineFramesChanged: Boolean;
+		
+		private function onInteractiveLayerMapFramesEnumerated(event: Event = null): void
+		{
+			var frames: Array = _interactiveLayerMap.getFrames();
+			
+			if (_cachedFrames == frames)
+			{
+				_timelineFramesChanged = false;
+			} else {
+				var framesAC: ArrayCollection = new ArrayCollection();
+				for each (var frameVariable: Object in _cachedFrames)
+				{
+					if (frameVariable is GlobalVariableValue)
+						framesAC.addItem(frameVariable.data as Date);
+					if (frameVariable is Date)
+						framesAC.addItem(frameVariable as Date);
+				}
+				
+				//TODO sameCollection takes to long
+				_timelineFramesChanged = !sameCollection(framesAC, _frames); 
+				if (_timelineFramesChanged)
+					_frames = framesAC;
+			}
+			
+			_cachedFrames = frames;
+		}
+		
 		private function onInteractiveLayerFrameVariableChanged(event: Event = null): void
 		{
 			var framesChanged: Boolean;
@@ -370,21 +403,27 @@ package com.iblsoft.flexiweather.ogc.managers
 					}
 				}
 				
+				if (!_cachedFrames)
+					onInteractiveLayerMapFramesEnumerated();
+				
 //				var framesObjects: Array = _interactiveLayerMap.primaryLayer.getSynchronisedVariableValuesList(GlobalVariable.FRAME);
-				var framesObjects: Array = _interactiveLayerMap.getFrames();
-				
-				var framesAC: ArrayCollection = new ArrayCollection();
-				for each (var frameVariable: Object in framesObjects)
-				{
-					if (frameVariable is GlobalVariableValue)
-						framesAC.addItem(frameVariable.data as Date);
-					if (frameVariable is Date)
-						framesAC.addItem(frameVariable as Date);
-				}
-				
-				var collectionChanged: Boolean = !sameCollection(framesAC, _frames); 
-				if (collectionChanged)
-					_frames = framesAC;
+//				if (!_cachedFrames)
+//					_cachedFrames = _interactiveLayerMap.getFrames();
+//				
+//				
+//				var framesAC: ArrayCollection = new ArrayCollection();
+//				for each (var frameVariable: Object in framesObjects)
+//				{
+//					if (frameVariable is GlobalVariableValue)
+//						framesAC.addItem(frameVariable.data as Date);
+//					if (frameVariable is Date)
+//						framesAC.addItem(frameVariable as Date);
+//				}
+//				
+//				//TODO sameCollection takes to long
+//				var collectionChanged: Boolean = !sameCollection(framesAC, _frames); 
+//				if (collectionChanged)
+//					_frames = framesAC;
 //				else {
 //					trace("GlobalVariablesManager ["+_interactiveLayerMap+"] _frames are same: ");
 //				}
@@ -395,7 +434,7 @@ package com.iblsoft.flexiweather.ogc.managers
 				if (_lastFrameNotified && _lastFrameNotified.time == selectedFrame.time)
 				{
 					//same time as last time
-					if (!collectionChanged)
+					if (!_timelineFramesChanged)
 						return;
 				}
 				_lastFrameNotified = selectedFrame;
@@ -479,10 +518,10 @@ package com.iblsoft.flexiweather.ogc.managers
 					var total: int = collection1.length;
 					for (var i: int = 0; i < total; i++)
 					{
-						var val1: * = collection1.getItemAt(i);
-						var val2: * = collection2.getItemAt(i);
+						var val1: Date = collection1.getItemAt(i) as Date;
+						var val2: Date = collection2.getItemAt(i) as Date;
 						
-						if (val1.toString() != val2.toString())
+						if (val1.time != val2.time) //if (val1.toString() != val2.toString())
 							return false;
 					}
 				} else {

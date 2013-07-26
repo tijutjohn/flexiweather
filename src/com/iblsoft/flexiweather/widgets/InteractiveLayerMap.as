@@ -55,6 +55,8 @@ package com.iblsoft.flexiweather.widgets
 	[Event(name = MAP_LAYERS_INITIALIZED, type = "flash.events.Event")]
 	public class InteractiveLayerMap extends InteractiveLayerComposer implements Serializable
 	{
+		public static const TIMELINE_FRAMES_ENUMERATED: String = "timelineFramesEnumerated";
+		
 		public static const TIMELINE_CONFIGURATION_CHANGE: String = "timelineConfigurationChange";
 		
 		public static const LAYERS_SERIALIZED_AND_READY: String = "layersSerializedAndReady";
@@ -450,6 +452,9 @@ package com.iblsoft.flexiweather.widgets
 			
 			var ilme: InteractiveLayerMapEvent = new InteractiveLayerMapEvent(InteractiveLayerMapEvent.MAP_LOADING_FINISHED);
 			dispatchEvent(ilme);
+			
+			//ask for map frames
+			notifyTimeAxisUpdate();
 		}
 		/**
 		 * This method serialize map for storing single map layers without any aditional info (e.g. animation data, area).
@@ -577,6 +582,12 @@ package com.iblsoft.flexiweather.widgets
 			dispatchEvent(new Event(MAP_LAYERS_INITIALIZED));
 		}
 			
+		private function notifyTimeAxisFrameUpdate(): void
+		{
+			trace("\n" + this + " notifyTimeAxisUpdate");
+			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
+			
+		}
 		private function notifyTimeAxisUpdate(): void
 		{
 			trace("\n" + this + " notifyTimeAxisUpdate");
@@ -646,9 +657,19 @@ package com.iblsoft.flexiweather.widgets
 //				}
 //			}
 		}
+		
+		private function invalidateEnumTimeAxis(): void
+		{
+			//delete enumTimeAxis cache and retrieve tham again
+			_cachedEnumTimeAxis = null;
+			enumTimeAxis();
+		}
+		
 		protected function onSynchronisedVariableChanged(event: SynchronisedVariableChangeEvent): void
 		{
-			notifyTimeAxisUpdate();
+			trace("ILM onSynchronisedVariableChanged: " + event.variableId);
+			invalidateEnumTimeAxis();
+			
 			if (event.variableId == GlobalVariable.FRAME)
 			{
 //				resynchronizeOnStart(event);
@@ -667,9 +688,12 @@ package com.iblsoft.flexiweather.widgets
 
 		protected function onSynchronisedVariableDomainChanged(event: SynchronisedVariableChangeEvent): void
 		{
-			notifyTimeAxisUpdate();
+			trace("ILM onSynchronisedVariableDomainChanged: " + event.variableId);
+			invalidateEnumTimeAxis();
+			
 			if (event.variableId == GlobalVariable.FRAME)
 			{
+				notifyTimeAxisUpdate();
 				resynchronizeOnStart(event);
 				periodicCheck();
 				dispatchEvent(new Event(FRAME_VARIABLE_CHANGED));
@@ -679,6 +703,7 @@ package com.iblsoft.flexiweather.widgets
 			
 			if (event.variableId == GlobalVariable.RUN)
 			{
+				notifyTimeAxisUpdate();
 				periodicCheck();
 				dispatchEvent(new Event(RUN_VARIABLE_CHANGED));
 			}
@@ -791,6 +816,8 @@ package com.iblsoft.flexiweather.widgets
 		
 		private function addLayerToTimeAxis(layer: InteractiveLayer): void
 		{
+			invalidateEnumTimeAxis();
+			
 			var dynamicEvent: DynamicEvent = new DynamicEvent(TIME_AXIS_ADDED);
 			dynamicEvent['layer'] = layer;
 			dispatchEvent(dynamicEvent);
@@ -935,6 +962,8 @@ package com.iblsoft.flexiweather.widgets
 			var dynamicEvent: DynamicEvent = new DynamicEvent(TIME_AXIS_REMOVED);
 			dynamicEvent['layer'] = l;
 			dispatchEvent(dynamicEvent);
+			
+			invalidateEnumTimeAxis();
 		}
 
 		private function getSynchronizedFrameValue(): Date
@@ -1008,11 +1037,44 @@ package com.iblsoft.flexiweather.widgets
 			dispatchEvent(new DataEvent(PRIMARY_LAYER_CHANGED, true));
 		}
 
+		private var _cachedEnumTimeAxis: Array;
+		private var _cachedSyncLayers: Array;
+		
 		// data global variables synchronisation
 		public function enumTimeAxis(l_syncLayers: Array = null): Array
 		{
-			if (l_syncLayers == null)
-				l_syncLayers = [];
+			
+			/**
+			 * enumTimeAxis is very time expensive function, which is called many times, so we can rather cache it and when
+			 * there is any change (add/remove layer, add/remove frames in any layer, we will reenumarate frame
+			 */
+			
+			if (!_cachedEnumTimeAxis)
+			{
+				_cachedSyncLayers = [];
+				_cachedEnumTimeAxis = reenumTimeAxis(_cachedSyncLayers);
+			}
+			if (l_syncLayers)
+			{
+				var so: ISynchronisedObject;
+				for each (so in _cachedSyncLayers)
+				{
+					l_syncLayers.push(so);
+				}
+			}
+			return _cachedEnumTimeAxis;
+		}
+		
+		private function notifyTimeAxisReenumerated(): void
+		{
+			dispatchEvent(new Event(TIMELINE_FRAMES_ENUMERATED));
+		}
+		
+		private function reenumTimeAxis(l_syncLayers: Array = null): Array
+		{
+//			if (l_syncLayers == null)
+//				l_syncLayers = [];
+			
 			var l_timeAxis: Array = null;
 			for each (var l: InteractiveLayer in m_layers)
 			{
@@ -1023,7 +1085,7 @@ package com.iblsoft.flexiweather.widgets
 				//debug("enumTimeAxis so: " + (so as Object).name + " synchro vars: " + test.toString());
 				if (test == null)
 					continue;
-				if (so.getSynchronisedVariables().indexOf(GlobalVariable.FRAME) < 0)
+				if (test.indexOf(GlobalVariable.FRAME) < 0)
 					continue;
 				if (!so.isPrimaryLayer())
 					continue;
@@ -1036,6 +1098,7 @@ package com.iblsoft.flexiweather.widgets
 				else
 					ArrayUtils.unionArrays(l_timeAxis, l_frames);
 			}
+			callLater(notifyTimeAxisReenumerated);
 			return l_timeAxis;
 		}
 		
