@@ -8,6 +8,7 @@ package com.iblsoft.flexiweather.proj
 	
 	import mx.logging.Log;
 	
+	import org.openscales.proj4as.ProjConstants;
 	import org.openscales.proj4as.ProjPoint;
 	import org.openscales.proj4as.ProjProjection;
 
@@ -195,6 +196,20 @@ package com.iblsoft.flexiweather.proj
 			var origPoint: ProjPoint = new ProjPoint(f_prjX, f_prjY);
 //			trace(" origPoint: " + origPoint);
 			var ptDest: ProjPoint = m_proj.inverse(origPoint);
+			if (m_proj.projParams.longZero && m_proj.projParams.longZero != 0)
+			{
+				ptDest.x += m_proj.projParams.longZero
+				if (ptDest.x > ProjConstants.PI)
+				{
+					ptDest.x -= ProjConstants.PI * 2;
+					//							trace("ProjStere fixed1: " + p.x);
+				}
+				if (ptDest.x < (-1 *ProjConstants.PI))
+				{
+					ptDest.x += ProjConstants.PI * 2;
+					//							trace("ProjStere fixed2: " + p.x);
+				}
+			}
 //			trace(" dest: " + ptDest);
 			if (ptDest == null)
 				return null;
@@ -245,6 +260,10 @@ package com.iblsoft.flexiweather.proj
 				f_latitudeRad *= 180.0 / Math.PI;
 			}
 			try {
+				if (m_proj.projParams.longZero && m_proj.projParams.longZero != 0)
+				{
+					f_longitudeRad -= m_proj.projParams.longZero;
+				}
 				var ptDest: ProjPoint = m_proj.forward(new ProjPoint(f_longitudeRad, f_latitudeRad));
 			} catch (error: Error) {
 				return null;
