@@ -1,17 +1,30 @@
 package com.iblsoft.flexiweather.widgets
 {
 	import com.iblsoft.flexiweather.proj.Coord;
+	
 	import flash.events.MouseEvent;
+	
 	import spark.components.Label;
 
 	public class InteractiveLayerCoordinate extends InteractiveLayer
 	{
-		internal var m_textLabel: Label;
+		private var m_textLabel: Label;
 
-		public function InteractiveLayerCoordinate(container: InteractiveWidget, textLabel: Label)
+		public function InteractiveLayerCoordinate(container: InteractiveWidget = null)
 		{
 			super(container);
 			m_textLabel = textLabel;
+		}
+
+
+		public function get textLabel():Label
+		{
+			return m_textLabel;
+		}
+
+		public function set textLabel(value:Label):void
+		{
+			m_textLabel = value;
 		}
 
 		override public function onMouseMove(event: MouseEvent): Boolean

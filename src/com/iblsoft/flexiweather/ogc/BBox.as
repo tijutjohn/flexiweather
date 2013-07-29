@@ -178,6 +178,10 @@ package com.iblsoft.flexiweather.ogc
 		}
 		
 
+		public function get isValid(): Boolean
+		{
+			return !isNaN(xMin) && !isNaN(xMax) && !isNaN(yMin) && !isNaN(yMax) ;
+		}
 		public function get isEmpty(): Boolean
 		{
 			return width == 0 || height == 0;

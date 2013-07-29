@@ -41,7 +41,8 @@ package com.iblsoft.flexiweather.proj
 //				}
 //			}
 			// internally the proj4as creates a dictionary cache of CRS -> ProjProjection pairs
-			m_proj = ProjProjection.getProjProjection(s_crs.toUpperCase());
+			s_crs = updateCRS(s_crs);
+			m_proj = ProjProjection.getProjProjection(s_crs);
 			if (m_proj == null)
 				Log.getLogger("Projection").error("Unknown CRS '" + s_crs + "'");
 			if (extentBBox == null)
@@ -75,6 +76,8 @@ package com.iblsoft.flexiweather.proj
 		 */
 		public static function getByCRS(s_crs: String): Projection
 		{
+			s_crs = updateCRS(s_crs);
+			
 			var prj: Projection;
 			if (s_crs in m_cache)
 			{
@@ -106,6 +109,16 @@ package com.iblsoft.flexiweather.proj
 			return getByCRS(cfg.crs);
 		}
 
+		private static function updateCRS(s_crs: String): String
+		{
+			s_crs = s_crs.toUpperCase();
+			while(s_crs.search(" ") != -1)
+			{
+				s_crs = (s_crs as String).replace(" ", "");
+			}
+			
+			return s_crs;
+		}
 		/**
 		 * @param s_crs
 		 * @param s_proj4String
@@ -117,11 +130,7 @@ package com.iblsoft.flexiweather.proj
 				s_crs: String, s_proj4String: String,
 				crsExtentBBox: BBox = null, b_crsWrapsHorizontally: Boolean = false): void
 		{
-			s_crs = s_crs.toUpperCase();
-			while(s_crs.search(" ") != -1)
-			{
-				s_crs = (s_crs as String).replace(" ", "");
-			}
+			s_crs = updateCRS(s_crs);
 			ProjProjection.defs[s_crs] = s_proj4String;
 			md_crsToDetails[s_crs] = {
 						extentBBox: crsExtentBBox,
@@ -132,6 +141,8 @@ package com.iblsoft.flexiweather.proj
 		public static function setCRSExtentBBox(
 				s_crs: String, crsExtentBBox: BBox, b_crsWrapsHorizontally: Boolean = false): void
 		{
+			s_crs = updateCRS(s_crs);
+			
 			if (!(s_crs in md_crsToDetails))
 				md_crsToDetails[s_crs] = {};
 			md_crsToDetails[s_crs].extentBBox = crsExtentBBox;
@@ -147,6 +158,9 @@ package com.iblsoft.flexiweather.proj
 
 		public function moveCoordToExtent(coord: Coord): Coord
 		{
+			if (!m_extentBBox || !m_extentBBox.isValid)
+				return coord;
+			
 			if (coord.x >= m_extentBBox.xMin && coord.x <= m_extentBBox.xMax)
 			{
 				return coord;
