@@ -306,8 +306,9 @@ package com.iblsoft.flexiweather.utils.anticollision
 		{
 			if (layout)
 			{
-				var lo: AnticollisionLayoutObject
-				for (var i: int = 0; i < ma_layoutObjects.length; i++)
+				var lo: AnticollisionLayoutObject;
+				var i: int;
+				for (i = 0; i < ma_layoutObjects.length; i++)
 				{
 					lo = ma_layoutObjects[i];
 					if (lo.name == "Obstacle")
@@ -318,7 +319,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 					}
 					
 				}
-				for (var i: int = 0; i < ma_layoutObjects.length; i++)
+				for (i = 0; i < ma_layoutObjects.length; i++)
 				{
 					lo = ma_layoutObjects[0];
 					removeObject(lo.object);
