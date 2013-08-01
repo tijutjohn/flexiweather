@@ -98,7 +98,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 			{
 				if (!(parent as InteractiveWidget).usedForIcon)
 				{
-					trace("new AnticollisionLayout is created");
+					//trace("new AnticollisionLayout is created");
 				}
 			}
 			_layoutName = layoutName;
@@ -324,7 +324,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 					lo = ma_layoutObjects[0];
 					removeObject(lo.object);
 				}
-				trace("ma_layoutObjects: " + ma_layoutObjects.length);
+				//trace("ma_layoutObjects: " + ma_layoutObjects.length);
 				setDirty();
 				updateLayoutObjectsLength();
 			}
@@ -357,8 +357,8 @@ package com.iblsoft.flexiweather.utils.anticollision
 				var diffTime: Number = getTimer() - mi_lastUpdate;
 				if (diffTime < 500)
 					return;
-				if (ma_layoutObjects.length > 0)
-					trace("\n ACL update");
+				//if (ma_layoutObjects.length > 0)
+				//	trace("\n ACL update");
 				var currObjects: Array = ma_layoutObjects.source;
 //				var currObjects: Array = ma_currentLayoutObjects;
 				if (!m_boundaryRect)
@@ -575,7 +575,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 						if (boundsFrom.width < 10 && boundsFrom.height < 10)
 						{
 							//object is too small, do not do anticollision for it
-							trace("" + this + " object is too small, do not do anticollision for it");
+							//trace("" + this + " object is too small, do not do anticollision for it");
 							continue;
 						}
 						var a_boundingLineSegmentsFrom: Array = getLineSegmentApproximation(lo.object);
@@ -848,7 +848,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 		{
 			if (!object || (!object is IAnticollisionLayoutObject))
 			{
-				trace("getAnticollisionLayoutObjectFor PROBLEM");
+				trace("AnticollisionLayout.getAnticollisionLayoutObjectFor(): PROBLEM");
 				return null;
 			}
 			return object.anticollisionLayoutObject;
@@ -867,7 +867,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 		{
 			if (!anchor || (!anchor is IAnticollisionLayoutObject))
 			{
-				trace("getAnticollisionLayoutObjectForAnchor PROBLEM");
+				trace("AnticollisionLayout.getAnticollisionLayoutObjectForAnchor(): PROBLEM");
 				return null;
 			}
 			return anchor.anticollisionLayoutObject;
