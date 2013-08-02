@@ -4,7 +4,11 @@
     <classEntry path="com.iblsoft.flexiweather.components.IndexRetainingDropDownList"/>
     <classEntry path="com.iblsoft.flexiweather.components.MultiSelectionButtonBar"/>
     <classEntry path="com.iblsoft.flexiweather.components.ResizableDropDownList"/>
+    <classEntry path="com.iblsoft.flexiweather.components.charts.ChartSerie"/>
+    <classEntry path="com.iblsoft.flexiweather.components.charts.ChartType"/>
     <classEntry path="com.iblsoft.flexiweather.components.charts.FlexChart"/>
+    <classEntry path="com.iblsoft.flexiweather.components.charts.FlexChartLegend"/>
+    <classEntry path="com.iblsoft.flexiweather.components.charts.FlexChartLegendEvent"/>
     <classEntry path="com.iblsoft.flexiweather.components.charts.SimpleChart"/>
     <classEntry path="com.iblsoft.flexiweather.constants.AnticollisionDisplayMode"/>
     <classEntry path="com.iblsoft.flexiweather.data.SetOperationType"/>
@@ -364,6 +368,9 @@
     <classEntry path="com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayout"/>
     <classEntry path="com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayoutObject"/>
     <classEntry path="com.iblsoft.flexiweather.utils.anticollision.IAnticollisionLayoutObject"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.draw.DrawMode"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.draw.FillStyle"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.draw.LineStyle"/>
     <classEntry path="com.iblsoft.flexiweather.utils.geometry.ILineSegmentApproximableBounds"/>
     <classEntry path="com.iblsoft.flexiweather.utils.geometry.LineSegment"/>
     <classEntry path="com.iblsoft.flexiweather.utils.geometry.Vector2D"/>
@@ -385,6 +392,7 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerCoordinate"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerLabel"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerLegendEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerLegendGroup"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerLegendImage"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerLegends"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerMap"/>
@@ -392,6 +400,7 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerPan"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerPlace"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerPlaces"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerPreloader"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerRoute"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerZoom"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveWidget"/>
@@ -401,6 +410,7 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.LabelJobProgressIndicator"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.ModuleLoaderWithData"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.ProgressBarJobProgressIndicator"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.RouteCurveRenderer"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.SimpleLayerBehaviourEditDialog"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.TextAreaWithEnter"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.basicauth.controls.BasicAuthCredentialsPopup"/>
@@ -413,6 +423,12 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.GroupVBox"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.skins.GroupBoxBorder"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.skins.GroupBoxSkin"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.ToggleButtonBar"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.ToggleButtonBarButton"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.ToggleButtonBarEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.ToggleButtonBarItemData"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.ToggleButtonBarSkin"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.data.InteractiveLayerMapSaveSettings"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.data.InteractiveLayerPrintQuality"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.errors.ErrorJournal"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.errors.ErrorJournalDataItem"/>
