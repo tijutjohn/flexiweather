@@ -879,15 +879,18 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					{
 						var run: Date = ISO8601Parser.stringToDate(runString);
 					}
-					var forecast: Duration = new Duration(((value as Date).time - run.time) / 1000.0);
-					var l_forecasts: Array = getWMSDimensionsValues(m_cfg.dimensionForecastName);
-					ofExactForecast = null;
-					for each (of in l_forecasts)
+					if (run)
 					{
-						if (of && of.data && Duration(of.data).secondsTotal == forecast.secondsTotal)
+						var forecast: Duration = new Duration(((value as Date).time - run.time) / 1000.0);
+						var l_forecasts: Array = getWMSDimensionsValues(m_cfg.dimensionForecastName);
+						ofExactForecast = null;
+						for each (of in l_forecasts)
 						{
-							ofExactForecast = of;
-							break;
+							if (of && of.data && Duration(of.data).secondsTotal == forecast.secondsTotal)
+							{
+								ofExactForecast = of;
+								break;
+							}
 						}
 					}
 					if (ofExactForecast != null)

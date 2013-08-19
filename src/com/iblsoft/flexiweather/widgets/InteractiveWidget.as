@@ -527,7 +527,7 @@ package com.iblsoft.flexiweather.widgets
 			
 			//TODO we need to check if layer is synchronizable and call this when it will be ready for synchronization
 			//when new layer is added to container, call onAreaChange to notify layer, that layer is already added to container, so it can render itself
-//			l.onAreaChanged(true);
+			l.onAreaChanged(true);
 			
 			
 			invalidateLayersOrder();
