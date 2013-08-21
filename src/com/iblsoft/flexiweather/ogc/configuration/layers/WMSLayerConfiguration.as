@@ -12,6 +12,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.IWMSLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceConfiguration;
 	import com.iblsoft.flexiweather.ogc.editable.IInteractiveLayerProvider;
+	import com.iblsoft.flexiweather.ogc.events.ServiceCapabilitiesEvent;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
@@ -69,13 +70,13 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		protected function registerService(): void
 		{
 			if (m_service)
-				m_service.addEventListener(WMSServiceConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated)
+				m_service.addEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onCapabilitiesUpdated)
 		}
 		
 		protected function unregisterService(): void
 		{
 			if (m_service)
-				m_service.removeEventListener(WMSServiceConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated)
+				m_service.removeEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onCapabilitiesUpdated)
 		}
 		
 		override public function destroy(): void
@@ -104,12 +105,12 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		override public function serialize(storage: Storage): void
 		{
 			if (storage.isLoading() && m_service != null)
-				m_service.removeEventListener(WMSServiceConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated)
+				m_service.removeEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onCapabilitiesUpdated)
 			super.serialize(storage);
 			
 			if (storage.isLoading())
 			{
-				m_service.addEventListener(WMSServiceConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
+				m_service.addEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
 //				trace(this + " serialized");
 			}
 			

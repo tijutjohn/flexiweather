@@ -11,6 +11,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 	import com.iblsoft.flexiweather.ogc.WMSLayerBase;
 	import com.iblsoft.flexiweather.ogc.WMSLayerGroup;
 	import com.iblsoft.flexiweather.ogc.configuration.ProjectionConfiguration;
+	import com.iblsoft.flexiweather.ogc.events.ServiceCapabilitiesEvent;
 	import com.iblsoft.flexiweather.ogc.managers.OGCServiceConfigurationManager;
 	import com.iblsoft.flexiweather.ogc.managers.ProjectionConfigurationManager;
 	import com.iblsoft.flexiweather.utils.LoggingUtils;
@@ -55,8 +56,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		{
 			return _imageFormats;
 		}
-		public static const CAPABILITIES_UPDATED: String = "serviceCapabilitiesUpdated";
-		public static const ALL_CAPABILITIES_UPDATED: String = "allServicesCapabilitiesUpdated";
+		
 
 		public function WMSServiceConfiguration(s_url: String = null, version: Version = null)
 		{
@@ -187,7 +187,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 						trace("WMSServiceConfiguration error: " + e.message);
 					}
 					m_capabilities = xml;
-					dispatchEvent(new DataEvent(CAPABILITIES_UPDATED, true));
+					dispatchEvent(new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, true));
 				}
 			}
 			//check all crs
@@ -218,6 +218,10 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 				m_capabilitiesLoadJob.finish();
 			m_capabilitiesLoadJob = null;
 			// keep old m_capabilities
+			
+			var e: ServiceCapabilitiesEvent = new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.CAPABILITIES_UPDATE_FAILED, true);
+			e.errorString = 'Can not load "'+event.request.url+'" service';
+			dispatchEvent(e);
 		}
 
 		public function get rootLayerGroup(): WMSLayerGroup

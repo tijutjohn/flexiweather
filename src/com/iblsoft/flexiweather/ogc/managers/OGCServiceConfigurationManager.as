@@ -1,8 +1,10 @@
 package com.iblsoft.flexiweather.ogc.managers
 {
+	import com.iblsoft.flexiweather.net.events.UniURLLoaderErrorEvent;
 	import com.iblsoft.flexiweather.ogc.Version;
 	import com.iblsoft.flexiweather.ogc.configuration.services.OGCServiceConfiguration;
 	import com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceConfiguration;
+	import com.iblsoft.flexiweather.ogc.events.ServiceCapabilitiesEvent;
 	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
@@ -137,7 +139,8 @@ package com.iblsoft.flexiweather.ogc.managers
 		{
 			for each (var wmsServiceConfiguration: WMSServiceConfiguration in _runningServices)
 			{
-				wmsServiceConfiguration.removeEventListener(WMSServiceConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
+				wmsServiceConfiguration.removeEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
+				wmsServiceConfiguration.removeEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATE_FAILED, onCapabilitiesUpdateFailed);
 			}
 			_runningServices = [];
 		}
@@ -178,7 +181,8 @@ package com.iblsoft.flexiweather.ogc.managers
 						var wmsServiceConfiguration: WMSServiceConfiguration = osc as WMSServiceConfiguration;
 						_runningServices.push(wmsServiceConfiguration);
 						m_servicesUpdating++;
-						wmsServiceConfiguration.addEventListener(WMSServiceConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
+						wmsServiceConfiguration.addEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
+						wmsServiceConfiguration.addEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATE_FAILED, onCapabilitiesUpdateFailed);
 					}
 					osc.update();
 					osc.mi_lastUpdateFlashStamp = i_currentFlashStamp;
@@ -186,12 +190,25 @@ package com.iblsoft.flexiweather.ogc.managers
 			}
 		}
 
-		private function onCapabilitiesUpdated(event: DataEvent): void
+		private function onCapabilitiesUpdateFailed(event: ServiceCapabilitiesEvent): void
 		{
-			var wmsServiceConfiguration: WMSServiceConfiguration = event.target as WMSServiceConfiguration;
+			dispatchEvent(event);
+			capabilitiesUpdated();
+			
+		}
+		
+		private function onCapabilitiesUpdated(event: ServiceCapabilitiesEvent): void
+		{
+			dispatchEvent(event);
+			capabilitiesUpdated();
+		}
+		
+		private function capabilitiesUpdated(): void
+		{
+//			var wmsServiceConfiguration: WMSServiceConfiguration = event.target as WMSServiceConfiguration;
 //			wmsServiceConfiguration.capabilitiesUpdated = true;
 			
-			dispatchEvent(new Event(WMSServiceConfiguration.CAPABILITIES_UPDATED, true));
+//			dispatchEvent(new Event(WMSServiceConfiguration.CAPABILITIES_UPDATED, true));
 			m_servicesUpdating--;
 			if (m_servicesUpdating == 0)
 			{
@@ -201,7 +218,7 @@ package com.iblsoft.flexiweather.ogc.managers
 		
 		private function allCapabilitiesAreUpdated(): void
 		{
-			dispatchEvent(new Event(WMSServiceConfiguration.ALL_CAPABILITIES_UPDATED, true));
+			dispatchEvent(new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.ALL_CAPABILITIES_UPDATED, true));
 		}
 
 		protected function onTimer(event: TimerEvent): void
