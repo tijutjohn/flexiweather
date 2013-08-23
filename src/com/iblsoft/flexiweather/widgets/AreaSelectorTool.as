@@ -150,6 +150,7 @@ package com.iblsoft.flexiweather.widgets
 
 		public function createSelection(bbox: BBox): void
 		{
+			_toolIsCreated = true;
 			_selectedBBox = bbox;
 			_r = new CustomRectangle();
 			updateRectangleFromViewBBox();

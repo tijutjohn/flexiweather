@@ -2,20 +2,31 @@ package com.iblsoft.flexiweather.ogc.configuration
 {
 	import com.iblsoft.flexiweather.net.loaders.AbstractURLLoader;
 	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
+	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.ogc.managers.ProjectionConfigurationManager;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
+	
 	import flash.geom.Rectangle;
 	import flash.net.URLRequest;
 	import flash.net.URLVariables;
-	import com.iblsoft.flexiweather.ogc.managers.ProjectionConfigurationManager;
-	import com.iblsoft.flexiweather.ogc.BBox;
 
 	public class AreaConfiguration implements Serializable
 	{
 		public static const AREA_ICON_WIDTH: int = 60;
 		public static const AREA_ICON_HEIGHT: int = 60;
-		public var projection: ProjectionConfiguration;
+		private var _projection: ProjectionConfiguration;
 		private var ms_default_area: Boolean;
+
+		public function get projection():ProjectionConfiguration
+		{
+			return _projection;
+		}
+
+		public function set projection(value:ProjectionConfiguration):void
+		{
+			_projection = value;
+		}
 
 		public function get isDefaultArea(): Boolean
 		{
@@ -67,6 +78,13 @@ package com.iblsoft.flexiweather.ogc.configuration
 		{
 		}
 
+		public function isSameArea(area: AreaConfiguration): Boolean
+		{
+			if (area.name == name)
+				return true;
+			
+			return false;
+		}
 		public function serialize(storage: Storage): void
 		{
 			if (storage.isLoading())
@@ -165,6 +183,11 @@ package com.iblsoft.flexiweather.ogc.configuration
 		public function get label(): String
 		{
 			return ms_name;
+		}
+		
+		public function toString(): String
+		{
+			return "AreaConfiguration: " + label + ": ";
 		}
 	}
 }

@@ -1634,7 +1634,7 @@ package com.iblsoft.flexiweather.widgets
 		public function setViewBBox(bbox: BBox, b_finalChange: Boolean, b_negotiateBBox: Boolean = true): void
 		{
 			
-//			debug(this + " setViewBBox: " + bbox.toBBOXString() + " finalChange: " + b_finalChange + " , negotiate: " + b_negotiateBBox);
+			debug(this + " setViewBBox: " + bbox.toBBOXString() + " finalChange: " + b_finalChange + " , negotiate: " + b_negotiateBBox);
 			
 			var b_changeZoom: Boolean = true;
 			var oldBox: BBox = getViewBBox();
@@ -1765,6 +1765,7 @@ package com.iblsoft.flexiweather.widgets
 
 		private function negotiateBBox(newBBox: BBox, b_finalChange: Boolean, b_changeZoom: Boolean = true): void
 		{
+			debug("negotiateBBox: " + newBBox.toBBOXString() + " final change: " + b_finalChange + " change zoom: " + b_changeZoom);
 			var latestBBox: BBox;
 			for (var i: int = 0; i < m_layerContainer.numElements; ++i)
 			{
@@ -1779,6 +1780,7 @@ package com.iblsoft.flexiweather.widgets
 
 		private function setViewBBoxAfterNegotiation(newBBox: BBox, b_finalChange: Boolean): void
 		{
+			debug("setViewBBoxAfterNegotiation " + newBBox.toBBOXString() + " final change: " + b_finalChange);
 			//dispath view bbox changed event to notify about change
 			m_viewBBox = newBBox;
 			dispatchEvent(new Event(VIEW_BBOX_CHANGED));
@@ -1787,6 +1789,7 @@ package com.iblsoft.flexiweather.widgets
 
 		public function setExtentBBox(bbox: BBox, b_finalChange: Boolean = true): void
 		{
+			debug("setExtentBBox " + bbox.toBBOXString() + " final change: " + b_finalChange);
 			m_extentBBox = bbox;
 			setViewBBox(m_extentBBox, b_finalChange); // this calls signalAreaChanged()
 		}
@@ -2353,7 +2356,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (id != null)
 			{
-//				trace(tag + "| " + type + "| " + str);
+				trace(tag + "| " + type + "| " + str);
 //				LoggingUtils.dispatchLogEvent(this, tag + "| " + type + "| " + str);
 			}
 		}

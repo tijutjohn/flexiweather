@@ -14,6 +14,7 @@ package com.iblsoft.flexiweather.widgets
 	import flash.ui.Multitouch;
 	import flash.utils.clearInterval;
 	import flash.utils.clearTimeout;
+	import flash.utils.getTimer;
 	import flash.utils.setInterval;
 	import flash.utils.setTimeout;
 	
@@ -317,7 +318,7 @@ package com.iblsoft.flexiweather.widgets
 							}
 						}
 						extentBBox = _wrapLimiter.moveViewBBoxBack(extentBBox);
-						container.setExtentBBox(extentBBox, false);
+//						container.setExtentBBox(extentBBox, false);
 						break;
 					}
 				}
@@ -333,9 +334,45 @@ package com.iblsoft.flexiweather.widgets
 				if (r.xMax > extentBBox.xMax)
 					r = r.translated(-r.xMax + extentBBox.xMax, 0);
 			}
+			container.setExtentBBox(extentBBox, false);
 			container.setViewBBox(r, b_finalChange);
+			
+//			updateContainerArea(extentBBox, r, b_finalChange);
 		}
 
+		private var _updateContainerAreaInterval: uint = 500;
+		private var _lastUpdateTime: Number;
+		private var _delayedUpdatedTimeout: Number;
+		
+		private var _extentBBox: BBox;
+		private var _viewBBox: BBox;
+		private var _viewBBoxFinalChange: Boolean;
+		
+		public function updateContainerArea(extentBBox: BBox, viewBBox: BBox, viewBBoxFinalChange: Boolean): void
+		{
+			_extentBBox = extentBBox;
+			_viewBBox = viewBBox;
+			_viewBBoxFinalChange = viewBBoxFinalChange;
+			
+			var currentTime: Number = getTimer();
+			var timeSinceLastUpdate: Number = currentTime - _lastUpdateTime;
+			if (isNaN(_lastUpdateTime) || timeSinceLastUpdate >= _updateContainerAreaInterval)
+			{
+				delayedUpdateContainerArea();
+			} else {
+				clearTimeout(_delayedUpdatedTimeout);
+				_delayedUpdatedTimeout = setTimeout(delayedUpdateContainerArea, _updateContainerAreaInterval - timeSinceLastUpdate);
+			}
+		}
+		
+		private function delayedUpdateContainerArea(): void
+		{			
+			_lastUpdateTime = getTimer();
+			container.setExtentBBox(_extentBBox, false);
+			container.setViewBBox(_extentBBox, _extentBBox);
+		}
+		
+		
 //		private var _txt: TextField;
 		/*
 		override protected function createChildren():void

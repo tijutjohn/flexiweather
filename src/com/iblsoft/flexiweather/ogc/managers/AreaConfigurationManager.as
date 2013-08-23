@@ -67,6 +67,29 @@ package com.iblsoft.flexiweather.ogc.managers
 			return null;
 		}
 
+		public static function resetCachedAreaThumbnail(s_key: String, cacheID: int): void
+		{
+			var img: BitmapData;
+			if (cacheID == 1)
+			{
+				if (AREAS_THUMBNAILS_CACHE[s_key])
+				{
+					img = AREAS_THUMBNAILS_CACHE[s_key]['image'] as BitmapData;
+					delete AREAS_THUMBNAILS_CACHE[s_key];
+				}
+			} else if (cacheID == 2) {
+				if (AREAS_THUMBNAILS_CACHE2[s_key])
+				{
+					img = AREAS_THUMBNAILS_CACHE2[s_key]['image'] as BitmapData;
+					delete AREAS_THUMBNAILS_CACHE2[s_key];
+				}
+			}
+			
+			if (img)
+				img.dispose();
+			
+		}
+		
 		public static function addAreaThumbnail(img: Bitmap, s_key: String, cacheID: int): void
 		{
 			if (img.width == 0 || img.height == 0)
