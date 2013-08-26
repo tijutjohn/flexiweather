@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc.tiling
 {
+	import com.iblsoft.flexiweather.FlexiWeatherConfiguration;
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerProgressEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerQTTEvent;
@@ -72,6 +73,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 		protected var ms_explicitBaseURLPattern: String;
 		private var m_cache: WMSTileCache;
 
+
+
 		public function set cache(value: WMSTileCache): void
 		{
 			if (m_cache)
@@ -136,7 +139,19 @@ package com.iblsoft.flexiweather.ogc.tiling
 		 */		
 		public var onCapabilitiesDependent: Boolean;
 		
-		public var capabilitiesReady: Boolean;
+		private var _capabilitiesReady: Boolean;
+		public function get capabilitiesReady():Boolean
+		{
+			if (!FlexiWeatherConfiguration.FLEXI_WEATHER_LOADS_GET_CAPABILITIES)
+				return true;
+			
+			return _capabilitiesReady;
+		}
+		
+		public function set capabilitiesReady(value:Boolean):void
+		{
+			_capabilitiesReady = value;
+		}
 		
 		public function InteractiveLayerTiled(container: InteractiveWidget = null, cfg: TiledLayerConfiguration = null)
 		{

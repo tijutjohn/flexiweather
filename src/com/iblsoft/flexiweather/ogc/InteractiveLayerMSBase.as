@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.FlexiWeatherConfiguration;
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerProgressEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerWMSEvent;
@@ -131,6 +132,12 @@ package com.iblsoft.flexiweather.ogc
 
 		protected function get capabilitiesReady(): Boolean
 		{
+			if (!FlexiWeatherConfiguration.FLEXI_WEATHER_LOADS_GET_CAPABILITIES)
+			{
+				//if FlexiWeather is not reading GetCapabilities requests, this getter return always TRUE
+				return true;
+			}
+			
 			if (m_cfg && m_cfg.service)
 			{
 				return m_cfg.service.capabilitiesUpdated;
