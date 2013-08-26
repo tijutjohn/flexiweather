@@ -120,7 +120,7 @@ package com.iblsoft.flexiweather.widgets
 				else
 				{
 					_r = _lastCreatedRectangle;
-					dispatchEvent(new Event(AREA_CANCELLED));
+//					dispatchEvent(new Event(AREA_CANCELLED));
 					_areaComponent.mouseEnabled = true;
 					_areaComponent.enableSprites(true);
 					return true;
