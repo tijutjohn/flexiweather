@@ -667,7 +667,7 @@ package com.iblsoft.flexiweather.widgets
 		
 		protected function onSynchronisedVariableChanged(event: SynchronisedVariableChangeEvent): void
 		{
-			trace("ILM onSynchronisedVariableChanged: " + event.variableId);
+//			trace("ILM onSynchronisedVariableChanged: " + event.variableId);
 			invalidateEnumTimeAxis();
 			
 			if (event.variableId == GlobalVariable.FRAME)

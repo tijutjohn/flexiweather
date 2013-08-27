@@ -442,9 +442,12 @@ package com.iblsoft.flexiweather.widgets
 
 		public function set zOrder(i_zOrder: int): void
 		{
-			mi_zOrder = i_zOrder;
-			if (container != null)
-				container.invalidateLayersOrder();
+			if (mi_zOrder != i_zOrder)
+			{
+				mi_zOrder = i_zOrder;
+				if (container != null)
+					container.invalidateLayersOrder();
+			}
 		}
 
 		public function getFullURLWithSize(width: int, height: int): String
