@@ -1,15 +1,20 @@
 package com.iblsoft.flexiweather.utils
 {
+	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayoutObject;
+	import com.iblsoft.flexiweather.utils.anticollision.IAnticollisionLayoutObject;
+	
 	import flash.display.Sprite;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
 
-	public class AnnotationBox extends Sprite
+	public class AnnotationBox extends Sprite implements IAnticollisionLayoutObject
 	{
 		public var measuredWidth: Number = 0;
 		public var measuredHeight: Number = 0;
 		private var _color: uint;
 
+		private var _anticollisionLayoutObject: AnticollisionLayoutObject;
+		
 		public function AnnotationBox()
 		{
 			super();
@@ -17,6 +22,16 @@ package com.iblsoft.flexiweather.utils
 			mouseChildren = false;
 		}
 
+		public function set anticollisionLayoutObject(object: AnticollisionLayoutObject): void
+		{
+			_anticollisionLayoutObject = object;
+		}
+		
+		public function get anticollisionLayoutObject(): AnticollisionLayoutObject
+		{
+			return _anticollisionLayoutObject;
+		}
+		
 		public function get color(): uint
 		{
 			return _color;

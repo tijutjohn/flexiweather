@@ -397,7 +397,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 				if (_selectedInteractiveWidget == oldIW)
 				{
 					oldSelectedIW = _selectedInteractiveWidget;
-					selectedInteractiveWidget = null;
+//					selectedInteractiveWidget = null;
 				}
 				removeWidget(oldIW);
 			}
@@ -411,6 +411,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 			//setting close buttons visibility
 			closeButtonVisible = (newConfiguration.rows * newConfiguration.columns) > 1;
 			
+			var currentSelection: InteractiveWidget;
 			
 			for (j = 0; j < newConfiguration.rows; j++)
 			{
@@ -433,11 +434,17 @@ package com.iblsoft.flexiweather.ogc.multiview
 						//selection change only if all wdiget are initialized, otherwise it must be notified after all widget will be initialized
 //						m_selectedWidgetAfterWidgetInitialization = iw;
 						selectedInteractiveWidget = iw;
+						currentSelection = iw;
 					}
 					cnt++;
 				}
 			}
 
+			if (!currentSelection && _widgetsCountToBeReady.length > 0)
+			{
+				selectedInteractiveWidget = _widgetsCountToBeReady.getItemAt(0) as InteractiveWidget;
+			}
+			
 			dataProvider = ac;
 			invalidateDisplayList();
 			if (_widgetsCountToBeReady.length == 0)

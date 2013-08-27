@@ -3,6 +3,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.events.WFSCursorManagerEvent;
 	import com.iblsoft.flexiweather.events.WFSCursorManagerTypes;
 	import com.iblsoft.flexiweather.ogc.events.MoveablePointEvent;
+	
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
@@ -15,6 +16,16 @@ package com.iblsoft.flexiweather.ogc.editable
 		protected var m_feature: WFSFeatureEditable;
 		private var _mi_pointIndex: uint;
 
+		override public function set x(value:Number):void
+		{
+			super.x = value;
+			
+			trace(this + " x = " + value);
+		}
+		override public function set visible(value:Boolean):void
+		{
+			super.visible = value;
+		}
 		protected function get mi_pointIndex(): uint
 		{
 			return _mi_pointIndex;
@@ -78,7 +89,8 @@ package com.iblsoft.flexiweather.ogc.editable
 			graphics.lineStyle(mb_highlighted ? 4 : 2, 0x000000);
 			graphics.beginFill(mb_selected ? 0x00ff00 : 0xffff00, 0.8);
 			var i_resize: uint = 0;
-			if (Capabilities.touchscreenType == TouchscreenType.FINGER)
+			var dpi: Number = Capabilities.screenDPI;
+			if (Capabilities.touchscreenType == TouchscreenType.FINGER && dpi > 72)
 				i_resize = 10;
 			graphics.drawCircle(0, 0, i_resize + (mb_highlighted ? 7 : 5));
 			graphics.endFill();
@@ -159,6 +171,7 @@ package com.iblsoft.flexiweather.ogc.editable
 
 		public function onMouseDown(pt: Point, event: MouseEvent): Boolean
 		{
+			trace("onMouseDown : " + pt);
 			m_editableItemManager.setMouseMoveCapture(this);
 			m_editableItemManager.setMouseClickCapture(this);
 			m_feature.selectMoveablePoint(mi_pointIndex, mi_reflection);
@@ -203,6 +216,8 @@ package com.iblsoft.flexiweather.ogc.editable
 			
 			var mpe: MoveablePointEvent 
 			
+			trace("onMouseUp : " + pt);
+			
 			mpe = new MoveablePointEvent(MoveablePointEvent.MOVEABLE_POINT_UP, true);
 			mpe.point = this;
 			mpe.feature = m_feature;
@@ -227,11 +242,12 @@ package com.iblsoft.flexiweather.ogc.editable
 
 		public function setPoint(pt: Point): void
 		{
-			if (!pt.equals(m_pt))
-			{
+//			if (!pt.equals(m_pt))
+//			{
 				m_pt = pt;
+				trace(this + " setPoint");
 				update();
-			}
+//			}
 		}
 
 		public function getFeature(): WFSFeatureEditable

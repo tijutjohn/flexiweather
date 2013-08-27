@@ -77,6 +77,11 @@ package com.iblsoft.flexiweather.utils.anticollision
 		private var _layoutName: String;
 		private var _updateLocationDictionary: UpdateLocationDictionary;
 
+		public function get layoutObjects(): ArrayCollection
+		{
+			return ma_layoutObjects;
+		}
+		
 		override public function set visible(value:Boolean):void
 		{
 			if (!m_suspendAnticollisionProcessing)
@@ -319,7 +324,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 					}
 					
 				}
-				for (i = 0; i < ma_layoutObjects.length; i++)
+				while (ma_layoutObjects.length > 0)
 				{
 					lo = ma_layoutObjects[0];
 					removeObject(lo.object);
