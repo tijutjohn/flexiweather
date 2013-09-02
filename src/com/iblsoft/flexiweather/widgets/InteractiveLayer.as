@@ -254,6 +254,7 @@ package com.iblsoft.flexiweather.widgets
 		 */
 		public function clear(graphics: Graphics): void
 		{
+			graphics.clear();
 		}
 
 		/**
@@ -278,8 +279,7 @@ package com.iblsoft.flexiweather.widgets
 		override protected function updateDisplayList(unscaledWidth: Number, unscaledHeight: Number): void
 		{
 //			trace(this + " updateDisplayList unscaledWidth: " + unscaledWidth + " unscaledHeight: " + unscaledHeight);
-			
-			graphics.clear();
+			clear(graphics);
 			draw(graphics);
 		}
 

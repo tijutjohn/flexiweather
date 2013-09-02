@@ -42,6 +42,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import flash.text.TextField;
 	import flash.text.TextFieldAutoSize;
 	import flash.text.TextFormat;
+	import flash.utils.getTimer;
 	
 	import mx.collections.ArrayCollection;
 	import mx.controls.Alert;
@@ -284,6 +285,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 			
 			//TODO test
 //			updateData(true);
+			
+			addEventListener(Event.EXIT_FRAME, onExitFrame);
 		}
 
 		/**
@@ -516,6 +519,25 @@ package com.iblsoft.flexiweather.ogc.tiling
 		}
 		private var _debugDrawInfoArray: Array;
 
+		private var customDrawCallsInFrame: int = 0;
+		
+		private function onExitFrame(event: Event): void
+		{
+			//on end of each frame reset customDrawCallsInFrame variable
+			customDrawCallsInFrame = 0;
+		}
+		
+		override public function clear(graphics:Graphics):void
+		{
+			//check onExitFrame() function
+			customDrawCallsInFrame++;
+			if (customDrawCallsInFrame > 1)
+			{
+				trace("clear will not be executed, it's called for: " + customDrawCallsInFrame + "th time this frame");
+				return;
+			}
+			super.clear(graphics);
+		}
 		private function customDraw(qttViewProperties: TiledViewProperties, graphics: Graphics, redrawBorder: Boolean = false): void
 		{
 			if (onCapabilitiesDependent && !capabilitiesReady)
@@ -528,6 +550,17 @@ package com.iblsoft.flexiweather.ogc.tiling
 					trace("InteractiveLayerQTTMS.customDraw(): Something is wrong, tile zoom is null");
 					return;
 				}
+				
+				
+				if (customDrawCallsInFrame > 1)
+				{
+					trace("customDraw will not be executed, it's called for: " + customDrawCallsInFrame + "th time this frame");
+					return;
+				}
+				
+				var startTime: Number = getTimer();
+				
+				
 				_debugDrawInfoArray = [];
 				var s_crs: String = qttViewProperties.crs; //container.crs;
 				var currentBBox: BBox = qttViewProperties.getViewBBox(); //container.getViewBBox();
@@ -541,8 +574,20 @@ package com.iblsoft.flexiweather.ogc.tiling
 				var _specialCacheStrings: Array = qttViewProperties.specialCacheStrings;
 				var _currentValidityTime: Date = qttViewProperties.validity;
 				//get cache tiles
+				var t1: Number = getTimer();
+				
 				var a_tiles: Array = wmsTileCache.getTiles(s_crs, mi_zoom, _specialCacheStrings, _currentValidityTime);
+				
+				var t2: Number = getTimer();
+				var getTilesTime: Number = t2 - t1;
+				trace("customDraw getTiles time: " +getTilesTime + "ms");
+				
 				var allTiles: Array = a_tiles.reverse();
+				
+				var t3: Number = getTimer();
+				var getReverseTime: Number = t3 - t2;
+				trace("customDraw reverse time: " + getReverseTime + "ms");
+				
 				graphics.clear();
 				graphics.lineStyle(0, 0, 0);
 				var t_tile: Object;
@@ -555,13 +600,21 @@ package com.iblsoft.flexiweather.ogc.tiling
 					viewPart = qttViewProperties.tileIndicesMapper.getTileIndexViewPart(tileIndex);
 					if (tileIndex)
 					{
-						_debugDrawInfoArray.push(tileIndex);
+//						_debugDrawInfoArray.push(tileIndex);
 						drawTile(tileIndex, s_crs, t_tile.image.bitmapData, redrawBorder, qttViewProperties);
 					}
 				}
+				
 				//FIXME change this, now there can be more tiledArea
 				//			m_cache.sortCache(m_tiledArea);
 				dispatchEvent(new Event(DRAW_TILES));
+				
+				
+				trace("customDraw drawTiles: " + (getTimer() - t3) + "ms");
+				
+				trace("customDraw total time: " + (getTimer() - startTime) + "ms");
+				
+				
 			}
 		}
 

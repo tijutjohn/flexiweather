@@ -682,7 +682,7 @@ graphics.lineTo(f_width - 1, 0);
 			//FIXME - check featuresContainer size (i have size more than 8000px)
 			var bd: BitmapData = new BitmapData(featuresContainer.width, featuresContainer.height, true, 0x00000000);
 			bd.draw(this);
-			graphics.clear();
+			clear(graphics);
 			graphics.beginBitmapFill(bd, matrix, false, true);
 			graphics.drawRect(0, 0, f_width, f_height);
 			graphics.endFill();

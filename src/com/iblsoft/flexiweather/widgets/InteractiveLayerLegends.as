@@ -630,7 +630,7 @@ package com.iblsoft.flexiweather.widgets
 			var colItems: int = 0;
 			var initialReposition: Boolean = false;
 			debug("\n\nLEGENDS graphics clear");
-			graphics.clear();
+			clear(graphics);
 			legendsBkgRectangle = new Rectangle();
 			_currentRectangle = new Rectangle();
 			var gapX: int = 10;
@@ -962,7 +962,7 @@ package com.iblsoft.flexiweather.widgets
 			var colItems: int = 0;
 			var initialReposition: Boolean = false;
 			debug("\n\nLEGENDS graphics clear");
-			graphics.clear();
+			clear(graphics);
 			legendsBkgRectangle = new Rectangle();
 			_currentRectangle = new Rectangle();
 			var gapX: int = 10;

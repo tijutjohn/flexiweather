@@ -878,7 +878,7 @@ package com.iblsoft.flexiweather.ogc
 //			removeVectorData();
 			
 			//clear bitmap data
-			graphics.clear();
+			clear(graphics);
 			
 			var movieObject: DisplayObject = image.parent; 
 			if (movieObject)

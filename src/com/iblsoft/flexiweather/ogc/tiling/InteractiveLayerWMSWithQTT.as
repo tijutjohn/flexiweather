@@ -148,7 +148,14 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			if (!m_tiledLayer)
 				return;
-			super.updateDisplayList(unscaledWidth, unscaledHeight);
+			
+			if (isTileable)
+			{
+				draw(graphics);
+			} else {
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
+			}
+			
 			m_tiledLayer.name = name + " (tiled)";
 			
 			//TODO fix this after InteractiveLayerTiled is implemented
@@ -401,7 +408,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			{
 				updateTiledLayerURLBase();
 				//clear WMS graphics
-				graphics.clear();
+				clear(graphics);
 				m_tiledLayer.draw(m_tiledLayer.graphics);
 //				changeTiledLayerVisibility(true);
 				changeTiledLayerVisibility(visible);
