@@ -521,19 +521,42 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		private var customDrawCallsInFrame: int = 0;
 		
+		private var customDrawFrameCounter: int = 0;
+		private var customDrawQttViewProperties: TiledViewProperties;
+		
+		private var _needToRenderTiles: Boolean;
+		public static var PAN_CUSTOM_DRAW_FRAMES_INTERVAL: int = 5;
+		
 		private function onExitFrame(event: Event): void
 		{
 			//on end of each frame reset customDrawCallsInFrame variable
 			customDrawCallsInFrame = 0;
+			customDrawFrameCounter++;
+//			if (PAN_CUSTOM_DRAW_FRAMES_INTERVAL > 1 && customDrawFrameCounter >= PAN_CUSTOM_DRAW_FRAMES_INTERVAL && _needToRenderTiles && customDrawQttViewProperties)
+//			{
+//				
+//				clear(graphics);
+//				customDraw(customDrawQttViewProperties, graphics);
+//				customDrawFrameCounter = 0;
+//				_needToRenderTiles = false;
+//			}
 		}
 		
 		override public function clear(graphics:Graphics):void
 		{
+//			trace("\nTiled clear" + name);
+			
 			//check onExitFrame() function
 			customDrawCallsInFrame++;
 			if (customDrawCallsInFrame > 1)
 			{
-				trace("clear will not be executed, it's called for: " + customDrawCallsInFrame + "th time this frame");
+//				trace("clear will not be executed, it's called for: " + customDrawCallsInFrame + "th time this frame");
+				return;
+			}
+			if (PAN_CUSTOM_DRAW_FRAMES_INTERVAL > 1 && customDrawFrameCounter < PAN_CUSTOM_DRAW_FRAMES_INTERVAL)
+			{
+//				trace("clear will not be executed, it should be called every " + PAN_CUSTOM_DRAW_FRAMES_INTERVAL + "frame, but this is just " +customDrawFrameCounter+"th frame");
+				_needToRenderTiles = true;
 				return;
 			}
 			super.clear(graphics);
@@ -545,18 +568,30 @@ package com.iblsoft.flexiweather.ogc.tiling
 			
 			if (!layerWasDestroyed)
 			{
+//				trace("\nTiled customdraw: " + name);
 				if (mi_zoom == null)
 				{
-					trace("InteractiveLayerQTTMS.customDraw(): Something is wrong, tile zoom is null");
+//					trace("InteractiveLayerQTTMS.customDraw(): Something is wrong, tile zoom is null");
 					return;
 				}
 				
 				
 				if (customDrawCallsInFrame > 1)
 				{
-					trace("customDraw will not be executed, it's called for: " + customDrawCallsInFrame + "th time this frame");
+//					trace("customDraw will not be executed, it's called for: " + customDrawCallsInFrame + "th time this frame");
 					return;
 				}
+				if (PAN_CUSTOM_DRAW_FRAMES_INTERVAL > 1 && customDrawFrameCounter < PAN_CUSTOM_DRAW_FRAMES_INTERVAL)
+				{
+//					trace("customDraw will not be executed, it should be called every " + PAN_CUSTOM_DRAW_FRAMES_INTERVAL + "frame, but this is just " +customDrawFrameCounter+"th frame");
+					_needToRenderTiles = true;
+					customDrawQttViewProperties = qttViewProperties;
+					return;
+				} else {
+					customDrawFrameCounter = 0;
+					_needToRenderTiles = false;
+				} 
+				
 				
 				var startTime: Number = getTimer();
 				
@@ -580,13 +615,13 @@ package com.iblsoft.flexiweather.ogc.tiling
 				
 				var t2: Number = getTimer();
 				var getTilesTime: Number = t2 - t1;
-				trace("customDraw getTiles time: " +getTilesTime + "ms");
+//				trace("customDraw getTiles time: " +getTilesTime + "ms");
 				
 				var allTiles: Array = a_tiles.reverse();
 				
 				var t3: Number = getTimer();
 				var getReverseTime: Number = t3 - t2;
-				trace("customDraw reverse time: " + getReverseTime + "ms");
+//				trace("customDraw reverse time: " + getReverseTime + "ms");
 				
 				graphics.clear();
 				graphics.lineStyle(0, 0, 0);
@@ -610,9 +645,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 				dispatchEvent(new Event(DRAW_TILES));
 				
 				
-				trace("customDraw drawTiles: " + (getTimer() - t3) + "ms");
-				
-				trace("customDraw total time: " + (getTimer() - startTime) + "ms");
+//				trace("customDraw drawTiles: " + (getTimer() - t3) + "ms");
+//				
+//				trace("customDraw total time: " + (getTimer() - startTime) + "ms");
 				
 				
 			}
