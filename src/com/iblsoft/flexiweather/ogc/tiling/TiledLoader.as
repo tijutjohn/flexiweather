@@ -429,7 +429,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 						}
 					}
 				}
-			}
+			} else {
+                m_layer.getCache().cacheItemLoadingCanceled(tileRequest.qttTileViewProperties);
+            }
 		}
 
 		private function tileLoadFailed(): void
