@@ -529,13 +529,13 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		override public function clear(graphics:Graphics):void
 		{
-			trace("\nTiled clear" + name);
+//			trace("\nTiled clear" + name);
 			
 			//check onExitFrame() function
 			customDrawCallsInFrame++;
 			if (customDrawCallsInFrame > 1)
 			{
-				trace("clear will not be executed, it's called for: " + customDrawCallsInFrame + "th time this frame");
+//				trace("clear will not be executed, it's called for: " + customDrawCallsInFrame + "th time this frame");
 				return;
 			}
 			super.clear(graphics);
@@ -547,7 +547,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			
 			if (!layerWasDestroyed)
 			{
-				trace("\nTiled customdraw: " + name);
+//				trace("\nTiled customdraw: " + name);
 				if (mi_zoom == null)
 				{
 //					trace("InteractiveLayerQTTMS.customDraw(): Something is wrong, tile zoom is null");
@@ -556,7 +556,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 				
 				if (customDrawCallsInFrame > 1)
 				{
-					trace("customDraw will not be executed, it's called for: " + customDrawCallsInFrame + "th time this frame");
+//					trace("customDraw will not be executed, it's called for: " + customDrawCallsInFrame + "th time this frame");
 					return;
 				}
 				

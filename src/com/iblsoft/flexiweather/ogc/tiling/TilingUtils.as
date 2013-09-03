@@ -41,12 +41,19 @@ package com.iblsoft.flexiweather.ogc.tiling
 			var _maxRowTileID: int = limits.maxTileRow;  //getMaxTileID(zoomLevel, tileSize);
 			var _maxColumnTileID: int = limits.maxTileColumn; // getMaxTileID(zoomLevel, tileSize);
 			
-			var tileBBox: Point = new Point(m_extent.width / maxColTiles, m_extent.height / maxRowTiles);
-			var viewTiles: Point = new Point((viewBBox.width / tileBBox.x), (viewBBox.height / tileBBox.y));
-			var leftCol: int = Math.max(0, Math.floor((viewBBox.xMin - m_extent.xMin) / tileBBox.x));
-			var topRow: int = Math.floor((m_extent.yMax - viewBBox.yMax) / tileBBox.y);
-			var topLeftIndex: TileIndex = new TileIndex(zoomLevel, Math.min(_maxRowTileID, Math.max(0, topRow)), Math.min(_maxColumnTileID, Math.max(0, leftCol)), tileSize);
-			var bottomRightIndex: TileIndex = new TileIndex(zoomLevel, Math.min(_maxRowTileID, Math.ceil(topRow + viewTiles.y)), Math.min(_maxColumnTileID, Math.ceil(leftCol + viewTiles.x)), tileSize);
+			var tilesInExtent: Point = new Point(m_extent.width / maxColTiles, m_extent.height / maxRowTiles);
+			
+			var leftColPosition: int = Math.max(0, Math.floor((viewBBox.xMin - m_extent.xMin) / tilesInExtent.x));
+			var rightColPosition: int = Math.max(0, Math.floor((viewBBox.xMin + viewBBox.width - m_extent.xMin) / tilesInExtent.x));
+			
+			var topRowPosition: int = Math.floor((m_extent.yMax - viewBBox.yMax) / tilesInExtent.y);
+			var bottomRowPosition: int = Math.floor((m_extent.yMax - viewBBox.yMax + viewBBox.height) / tilesInExtent.y);
+			
+			var topLeftIndex: TileIndex = new TileIndex(zoomLevel, Math.min(_maxRowTileID, Math.max(0, topRowPosition)), Math.min(_maxColumnTileID, Math.max(0, leftColPosition)), tileSize);
+			var bottomRightIndex: TileIndex = new TileIndex(zoomLevel, Math.min(_maxRowTileID, bottomRowPosition), Math.min(_maxColumnTileID, rightColPosition), tileSize);
+		
+//			trace("TilingUtils getTiledArea viewBBox: " + viewBBox.toBBOXString());
+//			trace("TilingUtils getTiledArea tilesInExtent: " + tilesInExtent + " topLeft: " + topLeftIndex + " bottomRight: " + bottomRightIndex);
 			var area: TiledArea = new TiledArea(topLeftIndex, bottomRightIndex, tileSize);
 			return area;
 		}
