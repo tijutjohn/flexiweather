@@ -68,7 +68,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		public function toString(): String
 		{
-			return 'TiledArea (' + topLeftTileIndex + ", " + bottomRightTileIndex + ") size: " + colTilesCount + " , " + rowTilesCount;
+			return 'TiledArea (' + topLeftTileIndex + ", " + bottomRightTileIndex + ") size: " + colTilesCount + " , " + rowTilesCount + " count: " + (colTilesCount * rowTilesCount);
 		}
 
 		public function isTileOutside(tile: TileIndex): Boolean

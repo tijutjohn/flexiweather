@@ -521,42 +521,21 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		private var customDrawCallsInFrame: int = 0;
 		
-		private var customDrawFrameCounter: int = 0;
-		private var customDrawQttViewProperties: TiledViewProperties;
-		
-		private var _needToRenderTiles: Boolean;
-		public static var PAN_CUSTOM_DRAW_FRAMES_INTERVAL: int = 5;
-		
 		private function onExitFrame(event: Event): void
 		{
 			//on end of each frame reset customDrawCallsInFrame variable
 			customDrawCallsInFrame = 0;
-			customDrawFrameCounter++;
-//			if (PAN_CUSTOM_DRAW_FRAMES_INTERVAL > 1 && customDrawFrameCounter >= PAN_CUSTOM_DRAW_FRAMES_INTERVAL && _needToRenderTiles && customDrawQttViewProperties)
-//			{
-//				
-//				clear(graphics);
-//				customDraw(customDrawQttViewProperties, graphics);
-//				customDrawFrameCounter = 0;
-//				_needToRenderTiles = false;
-//			}
 		}
-		
+
 		override public function clear(graphics:Graphics):void
 		{
-//			trace("\nTiled clear" + name);
+			trace("\nTiled clear" + name);
 			
 			//check onExitFrame() function
 			customDrawCallsInFrame++;
 			if (customDrawCallsInFrame > 1)
 			{
-//				trace("clear will not be executed, it's called for: " + customDrawCallsInFrame + "th time this frame");
-				return;
-			}
-			if (PAN_CUSTOM_DRAW_FRAMES_INTERVAL > 1 && customDrawFrameCounter < PAN_CUSTOM_DRAW_FRAMES_INTERVAL)
-			{
-//				trace("clear will not be executed, it should be called every " + PAN_CUSTOM_DRAW_FRAMES_INTERVAL + "frame, but this is just " +customDrawFrameCounter+"th frame");
-				_needToRenderTiles = true;
+				trace("clear will not be executed, it's called for: " + customDrawCallsInFrame + "th time this frame");
 				return;
 			}
 			super.clear(graphics);
@@ -568,30 +547,18 @@ package com.iblsoft.flexiweather.ogc.tiling
 			
 			if (!layerWasDestroyed)
 			{
-//				trace("\nTiled customdraw: " + name);
+				trace("\nTiled customdraw: " + name);
 				if (mi_zoom == null)
 				{
 //					trace("InteractiveLayerQTTMS.customDraw(): Something is wrong, tile zoom is null");
 					return;
 				}
 				
-				
 				if (customDrawCallsInFrame > 1)
 				{
-//					trace("customDraw will not be executed, it's called for: " + customDrawCallsInFrame + "th time this frame");
+					trace("customDraw will not be executed, it's called for: " + customDrawCallsInFrame + "th time this frame");
 					return;
 				}
-				if (PAN_CUSTOM_DRAW_FRAMES_INTERVAL > 1 && customDrawFrameCounter < PAN_CUSTOM_DRAW_FRAMES_INTERVAL)
-				{
-//					trace("customDraw will not be executed, it should be called every " + PAN_CUSTOM_DRAW_FRAMES_INTERVAL + "frame, but this is just " +customDrawFrameCounter+"th frame");
-					_needToRenderTiles = true;
-					customDrawQttViewProperties = qttViewProperties;
-					return;
-				} else {
-					customDrawFrameCounter = 0;
-					_needToRenderTiles = false;
-				} 
-				
 				
 				var startTime: Number = getTimer();
 				

@@ -578,19 +578,19 @@ package com.iblsoft.flexiweather.widgets
 
 		public function notifyAllLayersAreInitialized(): void
 		{
-			trace("\n" + this + " notifyAllLayersAreInitialized");
+//			trace("\n" + this + " notifyAllLayersAreInitialized");
 			dispatchEvent(new Event(MAP_LAYERS_INITIALIZED));
 		}
 			
 		private function notifyTimeAxisFrameUpdate(): void
 		{
-			trace("\n" + this + " notifyTimeAxisUpdate");
+//			trace("\n" + this + " notifyTimeAxisFrameUpdate");
 			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
 			
 		}
 		private function notifyTimeAxisUpdate(): void
 		{
-			trace("\n" + this + " notifyTimeAxisUpdate");
+//			trace("\n" + this + " notifyTimeAxisUpdate");
 			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
 		}
 
@@ -688,7 +688,7 @@ package com.iblsoft.flexiweather.widgets
 
 		protected function onSynchronisedVariableDomainChanged(event: SynchronisedVariableChangeEvent): void
 		{
-			trace("ILM onSynchronisedVariableDomainChanged: " + event.variableId);
+//			trace("ILM onSynchronisedVariableDomainChanged: " + event.variableId);
 			invalidateEnumTimeAxis();
 			
 			if (event.variableId == GlobalVariable.FRAME)
