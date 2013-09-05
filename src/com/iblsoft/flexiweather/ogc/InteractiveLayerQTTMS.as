@@ -67,8 +67,6 @@ package com.iblsoft.flexiweather.ogc
 	import mx.controls.Alert;
 	import mx.events.DynamicEvent;
 	
-	import spark.primitives.Graphic;
-
 	/**
 	 * Generic Quad Tree (like Google Maps) tiling layer
 	 **/

@@ -2,7 +2,9 @@ package com.iblsoft.flexiweather.widgets.errors
 {
 	public class ErrorJournalDataItem
 	{
+		[Bindable]
 		public var errorCode: int;
+		[Bindable]
 		public var errorMessage: String;
 		public var errorObject: Object;
 		

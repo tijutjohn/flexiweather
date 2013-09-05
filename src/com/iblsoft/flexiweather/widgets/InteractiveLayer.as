@@ -101,6 +101,8 @@ package com.iblsoft.flexiweather.widgets
 				dispatchEvent(new InteractiveLayerEvent(InteractiveLayerEvent.ALPHA_CHANGED, true));
 			}
 		}
+		
+		[Bindable (event="visibilityChanged")]
 		override public function get visible(): Boolean
 		{
 			return super.visible;
@@ -132,6 +134,8 @@ package com.iblsoft.flexiweather.widgets
 				
 				if (!effect)
 					callLater(visibilityChanged);
+				
+				dispatchEvent(new Event("visibilityChanged"));
 			}
 		}
 		

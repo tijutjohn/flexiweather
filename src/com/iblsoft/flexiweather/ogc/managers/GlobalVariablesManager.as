@@ -367,7 +367,8 @@ package com.iblsoft.flexiweather.ogc.managers
 				_timelineFramesChanged = false;
 			} else {
 				var framesAC: ArrayCollection = new ArrayCollection();
-				for each (var frameVariable: Object in _cachedFrames)
+//				for each (var frameVariable: Object in _cachedFrames)
+				for each (var frameVariable: Object in frames)
 				{
 					if (frameVariable is GlobalVariableValue)
 						framesAC.addItem(frameVariable.data as Date);
@@ -381,7 +382,7 @@ package com.iblsoft.flexiweather.ogc.managers
 					_frames = framesAC;
 			}
 			
-			_cachedFrames = frames;
+//			_cachedFrames = frames;
 		}
 		
 		private function onInteractiveLayerFrameVariableChanged(event: Event = null): void

@@ -369,7 +369,7 @@ package com.iblsoft.flexiweather.widgets
 		{			
 			_lastUpdateTime = getTimer();
 			container.setExtentBBox(_extentBBox, false);
-			container.setViewBBox(_extentBBox, _extentBBox);
+			container.setViewBBox(_extentBBox, true);
 		}
 		
 		
