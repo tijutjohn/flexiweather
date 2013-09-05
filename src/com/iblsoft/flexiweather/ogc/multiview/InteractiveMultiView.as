@@ -396,11 +396,16 @@ package com.iblsoft.flexiweather.ogc.multiview
 				oldIW = _interactiveWidgets.getWidgetAt(cnt);
 				if (_selectedInteractiveWidget == oldIW)
 				{
+					//do not not remove previously selected widget yet, after selectedInteractiveWidget is set
 					oldSelectedIW = _selectedInteractiveWidget;
+					cnt++;
 //					selectedInteractiveWidget = null;
+				} else {
+					removeWidget(oldIW);
 				}
-				removeWidget(oldIW);
 			}
+			
+			
 			_widgetsCountToBeReady = new ArrayCollection();
 			var newSelectedIndex: int = 0;
 			var synchronizator: ISynchronizator = getConfigurationSynchronizator(_configuration);
@@ -443,6 +448,12 @@ package com.iblsoft.flexiweather.ogc.multiview
 			if (!currentSelection && _widgetsCountToBeReady.length > 0)
 			{
 				selectedInteractiveWidget = _widgetsCountToBeReady.getItemAt(0) as InteractiveWidget;
+			}
+			
+			//now previously selected widget can be removed
+			if (oldSelectedIW)
+			{
+				removeWidget(oldSelectedIW);
 			}
 			
 			dataProvider = ac;
@@ -1558,8 +1569,11 @@ package com.iblsoft.flexiweather.ogc.multiview
 		{
 			if (widget)
 			{
+//				if (m_layerComposer)
+//					unregisterInteractiveLayerMap();
+				
 				widget.stopListenForChanges();
-				widget.interactiveLayerMap.removeAllLayers();
+//				widget.interactiveLayerMap.removeAllLayers();
 				_interactiveWidgets.removeWidget(widget);
 				var ac: ArrayCollection = dataProvider as ArrayCollection;
 				if (ac)

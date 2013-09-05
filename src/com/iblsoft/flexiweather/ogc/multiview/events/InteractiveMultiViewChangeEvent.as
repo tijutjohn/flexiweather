@@ -6,6 +6,11 @@ package com.iblsoft.flexiweather.ogc.multiview.events
 	
 	public class InteractiveMultiViewChangeEvent extends Event
 	{
+		/**
+		 * Dispatch when multi view is going to be change (new multi view configuration) 
+		 */		
+		public static const MULTI_VIEW_CHANGING: String = 'multiViewSelectionChange';
+		
 		public static const SELECTION_CHANGE: String = 'multiViewSelectionChange';
 		
 		public var oldInteractiveWidget: InteractiveWidget;
