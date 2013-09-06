@@ -1,23 +1,86 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import flash.utils.Dictionary;
+	import flash.utils.getTimer;
+	
 	import mx.collections.ArrayCollection;
 
 	public class WMSLayerGroup extends WMSLayerBase
 	{
-		internal var ma_layers: ArrayCollection = new ArrayCollection();
+		private var ma_layers: ArrayCollection = new ArrayCollection();
+		private var ma_layersDictionary: Dictionary
 
 		public function WMSLayerGroup(parent: WMSLayerGroup, xml: XML, wms: Namespace, version: Version)
 		{
 			super(parent, xml, wms, version);
-			for each (var layer: XML in xml.wms::Layer)
+			
+			ma_layersDictionary = new Dictionary();
+		}
+		
+		/**
+		 * all layers and groups within this group will be created and stored in dictionary, and bParse variable will be "true", also content will be parsed 
+		 * @param bParse
+		 * 
+		 */		
+		override public function initialize(bParse: Boolean = false):void
+		{
+			var currTime: Number = getTimer();
+
+			super.initialize(bParse);
+			
+			for each (var layer: XML in m_itemXML.wms::Layer)
 			{
-				if (layer.wms::Layer.length() == 0)
-					ma_layers.addItem(new WMSLayer(this, layer, wms, version));
-				else
-					ma_layers.addItem(new WMSLayerGroup(this, layer, wms, version));
+				var layerTime: Number = getTimer();
+				
+				if (layer.wms::Layer.length() == 0) {
+					var wmsLayer: WMSLayer = new WMSLayer(this, layer, wms, m_version);
+					
+					/**
+					 * we call initialize() instead of parse() method to create instances, but not parse whole data.
+					 * They will be parsed, when they will be needed
+					 */
+					wmsLayer.initialize(bParse);
+					
+					ma_layersDictionary[wmsLayer.name] = new LayerDataItem(wmsLayer, LayerDataItem.LAYER);
+					ma_layers.addItem(wmsLayer);
+					trace("\n" + this + " initialize layer: "+ wmsLayer.toString() + " total time: " + (getTimer() - layerTime) + "ms");
+				} else {
+					var wmsLayerGroup: WMSLayerGroup = new WMSLayerGroup(this, layer, wms, m_version);
+					
+					wmsLayerGroup.initialize(bParse);
+					
+					ma_layersDictionary[wmsLayerGroup.name] = new LayerDataItem(wmsLayerGroup, LayerDataItem.LAYER_GROUP);
+					ma_layers.addItem(wmsLayerGroup);
+					trace("\n" + this + " initialize layerGroup: "+ wmsLayerGroup.toString() + " total time: " + (getTimer() - layerTime) + "ms");
+				}
 			}
+			
+			trace(this + " initialize total time: " + (getTimer() - currTime) + "ms");
+		}
+		
+		override public function parse():void
+		{
+			var currTime: Number = getTimer();
+
+			super.parse();
+			
+//			for each (var layer: XML in m_itemXML.wms::Layer)
+			for each (var wmsLayerItem: LayerDataItem in ma_layersDictionary)
+			{
+				var layerTime: Number = getTimer();
+				
+				wmsLayerItem.layer.parse();
+				trace("\n" + this + " parse layer: "+ wmsLayerItem.layer.toString() + " total time: " + (getTimer() - layerTime) + "ms");
+			}
+			
+			trace(this + " parse total time: " + (getTimer() - currTime) + "ms");
 		}
 
+		override public function toString(): String
+		{
+			return "WMSLayerGroup: "+ name + " title: " + title;
+		}
+		
 		override public function destroy(): void
 		{
 			if (ma_layers && ma_layers.length > 0)
@@ -34,6 +97,15 @@ package com.iblsoft.flexiweather.ogc
 
 		public function getLayerByName(s_name: String): WMSLayer
 		{
+			
+			var item: LayerDataItem =  ma_layersDictionary[s_name] as LayerDataItem;
+			if (item)
+				return item.layer as WMSLayer;
+			
+			return null;
+			
+			
+			/*
 			var total: int = ma_layers.length;
 //			for each(var l: WMSLayerBase in ma_layers) {
 			for (var i: int = 0; i < total; i++)
@@ -52,6 +124,7 @@ package com.iblsoft.flexiweather.ogc
 				}
 			}
 			return null;
+			*/
 		}
 
 		// getters & setters
@@ -59,5 +132,24 @@ package com.iblsoft.flexiweather.ogc
 		{
 			return ma_layers;
 		}
+	}
+}
+
+
+import com.iblsoft.flexiweather.ogc.WMSLayerBase;
+
+
+class LayerDataItem
+{
+	public static const LAYER: String = 'layer';
+	public static const LAYER_GROUP: String = 'layer';
+	
+	public var layer: WMSLayerBase;
+	public var type: String;
+	
+	public function LayerDataItem(l: WMSLayerBase, t: String)
+	{
+		layer = l;
+		type = t;
 	}
 }

@@ -28,6 +28,12 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 	public class WMSServiceConfiguration extends OGCServiceConfiguration
 	{
 		Storage.addChangedClass('com.iblsoft.flexiweather.ogc.WMSServiceConfiguration', 'com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceConfiguration', new Version(1, 6, 0));
+	
+		/**
+		 * Set to "true" if GetCapabilities request needs to be parsed immediately. If it is set to "false" GetCapabilities items will be parsed when they will be needed 
+		 */		
+		public static var PARSE_GET_CAPABILITIES: Boolean = true;
+			
 		private var m_capabilitiesLoader: XMLLoader = new XMLLoader();
 		private var m_capabilities: XML = null;
 		private var _m_capabilitiesLoadJob: BackgroundJob = null;
@@ -104,6 +110,41 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 					"Getting WMS capabilities for " + baseURL);
 		}
 
+		protected function onCapabilitiesLoaded(event: UniURLLoaderEvent): void
+		{
+			if (!m_capabilitiesLoadJob)
+			{
+				trace("ERROR m_capabilitiesLoadJob IS null:" + id)
+				//				return;
+			} else {
+				//				trace("m_capabilitiesLoadJob loaded:" + id);
+				m_capabilitiesLoadJob.finish();
+				m_capabilitiesLoadJob = null;
+			}
+			
+			//			LoggingUtils.dispatchLogEvent(this, 'WMSServiceConfiguration onCapabilitiesLoaded: ' + fullURL);
+			
+			mb_capabilitiesUpdated = true;
+			//			trace(this + " onCapabilitiesLoaded");
+			if (event.result is XML)
+			{
+				var xml: XML = event.result as XML;
+				parseGetCapabilities(xml);
+			}
+		}
+		
+		protected function onCapabilitiesLoadFailed(event: UniURLLoaderErrorEvent): void
+		{
+			if (m_capabilitiesLoadJob)
+				m_capabilitiesLoadJob.finish();
+			m_capabilitiesLoadJob = null;
+			// keep old m_capabilities
+			
+			var e: ServiceCapabilitiesEvent = new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.CAPABILITIES_UPDATE_FAILED, true);
+			e.errorString = 'Can not load "'+event.request.url+'" service';
+			dispatchEvent(e);
+		}
+		
 		override public function update(): void
 		{
 			super.update();
@@ -116,12 +157,74 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 			return m_layers;
 		}
 
+		
+
+		public function parseGetCapabilities(xml: XML): void
+		{
+			var s_version: String = xml.@version;
+			var version: Version = Version.fromString(s_version);
+			var wms: Namespace = version.isLessThan(1, 3, 0)
+				? new Namespace() : new Namespace("http://www.opengis.net/wms");
+			var capability: XML = xml.wms::Capability[0];
+			
+			getGetMapImageFormats(capability);
+			
+			if (capability != null)
+			{
+				try
+				{
+					var layer: XML = capability.wms::Layer[0];
+					m_layers = new WMSLayerGroup(null, layer, wms, version);
+					
+					m_layers.initialize(PARSE_GET_CAPABILITIES);
+					
+				}
+				catch (e: Error)
+				{
+					trace("WMSServiceConfiguration error: " + e.message);
+				}
+				m_capabilities = xml;
+				dispatchEvent(new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, true));
+			}
+			
+			addSupportedProjections();
+			
+		}
+		
+		
+		
+		private function addSupportedProjections(): void
+		{
+			//check all crs
+			if (m_layers && m_layers.layers)
+			{
+				var allLayers: ArrayCollection = m_layers.layers;
+				
+				var projectionManager: ProjectionConfigurationManager = ProjectionConfigurationManager.getInstance();
+				projectionManager.removeParsedProjections();
+				var projConfig: ProjectionConfiguration;
+				for each (var currLayer: WMSLayerBase in allLayers)
+				{
+					var crsColl: ArrayCollection = currLayer.crsWithBBoxes;
+					var newBBox: BBox;
+					for each (var crs: CRSWithBBox in crsColl)
+					{
+						if (crs.bbox)
+							newBBox = crs.bbox.clone();
+						projConfig = new ProjectionConfiguration(crs.crs, newBBox);
+						projectionManager.addParsedProjectionByCRS(projConfig);
+					}
+				}
+				projectionManager.initializeParsedProjections();
+			}
+		}
+
 		private function getGetMapImageFormats(xml: XML): void
 		{
 			if (xml)
 			{
 				var wms: Namespace = version.isLessThan(1, 3, 0)
-						? new Namespace() : new Namespace("http://www.opengis.net/wms");
+					? new Namespace() : new Namespace("http://www.opengis.net/wms");
 				var xml1: XML = xml.wms::Request[0] as XML;
 				var xml2: XML = xml1.wms::GetMap[0] as XML;
 				var formatsXML: XMLList = xml2.wms::Format;
@@ -139,7 +242,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 				}
 			}
 		}
-
+		
 		private function imageFormatExist(imageFormat: String): Boolean
 		{
 			for each (var format: String in _imageFormats)
@@ -149,80 +252,8 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 			}
 			return false;
 		}
-
-		protected function onCapabilitiesLoaded(event: UniURLLoaderEvent): void
-		{
-			if (!m_capabilitiesLoadJob)
-			{
-				trace("ERROR m_capabilitiesLoadJob IS null:" + id)
-//				return;
-			} else {
-//				trace("m_capabilitiesLoadJob loaded:" + id);
-				m_capabilitiesLoadJob.finish();
-				m_capabilitiesLoadJob = null;
-			}
-			
-//			LoggingUtils.dispatchLogEvent(this, 'WMSServiceConfiguration onCapabilitiesLoaded: ' + fullURL);
-			
-			mb_capabilitiesUpdated = true;
-//			trace(this + " onCapabilitiesLoaded");
-			if (event.result is XML)
-			{
-				var xml: XML = event.result as XML;
-				var s_version: String = xml.@version;
-				var version: Version = Version.fromString(s_version);
-				var wms: Namespace = version.isLessThan(1, 3, 0)
-						? new Namespace() : new Namespace("http://www.opengis.net/wms");
-				var capability: XML = xml.wms::Capability[0];
-				getGetMapImageFormats(capability);
-				if (capability != null)
-				{
-					try
-					{
-						var layer: XML = capability.wms::Layer[0];
-						m_layers = new WMSLayerGroup(null, layer, wms, version);
-					}
-					catch (e: Error)
-					{
-						trace("WMSServiceConfiguration error: " + e.message);
-					}
-					m_capabilities = xml;
-					dispatchEvent(new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, true));
-				}
-			}
-			//check all crs
-			if (m_layers && m_layers.layers)
-			{
-				var projectionManager: ProjectionConfigurationManager = ProjectionConfigurationManager.getInstance();
-				projectionManager.removeParsedProjections();
-				var projConfig: ProjectionConfiguration;
-				for each (var currLayer: WMSLayerBase in m_layers.layers)
-				{
-					var crsColl: ArrayCollection = currLayer.crsWithBBoxes;
-					var newBBox: BBox;
-					for each (var crs: CRSWithBBox in crsColl)
-					{
-						if (crs.bbox)
-							newBBox = crs.bbox.clone();
-						projConfig = new ProjectionConfiguration(crs.crs, newBBox);
-						projectionManager.addParsedProjectionByCRS(projConfig);
-					}
-				}
-				projectionManager.initializeParsedProjections();
-			}
-		}
-
-		protected function onCapabilitiesLoadFailed(event: UniURLLoaderErrorEvent): void
-		{
-			if (m_capabilitiesLoadJob)
-				m_capabilitiesLoadJob.finish();
-			m_capabilitiesLoadJob = null;
-			// keep old m_capabilities
-			
-			var e: ServiceCapabilitiesEvent = new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.CAPABILITIES_UPDATE_FAILED, true);
-			e.errorString = 'Can not load "'+event.request.url+'" service';
-			dispatchEvent(e);
-		}
+		
+		
 
 		public function get rootLayerGroup(): WMSLayerGroup
 		{

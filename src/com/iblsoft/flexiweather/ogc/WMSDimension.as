@@ -3,14 +3,15 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariableValue;
 	import com.iblsoft.flexiweather.utils.Duration;
 	import com.iblsoft.flexiweather.utils.ISO8601Parser;
+	
 	import flash.utils.getTimer;
 
-	public class WMSDimension
+	public class WMSDimension extends GetCapabilitiesXMLItem
 	{
-		private var ms_name: String;
 		private var ma_values: Array;
 		private var ms_units: String;
 		private var ms_default: String;
+		
 		/**
 		 * String representing values of dimensions as found in the GetCapabilities document.
 		 * It will be parsed if the values getter is invoked.
@@ -21,11 +22,27 @@ package com.iblsoft.flexiweather.ogc
 
 		public function WMSDimension(xml: XML, wms: Namespace, version: Version)
 		{
-			ms_name = xml.@name;
+			super(xml, wms, version);
+			
 			// in WMS 1.3.0 dimension values are inside of <Dimension> element
 			ms_units = xml.@units;
-			if (!version.isLessThan(1, 3, 0))
-				loadExtent(xml, wms, version);
+			ms_name = xml.@name;
+		}
+		
+		override public function initialize(bParse: Boolean = false): void
+		{
+			super.initialize(bParse);
+			
+			if (bParse)
+				parse();
+		}
+		
+		override public function parse(): void
+		{
+			super.parse();
+			
+			if (!m_version.isLessThan(1, 3, 0))
+				loadExtent(m_itemXML, wms, m_version);
 		}
 
 		public function destroy(): void
@@ -219,11 +236,6 @@ package com.iblsoft.flexiweather.ogc
 			if (a.length > 0)
 				return a[0];
 			return null;
-		}
-
-		public function get name(): String
-		{
-			return ms_name;
 		}
 
 		public function get values(): Array
