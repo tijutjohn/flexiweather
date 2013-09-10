@@ -594,9 +594,12 @@ package com.iblsoft.flexiweather.widgets
 			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
 		}
 
+		private var _timelineInvalidate: Boolean;
+		
 		public function invalidateTimeline(): void
 		{
-			notifyTimeAxisUpdate();
+			_timelineInvalidate = true;
+			invalidateProperties();
 		}
 
 		override protected function onLayerCollectionChanged(event: CollectionEvent): void
@@ -749,6 +752,12 @@ package com.iblsoft.flexiweather.widgets
 				var ilme: InteractiveLayerMapEvent = new InteractiveLayerMapEvent(InteractiveLayerMapEvent.LAYER_SELECTION_CHANGED, true);
 				dispatchEvent(ilme);
 				m_selectedLayerIndexChanged = false;
+			}
+			
+			if (_timelineInvalidate)
+			{
+				notifyTimeAxisUpdate();
+				_timelineInvalidate = false;
 			}
 				
 		}
