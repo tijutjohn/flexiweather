@@ -29,20 +29,33 @@ package com.iblsoft.flexiweather.ogc
 			ms_name = xml.@name;
 		}
 		
-		override public function initialize(bParse: Boolean = false): void
-		{
-			super.initialize(bParse);
-			
-			if (bParse)
-				parse();
-		}
+//		override public function initialize(): void
+//		{
+//			super.initialize();
+//		}			
 		
 		override public function parse(): void
 		{
 			super.parse();
 			
-			if (!m_version.isLessThan(1, 3, 0))
+			// in WMS < 1.3.0, dimension values are inside of <Extent> element
+			// having the same @name as the <Dimension> element
+			if (m_version.isLessThan(1, 3, 0))
+			{
+				for each (var elemExtent: XML in m_itemXML.wms::Extent)
+				{
+					if (elemExtent.@name == name)
+					{
+						loadExtent(elemExtent, wms, m_version);
+						break;
+					}
+				}
+			} else {
+				//parse WMS1.3.0 dimension
 				loadExtent(m_itemXML, wms, m_version);
+			}
+			
+			
 		}
 
 		public function destroy(): void
@@ -83,6 +96,9 @@ package com.iblsoft.flexiweather.ogc
 
 		private function parseData(): void
 		{
+			if (!mb_isParsed)
+				parse();
+			
 			var arr: Array = ms_values == null ? [] : ms_values.split(",");
 			ma_values = [];
 			for each (var s_value: String in arr)
@@ -252,6 +268,8 @@ package com.iblsoft.flexiweather.ogc
 
 		public function get defaultValue(): String
 		{
+			if (mb_valuesHaveToBeParsed)
+				parseData();
 			return ms_default;
 		}
 	}

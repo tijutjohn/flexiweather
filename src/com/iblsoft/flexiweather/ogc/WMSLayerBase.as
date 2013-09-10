@@ -8,13 +8,12 @@ package com.iblsoft.flexiweather.ogc
 
 	public class WMSLayerBase extends GetCapabilitiesXMLItem
 	{
-		private var m_parent: WMSLayerGroup;
-		private var ms_title: String;
+		protected var m_parent: WMSLayerGroup;
+		protected var ms_title: String;
 		
-		private var ma_crsWithBBoxes: ArrayCollection = new ArrayCollection();
-		private var ma_dimensions: ArrayCollection = new ArrayCollection();
-		
-
+		protected var ma_crsWithBBoxes: ArrayCollection = new ArrayCollection();
+		protected var ma_dimensions: ArrayCollection = new ArrayCollection();
+			
 		public function WMSLayerBase(parent: WMSLayerGroup, xml: XML, wmsNamespace: Namespace, version: Version)
 		{
 			super(xml, wmsNamespace, version);
@@ -54,11 +53,11 @@ package com.iblsoft.flexiweather.ogc
 			// parse bounding box extents
 			if (m_version.isLessThan(1, 3, 0))
 			{
-				parseWMS130();
+				parseOlderVersion();
 			}
 			else
 			{
-				parseOlderVersion();
+				parseWMS130();
 			}
 			
 			
@@ -70,10 +69,10 @@ package com.iblsoft.flexiweather.ogc
 			
 			var afterParseTime: Number = getTimer();
 			
-			if (parent && parent.ma_dimensions)
+			if (parent && parent.dimensions)
 			{
 				// inherit dimensions
-				ma_dimensions.addAll(parent.ma_dimensions);
+				ma_dimensions.addAll(parent.dimensions);
 			}
 			
 			var time2: Number = (getTimer() - afterParseTime);
@@ -84,11 +83,11 @@ package com.iblsoft.flexiweather.ogc
 			var afterParseTime2: Number = getTimer();
 			
 			
-			if (parent && parent.ma_crsWithBBoxes)
+			if (parent && parent.crsWithBBoxes)
 			{
 				// inherit CRSs and bounding boxes, this may create some duplication (same CRS defined multiple times)
 				// but this is not a big problem because if search for bounding box we take the first found item. 
-				ma_crsWithBBoxes.addAll(parent.ma_crsWithBBoxes);
+				ma_crsWithBBoxes.addAll(parent.crsWithBBoxes);
 			}
 			
 			var time3: Number = (getTimer() - afterParseTime2);
@@ -115,29 +114,25 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function parseDimensions(): void
 		{
-			
+			trace("Parse dimension for layer: " + name);
+			if (name.indexOf('temper') >= 0)
+			{
+			trace("TEMPERATURE Parse dimension for layer: " + name);
+				
+			}
 			for each (var elemDim: XML in m_itemXML.wms::Dimension)
 			{
 				var dim: WMSDimension = new WMSDimension(elemDim, wms, m_version);
 				dim.parse();
-				// in WMS < 1.3.0, dimension values are inside of <Extent> element
-				// having the same @name as the <Dimension> element
-				if (m_version.isLessThan(1, 3, 0))
-				{
-					for each (var elemExtent: XML in m_itemXML.wms::Extent)
-					{
-						if (elemExtent.@name == dim.name)
-						{
-							dim.loadExtent(elemExtent, wms, m_version);
-							break;
-						}
-					}
-				}
 				ma_dimensions.addItem(dim);
 			}
 		}
 		
-		protected function parseWMS130(): void
+		/**
+		 * Parsing of layers from GetCapabilities request which is older then 1.3.0 version  
+		 * 
+		 */		
+		protected function parseOlderVersion(): void
 		{
 			var s_srs: String;
 			var srsBBox: BBox = null;
@@ -175,105 +170,132 @@ package com.iblsoft.flexiweather.ogc
 			
 		}
 		
-		protected function parseOlderVersion(): void
+		protected function parseWMS130(): void
 		{
 			var s_crs: String;
 			var crsBBox: BBox = null;
 			var bboxXML: XML;
-			var originalCRSWithBBox: CRSWithBBox;
 			var a_detectedCRSs: Array = [];
+			
 			// <BoundingBox CRS=... minx=...
-			for each (bboxXML in m_itemXML.wms::BoundingBox)
-			{
-				s_crs = String(bboxXML.@CRS);
-				ma_crsWithBBoxes.addItem(new CRSWithBBox(s_crs, BBox.fromXML_WMS(bboxXML)));
-				a_detectedCRSs.push(s_crs);
-			}
+			parseWMS130CRSWithBBoxes(a_detectedCRSs);
+			
 			// <EX_GeographicBoundingBox minx=...
 			if (m_itemXML.wms::EX_GeographicBoundingBox.length() != 0)
 			{
-				crsBBox = BBox.fromXML_WMS(m_itemXML.wms::EX_GeographicBoundingBox[0]);
-				if (a_detectedCRSs.indexOf(Projection.CRS_EPSG_GEOGRAPHIC) < 0)
-				{
-					ma_crsWithBBoxes.addItem(new CRSWithBBox(Projection.CRS_EPSG_GEOGRAPHIC, crsBBox));
-					a_detectedCRSs.push(Projection.CRS_EPSG_GEOGRAPHIC);
-				}
-				//FIXME in condition should be CRS_GEOGRAPHIC instead of CRS_EPSG_GEOGRAPHIC (otherwise is same condition as above
-				if (a_detectedCRSs.indexOf(Projection.CRS_EPSG_GEOGRAPHIC) < 0)
-				{
-					ma_crsWithBBoxes.addItem(new CRSWithBBox(Projection.CRS_GEOGRAPHIC, crsBBox));
-					a_detectedCRSs.push(Projection.CRS_GEOGRAPHIC);
-				}
+				parseWMS130EXGeographicBoundingBox(a_detectedCRSs);
 			}
+			
 			// <Identifier authority=...
 			if (m_itemXML.wms::Identifier.@authority == 'http://www.iblsoft.com/wms/ext/getgtile')
 			{
 				var identifierString: String = m_itemXML.wms::Identifier[0];
-				var identifierArray: Array = identifierString.split(';');
-				var tileWidth: int = 0;
-				var tileHeight: int = 0;
-				var arr: Array;
-				var crsBBoxTiled: CRSWithBBoxAndTilingInfo;
-				for each (var item: String in identifierArray)
-				{
-					if (item.indexOf('size:') == 0)
-					{
-						arr = item.split(':');
-						arr = (arr[1] as String).split('x');
-						tileWidth = arr[0];
-						tileHeight = arr[1];
-					}
-					if (item.indexOf('crs-boundary:') == 0)
-					{
-						item = item.substring('crs-boundary:'.length, item.length);
-						arr = item.split('[');
-						var s_tilingCRS: String = arr[0];
-						var s_tilingExtent: String = (arr[1] as String);
-						s_tilingExtent = s_tilingExtent.substr(0, s_tilingExtent.length - 1);
-						arr = s_tilingExtent.split(',');
-						var tilingExtent: BBox = new BBox(
-							Number(arr[0]), Number(arr[1]),
-							Number(arr[2]), Number(arr[3]));
-						var b_crsFound: Boolean = false;
-						for (var i: uint = 0; i < ma_crsWithBBoxes.length; i++)
-						{
-							originalCRSWithBBox = ma_crsWithBBoxes[i] as CRSWithBBox;
-							if (originalCRSWithBBox.crs == s_tilingCRS)
-							{
-								b_crsFound = true;
-								if (originalCRSWithBBox is CRSWithBBoxAndTilingInfo)
-									trace("WMSLayerBase.WMSLayerBase(): already having CRSWithBBoxAndTilingInfo for " + s_tilingCRS);
-								else
-								{
-									//TODO we support just tileSize... if you need support tileWidth and tileHeight, change it here as well
-									crsBBoxTiled = new CRSWithBBoxAndTilingInfo(
-										originalCRSWithBBox.crs, originalCRSWithBBox.bbox,
-										tilingExtent, tileWidth);
-									ma_crsWithBBoxes[i] = crsBBoxTiled;
-								}
-								break;
-							}
-						}
-						//there is no such crs already defined, add it as new CRS
-						if (!b_crsFound)
-						{
-							//TODO we support just tileSize... if you need support tileWidth and tileHeight, change it here as well
-							crsBBoxTiled = new CRSWithBBoxAndTilingInfo(
-								s_tilingCRS, null,
-								tilingExtent, tileWidth);
-							ma_crsWithBBoxes.addItem(crsBBoxTiled);
-						}
-					}
-				}
+				parseWMS130Identifier(identifierString);
 			}
 			// <CRS>
+			parseWMS130CRSs(a_detectedCRSs);
+		}
+		
+		private function parseWMS130CRSWithBBoxes(a_detectedCRSs: Array): void
+		{
+			var bboxXML: XML;
+			for each (bboxXML in m_itemXML.wms::BoundingBox)
+			{
+				var s_crs: String = String(bboxXML.@CRS);
+				ma_crsWithBBoxes.addItem(new CRSWithBBox(s_crs, BBox.fromXML_WMS(bboxXML)));
+				a_detectedCRSs.push(s_crs);
+			}
+
+		}
+		
+		private function parseWMS130EXGeographicBoundingBox(a_detectedCRSs: Array): void
+		{
+			var crsBBox: BBox = BBox.fromXML_WMS(m_itemXML.wms::EX_GeographicBoundingBox[0]);
+			if (a_detectedCRSs.indexOf(Projection.CRS_EPSG_GEOGRAPHIC) < 0)
+			{
+				ma_crsWithBBoxes.addItem(new CRSWithBBox(Projection.CRS_EPSG_GEOGRAPHIC, crsBBox));
+				a_detectedCRSs.push(Projection.CRS_EPSG_GEOGRAPHIC);
+			}
+			//FIXME in condition should be CRS_GEOGRAPHIC instead of CRS_EPSG_GEOGRAPHIC (otherwise is same condition as above
+			if (a_detectedCRSs.indexOf(Projection.CRS_EPSG_GEOGRAPHIC) < 0)
+			{
+				ma_crsWithBBoxes.addItem(new CRSWithBBox(Projection.CRS_GEOGRAPHIC, crsBBox));
+				a_detectedCRSs.push(Projection.CRS_GEOGRAPHIC);
+			}
+		}
+		
+		private function parseWMS130CRSs(a_detectedCRSs: Array): void
+		{
 			for each (var crs: XML in m_itemXML.wms::CRS)
 			{
-				s_crs = String(crs);
+				var s_crs: String = String(crs);
 				if (a_detectedCRSs.indexOf(s_crs) < 0)
 					ma_crsWithBBoxes.addItem(new CRSWithBBox(s_crs));
 			}
 		}
+		
+		private function parseWMS130Identifier(identifierString: String): void
+		{
+			var originalCRSWithBBox: CRSWithBBox;
+			
+			var identifierArray: Array = identifierString.split(';');
+			var tileWidth: int = 0;
+			var tileHeight: int = 0;
+			var arr: Array;
+			var crsBBoxTiled: CRSWithBBoxAndTilingInfo;
+			for each (var item: String in identifierArray)
+			{
+				if (item.indexOf('size:') == 0)
+				{
+					arr = item.split(':');
+					arr = (arr[1] as String).split('x');
+					tileWidth = arr[0];
+					tileHeight = arr[1];
+				}
+				if (item.indexOf('crs-boundary:') == 0)
+				{
+					item = item.substring('crs-boundary:'.length, item.length);
+					arr = item.split('[');
+					var s_tilingCRS: String = arr[0];
+					var s_tilingExtent: String = (arr[1] as String);
+					s_tilingExtent = s_tilingExtent.substr(0, s_tilingExtent.length - 1);
+					arr = s_tilingExtent.split(',');
+					var tilingExtent: BBox = new BBox(
+						Number(arr[0]), Number(arr[1]),
+						Number(arr[2]), Number(arr[3]));
+					var b_crsFound: Boolean = false;
+					for (var i: uint = 0; i < ma_crsWithBBoxes.length; i++)
+					{
+						originalCRSWithBBox = ma_crsWithBBoxes[i] as CRSWithBBox;
+						if (originalCRSWithBBox.crs == s_tilingCRS)
+						{
+							b_crsFound = true;
+							if (originalCRSWithBBox is CRSWithBBoxAndTilingInfo)
+								trace("WMSLayerBase.WMSLayerBase(): already having CRSWithBBoxAndTilingInfo for " + s_tilingCRS);
+							else
+							{
+								//TODO we support just tileSize... if you need support tileWidth and tileHeight, change it here as well
+								crsBBoxTiled = new CRSWithBBoxAndTilingInfo(
+									originalCRSWithBBox.crs, originalCRSWithBBox.bbox,
+									tilingExtent, tileWidth);
+								ma_crsWithBBoxes[i] = crsBBoxTiled;
+							}
+							break;
+						}
+					}
+					//there is no such crs already defined, add it as new CRS
+					if (!b_crsFound)
+					{
+						//TODO we support just tileSize... if you need support tileWidth and tileHeight, change it here as well
+						crsBBoxTiled = new CRSWithBBoxAndTilingInfo(
+							s_tilingCRS, null,
+							tilingExtent, tileWidth);
+						ma_crsWithBBoxes.addItem(crsBBoxTiled);
+					}
+				}
+			}
+		}
+		
 
 		private function getCRSWithBBox(crs: String): CRSWithBBox
 		{
@@ -298,23 +320,23 @@ package com.iblsoft.flexiweather.ogc
 			}
 			if (other == null)
 				return false;
-			if (ms_name != other.ms_name)
+			if (ms_name != other.name)
 				return false;
-			if (ms_title != other.ms_title)
+			if (ms_title != other.title)
 				return false;
-			if (!ma_crsWithBBoxes || !other.ma_crsWithBBoxes || ma_crsWithBBoxes.length != other.ma_crsWithBBoxes.length)
+			if (!ma_crsWithBBoxes || !other.crsWithBBoxes || ma_crsWithBBoxes.length != other.crsWithBBoxes.length)
 				return false;
 			for (var i: int = 0; i < ma_crsWithBBoxes.length; ++i)
 			{
 				var cb: CRSWithBBox = ma_crsWithBBoxes[i] as CRSWithBBox;
-				if (!cb.equals(other.ma_crsWithBBoxes[i] as CRSWithBBox))
+				if (!cb.equals(other.crsWithBBoxes[i] as CRSWithBBox))
 					return false;
 			}
-			if (ma_dimensions.length != other.ma_dimensions.length)
+			if (ma_dimensions.length != other.dimensions.length)
 				return false;
 			for (i = 0; i < ma_dimensions.length; ++i)
 			{
-				if (!ma_dimensions[i].equals(other.ma_dimensions[i]))
+				if (!ma_dimensions[i].equals(other.dimensions[i]))
 					return false;
 			}
 			return true;
@@ -404,6 +426,11 @@ package com.iblsoft.flexiweather.ogc
 			{
 				parse();
 			}
+			return ma_dimensions;
+		}
+		
+		public function get parsedDimensions(): ArrayCollection
+		{
 			return ma_dimensions;
 		}
 

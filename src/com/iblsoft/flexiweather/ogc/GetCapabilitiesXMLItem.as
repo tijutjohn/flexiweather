@@ -9,6 +9,9 @@ package com.iblsoft.flexiweather.ogc
 		
 		protected var m_itemXML: XML;
 		
+		protected var mb_isInitialized: Boolean;
+		protected var mb_isParsed: Boolean;
+		
 		public function GetCapabilitiesXMLItem(xml: XML, wmsNamespace: Namespace, version: Version)
 		{
 			m_itemXML = xml;
@@ -23,15 +26,14 @@ package com.iblsoft.flexiweather.ogc
 			return ms_name;
 		}
 		
-		public function initialize(bParse: Boolean = false): void
+		public function initialize(): void
 		{
-			if (bParse)
-				parse();
+			mb_isInitialized = true;
 		}
 		
 		public function parse(): void
 		{
-			
+			mb_isParsed = true;	
 		}
 
 	}

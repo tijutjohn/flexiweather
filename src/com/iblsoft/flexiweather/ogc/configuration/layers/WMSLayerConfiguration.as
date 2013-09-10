@@ -349,7 +349,8 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 
 		private function updateDimensions(layer: WMSLayer): void
 		{
-			for each (var dimension: WMSDimension in layer.dimensions)
+			var dimensions: ArrayCollection = layer.parsedDimensions;
+			for each (var dimension: WMSDimension in dimensions)
 			{
 				switch (dimension.name)
 				{

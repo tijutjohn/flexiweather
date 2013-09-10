@@ -9,11 +9,13 @@ package com.iblsoft.flexiweather.ogc
 	{
 		private var ma_layers: ArrayCollection = new ArrayCollection();
 		private var ma_layersDictionary: Dictionary
-
+		private var _groups: int;
+		
 		public function WMSLayerGroup(parent: WMSLayerGroup, xml: XML, wms: Namespace, version: Version)
 		{
 			super(parent, xml, wms, version);
-			
+		
+			_groups = 0;
 			ma_layersDictionary = new Dictionary();
 		}
 		
@@ -22,11 +24,11 @@ package com.iblsoft.flexiweather.ogc
 		 * @param bParse
 		 * 
 		 */		
-		override public function initialize(bParse: Boolean = false):void
+		override public function initialize():void
 		{
 			var currTime: Number = getTimer();
 
-			super.initialize(bParse);
+			super.initialize();
 			
 			for each (var layer: XML in m_itemXML.wms::Layer)
 			{
@@ -35,11 +37,15 @@ package com.iblsoft.flexiweather.ogc
 				if (layer.wms::Layer.length() == 0) {
 					var wmsLayer: WMSLayer = new WMSLayer(this, layer, wms, m_version);
 					
+					if (wmsLayer.name.indexOf("temper") > 0)
+					{
+						trace("debug Temperature layer");
+					}
 					/**
 					 * we call initialize() instead of parse() method to create instances, but not parse whole data.
 					 * They will be parsed, when they will be needed
 					 */
-					wmsLayer.initialize(bParse);
+					wmsLayer.initialize();
 					
 					ma_layersDictionary[wmsLayer.name] = new LayerDataItem(wmsLayer, LayerDataItem.LAYER);
 					ma_layers.addItem(wmsLayer);
@@ -47,9 +53,11 @@ package com.iblsoft.flexiweather.ogc
 				} else {
 					var wmsLayerGroup: WMSLayerGroup = new WMSLayerGroup(this, layer, wms, m_version);
 					
-					wmsLayerGroup.initialize(bParse);
+					wmsLayerGroup.initialize();
 					
-					ma_layersDictionary[wmsLayerGroup.name] = new LayerDataItem(wmsLayerGroup, LayerDataItem.LAYER_GROUP);
+					_groups++;
+					
+					ma_layersDictionary["group"+_groups] = new LayerDataItem(wmsLayerGroup, LayerDataItem.LAYER_GROUP);
 					ma_layers.addItem(wmsLayerGroup);
 					trace("\n" + this + " initialize layerGroup: "+ wmsLayerGroup.toString() + " total time: " + (getTimer() - layerTime) + "ms");
 				}
@@ -68,6 +76,11 @@ package com.iblsoft.flexiweather.ogc
 			for each (var wmsLayerItem: LayerDataItem in ma_layersDictionary)
 			{
 				var layerTime: Number = getTimer();
+				
+				if (wmsLayerItem.layer.name.indexOf("temper") > 0)
+				{
+					trace("debug Temperature layer");
+				}
 				
 				wmsLayerItem.layer.parse();
 				trace("\n" + this + " parse layer: "+ wmsLayerItem.layer.toString() + " total time: " + (getTimer() - layerTime) + "ms");
@@ -102,6 +115,16 @@ package com.iblsoft.flexiweather.ogc
 			if (item)
 				return item.layer as WMSLayer;
 			
+			var groupLayer: WMSLayer;
+			for each (item in ma_layersDictionary)
+			{
+				if (item.type == LayerDataItem.LAYER_GROUP)
+				{
+					groupLayer = (item.layer as WMSLayerGroup).getLayerByName(s_name);
+					if (groupLayer)
+						return groupLayer;
+				}
+			}
 			return null;
 			
 			
@@ -142,7 +165,7 @@ import com.iblsoft.flexiweather.ogc.WMSLayerBase;
 class LayerDataItem
 {
 	public static const LAYER: String = 'layer';
-	public static const LAYER_GROUP: String = 'layer';
+	public static const LAYER_GROUP: String = 'layerGroup';
 	
 	public var layer: WMSLayerBase;
 	public var type: String;

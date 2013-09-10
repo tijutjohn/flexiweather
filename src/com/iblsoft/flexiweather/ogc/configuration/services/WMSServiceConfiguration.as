@@ -101,7 +101,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 
 		public function queryCapabilities(): void
 		{
-//			trace(this + ' queryCapabilities: ' + fullURL);
+			trace(this + ' queryCapabilities: ' + fullURL);
 			var r: URLRequest = toGetCapabilitiesRequest();
 			m_capabilitiesLoader.load(r);
 			if (m_capabilitiesLoadJob != null)
@@ -161,6 +161,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 
 		public function parseGetCapabilities(xml: XML): void
 		{
+			trace("parseGetCapabilities fullURL: " + fullURL);
 			var s_version: String = xml.@version;
 			var version: Version = Version.fromString(s_version);
 			var wms: Namespace = version.isLessThan(1, 3, 0)
@@ -176,7 +177,10 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 					var layer: XML = capability.wms::Layer[0];
 					m_layers = new WMSLayerGroup(null, layer, wms, version);
 					
-					m_layers.initialize(PARSE_GET_CAPABILITIES);
+					m_layers.initialize();
+					
+					if (PARSE_GET_CAPABILITIES)
+						m_layers.parse();
 					
 				}
 				catch (e: Error)
@@ -187,7 +191,8 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 				dispatchEvent(new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, true));
 			}
 			
-			addSupportedProjections();
+			if (PARSE_GET_CAPABILITIES)
+				addSupportedProjections();
 			
 		}
 		
