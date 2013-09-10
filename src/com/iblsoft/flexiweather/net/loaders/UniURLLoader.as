@@ -56,6 +56,9 @@ package com.iblsoft.flexiweather.net.loaders
 			debug("decodeResult");
 			var test: ByteArray = ObjectUtil.copy(rawData) as ByteArray;
 			var s_data: String = test.readUTFBytes(test.length);
+			
+			test.clear();
+			
 			//we need to autodect correct format
 			var isValidDictionary: Dictionary = new Dictionary();
 			var currFormat: String;
@@ -202,6 +205,9 @@ package com.iblsoft.flexiweather.net.loaders
 					}
 				}
 			}
+			
+			isValidDictionary = null;
+			
 			debug("decodeResult Invalid content: " + validFormats);
 			//			
 			//dispatch fault, if any other format has not dispatched result

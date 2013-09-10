@@ -37,6 +37,8 @@ package com.iblsoft.flexiweather.net.loaders
 			{
 				var clonedBA: ByteArray = ObjectUtil.clone(data) as ByteArray;
 				data = clonedBA.readUTFBytes(clonedBA.length);
+				
+				clonedBA.clear();
 			}
 			if (data is String)
 			{

@@ -136,6 +136,8 @@ package com.iblsoft.flexiweather.net.loaders
 					obj = md_urlLoaderToRequestMap[id];
 				}
 			}
+			
+			data = null;
 			if (_baLoader)
 				_baLoader.destroy();
 		}
@@ -792,7 +794,10 @@ package com.iblsoft.flexiweather.net.loaders
 		protected function cloneByteArrayToString(ba: ByteArray): String
 		{
 			var clonedBA: ByteArray = ObjectUtil.clone(ba as Object) as ByteArray;
-			return clonedBA.readUTFBytes(clonedBA.length);
+			var str: String = clonedBA.readUTFBytes(clonedBA.length);
+			clonedBA.clear();
+			
+			return str;
 		}
 
 		protected function debug(txt: String): void
