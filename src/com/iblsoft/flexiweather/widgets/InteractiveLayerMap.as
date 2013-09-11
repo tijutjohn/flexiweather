@@ -100,9 +100,20 @@ package com.iblsoft.flexiweather.widgets
 		private var _periodicTimer: Timer;
 		private var _dateFormat: String;
 
+		private var _suspendTimeAxisNotify: Boolean;
 		
+		
+		public function get suspendTimeAxisNotify():Boolean
+		{
+			return _suspendTimeAxisNotify;
+		}
+
+		public function set suspendTimeAxisNotify(value:Boolean):void
+		{
+			_suspendTimeAxisNotify = value;
+		}
+
 		public var loadingStatus: String;
-		
 		public function get mapIsLoading(): Boolean
 		{
 			return loadingStatus == LOADING_STATUS_LOADING;
@@ -584,14 +595,20 @@ package com.iblsoft.flexiweather.widgets
 			
 		private function notifyTimeAxisFrameUpdate(): void
 		{
-//			trace("\n" + this + " notifyTimeAxisFrameUpdate");
-			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
+			if (!_suspendTimeAxisNotify)
+			{
+//				trace("\n" + this + " notifyTimeAxisFrameUpdate");
+				dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
+			}
 			
 		}
 		private function notifyTimeAxisUpdate(): void
 		{
-//			trace("\n" + this + " notifyTimeAxisUpdate");
-			dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
+			if (!_suspendTimeAxisNotify)
+			{
+//				trace("\n" + this + " notifyTimeAxisUpdate");
+				dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
+			}
 		}
 
 		private var _timelineInvalidate: Boolean;
@@ -1076,7 +1093,10 @@ package com.iblsoft.flexiweather.widgets
 		
 		private function notifyTimeAxisReenumerated(): void
 		{
-			dispatchEvent(new Event(TIMELINE_FRAMES_ENUMERATED));
+			if (!_suspendTimeAxisNotify)
+			{
+				dispatchEvent(new Event(TIMELINE_FRAMES_ENUMERATED));
+			}
 		}
 		
 		private function reenumTimeAxis(l_syncLayers: Array = null): Array
