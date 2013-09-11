@@ -981,6 +981,8 @@ package com.iblsoft.flexiweather.ogc
 					group.removeElementAt(0);
 					disp = null;
 				}
+			} else {
+				trace("ILMSBase removeLegend, does not have group");
 			}
 		}
 

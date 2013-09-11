@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.widgets
 {
 	import flash.display.Bitmap;
+	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.ui.Mouse;
 	
@@ -9,6 +10,9 @@ package com.iblsoft.flexiweather.widgets
 	[Event(name="click", type="flash.events.MouseEvent")]
 	public class InteractiveLayerLegendImage extends Image
 	{
+		public static var _uid: int = 0;
+		public var legendID: int = 0;
+		
 		public var title: String;
 		public var originalWidth: int;
 		public var originalHeight: int;
@@ -32,8 +36,21 @@ package com.iblsoft.flexiweather.widgets
 		}
 		public function InteractiveLayerLegendImage()
 		{
-			super();
-			addEventListener(MouseEvent.CLICK, onMouseClick);
+ 			super();
+			
+			legendID = _uid++;
+			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
+			addEventListener(Event.REMOVED_FROM_STAGE, onRemovedFromStage);
+//			addEventListener(MouseEvent.CLICK, onMouseClick);
+		}
+		
+		private function onAddedToStage(event: Event): void
+		{
+			trace("LegendImage ["+legendID+"] onAddedToStage");
+		}
+		private function onRemovedFromStage(event: Event): void
+		{
+			trace("LegendImage ["+legendID+"] onRemovedFromStage");
 		}
 		
 		private function onMouseClick(event: MouseEvent): void

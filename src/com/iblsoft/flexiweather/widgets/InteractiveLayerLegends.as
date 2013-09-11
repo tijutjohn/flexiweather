@@ -155,7 +155,10 @@ package com.iblsoft.flexiweather.widgets
 				m_layers.removeItemAt(i);
 				l.removeLegend(getGroupFromDictionary(l));
 				delete m_groupDictionary[l];
+			} else {
+				trace("Problem with remove layer from ILayerLegends");
 			}
+				
 		}
 		
 		private var _legendsInvalidated: Boolean;
