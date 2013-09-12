@@ -6,10 +6,12 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureBase;
 	import com.iblsoft.flexiweather.utils.ScreenUtils;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	
 	import flash.display.DisplayObject;
 	import flash.display.Sprite;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
+	
 	import mx.collections.ArrayCollection;
 	import mx.events.PropertyChangeEvent;
 	import mx.events.PropertyChangeEventKind;
@@ -173,10 +175,14 @@ package com.iblsoft.flexiweather.ogc.editable
 			var oldSItem: ISelectableItem = item as ISelectableItem;
 			if (item != null)
 				removeEditableItem(item);
+			
+			//FW-76: this SELECTION_CHANGE event does not needs to be called, as it will be dispatched when selectedItem = null
+			/*
 			dispatchEvent(new PropertyChangeEvent(
 					SELECTION_CHANGE, true, false,
 					PropertyChangeEventKind.UPDATE, "selectedItem",
 					oldSItem, null, this));
+			*/
 		}
 
 		public function doHitTest(
@@ -281,15 +287,22 @@ package com.iblsoft.flexiweather.ogc.editable
 					return true;
 				}
 			var l_hitItems: Array = doHitTest(event.stageX, event.stageY, IMouseEditableItem);
+			var _selectedItemHitted: Boolean;
+			
 			for each(var mItem: IMouseEditableItem in l_hitItems) {
 				//if(mItem.onMouseDown(new Point(event.localX, event.localY)))
+				if (mItem == m_selectedItem)
+				{
+					_selectedItemHitted = true;
+				}
 				if(mItem.onMouseDown(new Point(DisplayObject(event.currentTarget).mouseX, DisplayObject(event.currentTarget).mouseY), event))
 				{
 					return true;
 				}
 			}
-			
-			selectItem(null);
+
+			if (!_selectedItemHitted)
+				selectItem(null);
 			
 			return false;
 		}
