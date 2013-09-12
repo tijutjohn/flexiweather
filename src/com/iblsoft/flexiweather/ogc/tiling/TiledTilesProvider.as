@@ -104,7 +104,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			//cancel all requests;
 			ma_tilesBuffer = [];
 			
-			var tilesRequests: Array;
+			var tilesRequests: Array = [];
 			for each (var tileLoader: TileLoader in md_loadersRequests)
 			{
 				var data: TiledTileRequest = tileLoader.data;
