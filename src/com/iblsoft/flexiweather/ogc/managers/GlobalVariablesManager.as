@@ -312,9 +312,6 @@ package com.iblsoft.flexiweather.ogc.managers
 				_runChanged = false;
 				notifySelectedRunChanged(_run);
 			}
-			
-			//when RUN is changed also FRAMES needs to be updated
-			onInteractiveLayerFrameVariableChanged();
 		}
 		
 		

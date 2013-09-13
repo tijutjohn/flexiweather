@@ -197,7 +197,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 										widgetsForSynchronizing.push( {frame: frame, widget: widget } );
 									} else {
 										debug("Do not synchronise (same frames) frame: " + frame.toTimeString() + " for widget: " + widget.id, 'Info', 'FrameSychronizator');
-										if (widget.interactiveLayerMap.frame)
+										if (currWidgetFrame)
 											dataForWidgetAvailable(widget);
 										
 									}
