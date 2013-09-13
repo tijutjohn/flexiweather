@@ -96,7 +96,7 @@ package com.iblsoft.flexiweather.ogc.managers
 			{
 				_run = value;
 				_runChanged = true;
-				onRunVariableChanged();
+				onInteractiveLayerRunVariableChanged();
 				onInteractiveLayerFrameVariableChanged();
 			}
 		}
@@ -111,7 +111,7 @@ package com.iblsoft.flexiweather.ogc.managers
 			{
 				_level = value;
 				_levelChanged = true;
-				onLevelVariableChanged();
+				onInteractiveLayerLevelVariableChanged();
 			}
 		}
 		/**
@@ -162,8 +162,8 @@ package com.iblsoft.flexiweather.ogc.managers
 				_interactiveLayerMap.removeEventListener(InteractiveLayerMap.TIMELINE_FRAMES_ENUMERATED, onInteractiveLayerMapFramesEnumerated);
 			
 				_interactiveLayerMap.removeEventListener(InteractiveLayerMap.FRAME_VARIABLE_CHANGED, onInteractiveLayerFrameVariableChanged);
-				_interactiveLayerMap.removeEventListener(InteractiveLayerMap.LEVEL_VARIABLE_CHANGED, onLevelVariableChanged);
-				_interactiveLayerMap.removeEventListener(InteractiveLayerMap.RUN_VARIABLE_CHANGED, onRunVariableChanged);
+				_interactiveLayerMap.removeEventListener(InteractiveLayerMap.LEVEL_VARIABLE_CHANGED, onInteractiveLayerLevelVariableChanged);
+				_interactiveLayerMap.removeEventListener(InteractiveLayerMap.RUN_VARIABLE_CHANGED, onInteractiveLayerRunVariableChanged);
 				_interactiveLayerMap.removeEventListener(SynchronisationEvent.START_GLOBAL_VARIABLE_SYNCHRONIZATION, onGlobalVariableSynchronisationChanged);
 				_interactiveLayerMap.removeEventListener(SynchronisationEvent.STOP_GLOBAL_VARIABLE_SYNCHRONIZATION, onGlobalVariableSynchronisationChanged);
 				_interactiveLayerMap.removeEventListener(InteractiveLayerMap.PRIMARY_LAYER_CHANGED, onPrimaryLayerChanged);
@@ -174,8 +174,8 @@ package com.iblsoft.flexiweather.ogc.managers
 			_interactiveLayerMap.addEventListener(InteractiveLayerMap.TIMELINE_FRAMES_ENUMERATED, onInteractiveLayerMapFramesEnumerated);
 			
 			_interactiveLayerMap.addEventListener(InteractiveLayerMap.FRAME_VARIABLE_CHANGED, onInteractiveLayerFrameVariableChanged);
-			_interactiveLayerMap.addEventListener(InteractiveLayerMap.LEVEL_VARIABLE_CHANGED, onLevelVariableChanged);
-			_interactiveLayerMap.addEventListener(InteractiveLayerMap.RUN_VARIABLE_CHANGED, onRunVariableChanged);
+			_interactiveLayerMap.addEventListener(InteractiveLayerMap.LEVEL_VARIABLE_CHANGED, onInteractiveLayerLevelVariableChanged);
+			_interactiveLayerMap.addEventListener(InteractiveLayerMap.RUN_VARIABLE_CHANGED, onInteractiveLayerRunVariableChanged);
 			
 			_interactiveLayerMap.addEventListener(SynchronisationEvent.START_GLOBAL_VARIABLE_SYNCHRONIZATION, onGlobalVariableSynchronisationChanged);
 			_interactiveLayerMap.addEventListener(SynchronisationEvent.STOP_GLOBAL_VARIABLE_SYNCHRONIZATION, onGlobalVariableSynchronisationChanged);
@@ -191,8 +191,8 @@ package com.iblsoft.flexiweather.ogc.managers
 			
 			if (_interactiveLayerMap)
 			{
-				onLevelVariableChanged();
-				onRunVariableChanged();
+				onInteractiveLayerLevelVariableChanged();
+				onInteractiveLayerRunVariableChanged();
 				
 				if (_interactiveLayerMap.primaryLayer)
 					onInteractiveLayerFrameVariableChanged();
@@ -246,14 +246,14 @@ package com.iblsoft.flexiweather.ogc.managers
 				{
 					if (event.type == SynchronisationEvent.START_GLOBAL_VARIABLE_SYNCHRONIZATION)
 						level = event.globalVariableValue as String;
-					onLevelVariableChanged();
+					onInteractiveLayerLevelVariableChanged();
 					break;
 				}
 				case GlobalVariable.RUN:
 				{
 					if (event.type == SynchronisationEvent.START_GLOBAL_VARIABLE_SYNCHRONIZATION)
 						run = event.globalVariableValue as Date;
-					onRunVariableChanged();
+					onInteractiveLayerRunVariableChanged();
 					onInteractiveLayerFrameVariableChanged();
 					break;
 				}
@@ -274,7 +274,7 @@ package com.iblsoft.flexiweather.ogc.managers
 			return g1.data.time == g2.data.time;
 		}
 		
-		private function onRunVariableChanged(event: Event = null): void
+		private function onInteractiveLayerRunVariableChanged(event: Event = null): void
 		{
 			if (_interactiveLayerMap)
 			{
@@ -312,10 +312,13 @@ package com.iblsoft.flexiweather.ogc.managers
 				_runChanged = false;
 				notifySelectedRunChanged(_run);
 			}
+			
+			//when RUN is changed also FRAMES needs to be updated
+			onInteractiveLayerFrameVariableChanged();
 		}
 		
 		
-		private function onLevelVariableChanged(event: Event = null): void
+		private function onInteractiveLayerLevelVariableChanged(event: Event = null): void
 		{
 			if (_interactiveLayerMap)
 			{
