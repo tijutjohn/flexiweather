@@ -699,6 +699,8 @@ package com.iblsoft.flexiweather.ogc
 						_loader.addEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
 						_loader.addEventListener(InteractiveLayerEvent.INVALIDATE_DYNAMIC_PART, onCurrentWMSDataInvalidateDynamicPart);
 					}
+					
+					trace("UpdateWMSData: "+ this);
 					_loader.updateWMSData(b_forceUpdate, m_currentWMSViewProperties, forcedLayerWidth, forcedLayerHeight, printQuality);
 				}
 			}
@@ -780,12 +782,13 @@ package com.iblsoft.flexiweather.ogc
 			{
 				super.clear(graphics);
 				graphics.clear();
-				removeVectorData();
+//				removeVectorData();
 			}
 		}
 
 		public override function draw(graphics: Graphics): void
 		{
+			trace("draw " + this);
 			if (!m_currentWMSViewProperties)
 				return;
 			if (!layerWasDestroyed)
@@ -853,16 +856,23 @@ package com.iblsoft.flexiweather.ogc
 			if (_vectorParent && _vectorParent.numChildren > 0)
 			{
 				var total: int = _vectorParent.numChildren;
+				trace("removeVectorData movieObject: " + total + " => " + this);
 				for (var i: int = 0; i < total; i++)
 				{
 					var dispObject: DisplayObject = _vectorParent.removeChildAt(0);
-					var loader: LoaderWithAssociatedData = dispObject as LoaderWithAssociatedData;
-					var assocData: Object = loader.associatedData;
-					assocData.requestedImagePart = null;
-					assocData.result = null;
-					assocData.wmsViewProperties = null;
-					loader.unload();
-					dispObject = null;
+					if (dispObject is LoaderWithAssociatedData)
+					{
+						var loader: LoaderWithAssociatedData = dispObject as LoaderWithAssociatedData;
+						var assocData: Object = loader.associatedData;
+						assocData.requestedImagePart = null;
+						assocData.result = null;
+						assocData.wmsViewProperties = null;
+						loader.unload();
+						dispObject = null;
+					}
+					
+					removeChild(_vectorParent);
+					_vectorParent =  null;
 				}
 			}
 			
@@ -881,8 +891,12 @@ package com.iblsoft.flexiweather.ogc
 			clear(graphics);
 			
 			var movieObject: DisplayObject = image.parent; 
+			
+			trace("drawImagePartAsSWF movieObject: " + movieObject + " => " + this);
 			if (movieObject)
 				_vectorParent.addChild(movieObject);
+			else
+				_vectorParent.addChild(image);
 		}
 
 		private function drawImagePartAsBitmap(graphics: Graphics, image: Bitmap, s_imageCRS: String, imageBBox: BBox): void
