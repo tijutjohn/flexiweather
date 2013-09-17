@@ -32,9 +32,9 @@ package com.iblsoft.flexiweather.utils
 			return 0;
 		}
 
-		public static function moveSpriteToButHideWhenNotFullOnScreen(c: DisplayObject, pt: Point, container: InteractiveWidget = null): void
+		public static function willBeFullVisible(c: DisplayObject, pt: Point, container: InteractiveWidget = null): Boolean
 		{
-			trace("moveSpriteToButHideWhenNotFullOnScreen: " + pt);
+//			trace("moveSpriteToButHideWhenNotFullOnScreen: " + pt);
 			
 			var f_screenTop: Number;
 			var f_screenLeft: Number;
@@ -54,8 +54,65 @@ package com.iblsoft.flexiweather.utils
 				var tl: Point = container.localToGlobal(topLeft);
 				var br: Point = container.localToGlobal(bottomRight);
 				
-				trace("moveSpriteToButHideWhenNotFullOnScreen: " + topLeft + " , " + tl);
-				trace("moveSpriteToButHideWhenNotFullOnScreen: " + bottomRight + " , " + br);
+//				trace("moveSpriteToButHideWhenNotFullOnScreen: " + topLeft + " , " + tl);
+//				trace("moveSpriteToButHideWhenNotFullOnScreen: " + bottomRight + " , " + br);
+				
+				f_screenLeft = tl.x;
+				f_screenTop = tl.y;
+				f_screenRight = br.x;
+				f_screenBottom = br.y;
+			}
+			
+			var willBeVisible: Boolean = true;
+			
+//			var xOutside: int = -2000;
+			
+			if (pt.x + c.width > f_screenRight)
+			{
+//				c.x = xOutside;
+				willBeVisible = false;
+			}
+			if (pt.y + c.height > f_screenBottom)
+			{
+//				c.x = xOutside;
+				willBeVisible = false;
+			}
+			if (pt.x < f_screenLeft)
+			{
+//				c.x = xOutside;
+				willBeVisible = false;
+			}
+			if (pt.y < f_screenTop)
+			{
+//				c.x = xOutside;
+				willBeVisible = false;
+			}
+			return willBeVisible;
+		}
+		public static function moveSpriteToButHideWhenNotFullOnScreen(c: DisplayObject, pt: Point, container: InteractiveWidget = null): void
+		{
+//			trace("moveSpriteToButHideWhenNotFullOnScreen: " + pt);
+			
+			var f_screenTop: Number;
+			var f_screenLeft: Number;
+			var f_screenRight: Number;
+			var f_screenBottom: Number;
+			
+			if (!container)
+			{
+				f_screenTop = 0;
+				f_screenLeft = 0;
+				f_screenRight = FlexGlobals.topLevelApplication.screen.width;
+				f_screenBottom = FlexGlobals.topLevelApplication.screen.height;
+			} else {
+				var topLeft: Point = new Point(0,0);
+				var bottomRight: Point = new Point(container.width, container.height);
+				
+				var tl: Point = container.localToGlobal(topLeft);
+				var br: Point = container.localToGlobal(bottomRight);
+				
+//				trace("moveSpriteToButHideWhenNotFullOnScreen: " + topLeft + " , " + tl);
+//				trace("moveSpriteToButHideWhenNotFullOnScreen: " + bottomRight + " , " + br);
 				
 				f_screenLeft = tl.x;
 				f_screenTop = tl.y;
@@ -111,8 +168,8 @@ package com.iblsoft.flexiweather.utils
 				var tl: Point = container.localToGlobal(topLeft);
 				var br: Point = container.localToGlobal(bottomRight);
 				
-				trace("moveSpriteToButKeepFullyOnScreen: " + topLeft + " , " + tl);
-				trace("moveSpriteToButKeepFullyOnScreen: " + bottomRight + " , " + br);
+//				trace("moveSpriteToButKeepFullyOnScreen: " + topLeft + " , " + tl);
+//				trace("moveSpriteToButKeepFullyOnScreen: " + bottomRight + " , " + br);
 				
 				f_screenLeft = tl.x;
 				f_screenTop = tl.y;

@@ -501,7 +501,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 						}
 						else
 						{
-							trace("there is no Label Style defined");
+//							trace("there is no Label Style defined");
 							if (label)
 								updateLabelFormat(label, defaultLabelColor, 1, _featureScale);
 						}

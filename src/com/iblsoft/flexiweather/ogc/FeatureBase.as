@@ -138,11 +138,13 @@ package com.iblsoft.flexiweather.ogc
 					var previousPointVisible: Boolean;
 					var pt: Point;
 					var featureIsInside: Boolean = false;
+//					trace("\nFeatureBase update m_coordinates: " + total);
 					for (var i: uint = 0; i < total; ++i)
 					{
 						var c: Coord = m_coordinates[i];
 						
 						var reflectedCoords: Array = iw.mapCoordToViewReflections(c);
+//						trace("FeatureBase update reflectedCoords["+i+"] = " + reflectedCoords.length);
 						
 						for each (var currCoordObject: Object in reflectedCoords)
 						{
@@ -171,6 +173,7 @@ package com.iblsoft.flexiweather.ogc
 					}
 					if (featureIsInViewBBox != featureIsInside)
 					{
+//						trace("coordinatesvisibility change: " + featureIsInside);
 						var event: FeatureEvent = new FeatureEvent(FeatureEvent.PRESENCE_IN_VIEW_BBOX_CHANGED, true);
 						event.insideViewBBox = featureIsInside;
 						dispatchEvent(event);

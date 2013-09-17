@@ -84,9 +84,12 @@ package com.iblsoft.flexiweather.ogc
 
 		public function coordInside(coord: Coord): Boolean
 		{
+			var bInside: Boolean = false;
 			if (coord.x >= mf_xMin && coord.x <= mf_xMax && coord.y >= mf_yMin && coord.y <= mf_yMax)
-				return true;
-			return false;
+				bInside = true;
+			
+//			trace("BBox coordInside coord: " + coord.toNiceString() + " => " + bInside + " : " + this);
+			return bInside;
 		}
 
 		public function toBBOXString(): String

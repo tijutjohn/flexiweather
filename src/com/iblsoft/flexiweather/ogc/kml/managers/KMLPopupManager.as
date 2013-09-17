@@ -1,8 +1,11 @@
 package com.iblsoft.flexiweather.ogc.kml.managers
 {
 	import com.iblsoft.flexiweather.ogc.kml.controls.KMLInfoWindow;
+	import com.iblsoft.flexiweather.ogc.kml.controls.KMLInfoWindowArrowPosition;
 	import com.iblsoft.flexiweather.ogc.kml.events.KMLFeatureEvent;
+	import com.iblsoft.flexiweather.ogc.kml.features.KML;
 	import com.iblsoft.flexiweather.ogc.kml.features.KMLFeature;
+	import com.iblsoft.flexiweather.ogc.kml.features.ScreenOverlay;
 	import com.iblsoft.flexiweather.utils.ScreenUtils;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
@@ -11,6 +14,7 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 	import flash.display.Sprite;
 	import flash.display.Stage;
 	import flash.geom.Point;
+	import flash.geom.Rectangle;
 	import flash.utils.Dictionary;
 	
 	import mx.controls.IFlexContextMenu;
@@ -49,25 +53,61 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 			popUp.visible = true;
 			var featureParent: DisplayObjectContainer = feature.parent;
 			var stage: Stage = feature.stage;
+			
+			var popupDisp: DisplayObject = popUp as DisplayObject;
+			
+			_checkFeatureVisibilityChange = true;
+			
 			if (stage)
 			{
 				var xDiff: int = -1 * popUp.width / 2;
-//				var yDiff: int = -1 * (popUp.height + feature.kmlIcon.height);
 				var yDiff: int = -1 * (popUp.height + displaySprite.height);
 				if (popUp is KMLInfoWindow)
 					xDiff = -1 * (popUp as KMLInfoWindow).arrowPointerX;
-				//				var position: Point = new Point(feature.x + xDiff, feature.y + yDiff);
 						
-				var position: Point = new Point(displaySprite.x + xDiff, displaySprite.y + yDiff);
+//				var position: Point = new Point(displaySprite.x + xDiff, displaySprite.y + yDiff);
+//				var stagePosition: Point = stage.globalToLocal(featureParent.localToGlobal(position));
+				
+				var position: Point = new Point(displaySprite.x, displaySprite.y);
 				var stagePosition: Point = stage.globalToLocal(featureParent.localToGlobal(position));
-//				trace("centerPopUpOnFeature popup: " + popUp.width + " , " + popUp.height);
-//				trace("centerPopUpOnFeature displaySprite: " + displaySprite.x + " , " + displaySprite.y);
-//				trace("centerPopUpOnFeature yDiff: " + xDiff + " , " + yDiff);
-//				trace("centerPopUpOnFeature position: " + position + " stagePosition: " + stagePosition);
-				ScreenUtils.moveSpriteToButHideWhenNotFullOnScreen(popUp as DisplayObject, stagePosition, windObject.container);
-//				ScreenUtils.moveSpriteToButKeepFullyOnScreen(popUp as DisplayObject, stagePosition);
+//				var stagePosition: Point = position;
+				
+				
+				//find correct position
+//				var bounds: Dictionary = new Dictionary();
+				var directions: Array = [KMLInfoWindowArrowPosition.BOTTOM_CENTER, KMLInfoWindowArrowPosition.TOP_CENTER, KMLInfoWindowArrowPosition.BOTTOM_LEFT, KMLInfoWindowArrowPosition.BOTTOM_RIGHT, KMLInfoWindowArrowPosition.TOP_LEFT, KMLInfoWindowArrowPosition.TOP_RIGHT ];
+				var willBeVisible: Boolean;
+				var direction: String;
+				var kmlInfoWindow: KMLInfoWindow = popUp as KMLInfoWindow;
+				
+				while (directions.length > 0)
+				{
+					direction = directions.shift();
+					var rectangle: Rectangle = kmlInfoWindow.getBoundsForPosition(stagePosition.x, stagePosition.y, direction);
+					
+					willBeVisible = ScreenUtils.willBeFullVisible(popupDisp, new Point(rectangle.x, rectangle.y), windObject.container);
+//					trace("centerPopUpOnFeature direction: " + direction + " check for position: " + stagePosition.x +  ", " + stagePosition.y + " Will Be Visible: " + willBeVisible + "  rect: " + rectangle);
+					if (willBeVisible)
+					{
+						kmlInfoWindow.arrowPosition = direction;
+						break;
+					}
+						
+				}
+				
+				if (willBeVisible)
+				{
+					position = new Point(rectangle.x, rectangle.y);
+					ScreenUtils.moveSpriteToButHideWhenNotFullOnScreen(popUp as DisplayObject, position, windObject.container);
+				} else {
+					kmlInfoWindow.visible = false;
+				}
 			}
+			
+			_checkFeatureVisibilityChange = false;
 		}
+		
+		private var _checkFeatureVisibilityChange: Boolean;
 
 		public function addPopUp(popUp: IFlexDisplayObject, parent: DisplayObject, feature: KMLFeature, container: InteractiveWidget): IFlexDisplayObject
 		{
@@ -161,9 +201,16 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 
 		private function onKMLFeatureVisibilityChange(event: KMLFeatureEvent): void
 		{
-			var window: IFlexDisplayObject = getPopUpForFeature(event.kmlFeature);
-			window.visible = event.kmlFeature.visible;
-			bringToFront(window);
+//			if (_checkFeatureVisibilityChange)
+//			{
+				var window: IFlexDisplayObject = getPopUpForFeature(event.kmlFeature);
+				window.visible = event.kmlFeature.visible;
+				bringToFront(window);
+				
+				trace("onKMLFeatureVisibilityChange window.visible: " + window.visible);
+//			} else {
+//				trace("visibility is changed, but we are not listening for sucj chhange");
+//			}
 		}
 
 		private function onPopupResize(event: ResizeEvent): void

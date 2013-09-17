@@ -41,7 +41,7 @@
 			import mx.core.FlexVersion;
 			/* Define the skin elements that should not be colorized.
 			For panel, border and title background are skinned, but the content area, background, border, and title text are not. */
-			static private const exclusions: Array = ["background", "titleDisplay", "contentGroup", "border", "borderPath"];
+			static private const exclusions: Array = ["background", "titleDisplay", "contentGroup", "borderPath"];
 			/* exclusions before Flex 4.5 for backwards-compatibility purposes */
 			static private const exclusions_4_0: Array = ["background", "titleDisplay", "contentGroup"];
 
@@ -73,28 +73,29 @@
 			 */
 			override protected function updateDisplayList(unscaledWidth: Number, unscaledHeight: Number): void
 			{
-				border.visible = true;
+//				border.visible = true;
 				if (getStyle("borderVisible") == true)
 				{
 					borderPath.visible = true;
 					arrowBorder.visible = true;
+					
 					background.left = background.top = background.right = 0;
-					background.bottom = 50;
+					background.top = hostComponent.contentTop;
+					
 					contents.left = contents.top = contents.right = 0
-					contents.bottom = 50;
-//				borderPath.bottom = 50;
+					contents.top = hostComponent.contentTop;
 				}
 				else
 				{
 					borderPath.visible = false;
 					arrowBorder.visible = false;
+					
 					background.left = background.top = background.right = 0;
-					background.bottom = 50;
+					background.top = hostComponent.contentTop;
+					
 					contents.left = contents.top = contents.right = 0;
-					contents.bottom = 50;
-//				borderPath.bottom = 50;
+					contents.top = hostComponent.contentTop;
 				}
-//            dropShadow.visible = getStyle("dropShadowVisible");
 				var cr: Number = getStyle("cornerRadius");
 				var withControls: Boolean =
 						(currentState == "disabledWithControlBar" ||
@@ -103,25 +104,19 @@
 				if (cornerRadius != cr)
 				{
 					cornerRadius = cr;
-//                dropShadow.tlRadius = cornerRadius;
-//                dropShadow.trRadius = cornerRadius;
-//                dropShadow.blRadius = withControls ? cornerRadius : 0;
-//                dropShadow.brRadius = withControls ? cornerRadius : 0;
-//                setPartCornerRadii(topMaskRect, withControls); 
-//                setPartCornerRadii(border, withControls); 
 					setPartCornerRadii(background, withControls);
 				}
-//            if (bottomMaskRect) setPartCornerRadii(bottomMaskRect, withControls); 
-				borderStroke.color = getStyle("borderColor");
-				borderStroke.alpha = getStyle("borderAlpha");
+//				borderStroke.color = getStyle("borderColor");
+//				borderStroke.alpha = getStyle("borderAlpha");
 				arrowStroke.color = getStyle("borderColor");
 				arrowStroke.alpha = getStyle("borderAlpha");
 				borderPathStroke.color = getStyle("borderColor");
 				borderPathStroke.alpha = getStyle("borderAlpha");
-				backgroundFill.color = getStyle("backgroundColor");
+				backgroundFill.color = 0xcccccc; //getStyle("backgroundColor");
 				backgroundFill.alpha = getStyle("backgroundAlpha");
-				backgroundArrowFill.color = getStyle("backgroundColor");
+				backgroundArrowFill.color = 0xcccccc; //getStyle("backgroundColor");
 				backgroundArrowFill.alpha = getStyle("backgroundAlpha");
+				
 				super.updateDisplayList(unscaledWidth, unscaledHeight);
 			}
 
@@ -152,39 +147,25 @@
 	<!--- drop shadow can't be hittable so all other graphics go in this group -->
 	<s:Group left="0" right="0" top="0" bottom="0">
 
-		<!--s:Group left="1" top="1" right="1" bottom="51" id="topGroupMask">
-			<s:Rect id="topMaskRect" left="0" top="0" right="0" bottom="0">
-				<s:fill>
-					<s:SolidColor alpha="0"/>
-				</s:fill>
-			</s:Rect>
-		</s:Group>
-
-		<s:Group left="1" top="1" right="1" bottom="51" id="bottomGroupMask"
-				 includeIn="withControls">
-			<s:Rect id="bottomMaskRect" left="0" top="0" right="0" bottom="0">
-				<s:fill>
-					<s:SolidColor alpha="0"/>
-				</s:fill>
-			</s:Rect>
-		</s:Group-->
-		<s:Rect id="border" left="0" right="0" top="0" bottom="50">
+		<!--<s:Rect id="border" left="0" right="0" bottom="0" top="{hostComponent.contentTop}">
 			<s:stroke>
 				<s:SolidColorStroke id="borderStroke" weight="1"/>
 			</s:stroke>
-		</s:Rect>
+		</s:Rect>-->
 
 		<!-- layer 2: background fill -->
 
 		<!--- Defines the appearance of the TitleWindowSkin class's background. -->
-		<s:Rect id="background" left="0" top="0" right="0" bottom="50">
+		<s:Rect id="background" left="0" bottom="0" right="0" top="{hostComponent.contentTop}">
 			<s:fill>
 				<s:SolidColor id="backgroundFill" color="#FFFFFF" alpha="0.2"/>
 			</s:fill>
 		</s:Rect>
 
-		<!-- bottom arrow -->
-		<s:Graphic id="arrow" horizontalCenter="0" bottom="1" width="{hostComponent.arrowWidth}"
+		<!-- top arrow -->
+		<s:Graphic id="arrow" top="{hostComponent.arrowY}"
+				   left="{hostComponent.arrowX}"
+				   width="{hostComponent.arrowWidth}"
 				height="{hostComponent.arrowHeight}">
 			<s:Path data="{hostComponent.arrowPath}">
 				<s:fill>
@@ -196,7 +177,7 @@
 		<!-- layer 3: contents -->
 
 		<!--- Contains the vertical stack of title bar content and control bar. -->
-		<s:Group left="1" right="1" top="1" bottom="51" id="contents">
+		<s:Group left="1" right="1" bottom="1" top="{hostComponent.contentTop}" id="contents">
 			<s:layout>
 				<s:VerticalLayout gap="0" horizontalAlign="justify"/>
 			</s:layout>
@@ -204,63 +185,7 @@
 			<!--- @private -->
 			<s:Group id="topGroup">
 
-				<!--- layer 0: title bar fill @private -->
 
-				<!--s:Rect id="tbFill" left="0" right="0" top="0" bottom="1">
-					<s:fill>
-						<s:LinearGradient rotation="90">
-							<s:GradientEntry color="0xD2D2D2"
-											 color.inactiveGroup="0xEAEAEA"/>
-							<s:GradientEntry color="0x9A9A9A"
-											 color.inactiveGroup="0xCECECE"/>
-						</s:LinearGradient>
-					</s:fill>
-				</s:Rect-->
-
-				<!--- layer 1: title bar highlight @private -->
-
-				<!--s:Rect id="tbHilite" left="0" right="0" top="0" bottom="0">
-					<s:stroke>
-						<s:LinearGradientStroke rotation="90" weight="1">
-							<s:GradientEntry color="0xE6E6E6" />
-							<s:GradientEntry color="0xFFFFFF" alpha="0.22"/>
-						</s:LinearGradientStroke>
-					</s:stroke>
-					<s:fill>
-						<s:LinearGradient rotation="90">
-							<s:GradientEntry color="0xFFFFFF" alpha="0.15" />
-							<s:GradientEntry color="0xFFFFFF" alpha="0.15" ratio="0.44"/>
-							<s:GradientEntry color="0xFFFFFF" alpha="0" ratio="0.4401"/>
-						</s:LinearGradient>
-					</s:fill>
-				</s:Rect-->
-
-				<!--- layer 2: title bar divider @private -->
-
-				<!--s:Rect id="tbDiv" left="0" right="0" height="1" bottom="0">
-					<s:fill>
-						<s:SolidColor color="0x000000" alpha="0.75" />
-					</s:fill>
-				</s:Rect-->
-
-				<!-- layer 3: text -->
-
-				<!--- @copy spark.components.Panel#titleDisplay -->
-
-				<!--s:Label id="titleDisplay" maxDisplayedLines="1"
-						 left="9" right="36" top="1" bottom="0" minHeight="30"
-						 verticalAlign="middle" fontWeight="bold" /-->
-
-				<!-- layer 4: moveArea -->
-
-				<!--- @copy spark.components.TitleWindow#moveArea -->
-
-				<!--s:Group id="moveArea" left="0" right="0" top="0" bottom="0" /-->
-
-				<!--- @copy spark.components.TitleWindow#closeButton -->
-
-				<!--s:Button id="closeButton" skinClass="spark.skins.spark.TitleWindowCloseButtonSkin"
-						  width="15" height="15" right="7" top="7" /-->
 			</s:Group>
 
 			<!--
@@ -275,7 +200,7 @@
 
 			<!--- @private -->
 			<s:Group id="bottomGroup" minWidth="0" minHeight="0" includeIn="withControls">
-				<s:Group left="0" right="0" top="0" bottom="50">
+				<s:Group left="0" right="0" bottom="0" top="{hostComponent.contentTop}">
 
 					<!-- layer 0: control bar divider line -->
 					<s:Rect left="0" right="0" top="0" height="1" alpha="0.22">
@@ -287,7 +212,7 @@
 					<!-- layer 1: control bar highlight -->
 					<s:Rect left="0" right="0" top="1" bottom="0">
 						<s:stroke>
-							<s:LinearGradientStroke rotation="90" weight="1">
+							<s:LinearGradientStroke weight="1">
 								<s:GradientEntry color="0xFFFFFF"/>
 								<s:GradientEntry color="0xD8D8D8"/>
 							</s:LinearGradientStroke>
@@ -297,7 +222,7 @@
 					<!-- layer 2: control bar fill -->
 					<s:Rect left="1" right="1" top="2" bottom="1">
 						<s:fill>
-							<s:LinearGradient rotation="90">
+							<s:LinearGradient>
 								<s:GradientEntry color="0xEDEDED"/>
 								<s:GradientEntry color="0xCDCDCD"/>
 							</s:LinearGradient>
@@ -306,7 +231,7 @@
 				</s:Group>
 
 				<!--- @copy spark.components.Panel#controlBarGroup -->
-				<s:Group id="controlBarGroup" left="0" right="0" top="1" bottom="51" minWidth="0"
+				<s:Group id="controlBarGroup" left="0" right="0" bottom="1" top="{hostComponent.contentTop}" minWidth="0"
 						minHeight="0">
 					<s:layout>
 						<s:HorizontalLayout paddingLeft="10" paddingRight="10" paddingTop="7"
@@ -315,15 +240,21 @@
 				</s:Group>
 			</s:Group>
 		</s:Group>
-		<s:Graphic id="borderPath" left="0" top="0">
+		
+		<!-- border path -->
+		<s:Graphic id="borderPath" left="0" right="0"  top="{hostComponent.contentTop - 1}" bottom="0">
 			<s:Path data="{hostComponent.borderPath}">
 				<s:stroke>
 					<s:SolidColorStroke id="borderPathStroke" weight="1"/>
 				</s:stroke>
 			</s:Path>
 		</s:Graphic>
-		<s:Graphic id="arrowBorder" horizontalCenter="0" bottom="0"
-				width="{hostComponent.arrowWidth}" height="{hostComponent.arrowHeight}">
+		
+		<!-- arrow border -->
+		<s:Graphic id="arrowBorder" top="{hostComponent.arrowY}"
+				   		left="{hostComponent.arrowX}"
+						width="{hostComponent.arrowWidth}" 
+						height="{hostComponent.arrowHeight}">
 			<s:Path data="{hostComponent.arrowBorderPath}">
 				<s:stroke>
 					<s:SolidColorStroke id="arrowStroke" weight="1"/>

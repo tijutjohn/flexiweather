@@ -55,7 +55,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 			_visible = value;
 			//set object visibility to save value
 			object.visible = value;
-			trace(this + " VISIBLE CHANGED");
+//			trace(this + " VISIBLE CHANGED");
 		}
 
 		public function toString(): String
