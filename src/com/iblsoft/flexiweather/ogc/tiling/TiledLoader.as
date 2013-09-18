@@ -127,12 +127,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 			tiledViewProperties.tiledAreas = tiledAreas;
 			mi_updateCycleAge++;
 			var loadRequests: Array;
-			var baseURLPattern: String = m_layer.baseURLPatternForCRS(s_crs);
-			if (baseURLPattern)
-				loadRequests = prepareData(tiledViewProperties, tiledAreas, b_forceUpdate);
-			else {
-				trace("baseURLpattern is NULL");
-			}
+
+			loadRequests = prepareData(tiledViewProperties, tiledAreas, b_forceUpdate);
+
 			loadAllData(tiledViewProperties, loadRequests);
 		}
 
@@ -178,6 +175,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 			var request: URLRequest;
 			var m_time: Date; //container.time;
 			var s_crs: String = qttViewProperties.crs;
+			
+			var fullURL: String = m_layer.getFullURL() + m_layer.baseURLPatternForCRS(s_crs);
+			
 			var tileIndicesMapper: TileIndicesMapper = qttViewProperties.tileIndicesMapper;
 			//initialize tile indices mapper each frame
 			tileIndicesMapper.removeAll();
@@ -204,7 +204,10 @@ package com.iblsoft.flexiweather.ogc.tiling
 							
 							
 							tileIndicesMapper.addTileIndex(tileIndex, viewPart);
-							request = new URLRequest(getExpandedURL(tileIndex, s_crs));
+							
+							var url: String = getExpandedURL(tileIndex, s_crs, fullURL);
+							request = new URLRequest(url);
+							
 							// need to convert ${BASE_URL} because it's used in cachKey
 							request.url = AbstractURLLoader.fromBaseURL(request.url);
 							qttTileViewProperties.url = request;
@@ -518,9 +521,12 @@ package com.iblsoft.flexiweather.ogc.tiling
 			dispatchEvent(de);
 		}
 
-		private function getExpandedURL(tileIndex: TileIndex, crs: String): String
+		private function getExpandedURL(tileIndex: TileIndex, crs: String, fullPath: String): String
 		{
-			var url: String = InteractiveLayerTiled.expandURLPattern(m_layer.baseURLPatternForCRS(crs), tileIndex);
+			var url: String = fullPath;// + m_layer.baseURLPatternForCRS(crs);
+			
+			url = InteractiveLayerTiled.expandURLPattern(url, tileIndex);
+			
 			if (_tiledViewProperties.specialCacheStrings && _tiledViewProperties.specialCacheStrings.length > 0)
 			{
 				var specialLen: int = String("SPECIAL_").length;

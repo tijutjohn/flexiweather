@@ -255,6 +255,10 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		private function updateTiledLayerURLBase(): void
 		{
+			var fullURL: String = getFullURL();
+			m_tiledLayer.fullURL = fullURL;
+			
+			/*
 			var crs: String = container.getCRS();
 			var config: QTTMSLayerConfiguration = m_tiledLayer.configuration as QTTMSLayerConfiguration;
 			
@@ -263,11 +267,12 @@ package com.iblsoft.flexiweather.ogc.tiling
 				trace("updateTiledLayerURLBase problem with CRS");
 			else {
 				var fullURL: String = getFullURL();
-				tilingInfo.urlPattern = fullURL + WMS_TILING_URL_PATTERN;
+				m_tiledLayer.fullURL = fullURL;
+//				tilingInfo.urlPattern = fullURL + WMS_TILING_URL_PATTERN;
 			}
 			//			qttViewProperties.setSpecialCacheStrings(ma_specialCacheStrings);
+			*/
 		}
-
 		private function updateTiledLayerCRSs(): void
 		{
 			var a_layers: Array = getWMSLayers();
@@ -356,7 +361,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 						m_autoRefreshTimer.reset();
 						return;
 					}
-					//FIXME needs to move to QTTLoader
 					updateTiledLayerURLBase();
 					if (m_tiledLayer.currentQTTViewProperties)
 					{

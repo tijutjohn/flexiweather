@@ -42,6 +42,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import flash.text.TextField;
 	import flash.text.TextFieldAutoSize;
 	import flash.text.TextFormat;
+	import flash.utils.Dictionary;
 	import flash.utils.getTimer;
 	
 	import mx.collections.ArrayCollection;
@@ -74,7 +75,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 		protected var ms_explicitBaseURLPattern: String;
 		private var m_cache: WMSTileCache;
 
-
+		public var fullURL: String;
 
 		public function set cache(value: WMSTileCache): void
 		{
@@ -172,6 +173,17 @@ package com.iblsoft.flexiweather.ogc.tiling
 				_cacheIsUpdated = false;
 				invalidateDynamicPart();
 			}
+		}
+		
+		
+		/**
+		 * function returns full URL for getting map
+		 * @return
+		 *
+		 */
+		override public function getFullURL(): String
+		{
+			return fullURL;
 		}
 
 		/**************************************************************************************************************************************************
