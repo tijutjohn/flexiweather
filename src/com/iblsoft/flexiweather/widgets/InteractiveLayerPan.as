@@ -97,7 +97,16 @@ package com.iblsoft.flexiweather.widgets
 			doRealPan(event.offsetX, event.offsetY, b_finalChange);
 		}
 
+		override public function onMouseRollOver(event:MouseEvent):Boolean
+		{
+			return startPanning(event);
+		}
 		override public function onMouseDown(event: MouseEvent): Boolean
+		{
+			return startPanning(event);
+		}
+		
+		private function startPanning(event: MouseEvent): Boolean
 		{
 			if (!event.shiftKey && mb_requireShiftKey || event.ctrlKey)
 				return false;
@@ -148,7 +157,17 @@ package com.iblsoft.flexiweather.widgets
 			_animPoint = _moveIntervalPoint;
 		}
 
+		override public function onMouseRollOut(event:MouseEvent):Boolean
+		{
+			return finishPanning(event);
+		}
+		
 		override public function onMouseUp(event: MouseEvent): Boolean
+		{
+			return finishPanning(event);
+		}
+		
+		private function finishPanning(event: MouseEvent): Boolean
 		{
 			if (supportsPanAnimation)
 				removeEventListener(Event.ENTER_FRAME, onEnterFrame);

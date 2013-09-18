@@ -75,10 +75,10 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 				
 				//find correct position
 //				var bounds: Dictionary = new Dictionary();
-				var directions: Array = [KMLInfoWindowArrowPosition.BOTTOM_CENTER, KMLInfoWindowArrowPosition.TOP_CENTER, KMLInfoWindowArrowPosition.BOTTOM_LEFT, KMLInfoWindowArrowPosition.BOTTOM_RIGHT, KMLInfoWindowArrowPosition.TOP_LEFT, KMLInfoWindowArrowPosition.TOP_RIGHT ];
 				var willBeVisible: Boolean;
 				var direction: String;
 				var kmlInfoWindow: KMLInfoWindow = popUp as KMLInfoWindow;
+				var directions: Array = [kmlInfoWindow.arrowPosition, KMLInfoWindowArrowPosition.BOTTOM_CENTER, KMLInfoWindowArrowPosition.TOP_CENTER, KMLInfoWindowArrowPosition.BOTTOM_LEFT, KMLInfoWindowArrowPosition.BOTTOM_RIGHT, KMLInfoWindowArrowPosition.TOP_LEFT, KMLInfoWindowArrowPosition.TOP_RIGHT ];
 				
 				while (directions.length > 0)
 				{
