@@ -3,6 +3,8 @@ package com.iblsoft.flexiweather.ogc.configuration
 	import com.iblsoft.flexiweather.net.loaders.AbstractURLLoader;
 	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
 	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.ogc.configuration.services.OGCServiceConfiguration;
+	import com.iblsoft.flexiweather.ogc.managers.OGCServiceConfigurationManager;
 	import com.iblsoft.flexiweather.ogc.managers.ProjectionConfigurationManager;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
@@ -64,7 +66,17 @@ package com.iblsoft.flexiweather.ogc.configuration
 			else
 				h /= aspectRatio;
 			var url: String;
-			url = "${BASE_URL}/ria?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=background-dem,foreground-lines&STYLES=bright-colours,black-lines-dotted&CRS=" + projection.crs;
+			
+			var serviceRIA: OGCServiceConfiguration = OGCServiceConfigurationManager.getInstance().getServiceByName('ria', false);
+			
+			if (serviceRIA)
+			{
+				url = serviceRIA.fullURL;
+			} else {
+				url = "${BASE_URL}/ria";
+			}
+			url += "?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=background-dem,foreground-lines&STYLES=bright-colours,black-lines-dotted&CRS=" + projection.crs;
+			
 			if (!_thumbBBox)
 				url += "&BBOX=" + projection.bbox.toBBOXString();
 			else

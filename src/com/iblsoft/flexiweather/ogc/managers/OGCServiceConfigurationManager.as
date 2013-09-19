@@ -124,13 +124,30 @@ package com.iblsoft.flexiweather.ogc.managers
 		private var _currentServices: Array = [];
 		private var _runningServices: Array = [];
 
-		public function getServiceByName(serviceName: String): OGCServiceConfiguration
+		/**
+		 * Returns OGCServiceConfiguration defined by name, which is baseURL of OGCServiceConfiguration. If you want just look for string inside baseURL, set bExactName to "false"
+		 *  
+		 * @param serviceName - name of service (currently is baseURL used)
+		 * @param bExactName - if true, name must match exactly, if false it will returns first service with serviceName substring in baseURL
+		 * @return 
+		 * 
+		 */		
+		public function getServiceByName(serviceName: String, bExactName: Boolean = true): OGCServiceConfiguration
 		{
 			for each (var osc: OGCServiceConfiguration in ma_services)
 			{
 //				if (osc.id == serviceName)
-				if (osc.baseURL == serviceName)
-					return osc;
+				
+				if (bExactName)
+				{
+					if (osc.baseURL == serviceName)
+						return osc;
+				} else {
+					if (osc.baseURL.indexOf(serviceName) >= 0)
+					{
+						return osc;
+					}
+				}
 			}
 			return null;
 		}
