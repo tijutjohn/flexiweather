@@ -296,6 +296,16 @@ package com.iblsoft.flexiweather.ogc.editable
 			return false;
 		}
 
+		/**
+		 * This method will be called when WFS feature will be created as result of split.
+		 * Do whatever is needed after split in this method 
+		 * 
+		 */		
+		public function afterSplit(): void
+		{
+			
+		}
+		
 		public function clone(): WFSFeatureEditable
 		{
 			var o: Object = this;
