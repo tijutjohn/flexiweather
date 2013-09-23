@@ -418,6 +418,7 @@ package com.iblsoft.flexiweather.ogc
 							{
 								featuresContainer.removeChild(existingFeature);
 								onFeatureRemoved(existingFeature);
+								existingFeature.cleanup();
 							}
 							//add new feature
 							addFeatureAfterLoad(feature, _features);
@@ -451,6 +452,7 @@ package com.iblsoft.flexiweather.ogc
 						{
 							featuresContainer.removeChild(existingFeature);
 							onFeatureRemoved(existingFeature);
+							existingFeature.cleanup();
 						}
 					}
 				}
@@ -472,6 +474,7 @@ package com.iblsoft.flexiweather.ogc
 				{
 					featuresContainer.removeChild(oldFeature);
 					onFeatureRemoved(oldFeature);
+					oldFeature.cleanup();
 				}
 			}
 		}
@@ -484,6 +487,7 @@ package com.iblsoft.flexiweather.ogc
 				{
 					featuresContainer.removeChild(oldFeature);
 					onFeatureRemoved(oldFeature);
+					oldFeature.cleanup();
 				}
 				else
 				{
