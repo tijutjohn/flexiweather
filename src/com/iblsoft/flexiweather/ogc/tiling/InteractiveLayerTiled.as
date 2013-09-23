@@ -908,6 +908,12 @@ package com.iblsoft.flexiweather.ogc.tiling
 		 **************************************************************************************************************************************/
 		public function changeViewProperties(viewProperties: IViewProperties): void
 		{
+			if ((viewProperties as TiledViewProperties).crs != container.crs)
+			{
+				var crsError: Error = new Error("InteractiveLayerTiled ChangeViewProperties: Layer CRS is different than InteractiveWidget.CRS");
+				throw crsError;
+			}
+			
 			m_currentQTTViewProperties = viewProperties as TiledViewProperties;
 		}
 

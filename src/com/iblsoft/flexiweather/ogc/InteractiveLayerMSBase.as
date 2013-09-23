@@ -248,6 +248,12 @@ package com.iblsoft.flexiweather.ogc
 
 		public function changeViewProperties(viewProperties: IViewProperties): void
 		{
+			if ((viewProperties as WMSViewProperties).crs != container.crs)
+			{
+				var crsError: Error = new Error("InteractiveLayerMSBase ChangeViewProperties: Layer CRS is different than InteractiveWidget.CRS");
+				throw crsError;
+			}
+			
 			m_currentWMSViewProperties.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onCurrentWMSDataSynchronisedVariableChanged);
 			m_currentWMSViewProperties.removeEventListener(WMSViewPropertiesEvent.WMS_DIMENSION_VALUE_SET, onWMSDimensionValueSet);
 			m_currentWMSViewProperties = viewProperties as WMSViewProperties;
@@ -515,7 +521,9 @@ package com.iblsoft.flexiweather.ogc
 			} else {
 				//all frames are preloaded
 				ma_preloadingBuffer = [];
-				dispatchEvent(new InteractiveLayerEvent(InteractiveDataLayer.PRELOADING_FINISHED, true));
+				var ile: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveDataLayer.PRELOADING_FINISHED, true);
+				ile.data = wmsViewProperties;
+				dispatchEvent(ile);
 			}
 		}
 
@@ -700,6 +708,7 @@ package com.iblsoft.flexiweather.ogc
 						_loader.addEventListener(InteractiveLayerEvent.INVALIDATE_DYNAMIC_PART, onCurrentWMSDataInvalidateDynamicPart);
 					}
 					
+					//here is problem that m_currentWMSViewProperties has crs EPSG:102021 and viewBBox from CRS:84
 					trace("UpdateWMSData: "+ this);
 					_loader.updateWMSData(b_forceUpdate, m_currentWMSViewProperties, forcedLayerWidth, forcedLayerHeight, printQuality);
 				}
