@@ -183,7 +183,11 @@ package com.iblsoft.flexiweather.ogc.tiling
 		 */
 		override public function getFullURL(): String
 		{
-			return fullURL;
+            if (fullURL != null)
+            {
+                return fullURL;
+            }
+			return '';
 		}
 
 		/**************************************************************************************************************************************************
