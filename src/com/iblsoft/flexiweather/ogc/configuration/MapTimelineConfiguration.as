@@ -56,9 +56,8 @@ package com.iblsoft.flexiweather.ogc.configuration
 		public function MapTimelineConfiguration()
 		{
 			super();
-			animationDirection = AnimationDirection.ANIMATION_DIRECTION_FORWARD;
-			animationType = ANIMATION_TYPE_FULL;
-			animationExtent = 'PT1H';
+			
+			reset();
 		}
 
 		private var _duration: int = 1000;
@@ -220,6 +219,14 @@ package com.iblsoft.flexiweather.ogc.configuration
 			animationDirection = storage.serializeString("animation-direction", animationDirection, null);
 			mapVisibleUnderTimeline = storage.serializeBool("map-visible-under-timeline", mapVisibleUnderTimeline, true);
 			timelineVisibleAtStartup = storage.serializeBool("timeline-visible-at-startup", timelineVisibleAtStartup, true);
+		}
+		
+		public function reset(): void
+		{
+			animationDirection = AnimationDirection.ANIMATION_DIRECTION_FORWARD;
+			animationType = ANIMATION_TYPE_FULL;
+			animationExtent = 'PT1H';
+			duration = 1000;
 		}
 	}
 }

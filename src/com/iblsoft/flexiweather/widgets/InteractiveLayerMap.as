@@ -218,7 +218,8 @@ package com.iblsoft.flexiweather.widgets
 			
 			selectedLayerIndex = -1;
 			
-			timelineConfiguration = new MapTimelineConfiguration();
+			resetTimelineConfiguration();
+			
 			_globalVariablesManager = new GlobalVariablesManager();
 			_globalVariablesManager.registerInteractiveLayerMap(this);
 			_periodicTimer = new Timer(10 * 1000);
@@ -227,6 +228,14 @@ package com.iblsoft.flexiweather.widgets
 			dispatchEvent(new Event("globalVariablesManagerChanged"));
 		}
 
+		public function resetTimelineConfiguration(): void
+		{
+			if (!timelineConfiguration)
+				timelineConfiguration = new MapTimelineConfiguration();
+			
+			timelineConfiguration.reset();
+			
+		}
 		private function onPeriodicTimerTick(event: TimerEvent): void
 		{
 			periodicCheck();
