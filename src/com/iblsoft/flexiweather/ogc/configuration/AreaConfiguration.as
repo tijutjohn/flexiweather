@@ -4,6 +4,7 @@ package com.iblsoft.flexiweather.ogc.configuration
 	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.configuration.services.OGCServiceConfiguration;
+	import com.iblsoft.flexiweather.ogc.managers.AreaConfigurationManager;
 	import com.iblsoft.flexiweather.ogc.managers.OGCServiceConfigurationManager;
 	import com.iblsoft.flexiweather.ogc.managers.ProjectionConfigurationManager;
 	import com.iblsoft.flexiweather.utils.Serializable;
@@ -32,6 +33,10 @@ package com.iblsoft.flexiweather.ogc.configuration
 
 		public function get isDefaultArea(): Boolean
 		{
+			if (ms_default_area)
+			{
+				trace("This is default area");
+			}
 			return ms_default_area;
 		}
 
@@ -105,6 +110,7 @@ package com.iblsoft.flexiweather.ogc.configuration
 					"name", ms_name, null);
 			ms_default_area = storage.serializeBool(
 					"default", ms_default_area, false);
+			
 			var _crs: String = storage.serializeString("crs", projection.crs, null);
 			var xMin: Number = storage.serializeNumber("min-x", projection.bbox.xMin, 0);
 			var yMin: Number = storage.serializeNumber("min-y", projection.bbox.yMin, 0);
@@ -113,6 +119,12 @@ package com.iblsoft.flexiweather.ogc.configuration
 			var newProjectionBBox: BBox = new BBox(xMin, yMin, xMax, yMax);
 			if (storage.isLoading())
 				projection = new ProjectionConfiguration(_crs, newProjectionBBox);
+
+			if (storage.isLoading() && ms_default_area)
+			{
+				trace("AreaConfig: " + name + " is default area");
+				AreaConfigurationManager.getInstance().makeDefaultArea(newProjectionBBox, _crs);
+			}
 			createThumbnailBBox();
 		}
 		private var _thumbBBox: BBox;

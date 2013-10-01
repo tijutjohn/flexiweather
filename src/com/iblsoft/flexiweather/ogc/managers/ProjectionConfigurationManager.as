@@ -1,13 +1,15 @@
 package com.iblsoft.flexiweather.ogc.managers
 {
+	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.ogc.configuration.ProjectionConfiguration;
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
+	
 	import flash.utils.Dictionary;
+	
 	import mx.collections.ArrayCollection;
-	import com.iblsoft.flexiweather.ogc.BBox;
-	import com.iblsoft.flexiweather.ogc.configuration.ProjectionConfiguration;
 
 	public class ProjectionConfigurationManager implements Serializable
 	{
@@ -72,6 +74,17 @@ package com.iblsoft.flexiweather.ogc.managers
 			return getMaxExtentForCRS(projection.crs);
 		}
 
+		public function getProjectionForCRS(crs: String): ProjectionConfiguration
+		{
+			var allProjs: ArrayCollection = getAllProjections;
+			for each (var proj: ProjectionConfiguration in allProjs)
+			{
+				if (proj.crs == crs)
+					return proj;
+			}
+			return null;
+		}
+		
 		public function getMaxExtentForCRS(crs: String): BBox
 		{
 			var allProjs: ArrayCollection = getAllProjections;

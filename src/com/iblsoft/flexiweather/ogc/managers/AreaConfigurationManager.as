@@ -1,6 +1,8 @@
 package com.iblsoft.flexiweather.ogc.managers
 {
+	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.configuration.AreaConfiguration;
+	import com.iblsoft.flexiweather.ogc.configuration.ProjectionConfiguration;
 	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
@@ -118,6 +120,23 @@ package com.iblsoft.flexiweather.ogc.managers
 			ma_areas.addAll(areas);
 		}
 
+		public function serializeForConfiguration(storage: Storage): void
+		{
+			var defaultArea: AreaConfiguration;
+			if (storage.isStoring())
+			{
+				defaultArea = getDefaultArea();
+				if (defaultArea)
+					storage.serialize('area', defaultArea);
+			} else {
+				defaultArea = new AreaConfiguration();
+				storage.serialize('area', defaultArea);
+				defaultArea.name = "CustomArea " + defaultArea.projection.crs;
+				if (defaultArea.isDefaultArea)
+					_defaultArea = defaultArea;
+			}
+			
+		}
 		public function serialize(storage: Storage): void
 		{
 			storage.serializeNonpersistentArrayCollection("area", ma_areas, AreaConfiguration);
@@ -151,19 +170,37 @@ package com.iblsoft.flexiweather.ogc.managers
 			dispatchEvent(event);
 		}
 
+		public function makeDefaultArea(bbox: BBox, crs: String): void
+		{
+			var projConfig: ProjectionConfiguration = ProjectionConfigurationManager.getInstance().getProjectionForCRS(crs);
+			var newProjectionConfiguration: ProjectionConfiguration = new ProjectionConfiguration(crs, bbox, projConfig.proj4String);
+				
+			if (!_defaultArea)
+			{
+				_defaultArea = new AreaConfiguration();
+				trace("There were no previous default area!");
+			}
+			_defaultArea.projection = newProjectionConfiguration
+		}
+		
+		private var _defaultArea: AreaConfiguration;
+		
 		public function getDefaultArea(): AreaConfiguration
 		{
-			if (ma_areas && ma_areas.length > 0)
-			{
-				var areasXMLList: XML = <menuitem label='Areas' data='area'/>
-						;
-				var groupParentXML: XML;
-				for each (var area: AreaConfiguration in ma_areas)
-				{
-					if (area.isDefaultArea)
-						return area;
-				}
-			}
+			if (_defaultArea)
+				return _defaultArea;
+			
+//			if (ma_areas && ma_areas.length > 0)
+//			{
+//				var areasXMLList: XML = <menuitem label='Areas' data='area'/>
+//						;
+//				var groupParentXML: XML;
+//				for each (var area: AreaConfiguration in ma_areas)
+//				{
+//					if (area.isDefaultArea)
+//						return area;
+//				}
+//			}
 			return null;
 		}
 
@@ -220,6 +257,10 @@ package com.iblsoft.flexiweather.ogc.managers
 					else
 						areasXMLList.appendChild(areaXML);
 				}
+
+				var areaCustom: XML = <menuitem label="Restore to default area" data="map.restore-default-area" type="action"/>
+				areasXMLList.appendChild(areaCustom);
+
 				areasXMLList.appendChild(getCustomArea());
 				latestMenuItemsList = areasXMLList.children() 
 				return latestMenuItemsList;
