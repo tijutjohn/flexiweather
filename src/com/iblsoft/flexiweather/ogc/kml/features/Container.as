@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.ogc.kml.features
 {
 	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
+	import com.iblsoft.flexiweather.ogc.kml.events.KMLParsingStatusEvent;
 	import com.iblsoft.flexiweather.ogc.kml.managers.KMLParserManager;
 	import com.iblsoft.flexiweather.syndication.Namespaces;
 	import com.iblsoft.flexiweather.utils.DebugUtils;
@@ -57,6 +58,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 
 		override protected function parseKML(s_namespace: String, kmlParserManager: KMLParserManager): void
 		{
+			mb_kmlFeatureParsingSupportedFeature = false;
 			// Features are: Placemark, GroundOverlay, ScreenOverlay, PhotoOverlay, NetworkLink, Folder, Document
 			// We'll only support Placemark, GroundOverlay, Folder, and Document
 			var time: int = startProfileTimer();
@@ -70,6 +72,8 @@ package com.iblsoft.flexiweather.ogc.kml.features
 				var networkLink: NetworkLink = new NetworkLink(kml, s_namespace, XMLList(i));
 				kmlParserManager.addCall(networkLink, networkLink.parse, [s_namespace, kmlParserManager]);
 				kmlParserManager.addCall(networkLink, addFeature, [networkLink]);
+				
+				mb_kmlFeatureParsingSupportedFeature = true;
 			}
 			for each (i in this.xml.kmlns::Placemark)
 			{
@@ -77,6 +81,8 @@ package com.iblsoft.flexiweather.ogc.kml.features
 //				addFeature(placemark);
 				kmlParserManager.addCall(placemark, placemark.parse, [s_namespace, kmlParserManager]);
 				kmlParserManager.addCall(placemark, addFeature, [placemark]);
+				
+				mb_kmlFeatureParsingSupportedFeature = true;
 			}
 			for each (i in this.xml.kmlns::GroundOverlay)
 			{
@@ -84,6 +90,8 @@ package com.iblsoft.flexiweather.ogc.kml.features
 //				addFeature(groundOverlay);
 				kmlParserManager.addCall(groundOverlay, groundOverlay.parse, [s_namespace, kmlParserManager]);
 				kmlParserManager.addCall(groundOverlay, addFeature, [groundOverlay]);
+				
+				mb_kmlFeatureParsingSupportedFeature = true;
 			}
 			for each (i in this.xml.kmlns::ScreenOverlay)
 			{
@@ -91,6 +99,8 @@ package com.iblsoft.flexiweather.ogc.kml.features
 //				addFeature(screenOverlay);
 				kmlParserManager.addCall(screenOverlay, screenOverlay.parse, [s_namespace, kmlParserManager]);
 				kmlParserManager.addCall(screenOverlay, addFeature, [screenOverlay]);
+				
+				mb_kmlFeatureParsingSupportedFeature = true;
 			}
 			for each (i in this.xml.kmlns::Folder)
 			{
@@ -98,14 +108,25 @@ package com.iblsoft.flexiweather.ogc.kml.features
 //				addFeature(folder);
 				kmlParserManager.addCall(folder, folder.parse, [s_namespace, kmlParserManager]);
 				kmlParserManager.addCall(folder, addFeature, [folder]);
+				
+				mb_kmlFeatureParsingSupportedFeature = true;
 			}
 			for each (i in this.xml.kmlns::Document)
 			{
 				document = new Document(kml, s_namespace, XMLList(i));
 				kmlParserManager.addCall(document, document.parse, [s_namespace, kmlParserManager]);
 				kmlParserManager.addCall(document, addFeature, [document]);
+				
+				mb_kmlFeatureParsingSupportedFeature = true;
 			}
 			debug("Container parseKML: " + (stopProfileTimer(time)) + "ms");
+			
+			if (!mb_kmlFeatureParsingSupportedFeature)
+			{
+				changeKMLFeatureParsingStatus(KMLParsingStatusEvent.FEATURE_PARSING_FAILED);
+			} else {
+				changeKMLFeatureParsingStatus(KMLParsingStatusEvent.FEATURE_PARSING_SUCCESFULL);
+			}
 		}
 
 		override public function set parentDocument(value: Document): void

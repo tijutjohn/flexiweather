@@ -12,6 +12,7 @@ package com.iblsoft.flexiweather.ogc.kml.events
 		public static const UNPACKING_FINISHED: String = 'unpackingFinished';
 		public static const PARSING_STARTED: String = 'parsingStarted';
 		public static const PARSING_FINISHED: String = 'parsingFinished';
+		
 		public var data: KMLLoaderObject;
 		public var kmlLayerConfiguration: KMLLayerConfiguration;
 

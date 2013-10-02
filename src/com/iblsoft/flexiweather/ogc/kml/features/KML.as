@@ -2,12 +2,15 @@ package com.iblsoft.flexiweather.ogc.kml.features
 {
 	import com.iblsoft.flexiweather.ogc.kml.data.KMZFile;
 	import com.iblsoft.flexiweather.ogc.kml.events.KMLEvent;
+	import com.iblsoft.flexiweather.ogc.kml.events.KMLParsingStatusEvent;
 	import com.iblsoft.flexiweather.ogc.kml.managers.KMLParserManager;
 	import com.iblsoft.flexiweather.ogc.kml.managers.KMLResourceManager;
 	import com.iblsoft.flexiweather.ogc.kml.managers.NetworkLinkManager;
 	import com.iblsoft.flexiweather.syndication.XmlParser;
+	
 	import flash.events.Event;
 	import flash.utils.getTimer;
+	
 	import mx.collections.ArrayCollection;
 	import mx.utils.StringUtil;
 
@@ -29,6 +32,9 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			return _networkLinkManager;
 		}
 
+		protected var ms_kmlParsingStatus: String;
+		protected var mb_kmlParsingSupportedFeature: Boolean;
+		
 		public function KML(xmlStr: String, urlPath: String, baseUrlPath: String, resourceManager: KMLResourceManager = null)
 		{
 			super();
@@ -109,13 +115,91 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		*/
 		public function parse(kmzFile: KMZFile = null): void
 		{
+			beforeKMLParsing();
+			
 			parseSource(_kmlSource);
 			if (kmzFile)
 				_resourceManager.addKMZFile(kmzFile);
 		}
 
+		protected function changeKMLParsingStatus(status: String): void
+		{
+			trace(this + " changeKMLParsingStatus 1: "+ status +" => "+ ms_kmlParsingStatus);
+			
+			if (ms_kmlParsingStatus == null)
+			{
+				ms_kmlParsingStatus = status;
+			} else {
+				switch (status)
+				{
+					case KMLParsingStatusEvent.PARSING_FAILED:
+						if (ms_kmlParsingStatus != KMLParsingStatusEvent.PARSING_FAILED)
+						{
+							ms_kmlParsingStatus = KMLParsingStatusEvent.PARSING_PARTIALLY_SUCCESFULL;
+						}
+						break;
+					
+					case KMLParsingStatusEvent.PARSING_PARTIALLY_SUCCESFULL:
+					case KMLParsingStatusEvent.PARSING_SUCCESFULL:
+						
+						if (ms_kmlParsingStatus == KMLParsingStatusEvent.PARSING_FAILED)
+							ms_kmlParsingStatus = KMLParsingStatusEvent.PARSING_PARTIALLY_SUCCESFULL;
+						break;
+					
+					default:
+						trace("Unknowns KML parsing status" + status)
+						break;
+					
+				}
+			}
+			
+			trace(this + " changeKMLParsingStatus 2: "+ status +" => "+ ms_kmlParsingStatus);
+			
+		}
+		protected function beforeKMLParsing(): void
+		{
+			ms_kmlParsingStatus = null;
+		}
+		
+		protected function afterKMLParsing(): void
+		{
+			switch (ms_kmlParsingStatus)
+			{
+				case KMLParsingStatusEvent.PARSING_FAILED:
+					notifyKMLParsingFailed();	
+					break;
+				
+				case KMLParsingStatusEvent.PARSING_PARTIALLY_SUCCESFULL:
+					notifyKMLParsingPartiallySuccesfull();		
+					break;
+				case KMLParsingStatusEvent.PARSING_SUCCESFULL:
+					notifyKMLParsingSuccesfull();		
+					break;
+				default:
+					notifyKMLParsingFailed();	
+					break;
+				
+			}
+		}
+		
+		protected function notifyKMLParsingSuccesfull(): void
+		{
+			dispatchEvent(new KMLParsingStatusEvent(KMLParsingStatusEvent.PARSING_SUCCESFULL));	
+		}
+		
+		protected function notifyKMLParsingPartiallySuccesfull(): void
+		{
+			dispatchEvent(new KMLParsingStatusEvent(KMLParsingStatusEvent.PARSING_PARTIALLY_SUCCESFULL));	
+		}
+		
+		protected function notifyKMLParsingFailed(): void
+		{
+			dispatchEvent(new KMLParsingStatusEvent(KMLParsingStatusEvent.PARSING_FAILED));	
+		}
+		
 		protected function notifyParsingFinished(): void
 		{
+			afterKMLParsing();
 			dispatchEvent(new KMLEvent(KMLEvent.PARSING_FINISHED));
 		}
 

@@ -96,7 +96,7 @@ package com.iblsoft.flexiweather.utils
 			tick();
 		}
 
-		private function notifyEmpty(): void
+		protected function notifyEmpty(): void
 		{
 			dispatchEvent(new Event(EMPTY));
 		}

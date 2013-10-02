@@ -9,6 +9,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import com.iblsoft.flexiweather.ogc.kml.controls.KMLLabel;
 	import com.iblsoft.flexiweather.ogc.kml.controls.KMLSprite;
 	import com.iblsoft.flexiweather.ogc.kml.data.KMLReflectionData;
+	import com.iblsoft.flexiweather.ogc.kml.events.KMLParsingStatusEvent;
 	import com.iblsoft.flexiweather.ogc.kml.interfaces.IKMLLabeledFeature;
 	import com.iblsoft.flexiweather.ogc.kml.managers.KMLParserManager;
 	import com.iblsoft.flexiweather.ogc.kml.managers.KMLResourceManager;
@@ -28,7 +29,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import flash.utils.Dictionary;
 	
 	import mx.collections.ArrayCollection;
-	import mx.states.OverrideBase;
 
 	/**
 	*	Class that represents an Entry element within an Atom feed
@@ -143,21 +143,41 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		override protected function parseKML(s_namespace: String, kmlParserManager: KMLParserManager): void
 		{
 			super.parseKML(s_namespace, kmlParserManager);
+			
+			mb_kmlFeatureParsingSupportedFeature = false;
+			
 			var time: int = startProfileTimer();
 			createIcon();
 			var kmlns: Namespace = new Namespace(s_namespace);
 			// Features are: <Point>, <LineString>, <LinearRing>, <Polygon>, <MultiGeometry>, <Model>
 			// We'll only support <Point>, <LineString>, <LinearRing>, <Polygon>
-			if (ParsingTools.nullCheck(this.xml.kmlns::Point))
+			
+			if (ParsingTools.nullCheck(this.xml.kmlns::Point)) {
 				this._geometry = new com.iblsoft.flexiweather.ogc.kml.features.Point(s_namespace, this.xml.kmlns::Point);
-			if (ParsingTools.nullCheck(this.xml.kmlns::LineString))
+				mb_kmlFeatureParsingSupportedFeature = true;
+			}
+			if (ParsingTools.nullCheck(this.xml.kmlns::LineString)) {
 				this._geometry = new LineString(s_namespace, this.xml.kmlns::LineString);
-			if (ParsingTools.nullCheck(this.xml.kmlns::LinearRing))
+				mb_kmlFeatureParsingSupportedFeature = true;
+			}
+			if (ParsingTools.nullCheck(this.xml.kmlns::LinearRing)) {
 				this._geometry = new LinearRing(s_namespace, this.xml.kmlns::LinearRing);
-			if (ParsingTools.nullCheck(this.xml.kmlns::Polygon))
+				mb_kmlFeatureParsingSupportedFeature = true;
+			}
+			if (ParsingTools.nullCheck(this.xml.kmlns::Polygon)) {
 				this._geometry = new Polygon(s_namespace, this.xml.kmlns::Polygon);
-			if (ParsingTools.nullCheck(this.xml.kmlns::MultiGeometry))
+				mb_kmlFeatureParsingSupportedFeature = true;
+			}
+			if (ParsingTools.nullCheck(this.xml.kmlns::MultiGeometry)) {
 				this._geometry = new MultiGeometry(s_namespace, this.xml.kmlns::MultiGeometry);
+				mb_kmlFeatureParsingSupportedFeature = true;
+			}
+			if (!mb_kmlFeatureParsingSupportedFeature)
+			{
+				changeKMLFeatureParsingStatus(KMLParsingStatusEvent.FEATURE_PARSING_PARTIALLY_SUCCESFULL);
+			} else {
+				changeKMLFeatureParsingStatus(KMLParsingStatusEvent.FEATURE_PARSING_SUCCESFULL);
+			}
 			//			debug("Placemark parseKML: " + (stopProfileTimer(time)) + "ms");
 		}
 

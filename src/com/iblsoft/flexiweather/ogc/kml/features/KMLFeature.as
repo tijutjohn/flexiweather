@@ -15,6 +15,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import com.iblsoft.flexiweather.ogc.kml.data.KMLReflectionData;
 	import com.iblsoft.flexiweather.ogc.kml.data.KMLResourceKey;
 	import com.iblsoft.flexiweather.ogc.kml.events.KMLFeatureEvent;
+	import com.iblsoft.flexiweather.ogc.kml.events.KMLParsingStatusEvent;
 	import com.iblsoft.flexiweather.ogc.kml.features.styles.Style;
 	import com.iblsoft.flexiweather.ogc.kml.features.styles.StyleMap;
 	import com.iblsoft.flexiweather.ogc.kml.features.styles.StyleSelector;
@@ -39,6 +40,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import flash.geom.Point;
 	import flash.net.URLRequest;
 	import flash.utils.Dictionary;
+	import flash.utils.flash_proxy;
 	import flash.utils.getTimer;
 	
 	import mx.states.OverrideBase;
@@ -58,6 +60,9 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		private var _displaySprites: Array = [];
 		public var featureScale: Number = 1;
 
+		protected var ms_kmlFeatureParsingStatus: String;
+		protected var mb_kmlFeatureParsingSupportedFeature: Boolean;
+		
 		public function removeDisplaySprite(sprite: Sprite): void
 		{
 			var total: int = _displaySprites.length;
@@ -71,6 +76,81 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			}
 		}
 
+		protected function changeKMLFeatureParsingStatus(status: String): void
+		{
+			trace(this + " changeKMLFeatureParsingStatus 1: "+ status +" => "+ ms_kmlFeatureParsingStatus);
+			
+			if (ms_kmlFeatureParsingStatus == null)
+			{
+				ms_kmlFeatureParsingStatus = status;
+			} else {
+				switch (status)
+				{
+					case KMLParsingStatusEvent.FEATURE_PARSING_FAILED:
+						if (ms_kmlFeatureParsingStatus != KMLParsingStatusEvent.FEATURE_PARSING_FAILED)
+						{
+							ms_kmlFeatureParsingStatus = KMLParsingStatusEvent.FEATURE_PARSING_PARTIALLY_SUCCESFULL;
+						}
+						break;
+					
+					case KMLParsingStatusEvent.FEATURE_PARSING_PARTIALLY_SUCCESFULL:
+					case KMLParsingStatusEvent.FEATURE_PARSING_SUCCESFULL:
+						
+						if (ms_kmlFeatureParsingStatus == KMLParsingStatusEvent.FEATURE_PARSING_FAILED)
+							ms_kmlFeatureParsingStatus = KMLParsingStatusEvent.FEATURE_PARSING_PARTIALLY_SUCCESFULL;
+						break;
+					
+					default:
+						trace("Unknowns KMLFeature parsing status" + status)
+						break;
+					
+				}
+			}
+			
+			trace(this + " changeKMLFeatureParsingStatus 2: "+ status +" => "+ ms_kmlFeatureParsingStatus);
+			
+		}
+		protected function beforeKMLFeatureParsing(): void
+		{
+			ms_kmlFeatureParsingStatus = null;
+		}
+		
+		protected function afterKMLFeatureParsing(): void
+		{
+			switch (ms_kmlFeatureParsingStatus)
+			{
+				case KMLParsingStatusEvent.FEATURE_PARSING_FAILED:
+					notifyKMLFeatureParsingFailed();	
+					break;
+				
+				case KMLParsingStatusEvent.FEATURE_PARSING_PARTIALLY_SUCCESFULL:
+					notifyKMLFeatureParsingPartiallySuccesfull();		
+					break;
+				case KMLParsingStatusEvent.FEATURE_PARSING_SUCCESFULL:
+					notifyKMLFeatureParsingSuccesfull();		
+					break;
+				default:
+					notifyKMLFeatureParsingFailed();	
+					break;
+				
+			}
+		}
+		
+		protected function notifyKMLFeatureParsingSuccesfull(): void
+		{
+			dispatchEvent(new KMLParsingStatusEvent(KMLParsingStatusEvent.FEATURE_PARSING_SUCCESFULL));	
+		}
+		
+		protected function notifyKMLFeatureParsingPartiallySuccesfull(): void
+		{
+			dispatchEvent(new KMLParsingStatusEvent(KMLParsingStatusEvent.FEATURE_PARSING_PARTIALLY_SUCCESFULL));	
+		}
+		
+		protected function notifyKMLFeatureParsingFailed(): void
+		{
+			dispatchEvent(new KMLParsingStatusEvent(KMLParsingStatusEvent.FEATURE_PARSING_FAILED));	
+		}
+		
 		public function get displaySpritesLength(): int
 		{
 			if (_displaySprites)
@@ -534,7 +614,11 @@ package com.iblsoft.flexiweather.ogc.kml.features
 
 		public function parse(s_namespace: String, kmlParserManager: KMLParserManager): void
 		{
+			beforeKMLFeatureParsing();
+			
 			parseKML(s_namespace, kmlParserManager);
+			
+			afterKMLFeatureParsing();
 		}
 
 		public function cleanupKML(): void
