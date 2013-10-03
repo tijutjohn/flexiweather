@@ -1,7 +1,12 @@
 package com.iblsoft.flexiweather.ogc.kml.features
 {
+	import com.iblsoft.flexiweather.ogc.kml.data.KMLFeaturesReflectionDictionary;
+	import com.iblsoft.flexiweather.ogc.kml.events.KMLParsingStatusEvent;
 	import com.iblsoft.flexiweather.ogc.kml.features.constants.LinkRefreshMode;
+	import com.iblsoft.flexiweather.ogc.kml.managers.KMLParserManager;
 	import com.iblsoft.flexiweather.syndication.ParsingTools;
+	
+	import flashx.textLayout.operations.RedoOperation;
 
 	public class NetworkLink extends KMLFeature
 	{
@@ -15,11 +20,32 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		{
 			super(kml, s_namespace, s_xml);
 			var kmlns: Namespace = new Namespace(s_namespace);
+			
 			_container = new Container(null, s_namespace, null);
+			_container.addEventListener(KMLParsingStatusEvent.FEATURE_PARSING_FAILED, onKMLFeatureParsingStatus);
+			_container.addEventListener(KMLParsingStatusEvent.FEATURE_PARSING_PARTIALLY_SUCCESFULL, onKMLFeatureParsingStatus);
+			_container.addEventListener(KMLParsingStatusEvent.FEATURE_PARSING_SUCCESFULL, onKMLFeatureParsingStatus);
+			
 			this._refreshVisibility = ParsingTools.nanCheck(this.xml.kmlns::refreshVisibility);
 			this._flyToView = ParsingTools.nanCheck(this.xml.kmlns::flyToView);
 			if (ParsingTools.nullCheck(this.xml.kmlns::Link))
 				this._link = new Link(s_namespace, this.xml.kmlns::Link);
+		}
+		
+		override public function parse(s_namespace: String, kmlParserManager: KMLParserManager): void
+		{
+			beforeKMLFeatureParsing();
+			
+			parseKML(s_namespace, kmlParserManager);
+			
+			changeKMLFeatureParsingStatus(KMLParsingStatusEvent.FEATURE_PARSING_SUCCESFULL);
+			
+			afterKMLFeatureParsing();
+		}
+		
+		private function onKMLFeatureParsingStatus(event: KMLParsingStatusEvent): void
+		{
+			dispatchEvent(event);
 		}
 
 		public override function cleanup(): void

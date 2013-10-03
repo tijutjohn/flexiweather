@@ -516,9 +516,15 @@ package com.iblsoft.flexiweather.ogc.kml.features
 //				
 //				_kmlIcon = null;
 //			}
-			var resourceManager: KMLResourceManager = kml.resourceManager;
-			resourceManager.disposeResource(_normalResourceKey);
-			resourceManager.disposeResource(_highlightResourceKey);
+			if (kml)
+				var resourceManager: KMLResourceManager = kml.resourceManager;
+			
+			if (resourceManager)
+			{
+				resourceManager.disposeResource(_normalResourceKey);
+				resourceManager.disposeResource(_highlightResourceKey);
+			}
+			
 			_normalResourceKey = null;
 			_highlightResourceKey = null;
 		}
@@ -542,7 +548,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 
 		protected function createKMLLabel(parent: Sprite): KMLLabel
 		{
-			//reuse KMLLabels
+			//reuseleanup KMLLabels
 			_kmlLabel = kml.resourceManager.getKMLLabel(this);
 			_kmlLabel.visible = true;
 			_kmlLabel.reflection = (parent as KMLSprite).reflection;
