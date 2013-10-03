@@ -129,6 +129,11 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 			return mi_updatePeriod;
 		}
 
+		/**
+		 * How often will be service updated (load GetCapabilities service) 
+		 * @param i_period period in miliseconds
+		 * 
+		 */		
 		public function set updatePeriod(i_period: uint): void
 		{
 			mi_updatePeriod = i_period;
@@ -144,6 +149,10 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 			mb_enabled = b;
 		}
 
+		public function get name(): String
+		{
+			return ms_baseURL;
+		}
 		public function get baseURL(): String
 		{
 			return ms_baseURL;
