@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <flexLibProperties includeAllClasses="false" useMultiPlatformConfig="false" version="1">
   <includeClasses>
+    <classEntry path="com.iblsoft.flexiweather.FlexiWeatherConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.components.IndexRetainingDropDownList"/>
     <classEntry path="com.iblsoft.flexiweather.components.MultiSelectionButtonBar"/>
     <classEntry path="com.iblsoft.flexiweather.components.ResizableDropDownList"/>
@@ -57,6 +58,7 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.FeatureBase"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.FeatureUpdateContext"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.GMLUtils"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.GetCapabilitiesXMLItem"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.IBehaviouralObject"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.ISynchronisedObject"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase"/>
@@ -148,14 +150,17 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.events.MSBaseLoaderEvent"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.events.MoveablePointEvent"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.events.ReflectionEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.events.ServiceCapabilitiesEvent"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.InteractiveLayerKML"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.configuration.KMLLayerConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.controls.KMLBitmapLoader"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.controls.KMLInfoWindow"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.controls.KMLInfoWindowArrowPosition"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.controls.KMLInfoWindowBase"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.controls.KMLLabel"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.controls.KMLSprite"/>
-    <classEntry path="com.iblsoft.flexiweather.ogc.kml.controls.skins.KMLInfoWindowSkin"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.controls.skins.KMLInfoWindowBottomCenterSkin"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.controls.skins.KMLInfoWindowTopCenterSkin"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.data.KMLFeaturesReflectionDictionary"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.data.KMLLoaderObject"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.data.KMLReflectionData"/>
@@ -164,6 +169,7 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.events.KMLBitmapEvent"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.events.KMLEvent"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.events.KMLFeatureEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.events.KMLParsingStatusEvent"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.events.NetworkLinkEvent"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.AbstractLatLonBox"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.features.AbstractLink"/>
@@ -437,11 +443,13 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.GoogleMapsLayerOption"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.InteractiveLayerGoogleMaps"/>
     <classEntry path="com.tests.FlexiWeatherMappingSuite"/>
+    <classEntry path="com.tests.ProjectionSuite"/>
     <classEntry path="com.tests.TilingSuite"/>
     <classEntry path="com.tests.WMTSSuite"/>
     <classEntry path="com.tests.interactiveWidget.IWMapFunctions"/>
     <classEntry path="com.tests.interactiveWidget.MapBBoxToProjectionExtentParts"/>
     <classEntry path="com.tests.interactiveWidget.MapBBoxToViewReflections"/>
+    <classEntry path="com.tests.projection.ProjectionTest"/>
     <classEntry path="com.tests.utils.TilingUtilsTest"/>
     <classEntry path="com.tests.utils.URLUtilsTest"/>
     <classEntry path="com.tests.wmts.InteractiveLayerTiledTest"/>
