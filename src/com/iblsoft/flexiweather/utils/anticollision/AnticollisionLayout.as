@@ -285,14 +285,6 @@ package com.iblsoft.flexiweather.utils.anticollision
 					ma_layoutObjects.removeItemAt(i);
 					updateLayoutObjectsLength();
 					setDirty();
-					//FIXME remove this part of codem it's just debug code
-					var objName: String = '';
-					var instanceName: String = '';
-					if (object is KMLLabel)
-					{
-						objName = (object as KMLLabel).text;
-						instanceName = (object as KMLLabel).name;
-					}
 					return true;
 				}
 			}

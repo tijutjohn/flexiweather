@@ -13,5 +13,6 @@ package com.iblsoft.flexiweather.ogc.wfs
 		function get totalReflections(): int;
 		function get reflectionDictionary(): WFSEditableReflectionDictionary;
 		function getReflection(id: int): WFSEditableReflectionData;
+		function getDisplaySpriteForReflection(id: int): WFSFeatureEditableSprite;
 	}
 }

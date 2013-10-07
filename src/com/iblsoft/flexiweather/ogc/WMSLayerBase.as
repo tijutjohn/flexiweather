@@ -45,8 +45,8 @@ package com.iblsoft.flexiweather.ogc
 		
 		override public function parse(): void
 		{
-			trace("\n\n *******************************************************");
-			trace(this + " size: "+ (m_itemXML.toXMLString()).length);
+//			trace("\n\n *******************************************************");
+//			trace(this + " size: "+ (m_itemXML.toXMLString()).length);
 			
 			var currTime: Number = getTimer();
 			
@@ -62,10 +62,10 @@ package com.iblsoft.flexiweather.ogc
 			
 			
 			var time1: Number = (getTimer() - currTime);
-			if (time1 >= 5)
-			{
-				trace("\n\n" + this + " parse 1 time: " + time1 + "ms");
-			}
+//			if (time1 >= 5)
+//			{
+//				trace("\n\n" + this + " parse 1 time: " + time1 + "ms");
+//			}
 			
 			var afterParseTime: Number = getTimer();
 			
@@ -76,10 +76,10 @@ package com.iblsoft.flexiweather.ogc
 			}
 			
 			var time2: Number = (getTimer() - afterParseTime);
-			if (time2 >= 5)
-			{
-				trace("\n\n" + this + " parse 2 time: " + time2 + "ms");
-			}
+//			if (time2 >= 5)
+//			{
+//				trace("\n\n" + this + " parse 2 time: " + time2 + "ms");
+//			}
 			var afterParseTime2: Number = getTimer();
 			
 			
@@ -91,35 +91,35 @@ package com.iblsoft.flexiweather.ogc
 			}
 			
 			var time3: Number = (getTimer() - afterParseTime2);
-			if (time3 >= 5)
-			{
-				trace("\n\n" + this + " parse 3 time: " + time3 + "ms");
-			}
+//			if (time3 >= 5)
+//			{
+//				trace("\n\n" + this + " parse 3 time: " + time3 + "ms");
+//			}
 				
 			var afterParseTime3: Number = getTimer();
 			
 			parseDimensions();
 			
 			var time4: Number = (getTimer() - afterParseTime3);
-			if (time4 >= 5)
-			{
-				trace("\n\n" + this + " parse 4 time: " + time4 + "ms");
-			}
+//			if (time4 >= 5)
+//			{
+//				trace("\n\n" + this + " parse 4 time: " + time4 + "ms");
+//			}
 			
-			trace(this + " parse total time: " + (getTimer() - currTime) + "ms");
+//			trace(this + " parse total time: " + (getTimer() - currTime) + "ms");
 			
 			_parsed = true;
-			trace("*******************************************************\n\n");
+//			trace("*******************************************************\n\n");
 		}
 		
 		public function parseDimensions(): void
 		{
-			trace("Parse dimension for layer: " + name);
-			if (name.indexOf('temper') >= 0)
-			{
-			trace("TEMPERATURE Parse dimension for layer: " + name);
-				
-			}
+//			trace("Parse dimension for layer: " + name);
+//			if (name.indexOf('temper') >= 0)
+//			{
+//			trace("TEMPERATURE Parse dimension for layer: " + name);
+//				
+//			}
 			for each (var elemDim: XML in m_itemXML.wms::Dimension)
 			{
 				var dim: WMSDimension = new WMSDimension(elemDim, wms, m_version);
@@ -216,8 +216,7 @@ package com.iblsoft.flexiweather.ogc
 				ma_crsWithBBoxes.addItem(new CRSWithBBox(Projection.CRS_EPSG_GEOGRAPHIC, crsBBox));
 				a_detectedCRSs.push(Projection.CRS_EPSG_GEOGRAPHIC);
 			}
-			//FIXME in condition should be CRS_GEOGRAPHIC instead of CRS_EPSG_GEOGRAPHIC (otherwise is same condition as above
-			if (a_detectedCRSs.indexOf(Projection.CRS_EPSG_GEOGRAPHIC) < 0)
+			if (a_detectedCRSs.indexOf(Projection.CRS_GEOGRAPHIC) < 0)
 			{
 				ma_crsWithBBoxes.addItem(new CRSWithBBox(Projection.CRS_GEOGRAPHIC, crsBBox));
 				a_detectedCRSs.push(Projection.CRS_GEOGRAPHIC);

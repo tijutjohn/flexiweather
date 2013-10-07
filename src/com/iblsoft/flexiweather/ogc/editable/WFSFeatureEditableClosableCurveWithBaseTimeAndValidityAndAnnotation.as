@@ -7,52 +7,65 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.ogc.editable.MoveablePoint;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableMode;
-	import com.iblsoft.flexiweather.ogc.editable.data.FeatureData;
 	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
 	import com.iblsoft.flexiweather.ogc.managers.WFSCursorManager;
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSCurveFeature;
+	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithAnnotation;
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
 	import com.iblsoft.flexiweather.proj.Coord;
+	import com.iblsoft.flexiweather.utils.AnnotationBox;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.utils.CubicBezier;
 	import com.iblsoft.flexiweather.utils.ICurveRenderer;
+	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayout;
 	import com.iblsoft.flexiweather.utils.draw.DrawMode;
+	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	
 	import mx.collections.ArrayCollection;
 
-	public class WFSFeatureEditableClosableCurveWithBaseTimeAndValidity extends WFSFeatureEditableCurveWithBaseTimeAndValidity implements IClosableCurve, IWFSCurveFeature
+	public class WFSFeatureEditableClosableCurveWithBaseTimeAndValidityAndAnnotation extends WFSFeatureEditableClosableCurveWithBaseTimeAndValidity implements IClosableCurve, IWFSCurveFeature, IWFSFeatureWithAnnotation
 	{
-		protected var mb_closed: Boolean = false;
-
-		public function WFSFeatureEditableClosableCurveWithBaseTimeAndValidity(s_namespace: String, s_typeName: String, s_featureId: String)
+		public function get annotation():AnnotationBox
+		{
+			if (totalReflections > 0)
+			{
+				var reflection: WFSEditableReflectionData = getReflection(0);  
+				return reflection.annotation as AnnotationBox;
+			}
+			return null;
+		}
+		
+		public function WFSFeatureEditableClosableCurveWithBaseTimeAndValidityAndAnnotation(s_namespace: String, s_typeName: String, s_featureId: String)
 		{
 			super(s_namespace, s_typeName, s_featureId);
 		}
 		
-		
-		override protected function computeCurve(): void
+		override public function clone(): WFSFeatureEditable
 		{
-			var a_points: ArrayCollection = getPoints();
-			
-			if(a_points.length > 1) 
-			{
-				if (master)
-				{
-					m_featureData = new FeatureData(this.toString() + " FeatureData");
-					// feature is computed via drawSmoothPolyLine() or drawGeoPolyLine() method
-					if (smooth)
-						master.container.drawSmoothPolyLine(getRenderer, a_points.toArray(), DrawMode.PLAIN, isCurveClosed(), true, m_featureData);
-					else
-						master.container.drawGeoPolyLine(getRenderer, a_points.toArray(), DrawMode.PLAIN, isCurveClosed(), true, m_featureData);
-				}
-				
-			}
+			var feature: WFSFeatureEditable = super.clone();
+			(feature as WFSFeatureEditableClosableCurveWithBaseTimeAndValidityAndAnnotation).mb_closed = mb_closed;
+			return feature;
 		}
-		override protected function drawCurve(): void
+		
+		override protected function drawCurve():void
 		{
+			drawAnnotation();
+		}
+		
+		
+		public function createAnnotation(): AnnotationBox
+		{
+			return null;
+		}
+		
+		public function drawAnnotation(): void
+		{
+//			clearGraphics();
+			
+			var annotation: AnnotationBox;
 			var reflection: WFSEditableReflectionData;
 			var _addToLabelLayout: Boolean;
 			
@@ -60,6 +73,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			
 			//create sprites for reflections
 			var totalReflections: uint = ml_movablePoints.totalReflections;
+//			var blackColor: uint = getCurrentColor(0x000000);
 			
 			var displaySprite: WFSFeatureEditableSprite;
 			
@@ -78,7 +92,7 @@ package com.iblsoft.flexiweather.ogc.editable
 					
 					if (!reflection.displaySprite)
 					{
-						reflection.displaySprite = getDisplaySpriteForReflection(reflection.reflectionDelta);
+						reflection.displaySprite = getDisplaySpriteForReflection(reflection.reflectionDelta); //new CloudFeatureSprite(this);
 						addChild(reflection.displaySprite);
 					}
 					displaySprite = reflection.displaySprite as WFSFeatureEditableSprite;
@@ -86,35 +100,62 @@ package com.iblsoft.flexiweather.ogc.editable
 					if(pointsCount <= 1)
 					{
 						displaySprite.clear();
-						//						trace("displaySprite.clear: pointsCount: " + pointsCount);
+//						trace("displaySprite.clear: pointsCount: " + pointsCount);
 					} else {
 						var renderer: ICurveRenderer = getRenderer(reflection.reflectionDelta);
 						if (m_featureData)
 						{
 							reflection.displaySprite.graphics.clear();
-							//							trace("reflection.displaySprite: " + reflection.displaySprite.parent);
+//							trace("reflection.displaySprite: " + reflection.displaySprite.parent);
 							var reflectionData: FeatureDataReflection = m_featureData.getReflectionAt(reflection.reflectionDelta);
 							if (reflectionData)
 								drawFeatureReflection(renderer, reflectionData);
 						}
 						displaySprite.points = reflection.points;
 						
-//						if (!mb_spritesAddedToLabelLayout && master)
-//						{
-//							master.container.labelLayout.addObstacle(displaySprite, master);
-//							master.container.labelLayout.addObject(annotation, master, [displaySprite], i);
-//							_addToLabelLayout = true;
-//						}
-//						
-//						master.container.labelLayout.updateObjectReferenceLocation(annotation);
+						if (reflection.annotation )
+						{
+							annotation = reflection.annotation ;
+						} else {
+							annotation = createAnnotation();
+							reflection.addAnnotation(annotation);
+						}
+						
+						updateAnnotation(annotation, ptAvg);
+						
+						if (!mb_spritesAddedToLabelLayout && master)
+						{
+							master.container.labelLayout.addObstacle(displaySprite, master);
+							master.container.labelLayout.addObject(annotation, master, [displaySprite], i);
+							_addToLabelLayout = true;
+						}
+						
+						master.container.labelLayout.updateObjectReferenceLocation(annotation);
 					}
 				}
 			}
 			
-//			if (!mb_spritesAddedToLabelLayout && _addToLabelLayout)
-//				mb_spritesAddedToLabelLayout = true;
+			if (!mb_spritesAddedToLabelLayout && _addToLabelLayout)
+				mb_spritesAddedToLabelLayout = true;
 		}
-
+		
+		public function updateAnnotation(annotation: AnnotationBox, annotationPosition: Point, text: String = ""): void
+		{
+			
+		}
+		
+		public function removeFromLabelLayout(annotation: AnnotationBox, displaySprite: WFSFeatureEditableSprite, labelLayout: AnticollisionLayout): void
+		{
+			labelLayout.removeObject(this);
+			labelLayout.removeObject(annotation);
+		}
+		
+		public function addToLabelLayout(annotation: AnnotationBox, displaySprite: WFSFeatureEditableSprite, layer: InteractiveLayer, labelLayout: AnticollisionLayout, i_reflection: uint): void
+		{
+			labelLayout.addObstacle(displaySprite, layer);
+			labelLayout.addObject(annotation,  layer,  [displaySprite], i_reflection);
+		}
+		
 		/*
 		override public function toInsertGML(xmlInsert: XML): void
 		{
@@ -130,14 +171,6 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			super.fromGML(gml);
 		}
-*/
-		override public function clone(): WFSFeatureEditable
-		{
-			var feature: WFSFeatureEditable = super.clone();
-			WFSFeatureEditableClosableCurveWithBaseTimeAndValidity(feature).mb_closed = mb_closed;
-			return feature;
-		}
-
 		override protected function getEffectiveCoordinates(): Array
 		{
 			if (isCurveClosed())
@@ -211,9 +244,6 @@ package com.iblsoft.flexiweather.ogc.editable
 			}
 		}
 
-		/**
-		 *
-		 */
 		override public function onMouseMove(pt: Point, event: MouseEvent): Boolean
 		{
 			if ((mi_editMode == WFSFeatureEditableMode.ADD_POINTS_ON_CURVE)
@@ -241,9 +271,6 @@ package com.iblsoft.flexiweather.ogc.editable
 			WFSCursorManager.setCursor(WFSCursorManagerTypes.CURSOR_CLOSE_CURVE);
 		}
 
-		/**
-		 *
-		 */
 		override public function onMouseDown(pt: Point, event: MouseEvent): Boolean
 		{
 			var useThisOverride: Boolean = false;
@@ -338,5 +365,6 @@ package com.iblsoft.flexiweather.ogc.editable
 			else
 				return (super.onMouseDown(pt, event));
 		}
+		*/
 	}
 }

@@ -709,7 +709,6 @@ package com.iblsoft.flexiweather.ogc
 					}
 					
 					//here is problem that m_currentWMSViewProperties has crs EPSG:102021 and viewBBox from CRS:84
-					trace("UpdateWMSData: "+ this);
 					_loader.updateWMSData(b_forceUpdate, m_currentWMSViewProperties, forcedLayerWidth, forcedLayerHeight, printQuality);
 				}
 			}

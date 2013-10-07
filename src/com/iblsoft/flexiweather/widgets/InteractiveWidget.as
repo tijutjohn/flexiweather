@@ -10,6 +10,9 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.cache.WMSCacheKey;
 	import com.iblsoft.flexiweather.ogc.cache.WMSCacheManager;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureData;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataLine;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
 	import com.iblsoft.flexiweather.ogc.multiview.data.SynchronizationChangeType;
 	import com.iblsoft.flexiweather.ogc.multiview.synchronization.events.SynchronisationEvent;
 	import com.iblsoft.flexiweather.proj.Coord;
@@ -1935,7 +1938,7 @@ package com.iblsoft.flexiweather.widgets
 		 * @return 
 		 * 
 		 */		
-		private function _drawGeoLine(coordFrom: Coord, coordTo: Coord, drawMode: String, d_reflectionToSegmentPoints: Dictionary): void
+		private function _drawGeoLine(coordFrom: Coord, coordTo: Coord, drawMode: String, d_reflectionToSegmentPoints: Dictionary, featureDataLine: FeatureDataLine = null): void
 		{
 			var coords: Array;
 			var c: Coord;
@@ -2054,9 +2057,19 @@ package com.iblsoft.flexiweather.widgets
 								line = new LineSegment(o.pointFrom.x, o.pointFrom.y, o.pointTo.x, o.pointTo.y);
 								if (line.isInsideBox(m_viewBBox) || line.isIntersectedBox(viewBBoxWestLine, viewBBoxEastLine, viewBBoxNorthLine, viewBBoxSouthLine))
 								{
+									var reflection: FeatureDataReflection = featureDataLine.parentFeatureData.getReflectionAt(o.reflection);
+									var currLine: FeatureDataLine = reflection.getLineAt(featureDataLine.id);
+									trace("_drawGeoLine reflection: " + reflection);
+									trace("_drawGeoLine currLine: " + currLine);
+									
 									//check if line is intersect vieBBox
-									reflectedSegmentPoints.push(coordToPoint(new Coord(ms_crs, o.pointFrom.x, o.pointFrom.y)));
-									reflectedSegmentPoints.push(coordToPoint(new Coord(ms_crs, o.pointTo.x, o.pointTo.y)));
+									var p1: Point = coordToPoint(new Coord(ms_crs, o.pointFrom.x, o.pointFrom.y));
+									var p2: Point = coordToPoint(new Coord(ms_crs, o.pointTo.x, o.pointTo.y));
+									
+									currLine.addLineSegment(new LineSegment(p1.x, p1.y, p2.x, p2.y));
+									
+									reflectedSegmentPoints.push(p1);
+									reflectedSegmentPoints.push(p2);
 								
 									if (drawMode == DrawMode.PLAIN) 
 									{
@@ -2085,17 +2098,19 @@ package com.iblsoft.flexiweather.widgets
 		
 		private function _drawReflectedSegmentPoints(rendererCreator: Function, d_reflectionToSegmentPoints: Dictionary): void
 		{
-			for (var l_reflectionStr: String in d_reflectionToSegmentPoints) {
+			for (var s_reflectionStr: String in d_reflectionToSegmentPoints) {
 				var b_first: Boolean = true;
 				var ptPrev: Point = null;
 				var ptLast: Point = null;
 				
-				var l_reflectedSegmentPoints: Array = d_reflectionToSegmentPoints[l_reflectionStr];
+				var l_reflection: int = parseInt(s_reflectionStr);
 				
-				var g: ICurveRenderer = rendererCreator(l_reflectionStr);
+				var l_reflectedSegmentPoints: Array = d_reflectionToSegmentPoints[s_reflectionStr];
+				
+				var g: ICurveRenderer = rendererCreator(l_reflection);
 				
 //				trace("_drawReflectedSegmentPoints: l_reflectionStr: " + l_reflectedSegmentPoints.length + " points");
-				var str: String = '\nReflection: ' + l_reflectionStr + ': ';
+				var str: String = '\nReflection: ' + l_reflection + ': ';
 				for each(var pt: Point in l_reflectedSegmentPoints) {
 					if(!pt) {
 						ptPrev = null;
@@ -2121,27 +2136,74 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 
-		public function drawGeoLine(rendererCreator: Function, coordFrom: Coord, coordTo: Coord, drawMode: String): void
+		public function drawGeoLine(rendererCreator: Function, coordFrom: Coord, coordTo: Coord, drawMode: String, b_justCompute: Boolean = false, featureDataLine: FeatureDataLine = null): void
 		{
 			var d_reflectionToSegmentPoints: Dictionary = new Dictionary();
 			_drawGeoLine(coordFrom, coordTo, drawMode, d_reflectionToSegmentPoints);
-			_drawReflectedSegmentPoints(rendererCreator, d_reflectionToSegmentPoints);
+			if (!b_justCompute)
+				_drawReflectedSegmentPoints(rendererCreator, d_reflectionToSegmentPoints);
 		}
 
-		public function drawGeoPolyLine(rendererCreator: Function, coords: Array, drawMode: String): void
+		public function drawSmoothPolyLine(rendererCreator: Function, coords: Array, drawMode: String, b_closed: Boolean = false, b_justCompute: Boolean = false,  featureData: FeatureData = null): void
+		{
+			var splinePoints: Array = CubicBezier.calculateHermitSpline(coords, false);
+			drawGeoPolyLine(rendererCreator, splinePoints, drawMode, b_closed, b_justCompute, featureData);
+		}
+		
+		/**
+		 * Draws polyline in current InteractiveWidget projection. It can draw open/close polylines, also with fill (but that's part of renderer). Coords array can contains Coords or Points (screen positions), points will be 
+		 * automatically converted to Coords. Algorithm assumes that all coords/points are of same type, so it check only first coord/point and convert (if needed) all points.
+		 *  
+		 * @param rendererCreator function, which returns renderer for drawing polyline
+		 * @param coords Array of coordinates (type of Coord). If there will be array of Point, algorithm will take them as screen coordinates and will convert them to Coord in current InteractiveWidget projection
+		 * @param drawMode supports DrawMode constants
+		 * @param b_closed is this is set to true, first coordinate in coords Array will be doubled and inserted at the end
+		 * @param featureData if not null, algorithm will fill FeatureData class with all needed data (reflections / lines / lines segments)
+		 * 
+		 */		
+		public function drawGeoPolyLine(rendererCreator: Function, coords: Array, drawMode: String, b_closed: Boolean = false, b_justCompute: Boolean = false, featureData: FeatureData = null): void
 		{
 			var d_reflectionToSegmentPoints: Dictionary = new Dictionary();
 			var cPrev: Coord = null;
 			var total: int = coords.length;
 			var cnt: int = 0;
-			for each (var c: Coord in coords) {
+			
+			if (coords[0] is Point)
+			{
+				var newCoords: Array = [];
+				for each (var p: Point in coords)
+				{
+					newCoords.push(pointToCoord(p.x, p.y));	
+				}	
+				coords = newCoords;
+			}
+			
+			if (b_closed)
+			{
+				coords.push((coords[0] as Coord).clone());
+			}
+			
+			
+			for each (var c: Coord in coords) 
+			{
 				if(cPrev) {
-					_drawGeoLine(cPrev, c, drawMode, d_reflectionToSegmentPoints);
+					var featureDataLine: FeatureDataLine;
+					if (featureData)
+					{
+						featureDataLine = featureData.getLineAt(cnt-1);
+					}
+					_drawGeoLine(cPrev, c, drawMode, d_reflectionToSegmentPoints, featureDataLine);
 				}
 				cPrev = c;
 				cnt++;
 			}
-			_drawReflectedSegmentPoints(rendererCreator, d_reflectionToSegmentPoints);
+			
+			//debug featureData;
+			if (featureData)
+				featureData.debug();
+			
+			if (!b_justCompute)
+				_drawReflectedSegmentPoints(rendererCreator, d_reflectionToSegmentPoints);
 		}
 		
 		/**

@@ -37,10 +37,6 @@ package com.iblsoft.flexiweather.ogc
 				if (layer.wms::Layer.length() == 0) {
 					var wmsLayer: WMSLayer = new WMSLayer(this, layer, wms, m_version);
 					
-					if (wmsLayer.name.indexOf("temper") > 0)
-					{
-						trace("debug Temperature layer");
-					}
 					/**
 					 * we call initialize() instead of parse() method to create instances, but not parse whole data.
 					 * They will be parsed, when they will be needed
@@ -49,7 +45,7 @@ package com.iblsoft.flexiweather.ogc
 					
 					ma_layersDictionary[wmsLayer.name] = new LayerDataItem(wmsLayer, LayerDataItem.LAYER);
 					ma_layers.addItem(wmsLayer);
-					trace("\n" + this + " initialize layer: "+ wmsLayer.toString() + " total time: " + (getTimer() - layerTime) + "ms");
+//					trace("\n" + this + " initialize layer: "+ wmsLayer.toString() + " total time: " + (getTimer() - layerTime) + "ms");
 				} else {
 					var wmsLayerGroup: WMSLayerGroup = new WMSLayerGroup(this, layer, wms, m_version);
 					
@@ -59,11 +55,11 @@ package com.iblsoft.flexiweather.ogc
 					
 					ma_layersDictionary["group"+_groups] = new LayerDataItem(wmsLayerGroup, LayerDataItem.LAYER_GROUP);
 					ma_layers.addItem(wmsLayerGroup);
-					trace("\n" + this + " initialize layerGroup: "+ wmsLayerGroup.toString() + " total time: " + (getTimer() - layerTime) + "ms");
+//					trace("\n" + this + " initialize layerGroup: "+ wmsLayerGroup.toString() + " total time: " + (getTimer() - layerTime) + "ms");
 				}
 			}
 			
-			trace(this + " initialize total time: " + (getTimer() - currTime) + "ms");
+//			trace(this + " initialize total time: " + (getTimer() - currTime) + "ms");
 		}
 		
 		override public function parse():void
@@ -77,16 +73,16 @@ package com.iblsoft.flexiweather.ogc
 			{
 				var layerTime: Number = getTimer();
 				
-				if (wmsLayerItem.layer.name.indexOf("temper") > 0)
-				{
-					trace("debug Temperature layer");
-				}
+//				if (wmsLayerItem.layer.name.indexOf("temper") > 0)
+//				{
+//					trace("debug Temperature layer");
+//				}
 				
 				wmsLayerItem.layer.parse();
-				trace("\n" + this + " parse layer: "+ wmsLayerItem.layer.toString() + " total time: " + (getTimer() - layerTime) + "ms");
+//				trace("\n" + this + " parse layer: "+ wmsLayerItem.layer.toString() + " total time: " + (getTimer() - layerTime) + "ms");
 			}
 			
-			trace(this + " parse total time: " + (getTimer() - currTime) + "ms");
+//			trace(this + " parse total time: " + (getTimer() - currTime) + "ms");
 		}
 
 		override public function toString(): String

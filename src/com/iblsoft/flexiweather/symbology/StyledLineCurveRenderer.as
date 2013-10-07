@@ -3,10 +3,13 @@ package com.iblsoft.flexiweather.symbology
 	import com.iblsoft.flexiweather.utils.CubicBezier;
 	import com.iblsoft.flexiweather.utils.DistanceMarkingCurveRenderer;
 	
+	import flash.display.Bitmap;
+	import flash.display.BitmapData;
 	import flash.display.CapsStyle;
 	import flash.display.Graphics;
 	import flash.display.LineScaleMode;
 	import flash.geom.Point;
+	import flash.geom.Rectangle;
 
 	public class StyledLineCurveRenderer extends DistanceMarkingCurveRenderer
 	{
@@ -30,7 +33,7 @@ package com.iblsoft.flexiweather.symbology
 		protected var mi_color: uint;
 		protected var mf_alpha: Number;
 		protected var ms_style: String;
-		protected var ms_filLStyle: String;
+		protected var ms_fillStyle: String;
 		protected var mi_fillColor: uint;
 		// runtime variables
 		//protected var mf_currentDistance: Number = 0; 
@@ -79,7 +82,7 @@ package com.iblsoft.flexiweather.symbology
 			mi_color = i_color;
 			mf_alpha = f_alpha;
 			ms_style = s_style;
-			ms_filLStyle = s_fillStyle;
+			ms_fillStyle = s_fillStyle;
 			mi_fillColor = i_fillColor;
 			thickness = f_thickness;
 			switch (ms_style)
@@ -130,6 +133,9 @@ package com.iblsoft.flexiweather.symbology
 		override public function started(x: Number, y: Number): void
 		{
 			setDefaultLineStyle();
+			
+			beginFill(mi_fillColor);
+			
 			m_graphics.moveTo(x, y);
 			mp_actMarkPoint = null;
 			mp_lastMarkPoint = null;
@@ -137,10 +143,12 @@ package com.iblsoft.flexiweather.symbology
 			mi_lastPaternStep = 0;
 			mi_counter = -1;
 			mark(x, y);
+			
 		}
 
 		override public function finished(x: Number, y: Number): void
 		{
+			endFill();
 			m_graphics.moveTo(x, y);
 		}
 
@@ -359,6 +367,94 @@ package com.iblsoft.flexiweather.symbology
 			m_lastY = f_y;
 		}
 
+		
+		protected function beginFill(i_fillColor: uint): void
+		{
+//			if (isCurveClosed() && (ms_fillStyle != StyledLineCurveRenderer.FILL_STYLE_NONE)){
+			if (ms_fillStyle != StyledLineCurveRenderer.FILL_STYLE_NONE)
+			{
+				m_graphics.beginBitmapFill(createFillBitmap(i_fillColor), null, true, false);
+			}
+		}
+		
+		/**
+		 * 
+		 */
+		protected function endFill(): void
+		{
+			if (ms_fillStyle != StyledLineCurveRenderer.FILL_STYLE_NONE)
+			{
+				m_graphics.endFill();
+			}
+		}
+		
+		/**
+		 * 
+		 */
+		protected function createFillBitmap(i_fillColor: uint): BitmapData
+		{
+			var fillBitmapData: BitmapData = new BitmapData(16, 16, true, 0x00FFFFFF);//, 0x00000000);
+			var ix: uint;
+			var iy: uint;
+			
+			var nBitmap: Bitmap = new Bitmap(fillBitmapData);
+			
+			switch (ms_fillStyle){
+				case StyledLineCurveRenderer.FILL_STYLE_SOLID:
+					fillBitmapData.fillRect(new Rectangle(0, 0, 16, 16), getHexARGB(i_fillColor)); //mi_fillColor);
+					break;
+				case StyledLineCurveRenderer.FILL_STYLE_HORIZONTAL_LINES:
+					for (ix = 0; ix < 16; ix++){
+						for (iy = 0; iy < 16; iy = iy + 8){
+							fillBitmapData.setPixel32(ix, iy, getHexARGB(i_fillColor)); //mi_fillColor);
+							//fillBitmapData.setPixel(ix, iy, mi_fillColor);
+						}
+					}
+					break;
+				
+				case StyledLineCurveRenderer.FILL_STYLE_VERTICAL_LINES:
+					for (ix = 0; ix < 16; ix = ix + 8){
+						for (iy = 0; iy < 16; iy++){
+							fillBitmapData.setPixel32(ix, iy, getHexARGB(i_fillColor));
+						}
+					}
+					break;
+				
+				case StyledLineCurveRenderer.FILL_STYLE_CROSING_LINES:
+					for (ix = 0; ix < 16; ix++){
+						for (iy = 0; iy < 16; iy = iy + 8){
+							fillBitmapData.setPixel32(ix, iy, getHexARGB(i_fillColor));
+						}
+					}
+					for (ix = 0; ix < 16; ix = ix + 8){
+						for (iy = 0; iy < 16; iy++){
+							fillBitmapData.setPixel32(ix, iy, getHexARGB(i_fillColor));
+						}
+					}
+					break;
+			}
+			
+			return(nBitmap.bitmapData);
+		}
+		
+		/**
+		 * 
+		 */
+		protected function getHexARGB(color: uint, n_alpha: Number = 255): uint
+		{
+			var r: uint = ((color & 0xFF0000) >> 16);
+			var g: uint = ((color & 0x00FF00) >> 8);
+			var b: uint = ((color & 0x0000FF));
+			
+			var ret: uint = n_alpha << 24;
+			ret += (r << 16);
+			ret += (g << 8);
+			ret += (b);
+			
+			return(ret);
+		}
+		
+		
 		/**
 		 *
 		 */

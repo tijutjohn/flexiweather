@@ -60,7 +60,8 @@ package com.iblsoft.flexiweather.ogc
 		protected var m_coordinates: ArrayCollection = new ArrayCollection();
 		protected var m_points: ArrayCollection = new ArrayCollection();
 		protected var mb_pointsDirty: Boolean = false;
-
+		protected var mb_spritesAddedToLabelLayout: Boolean
+		
 		public function FeatureBase(s_namespace: String, s_typeName: String, s_featureId: String)
 		{
 			super();

@@ -6,9 +6,11 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.ogc.data.ReflectionData;
 	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
 	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionDictionary;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureData;
 	import com.iblsoft.flexiweather.ogc.events.MoveablePointEvent;
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithReflection;
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureBase;
+	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
@@ -52,6 +54,8 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			return mi_actSelectedMoveablePointIndex;
 		}
+		
+		protected var m_featureData: FeatureData;
 
 		public function WFSFeatureEditable(s_namespace: String, s_typeName: String, s_featureId: String)
 		{
@@ -73,6 +77,11 @@ package com.iblsoft.flexiweather.ogc.editable
 				masterEditable.editingComponentsContainer.addChild(m_editableSprite);
 		}
 
+		public function getDisplaySpriteForReflection(id: int): WFSFeatureEditableSprite
+		{
+			return null;
+		}
+		
 		private function updateCoordsReflections(): void
 		{
 //			var reflections: Dictionary = new Dictionary();

@@ -9,83 +9,55 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSCurveFeature;
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
-	import com.iblsoft.flexiweather.proj.Coord;
+	import com.iblsoft.flexiweather.utils.AnnotationBox;
 	import com.iblsoft.flexiweather.utils.CubicBezier;
 	import com.iblsoft.flexiweather.utils.ICurveRenderer;
 	import com.iblsoft.flexiweather.utils.ISO8601Parser;
+	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayout;
 	import com.iblsoft.flexiweather.utils.draw.DrawMode;
+	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	
-	import flash.display.Graphics;
 	import flash.geom.Point;
 	
 	import mx.collections.ArrayCollection;
 
-	public class WFSFeatureEditableCurveWithBaseTimeAndValidity extends WFSFeatureEditableCurve implements IObjectWithBaseTimeAndValidity, IWFSCurveFeature
+	public class WFSFeatureEditableCurveWithBaseTimeAndValidityAndAnnotation extends WFSFeatureEditableCurveWithBaseTimeAndValidity implements IObjectWithBaseTimeAndValidity, IWFSCurveFeature
 	{
-		protected var m_baseTime: Date;
-		protected var m_validity: Date;
-		protected var m_curvePoints: Array;
-
-		public function WFSFeatureEditableCurveWithBaseTimeAndValidity(
+//		protected var m_baseTime: Date;
+//		protected var m_validity: Date;
+//		protected var m_curvePoints: Array;
+//
+//		protected var m_featureData: FeatureData;
+		
+		public function get annotation():AnnotationBox
+		{
+			if (totalReflections > 0)
+			{
+				var reflection: WFSEditableReflectionData = getReflection(0);  
+				return reflection.annotation as AnnotationBox;
+			}
+			return null;
+		}
+		
+		public function WFSFeatureEditableCurveWithBaseTimeAndValidityAndAnnotation(
 				s_namespace: String, s_typeName: String, s_featureId: String)
 		{
 			super(s_namespace, s_typeName, s_featureId);
 		}
-
-		public function getRenderer(reflection: int): ICurveRenderer
+		
+		override protected function drawCurve():void
+		{
+			drawAnnotation();
+		}
+		
+		public function createAnnotation(): AnnotationBox
 		{
 			return null;
 		}
 		
-		public function clearGraphics(): void
+		public function drawAnnotation(): void
 		{
-			graphics.clear();
-		}
-		
-		override public function update(changeFlag: FeatureUpdateContext): void
-		{
-			super.update(changeFlag);
-			
-			clearGraphics();
-			
-			beforeCurveRendering();
-			
-			computeCurve();
-			drawCurve();
-			
-			afterCurveRendering();
-		}
-		
-		protected function beforeCurveRendering(): void
-		{
-			
-		}
-		protected function afterCurveRendering(): void
-		{
-			
-		}
-		
-		protected function computeCurve(): void
-		{
-			var a_points: ArrayCollection = getPoints();
-			
-			if(a_points.length > 1) 
-			{
-				if (master)
-				{
-					m_featureData = new FeatureData(this.toString() + " FeatureData");
-					
-					//curves will be not drawn, just compute, to be able to draw each reflection separately
-					if (smooth)
-						master.container.drawSmoothPolyLine(getRenderer, a_points.toArray(), DrawMode.PLAIN, false, true, m_featureData);
-					else
-						master.container.drawGeoPolyLine(getRenderer, a_points.toArray(), DrawMode.PLAIN, false, true, m_featureData);
-				}
-			}
-		}
-		
-	 	protected function drawCurve(): void
-		{
+			var annotation: AnnotationBox;
 			var reflection: WFSEditableReflectionData;
 			var _addToLabelLayout: Boolean;
 			
@@ -93,13 +65,11 @@ package com.iblsoft.flexiweather.ogc.editable
 			
 			//create sprites for reflections
 			var totalReflections: uint = ml_movablePoints.totalReflections;
+			//			var blackColor: uint = getCurrentColor(0x000000);
 			
 			var displaySprite: WFSFeatureEditableSprite;
-			
 			var pointsCount: int = a_points.length;
 			var ptAvg: Point;
-			var gr: Graphics;
-			
 			
 			for (var i: int = 0; i < totalReflections; i++)
 			{
@@ -113,83 +83,96 @@ package com.iblsoft.flexiweather.ogc.editable
 					
 					if (!reflection.displaySprite)
 					{
-						reflection.displaySprite = getDisplaySpriteForReflection(reflection.reflectionDelta);
-						if (reflection.displaySprite)
-							addChild(reflection.displaySprite);
+						reflection.displaySprite = getDisplaySpriteForReflection(reflection.reflectionDelta); //new CloudFeatureSprite(this);
+						addChild(reflection.displaySprite);
 					}
-					if (reflection.displaySprite) {
-						displaySprite = reflection.displaySprite as WFSFeatureEditableSprite;
-						gr = reflection.displaySprite.graphics;
-					} else {
-						gr = graphics;
-					}
+					displaySprite = reflection.displaySprite as WFSFeatureEditableSprite;
 					
-					if(pointsCount <= 1)
+					if(a_points.length <= 1)
 					{
-						if (reflection.displaySprite)
-							displaySprite.clear();
-						//						trace("displaySprite.clear: pointsCount: " + pointsCount);
+						displaySprite.clear();
 					} else {
 						var renderer: ICurveRenderer = getRenderer(reflection.reflectionDelta);
 						if (m_featureData)
 						{
-							gr.clear();
-							//							trace("reflection.displaySprite: " + reflection.displaySprite.parent);
+							reflection.displaySprite.graphics.clear();
 							var reflectionData: FeatureDataReflection = m_featureData.getReflectionAt(reflection.reflectionDelta);
 							if (reflectionData)
 								drawFeatureReflection(renderer, reflectionData);
 						}
-						if (displaySprite)
-							displaySprite.points = reflection.points;
+						displaySprite.points = reflection.points;
+						
+						if (reflection.annotation )
+						{
+							annotation = reflection.annotation ;
+						} else {
+							annotation = createAnnotation();
+							reflection.addAnnotation(annotation);
+						}
+						
+						updateAnnotation(annotation, ptAvg);
+						
+						if (!mb_spritesAddedToLabelLayout && master)
+						{
+							master.container.labelLayout.addObstacle(displaySprite, master);
+							master.container.labelLayout.addObject(annotation, master, [displaySprite], i);
+							_addToLabelLayout = true;
+						}
+						
+						master.container.labelLayout.updateObjectReferenceLocation(annotation);
 					}
 				}
 			}
+			
+			if (!mb_spritesAddedToLabelLayout && _addToLabelLayout)
+				mb_spritesAddedToLabelLayout = true;
 		}
 		
-		private function convertCoordToScreen(p: Point): Point
+		public function updateAnnotation(annotation: AnnotationBox, annotationPosition: Point, text: String = ""): void
 		{
-			return p;
 			
-//			var result: Point = master.container.coordToPoint(new Coord(master.container.crs, p.x, p.y));
-//			return result
 		}
 		
-		protected function drawFeatureReflection(g: ICurveRenderer, m_featureDataReflection: FeatureDataReflection): void
+		public function removeFromLabelLayout(annotation: AnnotationBox, displaySprite: WFSFeatureEditableSprite, labelLayout: AnticollisionLayout): void
 		{
-			if (!g || !m_featureDataReflection || !m_featureDataReflection.lines)
+			labelLayout.removeObject(this);
+			labelLayout.removeObject(annotation);
+		}
+		
+		public function addToLabelLayout(annotation: AnnotationBox, displaySprite: WFSFeatureEditableSprite, layer: InteractiveLayer, labelLayout: AnticollisionLayout, i_reflection: uint): void
+		{
+			labelLayout.addObstacle(displaySprite, layer);
+			labelLayout.addObject(annotation,  layer,  [displaySprite], i_reflection);
+		}
+
+		/*
+		public function getRenderer(reflection: int): ICurveRenderer
+		{
+			return null;
+		}
+		
+		override public function update(changeFlag: FeatureUpdateContext): void
+		{
+			super.update(changeFlag);
+			
+			drawCurve();
+		}
+		
+		protected function drawCurve(): void
+		{
+			var a_points: ArrayCollection = getPoints();
+			
+			if(a_points.length > 1) 
 			{
-				return;
-			}
-			
-			var p: Point;
-			var points: Array = m_featureDataReflection.points;
-			
-			var linesCount: int = m_featureDataReflection.lines.length;
-			var pointsCount: int = points.length;
-			
-			if (pointsCount == 0 && m_featureDataReflection.computingScheduled)
-			{
-				m_featureDataReflection.validate();
-				points = m_featureDataReflection.points;
-				pointsCount = points.length;
-			}
-			
-			if (pointsCount > 0)
-			{
-				p = convertCoordToScreen(m_featureDataReflection.startPoint);
-				
-				g.start(p.x, p.y);
-				g.moveTo(p.x, p.y);
-				
-				for (var i: int = 1; i < pointsCount; i++)
+				if (master)
 				{
-					p = convertCoordToScreen(points[i] as Point);
-					g.lineTo(p.x, p.y);
+					m_featureData = new FeatureData(this.toString() + " FeatureData");
+					if (smooth)
+						master.container.drawSmoothPolyLine(getRenderer, a_points.toArray(), DrawMode.PLAIN, false, m_featureData);
+					else
+						master.container.drawGeoPolyLine(getRenderer, a_points.toArray(), DrawMode.PLAIN, false, m_featureData);
 				}
-				
-				g.finish(p.x, p.y);
 			}
-			
 		}
 		
 		override public function toInsertGML(xmlInsert: XML): void
@@ -205,7 +188,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			addUpdateGMLProperty(xmlUpdate, null, "validity", ISO8601Parser.dateToString(m_validity));
 			super.toUpdateGML(xmlUpdate);
 		}
-
+		
 		override public function fromGML(gml: XML): void
 		{
 			var ns: Namespace = new Namespace(ms_namespace);
@@ -244,7 +227,6 @@ package com.iblsoft.flexiweather.ogc.editable
 					//ma_points = CubicBezier.calculateHermitSpline(m_points.toArray(),  
 			}
 		}
-
 		protected function createHitMask(curvesPoints: Array): void
 		{
 			for each (var curvePoints: Array in curvesPoints)
@@ -261,5 +243,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				}
 			}
 		}
+		*/
 	}
+
 }
