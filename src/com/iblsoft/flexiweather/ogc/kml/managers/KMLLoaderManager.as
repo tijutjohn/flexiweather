@@ -32,6 +32,16 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 				loadKML(url, kmlContent);
 		}
 
+		public function getKMLLayerConfigurationForURL(kmlURL: String): KMLLayerConfiguration
+		{
+			if (_kmlLayerDictionary && _kmlLayerDictionary[kmlURL])
+			{
+				var kmlDictObject: KMLLoaderObject = _kmlLayerDictionary[kmlURL] as KMLLoaderObject;
+				return kmlDictObject.configuration;
+			}
+			return null;
+		}
+		
 		private function loadKML(kmlURL: String, kmlContent: ByteArray = null): void
 		{
 			//start kml loadind and parsing => suspend anticollision layout updating for now
@@ -88,6 +98,7 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 					kmlConfig.addEventListener(KMLParsingStatusEvent.PARSING_SUCCESFULL, onKMLParsingStatus);
 					
 					kmlConfig.addEventListener(KMLEvent.UNPACKING_STARTED, onKMZUnpackingStarted);
+					kmlConfig.addEventListener(KMLEvent.UNPACKING_PROGRESS, onKMZUnpackingProgress);
 					kmlConfig.addEventListener(KMLEvent.UNPACKING_FINISHED, onKMZUnpackingFinished);
 					kmlConfig.addEventListener(KMLEvent.PARSING_STARTED, onKMLParsingStarted);
 					kmlConfig.addEventListener(KMLEvent.PARSING_FINISHED, onKMLParsingFinished);
@@ -102,6 +113,12 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 		}
 
 		protected function onKMZUnpackingStarted(event: KMLEvent): void
+		{
+			//notify
+			dispatchEvent(event);
+		}
+		
+		protected function onKMZUnpackingProgress(event: KMLEvent): void
 		{
 			//notify
 			dispatchEvent(event);

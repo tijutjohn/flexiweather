@@ -15,6 +15,7 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 	import com.iblsoft.flexiweather.ogc.kml.events.KMLEvent;
 	import com.iblsoft.flexiweather.ogc.kml.events.KMLParsingStatusEvent;
 	import com.iblsoft.flexiweather.ogc.kml.features.Document;
+	import com.iblsoft.flexiweather.ogc.kml.features.KML;
 	import com.iblsoft.flexiweather.ogc.kml.features.KML22;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
@@ -81,6 +82,7 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 		{
 			notifyKMZUnpackingStarted();
 			var kmz: KMZFile = new KMZFile(kmlPath);
+			kmz.addEventListener(KMLEvent.UNPACKING_PROGRESS, onKMZUnpackingProgress);
 			kmz.addEventListener(KMZFile.KMZ_FILE_READY, onKMZFileReady);
 			kmz.createFromByteArray(ba);
 		}
@@ -151,10 +153,7 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 		public function addKMZSource(kmz: KMZFile, urlPath: String): void
 		{
 			_kml = new KML22(kmz.kmlSource, urlPath, '');
-			_kml.addEventListener(KMLParsingStatusEvent.PARSING_FAILED, onKMLParsingStatus);
-			_kml.addEventListener(KMLParsingStatusEvent.PARSING_PARTIALLY_SUCCESFULL, onKMLParsingStatus);
-			_kml.addEventListener(KMLParsingStatusEvent.PARSING_SUCCESFULL, onKMLParsingStatus);
-			_kml.addEventListener(KMLEvent.PARSING_FINISHED, onKMZParsingFinished);
+			addKMLEventListeners(_kml);
 			_kml.parse(kmz);
 			_kmzFile = kmz;
 			kmlPath = urlPath;
@@ -166,6 +165,24 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 			}
 		}
 		
+		private function addKMLEventListeners(kml: KML): void
+		{
+			kml.addEventListener(KMLParsingStatusEvent.PARSING_FAILED, onKMLParsingStatus);
+			kml.addEventListener(KMLParsingStatusEvent.PARSING_PARTIALLY_SUCCESFULL, onKMLParsingStatus);
+			kml.addEventListener(KMLParsingStatusEvent.PARSING_SUCCESFULL, onKMLParsingStatus);
+			kml.addEventListener(KMLEvent.PARSING_FINISHED, onKMZParsingFinished);
+			kml.addEventListener(KMLEvent.PARSING_PROGRESS, onKMZParsingProgress);
+			kml.addEventListener(KMLEvent.UNPACKING_PROGRESS, onKMZUnpackingProgress);
+		}
+		private function removeKMLEventListeners(kml: KML): void
+		{
+			kml.removeEventListener(KMLParsingStatusEvent.PARSING_FAILED, onKMLParsingStatus);
+			kml.removeEventListener(KMLParsingStatusEvent.PARSING_PARTIALLY_SUCCESFULL, onKMLParsingStatus);
+			kml.removeEventListener(KMLParsingStatusEvent.PARSING_SUCCESFULL, onKMLParsingStatus);
+			kml.removeEventListener(KMLEvent.PARSING_FINISHED, onKMZParsingFinished);
+			kml.removeEventListener(KMLEvent.PARSING_PROGRESS, onKMZParsingProgress);
+			kml.removeEventListener(KMLEvent.UNPACKING_PROGRESS, onKMZUnpackingProgress);
+		}
 		private function onKMLParsingStatus(event: KMLParsingStatusEvent): void
 		{
 			dispatchEvent(event);
@@ -181,11 +198,7 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 		{
 			_kml = new KML22(kmlString, urlPath, baseUrlPath);
 			
-			_kml.addEventListener(KMLParsingStatusEvent.PARSING_FAILED, onKMLParsingStatus);
-			_kml.addEventListener(KMLParsingStatusEvent.PARSING_PARTIALLY_SUCCESFULL, onKMLParsingStatus);
-			_kml.addEventListener(KMLParsingStatusEvent.PARSING_SUCCESFULL, onKMLParsingStatus);
-			
-			_kml.addEventListener(KMLEvent.PARSING_FINISHED, onKMLParsingFinished);
+			addKMLEventListeners(_kml);
 			
 			_kml.parse();
 			kmlPath = urlPath;
@@ -201,17 +214,33 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 		{
 			var kml: KML22 = event.target as KML22;
 			
-			kml.removeEventListener(KMLParsingStatusEvent.PARSING_FAILED, onKMLParsingStatus);
-			kml.removeEventListener(KMLParsingStatusEvent.PARSING_PARTIALLY_SUCCESFULL, onKMLParsingStatus);
-			kml.removeEventListener(KMLParsingStatusEvent.PARSING_SUCCESFULL, onKMLParsingStatus);
+			removeKMLEventListeners(kml);
 			
-			kml.removeEventListener(KMLEvent.PARSING_FINISHED, onKMLParsingFinished);
 			notifyKMLParsingFinished();
 			var ke: KMLEvent = new KMLEvent(KMLEvent.KML_FILE_LOADED);
 			ke.kmlLayerConfiguration = this;
 			dispatchEvent(ke);
 		}
 
+		/**
+		 * KMZ unpacking finished
+		 * @param event
+		 *
+		 */
+		private function onKMZUnpackingProgress(event: KMLEvent): void
+		{
+			trace(this + " onKMZUnpackingProgress");
+			dispatchEvent(event);
+		}
+		/**
+		 * KMZ parsing finished
+		 * @param event
+		 *
+		 */
+		private function onKMZParsingProgress(event: KMLEvent): void
+		{
+			dispatchEvent(event);
+		}
 		/**
 		 * KMZ parsing finished
 		 * @param event
@@ -221,11 +250,8 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 		{
 			var kml: KML22 = event.target as KML22;
 			
-			kml.removeEventListener(KMLParsingStatusEvent.PARSING_FAILED, onKMLParsingStatus);
-			kml.removeEventListener(KMLParsingStatusEvent.PARSING_PARTIALLY_SUCCESFULL, onKMLParsingStatus);
-			kml.removeEventListener(KMLParsingStatusEvent.PARSING_SUCCESFULL, onKMLParsingStatus);
+			removeKMLEventListeners(kml);
 			
-			kml.removeEventListener(KMLEvent.PARSING_FINISHED, onKMZParsingFinished);
 			notifyKMLParsingFinished();
 			var ke: KMLEvent = new KMLEvent(KMLEvent.KMZ_FILE_LOADED);
 			ke.kmlLayerConfiguration = this;
@@ -247,6 +273,11 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 		override public function hasCustomLayerOptions(): Boolean
 		{
 			return false;
+		}
+		
+		override public function toString(): String
+		{
+			return 'KMLLayerConfiguration ['+id+']';
 		}
 	}
 }

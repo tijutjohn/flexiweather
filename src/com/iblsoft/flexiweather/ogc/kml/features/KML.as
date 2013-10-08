@@ -53,7 +53,11 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			_kmlURLPath = urlPath;
 			_kmlBaseURLPath = baseUrlPath;
 			_resourceManager = resourceManager;
+			
 			_kmlParserManager = new KMLParserManager();
+			_kmlParserManager.maxCallsPerTick = 3;
+			_kmlParserManager.addEventListener(KMLEvent.PARSING_PROGRESS, onKMLParserProgress);
+			
 			_networkLinkManager = new NetworkLinkManager();
 			_networkLinkManager.addEventListener(KMLEvent.KML_FILE_LOADED, onNetworkLinkLoaded);
 			if (!_resourceManager)
@@ -78,7 +82,10 @@ package com.iblsoft.flexiweather.ogc.kml.features
 //				cleanupFeature(_feature);
 			}
 			if (_kmlParserManager)
+			{
+				_kmlParserManager.removeEventListener(KMLEvent.PARSING_PROGRESS, onKMLParserProgress);
 				_kmlParserManager.cleanup();
+			}
 			if (_networkLinkManager)
 			{
 				_networkLinkManager.removeEventListener(KMLEvent.KML_FILE_LOADED, onNetworkLinkLoaded);
@@ -197,6 +204,11 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			dispatchEvent(new KMLParsingStatusEvent(KMLParsingStatusEvent.PARSING_FAILED));	
 		}
 		
+		protected function notifyParsingProgress(event: KMLEvent): void
+		{
+			dispatchEvent(event);
+		}
+		
 		protected function notifyParsingFinished(): void
 		{
 			afterKMLParsing();
@@ -290,6 +302,10 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			return false;
 		}
 
+		private function onKMLParserProgress(event: KMLEvent): void
+		{
+			notifyParsingProgress(event);
+		}
 		private function onNetworkLinkLoaded(event: KMLEvent): void
 		{
 			//kml data provider must be updated, because NetworkLink's KML was loaded and parsed

@@ -1,5 +1,9 @@
 package com.iblsoft.flexiweather.ogc.kml.data
 {
+	import com.iblsoft.flexiweather.ogc.kml.events.KMLEvent;
+	import com.iblsoft.flexiweather.ogc.kml.managers.KMLParserManager;
+	import com.iblsoft.flexiweather.utils.AsyncManager;
+	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.Loader;
@@ -7,7 +11,9 @@ package com.iblsoft.flexiweather.ogc.kml.data
 	import flash.events.EventDispatcher;
 	import flash.utils.ByteArray;
 	import flash.utils.Dictionary;
+	import flash.utils.getTimer;
 	import flash.utils.setTimeout;
+	
 	import nochump.util.zip.ZipEntry;
 	import nochump.util.zip.ZipFile;
 
@@ -133,25 +139,56 @@ package com.iblsoft.flexiweather.ogc.kml.data
 
 		public function createFromByteArray(ba: ByteArray): void
 		{
+			var time: Number = getTimer();
 			var zipFile: ZipFile = new ZipFile(ba);
+			var kmzParser: KMLParserManager = new KMLParserManager('KMZFile parser');
+			kmzParser.addEventListener(KMLEvent.PARSING_PROGRESS, onKMZParserProgress);
+			kmzParser.addEventListener(AsyncManager.EMPTY, onKMZParserFinish);
+			kmzParser.maxCallsPerTick = 1;
+			
 			for (var i: int = 0; i < zipFile.entries.length; i++)
 			{
 				var entry: ZipEntry = zipFile.entries[i];
-				// extract the entry's data from the zip
-				var data: ByteArray = zipFile.getInput(entry);
-				var name: String = entry.name;
-				if (name.indexOf(".kml") > 0)
-				{
-					name = name;
-					addKML(data.toString());
-				}
-				else
-				{
-					if (name.indexOf(".png") > 0 || name.indexOf(".jpg") > 0 || name.indexOf(".gif") > 0)
-						addAssets(name, data);
-				}
+				kmzParser.addCall({obj: entry}, onZipEntryParsing, [zipFile, entry]);
+				
 			}
+			trace("KMZFile createFromByteArray unzipped: " + (getTimer() - time) + "ms");
+			time = getTimer();
+			kmzParser.start();			
+			
+		}
+		
+		private function onKMZParserProgress(event: KMLEvent): void
+		{
+			var ke: KMLEvent = new KMLEvent(KMLEvent.UNPACKING_PROGRESS, true);
+			ke.progress = event.progress;
+			dispatchEvent(ke);
+		}
+		private function onKMZParserFinish(event: Event): void
+		{
+			var kmzParser: KMLParserManager = event.target as KMLParserManager;
+			kmzParser.removeEventListener(KMLEvent.UNPACKING_PROGRESS, onKMZParserProgress);
+			kmzParser.removeEventListener(AsyncManager.EMPTY, onKMZParserFinish);
+			
+			
 			createBitmaps();
+		}
+		public function onZipEntryParsing(zipFile: ZipFile, entry: ZipEntry): void
+		{
+			// extract the entry's data from the zip
+			var data: ByteArray = zipFile.getInput(entry);
+			var name: String = entry.name;
+			if (name.indexOf(".kml") > 0)
+			{
+				name = name;
+				addKML(data.toString());
+			}
+			else
+			{
+				if (name.indexOf(".png") > 0 || name.indexOf(".jpg") > 0 || name.indexOf(".gif") > 0)
+					addAssets(name, data);
+			}
+			
 		}
 	}
 }
