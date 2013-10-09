@@ -1,11 +1,13 @@
 package com.iblsoft.flexiweather.ogc.kml.managers
 {
+	import com.iblsoft.flexiweather.ogc.events.FeatureEvent;
 	import com.iblsoft.flexiweather.ogc.kml.controls.KMLInfoWindow;
 	import com.iblsoft.flexiweather.ogc.kml.controls.KMLInfoWindowArrowPosition;
 	import com.iblsoft.flexiweather.ogc.kml.events.KMLFeatureEvent;
 	import com.iblsoft.flexiweather.ogc.kml.features.KML;
 	import com.iblsoft.flexiweather.ogc.kml.features.KMLFeature;
 	import com.iblsoft.flexiweather.ogc.kml.features.ScreenOverlay;
+	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.utils.ScreenUtils;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
@@ -120,6 +122,8 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 			PopUpManager.addPopUp(popUp, parent);
 			feature.addEventListener(KMLFeatureEvent.KML_FEATURE_POSITION_CHANGE, onKMLFeaturePositionChange);
 			feature.addEventListener(KMLFeatureEvent.KML_FEATURE_VISIBILITY_CHANGE, onKMLFeatureVisibilityChange);
+			feature.addEventListener(FeatureEvent.COORDINATE_INVISIBLE, onCoordinateInvisible);
+			feature.addEventListener(FeatureEvent.COORDINATE_VISIBLE, onCoordinateVisible);
 			popUp.addEventListener(ResizeEvent.RESIZE, onPopupResize);
 			popUp.addEventListener(CloseEvent.CLOSE, onInfoWindowClose);
 			windowsDictionary[popUp] = {feature: feature, window: popUp, container: container};
@@ -142,6 +146,8 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 					var feature: KMLFeature = winObject.feature as KMLFeature;
 					feature.removeEventListener(KMLFeatureEvent.KML_FEATURE_POSITION_CHANGE, onKMLFeaturePositionChange);
 					feature.removeEventListener(KMLFeatureEvent.KML_FEATURE_VISIBILITY_CHANGE, onKMLFeatureVisibilityChange);
+					feature.removeEventListener(FeatureEvent.COORDINATE_INVISIBLE, onCoordinateInvisible);
+					feature.removeEventListener(FeatureEvent.COORDINATE_VISIBLE, onCoordinateVisible);
 					delete windowsDictionary[window];
 				}
 			}
@@ -199,6 +205,20 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 			removePopUp(window);
 		}
 
+		private function onCoordinateVisible(event: FeatureEvent): void
+		{
+			var feature: KMLFeature = event.target as KMLFeature
+			var window: IFlexDisplayObject = getPopUpForFeature(feature);
+			window.visible = event.insideViewBBox; //feature.visible;
+		}
+		
+		private function onCoordinateInvisible(event: FeatureEvent): void
+		{
+			var feature: KMLFeature = event.target as KMLFeature
+			var window: IFlexDisplayObject = getPopUpForFeature(feature);
+			window.visible = event.insideViewBBox; //feature.visible;
+		}
+		
 		private function onKMLFeatureVisibilityChange(event: KMLFeatureEvent): void
 		{
 //			if (_checkFeatureVisibilityChange)
@@ -223,6 +243,15 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 		private function onKMLFeaturePositionChange(event: KMLFeatureEvent): void
 		{
 			var window: IFlexDisplayObject = getPopUpForFeature(event.kmlFeature);
+			
+			var p: Point = event.kmlFeature.getPoint(0);
+			var c: Coord = event.kmlFeature.coordinates[0];
+			var iw: InteractiveWidget = event.kmlFeature.master.container;
+			if (iw && c)
+			{
+				var isInside: Boolean = iw.coordInside(c);
+			}
+			
 			centerPopUpOnFeature(window);
 			bringToFront(window);
 		}
