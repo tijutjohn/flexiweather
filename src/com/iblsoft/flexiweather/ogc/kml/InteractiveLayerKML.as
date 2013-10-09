@@ -51,6 +51,7 @@ package com.iblsoft.flexiweather.ogc.kml
 	import mx.core.FlexGlobals;
 	import mx.core.IFlexDisplayObject;
 	import mx.events.CloseEvent;
+	import mx.events.FlexEvent;
 	import mx.managers.PopUpManager;
 
 	/**
@@ -443,7 +444,17 @@ package com.iblsoft.flexiweather.ogc.kml
 				infoWindow = new KMLInfoWindow();
 				infoWindow.feature = feature;
 				infoWindow = kmlPM.addPopUp(infoWindow, FlexGlobals.topLevelApplication as DisplayObject, feature, this.container) as KMLInfoWindow;
+				infoWindow.addEventListener(FlexEvent.CREATION_COMPLETE, onInfoWindowCreated);
+			} else {
+				kmlPM.centerPopUpOnFeature(infoWindow);
 			}
+		}
+			
+		private function onInfoWindowCreated(event: FlexEvent): void
+		{
+			var kmlPM: KMLPopupManager = KMLPopupManager.getInstance();
+			
+			var infoWindow: KMLInfoWindow = event.target as KMLInfoWindow;
 			kmlPM.centerPopUpOnFeature(infoWindow);
 		}
 

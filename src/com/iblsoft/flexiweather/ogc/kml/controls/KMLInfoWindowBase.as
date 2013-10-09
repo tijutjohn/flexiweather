@@ -17,6 +17,11 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 
 	public class KMLInfoWindowBase extends TitleWindow
 	{
+		override public function set y(value:Number):void
+		{
+			super.y = value;
+			trace("KMLInfoWindow y = "+ value);
+		}
 		override public function get width():Number
 		{
 			return super.width;
@@ -45,11 +50,6 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 		[Bindable]
 		public var arrowRight: int = 0;
 		
-		override public function set y(value: Number): void
-		{
-			super.y = value;
-		}
-
 		override public function set visible(value: Boolean): void
 		{
 			super.visible = value;
@@ -185,6 +185,7 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 			super();
 			
 			arrowPosition = KMLInfoWindowArrowPosition.BOTTOM_CENTER;
+			setStyle('skinClass', KMLInfoWindowBottomCenterSkin);
 		}
 
 		override protected function partAdded(partName:String, instance:Object):void
@@ -214,7 +215,20 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 		
 		override protected function commitProperties(): void
 		{
+			if (!_arrowPositionChanged)
+			{
+				switch(_arrowPosition)
+				{
+					case KMLInfoWindowArrowPosition.TOP_LEFT:
+					case KMLInfoWindowArrowPosition.TOP_CENTER:
+					case KMLInfoWindowArrowPosition.TOP_RIGHT:
+						trace("test reinvalidation");
+						break;
+				}
+			}
 			super.commitProperties();
+			
+			var reinvalidatePropertiesForNewSkin: Boolean = false;
 			
 			if (_arrowPositionChanged)
 			{
@@ -225,12 +239,14 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 					case KMLInfoWindowArrowPosition.TOP_CENTER:
 					case KMLInfoWindowArrowPosition.TOP_RIGHT:
 						setStyle('skinClass', KMLInfoWindowTopCenterSkin);
+						reinvalidatePropertiesForNewSkin = true;
 						break;
 					default:
 					case KMLInfoWindowArrowPosition.BOTTOM_LEFT:
 					case KMLInfoWindowArrowPosition.BOTTOM_CENTER:
 					case KMLInfoWindowArrowPosition.BOTTOM_RIGHT:
 						setStyle('skinClass', KMLInfoWindowBottomCenterSkin);
+						reinvalidatePropertiesForNewSkin = true;
 						break;
 				}
 				_arrowPositionChanged = false;
@@ -238,6 +254,9 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 			}
 			if (_feature)
 				updateHTMLText(_feature.description);
+			
+			if (reinvalidatePropertiesForNewSkin)
+				validateProperties();
 		}
 
 		private function updateHTMLText(txt: String): void
@@ -252,6 +271,7 @@ package com.iblsoft.flexiweather.ogc.kml.controls
 			
 			var bounds: Rectangle = new Rectangle(x - arrX, y - arrY, width, height);
 			
+//			trace("getBoundsForPosition ["+x+","+y+"] direction: " + direction + " => " + bounds + " arr: ["+arrX+","+arrY+"]");
 			return bounds;
 		}
 
