@@ -27,6 +27,11 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		protected var _kmlParserManager: KMLParserManager;
 		protected var _networkLinkManager: NetworkLinkManager;
 
+		public function parsingStatus(): String
+		{
+			return ms_kmlParsingStatus;
+		}
+		
 		public function get networkLinkManager(): NetworkLinkManager
 		{
 			return _networkLinkManager;
