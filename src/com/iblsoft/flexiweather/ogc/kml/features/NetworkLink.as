@@ -10,6 +10,9 @@ package com.iblsoft.flexiweather.ogc.kml.features
 
 	public class NetworkLink extends KMLFeature
 	{
+		private static var _nlID: int = 0;
+		public var nlID: int;
+		
 		private var _refreshVisibility: int;
 		private var _flyToView: int;
 		private var _link: Link;
@@ -18,6 +21,8 @@ package com.iblsoft.flexiweather.ogc.kml.features
 
 		public function NetworkLink(kml: KML, s_namespace: String, s_xml: XMLList)
 		{
+			nlID = _nlID++;
+			
 			super(kml, s_namespace, s_xml);
 			var kmlns: Namespace = new Namespace(s_namespace);
 			
@@ -116,6 +121,11 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		public function get link(): Link
 		{
 			return _link;
+		}
+		
+		override public function toString(): String
+		{
+			return "NetworkLink: " + nlID;
 		}
 	}
 }

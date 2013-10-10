@@ -40,6 +40,7 @@
     <classEntry path="com.iblsoft.flexiweather.net.loaders.JSONLoader"/>
     <classEntry path="com.iblsoft.flexiweather.net.loaders.JSONRPCCaller"/>
     <classEntry path="com.iblsoft.flexiweather.net.loaders.JSONRPCLoader"/>
+    <classEntry path="com.iblsoft.flexiweather.net.loaders.KMLGenericLoader"/>
     <classEntry path="com.iblsoft.flexiweather.net.loaders.KMLLoader"/>
     <classEntry path="com.iblsoft.flexiweather.net.loaders.KMZLoader"/>
     <classEntry path="com.iblsoft.flexiweather.net.loaders.LoaderWithAssociatedData"/>
@@ -133,10 +134,16 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.MoveablePoint"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableClosableCurveWithBaseTimeAndValidity"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableClosableCurveWithBaseTimeAndValidityAndAnnotation"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableCurve"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableCurveWithBaseTimeAndValidity"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableCurveWithBaseTimeAndValidityAndAnnotation"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableMode"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableWithBaseTimeAndValidity"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableWithBaseTimeAndValidityAndAnnotation"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.data.FeatureData"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.data.FeatureDataLine"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.FrontType"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.GenericEditableFeature"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.IconLabeledEditableFeature"/>
@@ -165,6 +172,7 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.data.KMLLoaderObject"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.data.KMLReflectionData"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.data.KMLResourceKey"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.kml.data.KMLType"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.data.KMZFile"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.events.KMLBitmapEvent"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.kml.events.KMLEvent"/>
@@ -275,11 +283,13 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.tiling.TiledTilesProvider"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.tiling.TiledTilingInfo"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.tiling.TilingUtils"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.wfs.IWFSCurveFeature"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithAnnotation"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithReflection"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.wfs.WFSFeature"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.wfs.WFSFeatureBase"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSpriteWithAnnotation"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.wfs.WFSFeatureType"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.wfs.WFSServiceConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.IAbility"/>
@@ -442,18 +452,6 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.GoogleMapLayerConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.GoogleMapsLayerOption"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.InteractiveLayerGoogleMaps"/>
-    <classEntry path="com.tests.FlexiWeatherMappingSuite"/>
-    <classEntry path="com.tests.ProjectionSuite"/>
-    <classEntry path="com.tests.TilingSuite"/>
-    <classEntry path="com.tests.WMTSSuite"/>
-    <classEntry path="com.tests.interactiveWidget.IWMapFunctions"/>
-    <classEntry path="com.tests.interactiveWidget.MapBBoxToProjectionExtentParts"/>
-    <classEntry path="com.tests.interactiveWidget.MapBBoxToViewReflections"/>
-    <classEntry path="com.tests.projection.ProjectionTest"/>
-    <classEntry path="com.tests.utils.TilingUtilsTest"/>
-    <classEntry path="com.tests.utils.URLUtilsTest"/>
-    <classEntry path="com.tests.wmts.InteractiveLayerTiledTest"/>
-    <classEntry path="com.utils.ObjectSorter"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

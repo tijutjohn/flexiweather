@@ -7,6 +7,8 @@ package com.iblsoft.flexiweather.ogc.kml.events
 
 	public class KMLEvent extends Event
 	{
+		public static const KML_TYPE_IDENTIFIED: String = 'kmlTypeIdentified';
+		
 		public static const KML_FILE_LOADED: String = 'kmlFileLoaded';
 		public static const KMZ_FILE_LOADED: String = 'kmzFileLoaded';
 		public static const UNPACKING_STARTED: String = 'unpackingStarted';
@@ -18,6 +20,8 @@ package com.iblsoft.flexiweather.ogc.kml.events
 		
 		public var data: KMLLoaderObject;
 		public var kmlLayerConfiguration: KMLLayerConfiguration;
+		
+		public var kmlType: String;
 
 		/**
 		 * Progress of parsing in percentage. Used when dispatching UNPACKING_PROGRESS or PARSING_PROGRESS event
@@ -34,6 +38,7 @@ package com.iblsoft.flexiweather.ogc.kml.events
 			var event: KMLEvent = new KMLEvent(type, bubbles, cancelable);
 			event.data = data;
 			event.progress = progress;
+			event.kmlType = kmlType;
 			event.kmlLayerConfiguration = kmlLayerConfiguration;
 			return event;
 		}

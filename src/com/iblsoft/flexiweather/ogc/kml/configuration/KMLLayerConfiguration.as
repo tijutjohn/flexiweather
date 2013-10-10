@@ -3,6 +3,7 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderErrorEvent;
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.net.loaders.BinaryLoader;
+	import com.iblsoft.flexiweather.net.loaders.KMLGenericLoader;
 	import com.iblsoft.flexiweather.net.loaders.KMLLoader;
 	import com.iblsoft.flexiweather.net.loaders.KMZLoader;
 	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
@@ -11,6 +12,8 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 	import com.iblsoft.flexiweather.ogc.configuration.layers.LayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.editable.IInteractiveLayerProvider;
 	import com.iblsoft.flexiweather.ogc.kml.InteractiveLayerKML;
+	import com.iblsoft.flexiweather.ogc.kml.data.KMLLoaderObject;
+	import com.iblsoft.flexiweather.ogc.kml.data.KMLType;
 	import com.iblsoft.flexiweather.ogc.kml.data.KMZFile;
 	import com.iblsoft.flexiweather.ogc.kml.events.KMLEvent;
 	import com.iblsoft.flexiweather.ogc.kml.events.KMLParsingStatusEvent;
@@ -66,37 +69,19 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 			if (_kmlType)
 				return _kmlType;
 			else {
-				if (kmlPath.indexOf('kmz') >= 0)
-					return 'kmz';
+				if (kmlPath.indexOf(KMLType.KMZ) >= 0)
+					return KMLType.KMZ;
 			}
-			return 'kml';
+			return KMLType.KML;
 		}
-		public function loadKMZ(kmzURLPath: String): void
-		{
-			kmlPath = kmzURLPath;
-			_kmlType = 'kmz';
-			var loader: KMZLoader = new KMZLoader();
-			loader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onKMZLoaded);
-			loader.load(new URLRequest(kmlPath));
-		}
-
-		/**
-		 * KMZ file is loaded and can be un packed
-		 * @param event
-		 *
-		 */
-		private function onKMZLoaded(event: UniURLLoaderEvent): void
-		{
-			var ba: ByteArray = event.result as ByteArray;
-			addKMZByteArray(kmlPath, ba);
-		}
+		
 
 		public function addKMZByteArray(kmlPath: String, ba: ByteArray): void
 		{
 			notifyKMZUnpackingStarted();
 			var kmz: KMZFile = new KMZFile(kmlPath);
 			
-			_kmlType = 'kmz';
+			_kmlType = KMLType.KMZ;
 			
 			kmz.addEventListener(KMLEvent.UNPACKING_PROGRESS, onKMZUnpackingProgress);
 			kmz.addEventListener(KMZFile.KMZ_FILE_READY, onKMZFileReady);
@@ -117,30 +102,126 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 			addKMZSource(kmzFile, kmzURL);
 		}
 
+		/**
+		 * Load KML or KMZ File. Use this method when you do not know whether your file is KML or KMZ file (e.g. loaded from web service) 
+		 * @param kmlURLPath path for KML or KMZ file
+		 * 
+		 */	
+		public function loadKMLWithUnknowType(kmlURLPath: String, kmlObject: KMLLoaderObject): void
+		{
+//			_kmlBaseURLPath = baseURLPath;
+			kmlPath = kmlURLPath;
+			var loader: KMLGenericLoader = new KMLGenericLoader();
+			
+			_kmlType = KMLType.UNKNOWN;
+			
+			loader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onUnknownKMLLoaded);
+			loader.addEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onKMLLoadFailed);
+			loader.load(new URLRequest(kmlPath), kmlObject);
+		}
+		
+		/**
+		 * Load KML File. Use this method when you know that your file is KML file 
+		 * @param kmlURLPath path for KML file
+		 * 
+		 */	
 		public function loadKML(kmlURLPath: String, baseURLPath: String): void
 		{
 			_kmlBaseURLPath = baseURLPath;
 			kmlPath = kmlURLPath;
 			var loader: KMLLoader = new KMLLoader();
 			
-			_kmlType = 'kml';
+			_kmlType = KMLType.KML;
 			
 			loader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onKMLLoaded);
 			loader.addEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onKMLLoadFailed);
 			loader.load(new URLRequest(kmlPath));
 		}
-
+		
+		/**
+		 * Load KMZ File. Use this method when you know that your file is KMZ file 
+		 * @param kmzURLPath path for KMZ file
+		 * 
+		 */		
+		public function loadKMZ(kmzURLPath: String): void
+		{
+			kmlPath = kmzURLPath;
+			_kmlType = KMLType.KMZ;
+			var loader: KMZLoader = new KMZLoader();
+			loader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onKMZLoaded);
+			loader.load(new URLRequest(kmlPath));
+		}
+		
 		private function onKMLLoadFailed(event: UniURLLoaderErrorEvent): void
 		{
 			Alert.show("KMLLayerConfiguration: Loading of KML failed", "Loading failed", Alert.OK);
 		}
 
+		
+		/**
+		 * KML or KMZ file is loaded. It's needed to be determined if it is KML or KMZ
+		 * @param event
+		 *
+		 */
+		private function onUnknownKMLLoaded(event: UniURLLoaderEvent): void
+		{
+			//check if it is KML or KMZ
+			var kmlType: String;
+			if (event.result is XML)
+			{
+				kmlType = KMLType.KML;
+			} else if (event.result) {
+				kmlType = KMLType.KMZ;
+			}
+			
+			_kmlType = kmlType;
+			
+			var kmlObject: KMLLoaderObject = event.associatedData as KMLLoaderObject;
+			kmlObject.type = kmlType;
+			
+			var ke: KMLEvent = new KMLEvent(KMLEvent.KML_TYPE_IDENTIFIED);
+			ke.kmlType = kmlType;
+			ke.data = kmlObject;
+			dispatchEvent(ke);
+			
+			switch(kmlType)
+			{
+				case KMLType.KML:
+					onKMLLoaded(event);
+					break;
+				case KMLType.KMZ:
+					onKMZLoaded(event);
+					break;
+				default:
+					trace("Cannot find type of loaded KML");
+					Alert.show("Cannot find type of loaded KML", "KML Load Error", Alert.OK);
+					break;
+			}
+		}
+		
+		/**
+		 * KML file is loaded and can be parsed
+		 * @param event
+		 *
+		 */
 		private function onKMLLoaded(event: UniURLLoaderEvent): void
 		{
 			notifyKMLParsingStarted();
 			var xml: XML = event.result as XML;
 			addKMLSource(xml.toXMLString(), kmlPath, _kmlBaseURLPath);
 		}
+		
+		/**
+		 * KMZ file is loaded and can be un packed
+		 * @param event
+		 *
+		 */
+		private function onKMZLoaded(event: UniURLLoaderEvent): void
+		{
+			var ba: ByteArray = event.result as ByteArray;
+			addKMZByteArray(kmlPath, ba);
+		}
+		
 
 		private function notifyKMZUnpackingStarted(): void
 		{
@@ -173,7 +254,7 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 		{
 			_kml = new KML22(kmz.kmlSource, urlPath, '');
 			
-			_kmlType = 'kmz';
+			_kmlType = KMLType.KMZ;
 			
 			addKMLEventListeners(_kml);
 			_kml.parse(kmz);
@@ -258,7 +339,7 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 			
 			notifyKMLParsingFinished();
 			var ke: KMLEvent;
-			if (kmlType == 'kml')
+			if (kmlType == KMLType.KML)
 				ke = new KMLEvent(KMLEvent.KML_FILE_LOADED);
 			else
 				ke = new KMLEvent(KMLEvent.KMZ_FILE_LOADED);
