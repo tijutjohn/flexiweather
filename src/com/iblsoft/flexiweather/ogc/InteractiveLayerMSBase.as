@@ -140,7 +140,7 @@ package com.iblsoft.flexiweather.ogc
 			
 			if (m_cfg && m_cfg.service)
 			{
-				return m_cfg.service.capabilitiesUpdated;
+				return (m_cfg.service as WMSServiceConfiguration).capabilitiesUpdated;
 			}
 			return _capabilitiesReady;
 		}
@@ -148,9 +148,9 @@ package com.iblsoft.flexiweather.ogc
 
 		override public function get supportsVectorData(): Boolean
 		{
-			if (m_cfg && m_cfg.service && m_cfg.service.imageFormats)
+			if (m_cfg && m_cfg.wmsService && m_cfg.wmsService.imageFormats)
 			{
-				var imageFormats: Array = m_cfg.service.imageFormats;
+				var imageFormats: Array = m_cfg.wmsService.imageFormats;
 				if (imageFormats.length > 0)
 				{
 					for each (var format: String in imageFormats)
@@ -171,23 +171,7 @@ package com.iblsoft.flexiweather.ogc
 			
 			synchronizationRoleValue = SynchronisationRole.NONE;
 			
-			m_cfg = cfg;
-			
-			if (m_cfg && m_cfg.service)
-			{
-				//update service from OGCServiceConfigurationManager
-				var serviceManager: OGCServiceConfigurationManager = OGCServiceConfigurationManager.getInstance();
-				var existingService: OGCServiceConfiguration = serviceManager.getServiceByName(m_cfg.service.baseURL);
-				
-				var wmsService: WMSServiceConfiguration = existingService as WMSServiceConfiguration; 
-				
-				if (wmsService && wmsService.capabilitiesUpdated)
-				{
-//					trace("OGCServiceConfigurationManager found same service with capabilities already updated");
-					m_cfg.service = wmsService;
-				}
-			}
-			
+			configuration = cfg;
 			
 			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
 			
@@ -232,8 +216,27 @@ package com.iblsoft.flexiweather.ogc
 			// before layer was added to stage
 			// in _tempParameterStorage there are also store properties serialized from current WMSViewProperties
 			_tempParameterStorage.updateCurrentWMSPropertiesFromStorage(m_currentWMSViewProperties);
-			
 		}
+		
+		private function initializeConfiguration(): void
+		{
+			if (m_cfg && m_cfg.service)
+			{
+				//update service from OGCServiceConfigurationManager
+				var serviceManager: OGCServiceConfigurationManager = OGCServiceConfigurationManager.getInstance();
+				var existingService: OGCServiceConfiguration = serviceManager.getServiceByName(m_cfg.service.baseURL);
+				
+				var wmsService: WMSServiceConfiguration = existingService as WMSServiceConfiguration; 
+				
+				if (wmsService && wmsService.capabilitiesUpdated)
+				{
+					//					trace("OGCServiceConfigurationManager found same service with capabilities already updated");
+					m_cfg.service = wmsService;
+				}
+			}
+		}
+		
+		
 		private var fadeIn: Fade;
 		private var fadeOut: Fade;
 		[Bindable]
@@ -246,6 +249,16 @@ package com.iblsoft.flexiweather.ogc
 			notifySynchronizationChange(GlobalVariable.FRAME, null, true);
 		}
 
+		override protected function commitProperties():void
+		{
+			super.commitProperties();
+			
+			if (_configurationChanged)
+			{
+				initializeConfiguration();
+				_configurationChanged = false;
+			}
+		}
 		public function changeViewProperties(viewProperties: IViewProperties): void
 		{
 			if ((viewProperties as WMSViewProperties).crs != container.crs)
@@ -1311,7 +1324,7 @@ package com.iblsoft.flexiweather.ogc
 			var a: Array = [];
 			for each (var s_layerName: String in m_cfg.layerNames)
 			{
-				var layer: WMSLayer = m_cfg.service.getLayerByName(s_layerName);
+				var layer: WMSLayer = m_cfg.wmsService.getLayerByName(s_layerName);
 				if (layer != null)
 					a.push(layer);
 			}
@@ -1855,6 +1868,14 @@ package com.iblsoft.flexiweather.ogc
 //			trace("MSBase: ["+this+"] " + str);
 		}
 
+		private var _configurationChanged: Boolean;
+		public function set configuration(value: ILayerConfiguration): void
+		{
+			m_cfg = value as WMSLayerConfiguration;
+			_configurationChanged = true;
+			invalidateProperties();
+		}
+		
 		public function get configuration(): ILayerConfiguration
 		{
 			return m_cfg;

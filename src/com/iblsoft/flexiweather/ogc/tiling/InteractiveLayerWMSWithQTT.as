@@ -91,8 +91,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 		}
 
 		public function InteractiveLayerWMSWithQTT(
-				container: InteractiveWidget,
-				cfg: WMSWithQTTLayerConfiguration): void
+				container: InteractiveWidget = null,
+				cfg: WMSWithQTTLayerConfiguration = null): void
 		{
 			super(container, cfg);
 		}

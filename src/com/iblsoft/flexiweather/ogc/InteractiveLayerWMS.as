@@ -44,7 +44,7 @@ package com.iblsoft.flexiweather.ogc
 	{
 		protected var m_autoRefreshTimer: Timer;
 
-		public function InteractiveLayerWMS(container: InteractiveWidget, cfg: WMSLayerConfiguration)
+		public function InteractiveLayerWMS(container: InteractiveWidget = null, cfg: WMSLayerConfiguration = null)
 		{
 			super(container, cfg);
 		}

@@ -36,10 +36,13 @@ package com.iblsoft.flexiweather.widgets
 	
 	import mx.collections.ArrayCollection;
 	import mx.controls.Alert;
+	import mx.core.IVisualElement;
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
 	import mx.events.DynamicEvent;
 	import mx.events.PropertyChangeEvent;
+	
+	import spark.events.ElementExistenceEvent;
 
 	[Event(name = "mapLoadingStarted", type = "com.iblsoft.flexiweather.events.InteractiveLayerMapEvent")]
 	[Event(name = "mapLoadingFinished", type = "com.iblsoft.flexiweather.events.InteractiveLayerMapEvent")]
@@ -53,6 +56,9 @@ package com.iblsoft.flexiweather.widgets
 	[Event(name = TIME_AXIS_REMOVED, type = "mx.events.DynamicEvent")]
 	[Event(name = SYNCHRONISE_WITH, type = "mx.events.DynamicEvent")]
 	[Event(name = MAP_LAYERS_INITIALIZED, type = "flash.events.Event")]
+	
+	[DefaultProperty("mxmlContent")] 
+	
 	public class InteractiveLayerMap extends InteractiveLayerComposer implements Serializable
 	{
 		public static const TIMELINE_FRAMES_ENUMERATED: String = "timelineFramesEnumerated";
@@ -209,6 +215,19 @@ package com.iblsoft.flexiweather.widgets
 		
 		protected var _tempMapStorage: MapTemporaryParameterStorage = new MapTemporaryParameterStorage();
 
+		override public function set container(value:InteractiveWidget):void
+		{
+			super.container = value;
+			
+			if (m_layers)
+			{
+				for each (var layer: InteractiveLayer in m_layers)
+				{
+					layer.container = value;
+				}
+			}
+		}
+		
 		public function InteractiveLayerMap(container: InteractiveWidget = null)
 		{
 			super(container);
@@ -219,6 +238,8 @@ package com.iblsoft.flexiweather.widgets
 			selectedLayerIndex = -1;
 			
 			resetTimelineConfiguration();
+			
+//			addEventListener(ElementExistenceEvent.ELEMENT_ADD, onElementAdd);
 			
 			_globalVariablesManager = new GlobalVariablesManager();
 			_globalVariablesManager.registerInteractiveLayerMap(this);
@@ -788,6 +809,131 @@ package com.iblsoft.flexiweather.widgets
 				
 		}
 
+		//----------------------------------
+		//  mxmlContent
+		//----------------------------------
+		
+		private var mxmlContentChanged:Boolean = false;
+		private var _mxmlContent:Array;
+		
+		[ArrayElementType("mx.core.IVisualElement")]
+		
+		/**
+		 *  The visual content children for this Group.
+		 * 
+		 *  This method is used internally by Flex and is not intended for direct
+		 *  use by developers.
+		 *
+		 *  <p>The content items should only be IVisualElement objects.  
+		 *  An <code>mxmlContent</code> Array should not be shared between multiple
+		 *  Group containers because visual elements can only live in one container 
+		 *  at a time.</p>
+		 * 
+		 *  <p>If the content is an Array, do not modify the Array 
+		 *  directly. Use the methods defined by the Group class instead.</p>
+		 *
+		 *  @default null
+		 *
+		 *  @langversion 3.0
+		 *  @playerversion Flash 10
+		 *  @playerversion AIR 1.5
+		 *  @productversion Flex 4
+		 */
+		public function set mxmlContent(value:Array):void
+		{
+			if (createChildrenCalled)
+			{
+				setMXMLContent(value);
+			}
+			else
+			{
+				mxmlContentChanged = true;
+				_mxmlContent = value;
+				// we will validate this in createChildren();
+			}
+		}
+		
+		
+		/**
+		 *  @private
+		 *  Whether createChildren() has been called or not.
+		 *  We use this in the setter for mxmlContent to know 
+		 *  whether to validate the value immediately, or just 
+		 *  wait to let createChildren() do it.
+		 */
+		private var createChildrenCalled:Boolean = false;
+		
+		override protected function createChildren():void
+		{
+			super.createChildren();
+			
+			createChildrenCalled = true;
+			
+			if (mxmlContentChanged)
+			{
+				mxmlContentChanged = false;
+				setMXMLContent(_mxmlContent);
+			}
+		}
+		
+//		override protected function childrenCreated(): void
+//		{
+//			super.childrenCreated();
+//		}
+		
+		private function setMXMLContent(layers: Array): void
+		{
+			for each (var layer: InteractiveLayer in layers)
+			{
+				addLayer(layer);
+			}
+		}
+		
+		/**
+		 *  @private
+		 *  Adds the elements in <code>mxmlContent</code> to the Group.
+		 *  Flex calls this method automatically; you do not call it directly.
+		 *  
+		 *  @langversion 3.0
+		 *  @playerversion Flash 10
+		 *  @playerversion AIR 1.5
+		 *  @productversion Flex 4
+		 */ 
+/*		private function setMXMLContent(value:Array):void
+		{
+			var i:int;
+			
+			// if there's old content and it's different than what 
+			// we're trying to set it to, then let's remove all the old 
+			// elements first.
+			if (_mxmlContent != null && _mxmlContent != value)
+			{
+				for (i = _mxmlContent.length - 1; i >= 0; i--)
+				{
+					removeLayerAt(_mxmlContent[i], i);
+				}
+			}
+			
+			_mxmlContent = (value) ? value.concat() : null;  // defensive copy
+			
+			if (_mxmlContent != null)
+			{
+				var n:int = _mxmlContent.length;
+				for (i = 0; i < n; i++)
+				{   
+					var elt:IVisualElement = _mxmlContent[i];
+					
+					// A common mistake is to bind the viewport property of a Scroller
+					// to a group that was defined in the MXML file with a different parent    
+					if (elt.parent && (elt.parent != this))
+						throw new Error(resourceManager.getString("components", "mxmlElementNoMultipleParents", [elt]));
+					
+					addLayerAt(elt, i);
+				}
+			}
+		}*/
+		
+		
 		override public function addLayer(l: InteractiveLayer): void
 		{
 			if (l)

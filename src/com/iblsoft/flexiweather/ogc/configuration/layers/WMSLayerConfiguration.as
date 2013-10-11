@@ -10,6 +10,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 	import com.iblsoft.flexiweather.ogc.WMSLayer;
 	import com.iblsoft.flexiweather.ogc.WMSLayerBase;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.IWMSLayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.configuration.services.OGCServiceConfiguration;
 	import com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceConfiguration;
 	import com.iblsoft.flexiweather.ogc.editable.IInteractiveLayerProvider;
 	import com.iblsoft.flexiweather.ogc.events.ServiceCapabilitiesEvent;
@@ -64,16 +65,19 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			
 			registerService();
 			
-			onCapabilitiesUpdated(null);
+//			onCapabilitiesUpdated(null);
 		}
 
-		protected function registerService(): void
+		override protected function registerService(): void
 		{
 			if (m_service)
+			{
 				m_service.addEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onCapabilitiesUpdated)
+				onCapabilitiesUpdated(null);
+			}
 		}
 		
-		protected function unregisterService(): void
+		override protected function unregisterService(): void
 		{
 			if (m_service)
 				m_service.removeEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onCapabilitiesUpdated)
@@ -217,9 +221,9 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 
 		private function getVectorImageFormat(): String
 		{
-			if (service && service.imageFormats)
+			if (service && service is WMSServiceConfiguration && (service as WMSServiceConfiguration).imageFormats)
 			{
-				var formats: Array = service.imageFormats;
+				var formats: Array = (service as WMSServiceConfiguration).imageFormats;
 				for each (var currFormat: String in formats)
 				{
 					if (currFormat.indexOf('x-shockwave-flash') >= 0)
@@ -291,7 +295,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 				{
 					var l: WMSLayer = null;
 					if (m_service != null)
-						l = service.getLayerByName(ma_layerNames[i]);
+						l = (service as WMSServiceConfiguration).getLayerByName(ma_layerNames[i]);
 					if (l)
 						a_layers.addItem(l);
 				}
@@ -482,18 +486,9 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		}
 
 		// getters & setters				
-		public function get service(): WMSServiceConfiguration
+		public function get wmsService(): WMSServiceConfiguration
 		{
-			return WMSServiceConfiguration(m_service);
-		}
-
-		public function set service(service: WMSServiceConfiguration): void
-		{
-			unregisterService();
-			
-			m_service = service;
-			
-			registerService();
+			return m_service as WMSServiceConfiguration;
 		}
 
 		public function get behaviours(): Array

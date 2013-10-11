@@ -19,6 +19,21 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			m_service = service;
 		}
 
+
+		public function get service():OGCServiceConfiguration
+		{
+			return m_service;
+		}
+
+		public function set service(value:OGCServiceConfiguration):void
+		{
+			unregisterService();
+			
+			m_service = value;
+			
+			registerService();
+		}
+
 		override public function destroy(): void
 		{
 			super.destroy();
@@ -48,6 +63,14 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			}
 		}
 
+		protected function registerService(): void
+		{
+		}
+		
+		protected function unregisterService(): void
+		{
+		}
+		
 		public function get serviceType(): String
 		{
 			return "WMS";

@@ -219,7 +219,7 @@ package com.iblsoft.flexiweather.ogc.cache
 		
 		private function getKey(s_crs: String, bbox: BBox, url: URLRequest, dimensions: Array, validity: Date = null, wmsViewProperties: WMSViewProperties = null): String
 		{
-			var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url, dimensions, validity, wmsViewProperties.m_cfg.service.baseURL);
+			var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url, dimensions, validity, wmsViewProperties.m_cfg.wmsService.baseURL);
 			var s_key: String = ck.toString();
 			return s_key;
 		}
@@ -354,7 +354,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			var url: URLRequest = wmsViewProperties.url;
 			var dimensions: Array = wmsViewProperties.dimensions;
 			var validity: Date = wmsViewProperties.validity;
-			var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url, dimensions, validity, wmsViewProperties.m_cfg.service.baseURL);
+			var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url, dimensions, validity, wmsViewProperties.m_cfg.wmsService.baseURL);
 			var s_key: String = qetWMSViewCacheKey(wmsViewProperties);
 			var b_deleted: Boolean = deleteCacheItemByKey(s_key, true);
 			var item: CacheItem = new CacheItem();

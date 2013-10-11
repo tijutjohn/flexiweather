@@ -30,9 +30,13 @@ package com.iblsoft.flexiweather.proj
 				"EPSG:4326", 
 				"+title=WGS 84 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs", 
 				new BBox(-180, -90, 180, 90), true);
+		
+//		Projection.setCRSExtentBBox(
+//				'EPSG:900913',
+//				new BBox(-20037508.34, -20037508.34, 20037508.34, 20037508.34), true);
 		Projection.setCRSExtentBBox(
-				'EPSG:900913',
-				new BBox(-20037508.34, -20037508.34, 20037508.34, 20037508.34), true);
+				'CRS:84',
+				new BBox(-180, -90, 180, 90), true);
 
 		public function Projection(s_crs: String, extentBBox: BBox, b_wrapsHorizontally: Boolean): void
 		{

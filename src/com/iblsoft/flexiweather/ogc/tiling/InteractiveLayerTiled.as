@@ -91,12 +91,21 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			return m_cache;
 		}
-		protected var m_cfg: TiledLayerConfiguration;
 
+		protected var m_cfg: TiledLayerConfiguration;
+		private var _configurationChanged: Boolean;
+		public function set configuration(value: ILayerConfiguration): void
+		{
+			m_cfg = value as TiledLayerConfiguration;
+			_configurationChanged = true;
+			invalidateProperties();
+		}
+		
 		public function get configuration(): ILayerConfiguration
 		{
 			return m_cfg;
 		}
+		
 		protected var _avoidTiling: Boolean;
 
 		public function set avoidTiling(value: Boolean): void

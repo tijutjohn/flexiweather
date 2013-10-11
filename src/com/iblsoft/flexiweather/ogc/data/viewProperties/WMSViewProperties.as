@@ -306,7 +306,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 				var a: Array = [];
 				for each (var s_layerName: String in m_cfg.layerNames)
 				{
-					var layer: WMSLayer = m_cfg.service.getLayerByName(s_layerName);
+					var layer: WMSLayer = m_cfg.wmsService.getLayerByName(s_layerName);
 					if (layer != null)
 						a.push(layer);
 				}
