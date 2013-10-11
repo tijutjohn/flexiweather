@@ -1288,7 +1288,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 						{
 							tempCoverageRation += tilingExtent.coverageRatio(vBBox);
 						}
-						coverageRatio = tempCoverageRation / parts.length
+						coverageRatio = tempCoverageRation / parts.length;
 						
 						
 						if (coverageRatio == 1)

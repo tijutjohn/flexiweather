@@ -237,10 +237,10 @@ package com.iblsoft.flexiweather.ogc.multiview
 				value.addEventListener(CollectionEvent.COLLECTION_CHANGE, onDataProviderChange);
 			}
 		}
-		private var ms_crs: String = Projection.CRS_EPSG_GEOGRAPHIC;
-		private var m_crsProjection: Projection = Projection.getByCRS(ms_crs);
-		private var m_viewBBox: BBox = new BBox(-180, -90, 180, 90);
-		private var m_extentBBox: BBox = new BBox(-180, -90, 180, 90);
+		private var ms_crs: String;
+		private var m_crsProjection: Projection;
+		private var m_viewBBox: BBox;
+		private var m_extentBBox: BBox;
 
 		private var m_widgetCommonLayers: Array;
 		
@@ -259,8 +259,19 @@ package com.iblsoft.flexiweather.ogc.multiview
 			dispatchEvent(new Event("interactiveWidgetsChanged"));
 			
 			m_widgetCommonLayers = [];
+			
+			initializeDefaultProjection();
 		}
 
+		private function initializeDefaultProjection(): void
+		{
+			ms_crs = Projection.CRS_GEOGRAPHIC;
+			m_crsProjection = Projection.getByCRS(ms_crs);
+			m_viewBBox = new BBox(-180, -90, 180, 90);
+			m_extentBBox = m_crsProjection.extentBBox;
+			
+		}
+		
 		private function createDefaultConfiguration(): void
 		{
 			var config: MultiViewConfiguration = new MultiViewConfiguration();

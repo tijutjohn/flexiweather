@@ -1032,7 +1032,7 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 		 * @param y relative y position of label in pixels
 		 *
 		 */
-		private function updateLabelPosition(label: KMLLabel, x: int, y: int): void
+		private function updateLabelPosition(label: KMLLabel, x: Number, y: Number): void
 		{
 			//labels are positioned in InteractiveWidget in labelLayout (AnticollisionLayout)
 //			return;

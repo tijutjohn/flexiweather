@@ -380,7 +380,7 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 		
-		public function drawDraggablePoint(c: Coord, x: int, y: int): void
+		public function drawDraggablePoint(c: Coord, x: Number, y: Number): void
 		{
 			var i_pointColor: uint = uint(getStyle("placemarkBorderColor"));
 			var f_pointAlpha: uint = Number(getStyle("placemarkAlpha"));

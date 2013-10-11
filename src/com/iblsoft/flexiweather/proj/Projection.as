@@ -21,9 +21,14 @@ package com.iblsoft.flexiweather.proj
 		protected var mb_wrapsHorizontally: Boolean;
 		protected static var m_cache: Dictionary = new Dictionary();
 		protected static var md_crsToDetails: Dictionary = new Dictionary();
+		
 		Projection.addCRSByProj4(
 				"CRS:84",
 				"+title=Geographic WGS84 +proj=longlat +ellps=WGS84 +datum=WGS84 +units=degrees",
+				new BBox(-180, -90, 180, 90), true);
+		Projection.addCRSByProj4(
+				"EPSG:4326", 
+				"+title=WGS 84 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs", 
 				new BBox(-180, -90, 180, 90), true);
 		Projection.setCRSExtentBBox(
 				'EPSG:900913',

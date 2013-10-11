@@ -80,10 +80,11 @@ package com.iblsoft.flexiweather.widgets
 	public class InteractiveWidget extends Group
 	{
 		public static const VIEW_BBOX_CHANGED: String = 'viewBBoxChanged';
-		private var ms_crs: String = Projection.CRS_EPSG_GEOGRAPHIC;
-		private var m_crsProjection: Projection = Projection.getByCRS(ms_crs);
-		private var m_viewBBox: BBox = new BBox(-180, -90, 180, 90);
-		private var m_extentBBox: BBox = new BBox(-180, -90, 180, 90);
+		
+		private var ms_crs: String;
+		private var m_crsProjection: Projection;
+		private var m_viewBBox: BBox;
+		private var m_extentBBox: BBox;
 		private var mb_orderingLayers: Boolean = false;
 		private var mb_autoLayout: Boolean = false;
 		private var mb_backgroundChessBoard: Boolean = true;
@@ -205,6 +206,17 @@ package com.iblsoft.flexiweather.widgets
 			addEventListener(ElementExistenceEvent.ELEMENT_ADD, onElementAdd);
 			addEventListener(FlexEvent.CREATION_COMPLETE, onWidgetCreationComplete);
 			m_lastResizeTime = getTimer();
+			
+			initializeDefaultProjection();
+		}
+		
+		private function initializeDefaultProjection(): void
+		{
+			ms_crs = Projection.CRS_GEOGRAPHIC;
+			m_crsProjection = Projection.getByCRS(ms_crs);
+			m_viewBBox = new BBox(-180, -90, 180, 90);
+			m_extentBBox = m_crsProjection.extentBBox;
+			
 		}
 
 		public function destroy(): void
