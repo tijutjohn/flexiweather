@@ -21,9 +21,9 @@ package com.iblsoft.flexiweather.widgets
 		public function InteractiveLayerNorthIndicator(container: InteractiveWidget = null)
 		{
 			super(container);
-			indicatorPosition = new Point(40, 40);
+			_indicatorPosition = new Point(40, 40);
 		}
-
+		
 		override protected function createChildren(): void
 		{
 			super.createChildren();
@@ -80,6 +80,9 @@ package com.iblsoft.flexiweather.widgets
 
 		private function findDirection(): void
 		{
+			if (!container)
+				return;
+			
 			var startCoord: Coord = container.pointToCoord(_indicatorPosition.x, _indicatorPosition.y);
 			if (!startCoord)
 				return;
