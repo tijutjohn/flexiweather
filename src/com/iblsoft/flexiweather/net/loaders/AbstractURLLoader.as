@@ -793,9 +793,8 @@ package com.iblsoft.flexiweather.net.loaders
 
 		protected function cloneByteArrayToString(ba: ByteArray): String
 		{
-			var clonedBA: ByteArray = ObjectUtil.clone(ba as Object) as ByteArray;
-			var str: String = clonedBA.readUTFBytes(clonedBA.length);
-			clonedBA.clear();
+			var str: String = ba.readUTFBytes(ba.length);
+			ba.position = 0;
 			
 			return str;
 		}

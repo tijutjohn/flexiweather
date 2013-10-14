@@ -63,8 +63,9 @@ package com.iblsoft.flexiweather.net.loaders
 				return (data as XML).toXMLString();
 			if (data is ByteArray)
 			{
-				var clonedBA: ByteArray = ObjectUtil.clone(data) as ByteArray;
-				return clonedBA.readUTFBytes(clonedBA.length);
+				var ba: ByteArray = data as ByteArray;
+				data = ba.readUTFBytes(ba.length);
+				ba.position = 0;
 			}
 			if (data is String)
 				return data as String;

@@ -35,10 +35,9 @@ package com.iblsoft.flexiweather.net.loaders
 		{
 			if (data is ByteArray)
 			{
-				var clonedBA: ByteArray = ObjectUtil.clone(data) as ByteArray;
-				data = clonedBA.readUTFBytes(clonedBA.length);
-				
-				clonedBA.clear();
+				var ba: ByteArray = data as ByteArray;
+				data = ba.readUTFBytes(ba.length);
+				ba.position = 0;
 			}
 			if (data is String)
 			{
@@ -60,8 +59,9 @@ package com.iblsoft.flexiweather.net.loaders
 		{
 			if (data is ByteArray)
 			{
-				var clonedBA: ByteArray = ObjectUtil.clone(data) as ByteArray;
-				data = clonedBA.readUTFBytes(clonedBA.length);
+				var ba: ByteArray = data as ByteArray;
+				data = ba.readUTFBytes(ba.length);
+				ba.position = 0;
 			}
 			var jsonObject: Object = getJSON(data);
 			//return (jsonObject != null); // Note that this does not handle a valid JSON string "null" properly.

@@ -135,11 +135,15 @@ package com.iblsoft.flexiweather.net.loaders
 			if (data is ByteArray)
 			{
 				//we need to clone BYteArray, otherwise readded bytes will be removed from ByteArray
-				data = ObjectUtil.clone(data) as ByteArray;
-				var b0: int = data.length > 0 ? data.readUnsignedByte() : -1;
-				var b1: int = data.length > 1 ? data.readUnsignedByte() : -1;
-				var b2: int = data.length > 2 ? data.readUnsignedByte() : -1;
-				var b3: int = data.length > 3 ? data.readUnsignedByte() : -1;
+				var ba: ByteArray = data as ByteArray;
+				
+				var b0: int = ba.length > 0 ? ba.readUnsignedByte() : -1;
+				var b1: int = ba.length > 1 ? ba.readUnsignedByte() : -1;
+				var b2: int = ba.length > 2 ? ba.readUnsignedByte() : -1;
+				var b3: int = ba.length > 3 ? ba.readUnsignedByte() : -1;
+				
+				ba.position = 0;
+				
 				var isPNG: Boolean = b0 == 0x89 && b1 == 0x50 && b2 == 0x4E && b3 == 0x47;
 				var isGIF: Boolean = b0 == 0x47 && b1 == 0x49 && b2 == 0x46;
 				var isJPG: Boolean = b0 == 0xff && b1 == 0xd8 && b2 == 0xff && b3 == 0xe0;

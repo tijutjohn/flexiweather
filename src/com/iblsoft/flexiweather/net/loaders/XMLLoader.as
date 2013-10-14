@@ -35,8 +35,9 @@ package com.iblsoft.flexiweather.net.loaders
 				return data as XML;
 			if (data is ByteArray)
 			{
-				var clonedBA: ByteArray = ObjectUtil.clone(data) as ByteArray;
-				data = clonedBA.readUTFBytes(clonedBA.length);
+				var ba: ByteArray = data as ByteArray;
+				data = ba.readUTFBytes(ba.length);
+				ba.position = 0;
 			}
 			if (data is String)
 			{
@@ -57,6 +58,26 @@ package com.iblsoft.flexiweather.net.loaders
 
 		public static function isValidXML(data: Object): Boolean
 		{
+			if (data is ByteArray)
+			{
+				
+				var ba: ByteArray = data as ByteArray;
+				var b0: int = ba.length > 0 ? ba.readUnsignedByte() : -1;
+				var b1: int = ba.length > 1 ? ba.readUnsignedByte() : -1;
+				var b2: int = ba.length > 2 ? ba.readUnsignedByte() : -1;
+				var b3: int = ba.length > 3 ? ba.readUnsignedByte() : -1;
+				var b4: int = ba.length > 4 ? ba.readUnsignedByte() : -1;
+				
+//				0x3c 0x3f 0x78 0x6d 0x6c
+				var isXML: Boolean = b0 == 0x3c && b1 == 0x3f && b2 == 0x78 && b3 == 0x6d && b4 == 0x6c;
+				
+				ba.position = 0;
+				
+				if (isXML)
+					return true;
+			} 
+			
+			
 			return getXML(data) != null;
 		}
 	}
