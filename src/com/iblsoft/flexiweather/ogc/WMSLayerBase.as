@@ -1,18 +1,20 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceParsingManager;
 	import com.iblsoft.flexiweather.proj.Projection;
 	
 	import flash.utils.getTimer;
 	
 	import mx.collections.ArrayCollection;
+	import mx.events.CollectionEvent;
 
 	public class WMSLayerBase extends GetCapabilitiesXMLItem
 	{
 		protected var m_parent: WMSLayerGroup;
 		protected var ms_title: String;
 		
-		protected var ma_crsWithBBoxes: ArrayCollection = new ArrayCollection();
-		protected var ma_dimensions: ArrayCollection = new ArrayCollection();
+		protected var ma_crsWithBBoxes: ArrayCollection;
+		protected var ma_dimensions: ArrayCollection;
 			
 		public function WMSLayerBase(parent: WMSLayerGroup, xml: XML, wmsNamespace: Namespace, version: Version)
 		{
@@ -22,8 +24,22 @@ package com.iblsoft.flexiweather.ogc
 			ms_name = String(xml.wms::Name);
 			ms_title = String(xml.wms::Title);
 			
+			ma_dimensions = new ArrayCollection(); 
+			ma_crsWithBBoxes = new ArrayCollection();
+			
+			ma_dimensions.addEventListener(CollectionEvent.COLLECTION_CHANGE, onDimensionsChanged);
+			ma_crsWithBBoxes.addEventListener(CollectionEvent.COLLECTION_CHANGE, onCRSWithBBoxesChanged);
+			
 		}
 		
+		private function onDimensionsChanged(event: CollectionEvent): void
+		{
+			trace(this + " onDimenesionsChanged: " + event.kind);
+		}
+		private function onCRSWithBBoxesChanged(event: CollectionEvent): void
+		{
+			trace(this + " onCRSWithBBoxesChanged: " + event.kind);
+		}
 		public function toString(): String
 		{
 			return "WMSLayer: "+ ms_name + " title: "+ ms_title;
@@ -43,7 +59,7 @@ package com.iblsoft.flexiweather.ogc
 //			
 //		}
 		
-		override public function parse(): void
+		override public function parse(parsingManager: WMSServiceParsingManager = null): void
 		{
 //			trace("\n\n *******************************************************");
 //			trace(this + " size: "+ (m_itemXML.toXMLString()).length);
@@ -69,7 +85,7 @@ package com.iblsoft.flexiweather.ogc
 			
 			var afterParseTime: Number = getTimer();
 			
-			if (parent && parent.dimensions)
+			if (parent && parent.dimensions && parent.dimensions.length > 0)
 			{
 				// inherit dimensions
 				ma_dimensions.addAll(parent.dimensions);
@@ -83,7 +99,7 @@ package com.iblsoft.flexiweather.ogc
 			var afterParseTime2: Number = getTimer();
 			
 			
-			if (parent && parent.crsWithBBoxes)
+			if (parent && parent.crsWithBBoxes && parent.crsWithBBoxes.length > 0)
 			{
 				// inherit CRSs and bounding boxes, this may create some duplication (same CRS defined multiple times)
 				// but this is not a big problem because if search for bounding box we take the first found item. 
@@ -378,6 +394,9 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function destroy(): void
 		{
+			ma_dimensions.removeEventListener(CollectionEvent.COLLECTION_CHANGE, onDimensionsChanged);
+			ma_crsWithBBoxes.removeEventListener(CollectionEvent.COLLECTION_CHANGE, onCRSWithBBoxesChanged);
+			
 			if (ma_crsWithBBoxes && ma_crsWithBBoxes.length > 0)
 			{
 				for each (var crsWithBBox: CRSWithBBox in ma_crsWithBBoxes)

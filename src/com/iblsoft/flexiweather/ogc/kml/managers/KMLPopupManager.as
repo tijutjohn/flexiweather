@@ -111,9 +111,9 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 		
 		private var _checkFeatureVisibilityChange: Boolean;
 
-		public function addPopUp(popUp: IFlexDisplayObject, parent: DisplayObject, feature: KMLFeature, container: InteractiveWidget): IFlexDisplayObject
+		public function addPopUp(popUp: IFlexDisplayObject, parent: DisplayObject, feature: KMLFeature, container: InteractiveWidget, reflectionID: uint): IFlexDisplayObject
 		{
-			var window: IFlexDisplayObject = getPopUpForFeature(feature);
+			var window: IFlexDisplayObject = getPopUpForFeature(feature, reflectionID);
 			if (window)
 			{
 				//window is already opened, do not do anything
@@ -126,7 +126,7 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 			feature.addEventListener(FeatureEvent.COORDINATE_VISIBLE, onCoordinateVisible);
 			popUp.addEventListener(ResizeEvent.RESIZE, onPopupResize);
 			popUp.addEventListener(CloseEvent.CLOSE, onInfoWindowClose);
-			windowsDictionary[popUp] = {feature: feature, window: popUp, container: container};
+			windowsDictionary[popUp] = {feature: feature, window: popUp, container: container, reflection: reflectionID};
 			return popUp;
 		}
 
@@ -179,12 +179,13 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 			return null;
 		}
 
-		public function getPopUpForFeature(feature: KMLFeature): IFlexDisplayObject
+		public function getPopUpForFeature(feature: KMLFeature, reflectionID: uint): IFlexDisplayObject
 		{
 			for each (var winObject: Object in windowsDictionary)
 			{
 				var currFeature: KMLFeature = winObject.feature as KMLFeature;
-				if (feature == currFeature)
+				var currReflectionID: uint = winObject.reflection as uint;
+				if (feature == currFeature && reflectionID == currReflectionID)
 				{
 					var window: IFlexDisplayObject = winObject.window as IFlexDisplayObject;
 					return window;
@@ -208,29 +209,24 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 		private function onCoordinateVisible(event: FeatureEvent): void
 		{
 			var feature: KMLFeature = event.target as KMLFeature
-			var window: IFlexDisplayObject = getPopUpForFeature(feature);
+			var window: IFlexDisplayObject = getPopUpForFeature(feature, event.coordinateReflection);
 			window.visible = event.insideViewBBox; //feature.visible;
 		}
 		
 		private function onCoordinateInvisible(event: FeatureEvent): void
 		{
 			var feature: KMLFeature = event.target as KMLFeature
-			var window: IFlexDisplayObject = getPopUpForFeature(feature);
+			var window: IFlexDisplayObject = getPopUpForFeature(feature, event.coordinateReflection);
 			window.visible = event.insideViewBBox; //feature.visible;
 		}
 		
 		private function onKMLFeatureVisibilityChange(event: KMLFeatureEvent): void
 		{
-//			if (_checkFeatureVisibilityChange)
-//			{
-				var window: IFlexDisplayObject = getPopUpForFeature(event.kmlFeature);
-				window.visible = event.kmlFeature.visible;
-				bringToFront(window);
-				
-				trace("onKMLFeatureVisibilityChange window.visible: " + window.visible);
-//			} else {
-//				trace("visibility is changed, but we are not listening for sucj chhange");
-//			}
+//				var window: IFlexDisplayObject = getPopUpForFeature(event.kmlFeature);
+//				window.visible = event.kmlFeature.visible;
+//				bringToFront(window);
+//				
+//				trace("onKMLFeatureVisibilityChange window.visible: " + window.visible);
 		}
 
 		private function onPopupResize(event: ResizeEvent): void
@@ -242,7 +238,7 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 		
 		private function onKMLFeaturePositionChange(event: KMLFeatureEvent): void
 		{
-			var window: IFlexDisplayObject = getPopUpForFeature(event.kmlFeature);
+			var window: IFlexDisplayObject = getPopUpForFeature(event.kmlFeature, event.reflectionID);
 			
 			var p: Point = event.kmlFeature.getPoint(0);
 			var c: Coord = event.kmlFeature.coordinates[0];

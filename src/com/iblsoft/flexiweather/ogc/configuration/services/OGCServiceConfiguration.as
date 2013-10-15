@@ -23,6 +23,12 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		
 		public var mi_lastUpdateFlashStamp: int = -1000000;
 
+		protected var _xml: XML;
+		public function get xml(): XML
+		{
+			return _xml;
+		}
+		
 		public function OGCServiceConfiguration(s_url: String, s_service: String, version: Version)
 		{
 			ms_fullURL = s_url;

@@ -155,10 +155,10 @@ package com.iblsoft.flexiweather.ogc
 							if (iw.coordInside(currCoord))
 							{
 								featureIsInside = true;
-								notifyCoordinateInside(c, i);
+								notifyCoordinateInside(c, i, currCoordObject.reflection);
 							} else {
 								trace("coord is outside");
-								notifyCoordinateOutside(c, i);
+								notifyCoordinateOutside(c, i, currCoordObject.reflection);
 							}
 						}
 							
@@ -169,7 +169,7 @@ package com.iblsoft.flexiweather.ogc
 						{
 							//coordinates has no reflection, has to be hiden
 							trace("coordinates has no reflection, has to be hiden");
-							notifyCoordinateOutside(c, i);
+							notifyCoordinateOutside(c, i, currCoordObject.reflection);
 						}
 					}
 					if (featureIsInViewBBox != featureIsInside)
@@ -185,15 +185,16 @@ package com.iblsoft.flexiweather.ogc
 		}
 		public var featureIsInViewBBox: Boolean;
 
-		protected function notifyCoordinateInside(coord: Coord, coordIndex: uint): void
+		protected function notifyCoordinateInside(coord: Coord, coordIndex: uint, coordReflection: uint): void
 		{
 			var event: FeatureEvent = new FeatureEvent(FeatureEvent.COORDINATE_VISIBLE, true);
 			event.coordinate = coord;
 			event.coordinateIndex = coordIndex;
+			event.coordinateReflection = coordReflection;
 			dispatchEvent(event);
 		}
 		
-		protected function notifyCoordinateOutside(coord: Coord, coordIndex: uint): void
+		protected function notifyCoordinateOutside(coord: Coord, coordIndex: uint, coordReflection: uint): void
 		{
 			var event: FeatureEvent = new FeatureEvent(FeatureEvent.COORDINATE_INVISIBLE, true);
 			event.coordinate = coord;

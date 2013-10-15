@@ -21,6 +21,7 @@ package com.iblsoft.flexiweather.ogc.configuration
 		public static const EXTENT_CHANGED: String = 'extentChanged';
 		public static const ANIMATION_CHANGED: String = 'animationChanged';
 		public static const DURATION_CHANGED: String = 'durationChanged';
+		public static const DELAY_CHANGED: String = 'delayChanged';
 		public static const DIRECTION_CHANGED: String = 'directionChanged';
 		
 		public static const ANIMATION_TYPE_TO_LAST_FRAME: String = 'to-last-frame';
@@ -29,6 +30,19 @@ package com.iblsoft.flexiweather.ogc.configuration
 		public static const ANIMATION_TYPE_FROM_NOW: String = 'from-now';
 		public static const ANIMATION_TYPE_FULL: String = 'full';
 		public static const ANIMATION_TYPE_USER: String = 'user';
+		
+		public static const ANIMATION_TYPE_TO_LAST_FRAME_LABEL: String = 'To Last Frame';
+		public static const ANIMATION_TYPE_FROM_FIRST_FRAME_LABEL: String = 'From First Frame';
+		public static const ANIMATION_TYPE_TO_NOW_LABEL: String = 'To Now';
+		public static const ANIMATION_TYPE_FROM_NOW_LABEL: String = 'From Now';
+		public static const ANIMATION_TYPE_FULL_LABEL: String = 'Full';
+		public static const ANIMATION_TYPE_USER_LABEL: String = 'User Defined';
+		
+		public static const DEFAULT_DURATION: int = 100;
+		public static const DEFAULT_DURATION_STEP: int = 100;
+		public static const DEFAULT_DELAY: int = 100;
+		public static const DEFAULT_MIN_DURATION: int = 100;
+		public static const DEFAULT_MAX_DURATION: int = 5000;
 		
 		private var _mapVisibleUnderTimeline: Boolean = true;
 	
@@ -41,11 +55,14 @@ package com.iblsoft.flexiweather.ogc.configuration
 		[Bindable]
 		public var timeFormat: String = '%HZ';
 		[Bindable]
-		public var minDuration: int = 100;
+		public var minDuration: int;
 		[Bindable]
-		public var maxDuration: int = 5000;
+		public var maxDuration: int;
 
-		private var _durationStep: int = 100;
+		private var _durationStep: int;
+		private var _duration: int;
+		private var _delay: int;
+		
 		private var _animationExtent: String;
 		private var _animationType: String;
 		private var _animationDirection: String;
@@ -57,10 +74,15 @@ package com.iblsoft.flexiweather.ogc.configuration
 		{
 			super();
 			
+			minDuration = DEFAULT_MIN_DURATION;
+			maxDuration = DEFAULT_MAX_DURATION;
+			_duration = DEFAULT_DURATION;
+			_durationStep = DEFAULT_DURATION_STEP;
+			_delay = DEFAULT_DELAY;
+			
 			reset();
 		}
 
-		private var _duration: int = 1000;
 
 		[Bindable (event=TYPE_CHANGED)]
 		public function get animationType():String
@@ -137,6 +159,21 @@ package com.iblsoft.flexiweather.ogc.configuration
 			dispatchEvent(de);
 		}
 
+		[Bindable (event=DELAY_CHANGED)]
+		public function get delay():int
+		{
+			return _delay;
+		}
+
+		public function set delay(value:int):void
+		{
+			_delay = value;
+			
+			var de: DynamicEvent = new DynamicEvent(DELAY_CHANGED);
+			de['delay'] = _delay;
+			dispatchEvent(de);
+		}
+		
 		[Bindable (event=DURATION_CHANGED)]
 		public function get duration():int
 		{
@@ -196,10 +233,11 @@ package com.iblsoft.flexiweather.ogc.configuration
 			currentTimeFormat = storage.serializeString("current-time-format", currentTimeFormat, '%H:%M %d.%m.%Y');
 			dateFormat = storage.serializeString("date-format", dateFormat, '%d-%m');
 			dateFormat = storage.serializeString("time-format", dateFormat, '%HZ');
-			duration = storage.serializeInt("duration", duration, 1000);
-			durationStep = storage.serializeInt("duration-step", durationStep, 100);
-			minDuration = storage.serializeInt("min-duration", minDuration, 100);
-			maxDuration = storage.serializeInt("max-duration", maxDuration, 5000);
+			delay = storage.serializeInt("delay", delay, DEFAULT_DELAY);
+			duration = storage.serializeInt("duration", duration, DEFAULT_DURATION);
+			durationStep = storage.serializeInt("duration-step", durationStep, DEFAULT_DURATION_STEP);
+			minDuration = storage.serializeInt("min-duration", minDuration, DEFAULT_MIN_DURATION);
+			maxDuration = storage.serializeInt("max-duration", maxDuration, DEFAULT_MAX_DURATION);
 			animationType = storage.serializeString("animation-type", animationType, null);
 			
 			if (animationType == ANIMATION_TYPE_USER)
@@ -226,7 +264,8 @@ package com.iblsoft.flexiweather.ogc.configuration
 			animationDirection = AnimationDirection.ANIMATION_DIRECTION_FORWARD;
 			animationType = ANIMATION_TYPE_FULL;
 			animationExtent = 'PT1H';
-			duration = 1000;
+			duration = 100;
+			delay = 100;
 		}
 	}
 }

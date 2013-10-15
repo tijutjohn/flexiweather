@@ -1,5 +1,7 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceParsingManager;
+
 	public class GetCapabilitiesXMLItem
 	{
 		protected var ms_name: String;
@@ -26,12 +28,12 @@ package com.iblsoft.flexiweather.ogc
 			return ms_name;
 		}
 		
-		public function initialize(): void
+		public function initialize(parsingManager: WMSServiceParsingManager = null): void
 		{
 			mb_isInitialized = true;
 		}
 		
-		public function parse(): void
+		public function parse(parsingManager: WMSServiceParsingManager = null): void
 		{
 			mb_isParsed = true;	
 		}

@@ -1,5 +1,7 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceParsingManager;
+	
 	import flash.utils.Dictionary;
 	import flash.utils.getTimer;
 	
@@ -24,65 +26,86 @@ package com.iblsoft.flexiweather.ogc
 		 * @param bParse
 		 * 
 		 */		
-		override public function initialize():void
+		override public function initialize(parsingManager: WMSServiceParsingManager = null):void
 		{
 			var currTime: Number = getTimer();
 
-			super.initialize();
+			super.initialize(parsingManager);
 			
 			for each (var layer: XML in m_itemXML.wms::Layer)
 			{
-				var layerTime: Number = getTimer();
-				
-				if (layer.wms::Layer.length() == 0) {
-					var wmsLayer: WMSLayer = new WMSLayer(this, layer, wms, m_version);
-					
-					/**
-					 * we call initialize() instead of parse() method to create instances, but not parse whole data.
-					 * They will be parsed, when they will be needed
-					 */
-					wmsLayer.initialize();
-					
-					ma_layersDictionary[wmsLayer.name] = new LayerDataItem(wmsLayer, LayerDataItem.LAYER);
-					ma_layers.addItem(wmsLayer);
-//					trace("\n" + this + " initialize layer: "+ wmsLayer.toString() + " total time: " + (getTimer() - layerTime) + "ms");
-				} else {
-					var wmsLayerGroup: WMSLayerGroup = new WMSLayerGroup(this, layer, wms, m_version);
-					
-					wmsLayerGroup.initialize();
-					
-					_groups++;
-					
-					ma_layersDictionary["group"+_groups] = new LayerDataItem(wmsLayerGroup, LayerDataItem.LAYER_GROUP);
-					ma_layers.addItem(wmsLayerGroup);
-//					trace("\n" + this + " initialize layerGroup: "+ wmsLayerGroup.toString() + " total time: " + (getTimer() - layerTime) + "ms");
-				}
+				if (parsingManager)
+					parsingManager.addCall({obj: this.toString()+"Initialize"}, initializeLayer, [layer, parsingManager]);
+				else
+					initializeLayer(layer);
 			}
 			
 //			trace(this + " initialize total time: " + (getTimer() - currTime) + "ms");
 		}
 		
-		override public function parse():void
+		public function initializeLayer(layer: XML, parsingManager: WMSServiceParsingManager = null): void
+		{
+			var layerTime: Number = getTimer();
+			
+			if (layer.wms::Layer.length() == 0) {
+				var wmsLayer: WMSLayer = new WMSLayer(this, layer, wms, m_version);
+				
+				/**
+				 * we call initialize() instead of parse() method to create instances, but not parse whole data.
+				 * They will be parsed, when they will be needed
+				 */
+				wmsLayer.initialize(parsingManager);
+				
+				ma_layersDictionary[wmsLayer.name] = new LayerDataItem(wmsLayer, LayerDataItem.LAYER);
+				ma_layers.addItem(wmsLayer);
+				//					trace("\n" + this + " initialize layer: "+ wmsLayer.toString() + " total time: " + (getTimer() - layerTime) + "ms");
+			} else {
+				var wmsLayerGroup: WMSLayerGroup = new WMSLayerGroup(this, layer, wms, m_version);
+				
+				wmsLayerGroup.initialize(parsingManager);
+				
+				_groups++;
+				
+				ma_layersDictionary["group"+_groups] = new LayerDataItem(wmsLayerGroup, LayerDataItem.LAYER_GROUP);
+				ma_layers.addItem(wmsLayerGroup);
+				//					trace("\n" + this + " initialize layerGroup: "+ wmsLayerGroup.toString() + " total time: " + (getTimer() - layerTime) + "ms");
+			}
+		}
+		
+		override public function parse(parsingManager: WMSServiceParsingManager = null):void
 		{
 			var currTime: Number = getTimer();
 
-			super.parse();
+			super.parse(parsingManager);
 			
 //			for each (var layer: XML in m_itemXML.wms::Layer)
 			for each (var wmsLayerItem: LayerDataItem in ma_layersDictionary)
 			{
-				var layerTime: Number = getTimer();
-				
+//				var layerTime: Number = getTimer();
 //				if (wmsLayerItem.layer.name.indexOf("temper") > 0)
 //				{
 //					trace("debug Temperature layer");
 //				}
+
+				if (parsingManager)
+					parsingManager.addCall({obj: this.toString()+"Parse"}, parseLayerItem, [wmsLayerItem, parsingManager]);
+				else
+					wmsLayerItem.layer.parse();
 				
-				wmsLayerItem.layer.parse();
 //				trace("\n" + this + " parse layer: "+ wmsLayerItem.layer.toString() + " total time: " + (getTimer() - layerTime) + "ms");
 			}
 			
 //			trace(this + " parse total time: " + (getTimer() - currTime) + "ms");
+		}
+		
+		public function parseLayerItem(wmsLayerItem: LayerDataItem, parsingManager: WMSServiceParsingManager): void
+		{
+//			var layerTime: Number = getTimer();
+			if (wmsLayerItem.type == LayerDataItem.LAYER)
+				wmsLayerItem.layer.parse(parsingManager);
+			else
+				parsingManager.addCall(this, wmsLayerItem.layer.parse, [parsingManager]);
+				
 		}
 
 		override public function toString(): String

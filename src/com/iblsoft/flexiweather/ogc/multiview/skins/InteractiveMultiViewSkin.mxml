@@ -38,6 +38,8 @@
 			 */
 			override protected function updateDisplayList(unscaledWidth: Number, unscaledHeight: Number): void
 			{
+				trace("IMWSkin updateDisplayList " + unscaledWidth + " , " + unscaledHeight);
+				
 				if (getStyle("borderVisible") == false)
 				{
 					if (border)
@@ -69,8 +71,8 @@
 				{
 					selectedBorder.left = hostComponent.selectionL;
 					selectedBorder.top = hostComponent.selectionT;
-					selectedBorder.right = hostComponent.selectionR;
-					selectedBorder.bottom = hostComponent.selectionB;
+					selectedBorder.width = hostComponent.selectionWidth;
+					selectedBorder.height = hostComponent.selectionHeight;
 					selectedBorderStroke.color = getStyle("selectedBorderColor");
 					selectedBorderStroke.alpha = getStyle("selectedBorderAlpha");
 				}
@@ -88,7 +90,7 @@
 		<s:stroke>
 
 			<!--- border stroke @private -->
-			<s:SolidColorStroke id="borderStroke" weight="1"/>
+			<s:SolidColorStroke id="borderStroke" weight="1" caps="square" joints="miter" pixelHinting="true" scaleMode="none"/>
 		</s:stroke>
 	</s:Rect>
 	
@@ -108,11 +110,11 @@
 	</s:DataGroup>
 
 	<!--- @private -->
-	<s:Rect id="selectedBorder">
+	<s:Rect id="selectedBorder" radiusX="0" radiusY="0">
 		<s:stroke>
 
 			<!--- border stroke @private -->
-			<s:SolidColorStroke id="selectedBorderStroke" weight="3"/>
+			<s:SolidColorStroke id="selectedBorderStroke" weight="{hostComponent.selectedBorderWeight}" caps="square" joints="miter" pixelHinting="true" scaleMode="none"/>
 		</s:stroke>
 	</s:Rect>
 	

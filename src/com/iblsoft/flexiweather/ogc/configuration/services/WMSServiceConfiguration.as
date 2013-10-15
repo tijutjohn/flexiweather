@@ -14,13 +14,16 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 	import com.iblsoft.flexiweather.ogc.events.ServiceCapabilitiesEvent;
 	import com.iblsoft.flexiweather.ogc.managers.OGCServiceConfigurationManager;
 	import com.iblsoft.flexiweather.ogc.managers.ProjectionConfigurationManager;
+	import com.iblsoft.flexiweather.utils.AsyncManager;
 	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.widgets.BackgroundJob;
 	import com.iblsoft.flexiweather.widgets.BackgroundJobManager;
 	
 	import flash.events.DataEvent;
+	import flash.events.Event;
 	import flash.net.URLRequest;
+	import flash.utils.getTimer;
 	
 	import mx.collections.ArrayCollection;
 
@@ -128,8 +131,8 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 			//			trace(this + " onCapabilitiesLoaded");
 			if (event.result is XML)
 			{
-				var xml: XML = event.result as XML;
-				parseGetCapabilities(xml);
+				_xml = event.result as XML;
+				parseGetCapabilities(_xml);
 			}
 		}
 		
@@ -159,44 +162,114 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 
 		
 
+		public function forcedParseGetCapabilities(xml: XML): void
+		{
+			var currAllowedParsing: Boolean = PARSE_GET_CAPABILITIES;
+			
+			PARSE_GET_CAPABILITIES = true;
+			parseGetCapabilities(xml);
+			PARSE_GET_CAPABILITIES = currAllowedParsing;
+		}
+		
 		public function parseGetCapabilities(xml: XML): void
 		{
-			trace("parseGetCapabilities fullURL: " + fullURL);
+			trace("\nparseGetCapabilities fullURL: " + fullURL);
 			var s_version: String = xml.@version;
 			var version: Version = Version.fromString(s_version);
 			var wms: Namespace = version.isLessThan(1, 3, 0)
 				? new Namespace() : new Namespace("http://www.opengis.net/wms");
 			var capability: XML = xml.wms::Capability[0];
 			
+			var time: Number = getTimer();
+			
 			getGetMapImageFormats(capability);
 			
 			if (capability != null)
 			{
+				var bUseParsingManager: Boolean = false;
+				
+				var parsingManager: WMSServiceParsingManager = new WMSServiceParsingManager('wmsServiceParsingManager');
+				parsingManager.maxCallsPerTick = 50;
+				parsingManager.xml = xml;
+				parsingManager.addEventListener(AsyncManager.EMPTY, onGetCapabilitiesInitialized);
+				
 				try
 				{
 					var layer: XML = capability.wms::Layer[0];
 					m_layers = new WMSLayerGroup(null, layer, wms, version);
-					
-					m_layers.initialize();
-					
-					if (PARSE_GET_CAPABILITIES)
-						m_layers.parse();
+				
+					if (bUseParsingManager)
+						m_layers.initialize(parsingManager);
+					else
+						m_layers.initialize();
 					
 				}
 				catch (e: Error)
 				{
 					trace("WMSServiceConfiguration error: " + e.message);
 				}
-				m_capabilities = xml;
-				dispatchEvent(new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, true));
+				
+				if (bUseParsingManager)
+				{
+					parsingManager.start();
+				} else {
+					if (PARSE_GET_CAPABILITIES)
+						m_layers.parse();
+				}
+				
 			}
 			
 			if (PARSE_GET_CAPABILITIES)
 				addSupportedProjections();
 			
+			if (!bUseParsingManager)
+			{
+				m_capabilities = parsingManager.xml;
+				dispatchEvent(new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, true));
+				
+				parsingManager.xml = null;
+				parsingManager = null;;
+			}
+			
+			trace("WMSServiceConfiguration: " + fullURL + " parsing time: " + (getTimer() - time) + "ms\n");
 		}
 		
+		private function onGetCapabilitiesInitialized(event: Event): void
+		{
+			trace("onGetCapabilitiesInitialized");
+			var parsingManager: WMSServiceParsingManager = event.target as WMSServiceParsingManager;
+			parsingManager.removeEventListener(AsyncManager.EMPTY, onGetCapabilitiesInitialized);
+			
+			if (PARSE_GET_CAPABILITIES) {
+				trace("Start PARSING");
+				parsingManager.maxCallsPerTick = 5;
+				parsingManager.addEventListener(AsyncManager.EMPTY, onGetCapabilitiesParsed);
+				
+				m_layers.parse(parsingManager);
+				
+				parsingManager.start();
+			} else {
+				finishGetCapabitilitiesParsing(parsingManager);
+			}
+			
+		}
+		private function onGetCapabilitiesParsed(event: Event): void
+		{
+			trace("onGetCapabilitiesParsed");
+			var parsingManager: WMSServiceParsingManager = event.target as WMSServiceParsingManager;
+			parsingManager.removeEventListener(AsyncManager.EMPTY, onGetCapabilitiesParsed);
+			
+			finishGetCapabitilitiesParsing(parsingManager);
+		}
 		
+		private function finishGetCapabitilitiesParsing(parsingManager: WMSServiceParsingManager): void
+		{
+			m_capabilities = parsingManager.xml;
+			dispatchEvent(new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, true));
+			
+			parsingManager.xml = null;
+			parsingManager = null;;
+		}
 		
 		private function addSupportedProjections(): void
 		{

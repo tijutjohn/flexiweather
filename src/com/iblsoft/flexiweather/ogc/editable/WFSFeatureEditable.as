@@ -140,21 +140,21 @@ package com.iblsoft.flexiweather.ogc.editable
 			dispatchEvent(event);
 		}
 
-		override protected function notifyCoordinateInside(coord: Coord, coordIndex: uint): void
+		override protected function notifyCoordinateInside(coord: Coord, coordIndex: uint, coordReflection: uint): void
 		{
-			super.notifyCoordinateInside(coord, coordIndex);
+			super.notifyCoordinateInside(coord, coordIndex, coordReflection);
 			
-			changeMoveablePointVisibility(coord, coordIndex, true);
+			changeMoveablePointVisibility(coord, coordIndex, coordReflection, true);
 		}
 		
-		override protected function notifyCoordinateOutside(coord: Coord, coordIndex: uint): void
+		override protected function notifyCoordinateOutside(coord: Coord, coordIndex: uint, coordReflection: uint): void
 		{
-			super.notifyCoordinateOutside(coord, coordIndex);
+			super.notifyCoordinateOutside(coord, coordIndex, coordReflection);
 		
-			changeMoveablePointVisibility(coord, coordIndex, false);
+			changeMoveablePointVisibility(coord, coordIndex, coordReflection, false);
 		}
 		
-		private function changeMoveablePointVisibility(coord: Coord, coordIndex: uint, visible: Boolean): void
+		private function changeMoveablePointVisibility(coord: Coord, coordIndex: uint, coordReflection: uint, visible: Boolean): void
 		{
 			//hide correct moveable points
 			

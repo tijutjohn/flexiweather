@@ -133,7 +133,9 @@ package com.iblsoft.flexiweather.ogc.managers
 				storage.serialize('area', defaultArea);
 				defaultArea.name = "CustomArea " + defaultArea.projection.crs;
 				if (defaultArea.isDefaultArea)
+				{
 					_defaultArea = defaultArea;
+				}
 			}
 			
 		}
@@ -173,14 +175,21 @@ package com.iblsoft.flexiweather.ogc.managers
 		public function makeDefaultArea(bbox: BBox, crs: String): void
 		{
 			var projConfig: ProjectionConfiguration = ProjectionConfigurationManager.getInstance().getProjectionForCRS(crs);
-			var newProjectionConfiguration: ProjectionConfiguration = new ProjectionConfiguration(crs, bbox, projConfig.proj4String);
-				
-			if (!_defaultArea)
+			if (projConfig)
 			{
-				_defaultArea = new AreaConfiguration();
-				trace("There were no previous default area!");
+				var newProjectionConfiguration: ProjectionConfiguration = new ProjectionConfiguration(crs, bbox, projConfig.proj4String);
+					
+				if (!_defaultArea)
+				{
+					_defaultArea = new AreaConfiguration();
+					trace("There were no previous default area!");
+				}
+				_defaultArea.projection = newProjectionConfiguration;
+			} else {
+				trace("makeDefaultArea can not find projConfig for projetion: " + crs);
 			}
-			_defaultArea.projection = newProjectionConfiguration
+				
+				
 		}
 		
 		private var _defaultArea: AreaConfiguration;

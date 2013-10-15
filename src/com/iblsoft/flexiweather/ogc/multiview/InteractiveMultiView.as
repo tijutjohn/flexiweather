@@ -244,9 +244,22 @@ package com.iblsoft.flexiweather.ogc.multiview
 
 		private var m_widgetCommonLayers: Array;
 		
+		
+		[Bindable]
+		public var selectedBorderWeight:  Number;
+		public var selectionL:  Number;
+		public var selectionT:  Number;
+		public var selectionWidth:  Number;
+		public var selectionHeight:  Number;
+		public var selectionR:  Number;
+		public var selectionB:  Number;
+		
 		public function InteractiveMultiView()
 		{
 			super();
+			
+			selectedBorderWeight = 3;
+			
 			_interactiveWidgets = new WidgetCollection();
 			setStyle('skinClass', InteractiveMultiViewSkin);
 			_cacheManager = new WMSCacheManager();
@@ -1609,31 +1622,44 @@ package com.iblsoft.flexiweather.ogc.multiview
 		{
 			invalidateDisplayList();
 		}
-		public var selectionL: int;
-		public var selectionT: int;
-		public var selectionR: int;
-		public var selectionB: int;
+		
 
 		override protected function updateDisplayList(unscaledWidth: Number, unscaledHeight: Number): void
 		{
 			super.updateDisplayList(unscaledWidth, unscaledHeight);
+			var horizontalGap: int = 0;
+			var verticalGap: int = 0;
+			var columnWidth: Number = 1;
+			var rowHeight: Number = 1;
+			
 			if (dataGroup)
 			{
 				if (dataGroup.layout is TileLayout)
 				{
 					var tileLayout: TileLayout = (dataGroup.layout as TileLayout);
-					(dataGroup.layout as TileLayout).columnWidth = dataGroup.width / tileLayout.columnCount;
-					(dataGroup.layout as TileLayout).rowHeight = dataGroup.height / tileLayout.rowCount;
+					horizontalGap = tileLayout.horizontalGap;
+					verticalGap = tileLayout.verticalGap;
+					columnWidth = (dataGroup.layout as TileLayout).columnWidth = dataGroup.width / tileLayout.columnCount;
+					rowHeight = (dataGroup.layout as TileLayout).rowHeight = dataGroup.height / tileLayout.rowCount;
 				}
-			}
-			debugWidgets();
-			if (selectedInteractiveWidget)
-			{
-				selectionL = selectedInteractiveWidget.x;
-				selectionT = selectedInteractiveWidget.y;
-				selectionR = unscaledWidth - (selectionL + selectedInteractiveWidget.width) - 1;
-				selectionB = unscaledHeight - (selectionT + selectedInteractiveWidget.height) - 1;
-				skin.invalidateDisplayList();
+				debugWidgets();
+				if (selectedInteractiveWidget)
+				{
+					selectionL = selectedInteractiveWidget.x + 1;
+					selectionT = selectedInteractiveWidget.y + 1;
+					selectionWidth = Math.ceil(selectedInteractiveWidget.width - 1 * selectedBorderWeight);
+					selectionHeight = Math.ceil(selectedInteractiveWidget.height - 1 * selectedBorderWeight);
+					
+					var selectedColumnFromRight: int = tileLayout.columnCount - selectionL / columnWidth;
+					var selectedRowFromBottom: int = tileLayout.rowCount - selectionT / rowHeight;
+						
+					selectionR = dataGroup.width - (selectionL + selectedInteractiveWidget.width) - (horizontalGap * selectedColumnFromRight);
+					selectionB = dataGroup.height - (selectionT + selectedInteractiveWidget.height) - (verticalGap * selectedRowFromBottom);
+					trace("InMultiView: selectionL: " + selectionL + "  selectionR: " + selectionR + " selectedInteractiveWidget.width: " + selectedInteractiveWidget.width);
+					trace("InMultiView: selectedColumnFromRight: " + selectedColumnFromRight + "  selectedRowFromBottom: " + selectedRowFromBottom);
+					trace("InMultiView: dataGroup.width: " + dataGroup.width + "  unscaledWidth: " + unscaledWidth);
+					skin.invalidateDisplayList();
+				}
 			}
 			
 			disabledUI.includeInLayout = disabledUI.visible = !enabled || !_watchChanges;

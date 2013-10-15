@@ -1322,11 +1322,14 @@ package com.iblsoft.flexiweather.ogc
 		public function getWMSLayers(): Array
 		{
 			var a: Array = [];
-			for each (var s_layerName: String in m_cfg.layerNames)
+			if (m_cfg.wmsService)
 			{
-				var layer: WMSLayer = m_cfg.wmsService.getLayerByName(s_layerName);
-				if (layer != null)
-					a.push(layer);
+				for each (var s_layerName: String in m_cfg.layerNames)
+				{
+					var layer: WMSLayer = m_cfg.wmsService.getLayerByName(s_layerName);
+					if (layer != null)
+						a.push(layer);
+				}
 			}
 			return a;
 		}

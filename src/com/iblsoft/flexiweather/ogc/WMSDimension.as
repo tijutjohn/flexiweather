@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceParsingManager;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariableValue;
 	import com.iblsoft.flexiweather.utils.Duration;
 	import com.iblsoft.flexiweather.utils.ISO8601Parser;
@@ -34,7 +35,7 @@ package com.iblsoft.flexiweather.ogc
 //			super.initialize();
 //		}			
 		
-		override public function parse(): void
+		override public function parse(parsingManager: WMSServiceParsingManager = null): void
 		{
 			super.parse();
 			

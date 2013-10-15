@@ -165,7 +165,10 @@ package com.iblsoft.flexiweather.ogc.kml
 			while (featuresForUnloading.length > 0)
 			{
 				var currFeature: KMLFeature = featuresForUnloading.shift() as KMLFeature;
-				var window: IFlexDisplayObject = KMLPopupManager.getInstance().getPopUpForFeature(currFeature);
+				
+				//FIXME we need to have reflectionIDs
+				var reflectionID: uint = 0;
+				var window: IFlexDisplayObject = KMLPopupManager.getInstance().getPopUpForFeature(currFeature, reflectionID);
 				if (window)
 					KMLPopupManager.getInstance().removePopUp(window);
 				if (canContainFeatures(currFeature))
@@ -401,6 +404,7 @@ package com.iblsoft.flexiweather.ogc.kml
 			{
 				var ke: KMLFeatureEvent = new KMLFeatureEvent(KMLFeatureEvent.KML_FEATURE_CLICK, true, true);
 				ke.kmlFeature = featureClicked;
+				ke.reflectionID = -1;
 				dispatchEvent(ke);
 			}
 			return featureClicked != null;
@@ -409,7 +413,7 @@ package com.iblsoft.flexiweather.ogc.kml
 		private function onKMLFeatureClick(event: KMLFeatureEvent): void
 		{
 			if (!event.isDefaultPrevented())
-				openInfoWindow(event.kmlFeature);
+				openInfoWindow(event.kmlFeature, event.reflectionID);
 		}
 
 		private function checkKMLFeatureMouseEvent(event: MouseEvent, dispatchType: String, bDispatchEvent: Boolean = true): KMLFeature
@@ -435,15 +439,18 @@ package com.iblsoft.flexiweather.ogc.kml
 			return null;
 		}
 
-		private function openInfoWindow(feature: KMLFeature): void
+		private function openInfoWindow(feature: KMLFeature, reflectionID: int): void
 		{
 			var kmlPM: KMLPopupManager = KMLPopupManager.getInstance();
-			var infoWindow: KMLInfoWindow = kmlPM.getPopUpForFeature(feature) as KMLInfoWindow;
+			var infoWindow: KMLInfoWindow = kmlPM.getPopUpForFeature(feature, reflectionID) as KMLInfoWindow;
 			if (!infoWindow)
 			{
+				if (reflectionID == -1)
+					reflectionID = 0;
+				
 				infoWindow = new KMLInfoWindow();
 				infoWindow.feature = feature;
-				infoWindow = kmlPM.addPopUp(infoWindow, FlexGlobals.topLevelApplication as DisplayObject, feature, this.container) as KMLInfoWindow;
+				infoWindow = kmlPM.addPopUp(infoWindow, FlexGlobals.topLevelApplication as DisplayObject, feature, this.container, reflectionID) as KMLInfoWindow;
 				infoWindow.addEventListener(FlexEvent.CREATION_COMPLETE, onInfoWindowCreated);
 			} else {
 				kmlPM.centerPopUpOnFeature(infoWindow);

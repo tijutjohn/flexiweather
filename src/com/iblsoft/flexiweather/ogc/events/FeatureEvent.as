@@ -15,10 +15,22 @@ package com.iblsoft.flexiweather.ogc.events
 		
 		public var coordinate: Coord;
 		public var coordinateIndex: uint;
+		public var coordinateReflection: uint;
 
 		public function FeatureEvent(type: String, bubbles: Boolean = false, cancelable: Boolean = false)
 		{
 			super(type, bubbles, cancelable);
+		}
+		
+		override public function clone():Event
+		{
+			var fe: FeatureEvent = new FeatureEvent(type, bubbles, cancelable);
+			fe.insideViewBBox = insideViewBBox;
+			fe.coordinate = coordinate;
+			fe.coordinateIndex = coordinateIndex;
+			fe.coordinateReflection = coordinateReflection;
+			
+			return fe;
 		}
 	}
 }

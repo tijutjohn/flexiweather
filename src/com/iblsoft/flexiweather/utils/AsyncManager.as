@@ -23,6 +23,7 @@ package com.iblsoft.flexiweather.utils
 			return false;
 		}
 		private var _maxCallsPerTick: int;
+		private var _maxFrameDuration: Number;
 
 		public function get maxCallsPerTick(): int
 		{
