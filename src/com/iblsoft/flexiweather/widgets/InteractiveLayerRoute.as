@@ -3,6 +3,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
 	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionDictionary;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureData;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.draw.DrawMode;
@@ -338,7 +339,8 @@ package com.iblsoft.flexiweather.widgets
 			
 			if (_ma_coords.length > 1)
 			{
-				container.drawGeoPolyLine(getRouteRenderer, _ma_coords.source, _drawMode);
+				var featureData: FeatureData = new FeatureData('layerRoute');
+				container.drawGeoPolyLine(getRouteRenderer, _ma_coords.source, _drawMode, true, false, featureData);
 			}
 			
 			//draw points
