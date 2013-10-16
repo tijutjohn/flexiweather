@@ -34,11 +34,11 @@ package com.iblsoft.flexiweather.ogc
 		
 		private function onDimensionsChanged(event: CollectionEvent): void
 		{
-			trace(this + " onDimenesionsChanged: " + event.kind);
+//			trace(this + " onDimenesionsChanged: " + event.kind);
 		}
 		private function onCRSWithBBoxesChanged(event: CollectionEvent): void
 		{
-			trace(this + " onCRSWithBBoxesChanged: " + event.kind);
+//			trace(this + " onCRSWithBBoxesChanged: " + event.kind);
 		}
 		public function toString(): String
 		{
