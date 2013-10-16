@@ -28,7 +28,7 @@ package com.iblsoft.flexiweather.proj
 				new BBox(-180, -90, 180, 90), true);
 		Projection.addCRSByProj4(
 				"EPSG:4326", 
-				"+title=WGS 84 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs", 
+				"+title=WGS 84 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +units=degrees", 
 				new BBox(-180, -90, 180, 90), true);
 		
 //		Projection.setCRSExtentBBox(
