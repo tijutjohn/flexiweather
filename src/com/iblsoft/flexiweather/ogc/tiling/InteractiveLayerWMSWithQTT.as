@@ -173,6 +173,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		override protected function onCapabilitiesUpdated(event: DataEvent = null): void
 		{
+			if (!container)
+				return;
+			
 			updateTiledLayerCRSs();
 			if (m_tiledLayer)
 			{

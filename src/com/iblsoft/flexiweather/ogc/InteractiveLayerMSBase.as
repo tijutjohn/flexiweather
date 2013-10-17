@@ -641,7 +641,10 @@ package com.iblsoft.flexiweather.ogc
 		 */
 		override public function getFullURL(): String
 		{
-			return getGetMapFullUrl(int(container.width), int(container.height));
+			if (container)
+				return getGetMapFullUrl(int(container.width), int(container.height));
+			
+			return getGetMapFullUrl(0,0);
 		}
 
 		private function getGetMapFullUrl(width: int, height: int): String
