@@ -36,7 +36,11 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		 * Set to "true" if GetCapabilities request needs to be parsed immediately. If it is set to "false" GetCapabilities items will be parsed when they will be needed 
 		 */		
 		public static var PARSE_GET_CAPABILITIES: Boolean = true;
-			
+		/**
+		 * Set to "true" if GetCapabilities will be parsed asynchronous and not in one loop 
+		 */		
+		public static var USE_ASYNCHRONOUS_PARSING: Boolean = false;
+		
 		private var m_capabilitiesLoader: XMLLoader = new XMLLoader();
 		private var m_capabilities: XML = null;
 		private var _m_capabilitiesLoadJob: BackgroundJob = null;
@@ -186,21 +190,23 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 			
 			if (capability != null)
 			{
-				var bUseParsingManager: Boolean = false;
-				
-				var parsingManager: WMSServiceParsingManager = new WMSServiceParsingManager('wmsServiceParsingManager');
-				parsingManager.maxCallsPerTick = 50;
-				parsingManager.xml = xml;
-				parsingManager.addEventListener(AsyncManager.EMPTY, onGetCapabilitiesInitialized);
+				if (USE_ASYNCHRONOUS_PARSING)
+				{
+					var parsingManager: WMSServiceParsingManager = new WMSServiceParsingManager('wmsServiceParsingManager');
+					parsingManager.maxCallsPerTick = 50;
+					parsingManager.xml = xml;
+					parsingManager.addEventListener(AsyncManager.EMPTY, onGetCapabilitiesInitialized);
+				}
 				
 				try
 				{
 					var layer: XML = capability.wms::Layer[0];
 					m_layers = new WMSLayerGroup(null, layer, wms, version);
 				
-					if (bUseParsingManager)
+					if (USE_ASYNCHRONOUS_PARSING) {
 						m_layers.initialize(parsingManager);
-					else
+						parsingManager.start();
+					} else
 						m_layers.initialize();
 					
 				}
@@ -209,26 +215,19 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 					trace("WMSServiceConfiguration error: " + e.message);
 				}
 				
-				if (bUseParsingManager)
+				if (!USE_ASYNCHRONOUS_PARSING && PARSE_GET_CAPABILITIES)
 				{
-					parsingManager.start();
-				} else {
-					if (PARSE_GET_CAPABILITIES)
-						m_layers.parse();
+					m_layers.parse();
 				}
 				
 			}
 			
-			if (PARSE_GET_CAPABILITIES)
-				addSupportedProjections();
-			
-			if (!bUseParsingManager)
+			if (!USE_ASYNCHRONOUS_PARSING && PARSE_GET_CAPABILITIES)
 			{
-				m_capabilities = parsingManager.xml;
-				dispatchEvent(new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, true));
+				addSupportedProjections();
 				
-				parsingManager.xml = null;
-				parsingManager = null;;
+				m_capabilities = xml;
+				dispatchEvent(new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, true));
 			}
 			
 			trace("WMSServiceConfiguration: " + fullURL + " parsing time: " + (getTimer() - time) + "ms\n");
@@ -237,19 +236,21 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		private function onGetCapabilitiesInitialized(event: Event): void
 		{
 			trace("onGetCapabilitiesInitialized");
-			var parsingManager: WMSServiceParsingManager = event.target as WMSServiceParsingManager;
-			parsingManager.removeEventListener(AsyncManager.EMPTY, onGetCapabilitiesInitialized);
 			
 			if (PARSE_GET_CAPABILITIES) {
 				trace("Start PARSING");
+			
+				var parsingManager: WMSServiceParsingManager = event.target as WMSServiceParsingManager;
+				parsingManager.removeEventListener(AsyncManager.EMPTY, onGetCapabilitiesInitialized);
+				
 				parsingManager.maxCallsPerTick = 5;
 				parsingManager.addEventListener(AsyncManager.EMPTY, onGetCapabilitiesParsed);
-				
+			
 				m_layers.parse(parsingManager);
-				
 				parsingManager.start();
+				
 			} else {
-				finishGetCapabitilitiesParsing(parsingManager);
+				finishGetCapabitilitiesParsing(parsingManager.xml, parsingManager);
 			}
 			
 		}
@@ -259,16 +260,19 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 			var parsingManager: WMSServiceParsingManager = event.target as WMSServiceParsingManager;
 			parsingManager.removeEventListener(AsyncManager.EMPTY, onGetCapabilitiesParsed);
 			
-			finishGetCapabitilitiesParsing(parsingManager);
+			finishGetCapabitilitiesParsing(parsingManager.xml, parsingManager);
 		}
 		
-		private function finishGetCapabitilitiesParsing(parsingManager: WMSServiceParsingManager): void
+		private function finishGetCapabitilitiesParsing(xml: XML, parsingManager: WMSServiceParsingManager = null): void
 		{
-			m_capabilities = parsingManager.xml;
+			
+			m_capabilities = xml;
 			dispatchEvent(new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, true));
 			
-			parsingManager.xml = null;
-			parsingManager = null;;
+			if (USE_ASYNCHRONOUS_PARSING) {
+				parsingManager.xml = null;
+				parsingManager = null;
+			}
 		}
 		
 		private function addSupportedProjections(): void

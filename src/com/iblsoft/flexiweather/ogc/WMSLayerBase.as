@@ -23,13 +23,17 @@ package com.iblsoft.flexiweather.ogc
 			m_parent = parent;
 			ms_name = String(xml.wms::Name);
 			ms_title = String(xml.wms::Title);
+		}
+		
+		override public function initialize(parsingManager: WMSServiceParsingManager = null): void
+		{
+			super.initialize(parsingManager);
 			
 			ma_dimensions = new ArrayCollection(); 
 			ma_crsWithBBoxes = new ArrayCollection();
 			
 			ma_dimensions.addEventListener(CollectionEvent.COLLECTION_CHANGE, onDimensionsChanged);
 			ma_crsWithBBoxes.addEventListener(CollectionEvent.COLLECTION_CHANGE, onCRSWithBBoxesChanged);
-			
 		}
 		
 		private function onDimensionsChanged(event: CollectionEvent): void

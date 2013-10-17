@@ -9,7 +9,7 @@ package com.iblsoft.flexiweather.ogc
 
 	public class WMSLayerGroup extends WMSLayerBase
 	{
-		private var ma_layers: ArrayCollection = new ArrayCollection();
+		private var ma_layers: ArrayCollection;
 		private var ma_layersDictionary: Dictionary
 		private var _groups: int;
 		
@@ -18,7 +18,6 @@ package com.iblsoft.flexiweather.ogc
 			super(parent, xml, wms, version);
 		
 			_groups = 0;
-			ma_layersDictionary = new Dictionary();
 		}
 		
 		/**
@@ -31,6 +30,9 @@ package com.iblsoft.flexiweather.ogc
 			var currTime: Number = getTimer();
 
 			super.initialize(parsingManager);
+
+			ma_layers = new ArrayCollection();
+			ma_layersDictionary = new Dictionary();
 			
 			for each (var layer: XML in m_itemXML.wms::Layer)
 			{
