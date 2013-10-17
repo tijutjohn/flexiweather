@@ -953,8 +953,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 		{
 			if (widget)
 			{
-				updatePreloaderLabel(widget, "Map initialized.", 100, 100);
-				setTimeout(hidePreloader, 2000, widget);
+				updatePreloaderLabel(widget, "Map initialised.", 100, 100);
+				setTimeout(hidePreloader, 500, widget);
 			}
 		}
 		

@@ -534,6 +534,7 @@ package com.iblsoft.flexiweather.widgets
 				addElementAt(l, index);
 			else
 				addElement(l);
+			l.onAreaChanged(true);
 			//all other functionality will be done after layer will be initialized in onLayerInitialized function
 		}
 

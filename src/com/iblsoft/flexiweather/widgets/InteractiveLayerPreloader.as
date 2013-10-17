@@ -35,7 +35,7 @@ package com.iblsoft.flexiweather.widgets
 			_fadeOut = new Fade();
 			_fadeOut.alphaFrom = 1;
 			_fadeOut.alphaTo = 0;
-			_fadeOut.duration = 3000;
+			_fadeOut.duration = 500;
 			_fadeOut.target = this;
 		}
 			

@@ -40,7 +40,7 @@ package com.iblsoft.flexiweather.ogc.configuration
 		
 		public static const DEFAULT_DURATION: int = 100;
 		public static const DEFAULT_DURATION_STEP: int = 100;
-		public static const DEFAULT_DELAY: int = 100;
+		public static const DEFAULT_DELAY: int = 700;
 		public static const DEFAULT_MIN_DURATION: int = 100;
 		public static const DEFAULT_MAX_DURATION: int = 5000;
 		
@@ -76,6 +76,7 @@ package com.iblsoft.flexiweather.ogc.configuration
 			
 			minDuration = DEFAULT_MIN_DURATION;
 			maxDuration = DEFAULT_MAX_DURATION;
+			_animationExtent = "PT6H";
 			_duration = DEFAULT_DURATION;
 			_durationStep = DEFAULT_DURATION_STEP;
 			_delay = DEFAULT_DELAY;
@@ -263,9 +264,9 @@ package com.iblsoft.flexiweather.ogc.configuration
 		{
 			animationDirection = AnimationDirection.ANIMATION_DIRECTION_FORWARD;
 			animationType = ANIMATION_TYPE_FULL;
-			animationExtent = 'PT1H';
+			animationExtent = 'PT6H';
 			duration = 100;
-			delay = 100;
+			delay = 700;
 		}
 	}
 }
