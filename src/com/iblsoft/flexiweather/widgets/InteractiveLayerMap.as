@@ -717,6 +717,10 @@ package com.iblsoft.flexiweather.widgets
 		
 		protected function onSynchronisedVariableChanged(event: SynchronisedVariableChangeEvent): void
 		{
+			var layerSynchronized: InteractiveLayerMSBase = event.target as InteractiveLayerMSBase;
+			if (layerSynchronized && layerSynchronized != primaryLayer)
+				return;
+			
 //			trace("ILM onSynchronisedVariableChanged: " + event.variableId);
 			invalidateEnumTimeAxis();
 			
