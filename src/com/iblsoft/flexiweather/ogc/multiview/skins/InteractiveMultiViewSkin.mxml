@@ -71,8 +71,10 @@
 				{
 					selectedBorder.left = hostComponent.selectionL;
 					selectedBorder.top = hostComponent.selectionT;
-					selectedBorder.width = hostComponent.selectionWidth;
-					selectedBorder.height = hostComponent.selectionHeight;
+					selectedBorder.right = hostComponent.selectionR;
+					selectedBorder.bottom = hostComponent.selectionB;
+//					selectedBorder.width = hostComponent.selectionWidth;
+//					selectedBorder.height = hostComponent.selectionHeight;
 					selectedBorderStroke.color = getStyle("selectedBorderColor");
 					selectedBorderStroke.alpha = getStyle("selectedBorderAlpha");
 				}

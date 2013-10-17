@@ -249,8 +249,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 		public var selectedBorderWeight:  Number;
 		public var selectionL:  Number;
 		public var selectionT:  Number;
-		public var selectionWidth:  Number;
-		public var selectionHeight:  Number;
 		public var selectionR:  Number;
 		public var selectionB:  Number;
 		
@@ -1639,27 +1637,33 @@ package com.iblsoft.flexiweather.ogc.multiview
 					var tileLayout: TileLayout = (dataGroup.layout as TileLayout);
 					horizontalGap = tileLayout.horizontalGap;
 					verticalGap = tileLayout.verticalGap;
-					columnWidth = (dataGroup.layout as TileLayout).columnWidth = dataGroup.width / tileLayout.columnCount;
-					rowHeight = (dataGroup.layout as TileLayout).rowHeight = dataGroup.height / tileLayout.rowCount;
-				}
-				debugWidgets();
-				if (selectedInteractiveWidget)
-				{
-					selectionL = selectedInteractiveWidget.x + 1;
-					selectionT = selectedInteractiveWidget.y + 1;
-					selectionWidth = Math.ceil(selectedInteractiveWidget.width - 1 * selectedBorderWeight);
-					selectionHeight = Math.ceil(selectedInteractiveWidget.height - 1 * selectedBorderWeight);
+					var cols: int = tileLayout.columnCount;
+					var rows: int = tileLayout.rowCount
 					
-					var selectedColumnFromRight: int = tileLayout.columnCount - selectionL / columnWidth;
-					var selectedRowFromBottom: int = tileLayout.rowCount - selectionT / rowHeight;
-						
-					selectionR = dataGroup.width - (selectionL + selectedInteractiveWidget.width) - (horizontalGap * selectedColumnFromRight);
-					selectionB = dataGroup.height - (selectionT + selectedInteractiveWidget.height) - (verticalGap * selectedRowFromBottom);
-					trace("InMultiView: selectionL: " + selectionL + "  selectionR: " + selectionR + " selectedInteractiveWidget.width: " + selectedInteractiveWidget.width);
-					trace("InMultiView: selectedColumnFromRight: " + selectedColumnFromRight + "  selectedRowFromBottom: " + selectedRowFromBottom);
-					trace("InMultiView: dataGroup.width: " + dataGroup.width + "  unscaledWidth: " + unscaledWidth);
-					skin.invalidateDisplayList();
+					columnWidth = (dataGroup.layout as TileLayout).columnWidth = (dataGroup.width -  horizontalGap * (cols - 1))/cols ;
+					rowHeight = (dataGroup.layout as TileLayout).rowHeight = (dataGroup.height - verticalGap * (rows - 1)) / rows;
 				}
+			}
+			debugWidgets();
+			if (selectedInteractiveWidget)
+			{
+				var multiViewBorder: int =  1;
+				
+				selectionL = selectedInteractiveWidget.x + multiViewBorder;
+				selectionT = selectedInteractiveWidget.y + multiViewBorder;
+				
+				var selectedColumnFromRight: int = tileLayout.columnCount - selectionL / columnWidth;
+				var selectedRowFromBottom: int = tileLayout.rowCount - selectionT / rowHeight;
+					
+				if (columnWidth > 0)
+				{
+					selectionR = multiViewBorder + (columnWidth + horizontalGap) * selectedColumnFromRight;// - selectedBorderWeight;
+					selectionB = multiViewBorder + (rowHeight + verticalGap) * selectedRowFromBottom;// - selectedBorderWeight;
+				} else {
+					selectionR = 1;
+					selectionB = 1
+				}
+				skin.invalidateDisplayList();
 			}
 			
 			disabledUI.includeInLayout = disabledUI.visible = !enabled || !_watchChanges;
