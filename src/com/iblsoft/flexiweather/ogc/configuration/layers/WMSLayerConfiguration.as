@@ -83,6 +83,14 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 				m_service.removeEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onCapabilitiesUpdated)
 		}
 		
+		public function populateLayerCapabilities(layerXML: XML): void
+		{
+			if (m_service)
+			{ 
+				(m_service as WMSServiceConfiguration).populateLayerCapabilities(layerXML);
+			}
+		}
+		
 		override public function destroy(): void
 		{
 			unregisterService();

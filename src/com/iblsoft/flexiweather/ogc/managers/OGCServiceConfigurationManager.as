@@ -156,6 +156,7 @@ package com.iblsoft.flexiweather.ogc.managers
 		{
 			for each (var wmsServiceConfiguration: WMSServiceConfiguration in _runningServices)
 			{
+				wmsServiceConfiguration.removeEventListener(ServiceCapabilitiesEvent.CAPABILITIES_LOADED, onCapabilitiesLoaded);
 				wmsServiceConfiguration.removeEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
 				wmsServiceConfiguration.removeEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATE_FAILED, onCapabilitiesUpdateFailed);
 			}
@@ -198,6 +199,7 @@ package com.iblsoft.flexiweather.ogc.managers
 						var wmsServiceConfiguration: WMSServiceConfiguration = osc as WMSServiceConfiguration;
 						_runningServices.push(wmsServiceConfiguration);
 						m_servicesUpdating++;
+						wmsServiceConfiguration.addEventListener(ServiceCapabilitiesEvent.CAPABILITIES_LOADED, onCapabilitiesLoaded);
 						wmsServiceConfiguration.addEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
 						wmsServiceConfiguration.addEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATE_FAILED, onCapabilitiesUpdateFailed);
 					}
@@ -207,6 +209,11 @@ package com.iblsoft.flexiweather.ogc.managers
 			}
 		}
 
+		private function onCapabilitiesLoaded(event: ServiceCapabilitiesEvent): void
+		{
+			dispatchEvent(event);
+		}
+		
 		private function onCapabilitiesUpdateFailed(event: ServiceCapabilitiesEvent): void
 		{
 			dispatchEvent(event);

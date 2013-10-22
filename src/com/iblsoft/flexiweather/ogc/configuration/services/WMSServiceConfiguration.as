@@ -136,6 +136,10 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 			if (event.result is XML)
 			{
 				_xml = event.result as XML;
+				var sce: ServiceCapabilitiesEvent = new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.CAPABILITIES_LOADED, true);
+				sce.service = this;
+				sce.xml = _xml;
+				dispatchEvent(sce);
 				parseGetCapabilities(_xml);
 			}
 		}
@@ -166,6 +170,29 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 
 		
 
+		public function populateLayerCapabilities(layerXML: XML): void
+		{
+			trace("\n populateLayerCapabilities");
+			var s_version: String = layerXML.@version;
+			var version: Version = Version.fromString(s_version);
+			var wms: Namespace = version.isLessThan(1, 3, 0)
+				? new Namespace() : new Namespace("http://www.opengis.net/wms");
+			
+			try
+			{
+				m_layers = new WMSLayerGroup(null, layerXML, wms, version);
+				
+			}
+			catch (e: Error)
+			{
+				trace("WMSServiceConfiguration error: " + e.message);
+			}
+				
+			m_layers.initialize();
+			m_layers.parse();
+				
+		}
+		
 		public function forcedParseGetCapabilities(xml: XML): void
 		{
 			var currAllowedParsing: Boolean = PARSE_GET_CAPABILITIES;
