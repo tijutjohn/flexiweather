@@ -5,16 +5,13 @@ package com.iblsoft.flexiweather.ogc
 	
 	import flash.utils.getTimer;
 	
-	import mx.collections.ArrayCollection;
-	import mx.events.CollectionEvent;
-
 	public class WMSLayerBase extends GetCapabilitiesXMLItem
 	{
 		protected var m_parent: WMSLayerGroup;
 		protected var ms_title: String;
 		
-		protected var ma_crsWithBBoxes: ArrayCollection;
-		protected var ma_dimensions: ArrayCollection;
+		protected var ma_crsWithBBoxes: Array;
+		protected var ma_dimensions: Array;
 			
 		public function WMSLayerBase(parent: WMSLayerGroup, xml: XML, wmsNamespace: Namespace, version: Version)
 		{
@@ -29,21 +26,11 @@ package com.iblsoft.flexiweather.ogc
 		{
 			super.initialize(parsingManager);
 			
-			ma_dimensions = new ArrayCollection(); 
-			ma_crsWithBBoxes = new ArrayCollection();
+			ma_dimensions = new Array(); 
+			ma_crsWithBBoxes = new Array();
 			
-			ma_dimensions.addEventListener(CollectionEvent.COLLECTION_CHANGE, onDimensionsChanged);
-			ma_crsWithBBoxes.addEventListener(CollectionEvent.COLLECTION_CHANGE, onCRSWithBBoxesChanged);
 		}
 		
-		private function onDimensionsChanged(event: CollectionEvent): void
-		{
-//			trace(this + " onDimenesionsChanged: " + event.kind);
-		}
-		private function onCRSWithBBoxesChanged(event: CollectionEvent): void
-		{
-//			trace(this + " onCRSWithBBoxesChanged: " + event.kind);
-		}
 		public function toString(): String
 		{
 			return "WMSLayer: "+ ms_name + " title: "+ ms_title;
@@ -92,7 +79,8 @@ package com.iblsoft.flexiweather.ogc
 			if (parent && parent.dimensions && parent.dimensions.length > 0)
 			{
 				// inherit dimensions
-				ma_dimensions.addAll(parent.dimensions);
+//				ma_dimensions.addAll(parent.dimensions);
+				addAllArrayItems(ma_dimensions, parent.dimensions);
 			}
 			
 			var time2: Number = (getTimer() - afterParseTime);
@@ -107,7 +95,8 @@ package com.iblsoft.flexiweather.ogc
 			{
 				// inherit CRSs and bounding boxes, this may create some duplication (same CRS defined multiple times)
 				// but this is not a big problem because if search for bounding box we take the first found item. 
-				ma_crsWithBBoxes.addAll(parent.crsWithBBoxes);
+//				ma_crsWithBBoxes.addAll(parent.crsWithBBoxes);
+				addAllArrayItems(ma_crsWithBBoxes, parent.crsWithBBoxes);
 			}
 			
 			var time3: Number = (getTimer() - afterParseTime2);
@@ -144,7 +133,7 @@ package com.iblsoft.flexiweather.ogc
 			{
 				var dim: WMSDimension = new WMSDimension(elemDim, wms, m_version);
 				dim.parse();
-				ma_dimensions.addItem(dim);
+				ma_dimensions.push(dim);
 			}
 		}
 		
@@ -158,11 +147,16 @@ package com.iblsoft.flexiweather.ogc
 			var srsBBox: BBox = null;
 			var bboxXML: XML;
 			var a_detectedSRSs: Array = [];
+			var boundingBoxList: XMLList = m_itemXML.wms::BoundingBox;
+			var i: int 
+			var total: int = boundingBoxList.length();
+			
 			// <BoundingBox SRS=... minx=...
-			for each (bboxXML in m_itemXML.wms::BoundingBox)
+			for (i = 0; i < total; ++i)
 			{
+				bboxXML = boundingBoxList[i] as XML;
 				s_srs = String(bboxXML.@SRS);
-				ma_crsWithBBoxes.addItem(new CRSWithBBox(s_srs, BBox.fromXML_WMS(bboxXML)));
+				ma_crsWithBBoxes.push(new CRSWithBBox(s_srs, BBox.fromXML_WMS(bboxXML)));
 				a_detectedSRSs.push(s_srs);
 			}
 			// <LatLonBoundingBox minx=...
@@ -171,21 +165,27 @@ package com.iblsoft.flexiweather.ogc
 				srsBBox = BBox.fromXML_WMS(m_itemXML.wms::LatLonBoundingBox[0]);
 				if (a_detectedSRSs.indexOf(Projection.CRS_EPSG_GEOGRAPHIC) < 0)
 				{
-					ma_crsWithBBoxes.addItem(new CRSWithBBox(Projection.CRS_EPSG_GEOGRAPHIC, srsBBox));
+					ma_crsWithBBoxes.push(new CRSWithBBox(Projection.CRS_EPSG_GEOGRAPHIC, srsBBox));
 					a_detectedSRSs.push(Projection.CRS_EPSG_GEOGRAPHIC);
 				}
 				if (a_detectedSRSs.indexOf(Projection.CRS_EPSG_GEOGRAPHIC) < 0)
 				{
-					ma_crsWithBBoxes.addItem(new CRSWithBBox(Projection.CRS_GEOGRAPHIC, srsBBox));
+					ma_crsWithBBoxes.push(new CRSWithBBox(Projection.CRS_GEOGRAPHIC, srsBBox));
 					a_detectedSRSs.push(Projection.CRS_GEOGRAPHIC);
 				}
 			}
+			
+			var srsList: XMLList = m_itemXML.wms::SRS;
+			var srs: XML;
+			total = srsList.length();
+			
 			// <SRS>
-			for each (var srs: XML in m_itemXML.wms::SRS)
+			for (i = 0; i < total; ++i)
 			{
+				srs = srsList[i] as XML;
 				s_srs = String(srs);
 				if (a_detectedSRSs.indexOf(s_srs) < 0)
-					ma_crsWithBBoxes.addItem(new CRSWithBBox(s_srs));
+					ma_crsWithBBoxes.push(new CRSWithBBox(s_srs));
 			}
 			
 		}
@@ -219,10 +219,20 @@ package com.iblsoft.flexiweather.ogc
 		private function parseWMS130CRSWithBBoxes(a_detectedCRSs: Array): void
 		{
 			var bboxXML: XML;
-			for each (bboxXML in m_itemXML.wms::BoundingBox)
+			
+			var boundingBoxList: XMLList = m_itemXML.wms::BoundingBox;
+			var i: int 
+			var total: int = boundingBoxList.length();
+			
+			var localArr: Array = ma_crsWithBBoxes;
+			
+			// <BoundingBox SRS=... minx=...
+			for (i = 0; i < total; ++i)
 			{
+				bboxXML = boundingBoxList[i] as XML;
+				
 				var s_crs: String = String(bboxXML.@CRS);
-				ma_crsWithBBoxes.addItem(new CRSWithBBox(s_crs, BBox.fromXML_WMS(bboxXML)));
+				localArr.push(new CRSWithBBox(s_crs, BBox.fromXML_WMS(bboxXML)));
 				a_detectedCRSs.push(s_crs);
 			}
 
@@ -233,24 +243,35 @@ package com.iblsoft.flexiweather.ogc
 			var crsBBox: BBox = BBox.fromXML_WMS(m_itemXML.wms::EX_GeographicBoundingBox[0]);
 			if (a_detectedCRSs.indexOf(Projection.CRS_EPSG_GEOGRAPHIC) < 0)
 			{
-				ma_crsWithBBoxes.addItem(new CRSWithBBox(Projection.CRS_EPSG_GEOGRAPHIC, crsBBox));
+				ma_crsWithBBoxes.push(new CRSWithBBox(Projection.CRS_EPSG_GEOGRAPHIC, crsBBox));
 				a_detectedCRSs.push(Projection.CRS_EPSG_GEOGRAPHIC);
 			}
 			if (a_detectedCRSs.indexOf(Projection.CRS_GEOGRAPHIC) < 0)
 			{
-				ma_crsWithBBoxes.addItem(new CRSWithBBox(Projection.CRS_GEOGRAPHIC, crsBBox));
+				ma_crsWithBBoxes.push(new CRSWithBBox(Projection.CRS_GEOGRAPHIC, crsBBox));
 				a_detectedCRSs.push(Projection.CRS_GEOGRAPHIC);
 			}
 		}
 		
 		private function parseWMS130CRSs(a_detectedCRSs: Array): void
 		{
-			for each (var crs: XML in m_itemXML.wms::CRS)
+			var crsList: XMLList = m_itemXML.wms::CRS
+			var crs: XML;
+			var total: int = crsList.length();
+			var i: int;
+			var localArr: Array = ma_crsWithBBoxes;
+			for (i = 0; i < total; i++)
 			{
+				crs = crsList[i] as XML;
 				var s_crs: String = String(crs);
 				if (a_detectedCRSs.indexOf(s_crs) < 0)
-					ma_crsWithBBoxes.addItem(new CRSWithBBox(s_crs));
+				{
+					var crsWithBBox: CRSWithBBox = new CRSWithBBox(s_crs)
+//					ma_crsWithBBoxes.push(crsWithBBox);
+					localArr.push(crsWithBBox);
+				}
 			}
+//			addAllArrayItems(ma_crsWithBBoxes, localArr);
 		}
 		
 		private function parseWMS130Identifier(identifierString: String): void
@@ -262,8 +283,15 @@ package com.iblsoft.flexiweather.ogc
 			var tileHeight: int = 0;
 			var arr: Array;
 			var crsBBoxTiled: CRSWithBBoxAndTilingInfo;
-			for each (var item: String in identifierArray)
+			
+			var item: String;
+			var total: int = identifierArray.length;
+			var i: int;
+			var j: int;
+			for (j = 0; j < total; j++)
 			{
+				item = identifierArray[j] as String;
+				
 				if (item.indexOf('size:') == 0)
 				{
 					arr = item.split(':');
@@ -283,7 +311,9 @@ package com.iblsoft.flexiweather.ogc
 						Number(arr[0]), Number(arr[1]),
 						Number(arr[2]), Number(arr[3]));
 					var b_crsFound: Boolean = false;
-					for (var i: uint = 0; i < ma_crsWithBBoxes.length; i++)
+					
+					var crsWithBBoxesTotal: int = ma_crsWithBBoxes.length;
+					for (i = 0; i < crsWithBBoxesTotal; i++)
 					{
 						originalCRSWithBBox = ma_crsWithBBoxes[i] as CRSWithBBox;
 						if (originalCRSWithBBox.crs == s_tilingCRS)
@@ -309,7 +339,7 @@ package com.iblsoft.flexiweather.ogc
 						crsBBoxTiled = new CRSWithBBoxAndTilingInfo(
 							s_tilingCRS, null,
 							tilingExtent, tileWidth);
-						ma_crsWithBBoxes.addItem(crsBBoxTiled);
+						ma_crsWithBBoxes.push(crsBBoxTiled);
 					}
 				}
 			}
@@ -323,8 +353,14 @@ package com.iblsoft.flexiweather.ogc
 			{
 				parse();
 			}
-			for each (var crsWithBBox: CRSWithBBox in ma_crsWithBBoxes)
+			
+			var i: int;
+			var crsWithBBox: CRSWithBBox;
+			var crsWithBBoxesTotal: int = ma_crsWithBBoxes.length;
+			for (i = 0; i < crsWithBBoxesTotal; i++)
 			{
+				crsWithBBox = ma_crsWithBBoxes[i] as CRSWithBBox;
+				
 				if (crsWithBBox.crs == crs)
 					return crsWithBBox;
 			}
@@ -345,7 +381,10 @@ package com.iblsoft.flexiweather.ogc
 				return false;
 			if (!ma_crsWithBBoxes || !other.crsWithBBoxes || ma_crsWithBBoxes.length != other.crsWithBBoxes.length)
 				return false;
-			for (var i: int = 0; i < ma_crsWithBBoxes.length; ++i)
+			
+			var i: int;
+			var total: int = ma_crsWithBBoxes.length; 
+			for (i = 0; i < total; ++i)
 			{
 				var cb: CRSWithBBox = ma_crsWithBBoxes[i] as CRSWithBBox;
 				if (!cb.equals(other.crsWithBBoxes[i] as CRSWithBBox))
@@ -353,7 +392,9 @@ package com.iblsoft.flexiweather.ogc
 			}
 			if (ma_dimensions.length != other.dimensions.length)
 				return false;
-			for (i = 0; i < ma_dimensions.length; ++i)
+			
+			var dimTotal: int = ma_dimensions.length;
+			for (i = 0; i < dimTotal ; ++i)
 			{
 				if (!ma_dimensions[i].equals(other.dimensions[i]))
 					return false;
@@ -361,17 +402,23 @@ package com.iblsoft.flexiweather.ogc
 			return true;
 		}
 
-		public function enumerateAllCRSs(a_out: ArrayCollection): void
+		public function enumerateAllCRSs(a_out: Array): void
 		{
 			if (!_parsed)
 			{
 				parse();
 			}
 			
-			for each (var crsBBox: CRSWithBBox in ma_crsWithBBoxes)
+			var i: int;
+			var total: int = ma_crsWithBBoxes.length;
+			var crsBBox: CRSWithBBox;
+			
+			// <BoundingBox SRS=... minx=...
+			for (i = 0; i < total; ++i)
 			{
+				crsBBox = ma_crsWithBBoxes[i] as CRSWithBBox
 				if (!a_out.contains(crsBBox.crs))
-					a_out.addItem(crsBBox.crs);
+					a_out.push(crsBBox.crs);
 			}
 			parent.enumerateAllCRSs(a_out);
 		}
@@ -383,8 +430,14 @@ package com.iblsoft.flexiweather.ogc
 				parse();
 			}
 			
-			for each (var crsBBox: CRSWithBBox in ma_crsWithBBoxes)
+			var i: int;
+			var total: int = ma_crsWithBBoxes.length;
+			var crsBBox: CRSWithBBox;
+			
+			// <BoundingBox SRS=... minx=...
+			for (i = 0; i < total; ++i)
 			{
+				crsBBox = ma_crsWithBBoxes[i] as CRSWithBBox;
 				if (Projection.equalCRSs(s_crs, crsBBox.crs))
 				{
 					if (crsBBox.bbox != null)
@@ -398,31 +451,37 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function destroy(): void
 		{
-			ma_dimensions.removeEventListener(CollectionEvent.COLLECTION_CHANGE, onDimensionsChanged);
-			ma_crsWithBBoxes.removeEventListener(CollectionEvent.COLLECTION_CHANGE, onCRSWithBBoxesChanged);
-			
 			if (ma_crsWithBBoxes && ma_crsWithBBoxes.length > 0)
 			{
-				for each (var crsWithBBox: CRSWithBBox in ma_crsWithBBoxes)
+				var i: int;
+				var total: int = ma_crsWithBBoxes.length;
+				var crsBBox: CRSWithBBox;
+				
+				// <BoundingBox SRS=... minx=...
+				for (i = 0; i < total; ++i)
 				{
-					crsWithBBox.destroy();
+					crsBBox = ma_crsWithBBoxes[i] as CRSWithBBox;
+					crsBBox.destroy();
 				}
-				ma_crsWithBBoxes.removeAll();
+				removeAllArrayItems(ma_crsWithBBoxes);
 			}
 			ma_crsWithBBoxes = null;
 			if (ma_dimensions && ma_dimensions.length > 0)
 			{
-				for each (var wmsDimension: WMSDimension in ma_dimensions)
+				var wmsDimension: WMSDimension;
+				total = ma_dimensions.length;
+				for (i = 0; i < total; ++i)
 				{
+					wmsDimension = ma_dimensions[i] as WMSDimension;
 					wmsDimension.destroy();
 				}
-				ma_dimensions.removeAll();
+				removeAllArrayItems(ma_dimensions);
 			}
 			ma_dimensions = null;
 			if (m_parent)
 				m_parent.destroy();
 		}
-
+		
 		public function get parent(): WMSLayerGroup
 		{
 			return m_parent;
@@ -433,7 +492,7 @@ package com.iblsoft.flexiweather.ogc
 			return ms_title;
 		}
 
-		public function get crsWithBBoxes(): ArrayCollection
+		public function get crsWithBBoxes(): Array
 		{
 			if (!_parsed)
 			{
@@ -442,7 +501,7 @@ package com.iblsoft.flexiweather.ogc
 			return ma_crsWithBBoxes;
 		}
 
-		public function get dimensions(): ArrayCollection
+		public function get dimensions(): Array
 		{
 			if (!_parsed)
 			{
@@ -451,7 +510,7 @@ package com.iblsoft.flexiweather.ogc
 			return ma_dimensions;
 		}
 		
-		public function get parsedDimensions(): ArrayCollection
+		public function get parsedDimensions(): Array
 		{
 			return ma_dimensions;
 		}

@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import mx.collections.ArrayCollection;
 	import mx.collections.ICollectionView;
 	import mx.controls.treeClasses.ITreeDataDescriptor;
 
@@ -11,7 +12,7 @@ package com.iblsoft.flexiweather.ogc
 
 		public function getChildren(node: Object, model: Object = null): ICollectionView
 		{
-			return node is WMSLayerGroup ? WMSLayerGroup(node).layers : null;
+			return node is WMSLayerGroup ? new ArrayCollection(WMSLayerGroup(node).layers) : null;
 		}
 
 		public function hasChildren(node: Object, model: Object = null): Boolean

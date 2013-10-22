@@ -11,6 +11,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 	import com.iblsoft.flexiweather.ogc.WMSLayerBase;
 	import com.iblsoft.flexiweather.ogc.WMSLayerGroup;
 	import com.iblsoft.flexiweather.ogc.configuration.ProjectionConfiguration;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.events.ServiceCapabilitiesEvent;
 	import com.iblsoft.flexiweather.ogc.managers.OGCServiceConfigurationManager;
 	import com.iblsoft.flexiweather.ogc.managers.ProjectionConfigurationManager;
@@ -23,6 +24,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 	import flash.events.DataEvent;
 	import flash.events.Event;
 	import flash.net.URLRequest;
+	import flash.utils.Dictionary;
 	import flash.utils.getTimer;
 	
 	import mx.collections.ArrayCollection;
@@ -32,6 +34,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 	{
 		Storage.addChangedClass('com.iblsoft.flexiweather.ogc.WMSServiceConfiguration', 'com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceConfiguration', new Version(1, 6, 0));
 	
+		public static var EXPERIMENTAL_LAYERS_INITIALIZING: Boolean = false;
 		/**
 		 * Set to "true" if GetCapabilities request needs to be parsed immediately. If it is set to "false" GetCapabilities items will be parsed when they will be needed 
 		 */		
@@ -62,6 +65,8 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		{
 			return mb_capabilitiesUpdated;
 		}
+		private var m_layersXMLDictionary: Dictionary;
+		
 		private var m_layers: WMSLayerGroup = null;
 		private var _imageFormats: Array = [];
 
@@ -70,10 +75,13 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 			return _imageFormats;
 		}
 		
-
+		private var wms: Namespace
+		
 		public function WMSServiceConfiguration(s_url: String = null, version: Version = null)
 		{
 			super(s_url, "wms", version);
+			
+			m_layersXMLDictionary = new Dictionary();
 			
 			m_capabilitiesLoader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onCapabilitiesLoaded);
 			m_capabilitiesLoader.addEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onCapabilitiesLoadFailed);
@@ -94,10 +102,30 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 
 		public function getLayerByName(s_name: String): WMSLayer
 		{
+			var layerTemp: Object = m_layersXMLDictionary[s_name];
+			if (layerTemp)
+			{
+				if (layerTemp is XML)
+				{
+					var layer: WMSLayer = new WMSLayer(null, layerTemp as XML, wms, version);
+					layer.initialize();
+					layer.parse();
+				
+					m_layersXMLDictionary[s_name] = layer;
+					return layer;
+					
+				} else if (layerTemp is WMSLayer) {
+					return layerTemp as WMSLayer
+				}
+				
+			}
+			return null;
+			/*
 			if (m_layers == null)
 				return null;
 			var wmsLayer: WMSLayer = m_layers.getLayerByName(s_name);
 			return wmsLayer;
+			*/
 		}
 
 		public function toGetCapabilitiesRequest(): URLRequest
@@ -193,7 +221,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 				
 		}
 		
-		public function forcedParseGetCapabilities(xml: XML): void
+		public function populateGetCapabilities(xml: XML): void
 		{
 			var currAllowedParsing: Boolean = PARSE_GET_CAPABILITIES;
 			
@@ -206,9 +234,9 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		{
 			trace("\nparseGetCapabilities fullURL: " + fullURL);
 			var s_version: String = xml.@version;
-			var version: Version = Version.fromString(s_version);
-			var wms: Namespace = version.isLessThan(1, 3, 0)
-				? new Namespace() : new Namespace("http://www.opengis.net/wms");
+			version = Version.fromString(s_version);
+			wms = version.isLessThan(1, 3, 0) ? new Namespace() : new Namespace("http://www.opengis.net/wms");
+			
 			var capability: XML = xml.wms::Capability[0];
 			
 			var time: Number = getTimer();
@@ -227,14 +255,22 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 				
 				try
 				{
+					
 					var layer: XML = capability.wms::Layer[0];
-					m_layers = new WMSLayerGroup(null, layer, wms, version);
-				
-					if (USE_ASYNCHRONOUS_PARSING) {
-						m_layers.initialize(parsingManager);
-						parsingManager.start();
-					} else
-						m_layers.initialize();
+					
+					if (EXPERIMENTAL_LAYERS_INITIALIZING)
+					{
+						createLayersXMLDictionary(layer, wms);
+					} else {
+						m_layers = new WMSLayerGroup(null, layer, wms, version);
+					
+						if (USE_ASYNCHRONOUS_PARSING) {
+							m_layers.initialize(parsingManager);
+							parsingManager.start();
+						} else
+							m_layers.initialize();
+					}
+					
 					
 				}
 				catch (e: Error)
@@ -242,7 +278,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 					trace("WMSServiceConfiguration error: " + e.message);
 				}
 				
-				if (!USE_ASYNCHRONOUS_PARSING && PARSE_GET_CAPABILITIES)
+				if (!EXPERIMENTAL_LAYERS_INITIALIZING && !USE_ASYNCHRONOUS_PARSING && PARSE_GET_CAPABILITIES)
 				{
 					m_layers.parse();
 				}
@@ -258,6 +294,29 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 			}
 			
 			trace("WMSServiceConfiguration: " + fullURL + " parsing time: " + (getTimer() - time) + "ms\n");
+		}
+		
+		private function createLayersXMLDictionary(layerXML: XML, wms: Namespace): void
+		{
+			var bQueryable: Boolean = layerXML.@queryable;
+			var layers: XMLList = layerXML.wms::Layer;
+			var total: int = layers.length();
+			
+			if (bQueryable)
+			{
+				var name: String = String(layerXML.wms::Name);
+				if (name == '')
+					name = String(layerXML.wms::Title);
+				m_layersXMLDictionary[name] = layerXML;
+			}
+			if (total > 0) {
+				//it's subgroup
+				for (var i: int = 0; i < total; i++)
+				{
+					var layer: XML = layers[i] as XML;
+					createLayersXMLDictionary(layer, wms);
+				}
+			} 
 		}
 		
 		private function onGetCapabilitiesInitialized(event: Event): void
@@ -307,14 +366,14 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 			//check all crs
 			if (m_layers && m_layers.layers)
 			{
-				var allLayers: ArrayCollection = m_layers.layers;
+				var allLayers: Array = m_layers.layers;
 				
 				var projectionManager: ProjectionConfigurationManager = ProjectionConfigurationManager.getInstance();
 				projectionManager.removeParsedProjections();
 				var projConfig: ProjectionConfiguration;
 				for each (var currLayer: WMSLayerBase in allLayers)
 				{
-					var crsColl: ArrayCollection = currLayer.crsWithBBoxes;
+					var crsColl: Array = currLayer.crsWithBBoxes;
 					var newBBox: BBox;
 					for each (var crs: CRSWithBBox in crsColl)
 					{

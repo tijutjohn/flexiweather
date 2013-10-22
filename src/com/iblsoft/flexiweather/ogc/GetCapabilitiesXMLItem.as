@@ -23,6 +23,16 @@ package com.iblsoft.flexiweather.ogc
 			ms_name = String(xml.wms::Name);
 		}
 		
+		protected function addAllArrayItems(arrTo: Array, arrFrom: Array): void
+		{
+			arrTo = arrTo.concat(arrFrom);
+		}
+		
+		protected function removeAllArrayItems(arr: Array): void
+		{
+			arr.splice(0);
+		}
+		
 		public function get name(): String
 		{
 			return ms_name;

@@ -1,18 +1,25 @@
 package com.iblsoft.flexiweather.ogc
 {
-	import mx.collections.ArrayCollection;
+	import com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceParsingManager;
 
 	public class WMSLayer extends WMSLayerBase
 	{
 		private var mb_queryable: Boolean = false;
-		private var ma_styles: ArrayCollection = new ArrayCollection();
+		private var ma_styles: Array;
 
 		public function WMSLayer(parent: WMSLayerGroup, xml: XML, wms: Namespace, version: Version)
 		{
 			super(parent, xml, wms, version);
-			mb_queryable = int(xml.@queryable) != 0
+			mb_queryable = int(xml.@queryable) != 0;
+		}
+		
+		override public function initialize(parsingManager: WMSServiceParsingManager = null): void
+		{
+			super.initialize(parsingManager);
+			
+			ma_styles =  new Array();
 			var styleObject: Object;
-			for each (var elemStyle: XML in xml.wms::Style)
+			for each (var elemStyle: XML in m_itemXML.wms::Style)
 			{
 				styleObject = {
 							name: String(elemStyle.wms::Name),
@@ -25,7 +32,7 @@ package com.iblsoft.flexiweather.ogc
 					var legendObj: Object = {url: String(legendXML.wms::OnlineResource.@xlink::href), width: Number(legendXML.@width), height: Number(legendXML.@height)};
 					styleObject.legend = legendObj;
 				}
-				ma_styles.addItem(styleObject);
+				ma_styles.push(styleObject);
 			}
 		}
 
@@ -33,7 +40,9 @@ package com.iblsoft.flexiweather.ogc
 		{
 			super.destroy();
 			if (ma_styles)
-				ma_styles.removeAll();
+			{
+				removeAllArrayItems(ma_styles);
+			}
 			ma_styles = null;
 		}
 
@@ -78,7 +87,7 @@ package com.iblsoft.flexiweather.ogc
 			return mb_queryable;
 		}
 
-		public function get styles(): ArrayCollection
+		public function get styles(): Array
 		{
 			return ma_styles;
 		}
