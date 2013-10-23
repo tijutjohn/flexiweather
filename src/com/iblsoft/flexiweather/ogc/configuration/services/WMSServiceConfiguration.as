@@ -209,7 +209,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 			try
 			{
 				m_layers = new WMSLayerGroup(null, layerXML, wms, version);
-				
+                new GetCapabilitiesParser().createLayersXMLDictionary(layerXML, m_layersXMLDictionary, wms);
 			}
 			catch (e: Error)
 			{

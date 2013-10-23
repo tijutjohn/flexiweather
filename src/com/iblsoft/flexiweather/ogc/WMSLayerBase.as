@@ -15,6 +15,10 @@ package com.iblsoft.flexiweather.ogc
 			
 		public function WMSLayerBase(parent: WMSLayerGroup, xml: XML, wmsNamespace: Namespace, version: Version)
 		{
+            if (!wmsNamespace) {
+                wmsNamespace = version.isLessThan(1, 3, 0)
+                        ? new Namespace() : new Namespace("http://www.opengis.net/wms");
+            }
 			super(xml, wmsNamespace, version);
 			
 			m_parent = parent;
