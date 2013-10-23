@@ -37,20 +37,20 @@ package com.iblsoft.flexiweather.ogc
 			super.initialize(parsingManager);
 
 			
-			ma_layersXMLDictionary = new Dictionary();
-			
-			var layers: XMLList = m_itemXML.wms::Layer;
-			var total: int = layers.length();
-			for (var i: int = 0; i < total; i++)
-			{
-				var layer: XML = layers[i] as XML;
-				var name: String = String(layer.wms::Name);
-				var layersChildren: int = layer.wms::Layer.length();
-				
-				if (layersChildren == 0)
-					ma_layersXMLDictionary[name] = layer;
-				else
-					initializeSubgroup(layer);
+//			ma_layersXMLDictionary = new Dictionary();
+//			
+//			var layers: XMLList = m_itemXML.wms::Layer;
+//			var total: int = layers.length();
+//			for (var i: int = 0; i < total; i++)
+//			{
+//				var layer: XML = layers[i] as XML;
+//				var name: String = String(layer.wms::Name);
+//				var layersChildren: int = layer.wms::Layer.length();
+//				
+//				if (layersChildren == 0)
+//					ma_layersXMLDictionary[name] = layer;
+//				else
+//					initializeSubgroup(layer);
 				
 				
 				/*
@@ -59,7 +59,7 @@ package com.iblsoft.flexiweather.ogc
 				else
 					initializeLayer(layer);
 				*/
-			}
+//			}
 			
 //			trace(this + " initialize total time: " + (getTimer() - currTime) + "ms");
 		}
@@ -82,18 +82,19 @@ package com.iblsoft.flexiweather.ogc
 				 */
 				wmsLayer.initialize(parsingManager);
 				
-				ma_layersDictionary[wmsLayer.name] = new LayerDataItem(wmsLayer, LayerDataItem.LAYER);
-				ma_layers.push(wmsLayer);
+				addLayer(wmsLayer);
 				//					trace("\n" + this + " initialize layer: "+ wmsLayer.toString() + " total time: " + (getTimer() - layerTime) + "ms");
 			} else {
 				var wmsLayerGroup: WMSLayerGroup = new WMSLayerGroup(this, layer, wms, m_version);
 				
 				wmsLayerGroup.initialize(parsingManager);
 				
-				_groups++;
+				addLayer(wmsLayerGroup);
 				
-				ma_layersDictionary["group"+_groups] = new LayerDataItem(wmsLayerGroup, LayerDataItem.LAYER_GROUP);
-				ma_layers.push(wmsLayerGroup);
+//				_groups++;
+//				
+//				ma_layersDictionary["group"+_groups] = new LayerDataItem(wmsLayerGroup, LayerDataItem.LAYER_GROUP);
+//				ma_layers.push(wmsLayerGroup);
 				//					trace("\n" + this + " initialize layerGroup: "+ wmsLayerGroup.toString() + " total time: " + (getTimer() - layerTime) + "ms");
 			}
 		}
@@ -103,10 +104,10 @@ package com.iblsoft.flexiweather.ogc
 			ma_layers = new Array();
 			ma_layersDictionary = new Dictionary();
 			
-			for each (var layer: XML in ma_layersXMLDictionary)
-			{
-				initializeLayer(layer);
-			}
+//			for each (var layer: XML in ma_layersXMLDictionary)
+//			{
+//				initializeLayer(layer);
+//			}
 		}
 		
 		private function parsing(): void
@@ -142,7 +143,7 @@ package com.iblsoft.flexiweather.ogc
 			
 			_state = LAYER_INITIALIZED;
 			
-			parsing();
+//			parsing();
 			
 			_state = LAYER_PARSED;
 //			trace(this + " parse total time: " + (getTimer() - currTime) + "ms");
@@ -177,6 +178,23 @@ package com.iblsoft.flexiweather.ogc
 			super.destroy();
 		}
 
+		public function addLayer(wmsLayer: WMSLayerBase): void
+		{
+			
+			wmsLayer.parent = this;
+			
+			trace(this + " addLayer: "+ wmsLayer + " parent: "+ wmsLayer.parent);
+			if (wmsLayer is WMSLayer)
+			{
+				ma_layersDictionary[wmsLayer.name] = new LayerDataItem(wmsLayer, LayerDataItem.LAYER);
+				
+			} else if (wmsLayer is WMSLayerGroup) {
+				_groups++;
+				ma_layersDictionary["group"+_groups] = new LayerDataItem(wmsLayer, LayerDataItem.LAYER_GROUP);
+			}
+			ma_layers.push(wmsLayer);
+		}
+			
 		public function getLayerByName(s_name: String): WMSLayer
 		{
 			if (_state != LAYER_PARSED)

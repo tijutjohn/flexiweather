@@ -88,6 +88,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			if (m_service)
 			{ 
 				(m_service as WMSServiceConfiguration).populateLayerCapabilities(layerXML);
+				onCapabilitiesUpdated();
 			}
 		}
 		
@@ -289,7 +290,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			return "DIM_" + s_dim;
 		}
 
-		protected function onCapabilitiesUpdated(event: Event): void
+		protected function onCapabilitiesUpdated(event: Event = null): void
 		{
 			if (!m_service)
 				return;

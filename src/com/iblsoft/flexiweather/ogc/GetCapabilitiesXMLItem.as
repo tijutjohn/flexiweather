@@ -14,6 +14,11 @@ package com.iblsoft.flexiweather.ogc
 		protected var mb_isInitialized: Boolean;
 		protected var mb_isParsed: Boolean;
 		
+		public function get itemXML(): XML
+		{
+			return m_itemXML;
+		}
+		
 		public function GetCapabilitiesXMLItem(xml: XML, wmsNamespace: Namespace, version: Version)
 		{
 			m_itemXML = xml;
@@ -23,9 +28,12 @@ package com.iblsoft.flexiweather.ogc
 			ms_name = String(xml.wms::Name);
 		}
 		
-		protected function addAllArrayItems(arrTo: Array, arrFrom: Array): void
+		protected function addAllArrayItems(arrTo: Array, arrFrom: Array): Array
 		{
+			trace("addAllArrayItems 1  " +  arrTo.length + "from: "+ arrFrom.length);
 			arrTo = arrTo.concat(arrFrom);
+			trace("addAllArrayItems 2  " +  arrTo.length + "from: "+ arrFrom.length);
+			return arrTo;
 		}
 		
 		protected function removeAllArrayItems(arr: Array): void

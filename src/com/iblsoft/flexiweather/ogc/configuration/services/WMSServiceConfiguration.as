@@ -100,6 +100,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 			m_capabilitiesLoadJob = null;
 		}
 
+		
 		public function getLayerByName(s_name: String): WMSLayer
 		{
 			var layerTemp: Object = m_layersXMLDictionary[s_name];
@@ -107,14 +108,13 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 			{
 				if (layerTemp is XML)
 				{
-					var layer: WMSLayer = new WMSLayer(null, layerTemp as XML, wms, version);
-					layer.initialize();
-					layer.parse();
-				
-					m_layersXMLDictionary[s_name] = layer;
-					return layer;
+					var tempLayerXML: LayerXMLHelper = new LayerXMLHelper(m_layersXMLDictionary, wms, version);
+					var wmsLayer: WMSLayer = tempLayerXML.createLayer(s_name, layerTemp as XML);
+					trace("WMSServiceConfig getLayerByName 1: "+ wmsLayer + " parent: "+ wmsLayer.parent);
+					return wmsLayer;
 					
 				} else if (layerTemp is WMSLayer) {
+//					trace("WMSServiceConfig getLayerByName 2: "+ layerTemp + " parent: "+ (layerTemp as WMSLayer).parent);
 					return layerTemp as WMSLayer
 				}
 				
@@ -260,7 +260,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 					
 					if (EXPERIMENTAL_LAYERS_INITIALIZING)
 					{
-						createLayersXMLDictionary(layer, wms);
+						new GetCapabilitiesParser().createLayersXMLDictionary(layer, m_layersXMLDictionary, wms);
 					} else {
 						m_layers = new WMSLayerGroup(null, layer, wms, version);
 					
@@ -296,28 +296,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 			trace("WMSServiceConfiguration: " + fullURL + " parsing time: " + (getTimer() - time) + "ms\n");
 		}
 		
-		private function createLayersXMLDictionary(layerXML: XML, wms: Namespace): void
-		{
-			var bQueryable: Boolean = layerXML.@queryable;
-			var layers: XMLList = layerXML.wms::Layer;
-			var total: int = layers.length();
-			
-			if (bQueryable)
-			{
-				var name: String = String(layerXML.wms::Name);
-				if (name == '')
-					name = String(layerXML.wms::Title);
-				m_layersXMLDictionary[name] = layerXML;
-			}
-			if (total > 0) {
-				//it's subgroup
-				for (var i: int = 0; i < total; i++)
-				{
-					var layer: XML = layers[i] as XML;
-					createLayersXMLDictionary(layer, wms);
-				}
-			} 
-		}
+		
 		
 		private function onGetCapabilitiesInitialized(event: Event): void
 		{
@@ -432,5 +411,170 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		{
 			return "WMSServiceConfiguration " + id + " / " + fullURL + " capabilitiesUpdated: " + capabilitiesUpdated;
 		}
+	}
+}
+import com.iblsoft.flexiweather.ogc.Version;
+import com.iblsoft.flexiweather.ogc.WMSLayer;
+import com.iblsoft.flexiweather.ogc.WMSLayerBase;
+import com.iblsoft.flexiweather.ogc.WMSLayerGroup;
+
+import flash.utils.Dictionary;
+
+/**
+ * This class is helper class to fill m_layersXMLDictionary Dictionary with XML for each layer or Group
+ *  
+ * @author Franto
+ * 
+ */
+class GetCapabilitiesParser 
+{
+	private var wms: Namespace;
+	
+	public function createLayersXMLDictionary(layerXML: XML, m_layersXMLDictionary: Dictionary, wms: Namespace): void
+	{
+		this.wms = wms;
+		
+		var bQueryable: Boolean = layerXML.@queryable;
+		var layers: XMLList = layerXML.wms::Layer;
+		var total: int = layers.length();
+		
+		if (bQueryable)
+		{
+			var name: String = getLayerXMLName(layerXML);
+			m_layersXMLDictionary[name] = layerXML;
+		}
+		if (total > 0) {
+			//it's subgroup
+			for (var i: int = 0; i < total; i++)
+			{
+				var layer: XML = layers[i] as XML;
+				createLayersXMLDictionary(layer, m_layersXMLDictionary, wms);
+			}
+		} 
+	}
+	
+	private function getLayerXMLName(layerXML: XML): String
+	{
+		var name: String = String(layerXML.wms::Name);
+		if (name == '')
+			name = String(layerXML.wms::Title);
+		
+		return name;
+	}
+}
+
+class LayerXMLHelper
+{
+	public var name: String;
+	public var xml: XML;
+	public var layer: WMSLayerBase;
+	
+	private var wms: Namespace;
+	private var version: Version;
+	private var m_layersXMLDictionary: Dictionary;
+	
+	public function LayerXMLHelper(layersXMLDictionary: Dictionary, wms: Namespace, version: Version)
+	{
+		this.wms = wms;
+		this.version = version;
+		this.m_layersXMLDictionary = layersXMLDictionary;
+	}
+	
+	public function createLayerGroup(s_name: String, layerXML: XML): WMSLayerGroup
+	{
+		var wmsLayerGroup: WMSLayerGroup = new WMSLayerGroup(null, layerXML, wms, version);
+		
+		var parentLayer: WMSLayerBase = getLayerXMLParent(s_name, wmsLayerGroup);
+		
+		wmsLayerGroup.initialize();
+		wmsLayerGroup.parse();
+		
+		m_layersXMLDictionary[s_name] = wmsLayerGroup;
+		
+		return wmsLayerGroup;
+	}
+	public function createLayer(s_name: String, layerXML: XML): WMSLayer
+	{
+		var wmsLayer = new WMSLayer(null, layerXML as XML, wms, version);
+		
+		var parentLayer: WMSLayerBase = getLayerXMLParent(s_name, wmsLayer);
+		
+		wmsLayer.initialize();
+		wmsLayer.parse();
+		
+		m_layersXMLDictionary[s_name] = wmsLayer;
+		
+		return wmsLayer as WMSLayer;
+	}
+	
+	private function getLayerXMLParent(s_layerName: String, layer: WMSLayerBase): WMSLayerBase
+	{
+		var layerXML: XML = layer.itemXML;
+		var parentLayer: WMSLayerGroup;
+		
+		if(layerXML)
+		{
+			var parentXML: XML = (layerXML as XML).parent();
+			if (parentXML)
+			{
+				var currLayerName: String = getLayerXMLName(parentXML);
+				var dictionaryItem: Object = m_layersXMLDictionary[currLayerName];
+				if (dictionaryItem is XML)
+				{
+					var isGroup: Boolean = isLayerXMLGroup(currLayerName);
+					if (isGroup)
+					{
+						parentLayer = createLayerGroup(currLayerName, parentXML);
+					} else {
+						trace("Parent should be always group and has layer children");
+						//parentLayer = createLayer(currLayerName, parentXML);
+					}
+				} else if (dictionaryItem is WMSLayerBase) {
+					parentLayer = dictionaryItem as WMSLayerGroup;
+				}
+				
+				if (parentLayer)
+				{
+					//check if layer is already in parent group;
+					var childLayer: WMSLayerBase = parentLayer.getLayerByName(s_layerName);
+					if (!childLayer)
+					{
+						//layer is not there, add it to the parent
+						parentLayer.addLayer(layer);
+						
+					}
+//					getLayerXMLParent(currLayerName, parentLayer);
+				}
+			}
+		}
+		return parentLayer;
+		
+	}
+	
+	private function isLayerXMLGroup(s_name: String): Boolean
+	{
+		var item: Object = m_layersXMLDictionary[s_name];
+		if (item && item is XML)
+		{
+			var currXML: XML = item as XML;
+			var layers: XMLList = currXML.wms::Layer;
+			var total: int = layers.length();
+			
+			
+			return total > 0;
+		}
+		return false;
+	}
+	
+	private function getLayerXMLName(layerXML: XML = null): String
+	{
+		if (!layerXML)
+			layerXML = xml;
+		
+		var name: String = String(layerXML.wms::Name);
+		if (name == '')
+			name = String(layerXML.wms::Title);
+		
+		return name;
 	}
 }

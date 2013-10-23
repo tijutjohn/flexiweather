@@ -76,11 +76,15 @@ package com.iblsoft.flexiweather.ogc
 			
 			var afterParseTime: Number = getTimer();
 			
-			if (parent && parent.dimensions && parent.dimensions.length > 0)
+			if (parent)
 			{
-				// inherit dimensions
-//				ma_dimensions.addAll(parent.dimensions);
-				addAllArrayItems(ma_dimensions, parent.dimensions);
+				var parentDimensions: Array = parent.dimensions;
+				if (parentDimensions && parentDimensions.length > 0)
+				{
+					// inherit dimensions
+//					ma_dimensions.addAll(parent.dimensions);
+					ma_dimensions = addAllArrayItems(ma_dimensions, parent.dimensions);
+				}
 			}
 			
 			var time2: Number = (getTimer() - afterParseTime);
@@ -93,10 +97,15 @@ package com.iblsoft.flexiweather.ogc
 			
 			if (parent && parent.crsWithBBoxes && parent.crsWithBBoxes.length > 0)
 			{
-				// inherit CRSs and bounding boxes, this may create some duplication (same CRS defined multiple times)
-				// but this is not a big problem because if search for bounding box we take the first found item. 
-//				ma_crsWithBBoxes.addAll(parent.crsWithBBoxes);
-				addAllArrayItems(ma_crsWithBBoxes, parent.crsWithBBoxes);
+				var parentCrsWithBBoxes: Array = parent.crsWithBBoxes;
+				if (parentCrsWithBBoxes && parentCrsWithBBoxes.length > 0)
+				{
+					// inherit CRSs and bounding boxes, this may create some duplication (same CRS defined multiple times)
+					// but this is not a big problem because if search for bounding box we take the first found item. 
+//					ma_crsWithBBoxes.addAll(parent.crsWithBBoxes);
+					ma_crsWithBBoxes = addAllArrayItems(ma_crsWithBBoxes, parent.crsWithBBoxes);
+					
+				}
 			}
 			
 			var time3: Number = (getTimer() - afterParseTime2);
@@ -485,6 +494,10 @@ package com.iblsoft.flexiweather.ogc
 		public function get parent(): WMSLayerGroup
 		{
 			return m_parent;
+		}
+		public function set parent(value: WMSLayerGroup): void
+		{
+			m_parent = value;
 		}
 
 		public function get title(): String
