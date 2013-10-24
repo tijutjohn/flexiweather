@@ -28,8 +28,20 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 	import flash.utils.getTimer;
 	
 	import mx.collections.ArrayCollection;
+	import mx.effects.easing.Exponential;
 
 	[Event(name = CAPABILITIES_UPDATED, type = "flash.events.DataEvent")]
+	
+	/**
+	 * WMSServiceConfiguration is base class for all service WMS configurations.
+	 * 
+	 * WMSServiceConfiguration can load and parse GetCapabilities request.
+	 * 
+	 * There are 2 experimental modes for parsing GetCapabilities request
+	 * 
+	 * 
+	 * 
+	 */
 	public class WMSServiceConfiguration extends OGCServiceConfiguration
 	{
 		Storage.addChangedClass('com.iblsoft.flexiweather.ogc.WMSServiceConfiguration', 'com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceConfiguration', new Version(1, 6, 0));
@@ -103,29 +115,31 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		
 		public function getLayerByName(s_name: String): WMSLayer
 		{
-			var layerTemp: Object = m_layersXMLDictionary[s_name];
-			if (layerTemp)
+			if (EXPERIMENTAL_LAYERS_INITIALIZING)
 			{
-				if (layerTemp is XML)
+				var layerTemp: Object = m_layersXMLDictionary[s_name];
+				if (layerTemp)
 				{
-					var tempLayerXML: LayerXMLHelper = new LayerXMLHelper(m_layersXMLDictionary, wms, version);
-					var wmsLayer: WMSLayer = tempLayerXML.createLayer(s_name, layerTemp as XML);
-					trace("WMSServiceConfig getLayerByName 1: "+ wmsLayer + " parent: "+ wmsLayer.parent);
-					return wmsLayer;
+					if (layerTemp is XML)
+					{
+						var tempLayerXML: LayerXMLHelper = new LayerXMLHelper(m_layersXMLDictionary, wms, version);
+						var wmsLayer: WMSLayer = tempLayerXML.createLayer(s_name, layerTemp as XML);
+						trace("WMSServiceConfig getLayerByName 1: "+ wmsLayer + " parent: "+ wmsLayer.parent);
+						return wmsLayer;
+						
+					} else if (layerTemp is WMSLayer) {
+	//					trace("WMSServiceConfig getLayerByName 2: "+ layerTemp + " parent: "+ (layerTemp as WMSLayer).parent);
+						return layerTemp as WMSLayer
+					}
 					
-				} else if (layerTemp is WMSLayer) {
-//					trace("WMSServiceConfig getLayerByName 2: "+ layerTemp + " parent: "+ (layerTemp as WMSLayer).parent);
-					return layerTemp as WMSLayer
 				}
-				
+				return null;
 			}
-			return null;
-			/*
+			
 			if (m_layers == null)
 				return null;
 			var wmsLayer: WMSLayer = m_layers.getLayerByName(s_name);
 			return wmsLayer;
-			*/
 		}
 
 		public function toGetCapabilitiesRequest(): URLRequest

@@ -649,6 +649,10 @@ package com.iblsoft.flexiweather.ogc
 
 		private function getGetMapFullUrl(width: int, height: int): String
 		{
+//			if (width != 150)
+//			{
+//				trace("test getGetMapFullUrl");
+//			}
 			var request: URLRequest = m_cfg.toGetMapRequest(
 					container.getCRS(), container.getViewBBox().toBBOXString(),
 					width, height,

@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceConfiguration;
 	import com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceParsingManager;
 	
 	import flash.utils.Dictionary;
@@ -36,30 +37,33 @@ package com.iblsoft.flexiweather.ogc
 //			var currTime: Number = getTimer();
 			super.initialize(parsingManager);
 
+			if (WMSServiceConfiguration.EXPERIMENTAL_LAYERS_INITIALIZING)
+				return;
+			
+			ma_layers = new Array();
+			ma_layersDictionary = new Dictionary();
 			
 //			ma_layersXMLDictionary = new Dictionary();
 //			
-//			var layers: XMLList = m_itemXML.wms::Layer;
-//			var total: int = layers.length();
-//			for (var i: int = 0; i < total; i++)
-//			{
-//				var layer: XML = layers[i] as XML;
-//				var name: String = String(layer.wms::Name);
-//				var layersChildren: int = layer.wms::Layer.length();
-//				
-//				if (layersChildren == 0)
-//					ma_layersXMLDictionary[name] = layer;
-//				else
-//					initializeSubgroup(layer);
+			var layers: XMLList = m_itemXML.wms::Layer;
+			var total: int = layers.length();
+			for (var i: int = 0; i < total; i++)
+			{
+				var layer: XML = layers[i] as XML;
+				var name: String = String(layer.wms::Name);
+				var layersChildren: int = layer.wms::Layer.length();
+
+//					if (layersChildren == 0)
+//						ma_layersXMLDictionary[name] = layer;
+//					else
+//						initializeSubgroup(layer);
 				
 				
-				/*
 				if (parsingManager)
 					parsingManager.addCall({obj: this.toString()+"Initialize"}, initializeLayer, [layer, parsingManager]);
 				else
 					initializeLayer(layer);
-				*/
-//			}
+			}
 			
 //			trace(this + " initialize total time: " + (getTimer() - currTime) + "ms");
 		}
@@ -97,17 +101,22 @@ package com.iblsoft.flexiweather.ogc
 //				ma_layers.push(wmsLayerGroup);
 				//					trace("\n" + this + " initialize layerGroup: "+ wmsLayerGroup.toString() + " total time: " + (getTimer() - layerTime) + "ms");
 			}
+			
+			_state = LAYER_INITIALIZED;
 		}
 		
 		private function delayedInitialization(): void
 		{
-			ma_layers = new Array();
-			ma_layersDictionary = new Dictionary();
-			
-//			for each (var layer: XML in ma_layersXMLDictionary)
-//			{
-//				initializeLayer(layer);
-//			}
+			if (!WMSServiceConfiguration.EXPERIMENTAL_LAYERS_INITIALIZING)
+			{
+				for each (var layer: XML in ma_layersDictionary)
+				{
+					initializeLayer(layer);
+				}
+			} else {
+				ma_layers = new Array();
+				ma_layersDictionary = new Dictionary();
+			}
 		}
 		
 		private function parsing(): void
@@ -115,25 +124,15 @@ package com.iblsoft.flexiweather.ogc
 //			for each (var layer: XML in m_itemXML.wms::Layer)
 			for each (var wmsLayerItem: LayerDataItem in ma_layersDictionary)
 			{
-				//				var layerTime: Number = getTimer();
-				//				if (wmsLayerItem.layer.name.indexOf("temper") > 0)
-				//				{
-				//					trace("debug Temperature layer");
-				//				}
-				
 //				if (parsingManager)
 //					parsingManager.addCall({obj: this.toString()+"Parse"}, parseLayerItem, [wmsLayerItem, parsingManager]);
 //				else
 					wmsLayerItem.layer.parse();
-				
-				//				trace("\n" + this + " parse layer: "+ wmsLayerItem.layer.toString() + " total time: " + (getTimer() - layerTime) + "ms");
 			}
 		}
 		
 		override public function parse(parsingManager: WMSServiceParsingManager = null):void
 		{
-//			var currTime: Number = getTimer();
-
 			super.parse(parsingManager);
 			
 			if (_state == LAYER_XML_STORED)
@@ -143,15 +142,14 @@ package com.iblsoft.flexiweather.ogc
 			
 			_state = LAYER_INITIALIZED;
 			
-//			parsing();
+			if (!WMSServiceConfiguration.EXPERIMENTAL_LAYERS_INITIALIZING)
+				parsing();
 			
 			_state = LAYER_PARSED;
-//			trace(this + " parse total time: " + (getTimer() - currTime) + "ms");
 		}
 		
 		public function parseLayerItem(wmsLayerItem: LayerDataItem, parsingManager: WMSServiceParsingManager): void
 		{
-//			var layerTime: Number = getTimer();
 			if (wmsLayerItem.type == LayerDataItem.LAYER)
 				wmsLayerItem.layer.parse(parsingManager);
 			else
