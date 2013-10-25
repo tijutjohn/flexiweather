@@ -1640,8 +1640,12 @@ package com.iblsoft.flexiweather.ogc.multiview
 					var cols: int = tileLayout.columnCount;
 					var rows: int = tileLayout.rowCount
 					
-					columnWidth = (dataGroup.layout as TileLayout).columnWidth = (dataGroup.width -  horizontalGap * (cols - 1))/cols ;
-					rowHeight = (dataGroup.layout as TileLayout).rowHeight = (dataGroup.height - verticalGap * (rows - 1)) / rows;
+						
+					var dgWidth: Number = unscaledWidth - selectedBorderWeight * 2; //dataGroup.width
+					var dgHeight: Number = unscaledHeight - selectedBorderWeight * 2; //dataGroup.height
+					
+					columnWidth = (dataGroup.layout as TileLayout).columnWidth = (dgWidth -  horizontalGap * (cols - 1))/cols ;
+					rowHeight = (dataGroup.layout as TileLayout).rowHeight = (dgHeight - verticalGap * (rows - 1)) / rows;
 				}
 			}
 			debugWidgets();
