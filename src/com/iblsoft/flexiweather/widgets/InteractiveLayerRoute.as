@@ -204,10 +204,19 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (_ma_coords)
 				_ma_coords.removeEventListener(CollectionEvent.COLLECTION_CHANGE, onCoordsCollectionChanged);
-			_ma_coords = value;
+			    _ma_coords = value;
+                _ma_points = getPointsFromCoords();
 			if (_ma_coords)
 				_ma_coords.addEventListener(CollectionEvent.COLLECTION_CHANGE, onCoordsCollectionChanged);
 		}
+
+        private function getPointsFromCoords():ArrayCollection {
+            var points:ArrayCollection = new ArrayCollection();
+            for each (var coord:Coord in _ma_coords) {
+                points.addItem(container.coordToPoint(coord));
+            }
+            return points;
+        }
 
 		private function notifyChange(): void
 		{
