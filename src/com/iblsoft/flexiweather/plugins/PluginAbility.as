@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.plugins
 {
 	import flash.utils.Dictionary;
+	
 	import mx.controls.Image;
 
 	public class PluginAbility
@@ -120,8 +121,8 @@ package com.iblsoft.flexiweather.plugins
 		 * @return 
 		 * 
 		 */		
-		public static function menuItem(classOrInstance: Object,
-				s_menu_id: String, s_name: String, i_priority: int, s_plugin_id: String = null): PluginAbility
+		public static function menuItem(classOrInstance: Object, s_plugin_id: String,
+				s_menu_id: String, s_name: String, i_priority: int): PluginAbility
 		{
 			var ability: PluginAbility = new PluginAbility(PluginAbility.MENU_ITEM, s_menu_id, s_plugin_id, classOrInstance)
 			ability.withMetadata("name", s_name);
@@ -144,8 +145,8 @@ package com.iblsoft.flexiweather.plugins
 		 * @return 
 		 * 
 		 */		
-		public static function menuClickListener(classOrInstance: Object,
-				s_mainMenu_id: String,  s_itemIDSubstring: String, f_callback: Function, s_plugin_id: String = null): PluginAbility
+		public static function menuClickListener(classOrInstance: Object, s_plugin_id: String,
+				s_mainMenu_id: String,  s_itemIDSubstring: String, f_callback: Function): PluginAbility
 		{
 			var ability: PluginAbility = new PluginAbility(PluginAbility.MENU_ITEM_CLICK_LISTENER, s_mainMenu_id, s_plugin_id, classOrInstance)
 			ability.withMetadata("itemIDSubstring", s_itemIDSubstring);
@@ -168,8 +169,8 @@ package com.iblsoft.flexiweather.plugins
 		 * @return 
 		 * 
 		 */		
-		public static function submenuItem(classOrInstance: Object,
-				s_mainMenu_id: String, s_menu_id: String, s_name: String, i_priority: int, s_type: String = '', f_callback: Function = null, s_plugin_id: String = null, s_menuString: String = ''): PluginAbility
+		public static function submenuItem(classOrInstance: Object, s_plugin_id: String,
+				s_mainMenu_id: String, s_menu_id: String, s_name: String, i_priority: int, s_type: String = '', f_callback: Function = null, s_menuString: String = ''): PluginAbility
 		{
 			var ability: PluginAbility = new PluginAbility(PluginAbility.SUBMENU_ITEM, s_menu_id, s_plugin_id, classOrInstance)
 			ability.withMetadata("name", s_name);
