@@ -27,6 +27,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 	import com.iblsoft.flexiweather.plugins.IConsole;
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.LoggingUtils;
+	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.utils.XMLStorage;
 	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
@@ -834,9 +835,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 			
 			if (!synchronizator || !synchronizator.canCreateMap(widget))
 			{
-				createMapFromSerialization(widget, mapXML);
-				//						widget.interactiveLayerMap.addEventListener(InteractiveLayerMap.LAYERS_SERIALIZED_AND_READY, onMapFromXMLReady);
-				//						widget.interactiveLayerMap.serialize(_serializedMap);
+				createMapFromSerialization(widget, new XMLStorage(mapXML));
 			} else {
 				synchronizator.updateMapAction(widget, position, _configuration);
 				synchronizator.addEventListener(SynchronisationEvent.MAP_READY, onSynchronizatorMapReady);
@@ -845,12 +844,12 @@ package com.iblsoft.flexiweather.ogc.multiview
 			}
 		}
 		
-		private function createMapFromSerialization(iw: InteractiveWidget, mapXML: XML): void
+		public function createMapFromSerialization(iw: InteractiveWidget, storage: Storage): void
 		{
-			var _serializedMap: XMLStorage = new XMLStorage(mapXML);
+//			var _serializedMap: XMLStorage = new XMLStorage(mapXML);
 			iw.interactiveLayerMap.startMapLoading();
 			iw.interactiveLayerMap.addEventListener(InteractiveLayerMap.LAYERS_SERIALIZED_AND_READY, onMapFromXMLReady);
-			iw.interactiveLayerMap.serialize(_serializedMap);
+			iw.interactiveLayerMap.serialize(storage);
 		}
 
 		private function updatePreloaderLabel(widget: InteractiveWidget, label: String, loaded:  Number = 0, total: Number = 1): void

@@ -509,7 +509,7 @@ class LayerXMLHelper
 	}
 	public function createLayer(s_name: String, layerXML: XML): WMSLayer
 	{
-		var wmsLayer = new WMSLayer(null, layerXML as XML, wms, version);
+		var wmsLayer: WMSLayer = new WMSLayer(null, layerXML as XML, wms, version);
 		
 		var parentLayer: WMSLayerBase = getLayerXMLParent(s_name, wmsLayer);
 		

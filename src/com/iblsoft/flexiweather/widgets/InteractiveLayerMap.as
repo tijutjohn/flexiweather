@@ -56,11 +56,14 @@ package com.iblsoft.flexiweather.widgets
 	[Event(name = TIME_AXIS_REMOVED, type = "mx.events.DynamicEvent")]
 	[Event(name = SYNCHRONISE_WITH, type = "mx.events.DynamicEvent")]
 	[Event(name = MAP_LAYERS_INITIALIZED, type = "flash.events.Event")]
+	[Event(name = MAP_CHANGED, type = "flash.events.Event")]
 	
 	[DefaultProperty("mxmlContent")] 
 	
 	public class InteractiveLayerMap extends InteractiveLayerComposer implements Serializable
 	{
+		public static const MAP_CHANGED: String = "mapChanged";
+		
 		public static const TIMELINE_FRAMES_ENUMERATED: String = "timelineFramesEnumerated";
 		
 		public static const TIMELINE_CONFIGURATION_CHANGE: String = "timelineConfigurationChange";
@@ -496,6 +499,8 @@ package com.iblsoft.flexiweather.widgets
 			
 			//ask for map frames
 			notifyTimeAxisUpdate();
+			
+			notifyMapChanged();
 		}
 		/**
 		 * This method serialize map for storing single map layers without any aditional info (e.g. animation data, area).
@@ -621,6 +626,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 //			trace("\n" + this + " notifyAllLayersAreInitialized");
 			dispatchEvent(new Event(MAP_LAYERS_INITIALIZED));
+			notifyMapChanged();
 		}
 			
 		private function notifyTimeAxisFrameUpdate(): void
@@ -981,6 +987,8 @@ package com.iblsoft.flexiweather.widgets
 					addLayerToTimeAxis(layer);
 					invalidateAreaForLayer(layer);
 				}
+				
+				notifyMapChanged();
 			}
 			else
 			{
@@ -1149,6 +1157,8 @@ package com.iblsoft.flexiweather.widgets
 			dispatchEvent(dynamicEvent);
 			
 			invalidateEnumTimeAxis();
+			
+			notifyMapChanged();
 		}
 
 		private function getSynchronizedFrameValue(): Date
@@ -1220,6 +1230,7 @@ package com.iblsoft.flexiweather.widgets
 		private function primaryLayerHasChanged(): void
 		{
 			dispatchEvent(new DataEvent(PRIMARY_LAYER_CHANGED, true));
+			notifyMapChanged();
 		}
 
 		private var _cachedEnumTimeAxis: Array;
@@ -2022,6 +2033,11 @@ package com.iblsoft.flexiweather.widgets
 				debugConsole.print(str, type, tag);
 //			trace(tag + "| " + type + "| " + str);
 //			LoggingUtils.dispatchLogEvent(this, " ILM: " + str);
+		}
+		
+		private function notifyMapChanged(): void
+		{
+			dispatchEvent(new Event(MAP_CHANGED));
 		}
 	}
 }
