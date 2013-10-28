@@ -45,10 +45,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			var annotation: AnnotationBox;
 			var reflection: WFSEditableReflectionData;
 			var _addToLabelLayout: Boolean;
-			
-			
 			var displaySpriteWithAnnotation: WFSFeatureEditableSpriteWithAnnotation;
-			var reflection: WFSEditableReflectionData;
 			
 			//create sprites for reflections
 			var totalReflections: uint = ml_movablePoints.totalReflections;

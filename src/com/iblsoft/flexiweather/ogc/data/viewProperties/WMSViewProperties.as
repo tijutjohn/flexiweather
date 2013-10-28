@@ -773,6 +773,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 
 		public function exactlySynchroniseWith(s_variableId: String, value: Object): String
 		{
+//			trace("WMSViewProperties exactlySynchroniseWith: " + s_variableId + " value: " + value);
 			var of: Object;
 			
 			if (s_variableId == GlobalVariable.LEVEL)
@@ -860,6 +861,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 						if (of && of.data && (of.data as Date).time == frame.time)
 						{
 							ofExactForecast = of;
+//							trace("WMSViewProperties exact forecast: " + ofExactForecast + " layer: " + parentLayer.name);
 							break;
 						}
 					}

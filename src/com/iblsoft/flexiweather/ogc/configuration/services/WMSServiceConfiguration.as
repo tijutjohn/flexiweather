@@ -115,6 +115,8 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		
 		public function getLayerByName(s_name: String): WMSLayer
 		{
+			var wmsLayer: WMSLayer;
+			
 			if (EXPERIMENTAL_LAYERS_INITIALIZING)
 			{
 				var layerTemp: Object = m_layersXMLDictionary[s_name];
@@ -123,7 +125,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 					if (layerTemp is XML)
 					{
 						var tempLayerXML: LayerXMLHelper = new LayerXMLHelper(m_layersXMLDictionary, wms, version);
-						var wmsLayer: WMSLayer = tempLayerXML.createLayer(s_name, layerTemp as XML);
+						wmsLayer = tempLayerXML.createLayer(s_name, layerTemp as XML);
 						trace("WMSServiceConfig getLayerByName 1: "+ wmsLayer + " parent: "+ wmsLayer.parent);
 						return wmsLayer;
 						
@@ -138,7 +140,8 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 			
 			if (m_layers == null)
 				return null;
-			var wmsLayer: WMSLayer = m_layers.getLayerByName(s_name);
+			
+			wmsLayer = m_layers.getLayerByName(s_name);
 			return wmsLayer;
 		}
 

@@ -1677,6 +1677,8 @@ package com.iblsoft.flexiweather.ogc
 		{
 //			debug("MSBAse onCapabilitiesUpdated");
 			_capabilitiesReady = true;
+			
+			/*
 			dispatchEvent(new SynchronisedVariableChangeEvent(
 					SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, GlobalVariable.FRAME));
 			if (mb_synchroniseLevel)
@@ -1689,6 +1691,7 @@ package com.iblsoft.flexiweather.ogc
 				dispatchEvent(new SynchronisedVariableChangeEvent(
 						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, GlobalVariable.RUN));
 			}
+			*/
 			checkPostponedUpdateDataCall();
 		}
 
