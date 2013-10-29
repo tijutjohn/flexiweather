@@ -251,7 +251,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 
 		protected function notifyLoadingStart(associatedData: Object): void
 		{
-			var e: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveDataLayer.LOADING_STARTED);
+			var e: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveDataLayer.LOADING_STARTED, true);
 			e.data = associatedData;
 			dispatchEvent(e);
 		}
@@ -269,13 +269,13 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 
 		protected function notifyLoadingFinishedFromCache(associatedData: Object): void
 		{
-			var e: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE);
+			var e: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, true);
 			e.data = associatedData;
 			dispatchEvent(e);
 		}
 		protected function notifyLoadingFinished(associatedData: Object): void
 		{
-			var e: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveDataLayer.LOADING_FINISHED);
+			var e: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveDataLayer.LOADING_FINISHED, true);
 			e.data = associatedData;
 			dispatchEvent(e);
 		}

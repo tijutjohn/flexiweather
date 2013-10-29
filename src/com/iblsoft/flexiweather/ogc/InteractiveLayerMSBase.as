@@ -558,7 +558,7 @@ package com.iblsoft.flexiweather.ogc
 		protected function onCurrentWMSDataLoadingStarted(event: InteractiveLayerEvent): void
 		{
 			_currentWMSDataLoadingStarted = true;
-			notifyLoadingStart(false);
+			notifyLoadingStart(true);
 		}
 
 		protected function onCurrentWMSDataProgress(event: InteractiveLayerProgressEvent): void
