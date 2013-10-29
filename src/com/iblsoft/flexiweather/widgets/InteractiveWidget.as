@@ -2188,8 +2188,9 @@ package com.iblsoft.flexiweather.widgets
 			if (coords[0] is Point)
 			{
 				var newCoords: Array = [];
-				for each (var p: Point in coords)
+				for (var i: int = 0; i < total; i++)
 				{
+					var p: Point = coords[i] as Point;
 					newCoords.push(pointToCoord(p.x, p.y));	
 				}	
 				coords = newCoords;

@@ -213,7 +213,10 @@ package com.iblsoft.flexiweather.widgets
 
         private function getPointsFromCoords(): Array {
             var points: Array = [];
-            for each (var coord:Coord in _ma_coords) {
+			var total: int = _ma_coords.length;
+			for (var i: int = 0; i < total; i++)
+			{
+				var coord: Coord = _ma_coords[i] as Coord;
                 points.push(container.coordToPoint(coord));
             }
             return points;
@@ -307,8 +310,8 @@ package com.iblsoft.flexiweather.widgets
 				var i: int = getCoordIndex(m_selectedCoord);
 				if (i >= 0)
 				{
-					_ma_coords[c] = i;
-					_ma_points[mousePt] = i;
+					_ma_coords[i] = c;
+					_ma_points[i] = mousePt;
 					
 					debugCoords("Update coord at " + i);
 					notifyChange();
@@ -329,7 +332,7 @@ package com.iblsoft.flexiweather.widgets
 				var crs: String = container.crs;
 				for (var i: int = 0; i < total; i++)
 				{
-					var currCoord: Coord = _ma_coords.getItemAt(i) as Coord;
+					var currCoord: Coord = _ma_coords[i] as Coord;
 					if (currCoord.crs != crs)
 					{
 						currCoord = currCoord.convertToProjection(proj);
@@ -351,7 +354,7 @@ package com.iblsoft.flexiweather.widgets
 			var total: int = _ma_coords.length;
 			for  (var i: int = 0; i < total; i++)
 			{
-				var coord: Coord = _ma_coords.getItemAt(i) as Coord;
+				var coord: Coord = _ma_coords[i] as Coord;
 				trace("\tILR coord["+i+"]: " + coord);
 			}
 		}
@@ -365,9 +368,9 @@ package com.iblsoft.flexiweather.widgets
 			c = getHitCoord(mousePt);
 			if (c != null)
 			{
-				var i: int = _ma_coords.getItemIndex(c);
-				_ma_coords.removeItemAt(i);
-				_ma_points.removeItemAt(i);
+				var i: int = _ma_coords.indexOf(c);
+				_ma_coords.splice(i, 1);
+				_ma_points.splice(i, 1);
 				notifyChange();
 				invalidateDynamicPart();
 			}
@@ -394,7 +397,7 @@ package com.iblsoft.flexiweather.widgets
 			if (_ma_coords.length > 1)
 			{
 				var featureData: FeatureData = new FeatureData('layerRoute');
-				container.drawGeoPolyLine(getRouteRenderer, _ma_points.source, _drawMode, false, false, featureData);
+				container.drawGeoPolyLine(getRouteRenderer, _ma_points, _drawMode, false, false, featureData);
 			}
 			
 			//draw points
@@ -430,8 +433,10 @@ package com.iblsoft.flexiweather.widgets
 			
 			var pt: Point;
 			var proj: Projection = container.getCRSProjection();
-			for each (var c: Coord in _ma_coords)
+			var total: int = _ma_coords.length;
+			for (var i: int = 0; i < total; i++)
 			{
+				var c: Coord = _ma_coords[i] as Coord;
 				if (c.crs != container.crs)
 				{
 					c = c.convertToProjection(proj);
@@ -479,8 +484,10 @@ package com.iblsoft.flexiweather.widgets
 			var projectionWidth: Number = projection.extentBBox.width;
 			var crs: String = projection.crs;
 			
-			for each (var c: Coord in _ma_coords)
+			var total: int = _ma_coords.length;
+			for (var i: int = 0; i < total; i++)
 			{
+				var c: Coord = _ma_coords[i] as Coord;
 				if (c.crs != crs)
 				{
 					c = c.convertToProjection(projection);
