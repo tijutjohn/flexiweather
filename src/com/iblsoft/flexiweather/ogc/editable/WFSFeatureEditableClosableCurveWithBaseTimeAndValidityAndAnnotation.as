@@ -23,8 +23,6 @@ package com.iblsoft.flexiweather.ogc.editable
 	
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
-	
-	import mx.collections.ArrayCollection;
 
 	public class WFSFeatureEditableClosableCurveWithBaseTimeAndValidityAndAnnotation extends WFSFeatureEditableClosableCurveWithBaseTimeAndValidity implements IClosableCurve, IWFSCurveFeature, IWFSFeatureWithAnnotation
 	{
@@ -69,7 +67,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			var reflection: WFSEditableReflectionData;
 			var _addToLabelLayout: Boolean;
 			
-			var a_points: ArrayCollection = getPoints();
+			var a_points: Array = getPoints();
 			
 			//create sprites for reflections
 			var totalReflections: uint = ml_movablePoints.totalReflections;
@@ -88,7 +86,7 @@ package com.iblsoft.flexiweather.ogc.editable
 					if (m_featureData)
 						ptAvg = m_featureData.getReflectionAt(reflection.reflectionDelta).center;
 					else if (pointsCount == 1) 
-						ptAvg = a_points.getItemAt(0) as Point;
+						ptAvg = a_points[0] as Point;
 					
 					if (!reflection.displaySprite)
 					{
@@ -239,8 +237,8 @@ package com.iblsoft.flexiweather.ogc.editable
 			if (mi_editMode == WFSFeatureEditableMode.ADD_POINTS_ON_CURVE)
 			{
 				// PREPARE CURVE POINTS
-				ma_points = CubicBezier.calculateHermitSpline(m_points.toArray(), mb_closed);
-					//ma_points = CubicBezier.calculateHermitSpline(m_points.toArray(),  
+				ma_points = CubicBezier.calculateHermitSpline(m_points, mb_closed);
+					//ma_points = CubicBezier.calculateHermitSpline(m_points,  
 			}
 		}
 
@@ -295,7 +293,7 @@ package com.iblsoft.flexiweather.ogc.editable
 								return false;
 						}
 					}
-					var a: ArrayCollection = getPoints();
+					var a: Array = getPoints();
 					var i_best: int = -1;
 					var f_bestDistance: Number = 0;
 					var b_keepDrag: Boolean = true;

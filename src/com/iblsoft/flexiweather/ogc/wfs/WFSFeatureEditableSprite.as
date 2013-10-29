@@ -48,7 +48,7 @@ package com.iblsoft.flexiweather.ogc.wfs
 			var cPrev: Point = null;
 			var cFirst: Point = null;
 			// we use here, that Coord is derived from Point, and Coord.crs is not used
-//			var a_coordinates: Array = b_useCoordinates ? coordinates : getPoints().toArray(); 
+//			var a_coordinates: Array = b_useCoordinates ? coordinates : getPoints(); 
 			var a_coordinates: Array = points;
 			for each (var c: Point in a_coordinates)
 			{
@@ -111,13 +111,6 @@ package com.iblsoft.flexiweather.ogc.wfs
 						cPrev.x, cPrev.y, cFirst.x, cFirst.y));
 			}
 			return l;
-//				b_useCoordinates ? coordinates : getPoints().toArray(),
-//			_feature.master.container.drawHermitSpline(
-//				newSegmentRenderer,
-//				points,
-//				b_closed, false, 0.005);
-//			
-//			return newSegmentRenderer.segments;
 		}
 		private var _anticollisionLayoutObject: AnticollisionLayoutObject;
 

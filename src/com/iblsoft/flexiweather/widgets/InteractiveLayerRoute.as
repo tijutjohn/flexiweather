@@ -20,7 +20,6 @@ package com.iblsoft.flexiweather.widgets
 	import flash.geom.Point;
 	import flash.utils.getTimer;
 	
-	import mx.collections.ArrayCollection;
 	import mx.events.CollectionEvent;
 	import mx.events.FlexEvent;
 
@@ -133,8 +132,8 @@ package com.iblsoft.flexiweather.widgets
 	{
 		public static const ROUTE_CHANGED: String = 'routeChanged';
 		
-		private var _ma_coords: ArrayCollection;
-		private var _ma_points: ArrayCollection;
+		private var _ma_coords: Array;
+		private var _ma_points: Array;
 		
 		protected var m_highlightedCoord: Coord = null;
 		protected var m_selectedCoord: Coord = null;
@@ -174,8 +173,8 @@ package com.iblsoft.flexiweather.widgets
 			setStyle("placemarkBorderThickness", 1);
 			setStyle("placemarkRadius", 5);
 			
-			coords = new ArrayCollection();
-			_ma_points = new ArrayCollection();
+			coords = [];
+			_ma_points = [];
 		}
 
 		public function changeDrawMode(value: String): void
@@ -189,31 +188,33 @@ package com.iblsoft.flexiweather.widgets
 		}
 
 		[Bindable(event = "pointsChanged")]
-		public function get points(): ArrayCollection
+		public function get points(): Array
 		{
 			return _ma_points;
 		}
 		
 		[Bindable(event = "coordsChanged")]
-		public function get coords(): ArrayCollection
+		public function get coords(): Array
 		{
 			return _ma_coords;
 		}
 
-		public function set coords(value: ArrayCollection): void
+		public function set coords(value: Array): void
 		{
-			if (_ma_coords)
-				_ma_coords.removeEventListener(CollectionEvent.COLLECTION_CHANGE, onCoordsCollectionChanged);
-			    _ma_coords = value;
-                _ma_points = getPointsFromCoords();
-			if (_ma_coords)
-				_ma_coords.addEventListener(CollectionEvent.COLLECTION_CHANGE, onCoordsCollectionChanged);
+//			if (_ma_coords)
+//				_ma_coords.removeEventListener(CollectionEvent.COLLECTION_CHANGE, onCoordsCollectionChanged);
+			
+		    _ma_coords = value;
+            _ma_points = getPointsFromCoords();
+			
+//			if (_ma_coords)
+//				_ma_coords.addEventListener(CollectionEvent.COLLECTION_CHANGE, onCoordsCollectionChanged);
 		}
 
-        private function getPointsFromCoords():ArrayCollection {
-            var points:ArrayCollection = new ArrayCollection();
+        private function getPointsFromCoords(): Array {
+            var points: Array = [];
             for each (var coord:Coord in _ma_coords) {
-                points.addItem(container.coordToPoint(coord));
+                points.push(container.coordToPoint(coord));
             }
             return points;
         }
@@ -225,8 +226,11 @@ package com.iblsoft.flexiweather.widgets
 
 		public function clearRoute(): void
 		{
-			_ma_coords.removeAll();
-			_ma_points.removeAll();
+			_ma_coords.splice(0, _ma_coords.length);
+			_ma_points.splice(0, _ma_points.length);
+			
+//			_ma_coords.removeAll();
+//			_ma_points.removeAll();
 			invalidateDynamicPart();
 		}
 
@@ -235,9 +239,9 @@ package com.iblsoft.flexiweather.widgets
 			var total: int = _ma_coords.length;
 			for (var i: int = 0; i < total; i++)
 			{
-				var coord: Coord = _ma_coords.getItemAt(i) as Coord;
+				var coord: Coord = _ma_coords[i] as Coord;
 				var p: Point = container.coordToPoint(coord);
-				_ma_points.setItemAt(p, i);
+				_ma_points[p] = i;
 			}
 			
 			invalidateDynamicPart();
@@ -260,8 +264,8 @@ package com.iblsoft.flexiweather.widgets
 			}
 			else
 			{
-				_ma_coords.addItem(updateCoordToExtent(c));
-				_ma_points.addItem(mousePoint);
+				_ma_coords.push(updateCoordToExtent(c));
+				_ma_points.push(mousePoint);
 				debugCoords("ADDed coord at then end");
 				notifyChange();
 				setHighlightedCoord(c);
@@ -303,8 +307,8 @@ package com.iblsoft.flexiweather.widgets
 				var i: int = getCoordIndex(m_selectedCoord);
 				if (i >= 0)
 				{
-					_ma_coords.setItemAt(c, i);
-					_ma_points.setItemAt(mousePt, i);
+					_ma_coords[c] = i;
+					_ma_points[mousePt] = i;
 					
 					debugCoords("Update coord at " + i);
 					notifyChange();

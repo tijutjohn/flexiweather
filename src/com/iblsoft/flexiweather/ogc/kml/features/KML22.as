@@ -9,7 +9,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	
 	import flash.events.Event;
 	
-	import mx.collections.ArrayCollection;
 	import mx.core.UIComponent;
 
 	/**
@@ -167,7 +166,8 @@ package com.iblsoft.flexiweather.ogc.kml.features
 
 		override public function toString(): String
 		{
-			return "KML 2.2: " + this._feature.toString();
+//			return "KML 2.2: " + this._feature.toString();
+			return "KML 2.2";// + this._feature.toString();
 		}
 	}
 }

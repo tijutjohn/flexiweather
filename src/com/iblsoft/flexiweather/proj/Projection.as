@@ -16,6 +16,9 @@ package com.iblsoft.flexiweather.proj
 	{
 		public static const CRS_GEOGRAPHIC: String = "CRS:84";
 		public static const CRS_EPSG_GEOGRAPHIC: String = "EPSG:4326";
+		
+		public static var AVOID_HORIZONTAL_WRAPPING: Boolean;
+		
 		protected var m_proj: ProjProjection;
 		protected var m_extentBBox: BBox;
 		protected var mb_wrapsHorizontally: Boolean;
@@ -333,6 +336,9 @@ package com.iblsoft.flexiweather.proj
 
 		public function get wrapsHorizontally(): Boolean
 		{
+			if (AVOID_HORIZONTAL_WRAPPING)
+				return false;
+			
 			return mb_wrapsHorizontally;
 		}
 

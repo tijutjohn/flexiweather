@@ -421,6 +421,9 @@ package com.iblsoft.flexiweather.widgets
 		private function onLayerLoadingStart(event: InteractiveLayerEvent): void
 		{
 			m_layersLoading++;
+			
+			trace("IW onLayerLoadingStart: " + m_layersLoading);
+			
 			var ile: InteractiveWidgetEvent = new InteractiveWidgetEvent(InteractiveWidgetEvent.DATA_LAYER_LOADING_STARTED);
 			ile.layersLoading = m_layersLoading;
 			dispatchEvent(ile);
@@ -429,6 +432,7 @@ package com.iblsoft.flexiweather.widgets
 		private function onLayerLoaded(event: InteractiveLayerEvent): void
 		{
 			m_layersLoading--;
+			trace("IW onLayerLoaded: " + m_layersLoading);
 			var ile: InteractiveWidgetEvent
 			ile = new InteractiveWidgetEvent(InteractiveWidgetEvent.DATA_LAYER_LOADING_FINISHED);
 			ile.layersLoading = m_layersLoading;

@@ -42,6 +42,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 	import flash.utils.Dictionary;
 	import flash.utils.flash_proxy;
 	import flash.utils.getTimer;
+	import flash.utils.setTimeout;
 	
 	import mx.states.OverrideBase;
 	import mx.utils.object_proxy;
@@ -380,8 +381,13 @@ package com.iblsoft.flexiweather.ogc.kml.features
 
 		protected function onKMLAddReflection(event: ReflectionEvent): void
 		{
+			addEventListener(Event.ENTER_FRAME, onKMLAddReflectionDelayed);
+		}
+		
+		private function onKMLAddReflectionDelayed(event: Event): void
+		{
+			removeEventListener(Event.ENTER_FRAME, onKMLAddReflectionDelayed);
 			update(FeatureUpdateContext.fullUpdate());
-//			updateCoordsReflections();
 		}
 
 		protected function updateCoordsReflections( bCheckCoordIsInside: Boolean = true): void
@@ -459,28 +465,52 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		
 		protected function getReflectedCoordinate(coord: Coord): Dictionary
 		{
+			
+			//TODO optimalize getReflectedCoordinate method
+			
+			
 			var iw: InteractiveWidget = master.container;
 			var crs: String = iw.getCRS();
 			var projection: Projection = iw.getCRSProjection();
-			var coordPointForReflection: flash.geom.Point = new flash.geom.Point();
+			var coordPointForReflection: Coord;
 			if (coord.crs != crs)
 			{
 				//conver to InteractiveWidget CRS
 				coordPointForReflection = coord.convertToProjection(projection);
 			}
 			else
-				coordPointForReflection = new flash.geom.Point(coord.x, coord.y);
+				coordPointForReflection = coord; //new flash.geom.Point(coord.x, coord.y);
 			
-			var pointReflections: Array = iw.mapCoordInCRSToViewReflectionsForDeltas(coordPointForReflection, [0,1,-1,2,-2,3,-3]);
-			var reflectionsCount: int = pointReflections.length;
 			
+			var pointReflections: Array;
 			var reflections: Dictionary = new Dictionary();
-			for (var j: int = 0; j < reflectionsCount; j++)
+			
+			var bUseReflections: Boolean = false; //projection.wrapsHorizontally;
+			if (bUseReflections)
 			{
-				var pointReflectedObject: Object = pointReflections[j];
-				var pointReflected: flash.geom.Point = pointReflectedObject.point as flash.geom.Point;
-				var coordReflected: Coord = new Coord(crs, pointReflected.x, pointReflected.y);
-				reflections[pointReflectedObject.reflection] = {coord: coordReflected, point: iw.coordToPoint(coordReflected), reflection: pointReflectedObject.reflection};
+				pointReflections = iw.mapCoordInCRSToViewReflectionsForDeltas(coordPointForReflection, [0,1,-1,2,-2,3,-3]);
+			
+				var reflectionsCount: int = pointReflections.length;
+			
+				for (var j: int = 0; j < reflectionsCount; j++)
+				{
+					var pointReflectedObject: Object = pointReflections[j];
+					
+					var pointReflected: flash.geom.Point = pointReflectedObject.point as flash.geom.Point;
+					var coordReflected: Coord = new Coord(crs, pointReflected.x, pointReflected.y);
+					
+					var p2: flash.geom.Point = iw.coordToPoint(coordReflected);
+					
+					reflections[pointReflectedObject.reflection] = {coord: coordReflected, point: p2, reflection: pointReflectedObject.reflection};
+				}
+			} else {
+				
+//				var pointReflected: flash.geom.Point = coordPointForReflection;
+				var coordReflected: Coord = coordPointForReflection; //new Coord(crs, pointReflected.x, pointReflected.y);
+					
+				var p2: flash.geom.Point = iw.coordToPoint(coordReflected);
+					
+				reflections[0] = {coord: coordReflected, point: p2, reflection: 0};
 			}
 			return reflections;
 		}

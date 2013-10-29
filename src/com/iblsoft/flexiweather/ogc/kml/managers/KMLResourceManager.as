@@ -62,7 +62,7 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 
 		public function debugCache(txt: String): void
 		{
-			debug("cache items: [" + txt + "] " + _cache.getAllResources().length);
+			//debug("cache items: [" + txt + "] " + _cache.getAllResources().length);
 		}
 
 		private function debug(txt: String): void
@@ -79,7 +79,7 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 			var resource: Resource = _cache.getResource(key);
 			if (resource)
 			{
-				debug("isResourceLoading [" + key.toString() + "]: " + resource.isLoading);
+//				debug("isResourceLoading [" + key.toString() + "]: " + resource.isLoading);
 				return resource.isLoading;
 			}
 			return false;
@@ -88,7 +88,7 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 		public function isResourceLoaded(key: KMLResourceKey): Boolean
 		{
 			var bd: BitmapData = getBitmapData(key);
-			debug("isResourceLoaded [" + key.toString() + "]: " + (bd != null));
+//			debug("isResourceLoaded [" + key.toString() + "]: " + (bd != null));
 			return (bd != null);
 		}
 
@@ -122,7 +122,7 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 				resource = _cache.getResource(key);
 				if (resource.isResourceLoaded)
 				{
-					debug("getBitmapData [" + key.toString() + "]: " + (resource.bitmapData != null));
+					//debug("getBitmapData [" + key.toString() + "]: " + (resource.bitmapData != null));
 					return resource.bitmapData;
 				}
 			}
@@ -161,7 +161,7 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 
 		public function loadResource(key: KMLResourceKey): void
 		{
-			debug("loadResource [" + key.toString() + "]");
+			//debug("loadResource [" + key.toString() + "]");
 			var kbe: KMLBitmapEvent;
 			var bd: BitmapData
 			if (!URLUtils.isAbsolutePath(key.href))
@@ -173,12 +173,12 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 					bd = resource.bitmapData;
 					if (bd)
 					{
-						debug("\t loadResource absolutepath BITMAP_LOADED [" + key.toString() + "]");
+						//debug("\t loadResource absolutepath BITMAP_LOADED [" + key.toString() + "]");
 						notifyBitmapLoaded(resource);
 						return;
 					}
 				}
-				debug("\t loadResource relativepath [" + key.toString() + "]");
+				//debug("\t loadResource relativepath [" + key.toString() + "]");
 				//this is relative path, try to check it from .kmz files
 				for each (var kmzFile: KMZFile in _kmzFiles)
 				{
@@ -188,7 +188,7 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 						resource = new Resource(key);
 						resource.setBitmapData(bd);
 						_cache.addResource(key, resource);
-						debug("\t loadResource relativepath bitmap loaded [" + key.toString() + "]");
+						//debug("\t loadResource relativepath bitmap loaded [" + key.toString() + "]");
 						notifyBitmapLoaded(resource);
 						return;
 					}
@@ -197,19 +197,19 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 			var resource: Resource;
 			if (_cache.resourceExists(key))
 			{
-				debug("\t loadResource absolutepath resourceExists [" + key.toString() + "]");
+				//debug("\t loadResource absolutepath resourceExists [" + key.toString() + "]");
 				resource = _cache.getResource(key);
 				bd = resource.bitmapData;
 				if (bd)
 				{
-					debug("\t loadResource absolutepath BITMAP_LOADED [" + key.toString() + "]");
+					//debug("\t loadResource absolutepath BITMAP_LOADED [" + key.toString() + "]");
 					notifyBitmapLoaded(resource);
 					return;
 				}
 			}
 			else
 			{
-				debug("\t loadResource addResource [" + key.toString() + "]");
+				//debug("\t loadResource addResource [" + key.toString() + "]");
 				resource = new Resource(key);
 				_cache.addResource(key, resource);
 			}
@@ -218,7 +218,7 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 				resource.addEventListener(KMLBitmapEvent.BITMAP_LOADED, onResourceLoaded);
 				resource.addEventListener(KMLBitmapEvent.BITMAP_LOAD_ERROR, onResourceLoadError);
 				resource.load();
-				debug("\t loadResource load [" + key.toString() + "]");
+				//debug("\t loadResource load [" + key.toString() + "]");
 			}
 		}
 
@@ -236,7 +236,7 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 		{
 			if (allResourcesLoaded())
 			{
-				debug("\t loadResource allResourcesLoaded");
+				//debug("\t loadResource allResourcesLoaded");
 				dispatchEvent(new Event(ALL_RESOURCES_LOADED));
 			}
 		}
@@ -246,7 +246,7 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 			var resource: Resource = event.target as Resource;
 			if (resource)
 			{
-				debug("\t loadResource onResourceLoaded");
+				//debug("\t loadResource onResourceLoaded");
 				dispatchEvent(event);
 			}
 			notifyAllResourcesLoaded();
@@ -257,7 +257,7 @@ package com.iblsoft.flexiweather.ogc.kml.managers
 			var resource: Resource = event.target as Resource;
 			if (resource)
 			{
-				debug("\t loadResource onResourceLoadError");
+				//debug("\t loadResource onResourceLoadError");
 				dispatchEvent(event);
 			}
 			notifyAllResourcesLoaded();

@@ -3,7 +3,6 @@ package com.iblsoft.flexiweather.ogc.editable.features
 	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
 	import flash.display.Bitmap;
 	import flash.geom.Point;
-	import mx.collections.ArrayCollection;
 
 	public class IconLabeledEditableFeature extends LabeledEditableFeature
 	{
@@ -34,10 +33,10 @@ package com.iblsoft.flexiweather.ogc.editable.features
 		override public function update(changeFlag: FeatureUpdateContext): void
 		{
 			super.update(changeFlag);
-			var a_points: ArrayCollection = getPoints();
+			var a_points: Array = getPoints();
 			if (a_points.length > 0)
 			{
-				var pt: Point = a_points.getItemAt(0) as Point;
+				var pt: Point = a_points[0] as Point;
 				var gap: int = 5;
 				updateIconPosition(pt.x - _bitmap.width / 2, pt.y - _bitmap.height / 2);
 				updateLabelPosition(_bitmap.x + _bitmap.width + gap, _bitmap.y + _bitmap.height / 2 - textfield.textHeight / 2);

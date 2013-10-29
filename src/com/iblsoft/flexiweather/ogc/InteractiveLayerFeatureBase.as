@@ -18,7 +18,22 @@ package com.iblsoft.flexiweather.ogc
 
 	public class InteractiveLayerFeatureBase extends InteractiveDataLayer
 	{
+		protected var _areaChanged: Boolean;
+		protected var _areaChangedFinalChange: Boolean;
+		protected var _suspendUpdating: Boolean;
+		
 		protected var m_firstFeature: FeatureBase;
+
+
+		public function get suspendUpdating():Boolean
+		{
+			return _suspendUpdating;
+		}
+
+		public function set suspendUpdating(value:Boolean):void
+		{
+			_suspendUpdating = value;
+		}
 
 		public function get version(): Version
 		{
@@ -125,10 +140,33 @@ package com.iblsoft.flexiweather.ogc
 			feature.visible = event.insideViewBBox;
 		}
 		
+		override protected function commitProperties():void
+		{
+			if (_areaChanged)
+			{
+				if (!_suspendUpdating)
+					onAreaChanged(_areaChangedFinalChange);
+				else
+					callLater(onAreaChanged, [_areaChangedFinalChange]);
+			}
+		}
+		
 		override public function onAreaChanged(b_finalChange:Boolean):void
 		{
-			super.onAreaChanged(b_finalChange);
+			if (_suspendUpdating)
+			{
+				if (!_areaChanged)
+				{
+					_areaChanged = true;
+					_areaChangedFinalChange = b_finalChange;
+				} else {
+					_areaChangedFinalChange = _areaChangedFinalChange || b_finalChange;
+				}
+				invalidateProperties();
+				return;
+			}
 			
+			super.onAreaChanged(b_finalChange);
 			updateAllFeatures();
 		}
 		

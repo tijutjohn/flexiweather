@@ -21,8 +21,6 @@ package com.iblsoft.flexiweather.ogc.editable
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	
-	import mx.collections.ArrayCollection;
-
 	public class WFSFeatureEditableClosableCurveWithBaseTimeAndValidity extends WFSFeatureEditableCurveWithBaseTimeAndValidity implements IClosableCurve, IWFSCurveFeature
 	{
 		protected var mb_closed: Boolean = false;
@@ -35,7 +33,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		
 		override protected function computeCurve(): void
 		{
-			var a_points: ArrayCollection = getPoints();
+			var a_points: Array = getPoints();
 			
 			if(a_points.length > 1) 
 			{
@@ -44,9 +42,9 @@ package com.iblsoft.flexiweather.ogc.editable
 					m_featureData = new FeatureData(this.toString() + " FeatureData");
 					// feature is computed via drawSmoothPolyLine() or drawGeoPolyLine() method
 					if (smooth)
-						master.container.drawSmoothPolyLine(getRenderer, a_points.toArray(), DrawMode.PLAIN, isCurveClosed(), true, m_featureData);
+						master.container.drawSmoothPolyLine(getRenderer, a_points, DrawMode.PLAIN, isCurveClosed(), true, m_featureData);
 					else
-						master.container.drawGeoPolyLine(getRenderer, a_points.toArray(), DrawMode.PLAIN, isCurveClosed(), true, m_featureData);
+						master.container.drawGeoPolyLine(getRenderer, a_points, DrawMode.PLAIN, isCurveClosed(), true, m_featureData);
 				}
 				
 			}
@@ -56,7 +54,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			var reflection: WFSEditableReflectionData;
 			var _addToLabelLayout: Boolean;
 			
-			var a_points: ArrayCollection = getPoints();
+			var a_points: Array = getPoints();
 			
 			//create sprites for reflections
 			var totalReflections: uint = ml_movablePoints.totalReflections;
@@ -74,7 +72,7 @@ package com.iblsoft.flexiweather.ogc.editable
 					if (m_featureData)
 						ptAvg = m_featureData.getReflectionAt(reflection.reflectionDelta).center;
 					else if (pointsCount == 1) 
-						ptAvg = a_points.getItemAt(0) as Point;
+						ptAvg = a_points[0] as Point;
 					
 					if (!reflection.displaySprite)
 					{
@@ -206,8 +204,8 @@ package com.iblsoft.flexiweather.ogc.editable
 			if (mi_editMode == WFSFeatureEditableMode.ADD_POINTS_ON_CURVE)
 			{
 				// PREPARE CURVE POINTS
-				ma_points = CubicBezier.calculateHermitSpline(m_points.toArray(), mb_closed);
-					//ma_points = CubicBezier.calculateHermitSpline(m_points.toArray(),  
+				ma_points = CubicBezier.calculateHermitSpline(m_points, mb_closed);
+					//ma_points = CubicBezier.calculateHermitSpline(m_points,  
 			}
 		}
 
@@ -268,7 +266,7 @@ package com.iblsoft.flexiweather.ogc.editable
 								return false;
 						}
 					}
-					var a: ArrayCollection = getPoints();
+					var a: Array = getPoints();
 					var i_best: int = -1;
 					var f_bestDistance: Number = 0;
 					var b_keepDrag: Boolean = true;
@@ -277,7 +275,7 @@ package com.iblsoft.flexiweather.ogc.editable
 					{
 						// add point between 2 points
 						//add first point at the end to check possibility to insert point between last and first point
-						a.addItem((a.getItemAt(0) as Point).clone());
+						a.push((a[0] as Point).clone());
 						
 						for (var i: int = 1; i < a.length; ++i)
 						{

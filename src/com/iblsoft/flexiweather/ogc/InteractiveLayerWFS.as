@@ -20,7 +20,7 @@ package com.iblsoft.flexiweather.ogc
 
 	public class InteractiveLayerWFS extends InteractiveLayerFeatureBase
 	{
-		private var ma_queryFeatures: ArrayCollection = new ArrayCollection();
+		private var ma_queryFeatures: Array = new Array();
 		private var md_queryParametersGET: Array = new Array();
 
 		protected var m_wfsLoader: WFSLoader;
@@ -57,7 +57,7 @@ package com.iblsoft.flexiweather.ogc
 			url.data['VALIDITY'] = validity;
 			if (!version.isLessThan(1, 1, 0))
 				url.data['SRSNAME'] = container.getCRS();
-			url.data['TYPENAME'] = ma_queryFeatures.toArray().join(",");
+			url.data['TYPENAME'] = ma_queryFeatures.join(",");
 			m_wfsLoader.load(url, null, "Importing features");
 		}
 
@@ -96,7 +96,7 @@ package com.iblsoft.flexiweather.ogc
 			}
 			if (!version.isLessThan(1, 1, 0))
 				url.data['SRSNAME'] = container.getCRS();
-			url.data['TYPENAME'] = ma_queryFeatures.toArray().join(",");
+			url.data['TYPENAME'] = ma_queryFeatures.join(",");
 			m_wfsLoader.load(url, null, "Loading features");
 		}
 
@@ -508,7 +508,7 @@ package com.iblsoft.flexiweather.ogc
 
 		public function addQueryFeature(s_featureId: String): void
 		{
-			ma_queryFeatures.addItem(s_featureId);
+			ma_queryFeatures.push(s_featureId);
 		}
 
 		public function setQueryParameterGET(s_parameter: String, s_value: String): void

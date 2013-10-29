@@ -40,7 +40,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		
 		public function drawAnnotation(): void
 		{
-			var a_points: ArrayCollection = getPoints();
+			var a_points: Array = getPoints();
 			
 			var annotation: AnnotationBox;
 			var reflection: WFSEditableReflectionData;
@@ -79,7 +79,7 @@ package com.iblsoft.flexiweather.ogc.editable
 					master.container.anticollisionObjectVisible(displaySpriteWithAnnotation, true);
 				}
 				
-				//FIXME fix this commented li ne
+				//FIXME fix this commented line
 //				displaySpriteWithAnnotation.update(this, blackColor, master.container.labelLayout, pt);
 				
 				

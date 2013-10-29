@@ -41,7 +41,6 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 	import flash.utils.Dictionary;
 	import flash.utils.getTimer;
 	
-	import mx.collections.ArrayCollection;
 
 	/**
 	 * Renderer is used for rendering all KML features for single layer, not one renderer for one KML feature
@@ -283,15 +282,15 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 				var style: Style;
 				var icon: Icon = overlay.icon;
 				//order of coordinates inserted: NorthWest, NorthEast, SouthEast, SouthWest
-				var points: ArrayCollection = feature.getPoints();
+				var points: Array = feature.getPoints();
 				if (points.length != 4)
 					trace("we expect 4 points in GroundLevel");
 				else
 				{
-					var nw: Point = points.getItemAt(0) as Point;
-					var ne: Point = points.getItemAt(1) as Point;
-					var se: Point = points.getItemAt(2) as Point;
-					var sw: Point = points.getItemAt(3) as Point;
+					var nw: Point = points[0] as Point;
+					var ne: Point = points[1] as Point;
+					var se: Point = points[2] as Point;
+					var sw: Point = points[3] as Point;
 //					feature.x = nw.x;
 //					feature.y = ne.y;
 					_container.labelLayout.updateObjectReferenceLocation(feature);
@@ -332,15 +331,15 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 //			gr.clear();
 			var xDiff: Number = 0;
 			var yDiff: Number = 0;
-			var points: ArrayCollection = overlay.getPoints();
+			var points: Array = overlay.getPoints();
 			if (points.length != 4)
 				trace("we expect 4 points in GroundLevel");
 			else
 			{
-				var nw: Point = points.getItemAt(0) as Point;
-				var ne: Point = points.getItemAt(1) as Point;
-				var se: Point = points.getItemAt(2) as Point;
-				var sw: Point = points.getItemAt(3) as Point;
+				var nw: Point = points[0] as Point;
+				var ne: Point = points[1] as Point;
+				var se: Point = points[2] as Point;
+				var sw: Point = points[3] as Point;
 //				overlay.x = nw.x;// + (ne.x - nw.x) / 2;
 //				overlay.y = ne.y;// + (se.y - ne.y) / 2;
 //				
@@ -925,11 +924,11 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 				}
 			}
 			var coords: Array = linearRing.coordinatesPoints;
-			var points: ArrayCollection = new ArrayCollection();
+			var points: Array = [];
 			for each (var c: Coord in coords)
 			{
 				var pt: Point = _container.coordToPoint(c);
-				points.addItem(pt);
+				points.push(pt);
 			}
 			if (coords && coords.length > 1)
 			{

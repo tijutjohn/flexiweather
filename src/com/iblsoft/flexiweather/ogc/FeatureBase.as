@@ -10,13 +10,19 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.display.Sprite;
+	import flash.events.Event;
 	import flash.geom.Point;
 	
-	import mx.collections.ArrayCollection;
+	import mx.core.UIComponentGlobals;
+	import mx.core.mx_internal;
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
+	import mx.events.DynamicEvent;
 	import mx.events.PropertyChangeEvent;
+	import mx.managers.ISystemManager;
 
+	use namespace mx_internal;
+	
 	public class FeatureBase extends Sprite
 	{
 		private var _next: FeatureBase;
@@ -57,8 +63,13 @@ package com.iblsoft.flexiweather.ogc
 		protected var ms_typeName: String;
 		protected var ms_featureId: String;
 		protected var ms_internalFeatureId: String;
-		protected var m_coordinates: ArrayCollection = new ArrayCollection();
-		protected var m_points: ArrayCollection = new ArrayCollection();
+		
+//		protected var m_coordinates: ArrayCollection = new ArrayCollection();
+//		protected var m_points: ArrayCollection = new ArrayCollection();
+		
+		protected var m_coordinates: Array;
+		protected var m_points: Array;
+		
 		protected var mb_pointsDirty: Boolean = false;
 		protected var mb_spritesAddedToLabelLayout: Boolean
 		
@@ -71,6 +82,8 @@ package com.iblsoft.flexiweather.ogc
 			mouseEnabled = false;
 			mouseChildren = false;
 			doubleClickEnabled = false;
+			
+			m_coordinates = [];
 		}
 
 		/** Called after the feature is added to master, before first call to update(). */
@@ -79,8 +92,8 @@ package com.iblsoft.flexiweather.ogc
 			m_master = master;
 		}
 		
-		private function onPointsChanged(event: CollectionEvent): void
-		{
+//		private function onPointsChanged(event: CollectionEvent): void
+//		{
 //			var changeEvent: PropertyChangeEvent
 //			if (event.kind == CollectionEventKind.UPDATE)
 //			{
@@ -90,7 +103,7 @@ package com.iblsoft.flexiweather.ogc
 //			{
 //				changeEvent = event.items[0] as PropertyChangeEvent;
 //			}
-		}
+//		}
 		
 		public function addPointAt(point: Point, index: uint): void
 		{
@@ -99,22 +112,28 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function addPoint(point: Point): void
 		{
-			m_points.addItem(point);
+			m_points.push(point);
 		}
 		
 		public function insertPointBefore(i_pointIndex: uint, pt: Point): void
 		{
-			m_points.addItemAt(pt, i_pointIndex);
-			m_coordinates.addItemAt(m_master.container.pointToCoord(pt.x, pt.y), i_pointIndex);
+//			m_points.addItemAt(pt, i_pointIndex);
+//			m_coordinates.addItemAt(m_master.container.pointToCoord(pt.x, pt.y), i_pointIndex);
+			
+			m_points.splice(i_pointIndex, 0, pt);
+			m_coordinates.splice(i_pointIndex, 0, m_master.container.pointToCoord(pt.x, pt.y));
+				
 			update(FeatureUpdateContext.fullUpdate());
 		}
 		
 		private function initializePoints(): void
 		{
-			if (m_points)
-				m_points.removeEventListener(CollectionEvent.COLLECTION_CHANGE, onPointsChanged);
-			m_points = new ArrayCollection();
-			m_points.addEventListener(CollectionEvent.COLLECTION_CHANGE, onPointsChanged);
+			m_points = [];
+			
+//			if (m_points)
+//				m_points.removeEventListener(CollectionEvent.COLLECTION_CHANGE, onPointsChanged);
+//			m_points = new ArrayCollection();
+//			m_points.addEventListener(CollectionEvent.COLLECTION_CHANGE, onPointsChanged);
 		}
 
 		/** Called after the feature is added to master or after any change (e.g. area change). */
@@ -163,13 +182,13 @@ package com.iblsoft.flexiweather.ogc
 						}
 							
 						pt = iw.coordToPoint(c);
-						m_points.addItem(pt);
+						m_points.push(pt);
 						
 						if (reflectedCoords && reflectedCoords.length == 0)
 						{
 							//coordinates has no reflection, has to be hiden
 							trace("coordinates has no reflection, has to be hiden");
-							notifyCoordinateOutside(c, i, currCoordObject.reflection);
+							notifyCoordinateOutside(c, i, 0); //currCoordObject.reflection);
 						}
 					}
 					if (featureIsInViewBBox != featureIsInside)
@@ -205,8 +224,10 @@ package com.iblsoft.flexiweather.ogc
 		public function cleanup(): void
 		{
 			m_master = null;
-			m_coordinates.removeAll();
-			m_points.removeAll();
+//			m_coordinates.removeAll();
+//			m_points.removeAll();
+			m_coordinates.splice(0, m_coordinates.length);
+			m_points.splice(0, m_coordinates.length);
 		}
 
 		public function get master(): InteractiveLayerFeatureBase
@@ -214,7 +235,7 @@ package com.iblsoft.flexiweather.ogc
 			return m_master;
 		}
 
-		public function getPoints(): ArrayCollection
+		public function getPoints(): Array
 		{
 			return m_points;
 		}
@@ -248,7 +269,7 @@ package com.iblsoft.flexiweather.ogc
 		private function getArea(b_useCoordinates: Boolean = true): Number
 		{
 			var area: Number = 0;
-			var a_coordinates: Array = b_useCoordinates ? coordinates : getPoints().toArray();
+			var a_coordinates: Array = b_useCoordinates ? coordinates : getPoints();
 			var total: int = a_coordinates.length;
 			var j: int = total - 1;
 			var p1: Point;
@@ -302,7 +323,7 @@ package com.iblsoft.flexiweather.ogc
 
 		public function getCenter(b_useCoordinates: Boolean = true): Point
 		{
-			var a_coordinates: Array = b_useCoordinates ? coordinates : getPoints().toArray();
+			var a_coordinates: Array = b_useCoordinates ? coordinates : getPoints();
 			var total: int = a_coordinates.length;
 			var x: Number = 0;
 			var y: Number = 0;
@@ -339,7 +360,7 @@ package com.iblsoft.flexiweather.ogc
 			var cPrev: Point = null;
 			var cFirst: Point = null;
 			// we use here, that Coord is derived from Point, and Coord.crs is not used
-			var a_coordinates: Array = b_useCoordinates ? coordinates : getPoints().toArray();
+			var a_coordinates: Array = b_useCoordinates ? coordinates : getPoints();
 			for each (var c: Point in a_coordinates)
 			{
 				if (cPrev != null)
@@ -367,18 +388,8 @@ package com.iblsoft.flexiweather.ogc
 			var newSegmentRenderer: CurveLineSegmentRenderer = new CurveLineSegmentRenderer();
 			master.container.drawHermitSpline(
 					newSegmentRenderer,
-					b_useCoordinates ? coordinates : getPoints().toArray(),
+					b_useCoordinates ? coordinates : getPoints(),
 					b_closed, false, 0.005);
-			//TODO remove this and draw it with InteractiveWidget.drawHermitSpline
-//			CubicBezier.drawHermitSpline(
-//				newSegmentRenderer,
-//				b_useCoordinates ? coordinates : getPoints().toArray(),
-//				b_closed, false, 0.005, true);
-			/*CubicBezier.curveThroughPoints(
-			segmentRenderer,
-			b_useCoordinates ? coordinates : getPoints().toArray(),
-			b_closed);*/
-			//return segmentRenderer.segments;
 			return newSegmentRenderer.segments;
 		}
 
@@ -386,12 +397,12 @@ package com.iblsoft.flexiweather.ogc
 		// getters & setters
 		public function get coordinates(): Array
 		{
-			return m_coordinates.toArray();
+			return m_coordinates;
 		}
 
 		public function set coordinates(a: Array): void
 		{
-			m_coordinates = new ArrayCollection(a);
+			m_coordinates = a;
 			mb_pointsDirty = true;
 		}
 

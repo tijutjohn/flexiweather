@@ -594,8 +594,23 @@ package com.iblsoft.flexiweather.ogc.kml
 			return true;
 		}
 
+		
+		
 		override public function onAreaChanged(b_finalChange: Boolean): void
 		{
+			if (_suspendUpdating)
+			{
+				if (!_areaChanged)
+				{
+					_areaChanged = true;
+					_areaChangedFinalChange = b_finalChange;
+				} else {
+					_areaChangedFinalChange = _areaChangedFinalChange || b_finalChange;
+				}
+				invalidateProperties();
+				return;
+			}
+			
 			super.onAreaChanged(b_finalChange);
 			//FIXME this should not be called if panning or zooming is still in progress
 			//invalidateDynamicPart();

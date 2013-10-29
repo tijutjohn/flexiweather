@@ -59,19 +59,19 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			super.visible = value;
 		}
 
-		override public function getPoints(): ArrayCollection
+		override public function getPoints(): Array
 		{
 			if (_geometry is Polygon)
 			{
 				var linearRing: LinearRing = (_geometry as Polygon).outerBoundaryIs.linearRing;
-				return new ArrayCollection(linearRing.coordinatesPoints);
+				return linearRing.coordinatesPoints;
 			}
 			return m_points;
 		}
 
 		override public function get coordinates(): Array
 		{
-			return m_coordinates.toArray();
+			return m_coordinates;
 		}
 
 //		private var _spritesAddedToLabelLayout: Boolean;
@@ -352,9 +352,13 @@ package com.iblsoft.flexiweather.ogc.kml.features
 					updateGeometryCoordinates(_geometry);
 				}
 			}
+			
 			super.update(changeFlag);
+			
 			updateCoordsReflections();
+			
 			_kmlReflectionDictionary.updateKMLFeature(this);
+			
 			var reflection: KMLReflectionData = _kmlReflectionDictionary.getReflection(0) as KMLReflectionData;
 			var renderer: IKMLRenderer = (master as InteractiveLayerKML).itemRendererInstance;
 			if (changeFlag.fullUpdateNeeded)
@@ -389,32 +393,35 @@ package com.iblsoft.flexiweather.ogc.kml.features
 					if (kmlReflection.points && kmlReflection.points.length > 0)
 					{
 //						var iconPoint: flash.geom.Point = kmlReflection.points[0] as flash.geom.Point;
-						var iconPoint: flash.geom.Point = firstPointReflections[kmlReflection.reflectionDelta].point as flash.geom.Point;
-						if (kmlReflection.displaySprite && iconPoint && featureScale > 0)
+						if (firstPointReflections[kmlReflection.reflectionDelta])
 						{
-							kmlSprite = kmlReflection.displaySprite as KMLSprite;
-							kmlSprite.visible = true;
-							kmlSprite.x = iconPoint.x;
-							kmlSprite.y = iconPoint.y;
-							if (name && name.length > 0)
+							var iconPoint: flash.geom.Point = firstPointReflections[kmlReflection.reflectionDelta].point as flash.geom.Point;
+							if (kmlReflection.displaySprite && iconPoint && featureScale > 0)
 							{
-								createKMLLabel(kmlSprite);
-								kmlSprite.kmlLabel.text = name;
-								labelsCreation = true;
+								kmlSprite = kmlReflection.displaySprite as KMLSprite;
+								kmlSprite.visible = true;
+								kmlSprite.x = iconPoint.x;
+								kmlSprite.y = iconPoint.y;
+								if (name && name.length > 0)
+								{
+									createKMLLabel(kmlSprite);
+									kmlSprite.kmlLabel.text = name;
+									labelsCreation = true;
+								}
+								if (kmlSprite.kmlLabel && !kmlSprite.kmlLabel.visible)
+									kmlSprite.kmlLabel.visible = true;
+								if (master && kmlSprite.kmlLabel && !kmlSprite.kmlLabel.anticollisionLayoutObject)
+								{
+									addLabelToAnticollisionLayout(kmlSprite.kmlLabel);
+									_addToLabelLayout = true;
+								}
+								labelLayout.updateObjectReferenceLocation(kmlSprite);
 							}
-							if (kmlSprite.kmlLabel && !kmlSprite.kmlLabel.visible)
-								kmlSprite.kmlLabel.visible = true;
-							if (master && kmlSprite.kmlLabel && !kmlSprite.kmlLabel.anticollisionLayoutObject)
-							{
-								addLabelToAnticollisionLayout(kmlSprite.kmlLabel);
-								_addToLabelLayout = true;
-							}
-							labelLayout.updateObjectReferenceLocation(kmlSprite);
-						}
-						else
+							else
+								removeLabel = true;
+						} else
 							removeLabel = true;
-					}
-					else
+					} else
 						removeLabel = true;
 				}
 				if (removeLabel)

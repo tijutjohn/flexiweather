@@ -9,8 +9,6 @@ package com.iblsoft.flexiweather.ogc.editable
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
 
-	import mx.collections.ArrayCollection;
-
 	public class WFSFeatureEditableCurve extends WFSFeatureEditable implements IMouseEditableItem
 	{
 		protected var mb_smooth: Boolean = true;
@@ -90,7 +88,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			var cPrev: Point = null;
 			var cFirst: Point = null;
 			// we use here, that Coord is derived from Point, and Coord.crs is not used
-			var a_coordinates: Array = b_useCoordinates ? coordinates : getPoints().toArray();
+			var a_coordinates: Array = b_useCoordinates ? coordinates : getPoints();
 			for each(var c: Point in a_coordinates) {
 				if(cPrev != null) {
 					l.push(new CurveLineSegment(i_segment,
@@ -117,12 +115,12 @@ package com.iblsoft.flexiweather.ogc.editable
 
 			CubicBezier.drawHermitSpline(
 					newSegmentRenderer,
-					b_useCoordinates ? coordinates : getPoints().toArray(),
+					b_useCoordinates ? coordinates : getPoints(),
 					b_closed, false, 0.005, true);
 
 			/*CubicBezier.curveThroughPoints(
 					segmentRenderer,
-					b_useCoordinates ? coordinates : getPoints().toArray(),
+					b_useCoordinates ? coordinates : getPoints(),
 					b_closed);*/
 		//return segmentRenderer.segments;
 		/*
@@ -206,7 +204,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			}
 			if ((mi_editMode == WFSFeatureEditableMode.ADD_POINTS) || (mi_editMode == WFSFeatureEditableMode.ADD_POINTS_WITH_MOVE_POINTS))
 			{
-				var a: ArrayCollection = getPoints();
+				var a: Array = getPoints();
 				var i_best: int = -1;
 				var f_bestDistance: Number = 0;
 				var b_keepDrag: Boolean = true;

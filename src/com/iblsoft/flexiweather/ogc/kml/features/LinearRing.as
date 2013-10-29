@@ -1,8 +1,7 @@
 package com.iblsoft.flexiweather.ogc.kml.features
 {
 	import com.iblsoft.flexiweather.syndication.ParsingTools;
-	import mx.collections.ArrayCollection;
-
+	
 	/**
 	*	Class that represents an Entry element within an Atom feed
 	*
@@ -18,7 +17,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		// Can contain: <extrude>, <tessellate>, <altitudeMode>, <coordinates>
 		// We support coordinates only
 		private var _coordinates: Coordinates;
-		private var _coordinatesPoints: ArrayCollection;
+		private var _coordinatesPoints: Array;
 
 		/**
 		*	Constructor for class.
@@ -61,13 +60,13 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		public function get coordinatesPoints(): Array
 		{
 			if (_coordinatesPoints)
-				return _coordinatesPoints.toArray();
+				return _coordinatesPoints;
 			return [];
 		}
 
 		public function set coordinatesPoints(a: Array): void
 		{
-			_coordinatesPoints = new ArrayCollection(a);
+			_coordinatesPoints = a;
 		}
 
 		public override function toString(): String

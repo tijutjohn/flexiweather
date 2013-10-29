@@ -283,14 +283,19 @@ package com.iblsoft.flexiweather.ogc.kml.features
 						if (!obj.hasOwnProperty("children"))
 							obj['children'] = new Array();
 						var newObj: Object = addFeaturesToDataProvider(feature as Container, obj);
-						if (!isParentObjectInside((obj['children'] as Array), newObj))
+						
+						var objChildrenArray: Array = obj['children'] as Array;
+						if (objChildrenArray.indexOf(newObj) == -1)
+//						if (!isParentObjectInside((obj['children'] as Array), newObj))
 						{
-							(obj['children'] as Array).push(newObj);
+							objChildrenArray.push(newObj);
 						}
 					}
-					if (!isParentObjectInside((parentObject['children'] as Array), obj))
+					var parentObjectChildrenArray: Array = parentObject['children'] as Array;
+//					if (!isParentObjectInside((parentObject['children'] as Array), obj))
+					if (parentObjectChildrenArray.indexOf(obj) == -1)
 					{
-						(parentObject['children'] as Array).push(obj);
+						parentObjectChildrenArray.push(obj);
 					}
 				}
 			}

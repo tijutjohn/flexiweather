@@ -467,16 +467,16 @@ package com.iblsoft.flexiweather.ogc.editable
 		override public function insertPointBefore(i_pointIndex: uint, pt: Point): void
 		{
 			super.insertPointBefore(i_pointIndex, pt);
-//			addPointAt(pt, i_pointIndex);
-//			m_coordinates.addItemAt(m_master.container.pointToCoord(pt.x, pt.y), i_pointIndex);
-//			update(FeatureUpdateContext.fullUpdate());
 			modified = true;
 		}
 
 		public function removePointAt(i_pointIndex: uint): void
 		{
-			m_points.removeItemAt(i_pointIndex);
-			m_coordinates.removeItemAt(i_pointIndex);
+//			m_points.removeItemAt(i_pointIndex);
+//			m_coordinates.removeItemAt(i_pointIndex);
+			m_points.splice(i_pointIndex, 1);
+			m_coordinates.splice(i_pointIndex, 1);
+			
 			removeMoveablePointAt(i_pointIndex);
 			if (mi_actSelectedMoveablePointIndex == i_pointIndex)
 			{

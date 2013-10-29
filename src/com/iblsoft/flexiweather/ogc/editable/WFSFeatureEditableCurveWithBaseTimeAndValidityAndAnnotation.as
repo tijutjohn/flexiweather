@@ -61,7 +61,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			var reflection: WFSEditableReflectionData;
 			var _addToLabelLayout: Boolean;
 			
-			var a_points: ArrayCollection = getPoints();
+			var a_points: Array = getPoints();
 			
 			//create sprites for reflections
 			var totalReflections: uint = ml_movablePoints.totalReflections;
@@ -79,7 +79,7 @@ package com.iblsoft.flexiweather.ogc.editable
 					if (m_featureData)
 						ptAvg = m_featureData.getReflectionAt(reflection.reflectionDelta).center;
 					else if (pointsCount == 1) 
-						ptAvg = a_points.getItemAt(0) as Point;
+						ptAvg = a_points[0] as Point;
 					
 					if (!reflection.displaySprite)
 					{
@@ -160,7 +160,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		
 		protected function drawCurve(): void
 		{
-			var a_points: ArrayCollection = getPoints();
+			var a_points: Array = getPoints();
 			
 			if(a_points.length > 1) 
 			{
@@ -168,9 +168,9 @@ package com.iblsoft.flexiweather.ogc.editable
 				{
 					m_featureData = new FeatureData(this.toString() + " FeatureData");
 					if (smooth)
-						master.container.drawSmoothPolyLine(getRenderer, a_points.toArray(), DrawMode.PLAIN, false, m_featureData);
+						master.container.drawSmoothPolyLine(getRenderer, a_points, DrawMode.PLAIN, false, m_featureData);
 					else
-						master.container.drawGeoPolyLine(getRenderer, a_points.toArray(), DrawMode.PLAIN, false, m_featureData);
+						master.container.drawGeoPolyLine(getRenderer, a_points, DrawMode.PLAIN, false, m_featureData);
 				}
 			}
 		}
@@ -223,8 +223,8 @@ package com.iblsoft.flexiweather.ogc.editable
 			if (mi_editMode == WFSFeatureEditableMode.ADD_POINTS_ON_CURVE)
 			{
 				// PREPARE CURVE POINTS
-				ma_points = CubicBezier.calculateHermitSpline(m_points.toArray(), false);
-					//ma_points = CubicBezier.calculateHermitSpline(m_points.toArray(),  
+				ma_points = CubicBezier.calculateHermitSpline(m_points, false);
+					//ma_points = CubicBezier.calculateHermitSpline(m_points,  
 			}
 		}
 		protected function createHitMask(curvesPoints: Array): void

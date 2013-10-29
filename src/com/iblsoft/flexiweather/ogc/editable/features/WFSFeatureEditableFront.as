@@ -52,10 +52,10 @@ package com.iblsoft.flexiweather.ogc.editable.features
 			
 			updateFrontProperties();
 				
-			var a_points: ArrayCollection = getPoints();
+			var a_points: Array = getPoints();
 			if (a_points.length > 1)
 			{
-//				var splinePoints: Array = CubicBezier.calculateHermitSpline(a_points.toArray(), false);
+//				var splinePoints: Array = CubicBezier.calculateHermitSpline(a_points, false);
 //				var coords: Array = [];
 //				//what is the best way to check in which projection was front created? For now we check CRS of first coordinate
 //				var crs: String = (coordinates[0] as Coord).crs;
