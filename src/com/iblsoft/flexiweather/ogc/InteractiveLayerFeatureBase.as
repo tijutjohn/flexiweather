@@ -21,6 +21,7 @@ package com.iblsoft.flexiweather.ogc
 		protected var _areaChanged: Boolean;
 		protected var _areaChangedFinalChange: Boolean;
 		protected var _suspendUpdating: Boolean;
+		protected var _suspendUpdatingChanged: Boolean;
 		
 		protected var m_firstFeature: FeatureBase;
 
@@ -32,7 +33,12 @@ package com.iblsoft.flexiweather.ogc
 
 		public function set suspendUpdating(value:Boolean):void
 		{
-			_suspendUpdating = value;
+			if (_suspendUpdating != value)
+			{
+				_suspendUpdating = value;
+				_suspendUpdatingChanged = true;
+				invalidateProperties();
+			}
 		}
 
 		public function get version(): Version
@@ -55,7 +61,7 @@ package com.iblsoft.flexiweather.ogc
 			m_firstFeature = value;
 		}
 		private var ma_features: ArrayCollection = new ArrayCollection();
-		private var m_featuresContainer: Sprite = new Sprite();
+		protected var m_featuresContainer: Sprite = new Sprite();
 		protected var ms_serviceURL: String = null;
 		private var m_version: Version;
 		protected var mb_useMonochrome: Boolean = false;
@@ -133,6 +139,15 @@ package com.iblsoft.flexiweather.ogc
 			feature.removeEventListener(FeatureEvent.PRESENCE_IN_VIEW_BBOX_CHANGED, onFeaturePresenceInViewBBoxIsChanged);
 			invalidateDynamicPart();
 		}
+		
+		protected function showAllFeatures(): void
+		{
+			m_featuresContainer.visible = true;
+		}
+		protected function hideAllFeatures(): void
+		{
+			m_featuresContainer.visible = false;
+		}
 
 		private function onFeaturePresenceInViewBBoxIsChanged(event: FeatureEvent): void
 		{
@@ -148,6 +163,7 @@ package com.iblsoft.flexiweather.ogc
 					onAreaChanged(_areaChangedFinalChange);
 				else
 					callLater(onAreaChanged, [_areaChangedFinalChange]);
+				_suspendUpdatingChanged = false;
 			}
 		}
 		

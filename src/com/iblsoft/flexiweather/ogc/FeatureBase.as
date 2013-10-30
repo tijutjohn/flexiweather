@@ -107,7 +107,7 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function addPointAt(point: Point, index: uint): void
 		{
-			m_points.addItemAt(point, index);
+			m_points.splice(index, 0, point);
 		}
 		
 		public function addPoint(point: Point): void
@@ -243,12 +243,13 @@ package com.iblsoft.flexiweather.ogc
 		public function getAveragePoint():Point
 		{
 			var ret:Point = new Point();
-			for (var i:int = 0; i < m_points.source.length; i++) {
+			var len: int = m_points.length;
+			for (var i:int = 0; i < len; i++) {
 				ret.x = ret.x + m_points[i].x;
 				ret.y = ret.y + m_points[i].y;
 			}
-			ret.x = ret.x / m_points.source.length;
-			ret.y = ret.y / m_points.source.length;
+			ret.x = ret.x / len;
+			ret.y = ret.y / len;
 			
 			return ret;
 		}

@@ -159,8 +159,10 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			_kmlReflectionDictionary.updateKMLFeature(this);
 			var reflection: KMLReflectionData = _kmlReflectionDictionary.getReflection(0) as KMLReflectionData;
 			var renderer: IKMLRenderer = (master as InteractiveLayerKML).itemRendererInstance;
-			renderer.render(this, master.container);
+
 			super.update(changeFlag);
+			
+			renderer.render(this, master.container);
 		}
 
 		override public function set x(value: Number): void

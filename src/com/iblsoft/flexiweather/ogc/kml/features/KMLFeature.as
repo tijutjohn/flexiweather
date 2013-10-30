@@ -382,6 +382,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		protected function onKMLAddReflection(event: ReflectionEvent): void
 		{
 			addEventListener(Event.ENTER_FRAME, onKMLAddReflectionDelayed);
+			//onKMLAddReflectionDelayed(event);
 		}
 		
 		private function onKMLAddReflectionDelayed(event: Event): void

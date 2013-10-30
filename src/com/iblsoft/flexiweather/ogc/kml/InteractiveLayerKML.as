@@ -28,6 +28,7 @@ package com.iblsoft.flexiweather.ogc.kml
 	import com.iblsoft.flexiweather.ogc.kml.managers.KMLResourceManager;
 	import com.iblsoft.flexiweather.ogc.kml.renderer.DefaultKMLRenderer;
 	import com.iblsoft.flexiweather.ogc.kml.renderer.IKMLRenderer;
+	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.utils.AsyncManager;
 	import com.iblsoft.flexiweather.utils.DebugUtils;
 	import com.iblsoft.flexiweather.utils.ProfilerUtils;
@@ -51,6 +52,7 @@ package com.iblsoft.flexiweather.ogc.kml
 	import mx.core.FlexGlobals;
 	import mx.core.IFlexDisplayObject;
 	import mx.events.CloseEvent;
+	import mx.events.DynamicEvent;
 	import mx.events.FlexEvent;
 	import mx.managers.PopUpManager;
 
@@ -62,7 +64,6 @@ package com.iblsoft.flexiweather.ogc.kml
 	 */
 	public class InteractiveLayerKML extends InteractiveLayerFeatureBase
 	{
-		
 		private var _visibilityChanged: Boolean;
 		override public function set visible(b_visible:Boolean):void
 		{
@@ -131,6 +132,8 @@ package com.iblsoft.flexiweather.ogc.kml
 				_syncManager = new AsyncManager('syncManager');
 			if (!_syncManagerFullUpdate)
 				_syncManagerFullUpdate = new AsyncManager('fullSyncManager');
+			
+			bmp = new Bitmap();
 		}
 
 		override protected function childrenCreated(): void
@@ -144,6 +147,9 @@ package com.iblsoft.flexiweather.ogc.kml
 			}
 			if (!_syncManagerFullUpdate.parent)
 				addChild(_syncManagerFullUpdate);
+			
+			addChild(bmp);
+			bmp.visible = false;
 		}
 
 		/**
@@ -594,7 +600,88 @@ package com.iblsoft.flexiweather.ogc.kml
 			return true;
 		}
 
+		override protected function commitProperties():void
+		{
+			if (_suspendUpdatingChanged)
+			{
+				if (_suspendUpdating)
+				{
+					createBitmapPreview();
+				} else {
+					disposeBitmapPreview();
+				}
+			}
+			super.commitProperties();
+			
+			if (_suspendUpdating)
+			{
+				drawImagePartAsBitmap(graphics);
+			}
+		}
 		
+		private var bmp: Bitmap;
+		
+		public function testPan(event: DynamicEvent): void
+		{
+			var diff: Point = event['pixelsDiff'] as Point;
+			bmp.x += diff.x;
+			bmp.y += diff.y;
+		}
+		
+		private function drawImagePartAsBitmap(graphics: Graphics): void
+		{
+			
+//			removeVectorData();
+			
+			
+			var ptImageStartPoint: Point = container.coordToPoint(imageStartCoord);
+			var ptImageEndPoint: Point = container.coordToPoint(imageEndCoord);
+			
+			ptImageEndPoint.x += 1;
+			ptImageEndPoint.y += 1;
+			
+			var ptImageSize: Point = ptImageEndPoint.subtract(ptImageStartPoint);
+			ptImageSize.x = int(Math.round(ptImageSize.x));
+			ptImageSize.y = int(Math.round(ptImageSize.y));
+			
+			var matrix: Matrix = new Matrix();
+			matrix.scale(ptImageSize.x / bmp.width, ptImageSize.y / bmp.height);
+			matrix.translate(ptImageStartPoint.x, ptImageStartPoint.y);
+			
+			graphics.clear();
+			graphics.beginBitmapFill(bmp.bitmapData, matrix, true, true);
+			graphics.drawRect(ptImageStartPoint.x, ptImageStartPoint.y, ptImageSize.x, ptImageSize.y);
+			graphics.endFill();
+		} 
+		
+		private var imageStartCoord: Coord; 
+		private var imageEndCoord: Coord; 
+		
+		private function createBitmapPreview(): void
+		{
+			var s_imageCRS: String = container.crs;
+			var imageBBox: BBox = container.getViewBBox();
+			
+			imageStartCoord = new Coord(s_imageCRS, imageBBox.xMin, imageBBox.yMax);
+			imageEndCoord = new Coord(s_imageCRS, imageBBox.xMax, imageBBox.yMin);
+			
+			hideAllFeatures();
+			bmp.x = 0;
+			bmp.y = 0;
+			bmp.bitmapData = new BitmapData(width, height, true, 0x00000000);
+			bmp.bitmapData.draw(m_featuresContainer); 
+//			bmp.visible = true;
+		}
+		private function disposeBitmapPreview(): void
+		{
+			bmp.x = 0; 
+			bmp.y = 0;
+			bmp.bitmapData.dispose();
+			bmp.visible = false;
+			
+			showAllFeatures();
+			
+		}
 		
 		override public function onAreaChanged(b_finalChange: Boolean): void
 		{
