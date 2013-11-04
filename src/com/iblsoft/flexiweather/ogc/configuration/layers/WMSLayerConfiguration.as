@@ -445,21 +445,54 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			}
 			else
 			{
-				if (ms_previewURL == "<internal>")
+				if (ms_previewURL.indexOf("<internal>") >= 0)
 				{
 					if (service && ma_layerNames)
 					{
-						s_url = service.fullURL;
-						//check if there is ${BASE_URL} in fullURL and convert it
-						s_url = AbstractURLLoader.fromBaseURL(s_url);
-						s_url = s_url.replace(/.*\//, "").replace(/\?.*/, "");
-						s_url = s_url.replace("/", "-");
-						s_url += "-" + ma_layerNames.join("_").replace(" ", "-").toLowerCase();
-						s_url = "assets/layer-previews/" + s_url + ".png";
+						s_url = getInternalIconPath(s_url);
+					} else {
+						trace(this + " Problem find Internal Preview URL");
 					}
 				}
 			}
+			
+			if (s_url == '' && ms_previewURL && ms_previewURL.length > 0)
+				return ms_previewURL;
+			
 			return s_url;
+		}
+		
+		protected function getInternalIconPath(s_url: String): String
+		{
+			/*
+			 this is code from generate-preview.py
+			*/
+			
+			/*
+			s_serviceURL = x_layer.getAttribute('service-url')
+			if s_serviceURL.find('?') < 0:
+				s_serviceURL += '?'
+			s_id = s_serviceURL.replace('${BASE_URL}/', '').replace('http://', '').replace('https://', '')
+			s_id = re.sub(r'\?.*', '', s_id)
+			s_serviceURL = s_serviceURL.replace('${BASE_URL}', s_baseURL)
+			s_layers = ','.join([x.firstChild.nodeValue for x in x_layer.getElementsByTagName('layer-name')])
+				s_id += "_" + s_layers
+			s_id = s_id.replace('/', '_').replace(',', '+')
+			*/
+			
+			s_url = service.fullURL;
+			s_url = s_url.replace(/\$\{BASE_URL\}\//, "").replace(/http:\/\//, "").replace(/https:\/\//, "");
+			var paramPos: int = s_url.indexOf("?");
+			if (paramPos > 0)
+			{
+				s_url = s_url.substr(0, paramPos);
+			}
+			s_url = s_url.replace(/\//gi, "_");
+			s_url += "_" + ma_layerNames.join("_").replace(" ", "-").toLowerCase();
+			s_url = "assets/layer-previews/" + s_url + ".png";
+			
+			return s_url;
+			
 		}
 
 		override public function renderPreview(f_width: Number, f_height: Number, iw: InteractiveWidget = null): void

@@ -83,20 +83,28 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			}
 			else
 			{
-				if (ms_previewURL == "<internal>")
+				if (ms_previewURL.indexOf("<internal>") >= 0)
 				{
 					if (service && layerNames)
 					{
-						s_url = service.fullURL;
+						s_url = getInternalIconPath(s_url);
+//						s_url = service.fullURL;
 						//check if there is ${BASE_URL} in fullURL and convert it
-						s_url = AbstractURLLoader.fromBaseURL(s_url);
-						s_url = s_url.replace(/.*\//, "").replace(/\?.*/, "");
-						s_url = s_url.replace("/", "-");
-						s_url += "-" + layerNames.join("_").replace(" ", "-").toLowerCase();
-						s_url = "assets/layer-previews/" + s_url + ".png";
+//						s_url = AbstractURLLoader.fromBaseURL(s_url);
+//						s_url = s_url.replace(/.*\//, "").replace(/\?.*/, "");
+//						s_url = s_url.replace("/", "-");
+//						s_url += "-" + layerNames.join("_").replace(" ", "-").toLowerCase();
+//						s_url = "assets/layer-previews/" + s_url + ".png";
+						
+					} else {
+						trace(this + " Problem find Internal Preview URL");
 					}
 				}
 			}
+			
+			if (s_url == '' && ms_previewURL && ms_previewURL.length > 0)
+				return ms_previewURL;
+			
 			return s_url;
 		}
 		
