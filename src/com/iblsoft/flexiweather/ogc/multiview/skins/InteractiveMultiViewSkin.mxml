@@ -38,8 +38,6 @@
 			 */
 			override protected function updateDisplayList(unscaledWidth: Number, unscaledHeight: Number): void
 			{
-				trace("IMWSkin updateDisplayList " + unscaledWidth + " , " + unscaledHeight);
-				
 				if (getStyle("borderVisible") == false)
 				{
 					if (border)

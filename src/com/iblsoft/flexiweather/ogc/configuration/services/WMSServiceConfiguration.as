@@ -126,7 +126,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 					{
 						var tempLayerXML: LayerXMLHelper = new LayerXMLHelper(m_layersXMLDictionary, wms, version);
 						wmsLayer = tempLayerXML.createLayer(s_name, layerTemp as XML);
-						trace("WMSServiceConfig getLayerByName 1: "+ wmsLayer + " parent: "+ wmsLayer.parent);
+//						trace("WMSServiceConfig getLayerByName 1: "+ wmsLayer + " parent: "+ wmsLayer.parent);
 						return wmsLayer;
 						
 					} else if (layerTemp is WMSLayer) {
@@ -153,7 +153,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 
 		public function queryCapabilities(): void
 		{
-			trace(this + ' queryCapabilities: ' + fullURL);
+//			trace(this + ' queryCapabilities: ' + fullURL);
 			var r: URLRequest = toGetCapabilitiesRequest();
 			m_capabilitiesLoader.load(r);
 			if (m_capabilitiesLoadJob != null)
@@ -217,7 +217,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 
 		public function populateLayerCapabilities(layerXML: XML): void
 		{
-			trace("\n populateLayerCapabilities");
+//			trace("\n populateLayerCapabilities");
 			var s_version: String = layerXML.@version;
 			var version: Version = Version.fromString(s_version);
 			var wms: Namespace = version.isLessThan(1, 3, 0)
@@ -249,7 +249,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		
 		public function parseGetCapabilities(xml: XML): void
 		{
-			trace("\nparseGetCapabilities fullURL: " + fullURL);
+//			trace("\nparseGetCapabilities fullURL: " + fullURL);
 			var s_version: String = xml.@version;
 			version = Version.fromString(s_version);
 			wms = version.isLessThan(1, 3, 0) ? new Namespace() : new Namespace("http://www.opengis.net/wms");
@@ -310,17 +310,17 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 				dispatchEvent(new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, true));
 			}
 			
-			trace("WMSServiceConfiguration: " + fullURL + " parsing time: " + (getTimer() - time) + "ms\n");
+//			trace("WMSServiceConfiguration: " + fullURL + " parsing time: " + (getTimer() - time) + "ms\n");
 		}
 		
 		
 		
 		private function onGetCapabilitiesInitialized(event: Event): void
 		{
-			trace("onGetCapabilitiesInitialized");
+//			trace("onGetCapabilitiesInitialized");
 			
 			if (PARSE_GET_CAPABILITIES) {
-				trace("Start PARSING");
+//				trace("Start PARSING");
 			
 				var parsingManager: WMSServiceParsingManager = event.target as WMSServiceParsingManager;
 				parsingManager.removeEventListener(AsyncManager.EMPTY, onGetCapabilitiesInitialized);

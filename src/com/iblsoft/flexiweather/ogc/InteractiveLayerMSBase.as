@@ -816,7 +816,6 @@ package com.iblsoft.flexiweather.ogc
 
 		public override function draw(graphics: Graphics): void
 		{
-			trace("draw " + this);
 			if (!m_currentWMSViewProperties)
 				return;
 			if (!layerWasDestroyed)
@@ -920,7 +919,6 @@ package com.iblsoft.flexiweather.ogc
 			
 			var movieObject: DisplayObject = image.parent; 
 			
-			trace("drawImagePartAsSWF movieObject: " + movieObject + " => " + this);
 			if (movieObject)
 				_vectorParent.addChild(movieObject);
 			else

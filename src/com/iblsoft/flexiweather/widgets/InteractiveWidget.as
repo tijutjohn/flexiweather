@@ -416,29 +416,61 @@ package com.iblsoft.flexiweather.widgets
 			else
 				return super.addElementAt(element, index);
 		}
+		
 		private var m_layersLoading: int = 0;
 
 		private function onLayerLoadingStart(event: InteractiveLayerEvent): void
 		{
-			m_layersLoading++;
+//			m_layersLoading++;
+			updateLayersLoadingState();
 			
-			trace("IW onLayerLoadingStart: " + m_layersLoading);
+			trace(this + "IW onLayerLoadingStart: " + m_layersLoading);
 			
 			var ile: InteractiveWidgetEvent = new InteractiveWidgetEvent(InteractiveWidgetEvent.DATA_LAYER_LOADING_STARTED);
 			ile.layersLoading = m_layersLoading;
 			dispatchEvent(ile);
 		}
 
+		private function updateLayersLoadingState(): void
+		{
+			m_layersLoading = 0;
+			var total: int = interactiveLayerMap.layers.length;
+			for (var i: int = 0; i < total; i++)
+			{
+				var layer: InteractiveDataLayer = interactiveLayerMap.layers.getItemAt(i) as InteractiveDataLayer;
+				if (layer.status == InteractiveDataLayer.STATE_LOADING_DATA)
+					m_layersLoading++;
+			}
+		}
 		private function onLayerLoaded(event: InteractiveLayerEvent): void
 		{
-			m_layersLoading--;
-			trace("IW onLayerLoaded: " + m_layersLoading);
-			var ile: InteractiveWidgetEvent
+//			m_layersLoading--;
+			updateLayersLoadingState();
+			trace(this + " onLayerLoaded: " + m_layersLoading);
+			notifyLayerLoaded();
+		}
+		private function onLayerLoadedFromCache(event: InteractiveLayerEvent): void
+		{
+//			m_layersLoading--;
+			updateLayersLoadingState();
+			trace(this + " onLayerLoadedFromCache: " + m_layersLoading);
+			notifyLayerLoaded();
+		}
+		
+		private function notifyLayerLoaded(): void
+		{
+			var ile: InteractiveWidgetEvent;
 			ile = new InteractiveWidgetEvent(InteractiveWidgetEvent.DATA_LAYER_LOADING_FINISHED);
 			ile.layersLoading = m_layersLoading;
 			dispatchEvent(ile);
+			
+			var bAllLayersLoaded: Boolean = false;
 			if (m_layersLoading <= 0)
+				bAllLayersLoaded = true;
+			
+			if (bAllLayersLoaded)
 			{
+				trace("\t"+this + " IW onLayerLoaded ALL_DATA_LAYERS_LOADED: " + m_layersLoading);
 				ile = new InteractiveWidgetEvent(InteractiveWidgetEvent.ALL_DATA_LAYERS_LOADED);
 				dispatchEvent(ile);
 			}
@@ -527,6 +559,7 @@ package com.iblsoft.flexiweather.widgets
 		public function addLayer(l: InteractiveLayer, index: int = -1): void
 		{
 			l.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onLayerLoaded);
+			l.addEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onLayerLoadedFromCache);
 			l.addEventListener(InteractiveDataLayer.LOADING_STARTED, onLayerLoadingStart);
 			l.addEventListener(InteractiveLayerEvent.LAYER_INITIALIZED, onLayerInitialized);
 //			var bAddLayer: Boolean = false;
@@ -564,6 +597,7 @@ package com.iblsoft.flexiweather.widgets
 			if (l is InteractiveLayerMap && m_interactiveLayerMap == l)
 				setInteractiveLayerMap(null);
 			l.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onLayerLoaded);
+			l.removeEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onLayerLoadedFromCache);
 			l.removeEventListener(InteractiveDataLayer.LOADING_STARTED, onLayerLoadingStart);
 			if (l.parent == m_layerContainer)
 			{
@@ -582,6 +616,7 @@ package com.iblsoft.flexiweather.widgets
 				var i: int = m_layerContainer.numElements - 1;
 				var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
 				l.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onLayerLoaded);
+				l.removeEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onLayerLoadedFromCache);
 				l.removeEventListener(InteractiveDataLayer.LOADING_STARTED, onLayerLoadingStart);
 				l.destroy();
 				m_layerContainer.removeElementAt(i);
@@ -780,6 +815,7 @@ package com.iblsoft.flexiweather.widgets
 			if (areaChanged)
 			{
 				//dispatch area change event
+				trace("onAreaChange dispatching from " + this);
 				dispatchEvent(new InteractiveWidgetEvent(InteractiveWidgetEvent.AREA_CHANGED));
 //			} else {
 //				debug(this + " onAreaChanged but are is not changed: " + m_viewBBox.toBBOXString());

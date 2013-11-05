@@ -181,7 +181,7 @@ package com.iblsoft.flexiweather.ogc
 			
 			wmsLayer.parent = this;
 			
-			trace(this + " addLayer: "+ wmsLayer + " parent: "+ wmsLayer.parent);
+//			trace(this + " addLayer: "+ wmsLayer + " parent: "+ wmsLayer.parent);
 			if (wmsLayer is WMSLayer)
 			{
 				ma_layersDictionary[wmsLayer.name] = new LayerDataItem(wmsLayer, LayerDataItem.LAYER);

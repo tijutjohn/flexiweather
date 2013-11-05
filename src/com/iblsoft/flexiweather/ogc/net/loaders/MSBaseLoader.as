@@ -21,6 +21,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 	
 	import flash.display.Bitmap;
 	import flash.display.DisplayObject;
+	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.ProgressEvent;
 	import flash.net.URLRequest;
@@ -208,15 +209,15 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				{
 					jobName += "["+forecast+"]";
 				}
-				m_loader.load(request,
-						{requestedImagePart: imagePart, wmsViewProperties: wmsViewProperties},
-						jobName);
-				invalidateDynamicPart();
-				//			wmsCache.startImageLoading(s_currentCRS, currentViewBBox, request, dimensions);
-				wmsCache.startImageLoading(wmsViewProperties);
+				
+				_delayedRequestObject = {request: request, wmsViewProperties: wmsViewProperties, wmsCache: wmsCache, imagePart: imagePart, jobName: jobName};
+				m_layer.addEventListener(Event.ENTER_FRAME, startLoadingOnNextFrame);
+				
 			}
 			else
 			{
+				notifyLoadingStart(false);
+				
 				//image is cached
 				cacheItem = wmsCache.getCacheItem(wmsViewProperties);
 				var key: String;
@@ -226,10 +227,37 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				addImagePart(wmsViewProperties, imagePart, img, key);
 				onFinishedRequest(wmsViewProperties, null);
 				invalidateDynamicPart();
-				notifyLoadingFinishedFromCache({wmsViewProperties: wmsViewProperties});
+				
+				_delayedRequestObject = {wmsViewProperties: wmsViewProperties};
+				m_layer.addEventListener(Event.ENTER_FRAME, dispatchLoadingFinishedFromCacheOnNextFrame);
+				
 			}
 		}
+		
+		private var _delayedRequestObject: Object;
+		
+		private function dispatchLoadingFinishedFromCacheOnNextFrame(event: Event): void
+		{
+			m_layer.removeEventListener(Event.ENTER_FRAME, dispatchLoadingFinishedFromCacheOnNextFrame);
+			notifyLoadingFinishedFromCache({wmsViewProperties: _delayedRequestObject.wmsViewProperties});
+		}
+		
+		private function startLoadingOnNextFrame(event: Event): void
+		{
+			m_layer.removeEventListener(Event.ENTER_FRAME, startLoadingOnNextFrame);
+			startLoading(_delayedRequestObject.request, _delayedRequestObject.wmsViewProperties, _delayedRequestObject.wmsCache, _delayedRequestObject.imagePart, _delayedRequestObject.jobName);
+		}
 
+		private function startLoading(request: URLRequest, wmsViewProperties: WMSViewProperties, wmsCache: WMSCache, imagePart: ImagePart, jobName: String): void
+		{
+				m_loader.load(request,
+						{requestedImagePart: imagePart, wmsViewProperties: wmsViewProperties},
+						jobName);
+				invalidateDynamicPart();
+				//			wmsCache.startImageLoading(s_currentCRS, currentViewBBox, request, dimensions);
+				wmsCache.startImageLoading(wmsViewProperties);
+		}
+		
 		private function onCacheItemLoaded(event: WMSCacheEvent): void
 		{
 			var wmsCache: WMSCache = event.target as WMSCache;

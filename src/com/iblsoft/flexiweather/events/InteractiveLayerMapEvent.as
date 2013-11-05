@@ -17,6 +17,7 @@ package com.iblsoft.flexiweather.events
 		
 		public static const MAP_LOADING_STARTED: String = "mapLoadingStarted";
 		public static const MAP_LOADING_PROGRESS: String = "mapLoadingProgress";
+		public static const MAP_INITIALIZING_PROGRESS: String = "mapInitializingProgress";
 		public static const MAP_LOADING_FINISHED: String = "mapLoadingFinished";
 		
 		public static const BEFORE_REFRESH: String = "mapBeforeRefresh";

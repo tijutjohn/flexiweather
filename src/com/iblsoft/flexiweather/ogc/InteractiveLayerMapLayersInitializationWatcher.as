@@ -118,7 +118,7 @@ package com.iblsoft.flexiweather.ogc
 			_mapLayersInitializing--;
 			
 			var totalLayers: uint = interactiveLayerMap.layers.length;
-			interactiveLayerMap.progressMapLoading(totalLayers - _mapLayersInitializing, totalLayers);
+			interactiveLayerMap.progressMapInitializing(totalLayers - _mapLayersInitializing, totalLayers);
 			
 			if (_mapLayersInitializing == 0)
 			{

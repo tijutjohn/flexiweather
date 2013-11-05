@@ -30,9 +30,9 @@ package com.iblsoft.flexiweather.ogc
 		
 		protected function addAllArrayItems(arrTo: Array, arrFrom: Array): Array
 		{
-			trace("addAllArrayItems 1  " +  arrTo.length + "from: "+ arrFrom.length);
+//			trace("addAllArrayItems 1  " +  arrTo.length + "from: "+ arrFrom.length);
 			arrTo = arrTo.concat(arrFrom);
-			trace("addAllArrayItems 2  " +  arrTo.length + "from: "+ arrFrom.length);
+//			trace("addAllArrayItems 2  " +  arrTo.length + "from: "+ arrFrom.length);
 			return arrTo;
 		}
 		
