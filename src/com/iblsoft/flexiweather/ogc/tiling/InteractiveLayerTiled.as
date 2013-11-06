@@ -1703,7 +1703,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 		public override function validateSize(b_recursive: Boolean = false): void
 		{
 			super.validateSize(b_recursive);
-			checkZoom();
+			if (_layerInitialized)
+				checkZoom();
 		}
 		
 		protected function onBeforeCacheItemDeleted(event: WMSCacheEvent): void
