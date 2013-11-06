@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc.configuration.layers
 {
+	import com.iblsoft.flexiweather.FlexiWeatherConfiguration;
 	import com.iblsoft.flexiweather.net.loaders.AbstractURLLoader;
 	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
 	import com.iblsoft.flexiweather.ogc.BBox;
@@ -83,8 +84,13 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 				m_service.removeEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onCapabilitiesUpdated)
 		}
 		
+		
 		public function populateLayerCapabilities(layerXML: XML): void
 		{
+			//if FlexiWeather loads GetCapabilitie requests, this functionality is not needed and will not be executed			
+			if (FlexiWeatherConfiguration.FLEXI_WEATHER_LOADS_GET_CAPABILITIES)
+				return;
+			
 			if (m_service)
 			{ 
 				(m_service as WMSServiceConfiguration).populateLayerCapabilities(layerXML);
