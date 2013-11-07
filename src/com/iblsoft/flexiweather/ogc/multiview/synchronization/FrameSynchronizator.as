@@ -124,6 +124,11 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		{
 			var synchronizedWidgetFrame: Date = synchronizeFromWidget.frame;
 			
+			if (preferredSelectedIndex > -1)
+			{
+				synchronizeFromWidget = widgetsForSynchronisation.getItemAt(preferredSelectedIndex) as InteractiveWidget;
+			}
+			
 			debug("\n******************* FrameSychronizator synchronizeWidgets for " + synchronizedWidgetFrame, 'Info', 'FrameSychronizator');
 			if (!isSynchronizedFor(synchronizedWidgetFrame))
 			{

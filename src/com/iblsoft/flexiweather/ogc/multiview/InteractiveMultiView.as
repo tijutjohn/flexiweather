@@ -459,20 +459,24 @@ package com.iblsoft.flexiweather.ogc.multiview
 						ac.addItem(iw);
 						_widgetsCountToBeReady.addItem(iw);
 					}
-					if (newConfiguration.customData && cnt == newConfiguration.customData.selectedIndex)
-					{
+//					if (newConfiguration.customData && cnt == newConfiguration.customData.selectedIndex)
+//					{
 						//selection change only if all wdiget are initialized, otherwise it must be notified after all widget will be initialized
 //						m_selectedWidgetAfterWidgetInitialization = iw;
-						selectedInteractiveWidget = iw;
-						currentSelection = iw;
-					}
+//						selectedInteractiveWidget = iw;
+//						currentSelection = iw;
+//					}
 					cnt++;
 				}
 			}
 
 			if (!currentSelection && _widgetsCountToBeReady.length > 0)
 			{
-				selectedInteractiveWidget = _widgetsCountToBeReady.getItemAt(0) as InteractiveWidget;
+				if (newConfiguration.customData.selectedIndex && newConfiguration.customData.selectedIndex > -1)
+					m_selectedWidgetAfterWidgetInitialization = _widgetsCountToBeReady.getItemAt(newConfiguration.customData.selectedIndex) as InteractiveWidget;
+				else
+					m_selectedWidgetAfterWidgetInitialization = _widgetsCountToBeReady.getItemAt(0) as InteractiveWidget;
+				selectedInteractiveWidget = m_selectedWidgetAfterWidgetInitialization;
 			}
 			
 			//now previously selected widget can be removed
@@ -489,11 +493,11 @@ package com.iblsoft.flexiweather.ogc.multiview
 				notifyWidgetsReady(synchronizator);
 			}
 			
-//			if (multiViewInitialized)
-//			{
-//				selectedInteractiveWidget = m_selectedWidgetAfterWidgetInitialization;
-//				m_selectedWidgetAfterWidgetInitialization = null;
-//			}
+			if (multiViewInitialized)
+			{
+				selectedInteractiveWidget = m_selectedWidgetAfterWidgetInitialization;
+				m_selectedWidgetAfterWidgetInitialization = null;
+			}
 		}
 		
 		private var m_selectedWidgetAfterWidgetInitialization: InteractiveWidget;

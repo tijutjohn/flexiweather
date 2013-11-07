@@ -140,19 +140,6 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			}
 			return -1;
 		}
-		private function getWidgetPosition(synchronizeFromWidget:InteractiveWidget, widgetsForSynchronisation:ArrayCollection): int
-		{
-			var cnt: int = 0;
-			for each (var widget: InteractiveWidget in widgetsForSynchronisation)
-			{
-				if (widget.id == synchronizeFromWidget.id)
-				{
-					return cnt;
-				}
-				cnt++;
-			}
-			return -1;
-		}
 		
 		override public function getSynchronisedVariables():Array
 		{

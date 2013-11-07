@@ -72,6 +72,11 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			if (_levelValues)
 			{
 				var levels: Array = _levelValues;
+				
+				if (preferredSelectedIndex > -1)
+				{
+					synchronizeFromWidget = widgetsForSynchronisation.getItemAt(preferredSelectedIndex) as InteractiveWidget;
+				}
 			
 				var synchronizeFromWidgetPosition: int = getWidgetPosition(synchronizeFromWidget, widgetsForSynchronisation);
 				
