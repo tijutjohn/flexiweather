@@ -84,7 +84,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 								else if (obj.hasOwnProperty('path'))
 									fullPath = (dp.getItemAt(position) as Object).path;
 									
-								_widgetsMapDictionary[iw] = {action: 'loadMap', path: fullPath}
+								_widgetsMapDictionary[iw] = {action: 'loadMap', path: fullPath};
 								return;
 							}
 						}

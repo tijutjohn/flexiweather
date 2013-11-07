@@ -852,6 +852,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 			} else {
 				synchronizator.updateMapAction(widget, position, _configuration);
 				synchronizator.addEventListener(SynchronisationEvent.MAP_READY, onSynchronizatorMapReady);
+				synchronizator.addEventListener(InteractiveWidgetEvent.ALL_DATA_LAYERS_LOADED, onSynchronizatorAllDataLayersLoaded);
 				synchronizator.createMap(widget);
 				
 			}
@@ -1033,19 +1034,29 @@ package com.iblsoft.flexiweather.ogc.multiview
 		 */		
 		private function onSynchronizatorMapReady(event: SynchronisationEvent): void
 		{
-			trace("onSynchronizatorMapReady");
+//			trace("onSynchronizatorMapReady");
 			var widget: InteractiveWidget = event.widget;
-			mapIsLoaded(widget);
+//			mapIsLoaded(widget);
+			mapIsInitialised(widget);
 			
 			notifyWidgetsMapLayersInitialized();
 			
-			_loadingMapsCount--;
-			if (_loadingMapsCount == 0)
-			{
+//			_loadingMapsCount--;
+//			if (_loadingMapsCount == 0)
+//			{
 //				startWatchingChanges();
 //				notifyWidgetsMapLoaded();
-				notifyAllWidgetsMapLayersInitialized();
+//				notifyAllWidgetsMapLayersInitialized();
+//			}
+			
+			_initializingMapsCount--;
+			
+			if (_initializingMapsCount == 0)
+			{
+				allWidgetsMapLayersAreInitialized();
 			}
+			
+			
 		}
 		
 		private function onMapFromXMLReady(event: DynamicEvent): void
@@ -1078,13 +1089,26 @@ package com.iblsoft.flexiweather.ogc.multiview
 				updatePreloaderLabel(widget, "Map layers loaded: " + loaded + "/" + total, loaded, total);
 			}
 		}
+		
+		
+		private function onSynchronizatorAllDataLayersLoaded(event: InteractiveWidgetEvent): void
+		{
+			trace("onSynchronizatorAllDataLayersLoaded");
+			
+			var widget: InteractiveWidget = event.data as InteractiveWidget;
+			allMapLayersLoaded(widget);
+		}
+		
 		private function onAllDataLayersLoaded(event: InteractiveWidgetEvent): void
 		{
 			trace("onAllDataLayersLoaded");
 			
 			var widget: InteractiveWidget = event.target as InteractiveWidget;
-			
-//			var widget: InteractiveWidget = ilm.container as InteractiveWidget;
+			allMapLayersLoaded(widget);
+		}
+		
+		private function allMapLayersLoaded(widget: InteractiveWidget): void
+		{
 			mapIsLoaded(widget);
 			
 			_loadingMapsCount--;
@@ -2019,7 +2043,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 			if (debugConsole)
 				debugConsole.print(str, type, tag);
 			
-//			trace(tag + "| " + type + "| " + str);
+			trace(tag + "| " + type + "| " + str);
 //			LoggingUtils.dispatchLogEvent(this, tag + "| " + type + "| " + str);
 		}
 

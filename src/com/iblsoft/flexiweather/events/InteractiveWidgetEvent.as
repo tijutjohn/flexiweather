@@ -44,6 +44,7 @@ package com.iblsoft.flexiweather.events
 			var iwe: InteractiveWidgetEvent = new InteractiveWidgetEvent(type);
 			iwe.layersLoading = layersLoading;
 			iwe.changeDescription = changeDescription;
+			iwe.data = data;
 			return iwe;
 		}
 	}
