@@ -85,11 +85,11 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			var primaryLayer: InteractiveLayerMSBase = widget.interactiveLayerMap.primaryLayer;
 			if (primaryLayer)
 			{
-				trace("listenToWidgetSynchronization ADDING LAYER ["+primaryLayer.layerID+"]");
+//				trace("listenToWidgetSynchronization ADDING LAYER ["+primaryLayer.layerID+"]");
 				var bFound: Boolean = false;
 				for each (var layer: InteractiveLayer in widget.interactiveLayerMap.layers)
 				{
-					trace("\tlistenToWidgetSynchronization["+primaryLayer.layerID+"]: layer" + layer.layerID);
+//					trace("\tlistenToWidgetSynchronization["+primaryLayer.layerID+"]: layer" + layer.layerID);
 					if (layer.layerID == primaryLayer.layerID)
 						bFound = true;
 					

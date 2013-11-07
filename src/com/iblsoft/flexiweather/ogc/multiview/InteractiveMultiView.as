@@ -220,10 +220,10 @@ package com.iblsoft.flexiweather.ogc.multiview
 		{
 			if (super.enabled != value)
 			{
-				if (!value)
-				{
-					trace(this + " check disable state");
-				}
+//				if (!value)
+//				{
+//					trace(this + " check disable state");
+//				}
 				super.enabled = value;
 				invalidateDisplayList();
 			}
@@ -472,7 +472,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 
 			if (!currentSelection && _widgetsCountToBeReady.length > 0)
 			{
-				if (newConfiguration.customData.selectedIndex && newConfiguration.customData.selectedIndex > -1)
+				if (newConfiguration && newConfiguration.customData && newConfiguration.customData.selectedIndex && newConfiguration.customData.selectedIndex > -1)
 					m_selectedWidgetAfterWidgetInitialization = _widgetsCountToBeReady.getItemAt(newConfiguration.customData.selectedIndex) as InteractiveWidget;
 				else
 					m_selectedWidgetAfterWidgetInitialization = _widgetsCountToBeReady.getItemAt(0) as InteractiveWidget;

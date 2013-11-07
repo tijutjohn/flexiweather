@@ -424,7 +424,7 @@ package com.iblsoft.flexiweather.widgets
 //			m_layersLoading++;
 			updateLayersLoadingState();
 			
-			trace(this + "IW onLayerLoadingStart: " + m_layersLoading);
+//			trace(this + "IW onLayerLoadingStart: " + m_layersLoading);
 			
 			var ile: InteractiveWidgetEvent = new InteractiveWidgetEvent(InteractiveWidgetEvent.DATA_LAYER_LOADING_STARTED);
 			ile.layersLoading = m_layersLoading;
@@ -446,14 +446,14 @@ package com.iblsoft.flexiweather.widgets
 		{
 //			m_layersLoading--;
 			updateLayersLoadingState();
-			trace(this + " onLayerLoaded: " + m_layersLoading);
+//			trace(this + " onLayerLoaded: " + m_layersLoading);
 			notifyLayerLoaded();
 		}
 		private function onLayerLoadedFromCache(event: InteractiveLayerEvent): void
 		{
 //			m_layersLoading--;
 			updateLayersLoadingState();
-			trace(this + " onLayerLoadedFromCache: " + m_layersLoading);
+//			trace(this + " onLayerLoadedFromCache: " + m_layersLoading);
 			notifyLayerLoaded();
 		}
 		
@@ -470,7 +470,7 @@ package com.iblsoft.flexiweather.widgets
 			
 			if (bAllLayersLoaded)
 			{
-				trace("\t"+this + " IW onLayerLoaded ALL_DATA_LAYERS_LOADED: " + m_layersLoading);
+//				trace("\t"+this + " IW onLayerLoaded ALL_DATA_LAYERS_LOADED: " + m_layersLoading);
 				ile = new InteractiveWidgetEvent(InteractiveWidgetEvent.ALL_DATA_LAYERS_LOADED);
 				dispatchEvent(ile);
 			}
