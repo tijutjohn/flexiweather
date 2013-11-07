@@ -487,6 +487,8 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			var reflections: Dictionary = new Dictionary();
 			
 			var bUseReflections: Boolean = false; //projection.wrapsHorizontally;
+			var coordReflected: Coord;
+			var p2: flash.geom.Point;
 			if (bUseReflections)
 			{
 				pointReflections = iw.mapCoordInCRSToViewReflectionsForDeltas(coordPointForReflection, [0,1,-1,2,-2,3,-3]);
@@ -498,18 +500,18 @@ package com.iblsoft.flexiweather.ogc.kml.features
 					var pointReflectedObject: Object = pointReflections[j];
 					
 					var pointReflected: flash.geom.Point = pointReflectedObject.point as flash.geom.Point;
-					var coordReflected: Coord = new Coord(crs, pointReflected.x, pointReflected.y);
+					coordReflected = new Coord(crs, pointReflected.x, pointReflected.y);
 					
-					var p2: flash.geom.Point = iw.coordToPoint(coordReflected);
+					p2 = iw.coordToPoint(coordReflected);
 					
 					reflections[pointReflectedObject.reflection] = {coord: coordReflected, point: p2, reflection: pointReflectedObject.reflection};
 				}
 			} else {
 				
 //				var pointReflected: flash.geom.Point = coordPointForReflection;
-				var coordReflected: Coord = coordPointForReflection; //new Coord(crs, pointReflected.x, pointReflected.y);
+				coordReflected = coordPointForReflection; //new Coord(crs, pointReflected.x, pointReflected.y);
 					
-				var p2: flash.geom.Point = iw.coordToPoint(coordReflected);
+				p2 = iw.coordToPoint(coordReflected);
 					
 				reflections[0] = {coord: coordReflected, point: p2, reflection: 0};
 			}

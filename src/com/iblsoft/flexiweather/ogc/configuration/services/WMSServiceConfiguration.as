@@ -15,6 +15,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 	import com.iblsoft.flexiweather.ogc.events.ServiceCapabilitiesEvent;
 	import com.iblsoft.flexiweather.ogc.managers.OGCServiceConfigurationManager;
 	import com.iblsoft.flexiweather.ogc.managers.ProjectionConfigurationManager;
+	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.utils.AsyncManager;
 	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.utils.Storage;
@@ -79,7 +80,10 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		}
 		private var m_layersXMLDictionary: Dictionary;
 		
-		private var m_layers: WMSLayerGroup = null;
+//		private var m_layers: WMSLayerGroup = null;
+		private var ma_rootLayers: Array;
+		private var ma_allLayers: Array;
+		
 		private var _imageFormats: Array = [];
 
 		public function get imageFormats(): Array
@@ -94,6 +98,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 			super(s_url, "wms", version);
 			
 			m_layersXMLDictionary = new Dictionary();
+			ma_rootLayers = [];
 			
 			m_capabilitiesLoader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onCapabilitiesLoaded);
 			m_capabilitiesLoader.addEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onCapabilitiesLoadFailed);
@@ -105,9 +110,14 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 			if (m_capabilitiesLoader)
 				m_capabilitiesLoader.destroy();
 			m_capabilitiesLoader = null;
-			if (m_layers)
-				m_layers.destroy();
-			m_layers = null;
+			
+//			if (m_layers)
+//				m_layers.destroy();
+//			m_layers = null;
+			
+			//TODO destroy m_layersXMLDictionary
+			
+			
 			_imageFormats = null;
 			m_capabilitiesLoadJob = null;
 		}
@@ -117,9 +127,10 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		{
 			var wmsLayer: WMSLayer;
 			
+			var layerTemp: Object = m_layersXMLDictionary[s_name];
+			
 			if (EXPERIMENTAL_LAYERS_INITIALIZING)
 			{
-				var layerTemp: Object = m_layersXMLDictionary[s_name];
 				if (layerTemp)
 				{
 					if (layerTemp is XML)
@@ -136,13 +147,21 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 					
 				}
 				return null;
+			} 
+			
+//			if (m_layers == null)
+//				return null;
+//			
+//			wmsLayer = m_layers.getLayerByName(s_name);
+//			return wmsLayer;
+			for each (var layer: WMSLayerBase in ma_allLayers)
+			{
+				if (layer.name == s_name)
+					return layer as WMSLayer;
 			}
 			
-			if (m_layers == null)
-				return null;
+			return null;
 			
-			wmsLayer = m_layers.getLayerByName(s_name);
-			return wmsLayer;
 		}
 
 		public function toGetCapabilitiesRequest(): URLRequest
@@ -208,11 +227,14 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 				queryCapabilities();
 		}
 
-		public function get layers(): WMSLayerGroup
+		public function get rootLayers(): Array
 		{
-			return m_layers;
+			return ma_rootLayers;
 		}
-
+		public function get allLayers(): Array
+		{
+			return ma_allLayers;
+		}
 		
 
 		public function populateLayerCapabilities(layerXML: XML): void
@@ -225,7 +247,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 			
 			try
 			{
-				m_layers = new WMSLayerGroup(null, layerXML, wms, version);
+				var layerGroup: WMSLayerGroup = new WMSLayerGroup(null, layerXML, wms, version);
                 new GetCapabilitiesParser().createLayersXMLDictionary(layerXML, m_layersXMLDictionary, wms);
 			}
 			catch (e: Error)
@@ -233,9 +255,47 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 				trace("WMSServiceConfiguration error: " + e.message);
 			}
 				
-			m_layers.initialize();
-			m_layers.parse();
-				
+			layerGroup.initialize();
+			layerGroup.parse();
+			
+			//TODO add it to layers
+			addParseLayer(layerGroup);
+		}
+		
+		private function addParseLayer(layer: WMSLayerBase): void
+		{
+			ma_rootLayers.push(layer);
+			enumerateAllLayers();
+		}
+		private function enumerateAllLayers(): void
+		{
+			var allLayers: Array = [];
+			for each (var layer: WMSLayerBase in ma_rootLayers)
+			{
+				var currLayers: Array = [];
+				if (layer is WMSLayerGroup)
+				{
+					enumerateLayerGrop(allLayers, layer as WMSLayerGroup);
+//					ArrayUtils.unionArrays(allLayers, .layers);
+				} else if (layer is WMSLayer) {
+					ArrayUtils.unionArrays(allLayers, [layer]);
+				}
+			}
+			ma_allLayers = allLayers;
+		}
+		private function enumerateLayerGrop(destArray: Array, layerGroup: WMSLayerGroup): void
+		{
+			var groupLayers: Array = layerGroup.layers;
+			for each (var layer: WMSLayerBase in groupLayers)
+			{
+//				var currLayers: Array = [];
+				if (layer is WMSLayerGroup)
+				{
+					enumerateLayerGrop(destArray, layer as WMSLayerGroup);
+				} else if (layer is WMSLayer) {
+					ArrayUtils.unionArrays(destArray, [layer]);
+				}
+			}
 		}
 		
 		public function populateGetCapabilities(xml: XML): void
@@ -262,6 +322,8 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 			
 			if (capability != null)
 			{
+				
+				var layerGroup: WMSLayerGroup
 				if (USE_ASYNCHRONOUS_PARSING)
 				{
 					var parsingManager: WMSServiceParsingManager = new WMSServiceParsingManager('wmsServiceParsingManager');
@@ -279,13 +341,13 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 					{
 						new GetCapabilitiesParser().createLayersXMLDictionary(layer, m_layersXMLDictionary, wms);
 					} else {
-						m_layers = new WMSLayerGroup(null, layer, wms, version);
+						layerGroup = new WMSLayerGroup(null, layer, wms, version);
 					
 						if (USE_ASYNCHRONOUS_PARSING) {
-							m_layers.initialize(parsingManager);
+							layerGroup.initialize(parsingManager);
 							parsingManager.start();
 						} else
-							m_layers.initialize();
+							layerGroup.initialize();
 					}
 					
 					
@@ -297,10 +359,14 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 				
 				if (!EXPERIMENTAL_LAYERS_INITIALIZING && !USE_ASYNCHRONOUS_PARSING && PARSE_GET_CAPABILITIES)
 				{
-					m_layers.parse();
+					layerGroup.parse();
 				}
-				
 			}
+			
+			
+			//TODO add layerGroup to layers
+			addParseLayer(layerGroup);
+			
 			
 			if (!USE_ASYNCHRONOUS_PARSING && PARSE_GET_CAPABILITIES)
 			{
@@ -328,7 +394,13 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 				parsingManager.maxCallsPerTick = 5;
 				parsingManager.addEventListener(AsyncManager.EMPTY, onGetCapabilitiesParsed);
 			
-				m_layers.parse(parsingManager);
+				//TODO what should be parsed here
+//				m_layers.parse(parsingManager);
+				for each (var layer: WMSLayerBase in ma_rootLayers)
+				{
+					layer.parse(parsingManager);
+				}
+				
 				parsingManager.start();
 				
 			} else {
@@ -360,9 +432,11 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		private function addSupportedProjections(): void
 		{
 			//check all crs
-			if (m_layers && m_layers.layers)
-			{
-				var allLayers: Array = m_layers.layers;
+//			if (m_layers && m_layers.layers)
+//			{
+//				var allLayers: Array = m_layers.layers;
+				//TODO how we get all layers
+				var allLayers: Array = ma_allLayers;
 				
 				var projectionManager: ProjectionConfigurationManager = ProjectionConfigurationManager.getInstance();
 				projectionManager.removeParsedProjections();
@@ -380,7 +454,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 					}
 				}
 				projectionManager.initializeParsedProjections();
-			}
+//			}
 		}
 
 		private function getGetMapImageFormats(xml: XML): void
@@ -419,10 +493,10 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		
 		
 
-		public function get rootLayerGroup(): WMSLayerGroup
-		{
-			return m_layers;
-		}
+//		public function get rootLayerGroup(): WMSLayerGroup
+//		{
+//			return m_layers;
+//		}
 		
 		override public function toString(): String
 		{
