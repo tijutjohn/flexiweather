@@ -815,7 +815,6 @@ package com.iblsoft.flexiweather.widgets
 			if (areaChanged)
 			{
 				//dispatch area change event
-				trace("onAreaChange dispatching from " + this);
 				dispatchEvent(new InteractiveWidgetEvent(InteractiveWidgetEvent.AREA_CHANGED));
 //			} else {
 //				debug(this + " onAreaChanged but are is not changed: " + m_viewBBox.toBBOXString());
@@ -2010,7 +2009,7 @@ package com.iblsoft.flexiweather.widgets
 			if (drawMode == DrawMode.GREAT_ARC)
 			{
 				coords = Coord.interpolateGreatArc(coordFrom, coordTo, distanceValidator);
-				trace(coords);
+//				trace(coords);
 			}
 			else if (drawMode == DrawMode.PLAIN) {
 				if (projection.wrapsHorizontally) {
@@ -2112,8 +2111,8 @@ package com.iblsoft.flexiweather.widgets
 								{
 									var reflection: FeatureDataReflection = featureDataLine.parentFeatureData.getReflectionAt(o.reflection);
 									var currLine: FeatureDataLine = reflection.getLineAt(featureDataLine.id);
-									trace("_drawGeoLine reflection: " + reflection);
-									trace("_drawGeoLine currLine: " + currLine);
+//									trace("_drawGeoLine reflection: " + reflection);
+//									trace("_drawGeoLine currLine: " + currLine);
 									
 									//check if line is intersect vieBBox
 									var p1: Point = coordToPoint(new Coord(ms_crs, o.pointFrom.x, o.pointFrom.y));
@@ -2253,8 +2252,8 @@ package com.iblsoft.flexiweather.widgets
 			}
 			
 			//debug featureData;
-			if (featureData)
-				featureData.debug();
+//			if (featureData)
+//				featureData.debug();
 			
 			if (!b_justCompute)
 				_drawReflectedSegmentPoints(rendererCreator, d_reflectionToSegmentPoints);

@@ -233,10 +233,6 @@ package com.iblsoft.flexiweather.widgets
 			{
 				if (_allPoints.length > 0)
 				{
-					if (_allPoints.length > 1)
-					{
-						trace("debug");
-					}
 					routeType = ROUTE_FILL;
 					var currPointArr: Array = _allPoints.shift() as Array;
 					var type: int = currPointArr[0];

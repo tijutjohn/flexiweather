@@ -244,7 +244,7 @@ package com.iblsoft.flexiweather.widgets
 			{
 				var coord: Coord = _ma_coords[i] as Coord;
 				var p: Point = container.coordToPoint(coord);
-				_ma_points[p] = i;
+				_ma_points[i] = p;
 			}
 			
 			invalidateDynamicPart();
@@ -437,6 +437,7 @@ package com.iblsoft.flexiweather.widgets
 			for (var i: int = 0; i < total; i++)
 			{
 				var c: Coord = _ma_coords[i] as Coord;
+//				trace("Route drawDraggablePoints: " + c + " ["+i+"] " + (_ma_points[i] as Point));
 				if (c.crs != container.crs)
 				{
 					c = c.convertToProjection(proj);
