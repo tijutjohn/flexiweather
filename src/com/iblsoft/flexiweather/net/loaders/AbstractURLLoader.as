@@ -752,6 +752,7 @@ package com.iblsoft.flexiweather.net.loaders
 
 		protected function dispatchFault(errorString: String, errorID: int, rawData: Object, urlRequest: URLRequest, associatedData: Object): void
 		{
+			associatedData.errorResult = rawData;
 			dispatchEvent(new UniURLLoaderErrorEvent(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, rawData, urlRequest, associatedData, errorString, errorID, false, true));
 		}
 

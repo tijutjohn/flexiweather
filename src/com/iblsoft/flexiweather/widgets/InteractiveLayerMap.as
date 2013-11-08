@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.widgets
 {
+	import com.iblsoft.flexiweather.FlexiWeatherConfiguration;
 	import com.iblsoft.flexiweather.events.GetFeatureInfoEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerMapEvent;
@@ -246,9 +247,13 @@ package com.iblsoft.flexiweather.widgets
 			
 			_globalVariablesManager = new GlobalVariablesManager();
 			_globalVariablesManager.registerInteractiveLayerMap(this);
-			_periodicTimer = new Timer(10 * 1000);
+			
+			_periodicTimer = new Timer(FlexiWeatherConfiguration.INTERACTIVE_LAYER_MAP_PERIODIC_CHECK_INTERVAL * 1000);
 			_periodicTimer.addEventListener(TimerEvent.TIMER, onPeriodicTimerTick);
-			_periodicTimer.start();
+			
+			if (FlexiWeatherConfiguration.INTERACTIVE_LAYER_MAP_PERIODIC_CHECK)
+				_periodicTimer.start();
+			
 			dispatchEvent(new Event("globalVariablesManagerChanged"));
 		}
 
@@ -1731,6 +1736,7 @@ package com.iblsoft.flexiweather.widgets
 			//we need to remember old frame and synchronize frame after RUN is synchronized
 			var oldFrame: Date = frame;
 			
+			trace(this + " SET RUN: " + newRun);
 			
 			var bGlobalSynchronization: Boolean = false;
 			for each (var l: InteractiveLayer in m_layers)
@@ -1748,7 +1754,8 @@ package com.iblsoft.flexiweather.widgets
 				debug("setRun [" + newRun + "] newRun: " + newRun + " for: " + l.name + " bSynchronized: " + bSynchronized + " bGlobalSynchronization: " + bGlobalSynchronization);
 				if (bSynchronized)
 				{
-					l.refresh(false);
+//					l.refresh(false);
+					so.refreshForSynchronisation(false);
 				}
 				else
 				{
@@ -1807,7 +1814,8 @@ package com.iblsoft.flexiweather.widgets
 				debug("setLevel [" + newLevel + "] newLevel: " + newLevel + " for: " + l.name + " bSynchronized: " + bSynchronized + " bGlobalSynchronization: " + bGlobalSynchronization);
 				if (bSynchronized)
 				{
-					l.refresh(false);
+//					l.refresh(false);
+					so.refreshForSynchronisation(false);
 				}
 				else
 				{
@@ -1830,14 +1838,21 @@ package com.iblsoft.flexiweather.widgets
 		 */		
 		public function resynchronize(): void
 		{
-			if (frame)
-				setFrame(frame);
+			var synchronizedFrame: Date = frame;
+			
+			trace(this + " resynchronize to frame: " + synchronizedFrame);
+			if (synchronizedFrame)
+				setFrame(synchronizedFrame);
 		}
 		
 		public function setFrame(newFrame: Date, b_nearrest: Boolean = true, bGlobalValueChange: Boolean = true): Boolean
 		{
+			trace(this + " setFrame 1: " + newFrame);
+			
 			if (bGlobalValueChange)
 				_globalVariablesManager.frame = newFrame;
+			
+			trace(this + " setFrame 2: " + newFrame);
 			
 			for each (var l: InteractiveLayer in m_layers)
 			{
