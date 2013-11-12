@@ -723,6 +723,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 		{
 			
 			multiViewInitialized = false;
+			_loadingMapsCount = 0;
+			_initializingMapsCount = 0;
 			
 			
 			if (synchronizator && !synchronizator.isSynchronisingChangeType(SynchronizationChangeType.MAP_LAYER_ADDED))
@@ -730,10 +732,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 			else {
 				//load map just for currently selected widget
 				if (selectedInteractiveWidget) {
-					_loadingMapsCount = 1;
-					_initializingMapsCount = 1;
-					
-					
 					var position: int = _interactiveWidgets.getWidgetIndex(selectedInteractiveWidget);
 					
 					//update map configuration
@@ -795,8 +793,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 					
 					if (getMapInfoForPosition(cnt))
 					{
-						_loadingMapsCount++;
-						_initializingMapsCount++;
+//						_loadingMapsCount++;
+//						_initializingMapsCount++;
 						loadMapForWidget(currIW, mapXML, cnt);
 						cnt++;
 					}
@@ -851,6 +849,10 @@ package com.iblsoft.flexiweather.ogc.multiview
 				synchronizator.updateMapAction(widget, position, _configuration);
 				synchronizator.addEventListener(SynchronisationEvent.MAP_READY, onSynchronizatorMapReady);
 				synchronizator.addEventListener(InteractiveWidgetEvent.ALL_DATA_LAYERS_LOADED, onSynchronizatorAllDataLayersLoaded);
+				
+				_loadingMapsCount++;
+				_initializingMapsCount++;
+				
 				synchronizator.createMap(widget);
 				
 			}
@@ -861,7 +863,10 @@ package com.iblsoft.flexiweather.ogc.multiview
 //			var _serializedMap: XMLStorage = new XMLStorage(mapXML);
 			iw.interactiveLayerMap.startMapLoading();
 			iw.interactiveLayerMap.addEventListener(InteractiveLayerMap.LAYERS_SERIALIZED_AND_READY, onMapFromXMLReady);
+			
 			_loadingMapsCount++;
+			_initializingMapsCount++;
+			
 			iw.interactiveLayerMap.serialize(storage);
 		}
 

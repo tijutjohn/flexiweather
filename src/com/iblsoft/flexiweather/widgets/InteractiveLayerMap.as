@@ -1736,7 +1736,7 @@ package com.iblsoft.flexiweather.widgets
 			//we need to remember old frame and synchronize frame after RUN is synchronized
 			var oldFrame: Date = frame;
 			
-			trace(this + " SET RUN: " + newRun);
+			trace(this + " SET RUN: " + newRun + " OLD FRAME: " + oldFrame);
 			
 			var bGlobalSynchronization: Boolean = false;
 			for each (var l: InteractiveLayer in m_layers)
@@ -1847,12 +1847,12 @@ package com.iblsoft.flexiweather.widgets
 		
 		public function setFrame(newFrame: Date, b_nearrest: Boolean = true, bGlobalValueChange: Boolean = true): Boolean
 		{
-			trace(this + " setFrame 1: " + newFrame);
+			trace(this + " SET FRAME 1: " + newFrame);
 			
 			if (bGlobalValueChange)
 				_globalVariablesManager.frame = newFrame;
 			
-			trace(this + " setFrame 2: " + newFrame);
+			trace(this + "SET FRAME 2: " + newFrame);
 			
 			for each (var l: InteractiveLayer in m_layers)
 			{
@@ -1872,12 +1872,32 @@ package com.iblsoft.flexiweather.widgets
 				}
 				else
 				{
+					if (l is InteractiveLayerMSBase)
+					{
+						var msBaseLayer: InteractiveLayerMSBase = l as InteractiveLayerMSBase;
+						if (msBaseLayer.isPrimaryLayer())
+						{
+							/**
+							 * primary layer has not FRAME for synchronizatio, new FRAME musct be found and call setFrame method again.
+							 * Because primary layer need to have always FRAME set.
+							 */ 
+							var closestFrame: Date = getClosestFrame(msBaseLayer, newFrame);
+							setFrame(closestFrame);
+							dispatchEvent(new Event(FRAME_VARIABLE_CHANGED));
+							return false;
+						}
+					}
 					debug(this + " setFrame [" + newFrame.toTimeString() + "] FRAME NOT FOUND for " + l.name);
 				}
 			}
 			return true;
 		}
 
+		private function getClosestFrame(l: InteractiveLayerMSBase, requiredFrame: Date): Date
+		{
+			return l.getSynchronisedVariableClosetsValue(GlobalVariable.FRAME, requiredFrame) as Date; 
+		}
+		
 		// helper methods        
 		override protected function bindSubLayer(l: InteractiveLayer): void
 		{

@@ -1582,6 +1582,15 @@ package com.iblsoft.flexiweather.ogc
 			return false;
 		}
 
+		public function getSynchronisedVariableClosetsValue(s_variableId: String, requiredValue: Object, direction: String = "next"): Object
+		{
+			if (status == InteractiveDataLayer.STATE_DATA_LOADED_WITH_ERRORS)
+				return null;
+			if (m_currentWMSViewProperties)
+				return m_currentWMSViewProperties.getSynchronisedVariableClosetsValue(s_variableId, requiredValue, direction);
+			return null;
+			
+		}
 		public function getSynchronisedVariableValue(s_variableId: String): Object
 		{
 			if (status == InteractiveDataLayer.STATE_DATA_LOADED_WITH_ERRORS || status == InteractiveDataLayer.STATE_NO_SYNCHRONISATION_DATA_AVAILABLE)

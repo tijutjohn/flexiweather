@@ -279,6 +279,26 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 			}
 			return null;
 		}
+		
+		public function getWMSDimensionClosestValue(s_dimName: String, direction: String = "next"): String
+		{
+			if (isSupportedDimension(s_dimName)) {
+				var s_dimNameLowerCase: String = s_dimName.toLowerCase();
+				for (var currDimName: String in md_dimensionValues)
+				{
+					var currDimNameLowerCase: String = currDimName.toLowerCase();
+					if (currDimNameLowerCase == s_dimNameLowerCase)
+						return md_dimensionValues[currDimName];
+				}
+			}
+			else
+			{
+				return getWMSDimensionDefaultValue(s_dimName);
+			}
+			return null;
+			
+		}
+		
 		public function getWMSDimensionValue(s_dimName: String,
 				b_returnDefault: Boolean = false): String
 		{
@@ -602,6 +622,43 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 			return false;
 		}
 
+		public function getSynchronisedVariableClosetsValue(s_variableId: String, requiredValue: Object, direction: String = "next"): Object
+		{
+			if (direction != "previous" && direction != "next")
+				direction == "next";
+			
+			
+			var runValue: String;
+			var run: Date;
+			
+			if (s_variableId == GlobalVariable.FRAME)
+			{
+				var requiredFrameTime: Number = (requiredValue as Date).time;
+
+				if ((m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null) || m_cfg.dimensionTimeName != null)
+				{
+					var bestFrameTime: Number = 0;
+					//TODO here is frame synchronisation done, if you want to change left and right time frame, you can set it here
+					var frames:Array =  getSynchronisedVariableValuesList(s_variableId);
+					for each (var frame: Date in frames)
+					{
+						var frameTime: Number = frame.time;
+						if (direction == 'next' && frame.time >= requiredFrameTime)
+						{
+							if (bestFrameTime == 0 || Math.abs(bestFrameTime - requiredFrameTime) > Math.abs(frameTime - requiredFrameTime))
+								bestFrameTime = frameTime;
+						} else if (direction == 'previous' && frame.time <= requiredFrameTime) {
+							if (bestFrameTime == 0 || Math.abs(bestFrameTime - requiredFrameTime) > Math.abs(frameTime - requiredFrameTime))
+								bestFrameTime = frameTime;
+						}
+					}
+					
+					return new Date(bestFrameTime);
+				}
+			}
+			return null;
+		}
+		
 		public function getSynchronisedVariableValue(s_variableId: String): Object
 		{
 			var runValue: String;
@@ -630,7 +687,10 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					var forecast: Duration = ISO8601Parser.stringToDuration(forecastValue);
 					
 					if (run != null && forecast != null)
+					{
+//						trace(this + "  getSynchronisedVariableValue RUN: " + run + " FORECAST: " + forecast.toHoursString() + " ["+parentLayer+"]");
 						return new Date(run.time + forecast.milisecondsTotal);
+					}
 					return null;
 				}
 			}
@@ -915,6 +975,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		{
 //			LoggingUtils.dispatchLogEvent(this, "WMSViewProperties: " + str);
 		}
+		
 		
 		public function synchroniseWith(s_variableId: String, value: Object): String
 		{
