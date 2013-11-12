@@ -861,6 +861,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 //			var _serializedMap: XMLStorage = new XMLStorage(mapXML);
 			iw.interactiveLayerMap.startMapLoading();
 			iw.interactiveLayerMap.addEventListener(InteractiveLayerMap.LAYERS_SERIALIZED_AND_READY, onMapFromXMLReady);
+			_loadingMapsCount++;
 			iw.interactiveLayerMap.serialize(storage);
 		}
 
