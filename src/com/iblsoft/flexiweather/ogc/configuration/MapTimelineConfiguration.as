@@ -39,9 +39,9 @@ package com.iblsoft.flexiweather.ogc.configuration
 		public static const ANIMATION_TYPE_USER_LABEL: String = 'User Defined';
 		
 		public static const DEFAULT_DURATION: int = 100;
-		public static const DEFAULT_DURATION_STEP: int = 100;
+		public static const DEFAULT_DURATION_STEP: int = 50;
 		public static const DEFAULT_DELAY: int = 700;
-		public static const DEFAULT_MIN_DURATION: int = 100;
+		public static const DEFAULT_MIN_DURATION: int = 50;
 		public static const DEFAULT_MAX_DURATION: int = 5000;
 		
 		private var _mapVisibleUnderTimeline: Boolean = true;

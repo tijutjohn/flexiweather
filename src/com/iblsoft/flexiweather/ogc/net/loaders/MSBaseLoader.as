@@ -41,6 +41,9 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 		private var m_wmsViewProperties: WMSViewProperties;
 		private var m_imagePart: ImagePart;
 
+		private var _delayedRequestArray: Array;
+		private var _delayedCachedRequestArray: Array;
+		
 		public function MSBaseLoader(layer: InteractiveLayerMSBase)
 		{
 			uid++;
@@ -50,6 +53,9 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 			m_loader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onDataLoaded);
 			m_loader.addEventListener(ProgressEvent.PROGRESS, onDataProgress);
 			m_loader.addEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onDataLoadFailed);
+			
+			_delayedRequestArray = [];
+			_delayedCachedRequestArray = [];
 		}
 
 		override public function toString(): String
@@ -210,7 +216,11 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 					jobName += "["+forecast+"]";
 				}
 				
-				_delayedRequestObject = {request: request, wmsViewProperties: wmsViewProperties, wmsCache: wmsCache, imagePart: imagePart, jobName: jobName};
+				if (_delayedRequestArray.length > 0)
+				{
+					trace("there is _delayedRequestObject still, which was not executed yet");
+				}
+				_delayedRequestArray.push({request: request, wmsViewProperties: wmsViewProperties, wmsCache: wmsCache, imagePart: imagePart, jobName: jobName});
 				m_layer.addEventListener(Event.ENTER_FRAME, startLoadingOnNextFrame);
 				
 			}
@@ -228,24 +238,40 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				onFinishedRequest(wmsViewProperties, null);
 				invalidateDynamicPart();
 				
-				_delayedRequestObject = {wmsViewProperties: wmsViewProperties};
+				if (_delayedCachedRequestArray.length > 0)
+				{
+					trace("there is _delayedCachedRequestObject still, which was not executed yet");
+				}
+				_delayedCachedRequestArray.push({wmsViewProperties: wmsViewProperties});
 				m_layer.addEventListener(Event.ENTER_FRAME, dispatchLoadingFinishedFromCacheOnNextFrame);
 				
 			}
 		}
 		
-		private var _delayedRequestObject: Object;
-		
 		private function dispatchLoadingFinishedFromCacheOnNextFrame(event: Event): void
 		{
 			m_layer.removeEventListener(Event.ENTER_FRAME, dispatchLoadingFinishedFromCacheOnNextFrame);
-			notifyLoadingFinishedFromCache({wmsViewProperties: _delayedRequestObject.wmsViewProperties});
+			if (_delayedCachedRequestArray)
+			{
+				while (_delayedCachedRequestArray.length > 0)
+				{
+					var cachedObject: Object = _delayedCachedRequestArray.shift();
+					notifyLoadingFinishedFromCache({wmsViewProperties: cachedObject.wmsViewProperties});
+				}
+			}
 		}
 		
 		private function startLoadingOnNextFrame(event: Event): void
 		{
 			m_layer.removeEventListener(Event.ENTER_FRAME, startLoadingOnNextFrame);
-			startLoading(_delayedRequestObject.request, _delayedRequestObject.wmsViewProperties, _delayedRequestObject.wmsCache, _delayedRequestObject.imagePart, _delayedRequestObject.jobName);
+			if (_delayedRequestArray)
+			{
+				while (_delayedRequestArray.length > 0)
+				{
+					var cachedObject: Object = _delayedRequestArray.shift();
+					startLoading(cachedObject.request, cachedObject.wmsViewProperties, cachedObject.wmsCache, cachedObject.imagePart, cachedObject.jobName);
+				}
+			}
 		}
 
 		private function startLoading(request: URLRequest, wmsViewProperties: WMSViewProperties, wmsCache: WMSCache, imagePart: ImagePart, jobName: String): void
