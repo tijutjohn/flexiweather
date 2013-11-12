@@ -1618,8 +1618,7 @@ package com.iblsoft.flexiweather.ogc
 					sSynchronizeWithResponse = viewProperties.synchroniseWith(s_variableId, s_value);
 					if (!SynchronisationResponse.wasSynchronised(sSynchronizeWithResponse))
 					{
-						setStatus(InteractiveDataLayer.STATE_NO_SYNCHRONISATION_DATA_AVAILABLE);
-						clear(graphics);
+						callLater(noSynchronisationDataAvailable, [graphics]);
 					}
 					else
 					{
@@ -1633,8 +1632,7 @@ package com.iblsoft.flexiweather.ogc
 				sSynchronizeWithResponse = m_currentWMSViewProperties.synchroniseWith(s_variableId, s_value);
 				if (!SynchronisationResponse.wasSynchronised(sSynchronizeWithResponse))
 				{
-					setStatus(InteractiveDataLayer.STATE_NO_SYNCHRONISATION_DATA_AVAILABLE);
-					clear(graphics);
+					callLater(noSynchronisationDataAvailable, [graphics]);
 				}
 				else
 				{
@@ -1658,6 +1656,17 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 
+		/**
+		 * Update layer status and clear graphics, when layer has no data for current synchronized frame 
+		 * @param gr
+		 * 
+		 */		
+		private function noSynchronisationDataAvailable(gr: Graphics): void
+		{
+			setStatus(InteractiveDataLayer.STATE_NO_SYNCHRONISATION_DATA_AVAILABLE);
+			clear(graphics);
+		}
+			
 		protected function checkPostponedUpdateDataCall(): void
 		{
 //			debug("checkPostponedUpdateDataCall: _updateDataWaiting: " + _updateDataWaiting + " capabilitiesReady: " + capabilitiesReady);

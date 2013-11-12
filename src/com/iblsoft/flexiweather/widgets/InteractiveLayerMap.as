@@ -1854,9 +1854,11 @@ package com.iblsoft.flexiweather.widgets
 			
 			trace(this + "SET FRAME 2: " + newFrame);
 			
+			var layersForRefresh: Array = [];
+			var so: ISynchronisedObject;
 			for each (var l: InteractiveLayer in m_layers)
 			{
-				var so: ISynchronisedObject = l as ISynchronisedObject;
+				so = l as ISynchronisedObject;
 				if (so == null)
 					continue;
 				if (!so.hasSynchronisedVariable(GlobalVariable.FRAME))
@@ -1867,8 +1869,7 @@ package com.iblsoft.flexiweather.widgets
 				var bSynchronized: Boolean = SynchronisationResponse.wasSynchronised(so.synchroniseWith(GlobalVariable.FRAME, newFrame));
 				if (bSynchronized)
 				{
-//					l.refresh(false);
-					so.refreshForSynchronisation(false);
+					layersForRefresh.push(so);
 				}
 				else
 				{
@@ -1890,6 +1891,13 @@ package com.iblsoft.flexiweather.widgets
 					debug(this + " setFrame [" + newFrame.toTimeString() + "] FRAME NOT FOUND for " + l.name);
 				}
 			}
+			
+			for each (so in layersForRefresh)
+			{
+				so.refreshForSynchronisation(false);				
+			}
+			
+			
 			return true;
 		}
 
