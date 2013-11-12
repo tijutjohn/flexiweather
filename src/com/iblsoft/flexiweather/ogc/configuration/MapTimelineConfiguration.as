@@ -93,11 +93,14 @@ package com.iblsoft.flexiweather.ogc.configuration
 
 		public function set animationType(value:String):void
 		{
-			_animationType = value;
-			
-			var de: DynamicEvent = new DynamicEvent(TYPE_CHANGED);
-			de['value'] = _animationType;
-			dispatchEvent(de);
+			if (_animationType != value)
+			{
+				_animationType = value;
+				
+				var de: DynamicEvent = new DynamicEvent(TYPE_CHANGED);
+				de['value'] = _animationType;
+				dispatchEvent(de);
+			}
 		}
 
 		[Bindable (event=EXTENT_CHANGED)]
@@ -108,11 +111,14 @@ package com.iblsoft.flexiweather.ogc.configuration
 
 		public function set animationExtent(value:String):void
 		{
-			_animationExtent = value;
-			
-			var de: DynamicEvent = new DynamicEvent(EXTENT_CHANGED);
-			de['value'] = _animationExtent;
-			dispatchEvent(de);
+			if (_animationExtent != value)
+			{
+				_animationExtent = value;
+				
+				var de: DynamicEvent = new DynamicEvent(EXTENT_CHANGED);
+				de['value'] = _animationExtent;
+				dispatchEvent(de);
+			}
 		}
 		
 		[Bindable (event=EXTENT_CHANGED)]
@@ -123,11 +129,14 @@ package com.iblsoft.flexiweather.ogc.configuration
 
 		public function set animationUserLeftLimit(value: Date):void
 		{
-			_animationUserLeftLimit = value;
-			
-			var de: DynamicEvent = new DynamicEvent(EXTENT_CHANGED);
-			de['value'] = _animationExtent;
-			dispatchEvent(de);
+			if (_animationUserLeftLimit != value)
+			{
+				_animationUserLeftLimit = value;
+				
+				var de: DynamicEvent = new DynamicEvent(EXTENT_CHANGED);
+				de['value'] = _animationExtent;
+				dispatchEvent(de);
+			}
 		}
 		
 		[Bindable (event=EXTENT_CHANGED)]
@@ -138,11 +147,14 @@ package com.iblsoft.flexiweather.ogc.configuration
 
 		public function set animationUserRightLimit(value:Date):void
 		{
-			_animationUserRightLimit = value;
-			
-			var de: DynamicEvent = new DynamicEvent(EXTENT_CHANGED);
-			de['value'] = _animationExtent;
-			dispatchEvent(de);
+			if (_animationUserRightLimit != value)
+			{
+				_animationUserRightLimit = value;
+				
+				var de: DynamicEvent = new DynamicEvent(EXTENT_CHANGED);
+				de['value'] = _animationExtent;
+				dispatchEvent(de);
+			}
 		}
 
 		[Bindable (event=DIRECTION_CHANGED)]
@@ -153,11 +165,14 @@ package com.iblsoft.flexiweather.ogc.configuration
 
 		public function set animationDirection(value:String):void
 		{
-			_animationDirection = value;
-			
-			var de: DynamicEvent = new DynamicEvent(DIRECTION_CHANGED);
-			de['value'] = _animationDirection;
-			dispatchEvent(de);
+			if (_animationDirection != value)
+			{
+				_animationDirection = value;
+				
+				var de: DynamicEvent = new DynamicEvent(DIRECTION_CHANGED);
+				de['value'] = _animationDirection;
+				dispatchEvent(de);
+			}
 		}
 
 		[Bindable (event=DELAY_CHANGED)]
@@ -168,11 +183,14 @@ package com.iblsoft.flexiweather.ogc.configuration
 
 		public function set delay(value:int):void
 		{
-			_delay = value;
-			
-			var de: DynamicEvent = new DynamicEvent(DELAY_CHANGED);
-			de['delay'] = _delay;
-			dispatchEvent(de);
+			if (_delay != value)
+			{
+				_delay = value;
+				
+				var de: DynamicEvent = new DynamicEvent(DELAY_CHANGED);
+				de['delay'] = _delay;
+				dispatchEvent(de);
+			}
 		}
 		
 		[Bindable (event=DURATION_CHANGED)]
@@ -183,12 +201,16 @@ package com.iblsoft.flexiweather.ogc.configuration
 
 		public function set duration(value:int):void
 		{
-			_duration = value;
 			
-			var de: DynamicEvent = new DynamicEvent(DURATION_CHANGED);
-			de['value'] = _duration;
-			de['step'] = _durationStep;
-			dispatchEvent(de);
+			if (_duration)
+			{
+				_duration = value;
+				
+				var de: DynamicEvent = new DynamicEvent(DURATION_CHANGED);
+				de['value'] = _duration;
+				de['step'] = _durationStep;
+				dispatchEvent(de);
+			}
 		}
 		
 		[Bindable (event=DURATION_CHANGED)]
@@ -199,12 +221,15 @@ package com.iblsoft.flexiweather.ogc.configuration
 
 		public function set durationStep(value:int):void
 		{
-			_durationStep = value;
-			
-			var de: DynamicEvent = new DynamicEvent(DURATION_CHANGED);
-			de['value'] = _duration;
-			de['step'] = _durationStep;
-			dispatchEvent(de);
+			if (_durationStep != value)
+			{
+				_durationStep = value;
+				
+				var de: DynamicEvent = new DynamicEvent(DURATION_CHANGED);
+				de['value'] = _duration;
+				de['step'] = _durationStep;
+				dispatchEvent(de);
+			}
 		}
 
 		public function get mapVisibleUnderTimeline(): Boolean
@@ -267,6 +292,18 @@ package com.iblsoft.flexiweather.ogc.configuration
 			animationExtent = 'PT6H';
 			duration = 100;
 			delay = 700;
+		}
+		
+		public function copyConfiguration(timelineConfiguration: MapTimelineConfiguration): void
+		{
+			timelineConfiguration.animationDirection = _animationDirection;
+			timelineConfiguration.animationExtent = _animationExtent;
+			timelineConfiguration.animationType = _animationType;
+			timelineConfiguration.animationUserLeftLimit = _animationUserLeftLimit;
+			timelineConfiguration.animationUserRightLimit = _animationUserRightLimit;
+			timelineConfiguration.delay = _delay;
+			timelineConfiguration.duration = _duration;
+			timelineConfiguration.durationStep =_durationStep;
 		}
 	}
 }

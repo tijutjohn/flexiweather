@@ -1170,10 +1170,10 @@ package com.iblsoft.flexiweather.ogc.multiview
 				}
 				
 				imvce.newInteractiveWidget = _selectedInteractiveWidget;
-				dispatchEvent(imvce);
 				
-				dispatchEvent(new FlexEvent(FlexEvent.SELECTION_CHANGE));
 				dispatchEvent(new Event("interactiveLayerMapChanged"));
+				dispatchEvent(imvce);
+				dispatchEvent(new FlexEvent(FlexEvent.SELECTION_CHANGE));
 				invalidateDisplayList();
 			}
 		}
@@ -1265,6 +1265,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 						changeCause == SynchronizationChangeType.SYNCHRONIZE_LEVEL_CHANGED ||
 						changeCause == SynchronizationChangeType.SYNCHRONIZE_RUN_CHANGED ||
 						changeCause == SynchronizationChangeType.RUN_CHANGED ||
+						changeCause == SynchronizationChangeType.ANIMATOR_SETTINGS_CHANGED ||
 						changeCause == SynchronizationChangeType.LEVEL_CHANGED)
 					{
 						if (!synchronizator.isSynchronisingChangeType(changeCause))

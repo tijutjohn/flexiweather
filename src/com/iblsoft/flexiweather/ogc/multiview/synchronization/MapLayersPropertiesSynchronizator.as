@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.ogc.multiview.synchronization
 {
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
+	import com.iblsoft.flexiweather.ogc.configuration.MapTimelineConfiguration;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
@@ -20,6 +21,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			var widgetsForSynchronizing: Array = [];
 			
 			var ilm: InteractiveLayerMap = synchronizeFromWidget.interactiveLayerMap;
+			var ilmTimelineConfiguration: MapTimelineConfiguration = ilm.timelineConfiguration;
 			
 			var currLayerWmsConfig: WMSLayerConfiguration;
 			var synchLayerWmsConfig: WMSLayerConfiguration;
@@ -29,7 +31,11 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 				if (widget.id != synchronizeFromWidget.id)
 				{
 					var currILM: InteractiveLayerMap = widget.interactiveLayerMap;
+					var currILMTimelineConfiguration: MapTimelineConfiguration = currILM.timelineConfiguration;
 					
+					//synchronize animator setting
+					ilmTimelineConfiguration.copyConfiguration(currILMTimelineConfiguration);
+							
 					var totalLayers: int = widget.interactiveLayerMap.layers.length;
 					for (var i: int = 0; i < totalLayers; i++)
 					{

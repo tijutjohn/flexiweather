@@ -486,6 +486,11 @@ package com.iblsoft.flexiweather.widgets
 			notifyWidgetChanged(SynchronizationChangeType.MAP_LAYER_REMOVED, this);
 		}
 
+		private function onInteractiveLayerMapAnimatorSettingsChanged(event: Event): void
+		{
+			notifyWidgetChanged(SynchronizationChangeType.ANIMATOR_SETTINGS_CHANGED, event.target);
+		}
+		
 		private function onLayerChangedInInteractiveLayerMap(event: Event): void
 		{
 			if (event.type == SynchronisationEvent.START_GLOBAL_VARIABLE_SYNCHRONIZATION || event.type == SynchronisationEvent.STOP_GLOBAL_VARIABLE_SYNCHRONIZATION)
@@ -520,6 +525,7 @@ package com.iblsoft.flexiweather.widgets
 				ilm.addEventListener(InteractiveLayerWMSEvent.LEVEL_CHANGED, onLayerChangedInInteractiveLayerMap);
 				ilm.addEventListener(InteractiveLayerWMSEvent.RUN_CHANGED, onLayerChangedInInteractiveLayerMap);
 				
+				ilm.addEventListener(InteractiveLayerMap.TIMELINE_CONFIGURATION_CHANGE, onInteractiveLayerMapAnimatorSettingsChanged);
 				ilm.addEventListener(InteractiveLayerMap.TIME_AXIS_ADDED, onLayerInInteractiveLayerMapAdded);
 				ilm.addEventListener(InteractiveLayerMap.TIME_AXIS_REMOVED, onLayerInInteractiveLayerMapRemoved);
 			}
@@ -537,6 +543,7 @@ package com.iblsoft.flexiweather.widgets
 				ilm.removeEventListener(InteractiveLayerWMSEvent.LEVEL_CHANGED, onLayerChangedInInteractiveLayerMap);
 				ilm.removeEventListener(InteractiveLayerWMSEvent.RUN_CHANGED, onLayerChangedInInteractiveLayerMap);
 				
+				ilm.addEventListener(InteractiveLayerMap.TIMELINE_CONFIGURATION_CHANGE, onInteractiveLayerMapAnimatorSettingsChanged);
 				ilm.removeEventListener(InteractiveLayerMap.TIME_AXIS_ADDED, onLayerInInteractiveLayerMapAdded);
 				ilm.removeEventListener(InteractiveLayerMap.TIME_AXIS_REMOVED, onLayerInInteractiveLayerMapRemoved);
 			}

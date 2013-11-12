@@ -186,7 +186,9 @@ package com.iblsoft.flexiweather.ogc
 				return;
 			if (status != STATE_NO_SYNCHRONISATION_DATA_AVAILABLE)
 				super.updateData(b_forceUpdate);
-			
+			else {
+				trace(this + " updateData, status problem");
+			}
 			if (!visible)
 			{
 				m_autoRefreshTimer.reset();

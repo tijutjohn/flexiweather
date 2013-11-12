@@ -48,6 +48,11 @@ package com.iblsoft.flexiweather.ogc.multiview.data
 		 */		
 		public static const SYNCHRONIZE_RUN_CHANGED: String = 'synchronizeRunChanged';
 		
+		/**
+		 * Animator Settings are changed 
+		 */		
+		public static const ANIMATOR_SETTINGS_CHANGED: String = 'animatorSettingsChanged';
+		
 		public static const WMS_STYLE_CHANGED: String = 'wmsStyleChanged';
 		public static const MAP_CHANGED: String = 'mapChanged';
 		public static const MAP_LAYER_ADDED: String = 'mapLayerAdded';

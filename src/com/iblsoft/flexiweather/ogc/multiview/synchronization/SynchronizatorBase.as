@@ -31,7 +31,6 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		public function initializeSynchronizator(): void
 		{
 			md_synchronisationDictionary = new Dictionary();
-			ma_supportedChangeTypes
 		}
 	
 		public function invalidateSynchronizator():void

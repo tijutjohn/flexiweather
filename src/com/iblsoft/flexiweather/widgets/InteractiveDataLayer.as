@@ -237,6 +237,21 @@ package com.iblsoft.flexiweather.widgets
 		 ****************************************************************************************************************/
 		protected function setStatus(newStatus: String): void
 		{
+			var a: String;
+			if (newStatus == STATE_NO_SYNCHRONISATION_DATA_AVAILABLE)
+			{
+				a = STATE_NO_SYNCHRONISATION_DATA_AVAILABLE
+			}
+			if (newStatus == STATE_LOADING_DATA)
+			{
+				a = STATE_LOADING_DATA
+			}
+			if (newStatus == STATE_DATA_LOADED)
+			{
+				a = STATE_DATA_LOADED
+			}
+			
+			trace("\t\tLayer status = " + newStatus + " for ["+this+"] ");
 			_status = newStatus;
 			dispatchEvent(new Event(STATUS_CHANGED));
 		}

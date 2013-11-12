@@ -60,6 +60,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			registerChangeType(SynchronizationChangeType.VISIBILITY_CHANGED);
 			registerChangeType(SynchronizationChangeType.SYNCHRONIZE_RUN_CHANGED);
 			registerChangeType(SynchronizationChangeType.SYNCHRONIZE_LEVEL_CHANGED);
+			registerChangeType(SynchronizationChangeType.ANIMATOR_SETTINGS_CHANGED);
 		}
 		
 		override public function updateMapAction(iw: InteractiveWidget, position: int, configuration: MultiViewConfiguration): void
