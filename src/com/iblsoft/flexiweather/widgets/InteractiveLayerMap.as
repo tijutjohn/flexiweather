@@ -187,9 +187,19 @@ package com.iblsoft.flexiweather.widgets
 
 		public function set timelineConfiguration(value: MapTimelineConfiguration): void
 		{
-			m_timelineConfiguration = value;
-			m_timelineConfigurationChanged = true;
-			dispatchEvent(new Event(TIMELINE_CONFIGURATION_CHANGE));
+			if (m_timelineConfiguration != value)
+			{
+				if (m_timelineConfiguration)
+					m_timelineConfiguration.removeEventListener(Event.CHANGE, onTimelineConfigurationChange);
+				
+				m_timelineConfiguration = value;
+				m_timelineConfigurationChanged = true;
+				
+				if (m_timelineConfiguration)
+					m_timelineConfiguration.addEventListener(Event.CHANGE, onTimelineConfigurationChange);
+				
+				notifyTimelineConfigurationChanged();
+			}
 		}
 		private var _globalVariablesManager: GlobalVariablesManager;
 
@@ -1847,12 +1857,12 @@ package com.iblsoft.flexiweather.widgets
 		
 		public function setFrame(newFrame: Date, b_nearrest: Boolean = true, bGlobalValueChange: Boolean = true): Boolean
 		{
-			trace(this + " SET FRAME 1: " + newFrame);
+//			trace(this + " SET FRAME 1: " + newFrame);
 			
 			if (bGlobalValueChange)
 				_globalVariablesManager.frame = newFrame;
 			
-			trace(this + "SET FRAME 2: " + newFrame);
+//			trace(this + "SET FRAME 2: " + newFrame);
 			
 			var layersForRefresh: Array = [];
 			var so: ISynchronisedObject;
@@ -2088,6 +2098,15 @@ package com.iblsoft.flexiweather.widgets
 		private function notifyMapChanged(): void
 		{
 			dispatchEvent(new Event(MAP_CHANGED));
+		}
+		private function notifyTimelineConfigurationChanged(): void
+		{
+			dispatchEvent(new Event(TIMELINE_CONFIGURATION_CHANGE));
+		}
+		
+		private function onTimelineConfigurationChange(event: Event): void
+		{
+			notifyTimelineConfigurationChanged();
 		}
 	}
 }

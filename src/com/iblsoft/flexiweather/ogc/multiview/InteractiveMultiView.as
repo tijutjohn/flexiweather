@@ -1973,6 +1973,10 @@ package com.iblsoft.flexiweather.ogc.multiview
 				if (_configuration && _configuration.customData && _configuration.customData.hasOwnProperty('selectedIndex'))
 					selectedIndex = _configuration.customData.selectedIndex;
 				
+				var position: int = _interactiveWidgets.getWidgetIndex(selectedInteractiveWidget);
+				if (position > -1)
+					selectedIndex = position;
+				
 				//stop listening to changes and start after synchronization is done
 				if (bWaitForSynchronizationFinish)
 				{

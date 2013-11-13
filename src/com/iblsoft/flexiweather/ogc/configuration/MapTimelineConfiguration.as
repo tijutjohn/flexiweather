@@ -100,6 +100,8 @@ package com.iblsoft.flexiweather.ogc.configuration
 				var de: DynamicEvent = new DynamicEvent(TYPE_CHANGED);
 				de['value'] = _animationType;
 				dispatchEvent(de);
+				
+				notifyConfigurationIsChanged();
 			}
 		}
 
@@ -118,6 +120,8 @@ package com.iblsoft.flexiweather.ogc.configuration
 				var de: DynamicEvent = new DynamicEvent(EXTENT_CHANGED);
 				de['value'] = _animationExtent;
 				dispatchEvent(de);
+
+				notifyConfigurationIsChanged();
 			}
 		}
 		
@@ -136,6 +140,8 @@ package com.iblsoft.flexiweather.ogc.configuration
 				var de: DynamicEvent = new DynamicEvent(EXTENT_CHANGED);
 				de['value'] = _animationExtent;
 				dispatchEvent(de);
+
+				notifyConfigurationIsChanged();
 			}
 		}
 		
@@ -154,6 +160,8 @@ package com.iblsoft.flexiweather.ogc.configuration
 				var de: DynamicEvent = new DynamicEvent(EXTENT_CHANGED);
 				de['value'] = _animationExtent;
 				dispatchEvent(de);
+
+				notifyConfigurationIsChanged();
 			}
 		}
 
@@ -172,6 +180,8 @@ package com.iblsoft.flexiweather.ogc.configuration
 				var de: DynamicEvent = new DynamicEvent(DIRECTION_CHANGED);
 				de['value'] = _animationDirection;
 				dispatchEvent(de);
+
+				notifyConfigurationIsChanged();
 			}
 		}
 
@@ -190,6 +200,8 @@ package com.iblsoft.flexiweather.ogc.configuration
 				var de: DynamicEvent = new DynamicEvent(DELAY_CHANGED);
 				de['delay'] = _delay;
 				dispatchEvent(de);
+
+				notifyConfigurationIsChanged();
 			}
 		}
 		
@@ -210,6 +222,8 @@ package com.iblsoft.flexiweather.ogc.configuration
 				de['value'] = _duration;
 				de['step'] = _durationStep;
 				dispatchEvent(de);
+
+				notifyConfigurationIsChanged();
 			}
 		}
 		
@@ -229,6 +243,8 @@ package com.iblsoft.flexiweather.ogc.configuration
 				de['value'] = _duration;
 				de['step'] = _durationStep;
 				dispatchEvent(de);
+
+				notifyConfigurationIsChanged();
 			}
 		}
 
@@ -293,7 +309,11 @@ package com.iblsoft.flexiweather.ogc.configuration
 			duration = 100;
 			delay = 700;
 		}
-		
+
+		private function notifyConfigurationIsChanged(): void
+		{
+			dispatchEvent(new Event(Event.CHANGE));
+		}
 		public function copyConfiguration(timelineConfiguration: MapTimelineConfiguration): void
 		{
 			timelineConfiguration.animationDirection = _animationDirection;

@@ -251,7 +251,7 @@ package com.iblsoft.flexiweather.widgets
 				a = STATE_DATA_LOADED
 			}
 			
-			trace("\t\tLayer status = " + newStatus + " for ["+this+"] ");
+//			trace("\t\tLayer status = " + newStatus + " for ["+this+"] ");
 			_status = newStatus;
 			dispatchEvent(new Event(STATUS_CHANGED));
 		}
