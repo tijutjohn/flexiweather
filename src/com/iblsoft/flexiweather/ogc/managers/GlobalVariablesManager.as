@@ -279,22 +279,13 @@ package com.iblsoft.flexiweather.ogc.managers
 			if (_interactiveLayerMap)
 			{
 				var _layerRuns: Array = _interactiveLayerMap.getRuns();
-//				for each (var layer: InteractiveLayer in _interactiveLayerMap.layers)
-//				{
-//					if (layer is InteractiveLayerMSBase)
-//					{
-//						var layerMSBase: InteractiveLayerMSBase = layer as InteractiveLayerMSBase;
-//						if (layerMSBase.synchroniseRun)
-//						{
-//							var _layerRunsNew: Array = layerMSBase.getSynchronisedVariableValuesList(GlobalVariable.RUN);
-//							ArrayUtils.unionArrays(_layerRuns, _layerRunsNew, equalsByGlobalRUN);
-//						}
-//					}
-//				}
 				var tempArr: Array = [];
-				for each (var globalLevelVariable: GlobalVariableValue in _layerRuns)
+				for each (var runVariable: Object in _layerRuns)
 				{
-					tempArr.push(globalLevelVariable.data as Date);
+					if (runVariable is GlobalVariableValue)
+						tempArr.push(runVariable.data as Date);
+					if (runVariable is Date)
+						tempArr.push(runVariable as Date);
 				}
 				_runs = new ArrayCollection(tempArr);
 				_runs.refresh();
@@ -320,18 +311,6 @@ package com.iblsoft.flexiweather.ogc.managers
 			if (_interactiveLayerMap)
 			{
 				var _layerLevels: Array = _interactiveLayerMap.getLevels();
-//				for each (var layer: InteractiveLayer in _interactiveLayerMap.layers)
-//				{
-//					if (layer is InteractiveLayerMSBase)
-//					{
-//						var layerMSBase: InteractiveLayerMSBase = layer as InteractiveLayerMSBase;
-//						if (layerMSBase.synchroniseLevel)
-//						{
-//							var _layerLevelsNew: Array = layerMSBase.getSynchronisedVariableValuesList(GlobalVariable.LEVEL);
-//							ArrayUtils.unionArrays(_layerLevels, _layerLevelsNew);
-//						}
-//					}
-//				}
 				var tempArr: Array = [];
 				for each (var globalLevelVariable: GlobalVariableValue in _layerLevels)
 				{

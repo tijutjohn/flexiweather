@@ -741,37 +741,37 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 				{
 					//TODO check if getSynchronisedVariableValuesList RUN return everything correctly
 					var l_runs: Array = getWMSDimensionsValues(m_cfg.dimensionRunName);
-//					var l_resultRuns: Array = [];
-//					for each (var runObj: Object in l_runs)
-//					{
-//						if (runObj && (runObj.data is Date))
-//						{
-//							l_resultRuns.push(runObj.data);
-//						}
-//						else
-//						{
-//							trace("PROBLEM: InteractiveLayerMSBase getSynchronisedVariableValuesList run.data is not Number: " + runObj.data);
-//						}
-//					}
-//					
-//					//sort l_resultRuns by Date
-//					if (l_resultRuns && l_resultRuns.length > 0)
-//					{
-//						//sort Duration
-//						l_resultRuns.sort(sortDates);
-//					}
-					return l_runs;
+					var l_resultRuns: Array = [];
+					for each (var runObj: Object in l_runs)
+					{
+						if (runObj && (runObj.data is Date))
+						{
+							l_resultRuns.push(runObj.data);
+						}
+						else
+						{
+							trace("PROBLEM: InteractiveLayerMSBase getSynchronisedVariableValuesList run.data is not Number: " + runObj.data);
+						}
+					}
+					
+					//sort l_resultRuns by Date
+					if (l_resultRuns && l_resultRuns.length > 0)
+					{
+						//sort Duration
+						l_resultRuns.sort(sortDates);
+					}
+					return l_resultRuns;
 				}
 				else
 					return [];
 			}
 			else if (s_variableId == GlobalVariable.FRAME)
 			{
+				var l_resultTimes: Array = [];
+				var l_resultTimes2: Array = [];
 				if (m_cfg.dimensionTimeName != null)
 				{
 					var l_times: Array = getWMSDimensionsValues(m_cfg.dimensionTimeName);
-					var l_resultTimes: Array = [];
-					var l_resultTimes2: Array = [];
 					for each (var time: Object in l_times)
 					{
 						if (time.data is Date)
@@ -784,19 +784,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 							trace("PROBLEM: InteractiveLayerMSBase getSynchronisedVariableValuesList time.data is not Date: " + time.data);
 						}
 					}
-					//sort forecast by Date
-					if (l_resultTimes2 && l_resultTimes2.length > 0)
-					{
-						//sort Duration
-//						l_resultTimes.sort(sortDates);
-						l_resultTimes2.sort(sortTimes);
-						
-						for each (var sortedTime: Number in l_resultTimes2)
-						{
-							l_resultTimes.push(new Date(sortedTime));
-						}
-					}
-					return l_resultTimes;
+					
 					
 				}
 				else if (m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null)
@@ -805,28 +793,34 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					if (run == null)
 						return [];
 					var l_forecasts: Array = getWMSDimensionsValues(m_cfg.dimensionForecastName);
-					var l_resultForecasts: Array = [];
 					for each (var forecast: Object in l_forecasts)
 					{
 						if (forecast && (forecast.data is Duration))
 						{
-							l_resultForecasts.push(new Date(run.time + Duration(forecast.data).milisecondsTotal));
+							l_resultTimes2.push(new Date(run.time + Duration(forecast.data).milisecondsTotal));
 						}
 						else
 						{
 							trace("PROBLEM: InteractiveLayerMSBase getSynchronisedVariableValuesList forecast.data is not Number: " + forecast.data);
 						}
 					}
-					//sort forecast by Duration
-					if (l_forecasts && l_forecasts.length > 0)
-					{
-						//sort Duration
-						l_forecasts.sort(sortDurations);
-					}
-					return l_resultForecasts;
 				}
 				else
 					return [];
+				
+				//sort forecast by Date
+				if (l_resultTimes2 && l_resultTimes2.length > 0)
+				{
+					//sort Duration
+					//						l_resultTimes.sort(sortDates);
+					l_resultTimes2.sort(sortTimes);
+					
+					for each (var sortedTime: Number in l_resultTimes2)
+					{
+						l_resultTimes.push(new Date(sortedTime));
+					}
+				}
+				return l_resultTimes;
 			}
 			return null;
 		}
@@ -1024,7 +1018,8 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					var bestRun: Date = null;
 					var requiredRun: Number = (value as Date).time;
 					//TODO here is frame synchronisation done, if you want to change left and right time frame, you can set it here
-					for each (var run: Date in getSynchronisedVariableValuesList(s_variableId))
+					var synchronisedVariableValues: Array = getSynchronisedVariableValuesList(s_variableId)
+					for each (var run: Date in synchronisedVariableValues)
 					{
 						if (run.time >= requiredRun - leftDist && run.time <= requiredRun + rightDist)
 						{
