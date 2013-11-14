@@ -638,24 +638,31 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 			
 			if (s_variableId == GlobalVariable.FRAME)
 			{
-				var requiredFrameTime: Number = (requiredValue as Date).time;
+				var requiredFrameTime: Number = -1;
+				if (requiredValue)
+					requiredFrameTime = (requiredValue as Date).time;
 
 				if ((m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null) || m_cfg.dimensionTimeName != null)
 				{
 					var bestFrameTime: Number = 0;
 					//TODO here is frame synchronisation done, if you want to change left and right time frame, you can set it here
 					var frames:Array =  getSynchronisedVariableValuesList(s_variableId);
-					for each (var frame: Date in frames)
+					if (requiredFrameTime > -1)
 					{
-						var frameTime: Number = frame.time;
-						if (direction == 'next' && frame.time >= requiredFrameTime)
+						for each (var frame: Date in frames)
 						{
-							if (bestFrameTime == 0 || Math.abs(bestFrameTime - requiredFrameTime) > Math.abs(frameTime - requiredFrameTime))
-								bestFrameTime = frameTime;
-						} else if (direction == 'previous' && frame.time <= requiredFrameTime) {
-							if (bestFrameTime == 0 || Math.abs(bestFrameTime - requiredFrameTime) > Math.abs(frameTime - requiredFrameTime))
-								bestFrameTime = frameTime;
+							var frameTime: Number = frame.time;
+							if (direction == 'next' && frame.time >= requiredFrameTime)
+							{
+								if (bestFrameTime == 0 || Math.abs(bestFrameTime - requiredFrameTime) > Math.abs(frameTime - requiredFrameTime))
+									bestFrameTime = frameTime;
+							} else if (direction == 'previous' && frame.time <= requiredFrameTime) {
+								if (bestFrameTime == 0 || Math.abs(bestFrameTime - requiredFrameTime) > Math.abs(frameTime - requiredFrameTime))
+									bestFrameTime = frameTime;
+							}
 						}
+					} else {
+						return frames[0] as Date;
 					}
 					
 					return new Date(bestFrameTime);
@@ -978,6 +985,8 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		
 		public function synchroniseWith(s_variableId: String, value: Object): String
 		{
+			var exactSynchronisationResult: String = exactlySynchroniseWith(s_variableId, value);
+			
 			if (s_variableId == GlobalVariable.LEVEL)
 			{
 				var levelStr: String = value as String;
@@ -989,7 +998,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 				if (levelStr == currentLevel)
 					return SynchronisationResponse.ALREADY_SYNCHRONISED;
 				
-				if (!SynchronisationResponse.wasSynchronised( exactlySynchroniseWith(s_variableId, value)))
+				if (!SynchronisationResponse.wasSynchronised( exactSynchronisationResult ))
 				{
 					var a: Array = getSynchronisedVariableValuesList(s_variableId);
 					if (a)
@@ -1011,6 +1020,8 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					if (!bestLevel)
 						return SynchronisationResponse.SYNCHRONISATION_VALUE_NOT_FOUND;
 					return exactlySynchroniseWith(s_variableId, bestLevel);
+				} else {
+					return exactSynchronisationResult;
 				}
 			}
 			
@@ -1018,7 +1029,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 			var rightDist: Number = 1000 * 60 * FRAMES_SYNCHRONIZATION_RIGHT_TIME_FRAME;
 			if (s_variableId == GlobalVariable.RUN)
 			{
-				if (!SynchronisationResponse.wasSynchronised( exactlySynchroniseWith(s_variableId, value)))
+				if (!SynchronisationResponse.wasSynchronised( exactSynchronisationResult ))
 				{
 					var bestRun: Date = null;
 					var requiredRun: Number = (value as Date).time;
@@ -1035,12 +1046,15 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					if (bestRun == null)
 						return SynchronisationResponse.SYNCHRONISATION_VALUE_NOT_FOUND;
 					return exactlySynchroniseWith(s_variableId, bestRun);
+				} else {
+					return exactSynchronisationResult;
 				}
 			}
 			
 			if (s_variableId == GlobalVariable.FRAME)
 			{
-				if ( !SynchronisationResponse.wasSynchronised( exactlySynchroniseWith(s_variableId, value) ))
+//				var frameExactSynchro: String = exactlySynchroniseWith(s_variableId, value);
+				if ( !SynchronisationResponse.wasSynchronised( exactSynchronisationResult ))
 				{
 					var bestFrame: Date = null;
 					var requiredFrame: Number = (value as Date).time;
@@ -1056,9 +1070,11 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					if (bestFrame == null)
 						return SynchronisationResponse.SYNCHRONISATION_VALUE_NOT_FOUND;
 					return exactlySynchroniseWith(s_variableId, bestFrame);
+				} else {
+					return exactSynchronisationResult;
 				}
 			}
-			return exactlySynchroniseWith(s_variableId, value);
+			return exactSynchronisationResult;
 		}
 
 		private function dispatchSynchronizedVariableChangeEvent(event: SynchronisedVariableChangeEvent): void

@@ -231,7 +231,17 @@ package com.iblsoft.flexiweather.ogc.managers
 
 		private function onPrimaryLayerChanged(event: DataEvent): void
 		{
+			_lastFrameNotified = null;
+			_cachedFrames = null; 
 			checkGlobalVariableChange();
+			
+			notifyFramesChanged();
+			notifyLevelsChanged();
+			notifyRunsChanged();
+			
+			notifySelectedRunChanged(_interactiveLayerMap.run);
+			notifySelectedFrameChanged(_interactiveLayerMap.frame);
+			notifySelectedLevelChanged(_interactiveLayerMap.level);
 		}
 
 		private function onGlobalVariableSynchronisationChanged(event: SynchronisationEvent): void
@@ -409,7 +419,12 @@ package com.iblsoft.flexiweather.ogc.managers
 //				}
 				var selectedFrame: Date = _interactiveLayerMap.frame;
 				if (!selectedFrame)
-					return;
+				{
+					//TODO this selection can be done, only if primary layer is examined
+					selectedFrame = _interactiveLayerMap.primaryLayer.getSynchronisedVariableClosetsValue(GlobalVariable.FRAME, null) as Date;
+					if (!selectedFrame)
+						return;
+				}
 				
 				if (_lastFrameNotified && _lastFrameNotified.time == selectedFrame.time)
 				{
@@ -451,15 +466,6 @@ package com.iblsoft.flexiweather.ogc.managers
 		}
 		private var _lastFrameNotified: Date;
 
-		private function notifySelectedFrameChanged(selectedFrame: Date): void
-		{
-//			if (selectedFrame)
-//			{
-				_frame = selectedFrame;
-				var gvce: GlobalVariableChangeEvent = new GlobalVariableChangeEvent(GlobalVariableChangeEvent.DIMENSION_VALUE_CHANGED, GlobalVariable.FRAME, selectedFrame);
-				dispatchEvent(gvce);
-//			}
-		}
 
 		private function notifyFramesChanged(): void
 		{
@@ -473,8 +479,20 @@ package com.iblsoft.flexiweather.ogc.managers
 		{
 			dispatchEvent(new Event(LEVELS_CHANGED, true));
 		}
+		
+		private function notifySelectedFrameChanged(selectedFrame: Date): void
+		{
+//			if (selectedFrame)
+//			{
+				trace("notifySelectedFrameChanged: " + selectedFrame);
+				_frame = selectedFrame;
+				var gvce: GlobalVariableChangeEvent = new GlobalVariableChangeEvent(GlobalVariableChangeEvent.DIMENSION_VALUE_CHANGED, GlobalVariable.FRAME, selectedFrame);
+				dispatchEvent(gvce);
+//			}
+		}
 		private function notifySelectedRunChanged(selectedRun: Date): void
 		{
+			trace("notifySelectedRunChanged: " + selectedRun);
 			_run = selectedRun;
 			var gvce: GlobalVariableChangeEvent = new GlobalVariableChangeEvent(GlobalVariableChangeEvent.DIMENSION_VALUE_CHANGED, GlobalVariable.RUN, selectedRun);
 			dispatchEvent(gvce);

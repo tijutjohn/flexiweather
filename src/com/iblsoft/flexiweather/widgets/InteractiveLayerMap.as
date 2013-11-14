@@ -142,7 +142,7 @@ package com.iblsoft.flexiweather.widgets
 		public function set dateFormat(value: String): void
 		{
 			_dateFormat = value;
-			dispatchEvent(new Event(FRAME_VARIABLE_CHANGED));
+			notifyFrameVariableChanged();
 		}
 
 		[Bindable(event = RUN_VARIABLE_CHANGED)]
@@ -536,7 +536,7 @@ package com.iblsoft.flexiweather.widgets
 			var wrappers: ArrayCollection;
 			var wrapper: LayerSerializationWrapper;
 			var layer: InteractiveLayer;
-			debug("InteractiveLayerMap [IW: " + container.id + "] serialize loading: " + storage.isLoading());
+//			debug("InteractiveLayerMap [IW: " + container.id + "] serialize loading: " + storage.isLoading());
 			LayerSerializationWrapper.m_iw = container;
 			LayerSerializationWrapper.map = this;
 			var globalLevel: String;
@@ -620,7 +620,7 @@ package com.iblsoft.flexiweather.widgets
 					storage.serializeInt('selected-layer-index', m_selectedLayerIndex);
 				}
 				
-				debug("Map serialize: " + (storage as XMLStorage).xml);
+//				debug("Map serialize: " + (storage as XMLStorage).xml);
 			}
 		}
 		private var _frameInvalidated: Boolean;
@@ -747,7 +747,11 @@ package com.iblsoft.flexiweather.widgets
 		{
 			var layerSynchronized: InteractiveLayerMSBase = event.target as InteractiveLayerMSBase;
 			if (layerSynchronized && layerSynchronized != primaryLayer)
+			{
+				//if synchronization was done in non Primary Layer, dispatch InteractiveLayerMap.TIME_AXIS_UPDATED event to updated selection
+				dispatchEvent(new DataEvent(InteractiveLayerMap.TIME_AXIS_UPDATED));
 				return;
+			}
 			
 //			trace("ILM onSynchronisedVariableChanged: " + event.variableId);
 			invalidateEnumTimeAxis();
@@ -756,18 +760,30 @@ package com.iblsoft.flexiweather.widgets
 			{
 //				resynchronizeOnStart(event);
 				periodicCheck();
-				dispatchEvent(new Event(FRAME_VARIABLE_CHANGED));
+				notifyFrameVariableChanged();
 			}
 			if (event.variableId == GlobalVariable.LEVEL)
-				dispatchEvent(new Event(LEVEL_VARIABLE_CHANGED));
+				notifyLevelVariableChanged();
 			
 			if (event.variableId == GlobalVariable.RUN)
 			{
 				periodicCheck();
-				dispatchEvent(new Event(RUN_VARIABLE_CHANGED));
+				notifyRunVariableChanged();
 			}
 		}
 
+		private function notifyRunVariableChanged(): void
+		{
+			dispatchEvent(new Event(RUN_VARIABLE_CHANGED));
+		}
+		private function notifyFrameVariableChanged(): void
+		{
+			dispatchEvent(new Event(FRAME_VARIABLE_CHANGED));
+		}
+		private function notifyLevelVariableChanged(): void
+		{
+			dispatchEvent(new Event(LEVEL_VARIABLE_CHANGED));
+		}
 		protected function onSynchronisedVariableDomainChanged(event: SynchronisedVariableChangeEvent): void
 		{
 //			trace("ILM onSynchronisedVariableDomainChanged: " + event.variableId);
@@ -778,16 +794,16 @@ package com.iblsoft.flexiweather.widgets
 				notifyTimeAxisUpdate();
 				resynchronizeOnStart(event);
 				periodicCheck();
-				dispatchEvent(new Event(FRAME_VARIABLE_CHANGED));
+				notifyFrameVariableChanged();
 			}
 			if (event.variableId == GlobalVariable.LEVEL)
-				dispatchEvent(new Event(LEVEL_VARIABLE_CHANGED));
+				notifyLevelVariableChanged();
 			
 			if (event.variableId == GlobalVariable.RUN)
 			{
 				notifyTimeAxisUpdate();
 				periodicCheck();
-				dispatchEvent(new Event(RUN_VARIABLE_CHANGED));
+				notifyRunVariableChanged();
 			}
 		}
 
@@ -809,7 +825,10 @@ package com.iblsoft.flexiweather.widgets
 				_frameInvalidated = false;
 				//it will set frame again. This is done by purpose when adding new layer, to synchronise frame with newly added layer
 				if (frame)
+				{
 					setFrame(frame);
+					notifyFrameVariableChanged();
+				}
 			}
 			if (_runInvalidated)
 			{
@@ -817,6 +836,7 @@ package com.iblsoft.flexiweather.widgets
 				
 				//it will set run again. This is done by purpose when adding new layer, to synchronise level with newly added layer
 				setRun(_globalVariablesManager.run);
+				notifyRunVariableChanged();
 			}
 			if (_levelInvalidated)
 			{
@@ -824,6 +844,7 @@ package com.iblsoft.flexiweather.widgets
 				
 				//it will set level again. This is done by purpose when adding new layer, to synchronise level with newly added layer
 				setLevel(_globalVariablesManager.level);
+				notifyLevelVariableChanged();
 			}
 			
 			if (m_selectedLayerIndexChanged)
@@ -1251,7 +1272,14 @@ package com.iblsoft.flexiweather.widgets
 		 */
 		private function primaryLayerHasChanged(): void
 		{
+			invalidateEnumTimeAxis();
+			
+			invalidateRun();
+			invalidateFrame();
+			invalidateLevel();
+			
 			dispatchEvent(new DataEvent(PRIMARY_LAYER_CHANGED, true));
+			
 			notifyMapChanged();
 		}
 
@@ -1894,7 +1922,7 @@ package com.iblsoft.flexiweather.widgets
 							 */ 
 							var closestFrame: Date = getClosestFrame(msBaseLayer, newFrame);
 							setFrame(closestFrame);
-							dispatchEvent(new Event(FRAME_VARIABLE_CHANGED));
+							notifyFrameVariableChanged();
 							return false;
 						}
 					}
