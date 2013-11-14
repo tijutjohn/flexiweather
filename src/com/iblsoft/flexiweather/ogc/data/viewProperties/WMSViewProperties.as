@@ -29,6 +29,11 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 	
 	import mx.collections.ArrayCollection;
 
+	/**
+	 * Dispatched when WMS Dimension (RUN, FORECAST, ELEVATION) is set 
+	 */	
+	[Event(name = "wmsDimensionValueSet", type = "com.iblsoft.flexiweather.events.WMSViewPropertiesEvent")]
+	
 	public class WMSViewProperties extends EventDispatcher implements IViewProperties, Serializable
 	{
 		

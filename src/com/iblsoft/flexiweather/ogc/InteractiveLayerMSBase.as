@@ -77,6 +77,13 @@ package com.iblsoft.flexiweather.ogc
 	import spark.components.Group;
 
 	[Event(name = "wmsStyleChanged", type = "com.iblsoft.flexiweather.events.InteractiveLayerWMSEvent")]
+
+	/**
+	 * Dispatched when WMS Dimension (RUN, FORECAST, ELEVATION) is set 
+	 */	
+	[Event(name = "wmsDimensionValueSet", type = "com.iblsoft.flexiweather.events.WMSViewPropertiesEvent")]
+	
+	
 	/**
 	 * Common base class for WMS type layers
 	 *

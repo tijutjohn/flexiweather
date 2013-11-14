@@ -4,7 +4,7 @@ package com.iblsoft.flexiweather.events
 
 	public class WMSViewPropertiesEvent extends Event
 	{
-		public static var WMS_DIMENSION_VALUE_SET: String = 'wmsDimenstionValueSet';
+		public static var WMS_DIMENSION_VALUE_SET: String = 'wmsDimensionValueSet';
 		public var dimension: String;
 		public var value: String;
 
