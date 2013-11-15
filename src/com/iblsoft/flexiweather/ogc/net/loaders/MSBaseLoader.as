@@ -341,7 +341,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 			if (imageParts)
 			{
 				// found in the cache
-				imagePart.m_image = img;
+				imagePart.image = img;
 				imagePart.mb_imageOK = true;
 				imagePart.ms_cacheKey = cacheKey;
 				
@@ -398,7 +398,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 					imagePart.mi_updateCycleAge = mi_updateCycleAge;
 					addImagePart(wmsViewProperties, imagePart, result, key);
 					wmsViewProperties.url = event.request;
-					wmsCache.addCacheItem(imagePart.m_image, wmsViewProperties, event.associatedData);
+					wmsCache.addCacheItem(imagePart.image, wmsViewProperties, event.associatedData);
 					invalidateDynamicPart();
 				}
 				else
@@ -478,7 +478,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 					}
 				}
 				var imagePart: ImagePart = event.associatedData.requestedImagePart;
-				imagePart.m_image = null;
+				imagePart.image = null;
 				imagePart.mb_imageOK = false;
 				imagePart.ms_cacheKey = null;
 				invalidateDynamicPart();

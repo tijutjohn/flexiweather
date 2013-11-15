@@ -844,7 +844,7 @@ package com.iblsoft.flexiweather.ogc
 					var reflectedBBoxes: Array = container.mapBBoxToViewReflections(imagePart.m_imageBBox);
 					for each (var reflectedBBox: BBox in reflectedBBoxes)
 					{
-						drawImagePart(graphics, imagePart.m_image, imagePart.ms_imageCRS, reflectedBBox);
+						drawImagePart(graphics, imagePart.image, imagePart.ms_imageCRS, reflectedBBox);
 					}
 				}
 			}
@@ -884,7 +884,7 @@ package com.iblsoft.flexiweather.ogc
 			
 		}
 		
-		private function removeVectorData(): void
+		private function clearVectorData(): void
 		{
 			//remove previous instances
 			if (_vectorParent && _vectorParent.numChildren > 0)
@@ -905,9 +905,18 @@ package com.iblsoft.flexiweather.ogc
 						dispObject = null;
 					}
 					
-					removeChild(_vectorParent);
-					_vectorParent =  null;
 				}
+			}
+		}
+		private function removeVectorData(): void
+		{
+			//remove previous instances
+			if (_vectorParent && _vectorParent.numChildren > 0)
+			{
+				clearVectorData();
+				
+				removeChild(_vectorParent);
+				_vectorParent =  null;
 			}
 			
 		}
@@ -919,7 +928,7 @@ package com.iblsoft.flexiweather.ogc
 				addChild(_vectorParent);
 			}
 			
-//			removeVectorData();
+			clearVectorData();
 			
 			//clear bitmap data
 			clear(graphics);
@@ -1980,7 +1989,7 @@ package com.iblsoft.flexiweather.ogc
 				{
 					if (imagePart.isBitmap)
 					{
-						var currImage: DisplayObject = imagePart.m_image;
+						var currImage: DisplayObject = imagePart.image;
 						if (image == currImage)
 						{
 							//listen when same cache item will be added
@@ -2005,7 +2014,7 @@ package com.iblsoft.flexiweather.ogc
 					{
 						if (!imagePart.ms_cacheKey || imagePart.ms_cacheKey == cacheKey)
 						{
-							imagePart.m_image = event.item.image;
+							imagePart.image = event.item.image;
 							imagePart.mb_imageOK = true;
 							imagePart.ms_cacheKey = cacheKey;
 						}

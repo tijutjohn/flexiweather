@@ -242,7 +242,7 @@ package com.iblsoft.flexiweather.ogc
 				var matrix: Matrix = new Matrix();
 				imagePart = ImagePart(imageParts[0]);
 				if (imagePart.isBitmap)
-					var bitmap: Bitmap = imagePart.m_image as Bitmap;
+					var bitmap: Bitmap = imagePart.image as Bitmap;
 				else
 				{
 					trace("ATTENTION: renderPreviewWMSData image is not bitmap");

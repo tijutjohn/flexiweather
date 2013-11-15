@@ -10,11 +10,20 @@ package com.iblsoft.flexiweather.ogc.data
 	{
 		public var ms_cacheKey: String;
 		public var mi_updateCycleAge: uint;
-//		public var m_image: Bitmap = null;
-		public var m_image: DisplayObject = null;
+		private var m_image: DisplayObject = null;
 		public var mb_imageOK: Boolean = false;
 		public var ms_imageCRS: String = null;
 		public var m_imageBBox: BBox = null;
+
+		public function get image():DisplayObject
+		{
+			return m_image;
+		}
+
+		public function set image(value:DisplayObject):void
+		{
+			m_image = value;
+		}
 
 		public function get isBitmap(): Boolean
 		{
