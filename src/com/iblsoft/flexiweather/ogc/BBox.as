@@ -79,7 +79,9 @@ package com.iblsoft.flexiweather.ogc
 				return Number.MAX_VALUE;
 			var minLalo: Coord = prj.prjXYToLaLoCoord(mf_xMin, mf_yMin);
 			var maxLalo: Coord = prj.prjXYToLaLoCoord(mf_xMax, mf_yMax);
-			return minLalo.distanceTo(maxLalo);
+			if (minLalo)
+				return minLalo.distanceTo(maxLalo);
+			return 0;
 		}
 
 		public function coordInside(coord: Coord): Boolean
