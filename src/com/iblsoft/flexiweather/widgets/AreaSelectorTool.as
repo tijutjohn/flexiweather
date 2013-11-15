@@ -5,11 +5,13 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.configuration.ProjectionConfiguration;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
+	
 	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
+	
 	import mx.core.UIComponent;
 
 	public class AreaSelectorTool extends InteractiveLayer
@@ -78,6 +80,9 @@ package com.iblsoft.flexiweather.widgets
 				return false;
 //			if(!event.buttonDown)
 //				return false;
+			
+			systemManager.getSandboxRoot().addEventListener(MouseEvent.MOUSE_UP, onMouseUpOutside);
+			
 			if (_areaComponent.isResizing)
 			{
 				_areaComponent.mouseEnabled = false;
@@ -100,8 +105,14 @@ package com.iblsoft.flexiweather.widgets
 		}
 		private var _lastCreatedRectangle: CustomRectangle;
 
+		private function onMouseUpOutside(event: MouseEvent): void
+		{
+			onMouseUp(event);
+		}
 		override public function onMouseUp(event: MouseEvent): Boolean
 		{
+			systemManager.getSandboxRoot().removeEventListener(MouseEvent.MOUSE_UP, onMouseUpOutside);
+			
 			if (event.ctrlKey || event.shiftKey)
 				return false;
 			if (_r == null || _areaComponent.isResizing)

@@ -434,12 +434,15 @@ package com.iblsoft.flexiweather.widgets
 		private function updateLayersLoadingState(): void
 		{
 			m_layersLoading = 0;
-			var total: int = interactiveLayerMap.layers.length;
-			for (var i: int = 0; i < total; i++)
+			if (interactiveLayerMap)
 			{
-				var layer: InteractiveDataLayer = interactiveLayerMap.layers.getItemAt(i) as InteractiveDataLayer;
-				if (layer.status == InteractiveDataLayer.STATE_LOADING_DATA)
-					m_layersLoading++;
+				var total: int = interactiveLayerMap.layers.length;
+				for (var i: int = 0; i < total; i++)
+				{
+					var layer: InteractiveDataLayer = interactiveLayerMap.layers.getItemAt(i) as InteractiveDataLayer;
+					if (layer.status == InteractiveDataLayer.STATE_LOADING_DATA)
+						m_layersLoading++;
+				}
 			}
 		}
 		private function onLayerLoaded(event: InteractiveLayerEvent): void
