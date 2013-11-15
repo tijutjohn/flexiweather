@@ -1616,6 +1616,8 @@ package com.iblsoft.flexiweather.ogc
 
 		public function synchroniseWith(s_variableId: String, s_value: Object): String
 		{
+			setStatus(InteractiveDataLayer.STATE_EMPTY);
+			
 			var sSynchronizeWithResponse: String;
 			if (isPreloadedWMSDimensionValue(s_variableId, s_value))
 			{
@@ -1625,7 +1627,7 @@ package com.iblsoft.flexiweather.ogc
 					sSynchronizeWithResponse = viewProperties.synchroniseWith(s_variableId, s_value);
 					if (!SynchronisationResponse.wasSynchronised(sSynchronizeWithResponse))
 					{
-						callLater(noSynchronisationDataAvailable, [graphics]);
+						noSynchronisationDataAvailable(graphics);
 					}
 					else
 					{
@@ -1639,7 +1641,7 @@ package com.iblsoft.flexiweather.ogc
 				sSynchronizeWithResponse = m_currentWMSViewProperties.synchroniseWith(s_variableId, s_value);
 				if (!SynchronisationResponse.wasSynchronised(sSynchronizeWithResponse))
 				{
-					callLater(noSynchronisationDataAvailable, [graphics]);
+					noSynchronisationDataAvailable(graphics);
 				}
 				else
 				{

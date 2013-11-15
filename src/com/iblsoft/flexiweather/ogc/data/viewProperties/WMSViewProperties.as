@@ -236,6 +236,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 
 		public function setWMSDimensionValue(s_dimName: String, s_value: String): void
 		{
+//			trace("setWMSDimensionValue: " + s_dimName + " => " + s_value + " for " + parentLayer.name);
 			//FIXME clearing legend cache must be moved to layer
 //			if (m_cfg.mb_legendIsDimensionDependant)
 //			{
@@ -982,7 +983,16 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 //			LoggingUtils.dispatchLogEvent(this, "WMSViewProperties: " + str);
 		}
 		
-		
+		/**
+		 * Call when there is no value for synchronisation (in synchroniseWith method) 
+		 * 
+		 */		
+		private function noSynchronisationValueFound(): void
+		{
+//			trace("WMSViewProperties: " + parentLayer.name + " NO SYNCHRONISATION DATA");
+			dispatchSynchronizedVariableChangeEvent(new SynchronisedVariableChangeEvent(
+				SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.FRAME, false));
+		}
 		public function synchroniseWith(s_variableId: String, value: Object): String
 		{
 			var exactSynchronisationResult: String = exactlySynchroniseWith(s_variableId, value);
@@ -1018,7 +1028,10 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 						}
 					}
 					if (!bestLevel)
+					{
+						noSynchronisationValueFound();
 						return SynchronisationResponse.SYNCHRONISATION_VALUE_NOT_FOUND;
+					}
 					return exactlySynchroniseWith(s_variableId, bestLevel);
 				} else {
 					return exactSynchronisationResult;
@@ -1044,7 +1057,10 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 						}
 					}
 					if (bestRun == null)
+					{
+						noSynchronisationValueFound();
 						return SynchronisationResponse.SYNCHRONISATION_VALUE_NOT_FOUND;
+					}
 					return exactlySynchroniseWith(s_variableId, bestRun);
 				} else {
 					return exactSynchronisationResult;
@@ -1068,7 +1084,10 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 						}
 					}
 					if (bestFrame == null)
+					{
+						noSynchronisationValueFound();
 						return SynchronisationResponse.SYNCHRONISATION_VALUE_NOT_FOUND;
+					}
 					return exactlySynchroniseWith(s_variableId, bestFrame);
 				} else {
 					return exactSynchronisationResult;

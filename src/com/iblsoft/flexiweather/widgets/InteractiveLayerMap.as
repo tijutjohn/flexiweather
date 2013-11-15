@@ -1903,7 +1903,6 @@ package com.iblsoft.flexiweather.widgets
 					continue;
 //				debug(this + " setFrame try to synchronize: [" + newFrame.toTimeString() + "]  for " + l.name, 'Info', 'Layer Map');
 				
-				
 				var bSynchronized: Boolean = SynchronisationResponse.wasSynchronised(so.synchroniseWith(GlobalVariable.FRAME, newFrame));
 				if (bSynchronized)
 				{
