@@ -87,18 +87,20 @@ package com.iblsoft.flexiweather.ogc.editable
 //			var reflections: Dictionary = new Dictionary();
 //			ml_movablePoints.cleanup();
 			var total: int = coordinates.length;
-			var crs: String = master.container.getCRS();
+			var iw: InteractiveWidget = master.container;
+			var crs: String = iw.getCRS();
 			for (var i: int = 0; i < total; i++)
 			{
 				var coord: Coord = coordinates[i] as Coord;
-				var pointReflections: Array = master.container.mapCoordToViewReflections(coord);
+				var pointReflections: Array = iw.mapCoordToViewReflections(coord);
 				var reflectionsCount: int = pointReflections.length;
 				for (var j: int = 0; j < reflectionsCount; j++)
 				{
 					var pointReflectedObject: Object = pointReflections[j];
 					var pointReflected: Point = pointReflectedObject.point;
 					var coordReflected: Coord = new Coord(crs, pointReflected.x, pointReflected.y);
-					reflectionDictionary.addReflectedCoordAt(coordReflected, i, j, pointReflectedObject.reflection);
+					trace(this + " updateCoordsReflections coordReflected: " + coordReflected);
+					reflectionDictionary.addReflectedCoordAt(coordReflected, i, j, pointReflectedObject.reflection, iw);
 				}
 			}
 		}

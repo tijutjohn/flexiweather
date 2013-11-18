@@ -4,6 +4,7 @@ package com.iblsoft.flexiweather.ogc.data
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.utils.AnnotationBox;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	
 	import flash.display.Sprite;
 
 	public class ReflectionData
@@ -52,20 +53,23 @@ package com.iblsoft.flexiweather.ogc.data
 			_coords.splice(pointer, 1);
 		}
 
-		public function updateCoordAt(coord: Coord, position: int): void
+		public function updateCoordAt(coord: Coord, position: int, iw: InteractiveWidget = null): void
 		{
-			addCoordAt(coord, position);
+			addCoordAt(coord, position, iw);
 		}
 		
-		public function addCoordAt(coord: Coord, position: int): void
+		public function addCoordAt(coord: Coord, position: int, iw: InteractiveWidget = null): void
 		{
+			if (iw)
+				_iw = iw;
+			
 			_coords[position] = coord;
 			_points[position] = _iw.coordToPoint(coord);
 		}
 
-		public function addCoord(coord: Coord): void
+		public function addCoord(coord: Coord, iw: InteractiveWidget = null): void
 		{
-			addCoordAt(coord, _coords.length);
+			addCoordAt(coord, _coords.length, iw);
 //			_coords.push(coord);
 //			_points.push(_iw.coordToPoint(coord));
 		}
