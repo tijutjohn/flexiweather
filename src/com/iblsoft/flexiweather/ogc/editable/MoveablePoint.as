@@ -20,7 +20,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			super.x = value;
 			
-			trace(this + " x = " + value);
+//			trace(this + " x = " + value);
 		}
 		override public function set visible(value:Boolean):void
 		{
@@ -171,7 +171,7 @@ package com.iblsoft.flexiweather.ogc.editable
 
 		public function onMouseDown(pt: Point, event: MouseEvent): Boolean
 		{
-			trace("onMouseDown : " + pt);
+//			trace("onMouseDown : " + pt);
 			m_editableItemManager.setMouseMoveCapture(this);
 			m_editableItemManager.setMouseClickCapture(this);
 			m_feature.selectMoveablePoint(mi_pointIndex, mi_reflection);
@@ -218,7 +218,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			
 			var mpe: MoveablePointEvent 
 			
-			trace("onMouseUp : " + pt);
+//			trace("onMouseUp : " + pt);
 			
 			mpe = new MoveablePointEvent(MoveablePointEvent.MOVEABLE_POINT_UP, true);
 			mpe.point = this;
@@ -247,7 +247,7 @@ package com.iblsoft.flexiweather.ogc.editable
 //			if (!pt.equals(m_pt))
 //			{
 				m_pt = pt;
-				trace(this + " setPoint");
+//				trace(this + " setPoint");
 				update();
 //			}
 		}

@@ -1544,6 +1544,7 @@ package com.iblsoft.flexiweather.widgets
 		protected function onResized(Event: ResizeEvent): void
 		{
 			m_labelLayout.setBoundary(new Rectangle(0, 0, width, height));
+			m_objectLayout.setBoundary(new Rectangle(0, 0, width, height));
 			if (!m_resizeTimer)
 			{
 				m_resizeTimer = new Timer(500, 1);

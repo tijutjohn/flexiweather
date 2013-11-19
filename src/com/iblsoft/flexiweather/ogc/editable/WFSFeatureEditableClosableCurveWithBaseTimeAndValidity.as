@@ -39,6 +39,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			{
 				if (master)
 				{
+					//TODO Optimization: do not create new FeatureData everytime, but reuse old ones
 					m_featureData = new FeatureData(this.toString() + " FeatureData");
 					// feature is computed via drawSmoothPolyLine() or drawGeoPolyLine() method
 					if (smooth)

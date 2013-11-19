@@ -64,7 +64,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 		public var m_placementBitmap: BitmapData; // HACK: change back to protected
 		protected var mi_lastUpdate: int = 0;
 		protected var mb_dirty: Boolean = false;
-		protected var ma_layoutObjects: ArrayCollection = new ArrayCollection();
+		protected var ma_layoutObjects: Array = new Array();
 		protected var ma_currentLayoutObjects: Array = new Array();
 		protected var m_anchorsLayer: Sprite = new Sprite();
 		/**
@@ -77,7 +77,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 		private var _layoutName: String;
 		private var _updateLocationDictionary: UpdateLocationDictionary;
 
-		public function get layoutObjects(): ArrayCollection
+		public function get layoutObjects(): Array
 		{
 			return ma_layoutObjects;
 		}
@@ -95,10 +95,13 @@ package com.iblsoft.flexiweather.utils.anticollision
 			}
 		}
 		
+		private var _parentContainer: InteractiveWidget;
+		
 		public function AnticollisionLayout(layoutName: String, parent: DisplayObject)
 		{
 			super();
-			
+		
+			_parentContainer = parent as InteractiveWidget;
 			if (parent && parent is InteractiveWidget)
 			{
 				if (!(parent as InteractiveWidget).usedForIcon)
@@ -127,7 +130,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 		
 		private function onVisibilityChanged(): void
 		{
-			var currObjects: Array = ma_layoutObjects.source;
+			var currObjects: Array = ma_layoutObjects;
 			var lo: AnticollisionLayoutObject;
 			for each (lo in currObjects)
 			{
@@ -200,7 +203,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 			setDirty();
 			var lo: AnticollisionLayoutObject = new AnticollisionLayoutObject(object, parentLayer, false, AnticollisionDisplayMode.FIXED);
 			lo.name = "Obstacle";
-			ma_layoutObjects.addItem(lo);
+			ma_layoutObjects.push(lo);
 			updateLayoutObjectsLength();
 		}
 
@@ -246,7 +249,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 			lo.objectsToAnchor = a_anchors;
 			lo.reflectionID = i_reflection;
 			lo.manageVisibilityWithAnchors = (a_anchors != null && a_anchors.length > 0);
-			ma_layoutObjects.addItem(lo);
+			ma_layoutObjects.push(lo);
 			updateLayoutObjectsLength();
 			var objName: String = '';
 			var instanceName: String = '';
@@ -282,7 +285,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 						if (lo.object && lo.object.parent == this)
 							removeChild(lo.object);
 					}
-					ma_layoutObjects.removeItemAt(i);
+					ma_layoutObjects.splice(i, 1);
 					updateLayoutObjectsLength();
 					setDirty();
 					return true;
@@ -316,11 +319,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 					}
 					
 				}
-				while (ma_layoutObjects.length > 0)
-				{
-					lo = ma_layoutObjects[0];
-					removeObject(lo.object);
-				}
+				ma_layoutObjects.splice(0, ma_layoutObjects.length);
 				//trace("ma_layoutObjects: " + ma_layoutObjects.length);
 				setDirty();
 				updateLayoutObjectsLength();
@@ -333,7 +332,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 			{
 				removeChild(lo.object);
 			}
-			ma_layoutObjects.removeAll();
+			ma_layoutObjects = [];
 			setDirty();
 			updateLayoutObjectsLength();
 		}
@@ -356,7 +355,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 					return;
 				//if (ma_layoutObjects.length > 0)
 				//	trace("\n ACL update");
-				var currObjects: Array = ma_layoutObjects.source;
+				var currObjects: Array = ma_layoutObjects;
 //				var currObjects: Array = ma_currentLayoutObjects;
 				if (!m_boundaryRect)
 					return;
@@ -799,10 +798,13 @@ package com.iblsoft.flexiweather.utils.anticollision
 		public function set suspendAnticollisionProcessing(value: Boolean): void
 		{
 			debug("suspendAnticollisionProcessing = " + value);
-			m_suspendAnticollisionProcessing = value;
-			if (_areaChangedScheduled)
-				areaChanged(_areaChangedScheduledBBox);
-			update();
+			if (m_suspendAnticollisionProcessing != value)
+			{
+				m_suspendAnticollisionProcessing = value;
+				if (_areaChangedScheduled)
+					areaChanged(_areaChangedScheduledBBox);
+				update();
+			}
 		}
 
 		public function get drawAnnotationAnchor(): Boolean
@@ -838,7 +840,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 
 		override public function toString(): String
 		{
-			return "AnticollistionLayout [" + _layoutName + "]";
+			return "AnticollistionLayout [" + _layoutName + "] parent: " + _parentContainer.id;
 		}
 
 		private function getAnticollisionLayoutObjectFor(object: IAnticollisionLayoutObject): AnticollisionLayoutObject
@@ -849,15 +851,6 @@ package com.iblsoft.flexiweather.utils.anticollision
 				return null;
 			}
 			return object.anticollisionLayoutObject;
-			//			for each(var lo: AnticollisionLayoutObject in ma_layoutObjects) {
-		/*
-		for each(var lo: AnticollisionLayoutObject in ma_currentLayoutObjects) {
-			if(lo.object === object) {
-				return lo;
-			}
-		}
-		return null;
-		*/
 		}
 
 		private function getAnticollisionLayoutObjectForAnchor(anchor: IAnticollisionLayoutObject): AnticollisionLayoutObject
@@ -868,22 +861,6 @@ package com.iblsoft.flexiweather.utils.anticollision
 				return null;
 			}
 			return anchor.anticollisionLayoutObject;
-			//			for each(var lo: AnticollisionLayoutObject in ma_layoutObjects) {
-		/*
-		for each(var lo: AnticollisionLayoutObject in ma_currentLayoutObjects) {
-			if (lo.objectsToAnchor)
-			{
-				var arr: Array = lo.objectsToAnchor;
-				for each (var obj: DisplayObject in arr)
-				{
-					if(obj === anchor) {
-						return lo;
-					}
-				}
-			}
-		}
-		return null;
-		*/
 		}
 
 		public function updateObjectReferenceLocationWithCustomPosition(object: DisplayObject, rlX: Number, rlY: Number): Boolean
