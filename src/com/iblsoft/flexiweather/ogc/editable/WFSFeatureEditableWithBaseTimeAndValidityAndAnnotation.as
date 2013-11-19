@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.ogc.editable
 {
 	import com.iblsoft.flexiweather.ogc.FeatureBase;
+	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
 	import com.iblsoft.flexiweather.ogc.GMLUtils;
 	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
@@ -33,6 +34,13 @@ package com.iblsoft.flexiweather.ogc.editable
 			super(s_namespace, s_typeName, s_featureId);
 		}
 
+		override public function update(changeFlag:FeatureUpdateContext):void
+		{
+			super.update(changeFlag);
+			
+			drawAnnotation();
+			
+		}
 		public function createAnnotation(): AnnotationBox
 		{
 			return null;
@@ -79,9 +87,10 @@ package com.iblsoft.flexiweather.ogc.editable
 					master.container.anticollisionObjectVisible(displaySpriteWithAnnotation, true);
 				}
 				
+				
 				//FIXME fix this commented line
 //				displaySpriteWithAnnotation.update(this, blackColor, master.container.labelLayout, pt);
-				
+				displaySpriteWithAnnotation.update(this, annotation, 0, master.container.labelLayout, pt);
 				
 				
 				//				radiationSprite.x = Point(reflection.points[0]).x;
@@ -95,7 +104,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		
 		public function updateAnnotation(annotation: AnnotationBox, annotationPosition: Point, text: String = ""): void
 		{
-			
+			annotation.update()
 		}
 		
 		public function removeFromLabelLayout(annotation: AnnotationBox, displaySprite: WFSFeatureEditableSprite, labelLayout: AnticollisionLayout): void
