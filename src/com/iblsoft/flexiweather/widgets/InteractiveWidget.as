@@ -52,6 +52,7 @@ package com.iblsoft.flexiweather.widgets
 	import mx.events.FlexEvent;
 	import mx.events.ResizeEvent;
 	
+	import spark.components.DataGroup;
 	import spark.components.Group;
 	import spark.components.SkinnableContainer;
 	import spark.events.ElementExistenceEvent;
@@ -279,7 +280,7 @@ package com.iblsoft.flexiweather.widgets
 			
 			if (mb_autoLayoutChanged)
 			{
-				var widgetParent: Group = parent as Group;
+				var widgetParent: DataGroup = parent as DataGroup;
 				if (widgetParent)
 				{
 					if (mb_autoLayout)
@@ -1788,7 +1789,7 @@ package com.iblsoft.flexiweather.widgets
 		private function autoLayoutViewBBox(bbox: BBox, b_finalChange: Boolean, b_setViewBBox: Boolean = false): void
 		{
 			//auto layout in widget parent
-			var widgetParent: Group = parent as Group;
+			var widgetParent: DataGroup = parent as DataGroup;
 			if (widgetParent)
 			{
 				var f_bboxApect: Number = bbox.width / bbox.height;
