@@ -401,6 +401,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 						_loader.addEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
 						_loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
 						_loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onCurrentWMSDataLoadingFinishedFromCache);
+						_loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED_NO_SYNCHRONIZATION_DATA, onCurrentWMSDataLoadingFinishedNoSynchronizationData);
+						_loader.addEventListener(InteractiveDataLayer.LOADING_ERROR, onCurrentWMSDataLoadingError);
 						_loader.addEventListener(InteractiveLayerEvent.INVALIDATE_DYNAMIC_PART, onCurrentWMSDataInvalidateDynamicPart);
 					}
 					_loader.zoom = zoomLevel; 
@@ -421,6 +423,23 @@ package com.iblsoft.flexiweather.ogc.tiling
 			notifyProgress(event.loaded, event.total, event.units);
 		}
 
+		protected function onCurrentWMSDataLoadingError(event: InteractiveLayerEvent): void
+		{
+			var loader: IWMSViewPropertiesLoader = event.target as IWMSViewPropertiesLoader;
+			//			destroyWMSViewPropertiesLoader(loader);
+			notifyLoadingError();
+			_currentQTTDataLoadingStarted = false;
+			invalidateDynamicPart(true);
+		}
+		
+		protected function onCurrentWMSDataLoadingFinishedNoSynchronizationData(event: InteractiveLayerEvent): void
+		{
+			var loader: IWMSViewPropertiesLoader = event.target as IWMSViewPropertiesLoader;
+			//			destroyWMSViewPropertiesLoader(loader);
+			notifyLoadingFinishedNoSynchronizationData();
+			_currentQTTDataLoadingStarted = false;
+			invalidateDynamicPart(true);
+		}
 		protected function onCurrentWMSDataLoadingFinished(event: InteractiveLayerEvent): void
 		{
 			var loader: IWMSViewPropertiesLoader = event.target as IWMSViewPropertiesLoader;
@@ -1635,6 +1654,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 				_loader.removeEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
 				_loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
 				_loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onCurrentWMSDataLoadingFinishedFromCache);
+				_loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED_NO_SYNCHRONIZATION_DATA, onCurrentWMSDataLoadingFinishedNoSynchronizationData);
+				_loader.removeEventListener(InteractiveDataLayer.LOADING_ERROR, onCurrentWMSDataLoadingError);
 				_loader.removeEventListener(InteractiveLayerEvent.INVALIDATE_DYNAMIC_PART, onCurrentWMSDataInvalidateDynamicPart);
 				_loader.destroy();
 			}

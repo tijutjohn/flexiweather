@@ -7,6 +7,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.net.loaders.AbstractURLLoader;
 	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.ogc.ExceptionUtils;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerQTTMS;
 	import com.iblsoft.flexiweather.ogc.cache.CacheItem;
 	import com.iblsoft.flexiweather.ogc.cache.WMSTileCache;
@@ -445,7 +446,54 @@ package com.iblsoft.flexiweather.ogc.tiling
 		protected function onDataLoadFailed(event: UniURLLoaderErrorEvent): void
 		{
 			if (!m_layer.layerWasDestroyed)
+			{
+				
+				/**
+				 *
+				 * <ServiceExceptionReport version="1.3.0">
+				 * 	<ServiceException code="InvalidDimensionValue">
+				 * 		Failed to apply value '2012-05-29T00:00:00Z' to dimension 'time'
+				 *	 </ServiceException>
+				 * </ServiceExceptionReport>
+				 *
+				 */
+				var associatedData: Object = event.associatedData;
+				if (associatedData.errorResult)
+				{
+					var errorStateSet: Boolean;
+					
+					var xml: XML = associatedData.errorResult;
+					if (xml.localName() == "ServiceExceptionReport")
+					{
+						var serviceException: XML = xml.children()[0] as XML;
+						if (serviceException.localName() == "ServiceException" && serviceException.hasOwnProperty("@code") && serviceException.@code == "InvalidDimensionValue")
+						{
+							var exceptionText: String = serviceException.text();
+							if (exceptionText.indexOf('Failed to apply value') == 0)
+							{
+								var arr: Array = exceptionText.split("'");
+								var timeString: String = arr[1];
+								var dimension: String = arr[3];
+								
+//								m_layer.getCache().addCacheNoDataItem(wmsViewProperties);
+								
+//								ExceptionUtils.logError(Log.getLogger("WMS"), associatedData.errorResult,
+//									"Failed to apply value '" + (m_layer.configuration as IWMSLayerConfiguration).layerNames.join(",") + "'");
+								
+								notifyLoadingFinishedNoSynchronizationData()
+								errorStateSet = true;
+							}
+						}
+					}
+					
+					//TODO just one error needs to be dispatched whenall tiles are loaded
+					if (!errorStateSet)
+						notifyLoadingFinishedWithErrors();
+					
+				}
+				
 				tileLoadFailed();
+			}
 		}
 
 		private function checkIfAllTilesAreLoaded(): void
@@ -507,6 +555,19 @@ package com.iblsoft.flexiweather.ogc.tiling
 			dispatchEvent(event);
 		}
 
+		protected function notifyLoadingFinishedWithErrors(): void
+		{
+			var e: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveDataLayer.LOADING_ERROR);
+			e.data = _tiledViewProperties;
+			dispatchEvent(e);
+		}
+		protected function notifyLoadingFinishedNoSynchronizationData(): void
+		{
+			var e: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveDataLayer.LOADING_FINISHED_NO_SYNCHRONIZATION_DATA);
+			e.data = _tiledViewProperties;
+			dispatchEvent(e);
+		}
+		
 		protected function notifyLoadingFinished(): void
 		{
 			var e: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveDataLayer.LOADING_FINISHED);

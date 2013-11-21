@@ -580,10 +580,28 @@ package com.iblsoft.flexiweather.ogc
 				_loader.removeEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
 				_loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
 				_loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onCurrentWMSDataLoadingFinishedFromCache);
+				_loader.removeEventListener(InteractiveDataLayer.LOADING_FINISHED_NO_SYNCHRONIZATION_DATA, onCurrentWMSDataLoadingFinishedNoSynchronizationData);
+				_loader.removeEventListener(InteractiveDataLayer.LOADING_ERROR, onCurrentWMSDataLoadingError);
 				_loader.removeEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
 				_loader.removeEventListener(InteractiveLayerEvent.INVALIDATE_DYNAMIC_PART, onCurrentWMSDataInvalidateDynamicPart);
 				_loader.destroy();
 			}
+		}
+		protected function onCurrentWMSDataLoadingFinishedNoSynchronizationData(event: InteractiveLayerEvent): void
+		{
+			var loader: MSBaseLoader = event.target as MSBaseLoader;
+//			removeLoaderListeners(loader);
+			notifyLoadingFinishedNoSynchronizationData();
+			noSynchronisationDataAvailable(graphics);
+			_currentWMSDataLoadingStarted = false;
+			
+		}
+		protected function onCurrentWMSDataLoadingError(event: InteractiveLayerEvent): void
+		{
+			var loader: MSBaseLoader = event.target as MSBaseLoader;
+//			removeLoaderListeners(loader);
+			notifyLoadingError();
+			_currentWMSDataLoadingStarted = false;
 		}
 		protected function onCurrentWMSDataLoadingFinished(event: InteractiveLayerEvent): void
 		{
@@ -731,6 +749,8 @@ package com.iblsoft.flexiweather.ogc
 						_loader.addEventListener(InteractiveDataLayer.LOADING_STARTED, onCurrentWMSDataLoadingStarted);
 						_loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onCurrentWMSDataLoadingFinished);
 						_loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onCurrentWMSDataLoadingFinishedFromCache);
+						_loader.addEventListener(InteractiveDataLayer.LOADING_FINISHED_NO_SYNCHRONIZATION_DATA, onCurrentWMSDataLoadingFinishedNoSynchronizationData);
+						_loader.addEventListener(InteractiveDataLayer.LOADING_ERROR, onCurrentWMSDataLoadingError);
 						_loader.addEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
 						_loader.addEventListener(InteractiveLayerEvent.INVALIDATE_DYNAMIC_PART, onCurrentWMSDataInvalidateDynamicPart);
 					}
@@ -1640,7 +1660,7 @@ package com.iblsoft.flexiweather.ogc
 					}
 					else
 					{
-						setStatus(InteractiveDataLayer.STATE_DATA_LOADED);
+						setStatus(InteractiveDataLayer.STATE_LOADING_DATA);
 					}
 					return sSynchronizeWithResponse;
 				}

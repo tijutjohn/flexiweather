@@ -74,6 +74,16 @@ package com.iblsoft.flexiweather.widgets
 		public static const LOADING_FINISHED_FROM_CACHE: String = 'loadingFinishedFromCache';
 		/**
 		 *
+		 *  @eventType loadingFinishedNoSynchronizationData
+		 *
+		 *  @langversion 3.0
+		 *  @playerversion Flash 9
+		 *  @playerversion AIR 1.1
+		 *  @productversion Flex 3
+		 */
+		public static const LOADING_FINISHED_NO_SYNCHRONIZATION_DATA: String = 'loadingFinishedNoSynchronizationData';
+		/**
+		 *
 		 *  @eventType loadingError
 		 *
 		 *  @langversion 3.0
@@ -268,6 +278,17 @@ package com.iblsoft.flexiweather.widgets
 			dispatchEvent(event);
 		}
 
+		/**
+		 * Dispatch <code>InteractiveDataLayer.LOADING_FINISHED</code> event. If you need to dispatch more properties inside event, override this method in your class.
+		 *
+		 */
+		protected function notifyLoadingFinishedNoSynchronizationData(bubbles: Boolean = true): void
+		{
+			setStatus(STATE_NO_SYNCHRONISATION_DATA_AVAILABLE);
+			var event: InteractiveLayerEvent = new InteractiveLayerEvent(LOADING_FINISHED, bubbles);
+			event.interactiveLayer = this;
+			dispatchEvent(event);
+		}
 		/**
 		 * Dispatch <code>InteractiveDataLayer.LOADING_FINISHED</code> event. If you need to dispatch more properties inside event, override this method in your class.
 		 *

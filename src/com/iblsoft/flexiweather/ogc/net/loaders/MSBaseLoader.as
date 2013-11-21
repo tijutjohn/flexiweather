@@ -18,6 +18,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 	import com.iblsoft.flexiweather.ogc.events.MSBaseLoaderEvent;
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
+	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	
 	import flash.display.Bitmap;
 	import flash.display.DisplayObject;
@@ -175,8 +176,9 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				//			itemMetadata.dimensions = dimensions;
 				var isItemLoading: Boolean = wmsCache.isItemLoading(wmsViewProperties, true);
 				var isCached: Boolean = wmsCache.isItemCached(wmsViewProperties, true);
+				var isNoDataCached: Boolean = wmsCache.isNoDataItemCached(wmsViewProperties);
 				var imgTest: DisplayObject = wmsCache.getCacheItemBitmap(wmsViewProperties);
-				if (isItemLoading)
+				if (isItemLoading && !isNoDataCached)
 				{
 					m_wmsViewProperties = wmsViewProperties;
 					m_imagePart = imagePart;
@@ -184,11 +186,12 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 					wmsCache.addEventListener(WMSCacheEvent.ITEM_ADDED, onCacheItemLoaded);
 					return;
 				}
-				if (isCached && imgTest == null)
+				if (isCached && isNoDataCached && imgTest == null)
 				{
 					//is cached, but no data, do not load anything (it's data which was loaded before, but exception was returned, so we cached this info
 					// invalidate property "displayed" for cached items		
 					wmsCache.removeFromScreen();
+					notifyLoadingFinishedNoSynchronizationData(null);
 					return;
 				}
 				if (isCached && imgTest != null)
@@ -333,6 +336,18 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 			e.data = associatedData;
 			dispatchEvent(e);
 		}
+		protected function notifyLoadingFinishedWithErrors(associatedData: Object): void
+		{
+			var e: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveDataLayer.LOADING_ERROR);
+			e.data = associatedData;
+			dispatchEvent(e);
+		}
+		protected function notifyLoadingFinishedNoSynchronizationData(associatedData: Object): void
+		{
+			var e: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveDataLayer.LOADING_FINISHED_NO_SYNCHRONIZATION_DATA);
+			e.data = associatedData;
+			dispatchEvent(e);
+		}
 
 		private function addImagePart(wmsViewProperties: WMSViewProperties, imagePart: ImagePart, img: DisplayObject, cacheKey: String): void
 		{
@@ -388,6 +403,8 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				*/
 				var result: * = event.result;
 				event.associatedData.result = result;
+				var bError:  Boolean;
+				
 				if (result is DisplayObject)
 				{
 					var cacheItem: CacheItem = wmsCache.getCacheItem(wmsViewProperties);
@@ -400,9 +417,12 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 					wmsViewProperties.url = event.request;
 					wmsCache.addCacheItem(imagePart.image, wmsViewProperties, event.associatedData);
 					invalidateDynamicPart();
+					
 				}
 				else
 				{
+					notifyLoadingFinishedWithErrors(event.associatedData);
+					
 					ExceptionUtils.logError(Log.getLogger("WMS"), result,
 							"Error accessing layer(s) '" + (m_layer.configuration as IWMSLayerConfiguration).layerNames.join(",") + "' - unexpected response type")
 				}
@@ -460,6 +480,8 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				var associatedData: Object = event.associatedData;
 				if (associatedData.errorResult)
 				{
+					var errorStateSet: Boolean;
+					
 					var xml: XML = associatedData.errorResult;
 					if (xml.localName() == "ServiceExceptionReport")
 					{
@@ -473,9 +495,19 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 								var timeString: String = arr[1];
 								var dimension: String = arr[3];
 								m_layer.getCache().addCacheNoDataItem(wmsViewProperties);
+								
+								ExceptionUtils.logError(Log.getLogger("WMS"), associatedData.errorResult,
+									"Failed to apply value '" + (m_layer.configuration as IWMSLayerConfiguration).layerNames.join(",") + "'");
+								
+								notifyLoadingFinishedNoSynchronizationData(event.associatedData);
+								errorStateSet = true;
 							}
 						}
 					}
+					
+					if (!errorStateSet)
+						notifyLoadingFinishedWithErrors(event.associatedData);
+					
 				}
 				var imagePart: ImagePart = event.associatedData.requestedImagePart;
 				imagePart.image = null;
