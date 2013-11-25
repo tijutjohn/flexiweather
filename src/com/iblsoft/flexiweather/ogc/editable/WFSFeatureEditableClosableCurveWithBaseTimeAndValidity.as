@@ -35,7 +35,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			var a_points: Array = getPoints();
 			
-			if(a_points.length > 1) 
+			if(a_points && a_points.length > 1) 
 			{
 				if (master)
 				{
@@ -56,6 +56,9 @@ package com.iblsoft.flexiweather.ogc.editable
 			var _addToLabelLayout: Boolean;
 			
 			var a_points: Array = getPoints();
+			
+			if (!a_points)
+				return;
 			
 			//create sprites for reflections
 			var totalReflections: uint = ml_movablePoints.totalReflections;
@@ -268,6 +271,10 @@ package com.iblsoft.flexiweather.ogc.editable
 						}
 					}
 					var a: Array = getPoints();
+					
+					if (!a)
+						return false;
+					
 					var i_best: int = -1;
 					var f_bestDistance: Number = 0;
 					var b_keepDrag: Boolean = true;
