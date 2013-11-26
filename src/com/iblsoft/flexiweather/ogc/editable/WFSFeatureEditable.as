@@ -243,7 +243,6 @@ package com.iblsoft.flexiweather.ogc.editable
 
 		override public function cleanup(): void
 		{
-			super.cleanup();
 			var masterEditable: InteractiveLayerWFSEditable = master as InteractiveLayerWFSEditable;
 			if (masterEditable != null)
 				masterEditable.editingComponentsContainer.removeChild(m_editableSprite);
@@ -260,6 +259,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				}
 			}
 			reflectionDictionary.cleanup();
+			super.cleanup();
 		}
 		
 		public function get getAnticollisionObject(): DisplayObject
