@@ -307,8 +307,17 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 			PARSE_GET_CAPABILITIES = currAllowedParsing;
 		}
 		
+		protected function beforeParseGetCapabilities(): void
+		{
+			if (ma_rootLayers)
+				ma_rootLayers.splice(0, ma_rootLayers.length);
+			if (ma_allLayers)
+				ma_allLayers.splice(0, ma_allLayers.length);
+		}
 		public function parseGetCapabilities(xml: XML): void
 		{
+			beforeParseGetCapabilities();
+			
 //			trace("\nparseGetCapabilities fullURL: " + fullURL);
 			var s_version: String = xml.@version;
 			version = Version.fromString(s_version);
@@ -438,6 +447,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 				//TODO how we get all layers
 				var allLayers: Array = ma_allLayers;
 				
+				trace(this + " addSupportedProjections: " + ma_allLayers.length + " total: " + ma_rootLayers.length);
 				var projectionManager: ProjectionConfigurationManager = ProjectionConfigurationManager.getInstance();
 				projectionManager.removeParsedProjections();
 				var projConfig: ProjectionConfiguration;
