@@ -152,6 +152,7 @@ package com.iblsoft.flexiweather.ogc
 		private function onFeaturePresenceInViewBBoxIsChanged(event: FeatureEvent): void
 		{
 			var feature: FeatureBase = event.target as FeatureBase;
+			feature.presentInViewBBox = event.insideViewBBox;
 			feature.visible = event.insideViewBBox;
 		}
 		

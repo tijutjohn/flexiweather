@@ -18,6 +18,13 @@ package com.iblsoft.flexiweather.ogc.wfs
 		public var points: Array;
 		protected var _feature: WFSFeatureEditable;
 
+		override public function set visible(value:Boolean):void
+		{
+			value = value && _feature.presentInViewBBox;
+			
+			super.visible = value;
+		}
+		
 		public function WFSFeatureEditableSprite(feature: WFSFeatureEditable)
 		{
 			_feature = feature;

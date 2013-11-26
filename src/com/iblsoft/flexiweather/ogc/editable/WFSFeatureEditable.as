@@ -42,12 +42,17 @@ package com.iblsoft.flexiweather.ogc.editable
 
 		override public function set visible(value:Boolean):void
 		{
-			super.visible = value;
+			value = value && presentInViewBBox;
 			
-			var iw: InteractiveWidget = m_master.container;
-			iw.anticollisionObjectVisible(getAnticollisionObject, value);
-			iw.anticollisionObjectVisible(getAnticollisionObstacle, value);
-			iw.anticollisionForcedUpdate();
+			if (super.visible != value)
+			{
+				super.visible = value;
+				
+				var iw: InteractiveWidget = m_master.container;
+				iw.anticollisionObjectVisible(getAnticollisionObject, value);
+				iw.anticollisionObjectVisible(getAnticollisionObstacle, value);
+				iw.anticollisionForcedUpdate();
+			}
 		}
 		
 		public function get selectedMoveablePointIndex(): int
@@ -99,7 +104,7 @@ package com.iblsoft.flexiweather.ogc.editable
 					var pointReflectedObject: Object = pointReflections[j];
 					var pointReflected: Point = pointReflectedObject.point;
 					var coordReflected: Coord = new Coord(crs, pointReflected.x, pointReflected.y);
-					trace(this + " updateCoordsReflections coordReflected: " + coordReflected);
+//					trace(this + " updateCoordsReflections coordReflected: " + coordReflected);
 					reflectionDictionary.addReflectedCoordAt(coordReflected, i, j, pointReflectedObject.reflection, iw);
 				}
 			}
@@ -217,7 +222,7 @@ package com.iblsoft.flexiweather.ogc.editable
 						if (pt == null || mp == null)
 							continue; // TODO: check for CRS
 						var p: Point = mp.getPoint()
-						trace("WFSFeatureEditable update: pt: " + pt + " p: " + p + " for reflection r: " + r);
+//						trace("WFSFeatureEditable update: pt: " + pt + " p: " + p + " for reflection r: " + r);
 						if (p && !p.equals(pt))
 						{
 							// reuse MoveablePoint instance, just change it's location 
@@ -263,6 +268,17 @@ package com.iblsoft.flexiweather.ogc.editable
 		}
 		public function get getAnticollisionObstacle(): DisplayObject
 		{
+			return editableSprite;
+		}
+		
+		public function get editableSprite(): WFSFeatureEditableSprite
+		{
+			if (totalReflections > 0)
+			{
+				var reflection: WFSEditableReflectionData = getReflection(0);
+				if (reflection.displaySprite)
+					return reflection.displaySprite as WFSFeatureEditableSprite;
+			}
 			return null;
 		}
 

@@ -12,6 +12,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayout;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	
+	import flash.display.DisplayObject;
 	import flash.geom.Point;
 	
 	import mx.collections.ArrayCollection;
@@ -26,6 +27,11 @@ package com.iblsoft.flexiweather.ogc.editable
 				return reflection.annotation as AnnotationBox;
 			}
 			return null;
+		}
+		
+		override public function get getAnticollisionObject(): DisplayObject
+		{
+			return annotation;
 		}
 		
 		public function WFSFeatureEditableWithBaseTimeAndValidityAndAnnotation(
@@ -84,7 +90,7 @@ package com.iblsoft.flexiweather.ogc.editable
 					addToLabelLayout(annotation, displaySpriteWithAnnotation, master, master.container.labelLayout, i);
 					_addToLabelLayout = true;
 				} else {
-					master.container.anticollisionObjectVisible(displaySpriteWithAnnotation, true);
+					master.container.anticollisionObjectVisible(displaySpriteWithAnnotation, annotation.visible);
 				}
 				
 				

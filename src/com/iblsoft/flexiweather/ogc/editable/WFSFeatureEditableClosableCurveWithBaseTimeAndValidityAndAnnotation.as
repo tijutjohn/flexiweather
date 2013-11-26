@@ -21,6 +21,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.utils.draw.DrawMode;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	
+	import flash.display.DisplayObject;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
 
@@ -34,6 +35,11 @@ package com.iblsoft.flexiweather.ogc.editable
 				return reflection.annotation as AnnotationBox;
 			}
 			return null;
+		}
+		
+		override public function get getAnticollisionObject(): DisplayObject
+		{
+			return annotation;
 		}
 		
 		public function WFSFeatureEditableClosableCurveWithBaseTimeAndValidityAndAnnotation(s_namespace: String, s_typeName: String, s_featureId: String)

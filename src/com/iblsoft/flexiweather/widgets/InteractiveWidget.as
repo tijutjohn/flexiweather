@@ -1292,6 +1292,9 @@ package com.iblsoft.flexiweather.widgets
 				var f_crsExtentBBoxWidth: Number = m_crsProjection.extentBBox.width;
 				if (!vBBox)
 					vBBox = m_viewBBox;
+				
+//				trace(this.id + " mapCoordInCRSToViewReflections m_viewBBox: " + m_viewBBox);
+				
 //				var viewBBoxWest: Number = m_viewBBox.xMin;
 //				var viewBBoxEast: Number = m_viewBBox.xMax;
 				var viewBBoxWest: Number = vBBox.xMin;
@@ -1856,7 +1859,8 @@ package com.iblsoft.flexiweather.widgets
 		public function setExtentBBox(bbox: BBox, b_finalChange: Boolean = true): void
 		{
 			m_extentBBox = bbox;
-			setViewBBox(m_extentBBox, b_finalChange); // this calls signalAreaChanged()
+			if (b_finalChange)
+				setViewBBox(m_extentBBox, b_finalChange); // this calls signalAreaChanged()
 		}
 
 		[Deprecated(replacement = setExtentBBox)]

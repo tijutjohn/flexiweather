@@ -73,6 +73,18 @@ package com.iblsoft.flexiweather.ogc
 		protected var mb_pointsDirty: Boolean = false;
 		protected var mb_spritesAddedToLabelLayout: Boolean
 		
+		protected var mb_presentInViewBBox: Boolean
+		
+		public function get presentInViewBBox(): Boolean
+		{
+			return mb_presentInViewBBox;
+		}
+		
+		public function set presentInViewBBox(value: Boolean): void
+		{
+			mb_presentInViewBBox = value;
+		}
+		
 		public function FeatureBase(s_namespace: String, s_typeName: String, s_featureId: String)
 		{
 			super();
@@ -82,6 +94,8 @@ package com.iblsoft.flexiweather.ogc
 			mouseEnabled = false;
 			mouseChildren = false;
 			doubleClickEnabled = false;
+			
+			mb_presentInViewBBox = true;
 			
 			m_coordinates = [];
 		}
@@ -164,7 +178,7 @@ package com.iblsoft.flexiweather.ogc
 						var c: Coord = m_coordinates[i];
 						
 						var reflectedCoords: Array = iw.mapCoordToViewReflections(c);
-//						trace("FeatureBase update reflectedCoords["+i+"] = " + reflectedCoords.length);
+//						trace("FeatureBase update reflectedCoords["+i+"] = " + reflectedCoords.length + " c : " + c + " viewBBox: " + iw.getViewBBox());
 						
 						for each (var currCoordObject: Object in reflectedCoords)
 						{
@@ -191,18 +205,17 @@ package com.iblsoft.flexiweather.ogc
 							notifyCoordinateOutside(c, i, 0); //currCoordObject.reflection);
 						}
 					}
-					if (featureIsInViewBBox != featureIsInside)
+					if (presentInViewBBox != featureIsInside)
 					{
 //						trace("coordinatesvisibility change: " + featureIsInside);
 						var event: FeatureEvent = new FeatureEvent(FeatureEvent.PRESENCE_IN_VIEW_BBOX_CHANGED, true);
 						event.insideViewBBox = featureIsInside;
 						dispatchEvent(event);
 					}
-					featureIsInViewBBox = featureIsInside;
+					presentInViewBBox = featureIsInside;
 				}
 			}
 		}
-		public var featureIsInViewBBox: Boolean;
 
 		protected function notifyCoordinateInside(coord: Coord, coordIndex: uint, coordReflection: uint): void
 		{
