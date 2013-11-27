@@ -64,6 +64,19 @@ package com.iblsoft.flexiweather.symbology
 			}
 		}
 		
+		public function get fillColor(): uint
+		{
+			return mi_fillColor;
+		}
+		
+		public function set fillColor(value: uint): void
+		{
+			if (value != mi_fillColor) 
+			{
+				mi_fillColor = value;
+			}
+		}
+		
 		public function set thickness(value: Number): void
 		{
 			mf_thickness = value;
@@ -399,14 +412,16 @@ package com.iblsoft.flexiweather.symbology
 			
 			var nBitmap: Bitmap = new Bitmap(fillBitmapData);
 			
+			i_fillColor = getHexARGB(i_fillColor);
+			
 			switch (ms_fillStyle){
 				case StyledLineCurveRenderer.FILL_STYLE_SOLID:
-					fillBitmapData.fillRect(new Rectangle(0, 0, 16, 16), getHexARGB(i_fillColor)); //mi_fillColor);
+					fillBitmapData.fillRect(new Rectangle(0, 0, 16, 16), i_fillColor); //mi_fillColor);
 					break;
 				case StyledLineCurveRenderer.FILL_STYLE_HORIZONTAL_LINES:
 					for (ix = 0; ix < 16; ix++){
 						for (iy = 0; iy < 16; iy = iy + 8){
-							fillBitmapData.setPixel32(ix, iy, getHexARGB(i_fillColor)); //mi_fillColor);
+							fillBitmapData.setPixel32(ix, iy, i_fillColor); //mi_fillColor);
 							//fillBitmapData.setPixel(ix, iy, mi_fillColor);
 						}
 					}
@@ -415,7 +430,7 @@ package com.iblsoft.flexiweather.symbology
 				case StyledLineCurveRenderer.FILL_STYLE_VERTICAL_LINES:
 					for (ix = 0; ix < 16; ix = ix + 8){
 						for (iy = 0; iy < 16; iy++){
-							fillBitmapData.setPixel32(ix, iy, getHexARGB(i_fillColor));
+							fillBitmapData.setPixel32(ix, iy, i_fillColor);
 						}
 					}
 					break;
@@ -423,12 +438,12 @@ package com.iblsoft.flexiweather.symbology
 				case StyledLineCurveRenderer.FILL_STYLE_CROSING_LINES:
 					for (ix = 0; ix < 16; ix++){
 						for (iy = 0; iy < 16; iy = iy + 8){
-							fillBitmapData.setPixel32(ix, iy, getHexARGB(i_fillColor));
+							fillBitmapData.setPixel32(ix, iy, i_fillColor);
 						}
 					}
 					for (ix = 0; ix < 16; ix = ix + 8){
 						for (iy = 0; iy < 16; iy++){
-							fillBitmapData.setPixel32(ix, iy, getHexARGB(i_fillColor));
+							fillBitmapData.setPixel32(ix, iy,i_fillColor);
 						}
 					}
 					break;
