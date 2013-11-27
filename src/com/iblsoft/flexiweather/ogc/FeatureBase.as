@@ -239,8 +239,10 @@ package com.iblsoft.flexiweather.ogc
 			m_master = null;
 //			m_coordinates.removeAll();
 //			m_points.removeAll();
-			m_coordinates.splice(0, m_coordinates.length);
-			m_points.splice(0, m_coordinates.length);
+			if (m_coordinates)
+				m_coordinates.splice(0, m_coordinates.length);
+			if (m_points)
+				m_points.splice(0, m_points.length);
 		}
 
 		public function get master(): InteractiveLayerFeatureBase
