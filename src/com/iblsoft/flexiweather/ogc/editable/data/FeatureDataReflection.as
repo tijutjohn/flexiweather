@@ -166,7 +166,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		{
 			if (!_center)
 			{
-				trace("Center is not computed");
+//				trace("Center is not computed");
 				if (lines && lines.length > 0)
 				{
 					compute();

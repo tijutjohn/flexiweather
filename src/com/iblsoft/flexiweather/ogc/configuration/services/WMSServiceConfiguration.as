@@ -447,7 +447,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 				//TODO how we get all layers
 				var allLayers: Array = ma_allLayers;
 				
-				trace(this + " addSupportedProjections: " + ma_allLayers.length + " total: " + ma_rootLayers.length);
+//				trace(this + " addSupportedProjections: " + ma_allLayers.length + " total: " + ma_rootLayers.length);
 				var projectionManager: ProjectionConfigurationManager = ProjectionConfigurationManager.getInstance();
 				projectionManager.removeParsedProjections();
 				var projConfig: ProjectionConfiguration;

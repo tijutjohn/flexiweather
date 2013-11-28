@@ -89,7 +89,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 				if (super.visible != value)
 				{
 					super.visible = value;
-					
+					trace(this + " visible = " + value);
 					onVisibilityChanged();
 				}
 			}
@@ -97,8 +97,12 @@ package com.iblsoft.flexiweather.utils.anticollision
 		
 		private var _parentContainer: InteractiveWidget;
 		
+		public static var uid: int = 0;
+		public var id: int;
+		
 		public function AnticollisionLayout(layoutName: String, parent: DisplayObject)
 		{
+			id = uid++;
 			super();
 		
 			_parentContainer = parent as InteractiveWidget;
@@ -241,6 +245,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 		 **/
 		public function addObject(object: DisplayObject, parentLayer: InteractiveLayer, a_anchors: Array = null, i_reflection: int = 0, i_displacementMode: String = AnticollisionDisplayMode.DISPLACE_AROUND, b_addAsChild: Boolean = true): AnticollisionLayoutObject
 		{
+			trace(this + " addObject to this layout");
 			setDirty();
 			if (b_addAsChild)
 				addChild(object);
@@ -348,6 +353,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 		{
 			if (!m_suspendAnticollisionProcessing && !_updateLocked)
 			{
+				trace(this + " UPDATE");
 				var time: int = ProfilerUtils.startProfileTimer();
 				var pass: int = 0;
 				var diffTime: Number = getTimer() - mi_lastUpdate;
@@ -840,7 +846,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 
 		override public function toString(): String
 		{
-			return "AnticollistionLayout [" + _layoutName + "] parent: " + _parentContainer.id;
+			return "AnticollistionLayout [" + _layoutName + " / " + id + "] parent: " + _parentContainer.id;
 		}
 
 		private function getAnticollisionLayoutObjectFor(object: IAnticollisionLayoutObject): AnticollisionLayoutObject

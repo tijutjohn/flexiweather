@@ -52,10 +52,13 @@ package com.iblsoft.flexiweather.utils.anticollision
 
 		public function set visible(value: Boolean): void
 		{
-			_visible = value;
-			//set object visibility to save value
-			object.visible = value;
-//			trace(this + " VISIBLE CHANGED");
+			if (_visible != value || object.visible != value)
+			{
+				_visible = value;
+				//set object visibility to save value
+				object.visible = value;
+//				trace(this + " VISIBLE CHANGED");
+			}
 		}
 
 		public function toString(): String
