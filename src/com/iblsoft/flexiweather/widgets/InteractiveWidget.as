@@ -21,6 +21,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.utils.ICurveRenderer;
 	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayout;
+	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayoutObject;
 	import com.iblsoft.flexiweather.utils.draw.DrawMode;
 	import com.iblsoft.flexiweather.utils.draw.FillStyle;
 	import com.iblsoft.flexiweather.utils.draw.LineStyle;
@@ -2399,6 +2400,19 @@ package com.iblsoft.flexiweather.widgets
 
 		private var _forceAnticollisionUpdate: Boolean;
 		
+		public function anticollisionObjectsVisibilityForLayer(layer: InteractiveLayer, visible: Boolean): void
+		{
+			var labelLayoutsObjects: Array =  m_labelLayout.getAnticollisionLayoutObjectsForLayer(layer);
+			for each (var object1: AnticollisionLayoutObject in labelLayoutsObjects)
+			{
+				m_labelLayout.setObjectVisibility(object1.object, visible);
+			}
+			var objectLayoutsObjects: Array =  m_objectLayout.getAnticollisionLayoutObjectsForLayer(layer);
+			for each (var object2: AnticollisionLayoutObject in objectLayoutsObjects)
+			{
+				m_objectLayout.setObjectVisibility(object2.object, visible);
+			}
+		}
 		public function anticollisionObjectVisible(object: DisplayObject, visible: Boolean): void
 		{
 			m_labelLayout.setObjectVisibility(object, visible);

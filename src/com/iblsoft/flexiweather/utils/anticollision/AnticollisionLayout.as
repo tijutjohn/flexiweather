@@ -849,6 +849,20 @@ package com.iblsoft.flexiweather.utils.anticollision
 			return "AnticollistionLayout [" + _layoutName + " / " + id + "] parent: " + _parentContainer.id;
 		}
 
+		public function getAnticollisionLayoutObjectsForLayer(layer: InteractiveLayer): Array
+		{
+			var objects: Array = [];
+			var currObjects: Array = ma_layoutObjects;
+			var lo: AnticollisionLayoutObject;
+			for each (lo in currObjects)
+			{
+				if (lo.layer == layer)
+				{
+					objects.push(lo);
+				}
+			}
+			return objects;
+		}
 		private function getAnticollisionLayoutObjectFor(object: IAnticollisionLayoutObject): AnticollisionLayoutObject
 		{
 			if (!object || (!object is IAnticollisionLayoutObject))
