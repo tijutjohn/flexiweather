@@ -1497,54 +1497,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 		}
 
 		/**
-		 * Function checks if part is cached already. Function similar to udpateDataPart.
-		 * Only difference is, that isPartCached does not load data if part is not cached.
-		 *
-		 * @param s_currentCRS
-		 * @param currentViewBBox
-		 * @param dimensions
-		 * @param i_width
-		 * @param i_height
-		 * @return
-		 *
-		 */
-//		private function isPartCached(qttViewProperties: TiledViewProperties, s_currentCRS: String, currentViewBBox: BBox, i_width: uint, i_height: uint): Boolean
-//		{
-			/**
-			 * this is how you can find properties for cache metadata
-			 *
-			 * var s_currentCRS: String = container.getCRS();
-			 * var currentViewBBox: BBox = container.getViewBBox();
-			 * var dimensions: Array = getDimensionForCache();
-			 */
-			/*
-			var request: URLRequest = m_cfg.toGetMapRequest(
-			s_currentCRS, currentViewBBox.toBBOXString(),
-			i_width, i_height,
-			getWMSStyleListString());
-
-			if (!request)
-			return false;
-
-			qttViewProperties.updateDimensionsInURLRequest(request);
-			qttViewProperties.updateCustomParametersInURLRequest(request);
-
-			var wmsCache: WMSTileCache = getCache() as WMSTileCache;
-
-			//			var img: Bitmap = null;
-
-
-
-			var isCached: Boolean = getTileFromCache(qttViewProperties, request);
-			var imgTest: DisplayObject = wmsCache.getCacheItemBitmap(itemMetadata);
-			if (isCached && imgTest != null) {
-			return true;
-			}
-			*/
-//			return false;
-//		}
-
-		/**
 		 * Removed all cached tiles except tiles valid for specified time
 		 * @param validity
 		 *

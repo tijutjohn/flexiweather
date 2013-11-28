@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.proj
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.ogc.Version;
 	import com.iblsoft.flexiweather.ogc.configuration.ProjectionConfiguration;
 	
 	import flash.geom.Point;
@@ -64,6 +65,14 @@ package com.iblsoft.flexiweather.proj
 			mb_wrapsHorizontally = b_wrapsHorizontally;
 		}
 
+		static public function hasCRSAxesFlippedByISO(crs: String, version: Version): Boolean
+		{
+			if (crs == CRS_EPSG_GEOGRAPHIC && (version.equals(1,3,0) || !version.isLessThan(1,3,0)))
+				return true;
+			
+			return false;
+				
+		}
 		public static function isValidProjection(projection: Projection): Boolean
 		{
 			if (projection && projection.m_proj)

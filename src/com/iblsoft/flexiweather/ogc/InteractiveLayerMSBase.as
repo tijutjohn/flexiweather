@@ -466,6 +466,15 @@ package com.iblsoft.flexiweather.ogc
 		 */
 		private function isPartCached(wmsViewProperties: WMSViewProperties, currentViewBBox: BBox, i_width: uint, i_height: uint): Boolean
 		{
+			
+			var bbox: String;
+			if (Projection.hasCRSAxesFlippedByISO(wmsViewProperties.crs, (configuration as WMSLayerConfiguration).service.version))
+			{
+				bbox = String(currentViewBBox.yMin) + "," + String(currentViewBBox.xMin) + "," + String(currentViewBBox.yMax) + "," + String(currentViewBBox.xMax);	
+			} else {
+				bbox = currentViewBBox.toBBOXString();
+			}
+			
 			/**
 			 * this is how you can find properties for cache metadata
 			 *
@@ -474,7 +483,7 @@ package com.iblsoft.flexiweather.ogc
 			 * var dimensions: Array = getDimensionForCache();
 			 */
 			var request: URLRequest = m_cfg.toGetMapRequest(
-					wmsViewProperties.crs, currentViewBBox.toBBOXString(),
+					wmsViewProperties.crs, bbox,
 					i_width, i_height,
 					printQuality,
 					getWMSStyleListString());
@@ -678,8 +687,21 @@ package com.iblsoft.flexiweather.ogc
 //			{
 //				trace("test getGetMapFullUrl");
 //			}
+			var wmsLayerConfiguration: WMSLayerConfiguration = configuration as WMSLayerConfiguration;
+			
+			var bbox: String;
+			var crs: String = container.getCRS();
+			var viewBBox: BBox = container.getViewBBox();
+			
+			if (Projection.hasCRSAxesFlippedByISO(crs, wmsLayerConfiguration.service.version))
+			{
+				bbox = String(viewBBox.yMin) + "," + String(viewBBox.xMin) + "," + String(viewBBox.yMax) + "," + String(viewBBox.xMax);	
+			} else {
+				bbox = viewBBox.toBBOXString();
+			}
+			
 			var request: URLRequest = m_cfg.toGetMapRequest(
-					container.getCRS(), container.getViewBBox().toBBOXString(),
+					crs, bbox,
 					width, height,
 					printQuality,
 					getWMSStyleListString());

@@ -245,7 +245,12 @@ package com.iblsoft.flexiweather.ogc
 				bboxXML = boundingBoxList[i] as XML;
 				
 				var s_crs: String = String(bboxXML.@CRS);
-				localArr.push(new CRSWithBBox(s_crs, BBox.fromXML_WMS(bboxXML)));
+				if (Projection.hasCRSAxesFlippedByISO(s_crs, m_version))
+				{
+					var bbox: BBox = new BBox(bboxXML.@miny, bboxXML.@minx, bboxXML.@maxy, bboxXML.@maxx);
+					localArr.push(new CRSWithBBox(s_crs, bbox));
+				} else
+					localArr.push(new CRSWithBBox(s_crs, BBox.fromXML_WMS(bboxXML)));
 				a_detectedCRSs.push(s_crs);
 			}
 
@@ -320,9 +325,13 @@ package com.iblsoft.flexiweather.ogc
 					var s_tilingExtent: String = (arr[1] as String);
 					s_tilingExtent = s_tilingExtent.substr(0, s_tilingExtent.length - 1);
 					arr = s_tilingExtent.split(',');
-					var tilingExtent: BBox = new BBox(
-						Number(arr[0]), Number(arr[1]),
-						Number(arr[2]), Number(arr[3]));
+					
+					var tilingExtent: BBox;
+					if (Projection.hasCRSAxesFlippedByISO(s_tilingCRS, m_version))
+					 	tilingExtent = new BBox(Number(arr[1]), Number(arr[0]), Number(arr[3]), Number(arr[2]));
+					else
+					 	tilingExtent = new BBox(Number(arr[0]), Number(arr[1]), Number(arr[2]), Number(arr[3]));
+						
 					var b_crsFound: Boolean = false;
 					
 					var crsWithBBoxesTotal: int = ma_crsWithBBoxes.length;
