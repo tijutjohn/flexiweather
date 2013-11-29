@@ -33,6 +33,12 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 	public class InteractiveLayerGoogleMaps extends InteractiveDataLayer implements Serializable, IConfigurableLayer
 	{
 		public static const MAP_UDPATED: String = 'mapUpdated';
+		
+		public static var API_KEY: String;
+		public static var API_KEY_DOMAIN: String;
+		
+		public static var mapID: int = 0;
+		
 //		private var m_map: Map3D;
 		private var m_map: Map;
 		private var mb_mapIsReady: Boolean;
@@ -85,7 +91,6 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 					storage.serializeNumber("transparency", alpha);
 			}
 		}
-		public static var mapID: int = 0;
 
 		override protected function createChildren(): void
 		{
@@ -96,11 +101,12 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 				mapID++;
 				m_map = new Map();
 				m_map.id = mapID.toString();
-				//FIXME remove harcoded GoogleMap API Key to configuration
 				m_map.sensor = "false";
-				m_map.key = "ABQIAAAAH8k5scGjdxg3Yv6Rib0PTRSGpsRUUtKRAxSpaWXDxfvzoVavuhRINMFI-z2FR2XOe7s5zVypkDNl4A";
+				
+				m_map.key = API_KEY;  //"ABQIAAAAH8k5scGjdxg3Yv6Rib0PTRSGpsRUUtKRAxSpaWXDxfvzoVavuhRINMFI-z2FR2XOe7s5zVypkDNl4A";
 				//this must be set, otherwise google maps will not work in AIR (on mobiles)
-				m_map.url = 'http://www.iblsoft.com';
+				m_map.url = API_KEY_DOMAIN; //'http://www.iblsoft.com';
+				
 				m_map.addEventListener(MapEvent.COMPONENT_INITIALIZED, onComponentInitialized);
 				m_map.addEventListener(MapEvent.MAP_READY, onMapReady);
 				m_map.addEventListener(MapEvent.MAP_READY_INTERNAL, onMapReadyInternal);
