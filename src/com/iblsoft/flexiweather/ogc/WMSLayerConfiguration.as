@@ -1,8 +1,10 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.FlexiWeatherConfiguration;
 	import com.iblsoft.flexiweather.net.loaders.AbstractURLLoader;
 	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
 	import com.iblsoft.flexiweather.ogc.editable.IInteractiveLayerProvider;
+	import com.iblsoft.flexiweather.ogc.events.ServiceCapabilitiesEvent;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
@@ -13,9 +15,12 @@ package com.iblsoft.flexiweather.ogc
 	
 	import mx.collections.ArrayCollection;
 	
-	public class WMSLayerConfiguration extends OGCLayerConfiguration
-			implements IBehaviouralObject, IInteractiveLayerProvider, IWMSLayerConfiguration
+	[Event(name = CAPABILITIES_UPDATED, type = "flash.events.DataEvent")]
+	[Event(name = CAPABILITIES_RECEIVED, type = "flash.events.DataEvent")]
+	public class WMSLayerConfiguration extends OGCLayerConfiguration implements IBehaviouralObject, IInteractiveLayerProvider, IWMSLayerConfiguration
 	{
+		public static const CAPABILITIES_UPDATED: String = "capabilitiesUpdated";
+		public static const CAPABILITIES_RECEIVED: String = "capabilitiesReceived";
 
 		private var ma_layerNames: Array = [];
 		private var ma_styleNames: Array = [];
@@ -32,37 +37,63 @@ package com.iblsoft.flexiweather.ogc
 		// runtime variables
 		private var _layerConfigurations: Array;
 		
-		
-		public static const CAPABILITIES_UPDATED: String = "capabilitiesUpdated";
-		public static const CAPABILITIES_RECEIVED: String = "capabilitiesReceived";
-		
-		[Event(name = CAPABILITIES_UPDATED, type = "flash.events.DataEvent")]
-		[Event(name = CAPABILITIES_RECEIVED, type = "flash.events.DataEvent")]
+		private var mb_capabilitiesReceived: Boolean;
+		public function get capabilitiesReceived(): Boolean
+		{
+			return mb_capabilitiesReceived;
+		}
 
 		public function WMSLayerConfiguration(service: WMSServiceConfiguration = null, a_layerNames: Array = null)
 		{
 			super(service);
-			if(a_layerNames != null)
+			
+			mb_capabilitiesReceived = false;
+			
+			if (a_layerNames != null)
 				ma_layerNames = a_layerNames;
-			if(m_service != null)
-				m_service.addEventListener(WMSServiceConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated)
-			onCapabilitiesUpdated(null);
+			
+			registerService();
+			
+//			onCapabilitiesUpdated(null);
+		}
+
+		override protected function registerService(): void
+		{
+			if (m_service)
+			{
+				m_service.addEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onCapabilitiesUpdated)
+				onCapabilitiesUpdated(null);
+			}
 		}
 		
+		override protected function unregisterService(): void
+		{
+			if (m_service)
+				m_service.removeEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onCapabilitiesUpdated)
+		}
+		
+		
+		public function populateLayerCapabilities(layerXML: XML): void
+		{
+			//if FlexiWeather loads GetCapabilitie requests, this functionality is not needed and will not be executed			
+			if (FlexiWeatherConfiguration.FLEXI_WEATHER_LOADS_GET_CAPABILITIES)
+				return;
+			
+			if (m_service)
+			{ 
+				(m_service as WMSServiceConfiguration).populateLayerCapabilities(layerXML);
+				onCapabilitiesUpdated();
+			}
+		}
 
 		override public function destroy(): void
 		{
-			
-			if(m_service != null)
-				m_service.removeEventListener(WMSServiceConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
+			unregisterService();
 					
 			ma_layerNames = null;
-			debugArray(ma_styleNames);
-			debugArray(ma_behaviours);
-			debugArray(ma_availableImageFormats);
+			
 			if (_layerConfigurations && _layerConfigurations.length > 0)
 			{
-//				debugArray(_layerConfigurations); //WMSLayer
 				for each (var wmsLayer: WMSLayerBase in _layerConfigurations)
 				{
 					wmsLayer.destroy();
@@ -85,12 +116,18 @@ package com.iblsoft.flexiweather.ogc
 
 		override public function serialize(storage: Storage): void
 		{
-			if(storage.isLoading() && m_service != null)
-				m_service.removeEventListener(WMSServiceConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated)
+			if (storage.isLoading() && m_service != null)
+				m_service.removeEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onCapabilitiesUpdated)
 			super.serialize(storage);
-			m_service.addEventListener(WMSServiceConfiguration.CAPABILITIES_UPDATED, onCapabilitiesUpdated)
-
-			try {
+			
+			if (storage.isLoading())
+			{
+				m_service.addEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
+//				trace(this + " serialized");
+			}
+			
+			try
+			{
 				storage.serializeNonpersistentArray("layer-name", ma_layerNames, String);
 			} catch (error: Error) {
 				trace("WMSLayeConfig ma_layerNames error: " + error.message);
@@ -102,11 +139,7 @@ package com.iblsoft.flexiweather.ogc
 			}
 			try {
 				storage.serializeNonpersistentArrayMap("behaviour", ma_behaviours, String, String);
-				trace("ma_behaviours: ")
-				for (var k: String in ma_behaviours)
-				{
-					trace("ma_behaviours["+k+"] = " + ma_behaviours[k] + "<<");
-				}
+
 			} catch (error: Error) {
 				trace("WMSLayeConfig ma_behaviours error: " + error.message);
 			}
@@ -191,7 +224,21 @@ package com.iblsoft.flexiweather.ogc
 			
 			return r;
 		}
-
+		private function getVectorImageFormat(): String
+		{
+			if (service && service is WMSServiceConfiguration && (service as WMSServiceConfiguration).imageFormats)
+			{
+				var formats: Array = (service as WMSServiceConfiguration).imageFormats;
+				for each (var currFormat: String in formats)
+				{
+					if (currFormat.indexOf('x-shockwave-flash') >= 0)
+					{
+						return currFormat;
+					}
+				}
+			}
+			return getCurrentImageFormat();
+		}
 		private function getCurrentImageFormat(): String
 		{
 			var format: String = ms_imageFormat;
@@ -237,75 +284,103 @@ package com.iblsoft.flexiweather.ogc
 			return "DIM_" + s_dim; 
 		}
 		
-		protected function onCapabilitiesUpdated(event: Event): void
+		protected function onCapabilitiesUpdated(event: Event = null): void
 		{
+			if (!m_service)
+				return;
+			
 			var layer: WMSLayer
 			var layerConf: WMSLayer
-			
 			var a_layers: ArrayCollection = new ArrayCollection();
 			if (ma_layerNames)
 			{
-				for(var i: int = 0; i < ma_layerNames.length; ++i) {
+				for (var i: int = 0; i < ma_layerNames.length; ++i)
+				{
 					var l: WMSLayer = null;
-					if(m_service != null)
-						l = service.getLayerByName(ma_layerNames[i]);
+					if (m_service != null)
+						l = (service as WMSServiceConfiguration).getLayerByName(ma_layerNames[i]);
 					if (l)
 						a_layers.addItem(l);
 				}
 			}
 			var b_changed: Boolean = false;
-			if(_layerConfigurations == null)
+			if (_layerConfigurations == null)
 				b_changed = true;
-			else {
-				for(i = 0; i < a_layers.length; ++i) 
+			else
+			{
+				for (i = 0; i < a_layers.length; ++i)
 				{
 					layer = a_layers[i] as WMSLayer;
-					
 					updateDimensions(layer);
-					
 					layerConf = _layerConfigurations[i] as WMSLayer
-					if(layer == null) 
+					if (layer == null)
 					{
-						if(layerConf == null)
+						if (layerConf == null)
 							continue;
-						else {
+						else
+						{
 							b_changed = true;
 							break;
 						}
 					}
-					if(!layer.equals(layerConf)) 
+					if (!layer.equals(layerConf))
 					{
 						b_changed = true;
 						break;
-					} 
+					}
 				}
 			}
-			
-			if(b_changed) {
+			if (b_changed)
+			{
+				for (i = 0; i < a_layers.length; ++i)
+				{
+					layer = a_layers[i] as WMSLayer;
+					updateDimensions(layer);
+				}
 				_layerConfigurations = a_layers.toArray();
+				if (_layerConfigurations.length > 0)
+				{
+					mb_capabilitiesReceived = true;
+				}
 				dispatchEvent(new DataEvent(CAPABILITIES_UPDATED));
 			}
+			if (_layerConfigurations.length > 0)
+			{
+				mb_capabilitiesReceived = true;
+			}
 			dispatchEvent(new DataEvent(CAPABILITIES_RECEIVED));
+			
+//			trace(this + " onCapabilitiesUpdated ");
+			
 		}
 
 		private function updateDimensions(layer: WMSLayer): void
 		{
-			for each (var dimension: WMSDimension in layer.dimensions)
+			var dimensions: Array = layer.parsedDimensions;
+			for each (var dimension: WMSDimension in dimensions)
 			{
-				switch(dimension.name)
+				switch (dimension.name)
 				{
 					case "RUN":
+					{
 						dimensionRunName = dimension.name;
 						break;
+					}
 					case "FORECAST":
+					{
 						dimensionForecastName = dimension.name;
 						break;
+					}
 					case "TIME":
+					{
 						dimensionTimeName = dimension.name;
 						break;
+					}
 					case "ELEVATION":
+					{
 						dimensionVerticalLevelName = dimension.name;
 						break;
+					}
 				}
 			}
 		}
@@ -347,42 +422,74 @@ package com.iblsoft.flexiweather.ogc
 		override public function getPreviewURL(): String
 		{
 			var s_url: String = '';
-			
-			if(ms_previewURL == null || ms_previewURL.length == 0) 
+			if (ms_previewURL == null || ms_previewURL.length == 0)
 			{
 				var iw: InteractiveWidget = new InteractiveWidget();
 				var lWMS: InteractiveLayerWMS = createInteractiveLayer(iw) as InteractiveLayerWMS;
-				if(lWMS != null)
+				if (lWMS != null)
 				{
 					var bbox: BBox = lWMS.getExtent();
-					if(bbox != null)
+					if (bbox != null)
 						iw.setExtentBBOX(bbox);
 					iw.addLayer(lWMS);
-					lWMS.dataLoader.data = { label: label, cfg: this };
+					lWMS.dataLoader.data = {label: label, cfg: this};
 					s_url = lWMS.getFullURLWithSize(150, 100);
-						
-				} else {
-					trace("getMenuLayersXMLList interactive layer does not exist");
 				}
-			} else {
-			
-				if(ms_previewURL == "<internal>") {
+				else
+					trace("getMenuLayersXMLList interactive layer does not exist");
+			}
+			else
+			{
+				if (ms_previewURL.indexOf("<internal>") >= 0)
+				{
 					if (service && ma_layerNames)
 					{
-						s_url = service.fullURL;
-						//check if there is ${BASE_URL} in fullURL and convert it
-						s_url = AbstractURLLoader.fromBaseURL(s_url);
-						s_url = s_url.replace(/.*\//, "").replace(/\?.*/, "");
-						s_url = s_url.replace("/", "-");
-						s_url += "-" + ma_layerNames.join("_").replace(" ", "-").toLowerCase();
-						s_url = "assets/layer-previews/" + s_url + ".png";
+						s_url = getInternalIconPath(s_url);
+					} else {
+						trace(this + " Problem find Internal Preview URL");
 					}
 				}
-			}	
+			}
+			
+			if (s_url == '' && ms_previewURL && ms_previewURL.length > 0)
+				return ms_previewURL;
 			
 			return s_url;
 		}
 		
+		protected function getInternalIconPath(s_url: String): String
+		{
+			/*
+			 this is code from generate-preview.py
+			*/
+			
+			/*
+			s_serviceURL = x_layer.getAttribute('service-url')
+			if s_serviceURL.find('?') < 0:
+				s_serviceURL += '?'
+			s_id = s_serviceURL.replace('${BASE_URL}/', '').replace('http://', '').replace('https://', '')
+			s_id = re.sub(r'\?.*', '', s_id)
+			s_serviceURL = s_serviceURL.replace('${BASE_URL}', s_baseURL)
+			s_layers = ','.join([x.firstChild.nodeValue for x in x_layer.getElementsByTagName('layer-name')])
+				s_id += "_" + s_layers
+			s_id = s_id.replace('/', '_').replace(',', '+')
+			*/
+			
+			s_url = service.fullURL;
+			s_url = s_url.replace(/\$\{BASE_URL\}\//, "").replace(/http:\/\//, "").replace(/https:\/\//, "");
+			var paramPos: int = s_url.indexOf("?");
+			if (paramPos > 0)
+			{
+				s_url = s_url.substr(0, paramPos);
+			}
+			s_url = s_url.replace(/\//gi, "_");
+			s_url += "_" + ma_layerNames.join("_").replace(" ", "-").toLowerCase();
+			s_url = "assets/layer-previews/" + s_url + ".png";
+			
+			return s_url;
+			
+		}
+
 		override public function renderPreview(f_width: Number, f_height: Number, iw: InteractiveWidget =  null): void
 		{
 			if (!iw)
@@ -413,11 +520,10 @@ package com.iblsoft.flexiweather.ogc
 		{ return s_behaviourId in ma_behaviours; }
 				
 		// getters & setters				
-		public function get service(): WMSServiceConfiguration
-		{ return WMSServiceConfiguration(m_service); }
-
-		public function set service(service: WMSServiceConfiguration): void 
-		{ m_service = service; }
+		public function get wmsService(): WMSServiceConfiguration
+		{
+			return m_service as WMSServiceConfiguration;
+		}
 
 		public function get behaviours(): Array
 		{ return ma_behaviours; }

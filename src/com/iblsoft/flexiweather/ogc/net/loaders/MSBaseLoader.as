@@ -8,6 +8,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 	import com.iblsoft.flexiweather.ogc.ExceptionUtils;
 	import com.iblsoft.flexiweather.ogc.IWMSLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
+	import com.iblsoft.flexiweather.ogc.WMSLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.cache.WMSCache;
 	import com.iblsoft.flexiweather.ogc.data.IViewProperties;
 	import com.iblsoft.flexiweather.ogc.data.IWMSViewPropertiesLoader;
@@ -132,11 +133,19 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 		 */		
 		private function updateDataPart(wmsViewProperties: WMSViewProperties, currentViewBBox: BBox, i_width: uint, i_height: uint, b_forceUpdate: Boolean): void
 		{
-			var request: URLRequest = (m_layer.configuration as IWMSLayerConfiguration).toGetMapRequest(
-				wmsViewProperties.crs, currentViewBBox.toBBOXString(),
-				i_width, i_height,
-				m_layer.getWMSStyleListString());
+			var wmsLayerConfiguration: WMSLayerConfiguration = (m_layer.configuration as WMSLayerConfiguration);
 			
+			var bbox: String;
+			if (Projection.hasCRSAxesFlippedByISO(wmsViewProperties.crs, wmsLayerConfiguration.service.version))
+			{
+				bbox = String(currentViewBBox.yMin) + "," + String(currentViewBBox.xMin) + "," + String(currentViewBBox.yMax) + "," + String(currentViewBBox.xMax);	
+			} else {
+				bbox = currentViewBBox.toBBOXString();
+			}
+			var request: URLRequest = wmsLayerConfiguration.toGetMapRequest(
+					wmsViewProperties.crs, bbox,
+					i_width, i_height,
+					m_layer.getWMSStyleListString());
 			if (!request)
 				return;
 			

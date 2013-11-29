@@ -2,6 +2,7 @@ package com.iblsoft.flexiweather.proj
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.ProjectionConfiguration;
+	import com.iblsoft.flexiweather.ogc.Version;
 	
 	import flash.geom.Point;
 	import flash.utils.Dictionary;
@@ -27,13 +28,22 @@ package com.iblsoft.flexiweather.proj
 				"CRS:84",
 				"+title=Geographic WGS84 +proj=longlat +ellps=WGS84 +datum=WGS84 +units=degrees",
 				new BBox(-180, -90, 180, 90), true);
+		Projection.addCRSByProj4(
+				"EPSG:4326", 
+				"+title=WGS 84 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +units=degrees", 
+				new BBox(-180, -90, 180, 90), true);
+		
+//		Projection.setCRSExtentBBox(
+//				'EPSG:900913',
+//				new BBox(-20037508.34, -20037508.34, 20037508.34, 20037508.34), true);
 		Projection.setCRSExtentBBox(
-				'EPSG:900913',
-				new BBox(-20037508.34, -20037508.34, 20037508.34, 20037508.34), true);
+				'CRS:84',
+				new BBox(-180, -90, 180, 90), true);
 
 		public function Projection(s_crs: String, extentBBox: BBox, b_wrapsHorizontally: Boolean): void
 		{
 			// internally the proj4as creates a dictionary cache of CRS -> ProjProjection pairs
+			s_crs = updateCRS(s_crs);
 			m_proj = ProjProjection.getProjProjection(s_crs);
 			if(m_proj == null)
 				Log.getLogger("Projection").error("Unknown CRS '" + s_crs + "'");
@@ -43,6 +53,14 @@ package com.iblsoft.flexiweather.proj
 			mb_wrapsHorizontally = b_wrapsHorizontally;
 		}
 		
+		static public function hasCRSAxesFlippedByISO(crs: String, version: Version): Boolean
+		{
+			if (crs == CRS_EPSG_GEOGRAPHIC && (version.equals(1,3,0) || !version.isLessThan(1,3,0)))
+				return true;
+			
+			return false;
+				
+		}
 		public static function isValidProjection(projection: Projection): Boolean
 		{
 //			trace("\n isValidProjection" + projection.crs + " valid");
@@ -71,6 +89,8 @@ package com.iblsoft.flexiweather.proj
 		 */		
 		public static function getByCRS(s_crs: String): Projection
 		{
+			s_crs = updateCRS(s_crs);
+			
 			var prj: Projection;
 			if(s_crs in m_cache)
 			{
@@ -102,6 +122,16 @@ package com.iblsoft.flexiweather.proj
 			return getByCRS(cfg.crs);
 		}
 		
+		private static function updateCRS(s_crs: String): String
+		{
+			s_crs = s_crs.toUpperCase();
+			while(s_crs.search(" ") != -1)
+			{
+				s_crs = (s_crs as String).replace(" ", "");
+			}
+			
+			return s_crs;
+		}
 		/**
 		 * @param s_crs
 		 * @param s_proj4String
@@ -113,6 +143,7 @@ package com.iblsoft.flexiweather.proj
 				s_crs: String, s_proj4String: String,
 				crsExtentBBox: BBox = null, b_crsWrapsHorizontally: Boolean = false): void
 		{
+			s_crs = updateCRS(s_crs);
 			ProjProjection.defs[s_crs] = s_proj4String;
 			md_crsToDetails[s_crs] = {
 				extentBBox: crsExtentBBox,
@@ -123,7 +154,9 @@ package com.iblsoft.flexiweather.proj
 		public static function setCRSExtentBBox(
 				s_crs: String, crsExtentBBox: BBox, b_crsWrapsHorizontally: Boolean = false): void
 		{
-			if(!(s_crs in md_crsToDetails))
+			s_crs = updateCRS(s_crs);
+			
+			if (!(s_crs in md_crsToDetails))
 				md_crsToDetails[s_crs] = {};
 			md_crsToDetails[s_crs].extentBBox = crsExtentBBox;
 			md_crsToDetails[s_crs].b_wrapsHorizontally = b_crsWrapsHorizontally;

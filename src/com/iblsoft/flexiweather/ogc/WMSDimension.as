@@ -1,55 +1,81 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceParsingManager;
 	import com.iblsoft.flexiweather.utils.Duration;
 	import com.iblsoft.flexiweather.utils.ISO8601Parser;
 	
 	import flash.utils.getTimer;
-	
-	public class WMSDimension
+
+	public class WMSDimension extends GetCapabilitiesXMLItem
 	{
-		private var ms_name: String;
 		private var ma_values: Array;
 		private var ms_units: String;
 		private var ms_default: String;
-
+		
 		/**
 		 * String representing values of dimensions as found in the GetCapabilities document.
 		 * It will be parsed if the values getter is invoked.
 		 **/
 		private var ms_values: String = null;
 		private var mb_valuesHaveToBeParsed: Boolean = true;
-
 		protected static var sm_dateTimeParser: ISO8601Parser = new ISO8601Parser();
-		
+
 		public function WMSDimension(xml: XML, wms: Namespace, version: Version)
 		{
-			ms_name = xml.@name;
+			super(xml, wms, version);
+			
 			// in WMS 1.3.0 dimension values are inside of <Dimension> element
 			ms_units = xml.@units;
-			if(!version.isLessThan(1, 3, 0))
-				loadExtent(xml, wms, version);
+			ms_name = xml.@name;
+		}
+		
+//		override public function initialize(): void
+//		{
+//			super.initialize();
+//		}			
+		
+		override public function parse(parsingManager: WMSServiceParsingManager = null): void
+		{
+			super.parse();
+			
+			// in WMS < 1.3.0, dimension values are inside of <Extent> element
+			// having the same @name as the <Dimension> element
+			if (m_version.isLessThan(1, 3, 0))
+			{
+				for each (var elemExtent: XML in m_itemXML.wms::Extent)
+				{
+					if (elemExtent.@name == name)
+					{
+						loadExtent(elemExtent, wms, m_version);
+						break;
+					}
+				}
+			} else {
+				//parse WMS1.3.0 dimension
+				loadExtent(m_itemXML, wms, m_version);
+			}
+			
+			
 		}
 
 		public function destroy(): void
 		{
 			if (ma_values && ma_values.length > 0)
-			{
 				ma_values = null;
-			}
-//			sm_dateTimeParser = null;
+			//			sm_dateTimeParser = null;
 		}
-		
+
 		public function equals(other: WMSDimension): Boolean
 		{
-			if(other == null)
+			if (other == null)
 				return false;
-			if(ms_name != other.ms_name)
+			if (ms_name != other.ms_name)
 				return false;
-			if(ms_units != other.ms_units)
+			if (ms_units != other.ms_units)
 				return false;
-			if(ms_values != other.ms_values)
+			if (ms_values != other.ms_values)
 				return false;
-			if(ms_default != other.ms_default)
+			if (ms_default != other.ms_default)
 				return false;
 			return true;
 		}
@@ -57,23 +83,26 @@ package com.iblsoft.flexiweather.ogc
 		public function loadExtent(xml: XML, wms: Namespace, version: Version): void
 		{
 			ms_default = xml.@default;
-
 			var s: String = String(xml);
-			if(ms_values == null)
+			if (ms_values == null)
 				ms_values = s;
-			else {
+			else
+			{
 				ms_values += ",";
 				ms_values + s;
 			}
 			mb_valuesHaveToBeParsed = true;
 		}
-		
+
 		private function parseData(): void
 		{
-			var arr: Array = ms_values == null ? [] : ms_values.split(",");
+			if (!mb_isParsed)
+				parse();
 			
+			var arr: Array = ms_values == null ? [] : ms_values.split(",");
 			ma_values = [];
-			for each(var s_value: String in arr) {
+			for each (var s_value: String in arr)
+			{
 				// Strip white spaces to workaround " , " separation used in
 				// http://openmetoc.met.no/metoc/metocwms?request=GetCapabilities&VERSION=1.1.1 
 				s_value = s_value.replace(/\s+\Z/, '').replace(/\A\s+/, '');
@@ -180,34 +209,33 @@ package com.iblsoft.flexiweather.ogc
 			// default operation
 			a_values.push({label: s_label, value: s_value, data: data});
 		}
-		
+
 		public static function stringValueToObject(s_value: String, s_units: String): Object
 		{
 			var a: Array = [];
 			stringValueToObjects(a, s_value, s_units);
-			if(a.length > 0)
+			if (a.length > 0)
 				return a[0];
 			return null;
 		}
 
-		public function get name(): String
-		{ return ms_name; }
-
 		public function get values(): Array
 		{
-			if(mb_valuesHaveToBeParsed)
+			if (mb_valuesHaveToBeParsed)
 				parseData();
 			return ma_values;
 		}
-		
+
 		public function get units(): String
 		{
 			return ms_units;
 		}
+
 		public function get defaultValue(): String
 		{
+			if (mb_valuesHaveToBeParsed)
+				parseData();
 			return ms_default;
 		}
-
 	}
 }

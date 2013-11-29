@@ -58,15 +58,23 @@ package com.iblsoft.flexiweather.ogc.data
 //		public var cache: ICache;
 //		
 		public var name: String;
-		
-		protected var m_cfg: IWMSLayerConfiguration;
-		
+		private var _m_cfg: IWMSLayerConfiguration;
 		protected var md_dimensionValues: Dictionary = new Dictionary();
 		protected var md_customParameters: Dictionary = new Dictionary(); 
 		protected var ma_subLayerStyleNames: Array = [];
 		
 		
 		protected var ma_imageParts: ArrayCollection = new ArrayCollection(); // of ImagePart
+
+		public function get m_cfg(): IWMSLayerConfiguration
+		{
+			return _m_cfg;
+		}
+
+		public function set m_cfg(value: IWMSLayerConfiguration): void
+		{
+			_m_cfg = value;
+		}
 		public function get imageParts(): ArrayCollection
 		{
 			return ma_imageParts;
@@ -288,13 +296,18 @@ package com.iblsoft.flexiweather.ogc.data
 		
 		public function getWMSLayers(): Array
 		{
-			var a: Array = [];
-			for each(var s_layerName: String in m_cfg.layerNames) {
-				var layer: WMSLayer = m_cfg.service.getLayerByName(s_layerName);
-				if(layer != null)
-					a.push(layer);
+			if (m_cfg)
+			{
+				var a: Array = [];
+				for each (var s_layerName: String in m_cfg.layerNames)
+				{
+					var layer: WMSLayer = m_cfg.wmsService.getLayerByName(s_layerName);
+					if (layer != null)
+						a.push(layer);
+				}
+				return a;
 			}
-			return a;
+			return [];
 		}
 		
 		public function getWMSDimensionsNames(): Array
