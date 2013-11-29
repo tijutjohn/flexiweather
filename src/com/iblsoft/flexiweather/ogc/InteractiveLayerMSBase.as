@@ -777,7 +777,7 @@ package com.iblsoft.flexiweather.ogc
 						_loader.addEventListener(InteractiveLayerEvent.INVALIDATE_DYNAMIC_PART, onCurrentWMSDataInvalidateDynamicPart);
 					}
 					
-					//here is problem that m_currentWMSViewProperties has crs EPSG:102021 and viewBBox from CRS:84
+					//here is problem that m_currentWMSViewProperties has crs ESRI:102021 and viewBBox from CRS:84
 					_loader.updateWMSData(b_forceUpdate, m_currentWMSViewProperties, forcedLayerWidth, forcedLayerHeight, printQuality);
 				}
 			}
