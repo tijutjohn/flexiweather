@@ -7,6 +7,7 @@ package com.iblsoft.flexiweather.ogc.configuration
 	import com.iblsoft.flexiweather.ogc.managers.AreaConfigurationManager;
 	import com.iblsoft.flexiweather.ogc.managers.OGCServiceConfigurationManager;
 	import com.iblsoft.flexiweather.ogc.managers.ProjectionConfigurationManager;
+	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	
@@ -81,11 +82,23 @@ package com.iblsoft.flexiweather.ogc.configuration
 				url = "${BASE_URL}/ria";
 			}
 			url += "?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=background-dem,foreground-lines&STYLES=bright-colours,black-lines-dotted&CRS=" + projection.crs;
+
+			var currentViewBBox: BBox;
+			var bbox: String;
 			
 			if (!_thumbBBox)
-				url += "&BBOX=" + projection.bbox.toBBOXString();
+				currentViewBBox = projection.bbox;
 			else
-				url += "&BBOX=" + _thumbBBox.toBBOXString();
+				currentViewBBox = _thumbBBox;
+			
+			if (Projection.hasCRSAxesFlippedByISO(projection.crs, serviceRIA.version))
+			{
+				bbox = String(currentViewBBox.yMin) + "," + String(currentViewBBox.xMin) + "," + String(currentViewBBox.yMax) + "," + String(currentViewBBox.xMax);	
+			} else {
+				bbox = currentViewBBox.toBBOXString();
+			}
+			
+			url += "&BBOX=" + bbox;
 			url += "&WIDTH=" + w + "&HEIGHT=" + h + "&FORMAT=image/png&TRANSPARENT=TRUE";
 			url = AbstractURLLoader.fromBaseURL(url);
 			return url;
