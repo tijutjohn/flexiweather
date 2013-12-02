@@ -96,7 +96,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				
 				//FIXME fix this commented line
 //				displaySpriteWithAnnotation.update(this, blackColor, master.container.labelLayout, pt);
-				displaySpriteWithAnnotation.update(this, annotation, 0, master.container.labelLayout, pt);
+				displaySpriteWithAnnotation.update(this, annotation, getCurrentColor(0x000000), master.container.labelLayout, pt);
 				
 				
 				//				radiationSprite.x = Point(reflection.points[0]).x;

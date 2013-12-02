@@ -22,6 +22,11 @@ package com.iblsoft.flexiweather.symbology
 			mi_color = i_color;
 			mf_alpha = f_alpha;
 		}
+		
+		public function setColor(color: uint): void
+		{
+			mi_color = color;
+		}
 
 		override public function started(x: Number, y: Number): void
 		{
