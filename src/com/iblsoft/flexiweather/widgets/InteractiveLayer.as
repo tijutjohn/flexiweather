@@ -15,8 +15,6 @@ package com.iblsoft.flexiweather.widgets
 	import mx.events.EffectEvent;
 	import mx.events.FlexEvent;
 	
-	import spark.components.Group;
-
 	[Event(name = "layerInitialized", type = "com.iblsoft.flexiweather.events.InteractiveLayerEvent")]
 	public class InteractiveLayer extends UIComponent
 	{
@@ -58,7 +56,7 @@ package com.iblsoft.flexiweather.widgets
 		private var mb_dynamicPartInvalid: Boolean = false;
 		private var mi_zOrder: int = 0;
 		protected var m_legendCallBack: Function;
-		protected var m_legendGroup: Group;
+		protected var m_legendGroup: InteractiveLayerLegendGroup;
 		protected var m_legendLabelAlign: String;
 		
 		[Bindable]
@@ -87,7 +85,7 @@ package com.iblsoft.flexiweather.widgets
 			_forcedLayerHeight = value;
 		}
 
-		public function get legendGroup(): Group
+		public function get legendGroup(): InteractiveLayerLegendGroup
 		{
 			return m_legendGroup;
 		}
@@ -409,11 +407,11 @@ package com.iblsoft.flexiweather.widgets
 		{
 		}
 
-		public function removeLegend(group: Group): void
+		public function removeLegend(group: InteractiveLayerLegendGroup): void
 		{
 		}
 
-		public function renderLegend(group: Group, callback: Function, legendScaleX: Number, legendScaleY: Number, labelAlign: String = 'left', useCache: Boolean = false, hintSize: Rectangle = null): Rectangle
+		public function renderLegend(group: InteractiveLayerLegendGroup, callback: Function, legendScaleX: Number, legendScaleY: Number, labelAlign: String = 'left', useCache: Boolean = false, hintSize: Rectangle = null): Rectangle
 		{
 			return new Rectangle();
 		}

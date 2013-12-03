@@ -43,6 +43,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
+	import com.iblsoft.flexiweather.widgets.InteractiveLayerLegendGroup;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerLegendImage;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	import com.iblsoft.flexiweather.widgets.data.InteractiveLayerPrintQuality;
@@ -1062,11 +1063,9 @@ package com.iblsoft.flexiweather.ogc
 			return false;
 		}
 
-		override public function removeLegend(group: Group): void
+		override public function removeLegend(group: InteractiveLayerLegendGroup): void
 		{
 			super.removeLegend(group);
-//			if (m_currentWMSViewProperties)
-//				return m_currentWMSViewProperties.removeLegend(group);
 			if (group)
 			{
 				while (group.numElements > 0)
@@ -1112,7 +1111,7 @@ package com.iblsoft.flexiweather.ogc
 		 * @return
 		 *
 		 */
-		override public function renderLegend(group: Group, callback: Function, legendScaleX: Number, legendScaleY: Number, labelAlign: String = 'left', useCache: Boolean = false, hintSize: Rectangle = null): Rectangle
+		override public function renderLegend(group: InteractiveLayerLegendGroup, callback: Function, legendScaleX: Number, legendScaleY: Number, labelAlign: String = 'left', useCache: Boolean = false, hintSize: Rectangle = null): Rectangle
 		{
 			var styleName: String = getWMSStyleName(0);
 			if (!styleName)
@@ -1183,7 +1182,7 @@ package com.iblsoft.flexiweather.ogc
 		 * @param useCache
 		 *
 		 */
-		private function createLegend(bitmap: Bitmap, group: Group, labelAlign: String, callback: Function, legendScaleX: Number, legendScaleY: Number, origWidth: int, origHeight: int): void
+		private function createLegend(bitmap: Bitmap, group: InteractiveLayerLegendGroup, labelAlign: String, callback: Function, legendScaleX: Number, legendScaleY: Number, origWidth: int, origHeight: int): void
 		{
 			var gap: int = 2;
 			var labelHeight: int = 12;

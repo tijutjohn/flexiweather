@@ -41,7 +41,7 @@ package com.iblsoft.flexiweather.widgets
 			legendID = _uid++;
 			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
 			addEventListener(Event.REMOVED_FROM_STAGE, onRemovedFromStage);
-//			addEventListener(MouseEvent.CLICK, onMouseClick);
+			addEventListener(MouseEvent.CLICK, onMouseClick);
 		}
 		
 		private function onAddedToStage(event: Event): void
@@ -55,6 +55,7 @@ package com.iblsoft.flexiweather.widgets
 		
 		private function onMouseClick(event: MouseEvent): void
 		{
+			trace("legend click");
 		}
 		
 		public function clone(): InteractiveLayerLegendImage

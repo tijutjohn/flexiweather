@@ -11,7 +11,7 @@ package com.iblsoft.flexiweather.widgets
 		public static const LEGEND_ROLLOUT: String = 'legendRollout';
 		
 		public var legend: InteractiveLayerLegendImage;
-		public var legendGroup: Group;
+		public var legendGroup: InteractiveLayerLegendGroup;
 		
 		public function InteractiveLayerLegendEvent(type:String, legend: InteractiveLayerLegendImage, bubbles:Boolean=false, cancelable:Boolean=false)
 		{

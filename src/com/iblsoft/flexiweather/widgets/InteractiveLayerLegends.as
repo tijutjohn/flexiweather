@@ -65,6 +65,17 @@ package com.iblsoft.flexiweather.widgets
 		public static const LEGENDS_LAYERING_STARTED: String = 'legendsLayeringStarted';
 		public static const LEGENDS_LAYERING_FINISHED: String = 'legendsLayeringFinished';
 		
+		
+		override public function set mouseEnabled(enabled:Boolean):void
+		{
+			super.mouseEnabled = enabled;
+		}
+		
+		override public function set mouseChildren(enable:Boolean):void
+		{
+			super.mouseChildren = enable;
+		}
+		
 		internal var m_layers: ArrayCollection = new ArrayCollection();
 		private var _legendsLoadingCount: int;
 		private var _legendsAlreadyLoaded: int;
@@ -372,7 +383,7 @@ package com.iblsoft.flexiweather.widgets
 
 		private function onLegendGroupClick(event: MouseEvent): void
 		{
-			var group: InteractiveLayerLegendGroup = event.target as InteractiveLayerLegendGroup;
+			var group: InteractiveLayerLegendGroup = event.currentTarget as InteractiveLayerLegendGroup;
 			if (group)
 			{
 				var legend: InteractiveLayerLegendImage = getLegendImageFromGroup(group);
