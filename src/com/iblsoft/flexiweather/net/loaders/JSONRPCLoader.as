@@ -20,6 +20,16 @@ package com.iblsoft.flexiweather.net.loaders
 			super();
 		}
 
+		/**
+		 * Decode JSON RPC response
+		 *  
+		 * @param rawData
+		 * @param urlLoader
+		 * @param urlRequest
+		 * @param resultCallback
+		 * @param errorCallback
+		 * 
+		 */		
 		override protected function decodeResult(rawData: ByteArray, urlLoader: URLLoaderWithAssociatedData, urlRequest: URLRequest, resultCallback: Function, errorCallback: Function): void
 		{
 			var data: String = cloneByteArrayToString(rawData);
@@ -41,7 +51,8 @@ package com.iblsoft.flexiweather.net.loaders
 						{
 							errorMessage = errorMessage.substr(0, ERROR_MESSAGE_MAXIMUM_LENGTH - 3) + "...";
 						}
-						errorCallback("JSON Loader error: Result is RPC strict JSON, but error was returned: " + errorMessage, errorCode, json['error'], urlRequest, urlLoader.associatedData);
+//						errorCallback("JSON Loader error: Result is RPC strict JSON, but error was returned: " + errorMessage, errorCode, json['error'], urlRequest, urlLoader.associatedData);
+						errorCallback(errorMessage, errorCode, json['error'], urlRequest, urlLoader.associatedData);
 					}
 				}
 				else
