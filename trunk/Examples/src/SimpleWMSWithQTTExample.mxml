@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FlexiWeatherTemplate xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:widgets="com.iblsoft.flexiweather.widgets.*" 
+			   xmlns="*"
+			   xmlns:mx="library://ns.adobe.com/flex/mx" minWidth="955" minHeight="600" 
+			   xmlns:tiling="com.iblsoft.flexiweather.ogc.tiling.*"
+			   xmlns:layers="com.iblsoft.flexiweather.ogc.configuration.layers.*" xmlns:ogc="com.iblsoft.flexiweather.ogc.*">
+	
+	<fx:Declarations>
+		<layers:WMSWithQTTLayerConfiguration id="lcqt" service="{serviceRIA}" label="Backgrounds/DEM" layerNames="['background-dem']" />
+		<layers:WMSWithQTTLayerConfiguration id="lcqt2" service="{serviceRIA}" label="Foreground" layerNames="['foreground-lines']" />
+		<layers:WMSWithQTTLayerConfiguration id="lcqt3" service="{serviceGFS}" label="Temperature" layerNames="['temperature']" 
+											 dimensionRunName="RUN" dimensionForecastName="FORECAST"
+											 avoidTiling="true"/>
+		<layers:WMSLayerConfiguration id="wmsConfig1" service="{serviceGFS}" label="Temperature" layerNames="['temperature']"
+											 dimensionRunName="RUN" dimensionForecastName="FORECAST"/>
+	</fx:Declarations>	
+	
+	<widgets:InteractiveWidget minWidth="400" width="80%" height="100%" id="m_iw">
+		<widgets:InteractiveLayerNorthIndicator/>
+		<widgets:InteractiveLayerZoom zOrder="10"/>
+		<widgets:InteractiveLayerPan zOrder="10"/>
+		
+		<widgets:InteractiveLayerMap>
+			<tiling:InteractiveLayerWMSWithQTT configuration="{lcqt}" name="DEMBackground" zOrder="-10"/>
+			<tiling:InteractiveLayerWMSWithQTT configuration="{lcqt3}" name="Temperature" zOrder="5" alpha="0"/>
+			<ogc:InteractiveLayerWMS configuration="{wmsConfig1}" name="Temp2" zOrder="6" alpha="0.5"/>
+			<tiling:InteractiveLayerWMSWithQTT configuration="{lcqt2}" name="Foreground" zOrder="9"/>
+		</widgets:InteractiveLayerMap>
+	</widgets:InteractiveWidget>
+
+	<fx:Script>
+		<![CDATA[
+			import com.iblsoft.flexiweather.ogc.configuration.layers.WMSWithQTTLayerConfiguration;
+			import com.iblsoft.flexiweather.ogc.events.ServiceCapabilitiesEvent;
+			import com.iblsoft.flexiweather.ogc.tiling.InteractiveLayerWMSWithQTT;
+			import com.iblsoft.flexiweather.proj.Projection;
+			
+			import mx.events.FlexEvent;
+			override protected function onCreationComplete(event: FlexEvent): void
+			{
+				super.onCreationComplete(event);
+				
+				m_iw.setCRSExtentAndViewBBox(Projection.CRS_EPSG_GEOGRAPHIC);
+			
+				getAllServicesCapabilities();
+			}
+			
+			override protected function onAllCapabilitiesUpdated(event: ServiceCapabilitiesEvent): void
+			{
+//				addBackground();
+			}
+			
+			private function addBackground(): void
+			{
+				trace("FlexiWeatherTemplate onAllCapabilitiesUpdated");
+				
+				/*
+				var lcqt: WMSWithQTTLayerConfiguration;
+				lcqt = new WMSWithQTTLayerConfiguration(serviceRIA, ["background-dem"]);
+				lcqt.label = "Backgrounds/DEM";
+				
+				var layerBackground: InteractiveLayerWMSWithQTT = new InteractiveLayerWMSWithQTT(m_iw, lcqt);
+//				var layerBackground: InteractiveLayerWMSWithQTT = lcqt.createInteractiveLayer(m_iw) as InteractiveLayerWMSWithQTT;
+				layerBackground.setWMSStyleName(0, "white-colours");
+				layerBackground.name = 'DEMBackground';
+				layerBackground.zOrder = -10;
+				m_iw.addLayer(layerBackground);
+//				m_iw.interactiveLayerMap.addLayer(layerBackground);
+//				layerBackground.refresh(true);
+				*/
+			}
+			override protected function onCapabilitiesUpdated(event: ServiceCapabilitiesEvent): void
+			{
+				trace("FlexiWeatherTemplate onCapabilitiesUpdated");
+			}
+		]]>
+	</fx:Script>
+</FlexiWeatherTemplate>

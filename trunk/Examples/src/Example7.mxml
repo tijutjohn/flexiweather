@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:s="library://ns.adobe.com/flex/spark" xmlns:mx="library://ns.adobe.com/flex/mx"
+		creationComplete="onCreationComplete(event)"
+		xmlns:widgets="com.iblsoft.flexiweather.widgets.*" minWidth="955" minHeight="600"
+		skinClass="spark.skins.spark.ApplicationSkin">
+	<fx:Declarations>
+
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:VGroup width="100%" height="100%" paddingTop="10" paddingBottom="10" paddingLeft="10"
+			paddingRight="10">
+		<s:HGroup id="hboxCaption" width="100%" verticalAlign="middle">
+			<s:Label 
+					text="This example demonstrates preloading of multiple layers and shows correct behaviour of InteractiveWidget InteractiveLayerEvent.ALL_DATA_LAYERS_LOADED event."/>
+			<s:Label id="labelProgress" textAlign="right" fontWeight="bold"/>
+		</s:HGroup>
+		<s:HGroup width="100%" verticalAlign="middle">
+			<s:Label text="Add layer:"/>
+			<s:Button label="DEM" click="addLayer('dem')"/>
+			<s:Button label="Temperature" click="addLayer('temperature')"/>
+			<s:Button label="Pressure" click="addLayer('pressure')"/>
+			<s:Button label="Wind" click="addLayer('wind')"/>
+			<s:Button label="Borders" click="addLayer('foreground')"/>
+			<s:ButtonBar id="bbLayerType" dataProvider="{layerTypes}"
+					change="currentLabelTypeChanged(bbLayerType.selectedItem)"/>
+			<s:CheckBox label="Create tiled layers for WMS with QTT"
+					selected="{createTiledLayers}"
+					change="wmsWithQTTTilingChange(event.target as CheckBox)"/>
+
+			<!-- uncomment this code if you want to check unloading InteractiveWidget and services -->
+
+			<!--s:HGroup width="100%" horizontalAlign="right">
+				<s:Label text="Debug purposes for checking profiler after destroying InteractiveWidget and services"/>
+				<s:Button label="Destroy all" click="destroyAll()"/>
+			</s:HGroup-->
+		</s:HGroup>
+		<s:HGroup width="100%" height="100%" verticalAlign="middle">
+			<s:List id="layerList" dataProvider="{layers}" height="100%" width="350">
+				<s:itemRenderer>
+					<fx:Component>
+						<s:ItemRenderer width="100%">
+							<fx:Script>
+								<![CDATA[
+									import com.iblsoft.flexiweather.widgets.InteractiveLayer;
+									
+									import mx.events.DynamicEvent;
+
+									private function removeLayer(layer: InteractiveLayer): void
+									{
+										trace("remove layer: " + layer.name);
+										var de: DynamicEvent = new DynamicEvent("removeLayer", true);
+										de['layer'] = layer;
+										(this as ItemRenderer).dispatchEvent(de);
+									}
+								]]>
+							</fx:Script>
+							<s:HGroup width="100%" paddingBottom="5" paddingLeft="5"
+									paddingRight="5" paddingTop="5" verticalAlign="bottom">
+								<s:Label text="{data.name}" width="100%" fontWeight="bold"/>
+								<s:Button label="Remove"
+										click="removeLayer(InteractiveLayer(data))"/>
+							</s:HGroup>
+						</s:ItemRenderer>
+					</fx:Component>
+				</s:itemRenderer>
+			</s:List>
+			<s:VGroup width="100%" height="100%">
+				<widgets:InteractiveWidget id="m_iw" width="100%" height="100%"
+						allDataLayersLoaded="onAllLayersLoaded(event)"
+						dataLayerLoadingStarted="dataLayerLoadingStarted(event)"
+						dataLayerLoadingFinished="dataLayerLoadingFinished(event)">
+					<widgets:InteractiveLayerZoom id="m_ilz" zOrder="1"/>
+					<widgets:InteractiveLayerPan id="m_ilp" zOrder="2"/>
+				</widgets:InteractiveWidget>
+				<s:Label text="Debug text area to see loading events information"/>
+				<s:TextArea id="output" width="100%" heightInLines="10" fontSize="13"/>
+			</s:VGroup>
+		</s:HGroup>
+	</s:VGroup>
+	<fx:Script>
+		<![CDATA[
+			import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
+			import com.iblsoft.flexiweather.ogc.configuration.layers.WMSWithQTTLayerConfiguration;
+			import com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration;
+			import com.iblsoft.flexiweather.ogc.configuration.layers.QTTMSLayerConfiguration;
+			import com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceConfiguration;
+			import com.iblsoft.flexiweather.ogc.configuration.layers.LayerConfiguration;
+			import mx.core.InteractionMode;
+			import mx.events.DynamicEvent;
+			import com.iblsoft.flexiweather.events.InteractiveWidgetEvent;
+			import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
+			import com.iblsoft.flexiweather.ogc.managers.OGCServiceConfigurationManager;
+			import com.iblsoft.flexiweather.ogc.Version;
+			import com.iblsoft.flexiweather.ogc.tiling.InteractiveLayerWMSWithQTT;
+			import com.iblsoft.flexiweather.widgets.BackgroundJobManager;
+			import com.iblsoft.flexiweather.widgets.InteractiveLayer;
+			import com.iblsoft.flexiweather.widgets.LabelJobProgressIndicator;
+			import mx.collections.ArrayCollection;
+			[Bindable]
+			public var layers: ArrayCollection;
+			[Bindable]
+			public var currentLabelType: String;
+			[Bindable]
+			public var labelWidth: int = 220;
+			[Bindable]
+			public var createTiledLayers: Boolean;
+			[Bindable]
+			public var layerTypes: ArrayCollection = new ArrayCollection(String("WMS,WMSWithQTT,QTTMS").split(","));
+			private var scm: OGCServiceConfigurationManager;
+			private var serviceRIA: WMSServiceConfiguration;
+			private var serviceGFS: WMSServiceConfiguration;
+
+			private function writeToOutput(txt: String): void
+			{
+				output.text = txt + "\n" + output.text;
+			}
+
+			private function dataLayerLoadingStarted(event: InteractiveWidgetEvent): void
+			{
+				writeToOutput("Layer starts loading. Currently layers loading: " + event.layersLoading);
+			}
+
+			private function dataLayerLoadingFinished(event: InteractiveWidgetEvent): void
+			{
+				writeToOutput("Layer finished loading. Currently layers loading: " + event.layersLoading);
+			}
+
+			private function onAllLayersLoaded(event: InteractiveWidgetEvent): void
+			{
+				writeToOutput("ALL LAYERS ARE LOADED ");
+			}
+
+			private function destroyAll(): void
+			{
+				scm.destroy();
+				serviceRIA = null;
+				serviceGFS = null;
+				m_iw.removeLayer(m_ilp);
+				m_iw.removeLayer(m_ilz);
+				m_ilp.destroy();
+				m_ilz.destroy();
+				m_iw.destroy();
+			}
+
+			private function onLayerRemove(event: DynamicEvent): void
+			{
+				var layer: InteractiveLayer = event['layer'] as InteractiveLayer;
+				var id: int = layers.getItemIndex(layer);
+				if (id > -1)
+				{
+					layers.removeItemAt(id);
+					m_iw.removeLayer(layer, true);
+				}
+				layer = null;
+			}
+
+			/**
+			 * Initialization of example. Temperature layer creation, call get capabilities
+			 */
+			private function onCreationComplete(event: Event): void
+			{
+//				if(Capabilities.playerType == "Desktop")
+//					BackgroundJobManager.getInstance().m_progressBar = new LabelJobProgressIndicator(labelProgress);
+//				else {
+//					BackgroundJobManager.getInstance().createDefaultPreloader();
+//					BackgroundJobManager.getInstance().setupIndicator(hboxCaption);
+//				}
+				layers = new ArrayCollection();
+				layerList.addEventListener('removeLayer', onLayerRemove);
+				m_iw.setCRSExtentAndViewBBox('EPSG:900913');
+				
+				var s_serverURL: String = 'http://ogcie.iblsoft.com';
+				
+				scm = OGCServiceConfigurationManager.getInstance();
+				serviceRIA = scm.getService("ria", s_serverURL + "/ria", new Version(1, 3, 0), WMSServiceConfiguration) as WMSServiceConfiguration;
+				serviceGFS = scm.getService("gfs", s_serverURL + "/ncep/gfs", new Version(1, 3, 0), WMSServiceConfiguration) as WMSServiceConfiguration;
+				
+				var map: InteractiveLayerMap = new InteractiveLayerMap();
+				m_iw.addLayer(map);
+				
+				scm.update(scm.getAllServicesNames());
+				InteractiveLayerWMSWithQTT.avoidTilingForAllLayers = createTiledLayers;
+			}
+
+			private function getWMSLayerConfiguration(type: String): WMSServiceConfiguration
+			{
+				var srv: WMSServiceConfiguration
+				switch (type)
+				{
+					case 'ria':
+						return serviceRIA;
+					case 'gfs':
+						return serviceGFS;
+				}
+				return null;
+			}
+
+			private function wmsWithQTTTilingChange(checkbox: CheckBox): void
+			{
+				createTiledLayers = checkbox.selected;
+				InteractiveLayerWMSWithQTT.avoidTilingForAllLayers = !createTiledLayers
+			}
+
+			private function currentLabelTypeChanged(newType: String): void
+			{
+				currentLabelType = newType;
+			}
+
+			private function createLayerConfiguration(srv: WMSServiceConfiguration, layerNames: Array): LayerConfiguration
+			{
+				switch (currentLabelType)
+				{
+					case "WMS":
+					default:
+						return new WMSLayerConfiguration(srv, layerNames);
+					case "WMSWithQTT":
+						return new WMSWithQTTLayerConfiguration(srv, layerNames);
+					case "QTTMS":
+						return new QTTMSLayerConfiguration();
+				}
+				return new WMSLayerConfiguration(srv, layerNames);
+			}
+
+			private function addLayer(type: String): void
+			{
+				var lWMS: InteractiveLayer;
+				var srv: WMSServiceConfiguration;
+				var lc: LayerConfiguration;
+				switch (type)
+				{
+					case 'dem':
+					{
+						srv = getWMSLayerConfiguration('ria');
+						lc = createLayerConfiguration(srv, ["background-dem"]);
+						lc.label = "Background";
+						lWMS = lc.createInteractiveLayer(m_iw) as InteractiveLayer;
+						m_iw.interactiveLayerMap.addLayer(lWMS);
+						lWMS.name = 'Background';
+//						lWMS.refresh(true);
+						break;
+					}
+					case 'temperature':
+					{
+						srv = getWMSLayerConfiguration('gfs');
+						lc = createLayerConfiguration(srv, ["temperature"]);
+						lc.label = "Temperature";
+						lWMS = lc.createInteractiveLayer(m_iw) as InteractiveLayer;
+						m_iw.interactiveLayerMap.addLayer(lWMS);
+						lWMS.name = 'Temperature';
+						lWMS.zOrder = 0;
+//						lWMS.refresh(true);
+						break;
+					}
+					case 'pressure':
+					{
+						srv = getWMSLayerConfiguration('gfs');
+						lc = createLayerConfiguration(srv, ["msl-pressure"]);
+						lc.label = "Pressure";
+						lWMS = lc.createInteractiveLayer(m_iw) as InteractiveLayer;
+						m_iw.interactiveLayerMap.addLayer(lWMS);
+						lWMS.name = 'Pressure';
+						lWMS.zOrder = 0;
+//						lWMS.refresh(true);
+						break;
+					}
+					case 'wind':
+					{
+						srv = getWMSLayerConfiguration('gfs');
+						lc = createLayerConfiguration(srv, ["wind"]);
+						lc.label = "Windbarbs";
+						lWMS = lc.createInteractiveLayer(m_iw) as InteractiveLayer;
+						m_iw.interactiveLayerMap.addLayer(lWMS);
+						lWMS.name = 'Wind';
+						lWMS.zOrder = 0;
+//						lWMS.refresh(true);
+						break;
+					}
+					case 'foreground':
+					{
+						srv = getWMSLayerConfiguration('ria');
+						lc = createLayerConfiguration(srv, ["foreground-lines"]);
+						lc.label = "Overlays/Border lines";
+						lWMS = lc.createInteractiveLayer(m_iw) as InteractiveLayerWMS;
+						m_iw.interactiveLayerMap.addLayer(lWMS);
+						lWMS.name = 'Borders';
+//						lWMS.refresh(true);
+						break;
+					}
+				}
+				layers.addItem(lWMS);
+			}
+		]]>
+	</fx:Script>
+</s:Application>

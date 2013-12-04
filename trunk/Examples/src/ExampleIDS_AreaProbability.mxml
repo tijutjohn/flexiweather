@@ -1,0 +1,520 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FlexiWeatherTemplate xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:s="library://ns.adobe.com/flex/spark" xmlns:mx="library://ns.adobe.com/flex/mx"
+		xmlns="*" xmlns:widgets="com.iblsoft.flexiweather.widgets.*"
+		xmlns:utils="com.iblsoft.utils.*">
+	<fx:Declarations>
+
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:VGroup width="100%" height="100%" gap="2" paddingTop="10" paddingBottom="10"
+			paddingLeft="10" paddingRight="10">
+		<s:HGroup width="100%" id="hboxCaption">
+			<s:CheckBox id="m_showLegendCheckBox" selected="false" label="Show legend"/>
+			<s:Spacer width="100%"/>
+			<s:Label id="m_labelProgress" textAlign="right" fontWeight="bold"/>
+		</s:HGroup>
+		<s:TextArea id="m_legendTextArea" height="150" width="100%" editable="false"
+				visible="{m_showLegendCheckBox.selected}"
+				includeInLayout="{m_showLegendCheckBox.selected}"/>
+		<s:HGroup width="100%" height="100%">
+			<widgets:InteractiveWidget id="m_iw" width="100%" height="100%"
+					contentBackgroundAlpha="0">
+				<widgets:InteractiveLayerZoom id="m_ilzoom" zOrder="1"/>
+				<widgets:InteractiveLayerPan id="m_ilpan" zOrder="2"/>
+				<utils:InteractiveLayerPolygons id="m_ilPolygons" zOrder="3"/>
+				<utils:InteractiveLayerLabels id="m_ilGridPointsLabels" zOrder="4"/>
+				<utils:InteractiveLayerLabels id="m_ilAreaProbLabels" zOrder="5"/>
+			</widgets:InteractiveWidget>
+			<s:VGroup>
+				<s:Button label="Clear all" id="m_clearAllButton" click="clearAll()"/>
+				<s:Button label="Clear recent polygon" id="m_clearRecentPolygonButton"
+						click="clearRecentPolygon()"/>
+				<s:Spacer height="20"/>
+				<s:HGroup verticalAlign="middle">
+					<s:Label text="Run:"/>
+					<s:DropDownList id="m_runComboBox" dataProvider="{ma_runs}"
+							change="onSelectedRunChanged()"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle">
+					<s:Label text="Forecast:"/>
+					<s:DropDownList id="m_forecastComboBox" dataProvider="{ma_forecasts}"
+							change="onSelectedForecastChanged()"/>
+				</s:HGroup>
+				<s:HGroup verticalAlign="middle">
+					<s:Label text="Validity:"/>
+					<s:Label id="m_validityLabel"/>
+				</s:HGroup>
+				<s:Spacer height="20"/>
+				<s:HGroup verticalAlign="middle">
+					<s:Label text="Precipitation threshold:"/>
+					<s:NumericStepper id="m_thresholdStepper"
+							value="@{mf_precipitationThreshold}" snapInterval="1" stepSize="1"
+							minimum="1" maximum="99"/>
+				</s:HGroup>
+				<s:Spacer height="20"/>
+				<s:CheckBox label="Show area probability - method 1" id="m_showAreaProb1CheckBox"
+						change="redrawAreaProbLabels()" selected="true"/>
+				<s:CheckBox label="Show area probability - method 2" id="m_showAreaProb2CheckBox"
+						change="redrawAreaProbLabels()" selected="true"/>
+				<s:CheckBox label="Show probability in grid points"
+						id="m_showGridPointsValuesCheckBox" change="redrawGridPointsLabels()"
+						selected="false"/>
+				<s:Spacer height="20"/>
+				<s:Button label="Compute" id="m_computeButton" click="compute()"/>
+			</s:VGroup>
+		</s:HGroup>
+		<s:TextArea id="m_requestsTextArea" editable="false" text="@{ms_requests}" height="20%"
+				width="100%" valueCommit="onRequestAdded()"
+				visible="{m_showRequestsCheckBox.selected}"
+				includeInLayout="{m_showRequestsCheckBox.selected}"/>
+		<s:CheckBox id="m_showRequestsCheckBox" selected="false" label="Show requests"/>
+	</s:VGroup>
+	<fx:Script>
+		<![CDATA[
+			import com.iblsoft.flexiweather.net.events.UniURLLoaderErrorEvent;
+			import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
+			import com.iblsoft.flexiweather.net.loaders.JSONLoader;
+			import com.iblsoft.flexiweather.net.loaders.XMLLoader;
+			import com.iblsoft.flexiweather.ogc.CRSWithBBox;
+			import com.iblsoft.flexiweather.ogc.CRSWithBBoxAndTilingInfo;
+			import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
+			import com.iblsoft.flexiweather.proj.Coord;
+			import com.iblsoft.flexiweather.utils.DateUtils;
+			import com.iblsoft.flexiweather.utils.Duration;
+			import com.iblsoft.flexiweather.utils.ISO8601Parser;
+			import com.iblsoft.flexiweather.widgets.BackgroundJobManager;
+			import com.iblsoft.flexiweather.widgets.InteractiveLayer;
+			import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
+			import com.iblsoft.flexiweather.widgets.LabelJobProgressIndicator;
+			import com.iblsoft.utils.InteractiveLayerPolygons;
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import spark.utils.TextFlowUtil;
+			private var m_jsonLoader: JSONLoader;
+			private var m_xmlLoader: XMLLoader;
+			[Bindable]
+			private var ma_runs: ArrayCollection = new ArrayCollection();
+			[Bindable]
+			private var ma_forecasts: ArrayCollection = new ArrayCollection();
+			private var m_run: Date = null;
+			private var m_forecast: Duration = null;
+			[Bindable]
+			private var mf_precipitationThreshold: Number;
+			private var ma_areaProbValuesMethod1: ArrayCollection = new ArrayCollection();
+			private var ma_areaProbValuesMethod2: ArrayCollection = new ArrayCollection();
+			private var ma_gridPointValues: ArrayCollection = new ArrayCollection;
+			[Bindable]
+			private var ms_requests: String = "";
+			private var ms_coverageName: String = "precipitation";
+			private const REQUEST_PROBABILITY_AREA_METHOD1: String = "probability-area-method1";
+			private const REQUEST_PROBABILITY_AREA_METHOD2: String = "probability-area-method2";
+			private const REQUEST_PROBABILITY_GRID: String = "probability-grid";
+			private const LEGEND: String = "This example demonstrates capability of WCS to calculate " +
+					"<span fontWeight='bold'>probabilistic forecast for a polygonal area</span>.<br/>" +
+					"The following two methods are used to calculate probability that the precipitation " +
+					"value exceeds a defined threshold for a given area:<br/>" +
+					"<span color='#008800'>1) Probability that the event will occur at any grid point within the area</span><br/>" +
+					"<span color='#0000ff'>2) The highest probability grid point in the area</span><br/>" +
+					"<span fontWeight='bold'>Usage:</span><br/>" +
+					"1) Draw polygons on the map (use double-click to complete a polygon).<br/>" +
+					"2) Select run and forecast.<br/>" +
+					"3) Click the 'Compute' button.<br/>" +
+					"4) The results of both method are displayed inside the polygons. Note that you can display " +
+					"probability values in all grid points, as well, to check result of the second method.";
+			//private const WCS_URL: String = "http://palo:8008/test";
+			private const WCS_URL: String = "http://wms.iblsoft.com/gfs";
+
+			/**
+			 * Initialization of example.
+			 */
+			override protected function onCreationComplete(event: FlexEvent): void
+			{
+				super.onCreationComplete(event);
+				var ilm: InteractiveLayerMap = new InteractiveLayerMap(m_iw);
+				m_iw.addLayer(ilm);
+				m_ilPolygons.container = m_iw;
+				m_ilGridPointsLabels.container = m_iw;
+				m_ilAreaProbLabels.container = m_iw;
+				m_iw.setCRSExtentAndViewBBox('CRS:84');
+				var ilBkg: InteractiveLayerMSBase = addLayer('dem', 1);
+				ilBkg.setWMSStyleName(0, 'white-colours');
+				scm.update(scm.getAllServicesNames());
+				mf_precipitationThreshold = 5;
+				if (Capabilities.playerType == "Desktop")
+					BackgroundJobManager.getInstance().m_progressBar = new LabelJobProgressIndicator(m_labelProgress);
+				else
+				{
+					BackgroundJobManager.getInstance().createDefaultPreloader();
+					BackgroundJobManager.getInstance().setupIndicator(hboxCaption);
+				}
+				m_jsonLoader = new JSONLoader();
+				m_jsonLoader.addEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onDataLoadedFailed);
+				m_jsonLoader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onCoverageDataLoaded);
+				m_xmlLoader = new XMLLoader();
+				m_xmlLoader.addEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onDataLoadedFailed);
+				m_xmlLoader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onDescribeCoverageDataLoaded);
+				loadAvailableRuns();
+				m_legendTextArea.textFlow = spark.utils.TextFlowUtil.importFromString(LEGEND);
+			}
+
+			private function setRun(r: Date): void
+			{
+				m_run = r;
+				updateValidity();
+			}
+
+			[Bindable(event = "runChanged")]
+			public function get run(): Date
+			{
+				return m_run;
+			}
+
+			private function onSelectedRunChanged(): void
+			{
+				setRun(m_runComboBox.selectedItem["value"]);
+			}
+
+			private function setForecast(f: Duration): void
+			{
+				m_forecast = f;
+				updateValidity();
+			}
+
+			[Bindable(event = "forecastChanged")]
+			public function get forecast(): Duration
+			{
+				return m_forecast;
+			}
+
+			private function onSelectedForecastChanged(): void
+			{
+				setForecast(m_forecastComboBox.selectedItem["value"]);
+			}
+
+			private function loadAvailableRuns(): void
+			{
+				var request: URLRequest = new URLRequest(WCS_URL);
+				request.method = URLRequestMethod.GET;
+				var requestParams: URLVariables = new URLVariables();
+				requestParams["SERVICE"] = "WCS";
+				requestParams["VERSION"] = "1.0.0";
+				requestParams["REQUEST"] = "DescribeCoverage";
+				requestParams["COVERAGE"] = ms_coverageName;
+				request.data = requestParams;
+				logRequest(request);
+				m_xmlLoader.load(request);
+			}
+
+			private function onDataLoadedFailed(event: UniURLLoaderErrorEvent): void
+			{
+				trace("onDataLoadedFailed");
+				Alert.show("Problem loading request", "Error", Alert.OK);
+			}
+
+			private function onDescribeCoverageDataLoaded(event: UniURLLoaderEvent): void
+			{
+				var wcs: Namespace = new Namespace("http://www.opengis.net/wcs");
+				var xmlResult: XML = event.result as XML;
+				var xmlAxisDescription: XMLList = xmlResult.wcs::CoverageOffering.wcs::rangeSet.wcs::RangeSet.wcs::axisDescription.wcs::AxisDescription;
+				var xmlRunValues: XMLList = xmlAxisDescription.(wcs::name == "DIM_RUN").wcs::values;
+				var xmlRunInterval: XMLList = xmlRunValues.wcs::interval;
+				var xmlMinRun: XMLList = xmlRunInterval.wcs::min;
+				var xmlMaxRun: XMLList = xmlRunInterval.wcs::max;
+				var runItem: Object;
+				var xmlSingleValue: XML;
+				if ((xmlMinRun.length() > 0) && (xmlMaxRun.length() > 0))
+				{
+					var s_minRun: String = xmlRunInterval.wcs::min[0].text();
+					var s_maxRun: String = xmlRunInterval.wcs::max[0].text();
+					var s_runResolution: String = xmlRunInterval.wcs::res[0].text();
+					var minRun: Date = ISO8601Parser.stringToDate(s_minRun);
+					var maxRun: Date = ISO8601Parser.stringToDate(s_maxRun);
+					var runResolution: Duration = ISO8601Parser.stringToDuration(s_runResolution);
+					var currentRun: Date = minRun;
+					while (currentRun <= maxRun)
+					{
+						runItem = new Object();
+						runItem["value"] = new Date(currentRun);
+						runItem["label"] = DateUtils.strftime(currentRun, "%d.%m.%Y %H:%M");
+						ma_runs.addItemAt(runItem, 0);
+						currentRun.hours += runResolution.hoursTotal;
+					}
+				}
+				else
+				{
+					for each (xmlSingleValue in xmlRunValues.wcs::singleValue)
+					{
+						var s_run: String = xmlSingleValue.toString();
+						runItem = new Object();
+						runItem["value"] = ISO8601Parser.stringToDate(s_run);
+						runItem["label"] = DateUtils.strftime(runItem["value"], "%d.%m.%Y %H:%M");
+						ma_runs.addItem(runItem);
+					}
+				}
+				if (ma_runs.length > 0)
+				{
+					m_runComboBox.selectedIndex = 0;
+					m_runComboBox.typicalItem = ma_runs.getItemAt(0);
+					m_run = ma_runs.getItemAt(0)["value"] as Date;
+				}
+				var xmlForecastValues: XMLList = xmlAxisDescription.(wcs::name == "DIM_FORECAST").wcs::values;
+				var xmlForecastInterval: XMLList = xmlForecastValues.wcs::interval;
+				var xmlMinForecast: XMLList = xmlForecastInterval.wcs::min;
+				var xmlMaxForecast: XMLList = xmlForecastInterval.wcs::max;
+				var forecastItem: Object;
+				if ((xmlMinForecast.length() > 0) && (xmlMaxForecast.length() > 0))
+				{
+					var s_minForecast: String = xmlForecastInterval.wcs::min[0].text();
+					var s_maxForecast: String = xmlForecastInterval.wcs::max[0].text();
+					var s_forecastResolution: String = xmlForecastInterval.wcs::res[0].text();
+					var minForecast: Duration = ISO8601Parser.stringToDuration(s_minForecast);
+					var maxForecast: Duration = ISO8601Parser.stringToDuration(s_maxForecast);
+					var forecastResolution: Duration = ISO8601Parser.stringToDuration(s_forecastResolution);
+					var currentForecast: Duration = minForecast;
+					while (currentForecast.secondsTotal <= maxForecast.secondsTotal)
+					{
+						forecastItem = new Object();
+						forecastItem["value"] = new Duration(currentForecast.secondsTotal);
+						forecastItem["label"] = currentForecast.toHoursString();
+						ma_forecasts.addItem(forecastItem);
+						currentForecast.add(forecastResolution);
+					}
+				}
+				else
+				{
+					for each (xmlSingleValue in xmlForecastValues.wcs::singleValue)
+					{
+						var s_forecast: String = xmlSingleValue.toString();
+						forecastItem = new Object();
+						forecastItem["value"] = ISO8601Parser.stringToDuration(s_forecast);
+						forecastItem["label"] = (forecastItem["value"] as Duration).toHoursString();
+						ma_forecasts.addItem(forecastItem);
+					}
+				}
+				if (ma_forecasts.length > 0)
+				{
+					m_forecastComboBox.selectedIndex = 0;
+					m_forecastComboBox.typicalItem = ma_forecasts.getItemAt(ma_forecasts.length - 1);
+					m_forecast = ma_forecasts.getItemAt(0)["value"] as Duration;
+				}
+				updateValidity();
+			}
+
+			private function updateValidity(): void
+			{
+				if (run && forecast)
+				{
+					var validity: Date = new Date(run);
+					validity.hours += forecast.hoursTotal;
+					m_validityLabel.text = DateUtils.strftime(validity, "%d.%m.%Y %H:%M");
+				}
+				else
+					m_validityLabel.text = ""
+			}
+
+			private function onCoverageDataLoaded(event: UniURLLoaderEvent): void
+			{
+				var s_requestType: String = event.associatedData as String;
+				var data: Object = event.result;
+				var a_coverageStatisticsData: Array = data["coverageStatisticsData"];
+				for each (var coverageItem: Object in a_coverageStatisticsData)
+				{
+					var i_value: int = coverageItem["value"] * 100;
+					var s_value: String;
+					var coord: Coord;
+					if (s_requestType == REQUEST_PROBABILITY_GRID)
+					{
+						s_value = i_value.toString();
+						var gridPoint: Object = coverageItem["gridPoint"];
+						var f_lat: Number = gridPoint["lat"];
+						var f_long: Number = gridPoint["long"];
+						coord = new Coord("CRS:84", f_long, f_lat);
+						var gridPointValue: Object = new Object();
+						gridPointValue["coord"] = coord;
+						gridPointValue["value"] = s_value;
+						ma_gridPointValues.addItem(gridPointValue);
+						if (m_showGridPointsValuesCheckBox.selected)
+							addGridPointCoverageValue(s_value, coord);
+					}
+					else if (s_requestType == REQUEST_PROBABILITY_AREA_METHOD1 || s_requestType == REQUEST_PROBABILITY_AREA_METHOD2)
+					{
+						s_value = i_value.toString() + "%";
+						var a_coords: ArrayCollection = new ArrayCollection();
+						var s_area: String = coverageItem["area"];
+						var as_coords: Array = s_area.split(" ");
+						for each (var s_coord: String in as_coords)
+						{
+							coord = Coord.fromString(s_coord);
+							a_coords.addItem(coord);
+						}
+						var xSum: Number = 0;
+						var ySum: Number = 0;
+						for each (var c: Coord in a_coords)
+						{
+							xSum = xSum + c.x;
+							ySum = ySum + c.y;
+						}
+						coord = new Coord(a_coords[0].crs, xSum / a_coords.length, ySum / a_coords.length);
+						var areaValue: Object = new Object();
+						areaValue["coord"] = coord;
+						areaValue["value"] = s_value;
+						if (s_requestType == REQUEST_PROBABILITY_AREA_METHOD1)
+						{
+							if (m_showAreaProb1CheckBox.selected)
+								addAreaCoverageValue(s_value, coord, 1);
+							ma_areaProbValuesMethod1.addItem(areaValue);
+						}
+						else if (s_requestType == REQUEST_PROBABILITY_AREA_METHOD2)
+						{
+							if (m_showAreaProb2CheckBox.selected)
+								addAreaCoverageValue(s_value, coord, 2);
+							ma_areaProbValuesMethod2.addItem(areaValue);
+						}
+					}
+				}
+			}
+
+			private function addGridPointCoverageValue(s_value: String, coord: Coord): void
+			{
+				var textFormat: TextFormat = new TextFormat();
+				textFormat.size = 10;
+				var i_xShift: int = 0;
+				var i_yShift: int = 0;
+				textFormat.color = 0x0000ff;
+				m_ilGridPointsLabels.addLabel(coord, s_value, textFormat, i_xShift, i_yShift);
+			}
+
+			private function addAreaCoverageValue(s_value: String, coord: Coord, i_method: int): void
+			{
+				var textFormat: TextFormat = new TextFormat();
+				textFormat.size = 20;
+				textFormat.bold = true;
+				var i_xShift: int = 0;
+				var i_yShift: int = 0;
+				if (i_method == 1)
+				{
+					textFormat.color = 0x008800;
+					if (m_showAreaProb2CheckBox.selected)
+						i_yShift = -10;
+				}
+				else if (i_method == 2)
+				{
+					textFormat.color = 0x0000ff;
+					if (m_showAreaProb1CheckBox.selected)
+						i_yShift = 10;
+				}
+				m_ilAreaProbLabels.addLabel(coord, s_value, textFormat, i_xShift, i_yShift);
+			}
+
+			private function clearAll(): void
+			{
+				m_ilPolygons.clearPolygons();
+				m_ilGridPointsLabels.clearLabels();
+				m_ilAreaProbLabels.clearLabels();
+				ma_gridPointValues.removeAll();
+				ma_areaProbValuesMethod1.removeAll();
+				ma_areaProbValuesMethod2.removeAll();
+			}
+
+			private function clearRecentPolygon(): void
+			{
+				m_ilPolygons.clearRecentPolygon();
+			}
+
+			private function redrawGridPointsLabels(): void
+			{
+				m_ilGridPointsLabels.clearLabels();
+				if (m_showGridPointsValuesCheckBox.selected)
+				{
+					for each (var gridPointValue: Object in ma_gridPointValues)
+					{
+						addGridPointCoverageValue(gridPointValue["value"], gridPointValue["coord"]);
+					}
+				}
+			}
+
+			private function redrawAreaProbLabels(): void
+			{
+				m_ilAreaProbLabels.clearLabels();
+				if (m_showAreaProb1CheckBox.selected)
+				{
+					for each (var areaProbValue: Object in ma_areaProbValuesMethod1)
+					{
+						addAreaCoverageValue(areaProbValue["value"], areaProbValue["coord"], 1);
+					}
+				}
+				if (m_showAreaProb2CheckBox.selected)
+				{
+					for each (areaProbValue in ma_areaProbValuesMethod2)
+					{
+						addAreaCoverageValue(areaProbValue["value"], areaProbValue["coord"], 2);
+					}
+				}
+			}
+
+			private function compute(): void
+			{
+				m_ilGridPointsLabels.clearLabels();
+				m_ilAreaProbLabels.clearLabels();
+				ma_gridPointValues.removeAll();
+				ma_areaProbValuesMethod1.removeAll();
+				ma_areaProbValuesMethod2.removeAll();
+				var request: URLRequest = new URLRequest(WCS_URL);
+				request.method = URLRequestMethod.GET;
+				var requestParams: URLVariables = new URLVariables();
+				requestParams["SERVICE"] = "WCS";
+				requestParams["VERSION"] = "1.0.0";
+				requestParams["REQUEST"] = "GetCoverageStatistics";
+				requestParams["CRS"] = "CRS:84";
+				requestParams["FORMAT"] = "JSON";
+				requestParams["COVERAGE"] = ms_coverageName;
+				requestParams["DIM_RUN"] = ISO8601Parser.dateToString(run);
+				requestParams["DIM_FORECAST"] = "PT" + forecast.hoursTotal.toString() + "H";
+				requestParams["ELEVATION"] = "gnd-surf";
+				for each (var a_polygonPoints: ArrayCollection in m_ilPolygons.polygons)
+				{
+					var s_geometry: String = new String();
+					for each (var c: Coord in a_polygonPoints)
+					{
+						if (s_geometry.length > 0)
+							s_geometry += " ";
+						s_geometry += c.toString();
+					}
+					requestParams["GEOMETRY"] = s_geometry;
+					requestParams["STATISTICS"] = "prob(member;max(area;C)>=" + mf_precipitationThreshold.toString() + ")";
+					request.data = requestParams;
+					logRequest(request);
+					m_jsonLoader.load(request, REQUEST_PROBABILITY_AREA_METHOD1,
+							"Get computed probability for area from web service (method 1).");
+					requestParams["STATISTICS"] = "max(area;prob(member;C>=" + mf_precipitationThreshold.toString() + "))";
+					request.data = requestParams;
+					logRequest(request);
+					m_jsonLoader.load(request, REQUEST_PROBABILITY_AREA_METHOD2,
+							"Get computed probability for area from web service (method 2).");
+					requestParams["STATISTICS"] = "prob(member;C>=" + mf_precipitationThreshold.toString() + ")";
+					request.data = requestParams;
+					logRequest(request);
+					m_jsonLoader.load(request, REQUEST_PROBABILITY_GRID,
+							"Get computed probability for grid points within the area from web service.");
+				}
+			}
+
+			private function logRequest(request: URLRequest): void
+			{
+				var requestParams: URLVariables = request.data as URLVariables;
+				var now: Date = new Date();
+				ms_requests += DateUtils.strftime(now, "%Y-%m-%d %H:%M:%SZ") + "\n" + request.url + "?" +
+						requestParams.toString().split("%2D").join("-").split("%5F").join("_").split("%2E").join(".")
+						.split("%28").join("(").split("%29").join(")").split("%3B").join(";").split("%3A").join(":")
+						.split("%3E").join(">").split("%3C").join("<").split("%3D").join("=").split("%2C").join(",") + "\n";
+			}
+
+			private function onRequestAdded(): void
+			{
+				m_requestsTextArea.scrollToRange(m_requestsTextArea.text.length - 1, m_requestsTextArea.text.length);
+			}
+		]]>
+	</fx:Script>
+</FlexiWeatherTemplate>

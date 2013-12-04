@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:MXTreeItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:s="library://ns.adobe.com/flex/spark" xmlns:mx="library://ns.adobe.com/flex/mx">
+	<s:states>
+		<s:State name="normal"/>
+		<s:State name="hovered"/>
+		<s:State name="selected"/>
+	</s:states>
+	<s:HGroup left="0" right="0" top="0" bottom="0" verticalAlign="middle">
+		<s:Rect id="indentationSpacer" width="{treeListData.indent}" percentHeight="100"
+				alpha="0">
+			<s:fill>
+				<s:SolidColor color="0xFFFFFF"/>
+			</s:fill>
+		</s:Rect>
+		<s:Group id="disclosureGroup">
+			<s:BitmapImage source="{treeListData.disclosureIcon}"
+					visible="{treeListData.hasChildren}"/>
+		</s:Group>
+		<s:BitmapImage source="{treeListData.icon}"/>
+		<s:CheckBox label="" selected="{feature.visible}" change="changeVisibility(event)"/>
+		<s:Label id="labelField" text="{treeListData.label}" paddingTop="2"/>
+	</s:HGroup>
+	<fx:Script>
+		<![CDATA[
+			import com.iblsoft.flexiweather.ogc.kml.features.KMLFeature;
+			[Bindable]
+			public var feature: KMLFeature;
+
+			override public function set data(value: Object): void
+			{
+				super.data = value;
+				if (value is Object)
+				{
+					label = value.label;
+					feature = value.data as KMLFeature;
+				}
+			}
+
+			private function changeVisibility(event: Event): void
+			{
+				trace("visible change for : " + feature);
+				var chb: CheckBox = event.target as CheckBox;
+				var visible: Boolean = chb.visible
+				feature.changeVisibility(visible);
+				event.stopPropagation();
+				event.stopImmediatePropagation();
+			}
+		]]>
+	</fx:Script>
+</s:MXTreeItemRenderer>

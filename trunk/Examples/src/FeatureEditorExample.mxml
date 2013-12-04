@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FlexiWeatherTemplate xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:s="library://ns.adobe.com/flex/spark" xmlns:mx="library://ns.adobe.com/flex/mx"
+		xmlns:widgets="com.iblsoft.flexiweather.widgets.*" xmlns="*"
+		xmlns:editable="com.iblsoft.flexiweather.ogc.editable.*">
+	<fx:Declarations>
+
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<states>
+		<s:State name="normal"/>
+		<s:State name="editing"/>
+	</states>
+	<s:VGroup width="100%" height="100%">
+		<s:HGroup width="100%">
+			<s:Button label="Warm Front" click="changeTool('front', FrontType.WARM)"
+					enabled.editing="false"/>
+			<s:Button label="Cold Front" click="changeTool('front', FrontType.COLD)"
+					enabled.editing="false"/>
+			<s:Button label="Occluded Front" click="changeTool('front', FrontType.OCCLUDED)"
+					enabled.editing="false"/>
+			<s:Button label="Pressure Centre" click="changeTool('pressure')"
+					enabled.editing="false"/>
+			<s:Button label="Star" click="changeTool('star')" enabled.editing="false"/>
+			<s:Button label="Star with Label" click="changeTool('starWithLabel')"
+					enabled.editing="false"/>
+			<s:Button label="Done" click="done()" enabled.normal="false"/>
+		</s:HGroup>
+		<s:HGroup width="100%">
+			<s:ToggleButton width="32" height="32" id="buttonCurveAddPoints"
+					click="addCurvePoints()" toolTip="Add points"
+					icon="@Embed(source='/assets/icons/common/edit-24.png')"/>
+		</s:HGroup>
+		<s:BorderContainer backgroundColor="0xaaaaaa" borderColor="0xcccccc" width="100%"
+				minHeight="0">
+			<s:HGroup id="hboxMenu" width="100%" verticalAlign="middle" paddingBottom="5"
+					paddingLeft="5" paddingRight="5" paddingTop="5">
+				<s:Label text="Change projection"/>
+				<s:ToggleButton label="LatLon CRS:84" selected="{m_iw.crs == 'CRS:84'}"
+						click="m_iw.setCRS('CRS:84', false); m_iw.setExtentBBoxRaw(-180,-90,180,90);"/>
+				<s:ToggleButton label="North Polar Stereo" selected="{m_iw.crs == 'ESRI:102018'}"
+						click="m_iw.setCRS('ESRI:102018', false); m_iw.setExtentBBoxRaw(-10000000,-10000000,10000000,10000000);"/>
+				<s:ToggleButton label="South Polar Stereo" selected="{m_iw.crs == 'ESRI:102021'}"
+						click="m_iw.setCRS('ESRI:102021', false); m_iw.setExtentBBoxRaw(-10000000,-10000000,10000000,10000000);"/>
+				<s:ToggleButton label="Google Maps" selected="{m_iw.crs == 'EPSG:900913'}"
+						click="m_iw.setCRS('EPSG:900913', false); m_iw.setExtentBBoxRaw(-20037508.34,-20037508.34,20037508.34,20037508.34);"/>
+			</s:HGroup>
+		</s:BorderContainer>
+		<widgets:InteractiveWidget id="m_iw" width="100%" height="100%"
+				click="onMouseClick(event)">
+			<widgets:InteractiveLayerZoom id="m_ilz" zOrder="1"/>
+			<widgets:InteractiveLayerPan id="m_ilp" zOrder="2"/>
+			<editable:InteractiveLayerWFSEditable id="wfsLayer" version="{new Version(1,0,0)}"
+					zOrder="1000"/>
+		</widgets:InteractiveWidget>
+	</s:VGroup>
+
+	<!-- Point tools dialog -->
+	<s:BorderContainer id="pointTools" visible="false" includeInLayout="false"
+			backgroundColor="0xaaaaaa" backgroundAlpha="0.6" borderColor="0x444444" width="200">
+		<s:VGroup width="100%" paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+			<s:Button height="32" width="100%" id="buttonFeatureRemove"
+					click="removeSelectedFeature()" label="Remove selected feature"
+					icon="@Embed(source='/assets/icons/common/delete-24.png')"/>
+			<s:Button height="32" width="100%" id="buttonPointRemove"
+					label="Remove selected point"
+					icon="@Embed(source='/assets/icons/common/delete-24.png')"
+					click="removeSelectedPoint()"/>
+			<s:HGroup width="100%">
+				<s:Button label="Finish editing" enabled.normal="false"
+						click="done();hideTools()" width="100%"/>
+				<s:Button label="Hide" click="hideTools()"/>
+			</s:HGroup>
+		</s:VGroup>
+	</s:BorderContainer>
+	<fx:Script>
+		<![CDATA[
+			import com.iblsoft.features.StarFeature;
+			import com.iblsoft.flexiweather.ogc.FeatureBase;
+			import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
+			import com.iblsoft.flexiweather.ogc.Version;
+			import com.iblsoft.flexiweather.ogc.editable.InteractiveLayerWFSEditable;
+			import com.iblsoft.flexiweather.ogc.editable.MoveablePoint;
+			import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
+			import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableMode;
+			import com.iblsoft.flexiweather.ogc.editable.features.FrontType;
+			import com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableFront;
+			import com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditablePressureCentre;
+			import com.iblsoft.flexiweather.ogc.events.MoveablePointEvent;
+			import com.iblsoft.flexiweather.proj.Coord;
+			import com.iblsoft.flexiweather.proj.Projection;
+			import mx.events.FlexEvent;
+			import mx.events.PropertyChangeEvent;
+			private var currentFeatureType: String;
+			private var currentFeatureSetting: String;
+			private var currentlyEditedFeature: WFSFeatureEditable;
+			private var currentlySelectedPoint: MoveablePoint;
+
+			override protected function onCreationComplete(event: FlexEvent): void
+			{
+				super.onCreationComplete(event);
+				Projection.addCRSByProj4("ESRI:54004", "+title=World Mercator +proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs");
+				Projection.addCRSByProj4("ESRI:102018", "+title=North Pole Stereographic +proj=stere +lat_0=90 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m");
+				Projection.addCRSByProj4("ESRI:102021", "+title=South Pole Stereographic +proj=stere +lat_0=-90 +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m");
+				m_iw.setCRS('CRS:84', false);
+				m_iw.setExtentBBoxRaw(-180, -90, 180, 90);
+				addLayer('dem', 1);
+				addLayer('foreground', 1);
+				wfsLayer.addEventListener(InteractiveLayerWFSEditable.SELECTION_CHANGE, onWFSLayerSelectionChange);
+				getAllServicesCapabilities();
+			}
+
+			private function createNewEditableWFSLayer(): InteractiveLayerWFSEditable
+			{
+				return new InteractiveLayerWFSEditable(m_iw, new Version(1, 0, 0));
+			}
+
+			private function changeTool(type: String, setting: String = null): void
+			{
+				onNewObjectAdded();
+				currentlyEditedFeature = null;
+				currentFeatureType = type;
+				currentFeatureSetting = setting;
+				currentState = 'editing';
+			}
+
+			private function addCurvePoints(): void
+			{
+				currentlyEditedFeature.editMode = (buttonCurveAddPoints.selected) ? WFSFeatureEditableMode.ADD_POINTS_WITH_MOVE_POINTS : WFSFeatureEditableMode.MOVE_POINTS;
+			}
+
+			private function removeSelectedFeature(): void
+			{
+				if (currentlyEditedFeature)
+				{
+					wfsLayer.removeFeature(currentlyEditedFeature);
+					reset();
+				}
+				updatePointToolsPosition();
+			}
+
+			private function removeSelectedPoint(): void
+			{
+				if (currentlyEditedFeature)
+				{
+					if (currentlyEditedFeature.selectedMoveablePointIndex > -1)
+						currentlyEditedFeature.removePointAt(currentlyEditedFeature.selectedMoveablePointIndex);
+				}
+				updatePointToolsPosition();
+			}
+
+			private function addStarWithLabel(pt: Point): void
+			{
+				currentlyEditedFeature = new StarFeature("http://www.iblsoft.com/wfs", "Star", null);
+				(currentlyEditedFeature as StarFeature).text = "Custom label for star";
+				(currentlyEditedFeature as StarFeature).bold = true;
+				(currentlyEditedFeature as StarFeature).color = 0xffffff;
+				(currentlyEditedFeature as StarFeature).fontSize = 18;
+				currentlyEditedFeature.coordinates = [m_iw.pointToCoord(pt.x, pt.y)];
+				wfsLayer.addFeature(currentlyEditedFeature);
+				wfsLayer.highlightItem(currentlyEditedFeature);
+				wfsLayer.selectItem(currentlyEditedFeature);
+			}
+
+			private function addStar(pt: Point): void
+			{
+				currentlyEditedFeature = new StarFeature("http://www.iblsoft.com/wfs", "Star", null);
+				currentlyEditedFeature.coordinates = [m_iw.pointToCoord(pt.x, pt.y)];
+				wfsLayer.addFeature(currentlyEditedFeature);
+				wfsLayer.highlightItem(currentlyEditedFeature);
+				wfsLayer.selectItem(currentlyEditedFeature);
+			}
+
+			private function addNewPressureCentre(pt: Point): void
+			{
+				currentlyEditedFeature = new WFSFeatureEditablePressureCentre("http://www.iblsoft.com/wfs", "PressureCentre", null);
+				currentlyEditedFeature.coordinates = [m_iw.pointToCoord(pt.x, pt.y)];
+				wfsLayer.addFeature(currentlyEditedFeature);
+				wfsLayer.highlightItem(currentlyEditedFeature);
+				wfsLayer.selectItem(currentlyEditedFeature);
+			}
+
+			private function addNewFront(pt: Point): void
+			{
+				currentlyEditedFeature = new WFSFeatureEditableFront("http://www.iblsoft.com/wfs", "Front", null);
+				if (currentFeatureSetting != null)
+					(currentlyEditedFeature as WFSFeatureEditableFront).type = currentFeatureSetting;
+				currentlyEditedFeature.coordinates = [m_iw.pointToCoord(pt.x, pt.y)];
+				currentlyEditedFeature.editMode = WFSFeatureEditableMode.ADD_POINTS_WITH_MOVE_POINTS;
+				wfsLayer.addFeature(currentlyEditedFeature);
+				wfsLayer.highlightItem(currentlyEditedFeature);
+				wfsLayer.selectItem(currentlyEditedFeature);
+			}
+
+			private function onNewObjectAdded(): void
+			{
+				reset();
+			}
+
+			private function removeMoveablePointsListeners(): void
+			{
+				if (currentlyEditedFeature)
+				{
+					currentlyEditedFeature.removeEventListener(MoveablePointEvent.MOVEABLE_POINT_SELECTION_CHANGE, onCurrentlyEditedFeaturePointSelectionChange);
+					currentlyEditedFeature.removeEventListener(MoveablePointEvent.MOVEABLE_POINT_MOVE, onCurrentlyEditedFeatureMove);
+					currentlyEditedFeature.removeEventListener(MoveablePointEvent.MOVEABLE_POINT_CLICK, onCurrentlyEditedFeatureClick);
+				}
+			}
+
+			private function addMoveablePointsListeners(): void
+			{
+				if (currentlyEditedFeature)
+				{
+					currentlyEditedFeature.addEventListener(MoveablePointEvent.MOVEABLE_POINT_SELECTION_CHANGE, onCurrentlyEditedFeaturePointSelectionChange);
+					currentlyEditedFeature.addEventListener(MoveablePointEvent.MOVEABLE_POINT_MOVE, onCurrentlyEditedFeatureMove);
+					currentlyEditedFeature.addEventListener(MoveablePointEvent.MOVEABLE_POINT_CLICK, onCurrentlyEditedFeatureClick);
+				}
+			}
+
+			private function hideTools(): void
+			{
+				changePointToolsVisibility(false);
+			}
+
+			private function changePointToolsVisibility(visible: Boolean): void
+			{
+				pointTools.visible = visible;
+				pointTools.includeInLayout = visible;
+			}
+
+			private function deleteMarker(): void
+			{
+				removeSelectedPoint();
+			}
+
+			private function onCurrentlyEditedFeaturePointSelectionChange(event: MoveablePointEvent): void
+			{
+				currentlySelectedPoint = event.point;
+				changePointToolsVisibility(true);
+			}
+
+			private function onCurrentlyEditedFeatureClick(event: MoveablePointEvent): void
+			{
+				currentlySelectedPoint = event.point;
+				changePointToolsVisibility(true);
+			}
+
+			private function onCurrentlyEditedFeatureMove(event: MoveablePointEvent): void
+			{
+				currentlySelectedPoint = event.point;
+				updatePointToolsPosition();
+			}
+
+			private function updatePointToolsPosition(): void
+			{
+				if (currentlyEditedFeature)
+				{
+					var p: Point = new Point(currentlySelectedPoint.x, currentlySelectedPoint.y);
+					currentlyEditedFeature.localToGlobal(p);
+					pointTools.x = p.x - pointTools.width / 2;
+					pointTools.y = p.y - 40;
+				}
+				else
+				{
+					hideTools();
+				}
+			}
+
+			private function onWFSLayerSelectionChange(event: PropertyChangeEvent): void
+			{
+				trace("onSelectionChanged");
+				removeMoveablePointsListeners();
+				currentlyEditedFeature = event.newValue as WFSFeatureEditable;
+				if (currentlyEditedFeature)
+				{
+					if (isSinglePointFeature(currentlyEditedFeature))
+					{
+						if (currentlyEditedFeature.getPoints().length < 1)
+							currentlyEditedFeature.editMode = WFSFeatureEditableMode.ADD_POINTS_WITH_MOVE_POINTS;
+						else
+							currentlyEditedFeature.editMode = WFSFeatureEditableMode.MOVE_POINTS;
+					}
+					else
+					{
+						if (currentlyEditedFeature.getPoints().length < 2)
+							currentlyEditedFeature.editMode = WFSFeatureEditableMode.ADD_POINTS_WITH_MOVE_POINTS;
+						else
+							currentlyEditedFeature.editMode = WFSFeatureEditableMode.MOVE_POINTS;
+					}
+					addMoveablePointsListeners();
+				}
+				else
+				{
+					//unselect
+					reset();
+				}
+				if (currentlyEditedFeature)
+				{
+					buttonCurveAddPoints.selected = ((currentlyEditedFeature.editMode == WFSFeatureEditableMode.ADD_POINTS) 
+							|| (currentlyEditedFeature.editMode == WFSFeatureEditableMode.ADD_POINTS_WITH_MOVE_POINTS));
+				}
+			}
+
+			private function isSinglePointFeature(feature: WFSFeatureEditable): Boolean
+			{
+				if (feature is WFSFeatureEditablePressureCentre)
+					return true;
+				if (feature is StarFeature)
+					return true;
+				return false;
+			}
+
+			private function done(): void
+			{
+				reset();
+			}
+
+			private function reset(): void
+			{
+				wfsLayer.selectItem(null);
+				wfsLayer.highlightItem(null);
+				currentlyEditedFeature = null;
+				currentFeatureType = null;
+				currentFeatureSetting = null;
+				currentState = 'normal';
+			}
+
+			private function onMouseClick(event: MouseEvent): void
+			{
+				var pt: Point = new Point(event.localX, event.localY);
+				if (currentlyEditedFeature)
+				{
+					//currently edited feature must be select to add new point
+					if (!currentlyEditedFeature.selected)
+						return;
+					if (event.target is MoveablePoint)
+					{
+						//do not add new point, user clicks on MoveablePoint
+						return;
+					}
+					if (currentlyEditedFeature.editMode == WFSFeatureEditableMode.ADD_POINTS ||
+							currentlyEditedFeature.editMode == WFSFeatureEditableMode.ADD_POINTS_ON_CURVE ||
+							currentlyEditedFeature.editMode == WFSFeatureEditableMode.ADD_POINTS_WITH_MOVE_POINTS)
+					{
+						currentlyEditedFeature.addPoint(pt);
+						currentlyEditedFeature.update(new FeatureUpdateContext(FeatureUpdateContext.FULL_UPDATE));
+						wfsLayer.selectItem(currentlyEditedFeature);
+					}
+					else
+						trace("do not add Point, user is just moving existing point");
+				}
+				else
+				{
+					if (currentFeatureType)
+					{
+						switch (currentFeatureType)
+						{
+							case 'front':
+							{
+								addNewFront(pt);
+								break;
+							}
+							case 'pressure':
+							{
+								addNewPressureCentre(pt);
+								//we have added point and Pressure has just 1 point, so we're done
+								done();
+								break;
+							}
+							case 'star':
+							{
+								addStar(pt);
+								//we have added point and Star has just 1 point, so we're done
+								done();
+								break;
+							}
+							case 'starWithLabel':
+							{
+								addStarWithLabel(pt);
+								//we have added point and Star has just 1 point, so we're done
+								done();
+								break;
+							}
+						}
+					}
+				}
+			}
+		]]>
+	</fx:Script>
+</FlexiWeatherTemplate>

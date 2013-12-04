@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:s="library://ns.adobe.com/flex/spark" xmlns:mx="library://ns.adobe.com/flex/mx"
+		minWidth="955" minHeight="600" xmlns:widgets="com.iblsoft.flexiweather.widgets.*"
+		creationComplete="onCreationComplete(event)"
+		skinClass="spark.skins.spark.ApplicationSkin">
+	<fx:Declarations>
+
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:VGroup width="100%" height="100%">
+		<mx:HBox width="100%" paddingTop="5">
+			<mx:Label text="Panning across the dateline example"/>
+			<mx:ProgressBar width="200" height="25" id="demProgress" mode="manual"
+					maskSkin="mx.skins.halo.ProgressMaskSkin"/>
+			<mx:Label text="Zoom before delay"/>
+			<s:HSlider width="200" minimum="50" maximum="5000" stepSize="10"
+					change="delay = (event.currentTarget as HSlider).value"/>
+		</mx:HBox>
+		<widgets:InteractiveWidget width="100%" height="100%" id="m_iw">
+			<widgets:InteractiveLayerZoom id="m_ilz" zOrder="1" delayBeforeLoad="{delay}"/>
+			<widgets:InteractiveLayerPan id="m_ilp" zOrder="2"/>
+		</widgets:InteractiveWidget>
+	</s:VGroup>
+	<fx:Script>
+		<![CDATA[
+			import com.iblsoft.flexiweather.events.InteractiveLayerProgressEvent;
+			import com.iblsoft.flexiweather.ogc.BBox;
+			import com.iblsoft.flexiweather.ogc.CRSWithBBox;
+			import com.iblsoft.flexiweather.ogc.InteractiveLayerQTTMS;
+			import com.iblsoft.flexiweather.ogc.configuration.layers.QTTMSLayerConfiguration;
+			import com.iblsoft.flexiweather.ogc.tiling.InteractiveLayerTiled;
+			import com.iblsoft.flexiweather.ogc.tiling.TiledTilesProvider;
+			import com.iblsoft.flexiweather.ogc.tiling.TiledTilingInfo;
+			import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
+			import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
+			private var m_layerDEMBackground: InteractiveLayerQTTMS;
+			[Bindable]
+			public var delay: int = 50;
+
+			private function onCreationComplete(event: Event): void
+			{
+				m_iw.setCRSExtentAndViewBBox('CRS:84');
+				var s_serverURL: String = 'http://ogcie.iblsoft.com';
+				InteractiveLayerTiled.drawBorders = true;
+				InteractiveLayerTiled.drawDebugText = true;
+				var demPattern: String = s_serverURL + "/ria?SERVICE=WMS&FORMAT=image%2Fpng&REQUEST=GetGTile&LAYER=background%2Ddem&CRS=CRS%3A84&VERSION=1%2E3%2E0&TILEZOOM=%ZOOM%&TILECOL=%COL%&TILEROW=%ROW%";
+				var demConfiguration: QTTMSLayerConfiguration = new QTTMSLayerConfiguration();
+				var demTilingInfo: TiledTilingInfo = new TiledTilingInfo(demPattern, new CRSWithBBox('CRS:84', new BBox(-180, -180, 180, 180)));
+				demTilingInfo.minimumZoomLevel = 1;
+				demTilingInfo.maximumZoomLevel = 18;
+				demConfiguration.addTiledTilingInfo(demTilingInfo);
+				
+				
+				var map: InteractiveLayerMap = new InteractiveLayerMap();
+				m_iw.addLayer(map);
+				
+//				m_layerDEMBackground = new InteractiveLayerQTTMS(m_iw, null, demPattern, 'CRS:84', new BBox(-180,-180,180, 180));
+				m_layerDEMBackground = new InteractiveLayerQTTMS(m_iw, demConfiguration);
+				m_layerDEMBackground.addEventListener(InteractiveDataLayer.PROGRESS, onDEMProgress);
+				m_iw.interactiveLayerMap.addLayer(m_layerDEMBackground);
+//				m_layerDEMBackground.tilesProvider = new QTTTilesProvider();
+				m_layerDEMBackground.avoidTiling = false;
+				m_layerDEMBackground.name = 'DEMBackground';
+				m_layerDEMBackground.zOrder = -10;
+//				m_layerDEMBackground.refresh(true);
+			}
+
+			private function onDEMProgress(event: InteractiveLayerProgressEvent): void
+			{
+				if (demProgress)
+					demProgress.setProgress(event.loaded, event.total);
+			}
+		]]>
+	</fx:Script>
+</s:Application>

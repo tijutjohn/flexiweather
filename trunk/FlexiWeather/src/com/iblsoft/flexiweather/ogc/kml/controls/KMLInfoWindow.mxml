@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<controls:KMLInfoWindowBase xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:s="library://ns.adobe.com/flex/spark" xmlns:mx="library://ns.adobe.com/flex/mx"
+		xmlns:controls="com.iblsoft.flexiweather.ogc.kml.controls.*"
+		close="close()">
+	<fx:Declarations>
+
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<controls:layout>
+		<s:VerticalLayout paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10"/>
+	</controls:layout>
+	
+	<s:Label text="{feature.name}" left="0" right="0" styleName="kmlInfoWindowHeadline"/>
+	
+	
+	<s:TextArea id="textArea" left="0" right="0" enabled="true" editable="false" borderAlpha="0" styleName="kmlInfoWindowTextArea" minHeight="30" heightInLines="NaN"/>
+	
+	<s:HGroup left="0" right="0" horizontalAlign="right">
+		<s:Button label="Close" click="close()" styleName="kmlInfoWindowCloseButton"/>
+	</s:HGroup>
+	
+</controls:KMLInfoWindowBase>

@@ -1,0 +1,41 @@
+/* Fonts */
+@font-face
+{	/* Regular font-face */
+	src:url("/assets/fonts/DroidSans.ttf");
+	fontFamily: defaultFontSpark;
+	fontWeight: normal;
+	embed-as-cff:true;
+	advancedAntiAliasing: true;
+
+}
+
+@font-face
+{	/* Bold font-face */
+	src:url("/assets/fonts/DroidSans-Bold.ttf");
+	fontFamily: defaultFontSpark;
+	fontWeight: bold;
+	embed-as-cff:true;
+	advancedAntiAliasing: true;
+
+}
+
+@font-face
+{	/* Regular font-face */
+	src:url("/assets/fonts/DroidSans.ttf");
+	fontFamily: defaultFontMX;
+	fontWeight: normal;
+	embed-as-cff:false;
+	advancedAntiAliasing: true;
+	
+}
+
+@font-face
+{	/* Bold font-face */
+	src:url("/assets/fonts/DroidSans-Bold.ttf");
+	fontFamily: defaultFontMX;
+	fontWeight: bold;
+	embed-as-cff:false;
+	advancedAntiAliasing: true;
+	
+}
+

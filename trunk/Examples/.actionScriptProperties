@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<actionScriptProperties analytics="false" mainApplicationPath="Example7.mxml" projectUUID="0bc2d61c-1fdb-49ab-b5aa-8303dc3ba720" version="10">
+  <compiler additionalCompilerArguments="-locale en_US" autoRSLOrdering="true" copyDependentFiles="true" fteInMXComponents="false" generateAccessible="false" htmlExpressInstall="true" htmlGenerate="true" htmlHistoryManagement="true" htmlPlayerVersionCheck="true" includeNetmonSwc="false" outputFolderPath="bin-debug" removeUnusedRSL="true" sourceFolderPath="src" strict="true" targetPlayerVersion="0.0.0" useApolloConfig="false" useDebugRSLSwfs="true" verifyDigests="true" warn="true">
+    <compilerSourcePath/>
+    <libraryPath defaultLinkType="1">
+      <libraryPathEntry kind="4" path=""/>
+      <libraryPathEntry kind="1" linkType="1" path="libs"/>
+      <libraryPathEntry kind="3" linkType="1" path="/FlexiWeather/bin/FlexiWeather.swc" useDefaultLinkType="false"/>
+      <libraryPathEntry kind="1" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/air"/>
+      <libraryPathEntry kind="1" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/mobile"/>
+    </libraryPath>
+    <sourceAttachmentPath/>
+  </compiler>
+  <applications>
+    <application path="Example7.mxml"/>
+    <application path="Test.mxml"/>
+    <application path="ExampleMultiViewWithConfiguration.mxml"/>
+    <application path="Example3.mxml"/>
+    <application path="Example2.mxml"/>
+    <application path="Example8.mxml"/>
+    <application path="Example1WebApp.mxml"/>
+    <application path="FlyingRouteExample.mxml"/>
+    <application path="TileLayoutTest.mxml"/>
+    <application path="DropdownlistTest.mxml"/>
+    <application path="FlexiWeatherExample.mxml"/>
+    <application path="FeatureEditorExample.mxml"/>
+    <application path="TileSizeExample.mxml"/>
+    <application path="ExampleIDS_AreaProbability.mxml"/>
+    <application path="ExampleIDS_AreaStatistics.mxml"/>
+    <application path="ExampleIDS_GridSubSet.mxml"/>
+    <application path="ExampleIDS_TimeSeriesAtPoint.mxml"/>
+  </applications>
+  <modules/>
+  <buildCSSFiles/>
+  <flashCatalyst validateFlashCatalystCompatibility="false"/>
+  <buildTargets>
+    <buildTarget buildTargetName="com.adobe.flexide.multiplatform.ios.platform">
+      <actionScriptSettings version="1"/>
+    </buildTarget>
+    <buildTarget buildTargetName="com.adobe.flexide.multiplatform.android.platform">
+      <actionScriptSettings version="1"/>
+    </buildTarget>
+  </buildTargets>
+</actionScriptProperties>

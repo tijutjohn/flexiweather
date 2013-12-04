@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:s="library://ns.adobe.com/flex/spark" xmlns:mx="library://ns.adobe.com/flex/mx"
+		width="800" height="600" title="KML Interactive Sampler" close="close()"
+		creationComplete="init()">
+	<fx:Declarations>
+
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:states>
+		<s:State name="normal"/>
+		<s:State name="generateKML"/>
+	</s:states>
+	<s:layout>
+		<s:VerticalLayout paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10"/>
+	</s:layout>
+	<s:TextArea width="100%" height="100%" id="taSource"/>
+	<s:Label 
+			text="Check https://kml-samples.googlecode.com/svn/trunk/interactive/index.html for examples"
+			click="navigateToURL(new URLRequest('https://kml-samples.googlecode.com/svn/trunk/interactive/index.html'))"/>
+	<s:HGroup width="100%" horizontalAlign="right">
+		<s:Button label="Generate Placemark KML" click="currentState='generateKML'"/>
+		<s:HGroup includeIn="generateKML">
+			<s:Label text="Placemarks:"/>
+			<s:NumericStepper id="totalPlacemarks" minimum="1" maximum="10000" stepSize="10"/>
+			<s:CheckBox id="chbLabels" label="with labels"/>
+			<s:Button label="Generate" click="generateKML(chbLabels.selected)"/>
+		</s:HGroup>
+		<s:Button label="Create KML" click="createKML()"/>
+	</s:HGroup>
+	<fx:Script>
+		<![CDATA[
+			import com.iblsoft.flexiweather.ogc.BBox;
+			import com.iblsoft.flexiweather.ogc.kml.data.KMLType;
+			import com.iblsoft.utils.KMLGenerator;
+			
+			import flash.net.navigateToURL;
+			
+			import mx.events.DynamicEvent;
+			import mx.managers.PopUpManager;
+
+			private function init(): void
+			{
+			/*
+							taSource.text = '<?xml version="1.0" encoding="UTF-8"?>';
+							taSource.text += '<kml xmlns="http://www.opengis.net/kml/2.2">';
+							taSource.text += '<GroundOverlay>';
+							taSource.text += '<name>Large-scale overlay on terrain</name>';
+							taSource.text += '<visibility>1</visibility>';
+							taSource.text += '<description>Overlay shows Mount Etna erupting on July 13th, 2001.</description>';
+							taSource.text += '<Icon>';
+							taSource.text += '<href>http://kml-samples.googlecode.com/svn/trunk/resources/etna.jpg</href>';
+							taSource.text += '</Icon>';
+							taSource.text += '<LatLonBox>';
+							taSource.text += '<north>37.91904192681665</north>';
+							taSource.text += '<south>37.46543388598137</south>';
+							taSource.text += '<east>15.35832653742206</east>';
+							taSource.text += '<west>14.60128369746704</west>';
+							taSource.text += '<rotation>-0.1556640799496235</rotation>';
+							taSource.text += '</LatLonBox>';
+							taSource.text += '</GroundOverlay>';
+							taSource.text += '</kml>';
+			*/
+			}
+
+			protected function close(): void
+			{
+				PopUpManager.removePopUp(this);
+			}
+
+			protected function createKML(): void
+			{
+				close();
+				var de: DynamicEvent = new DynamicEvent('createKML');
+				de[KMLType.KML] = taSource.text;
+				dispatchEvent(de);
+			}
+
+			private function generateKML(bWithLabels: Boolean): void
+			{
+				var str: String = KMLGenerator.generateKMLWithPlacemarks(totalPlacemarks.value, new BBox(-180, -90, 180, 90), bWithLabels);
+				taSource.text = str;
+				currentState = null;
+			}
+		]]>
+	</fx:Script>
+</s:TitleWindow>

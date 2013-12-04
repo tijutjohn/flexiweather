@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:mx="library://ns.adobe.com/flex/mx"
+		xmlns:s="library://ns.adobe.com/flex/spark" xmlns:fx="http://ns.adobe.com/mxml/2009"
+		width="400" height="244" implements="com.iblsoft.flexiweather.plugins.ILayerBehaviour"
+		title="Layer Behaviour" creationComplete="onCreated()" close="onCancelClicked()">
+	<fx:Script>
+		<![CDATA[
+			import mx.managers.PopUpManager;
+			import com.iblsoft.flexiweather.plugins.IPlugin;
+			protected var ms_behaviourId: String;
+			protected var ms_initalValue: String;
+			protected var m_saveCallback: Function;
+			protected var m_cancelCallback: Function;
+
+			// IAbility implementation
+			public function bindToPlugin(plugin: IPlugin): void
+			{
+			}
+
+			// ILayerBehaviour implementation
+			public function editBehaviour(s_behaviourId: String, s_value: String, parent: DisplayObject, saveCallback: Function, cancelCallback: Function = null): void
+			{
+				var dlg: SimpleLayerBehaviourEditDialog = new SimpleLayerBehaviourEditDialog();
+				dlg.ms_behaviourId = s_behaviourId;
+				dlg.ms_initalValue = s_value;
+				dlg.m_saveCallback = saveCallback;
+				dlg.m_cancelCallback = cancelCallback;
+				PopUpManager.addPopUp(dlg, parent, true);
+				PopUpManager.centerPopUp(dlg);
+			}
+
+			protected function onCreated(): void
+			{
+				editValue.text = ms_initalValue;
+				editBehaviourId.text = ms_behaviourId;
+			}
+
+			protected function onOKClicked(): void
+			{
+				PopUpManager.removePopUp(this);
+				m_saveCallback.call(null, editBehaviourId.text, editValue.text);
+			}
+
+			protected function onRestoreClicked(): void
+			{
+				editValue.text = ms_initalValue;
+			}
+
+			protected function onCancelClicked(): void
+			{
+				PopUpManager.removePopUp(this);
+				if (m_cancelCallback != null)
+					m_cancelCallback.call(null, ms_behaviourId);
+			}
+		]]>
+	</fx:Script>
+	<s:Label x="10" y="10" text="Behaviour Id:"/>
+	<mx:TextInput x="99" y="8" width="271" id="editBehaviourId" enabled="false"/>
+	<s:Label x="10" y="36" text="Value:"/>
+	<mx:TextArea x="99" y="35" width="271" height="128" id="editValue" wordWrap="true"/>
+	<s:Button x="77" y="172" label="OK" width="70" click="onOKClicked()"/>
+	<s:Button x="233" y="172" label="Cancel" width="70" click="onCancelClicked()"/>
+	<s:Button x="155" y="172" label="Restore" width="70" click="onRestoreClicked()"/>
+</s:TitleWindow>

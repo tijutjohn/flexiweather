@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="vertical"
+		creationComplete="onCreationComplete(event)">
+	<mx:Script>
+		<![CDATA[
+			import com.iblsoft.flexiweather.symbology.StyledLineCurveRenderer;
+			import com.iblsoft.flexiweather.symbology.FrontCurveRenderer;
+			import com.iblsoft.flexiweather.symbology.TurbulenceCurveRenderer;
+			import com.iblsoft.flexiweather.symbology.CloudCurveRenderer;
+			import com.iblsoft.flexiweather.utils.CubicBezier;
+			import com.iblsoft.flexiweather.utils.ICurveRenderer;
+			import com.iblsoft.flexiweather.symbology.JetStreamCurveRenderer;
+			private var ml_points: Array = [];
+			private var ml_animPointDelta: Array = [];
+			private var m_animationTimer: Timer = new Timer(20);
+
+			private function onCreationComplete(event: Event): void
+			{
+				m_animationTimer.addEventListener(TimerEvent.TIMER, onAnimationTimer);
+				comboObjectType.dataProvider = [
+						{label: "Warm Front", renderer: new FrontCurveRenderer(canvas.graphics, 0xff0000, 0, FrontCurveRenderer.MARK_WARM)},
+						{label: "Cold Front", renderer: new FrontCurveRenderer(canvas.graphics, 0x0000ff, 0, FrontCurveRenderer.MARK_COLD)},
+						{label: "Occluded Front", renderer: new FrontCurveRenderer(canvas.graphics, 0xff00ff, 0, FrontCurveRenderer.MARK_OCCLUDED)},
+						{label: "Stationary Front", renderer: new FrontCurveRenderer(canvas.graphics, 0xff0000, 0x0000ff, FrontCurveRenderer.MARK_STATIONARY)},
+						{label: "SIGWX Jet Stream", renderer: new JetStreamCurveRenderer(canvas.graphics)},
+						{label: "SIGWX Cloud", renderer: new CloudCurveRenderer(canvas.graphics)},
+						{label: "SIGWX Turbulence", renderer: new TurbulenceCurveRenderer(canvas.graphics)},
+						{label: "Solid black line", renderer: new StyledLineCurveRenderer(canvas.graphics, 1.0, 0x00000, 1, StyledLineCurveRenderer.STYLE_SOLID)},
+						{label: "Dashed black line", renderer: new StyledLineCurveRenderer(canvas.graphics, 1.0, 0x00000, 1, StyledLineCurveRenderer.STYLE_DASHED)},
+						];
+				comboObjectType.selectedIndex = 0;
+				onShapeRandomN();
+			}
+
+			private function onObjectTypeChanged(): void
+			{
+				update();
+			}
+
+			private function onShapeRandom(): void
+			{
+				var i_ptCount: uint = uint(Math.random() * 5) + 2;
+				ml_points = [];
+				for (var i: uint = 0; i < i_ptCount; ++i)
+				{
+					ml_points.push(new Point(Math.random() * canvas.width, Math.random() * canvas.height));
+				}
+				update();
+			}
+
+			private function onShapeRandomN(): void
+			{
+				ml_points = [];
+				for (var i: uint = 0; i < 4; ++i)
+				{
+					ml_points.push(new Point(Math.random() * canvas.width / 2.0, Math.random() * canvas.height / 2.0));
+				}
+				ml_points[1].y += canvas.height / 2.0;
+				ml_points[2].x += canvas.width / 2.0;
+				ml_points[3].x += canvas.width / 2.0;
+				ml_points[3].y += canvas.height / 2.0;
+				update();
+			}
+
+			private function onShapeRandomV(): void
+			{
+				ml_points = [];
+				for (var i: uint = 0; i < 3; ++i)
+				{
+					ml_points.push(new Point(Math.random() * canvas.width / 2.0, Math.random() * canvas.height / 3.0));
+				}
+				ml_points[1].y += canvas.height / 3.0;
+				ml_points[1].x += canvas.width / 2.0;
+				ml_points[2].y += 2.0 * canvas.height / 3.0;
+				ml_points[2].x *= 2.0;
+				update();
+			}
+
+			private function onAnimateToggled(): void
+			{
+				if (m_animationTimer.running)
+					m_animationTimer.stop();
+				else
+					m_animationTimer.start();
+			}
+
+			private function onAnimationTimer(event: TimerEvent): void
+			{
+				for (var i_pt: uint = 0; i_pt < ml_points.length; ++i_pt)
+				{
+					var ptDelta: Point = ml_animPointDelta[i_pt];
+					var pt: Point = ml_points[i_pt];
+					pt.x += ptDelta.x;
+					pt.y += ptDelta.y;
+					if (pt.x < 0)
+					{
+						pt.x = 0;
+						ptDelta.x = -ptDelta.x;
+					}
+					if (pt.y < 0)
+					{
+						pt.y = 0;
+						ptDelta.y = -ptDelta.y;
+					}
+					if (pt.x >= canvas.width)
+					{
+						pt.x = canvas.width - 1;
+						ptDelta.x = -ptDelta.x;
+					}
+					if (pt.y >= canvas.height)
+					{
+						pt.y = canvas.height - 1;
+						ptDelta.y = -ptDelta.y;
+					}
+				}
+				update(false);
+			}
+
+			private function update(b_updateAnimationDeltas: Boolean = true): void
+			{
+				if (b_updateAnimationDeltas)
+				{
+					ml_animPointDelta = [];
+					for each (var pt: Point in ml_points)
+					{
+						ml_animPointDelta.push(new Point(
+								int(Math.random() * 5) - 2,
+								int(Math.random() * 5) - 2
+								));
+					}
+				}
+				canvas.graphics.clear();
+				var curveRenderer: ICurveRenderer = comboObjectType.selectedItem.renderer;
+				CubicBezier.curveThroughPoints(curveRenderer, ml_points);
+			}
+		]]>
+	</mx:Script>
+	<mx:Label 
+			text="This example demostrates rendering of smooth bezier curves with custom styling used for meteorological objects"/>
+	<mx:HBox>
+		<mx:Button label="Animate" toggle="true" click="onAnimateToggled()"/>
+		<mx:Label text="Met Objects:"/>
+		<mx:ComboBox id="comboObjectType" change="onObjectTypeChanged()"/>
+		<mx:Label text="Shapes:"/>
+		<mx:Button label="Random" click="onShapeRandom()"/>
+		<mx:Button label="Random 'N'" click="onShapeRandomN()"/>
+		<mx:Button label="Random '>'" click="onShapeRandomV()"/>
+	</mx:HBox>
+	<mx:VBox width="100%" height="100%">
+		<mx:Canvas id="canvas" width="100%" height="100%"/>
+	</mx:VBox>
+</mx:Application>

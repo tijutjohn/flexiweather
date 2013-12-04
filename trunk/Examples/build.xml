@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Browsing Weather" basedir=".">
+	<taskdef resource="flexTasks.tasks">
+		<classpath>
+		    <pathelement path="${FLEX_HOME}/ant/lib/flexTasks.jar"/>
+		</classpath>
+	</taskdef>
+	<property name="FLEX_HOME" value="${FLEX_HOME}" />
+	<property name="FLEXIWEATHER_LIBDIR" value="${FLEXIWEATHER_LIBDIR}" />
+	<property name="UPLOAD_TO" value="${UPLOAD_TO}" />
+	<property name="DISTDIR" value="bin" />
+	<property name="LIBDIR" value="libs" />
+	<property name="BUILDDIR" value="${DISTDIR}-build" />
+	<target name="main">
+		<java jar="${FLEX_HOME}/lib/adt.jar" fork="true" failonerror="true">
+			<arg value="-certificate" />
+			<arg value="-cn" />
+			<arg value="Self Signed" />
+			<arg value="-ou" />
+			<arg value="Visual Weather Team" />
+			<arg value="-o" />
+			<arg value="IBL Software Engineering" />
+			<arg value="-c" />
+			<arg value="SK" />
+			<arg value="2048-RSA" />
+			<arg value="air-self-sign.p12" />
+			<arg value="5ecret" />
+		</java>
+
+		<mxmlc file="src/Example1WebApp.mxml"
+				output="${DISTDIR}/Example1WebApp.swf"
+				keep-generated-actionscript="false">
+			<load-config filename="${FLEX_HOME}/frameworks/flex-config.xml" />
+			<library-path dir="${FLEXIWEATHER_LIBDIR}" includes="FlexiWeather.swc" append="true"/>
+			<source-path path-element="${FLEX_HOME}/frameworks" />
+		</mxmlc>
+		
+		<mxmlc file="src/Example1AIR.mxml"
+				output="${BUILDDIR}/Example1AIR.swf"
+				keep-generated-actionscript="false">
+			<load-config filename="${FLEX_HOME}/frameworks/air-config.xml" />
+			<library-path dir="${FLEXIWEATHER_LIBDIR}" includes="FlexiWeather.swc" append="true"/>
+			<source-path path-element="${FLEX_HOME}/frameworks" />
+		</mxmlc>
+		<copy file="src/Example-app.xml" tofile="${BUILDDIR}/Example1AIR-app.xml" overwrite="true"/>
+		<replace file="${BUILDDIR}/Example1AIR-app.xml">
+			<replacefilter token="@ID@" value="FlexiWeatherExample1"/>
+			<replacefilter token="@FILENAME@" value="FlexiWeatherExample1"/>
+			<replacefilter token="@NAME@" value="FlexiWeatherExample1"/>
+			<replacefilter token="@SWF@" value="Example1AIR.swf"/>
+			<replacefilter token="@TITLE@" value="Flexi Weather Example 1"/>
+		</replace>
+		<java jar="${FLEX_HOME}/lib/adt.jar" fork="true" failonerror="true">
+			<arg value="-package" />
+			<arg value="-storetype" />
+			<arg value="pkcs12" />
+			<arg value="-keystore" />
+			<arg value="air-self-sign.p12" />
+			<arg value="-storepass" />
+			<arg value="5ecret" />
+			<arg value="${DISTDIR}/Example1.air" />
+			<arg value="${BUILDDIR}/Example1AIR-app.xml" />
+			<arg value="-C" />
+			<arg value="${BUILDDIR}" />
+			<arg value="Example1AIR.swf" />
+		</java>
+
+		<mxmlc file="src/Example1Mobile.mxml"
+				output="${BUILDDIR}/Example1Mobile.swf"
+				keep-generated-actionscript="false"
+				debug="false">
+			<load-config filename="${FLEX_HOME}/frameworks/airmobile-config.xml" />
+			<library-path dir="${FLEXIWEATHER_LIBDIR}" includes="FlexiWeather.swc" append="true" />
+			<library-path dir="${FLEX_HOME}/frameworks" append="true">
+				<include name="libs/*" />
+				<include name="libs/mx/*" />
+			</library-path>
+			<source-path path-element="${FLEX_HOME}/frameworks" />
+		</mxmlc>
+		<copy file="src/Example-app.xml" tofile="${BUILDDIR}/Example1Mobile-app.xml" overwrite="true"/>
+		<replace file="${BUILDDIR}/Example1Mobile-app.xml">
+			<replacefilter token="@ID@" value="FlexiWeatherExample1"/>
+			<replacefilter token="@FILENAME@" value="FlexiWeatherExample1"/>
+			<replacefilter token="@NAME@" value="FlexiWeatherExample1"/>
+			<replacefilter token="@SWF@" value="Example1Mobile.swf"/>
+			<replacefilter token="@TITLE@" value="Flexi Weather Example 1"/>
+		</replace>
+		<java jar="${FLEX_HOME}/lib/adt.jar" fork="true" failonerror="true">
+			<arg value="-package" />
+			<arg value="-target" />
+			<arg value="apk" />
+			<arg value="-storetype" />
+			<arg value="pkcs12" />
+			<arg value="-keystore" />
+			<arg value="air-self-sign.p12" />
+			<arg value="-storepass" />
+			<arg value="5ecret" />
+			<arg value="${DISTDIR}/Example1.apk" />
+			<arg value="${BUILDDIR}/Example1Mobile-app.xml" />
+			<arg value="-C" />
+			<arg value="${BUILDDIR}" />
+			<arg value="Example1Mobile.swf" />
+		</java>
+		<!--java jar="${FLEX_HOME}/lib/adt.jar" fork="true" failonerror="true">
+			<arg value="-package" />
+			<arg value="-target" />
+			<arg value="ipa-ad-hoc" />
+			<arg value="-storetype" />
+			<arg value="pkcs12" />
+			<arg value="-keystore" />
+			<arg value="air-self-sign.p12" />
+			<arg value="-storepass" />
+			<arg value="5ecret" />
+			<arg value="${DISTDIR}/Example1.ipa" />
+			<arg value="${BUILDDIR}/Example1Mobile-app.xml" />
+			<arg value="-C" />
+			<arg value="${BUILDDIR}" />
+			<arg value="Example1Mobile.swf" />
+		</java-->
+
+		<mxmlc file="src/Example2.mxml"
+				output="${DISTDIR}/Example2.swf"
+				keep-generated-actionscript="false">
+			<load-config filename="${FLEX_HOME}/frameworks/flex-config.xml" />
+			<library-path dir="${FLEXIWEATHER_LIBDIR}" includes="FlexiWeather.swc" append="true"/>
+			<source-path path-element="${FLEX_HOME}/frameworks" />
+		</mxmlc>
+		<mxmlc file="src/Example3.mxml"
+				output="${DISTDIR}/Example3.swf"
+				keep-generated-actionscript="false">
+			<load-config filename="${FLEX_HOME}/frameworks/flex-config.xml" />
+			<library-path dir="${FLEXIWEATHER_LIBDIR}" includes="FlexiWeather.swc" append="true"/>
+			<source-path path-element="${FLEX_HOME}/frameworks" />
+		</mxmlc>
+		<mxmlc file="src/Example5.mxml"
+				output="${DISTDIR}/Example5.swf"
+				keep-generated-actionscript="false">
+			<load-config filename="${FLEX_HOME}/frameworks/flex-config.xml" />
+			<library-path dir="${FLEXIWEATHER_LIBDIR}" includes="FlexiWeather.swc" append="true"/>
+			<source-path path-element="${FLEX_HOME}/frameworks" />
+		</mxmlc>
+		<mxmlc file="src/Example6.mxml"
+				output="${DISTDIR}/Example6.swf"
+				keep-generated-actionscript="false">
+			<load-config filename="${FLEX_HOME}/frameworks/flex-config.xml" />
+			<library-path dir="${FLEXIWEATHER_LIBDIR}" includes="FlexiWeather.swc" append="true"/>
+			<source-path path-element="${FLEX_HOME}/frameworks" />
+		</mxmlc>
+		<mxmlc file="src/Example7.mxml"
+				output="${DISTDIR}/Example7.swf"
+				keep-generated-actionscript="false">
+			<load-config filename="${FLEX_HOME}/frameworks/flex-config.xml" />
+			<library-path dir="${FLEXIWEATHER_LIBDIR}" includes="FlexiWeather.swc" append="true"/>
+			<source-path path-element="${FLEX_HOME}/frameworks" />
+		</mxmlc>
+		<mxmlc file="src/Example8.mxml"
+				output="${DISTDIR}/Example8.swf"
+				keep-generated-actionscript="false">
+			<load-config filename="${FLEX_HOME}/frameworks/flex-config.xml" />
+			<library-path dir="${FLEXIWEATHER_LIBDIR}" includes="FlexiWeather.swc" append="true"/>
+			<library-path dir="${LIBDIR}" includes="DConsole2SWC.swc" append="true"/>
+			<source-path path-element="${FLEX_HOME}/frameworks" />
+		</mxmlc>
+		<mxmlc file="src/FlyingRouteExample.mxml"
+				output="${DISTDIR}/FlyingRouteExample.swf"
+				keep-generated-actionscript="false">
+			<load-config filename="${FLEX_HOME}/frameworks/flex-config.xml" />
+			<library-path dir="${FLEXIWEATHER_LIBDIR}" includes="FlexiWeather.swc" append="true"/>
+			<source-path path-element="${FLEX_HOME}/frameworks" />
+		</mxmlc>
+		<mxmlc file="src/ExampleMultiViewWithConfiguration.mxml"
+				output="${DISTDIR}/ExampleMultiViewWithConfiguration.swf"
+				keep-generated-actionscript="false">
+			<load-config filename="${FLEX_HOME}/frameworks/flex-config.xml" />
+			<library-path dir="${FLEXIWEATHER_LIBDIR}" includes="FlexiWeather.swc" append="true"/>
+			<source-path path-element="${FLEX_HOME}/frameworks" />
+		</mxmlc>
+		<mxmlc file="src/FeatureEditorExample.mxml"
+				output="${DISTDIR}/FeatureEditorExample.swf"
+				keep-generated-actionscript="false">
+			<load-config filename="${FLEX_HOME}/frameworks/flex-config.xml" />
+			<library-path dir="${FLEXIWEATHER_LIBDIR}" includes="FlexiWeather.swc" append="true"/>
+			<source-path path-element="${FLEX_HOME}/frameworks" />
+		</mxmlc>
+		<echo message="Preparing assets"/>
+		<mkdir dir="${DISTDIR}/assets"/>
+		<mkdir dir="${DISTDIR}/assets/kml"/>
+		<mkdir dir="${DISTDIR}/assets/kmz"/>
+		<mkdir dir="${DISTDIR}/assets/pngs"/>
+		<copy todir="${DISTDIR}/assets/kml">
+			<fileset dir="src/assets/kml">
+				<include name="*.kml" />
+			</fileset>
+		</copy>
+		<copy todir="${DISTDIR}/assets/kmz">
+			<fileset dir="src/assets/kmz">
+				<include name="*.kmz" />
+			</fileset>
+		</copy>
+		<copy todir="${DISTDIR}/assets/pngs">
+			<fileset dir="src/assets/pngs">
+				<include name="*.png" />
+			</fileset>
+		</copy>
+	</target>
+	<target name="clean">
+		<delete dir="${DISTDIR}"/>
+		<delete dir="${BUILDDIR}"/>
+	</target>
+	<target name="upload" depends="main">
+		<exec executable="/usr/bin/rsync">
+			<arg value="-v"/>
+			<arg value="-e"/>
+			<arg value="ssh"/>
+			<arg value="-a"/>
+			<arg value="--delete"/>
+			<arg value="${DISTDIR}/"/>
+			<arg value="${UPLOAD_TO}"/>
+		</exec>
+	</target>		
+</project>

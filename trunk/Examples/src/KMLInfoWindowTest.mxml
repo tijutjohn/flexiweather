@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" minWidth="955" minHeight="600" xmlns:controls="com.iblsoft.flexiweather.ogc.kml.controls.*"
+			   applicationComplete="init()">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Style source="css/fonts.css"/>
+	<fx:Style source="css/kml.css"/>
+	
+	<s:VGroup width="100%" height="100%" paddingLeft="50">
+		<s:HGroup width="100%">
+			<s:TextInput width="100%" id="txtPath" enter="drawDebug()"/>
+			<s:Button label="draw" click="drawDebug()"/>
+		</s:HGroup>
+		<mx:UIComponent id="canvas" width="100%" height="200"/>
+		<s:Group left="0" right="0" top="0" bottom="0">
+			<s:layout>
+				<s:TileLayout horizontalGap="100" verticalGap="50" requestedColumnCount="3"/>
+			</s:layout>
+			
+			<controls:KMLInfoWindow  width="150" height="250" arrowPosition="{KMLInfoWindowArrowPosition.TOP_LEFT}"/>
+			<controls:KMLInfoWindow  width="150" height="250" arrowPosition="{KMLInfoWindowArrowPosition.TOP_CENTER}"/>
+			<controls:KMLInfoWindow  width="150" height="250" arrowPosition="{KMLInfoWindowArrowPosition.TOP_RIGHT}"/>
+
+			<controls:KMLInfoWindow  width="150" height="250" arrowPosition="{KMLInfoWindowArrowPosition.BOTTOM_LEFT}"/>
+			<controls:KMLInfoWindow width="150" height="250" arrowPosition="{KMLInfoWindowArrowPosition.BOTTOM_CENTER}"/>
+			<controls:KMLInfoWindow  width="150" height="250" arrowPosition="{KMLInfoWindowArrowPosition.BOTTOM_RIGHT}"/>
+		</s:Group>
+	</s:VGroup>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.iblsoft.flexiweather.ogc.kml.controls.KMLInfoWindow;
+			import com.iblsoft.flexiweather.ogc.kml.controls.KMLInfoWindowArrowPosition;
+			import com.iblsoft.flexiweather.ogc.kml.features.Placemark;
+			import com.iblsoft.flexiweather.ogc.kml.managers.KMLPopupManager;
+			
+			import mx.core.FlexGlobals;
+
+			private function drawDebug(): void
+			{
+				var gr: Graphics = canvas.graphics;
+				gr.clear();
+				gr.beginFill(0xaaaaaa);
+				gr.lineStyle(1,0x666666);
+				gr.drawRect(0,0,600,200);
+				gr.endFill()
+				gr.lineStyle(4);
+				
+				var drawCoords:Vector.<Number> = new Vector.<Number>();
+				var drawCommands:Vector.<int> = new Vector.<int>();
+				
+				var cmd: Array = txtPath.text.split(' ');
+				while (cmd.length > 0)
+				{
+					var command: String = cmd.shift();
+					if (command == "m")
+					{
+						drawCommands.push(1);
+					} else if (command == "l")
+					{
+						drawCommands.push(2);
+					}
+					drawCoords.push(cmd.shift(), cmd.shift());
+				}
+				
+				gr.beginFill(0xaa0000);
+				gr.drawPath(drawCommands, drawCoords);
+				gr.endFill();
+			}
+			
+			private function init(): void
+			{
+//				var window1: KMLInfoWindow = new KMLInfoWindow();
+//				
+//				KMLPopupManager.getInstance().addPopUp(window1, FlexGlobals.topLevelApplication as DisplayObject, null, null);
+			}
+		]]>
+	</fx:Script>
+</s:Application>

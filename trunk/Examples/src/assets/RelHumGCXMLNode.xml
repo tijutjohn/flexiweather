@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WMS_Capabilities version="1.3.0" updateSequence="1382416902985" xmlns="http://www.opengis.net/wms" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wms http://schemas.opengis.net/wms/1.3.0/capabilities_1_3_0.xsd" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <Layer queryable="1">
+        <Name>relative-humidity</Name>
+        <Title>Relative Humidity</Title>
+        <CRS>EPSG:900913</CRS>
+        <CRS>ESRI:102018</CRS>
+        <CRS>ESRI:102021</CRS>
+        <CRS>EPSG:27700</CRS>
+        <CRS>CRS:84</CRS>
+        <CRS>EPSG:4326</CRS>
+        <EX_GeographicBoundingBox>
+            <westBoundLongitude>-180</westBoundLongitude>
+            <eastBoundLongitude>179.99978027343747</eastBoundLongitude>
+            <southBoundLatitude>-89.999890136718733</southBoundLatitude>
+            <northBoundLatitude>89.999890136718733</northBoundLatitude>
+        </EX_GeographicBoundingBox>
+        <BoundingBox CRS="CRS:84" minx="-180" miny="-89.999890136718733" maxx="179.99978027343747" maxy="89.999890136718733"/>
+        <BoundingBox CRS="EPSG:4326" minx="-180" miny="-89.999890136718733" maxx="179.99978027343747" maxy="89.999890136718733"/>
+        <Dimension name="RUN" units="ISO8601" default="2013-11-06T12:00:00Z">
+            2013-11-05T00:00:00Z,2013-11-05T06:00:00Z,2013-11-05T12:00:00Z,2013-11-05T18:00:00Z,2013-11-06T00:00:00Z,2013-11-06T06:00:00Z,2013-11-06T12:00:00Z
+        </Dimension>
+        <Dimension name="ELEVATION" units="" default="850hPa">
+            ground*,1000hPa,975hPa,950hPa,925hPa,900hPa,850hPa,800hPa,750hPa,700hPa,650hPa,600hPa,550hPa,500hPa,450hPa,400hPa,350hPa,300hPa,250hPa,200hPa,150hPa,100hPa,70hPa,50hPa,30hPa,10hPa,2m,atmosphere,tropo-freeze,0C isoterm,sigma 0.9950,sigma 0.33/1.00,sigma 0.44/0.72,sigma 0.44/1.00,sigma 0.72/0.94,surf -30/-0hPa
+        </Dimension>
+        <Dimension name="FORECAST" units="ISO8601" default="PT0S">
+            PT0S,PT3H,PT6H,PT9H,PT12H,PT15H,PT18H,PT21H,PT24H,PT27H,PT30H,PT33H,PT36H,PT39H,PT42H,PT45H,PT48H,PT54H,PT60H,PT66H,PT72H,PT78H,PT84H,PT90H,PT96H,PT102H,PT108H,PT114H,P5D,P5DT12H,P6D,P6DT12H,P7D
+        </Dimension>
+        <Identifier authority="http://www.iblsoft.com/wms/ext/getgtile">
+            size:256x256;cached;crs-boundary:EPSG:900913[-20037508,-20037508,20037508,20037508.34];crs-boundary:EPSG:4326[-180,-180,180,180];crs-boundary:CRS:84[-180,-180,180,180]
+        </Identifier>
+        <Style>
+            <Name>default</Name>
+            <Title>Default</Title>
+            <LegendURL width="600" height="35">
+                <Format>image/png</Format>
+                <OnlineResource xlink:type="simple" xlink:href="http://ogcie.iblsoft.com/ncep/gfs?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetLegendGraphic&LAYER=relative-humidity&STYLE=default"/>
+            </LegendURL>
+        </Style>
+    </Layer>
+</WMS_Capabilities>

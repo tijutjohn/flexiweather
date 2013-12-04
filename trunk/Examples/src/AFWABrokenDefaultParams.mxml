@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+               xmlns:s="library://ns.adobe.com/flex/spark" 
+               xmlns:mx="library://ns.adobe.com/flex/mx"
+               creationComplete="onCreationComplete(event)"
+               xmlns:widgets="com.iblsoft.flexiweather.widgets.*"
+               minWidth="955" minHeight="600"
+               skinClass="spark.skins.spark.ApplicationSkin">
+    
+    <s:VGroup width="100%" height="100%" paddingTop="10" paddingBottom="10" paddingLeft="10" paddingRight="10">
+                <s:Button label="Change To Style" click="changeStyle(event)" />
+                <widgets:InteractiveWidget id="m_iw" width="100%" height="100%" 
+                                           >
+                    <widgets:InteractiveLayerZoom id="m_ilz" zOrder="1"/>
+                    <widgets:InteractiveLayerPan id="m_ilp" zOrder="2"/>
+                </widgets:InteractiveWidget>
+    </s:VGroup>
+    
+    <fx:Script>
+        <![CDATA[
+            import com.iblsoft.flexiweather.ogc.Version;
+            import com.iblsoft.flexiweather.ogc.configuration.layers.WMSWithQTTLayerConfiguration;
+            import com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceConfiguration;
+            import com.iblsoft.flexiweather.ogc.managers.OGCServiceConfigurationManager;
+            import com.iblsoft.flexiweather.ogc.tiling.InteractiveLayerWMSWithQTT;
+            
+            import mx.events.FlexEvent;
+            
+            private var scm: OGCServiceConfigurationManager;
+            private var serviceRIA: WMSServiceConfiguration;
+            private var serviceGFS: WMSServiceConfiguration;
+            
+            private var m_layerDEMBackground: InteractiveLayerWMSWithQTT;
+
+            private function onCreationComplete(event: Event): void
+            {
+                m_iw.setCRS('EPSG:900913', false);
+                m_iw.setExtentBBoxRaw(-20037508.34,-20037508.34,20037508.34,20037508.34);
+                
+                var s_serverURL: String = 'http://wms.iblsoft.com';
+                scm = OGCServiceConfigurationManager.getInstance();
+                
+                serviceRIA = scm.getService(
+                    "ria",
+                    s_serverURL + "/ria", new Version(1, 3, 0),
+                    WMSServiceConfiguration) as WMSServiceConfiguration;
+                
+                serviceGFS = scm.getService(
+                    "gfs",
+                    s_serverURL + "/gfs", new Version(1, 3, 0),
+                    WMSServiceConfiguration) as WMSServiceConfiguration;
+                
+                scm.update(scm.getAllServicesNames());
+                
+                var lcqt: WMSWithQTTLayerConfiguration;
+                lcqt = new WMSWithQTTLayerConfiguration(serviceRIA, ["background-dem"]);
+                lcqt.label = "Backgrounds/DEM";
+                lcqt.avoidTiling = true;
+                m_layerDEMBackground = new InteractiveLayerWMSWithQTT(m_iw, lcqt);
+                //This set Style is broken because m_currentWMSViewProperties is now null until a FlexEvent.CREATION_COMPLETE is caught in InteractiveLayer
+                m_layerDEMBackground.setWMSStyleName(0, "white-colours");  //---------------------
+                m_layerDEMBackground.name = 'DEMBackground';               // If you comment these 3 lines out and uncomment the one below, it works again:
+                m_layerDEMBackground.zOrder = -10;                         //---------------------
+//                m_layerDEMBackground.addEventListener(FlexEvent.CREATION_COMPLETE, onLayerCreationComplete);
+                m_layerDEMBackground.setWMSDimensionValue("ELEVATION", "test");
+                m_iw.addLayer(m_layerDEMBackground);
+            }
+            
+            private function onLayerCreationComplete(event:FlexEvent):void {
+                m_layerDEMBackground.setWMSStyleName(0, "white-colours");
+                m_layerDEMBackground.name = 'DEMBackground';
+                m_layerDEMBackground.zOrder = -10;
+            }
+            
+            /**
+            * Clicking the button after the app has loaded when the app is in a "bugged" state will request the correct style.
+            */
+            private function changeStyle(event:MouseEvent):void {
+                m_layerDEMBackground.setWMSStyleName(0, "white-colours");
+                m_layerDEMBackground.refresh(true);
+            }
+        ]]>
+    </fx:Script>
+    
+</s:Application>

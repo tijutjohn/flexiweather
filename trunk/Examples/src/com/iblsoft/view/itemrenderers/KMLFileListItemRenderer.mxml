@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:s="library://ns.adobe.com/flex/spark" xmlns:mx="library://ns.adobe.com/flex/mx"
+		autoDrawBackground="true">
+	
+	<s:VGroup width="100%" gap="2" verticalAlign="middle" paddingLeft="5" paddingRight="5"
+				paddingBottom="1" paddingTop="1">
+		<s:HGroup width="100%" gap="2" verticalAlign="middle">
+			<s:Button label="Unload" click="dispatchEvent(new Event('unload', true))"/>
+			<s:Button label="Change visibility" click="dispatchEvent(new Event('changeVisibility', true))"/>
+		</s:HGroup>
+		<mx:ProgressBar id="progress" width="100%" mode="manual" labelPlacement="center"/>
+		<s:Label text="{path}" width="100%"/>
+	</s:VGroup>
+
+	<fx:Script>
+		<![CDATA[
+			import com.iblsoft.flexiweather.ogc.kml.configuration.KMLLayerConfiguration;
+			import com.iblsoft.flexiweather.ogc.kml.events.KMLEvent;
+			
+			[Bindable]
+			public var path: String;
+			
+			[Bindable]
+			public var configuration: KMLLayerConfiguration;
+			
+			override public function set data(value:Object):void
+			{
+				super.data = value;
+				
+				if (value && value.hasOwnProperty('path'))
+					path = value.path;
+				
+				if (value && value.hasOwnProperty('configuration'))
+				{
+					configuration = value.configuration as KMLLayerConfiguration;
+					if (configuration)
+					{
+						trace(configuration.toString() + " KMLFileListItemRenderer");
+						configuration.addEventListener(KMLEvent.PARSING_PROGRESS, onParsingProgress);
+						configuration.addEventListener(KMLEvent.UNPACKING_PROGRESS, onUnpackingProgress);
+						configuration.addEventListener(KMLEvent.PARSING_FINISHED, onParsingFinished);
+					}
+				}
+			}
+			
+			private function onParsingProgress(event: KMLEvent): void
+			{
+				progress.setProgress(event.progress, 100);
+				progress.label = "KML Parsing";
+			}
+			private function onUnpackingProgress(event: KMLEvent): void
+			{
+				progress.setProgress(event.progress, 100);
+				progress.label = "KML Unpacking";
+			}
+			private function onParsingFinished(event: KMLEvent): void
+			{
+				configuration.removeEventListener(KMLEvent.PARSING_PROGRESS, onParsingProgress);
+				configuration.removeEventListener(KMLEvent.UNPACKING_PROGRESS, onUnpackingProgress);
+				configuration.removeEventListener(KMLEvent.PARSING_FINISHED, onParsingFinished);
+				
+				configuration = null;
+				
+				progress.visible = progress.includeInLayout = false;
+			}
+		]]>
+	</fx:Script>
+</s:ItemRenderer>

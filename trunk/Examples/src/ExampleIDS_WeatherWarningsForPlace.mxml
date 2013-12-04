@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FlexiWeatherTemplate xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:s="library://ns.adobe.com/flex/spark" xmlns:mx="library://ns.adobe.com/flex/mx"
+		xmlns="*">
+	<fx:Declarations>
+
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:VGroup width="100%" height="100%" gap="2" paddingTop="10" paddingBottom="10"
+			paddingLeft="10" paddingRight="10">
+		<s:HGroup width="100%" id="hboxCaption">
+			<s:CheckBox id="m_showLegendCheckBox" selected="false" label="Show legend"/>
+			<s:Spacer width="100%"/>
+			<s:Label id="m_labelProgress" textAlign="right" fontWeight="bold"/>
+		</s:HGroup>
+		<s:TextArea id="m_legendTextArea" height="110" width="100%" editable="false"
+				visible="{m_showLegendCheckBox.selected}"
+				includeInLayout="{m_showLegendCheckBox.selected}"/>
+		<s:HGroup verticalAlign="middle" width="100%">
+			<s:Label text="ICAO code:"/>
+			<s:TextInput id="m_ICAOInput" maxChars="4"/>
+		</s:HGroup>
+		<s:HGroup verticalAlign="middle" width="100%">
+			<s:Label text="Validity:"/>
+			<s:TextInput id="m_validityFromInput" restrict="0123456789\.\-: " maxChars="16"
+					change="onValidityFromChanged()"/>
+			<s:Label text="-"/>
+			<s:TextInput id="m_validityToInput" restrict="0123456789\.\-: " maxChars="16"
+					change="onValidityToChanged()"/>
+			<s:Label text="UTC"/>
+		</s:HGroup>
+		<s:Button label="Display SIGMETs" id="m_displaySIGMETsButton" click="displaySIGMETs()"/>
+		<s:TextArea id="m_reportsTextArea" height="100%" width="100%" text="@{ms_reports}"/>
+		<s:TextArea id="m_requestsTextArea" editable="false" text="@{ms_requests}" height="20%"
+				width="100%" valueCommit="onRequestAdded()"
+				visible="{m_showRequestsCheckBox.selected}"
+				includeInLayout="{m_showRequestsCheckBox.selected}"/>
+		<s:CheckBox id="m_showRequestsCheckBox" selected="false" label="Show requests"/>
+	</s:VGroup>
+	<fx:Script>
+		<![CDATA[
+			import com.iblsoft.flexiweather.net.events.UniURLLoaderErrorEvent;
+			import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
+			import com.iblsoft.flexiweather.net.loaders.XMLLoader;
+			import com.iblsoft.flexiweather.utils.DateUtils;
+			import com.iblsoft.flexiweather.utils.ISO8601Parser;
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			import spark.utils.TextFlowUtil;
+			private var m_xmlLoader: XMLLoader;
+			[Bindable]
+			private var m_validityFrom: Date = null;
+			[Bindable]
+			private var m_validityTo: Date = null;
+			[Bindable]
+			private var ms_reports: String = "";
+			[Bindable]
+			private var ms_requests: String = "";
+			private const DATE_TIME_FORMAT: String = "%d.%m.%Y %H:%M";
+			private const LEGEND: String = "This example demonstrates capability of WFS to obtain " +
+					"weather warnings (just SIGMETs at the moment) for a specific place.<br/>" +
+					"<span fontWeight='bold'>Usage:</span><br/>" +
+					"1) Fill in the ICAO code of the place.<br/>" +
+					"2) Select validity range.<br/>" +
+					"3) Click the 'Display SIGMETs' button.<br/>" +
+					"4) All SIGMETs for the specified place which validity intersects the specified range will " +
+					"be displayed in the area below the button (if no ICAO code is specified, SIGMETs for all places " +
+					"will be displayed).<br/>";
+			//private const WCS_URL: String = "http://palo:8008/obs";
+			private const WCS_URL: String = "http://wms.iblsoft.com/obs";
+
+			/**
+			 * Initialization of example.
+			 */
+			override protected function onCreationComplete(event: FlexEvent): void
+			{
+				super.onCreationComplete(event);
+				m_validityTo = new Date();
+				m_validityTo.milliseconds = 0;
+				m_validityTo.seconds = 0;
+				m_validityTo.minutesUTC = 0;
+				m_validityTo.hoursUTC += 3;
+				m_validityFrom = new Date(m_validityTo);
+				m_validityFrom.hoursUTC -= 6;
+				m_validityFromInput.text = DateUtils.strftime(m_validityFrom, DATE_TIME_FORMAT);
+				m_validityToInput.text = DateUtils.strftime(m_validityTo, DATE_TIME_FORMAT);
+				m_xmlLoader = new XMLLoader();
+				m_xmlLoader.addEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onDataLoadedFailed);
+				m_xmlLoader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onDataLoaded);
+				m_legendTextArea.textFlow = spark.utils.TextFlowUtil.importFromString(LEGEND);
+			}
+
+			private function onValidityFromChanged(): void
+			{
+				var newValidityFrom: Date = DateUtils.strptime(m_validityFromInput.text, DATE_TIME_FORMAT);
+				if (!isNaN(newValidityFrom.time))
+					m_validityFrom = newValidityFrom;
+			}
+
+			private function onValidityToChanged(): void
+			{
+				var newValidityTo: Date = DateUtils.strptime(m_validityToInput.text, DATE_TIME_FORMAT);
+				if (!isNaN(newValidityTo.time))
+					m_validityTo = newValidityTo;
+			}
+
+			private function normalizeValidityInput(): void
+			{
+				m_validityFromInput.text = DateUtils.strftime(m_validityFrom, DATE_TIME_FORMAT);
+				m_validityToInput.text = DateUtils.strftime(m_validityTo, DATE_TIME_FORMAT);
+			}
+
+			private function displaySIGMETs(): void
+			{
+				normalizeValidityInput();
+				var request: URLRequest = new URLRequest(WCS_URL);
+				request.method = URLRequestMethod.GET;
+				var requestParams: URLVariables = new URLVariables();
+				requestParams["SERVICE"] = "WFS";
+				requestParams["VERSION"] = "1.1.0";
+				requestParams["REQUEST"] = "GetFeature";
+				requestParams["TYPENAME"] = "ns:SIGMETReportLatest";
+				requestParams["NAMESPACE"] = "xmlns(ns=http://www.iblsoft.com/wfs)";
+				if (m_ICAOInput.text != "")
+					requestParams["ICAO"] = m_ICAOInput.text;
+				var validFromMin: Date = new Date(m_validityFrom);
+				validFromMin.dateUTC -= 1;
+				var validFromMax: Date = new Date(m_validityTo);
+				var validToMin: Date = new Date(m_validityFrom);
+				var validToMax: Date = new Date(m_validityTo);
+				validToMax.dateUTC += 1;
+				requestParams["VALID_FROM"] = ISO8601Parser.dateToString(validFromMin) + "/" + ISO8601Parser.dateToString(validFromMax);
+				requestParams["VALID_TO"] = ISO8601Parser.dateToString(validToMin) + "/" + ISO8601Parser.dateToString(validToMax);
+				request.data = requestParams;
+				logRequest(request);
+				m_xmlLoader.load(request, null, "Get queried SIGMETs from web service.");
+			}
+
+			private function onDataLoadedFailed(event: UniURLLoaderErrorEvent): void
+			{
+				trace("onDataLoadedFailed");
+				Alert.show("Problem loading request", "Error", Alert.OK);
+			}
+
+			private function onDataLoaded(event: UniURLLoaderEvent): void
+			{
+				var gml: Namespace = new Namespace("http://www.opengis.net/gml");
+				var wfs: Namespace = new Namespace("http://www.iblsoft.com/wfs");
+				var xmlResult: XML = event.result as XML;
+				var xmlFeatureMembers: XMLList = xmlResult.gml::featureMember;
+				var xmlSIGMETReportLatest: XMLList = xmlFeatureMembers.wfs::SIGMETReportLatest;
+				var xmlReportTexts: XMLList = xmlSIGMETReportLatest.wfs::reportText;
+				ms_reports = "";
+				for each (var xmlReportText: XML in xmlReportTexts)
+				{
+					var s_report: String = xmlReportText.toString().split("\r\r\n").join("\n");
+					if (ms_reports != "")
+						ms_reports += "\n\n";
+					ms_reports += s_report;
+				}
+			}
+
+			private function logRequest(request: URLRequest): void
+			{
+				var requestParams: URLVariables = request.data as URLVariables;
+				var now: Date = new Date();
+				ms_requests += DateUtils.strftime(now, "%Y-%m-%d %H:%M:%SZ") + "\n" + request.url + "?" +
+						requestParams.toString().split("%2D").join("-").split("%5F").join("_").split("%2E").join(".")
+						.split("%28").join("(").split("%29").join(")").split("%3B").join(";").split("%3A").join(":")
+						.split("%3E").join(">").split("%3C").join("<").split("%3D").join("=").split("%2C").join(",") + "\n";
+			}
+
+			private function onRequestAdded(): void
+			{
+				m_requestsTextArea.scrollToRange(m_requestsTextArea.text.length - 1, m_requestsTextArea.text.length);
+			}
+		]]>
+	</fx:Script>
+</FlexiWeatherTemplate>

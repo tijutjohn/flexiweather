@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FlexiWeatherTemplate xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:s="library://ns.adobe.com/flex/spark" xmlns:mx="library://ns.adobe.com/flex/mx"
+		xmlns:widgets="com.iblsoft.flexiweather.widgets.*" xmlns="*" minWidth="955"
+		minHeight="600">
+	<fx:Declarations>
+
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<s:NumberFormatter fractionalDigits="2" useGrouping="false" id="distanceFormatter"/>
+	</fx:Declarations>
+	<s:VGroup width="100%" height="100%" gap="2" paddingTop="10" paddingBottom="10"
+			paddingLeft="10" paddingRight="10">
+		<s:HGroup id="hboxCaption" width="100%" verticalAlign="middle">
+			<s:Label 
+					text="This example demonstrates displaying InteractiveLayerRoute in InteractiveWidget."
+					fontWeight="bold" fontSize="14"/>
+			<s:Label id="labelProgress" textAlign="right" fontWeight="bold"/>
+			<s:Button label="Draw mode: Plain"
+					click="changeDrawMode(DrawMode.PLAIN)"/>
+			<s:Button label="Draw mode: Great Arc"
+					click="changeDrawMode(DrawMode.GREAT_ARC)"/>
+			<s:Button label="Clear route" click="clearRoute()"/>
+		</s:HGroup>
+		<s:HGroup width="100%" height="100%">
+			<widgets:InteractiveWidget id="m_iw" width="100%" height="100%">
+				<widgets:InteractiveLayerZoom id="m_ilz" zOrder="1"/>
+				<widgets:InteractiveLayerPan id="m_ilp" zOrder="2"/>
+
+				<!-- example with bigger placemarks and thick routes (e.g. for mobile) -->
+
+				<!--widgets:InteractiveLayerRoute width="100%" height="100%" zOrder="3"
+											   routeThickness="10" routeBorderThickness="3"
+											   routeBorderColor="0xff0000" routeFillColor="0xffcc00"
+											   placemarkBorderColor="0xff0000" placemarkFillColor="0xffcc00" placemarkHighlightFillColor="0xffffff"
+											   placemarkRadius="20" placemarkBorderThickness="3"/-->
+				<widgets:InteractiveLayerRoute id="route" width="100%" height="100%" zOrder="1"
+						routeThickness="3" routeBorderThickness="1" routeBorderColor="0x004400"
+						routeFillColor="0x00aa00" placemarkBorderColor="0x004400"
+						placemarkFillColor="0x00aa00" placemarkHighlightFillColor="0xffffff"
+						placemarkRadius="7" placemarkBorderThickness="1" drawMode="greatArc"
+						routeChanged="onRouteChanged()"/>
+			</widgets:InteractiveWidget>
+			<s:VGroup width="250" height="100%">
+				<s:Label text="Distances"/>
+				<s:Label text="Total distance: {distanceFormatter.format(totalDistance)}km"/>
+				<s:List dataProvider="{distances}" width="100%" height="100%">
+					<s:itemRenderer>
+						<fx:Component>
+							<s:ItemRenderer>
+								<s:Label 
+										text="{data.part}: Distance: {outerDocument.distanceFormatter.format(data.kilometres)}km, {outerDocument.distanceFormatter.format(data.nauticalMiles)} NM"
+										paddingBottom="3" paddingTop="3" paddingLeft="5"
+										paddingRight="5"/>
+							</s:ItemRenderer>
+						</fx:Component>
+					</s:itemRenderer>
+				</s:List>
+			</s:VGroup>
+		</s:HGroup>
+	</s:VGroup>
+	<fx:Script>
+		<![CDATA[
+			import com.iblsoft.flexiweather.proj.Coord;
+			import com.iblsoft.flexiweather.utils.draw.DrawMode;
+			import com.iblsoft.flexiweather.widgets.InteractiveLayer;
+			import com.iblsoft.flexiweather.widgets.InteractiveLayerRoute;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			[Bindable]
+			public var totalDistance: Number;
+			[Bindable]
+			public var distances: ArrayCollection = new ArrayCollection();
+
+			private function changeDrawMode(mode: String): void
+			{
+				route.changeDrawMode(mode);
+			}
+
+			override protected function onCreationComplete(event: FlexEvent): void
+			{
+				super.onCreationComplete(event);
+				m_iw.setCRSExtentAndViewBBox('CRS:84');
+				addLayer('dem', 1);
+				addLayer('foreground', 1);
+				getAllServicesCapabilities();
+			}
+
+			private function clearRoute(): void
+			{
+				route.clearRoute();
+			}
+
+			private function onRouteChanged(): void
+			{
+				measureDistances();
+			}
+
+			private function measureDistances(): void
+			{
+				var routeCoords: Array = route.coords;
+				var totalCoords: int = routeCoords.length;
+				totalDistance = 0;
+				distances.removeAll();
+				//need to check new segments
+				for (var i: int = 1; i < (totalCoords); i++)
+				{
+					var coord1: Coord = routeCoords[i - 1] as Coord;
+					var coord2: Coord = routeCoords[i] as Coord;
+					//need to convert coord to LatLon
+					coord1 = coord1.toLaLoCoord();
+					coord2 = coord2.toLaLoCoord();
+					var segment: Object = {part: i, coord1: coord1, coord2: coord2, index: i - 1, distance: 0};
+					measureSegment(segment);
+					distances.addItem(segment);
+//					trace("find segment : " + i);
+				}
+			}
+
+			private function measureSegment(segment: Object): void
+			{
+				var distance: Number = segment.coord1.distanceTo(segment.coord2);
+				totalDistance += distance;
+				segment.meters = distance * 1000;
+				segment.kilometres = distance;
+				segment.nauticalMiles = segment.meters * 0.000539956803;
+				segment.statuteMiles = segment.meters * 0.000621371192
+			}
+		]]>
+	</fx:Script>
+</FlexiWeatherTemplate>

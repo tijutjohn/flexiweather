@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FlexiWeatherTemplate xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" 
+			   xmlns:widgets="com.iblsoft.flexiweather.widgets.*"
+			   xmlns="*"
+			   minWidth="955" minHeight="600">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.iblsoft.flexiweather.proj.Coord;
+			import com.iblsoft.flexiweather.proj.Projection;
+			import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
+			
+			import mx.events.FlexEvent;
+			
+			import org.openscales.proj4as.ProjProjection;
+			
+			override protected function onCreationComplete(event:FlexEvent):void
+			{
+				super.onCreationComplete(event);
+				
+				Projection.addCRSByProj4("ESRI:102018", "+title=North Pole Stereographic +proj=stere +lat_0=90 +lon_0=-45 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m");
+				for (var i: int = -180; i <= 180; i+=5)
+					Projection.addCRSByProj4("PROJ4:proj=stere +lat_0=90 +lon_0="+i+" +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m", "+proj=stere +lat_0=90 +lon_0="+i+" +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m");
+				
+				
+				
+				var map: InteractiveLayerMap = new InteractiveLayerMap();
+				m_iw.addLayer(map);
+				
+				addLayer('dem');
+				addLayer('foreground');
+				
+//				m_iw.setCRSExtentAndViewBBox('PROJ4:proj=stere +lat_0=90 +lon_0=-45 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m');
+				m_iw.setCRS('PROJ4:proj=stere +lat_0=90 +lon_0='+_preloadingRotation+' +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m', false); 
+				m_iw.setExtentBBoxRaw(-10000000,-10000000,10000000,10000000);
+				
+				scm.update(scm.getAllServicesNames());
+				
+				preloadAllRotations();
+			}
+			
+			[Bindable]
+			private var _preloadingRotation: int = -180;
+			
+			[Bindable]
+			private var _preloadingRotationStep: int = 5;
+			
+			[Bindable]
+			private var _preloadingRotationInterval: int = 50;
+			private var _preloadingRotationTimer: Timer;
+			private function preloadAllRotations(): void
+			{
+				_preloadingRotationTimer = new Timer(3000, 360 / _preloadingRotationStep);
+				_preloadingRotationTimer.addEventListener(TimerEvent.TIMER, onPreloadRotationTimerTick);
+				_preloadingRotationTimer.addEventListener(TimerEvent.TIMER_COMPLETE, onPreloadingFinished);
+				_preloadingRotationTimer.start();
+			}
+			
+			private function onPreloadRotationTimerTick(event: TimerEvent): void
+			{
+				_preloadingRotation += _preloadingRotationStep;
+				var crs: String = 'PROJ4:proj=stere +lat_0=90 +lon_0='+_preloadingRotation+' +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m';
+				trace("preload: " + crs);
+				m_iw.setCRS(crs, true); 
+			}
+			
+			private function onPreloadingFinished(event: TimerEvent): void
+			{
+				_preloadingRotation = -180;
+				_preloadingRotationTimer = new Timer(_preloadingRotationInterval);
+				_preloadingRotationTimer.addEventListener(TimerEvent.TIMER, onAnimationRotationTimerTick);
+				_preloadingRotationTimer.start();
+			}
+			private function onAnimationRotationTimerTick(event: TimerEvent): void
+			{
+				_preloadingRotation += _preloadingRotationStep;
+				m_iw.setCRS('PROJ4:proj=stere +lat_0=90 +lon_0='+_preloadingRotation+' +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m', true); 
+				if (_preloadingRotation == 180)
+					_preloadingRotation = -180;
+			}
+			protected function onMouseMove(event: MouseEvent): void
+			{
+				labelLocation.text = "[" + event.localX + ", " + event.localY + "] = ";
+				var c: Coord = m_iw.pointToCoord(event.localX, event.localY).toLaLoCoord();
+				labelLocation.text += c != null ? c.toNiceString() : "?";
+			}
+			
+			private function onRotationChange(): void
+			{
+				trace("Rotation: " + sliderRotation.value); 
+				var crsValue: String = 'proj=stere +lat_0=90 +lon_0='+sliderRotation.value.toString()+' +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m';
+				var crs: String = 'PROJ4:' + crsValue;
+					
+				m_iw.setCRS(crs);
+			}
+			
+			private function onAnimationIntervalChange(): void
+			{
+				_preloadingRotationTimer.delay = sliderAnimInterval.value;
+			}
+			private function toggleAnimation(): void
+			{
+				if (toggleAnim.selected)
+				{
+					toggleAnim.label = "Stop Animation";
+					_preloadingRotationTimer.start();
+				} else {
+					toggleAnim.label = "Start Animation";
+					_preloadingRotationTimer.stop();
+				} 
+			}
+				
+		]]>
+	</fx:Script>
+	
+	<s:VGroup width="100%" height="100%">
+		
+		<s:Label id="labelLocation" text="[Mouse location]"/>
+		<s:HGroup>
+			<s:Label text="Projection rotation:"/>
+			<s:HSlider id="sliderRotation" minimum="-180" maximum="180" value="{_preloadingRotation}" stepSize="{_preloadingRotationStep}" snapInterval="{_preloadingRotationStep}" change="onRotationChange()"
+					   width="500" showDataTip="true" toolTip="Projection Rotation"
+					   liveDragging="false"/>
+			<s:ToggleButton label="Stop Animation" selected="true" change="toggleAnimation()" id="toggleAnim"/>
+			<s:Label text="Animation interval:"/>
+			<s:HSlider id="sliderAnimInterval" minimum="10" maximum="2000" value="{_preloadingRotationInterval}" stepSize="10" snapInterval="10" change="onAnimationIntervalChange()"
+					   width="100" showDataTip="true" toolTip="Animation interval"
+					   liveDragging="false"/>
+		</s:HGroup>
+		<s:NavigatorContent width="100%" height="100%">
+			<widgets:InteractiveWidget id="m_iw" width="100%" height="100%"
+									   mouseMove="onMouseMove(event)">
+				<widgets:InteractiveLayerZoom id="m_ilz" zOrder="1" enabled="true" minimimMapScale="100000"/>
+				<widgets:InteractiveLayerPan id="m_ilp" zOrder="2" enabled="true"/>
+			</widgets:InteractiveWidget>
+		</s:NavigatorContent>
+	</s:VGroup>
+	
+</FlexiWeatherTemplate>

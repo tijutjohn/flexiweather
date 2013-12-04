@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" minWidth="955" minHeight="600">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:VGroup width="100%" height="100%">
+		<s:HGroup width="100%">
+			<s:Button label="Test MainPanel request" click="mainPanel()"/>
+			<s:Label text="Timeout: "/>
+			<s:ComboBox id="methodCB" selectedIndex="0">
+				<s:dataProvider>
+					<mx:ArrayList>
+						<fx:String>POST</fx:String>
+						<fx:String>GET</fx:String>
+					</mx:ArrayList>
+				</s:dataProvider>
+			</s:ComboBox>
+			<s:NumericStepper minimum="1" maximum="200" value="10" stepSize="1" id="nsSize"/>
+			<s:Button label="Cancel it" click="cancelPost()"/>
+		</s:HGroup>
+		<s:TextArea id="output"  width="100%" height="100%"/>
+	</s:VGroup>
+	<fx:Script>
+		<![CDATA[
+			import com.iblsoft.flexiweather.net.events.UniURLLoaderErrorEvent;
+			import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
+			import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
+			
+			private var _loader: UniURLLoader;
+			private var _loader2: URLLoader;
+			private var _request: URLRequest;
+//			private function mainPanel(): void
+//			{
+//				_loader = new UniURLLoader();
+//				_loader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onUniURLEvent);
+//				_loader.addEventListener(UniURLLoaderEvent.STOP_REQUEST, onUniURLEvent);
+//				_loader.addEventListener(UniURLLoaderEvent.LOAD_STARTED, onUniURLEvent);
+//				_loader.addEventListener(UniURLLoaderEvent.RUN_STOPPED_REQUEST, onUniURLEvent);
+//				_loader.addEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onUniURLErrorEvent);
+//				
+//				var jsonString: String = '{"params":{"timeout":"'+nsSize.value+'s","roles":["Shared","LDDU","LDOS"],"notifications":{"id":"13|2013-03-04T12:29:21Z"},"validForecasts":{"id":"1362377575"},"alerts":{"id":"03072afa2bee98c883f9f9ce55c1a34b"},"regularTasks":{"id":"6189e109ed2155b3a82aabbe6169e5d4","timeFrom":"2013-03-04T07:00:00Z","timeTo":"2013-03-04T13:00:00Z"}},"jsonrpc":"2.0","id":1,"method":"listRegularTasksNotificationsValidForecastsAndAlerts"}';
+//				_request = new URLRequest("http://murcikan:8010/ria/mainpanel");
+//				_request.method = methodCB.selectedItem as String;
+//				_request.data = jsonString;
+//				_loader.load(_request);
+//				
+//			}
+			private function mainPanel(): void
+			{
+				_loader2 = new URLLoader();
+				_loader2.addEventListener(ProgressEvent.PROGRESS, onProgress);
+				_loader2.addEventListener(Event.COMPLETE, onLoader2Complete);
+				_loader2.addEventListener(IOErrorEvent.IO_ERROR, onIOError);
+				
+				var jsonString: String = '{"params":{"timeout":"'+nsSize.value+'s","roles":["Shared","LDDU","LDOS"],"notifications":{"id":"13|2013-03-04T12:29:21Z"},"validForecasts":{"id":"1362377575"},"alerts":{"id":"03072afa2bee98c883f9f9ce55c1a34b"},"regularTasks":{"id":"6189e109ed2155b3a82aabbe6169e5d4","timeFrom":"2013-03-04T07:00:00Z","timeTo":"2013-03-04T13:00:00Z"}},"jsonrpc":"2.0","id":1,"method":"listRegularTasksNotificationsValidForecastsAndAlerts"}';
+				_request = new URLRequest("http://murcikan:8010/ria/mainpanel");
+				_request.method = methodCB.selectedItem as String;
+				_request.data = jsonString;
+				_loader2.load(_request);
+				
+			}
+			private function log(txt: String): void
+			{
+				output.text = txt + "\n" + output.text;
+			}
+			private function onProgress(event: ProgressEvent): void
+			{
+				log("onProgress: " + event.bytesLoaded + " / " + event.bytesTotal);
+			}
+			private function onLoader2Complete(event: Event): void
+			{
+				log("onLoader2Complete: " );
+			}
+			private function onIOError(event: IOErrorEvent): void
+			{
+				log("onIOError: " + event.errorID );
+			}
+			
+			private function onUniURLEvent(event: UniURLLoaderEvent): void
+			{
+				log(event.type);
+			}
+			private function onUniURLErrorEvent(event: UniURLLoaderErrorEvent): void
+			{
+				log("Error: " + event.errorString);
+				
+			}
+			private function cancelPost(): void
+			{
+				log("CALL _loader.cancel");
+				if (_loader)
+					_loader.cancel(_request);
+				if (_loader2)
+				{
+					_loader2.close();
+				}
+			}
+		]]>
+	</fx:Script>
+</s:Application>

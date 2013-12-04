@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FlexiWeatherTemplate xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:s="library://ns.adobe.com/flex/spark" xmlns:mx="library://ns.adobe.com/flex/mx"
+		xmlns:widgets="com.iblsoft.flexiweather.widgets.*"
+		xmlns="*">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.iblsoft.flexiweather.ogc.BBox;
+			import com.iblsoft.flexiweather.ogc.CRSWithBBox;
+			import com.iblsoft.flexiweather.ogc.InteractiveLayerQTTMS;
+			import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
+			import com.iblsoft.flexiweather.ogc.Version;
+			import com.iblsoft.flexiweather.ogc.configuration.layers.QTTMSLayerConfiguration;
+			import com.iblsoft.flexiweather.ogc.configuration.layers.WMSWithQTTLayerConfiguration;
+			import com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceConfiguration;
+			import com.iblsoft.flexiweather.ogc.managers.OGCServiceConfigurationManager;
+			import com.iblsoft.flexiweather.ogc.tiling.InteractiveLayerWMSWithQTT;
+			import com.iblsoft.flexiweather.ogc.tiling.TiledTilingInfo;
+			import com.iblsoft.flexiweather.proj.Coord;
+			import com.iblsoft.flexiweather.proj.Projection;
+			import com.iblsoft.flexiweather.widgets.BackgroundJobManager;
+			import com.iblsoft.flexiweather.widgets.InteractiveLayer;
+			import com.iblsoft.flexiweather.widgets.InteractiveLayerZoom;
+			import com.iblsoft.flexiweather.widgets.LabelJobProgressIndicator;
+			
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			
+			import spark.filters.GlowFilter;
+			private var m_openStreetLayer: InteractiveLayerQTTMS;
+			private var m_layerDEMBackground: InteractiveLayerWMSWithQTT;
+			private var m_layerSufraceObservations: InteractiveLayerWMS;
+			private var m_layerForegroundBorders: InteractiveLayerWMSWithQTT;
+
+			/**
+			 * Initialization of example. Temperature layer creation, call get capabilities
+			 */
+			override protected function onCreationComplete(event: FlexEvent): void
+			{
+				super.onCreationComplete(event);
+				BackgroundJobManager.getInstance().createDefaultPreloader();
+				BackgroundJobManager.getInstance().setupIndicator(hboxCaption);
+				
+				
+				m_iw.setCRS('EPSG:900913', false);
+				m_iw.setExtentBBoxRaw(-20037508.34 * 3, -20037508.34, 20037508.34 * 2, 20037508.34, false);
+				m_iw.setViewBBoxRaw(-20037508.34, -20037508.34, 20037508.34, 20037508.34, true);
+				
+				Projection.addCRSByProj4(
+					"ESRI:54004",
+					"+title=World Mercator +proj=merc +lat_ts=0 +lon_0=0 +k=1.000000 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m",
+					new BBox(0, -NaN, 2 * 20037508.34, NaN), true);
+				
+				var bkgLayer: InteractiveLayer = addLayer('dem', 1) as InteractiveLayer;
+				
+				var openStreetLayerCfg: QTTMSLayerConfiguration = new QTTMSLayerConfiguration();
+				
+				m_openStreetLayer = new InteractiveLayerQTTMS(m_iw, openStreetLayerCfg); // 1, 18;
+				m_openStreetLayer.alpha = 1;
+				m_openStreetLayer.name = 'OpenStreetMap';
+				m_openStreetLayer.zOrder = 10;
+				
+				m_openStreetLayer.addCRSWithTilingExtent('http://b.tile.openstreetmap.org/%ZOOM%/%COL%/%ROW%.png', 'EPSG:900913', new BBox(-20037508.34, -20037508.34, 20037508.34, 20037508.34), 256, 0, 18);
+				
+				
+				var frgLayer: InteractiveLayer = addLayer('foreground', 1) as InteractiveLayer;
+				
+				getAllServicesCapabilities();
+			}
+
+			protected function onMouseMove(event: MouseEvent): void
+			{
+				labelLocation.text = "[" + event.localX + ", " + event.localY + "] = ";
+				var c: Coord = m_iw.pointToCoord(event.localX, event.localY).toLaLoCoord();
+				labelLocation.text += c != null ? c.toNiceString() : "?";
+			}
+			[Bindable]
+			public var mb_useOpenStreeMap: Boolean = false;
+
+			protected function onUseOpenStreetMapToggled(): void
+			{
+				// TODO Auto-generated method stub
+				mb_useOpenStreeMap = checkUseOpenStreetMap.selected;
+				if (mb_useOpenStreeMap)
+				{
+					m_iw.addLayer(m_openStreetLayer);
+					m_openStreetLayer.refresh(false);
+				}
+				else
+					m_iw.removeLayer(m_openStreetLayer);
+			}
+		]]>
+	</fx:Script>
+	<s:VGroup width="100%" height="100%">
+		<s:HGroup id="hboxCaption" width="100%" verticalAlign="middle">
+			<s:Label 
+					text="This example demonstrates OpenGIS WMS panning and zooming capabilities over anti-meridian."/>
+			<s:Label id="labelProgress" textAlign="right" fontWeight="bold"/>
+		</s:HGroup>
+		<s:HGroup id="hboxMenu" width="100%" verticalAlign="middle">
+			<s:Label text="Tools:"/>
+			<s:ToggleButton label="Zoom (Ctrl)" selected="{!m_ilz.requireCtrlKey}"
+					click="m_ilp.requireShiftKey = true; m_ilz.requireCtrlKey = !m_ilz.requireCtrlKey;"/>
+			<s:ToggleButton label="Zoom 100%" click="m_iw.setViewFullExtent()"/>
+			<s:ToggleButton label="Pan (Shift)" selected="{!m_ilp.requireShiftKey}"
+					click="m_ilz.requireCtrlKey = true; m_ilp.requireShiftKey = !m_ilp.requireShiftKey;"/>
+			<s:Spacer width="10"/>
+			<s:Label text="Projections:"/>
+			<s:ToggleButton label="LatLon" selected="{m_iw.crs == 'CRS:84'}"
+					click="m_iw.setCRSExtentAndViewBBox('CRS:84');"/>
+			<s:ToggleButton label="Mercator" selected="{m_iw.crs == 'ESRI:54004'}"
+					click="m_iw.setCRS('ESRI:54004', false); m_iw.setExtentBBoxRaw(0, -13000000, 36000000, 13000000);"/>
+			<s:ToggleButton label="Google Maps" selected="{m_iw.crs == 'EPSG:900913'}"
+					click="m_iw.setCRSExtentAndViewBBox('EPSG:900913');"/>
+		</s:HGroup>
+		<s:HGroup width="100%" verticalAlign="middle">
+			<s:Label id="labelLocation" text="[Mouse location]"/>
+		</s:HGroup>
+		<s:HGroup width="100%" verticalAlign="middle">
+			<s:CheckBox id="checkUseOpenStreetMap" label="Use Open Street Map if possible"
+					selected="{mb_useOpenStreeMap}" change="onUseOpenStreetMapToggled()"/>
+			<s:Label text="Alpha:"/>
+			<s:HSlider id="sliderAlpha" liveDragging="true" minimum="0" value="1" maximum="1"
+					snapInterval="0.1" change="m_openStreetLayer.alpha = sliderAlpha.value"/>
+		</s:HGroup>
+		<widgets:InteractiveWidget id="m_iw" width="100%" height="100%"
+				mouseMove="onMouseMove(event)">
+			<widgets:InteractiveLayerZoom id="m_ilz" zOrder="1"/>
+			<widgets:InteractiveLayerPan id="m_ilp" zOrder="2"/>
+		</widgets:InteractiveWidget>
+	</s:VGroup>
+</FlexiWeatherTemplate>
