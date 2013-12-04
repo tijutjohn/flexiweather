@@ -1178,9 +1178,9 @@ package com.iblsoft.flexiweather.widgets
 		}
 		override public function onMouseClick(event: MouseEvent): Boolean
 		{
-			var group: InteractiveLayerLegendGroup = event.target as InteractiveLayerLegendGroup;
-			if (group)
-			{
+//			var group: InteractiveLayerLegendGroup = event.target as InteractiveLayerLegendGroup;
+//			if (group)
+//			{
 				for each (var currGroup: InteractiveLayerLegendGroup in  m_groupDictionary)
 				{
 					var hit: Boolean = currGroup.hitTestPoint(event.stageX, event.stageY, true);
@@ -1193,7 +1193,7 @@ package com.iblsoft.flexiweather.widgets
 						return true;
 					}
 				}
-			}
+//			}
 			return false;
 		}
 		

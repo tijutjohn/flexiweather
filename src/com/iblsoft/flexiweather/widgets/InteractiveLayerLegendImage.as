@@ -73,6 +73,11 @@ package com.iblsoft.flexiweather.widgets
 			}
 			return this;
 		}
+		
+		override public function toString(): String
+		{
+			return "InteractiveLayerLegendImage: " + legendID;
+		}
 			
 		
 	}

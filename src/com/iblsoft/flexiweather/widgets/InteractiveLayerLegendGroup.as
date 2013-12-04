@@ -4,6 +4,10 @@ package com.iblsoft.flexiweather.widgets
 	
 	public class InteractiveLayerLegendGroup extends Group
 	{
+		static public var groupUID: int = 0;
+		
+		public var groupID: int;
+		
 		override public function set visible(value:Boolean):void
 		{
 			super.visible = value;
@@ -11,7 +15,13 @@ package com.iblsoft.flexiweather.widgets
 		
 		public function InteractiveLayerLegendGroup()
 		{
+			groupID = groupUID++;
 			super();
+		}
+		
+		override public function toString(): String
+		{
+			return "InteractiveLayerLegendGroup: "+ groupID;
 		}
 	}
 }

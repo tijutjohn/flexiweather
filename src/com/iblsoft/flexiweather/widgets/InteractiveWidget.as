@@ -195,7 +195,10 @@ package com.iblsoft.flexiweather.widgets
 			mouseFocusEnabled = true;
 			doubleClickEnabled = true;
 			clipAndEnableScrolling = true;
-			m_layerContainer.x = m_layerContainer.y = 0;
+			
+			m_layerContainer.mouseEnabled = false;
+		
+			
 			addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
 			addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
 			addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
@@ -249,6 +252,8 @@ package com.iblsoft.flexiweather.widgets
 			super.createChildren();
 			m_layerBackground = new UIComponent();
 			m_layerLayoutParent = new UIComponent();
+			
+			m_layerContainer.id = "LayerContainer: " + id
 		}
 
 		override protected function childrenCreated(): void
@@ -263,6 +268,8 @@ package com.iblsoft.flexiweather.widgets
 			{
 				addLayer(layer);
 			}
+			
+			m_layerContainer.x = m_layerContainer.y = 0;
 		}
 
 		override protected function commitProperties(): void
