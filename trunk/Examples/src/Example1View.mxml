@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
-		title="Flexi Weather Example 1" xmlns:local="*">
-	<fx:Declarations>
-
-		<!-- Place non-visual elements (e.g., services, value objects) here -->
-	</fx:Declarations>
-	<local:Example1 width="100%" height="100%"/>
-</s:View>
