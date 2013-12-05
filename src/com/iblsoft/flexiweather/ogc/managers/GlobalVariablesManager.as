@@ -485,23 +485,45 @@ package com.iblsoft.flexiweather.ogc.managers
 //			if (selectedFrame)
 //			{
 				trace("notifySelectedFrameChanged: " + selectedFrame);
-				_frame = selectedFrame;
-				var gvce: GlobalVariableChangeEvent = new GlobalVariableChangeEvent(GlobalVariableChangeEvent.DIMENSION_VALUE_CHANGED, GlobalVariable.FRAME, selectedFrame);
-				dispatchEvent(gvce);
+				var bChanged: Boolean = true;
+				if (_frame && selectedFrame && _frame.time == selectedFrame.time)
+					bChanged = false;
+				
+				if (bChanged)
+				{
+					_frame = selectedFrame;
+					var gvce: GlobalVariableChangeEvent = new GlobalVariableChangeEvent(GlobalVariableChangeEvent.DIMENSION_VALUE_CHANGED, GlobalVariable.FRAME, selectedFrame);
+					dispatchEvent(gvce);
+				}
 //			}
 		}
 		private function notifySelectedRunChanged(selectedRun: Date): void
 		{
 			trace("notifySelectedRunChanged: " + selectedRun);
-			_run = selectedRun;
-			var gvce: GlobalVariableChangeEvent = new GlobalVariableChangeEvent(GlobalVariableChangeEvent.DIMENSION_VALUE_CHANGED, GlobalVariable.RUN, selectedRun);
-			dispatchEvent(gvce);
+			
+			var bChanged: Boolean = true;
+			if (_run && selectedRun && _run.time == selectedRun.time)
+				bChanged = false;
+			
+			if (bChanged)
+			{
+				_run = selectedRun;
+				var gvce: GlobalVariableChangeEvent = new GlobalVariableChangeEvent(GlobalVariableChangeEvent.DIMENSION_VALUE_CHANGED, GlobalVariable.RUN, selectedRun);
+				dispatchEvent(gvce);
+			}
 		}
 		private function notifySelectedLevelChanged(selectedLevel: String): void
 		{
-			_level = selectedLevel;
-			var gvce: GlobalVariableChangeEvent = new GlobalVariableChangeEvent(GlobalVariableChangeEvent.DIMENSION_VALUE_CHANGED, GlobalVariable.LEVEL, selectedLevel);
-			dispatchEvent(gvce);
+			var bChanged: Boolean = true;
+			if (_level && selectedLevel && _level == selectedLevel)
+				bChanged = false;
+			
+			if (bChanged)
+			{
+				_level = selectedLevel;
+				var gvce: GlobalVariableChangeEvent = new GlobalVariableChangeEvent(GlobalVariableChangeEvent.DIMENSION_VALUE_CHANGED, GlobalVariable.LEVEL, selectedLevel);
+				dispatchEvent(gvce);
+			}
 		}
 		
 		private function sameCollection(collection1: ArrayCollection, collection2: ArrayCollection): Boolean

@@ -1339,7 +1339,7 @@ package com.iblsoft.flexiweather.widgets
 				if (!so.isPrimaryLayer())
 					continue;
 				var l_frames: Array = so.getSynchronisedVariableValuesList(GlobalVariable.FRAME);
-				if (l_frames == null)
+				if (l_frames == null || l_frames.length == 0)
 					continue;
 				l_syncLayers.push(so);
 				if (l_timeAxis == null)
@@ -1355,7 +1355,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (l_syncLayers == null)
 				l_syncLayers = [];
-			var l_timeAxis: Array = null;
+			var l_allRuns: Array = null;
 			for each (var l: InteractiveLayer in m_layers)
 			{
 				var so: ISynchronisedObject = l as ISynchronisedObject;
@@ -1371,23 +1371,23 @@ package com.iblsoft.flexiweather.widgets
 				if (!so.synchroniseRun)
 					continue;
 				var l_runs: Array = so.getSynchronisedVariableValuesList(GlobalVariable.RUN);
-				if (l_runs == null)
+				if (l_runs == null || l_runs.length == 0)
 					continue;
 				l_syncLayers.push(so);
-				if (l_timeAxis == null)
-					l_timeAxis = l_runs;
+				if (l_allRuns == null)
+					l_allRuns = l_runs;
 				else {
 //					ArrayUtils.unionArrays(l_timeAxis, l_runs);
-					ArrayUtils.intersectedArrays(l_timeAxis, l_runs);
+					ArrayUtils.intersectedArrays(l_allRuns, l_runs);
 				}
 			}
-			return l_timeAxis;
+			return l_allRuns;
 		}
 		public function enumLevels(l_syncLayers: Array = null): Array
 		{
 			if (l_syncLayers == null)
 				l_syncLayers = [];
-			var l_timeAxis: Array = null;
+			var l_allLevels: Array = null;
 			for each (var l: InteractiveLayer in m_layers)
 			{
 				var so: ISynchronisedObject = l as ISynchronisedObject;
@@ -1406,14 +1406,14 @@ package com.iblsoft.flexiweather.widgets
 				if (l_levels == null)
 					continue;
 				l_syncLayers.push(so);
-				if (l_timeAxis == null)
-					l_timeAxis = l_levels;
+				if (l_allLevels == null || l_allLevels.length == 0)
+					l_allLevels = l_levels;
 				else {
 //					ArrayUtils.unionArrays(l_timeAxis, l_levels);
-					ArrayUtils.intersectedArrays(l_timeAxis, l_levels);
+					ArrayUtils.intersectedArrays(l_allLevels, l_levels);
 				}
 			}
-			return l_timeAxis;
+			return l_allLevels;
 		}
 
 		public function getDimensionDefaultValue(dimName: String): Object
@@ -1920,8 +1920,11 @@ package com.iblsoft.flexiweather.widgets
 							 * Because primary layer need to have always FRAME set.
 							 */ 
 							var closestFrame: Date = getClosestFrame(msBaseLayer, newFrame);
-							setFrame(closestFrame);
-							notifyFrameVariableChanged();
+							if (closestFrame)
+							{
+								setFrame(closestFrame);
+								notifyFrameVariableChanged();
+							}
 							return false;
 						}
 					}
