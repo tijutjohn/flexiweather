@@ -648,6 +648,8 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					var bestFrameTime: Number = 0;
 					//TODO here is frame synchronisation done, if you want to change left and right time frame, you can set it here
 					var frames:Array =  getSynchronisedVariableValuesList(s_variableId);
+					if (frames.length == 0)
+						return null;
 					if (requiredFrameTime > -1)
 					{
 						for each (var frame: Date in frames)

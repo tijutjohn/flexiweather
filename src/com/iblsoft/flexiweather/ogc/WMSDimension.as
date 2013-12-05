@@ -107,7 +107,10 @@ package com.iblsoft.flexiweather.ogc
 				// Strip white spaces to workaround " , " separation used in
 				// http://openmetoc.met.no/metoc/metocwms?request=GetCapabilities&VERSION=1.1.1 
 				s_value = s_value.replace(/\s+\Z/, '').replace(/\A\s+/, '');
-				stringValueToObjects(ma_values, s_value, ms_units);
+				if (s_value.length > 0)
+					stringValueToObjects(ma_values, s_value, ms_units);
+				else
+					trace("WMSDimension: There is problem with value: " + s_value);
 			}
 			mb_valuesHaveToBeParsed = false;
 		}
