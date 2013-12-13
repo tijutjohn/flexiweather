@@ -486,8 +486,8 @@ package com.iblsoft.flexiweather.ogc.managers
 //			{
 				trace("notifySelectedFrameChanged: " + selectedFrame);
 				var bChanged: Boolean = true;
-				if (_frame && selectedFrame && _frame.time == selectedFrame.time)
-					bChanged = false;
+				//if (_frame && selectedFrame && _frame.time == selectedFrame.time)
+				//	bChanged = false;
 				
 				if (bChanged)
 				{
@@ -502,8 +502,8 @@ package com.iblsoft.flexiweather.ogc.managers
 			trace("notifySelectedRunChanged: " + selectedRun);
 			
 			var bChanged: Boolean = true;
-			if (_run && selectedRun && _run.time == selectedRun.time)
-				bChanged = false;
+			//if (_run && selectedRun && _run.time == selectedRun.time)
+			//	bChanged = false;
 			
 			if (bChanged)
 			{
@@ -515,8 +515,8 @@ package com.iblsoft.flexiweather.ogc.managers
 		private function notifySelectedLevelChanged(selectedLevel: String): void
 		{
 			var bChanged: Boolean = true;
-			if (_level && selectedLevel && _level == selectedLevel)
-				bChanged = false;
+			//if (_level && selectedLevel && _level == selectedLevel)
+			//	bChanged = false;
 			
 			if (bChanged)
 			{
