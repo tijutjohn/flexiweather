@@ -8,6 +8,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.utils.packing.Padding;
 	
 	import flash.display.DisplayObject;
+	import flash.display.DisplayObjectContainer;
 	import flash.display.Graphics;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
@@ -76,7 +77,11 @@ package com.iblsoft.flexiweather.widgets
 			super.mouseChildren = enable;
 		}
 		
-		internal var m_layers: ArrayCollection = new ArrayCollection();
+		private var m_layers: ArrayCollection = new ArrayCollection();
+		public function get layers(): ArrayCollection
+		{
+			return m_layers;
+		}
 		private var _legendsLoadingCount: int;
 		private var _legendsAlreadyLoaded: int;
 		private var _legendScaleX: Number = 1;
@@ -84,6 +89,11 @@ package com.iblsoft.flexiweather.widgets
 		private var _maximumArea: Rectangle;
 		private var _logger: ILogger;
 
+		override public function set visible(b_visible:Boolean):void
+		{
+			super.visible = b_visible;
+		}
+		
 		public function get maximumArea(): Rectangle
 		{
 			return _maximumArea;
@@ -152,6 +162,7 @@ package com.iblsoft.flexiweather.widgets
 
 		public function addLayer(l: InteractiveLayer): void
 		{
+			trace("ILLegend addLayer: " + l.name);
 			m_layers.addItemAt(l, 0);
 			l.addEventListener(InteractiveLayerEvent.VISIBILITY_EFFECT_FINISHED, onLayerVisibilityChanged);
 		}
@@ -164,8 +175,15 @@ package com.iblsoft.flexiweather.widgets
 //				unbindSubLayer(l);
 				l.removeEventListener(InteractiveLayerEvent.VISIBILITY_EFFECT_FINISHED, onLayerVisibilityChanged);
 				m_layers.removeItemAt(i);
-				l.removeLegend(getGroupFromDictionary(l));
-				delete m_groupDictionary[l];
+				
+				var legendGroup: InteractiveLayerLegendGroup = getGroupFromDictionary(l);
+				if (!legendGroup)
+				{
+					trace("Does not find legendGroup in removeLayer for layer: " + l.name);
+				} else {
+					l.removeLegend(legendGroup);
+					removeCanvasFromDictionary(l);
+				}
 			} else {
 				trace("Problem with remove layer from ILayerLegends");
 			}
@@ -248,6 +266,15 @@ package com.iblsoft.flexiweather.widgets
 			_legends = new Array();
 		}
 
+		private function removeCanvasFromDictionary(layer: InteractiveLayer): void
+		{
+			var group: InteractiveLayerLegendGroup = m_groupDictionary[layer];
+			delete m_groupDictionary[layer];
+			if (group.parent)
+			{
+				(group.parent as DisplayObjectContainer).removeChild(group);
+			}
+		}
 		private function addCanvasToDictionary(group: InteractiveLayerLegendGroup, layer: InteractiveLayer): void
 		{
 			if (!group)

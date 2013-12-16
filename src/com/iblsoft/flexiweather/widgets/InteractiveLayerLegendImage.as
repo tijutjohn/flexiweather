@@ -46,7 +46,9 @@ package com.iblsoft.flexiweather.widgets
 		
 		private function onAddedToStage(event: Event): void
 		{
-			trace("LegendImage ["+legendID+"] onAddedToStage");
+			trace("LegendImage ["+legendID+"] onAddedToStage visible: " + visible + " parent: " + parent);
+			if (parent)
+				trace("\tLegendImage ["+legendID+"] onAddedToStage parent visible: " + parent.visible);
 		}
 		private function onRemovedFromStage(event: Event): void
 		{
