@@ -353,7 +353,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 		{
 			if (!m_suspendAnticollisionProcessing && !_updateLocked)
 			{
-				trace(this + " UPDATE");
+//				trace(this + " UPDATE");
 				var time: int = ProfilerUtils.startProfileTimer();
 				var pass: int = 0;
 				var diffTime: Number = getTimer() - mi_lastUpdate;
