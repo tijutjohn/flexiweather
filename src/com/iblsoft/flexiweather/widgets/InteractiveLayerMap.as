@@ -1774,8 +1774,6 @@ package com.iblsoft.flexiweather.widgets
 			//we need to remember old frame and synchronize frame after RUN is synchronized
 			var oldFrame: Date = frame;
 			
-			trace(this + " SET RUN: " + newRun + " OLD FRAME: " + oldFrame);
-			
 			var bGlobalSynchronization: Boolean = false;
 			for each (var l: InteractiveLayer in m_layers)
 			{
@@ -1878,7 +1876,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			var synchronizedFrame: Date = frame;
 			
-			trace(this + " resynchronize to frame: " + synchronizedFrame);
+//			trace(this + " resynchronize to frame: " + synchronizedFrame);
 			if (synchronizedFrame)
 				setFrame(synchronizedFrame);
 		}

@@ -27,6 +27,11 @@ package com.iblsoft.flexiweather.ogc
 			_groups = 0;
 		}
 		
+		public function setStatus(state: int): void
+		{
+			_state = state;
+		}
+		
 		/**
 		 * all layers and groups within this group will be created and stored in dictionary, and bParse variable will be "true", also content will be parsed 
 		 * @param bParse
@@ -102,7 +107,7 @@ package com.iblsoft.flexiweather.ogc
 				//					trace("\n" + this + " initialize layerGroup: "+ wmsLayerGroup.toString() + " total time: " + (getTimer() - layerTime) + "ms");
 			}
 			
-			_state = LAYER_INITIALIZED;
+			setStatus(LAYER_INITIALIZED);
 		}
 		
 		private function delayedInitialization(): void
@@ -129,6 +134,7 @@ package com.iblsoft.flexiweather.ogc
 //				else
 					wmsLayerItem.layer.parse();
 			}
+			setStatus(LAYER_PARSED);
 		}
 		
 		override public function parse(parsingManager: WMSServiceParsingManager = null):void
@@ -140,12 +146,12 @@ package com.iblsoft.flexiweather.ogc
 				delayedInitialization();
 			}
 			
-			_state = LAYER_INITIALIZED;
+			setStatus(LAYER_INITIALIZED);
 			
 			if (!WMSServiceConfiguration.EXPERIMENTAL_LAYERS_INITIALIZING)
 				parsing();
+				
 			
-			_state = LAYER_PARSED;
 		}
 		
 		public function parseLayerItem(wmsLayerItem: LayerDataItem, parsingManager: WMSServiceParsingManager): void

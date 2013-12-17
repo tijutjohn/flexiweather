@@ -484,7 +484,6 @@ package com.iblsoft.flexiweather.ogc.managers
 		{
 //			if (selectedFrame)
 //			{
-				trace("notifySelectedFrameChanged: " + selectedFrame);
 				var bChanged: Boolean = true;
 				//if (_frame && selectedFrame && _frame.time == selectedFrame.time)
 				//	bChanged = false;
@@ -499,8 +498,6 @@ package com.iblsoft.flexiweather.ogc.managers
 		}
 		private function notifySelectedRunChanged(selectedRun: Date): void
 		{
-			trace("notifySelectedRunChanged: " + selectedRun);
-			
 			var bChanged: Boolean = true;
 			//if (_run && selectedRun && _run.time == selectedRun.time)
 			//	bChanged = false;
