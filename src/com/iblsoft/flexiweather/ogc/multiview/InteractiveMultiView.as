@@ -29,7 +29,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.utils.XMLStorage;
-	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerComposer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerCoordinate;
@@ -2091,7 +2090,6 @@ import com.iblsoft.flexiweather.events.InteractiveWidgetEvent;
 import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
 import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 import com.iblsoft.flexiweather.ogc.multiview.synchronization.SynchronizatorBase;
-import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
 import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
 import com.iblsoft.flexiweather.widgets.InteractiveWidget;
