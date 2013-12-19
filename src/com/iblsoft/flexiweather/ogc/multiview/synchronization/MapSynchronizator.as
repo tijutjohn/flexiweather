@@ -3,7 +3,9 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.ogc.multiview.data.MultiViewConfiguration;
+	import com.iblsoft.flexiweather.ogc.multiview.data.MultiViewCustomData;
 	import com.iblsoft.flexiweather.ogc.multiview.data.SynchronizationChangeType;
+	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.events.EventDispatcher;
@@ -24,14 +26,11 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			return _synchronizeFrame;
 		}
 
-		override public function set customData(data: Object):void
+		override public function set customData(data: MultiViewCustomData):void
 		{
 			super.customData = data;
 			
-			if (data && data.hasOwnProperty('synchronizeFrame'))
-				synchronizeFrame = data.synchronizeFrame;
-			else
-				synchronizeFrame = false;
+			synchronizeFrame = data.synchronizeFrame;
 		}
 		public function set synchronizeFrame(value:Boolean):void
 		{
@@ -52,6 +51,8 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		{
 			super();
 			
+			type = "map-synchronizator";
+			
 			registerChangeType(SynchronizationChangeType.MAP_LAYER_ADDED);
 			registerChangeType(SynchronizationChangeType.MAP_LAYER_REMOVED);
 			registerChangeType(SynchronizationChangeType.MAP_CHANGED);
@@ -63,11 +64,18 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			registerChangeType(SynchronizationChangeType.ANIMATOR_SETTINGS_CHANGED);
 		}
 		
+		override public function serialize(storage:Storage):void
+		{
+			storage.serializeBool('synchronizeFrame', synchronizeFrame);
+			storage.serialize('custom-data', customData);
+//			storage.serialize('view-data', viewData);
+		}
+		
 		override public function updateMapAction(iw: InteractiveWidget, position: int, configuration: MultiViewConfiguration): void
 		{
 			if (configuration && configuration.synchronizators && configuration.synchronizators.length > 0)
 			{
-				if (configuration.customData && configuration.customData.hasOwnProperty('dataProvider'))
+				if (configuration.customData && configuration.customData.dataProvider != null)
 				{
 					var dp: ArrayCollection = configuration.customData.dataProvider as ArrayCollection;
 					if (dp && dp.length > 0 && dp.length > position)

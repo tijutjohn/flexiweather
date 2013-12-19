@@ -7,7 +7,9 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariableValue;
 	import com.iblsoft.flexiweather.ogc.multiview.data.MultiViewConfiguration;
+	import com.iblsoft.flexiweather.ogc.multiview.data.MultiViewViewData;
 	import com.iblsoft.flexiweather.ogc.multiview.data.SynchronizationChangeType;
+	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
@@ -24,7 +26,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			return '<level/>';
 		}
 		
-		private var _levelValues: Array;
+		private var _levelValues: MultiViewViewData;
 		private var _widgetDictionary: Dictionary;
 		
 		
@@ -33,7 +35,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			return true;
 		}
 		
-		override public function set viewData(data: Array): void
+		override public function set viewData(data: MultiViewViewData): void
 		{
 			_levelValues = data;
 		}
@@ -43,9 +45,16 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		{
 			super();
 			
+			type = "level-synchronizator";
+			
 			_widgetDictionary = new Dictionary(true);
 			
 			registerChangeType(SynchronizationChangeType.GLOBAL_LEVEL_CHANGED);
+		}
+		
+		override public function serialize(storage:Storage):void
+		{
+//			storage.serialize('view-data', viewData);
 		}
 		
 		private function getLevelValue(position: int): void
@@ -60,9 +69,9 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			{
 //				var position: int = infoObject.position;
 				//update level at this position
-				var oldObj: Object = _levelValues[position];
+				var oldObj: Object = _levelValues.dataProvider[position];
 				
-				_levelValues[position] = configuration.viewData[position]; 
+				_levelValues.dataProvider[position] = configuration.viewData.dataProvider[position]; 
 			}
 			
 		}
@@ -71,7 +80,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		{
 			if (_levelValues)
 			{
-				var levels: Array = _levelValues;
+				var levels: Array = _levelValues.dataProvider;
 				
 				if (preferredSelectedIndex > -1)
 				{
@@ -105,9 +114,9 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 						
 						if (hasSynchronizableLevel)
 						{
-							if (_levelValues.length > cnt && _levelValues[cnt])
+							if (levels.length > cnt && levels[cnt])
 							{
-								var levelObject: Object = _levelValues[cnt] as Object;
+								var levelObject: Object = levels[cnt] as Object;
 								
 								_widgetDictionary[widget] = {widget: widget, position: i, levelObject: levelObject};
 								

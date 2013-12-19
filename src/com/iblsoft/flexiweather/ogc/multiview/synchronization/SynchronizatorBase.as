@@ -3,7 +3,11 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.SynchronisedVariableChangeEvent;
 	import com.iblsoft.flexiweather.ogc.multiview.data.MultiViewConfiguration;
+	import com.iblsoft.flexiweather.ogc.multiview.data.MultiViewCustomData;
+	import com.iblsoft.flexiweather.ogc.multiview.data.MultiViewViewData;
 	import com.iblsoft.flexiweather.ogc.multiview.synchronization.events.SynchronisationEvent;
+	import com.iblsoft.flexiweather.utils.Serializable;
+	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerLabel;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
@@ -14,11 +18,13 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 	
 	import mx.collections.ArrayCollection;
 	
-	public class SynchronizatorBase extends EventDispatcher implements ISynchronizator
+	public class SynchronizatorBase extends EventDispatcher implements ISynchronizator, Serializable
 	{
 		private var ma_supportedChangeTypes: Array;
 		protected var md_synchronisationDictionary: Dictionary;
 		protected var mb_synchronizatorInvalid: Boolean;
+		
+		public var type: String;
 		
 		public function SynchronizatorBase()
 		{
@@ -137,18 +143,18 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			return '';
 		}
 		
-		public function set viewData(data:Array):void
+		public function set viewData(data: MultiViewViewData):void
 		{
 		}
 		
-		public function set customData(data: Object): void
+		public function set customData(data: MultiViewCustomData): void
 		{
 			
 		}
 		
-		public function get customData(): Object
+		public function get customData(): MultiViewCustomData
 		{
-			return {};
+			return new MultiViewCustomData();
 		}
 		
 		public function get willSynchronisePrimaryLayer():Boolean
@@ -225,5 +231,12 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			}
 			return retArray;
 		}
+		
+		public function serialize(storage:Storage):void
+		{
+			
+		}
+		
+		
 	}
 }

@@ -2,6 +2,8 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 {
 	import com.iblsoft.flexiweather.ogc.ISynchronisedObject;
 	import com.iblsoft.flexiweather.ogc.multiview.data.MultiViewConfiguration;
+	import com.iblsoft.flexiweather.ogc.multiview.data.MultiViewCustomData;
+	import com.iblsoft.flexiweather.ogc.multiview.data.MultiViewViewData;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.events.IEventDispatcher;
@@ -25,9 +27,9 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		function synchronizeWidgets(synchronizeFromWidget: InteractiveWidget, widgetsForSynchronisation: ArrayCollection, preferredSelectedIndex: int = -1): void;
 		function notifySynchronizationDone(): void;
 		function get labelString():String;
-		function set viewData(data: Array): void;
-		function set customData(data: Object): void;
-		function get customData(): Object;
+		function set viewData(data: MultiViewViewData): void;
+		function set customData(data: MultiViewCustomData): void;
+		function get customData(): MultiViewCustomData;
 		
 		/**
 		 * Return true if synchronisator will synchronise primary layer 
