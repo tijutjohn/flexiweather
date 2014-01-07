@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.ogc.multiview.data
 {
 	import com.iblsoft.flexiweather.ogc.multiview.synchronization.SynchronizatorBase;
+	import com.iblsoft.flexiweather.ogc.multiview.synchronization.SynchronizatorWrapper;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	
@@ -132,55 +133,5 @@ package com.iblsoft.flexiweather.ogc.multiview.data
 			}
 		}
 		
-	}
-}
-import com.iblsoft.flexiweather.ogc.multiview.synchronization.FrameSynchronizator;
-import com.iblsoft.flexiweather.ogc.multiview.synchronization.LevelSynchronizator;
-import com.iblsoft.flexiweather.ogc.multiview.synchronization.MapSynchronizator;
-import com.iblsoft.flexiweather.ogc.multiview.synchronization.SynchronizatorBase;
-import com.iblsoft.flexiweather.utils.Serializable;
-import com.iblsoft.flexiweather.utils.Storage;
-
-class SynchronizatorWrapper implements Serializable
-{
-	public var synchronizator: SynchronizatorBase;
-	
-	public function SynchronizatorWrapper(synchronizator: SynchronizatorBase)
-	{
-		this.synchronizator = synchronizator;
-	}
-	
-	public function serialize(storage: Storage): void
-	{
-		if (storage.isLoading())
-		{
-			var s_synchronizatorType: String = storage.serializeString("synchronizator-type", null);
-			
-			switch (s_synchronizatorType)
-			{
-				case "frame-synchronizator":
-					synchronizator = new FrameSynchronizator();
-					break;
-				case "level-synchronizator":
-					synchronizator = new LevelSynchronizator();
-					break;
-				case "map-synchronizator":
-					synchronizator = new MapSynchronizator();
-					break;
-			}
-			
-			if (synchronizator is Serializable)
-			{
-				(synchronizator as Serializable).serialize(storage);
-			}
-		}
-		else
-		{
-			if (synchronizator is Serializable)
-			{
-				storage.serializeString("synchronizator-type", synchronizator.type, null);
-				(synchronizator as Serializable).serialize(storage);
-			}
-		}
 	}
 }

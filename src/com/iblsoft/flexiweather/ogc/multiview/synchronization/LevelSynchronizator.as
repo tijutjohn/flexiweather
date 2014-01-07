@@ -54,7 +54,12 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		
 		override public function serialize(storage:Storage):void
 		{
-//			storage.serialize('view-data', viewData);
+			if (storage.isStoring())
+				storage.serialize('view-data', _levelValues);
+			else {
+				storage.serialize('view-data', _levelValues);
+				viewData = _levelValues;
+			}
 		}
 		
 		private function getLevelValue(position: int): void
