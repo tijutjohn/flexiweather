@@ -446,7 +446,7 @@ package com.iblsoft.flexiweather.widgets
 			var group: InteractiveLayerLegendGroup;
 			for each (l in m_layers)
 			{
-				debug("LEGENDS checkIfAllLegendsAreLoaded l: " + l.name + " hasLegend: " + l.hasLegend() + " visible: " + l.visible);
+				debug("LEGENDS checkIfAllLegendsAreLoaded l: " + l.name);
 				if (l.hasLegend() && l.visible)
 				{
 					group = getGroupFromDictionary(l);
@@ -455,8 +455,6 @@ package com.iblsoft.flexiweather.widgets
 						debug("\t LEGENDS checkIfAllLegendsAreLoaded NEEDS LOADING l: " + l.name);
 						//it needs to be loaded
 						needLoading = true;
-					} else {
-						debug("LEGENDS checkIfAllLegendsAreLoaded l: " + l.name + " DO NOT HAVE GROUP for layer");
 					}
 				}
 			}
@@ -1229,7 +1227,7 @@ package com.iblsoft.flexiweather.widgets
 		private function debug(str: String): void
 		{
 //			_logger.debug(str);
-			trace(this + str);
+//			trace(this + str);
 		}
 		
 		override public function toString(): String

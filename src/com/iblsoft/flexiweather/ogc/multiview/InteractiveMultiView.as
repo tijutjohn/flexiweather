@@ -14,7 +14,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.ogc.editable.IInteractiveLayerProvider;
 	import com.iblsoft.flexiweather.ogc.multiview.data.MultiViewConfiguration;
-	import com.iblsoft.flexiweather.ogc.multiview.data.MultiViewCustomData;
 	import com.iblsoft.flexiweather.ogc.multiview.data.SynchronizationChangeType;
 	import com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewChangeEvent;
 	import com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent;
@@ -30,6 +29,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.utils.XMLStorage;
+	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerComposer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerCoordinate;
@@ -291,7 +291,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 			var config: MultiViewConfiguration = new MultiViewConfiguration();
 			config.columns = 1;
 			config.rows = 1;
-			config.customData = new MultiViewCustomData(0);
+			config.customData = {selectedIndex: 0};
 			createInteractiveWidgetsFromConfiguration(config);
 		}
 
@@ -736,9 +736,9 @@ package com.iblsoft.flexiweather.ogc.multiview
 					
 					//update map configuration
 					
-					if (_configuration && _configuration.customData && _configuration.customData.dataProvider != null)
+					if (_configuration && _configuration.customData && _configuration.customData.hasOwnProperty('dataProvider'))
 					{
-						var dp: ArrayCollection = _configuration.customData.dataProvider;
+						var dp: ArrayCollection = _configuration.customData.dataProvider as ArrayCollection;
 						if (dp)
 						{
 							dp.setItemAt(itemData, position);
@@ -806,7 +806,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 		{
 			if (_configuration && _configuration.synchronizators && _configuration.synchronizators.length > 0)
 			{
-				if (_configuration.customData && _configuration.customData.dataProvider != null)
+				if (_configuration.customData && _configuration.customData.hasOwnProperty('dataProvider'))
 				{
 					var dp: ArrayCollection = _configuration.customData.dataProvider as ArrayCollection;
 					if (dp && dp.length > 0 && dp.length > position)
@@ -1970,7 +1970,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 				synchronizator.invalidateSynchronizator();
 				
 				var selectedIndex: int = -1;
-				if (_configuration && _configuration.customData && _configuration.customData.selectedIndex != -1)
+				if (_configuration && _configuration.customData && _configuration.customData.hasOwnProperty('selectedIndex'))
 					selectedIndex = _configuration.customData.selectedIndex;
 				
 				var position: int = _interactiveWidgets.getWidgetIndex(selectedInteractiveWidget);
@@ -2091,6 +2091,7 @@ import com.iblsoft.flexiweather.events.InteractiveWidgetEvent;
 import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
 import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 import com.iblsoft.flexiweather.ogc.multiview.synchronization.SynchronizatorBase;
+import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
 import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
 import com.iblsoft.flexiweather.widgets.InteractiveWidget;

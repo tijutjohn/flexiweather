@@ -25,7 +25,6 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.WMSViewProperties;
 	import com.iblsoft.flexiweather.ogc.events.GetCapabilitiesEvent;
 	import com.iblsoft.flexiweather.ogc.events.MSBaseLoaderEvent;
-	import com.iblsoft.flexiweather.ogc.events.ServiceCapabilitiesEvent;
 	import com.iblsoft.flexiweather.ogc.managers.OGCServiceConfigurationManager;
 	import com.iblsoft.flexiweather.ogc.multiview.synchronization.events.SynchronisationEvent;
 	import com.iblsoft.flexiweather.ogc.net.loaders.MSBaseLoader;
@@ -237,25 +236,12 @@ package com.iblsoft.flexiweather.ogc
 				
 				var wmsService: WMSServiceConfiguration = existingService as WMSServiceConfiguration; 
 				
-				if (wmsService)
+				if (wmsService && wmsService.capabilitiesUpdated)
 				{
-					if ( wmsService.capabilitiesUpdated)
-					{
-						m_cfg.service = wmsService;
-						checkPostponedUpdateDataCall();
-					} else {
-						wmsService.addEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onWaitForCapabilities);
-					}
+					//					trace("OGCServiceConfigurationManager found same service with capabilities already updated");
+					m_cfg.service = wmsService;
 				}
 			}
-		}
-		
-		private function onWaitForCapabilities(event: ServiceCapabilitiesEvent): void
-		{
-			var wmsService: WMSServiceConfiguration = event.target as WMSServiceConfiguration;
-			wmsService.removeEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onWaitForCapabilities);
-			initializeConfiguration();
-			
 		}
 		
 		

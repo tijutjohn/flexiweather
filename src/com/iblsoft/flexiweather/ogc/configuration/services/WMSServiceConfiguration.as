@@ -382,7 +382,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 				addSupportedProjections();
 				
 				m_capabilities = xml;
-				notifyCapabilitiesUpdated();
+				dispatchEvent(new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, true));
 			}
 			
 //			trace("WMSServiceConfiguration: " + fullURL + " parsing time: " + (getTimer() - time) + "ms\n");
@@ -430,17 +430,12 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		{
 			
 			m_capabilities = xml;
-			notifyCapabilitiesUpdated();
+			dispatchEvent(new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, true));
 			
 			if (USE_ASYNCHRONOUS_PARSING) {
 				parsingManager.xml = null;
 				parsingManager = null;
 			}
-		}
-		
-		private function notifyCapabilitiesUpdated(): void
-		{
-			dispatchEvent(new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, true));
 		}
 		
 		private function addSupportedProjections(): void

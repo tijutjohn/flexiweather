@@ -5,11 +5,8 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 	import com.iblsoft.flexiweather.ogc.SynchronisedVariableChangeEvent;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.ogc.multiview.data.MultiViewConfiguration;
-	import com.iblsoft.flexiweather.ogc.multiview.data.MultiViewCustomData;
-	import com.iblsoft.flexiweather.ogc.multiview.data.MultiViewViewData;
 	import com.iblsoft.flexiweather.ogc.multiview.data.SynchronizationChangeType;
 	import com.iblsoft.flexiweather.plugins.IConsole;
-	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
@@ -43,26 +40,26 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		}
 		private var _frameStep: int;
 
-		override public function set customData(data: MultiViewCustomData): void
+		override public function set customData(data: Object): void
 		{
-			if (data && data.timeDifference != -1)
+			if (data && data.hasOwnProperty("timeDifference"))
 				timeDifference = data.timeDifference;
 		}
 
-		override public function get customData(): MultiViewCustomData
+		override public function get customData(): Object
 		{
-			return new MultiViewCustomData(-1, timeDifference);
+			return {timeDifference: timeDifference};
 		}
 
-		override public function set viewData(data: MultiViewViewData): void
+		override public function set viewData(data: Array): void
 		{
 			_frameStep = 0;
-			if (data && data.dataProvider)
+			if (data)
 			{
-				if (data.dataProvider[0] == null || data.dataProvider[1] == null)
+				if (data[0] == null || data[1] == null)
 					_frameStep = 0;
 				else
-					_frameStep = data.dataProvider[1].data - data.dataProvider[0].data;
+					_frameStep = data[1].data - data[0].data;
 			}
 			
 		}
@@ -76,18 +73,9 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		{
 			super();
 			
-			type = "frame-synchronizator";
-			
 			timeDifference = -1;
 			
 			registerChangeType(SynchronizationChangeType.GLOBAL_FRAME_CHANGED);
-		}
-		
-		override public function serialize(storage:Storage):void
-		{
-			storage.serializeNumber('time-difference',_timeDifference);
-			storage.serialize('custom-data', customData);
-//			storage.serialize('view-data', viewData);
 		}
 
 		private function debug(str: String, type: String = "Info", tag: String = "FrameSynchronizator"): void
