@@ -12,6 +12,8 @@ package com.iblsoft.flexiweather.ogc.multiview.data
 		public var rows: int;
 		public var columns: int;
 		
+		public static var wrapperClass: Class;
+		
 		private var _synchronizators: Array;
 		
 		/**
@@ -23,6 +25,8 @@ package com.iblsoft.flexiweather.ogc.multiview.data
 		
 		public function MultiViewConfiguration()
 		{
+			if (!wrapperClass)
+				wrapperClass = SynchronizatorWrapper;
 		}
 
 
@@ -86,10 +90,11 @@ package com.iblsoft.flexiweather.ogc.multiview.data
 					wrappers = new Array();
 					for each (synchronizator in _synchronizators)
 					{
-						wrapper = new SynchronizatorWrapper(synchronizator);
+//						wrapper = new SynchronizatorWrapper(synchronizator);
+						wrapper = new wrapperClass(synchronizator) as SynchronizatorWrapper;
 						wrappers.push(wrapper);
 					}
-					storage.serializeNonpersistentArray("synchronizator", wrappers, SynchronizatorWrapper);
+					storage.serializeNonpersistentArray("synchronizator", wrappers, wrapperClass);
 					
 				}
 			} else {
@@ -115,7 +120,7 @@ package com.iblsoft.flexiweather.ogc.multiview.data
 				wrappers = new Array();
 				
 				try {
-					storage.serializeNonpersistentArray("synchronizator", wrappers, SynchronizatorWrapper);
+					storage.serializeNonpersistentArray("synchronizator", wrappers, wrapperClass);
 					if (wrappers.length > 0)
 					{
 						var total: int = wrappers.length - 1;

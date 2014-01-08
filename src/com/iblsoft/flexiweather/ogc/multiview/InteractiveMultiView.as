@@ -858,16 +858,20 @@ package com.iblsoft.flexiweather.ogc.multiview
 			}
 		}
 		
-		public function createMapFromSerialization(iw: InteractiveWidget, storage: Storage): void
+		public function createMapFromSerialization(iw: InteractiveWidget, storage: Storage, bLoadFromWebService: Boolean = true): void
 		{
-//			var _serializedMap: XMLStorage = new XMLStorage(mapXML);
-			iw.interactiveLayerMap.startMapLoading();
-			iw.interactiveLayerMap.addEventListener(InteractiveLayerMap.LAYERS_SERIALIZED_AND_READY, onMapFromXMLReady);
-			
-			_loadingMapsCount++;
-			_initializingMapsCount++;
-			
-			iw.interactiveLayerMap.serialize(storage);
+			if (!bLoadFromWebService)
+			{
+				iw.interactiveLayerMap.startMapLoading();
+				iw.interactiveLayerMap.addEventListener(InteractiveLayerMap.LAYERS_SERIALIZED_AND_READY, onMapFromXMLReady);
+				
+				_loadingMapsCount++;
+				_initializingMapsCount++;
+				
+				iw.interactiveLayerMap.serialize(storage);
+			} else {
+				loadMapsForAllWidgets(<empty/>);
+			}
 		}
 
 		private function updatePreloaderLabel(widget: InteractiveWidget, label: String, loaded:  Number = 0, total: Number = 1): void
