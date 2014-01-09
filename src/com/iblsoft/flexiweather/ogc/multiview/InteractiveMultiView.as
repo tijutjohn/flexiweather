@@ -741,7 +741,11 @@ package com.iblsoft.flexiweather.ogc.multiview
 						var dp: ArrayCollection = _configuration.customData.dataProvider;
 						if (dp)
 						{
-							dp.setItemAt(itemData, position);
+							if (dp.length > position)
+								dp.setItemAt(itemData, position);
+							else if ((dp.length == (position - 1)) || position == 0) {
+								dp.addItem(itemData);
+							}
 						}
 					}
 					loadMapForWidget(selectedInteractiveWidget, mapXML, position);
