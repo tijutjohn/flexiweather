@@ -858,7 +858,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 			}
 		}
 		
-		public function createMapFromSerialization(iw: InteractiveWidget, storage: Storage, bLoadFromWebService: Boolean = true): void
+		public function createMapFromSerialization(iw: InteractiveWidget, storage: Storage, bLoadFromWebService: Boolean = false): void
 		{
 			if (!bLoadFromWebService)
 			{
