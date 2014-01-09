@@ -89,6 +89,8 @@ package com.iblsoft.flexiweather.ogc.editable
 		
 		private function updateCoordsReflections(): void
 		{
+			if (!master)
+				return;
 //			var reflections: Dictionary = new Dictionary();
 //			ml_movablePoints.cleanup();
 			var total: int = coordinates.length;
