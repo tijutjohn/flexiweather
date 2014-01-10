@@ -109,8 +109,9 @@ package com.iblsoft.flexiweather.ogc
 		protected function get capabilitiesReady(): Boolean
 		{
 			if (m_cfg && m_cfg.service)
-				return m_cfg.service.capabilitiesUpdated;
-			
+			{
+				return (m_cfg.service as WMSServiceConfiguration).capabilitiesUpdated;
+			}
 			return _capabilitiesReady;
 		}
 		private var _updateDataWaiting: Boolean;
@@ -324,16 +325,24 @@ package com.iblsoft.flexiweather.ogc
 		 */		
 		private function isPartCached(wmsViewProperties: WMSViewProperties, currentViewBBox: BBox, i_width: uint, i_height: uint): Boolean
 		{
+			
+			var bbox: String;
+			if (Projection.hasCRSAxesFlippedByISO(wmsViewProperties.crs, (configuration as WMSLayerConfiguration).service.version))
+			{
+				bbox = String(currentViewBBox.yMin) + "," + String(currentViewBBox.xMin) + "," + String(currentViewBBox.yMax) + "," + String(currentViewBBox.xMax);	
+			} else {
+				bbox = currentViewBBox.toBBOXString();
+			}
+			
 			/**
 			 * this is how you can find properties for cache metadata
-			 * 
+			 *
 			 * var s_currentCRS: String = container.getCRS();
 			 * var currentViewBBox: BBox = container.getViewBBox();
 			 * var dimensions: Array = getDimensionForCache();
 			 */
-			
 			var request: URLRequest = m_cfg.toGetMapRequest(
-				wmsViewProperties.crs, currentViewBBox.toBBOXString(),
+					wmsViewProperties.crs, bbox,
 				i_width, i_height,
 				getWMSStyleListString());
 			
@@ -527,8 +536,21 @@ package com.iblsoft.flexiweather.ogc
 		
 		private function getGetMapFullUrl(width: int, height: int): String
 		{
+			var wmsLayerConfiguration: WMSLayerConfiguration = configuration as WMSLayerConfiguration;
+			
+			var bbox: String;
+			var crs: String = container.getCRS();
+			var viewBBox: BBox = container.getViewBBox();
+			
+			if (Projection.hasCRSAxesFlippedByISO(crs, wmsLayerConfiguration.service.version))
+			{
+				bbox = String(viewBBox.yMin) + "," + String(viewBBox.xMin) + "," + String(viewBBox.yMax) + "," + String(viewBBox.xMax);	
+			} else {
+				bbox = viewBBox.toBBOXString();
+			}
+			
 			var request: URLRequest = m_cfg.toGetMapRequest(
-					container.getCRS(), container.getViewBBox().toBBOXString(),
+					crs, bbox,
 					width, height,
 					getWMSStyleListString());
 			if (!request)
@@ -1136,10 +1158,14 @@ package com.iblsoft.flexiweather.ogc
 		public function getWMSLayers(): Array
 		{
 			var a: Array = [];
-			for each(var s_layerName: String in m_cfg.layerNames) {
-				var layer: WMSLayer = m_cfg.service.getLayerByName(s_layerName);
-				if(layer != null)
-					a.push(layer);
+			if (m_cfg.wmsService)
+			{
+				for each (var s_layerName: String in m_cfg.layerNames)
+				{
+					var layer: WMSLayer = m_cfg.wmsService.getLayerByName(s_layerName);
+					if (layer != null)
+						a.push(layer);
+				}
 			}
 			return a;
 		}
