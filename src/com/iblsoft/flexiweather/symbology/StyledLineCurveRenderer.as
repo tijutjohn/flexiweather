@@ -407,8 +407,8 @@ package com.iblsoft.flexiweather.symbology
 		protected function createFillBitmap(i_fillColor: uint): BitmapData
 		{
 			var fillBitmapData: BitmapData = new BitmapData(16, 16, true, 0x00FFFFFF);//, 0x00000000);
-			var ix: uint;
-			var iy: uint;
+			var ix: int;
+			var iy: int;
 			
 			var nBitmap: Bitmap = new Bitmap(fillBitmapData);
 			
@@ -444,6 +444,48 @@ package com.iblsoft.flexiweather.symbology
 					for (ix = 0; ix < 16; ix = ix + 8){
 						for (iy = 0; iy < 16; iy++){
 							fillBitmapData.setPixel32(ix, iy,i_fillColor);
+						}
+					}
+					break;
+				case StyledLineCurveRenderer.FILL_STYLE_BACKWARD_DIAGONAL_LINES:
+					for (ix = 15; ix >= 0; ix--){
+						if (ix < 8){
+							fillBitmapData.setPixel32(ix, 7 - ix, getHexARGB(i_fillColor));
+						}
+						fillBitmapData.setPixel32(ix, 15 - ix, getHexARGB(i_fillColor));
+						if ((15 - ix + 7) < 16){
+							fillBitmapData.setPixel32(ix, 15 - ix + 7, getHexARGB(i_fillColor));
+						}
+					}
+					break;
+				case StyledLineCurveRenderer.FILL_STYLE_FORWARD_DIAGONAL_LINES:
+					for (ix = 0; ix < 16; ix++){
+						if ((ix + 7) < 16){
+							fillBitmapData.setPixel32(ix, ix + 7, getHexARGB(i_fillColor));
+						}
+						fillBitmapData.setPixel32(ix, ix, getHexARGB(i_fillColor));
+						if (ix > 7){
+							fillBitmapData.setPixel32(ix, 8 - ix, getHexARGB(i_fillColor));
+						}
+					}
+					break;
+				case StyledLineCurveRenderer.FILL_STYLE_CROSSING_DIAGONAL_LINES:
+					for (ix = 15; ix >= 0; ix--){
+						if (ix < 8){
+							fillBitmapData.setPixel32(ix, 7 - ix, getHexARGB(i_fillColor));
+						}
+						fillBitmapData.setPixel32(ix, 15 - ix, getHexARGB(i_fillColor));
+						if ((15 - ix + 7) < 16){
+							fillBitmapData.setPixel32(ix, 15 - ix + 7, getHexARGB(i_fillColor));
+						}
+					}
+					for (ix = 0; ix < 16; ix++){
+						if ((ix + 7) < 16){
+							fillBitmapData.setPixel32(ix, ix + 7, getHexARGB(i_fillColor));
+						}
+						fillBitmapData.setPixel32(ix, ix, getHexARGB(i_fillColor));
+						if (ix > 7){
+							fillBitmapData.setPixel32(ix, 8 - ix, getHexARGB(i_fillColor));
 						}
 					}
 					break;

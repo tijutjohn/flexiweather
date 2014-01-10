@@ -362,16 +362,18 @@ package com.iblsoft.flexiweather.ogc.editable
 		}
 
 		public function addUpdateGMLProperty(xmlUpdate: XML,
-				s_namespace: String, s_property: String, value: Object): void
+				s_namespace: String, s_property: String, value: Object, bUseNSnamespace: Boolean = true): void
 		{
 			if (s_namespace == null)
 				s_namespace = ms_namespace;
-			var p: XML = <wfs:Property xmlns:wfs="http://www.opengis.net/wfs"/>
-					;
-			p.appendChild(<wfs:Name xmlns:wfs="http://www.opengis.net/wfs" xmlns:ns={s_namespace}>ns:{s_property}</wfs:Name>
-					);
-			var v: XML = <wfs:Value xmlns:wfs="http://www.opengis.net/wfs"/>
-					;
+			var p: XML = <wfs:Property xmlns:wfs="http://www.opengis.net/wfs"/>;
+			
+			if (bUseNSnamespace)
+				p.appendChild(<wfs:Name xmlns:wfs="http://www.opengis.net/wfs" xmlns:ns={s_namespace}>ns:{s_property}</wfs:Name>);
+			else
+				p.appendChild(<wfs:Name xmlns:wfs="http://www.opengis.net/wfs">{s_property}</wfs:Name>);
+			
+			var v: XML = <wfs:Value xmlns:wfs="http://www.opengis.net/wfs"/>;
 			v.appendChild(value);
 			p.appendChild(v);
 			xmlUpdate.appendChild(p);
