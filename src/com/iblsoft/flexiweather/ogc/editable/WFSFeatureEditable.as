@@ -260,6 +260,16 @@ package com.iblsoft.flexiweather.ogc.editable
 			return false;
 		}
 
+		/**
+		 * This method will be called when WFS feature will be created as result of split.
+		 * Do whatever is needed after split in this method 
+		 * 
+		 */		
+		public function afterSplit(): void
+		{
+			
+		}
+		
 		public function clone(): WFSFeatureEditable
 		{
 			var o: Object = this;
@@ -396,11 +406,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		override public function insertPointBefore(i_pointIndex: uint, pt: Point): void
 		{
 			super.insertPointBefore(i_pointIndex, pt);
-//			addPointAt(pt, i_pointIndex);
-//			m_coordinates.addItemAt(m_master.container.pointToCoord(pt.x, pt.y), i_pointIndex);
-//			update(FeatureUpdateContext.fullUpdate());
 			modified = true;
-			trace("WFSFeatureEditable insertPointBefore i_pointIndex: " + i_pointIndex + " pt: " + pt);
 		}
 
 		public function removePoint(i_pointIndex: uint): void
@@ -447,9 +453,12 @@ package com.iblsoft.flexiweather.ogc.editable
 			for (var i: int = 0; i < reflectionsTotal; i++)
 			{
 				var reflection: WFSEditableReflectionData = reflectionDictionary.getReflection(i) as WFSEditableReflectionData;
-				for each (var mp: MoveablePoint in reflection.moveablePoints)
+				if (reflection)
 				{
-					m_editableItemManager.addEditableItem(mp);
+					for each (var mp: MoveablePoint in reflection.moveablePoints)
+					{
+						m_editableItemManager.addEditableItem(mp);
+					}
 				}
 			}
 		}
@@ -460,9 +469,12 @@ package com.iblsoft.flexiweather.ogc.editable
 			for (var i: int = 0; i < reflectionsTotal; i++)
 			{
 				var reflection: WFSEditableReflectionData = reflectionDictionary.getReflection(i) as WFSEditableReflectionData;
-				for each (var mp: MoveablePoint in reflection.moveablePoints)
+				if (reflection)
 				{
-					eim.removeEditableItem(mp);
+					for each (var mp: MoveablePoint in reflection.moveablePoints)
+					{
+						eim.removeEditableItem(mp);
+					}
 				}
 			}
 		}
