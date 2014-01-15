@@ -680,12 +680,17 @@ package com.iblsoft.flexiweather.ogc.multiview
 		private var _oldViewBBox: BBox;
 		private var _oldExtentBBox: BBox;
 
-		private function saveMapBeforeChangingToNewLayout(widget: InteractiveWidget): void
+		public function saveCurrentArea(widget: InteractiveWidget): void
 		{
-			var _serializedMap: XMLStorage = new XMLStorage();
 			_oldCRS = widget.getCRS();
 			_oldViewBBox = widget.getViewBBox().clone();
 			_oldExtentBBox = widget.getExtentBBox().clone();
+			
+		}
+		private function saveMapBeforeChangingToNewLayout(widget: InteractiveWidget): void
+		{
+			saveCurrentArea(widget);
+			var _serializedMap: XMLStorage = new XMLStorage();
 			widget.interactiveLayerMap.serialize(_serializedMap);
 			_serializedMapXML = _serializedMap.xml;
 			
