@@ -292,6 +292,8 @@ package com.iblsoft.flexiweather.ogc.cache
 			var s_key: String = qetWMSViewCacheKey(wmsViewProperties);
 			if (s_key in md_cache)
 			{
+				trace("WMSCache getCacheItem: "+ s_key);
+				
 				var item: CacheItem = md_cache[s_key] as CacheItem;
 				item.lastUsed = new Date();
 				item.displayed = true;
@@ -356,6 +358,8 @@ package com.iblsoft.flexiweather.ogc.cache
 			var validity: Date = wmsViewProperties.validity;
 			var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url, dimensions, validity, wmsViewProperties.m_cfg.wmsService.baseURL);
 			var s_key: String = qetWMSViewCacheKey(wmsViewProperties);
+			
+			trace("WMSCache addCacheItem: "+ s_key);
 			var b_deleted: Boolean = deleteCacheItemByKey(s_key, true);
 			var item: CacheItem = new CacheItem();
 			item.cacheKey = ck;

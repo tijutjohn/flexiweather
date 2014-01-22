@@ -13,6 +13,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import com.iblsoft.flexiweather.ogc.cache.event.WMSCacheEvent;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.TiledLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.IViewProperties;
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.IWMSViewPropertiesLoader;
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.TiledTileViewProperties;
@@ -1094,6 +1095,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 					}
 				}
 				*/
+				
+				
 				//add wmsViewProperties to array of already preloaded wms view properties
 				ma_preloadedQTTViewProperties.push(qttViewProperties);
 				setPreloadingStatus(false);

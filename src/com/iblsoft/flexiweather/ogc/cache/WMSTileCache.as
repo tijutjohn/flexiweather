@@ -124,6 +124,9 @@ package com.iblsoft.flexiweather.ogc.cache
 			if (!qttTileViewProperties)
 				return null;
 			var s_key: String = getQTTTileViewCacheKey(qttTileViewProperties);
+			
+			trace("WMSTileCache getCacheItem: "+ s_key);
+			
 			return md_cache[s_key] as CacheItem;
 		}
 
@@ -151,8 +154,8 @@ package com.iblsoft.flexiweather.ogc.cache
 					continue;
 				if (cacheKey.validity && validity && cacheKey.validity.time != validity.time)
 					continue;
-//				if (cacheKey.validity)
-//					trace("getTiles ["+cacheKey.m_tileIndex+"]: validity" + cacheKey.validity.toString()); 
+				if (cacheKey.validity)
+					trace("getTiles ["+cacheKey.m_tileIndex+"]: validity" + cacheKey.validity.toString()); 
 				if (!cacheKey.validity && validity)
 					continue;
 				if (cacheKey.m_tileIndex.mi_tileZoom != i_tileZoom)
@@ -349,6 +352,9 @@ package com.iblsoft.flexiweather.ogc.cache
 			
 			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, null, tileIndex, url, time, specialStrings);
 			var s_key: String = decodeURI(ck.toString());
+			
+			trace("WMSTileCache addCacheItem: "+ s_key);
+			
 			var item: CacheItem = new CacheItem();
 			item.viewProperties = qttTileViewProperties;
 			item.cacheKey = ck as CacheKey;

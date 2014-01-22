@@ -440,7 +440,9 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		
 		private function notifyCapabilitiesUpdated(): void
 		{
-			dispatchEvent(new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, true));
+			var se: ServiceCapabilitiesEvent  = new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, true);
+			se.service = this;
+			dispatchEvent(se);
 		}
 		
 		private function addSupportedProjections(): void

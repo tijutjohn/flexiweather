@@ -26,7 +26,7 @@ package com.iblsoft.flexiweather.ogc.managers
 	{
 		private static var sm_instance: OGCServiceConfigurationManager;
 		private var ma_services: ArrayCollection = new ArrayCollection();
-		private var m_timer: Timer = new Timer(60000);
+		private var m_timer: Timer = new Timer(300000);
 
 		private var m_servicesUpdating: int;
 		
@@ -36,6 +36,16 @@ package com.iblsoft.flexiweather.ogc.managers
 				throw new Error("OGCServiceManager can only be accessed through OGCServiceManager.getIntstance()");
 			m_timer.stop();
 			m_timer.addEventListener(TimerEvent.TIMER, onTimer);
+		}
+
+		public function get servicesUpdating():int
+		{
+			return m_servicesUpdating;
+		}
+
+		public function set servicesUpdating(value:int):void
+		{
+			m_servicesUpdating = value;
 		}
 
 		public static function getInstance(): OGCServiceConfigurationManager
@@ -179,7 +189,7 @@ package com.iblsoft.flexiweather.ogc.managers
 			_currentServices = currServices;
 			stopAllRunningServices();
 			
-			m_servicesUpdating = 0;
+			servicesUpdating = 0;
 			var i_currentFlashStamp: int = getTimer();
 //			for each(var osc: OGCServiceConfiguration in ma_services) 
 			for each (var oscName: String in currServices)
@@ -198,7 +208,7 @@ package com.iblsoft.flexiweather.ogc.managers
 					{
 						var wmsServiceConfiguration: WMSServiceConfiguration = osc as WMSServiceConfiguration;
 						_runningServices.push(wmsServiceConfiguration);
-						m_servicesUpdating++;
+						servicesUpdating++;
 						wmsServiceConfiguration.addEventListener(ServiceCapabilitiesEvent.CAPABILITIES_LOADED, onCapabilitiesLoaded);
 						wmsServiceConfiguration.addEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
 						wmsServiceConfiguration.addEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATE_FAILED, onCapabilitiesUpdateFailed);
@@ -233,8 +243,8 @@ package com.iblsoft.flexiweather.ogc.managers
 //			wmsServiceConfiguration.capabilitiesUpdated = true;
 			
 //			dispatchEvent(new Event(WMSServiceConfiguration.CAPABILITIES_UPDATED, true));
-			m_servicesUpdating--;
-			if (m_servicesUpdating == 0)
+			servicesUpdating--;
+			if (servicesUpdating == 0)
 			{
 				allCapabilitiesAreUpdated();
 			}

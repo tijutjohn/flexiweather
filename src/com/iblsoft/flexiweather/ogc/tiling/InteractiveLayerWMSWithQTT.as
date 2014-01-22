@@ -177,6 +177,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 				return;
 			
 			updateTiledLayerCRSs();
+			updateTiledLayerValidityTime();
+			
 			if (m_tiledLayer)
 			{
 				m_tiledLayer.capabilitiesReady = true;
@@ -208,7 +210,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			ma_specialCacheStrings = [];
 			var currWMSViewProperties: WMSViewProperties = currentViewProperties as WMSViewProperties;
 			var dimNames: Array = currWMSViewProperties.getWMSDimensionsNames();
-			for (var s_dimName: String in dimNames)
+			for each (var s_dimName: String in dimNames)
 			{
 				var str: String = "SPECIAL_" + m_cfg.dimensionToParameterName(s_dimName) + "="
 						+ currWMSViewProperties.getWMSDimensionValue(s_dimName);
@@ -256,8 +258,19 @@ package com.iblsoft.flexiweather.ogc.tiling
 			updateTiledLayerURLBase();
 		}
 
+
+		private function updateTiledLayerValidityTime(): void
+		{
+			var currWMSViewProperties: WMSViewProperties = currentViewProperties as WMSViewProperties;
+			
+			var currentValidityTime: Date = currWMSViewProperties.getSynchronisedVariableValue(GlobalVariable.FRAME) as Date;
+			if (m_tiledLayer && currentValidityTime)
+				m_tiledLayer.setValidityTime(currentValidityTime);
+		}
 		private function updateTiledLayerURLBase(): void
 		{
+			updateTiledLayerValidityTime();
+			
 			var fullURL: String = getFullURL();
 			m_tiledLayer.fullURL = fullURL;
 			
@@ -303,7 +316,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 				updateTiledLayerURLBase();
 			}
 		}
-
+		
 		override public function destroy(): void
 		{
 			if (m_tiledLayer)
