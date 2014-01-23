@@ -197,7 +197,15 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			if (isTileable)
 			{
+				ma_specialCacheStrings = [];
 				updateTiledLayerURLBase();
+				updateWMSViewProperties(currentViewProperties as WMSViewProperties);
+				
+				if (isTileable && m_tiledLayer)
+				{
+					m_tiledLayer.setSpecialCacheStrings(ma_specialCacheStrings);
+				}
+				
 				m_tiledLayer.refresh(b_force);
 			}
 			else
@@ -208,6 +216,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			super.updateDimensionsInURLRequest(url);
 			ma_specialCacheStrings = [];
+			updateWMSViewProperties(currentViewProperties as WMSViewProperties);
+			
+			/*
 			var currWMSViewProperties: WMSViewProperties = currentViewProperties as WMSViewProperties;
 			var dimNames: Array = currWMSViewProperties.getWMSDimensionsNames();
 			for each (var s_dimName: String in dimNames)
@@ -216,6 +227,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 						+ currWMSViewProperties.getWMSDimensionValue(s_dimName);
 				ma_specialCacheStrings.push(str);
 			}
+			*/
 		}
 
 		override protected function updateRequestData(request: URLRequest): void
@@ -238,9 +250,54 @@ package com.iblsoft.flexiweather.ogc.tiling
 				if (request.data.hasOwnProperty('STYLE'))
 				{
 					var str: String = "SPECIAL_STYLE=" + request.data.STYLE;
-					ma_specialCacheStrings.push(str);
+					addToSpecialCacheString(str);
 				}
 			}
+		}
+		
+		
+		private function updateWMSViewProperties(wmsViewProperties: WMSViewProperties): void
+		{
+			var validityTime: Date = getValidityTimeForViewProperties(wmsViewProperties);
+			wmsViewProperties.setValidityTime(validityTime);
+			
+			//need to check dimension other than "validity" dependent dimension
+			var specialStringArr: Array = [];
+			var dimNames: Array = wmsViewProperties.getWMSDimensionsNames();
+			for each (var s_dimName: String in dimNames)
+			{
+				var lowerDimName: String = s_dimName.toLowerCase();
+				if (lowerDimName != 'run' && lowerDimName != 'forecast' && lowerDimName != 'time')
+				{
+					var value: String = wmsViewProperties.getWMSDimensionValue(s_dimName);
+					if (value)
+					{
+						var specialParamName: String = "SPECIAL_" + m_cfg.dimensionToParameterName(s_dimName); 
+						var str: String = specialParamName  + "=" + value;
+						addToSpecialCacheString(str);
+					}
+				}
+				
+			}
+		}
+		
+		private function addToSpecialCacheString(str: String): void
+		{
+			var arr: Array = str.split('=');
+			var specialParamName: String = arr[0];
+			
+			var len: int = ma_specialCacheStrings.length
+			for (var i: int = 0; i < len; i++)
+			{
+				var currStr: String = ma_specialCacheStrings[i] as String;
+				if (currStr.indexOf(specialParamName) == 0)
+				{
+					ma_specialCacheStrings[i] = str;
+					return;
+				}
+			}
+			
+			ma_specialCacheStrings.push(str);
 		}
 
 		override protected function updateWMSViewPropertiesConfiguration(wmsViewProperties: WMSViewProperties, configuration: ILayerConfiguration, cache: ICache): void
@@ -259,11 +316,16 @@ package com.iblsoft.flexiweather.ogc.tiling
 		}
 
 
+		private function getValidityTimeForViewProperties(viewProperties: WMSViewProperties): Date
+		{
+			var validityTime: Date = viewProperties.getSynchronisedVariableValue(GlobalVariable.FRAME) as Date;
+			return validityTime;
+		}
 		private function updateTiledLayerValidityTime(): void
 		{
 			var currWMSViewProperties: WMSViewProperties = currentViewProperties as WMSViewProperties;
 			
-			var currentValidityTime: Date = currWMSViewProperties.getSynchronisedVariableValue(GlobalVariable.FRAME) as Date;
+			var currentValidityTime: Date = getValidityTimeForViewProperties(currWMSViewProperties);
 			if (m_tiledLayer && currentValidityTime)
 				m_tiledLayer.setValidityTime(currentValidityTime);
 		}
@@ -597,20 +659,14 @@ package com.iblsoft.flexiweather.ogc.tiling
 			var qttViewProperties: TiledViewProperties = _qttViewPropertiesDictionary[wmsViewProperties];
 			qttViewProperties.crs = wmsViewProperties.crs;
 			qttViewProperties.setViewBBox(wmsViewProperties.getViewBBox());
-			var specialStringArr: Array = [];
-			var dimNames: Array = wmsViewProperties.getWMSDimensionsNames();
-			for each (var s_dimName: String in dimNames)
-			{
-				var value: String = wmsViewProperties.getWMSDimensionValue(s_dimName);
-				if (value)
-				{
-					var str: String = "SPECIAL_" + m_cfg.dimensionToParameterName(s_dimName) + "=" + value;
-					specialStringArr.push(str);
-				}
-			}
-			qttViewProperties.setSpecialCacheStrings(specialStringArr);
+			
+			updateWMSViewProperties(wmsViewProperties);
+			qttViewProperties.setValidityTime(wmsViewProperties.validity);
+			qttViewProperties.setSpecialCacheStrings(ma_specialCacheStrings);
 			return qttViewProperties;
 		}
+		
+		
 
 		public function getTiledArea(viewBBox: BBox, zoomLevel: String, tileSize: int): TiledArea
 		{
