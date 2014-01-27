@@ -125,7 +125,7 @@ package com.iblsoft.flexiweather.ogc.cache
 				return null;
 			var s_key: String = getQTTTileViewCacheKey(qttTileViewProperties);
 			
-			trace("WMSTileCache getCacheItem: "+ s_key);
+//			trace("WMSTileCache getCacheItem: "+ s_key);
 			
 			return md_cache[s_key] as CacheItem;
 		}
@@ -154,8 +154,8 @@ package com.iblsoft.flexiweather.ogc.cache
 					continue;
 				if (cacheKey.validity && validity && cacheKey.validity.time != validity.time)
 					continue;
-				if (cacheKey.validity)
-					trace("getTiles ["+cacheKey.m_tileIndex+"]: validity" + cacheKey.validity.toString()); 
+//				if (cacheKey.validity)
+//					trace("getTiles ["+cacheKey.m_tileIndex+"]: validity" + cacheKey.validity.toString()); 
 				if (!cacheKey.validity && validity)
 					continue;
 				if (cacheKey.m_tileIndex.mi_tileZoom != i_tileZoom)
@@ -170,26 +170,25 @@ package com.iblsoft.flexiweather.ogc.cache
 					var currKeyPart: String
 					for each (currKeyPart in specialStrings)
 					{
-						if (currKeyPart.indexOf("SPECIAL_") == -1)
-							continue;
+//						if (currKeyPart.indexOf("SPECIAL_") == -1)
+//							continue;
 						specialStringsLength++;
 					}
 					for each (currKeyPart in keyParts)
 					{
-						if (currKeyPart.indexOf("SPECIAL_") == -1)
-							continue;
+//						if (currKeyPart.indexOf("SPECIAL_") == -1)
+//							continue;
 						var id: int = specialStrings.indexOf(currKeyPart);
-						if (id < 0)
+						if (id >= 0)
 						{
-							specialStringInside = false;
-							break;
+							specialStringsFound++;
 						}
-						specialStringsFound++;
 					}
 //					debug("getTiles specialStringsFound: " + specialStringsFound + " specialStringsLength: " + specialStringsLength);
 					if (specialStringsFound != specialStringsLength)
 					{
 						//not all special strings were inside
+						specialStringInside = false;
 						continue;
 					}
 					//TODO all special strings must be in key
@@ -198,15 +197,16 @@ package com.iblsoft.flexiweather.ogc.cache
 				}
 				if (cacheKey.validity)
 					debug("add tile: [" + cacheKey.m_tileIndex.toString() + "] " + cacheKey.validity.time + " last time usedL : " + cacheRecord.lastUsed)
-				cacheRecord.lastUsed = new Date();
-				a.push({
+					cacheRecord.lastUsed = new Date();
+					a.push({
 							tileIndex: cacheKey.m_tileIndex,
 							image: cacheRecord.image,
 							cacheKey: cacheKey
 						});
 			}
-//			debug("GET TILES: " + a.length);
+//			trace("GET TILES: validity: " + validity.toString() + " >> " + a.length);
 			testingTilesValidity(a)
+			
 			return a;
 		}
 		
@@ -249,7 +249,8 @@ package com.iblsoft.flexiweather.ogc.cache
 			
 			var tileIndex: TileIndex = qttTileViewProperties.tileIndex as TileIndex;
 			var url: URLRequest = qttTileViewProperties.url;
-			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, null, tileIndex, url, time, specialStrings);
+//			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, null, tileIndex, url, time, specialStrings);
+			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, tileIndex, url, null, time, null);
 			var s_key: String = ck.toString();
 			return s_key;
 		}
@@ -343,14 +344,19 @@ package com.iblsoft.flexiweather.ogc.cache
 			
 			var s_crs: String = qttTileViewProperties.crs as String;
 			var bbox: BBox = qttTileViewProperties.getViewBBox() as BBox;
-			var time: Date = qttTileViewProperties.validity;
+			var validity: Date = qttTileViewProperties.validity;
 			var tiledAreas: Array = qttTileViewProperties.tiledAreas;
 			var specialStrings: Array = qttTileViewProperties.specialCacheStrings;
 			
+			if (!validity)
+			{
+				trace("Check why validity == null in  WMSTileCache.addCacheItem");
+			}
 			var url: URLRequest = qttTileViewProperties.url;
 			var tileIndex: TileIndex = qttTileViewProperties.tileIndex;
 			
-			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, null, tileIndex, url, time, specialStrings);
+//			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, null, tileIndex, url, validity, specialStrings);
+			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, tileIndex, url, null, validity, null);
 			var s_key: String = decodeURI(ck.toString());
 			
 			trace("WMSTileCache addCacheItem: "+ s_key);

@@ -249,7 +249,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 				}
 				if (request.data.hasOwnProperty('STYLE'))
 				{
-					var str: String = "SPECIAL_STYLE=" + request.data.STYLE;
+					var str: String = "STYLE=" + request.data.STYLE;
 					addToSpecialCacheString(str);
 				}
 			}
@@ -267,16 +267,17 @@ package com.iblsoft.flexiweather.ogc.tiling
 			for each (var s_dimName: String in dimNames)
 			{
 				var lowerDimName: String = s_dimName.toLowerCase();
-				if (lowerDimName != 'run' && lowerDimName != 'forecast' && lowerDimName != 'time')
-				{
+//				if (lowerDimName != 'run' && lowerDimName != 'forecast' && lowerDimName != 'time')
+//				{
 					var value: String = wmsViewProperties.getWMSDimensionValue(s_dimName);
 					if (value)
 					{
-						var specialParamName: String = "SPECIAL_" + m_cfg.dimensionToParameterName(s_dimName); 
+//						var specialParamName: String = "SPECIAL_" + m_cfg.dimensionToParameterName(s_dimName); 
+						var specialParamName: String = m_cfg.dimensionToParameterName(s_dimName); 
 						var str: String = specialParamName  + "=" + value;
 						addToSpecialCacheString(str);
 					}
-				}
+//				}
 				
 			}
 		}
@@ -440,10 +441,13 @@ package com.iblsoft.flexiweather.ogc.tiling
 						return;
 					}
 					updateTiledLayerURLBase();
+					updateWMSViewProperties(currentViewProperties as WMSViewProperties);
+					
 					if (m_tiledLayer.currentQTTViewProperties)
 					{
 						m_tiledLayer.currentQTTViewProperties.crs = container.getCRS();
 						m_tiledLayer.currentQTTViewProperties.setViewBBox(container.getViewBBox());
+						m_tiledLayer.currentQTTViewProperties.setSpecialCacheStrings(ma_specialCacheStrings);
 					}
 					m_tiledLayer.invalidateData(b_forceUpdate);
 					changeTiledLayerVisibility(true);
