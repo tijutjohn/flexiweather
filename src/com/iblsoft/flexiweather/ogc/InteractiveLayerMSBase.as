@@ -283,6 +283,9 @@ package com.iblsoft.flexiweather.ogc
 		}
 		public function changeViewProperties(viewProperties: IViewProperties): void
 		{
+			if (!(viewProperties is WMSViewProperties))
+				return;
+			
 			if ((viewProperties as WMSViewProperties).crs != container.crs)
 			{
 				var crsError: Error = new Error("InteractiveLayerMSBase ChangeViewProperties: Layer CRS is different than InteractiveWidget.CRS");

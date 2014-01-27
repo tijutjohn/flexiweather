@@ -207,6 +207,8 @@ package com.iblsoft.flexiweather.ogc.cache
 //			trace("GET TILES: validity: " + validity.toString() + " >> " + a.length);
 			testingTilesValidity(a)
 			
+			if (specialStrings)
+				trace("\t getTiles specialStrings " + specialStrings[0] + " tiles: " + a.length);
 			return a;
 		}
 		

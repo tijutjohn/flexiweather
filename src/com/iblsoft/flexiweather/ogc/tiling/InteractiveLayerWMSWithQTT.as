@@ -197,14 +197,14 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			if (isTileable)
 			{
-				ma_specialCacheStrings = [];
-				updateTiledLayerURLBase();
-				updateWMSViewProperties(currentViewProperties as WMSViewProperties);
-				
-				if (isTileable && m_tiledLayer)
-				{
-					m_tiledLayer.setSpecialCacheStrings(ma_specialCacheStrings);
-				}
+//				ma_specialCacheStrings = [];
+//				updateTiledLayerURLBase();
+//				updateWMSViewProperties(currentViewProperties as WMSViewProperties);
+//				
+//				if (isTileable && m_tiledLayer)
+//				{
+//					m_tiledLayer.setSpecialCacheStrings(ma_specialCacheStrings);
+//				}
 				
 				m_tiledLayer.refresh(b_force);
 			}
@@ -440,14 +440,22 @@ package com.iblsoft.flexiweather.ogc.tiling
 						m_autoRefreshTimer.reset();
 						return;
 					}
+					ma_specialCacheStrings = [];
+					
 					updateTiledLayerURLBase();
 					updateWMSViewProperties(currentViewProperties as WMSViewProperties);
+					
+					
+					if (isTileable && m_tiledLayer)
+					{
+						m_tiledLayer.setSpecialCacheStrings(ma_specialCacheStrings);
+					}
 					
 					if (m_tiledLayer.currentQTTViewProperties)
 					{
 						m_tiledLayer.currentQTTViewProperties.crs = container.getCRS();
 						m_tiledLayer.currentQTTViewProperties.setViewBBox(container.getViewBBox());
-						m_tiledLayer.currentQTTViewProperties.setSpecialCacheStrings(ma_specialCacheStrings);
+//						m_tiledLayer.currentQTTViewProperties.setSpecialCacheStrings(ma_specialCacheStrings);
 					}
 					m_tiledLayer.invalidateData(b_forceUpdate);
 					changeTiledLayerVisibility(true);
@@ -684,9 +692,15 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		override public function changeViewProperties(viewProperties: IViewProperties): void
 		{
+//			return super.changeViewProperties(getViewPropertiesBasedOnIsTileable(viewProperties));
+			super.changeViewProperties(viewProperties);
+			
 			var layer: IPreloadableLayer = getPreloadableInteractiveLayerBaseOnIsTileable();
 			if (layer == this)
-				return super.changeViewProperties(getViewPropertiesBasedOnIsTileable(viewProperties));
+			{
+				return;
+//				return super.changeViewProperties(getViewPropertiesBasedOnIsTileable(viewProperties));
+			}
 					
 			return layer.changeViewProperties(getViewPropertiesBasedOnIsTileable(viewProperties));
 		}
