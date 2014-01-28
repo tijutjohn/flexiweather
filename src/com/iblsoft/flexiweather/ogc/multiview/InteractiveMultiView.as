@@ -1847,7 +1847,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 				}
 			}
 			
-			if (_configuration.customData.synchronizeArea)
+			if (_configuration && _configuration.customData && _configuration.customData.synchronizeArea)
 				synchronizeWidgets(_areaSynchronizator, event.target as InteractiveWidget, false);
 		}
 		private var _synchronizator: ISynchronizator;
