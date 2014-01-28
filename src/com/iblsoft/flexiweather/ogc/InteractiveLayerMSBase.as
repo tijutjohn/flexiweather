@@ -1387,7 +1387,9 @@ package com.iblsoft.flexiweather.ogc
 			var bbox: BBox = null;
 			for each (var layer: WMSLayer in getWMSLayers())
 			{
-				var b: BBox = layer.getBBoxForCRS(container.getCRS());
+				var crs: String = container.getCRS()
+//				var b: BBox = layer.getBBoxForCRS(crs);
+				var b: BBox = layer.getTileExtentForCRS(crs);
 				if (b == null)
 					continue;
 				if (bbox == null)

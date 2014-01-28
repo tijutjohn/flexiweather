@@ -471,6 +471,35 @@ package com.iblsoft.flexiweather.ogc
 			return parent.getBBoxForCRS(s_crs);
 		}
 		
+		public function getTileExtentForCRS(s_crs: String): BBox
+		{
+			if (!_parsed)
+			{
+				parse();
+			}
+			
+			var i: int;
+			var total: int = ma_crsWithBBoxes.length;
+			var crsBBox: CRSWithBBoxAndTilingInfo;
+			
+			// <BoundingBox SRS=... minx=...
+			for (i = 0; i < total; ++i)
+			{
+				if (ma_crsWithBBoxes[i] is CRSWithBBoxAndTilingInfo)
+				{
+					crsBBox = ma_crsWithBBoxes[i] as CRSWithBBoxAndTilingInfo;
+					if (Projection.equalCRSs(s_crs, crsBBox.crs))
+					{
+						if (crsBBox.tilingExtent != null)
+							return crsBBox.tilingExtent;
+					}
+				}
+			}
+			if (parent == null)
+				return null;
+			return parent.getTileExtentForCRS(s_crs);
+		}
+		
 		public function destroy(): void
 		{
 			if (ma_crsWithBBoxes && ma_crsWithBBoxes.length > 0)
