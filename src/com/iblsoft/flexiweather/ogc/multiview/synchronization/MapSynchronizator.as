@@ -105,7 +105,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			
 		override public function synchronizeWidgets(synchronizeFromWidget:InteractiveWidget, widgetsForSynchronisation:ArrayCollection, preferredSelectedIndex: int = -1):void
 		{
-			//there is no synchronizing needed for this syncrhonizator, all is done by AreaSynchronizator anf GlobalFrameSynchronizator
+			//there is no synchronizing needed for this syncrhonizator, all is done by AreaSynchronizator and GlobalFrameSynchronizator
 			
 			var cnt: int = 0;
 			var total: int = widgetsForSynchronisation.length;

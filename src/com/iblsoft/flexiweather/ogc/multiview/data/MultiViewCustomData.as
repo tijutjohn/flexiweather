@@ -10,7 +10,8 @@ package com.iblsoft.flexiweather.ogc.multiview.data
 		private var _dataProvider: ArrayCollection;
 		public var selectedIndex: int;
 		public var timeDifference: int;
-		public var synchronizeFrame: Boolean;
+		public var synchronizeFrame: Boolean = true;
+		public var synchronizeArea: Boolean = true;
 		
 		public function MultiViewCustomData(selectedIndex: int = -1, timeDifference: int = -1)
 		{
@@ -35,6 +36,7 @@ package com.iblsoft.flexiweather.ogc.multiview.data
 			selectedIndex = storage.serializeInt("selected-index", selectedIndex);
 			timeDifference = storage.serializeInt("time-difference", timeDifference);
 			synchronizeFrame = storage.serializeBool("synchronize-frame", synchronizeFrame);
+			synchronizeArea = storage.serializeBool("synchronize-area", synchronizeArea);
 			
 			var arr: Array = [];
 			if (storage.isStoring())
