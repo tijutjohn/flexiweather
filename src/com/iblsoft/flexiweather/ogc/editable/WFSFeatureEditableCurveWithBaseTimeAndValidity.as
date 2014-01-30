@@ -42,6 +42,9 @@ package com.iblsoft.flexiweather.ogc.editable
 		
 		override public function update(changeFlag: FeatureUpdateContext): void
 		{
+			if (!master)
+				return;
+			
 			super.update(changeFlag);
 			
 			clearGraphics();
