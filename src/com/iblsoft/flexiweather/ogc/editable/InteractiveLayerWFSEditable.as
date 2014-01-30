@@ -85,6 +85,9 @@ package com.iblsoft.flexiweather.ogc.editable
 
 		public function setMouseClickCapture(item: IMouseEditableItem): void
 		{
+			if (item == m_mouseClickCapturingItem)
+				return;
+			
 			if (item == null)
 				throw new Error("Cannot capture mouse clicks for a null object");
 			if (m_mouseClickCapturingItem != null)
