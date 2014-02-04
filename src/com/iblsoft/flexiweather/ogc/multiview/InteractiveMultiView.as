@@ -771,39 +771,16 @@ package com.iblsoft.flexiweather.ogc.multiview
 			{
 				beforeMultiViewChange();
 				notifyWidgetsMapsLoadingStarted();
-//				var _serializedMap: XMLStorage = new XMLStorage(mapXML);
-				_loadingMapsCount = 0;// _interactiveWidgets.widgets.length;
-				_initializingMapsCount = 0; //_interactiveWidgets.widgets.length;
+				_loadingMapsCount = 0;
+				_initializingMapsCount = 0;
 				
 				var cnt: int = 0;
 				for each (var currIW: InteractiveWidget in _interactiveWidgets.widgets)
 				{
-					/*
-					if (_oldCRS)
-						currIW.setCRS(_oldCRS, false);
-					if (_oldExtentBBox)
-						currIW.setExtentBBox(_oldExtentBBox, false);
-					if (_oldViewBBox)
-						currIW.setViewBBox(_oldViewBBox, true);
-					currIW.stopListenForChanges();
-					
-					if (!synchronizator || !synchronizator.canCreateMap(currIW))
-					{
-						createMapFromSerialization(currIW, mapXML);
-//						currIW.interactiveLayerMap.addEventListener(InteractiveLayerMap.LAYERS_SERIALIZED_AND_READY, onMapFromXMLReady);
-//						currIW.interactiveLayerMap.serialize(_serializedMap);
-					} else {
-						synchronizator.updateMapAction(currIW, cnt, _configuration);
-						synchronizator.addEventListener(SynchronisationEvent.MAP_READY, onSynchronizatorMapReady);
-						synchronizator.createMap(currIW);
-						
-					}
-					*/
+
 					
 					if (getMapInfoForPosition(cnt))
 					{
-//						_loadingMapsCount++;
-//						_initializingMapsCount++;
 						loadMapForWidget(currIW, mapXML, cnt);
 						cnt++;
 					}
@@ -879,7 +856,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 				
 				iw.interactiveLayerMap.serialize(storage);
 			} else {
-				loadMapsForAllWidgets(<empty/>);
+				if (storage is XMLStorage)
+					loadMapsForAllWidgets((storage as XMLStorage).xml);
 			}
 		}
 

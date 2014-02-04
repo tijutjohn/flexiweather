@@ -10,8 +10,8 @@ package com.iblsoft.flexiweather.ogc.multiview.data
 		private var _dataProvider: ArrayCollection;
 		public var selectedIndex: int;
 		public var timeDifference: int;
-		public var synchronizeFrame: Boolean = true;
-		public var synchronizeArea: Boolean = true;
+		private var _synchronizeFrame: Boolean = true;
+		private var _synchronizeArea: Boolean = true;
 		
 		public function MultiViewCustomData(selectedIndex: int = -1, timeDifference: int = -1)
 		{
@@ -20,6 +20,27 @@ package com.iblsoft.flexiweather.ogc.multiview.data
 			this.timeDifference = timeDifference;
 		}
 		
+
+
+		public function get synchronizeFrame():Boolean
+		{
+			return _synchronizeFrame;
+		}
+
+		public function set synchronizeFrame(value:Boolean):void
+		{
+			_synchronizeFrame = value;
+		}
+
+		public function get synchronizeArea():Boolean
+		{
+			return _synchronizeArea;
+		}
+
+		public function set synchronizeArea(value:Boolean):void
+		{
+			_synchronizeArea = value;
+		}
 
 		public function get dataProvider():ArrayCollection
 		{
