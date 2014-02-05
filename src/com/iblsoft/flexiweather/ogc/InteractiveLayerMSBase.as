@@ -750,7 +750,10 @@ package com.iblsoft.flexiweather.ogc
 
 		public function setAnimationModeEnable(value: Boolean): void
 		{
-			m_cache.setAnimationModeEnable(value);
+			if (m_cache)
+				m_cache.setAnimationModeEnable(value);
+			else
+				trace(this + " Cache is not created yet, setAnimationModeEnable");
 		}
 
 		protected function waitForCapabilities(): void
