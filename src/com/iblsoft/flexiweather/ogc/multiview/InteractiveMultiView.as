@@ -1709,6 +1709,10 @@ package com.iblsoft.flexiweather.ogc.multiview
 		}
 		
 
+		override public function invalidateDisplayList():void
+		{
+			super.invalidateDisplayList();
+		}
 		override protected function updateDisplayList(unscaledWidth: Number, unscaledHeight: Number): void
 		{
 			super.updateDisplayList(unscaledWidth, unscaledHeight);

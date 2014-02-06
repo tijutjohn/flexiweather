@@ -745,62 +745,65 @@ package com.iblsoft.flexiweather.widgets
 				//when user press Cancel on printing interactiveWidget, both sizes was NaN
 				return;
 			}
-			m_layerContainer.width = width;
-			m_layerContainer.height = height;
-			if (m_labelLayout.m_placementBitmap == null)
-				m_labelLayout.setBoundary(new Rectangle(0, 0, width, height));
-			var g: Graphics = m_layerBackground.graphics;
-			g.clear();
-			
-			var bDrawDisableState: Boolean = !enabled;
-			if (_enableSynchronization)
-				bDrawDisableState = bDrawDisableState && !mb_listenForChanges;
-			
-			if (bDrawDisableState)
+			if (m_layerContainer.width != width || m_layerContainer.height != height)
 			{
-				drawDisabledState();
-//				return;
-			}
-			else
-			{
-				if (_disableUI)
+				m_layerContainer.width = width;
+				m_layerContainer.height = height;
+				if (m_labelLayout.m_placementBitmap == null)
+					m_labelLayout.setBoundary(new Rectangle(0, 0, width, height));
+				var g: Graphics = m_layerBackground.graphics;
+				g.clear();
+				
+				var bDrawDisableState: Boolean = !enabled;
+				if (_enableSynchronization)
+					bDrawDisableState = bDrawDisableState && !mb_listenForChanges;
+				
+				if (bDrawDisableState)
 				{
-					_disableUI.graphics.clear();
-					_disableUI.includeInLayout = false;
-					_disableUI.visible = false;
+					drawDisabledState();
+	//				return;
 				}
-			}
-			anticollisionUpdate();
-			if (mb_backgroundChessBoard)
-			{
-				var i_squareSize: uint = 10;
-				var i_row: uint = 0;
-				for (var y: uint = 0; y < height; y += i_squareSize, ++i_row)
+				else
 				{
-					var b_flag: Boolean = (i_row & 1) != 0;
-					for (var x: uint = 0; x < width; x += i_squareSize)
+					if (_disableUI)
 					{
-						g.beginFill(b_flag ? 0xc0c0c0 : 0x808080);
-						g.drawRect(x, y, i_squareSize, i_squareSize);
-						g.endFill();
-						b_flag = !b_flag;
+						_disableUI.graphics.clear();
+						_disableUI.includeInLayout = false;
+						_disableUI.visible = false;
 					}
 				}
+				anticollisionUpdate();
+				if (mb_backgroundChessBoard)
+				{
+					var i_squareSize: uint = 10;
+					var i_row: uint = 0;
+					for (var y: uint = 0; y < height; y += i_squareSize, ++i_row)
+					{
+						var b_flag: Boolean = (i_row & 1) != 0;
+						for (var x: uint = 0; x < width; x += i_squareSize)
+						{
+							g.beginFill(b_flag ? 0xc0c0c0 : 0x808080);
+							g.drawRect(x, y, i_squareSize, i_squareSize);
+							g.endFill();
+							b_flag = !b_flag;
+						}
+					}
+				}
+				else
+				{
+					var matrix: Matrix = new Matrix();
+					matrix.rotate(90);
+					g.beginGradientFill(GradientType.LINEAR, [0xAAAAAA, 0xFFFFFF], [1, 1], [0, 255], matrix);
+					g.drawRect(0, 0, width, height);
+					g.endFill();
+				}
+				//TODO: uncomment next if statement if you want display label layout placement bitmap
+				if (m_labelLayout.m_placementBitmap)
+					m_labelLayout.drawDebugPlacementBitmap(g);
+				if (m_objectLayout.m_placementBitmap)
+					m_objectLayout.drawDebugPlacementBitmap(g);
+				super.updateDisplayList(unscaledWidth, unscaledHeight);
 			}
-			else
-			{
-				var matrix: Matrix = new Matrix();
-				matrix.rotate(90);
-				g.beginGradientFill(GradientType.LINEAR, [0xAAAAAA, 0xFFFFFF], [1, 1], [0, 255], matrix);
-				g.drawRect(0, 0, width, height);
-				g.endFill();
-			}
-			//TODO: uncomment next if statement if you want display label layout placement bitmap
-			if (m_labelLayout.m_placementBitmap)
-				m_labelLayout.drawDebugPlacementBitmap(g);
-			if (m_objectLayout.m_placementBitmap)
-				m_objectLayout.drawDebugPlacementBitmap(g);
-			super.updateDisplayList(unscaledWidth, unscaledHeight);
 		}
 
 		protected function signalAreaChanged(b_finalChange: Boolean): void
@@ -1828,6 +1831,7 @@ package com.iblsoft.flexiweather.widgets
 				var heightDiff: Number = Math.abs(_oldWidgetHeight - widgetHeight);
 				if (widgetWidth > 1 || widgetHeight > 1)
 				{
+					trace(this + "autoLayoutViewBBox ["+widgetWidth+","+widgetHeight+"] b_setViewBBox: " + b_setViewBBox);
 					this.width = widgetWidth;
 					this.height = widgetHeight;
 					this.x = widgetXPosition;
@@ -2570,6 +2574,11 @@ package com.iblsoft.flexiweather.widgets
 		}
 		private var mb_autoLayoutChanged: Boolean;
 
+		/**
+		 * FitMap 
+		 * @param value
+		 * 
+		 */		
 		public function set autoLayoutInParent(value: Boolean): void
 		{
 			mb_autoLayout = value;

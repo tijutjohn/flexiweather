@@ -542,7 +542,7 @@ package com.iblsoft.flexiweather.widgets
 
 		private function notify(type: String): void
 		{
-			debug("InteractiveLayerLegends NOTIFY: " + type);
+//			debug("InteractiveLayerLegends NOTIFY: " + type);
 			dispatchEvent(new Event(type));
 		}
 
@@ -1229,7 +1229,7 @@ package com.iblsoft.flexiweather.widgets
 		private function debug(str: String): void
 		{
 //			_logger.debug(str);
-			trace(this + str);
+//			trace(this + str);
 		}
 		
 		override public function toString(): String
