@@ -113,6 +113,30 @@ package com.iblsoft.flexiweather.utils
 			url = replaceDomainURLString(url, '//', '/');
 			return url;
 		}
+		
+		public static function changeURLParameterValue(url: String, parameterName: String, parameterValue: String): String
+		{
+			url = decodeURIComponent(url);
+			parameterName = (parameterName);
+			parameterValue = (parameterValue);
+			
+			var posInURL: int = url.indexOf(parameterName);
+			if (posInURL >= 0)
+			{
+				var nextAmpPos: int = url.indexOf('&', posInURL);
+				var endStr: String = "";
+				if (nextAmpPos >= 0)
+					endStr = url.substring(nextAmpPos, url.length);
+				
+				if (posInURL > 0)
+					url = url.substr(0, posInURL);
+				
+				url += parameterName + "=" + (parameterValue);
+				url += endStr;
+			}
+			
+			return url;
+		}
 
 		private static function replaceDomainURLString(url: String, originString: String, newString: String): String
 		{

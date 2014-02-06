@@ -29,6 +29,15 @@ package com.iblsoft.flexiweather.ogc.cache
 			this.validity = validity;
 		}
 
+		protected function sortKeysArray(var1: Object, var2: Object): int
+		{
+			if (var1.name < var2.name)
+				return -1;
+			if (var1.name > var2.name)
+				return 1;
+			return 0;
+		}
+		
 		protected function sortCacheKeyString(): void
 		{
 			if (ms_key)
@@ -46,6 +55,20 @@ package com.iblsoft.flexiweather.ogc.cache
 			}
 		}
 
+		protected function getURLParameterName(str: String): String
+		{
+			var arr: Array = str.split('=');
+			arr.pop();
+			return arr.join('=');
+		}
+		
+		protected function getURLParameterValue(str: String): String
+		{
+			var arr: Array = str.split('=');
+			var value: String = arr.pop();
+			return value;
+		}
+		
 		public function destroy(): void
 		{
 			url = null;

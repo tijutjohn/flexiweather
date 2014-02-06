@@ -47,7 +47,7 @@ package com.iblsoft.flexiweather.ogc.cache
 						}
 					}
 				}
-				a.sort();
+				a.sort(sortKeysArray);
 				var type: String;
 				for each (obj in a)
 				{
@@ -62,20 +62,6 @@ package com.iblsoft.flexiweather.ogc.cache
 				}
 			}
 			sortCacheKeyString();
-		}
-
-		private function getURLParameterName(str: String): String
-		{
-			var arr: Array = str.split('=');
-			arr.pop();
-			return arr.join('=');
-		}
-
-		private function getURLParameterValue(str: String): String
-		{
-			var arr: Array = str.split('=');
-			var value: String = arr.pop();
-			return value;
 		}
 
 		override public function destroy(): void

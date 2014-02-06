@@ -25,6 +25,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.WMSViewProperties;
 	import com.iblsoft.flexiweather.ogc.events.GetCapabilitiesEvent;
 	import com.iblsoft.flexiweather.ogc.events.MSBaseLoaderEvent;
+	import com.iblsoft.flexiweather.ogc.events.ServiceCapabilitiesEvent;
 	import com.iblsoft.flexiweather.ogc.managers.OGCServiceConfigurationManager;
 	import com.iblsoft.flexiweather.ogc.multiview.synchronization.events.SynchronisationEvent;
 	import com.iblsoft.flexiweather.ogc.net.loaders.MSBaseLoader;
@@ -236,12 +237,25 @@ package com.iblsoft.flexiweather.ogc
 				
 				var wmsService: WMSServiceConfiguration = existingService as WMSServiceConfiguration; 
 				
-				if (wmsService && wmsService.capabilitiesUpdated)
+				if (wmsService)
 				{
-					//					trace("OGCServiceConfigurationManager found same service with capabilities already updated");
-					m_cfg.service = wmsService;
+					if ( wmsService.capabilitiesUpdated)
+					{
+						m_cfg.service = wmsService;
+						checkPostponedUpdateDataCall();
+					} else {
+						wmsService.addEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onWaitForCapabilities);
+					}
 				}
 			}
+		}
+		
+		private function onWaitForCapabilities(event: ServiceCapabilitiesEvent): void
+		{
+			var wmsService: WMSServiceConfiguration = event.target as WMSServiceConfiguration;
+			wmsService.removeEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onWaitForCapabilities);
+			initializeConfiguration();
+			
 		}
 		
 		
@@ -269,6 +283,9 @@ package com.iblsoft.flexiweather.ogc
 		}
 		public function changeViewProperties(viewProperties: IViewProperties): void
 		{
+			if (!(viewProperties is WMSViewProperties))
+				return;
+			
 			if ((viewProperties as WMSViewProperties).crs != container.crs)
 			{
 				var crsError: Error = new Error("InteractiveLayerMSBase ChangeViewProperties: Layer CRS is different than InteractiveWidget.CRS");
@@ -733,7 +750,10 @@ package com.iblsoft.flexiweather.ogc
 
 		public function setAnimationModeEnable(value: Boolean): void
 		{
-			m_cache.setAnimationModeEnable(value);
+			if (m_cache)
+				m_cache.setAnimationModeEnable(value);
+			else
+				trace(this + " Cache is not created yet, setAnimationModeEnable");
 		}
 
 		protected function waitForCapabilities(): void
@@ -1370,7 +1390,9 @@ package com.iblsoft.flexiweather.ogc
 			var bbox: BBox = null;
 			for each (var layer: WMSLayer in getWMSLayers())
 			{
-				var b: BBox = layer.getBBoxForCRS(container.getCRS());
+				var crs: String = container.getCRS()
+//				var b: BBox = layer.getBBoxForCRS(crs);
+				var b: BBox = layer.getTileExtentForCRS(crs);
 				if (b == null)
 					continue;
 				if (bbox == null)
