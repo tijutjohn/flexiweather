@@ -13,6 +13,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import com.iblsoft.flexiweather.ogc.cache.event.WMSCacheEvent;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.TiledLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.IViewProperties;
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.IWMSViewPropertiesLoader;
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.TiledTileViewProperties;
@@ -75,7 +76,18 @@ package com.iblsoft.flexiweather.ogc.tiling
 		protected var ms_explicitBaseURLPattern: String;
 		private var m_cache: WMSTileCache;
 
-		public var fullURL: String;
+		private var _fullURL: String;
+
+
+		public function get fullURL():String
+		{
+			return _fullURL;
+		}
+
+		public function set fullURL(value:String):void
+		{
+			_fullURL = value;
+		}
 
 		public function set cache(value: WMSTileCache): void
 		{
@@ -622,7 +634,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 				//get cache tiles
 				var t1: Number = getTimer();
 				
-				var a_tiles: Array = wmsTileCache.getTiles(s_crs, mi_zoom, _specialCacheStrings, _currentValidityTime);
+//				var a_tiles: Array = wmsTileCache.getTiles(s_crs, mi_zoom, _specialCacheStrings, _currentValidityTime);
+				var a_tiles: Array = wmsTileCache.getTiles(s_crs, mi_zoom, _specialCacheStrings, null);
 				
 				var t2: Number = getTimer();
 				var getTilesTime: Number = t2 - t1;
@@ -1004,7 +1017,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 				_preloader.updateWMSData(true, qttViewProperties, forcedLayerWidth, forcedLayerHeight, printQuality);
 			} else {
 				ma_preloadingBuffer.push(qttViewProperties);
-				trace(this + " preload add to buffer: " + ma_preloadingBuffer.length);
+				trace(this + " preload add to buffer: " + ma_preloadingBuffer.length + " qttViewProperties: " + qttViewProperties.specialCacheStrings[0]);
 			}
 			
 		}
@@ -1033,6 +1046,15 @@ package com.iblsoft.flexiweather.ogc.tiling
 			return isAllPreloaded;
 		}
 
+		public function isPreloading(viewProperties: IViewProperties): Boolean
+		{
+//			var qttViewProperties: TiledViewProperties = viewProperties as TiledViewProperties;
+//			if (!qttViewProperties)
+//				return false;
+//			return qttViewProperties.isPreloading(m_cache);
+			
+			return false;
+		}
 		public function isPreloaded(viewProperties: IViewProperties): Boolean
 		{
 			var qttViewProperties: TiledViewProperties = viewProperties as TiledViewProperties;
@@ -1094,6 +1116,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 					}
 				}
 				*/
+				
+				
 				//add wmsViewProperties to array of already preloaded wms view properties
 				ma_preloadedQTTViewProperties.push(qttViewProperties);
 				setPreloadingStatus(false);

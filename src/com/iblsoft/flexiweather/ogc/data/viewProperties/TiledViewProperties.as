@@ -1,12 +1,14 @@
 package com.iblsoft.flexiweather.ogc.data.viewProperties
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.ogc.cache.WMSTileCache;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.IWMSLayerConfiguration;
-	import com.iblsoft.flexiweather.ogc.cache.WMSTileCache;
 	import com.iblsoft.flexiweather.ogc.tiling.TileIndex;
 	import com.iblsoft.flexiweather.ogc.tiling.TileIndicesMapper;
 	import com.iblsoft.flexiweather.ogc.tiling.TiledArea;
+	import com.iblsoft.flexiweather.utils.ArrayUtils;
+	
 	import flash.events.EventDispatcher;
 	import flash.net.URLRequest;
 
@@ -42,7 +44,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 
 		public function setSpecialCacheStrings(arr: Array): void
 		{
-			ma_specialCacheStrings = arr;
+			ma_specialCacheStrings = ArrayUtils.dupArray(arr);
 		}
 		private var _tileIndicesMapper: TileIndicesMapper;
 

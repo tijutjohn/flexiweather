@@ -108,8 +108,10 @@ package com.iblsoft.flexiweather.ogc.tiling
 			for each (var tileLoader: TileLoader in md_loadersRequests)
 			{
 				var data: TiledTileRequest = tileLoader.data;
-				tilesRequests.push(tileLoader);
+				if (data)
+					tilesRequests.push(data);
 			}
+			if (tilesRequests.length > 0)
 			cancelPreviousRequests(tilesRequests);
 		}
 		

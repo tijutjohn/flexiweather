@@ -1,7 +1,6 @@
 package com.iblsoft.flexiweather.ogc.tiling
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
-	import com.iblsoft.flexiweather.ogc.InteractiveLayerQTTMS;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
 	import com.iblsoft.flexiweather.ogc.cache.ICachedLayer;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration;

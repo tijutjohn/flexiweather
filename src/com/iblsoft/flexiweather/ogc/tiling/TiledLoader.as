@@ -19,6 +19,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.ISO8601Parser;
+	import com.iblsoft.flexiweather.utils.URLUtils;
 	import com.iblsoft.flexiweather.widgets.BackgroundJob;
 	import com.iblsoft.flexiweather.widgets.BackgroundJobManager;
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
@@ -588,13 +589,14 @@ package com.iblsoft.flexiweather.ogc.tiling
 			
 			url = InteractiveLayerTiled.expandURLPattern(url, tileIndex);
 			
+			//FIXME check if SPECIAL cache properties are already in URL (TiledLoader)
 			if (_tiledViewProperties.specialCacheStrings && _tiledViewProperties.specialCacheStrings.length > 0)
 			{
-				var specialLen: int = String("SPECIAL_").length;
 				for each (var str: String in _tiledViewProperties.specialCacheStrings)
 				{
-					str = str.substring(specialLen, str.length);
-					url += "&" + str;
+					//change special variable value in URL
+					var arr: Array = str.split('=');
+					url = URLUtils.changeURLParameterValue(url, arr[0], arr[1]);
 				}
 			}
 			return url;
