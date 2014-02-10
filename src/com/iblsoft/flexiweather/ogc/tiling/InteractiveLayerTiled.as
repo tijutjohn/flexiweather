@@ -189,6 +189,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			super.commitProperties();
 			
+			trace(this + " commitProperties _cacheIsUpdated: " + _cacheIsUpdated);
 			if (_cacheIsUpdated)
 			{
 				_cacheIsUpdated = false;
@@ -1046,6 +1047,15 @@ package com.iblsoft.flexiweather.ogc.tiling
 			return isAllPreloaded;
 		}
 
+		public function isPreloading(viewProperties: IViewProperties): Boolean
+		{
+//			var qttViewProperties: TiledViewProperties = viewProperties as TiledViewProperties;
+//			if (!qttViewProperties)
+//				return false;
+//			return qttViewProperties.isPreloading(m_cache);
+			
+			return false;
+		}
 		public function isPreloaded(viewProperties: IViewProperties): Boolean
 		{
 			var qttViewProperties: TiledViewProperties = viewProperties as TiledViewProperties;

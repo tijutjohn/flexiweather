@@ -408,7 +408,6 @@ package com.iblsoft.flexiweather.ogc
 		{
 			for each (var currWmsViewProperties: WMSViewProperties in ma_preloadedWMSViewProperties)
 			{
-				//for now just check if preloading has started
 				if (currWmsViewProperties.getWMSDimensionValue(s_variableId) == s_value)
 					return currWmsViewProperties;
 			}
@@ -419,9 +418,35 @@ package com.iblsoft.flexiweather.ogc
 		{
 			for each (var currWmsViewProperties: WMSViewProperties in ma_preloadedWMSViewProperties)
 			{
-				//for now just check if preloading has started
 				if (currWmsViewProperties.getWMSDimensionValue(s_variableId) == s_value)
 					return true;
+			}
+			return false;
+		}
+		public function isPreloading(viewProperties: IViewProperties): Boolean
+		{
+			var wmsViewProperties: WMSViewProperties = viewProperties as WMSViewProperties;
+			if (!wmsViewProperties)
+				return false;
+			
+			var totalDimensions: uint = wmsViewProperties.dimensions.length;
+			if (totalDimensions > 0)
+			{
+				var dimensions: Array = wmsViewProperties.dimensions;
+				
+				for each (var currWmsViewProperties: WMSViewProperties in ma_preloadingBuffer)
+				{
+					var correct: int = 0;
+					for each (var dimension: Object in wmsViewProperties.dimensions)
+					{
+						var s_variableId: String = dimension['name'] as String;
+						var s_value: Object = dimension['value'] as String;
+						if (currWmsViewProperties.getWMSDimensionValue(s_variableId) == s_value)
+							correct++;
+					}
+					if (correct == totalDimensions)
+						return true;
+				}
 			}
 			return false;
 		}

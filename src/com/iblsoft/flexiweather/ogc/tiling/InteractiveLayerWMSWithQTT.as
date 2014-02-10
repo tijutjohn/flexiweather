@@ -731,6 +731,15 @@ package com.iblsoft.flexiweather.ogc.tiling
 			return layer.preloadMultiple(convertViewPropertiesArray(viewPropertiesArray));
 		}
 
+		override public function isPreloading(viewProperties: IViewProperties): Boolean
+		{
+// 			var layer: IPreloadableLayer = getPreloadableInteractiveLayerBaseOnIsTileable();
+//			if (layer == this)
+				return super.isPreloading(getViewPropertiesBasedOnIsTileable(viewProperties));
+
+//			return layer.isPreloading(getViewPropertiesBasedOnIsTileable(viewProperties));
+		}
+		
 		override public function isPreloaded(viewProperties: IViewProperties): Boolean
 		{
  			var layer: IPreloadableLayer = getPreloadableInteractiveLayerBaseOnIsTileable();
