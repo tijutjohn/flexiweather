@@ -1046,6 +1046,15 @@ package com.iblsoft.flexiweather.ogc.tiling
 			return isAllPreloaded;
 		}
 
+		public function isPreloading(viewProperties: IViewProperties): Boolean
+		{
+//			var qttViewProperties: TiledViewProperties = viewProperties as TiledViewProperties;
+//			if (!qttViewProperties)
+//				return false;
+//			return qttViewProperties.isPreloading(m_cache);
+			
+			return false;
+		}
 		public function isPreloaded(viewProperties: IViewProperties): Boolean
 		{
 			var qttViewProperties: TiledViewProperties = viewProperties as TiledViewProperties;

@@ -9,6 +9,7 @@ package com.iblsoft.flexiweather.ogc.preload
 		function cancelPreload(): void;
 		function preload(viewProperties: IViewProperties): void;
 		function preloadMultiple(viewPropertiesArray: Array): void;
+		function isPreloading(viewProperties: IViewProperties): Boolean;
 		function isPreloaded(viewProperties: IViewProperties): Boolean;
 		function isPreloadedMultiple(viewPropertiesArray: Array): Boolean;
 	}
