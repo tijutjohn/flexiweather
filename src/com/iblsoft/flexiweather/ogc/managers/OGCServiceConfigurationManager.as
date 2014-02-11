@@ -26,16 +26,20 @@ package com.iblsoft.flexiweather.ogc.managers
 	{
 		private static var sm_instance: OGCServiceConfigurationManager;
 		private var ma_services: ArrayCollection = new ArrayCollection();
-		private var m_timer: Timer = new Timer(300000);
+		
+		private var m_timer: Timer;
 
 		private var m_servicesUpdating: int;
 		
-		public function OGCServiceConfigurationManager()
+		public function OGCServiceConfigurationManager(timeInterval: int = 60000)
 		{
 			if (sm_instance != null)
 				throw new Error("OGCServiceManager can only be accessed through OGCServiceManager.getIntstance()");
+			
+			m_timer = new Timer(timeInterval);
 			m_timer.stop();
 			m_timer.addEventListener(TimerEvent.TIMER, onTimer);
+			
 		}
 
 		public function get servicesUpdating():int
@@ -118,6 +122,10 @@ package com.iblsoft.flexiweather.ogc.managers
 
 		public function addService(osc: OGCServiceConfiguration): void
 		{
+			trace("OGCServiceManager addService: " + osc.toString());
+			if (osc.name.indexOf('obser') >= 0)
+				trace("check observations");
+			
 			ma_services.addItem(osc);
 			if (ma_services.length == 1)
 				m_timer.start();
@@ -213,6 +221,7 @@ package com.iblsoft.flexiweather.ogc.managers
 						wmsServiceConfiguration.addEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
 						wmsServiceConfiguration.addEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATE_FAILED, onCapabilitiesUpdateFailed);
 					}
+					trace("OGCServiceManager udpate: " + osc.toString());
 					osc.update();
 					osc.mi_lastUpdateFlashStamp = i_currentFlashStamp;
 				}

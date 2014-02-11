@@ -83,6 +83,25 @@ package com.iblsoft.flexiweather.widgets
 	{
 		public static const VIEW_BBOX_CHANGED: String = 'viewBBoxChanged';
 		
+		override public function set x(value:Number):void
+		{
+			super.x = value;
+		}
+		override public function set y(value:Number):void
+		{
+			super.y = value;
+		}
+		
+		override public function set width(value:Number):void
+		{
+			super.width = value;
+		}
+		
+		override public function set height(value:Number):void
+		{
+			super.height = value;
+		}
+		
 		private var ms_crs: String;
 		private var m_crsProjection: Projection;
 		private var m_viewBBox: BBox;
@@ -1558,6 +1577,8 @@ package com.iblsoft.flexiweather.widgets
 
 		protected function onResized(Event: ResizeEvent): void
 		{
+			
+			trace("IW onResized: ["+width+","+height+"] ["+Event.oldWidth+","+Event.oldHeight+"]");
 			m_labelLayout.setBoundary(new Rectangle(0, 0, width, height));
 			m_objectLayout.setBoundary(new Rectangle(0, 0, width, height));
 			if (!m_resizeTimer)
@@ -1831,7 +1852,7 @@ package com.iblsoft.flexiweather.widgets
 				var heightDiff: Number = Math.abs(_oldWidgetHeight - widgetHeight);
 				if (widgetWidth > 1 || widgetHeight > 1)
 				{
-					trace(this + "autoLayoutViewBBox ["+widgetWidth+","+widgetHeight+"] b_setViewBBox: " + b_setViewBBox);
+					trace(this + "autoLayoutViewBBox ["+widgetWidth+","+widgetHeight+"] previous size ["+width+","+height+"] b_setViewBBox: " + b_setViewBBox);
 					this.width = widgetWidth;
 					this.height = widgetHeight;
 					this.x = widgetXPosition;

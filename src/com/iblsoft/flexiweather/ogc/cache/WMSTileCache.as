@@ -361,7 +361,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, tileIndex, url, null, validity, null);
 			var s_key: String = decodeURI(ck.toString());
 			
-			trace("WMSTileCache addCacheItem: "+ s_key);
+//			trace("WMSTileCache addCacheItem: "+ s_key);
 			
 			var item: CacheItem = new CacheItem();
 			item.viewProperties = qttTileViewProperties;

@@ -417,6 +417,8 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		public function getWMSDimensionsValues(s_dimName: String, b_intersection: Boolean = true): Array
 		{
 			var a_dimValues: Array;
+			trace("getWMSDimensionsValues: " + m_cfg.wmsService.toString());
+			
 			var wmsLayers: Array = getWMSLayers();
 			for each (var layer: WMSLayer in wmsLayers)
 			{
