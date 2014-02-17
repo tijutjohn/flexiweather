@@ -14,7 +14,9 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.cache.ICache;
 	import com.iblsoft.flexiweather.ogc.configuration.MapTimelineConfiguration;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
+	import com.iblsoft.flexiweather.ogc.events.ServiceCapabilitiesEvent;
 	import com.iblsoft.flexiweather.ogc.managers.GlobalVariablesManager;
+	import com.iblsoft.flexiweather.ogc.managers.OGCServiceConfigurationManager;
 	import com.iblsoft.flexiweather.ogc.synchronisation.SynchronisationResponse;
 	import com.iblsoft.flexiweather.ogc.tiling.ITiledLayer;
 	import com.iblsoft.flexiweather.plugins.IConsole;
@@ -264,7 +266,21 @@ package com.iblsoft.flexiweather.widgets
 			if (FlexiWeatherConfiguration.INTERACTIVE_LAYER_MAP_PERIODIC_CHECK)
 				_periodicTimer.start();
 			
+			
+			registerServices();
+			
 			dispatchEvent(new Event("globalVariablesManagerChanged"));
+		}
+		
+		private function registerServices(): void
+		{
+			var ogcManager:OGCServiceConfigurationManager = OGCServiceConfigurationManager.getInstance();
+			ogcManager.addEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onServiceGetCapabilitiesUpdated);
+		}
+		
+		private function onServiceGetCapabilitiesUpdated(event: ServiceCapabilitiesEvent): void
+		{
+			callLater(invalidateEnumTimeAxis);
 		}
 
 		public function resetTimelineConfiguration(): void
@@ -1774,8 +1790,6 @@ package com.iblsoft.flexiweather.widgets
 			//we need to remember old frame and synchronize frame after RUN is synchronized
 			var oldFrame: Date = frame;
 			
-			trace(this + " SET RUN: " + newRun + " OLD FRAME: " + oldFrame);
-			
 			var bGlobalSynchronization: Boolean = false;
 			for each (var l: InteractiveLayer in m_layers)
 			{
@@ -1878,7 +1892,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			var synchronizedFrame: Date = frame;
 			
-			trace(this + " resynchronize to frame: " + synchronizedFrame);
+//			trace(this + " resynchronize to frame: " + synchronizedFrame);
 			if (synchronizedFrame)
 				setFrame(synchronizedFrame);
 		}

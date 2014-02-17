@@ -10,6 +10,9 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 
 	public class OGCServiceConfiguration extends EventDispatcher implements Serializable
 	{
+		public static var staticIDCounter: int = 0;
+		public var staticID: int;
+		
 		Storage.addChangedClass('com.iblsoft.flexiweather.ogc.OGCServiceConfiguration', 'com.iblsoft.flexiweather.ogc.configuration.services.OGCServiceConfiguration', new Version(1, 6, 0));
 		private var ms_id: String;
 		private var ms_fullURL: String;
@@ -31,6 +34,8 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		
 		public function OGCServiceConfiguration(s_url: String, s_service: String, version: Version)
 		{
+			staticID = staticIDCounter++;
+			
 			ms_fullURL = s_url;
 			parseFullURL(s_url);
 			ms_service = s_service;
@@ -181,7 +186,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		
 		override public function toString(): String
 		{
-			return "OGCServiceConfiguration: " + id + " - " + fullURL;
+			return "OGCServiceConfiguration: " + id + " / " + staticID + " - " + fullURL;
 		}
 	}
 }

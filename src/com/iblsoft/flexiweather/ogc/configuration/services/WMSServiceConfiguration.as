@@ -517,7 +517,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		
 		override public function toString(): String
 		{
-			return "WMSServiceConfiguration " + id + " / " + fullURL + " capabilitiesUpdated: " + capabilitiesUpdated;
+			return "WMSServiceConfiguration " + id + " / " + staticID + " - " + fullURL + " capabilitiesUpdated: " + capabilitiesUpdated;
 		}
 	}
 }
