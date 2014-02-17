@@ -195,21 +195,11 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		override public function refresh(b_force: Boolean): void
 		{
+			super.refresh(b_force);
 			if (isTileable)
 			{
-//				ma_specialCacheStrings = [];
-//				updateTiledLayerURLBase();
-//				updateWMSViewProperties(currentViewProperties as WMSViewProperties);
-//				
-//				if (isTileable && m_tiledLayer)
-//				{
-//					m_tiledLayer.setSpecialCacheStrings(ma_specialCacheStrings);
-//				}
-				
 				m_tiledLayer.refresh(b_force);
 			}
-			else
-				super.refresh(b_force);
 		}
 
 		override public function updateDimensionsInURLRequest(url: URLRequest): void
