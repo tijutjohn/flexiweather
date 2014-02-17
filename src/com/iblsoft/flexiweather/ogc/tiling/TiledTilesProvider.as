@@ -112,7 +112,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 					tilesRequests.push(data);
 			}
 			if (tilesRequests.length > 0)
-			cancelPreviousRequests(tilesRequests);
+				cancelPreviousRequests(tilesRequests);
 		}
 		
 //		private var _cancelledRequests: Array = [];
