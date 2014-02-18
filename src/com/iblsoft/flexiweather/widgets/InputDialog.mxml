@@ -5,6 +5,9 @@
 -->
 <s:TitleWindow xmlns:mx="library://ns.adobe.com/flex/mx"
 		xmlns:s="library://ns.adobe.com/flex/spark" xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:controls="com.iblsoft.ria.widgets.controls"
+		skinClass="com.iblsoft.flexiweather.widgets.skins.TitleWindowSkin"
+		close="onCancel()"
 		maxWidth="800" minWidth="400">
 	<fx:Script>
 		<![CDATA[
@@ -52,8 +55,8 @@
 		]]>
 	</fx:Script>
 	<s:VGroup left="10" right="10" top="10" bottom="10">
-		<mx:Text id="m_label" width="100%" height="100%" text="{ms_label}"/>
-		<mx:TextInput id="m_input" width="100%" editable="true" text="{ms_text}"
+		<s:Label id="m_label" width="100%" height="100%" text="{ms_label}"/>
+		<s:TextInput id="m_input" width="100%" editable="true" text="{ms_text}"
 				displayAsPassword="{mi_echoMode != NORMAL}"/>
 		<s:HGroup width="100%" horizontalAlign="center">
 			<s:Button id="m_buttonOK" label="OK" click="onOK()" width="{m_buttonCancel.width}"/>
