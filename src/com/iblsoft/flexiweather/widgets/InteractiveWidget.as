@@ -95,11 +95,28 @@ package com.iblsoft.flexiweather.widgets
 		override public function set width(value:Number):void
 		{
 			super.width = value;
+			if (id == "m_iw1")
+			{
+				trace("Widget size[width]: " + this + " ["+width+","+height+"] ["+explicitWidth+","+explicitHeight+"]");
+			}
 		}
 		
+//		override public function get height():Number
+//		{
+//			var h: Number = super.height;
+//			if (id == "m_iw1")
+//			{
+//				trace("Widget size[get height]: ");
+//			}
+//			return h;
+//		}
 		override public function set height(value:Number):void
 		{
 			super.height = value;
+			if (id == "m_iw1")
+			{
+				trace("Widget size[height]: " + this + " ["+width+","+height+"] ["+explicitWidth+","+explicitHeight+"]");
+			}
 		}
 		
 		private var ms_crs: String;
@@ -1605,10 +1622,23 @@ package com.iblsoft.flexiweather.widgets
 
 		protected function onResized(Event: ResizeEvent): void
 		{
+		
+			var w: Number;
+			var h: Number;
 			
-			trace("IW onResized: ["+width+","+height+"] ["+Event.oldWidth+","+Event.oldHeight+"]");
-			m_labelLayout.setBoundary(new Rectangle(0, 0, width, height));
-			m_objectLayout.setBoundary(new Rectangle(0, 0, width, height));
+			if (!isNaN(explicitWidth))
+				w = explicitWidth;
+			else
+				w = width;
+			if (!isNaN(explicitHeight))
+				h = explicitHeight;
+			else
+				h = height;
+			
+			
+			trace("IW onResized: ["+w+","+h+"] old ["+Event.oldWidth+","+Event.oldHeight+"]");
+			m_labelLayout.setBoundary(new Rectangle(0, 0, w, h));
+			m_objectLayout.setBoundary(new Rectangle(0, 0, w, h));
 			if (!m_resizeTimer)
 			{
 				m_resizeTimer = new Timer(500, 1);
@@ -1631,7 +1661,20 @@ package com.iblsoft.flexiweather.widgets
 				if (!l.isDynamicPartInvalid())
 					l.invalidateDynamicPart();
 			}
-			scrollRect = new Rectangle(0, 0, width, height);
+			
+			var w: Number;
+			var h: Number;
+			
+			if (!isNaN(explicitWidth))
+				w = explicitWidth;
+			else
+				w = width;
+			if (!isNaN(explicitHeight))
+				h = explicitHeight;
+			else
+				h = height;
+			
+			scrollRect = new Rectangle(0, 0, w, h);
 			postUserActionUpdate();
 		}
 
@@ -1881,8 +1924,9 @@ package com.iblsoft.flexiweather.widgets
 				if (widgetWidth > 1 || widgetHeight > 1)
 				{
 					trace(this + "autoLayoutViewBBox ["+widgetWidth+","+widgetHeight+"] previous size ["+width+","+height+"] b_setViewBBox: " + b_setViewBBox);
-					this.width = widgetWidth;
-					this.height = widgetHeight;
+					setActualSize(widgetWidth, widgetHeight);
+//					this.width = widgetWidth;
+//					this.height = widgetHeight;
 					this.x = widgetXPosition;
 					this.y = widgetYPosition;
 					_oldWidgetWidth = widgetWidth;

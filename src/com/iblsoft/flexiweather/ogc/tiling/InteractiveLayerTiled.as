@@ -189,7 +189,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			super.commitProperties();
 			
-			trace(this + " commitProperties _cacheIsUpdated: " + _cacheIsUpdated);
 			if (_cacheIsUpdated)
 			{
 				_cacheIsUpdated = false;
