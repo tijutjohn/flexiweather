@@ -81,7 +81,7 @@ package com.iblsoft.flexiweather.widgets
 //			if(!event.buttonDown)
 //				return false;
 			
-			systemManager.getSandboxRoot().addEventListener(MouseEvent.MOUSE_UP, onMouseUpOutside);
+			systemManager.getSandboxRoot().addEventListener(MouseEvent.MOUSE_UP, onMouseUpOutsideArea);
 			
 			if (_areaComponent.isResizing)
 			{
@@ -105,13 +105,13 @@ package com.iblsoft.flexiweather.widgets
 		}
 		private var _lastCreatedRectangle: CustomRectangle;
 
-		private function onMouseUpOutside(event: MouseEvent): void
+		private function onMouseUpOutsideArea(event: MouseEvent): void
 		{
 			onMouseUp(event);
 		}
 		override public function onMouseUp(event: MouseEvent): Boolean
 		{
-			systemManager.getSandboxRoot().removeEventListener(MouseEvent.MOUSE_UP, onMouseUpOutside);
+			systemManager.getSandboxRoot().removeEventListener(MouseEvent.MOUSE_UP, onMouseUpOutsideArea);
 			
 			if (event.ctrlKey || event.shiftKey)
 				return false;

@@ -347,6 +347,11 @@ package com.iblsoft.flexiweather.widgets
 			return false;
 		}
 
+		public function onMouseUpOutside(event: MouseEvent): Boolean
+		{
+			return false;
+		}
+		
 		public function onMouseUp(event: MouseEvent): Boolean
 		{
 			return false;

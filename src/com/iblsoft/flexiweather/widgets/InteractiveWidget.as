@@ -1456,6 +1456,9 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (!_enableMouseClick)
 				return;
+			
+			event.target.stage.addEventListener( MouseEvent.MOUSE_UP, onStageMouseUpHandler );
+			
 			for (var i: int = m_layerContainer.numElements - 1; i >= 0; --i)
 			{
 				var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
@@ -1469,11 +1472,36 @@ package com.iblsoft.flexiweather.widgets
 			}
 			postUserActionUpdate();
 		}
+		
+		protected function onStageMouseUpHandler(event: MouseEvent): void
+		{
+			event.target.removeEventListener( MouseEvent.MOUSE_UP, onStageMouseUpHandler );
+			
+			onMouseUpOutside(event);
+		}
 
+		protected function onMouseUpOutside(event: MouseEvent): void
+		{
+			if (!_enableMouseClick)
+				return;
+			for (var i: int = m_layerContainer.numElements - 1; i >= 0; --i)
+			{
+				var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
+				if (!l.enabled)
+					continue;
+				if (l.onMouseUpOutside(event))
+					break;
+			}
+			postUserActionUpdate();
+		}
 		protected function onMouseUp(event: MouseEvent): void
 		{
 			if (!_enableMouseClick)
 				return;
+			
+			event.stopImmediatePropagation( );
+			event.target.removeEventListener( MouseEvent.MOUSE_UP, onStageMouseUpHandler );
+			
 			for (var i: int = m_layerContainer.numElements - 1; i >= 0; --i)
 			{
 				var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));

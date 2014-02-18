@@ -312,6 +312,30 @@ package com.iblsoft.flexiweather.ogc.editable
 
 		override public function onMouseUp(event: MouseEvent): Boolean
 		{
+			var bool: Boolean = onMouseUpCommon(event);
+			if (bool)
+				trace(this + " onMouseUp");
+			
+			return bool;
+		}
+		
+		override public function onMouseUpOutside(event: MouseEvent): Boolean
+		{
+			if(event.ctrlKey || event.shiftKey)
+				return false;
+			if(m_mouseClickCapturingItem != null)
+				if(m_mouseClickCapturingItem.onMouseUp(new Point(event.localX, event.localY), event))
+					return true;
+			var l_hitItems: Array = doHitTest(event.stageX, event.stageY, IMouseEditableItem);
+			for each(var mItem: IMouseEditableItem in l_hitItems) {
+				if(mItem.onMouseUp(new Point(event.localX, event.localY), event))
+					return true;
+			}
+			return false;
+		}
+		
+		private function onMouseUpCommon(event: MouseEvent): Boolean
+		{
 			if(event.ctrlKey || event.shiftKey)
 				return false;
 			if(m_mouseClickCapturingItem != null)
