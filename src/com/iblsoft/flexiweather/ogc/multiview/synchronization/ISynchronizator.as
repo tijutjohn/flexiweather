@@ -20,6 +20,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		
 		function isSynchronizedFor(synchronizedDate: Date): Boolean;
 		function canCreateMap(iw: InteractiveWidget): Boolean;
+		function get displayLegends(): Boolean;
 		function createMap(iw: InteractiveWidget): void;
 		
 		function updateMapAction(iw: InteractiveWidget, position: int, configuration: MultiViewConfiguration): void;

@@ -238,5 +238,10 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		}
 		
 		
+		public function get displayLegends():Boolean
+		{
+			return true;
+		}
+		
 	}
 }
