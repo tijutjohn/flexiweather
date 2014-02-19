@@ -197,8 +197,8 @@ package com.iblsoft.flexiweather.widgets
 			if (!_r)
 				return;
 			var r: Rectangle = container.getViewBBox().toRectangle();
-			var w: Number = container.width;
-			var h: Number = container.height;
+			var w: Number = container.areaWidth;
+			var h: Number = container.areaHeight;
 			var bW: Number = r.width;
 			var bH: Number = r.height;
 			r.width = bW / w * _r.width;
@@ -229,8 +229,8 @@ package com.iblsoft.flexiweather.widgets
 				var bbox1: Rectangle = container.getViewBBox().toRectangle();
 				var r: BBox = _selectedBBox; //container.getViewBBox().toRectangle();
 				var r2: Rectangle = _selectedBBox.toRectangle(); //container.getViewBBox().toRectangle();
-				var w: Number = container.width;
-				var h: Number = container.height;
+				var w: Number = container.areaWidth;
+				var h: Number = container.areaHeight;
 				var bW: Number = r.width;
 				var bH: Number = r.height;
 				var newWidth: Number = r.width * w / bbox1.width;

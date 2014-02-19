@@ -1688,8 +1688,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 			super.invalidateSize();
 			if (container != null)
 			{
-				width = container.width;
-				height = container.height;
+				width = container.areaWidth;
+				height = container.areaHeight;
 			}
 		}
 

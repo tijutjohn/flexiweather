@@ -169,7 +169,7 @@ package com.iblsoft.flexiweather.widgets
 				mi_slideZoomStartY = event.localY;
 			else
 			{
-				initializeRectangle(event.localX, event.localY);
+				initializeRectangle(event.localX - container.areaX, event.localY - container.areaY);
 			}
 			return true;
 		}
@@ -198,8 +198,8 @@ package com.iblsoft.flexiweather.widgets
             if ((m_areaZoomingRectangle.width) > 5 && (m_areaZoomingRectangle.height) > 5)
             {
                 var r: Rectangle = container.getViewBBox().toRectangle();
-                var w: Number = container.width;
-                var h: Number = container.height;
+                var w: Number = container.areaWidth;
+                var h: Number = container.areaHeight;
                 var bW: Number = r.width;
                 var bH: Number = r.height;
                 r.width = bW / w * m_areaZoomingRectangle.width;
@@ -337,8 +337,8 @@ package com.iblsoft.flexiweather.widgets
 				m_previousGestureZoomMidPoint = null;
 			var newViewBBox: Rectangle = container.getViewBBox().toRectangle();
 			var oldViewBBox: Rectangle = container.getViewBBox().toRectangle();
-			var f_pxWidth: Number = container.width;
-			var f_pxHeight: Number = container.height;
+			var f_pxWidth: Number = container.areaWidth;
+			var f_pxHeight: Number = container.areaHeight;
 			var f_viewWidth: Number = oldViewBBox.width;
 			var f_viewHeight: Number = oldViewBBox.height;
 			var f_aspectedScale: Number = (event.scaleX + event.scaleY) / 2;
@@ -370,7 +370,7 @@ package com.iblsoft.flexiweather.widgets
 			//draw zoom area on right side
 			var gr: Graphics = m_slideZoomSprite.graphics;
 			gr.clear()
-			gr.beginFill(0, 0.35);
+			gr.beginFill(0, 0.35)
 			gr.drawRoundRectComplex(width - 50, 20, 30, height - 40, 5, 5, 5, 5);
 			gr.endFill();
 			m_slideZoomSprite.visible = mb_showSlideZoomingSprite;

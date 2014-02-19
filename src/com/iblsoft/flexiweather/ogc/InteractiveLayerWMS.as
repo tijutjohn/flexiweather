@@ -196,19 +196,6 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 
-		/*
-		public override function draw(graphics: Graphics): void
-		{
-			super.draw(graphics);
-			if(container.height <= 0)
-				return;
-			if(container.width <= 0)
-				return;
-
-			if (m_currentWMSViewProperties)
-				m_currentWMSViewProperties.drawWMSData(graphics);
-		}
-		*/
 		override public function hasPreview(): Boolean
 		{
 			return true;
@@ -219,8 +206,8 @@ package com.iblsoft.flexiweather.ogc
 			super.invalidateSize();
 			if (container != null)
 			{
-				width = container.width;
-				height = container.height;
+				width = container.areaWidth;
+				height = container.areaHeight;
 			}
 		}
 

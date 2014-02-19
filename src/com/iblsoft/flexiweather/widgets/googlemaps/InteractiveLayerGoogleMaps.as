@@ -22,12 +22,14 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+	
 	import flash.display.Bitmap;
 	import flash.display.Graphics;
 	import flash.events.Event;
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.utils.setTimeout;
+	
 	import mx.collections.ArrayCollection;
 
 	public class InteractiveLayerGoogleMaps extends InteractiveDataLayer implements Serializable, IConfigurableLayer
@@ -275,6 +277,9 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 
 		private function initializeMap(): void
 		{
+			var w: Number = container.areaWidth;
+			var h: Number = container.areaHeight;
+			
 			mb_mapIsInitialized = true;
 //			m_map.enabled = false;
 			m_map.disableControlByKeyboard();
@@ -283,13 +288,13 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 			m_map.disableScrollWheelZoom();
 //			m_map.viewMode = View.VIEWMODE_2D;
 			if (container)
-				m_map.setSize(new Point(container.width, container.height));
+				m_map.setSize(new Point(w, h));
 			else
 				m_map.setSize(new Point(width, height));
 			m_map.x = 0;
 			m_map.y = 0;
-			m_map.width = container.width;
-			m_map.height = container.height;
+			m_map.width = w;
+			m_map.height = h;
 			m_map.mouseChildren = false;
 			m_map.mouseEnabled = false;
 			mouseChildren = false;
@@ -483,10 +488,10 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 					callLater(invalidateData, [b_forceUpdate]);
 					return;
 				}
-				if (container.width > 0 && container.height > 0)
+				if (container.areaWidth > 0 && container.areaHeight > 0)
 				{
-					m_map.width = container.width;
-					m_map.height = container.height;
+					m_map.width = container.areaWidth;
+					m_map.height = container.areaHeight;
 				}
 				var s_crs: String = container.getCRS();
 				var _bbox: BBox = container.getViewBBox();

@@ -5,9 +5,6 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.events.InteractiveWidgetEvent;
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
-	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
-	import com.iblsoft.flexiweather.ogc.SynchronisedVariableChangeEvent;
-	import com.iblsoft.flexiweather.ogc.cache.WMSCacheKey;
 	import com.iblsoft.flexiweather.ogc.cache.WMSCacheManager;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.ogc.editable.data.FeatureData;
@@ -19,7 +16,6 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.CubicBezier;
 	import com.iblsoft.flexiweather.utils.ICurveRenderer;
-	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayout;
 	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayoutObject;
 	import com.iblsoft.flexiweather.utils.draw.DrawMode;
@@ -45,17 +41,14 @@ package com.iblsoft.flexiweather.widgets
 	import flash.utils.getTimer;
 	import flash.utils.setTimeout;
 	
-	import mx.containers.Canvas;
 	import mx.core.IVisualElement;
 	import mx.core.UIComponent;
-	import mx.core.mx_internal;
 	import mx.events.DynamicEvent;
 	import mx.events.FlexEvent;
 	import mx.events.ResizeEvent;
 	
 	import spark.components.DataGroup;
 	import spark.components.Group;
-	import spark.components.SkinnableContainer;
 	import spark.events.ElementExistenceEvent;
 
 	[Event(name = "viewBBoxChanged", type = "flash.events.Event")]
@@ -83,6 +76,43 @@ package com.iblsoft.flexiweather.widgets
 	{
 		public static const VIEW_BBOX_CHANGED: String = 'viewBBoxChanged';
 		
+		public function get areaX(): Number
+		{
+			if (!autoLayoutInParent)
+				return x;
+			if (m_widgetBounds)
+				return m_widgetBounds.x;
+			
+			return 0;
+		}
+		public function get areaY(): Number
+		{
+			if (!autoLayoutInParent)
+				return y;
+			if (m_widgetBounds)
+				return m_widgetBounds.y;
+			
+			return 0;
+		}
+		public function get areaWidth(): Number
+		{
+			if (!autoLayoutInParent)
+				return width;
+			if (m_widgetBounds)
+				return m_widgetBounds.width;
+			
+			return 0;
+		}
+//		override public function get height():Number
+		public function get areaHeight(): Number
+		{
+			if (!autoLayoutInParent)
+				return height;
+			if (m_widgetBounds)
+				return m_widgetBounds.height;
+			
+			return 0;
+		}
 		override public function set x(value:Number):void
 		{
 			super.x = value;
@@ -99,17 +129,13 @@ package com.iblsoft.flexiweather.widgets
 			{
 				trace("Widget size[width]: " + this + " ["+width+","+height+"] ["+explicitWidth+","+explicitHeight+"]");
 			}
+//			if (!autoLayoutInParent && m_widgetBounds)
+			if (m_widgetBounds)
+				m_widgetBounds.width = value;
 		}
 		
-//		override public function get height():Number
-//		{
-//			var h: Number = super.height;
-//			if (id == "m_iw1")
-//			{
-//				trace("Widget size[get height]: ");
-//			}
-//			return h;
-//		}
+		private var m_widgetBounds: WidgetSize;
+
 		override public function set height(value:Number):void
 		{
 			super.height = value;
@@ -117,6 +143,9 @@ package com.iblsoft.flexiweather.widgets
 			{
 				trace("Widget size[height]: " + this + " ["+width+","+height+"] ["+explicitWidth+","+explicitHeight+"]");
 			}
+//			if (!autoLayoutInParent && m_widgetBounds)
+			if (m_widgetBounds)
+				m_widgetBounds.height = value;
 		}
 		
 		private var ms_crs: String;
@@ -215,6 +244,8 @@ package com.iblsoft.flexiweather.widgets
 		public function InteractiveWidget(bUsedForIcon: Boolean = false)
 		{
 			super();
+			
+			m_widgetBounds = new WidgetSize();
 		
 			usedForIcon = bUsedForIcon;
 			
@@ -278,7 +309,7 @@ package com.iblsoft.flexiweather.widgets
 			if (m_resizeTimer)
 			{
 				m_resizeTimer.stop();
-				m_resizeTimer.removeEventListener(TimerEvent.TIMER_COMPLETE, afterDelayedResize);
+				m_resizeTimer.removeEventListener(TimerEvent.TIMER_COMPLETE, callDelayedResize);
 			}
 			m_featureSplitter.destroy();
 		}
@@ -781,64 +812,79 @@ package com.iblsoft.flexiweather.widgets
 				//when user press Cancel on printing interactiveWidget, both sizes was NaN
 				return;
 			}
-			if (m_layerContainer.width != width || m_layerContainer.height != height)
+			
+			if (m_widgetBounds)
 			{
-				m_layerContainer.width = width;
-				m_layerContainer.height = height;
-				if (m_labelLayout.m_placementBitmap == null)
-					m_labelLayout.setBoundary(new Rectangle(0, 0, width, height));
-				var g: Graphics = m_layerBackground.graphics;
-				g.clear();
-				
-				var bDrawDisableState: Boolean = !enabled;
-				if (_enableSynchronization)
-					bDrawDisableState = bDrawDisableState && !mb_listenForChanges;
-				
-				if (bDrawDisableState)
+				if (isNaN(m_widgetBounds.width))
 				{
-					drawDisabledState();
-	//				return;
-				}
-				else
+					m_widgetBounds.width = unscaledWidth;
+					m_widgetBounds.height = unscaledHeight;
+				}					
+				var w: Number = width; //m_widgetBounds.width;
+				var h: Number = height; //m_widgetBounds.height;
+				if (m_layerContainer.width != w || m_layerContainer.height != h)
 				{
-					if (_disableUI)
+//					m_layerContainer.width = w;
+//					m_layerContainer.height = h;
+					if (m_labelLayout.m_placementBitmap == null)
+						m_labelLayout.setBoundary(new Rectangle(0, 0, w, h));
+					
+					var bDrawDisableState: Boolean = !enabled;
+					if (_enableSynchronization)
+						bDrawDisableState = bDrawDisableState && !mb_listenForChanges;
+					
+					if (bDrawDisableState)
 					{
-						_disableUI.graphics.clear();
-						_disableUI.includeInLayout = false;
-						_disableUI.visible = false;
+						drawDisabledState();
+		//				return;
 					}
-				}
-				anticollisionUpdate();
-				if (mb_backgroundChessBoard)
-				{
-					var i_squareSize: uint = 10;
-					var i_row: uint = 0;
-					for (var y: uint = 0; y < height; y += i_squareSize, ++i_row)
+					else
 					{
-						var b_flag: Boolean = (i_row & 1) != 0;
-						for (var x: uint = 0; x < width; x += i_squareSize)
+						if (_disableUI)
 						{
-							g.beginFill(b_flag ? 0xc0c0c0 : 0x808080);
-							g.drawRect(x, y, i_squareSize, i_squareSize);
-							g.endFill();
-							b_flag = !b_flag;
+							_disableUI.graphics.clear();
+							_disableUI.includeInLayout = false;
+							_disableUI.visible = false;
 						}
 					}
+					anticollisionUpdate();
 				}
-				else
-				{
-					var matrix: Matrix = new Matrix();
-					matrix.rotate(90);
-					g.beginGradientFill(GradientType.LINEAR, [0xAAAAAA, 0xFFFFFF], [1, 1], [0, 255], matrix);
-					g.drawRect(0, 0, width, height);
-					g.endFill();
-				}
-				//TODO: uncomment next if statement if you want display label layout placement bitmap
-				if (m_labelLayout.m_placementBitmap)
-					m_labelLayout.drawDebugPlacementBitmap(g);
-				if (m_objectLayout.m_placementBitmap)
-					m_objectLayout.drawDebugPlacementBitmap(g);
-				super.updateDisplayList(unscaledWidth, unscaledHeight);
+					var g: Graphics = m_layerBackground.graphics;
+					g.clear();
+					if (mb_backgroundChessBoard)
+					{
+						var i_squareSize: uint = 10;
+						var i_row: uint = 0;
+						if (width > 0 && height > 0 && g)
+						{
+							for (var y: uint = 0; y < height; y += i_squareSize, ++i_row)
+							{
+								var b_flag: Boolean = (i_row & 1) != 0;
+								for (var x: uint = 0; x < width; x += i_squareSize)
+								{
+									g.beginFill(b_flag ? 0xc0c0c0 : 0x808080);
+									g.drawRect(x, y, i_squareSize, i_squareSize);
+									g.endFill();
+									b_flag = !b_flag;
+								}
+							}
+						}
+					}
+					else
+					{
+						var matrix: Matrix = new Matrix();
+						matrix.rotate(90);
+						g.beginGradientFill(GradientType.LINEAR, [0xAAAAAA, 0xFFFFFF], [1, 1], [0, 255], matrix);
+						g.drawRect(0, 0, width, height);
+						g.endFill();
+					}
+					//TODO: uncomment next if statement if you want display label layout placement bitmap
+					if (m_labelLayout.m_placementBitmap)
+						m_labelLayout.drawDebugPlacementBitmap(g);
+					if (m_objectLayout.m_placementBitmap)
+						m_objectLayout.drawDebugPlacementBitmap(g);
+					super.updateDisplayList(unscaledWidth, unscaledHeight);
+//				}
 			}
 		}
 
@@ -895,10 +941,11 @@ package com.iblsoft.flexiweather.widgets
 		/** Converts screen point (pixels) into Coord with current CRS. */
 		public function pointToCoord(x: Number, y: Number): Coord
 		{
-			var cx: Number = x * m_viewBBox.width / (width - 1) + m_viewBBox.xMin;
-			var cy: Number = (height - 1 - y) * m_viewBBox.height / (height - 1) + m_viewBBox.yMin;
-//			trace("pointToCoord: ["+width+","+height+"] = viewBBox ["+m_viewBBox.width+","+m_viewBBox.height+"]");
-//			trace("pointToCoord: ["+x+","+y+"] = crs: " + ms_crs + " ["+cx+","+cy+"]");
+			var w: Number = width// m_widgetBounds.width;
+			var h: Number = height//m_widgetBounds.height;
+			
+			var cx: Number = x * m_viewBBox.width / (w - 1) + m_viewBBox.xMin;
+			var cy: Number = (h - 1 - m_widgetBounds.y) * m_viewBBox.height / (h - 1) + m_viewBBox.yMin;
 			return new Coord(ms_crs, cx , cy);
 		}
 
@@ -976,9 +1023,11 @@ package com.iblsoft.flexiweather.widgets
 			}
 			if (ptInOurCRS && m_viewBBox)
 			{
-				var pX: Number = (ptInOurCRS.x - m_viewBBox.xMin) * (width - 1) / m_viewBBox.width;
-				var pY: Number = height - 1 - (ptInOurCRS.y - m_viewBBox.yMin) * (height - 1) / m_viewBBox.height;
-//				trace("coorToPoint: " + c.toLaLoCoord() + " to point: " + pX + " , " + pY + " m_viewBBox: " + m_viewBBox.toBBOXString()); 
+				var w: Number = width// m_widgetBounds.width;
+				var h: Number = height //m_widgetBounds.height;
+				
+				var pX: Number = (ptInOurCRS.x - m_viewBBox.xMin) * (w - 1) / m_viewBBox.width;
+				var pY: Number = h - 1 - (ptInOurCRS.y - m_viewBBox.yMin) * (h - 1) / m_viewBBox.height;
 				return new Point(pX, pY);
 			}
 			return null;
@@ -1635,6 +1684,11 @@ package com.iblsoft.flexiweather.widgets
 			else
 				h = height;
 			
+			if (autoLayoutInParent)
+			{
+				w = m_widgetBounds.width;
+				h = m_widgetBounds.height;
+			}
 			
 			trace("IW onResized: ["+w+","+h+"] old ["+Event.oldWidth+","+Event.oldHeight+"]");
 			m_labelLayout.setBoundary(new Rectangle(0, 0, w, h));
@@ -1642,38 +1696,49 @@ package com.iblsoft.flexiweather.widgets
 			if (!m_resizeTimer)
 			{
 				m_resizeTimer = new Timer(500, 1);
-				m_resizeTimer.addEventListener(TimerEvent.TIMER_COMPLETE, afterDelayedResize);
+				m_resizeTimer.addEventListener(TimerEvent.TIMER_COMPLETE, callDelayedResize);
 			}
 			m_resizeTimer.stop();
 			m_resizeTimer.start();
 		}
 
-		private function afterDelayedResize(event: TimerEvent = null): void
+		private function callDelayedResize(event: TimerEvent = null): void
 		{
-//        	setViewBBox(m_viewBBox, true); // set the view bbox to update the aspects 
-			setViewBBox(m_viewBBox, false); // set the view bbox to update the aspects 
+			callLater(afterDelayedResize);
+		}
+		private function afterDelayedResize(): void
+		{
+//        	setViewBBox(m_viewBBox, true); // set the view bbox to update the aspects
+			setViewBBox(m_viewBBox, false); // set the view bbox to update the aspects
+			updateLayersBounds();
+		} 
+		
+		private function updateLayersBounds(): void
+		{
+			var w: Number = m_widgetBounds.width;
+			var h: Number = m_widgetBounds.height;
+			var xPos: Number = m_widgetBounds.x;
+			var yPos: Number = m_widgetBounds.y;
+			
+			m_layerContainer.x = xPos;
+			m_layerContainer.y = yPos;
+			m_layerContainer.width = w;
+			m_layerContainer.height = h;
+			
 			for (var i: int = 0; i < m_layerContainer.numElements; ++i)
 			{
 				var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
-				l.width = width;
-				l.height = height;
-				l.onContainerSizeChanged();
-				if (!l.isDynamicPartInvalid())
-					l.invalidateDynamicPart();
+				if (l.width != w || l.height != h)
+				{
+					l.x = 0;
+					l.y = 0;
+					l.width = w;
+					l.height = h;
+					l.onContainerSizeChanged();
+					if (!l.isDynamicPartInvalid())
+						l.invalidateDynamicPart();
+				}
 			}
-			
-			var w: Number;
-			var h: Number;
-			
-			if (!isNaN(explicitWidth))
-				w = explicitWidth;
-			else
-				w = width;
-			if (!isNaN(explicitHeight))
-				h = explicitHeight;
-			else
-				h = height;
-			
 			scrollRect = new Rectangle(0, 0, w, h);
 			postUserActionUpdate();
 		}
@@ -1737,8 +1802,8 @@ package com.iblsoft.flexiweather.widgets
 
 		public function getPixelDistance(): Number
 		{
-			var w: int = width;
-			var h: int = height;
+			var w: Number = m_widgetBounds.width;
+			var h: Number = m_widgetBounds.height;
 			var bbox: BBox = m_viewBBox;
 			var prj: Projection = m_crsProjection;
 			var dpi: int = Capabilities.screenDPI;
@@ -1751,8 +1816,8 @@ package com.iblsoft.flexiweather.widgets
 		}
 		public function getMapScale(): Number
 		{
-			var w: int = width;
-			var h: int = height;
+			var w: Number = m_widgetBounds.width;
+			var h: Number = m_widgetBounds.height;
 			var bbox: BBox = m_viewBBox;
 			var prj: Projection = m_crsProjection;
 			var dpi: int = Capabilities.screenDPI;
@@ -1923,12 +1988,18 @@ package com.iblsoft.flexiweather.widgets
 				var heightDiff: Number = Math.abs(_oldWidgetHeight - widgetHeight);
 				if (widgetWidth > 1 || widgetHeight > 1)
 				{
-					trace(this + "autoLayoutViewBBox ["+widgetWidth+","+widgetHeight+"] previous size ["+width+","+height+"] b_setViewBBox: " + b_setViewBBox);
-					setActualSize(widgetWidth, widgetHeight);
 //					this.width = widgetWidth;
 //					this.height = widgetHeight;
+					
+					/*
+					setActualSize(widgetWidth, widgetHeight);
 					this.x = widgetXPosition;
 					this.y = widgetYPosition;
+					*/
+					m_widgetBounds.setBounds(widgetXPosition, widgetYPosition, widgetWidth, widgetHeight);
+					trace(this + "autoLayoutViewBBox ["+m_widgetBounds.width+","+m_widgetBounds.height+"] ["+widgetWidth+","+widgetHeight+"] previous size ["+width+","+height+"] b_setViewBBox: " + b_setViewBBox);
+					updateLayersBounds();
+					
 					_oldWidgetWidth = widgetWidth;
 					_oldWidgetHeight = widgetHeight;
 					if (b_setViewBBox)
@@ -2031,9 +2102,11 @@ package com.iblsoft.flexiweather.widgets
 
 		public function pointIsOutside(p: Point): Boolean
 		{
-			if (p.x < 0 || p.x > width)
+			var w: Number = m_widgetBounds.width;
+			var h: Number = m_widgetBounds.height;
+			if (p.x < 0 || p.x > w)
 				return true;
-			if (p.y < 0 || p.y > height)
+			if (p.y < 0 || p.y > h)
 				return true;
 			return false;
 		}
@@ -2684,5 +2757,40 @@ package com.iblsoft.flexiweather.widgets
 			return mb_autoLayout;
 		}
 		
+	}
+}
+
+class WidgetSize
+{
+	public var x: Number = 0;
+	public var y: Number = 0;
+	private var m_width: Number;
+	private var m_height: Number;
+
+	public function set width(value:Number):void
+	{
+		m_width = value;
+	}
+	public function get width():Number
+	{
+		return m_width;
+	}
+
+	public function set height(value:Number):void
+	{
+		m_height = value;
+	}
+	public function get height():Number
+	{
+		return m_height;
+	}
+
+
+	public function setBounds(x: Number, y: Number, width: Number, height: Number): void
+	{
+		this.x = x;
+		this.y = y ;
+		this.width = width;
+		this.height = height;
 	}
 }

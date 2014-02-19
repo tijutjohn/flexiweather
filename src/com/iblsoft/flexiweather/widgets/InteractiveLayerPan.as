@@ -252,8 +252,8 @@ package com.iblsoft.flexiweather.widgets
 			if (Math.abs(pDiff.x) > 1 || Math.abs(pDiff.y) > 1 || b_finalChange)
 			{
 //				var r: BBox = container.getViewBBox();
-//				var w: Number = container.width;
-//				var h: Number = container.height;
+//				var w: Number = container.areaWidth;
+//				var h: Number = container.aeight;
 //				pDiff.x = pDiff.x * r.width / w;
 //				pDiff.y = pDiff.y * r.height / h;
 //				container.setViewBBox(r.translated(-pDiff.x, pDiff.y), b_finalChange);
@@ -298,8 +298,8 @@ package com.iblsoft.flexiweather.widgets
 		private function doRealPan(xDiff: Number, yDiff: Number, b_finalChange: Boolean): void
 		{
 			var r: BBox = container.getViewBBox();
-			var w: Number = container.width;
-			var h: Number = container.height;
+			var w: Number = container.areaWidth;
+			var h: Number = container.areaHeight;
 			xDiff = xDiff * r.width / w;
 			yDiff = yDiff * r.height / h;
 			if (!_diff)

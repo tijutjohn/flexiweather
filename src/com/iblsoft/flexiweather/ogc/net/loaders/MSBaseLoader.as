@@ -108,8 +108,8 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 			//cancel all running requests
 			cancel();
 			
-			var i_width: int = int(m_layer.container.width);
-			var i_height: int = int(m_layer.container.height);
+			var i_width: int = int(m_layer.container.areaWidth);
+			var i_height: int = int(m_layer.container.areaHeight);
 			if (forcedLayerWidth > 0)
 				i_width = forcedLayerWidth;
 			if (forcedLayerHeight > 0)

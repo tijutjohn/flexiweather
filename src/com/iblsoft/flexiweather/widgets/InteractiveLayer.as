@@ -324,8 +324,8 @@ package com.iblsoft.flexiweather.widgets
 			this.y = 0;
 			if (container)
 			{
-				this.width = container.width;
-				this.height = container.height;
+				this.width = container.areaWidth;
+				this.height = container.areaHeight;
 			}
 		}
 
