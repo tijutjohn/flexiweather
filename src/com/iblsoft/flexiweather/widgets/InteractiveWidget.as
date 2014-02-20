@@ -77,6 +77,11 @@ package com.iblsoft.flexiweather.widgets
 	{
 		public static const VIEW_BBOX_CHANGED: String = 'viewBBoxChanged';
 		
+		override public function set id(value:String):void
+		{
+			super.id = value;
+		}
+		
 		public function get areaX(): Number
 		{
 			if (!autoLayoutInParent)
@@ -360,14 +365,19 @@ package com.iblsoft.flexiweather.widgets
 				var widgetParent: GroupBase = parent as GroupBase;
 				if (widgetParent)
 				{
+//					trace(this + " mb_autoLayoutChanged: addEventListener(ResizeEvent.RESIZE, onParentResize) ");
 					if (mb_autoLayout)
-						widgetParent.addEventListener(ResizeEvent.RESIZE, onParentResize);
-					else
+					{
+						if (!widgetParent.hasEventListener(ResizeEvent.RESIZE))
+							widgetParent.addEventListener(ResizeEvent.RESIZE, onParentResize);
+					} else {
 						widgetParent.removeEventListener(ResizeEvent.RESIZE, onParentResize);
+					}
 					
 					updateAreaSize();
 					updateLayersBounds();
 				}
+				mb_autoLayoutChanged = false;
 			}
 			
 			if (_layersOrderChanged)
@@ -2783,6 +2793,8 @@ package com.iblsoft.flexiweather.widgets
 				mb_autoLayout = value;
 				mb_autoLayoutChanged = true;
 				invalidateProperties();
+				
+				trace(id + " autoLayoutInParent = " + mb_autoLayout);
 			}
 		}
 
