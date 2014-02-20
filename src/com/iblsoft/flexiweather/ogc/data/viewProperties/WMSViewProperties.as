@@ -417,7 +417,6 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		public function getWMSDimensionsValues(s_dimName: String, b_intersection: Boolean = true): Array
 		{
 			var a_dimValues: Array;
-			trace("getWMSDimensionsValues: " + m_cfg.wmsService.toString());
 			
 			var wmsLayers: Array = getWMSLayers();
 			for each (var layer: WMSLayer in wmsLayers)
@@ -437,8 +436,20 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					}
 				}
 			}
+
+			//Small debug code piece
+//			if (s_dimName == "time" && a_dimValues && a_dimValues.length > 0)
+//			{
+//				var value: String = a_dimValues[a_dimValues.length - 1].toString();
+//				if (value != _oldTimeValue)
+//					trace("\t getWMSDimensionsValues: " + a_dimValues[a_dimValues.length - 1]);
+//				
+//				_oldTimeValue = value;
+//			}
 			return a_dimValues;
 		}
+		
+		private var _oldTimeValue: String;
 
 		/**
 		 * It returns date from RUN and FORECAST set for this layer

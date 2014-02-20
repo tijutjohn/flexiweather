@@ -49,6 +49,7 @@ package com.iblsoft.flexiweather.widgets
 	
 	import spark.components.DataGroup;
 	import spark.components.Group;
+	import spark.components.supportClasses.GroupBase;
 	import spark.events.ElementExistenceEvent;
 
 	[Event(name = "viewBBoxChanged", type = "flash.events.Event")]
@@ -80,7 +81,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (!autoLayoutInParent)
 				return x;
-			if (m_widgetBounds)
+			if (m_widgetBounds && !isNaN(m_widgetBounds.x))
 				return m_widgetBounds.x;
 			
 			return 0;
@@ -89,7 +90,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (!autoLayoutInParent)
 				return y;
-			if (m_widgetBounds)
+			if (m_widgetBounds && !isNaN(m_widgetBounds.y))
 				return m_widgetBounds.y;
 			
 			return 0;
@@ -98,7 +99,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (!autoLayoutInParent)
 				return width;
-			if (m_widgetBounds)
+			if (m_widgetBounds && !isNaN(m_widgetBounds.width))
 				return m_widgetBounds.width;
 			
 			return 0;
@@ -108,7 +109,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (!autoLayoutInParent)
 				return height;
-			if (m_widgetBounds)
+			if (m_widgetBounds && !isNaN(m_widgetBounds.height))
 				return m_widgetBounds.height;
 			
 			return 0;
@@ -355,13 +356,17 @@ package com.iblsoft.flexiweather.widgets
 			
 			if (mb_autoLayoutChanged)
 			{
-				var widgetParent: DataGroup = parent as DataGroup;
+//				var widgetParent: DataGroup = parent as DataGroup;
+				var widgetParent: GroupBase = parent as GroupBase;
 				if (widgetParent)
 				{
 					if (mb_autoLayout)
 						widgetParent.addEventListener(ResizeEvent.RESIZE, onParentResize);
 					else
 						widgetParent.removeEventListener(ResizeEvent.RESIZE, onParentResize);
+					
+					updateAreaSize();
+					updateLayersBounds();
 				}
 			}
 			
@@ -941,8 +946,8 @@ package com.iblsoft.flexiweather.widgets
 		/** Converts screen point (pixels) into Coord with current CRS. */
 		public function pointToCoord(x: Number, y: Number): Coord
 		{
-			var w: Number = width// m_widgetBounds.width;
-			var h: Number = height//m_widgetBounds.height;
+			var w: Number = areaWidth;
+			var h: Number = areaHeight;
 			
 			var cx: Number = x * m_viewBBox.width / (w - 1) + m_viewBBox.xMin;
 			var cy: Number = (h - 1 - m_widgetBounds.y) * m_viewBBox.height / (h - 1) + m_viewBBox.yMin;
@@ -1023,8 +1028,8 @@ package com.iblsoft.flexiweather.widgets
 			}
 			if (ptInOurCRS && m_viewBBox)
 			{
-				var w: Number = width// m_widgetBounds.width;
-				var h: Number = height //m_widgetBounds.height;
+				var w: Number = areaWidth;
+				var h: Number = areaHeight;
 				
 				var pX: Number = (ptInOurCRS.x - m_viewBBox.xMin) * (w - 1) / m_viewBBox.width;
 				var pY: Number = h - 1 - (ptInOurCRS.y - m_viewBBox.yMin) * (h - 1) / m_viewBBox.height;
@@ -1686,8 +1691,8 @@ package com.iblsoft.flexiweather.widgets
 			
 			if (autoLayoutInParent)
 			{
-				w = m_widgetBounds.width;
-				h = m_widgetBounds.height;
+				w = areaWidth;
+				h = areaHeight;
 			}
 			
 			trace("IW onResized: ["+w+","+h+"] old ["+Event.oldWidth+","+Event.oldHeight+"]");
@@ -1713,12 +1718,37 @@ package com.iblsoft.flexiweather.widgets
 			updateLayersBounds();
 		} 
 		
+		/**
+		 * Update correct area size. Need to be called when property autoLayoutInParent is changed.
+		 * 
+		 */		
+		private function updateAreaSize(): void
+		{
+			if (!autoLayoutInParent)
+			{
+				
+				m_widgetBounds.x = 0;
+				m_widgetBounds.y = 0;
+				m_widgetBounds.width = width;
+				m_widgetBounds.height = height;
+				
+				setViewBBox(m_viewBBox, false);
+			} else {
+				
+				autoLayoutViewBBox(m_viewBBox, true, true);
+			}
+		}
+		
+		/**
+		 * Updates all layers bounds to current area size. Area size depends whether autoLayoutInParent is set to true (fit map) or false 
+		 * 
+		 */		
 		private function updateLayersBounds(): void
 		{
-			var w: Number = m_widgetBounds.width;
-			var h: Number = m_widgetBounds.height;
-			var xPos: Number = m_widgetBounds.x;
-			var yPos: Number = m_widgetBounds.y;
+			var w: Number = areaWidth;
+			var h: Number = areaHeight;
+			var xPos: Number = areaX;
+			var yPos: Number = areaY;
 			
 			m_layerContainer.x = xPos;
 			m_layerContainer.y = yPos;
@@ -1802,8 +1832,8 @@ package com.iblsoft.flexiweather.widgets
 
 		public function getPixelDistance(): Number
 		{
-			var w: Number = m_widgetBounds.width;
-			var h: Number = m_widgetBounds.height;
+			var w: Number = areaWidth;
+			var h: Number = areaHeight;
 			var bbox: BBox = m_viewBBox;
 			var prj: Projection = m_crsProjection;
 			var dpi: int = Capabilities.screenDPI;
@@ -1816,8 +1846,8 @@ package com.iblsoft.flexiweather.widgets
 		}
 		public function getMapScale(): Number
 		{
-			var w: Number = m_widgetBounds.width;
-			var h: Number = m_widgetBounds.height;
+			var w: Number = areaWidth;
+			var h: Number = areaHeight;
 			var bbox: BBox = m_viewBBox;
 			var prj: Projection = m_crsProjection;
 			var dpi: int = Capabilities.screenDPI;
@@ -1960,7 +1990,8 @@ package com.iblsoft.flexiweather.widgets
 		private function autoLayoutViewBBox(bbox: BBox, b_finalChange: Boolean, b_setViewBBox: Boolean = false): void
 		{
 			//auto layout in widget parent
-			var widgetParent: DataGroup = parent as DataGroup;
+//			var widgetParent: DataGroup = parent as DataGroup;
+			var widgetParent: GroupBase = parent as GroupBase;
 			if (widgetParent)
 			{
 				var f_bboxApect: Number = bbox.width / bbox.height;
@@ -1997,7 +2028,7 @@ package com.iblsoft.flexiweather.widgets
 					this.y = widgetYPosition;
 					*/
 					m_widgetBounds.setBounds(widgetXPosition, widgetYPosition, widgetWidth, widgetHeight);
-					trace(this + "autoLayoutViewBBox ["+m_widgetBounds.width+","+m_widgetBounds.height+"] ["+widgetWidth+","+widgetHeight+"] previous size ["+width+","+height+"] b_setViewBBox: " + b_setViewBBox);
+					trace(this + "autoLayoutViewBBox ["+areaWidth+","+areaHeight+"] ["+widgetWidth+","+widgetHeight+"] previous size ["+width+","+height+"] b_setViewBBox: " + b_setViewBBox);
 					updateLayersBounds();
 					
 					_oldWidgetWidth = widgetWidth;
@@ -2102,8 +2133,8 @@ package com.iblsoft.flexiweather.widgets
 
 		public function pointIsOutside(p: Point): Boolean
 		{
-			var w: Number = m_widgetBounds.width;
-			var h: Number = m_widgetBounds.height;
+			var w: Number = areaWidth;
+			var h: Number = areaHeight;
 			if (p.x < 0 || p.x > w)
 				return true;
 			if (p.y < 0 || p.y > h)
@@ -2747,9 +2778,12 @@ package com.iblsoft.flexiweather.widgets
 		 */		
 		public function set autoLayoutInParent(value: Boolean): void
 		{
-			mb_autoLayout = value;
-			mb_autoLayoutChanged = true;
-			invalidateProperties();
+			if (mb_autoLayout != value)
+			{
+				mb_autoLayout = value;
+				mb_autoLayoutChanged = true;
+				invalidateProperties();
+			}
 		}
 
 		public function get autoLayoutInParent(): Boolean

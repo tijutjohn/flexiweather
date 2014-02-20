@@ -12,6 +12,7 @@ package com.iblsoft.flexiweather.widgets
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
 	import flash.events.TransformGestureEvent;
+	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.ui.Multitouch;
 	import flash.utils.Timer;
@@ -159,6 +160,10 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 
+		private function getMousePositionInArea(localX: Number, localY: Number): Point
+		{
+			return new Point(localX - container.areaX, localY - container.areaY);
+		}
 		override public function onMouseDown(event: MouseEvent): Boolean
 		{
 			if (!event.ctrlKey && mb_requireCtrlKey || event.shiftKey)
@@ -169,7 +174,8 @@ package com.iblsoft.flexiweather.widgets
 				mi_slideZoomStartY = event.localY;
 			else
 			{
-				initializeRectangle(event.localX - container.areaX, event.localY - container.areaY);
+				var p: Point = getMousePositionInArea(event.localX, event.localY);
+				initializeRectangle(p.x, p.y);
 			}
 			return true;
 		}
@@ -231,8 +237,11 @@ package com.iblsoft.flexiweather.widgets
 			{
 				if (m_areaZoomingRectangle == null)
 					return false;
-				m_areaZoomingRectangle.width = event.localX - m_areaZoomingRectangle.x;
-				m_areaZoomingRectangle.height = event.localY - m_areaZoomingRectangle.y;
+				
+				var p: Point = getMousePositionInArea(event.localX, event.localY);
+				
+				m_areaZoomingRectangle.width = p.x - m_areaZoomingRectangle.x;
+				m_areaZoomingRectangle.height = p.y - m_areaZoomingRectangle.y;
 				invalidateDynamicPart();
 			}
 			return true;
@@ -342,7 +351,10 @@ package com.iblsoft.flexiweather.widgets
 			var f_viewWidth: Number = oldViewBBox.width;
 			var f_viewHeight: Number = oldViewBBox.height;
 			var f_aspectedScale: Number = (event.scaleX + event.scaleY) / 2;
-			var newMidPoint: Coord = container.pointToCoord(event.localX, event.localY);
+			
+			var p: Point = getMousePositionInArea(event.localX, event.localY);
+			
+			var newMidPoint: Coord = container.pointToCoord(p.x, p.y);
 			if (!newMidPoint)
 				return;
 			// apply scaling of the view BBox

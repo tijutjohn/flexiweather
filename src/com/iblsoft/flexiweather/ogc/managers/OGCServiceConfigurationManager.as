@@ -221,7 +221,7 @@ package com.iblsoft.flexiweather.ogc.managers
 						wmsServiceConfiguration.addEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
 						wmsServiceConfiguration.addEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATE_FAILED, onCapabilitiesUpdateFailed);
 					}
-					trace("OGCServiceManager udpate: " + osc.toString());
+//					trace("OGCServiceManager udpate: " + osc.toString());
 					osc.update();
 					osc.mi_lastUpdateFlashStamp = i_currentFlashStamp;
 				}

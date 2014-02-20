@@ -206,8 +206,11 @@ package com.iblsoft.flexiweather.ogc
 			super.invalidateSize();
 			if (container != null)
 			{
-				width = container.areaWidth;
-				height = container.areaHeight;
+				if (container.areaWidth > 0 && container.areaHeight > 0)
+				{
+					width = container.areaWidth;
+					height = container.areaHeight;
+				}
 			}
 		}
 

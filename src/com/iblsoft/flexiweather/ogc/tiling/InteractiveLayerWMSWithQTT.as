@@ -521,8 +521,11 @@ package com.iblsoft.flexiweather.ogc.tiling
 			super.onContainerSizeChanged();
 			if (m_tiledLayer)
 			{
-				m_tiledLayer.width = container.areaWidth;
-				m_tiledLayer.height = container.areaHeight;
+				if (container.areaWidth > 0 && container.areaHeight > 0)
+				{
+					m_tiledLayer.width = container.areaWidth;
+					m_tiledLayer.height = container.areaHeight;
+				}
 			}
 		}
 

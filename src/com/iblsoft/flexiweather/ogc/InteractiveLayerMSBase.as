@@ -1045,7 +1045,7 @@ package com.iblsoft.flexiweather.ogc
 			ptImageSize.y = int(Math.round(ptImageSize.y));
 			
 			
-			trace(this + "drawImagePartAsBitmap ["+image.bitmapData.width+","+image.bitmapData.height+"]  ptImageSize: "+ ptImageSize);
+			trace(id + " drawImagePartAsBitmap ["+image.bitmapData.width+","+image.bitmapData.height+"]  ptImageSize: "+ ptImageSize);
 			var matrix: Matrix = new Matrix();
 			matrix.scale(ptImageSize.x / image.width, ptImageSize.y / image.height);
 			matrix.translate(ptImageStartPoint.x, ptImageStartPoint.y);
