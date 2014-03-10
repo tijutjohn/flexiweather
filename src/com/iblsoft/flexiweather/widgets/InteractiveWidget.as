@@ -960,7 +960,7 @@ package com.iblsoft.flexiweather.widgets
 			var h: Number = areaHeight;
 			
 			var cx: Number = x * m_viewBBox.width / (w - 1) + m_viewBBox.xMin;
-			var cy: Number = (h - 1 - m_widgetBounds.y) * m_viewBBox.height / (h - 1) + m_viewBBox.yMin;
+			var cy: Number = (h - 1 - y) * m_viewBBox.height / (h - 1) + m_viewBBox.yMin;
 			return new Coord(ms_crs, cx , cy);
 		}
 
