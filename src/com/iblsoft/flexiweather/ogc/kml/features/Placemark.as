@@ -105,29 +105,32 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		public override function cleanup(): void
 		{
 			super.cleanup();
-			var totalReflections: int = kmlReflectionDictionary.totalReflections;
-			var kmlSprite: KMLSprite;
-			for (var i: int = 0; i < totalReflections; i++)
+			if (kmlReflectionDictionary)
 			{
-				var kmlReflection: KMLReflectionData = kmlReflectionDictionary.getReflection(i) as KMLReflectionData;
-				if (kmlReflection)
+				var totalReflections: int = kmlReflectionDictionary.totalReflections;
+				var kmlSprite: KMLSprite;
+				for (var i: int = 0; i < totalReflections; i++)
 				{
-					kmlSprite = kmlReflection.displaySprite as KMLSprite;
-					if (kmlSprite)
+					var kmlReflection: KMLReflectionData = kmlReflectionDictionary.getReflection(i) as KMLReflectionData;
+					if (kmlReflection)
 					{
-						if (kmlSprite.kmlLabel)
+						kmlSprite = kmlReflection.displaySprite as KMLSprite;
+						if (kmlSprite)
 						{
-							if (kmlSprite.kmlLabel.anticollisionLayoutObject)
-								removeLabelFromAnticollisionLayout(kmlSprite.kmlLabel);
-							kmlSprite.kmlLabel.cleanup();
+							if (kmlSprite.kmlLabel)
+							{
+								if (kmlSprite.kmlLabel.anticollisionLayoutObject)
+									removeLabelFromAnticollisionLayout(kmlSprite.kmlLabel);
+								kmlSprite.kmlLabel.cleanup();
+							}
+							kmlSprite.cleanup();
 						}
-						kmlSprite.cleanup();
+						kmlReflection.remove();
 					}
-					kmlReflection.remove();
 				}
+				kmlReflectionDictionary.destroy();
+				_kmlReflectionDictionary = null;
 			}
-			kmlReflectionDictionary.destroy();
-			_kmlReflectionDictionary = null;
 			if (_geometry)
 			{
 				_geometry.cleanupKML();

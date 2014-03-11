@@ -414,8 +414,8 @@ package com.iblsoft.flexiweather.widgets
 				//do not support map scale more than 1:1
 				trace("do not support map scale more than 1:"+_minimimMapScale + " mapScaleRatio: " + mapScaleRatio);
 				return false;
-			} else {
-				trace("current map scale [min: "+minimimMapScale+"]: " + mapScale + " , " + (1/mapScale) + " bZoomOutAction: " + bZoomOutAction);
+//			} else {
+//				trace("current map scale [min: "+minimimMapScale+"]: " + mapScale + " , " + (1/mapScale) + " bZoomOutAction: " + bZoomOutAction);
 			}
 			var extentBBox: BBox = container.getExtentBBox();
 			var allowHorizontalWrap: Boolean = allowWrapHorizontally();

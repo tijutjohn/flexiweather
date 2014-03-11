@@ -10,6 +10,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.editable.data.FeatureData;
 	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataLine;
 	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
+	import com.iblsoft.flexiweather.ogc.kml.InteractiveLayerKML;
 	import com.iblsoft.flexiweather.ogc.multiview.data.SynchronizationChangeType;
 	import com.iblsoft.flexiweather.ogc.multiview.synchronization.events.SynchronisationEvent;
 	import com.iblsoft.flexiweather.proj.Coord;
@@ -85,7 +86,7 @@ package com.iblsoft.flexiweather.widgets
 		public function get areaX(): Number
 		{
 			if (!autoLayoutInParent)
-				return x;
+				return 0; //x;
 			if (m_widgetBounds && !isNaN(m_widgetBounds.x))
 				return m_widgetBounds.x;
 			
@@ -94,7 +95,7 @@ package com.iblsoft.flexiweather.widgets
 		public function get areaY(): Number
 		{
 			if (!autoLayoutInParent)
-				return y;
+				return 0;//y;
 			if (m_widgetBounds && !isNaN(m_widgetBounds.y))
 				return m_widgetBounds.y;
 			
@@ -247,10 +248,13 @@ package com.iblsoft.flexiweather.widgets
 			return null;
 		}
 		
+		public var kmlSpeedOptimization: KMLSpeedOptimization;
+		
 		public function InteractiveWidget(bUsedForIcon: Boolean = false)
 		{
 			super();
 			
+			kmlSpeedOptimization = new KMLSpeedOptimization(this); 
 			m_widgetBounds = new WidgetSize();
 		
 			usedForIcon = bUsedForIcon;
@@ -664,9 +668,18 @@ package com.iblsoft.flexiweather.widgets
 			l.addEventListener(InteractiveDataLayer.LOADING_STARTED, onLayerLoadingStart);
 			l.addEventListener(InteractiveLayerEvent.LAYER_INITIALIZED, onLayerInitialized);
 //			var bAddLayer: Boolean = false;
+			
 			//all map data layer have to go to interactiveLayerMap, all others just to interactiveWidget
 			if (l is InteractiveLayerMap)
 				setInteractiveLayerMap(l as InteractiveLayerMap);
+			
+			if (l is InteractiveLayerPan)
+				kmlSpeedOptimization.setPanLayer(l as InteractiveLayerPan);
+			
+			if (l is InteractiveLayerKML)
+				kmlSpeedOptimization.addKMLLayer(l as InteractiveLayerKML)
+			
+			
 			l.container = this;
 			if (index >= 0)
 				addElementAt(l, index);
@@ -2805,6 +2818,12 @@ package com.iblsoft.flexiweather.widgets
 		
 	}
 }
+import com.iblsoft.flexiweather.FlexiWeatherConfiguration;
+import com.iblsoft.flexiweather.ogc.kml.InteractiveLayerKML;
+import com.iblsoft.flexiweather.widgets.InteractiveLayerPan;
+import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+
+import flash.events.Event;
 
 class WidgetSize
 {
@@ -2838,5 +2857,75 @@ class WidgetSize
 		this.y = y ;
 		this.width = width;
 		this.height = height;
+	}
+}
+
+class KMLSpeedOptimization
+{
+	private var m_iw: InteractiveWidget;
+	private var m_panLayer: InteractiveLayerPan;
+	private var m_kmlLayers: Array = [];
+	
+	private var _layoutVisibilityBeforePanning: Boolean;
+	
+	public function KMLSpeedOptimization(widget: InteractiveWidget)
+	{
+		m_iw = widget;
+	}
+	public function destroy(): void
+	{
+		if (m_panLayer)
+		{
+			m_panLayer.removeEventListener(InteractiveLayerPan.START_PANNING, onStartPanning);
+			m_panLayer.removeEventListener(InteractiveLayerPan.STOP_PANNING, onStopPanning);
+		}
+		
+		if (m_kmlLayers)
+			m_kmlLayers.splice(0, m_kmlLayers.length);
+	}
+	
+	public function setPanLayer(layer: InteractiveLayerPan): void
+	{
+		m_panLayer = layer;
+		
+		if (FlexiWeatherConfiguration.USE_KML_BITMAP_PANNING)
+		{
+			m_panLayer.addEventListener(InteractiveLayerPan.START_PANNING, onStartPanning);
+			m_panLayer.addEventListener(InteractiveLayerPan.STOP_PANNING, onStopPanning);
+		}
+	}
+	public function addKMLLayer(layer: InteractiveLayerKML): void
+	{
+		m_kmlLayers.push(layer);
+	}
+	
+	private function onStartPanning(event: Event): void
+	{
+		if (FlexiWeatherConfiguration.USE_KML_BITMAP_PANNING)
+		{
+			_layoutVisibilityBeforePanning = m_iw.labelLayout.visible;
+			m_iw.labelLayout.visible = false;
+			
+			for each (var layer: InteractiveLayerKML in m_kmlLayers)
+			{
+				layer.suspendUpdating = true;
+			}
+			
+			m_iw.suspendAnticollisionProcessing = true;
+		}
+	}
+	
+	private function onStopPanning(event: Event): void
+	{
+		if (FlexiWeatherConfiguration.USE_KML_BITMAP_PANNING)
+		{
+			m_iw.suspendAnticollisionProcessing = false;
+			m_iw.labelLayout.visible = _layoutVisibilityBeforePanning;
+			
+			for each (var layer: InteractiveLayerKML in m_kmlLayers)
+			{
+				layer.suspendUpdating = false;
+			}
+		}
 	}
 }

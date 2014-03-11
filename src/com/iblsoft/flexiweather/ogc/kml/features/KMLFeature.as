@@ -79,8 +79,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 
 		protected function changeKMLFeatureParsingStatus(status: String): void
 		{
-			trace(this + " changeKMLFeatureParsingStatus 1: "+ status +" => "+ ms_kmlFeatureParsingStatus);
-			
 			if (ms_kmlFeatureParsingStatus == null)
 			{
 				ms_kmlFeatureParsingStatus = status;
@@ -107,8 +105,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 					
 				}
 			}
-			
-			trace(this + " changeKMLFeatureParsingStatus 2: "+ status +" => "+ ms_kmlFeatureParsingStatus);
 			
 		}
 		protected function beforeKMLFeatureParsing(): void
@@ -178,6 +174,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		override public function set x(value: Number): void
 		{
 			super.x = value;
+			trace(this + " X = " + value);
 			notifyPositionChange();
 		}
 
@@ -826,6 +823,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 		{
 			if (this._visibility != value)
 			{
+				trace(this + " changeVisibility: " + value);
 				this._visibility = value;
 				dispatchEvent(new Event(VISIBILITY_CHANGE));
 			}

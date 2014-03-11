@@ -245,7 +245,6 @@ package com.iblsoft.flexiweather.utils.anticollision
 		 **/
 		public function addObject(object: DisplayObject, parentLayer: InteractiveLayer, a_anchors: Array = null, i_reflection: int = 0, i_displacementMode: String = AnticollisionDisplayMode.DISPLACE_AROUND, b_addAsChild: Boolean = true): AnticollisionLayoutObject
 		{
-			trace(this + " addObject to this layout");
 			setDirty();
 			if (b_addAsChild)
 				addChild(object);
@@ -803,7 +802,6 @@ package com.iblsoft.flexiweather.utils.anticollision
 
 		public function set suspendAnticollisionProcessing(value: Boolean): void
 		{
-			debug("suspendAnticollisionProcessing = " + value);
 			if (m_suspendAnticollisionProcessing != value)
 			{
 				m_suspendAnticollisionProcessing = value;
@@ -840,6 +838,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 
 		protected function debug(txt: String): void
 		{
+//			trace("AnticollisionLayout: " + txt);
 			if (debugConsole)
 				debugConsole.print("AnticollisionLayout: " + txt, 'Info', 'AnticollisionLayout');
 		}

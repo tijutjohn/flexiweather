@@ -21,6 +21,11 @@ package com.iblsoft.flexiweather
 		 */
 		public static var INTERACTIVE_LAYER_MAP_PERIODIC_CHECK_INTERVAL: int = 10;
 		
+		/**
+		 * Panning of InteractiveLayerKML layers will be done just with bitmap representation of kml layer, because of boosting CPU performance.
+		 */
+		public static var USE_KML_BITMAP_PANNING: Boolean = true;
+		
 		public function FlexiWeatherConfiguration()
 		{
 		}
