@@ -994,9 +994,9 @@ package com.iblsoft.flexiweather.ogc.kml.renderer
 								} else {
 									trace("there is problem with first point of LinearRing");
 								}
-							} else {
-								
-								trace(this + " renderPolygon no points: " + p);
+//							} else {
+//								
+//								trace(this + " renderPolygon no points: " + p);
 							}
 						}
 						if (fillExists)

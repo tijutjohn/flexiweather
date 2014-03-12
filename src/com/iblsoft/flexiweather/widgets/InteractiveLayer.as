@@ -324,8 +324,11 @@ package com.iblsoft.flexiweather.widgets
 			this.y = 0;
 			if (container)
 			{
-				this.width = container.width;
-				this.height = container.height;
+				if (container.areaWidth > 0 && container.areaHeight > 0)
+				{
+					this.width = container.areaWidth;
+					this.height = container.areaHeight;
+				}
 			}
 		}
 
@@ -347,6 +350,11 @@ package com.iblsoft.flexiweather.widgets
 			return false;
 		}
 
+		public function onMouseUpOutside(event: MouseEvent): Boolean
+		{
+			return false;
+		}
+		
 		public function onMouseUp(event: MouseEvent): Boolean
 		{
 			return false;

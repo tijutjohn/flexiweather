@@ -14,6 +14,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.ogc.editable.IInteractiveLayerProvider;
 	import com.iblsoft.flexiweather.ogc.multiview.data.MultiViewConfiguration;
+	import com.iblsoft.flexiweather.ogc.multiview.data.MultiViewCustomData;
 	import com.iblsoft.flexiweather.ogc.multiview.data.SynchronizationChangeType;
 	import com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewChangeEvent;
 	import com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent;
@@ -29,7 +30,6 @@ package com.iblsoft.flexiweather.ogc.multiview
 	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.utils.XMLStorage;
-	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerComposer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerCoordinate;
@@ -291,7 +291,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 			var config: MultiViewConfiguration = new MultiViewConfiguration();
 			config.columns = 1;
 			config.rows = 1;
-			config.customData = {selectedIndex: 0};
+			config.customData = new MultiViewCustomData(0);
 			createInteractiveWidgetsFromConfiguration(config);
 		}
 
@@ -680,12 +680,17 @@ package com.iblsoft.flexiweather.ogc.multiview
 		private var _oldViewBBox: BBox;
 		private var _oldExtentBBox: BBox;
 
-		private function saveMapBeforeChangingToNewLayout(widget: InteractiveWidget): void
+		public function saveCurrentArea(widget: InteractiveWidget): void
 		{
-			var _serializedMap: XMLStorage = new XMLStorage();
 			_oldCRS = widget.getCRS();
 			_oldViewBBox = widget.getViewBBox().clone();
 			_oldExtentBBox = widget.getExtentBBox().clone();
+			
+		}
+		private function saveMapBeforeChangingToNewLayout(widget: InteractiveWidget): void
+		{
+			saveCurrentArea(widget);
+			var _serializedMap: XMLStorage = new XMLStorage();
 			widget.interactiveLayerMap.serialize(_serializedMap);
 			_serializedMapXML = _serializedMap.xml;
 			
@@ -736,12 +741,16 @@ package com.iblsoft.flexiweather.ogc.multiview
 					
 					//update map configuration
 					
-					if (_configuration && _configuration.customData && _configuration.customData.hasOwnProperty('dataProvider'))
+					if (_configuration && _configuration.customData && _configuration.customData.dataProvider != null)
 					{
-						var dp: ArrayCollection = _configuration.customData.dataProvider as ArrayCollection;
+						var dp: ArrayCollection = _configuration.customData.dataProvider;
 						if (dp)
 						{
-							dp.setItemAt(itemData, position);
+							if (position >= 0 && dp.length > position)
+								dp.setItemAt(itemData, position);
+							else if ((dp.length == (position - 1)) || position == 0) {
+								dp.addItem(itemData);
+							}
 						}
 					}
 					loadMapForWidget(selectedInteractiveWidget, mapXML, position);
@@ -762,39 +771,16 @@ package com.iblsoft.flexiweather.ogc.multiview
 			{
 				beforeMultiViewChange();
 				notifyWidgetsMapsLoadingStarted();
-//				var _serializedMap: XMLStorage = new XMLStorage(mapXML);
-				_loadingMapsCount = 0;// _interactiveWidgets.widgets.length;
-				_initializingMapsCount = 0; //_interactiveWidgets.widgets.length;
+				_loadingMapsCount = 0;
+				_initializingMapsCount = 0;
 				
 				var cnt: int = 0;
 				for each (var currIW: InteractiveWidget in _interactiveWidgets.widgets)
 				{
-					/*
-					if (_oldCRS)
-						currIW.setCRS(_oldCRS, false);
-					if (_oldExtentBBox)
-						currIW.setExtentBBox(_oldExtentBBox, false);
-					if (_oldViewBBox)
-						currIW.setViewBBox(_oldViewBBox, true);
-					currIW.stopListenForChanges();
-					
-					if (!synchronizator || !synchronizator.canCreateMap(currIW))
-					{
-						createMapFromSerialization(currIW, mapXML);
-//						currIW.interactiveLayerMap.addEventListener(InteractiveLayerMap.LAYERS_SERIALIZED_AND_READY, onMapFromXMLReady);
-//						currIW.interactiveLayerMap.serialize(_serializedMap);
-					} else {
-						synchronizator.updateMapAction(currIW, cnt, _configuration);
-						synchronizator.addEventListener(SynchronisationEvent.MAP_READY, onSynchronizatorMapReady);
-						synchronizator.createMap(currIW);
-						
-					}
-					*/
+
 					
 					if (getMapInfoForPosition(cnt))
 					{
-//						_loadingMapsCount++;
-//						_initializingMapsCount++;
 						loadMapForWidget(currIW, mapXML, cnt);
 						cnt++;
 					}
@@ -806,7 +792,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 		{
 			if (_configuration && _configuration.synchronizators && _configuration.synchronizators.length > 0)
 			{
-				if (_configuration.customData && _configuration.customData.hasOwnProperty('dataProvider'))
+				if (_configuration.customData && _configuration.customData.dataProvider != null)
 				{
 					var dp: ArrayCollection = _configuration.customData.dataProvider as ArrayCollection;
 					if (dp && dp.length > 0 && dp.length > position)
@@ -858,16 +844,21 @@ package com.iblsoft.flexiweather.ogc.multiview
 			}
 		}
 		
-		public function createMapFromSerialization(iw: InteractiveWidget, storage: Storage): void
+		public function createMapFromSerialization(iw: InteractiveWidget, storage: Storage, bLoadFromWebService: Boolean = false): void
 		{
-//			var _serializedMap: XMLStorage = new XMLStorage(mapXML);
-			iw.interactiveLayerMap.startMapLoading();
-			iw.interactiveLayerMap.addEventListener(InteractiveLayerMap.LAYERS_SERIALIZED_AND_READY, onMapFromXMLReady);
-			
-			_loadingMapsCount++;
-			_initializingMapsCount++;
-			
-			iw.interactiveLayerMap.serialize(storage);
+			if (!bLoadFromWebService)
+			{
+				iw.interactiveLayerMap.startMapLoading();
+				iw.interactiveLayerMap.addEventListener(InteractiveLayerMap.LAYERS_SERIALIZED_AND_READY, onMapFromXMLReady);
+				
+				_loadingMapsCount++;
+				_initializingMapsCount++;
+				
+				iw.interactiveLayerMap.serialize(storage);
+			} else {
+				if (storage is XMLStorage)
+					loadMapsForAllWidgets((storage as XMLStorage).xml);
+			}
 		}
 
 		private function updatePreloaderLabel(widget: InteractiveWidget, label: String, loaded:  Number = 0, total: Number = 1): void
@@ -1718,6 +1709,10 @@ package com.iblsoft.flexiweather.ogc.multiview
 		}
 		
 
+		override public function invalidateDisplayList():void
+		{
+			super.invalidateDisplayList();
+		}
 		override protected function updateDisplayList(unscaledWidth: Number, unscaledHeight: Number): void
 		{
 			super.updateDisplayList(unscaledWidth, unscaledHeight);
@@ -1833,7 +1828,9 @@ package com.iblsoft.flexiweather.ogc.multiview
 					}
 				}
 			}
-			synchronizeWidgets(_areaSynchronizator, event.target as InteractiveWidget, false);
+			
+			if (_configuration && _configuration.customData && _configuration.customData.synchronizeArea)
+				synchronizeWidgets(_areaSynchronizator, event.target as InteractiveWidget, false);
 		}
 		private var _synchronizator: ISynchronizator;
 
@@ -1970,7 +1967,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 				synchronizator.invalidateSynchronizator();
 				
 				var selectedIndex: int = -1;
-				if (_configuration && _configuration.customData && _configuration.customData.hasOwnProperty('selectedIndex'))
+				if (_configuration && _configuration.customData && _configuration.customData.selectedIndex != -1)
 					selectedIndex = _configuration.customData.selectedIndex;
 				
 				var position: int = _interactiveWidgets.getWidgetIndex(selectedInteractiveWidget);
@@ -2091,7 +2088,6 @@ import com.iblsoft.flexiweather.events.InteractiveWidgetEvent;
 import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
 import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 import com.iblsoft.flexiweather.ogc.multiview.synchronization.SynchronizatorBase;
-import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
 import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
 import com.iblsoft.flexiweather.widgets.InteractiveWidget;

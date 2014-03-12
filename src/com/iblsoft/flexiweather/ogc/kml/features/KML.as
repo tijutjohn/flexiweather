@@ -136,8 +136,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 
 		protected function changeKMLParsingStatus(status: String): void
 		{
-			trace(this + " changeKMLParsingStatus 1: "+ status +" => "+ ms_kmlParsingStatus);
-			
 			if (ms_kmlParsingStatus == null)
 			{
 				ms_kmlParsingStatus = status;
@@ -164,8 +162,6 @@ package com.iblsoft.flexiweather.ogc.kml.features
 					
 				}
 			}
-			
-			trace(this + " changeKMLParsingStatus 2: "+ status +" => "+ ms_kmlParsingStatus);
 			
 		}
 		protected function beforeKMLParsing(): void

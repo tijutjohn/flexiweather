@@ -190,7 +190,6 @@ package com.iblsoft.flexiweather.ogc
 								featureIsInside = true;
 								notifyCoordinateInside(c, i, currCoordObject.reflection);
 							} else {
-								trace("coord is outside");
 								notifyCoordinateOutside(c, i, currCoordObject.reflection);
 							}
 						}
@@ -201,7 +200,7 @@ package com.iblsoft.flexiweather.ogc
 						if (reflectedCoords && reflectedCoords.length == 0)
 						{
 							//coordinates has no reflection, has to be hiden
-							trace("coordinates has no reflection, has to be hiden");
+//							trace("coordinates has no reflection, has to be hiden");
 							notifyCoordinateOutside(c, i, 0); //currCoordObject.reflection);
 						}
 					}

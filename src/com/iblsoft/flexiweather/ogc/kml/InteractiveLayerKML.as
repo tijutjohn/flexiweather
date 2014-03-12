@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc.kml
 {
+	import com.iblsoft.flexiweather.FlexiWeatherConfiguration;
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
@@ -142,7 +143,7 @@ package com.iblsoft.flexiweather.ogc.kml
 			if (!_syncManager.parent)
 			{
 				addChild(_syncManager);
-				addChild(_screenshot);
+//				addChild(_screenshot);
 				parseKML(_kml);
 			}
 			if (!_syncManagerFullUpdate.parent)
@@ -630,28 +631,30 @@ package com.iblsoft.flexiweather.ogc.kml
 		
 		private function drawImagePartAsBitmap(graphics: Graphics): void
 		{
+			if (FlexiWeatherConfiguration.USE_KML_BITMAP_PANNING)
+			{
+//				removeVectorData();
 			
-//			removeVectorData();
 			
-			
-			var ptImageStartPoint: Point = container.coordToPoint(imageStartCoord);
-			var ptImageEndPoint: Point = container.coordToPoint(imageEndCoord);
-			
-			ptImageEndPoint.x += 1;
-			ptImageEndPoint.y += 1;
-			
-			var ptImageSize: Point = ptImageEndPoint.subtract(ptImageStartPoint);
-			ptImageSize.x = int(Math.round(ptImageSize.x));
-			ptImageSize.y = int(Math.round(ptImageSize.y));
-			
-			var matrix: Matrix = new Matrix();
-			matrix.scale(ptImageSize.x / bmp.width, ptImageSize.y / bmp.height);
-			matrix.translate(ptImageStartPoint.x, ptImageStartPoint.y);
-			
-			graphics.clear();
-			graphics.beginBitmapFill(bmp.bitmapData, matrix, true, true);
-			graphics.drawRect(ptImageStartPoint.x, ptImageStartPoint.y, ptImageSize.x, ptImageSize.y);
-			graphics.endFill();
+				var ptImageStartPoint: Point = container.coordToPoint(imageStartCoord);
+				var ptImageEndPoint: Point = container.coordToPoint(imageEndCoord);
+				
+				ptImageEndPoint.x += 1;
+				ptImageEndPoint.y += 1;
+				
+				var ptImageSize: Point = ptImageEndPoint.subtract(ptImageStartPoint);
+				ptImageSize.x = int(Math.round(ptImageSize.x));
+				ptImageSize.y = int(Math.round(ptImageSize.y));
+				
+				var matrix: Matrix = new Matrix();
+				matrix.scale(ptImageSize.x / bmp.width, ptImageSize.y / bmp.height);
+				matrix.translate(ptImageStartPoint.x, ptImageStartPoint.y);
+				
+				graphics.clear();
+				graphics.beginBitmapFill(bmp.bitmapData, matrix, true, true);
+				graphics.drawRect(ptImageStartPoint.x, ptImageStartPoint.y, ptImageSize.x, ptImageSize.y);
+				graphics.endFill();
+			}
 		} 
 		
 		private var imageStartCoord: Coord; 
@@ -659,27 +662,33 @@ package com.iblsoft.flexiweather.ogc.kml
 		
 		private function createBitmapPreview(): void
 		{
-			var s_imageCRS: String = container.crs;
-			var imageBBox: BBox = container.getViewBBox();
-			
-			imageStartCoord = new Coord(s_imageCRS, imageBBox.xMin, imageBBox.yMax);
-			imageEndCoord = new Coord(s_imageCRS, imageBBox.xMax, imageBBox.yMin);
-			
-			hideAllFeatures();
-			bmp.x = 0;
-			bmp.y = 0;
-			bmp.bitmapData = new BitmapData(width, height, true, 0x00000000);
-			bmp.bitmapData.draw(m_featuresContainer); 
-//			bmp.visible = true;
+			if (FlexiWeatherConfiguration.USE_KML_BITMAP_PANNING)
+			{
+				var s_imageCRS: String = container.crs;
+				var imageBBox: BBox = container.getViewBBox();
+				
+				imageStartCoord = new Coord(s_imageCRS, imageBBox.xMin, imageBBox.yMax);
+				imageEndCoord = new Coord(s_imageCRS, imageBBox.xMax, imageBBox.yMin);
+				
+				hideAllFeatures();
+				bmp.x = 0;
+				bmp.y = 0;
+				bmp.bitmapData = new BitmapData(width, height, true, 0x00000000);
+				bmp.bitmapData.draw(m_featuresContainer); 
+//				bmp.visible = true;
+			}
 		}
 		private function disposeBitmapPreview(): void
 		{
-			bmp.x = 0; 
-			bmp.y = 0;
-			bmp.bitmapData.dispose();
-			bmp.visible = false;
-			
-			showAllFeatures();
+			if (FlexiWeatherConfiguration.USE_KML_BITMAP_PANNING)
+			{
+				bmp.x = 0; 
+				bmp.y = 0;
+				bmp.bitmapData.dispose();
+				bmp.visible = false;
+				
+				showAllFeatures();
+			}
 			
 		}
 		

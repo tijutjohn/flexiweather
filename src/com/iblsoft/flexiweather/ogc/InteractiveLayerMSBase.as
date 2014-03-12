@@ -456,8 +456,8 @@ package com.iblsoft.flexiweather.ogc
 			var wmsViewProperties: WMSViewProperties = viewProperties as WMSViewProperties;
 			if (!wmsViewProperties)
 				return false;
-			var i_width: int = int(container.width);
-			var i_height: int = int(container.height);
+			var i_width: int = int(container.areaWidth);
+			var i_height: int = int(container.areaHeight);
 			if (forcedLayerWidth > 0)
 				i_width = forcedLayerWidth;
 			if (forcedLayerHeight > 0)
@@ -719,7 +719,7 @@ package com.iblsoft.flexiweather.ogc
 		override public function getFullURL(): String
 		{
 			if (container)
-				return getGetMapFullUrl(int(container.width), int(container.height));
+				return getGetMapFullUrl(int(container.areaWidth), int(container.areaHeight));
 			
 			return getGetMapFullUrl(0,0);
 		}
@@ -917,9 +917,9 @@ package com.iblsoft.flexiweather.ogc
 			{
 				super.draw(graphics);
 				var imageParts: ArrayCollection = m_currentWMSViewProperties.imageParts;
-				if (container.height <= 0)
+				if (container.areaWidth <= 0)
 					return;
-				if (container.width <= 0)
+				if (container.areaHeight <= 0)
 					return;
 				var s_currentCRS: String = m_currentWMSViewProperties.crs;
 				for each (var imagePart: ImagePart in imageParts)
@@ -1043,6 +1043,9 @@ package com.iblsoft.flexiweather.ogc
 			var ptImageSize: Point = ptImageEndPoint.subtract(ptImageStartPoint);
 			ptImageSize.x = int(Math.round(ptImageSize.x));
 			ptImageSize.y = int(Math.round(ptImageSize.y));
+			
+			
+//			trace(id + " drawImagePartAsBitmap ["+image.bitmapData.width+","+image.bitmapData.height+"]  ptImageSize: "+ ptImageSize);
 			var matrix: Matrix = new Matrix();
 			matrix.scale(ptImageSize.x / image.width, ptImageSize.y / image.height);
 			matrix.translate(ptImageStartPoint.x, ptImageStartPoint.y);
@@ -1282,8 +1285,8 @@ package com.iblsoft.flexiweather.ogc
 			origHeight = bitmap.bitmapData.height;
 			
 			//check if legend is not bigger that container, otherwsie scale needs to be adjusted
-			var containerWidth: int = container.width;
-			var containerHeight: int = container.height;
+			var containerWidth: int = container.areaWidth;
+			var containerHeight: int = container.areaHeight;
 			
 			var expectedWidth: Number = origWidth * legendScaleX;
 			var expectedHeight: Number = origHeight * legendScaleY;
@@ -1394,7 +1397,7 @@ package com.iblsoft.flexiweather.ogc
 			var pt: Point = container.coordToPoint(coord);
 			var url: URLRequest = m_cfg.toGetFeatureInfoRequest(
 					container.getCRS(), container.getViewBBox().toBBOXString(),
-					int(container.width), int(container.height),
+					int(container.areaWidth), int(container.areaHeight),
 					a_queryableLayerNames, int(Math.round(pt.x)), int(Math.round(pt.y)),
 					getWMSStyleListString());
 			updateDimensionsInURLRequest(url);
@@ -1416,8 +1419,8 @@ package com.iblsoft.flexiweather.ogc
 			for each (var layer: WMSLayer in getWMSLayers())
 			{
 				var crs: String = container.getCRS()
-				var b: BBox = layer.getBBoxForCRS(crs);
-//				var b: BBox = layer.getTileExtentForCRS(crs);
+//				var b: BBox = layer.getBBoxForCRS(crs);
+				var b: BBox = layer.getTileExtentForCRS(crs);
 				if (b == null)
 					continue;
 				if (bbox == null)

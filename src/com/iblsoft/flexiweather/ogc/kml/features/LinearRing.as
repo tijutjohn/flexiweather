@@ -44,7 +44,7 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			}
 			if (_coordinatesPoints)
 			{
-				_coordinatesPoints.removeAll();
+				_coordinatesPoints.splice(0, _coordinatesPoints.length);
 				_coordinatesPoints = null;
 			}
 		}

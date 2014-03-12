@@ -120,19 +120,42 @@ package com.iblsoft.flexiweather.utils
 			parameterName = (parameterName);
 			parameterValue = (parameterValue);
 			
-			var posInURL: int = url.indexOf(parameterName);
-			if (posInURL >= 0)
+			var searchPos: int = 0;
+			var posInURL: int;
+			var parameterFound: Boolean = false;
+			var stillSearching: Boolean = true;
+			
+			while (stillSearching)
 			{
-				var nextAmpPos: int = url.indexOf('&', posInURL);
-				var endStr: String = "";
-				if (nextAmpPos >= 0)
-					endStr = url.substring(nextAmpPos, url.length);
+				parameterFound = false;
+				posInURL = url.indexOf(parameterName, searchPos);
+				if (posInURL >= 0)
+				{
+					//check if there is "=" after parameter name, and "&" or "?" before parameter name
+					var charBefore: String = url.substr(posInURL - 1, 1);
+					var charAfter: String = url.substr(posInURL + parameterName.length, 1);
+					
+					if ((charBefore == "&" || charBefore == "?") && charAfter == "=")
+						parameterFound = true;
+					
+					searchPos = posInURL + 1;
+					
+				} else
+					stillSearching = false;
 				
-				if (posInURL > 0)
-					url = url.substr(0, posInURL);
-				
-				url += parameterName + "=" + (parameterValue);
-				url += endStr;
+				if (parameterFound)
+				{
+					var nextAmpPos: int = url.indexOf('&', posInURL);
+					var endStr: String = "";
+					if (nextAmpPos >= 0)
+						endStr = url.substring(nextAmpPos, url.length);
+					
+					if (posInURL > 0)
+						url = url.substr(0, posInURL);
+					
+					url += parameterName + "=" + (parameterValue);
+					url += endStr;
+				}
 			}
 			
 			return url;
