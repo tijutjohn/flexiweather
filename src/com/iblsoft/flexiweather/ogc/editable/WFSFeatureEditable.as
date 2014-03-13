@@ -22,6 +22,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	import flash.geom.Point;
 	import flash.ui.Keyboard;
 	import flash.utils.Dictionary;
+	import com.iblsoft.flexiweather.ogc.editable.data.MoveablePoint;
 
 	public class WFSFeatureEditable extends WFSFeatureBase implements IEditableItem, IHighlightableItem, ISelectableItem, IWFSFeatureWithReflection
 	{

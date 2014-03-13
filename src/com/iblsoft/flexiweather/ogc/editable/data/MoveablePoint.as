@@ -1,4 +1,4 @@
-package com.iblsoft.flexiweather.ogc.editable
+package com.iblsoft.flexiweather.ogc.editable.data
 {
 	import com.iblsoft.flexiweather.events.WFSCursorManagerEvent;
 	import com.iblsoft.flexiweather.events.WFSCursorManagerTypes;
@@ -10,6 +10,11 @@ package com.iblsoft.flexiweather.ogc.editable
 	import flash.geom.Point;
 	import flash.system.Capabilities;
 	import flash.system.TouchscreenType;
+	import com.iblsoft.flexiweather.ogc.editable.IClosableCurve;
+	import com.iblsoft.flexiweather.ogc.editable.IEditableItemManager;
+	import com.iblsoft.flexiweather.ogc.editable.IHighlightableItem;
+	import com.iblsoft.flexiweather.ogc.editable.IMouseEditableItem;
+	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
 
 	public class MoveablePoint extends Sprite implements IMouseEditableItem, IHighlightableItem
 	{

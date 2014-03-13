@@ -1,7 +1,7 @@
 package com.iblsoft.flexiweather.ogc.events
 {
 	import com.iblsoft.flexiweather.ogc.FeatureBase;
-	import com.iblsoft.flexiweather.ogc.editable.MoveablePoint;
+	import com.iblsoft.flexiweather.ogc.editable.data.MoveablePoint;
 	import flash.events.Event;
 
 	public class MoveablePointEvent extends Event

@@ -1,4 +1,4 @@
-package com.iblsoft.flexiweather.ogc.editable.features
+package com.iblsoft.flexiweather.ogc.editable.data.front
 {
 
 	public class FrontType

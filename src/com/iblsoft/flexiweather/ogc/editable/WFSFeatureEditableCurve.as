@@ -8,6 +8,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	import flash.display.Sprite;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
+	import com.iblsoft.flexiweather.ogc.editable.data.MoveablePoint;
 
 	public class WFSFeatureEditableCurve extends WFSFeatureEditable implements IMouseEditableItem
 	{
