@@ -3,6 +3,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.FlexiWeatherConfiguration;
 	import com.iblsoft.flexiweather.events.GetFeatureInfoEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
+	import com.iblsoft.flexiweather.events.InteractiveLayerFrameEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerMapEvent;
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.ISynchronisedObject;
@@ -765,7 +766,8 @@ package com.iblsoft.flexiweather.widgets
 			if (layerSynchronized && layerSynchronized != primaryLayer)
 			{
 				//if synchronization was done in non Primary Layer, dispatch InteractiveLayerMap.TIME_AXIS_UPDATED event to updated selection
-				dispatchEvent(new DataEvent(InteractiveLayerMap.TIME_AXIS_UPDATED));
+//				dispatchEvent(new DataEvent(InteractiveLayerMap.TIME_AXIS_UPDATED));
+				dispatchEvent(new InteractiveLayerFrameEvent(InteractiveLayerFrameEvent.FRAME_SELECTION_CHANGED, layerSynchronized, null, null, true));
 				return;
 			}
 			

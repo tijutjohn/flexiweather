@@ -13,6 +13,9 @@ package com.iblsoft.flexiweather.events
 		
 		public static const MAP_LOADED: String = "mapLoaded";
 		
+		/**
+		 * Dispatch when selected layers in map is changed 
+		 */		
 		public static const LAYER_SELECTION_CHANGED: String = "layerSelectionChanged";
 		
 		public static const MAP_LOADING_STARTED: String = "mapLoadingStarted";
