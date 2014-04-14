@@ -26,7 +26,7 @@ package com.iblsoft.flexiweather.widgets.containers.panels
 	import spark.effects.easing.EasingFraction;
 	import spark.effects.easing.Elastic;
 	
-	public class InteractiveStateTabBarPanel extends SkinnableContainer
+	public class InteractiveTabBarPanel extends SkinnableContainer
 	{
 		public static const TAB_POSITION_LEFT: String = 'left';
 		public static const TAB_POSITION_RIGHT: String = 'right';
@@ -106,7 +106,7 @@ package com.iblsoft.flexiweather.widgets.containers.panels
 			}
 		}
 		
-		public function InteractiveStateTabBarPanel()
+		public function InteractiveTabBarPanel()
 		{
 			super();
 			
@@ -134,7 +134,7 @@ package com.iblsoft.flexiweather.widgets.containers.panels
 		{
 			super.measure();
 			
-			trace("InteractiveStateTabBarPanel measure: ");
+			trace("InteractiveTabBarPanel measure: ");
 		}
 		
 		private var m_oldSelectedIndex: int = -1;

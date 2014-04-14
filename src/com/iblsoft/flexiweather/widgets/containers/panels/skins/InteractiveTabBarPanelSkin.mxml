@@ -24,11 +24,11 @@ in accordance with the terms of the license agreement accompanying it.
     xmlns:fb="http://ns.adobe.com/flashbuilder/2009" blendMode="normal" mouseEnabled="false" 
     minWidth="131" minHeight="127" alpha.disabled="0.5" alpha.disabledWithControlBar="0.5" 
 	xmlns:tabbar="com.iblsoft.flexiweather.widgets.controls.tabbar.*">
-	<fx:Metadata>[HostComponent("com.iblsoft.flexiweather.widgets.containers.panels.InteractiveStateTabBarPanel")]</fx:Metadata>
+	<fx:Metadata>[HostComponent("com.iblsoft.flexiweather.widgets.containers.panels.InteractiveTabBarPanel")]</fx:Metadata>
     
     <fx:Script fb:purpose="styling">
         <![CDATA[
-			import com.iblsoft.flexiweather.widgets.containers.panels.InteractiveStateTabBarPanel;
+			import com.iblsoft.flexiweather.widgets.containers.panels.InteractiveTabBarPanel;
 			
 			import mx.core.FlexVersion;
 		
@@ -73,7 +73,7 @@ in accordance with the terms of the license agreement accompanying it.
 			
 			var tabPosition: String = hostComponent.tabPosition;
 			if (!tabPosition)
-				tabPosition = InteractiveStateTabBarPanel.TAB_POSITION_LEFT;
+				tabPosition = InteractiveTabBarPanel.TAB_POSITION_LEFT;
 			
             if (getStyle("borderVisible") == true)
             {
@@ -81,12 +81,12 @@ in accordance with the terms of the license agreement accompanying it.
                 background.left = background.top = background.right = background.bottom = 1;
                 contents.left = contents.top = contents.right = contents.bottom = 1;
 				
-				if (tabPosition == InteractiveStateTabBarPanel.TAB_POSITION_LEFT)
+				if (tabPosition == InteractiveTabBarPanel.TAB_POSITION_LEFT)
 				{
 	                background.right = contents.right = 26;
 					border.right = 25;
 					tabBar.right = 0;
-				} else if (tabPosition == InteractiveStateTabBarPanel.TAB_POSITION_RIGHT)
+				} else if (tabPosition == InteractiveTabBarPanel.TAB_POSITION_RIGHT)
 				{
 	                background.left = contents.left = 26;
 					border.left = 25;
@@ -99,11 +99,11 @@ in accordance with the terms of the license agreement accompanying it.
                 background.left = background.top = background.right = background.bottom = 0;
                 contents.left = contents.top = contents.right = contents.bottom = 0;
 				
-				if (tabPosition == InteractiveStateTabBarPanel.TAB_POSITION_LEFT)
+				if (tabPosition == InteractiveTabBarPanel.TAB_POSITION_LEFT)
 				{
 					background.right = contents.right = 25;
 					tabBar.right = 0;
-				} else if (tabPosition == InteractiveStateTabBarPanel.TAB_POSITION_RIGHT)
+				} else if (tabPosition == InteractiveTabBarPanel.TAB_POSITION_RIGHT)
 				{
 					background.left = contents.left = 25;
 					tabBar.left = 0;
