@@ -1178,6 +1178,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 			
 			var tileMatrix: TileMatrix = getTileMatrixForCRSAndZoom(s_crs, tileIndex.mi_tileZoom);
 			
+			if (!tileMatrix)
+				return null; 
+			
 			var zoomArr: Array = tileIndex.mi_tileZoom.split(':');
 			var zoomLevel: int = int(zoomArr[zoomArr.length - 1]);
 			
