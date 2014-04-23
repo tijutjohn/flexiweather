@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<flexLibProperties includeAllClasses="false" useMultiPlatformConfig="false" version="1">
+<flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="1">
   <includeClasses>
     <classEntry path="com.iblsoft.flexiweather.FlexiWeatherConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.components.IndexRetainingDropDownList"/>
@@ -16,6 +16,7 @@
     <classEntry path="com.iblsoft.flexiweather.events.BackgroundJobEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.GetFeatureInfoEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.InteractiveLayerEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.events.InteractiveLayerFrameEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.InteractiveLayerMapEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.InteractiveLayerProgressEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.InteractiveLayerQTTEvent"/>
@@ -468,13 +469,27 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.GroupBox"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.GroupHBox"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.GroupVBox"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.containers.panels.InteractiveTabBarPanel"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.containers.panels.skins.IntTabBarPanelSkin"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.containers.panels.skins.InteractiveTabBarPanelSkin"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.skins.GroupBoxBorder"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.skins.GroupBoxSkin"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.InteractiveDropDownList"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.controls.ToggleButtonBar"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.controls.ToggleButtonBarButton"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.controls.ToggleButtonBarEvent"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.controls.ToggleButtonBarItemData"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.controls.ToggleButtonBarSkin"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.tabbar.InteractiveTabBar"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.tabbar.InteractiveTabBarButton"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.tabbar.InteractiveTabBarEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.tabbar.InteractiveVerticalTabBarButton"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.tabbar.layouts.InteractiveVerticalButtonBarLayout"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.tabbar.skins.InteractiveCloseButtonSkin"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.tabbar.skins.InteractiveTabBarButtonSkin"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.tabbar.skins.InteractiveTabBarSkin"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.tabbar.skins.InteractiveVerticalTabBarButtonSkin"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.tabbar.skins.InteractiveVerticalTabBarSkin"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.data.InteractiveLayerMapSaveSettings"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.data.InteractiveLayerPrintQuality"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.errors.ErrorJournal"/>
