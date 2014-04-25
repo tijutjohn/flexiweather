@@ -16,6 +16,7 @@
     <classEntry path="com.iblsoft.flexiweather.events.BackgroundJobEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.GetFeatureInfoEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.InteractiveLayerEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.events.InteractiveLayerFrameEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.InteractiveLayerMapEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.InteractiveLayerProgressEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.InteractiveLayerQTTEvent"/>
@@ -24,6 +25,7 @@
     <classEntry path="com.iblsoft.flexiweather.events.WFSCursorManagerEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.WFSCursorManagerTypes"/>
     <classEntry path="com.iblsoft.flexiweather.events.WFSEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.events.WFSFeatureEditorServiceEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.WMSViewPropertiesEvent"/>
     <classEntry path="com.iblsoft.flexiweather.layouts.FlowLayout"/>
     <classEntry path="com.iblsoft.flexiweather.net.UniURLLoaderFormat"/>
@@ -67,6 +69,7 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.InteractiveLayerMapLayersInitializationWatcher"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.InteractiveLayerQTTMS"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.InteractiveLayerWFS"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.InteractiveLayerWFSFeatureEditor"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.InteractiveLayerWMS"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.LayerArrayCollection"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.SchemaParser"/>
@@ -133,7 +136,6 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.ISelectableItem"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.ISelectableItemManager"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.InteractiveLayerWFSEditable"/>
-    <classEntry path="com.iblsoft.flexiweather.ogc.editable.MoveablePoint"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableClosableCurveWithBaseTimeAndValidity"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableClosableCurveWithBaseTimeAndValidityAndAnnotation"/>
@@ -143,16 +145,47 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableMode"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableWithBaseTimeAndValidity"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableWithBaseTimeAndValidityAndAnnotation"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.annotations.CloudAnnotation"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.annotations.IcingAreaAnnotation"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.annotations.RadiationAnnotation"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.annotations.StormAnnotation"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.annotations.ThunderstormAreaAnnotation"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.annotations.TurbulenceAreaAnnotation"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.data.FeatureData"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.data.FeatureDataLine"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection"/>
-    <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.FrontType"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.data.FeatureType"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.data.IconFeatureType"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.data.MoveablePoint"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.data.front.FrontType"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.data.jetstream.MoveableWindPoint"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.data.jetstream.WindBarb"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.data.jetstream.WindMoveablePointsDictionary"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.data.jetstream.WindReflectionData"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.events.WindBarbChangeEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.featureEditor.data.FeatureEditorProduct"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.featureEditor.service.WFSFeatureEditorService"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.GenericEditableFeature"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.IconLabeledEditableFeature"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.LabeledEditableFeature"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.PressureCentreType"/>
-    <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableFront"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableIcon"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditablePressureCentre"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableRadiation"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableStorm"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableText"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableTropopause"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableVolcanicAsh"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableVolcano"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.curves.WFSFeatureEditableFront"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.curves.WFSFeatureEditableGeometry"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.curves.WFSFeatureEditableJetStream"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.curves.WFSFeatureEditableJetStreamWindBarb"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation.WFSFeatureEditableAnnotation"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation.WFSFeatureEditableCloud"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation.WFSFeatureEditableIcingArea"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation.WFSFeatureEditableThunderstormArea"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation.WFSFeatureEditableTurbulenceArea"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.events.FeatureEvent"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.events.GetCapabilitiesEvent"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.events.GlobalVariableChangeEvent"/>
@@ -460,7 +493,6 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.InteractiveLayerGoogleMaps"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.skins.TitleWindowCloseButtonSkin"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.skins.TitleWindowSkin"/>
-    <classEntry path="com.iblsoft.flexiweather.events.InteractiveLayerFrameEvent"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

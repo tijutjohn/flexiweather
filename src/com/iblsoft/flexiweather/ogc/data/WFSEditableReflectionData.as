@@ -1,6 +1,6 @@
 package com.iblsoft.flexiweather.ogc.data
 {
-	import com.iblsoft.flexiweather.ogc.editable.MoveablePoint;
+	import com.iblsoft.flexiweather.ogc.editable.data.MoveablePoint;
 	import com.iblsoft.flexiweather.utils.AnnotationBox;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 

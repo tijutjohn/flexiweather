@@ -84,6 +84,29 @@ package com.iblsoft.flexiweather.ogc.editable.features
 				}
 			}
 		}
+
+		override public function toInsertGML(xmlInsert: XML): void
+		{
+			var gml: Namespace = new Namespace("http://www.opengis.net/gml");
+			super.toInsertGML(xmlInsert);
+			addInsertGMLProperty(xmlInsert, null, "type", type);
+			addInsertGMLProperty(xmlInsert, null, "pressureValue", pressure);
+		}
+
+		override public function toUpdateGML(xmlUpdate: XML): void
+		{
+			super.toUpdateGML(xmlUpdate);
+			addUpdateGMLProperty(xmlUpdate, null, "type", type);
+			addUpdateGMLProperty(xmlUpdate, null, "pressureValue", pressure);
+		}
+
+		override public function fromGML(gml: XML): void
+		{
+			super.fromGML(gml);
+			var ns: Namespace = new Namespace(ms_namespace);
+			type = gml.ns::type[0];
+			pressure = gml.ns::pressureValue[0];
+		}
 	}
 }
 import flash.display.Sprite;

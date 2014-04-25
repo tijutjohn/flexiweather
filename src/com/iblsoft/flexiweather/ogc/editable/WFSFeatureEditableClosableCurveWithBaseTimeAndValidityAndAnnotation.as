@@ -4,7 +4,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
 	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
 	import com.iblsoft.flexiweather.ogc.editable.IClosableCurve;
-	import com.iblsoft.flexiweather.ogc.editable.MoveablePoint;
+	import com.iblsoft.flexiweather.ogc.editable.data.MoveablePoint;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableMode;
 	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
