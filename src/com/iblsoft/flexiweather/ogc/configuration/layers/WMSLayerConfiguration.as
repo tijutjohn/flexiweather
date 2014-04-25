@@ -45,6 +45,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		private var ms_dimensionVerticalLevelName: String = null;
 		private var ms_imageFormat: String = null;
 		private var mb_legendIsDimensionDependant: Boolean;
+		private var mb_legendIsAreaDependant: Boolean;
 		private var mi_autoRefreshPeriod: uint = 0;
 		// runtime variables
 		private var _layerConfigurations: Array;
@@ -167,6 +168,8 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 					"dimension-level-name", ms_dimensionVerticalLevelName, null);
 			mb_legendIsDimensionDependant = storage.serializeBool(
 					"legend-dependant-on-dimension", mb_legendIsDimensionDependant, false);
+			mb_legendIsAreaDependant = storage.serializeBool(
+					"legend-dependant-on-area", mb_legendIsAreaDependant, false);
 			ms_previewURL = storage.serializeString("preview-url", ms_previewURL, "<internal>");
 			mi_autoRefreshPeriod = storage.serializeInt(
 					"auto-refresh-period", mi_autoRefreshPeriod, 0);
@@ -215,7 +218,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		{
 			var r: URLRequest = m_service.toRequest("GetMap");
 			r.data.LAYERS = s_layersOverride == null ? ma_layerNames.join(",") : s_layersOverride;
-			if (m_service.version.isLessThan(1, 3, 0))
+			if (m_service.isBefore130Version)
 				r.data.SRS = s_crs;
 			else
 				r.data.CRS = s_crs;
@@ -552,6 +555,16 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		public function get legendIsDimensionDependant(): Boolean
 		{
 			return mb_legendIsDimensionDependant;
+		}
+		
+		public function set legendIsAreaDependant(b: Boolean): void
+		{
+			mb_legendIsAreaDependant = b;
+		}
+
+		public function get legendIsAreaDependant(): Boolean
+		{
+			return mb_legendIsAreaDependant;
 		}
 		
 		public function set dimensionTimeName(s: String): void

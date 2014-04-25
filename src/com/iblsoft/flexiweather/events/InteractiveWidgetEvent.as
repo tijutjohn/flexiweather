@@ -32,11 +32,13 @@ package com.iblsoft.flexiweather.events
 		public var layersLoading: int;
 		public var changeDescription: String;
 
+		public var finalChange: Boolean;
 		public var data: Object;
 		
 		public function InteractiveWidgetEvent(type: String, bubbles: Boolean = false, cancelable: Boolean = false)
 		{
 			super(type, bubbles, cancelable);
+			finalChange = true;
 		}
 
 		override public function clone(): Event
@@ -45,6 +47,7 @@ package com.iblsoft.flexiweather.events
 			iwe.layersLoading = layersLoading;
 			iwe.changeDescription = changeDescription;
 			iwe.data = data;
+			iwe.finalChange = finalChange;
 			return iwe;
 		}
 	}
