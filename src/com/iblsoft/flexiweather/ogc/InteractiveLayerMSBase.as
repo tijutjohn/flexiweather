@@ -1157,6 +1157,8 @@ package com.iblsoft.flexiweather.ogc
 			else
 				url.data.CRS = s_crs;
 			url.data.BBOX = s_bbox;
+			url.data.MAP_WIDTH = container.width; 
+			url.data.MAP_HEIGHT = container.height;
 		}
 		private function updateURLWithDimensions(url: URLRequest): void
 		{
