@@ -114,6 +114,16 @@ package com.iblsoft.flexiweather.proj
 				extentBBox = md_crsToDetails[s_crs].extentBBox;
 				b_wrapsHorizontally = md_crsToDetails[s_crs].b_wrapsHorizontally;
 			}
+			
+			if (!ProjProjection.defs[s_crs])
+			{
+				//WORKAROUND proj4s - if this crs is not in Proj4s library and it is PROJ4 crs, it will be added automatically
+				if (s_crs.indexOf('PROJ4:') == 0)
+				{
+					var proj4s: String = s_crs.substring(6, s_crs.length);
+					ProjProjection.defs[s_crs] = proj4s;
+				}
+			}
 			prj = new Projection(s_crs, extentBBox, b_wrapsHorizontally);
 			m_cache[s_crs] = prj;
 			return prj;
