@@ -78,6 +78,12 @@ package com.iblsoft.flexiweather.ogc
 			{
 				if (crsWithBBox.crs == crs)
 					return true;
+				
+				if (crs.indexOf("PROJ4:") == 0)
+				{
+					if (crsWithBBox.crs.indexOf("PROJ4:*") == 0)
+						return true;
+				}
 			}
 			return false;
 		}
