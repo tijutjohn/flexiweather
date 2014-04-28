@@ -327,7 +327,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 
 		public function getWMSLayers(): Array
 		{
-			if (m_cfg)
+			if (m_cfg && m_cfg.wmsService)
 			{
 				var a: Array = [];
 				for each (var s_layerName: String in m_cfg.layerNames)
