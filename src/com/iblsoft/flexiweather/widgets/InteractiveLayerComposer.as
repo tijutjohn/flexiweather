@@ -4,9 +4,11 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.events.InteractiveLayerMapEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerWMSEvent;
 	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.ogc.IBehaviouralObject;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
 	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
@@ -37,6 +39,7 @@ package com.iblsoft.flexiweather.widgets
 			super(container);
 			m_layers.addEventListener(CollectionEvent.COLLECTION_CHANGE, onLayerCollectionChanged);
 			
+			m_staticLayers = new ArrayCollection();
 			composerID++;
 			id = composerID.toString();
 		}
@@ -145,6 +148,7 @@ package com.iblsoft.flexiweather.widgets
 		protected function layerAdded(layer: InteractiveLayer): void
 		{
 			bindSubLayer(layer);
+			updateStaticLayers();
 			notifyLayersChanged(layer);
 			
 			//TODO we need to check if layer is synchronizable and call this when it will be ready for synchronization
@@ -153,6 +157,25 @@ package com.iblsoft.flexiweather.widgets
 //			invalidateAreaForLayer(layer);
 		}
 
+		private function updateStaticLayers(): void
+		{
+			m_staticLayers.removeAll();
+			for each (var layer: InteractiveLayer in m_layers)
+			{
+				if (layer is IConfigurableLayer)
+				{
+					var configuration: ILayerConfiguration = (layer as IConfigurableLayer).configuration;
+					if (configuration is IBehaviouralObject)
+					{
+						var behObject: IBehaviouralObject = configuration as IBehaviouralObject;
+						var isBackgroundStr: String = behObject.getBehaviourString("com.iblsoft.ria.solidlayers.background");
+						var isForegroundStr: String = behObject.getBehaviourString("com.iblsoft.ria.solidlayers.foreground");
+						if (isBackgroundStr != null || isForegroundStr != null)
+							m_staticLayers.addItem(layer);
+					}
+				}
+			}
+		}
 		override public function invalidateDynamicPart(b_invalid: Boolean = true): void
 		{
 			//do not do anything in layer composer on invalidate dynamic part, each layer will handle this on its own
@@ -441,6 +464,16 @@ package com.iblsoft.flexiweather.widgets
 		{
 			return m_layers;
 		}
+		
+		private var m_staticLayers: ArrayCollection;
+		
+		[Bindable(event = "layersChanged")]
+		public function get staticLayers(): ArrayCollection
+		{
+			return m_staticLayers;
+		}
+		
+		
 		[Bindable(event = "layersChanged")]
 		public function get layersIDs(): String
 		{
