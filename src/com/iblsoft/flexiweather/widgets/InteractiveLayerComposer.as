@@ -9,6 +9,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceConfiguration;
 	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
@@ -266,6 +267,39 @@ package com.iblsoft.flexiweather.widgets
 			return m_layers.length;
 		}
 
+		public function getLayerByFullPath(layerPath: String): InteractiveLayer
+		{
+			if (m_layers && m_layers.length > 0)
+			{
+				for each (var layer: InteractiveLayer in m_layers)
+				{
+					var layerType: String = '';
+					
+					if (layer is InteractiveLayerMSBase)
+					{
+						var config: WMSLayerConfiguration = (layer as InteractiveLayerMSBase).configuration as WMSLayerConfiguration;
+						layerType = config.layerType;
+						var wmsService: WMSServiceConfiguration = config.wmsService;
+						var baseURL: String = wmsService.baseURL;
+						
+						if (baseURL.indexOf("${BASE_URL}") >= 0)
+						{
+							var regExp: RegExp = /\$\{BASE_URL\}/ig;
+							while (regExp.exec(baseURL) != null)
+							{
+								baseURL = baseURL.replace(regExp, "");
+							}
+						}
+						
+						layerType = baseURL + '/'+layerType;
+						
+					}
+					if (layerType == layerPath)
+						return layer;
+				}
+			}
+			return null;
+		}
 		public function getLayerByID(layerID: String): InteractiveLayer
 		{
 			if (m_layers && m_layers.length > 0)
