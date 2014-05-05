@@ -146,6 +146,20 @@ package com.iblsoft.flexiweather.ogc
 			{
 				var dim: WMSDimension = new WMSDimension(elemDim, wms, m_version);
 				dim.parse();
+				// in WMS < 1.3.0, dimension values are inside of <Extent> element
+				// having the same @name as the <Dimension> element
+				if (m_version.isLessThan(1, 3, 0))
+				{
+					for each (var elemExtent: XML in m_itemXML.wms::Extent)
+					{
+						if (elemExtent.@name == dim.name)
+						{
+							dim.loadExtent(elemExtent, wms, m_version);
+							break;
+						}
+					}
+				}
+				
 				ma_dimensions.push(dim);
 			}
 		}

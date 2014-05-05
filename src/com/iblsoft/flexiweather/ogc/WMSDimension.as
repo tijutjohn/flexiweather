@@ -41,17 +41,22 @@ package com.iblsoft.flexiweather.ogc
 			
 			// in WMS < 1.3.0, dimension values are inside of <Extent> element
 			// having the same @name as the <Dimension> element
-			if (m_version.isLessThan(1, 3, 0))
+			if (!m_version.isLessThan(1, 3, 0))
 			{
-				for each (var elemExtent: XML in m_itemXML.wms::Extent)
-				{
-					if (elemExtent.@name == name)
-					{
-						loadExtent(elemExtent, wms, m_version);
-						break;
-					}
-				}
-			} else {
+				
+				// in WMS < 1.3.0, dimension values are inside of <Extent> element
+				// having the same @name as the <Dimension> element
+				//			if (m_version.isLessThan(1, 3, 0))
+				//			{
+				//				for each (var elemExtent: XML in m_itemXML.wms::Extent)
+				//				{
+				//					if (elemExtent.@name == name)
+				//					{
+				//						loadExtent(elemExtent, wms, m_version);
+				//						break;
+				//					}
+				//				}
+				//			} else {
 				//parse WMS1.3.0 dimension
 				loadExtent(m_itemXML, wms, m_version);
 			}
