@@ -5,6 +5,8 @@ package com.iblsoft.flexiweather.ogc.editable.featureEditor.service
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderErrorEvent;
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.net.loaders.WFSLoader;
+	import com.iblsoft.flexiweather.ogc.editable.IObjectWithBaseTimeAndValidity;
+	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
 	import com.iblsoft.flexiweather.ogc.editable.featureEditor.data.FeatureEditorProduct;
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeature;
 	import com.iblsoft.flexiweather.utils.ISO8601Parser;
@@ -193,7 +195,18 @@ package com.iblsoft.flexiweather.ogc.editable.featureEditor.service
 		
 		
 		
-		
+		public function updateFeatureBaseTimeAndValidity(feature: WFSFeatureEditable): void
+		{
+			if(feature is IObjectWithBaseTimeAndValidity) 
+			{
+				if (m_product)
+				{
+					IObjectWithBaseTimeAndValidity(feature).baseTime = getBaseTime(m_product);
+					IObjectWithBaseTimeAndValidity(feature).validity = getValidity(m_product);
+				}
+				
+			}
+		}
 		
 		
 		public function getBaseTime(product: FeatureEditorProduct): Date
@@ -207,7 +220,7 @@ package com.iblsoft.flexiweather.ogc.editable.featureEditor.service
 			return getBaseTimeFunction(dateLocal, timeOffset);
 		}
 		
-		private function getBaseTimeFunction(dateLocal: Date, timeOffset: int): Date
+		public function getBaseTimeFunction(dateLocal: Date, timeOffset: int): Date
 		{
 			var date: Date = new Date(Date.UTC(dateLocal.fullYear, dateLocal.month, dateLocal.date));
 			date.time += Number(timeOffset) * 1000.0;
@@ -220,7 +233,7 @@ package com.iblsoft.flexiweather.ogc.editable.featureEditor.service
 			return getValidityFunction(forecastTime, getBaseTime(product));
 		}
 		
-		protected function getValidityFunction(forecastTime: int, runDate: Date): Date
+		public function getValidityFunction(forecastTime: int, runDate: Date): Date
 		{
 			return new Date(runDate.time + Number(forecastTime) * 1000.0);
 		}

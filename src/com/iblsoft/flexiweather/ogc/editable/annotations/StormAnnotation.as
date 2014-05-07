@@ -101,7 +101,10 @@ package com.iblsoft.flexiweather.ogc.editable.annotations
 			
 			if (m_stormFeature.label == null)
 			{
-				visible = false;
+				m_TextLabel.visible = false;
+				graphics.clear();
+				return;
+//				visible = false;
 			}
 			
 			if (m_stormFeature){

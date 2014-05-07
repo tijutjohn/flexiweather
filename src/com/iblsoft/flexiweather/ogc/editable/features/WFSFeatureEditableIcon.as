@@ -3,6 +3,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
 	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
+	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableWithBaseTimeAndValidity;
 	import com.iblsoft.flexiweather.ogc.editable.data.IconFeatureType;
 	import com.iblsoft.flexiweather.ogc.net.loaders.WFSIconLoader;
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithReflection;
@@ -12,7 +13,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 	import flash.display.BitmapData;
 	import flash.geom.Point;
 	
-	public class WFSFeatureEditableIcon extends WFSFeatureEditable implements IWFSFeatureWithReflection
+	public class WFSFeatureEditableIcon extends WFSFeatureEditableWithBaseTimeAndValidity implements IWFSFeatureWithReflection
 	{
 		public var type: String;
 		public var color: uint;
@@ -37,6 +38,32 @@ package com.iblsoft.flexiweather.ogc.editable.features
 				ms_actIconLoaded = nIcon;
 				var folderName: String = resolveIconFolder();
 				WFSIconLoader.getInstance().getIcon(nIcon, this, onIconLoaded, folderName);
+			} else {
+				
+				
+				var iconSprite: IconSprite;
+				var reflection: WFSEditableReflectionData;
+				
+				//create sprites for reflections
+				var totalReflections: uint = ml_movablePoints.totalReflections;
+				for (var i: int = 0; i < totalReflections; i++)
+				{
+					reflection = ml_movablePoints.getReflection(i) as WFSEditableReflectionData;
+					if (!reflection.displaySprite)
+					{
+						iconSprite = new IconSprite(this); 
+						reflection.displaySprite = iconSprite;
+						addChild(reflection.displaySprite);
+					} else {
+						iconSprite = reflection.displaySprite as IconSprite;
+					}
+					
+					var pt: Point = Point(reflection.points[0]);
+					
+					iconSprite.update(color, pt);
+					
+				}
+				
 			}
 		}
 		
