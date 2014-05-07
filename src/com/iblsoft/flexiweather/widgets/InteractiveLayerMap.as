@@ -1608,7 +1608,8 @@ package com.iblsoft.flexiweather.widgets
 			}
 			var i: int;
 			var so: ISynchronisedObject;
-			var now: Date = DateUtils.convertToUTCDate(new Date());
+//			var now: Date = DateUtils.convertToUTCDate(new Date());
+			var now: Date = new Date();
 			var nowDistance: Number = Number.MAX_VALUE;
 			var nowFrame: Date;
 			for each (so in l_syncLayers)

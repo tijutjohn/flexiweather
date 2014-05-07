@@ -416,6 +416,9 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 
 		override public function isCompatibleWithCRS(crs: String): Boolean
 		{
+			if (crs == null)
+				return false;
+			
 			if (_layerConfigurations && _layerConfigurations.length > 0)
 			{
 				for each (var layer: WMSLayer in _layerConfigurations)
