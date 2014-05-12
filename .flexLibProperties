@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="1">
+<flexLibProperties includeAllClasses="false" useMultiPlatformConfig="false" version="1">
   <includeClasses>
     <classEntry path="com.iblsoft.flexiweather.FlexiWeatherConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.components.IndexRetainingDropDownList"/>
     <classEntry path="com.iblsoft.flexiweather.components.MultiSelectionButtonBar"/>
     <classEntry path="com.iblsoft.flexiweather.components.ResizableDropDownList"/>
+    <classEntry path="com.iblsoft.flexiweather.components.ResizableList"/>
     <classEntry path="com.iblsoft.flexiweather.components.charts.ChartSerie"/>
     <classEntry path="com.iblsoft.flexiweather.components.charts.ChartType"/>
     <classEntry path="com.iblsoft.flexiweather.components.charts.FlexChart"/>
@@ -480,6 +481,10 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.controls.ToggleButtonBarEvent"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.controls.ToggleButtonBarItemData"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.controls.ToggleButtonBarSkin"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.panzoom.PanZoomComponent"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.panzoom.PanZoomComponentError"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.panzoom.PanZoomContent"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.panzoom.events.PanZoomEvent"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.controls.tabbar.InteractiveTabBar"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.controls.tabbar.InteractiveTabBarButton"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.controls.tabbar.InteractiveTabBarEvent"/>
