@@ -20,7 +20,13 @@ package com.iblsoft.flexiweather.ogc.editable.featureEditor.service
 
 	public class WFSFeatureEditorService extends EventDispatcher
 	{
-		private var m_product: FeatureEditorProduct
+		private var m_product: FeatureEditorProduct;
+		
+		public function get product(): FeatureEditorProduct
+		{
+			return m_product;
+		}
+		
 		protected var m_wfsLoader: WFSLoader;
 		
 		public function WFSFeatureEditorService()
@@ -126,6 +132,8 @@ package com.iblsoft.flexiweather.ogc.editable.featureEditor.service
 		
 		public function loadData(data: Array, typeName: String, versionString: String, srsName: String = null): void
 		{
+			updateParametersFromProduct(data);
+			
 			m_wfsLoader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onLoadDataLoaded);
 			updateWFSData('load', "Load features", data, versionString, typeName, srsName);
 			
@@ -148,6 +156,8 @@ package com.iblsoft.flexiweather.ogc.editable.featureEditor.service
 		
 		public function refreshData(data: Array, typeName: String, versionString: String, srsName: String = null): void
 		{
+			updateParametersFromProduct(data);
+			
 			m_wfsLoader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onRefreshDataLoaded);
 			updateWFSData('refresh', "Refresh features", data, versionString, typeName, srsName);
 			
@@ -193,7 +203,17 @@ package com.iblsoft.flexiweather.ogc.editable.featureEditor.service
 			m_wfsLoader.load(url, null, description);
 		}
 		
-		
+		private function updateParametersFromProduct(data: Array): void
+		{
+			if (m_product)
+			{
+				var run: String = ISO8601Parser.dateToString(getBaseTime(m_product));
+				data["RUN"] = run;
+				
+				var validity: String = ISO8601Parser.dateToString(getValidity(m_product));
+				data["VALIDITY"] = validity;	
+			}
+		}
 		
 		public function updateFeatureBaseTimeAndValidity(feature: WFSFeatureEditable): void
 		{

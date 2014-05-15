@@ -7,6 +7,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.ogc.Version;
 	import com.iblsoft.flexiweather.ogc.editable.InteractiveLayerWFSEditable;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
+	import com.iblsoft.flexiweather.ogc.editable.featureEditor.events.WFSTransactionEvent;
 	import com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditablePressureCentre;
 	import com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableRadiation;
 	import com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableStorm;
@@ -251,8 +252,8 @@ package com.iblsoft.flexiweather.ogc
 		public function issue(): void
 		{
 			
-			var baseTimeString: String = ISO8601Parser.dateToString(m_product.getBaseTime());
-			var validityString: String = ISO8601Parser.dateToString(m_product.getValidity());
+			var baseTimeString: String = ISO8601Parser.dateToString(wfsService.product.getBaseTime());
+			var validityString: String = ISO8601Parser.dateToString(wfsService.product.getValidity());
 			
 			/*
 			<Transaction xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.0.0/WFS-transaction.xsd http://www.iblsoft.com/wfs http://localhost:8008/test?SERVICE=WFS&REQUEST=DescribeFeatureType&VERSION=1.0.0&TYPENAME=Front%2cPressureCentre" version="1.0.0" service="WFS" xmlns="http://www.opengis.net/wfs" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -287,6 +288,9 @@ package com.iblsoft.flexiweather.ogc
 		
 		protected function onTransactionFailed(event: UniURLLoaderErrorEvent): void
 		{
+			var wte: WFSTransactionEvent = new WFSTransactionEvent(WFSTransactionEvent.TRANSACTION_FAILED, ms_transactionType, event.result);
+			dispatchEvent(wte);
+			
 			dispatchEvent(event);
 		}
 		
@@ -301,12 +305,12 @@ package com.iblsoft.flexiweather.ogc
 				return; 
 			}
 
-			switch (ms_transactionType)
-			{
-				case TRANSACTION_ISSUE:
-					Alert.show('Product was issued', 'Feature Editor');
-					break;
-			}
+//			switch (ms_transactionType)
+//			{
+//				case TRANSACTION_ISSUE:
+//					Alert.show('Product was issued', 'Feature Editor');
+//					break;
+//			}
 			var editableFeature: WFSFeatureEditable;
 
 			var i_index: uint = 0;
@@ -327,6 +331,9 @@ package com.iblsoft.flexiweather.ogc
 			}
 			emptyRemovedFeatures();
 			
+			var wte: WFSTransactionEvent = new WFSTransactionEvent(WFSTransactionEvent.TRANSACTION_COMPLETE, ms_transactionType, event.result);
+			dispatchEvent(wte);
+			
 			ms_transactionType = '';
 			
 			dispatchEvent(event);
@@ -342,6 +349,12 @@ package com.iblsoft.flexiweather.ogc
 			editableFeature = mm_insertionHandleToFeatureMap[s_handle];
 			
 			return editableFeature;
+		}
+		
+		override public function removeAllFeatures(): void
+		{
+			super.removeAllFeatures();
+			emptyRemovedFeatures();
 		}
 		
 		public function emptyRemovedFeatures(): void
