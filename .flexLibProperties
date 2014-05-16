@@ -493,6 +493,7 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.InteractiveLayerGoogleMaps"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.skins.TitleWindowCloseButtonSkin"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.skins.TitleWindowSkin"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.featureEditor.events.WFSTransactionEvent"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
