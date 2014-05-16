@@ -177,7 +177,11 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (dateFormat && dateFormat.length > 0)
 				return DateUtils.strftime(frame, dateFormat);
-			return frame.toString();
+			
+			if (frame)
+				return frame.toString();
+			
+			return "";
 		}
 		private var m_timelineConfiguration: MapTimelineConfiguration;
 		private var m_timelineConfigurationChanged: Boolean;
