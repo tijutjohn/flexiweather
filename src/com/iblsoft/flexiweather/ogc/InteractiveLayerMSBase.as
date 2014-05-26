@@ -13,6 +13,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.ogc.cache.ICachedLayer;
 	import com.iblsoft.flexiweather.ogc.cache.WMSCache;
 	import com.iblsoft.flexiweather.ogc.cache.event.WMSCacheEvent;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.OGCLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.configuration.services.OGCServiceConfiguration;
@@ -1131,6 +1132,34 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 
+		private function updateURLWithArea(url: URLRequest): void
+		{
+			var str: String = '';
+			if (!url.data)
+			{
+				url.data = new URLVariables();
+			}
+			
+			var s_crs: String = container.crs;
+			var viewBBox: BBox = container.getViewBBox();
+			var ogcLayerConfiguration: OGCLayerConfiguration = configuration as OGCLayerConfiguration;
+			
+			var s_bbox: String;
+			if (Projection.hasCRSAxesFlippedByISO(s_crs, ogcLayerConfiguration.service.version))
+			{
+				s_bbox = String(viewBBox.yMin) + "," + String(viewBBox.xMin) + "," + String(viewBBox.yMax) + "," + String(viewBBox.xMax);	
+			} else {
+				s_bbox = viewBBox.toBBOXString();
+			}
+			
+			if (ogcLayerConfiguration.service.isBefore130Version)
+				url.data.SRS = s_crs;
+			else
+				url.data.CRS = s_crs;
+			url.data.BBOX = s_bbox;
+			url.data.MAP_WIDTH = container.width; 
+			url.data.MAP_HEIGHT = container.height;
+		}
 		private function updateURLWithDimensions(url: URLRequest): void
 		{
 			var str: String = '';
@@ -1190,7 +1219,14 @@ package com.iblsoft.flexiweather.ogc
 				{
 					debug(" ${BASE_URL} are not using legend url from capabilities");
 				}
-				updateURLWithDimensions(url);
+				if (configuration is WMSLayerConfiguration)
+				{
+					var wmsLayerConfiguration: WMSLayerConfiguration = configuration as WMSLayerConfiguration;
+					if (wmsLayerConfiguration.legendIsDimensionDependant)
+						updateURLWithDimensions(url);
+					if (wmsLayerConfiguration.legendIsAreaDependant)
+						updateURLWithArea(url);
+				}
 				if (isNaN(legendScaleX))
 					legendScaleX = 1;
 				if (isNaN(legendScaleY))

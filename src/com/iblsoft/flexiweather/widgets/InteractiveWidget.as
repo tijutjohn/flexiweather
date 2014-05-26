@@ -944,10 +944,12 @@ package com.iblsoft.flexiweather.widgets
 			
 //			debug(this + " area: " + m_viewBBox.toBBOXString());
 			
-			if (areaChanged)
+			if (areaChanged || (!areaChanged && b_finalChange))
 			{
 				//dispatch area change event
-				dispatchEvent(new InteractiveWidgetEvent(InteractiveWidgetEvent.AREA_CHANGED));
+				var iwe: InteractiveWidgetEvent = new InteractiveWidgetEvent(InteractiveWidgetEvent.AREA_CHANGED);
+				iwe.finalChange = b_finalChange;
+				dispatchEvent(iwe);
 //			} else {
 //				debug(this + " onAreaChanged but are is not changed: " + m_viewBBox.toBBOXString());
 			}

@@ -125,6 +125,11 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 			parseFullURL(s_fullUrl);
 		}
 
+		public function get isBefore130Version(): Boolean
+		{
+			return m_version.isLessThan(1, 3, 0);
+		}
+		
 		public function get version(): Version
 		{
 			return m_version;
