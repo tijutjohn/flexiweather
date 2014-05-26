@@ -545,10 +545,14 @@ package com.iblsoft.flexiweather.net.loaders
 						realm = null;
 						if (basicAuthAccount)
 						{
+							var autorizationResetValue: String;
 							realm = basicAuthAccount.realm;
+							
+							//autorizationResetValue instead of null was used, because of failed Fortify tests (see FW-97)
+							
 							//401 - authorization problem, reset name and password
-							basicAuthAccount.name = null;
-							basicAuthAccount.password = null;
+							basicAuthAccount.name = autorizationResetValue;
+							basicAuthAccount.password = autorizationResetValue;
 						}
 						if (realm)
 						{

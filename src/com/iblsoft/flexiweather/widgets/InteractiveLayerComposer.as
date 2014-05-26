@@ -482,6 +482,9 @@ package com.iblsoft.flexiweather.widgets
 
 		public function isCompatibleWithCRS(crs: String): Boolean
 		{
+			if (crs == null)
+				return false;
+			
 			if (m_layers && m_layers.length > 0)
 			{
 				for each (var layer: InteractiveLayer in m_layers)
