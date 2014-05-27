@@ -5,6 +5,7 @@
     <classEntry path="com.iblsoft.flexiweather.components.IndexRetainingDropDownList"/>
     <classEntry path="com.iblsoft.flexiweather.components.MultiSelectionButtonBar"/>
     <classEntry path="com.iblsoft.flexiweather.components.ResizableDropDownList"/>
+    <classEntry path="com.iblsoft.flexiweather.components.ResizableList"/>
     <classEntry path="com.iblsoft.flexiweather.components.charts.ChartSerie"/>
     <classEntry path="com.iblsoft.flexiweather.components.charts.ChartType"/>
     <classEntry path="com.iblsoft.flexiweather.components.charts.FlexChart"/>
@@ -163,7 +164,9 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.data.jetstream.WindMoveablePointsDictionary"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.data.jetstream.WindReflectionData"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.events.WindBarbChangeEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.featureEditor.FeatureEditorManager"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.featureEditor.data.FeatureEditorProduct"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.featureEditor.events.WFSTransactionEvent"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.featureEditor.service.WFSFeatureEditorService"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.GenericEditableFeature"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.IconLabeledEditableFeature"/>
@@ -476,13 +479,27 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.GroupBox"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.GroupHBox"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.GroupVBox"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.containers.panels.InteractiveTabBarPanel"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.containers.panels.skins.IntTabBarPanelSkin"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.containers.panels.skins.InteractiveTabBarPanelSkin"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.skins.GroupBoxBorder"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.containers.skins.GroupBoxSkin"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.InteractiveDropDownList"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.controls.ToggleButtonBar"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.controls.ToggleButtonBarButton"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.controls.ToggleButtonBarEvent"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.controls.ToggleButtonBarItemData"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.controls.ToggleButtonBarSkin"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.tabbar.InteractiveTabBar"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.tabbar.InteractiveTabBarButton"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.tabbar.InteractiveTabBarEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.tabbar.InteractiveVerticalTabBarButton"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.tabbar.layouts.InteractiveVerticalButtonBarLayout"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.tabbar.skins.InteractiveCloseButtonSkin"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.tabbar.skins.InteractiveTabBarButtonSkin"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.tabbar.skins.InteractiveTabBarSkin"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.tabbar.skins.InteractiveVerticalTabBarButtonSkin"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.tabbar.skins.InteractiveVerticalTabBarSkin"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.data.InteractiveLayerMapSaveSettings"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.data.InteractiveLayerPrintQuality"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.errors.ErrorJournal"/>
@@ -493,7 +510,6 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.InteractiveLayerGoogleMaps"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.skins.TitleWindowCloseButtonSkin"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.skins.TitleWindowSkin"/>
-    <classEntry path="com.iblsoft.flexiweather.ogc.editable.featureEditor.events.WFSTransactionEvent"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

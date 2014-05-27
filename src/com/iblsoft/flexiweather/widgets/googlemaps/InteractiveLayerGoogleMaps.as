@@ -57,7 +57,7 @@ package com.iblsoft.flexiweather.widgets.googlemaps
 			return m_cfg;
 		}
 
-		public function InteractiveLayerGoogleMaps(container: InteractiveWidget, cfg: GoogleMapLayerConfiguration)
+		public function InteractiveLayerGoogleMaps(container: InteractiveWidget = null, cfg: GoogleMapLayerConfiguration = null)
 		{
 			super(container);
 			m_cfg = cfg;
