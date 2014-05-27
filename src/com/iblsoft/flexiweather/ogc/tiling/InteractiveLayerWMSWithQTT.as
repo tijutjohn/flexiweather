@@ -53,7 +53,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		public function get isTileable(): Boolean
 		{
-			if (!m_cfg || !m_tiledLayer)
+			if (!m_cfg || !m_tiledLayer || !container)
 				return false;
 			var configAvoidTiling: Boolean = (m_cfg as WMSWithQTTLayerConfiguration).avoidTiling;
 			if ((m_cfg as WMSWithQTTLayerConfiguration).avoidTiling || avoidTilingForAllLayers)

@@ -9,6 +9,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceConfiguration;
 	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
@@ -40,6 +41,7 @@ package com.iblsoft.flexiweather.widgets
 			m_layers.addEventListener(CollectionEvent.COLLECTION_CHANGE, onLayerCollectionChanged);
 			
 			m_staticLayers = new ArrayCollection();
+			m_dynamicLayers = new ArrayCollection();
 			composerID++;
 			id = composerID.toString();
 		}
@@ -160,6 +162,7 @@ package com.iblsoft.flexiweather.widgets
 		private function updateStaticLayers(): void
 		{
 			m_staticLayers.removeAll();
+			m_dynamicLayers.removeAll();
 			for each (var layer: InteractiveLayer in m_layers)
 			{
 				if (layer is IConfigurableLayer)
@@ -172,6 +175,8 @@ package com.iblsoft.flexiweather.widgets
 						var isForegroundStr: String = behObject.getBehaviourString("com.iblsoft.ria.solidlayers.foreground");
 						if (isBackgroundStr != null || isForegroundStr != null)
 							m_staticLayers.addItem(layer);
+						else
+							m_dynamicLayers.addItem(layer);
 					}
 				}
 			}
@@ -262,6 +267,39 @@ package com.iblsoft.flexiweather.widgets
 			return m_layers.length;
 		}
 
+		public function getLayerByFullPath(layerPath: String): InteractiveLayer
+		{
+			if (m_layers && m_layers.length > 0)
+			{
+				for each (var layer: InteractiveLayer in m_layers)
+				{
+					var layerType: String = '';
+					
+					if (layer is InteractiveLayerMSBase)
+					{
+						var config: WMSLayerConfiguration = (layer as InteractiveLayerMSBase).configuration as WMSLayerConfiguration;
+						layerType = config.layerType;
+						var wmsService: WMSServiceConfiguration = config.wmsService;
+						var baseURL: String = wmsService.baseURL;
+						
+						if (baseURL.indexOf("${BASE_URL}") >= 0)
+						{
+							var regExp: RegExp = /\$\{BASE_URL\}/ig;
+							while (regExp.exec(baseURL) != null)
+							{
+								baseURL = baseURL.replace(regExp, "");
+							}
+						}
+						
+						layerType = baseURL + '/'+layerType;
+						
+					}
+					if (layerType == layerPath)
+						return layer;
+				}
+			}
+			return null;
+		}
 		public function getLayerByID(layerID: String): InteractiveLayer
 		{
 			if (m_layers && m_layers.length > 0)
@@ -469,11 +507,17 @@ package com.iblsoft.flexiweather.widgets
 		}
 		
 		private var m_staticLayers: ArrayCollection;
+		private var m_dynamicLayers: ArrayCollection;
 		
 		[Bindable(event = "layersChanged")]
 		public function get staticLayers(): ArrayCollection
 		{
 			return m_staticLayers;
+		}
+		[Bindable(event = "layersChanged")]
+		public function get dynamicLayers(): ArrayCollection
+		{
+			return m_dynamicLayers;
 		}
 		
 		

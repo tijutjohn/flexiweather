@@ -177,7 +177,11 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (dateFormat && dateFormat.length > 0)
 				return DateUtils.strftime(frame, dateFormat);
-			return frame.toString();
+			
+			if (frame)
+				return frame.toString();
+			
+			return "";
 		}
 		private var m_timelineConfiguration: MapTimelineConfiguration;
 		private var m_timelineConfigurationChanged: Boolean;
@@ -1778,7 +1782,7 @@ package com.iblsoft.flexiweather.widgets
 			return l_levels;
 		}
 
-		public function setRun(newRun: Date, b_nearrest: Boolean = true): Boolean
+		public function setRun(newRun: Date, b_nearrest: Boolean = true, bGlobalValueChange: Boolean = true): Boolean
 		{
 			if (newRun == null)
 				return false;
@@ -1789,6 +1793,8 @@ package com.iblsoft.flexiweather.widgets
 				return false;
 			}
 			
+			if (bGlobalValueChange)
+				_globalVariablesManager.run = newRun;
 			
 			//we need to remember old frame and synchronize frame after RUN is synchronized
 			var oldFrame: Date = frame;
@@ -1842,7 +1848,7 @@ package com.iblsoft.flexiweather.widgets
 		 * @return 
 		 * 
 		 */
-		public function setLevel(newLevel: String, b_nearrest: Boolean = true): Boolean
+		public function setLevel(newLevel: String, b_nearrest: Boolean = true, bGlobalValueChange: Boolean = true): Boolean
 		{
 			if (newLevel == null)
 				return false;
@@ -1852,6 +1858,9 @@ package com.iblsoft.flexiweather.widgets
 				_tempMapStorage.setLevel(newLevel, b_nearrest);
 				return false;
 			}
+			
+			if (bGlobalValueChange)
+				_globalVariablesManager.level = newLevel;
 			
 			var bGlobalSynchronization: Boolean = false;
 			for each (var l: InteractiveLayer in m_layers)

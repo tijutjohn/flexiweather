@@ -248,7 +248,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 				delete md_dimensionValues[s_dimName];
 			
 			
-			var wvpe: WMSViewPropertiesEvent = new WMSViewPropertiesEvent(WMSViewPropertiesEvent.WMS_DIMENSION_VALUE_SET);
+			var wvpe: WMSViewPropertiesEvent = new WMSViewPropertiesEvent(WMSViewPropertiesEvent.WMS_DIMENSION_VALUE_SET, true);
 			wvpe.dimension = s_dimName;
 			wvpe.value = s_value;
 			notifyEvent(wvpe);
