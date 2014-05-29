@@ -106,23 +106,35 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 			if (type.substr(0, 4) == FrontType.WARM)
 			{
 				i_color = getCurrentColor(0xff0000);
-				i_markType = 1;
+				i_markType = FrontCurveRenderer.MARK_WARM;
 			}
 			else if (type.substr(0, 4) == FrontType.COLD)
 			{
 				i_color = getCurrentColor(0x0000ff);
-				i_markType = 0;
+				i_markType = FrontCurveRenderer.MARK_COLD;
 			}
 			else if (type.substr(0, 8) == FrontType.OCCLUDED)
 			{
 				i_color = getCurrentColor(0xff00ff);
-				i_markType = 2;
+				i_markType = FrontCurveRenderer.MARK_OCCLUDED;
 			}
 			else if (type.substr(0, 10) == FrontType.STATIONARY)
 			{
 				i_color = getCurrentColor(0xff0000); 
 				i_colorSecondary = getCurrentColor(0x0000ff);
-				i_markType = 3;
+				i_markType = FrontCurveRenderer.MARK_STATIONARY;
+			}
+			else if (type.substr(0, 10) == FrontType.TROUGH)
+			{
+				i_color = getCurrentColor(0x000000); 
+				i_colorSecondary = getCurrentColor(0x000000);
+				i_markType = FrontCurveRenderer.MARK_TROUGH;
+			}
+			else if (type.substr(0, 10) == FrontType.DRY_LINE)
+			{
+				i_color = getCurrentColor(0xde8d4e); 
+				i_colorSecondary = getCurrentColor(0xde8d4e);
+				i_markType = FrontCurveRenderer.MARK_DRY_LINE;
 			}
 			else if (type.substr(0, 10) == "Cloud")
 			{
