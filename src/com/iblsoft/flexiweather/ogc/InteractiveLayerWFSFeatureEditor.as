@@ -7,7 +7,9 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.ogc.Version;
 	import com.iblsoft.flexiweather.ogc.editable.InteractiveLayerWFSEditable;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
+	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableMode;
 	import com.iblsoft.flexiweather.ogc.editable.featureEditor.events.WFSTransactionEvent;
+	import com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableMacro;
 	import com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditablePressureCentre;
 	import com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableRadiation;
 	import com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableStorm;
@@ -156,6 +158,10 @@ package com.iblsoft.flexiweather.ogc
 				else if (tagName.localName == "Text")
 				{
 					feature = new WFSFeatureEditableText("http://www.iblsoft.com/wfs", "Text", xml.@gml::id);
+				}
+				else if (tagName.localName == "Macro")
+				{
+					feature = new WFSFeatureEditableMacro("http://www.iblsoft.com/wfs", "Macro", xml.@gml::id);
 				}
 				else
 					return null;

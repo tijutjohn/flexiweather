@@ -8,22 +8,27 @@ package com.iblsoft.flexiweather.ogc.editable.features
 	import com.iblsoft.flexiweather.ogc.net.loaders.WFSIconLoader;
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithReflection;
 	import com.iblsoft.flexiweather.proj.Coord;
+	import com.iblsoft.flexiweather.utils.NumberUtils;
 	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.geom.Point;
 	
-	public class WFSFeatureEditableIcon extends WFSFeatureEditableWithBaseTimeAndValidity implements IWFSFeatureWithReflection
+	public class WFSFeatureEditableMacro extends WFSFeatureEditableWithBaseTimeAndValidity implements IWFSFeatureWithReflection
 	{
 		public var type: String;
 		public var color: uint;
 		private var ms_actIconLoaded: String = '';
 		private var m_iconBitmap: Bitmap = new Bitmap();
+		private var ma_types: Array;
 		
-		public function WFSFeatureEditableIcon(s_namespace:String, s_typeName:String, s_featureId:String)
+		public function WFSFeatureEditableMacro(s_namespace:String, s_typeName:String, s_featureId:String)
 		{
 			super(s_namespace, s_typeName, s_featureId);
 			color = 0x000000;
+			
+			ma_types = [];
+			initializeTypes();
 		}
 		
 		override public function update(changeFlag: FeatureUpdateContext): void
@@ -135,76 +140,129 @@ package com.iblsoft.flexiweather.ogc.editable.features
 			
 			return folderName;
 		}
+		private function resolveTypeFromIconPath(path: String): String
+		{
+			var arr: Array = path.split('/');
+			var iconName: String = arr[arr.length - 1];
+			
+			var retType: String = '';
+			
+			for each (var obj: IconTypeData in ma_types)
+			{
+				if (obj.icon == iconName)
+				{
+					retType = obj.type;
+					break;
+				}
+			}
+			
+			return(retType);
+		}
+		
+		private function initializeTypes(): void
+		{
+			ma_types.push( new IconTypeData( IconFeatureType.RAIN_STEADY, IconFeatureType.ICON_NAME_RAIN_STEADY ) );
+			ma_types.push( new IconTypeData( IconFeatureType.RAIN_SHOWERS, IconFeatureType.ICON_NAME_RAIN_SHOWERS ) );
+			ma_types.push( new IconTypeData( IconFeatureType.SNOW_STEADY, IconFeatureType.ICON_NAME_SNOW_STEADY ) );
+			ma_types.push( new IconTypeData( IconFeatureType.SNOW_SHOWERS, IconFeatureType.ICON_NAME_SNOW_SHOWERS ) );
+			ma_types.push( new IconTypeData( IconFeatureType.RAIN, IconFeatureType.ICON_NAME_RAIN_STEADY ) );
+			ma_types.push( new IconTypeData( IconFeatureType.DRIZZLE, IconFeatureType.DRIZZLE ) );
+			ma_types.push( new IconTypeData( IconFeatureType.PELLETS, IconFeatureType.ICON_NAME_PELLETS ) );
+			ma_types.push( new IconTypeData( IconFeatureType.FOG, IconFeatureType.ICON_NAME_FOG ) );
+			ma_types.push( new IconTypeData( IconFeatureType.HAZE, IconFeatureType.ICON_NAME_HAZE ) );
+			ma_types.push( new IconTypeData( IconFeatureType.SMOKE, IconFeatureType.ICON_NAME_SMOKE ) );
+			ma_types.push( new IconTypeData( IconFeatureType.BLOWING_DUST, IconFeatureType.ICON_NAME_BLOWING_DUST ) );
+		}
 		private function resolveIconName(): String
 		{
 			var retIconName: String = '';
-//			var isSouthHemisphere: Boolean = false;
-//			if (coordinates && coordinates.length > 0)
-//			{
-//				var coord: Coord = coordinates[0] as Coord;
-//				var latLonCoord: Coord = coord.toLaLoCoord();
-//				if (latLonCoord.y < 0)
-//				{
-//					isSouthHemisphere = true;
-//				}
-//			}
 			
-			switch (type)
+			for each (var obj: IconTypeData in ma_types)
 			{
-				case IconFeatureType.RAIN_STEADY:
-					retIconName = IconFeatureType.ICON_NAME_RAIN_STEADY;
+				if (obj.type == type)
+				{
+					retIconName = obj.icon;
 					break;
-				case IconFeatureType.RAIN_SHOWERS:
-					retIconName = IconFeatureType.ICON_NAME_RAIN_SHOWERS;
-					break;
-				case IconFeatureType.SNOW_STEADY:
-					retIconName = IconFeatureType.ICON_NAME_SNOW_STEADY;
-					break;
-				case IconFeatureType.SNOW_SHOWERS:
-					retIconName = IconFeatureType.ICON_NAME_SNOW_SHOWERS;
-					break;
-				case IconFeatureType.RASN_STEADY:
-					retIconName = IconFeatureType.ICON_NAME_RASN_STEADY;
-					break;
-				case IconFeatureType.RASN_SHOWERS:
-					retIconName = IconFeatureType.ICON_NAME_RASN_SHOWERS;
-					break;
-				case IconFeatureType.RAIN:
-					retIconName = IconFeatureType.ICON_NAME_RAIN;
-					break;
-				case IconFeatureType.DRIZZLE:
-					retIconName = IconFeatureType.ICON_NAME_DRIZZLE;
-					break;
-				case IconFeatureType.PELLETS:
-					retIconName = IconFeatureType.ICON_NAME_PELLETS;
-					break;
-				case IconFeatureType.FOG:
-					retIconName = IconFeatureType.ICON_NAME_FOG;
-					break;
-				case IconFeatureType.HAZE:
-					retIconName = IconFeatureType.ICON_NAME_HAZE;
-					break;
-				case IconFeatureType.SMOKE:
-					retIconName = IconFeatureType.ICON_NAME_SMOKE;
-					break;
-				case IconFeatureType.BLOWING_DUST:
-					retIconName = IconFeatureType.ICON_NAME_BLOWING_DUST;
-					break;
-			} 
+				}
+			}
 			
 			return(retIconName);
+		}
+		
+		override public function toInsertGML(xmlInsert: XML): void
+		{
+			super.toInsertGML(xmlInsert);
+			
+			addInsertGMLProperty(xmlInsert, null, "iconPath", "doc:global/macros/" + resolveIconFolder() + "/" + resolveIconName());
+			
+			var clrString: String = NumberUtils.encodeHTMLColorWithAlpha(color, 1);
+			var scale: int = 1;
+			var rotation: int = 0;
+			
+			xmlInsert.appendChild(
+				<style xmlns={ms_namespace}>
+					<color>{clrString}</color>
+					<scale>{scale}</scale>
+				</style>
+				);
+			xmlInsert.appendChild(
+				<rotation>{rotation}</rotation>
+				);
+		}
+		
+		override public function toUpdateGML(xmlUpdate: XML): void
+		{
+			super.toUpdateGML(xmlUpdate);
+			
+			addUpdateGMLProperty(xmlUpdate, null, "iconPath", "doc:global/macros/" + resolveIconFolder() + "/" + resolveIconName());
+			addUpdateGMLProperty(xmlUpdate, null, "style/color", NumberUtils.encodeHTMLColorWithAlpha(color, 1));
+		}
+		
+		override public function fromGML(gml: XML): void
+		{
+			super.fromGML(gml);
+			
+			var ns: Namespace = new Namespace(ms_namespace);
+			
+			var iconPath: String = gml.ns::iconPath[0].toString();
+			
+			type = resolveTypeFromIconPath( iconPath );
+			
+			if (gml.ns::style)
+			{
+				var style: XMLList = gml.ns::style;
+				if (style.ns::color)
+				{
+					var macroColor: XMLList = style.ns::color;
+					var clr1: String = macroColor[0].text().toString();
+					
+					color = NumberUtils.decodeHTMLColor(String(clr1), color);
+				}
+			}
 		}
 	}
 }
 
 import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
-import com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableIcon;
+import com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableMacro;
 import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
 import com.iblsoft.flexiweather.utils.ColorUtils;
 
 import flash.display.Bitmap;
 import flash.display.BitmapData;
 import flash.geom.Point;
+
+class IconTypeData
+{
+	public var type: String;
+	public var icon: String;
+	
+	public function IconTypeData(sType: String, sIcon: String)
+	{
+		type = sType;
+		icon = sIcon;
+	}
+}
 
 class IconSprite extends WFSFeatureEditableSprite 
 {

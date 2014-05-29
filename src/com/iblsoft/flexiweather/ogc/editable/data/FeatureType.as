@@ -9,6 +9,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		public static const CLOUD: String = 'Cloud';
 		public static const STORM: String = 'Storm';
 		public static const ICING_AREA: String = 'IcingArea';
+		public static const MACRO: String = 'Macro';
 		
 	}
 }

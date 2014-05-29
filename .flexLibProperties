@@ -172,7 +172,7 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.IconLabeledEditableFeature"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.LabeledEditableFeature"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.PressureCentreType"/>
-    <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableIcon"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableMacro"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditablePressureCentre"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableRadiation"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableStorm"/>
