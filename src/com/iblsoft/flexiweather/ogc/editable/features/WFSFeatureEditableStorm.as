@@ -95,51 +95,6 @@ package com.iblsoft.flexiweather.ogc.editable.features
 				WFSIconLoader.getInstance().getIcon(nIcon, this, onIconLoaded, 'SIGWX');
 			}
 			
-			/*
-			var stormAnnotation: StormAnnotation;
-			var stormSprite: StormSprite;
-			var reflection: WFSEditableReflectionData;
-			var _addToLabelLayout: Boolean;
-			
-			//create sprites for reflections
-			var totalReflections: uint = ml_movablePoints.totalReflections;
-			var blackColor: uint = getCurrentColor(0x000000);
-			for (var i: int = 0; i < totalReflections; i++)
-			{
-				reflection = ml_movablePoints.getReflection(i) as WFSEditableReflectionData;
-				if (!reflection.displaySprite)
-				{
-					stormSprite = new StormSprite(this); 
-					reflection.displaySprite = stormSprite;
-					addChild(reflection.displaySprite);
-				} else {
-					stormSprite = reflection.displaySprite as StormSprite;
-				}
-				
-				if (reflection.annotation )
-				{
-					stormAnnotation = reflection.annotation as StormAnnotation;
-				} else {
-					reflection.addAnnotation(stormSprite.stormAnnotation);
-				}
-				
-				var pt: Point = Point(reflection.points[0]); 
-				stormSprite.points = [pt];
-//				stormSprite.x = pt.x;
-//				stormSprite.y = pt.y;
-				
-				if (!_spritesAddedToLabelLayout && master)
-				{
-					master.container.labelLayout.addObstacle(reflection.displaySprite, master);
-					master.container.labelLayout.addObject(stormSprite.stormAnnotation, master, [reflection.displaySprite], i);
-					_addToLabelLayout = true;
-				}
-				stormSprite.update(this, blackColor, master.container.labelLayout, pt);
-			}
-			
-			if (!_spritesAddedToLabelLayout && _addToLabelLayout)
-				_spritesAddedToLabelLayout = true;
-			*/
 		}	
 		
 		override public function getDisplaySpriteForReflection(id: int): WFSFeatureEditableSprite
@@ -183,8 +138,6 @@ package com.iblsoft.flexiweather.ogc.editable.features
 					
 					stormSprite.points = [pt];
 					stormSprite.setBitmap(nBitmapData, pt);
-//					stormSprite.x = pt.x;
-//					stormSprite.y = pt.y;
 					
 				}
 				if (pt)

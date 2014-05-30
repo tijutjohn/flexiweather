@@ -18,12 +18,14 @@ package com.iblsoft.flexiweather.ogc.editable.annotations
 		public static const NAME_HEAVY_WITHOUT_HAIL: String = "Heavy without Hail";
 		public static const NAME_COMBINED_WITH_DUST_OR_SAND: String = "Combined with Dust or Sand";
 		public static const NAME_HEAVY_WITH_HAIL: String = "Heavy with Hail";
+		public static const NAME_RAIN: String = "Rain";
 		
 		public static const TYPE_SLIGHT_OR_MODERATE_WITHOUT_HAIL: String = "SlightOrModerateWithoutHail";
 		public static const TYPE_SLIGHT_OR_MODERATE_WITH_HAIL: String = "SlightOrModerateWithHail";
 		public static const TYPE_HEAVY_WITHOUT_HAIL: String = "HeavyWithoutHail";
 		public static const TYPE_COMBINED_WITH_DUST_OR_SAND: String = "CombinedWithDustOrSand";
 		public static const TYPE_HEAVY_WITH_HAIL: String = "HeavyWithHail";
+		public static const TYPE_RAIN: String = "Rain";
 			
 		//private var m_label: TextField = new TextField();
 		
@@ -129,6 +131,9 @@ package com.iblsoft.flexiweather.ogc.editable.annotations
 					break;
 				case TYPE_HEAVY_WITH_HAIL: // 'Heavy with Hail'){
 					retIconName = '99';
+					break;
+				case TYPE_RAIN: 
+					retIconName = 'thunderstorm_rain';
 					break;
 			} 
 			

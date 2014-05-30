@@ -20,12 +20,14 @@ package com.iblsoft.flexiweather.ogc.editable.annotations
 		public static const NAME_MODERATE_ISOL_SEVERE: String = 'Moderate ISOL Severe';
 		public static const NAME_MODERATE_OCNL_SEVERE: String = 'Moderate OCNL Severe';
 		public static const NAME_MODERATE_FRQ_SEVERE: String = 'Moderate FRQ Severe';
+		public static const NAME_LIGHT: String = 'Light';
 		
 		public static const TYPE_MODERATE_IN_CLEAR_AIR: String = 'ClearAirModerate';
 		public static const TYPE_SEVERE_IN_CLEAR_AIR: String = 'ClearAirSevere';
 		public static const TYPE_MODERATE_ISOL_SEVERE: String = 'ModerateISOLSevere';
 		public static const TYPE_MODERATE_OCNL_SEVERE: String = 'ModerateOCNLSevere';
 		public static const TYPE_MODERATE_FRQ_SEVERE: String = 'ModerateFRQSevere';
+		public static const TYPE_LIGHT: String = 'Light';
 		
 		
 		private var m_BaseLabel: TextField = new TextField();

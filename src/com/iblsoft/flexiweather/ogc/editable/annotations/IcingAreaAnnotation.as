@@ -14,6 +14,22 @@ package com.iblsoft.flexiweather.ogc.editable.annotations
 
 	public class IcingAreaAnnotation extends AnnotationBox
 	{
+		public static const NAME_CLEAR: String = 'Clear';
+		public static const NAME_RIME: String = 'Rime';
+		public static const NAME_MIXED: String = 'Mixed';
+		
+		public static const TYPE_CLEAR: String = 'Clear';
+		public static const TYPE_RIME: String = 'Rime';
+		public static const TYPE_MIXED: String = 'Mixed';
+		
+		public static const DEGREE_NAME_LIGHT: String = 'Light';
+		public static const DEGREE_NAME_MODERATE: String = 'Moderate';
+		public static const DEGREE_NAME_SEVERE: String = 'Severe';
+		
+		public static const DEGREE_TYPE_LIGHT: String = 'Light';
+		public static const DEGREE_TYPE_MODERATE: String = 'Moderate';
+		public static const DEGREE_TYPE_SEVERE: String = 'Severe';
+		
 		//private var m_label: TextField = new TextField();
 		
 		private var m_BaseLabel: TextField = new TextField();
