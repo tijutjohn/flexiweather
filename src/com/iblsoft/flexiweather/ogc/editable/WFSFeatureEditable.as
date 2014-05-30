@@ -90,6 +90,8 @@ package com.iblsoft.flexiweather.ogc.editable
 		
 		private function updateCoordsReflections(): void
 		{
+			if (!master)
+				return;
 //			var reflections: Dictionary = new Dictionary();
 //			ml_movablePoints.cleanup();
 			var total: int = coordinates.length;
@@ -365,14 +367,16 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			if (s_namespace == null)
 				s_namespace = ms_namespace;
-			var p: XML = <wfs:Property xmlns:wfs="http://www.opengis.net/wfs"/>
-					;
-			p.appendChild(<wfs:Name xmlns:wfs="http://www.opengis.net/wfs" xmlns:ns={s_namespace}>ns:{s_property}</wfs:Name>
-					);
-			var v: XML = <wfs:Value xmlns:wfs="http://www.opengis.net/wfs"/>
-					;
-			v.appendChild(value);
-			p.appendChild(v);
+			var p: XML = <wfs:Property xmlns:wfs="http://www.opengis.net/wfs"/>;
+			p.appendChild(<wfs:Name xmlns:wfs="http://www.opengis.net/wfs" xmlns={s_namespace}>{s_property}</wfs:Name>);
+			
+			if (value)
+			{
+				var v: XML = <wfs:Value xmlns:wfs="http://www.opengis.net/wfs"/>;
+				v.appendChild(value);
+				p.appendChild(v);
+			}
+			
 			xmlUpdate.appendChild(p);
 		}
 

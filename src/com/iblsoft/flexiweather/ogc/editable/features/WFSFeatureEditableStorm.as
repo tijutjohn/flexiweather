@@ -94,6 +94,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 				ms_actIconLoaded = nIcon;
 				WFSIconLoader.getInstance().getIcon(nIcon, this, onIconLoaded, 'SIGWX');
 			}
+			
 		}	
 		
 		override public function getDisplaySpriteForReflection(id: int): WFSFeatureEditableSprite

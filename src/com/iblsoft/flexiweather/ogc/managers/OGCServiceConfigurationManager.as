@@ -126,9 +126,6 @@ package com.iblsoft.flexiweather.ogc.managers
 			if (osc.name.indexOf('obser') >= 0)
 				trace("check observations");
 			
-//			if (osc.updatePeriod == 0)
-//				osc.updatePeriod = 60000;
-			
 			ma_services.addItem(osc);
 			if (ma_services.length == 1)
 				m_timer.start();

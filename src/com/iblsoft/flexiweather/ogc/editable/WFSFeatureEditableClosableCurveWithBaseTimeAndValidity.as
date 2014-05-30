@@ -302,7 +302,8 @@ package com.iblsoft.flexiweather.ogc.editable
 						}
 						
 						//remove last point as we have added it just for this test
-						a.removeItemAt(a.length - 1);
+//						a.removeItemAt(a.length - 1);
+						a.splice(a.length - 1, 1);
 					}
 					if (i_best != -1)
 					{
@@ -329,7 +330,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				else
 				{
 					// IF USER CLICK NEAR BY FIRST POINT AND CURVE HAS MORE THAN 2 POINTS (IT CAN BE CLOSED)
-					if (m_points.length > 0)
+					if (m_points && m_points.length > 0)
 					{
 						var f_distanceToFirst: Number = pt.subtract(m_points[0]).length;
 						if ((f_distanceToFirst < 10) && (m_points.length > 2))
