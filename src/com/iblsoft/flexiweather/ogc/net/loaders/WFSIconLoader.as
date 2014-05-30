@@ -136,6 +136,7 @@ class IconAssociatedData
 {
 	public var callbackFunction: Function;
 	public var url: String;
+	public var errorResult: Object;
 
 	public function IconAssociatedData(_callbackFunction: Function, s_url: String)
 	{

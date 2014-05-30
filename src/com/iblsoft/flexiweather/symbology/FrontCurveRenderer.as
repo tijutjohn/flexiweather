@@ -1,15 +1,19 @@
 package com.iblsoft.flexiweather.symbology
 {
 	import com.iblsoft.flexiweather.utils.DistanceMarkingCurveRenderer;
+	
 	import flash.display.Graphics;
 	import flash.geom.Point;
 
 	public class FrontCurveRenderer extends DistanceMarkingCurveRenderer
 	{
-		public static const MARK_WARM: uint = 0;
-		public static const MARK_COLD: uint = 1;
+		public static const MARK_COLD: uint = 0;
+		public static const MARK_WARM: uint = 1;
 		public static const MARK_OCCLUDED: uint = 2;
 		public static const MARK_STATIONARY: uint = 3;
+		public static const MARK_TROUGH: uint = 4;
+		public static const MARK_DRY_LINE: uint = 5;
+		
 		// style variables
 		protected var mi_color: uint;
 		protected var mi_colorSecondary: uint;
@@ -39,14 +43,19 @@ package com.iblsoft.flexiweather.symbology
 			m_graphics.lineStyle(2, mi_color);
 			switch (mi_markType)
 			{
-				case 2:
+				case MARK_OCCLUDED:
 				{
 					mf_markStep = 10;
 					break;
 				}
-				case 3:
+				case MARK_STATIONARY:
 				{
 					mf_markStep = 5;
+					break;
+				}
+				case MARK_DRY_LINE:
+				{
+					mf_markStep = 10;
 					break;
 				}
 				default:
@@ -69,17 +78,17 @@ package com.iblsoft.flexiweather.symbology
 					continue;
 				switch (mi_markType)
 				{
-					case 0:
+					case MARK_COLD:
 					{
 						triangle(mark.pt, mark.vDiff, mark.vNormal, mi_color);
 						break;
 					}
-					case 1:
+					case MARK_WARM:
 					{
 						hemicircle(mark.pt, mark.vDiff, mark.vNormal, mi_color);
 						break;
 					}
-					case 2:
+					case MARK_OCCLUDED:
 					{
 						switch (i_markCounter % 4)
 						{
@@ -100,7 +109,7 @@ package com.iblsoft.flexiweather.symbology
 						}
 						break;
 					}
-					case 3:
+					case MARK_STATIONARY:
 					{
 						switch (i_markCounter % 8)
 						{
@@ -115,6 +124,15 @@ package com.iblsoft.flexiweather.symbology
 								break;
 							}
 						}
+					}
+					case MARK_TROUGH:
+					{
+						break;
+					}
+					case MARK_DRY_LINE:
+					{
+						dryLineHemicircle(mark.pt, mark.vDiff, mark.vNormal, mi_color);
+						break;
 					}
 				}
 				++i_markCounter;
@@ -131,7 +149,7 @@ package com.iblsoft.flexiweather.symbology
 			vNormal.normalize(1);
 			ml_markPoints.push(new Mark(pt, vNormal, vDiff, mf_currentDistance));
 			++mi_markCounter;
-			if (mi_markType == 3)
+			if (mi_markType == MARK_STATIONARY)
 			{
 				switch (mi_markCounter % 8)
 				{
@@ -185,7 +203,7 @@ package com.iblsoft.flexiweather.symbology
 			m_graphics.endFill();
 		}
 
-		protected function hemicircle(pt: Point, vDiff: Point, vNormal: Point, i_color: uint): void
+		protected function hemicircle(pt: Point, vDiff: Point, vNormal: Point, i_color: uint, b_useFill: Boolean = true): void
 		{
 			var f_w: Number = mf_markWidth / 2.0;
 			var f_h: Number = f_w * 1.2;
@@ -196,12 +214,21 @@ package com.iblsoft.flexiweather.symbology
 			var f_xL: Number = pt.x - vDiff.x * f_w;
 			var f_yL: Number = pt.y - vDiff.y * f_w;
 			m_graphics.lineStyle(1, i_color);
-			m_graphics.beginFill(i_color);
+			
+			if (b_useFill)
+				m_graphics.beginFill(i_color);
+			
 			m_graphics.moveTo(f_xR, f_yR);
 			m_graphics.curveTo(f_xR + vNormal.x * f_h, f_yR + vNormal.y * f_h, f_xC, f_yC);
 			m_graphics.curveTo(f_xL + vNormal.x * f_h, f_yL + vNormal.y * f_h, f_xL, f_yL);
 			m_graphics.lineTo(f_xR, f_yR);
-			m_graphics.endFill();
+			if (b_useFill)
+				m_graphics.endFill();
+		}
+		
+		protected function dryLineHemicircle(pt: Point, vDiff: Point, vNormal: Point, i_color: uint): void
+		{
+			hemicircle(pt, vDiff, vNormal, i_color, false);
 		}
 	}
 }

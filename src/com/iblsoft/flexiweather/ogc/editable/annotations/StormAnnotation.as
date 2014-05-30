@@ -99,6 +99,13 @@ package com.iblsoft.flexiweather.ogc.editable.annotations
 		{
 			super.updateContent();
 			
+			if (m_stormFeature.label == null)
+			{
+				m_TextLabel.visible = false;
+				graphics.clear();
+				return;
+//				visible = false;
+			}
 			
 			if (m_stormFeature){
 				// FILL BASE DATA

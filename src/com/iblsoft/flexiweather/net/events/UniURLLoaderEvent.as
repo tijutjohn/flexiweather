@@ -28,7 +28,10 @@ package com.iblsoft.flexiweather.net.events
 
 		public override function clone(): Event
 		{
-			return new UniURLLoaderEvent(type, m_result, m_request, m_associatedData, bubbles, cancelable);
+			var event: UniURLLoaderEvent = new UniURLLoaderEvent(type, m_result, m_request, m_associatedData, bubbles, cancelable);
+			event.m_loader = m_loader;
+			
+			return event;
 		}
 
 		public function get result(): Object
