@@ -171,7 +171,7 @@ package com.iblsoft.flexiweather.net.loaders
 			var urlArr: Array = url.split('?');
 			//check if there are get parameters divide by "?" character
 			var urlParamsExists: Boolean = (urlArr.length == 2);
-			if (!urlParamsExists)
+			if (!urlParamsExists || (urlParamsExists && (urlArr[1] as String).length == 0))
 			{
 				//don't do anything, there are not url params
 				return;
@@ -486,7 +486,7 @@ package com.iblsoft.flexiweather.net.loaders
 			}
 			UniURLLoaderManager.instance.addLoaderRequest(urlRequest);
 			urlLoader.load(urlRequest);
-//			debug("Load URL: " + urlRequest.url);
+			debug("Load URL: " + urlRequest.url);
 			var backgroundJob: BackgroundJob = null;
 			if (s_backgroundJobName != null)
 				backgroundJob = BackgroundJobManager.getInstance().startJob(s_backgroundJobName);
