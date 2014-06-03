@@ -526,6 +526,58 @@ package com.iblsoft.flexiweather.ogc.managers
 			}
 		}
 		
+		public function getPreviousGlobalVariableValue(globalVariable: String): Object
+		{
+			return getGlobalVariableValue(globalVariable, -1);
+		}
+		public function getNextGlobalVariableValue(globalVariable: String): Object
+		{
+			return getGlobalVariableValue(globalVariable, 1);
+		}
+		
+		private function getGlobalVariableValue(globalVariable: String, positionDiff: int): Object
+		{
+			var arr: ArrayCollection;
+			var selectedValue: Object;
+			
+			switch (globalVariable)
+			{
+				case GlobalVariable.FRAME:
+					arr = frames;
+					selectedValue = _frame;
+					break;
+				case GlobalVariable.RUN:
+					arr = runs;
+					selectedValue = _run;
+					break;
+				case GlobalVariable.LEVEL:
+					arr = levels;
+					selectedValue = _level;
+					break;
+			}
+
+			var selectedPosition: int = -1;
+			
+			var total: int = arr.length;
+			for (var i: int = 0; i < total; i++)
+			{
+				var value: Object = arr.getItemAt(i);
+				if (selectedValue == value)
+				{
+					selectedPosition = i;
+					break;
+				}
+			}
+			
+			var requestedPosition: int = selectedPosition + positionDiff;
+			if (requestedPosition > -1 && requestedPosition < (total - 1))
+			{
+				return arr.getItemAt(requestedPosition);
+			}
+			
+			return null;
+		}
+		
 		private function sameCollection(collection1: ArrayCollection, collection2: ArrayCollection): Boolean
 		{
 			if (collection1 && collection2)
