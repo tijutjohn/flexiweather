@@ -1,15 +1,17 @@
 package com.iblsoft.flexiweather.proj
 {
 	import flash.geom.Point;
-	import flash.geom.Vector3D;
 	
-	import mx.formatters.NumberFormatter;
+	import spark.formatters.NumberFormatter;
+	
+	
 
 	public class Coord extends Point
 	{
 		public var crs: String;
 		private var toRadConst: Number = Math.PI / 180;
 
+		private var _formatter: NumberFormatter;
 		/**
 		 *
 		 * @param s_crs
@@ -21,6 +23,10 @@ package com.iblsoft.flexiweather.proj
 		{
 			super(f_x, f_y);
 			crs = s_crs;
+			
+			_formatter = new NumberFormatter();
+			_formatter.leadingZero = true;
+			_formatter.trailingZeros = true;
 		}
 
 		private function toRad(degree: Number): Number
@@ -425,8 +431,10 @@ package com.iblsoft.flexiweather.proj
 		{
 			if (Projection.equalCRSs(crs, "CRS:84"))
 			{
+				/*
 				var f_loFrac: Number = x;
-				var f_loEW: String = f_loFrac < 0 ? "W" : "E";
+				
+				var f_loEW: String = getEastWestChar();
 				f_loFrac = Math.abs(f_loFrac);
 				var f_loDeg: Number = Math.floor(f_loFrac);
 				f_loFrac = f_loFrac - f_loDeg;
@@ -435,8 +443,9 @@ package com.iblsoft.flexiweather.proj
 				f_loFrac -= f_loMin;
 				f_loFrac *= 60;
 				var f_loSec: Number = Math.round(f_loFrac);
+				
 				var f_laFrac: Number = y;
-				var f_laNS: String = f_laFrac < 0 ? "S" : "N";
+				var f_laNS: String = getSouthNorthChar();
 				f_laFrac = Math.abs(f_laFrac);
 				var f_laDeg: Number = Math.floor(f_laFrac);
 				f_laFrac = f_laFrac - f_laDeg;
@@ -445,12 +454,165 @@ package com.iblsoft.flexiweather.proj
 				f_laFrac -= f_laMin;
 				f_laFrac *= 60;
 				var f_laSec: Number = Math.round(f_laFrac);
+				
 				return f_laDeg + f_laNS + f_laMin + "'" + f_laSec + '"' + " "
 						+ f_loDeg + f_loEW + f_loMin + "'" + f_loSec + '"';
+				*/
+				
+				return getLatitudeString(CoordFormatType.FORMAT_DEGREES_AND_MINUTES) + " " + getLongitudeString(CoordFormatType.FORMAT_DEGREES_AND_MINUTES);
 			}
-			var nf: NumberFormatter = new NumberFormatter();
-			nf.precision = 2;
-			return crs + ": [" + nf.format(x) + ", " + nf.format(y) + "]";
+			_formatter.fractionalDigits = 2;
+			return crs + ": [" + _formatter.format(x) + ", " + _formatter.format(y) + "]";
+		}
+		
+		private function updateLeadingZeroes(numberString: Number, length: int): String
+		{
+			var sNumberString: String = numberString.toString();
+			
+			if (sNumberString.length < length)
+			{
+				var zeroesNeeded: int = length - sNumberString.length;
+				var returnStr: String = '';
+				for (var i: int = 0; i < zeroesNeeded; i++)
+				{
+					returnStr += "0";	
+				}
+				returnStr += sNumberString;
+				
+				return returnStr;
+			}
+			
+			return sNumberString;
+		}
+		private function getLongitudeString(sFormat: String): String
+		{
+			var f_loFrac: Number = x;
+			
+			var f_loEW: String = getEastWestChar();
+			f_loFrac = Math.abs(f_loFrac);
+			var f_loDeg: Number = Math.floor(f_loFrac);
+			f_loFrac = f_loFrac - f_loDeg;
+			f_loFrac *= 60;
+			var f_loMin: Number = Math.floor(f_loFrac);
+			
+			var s_loMin: String = updateLeadingZeroes(f_loMin, 2);
+			switch (sFormat)
+			{
+				case CoordFormatType.FORMAT_RADIANS:
+					_formatter.fractionalDigits = 6;
+					return _formatter.format(toRad(x))+"rad";
+					
+				case CoordFormatType.FORMAT_SIGMET:
+					return f_loEW +  updateLeadingZeroes(f_loDeg, 3) + s_loMin;
+					
+				case CoordFormatType.FORMAT_DEGREES_AND_MINUTES:
+					return f_loDeg +"°" + s_loMin + "'" + f_loEW;
+					
+				case CoordFormatType.FORMAT_DEGREES_ROUNDED:
+					return f_loDeg +"°" + s_loMin + "'" + f_loEW;
+					
+				case CoordFormatType.FORMAT_DECIMAL_DEGREE_1_DIGIT:
+					_formatter.fractionalDigits = 1;
+					return _formatter.format(f_loFrac) +"°" + f_loEW;
+					
+				case CoordFormatType.FORMAT_DECIMAL_DEGREE_2_DIGIT:
+					_formatter.fractionalDigits = 2;
+					return _formatter.format(f_loFrac) +"°" + f_loEW;
+					
+				case CoordFormatType.FORMAT_DECIMAL_DEGREE_6_DIGIT:
+					_formatter.fractionalDigits = 6;
+					return _formatter.format(f_loFrac) +"°" + f_loEW;
+			}
+				
+			f_loFrac -= f_loMin;
+			f_loFrac *= 60;
+			
+			var f_loSec: Number = Math.round(f_loFrac);
+			var s_loSec: String = updateLeadingZeroes(f_loSec, 2);
+			switch (sFormat)
+			{
+				case CoordFormatType.FORMAT_DEGREES_MINUTES_AND_SECONDS:
+					return f_loDeg +"°" + s_loMin + "'" + s_loSec + '"' + f_loEW;
+					
+				case CoordFormatType.FORMAT_DEGREES_MINUTES_AND_SECONDS_6_DIGITS:
+					_formatter.fractionalDigits = 6;
+					return f_loDeg +"°" + s_loMin + "'" + _formatter.format(f_loFrac) + '"' + f_loEW;
+			}
+			
+			return f_loDeg + f_loEW + s_loMin + "'" + f_loSec + '"';
+		}
+		
+		private function getLatitudeString(sFormat: String): String
+		{
+			var f_laFrac: Number = y;
+			var f_laNS: String = getSouthNorthChar();
+			f_laFrac = Math.abs(f_laFrac);
+			
+			var f_laDeg: Number = Math.floor(f_laFrac);
+			f_laFrac = f_laFrac - f_laDeg;
+			f_laFrac *= 60;
+			
+			var f_laMin: Number = Math.floor(f_laFrac);
+			var s_laMin: String = updateLeadingZeroes(f_laMin, 2);
+			
+			switch (sFormat)
+			{
+				case CoordFormatType.FORMAT_RADIANS:
+					_formatter.fractionalDigits = 6;
+					return _formatter.format(toRad(y))+"rad";
+					
+				case CoordFormatType.FORMAT_SIGMET:
+					return f_laNS + updateLeadingZeroes(f_laDeg, 2) + s_laMin;
+					
+				case CoordFormatType.FORMAT_DEGREES_AND_MINUTES:
+					return f_laDeg +"°" + s_laMin + "'" + f_laNS;
+					
+				case CoordFormatType.FORMAT_DEGREES_ROUNDED:
+					return f_laDeg + f_laNS;
+					
+				case CoordFormatType.FORMAT_DECIMAL_DEGREE_1_DIGIT:
+					_formatter.fractionalDigits = 1;
+					return _formatter.format(f_laFrac) +"°" + f_laNS;
+					
+				case CoordFormatType.FORMAT_DECIMAL_DEGREE_2_DIGIT:
+					_formatter.fractionalDigits = 2;
+					return _formatter.format(f_laFrac) +"°" + f_laNS;
+					
+				case CoordFormatType.FORMAT_DECIMAL_DEGREE_6_DIGIT:
+					_formatter.fractionalDigits = 6;
+					return _formatter.format(f_laFrac) +"°" + f_laNS;
+			}
+			
+			f_laFrac -= f_laMin;
+			f_laFrac *= 60;
+			var f_laSec: Number = Math.round(f_laFrac);
+			
+			switch (sFormat)
+			{
+				case CoordFormatType.FORMAT_DEGREES_MINUTES_AND_SECONDS:
+					return f_laDeg +"°" + s_laMin + "'" + f_laSec + '"' + f_laNS;
+				case CoordFormatType.FORMAT_DEGREES_MINUTES_AND_SECONDS_6_DIGITS:
+						_formatter.fractionalDigits = 6;
+					return f_laDeg +"°" + s_laMin + "'" + _formatter.format(f_laFrac) + '"' + f_laNS;
+			}
+			
+			return f_laDeg + f_laNS + s_laMin + "'" + f_laSec + '"';
+		}
+		
+		private function getEastWestChar(): String
+		{
+			return x < 0 ? "W" : "E";
+		}
+		private function getSouthNorthChar(): String
+		{
+			return y < 0 ? "S" : "N";
+		}
+		
+		
+		public function formatCoordinate(formatType: String): String
+		{
+			var formattedString: String = getLatitudeString(formatType) + " " + getLongitudeString(formatType);
+			return formattedString;
 		}
 
 		public function convertToProjection(projection: Projection): Coord
