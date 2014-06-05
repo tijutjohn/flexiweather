@@ -509,7 +509,7 @@ package com.iblsoft.flexiweather.proj
 					return f_loDeg +"°" + s_loMin + "'" + f_loEW;
 					
 				case CoordFormatType.FORMAT_DEGREES_ROUNDED:
-					return f_loDeg +"°" + s_loMin + "'" + f_loEW;
+					return updateLeadingZeroes(f_loDeg, 3) + f_loEW;
 					
 				case CoordFormatType.FORMAT_DECIMAL_DEGREE_1_DIGIT:
 					_formatter.fractionalDigits = 1;
@@ -521,7 +521,7 @@ package com.iblsoft.flexiweather.proj
 					
 				case CoordFormatType.FORMAT_DECIMAL_DEGREE_6_DIGIT:
 					_formatter.fractionalDigits = 6;
-					return _formatter.format(f_loFrac) +"°" + f_loEW;
+					return _formatter.format(x);// +"°" + f_loEW;
 			}
 				
 			f_loFrac -= f_loMin;
@@ -539,7 +539,7 @@ package com.iblsoft.flexiweather.proj
 					return f_loDeg +"°" + s_loMin + "'" + _formatter.format(f_loFrac) + '"' + f_loEW;
 			}
 			
-			return f_loDeg + f_loEW + s_loMin + "'" + f_loSec + '"';
+			return f_loDeg + f_loEW + s_loMin + "'" + s_loSec + '"';
 		}
 		
 		private function getLatitudeString(sFormat: String): String
@@ -568,7 +568,7 @@ package com.iblsoft.flexiweather.proj
 					return f_laDeg +"°" + s_laMin + "'" + f_laNS;
 					
 				case CoordFormatType.FORMAT_DEGREES_ROUNDED:
-					return f_laDeg + f_laNS;
+					return updateLeadingZeroes(f_laDeg, 2) + f_laNS;
 					
 				case CoordFormatType.FORMAT_DECIMAL_DEGREE_1_DIGIT:
 					_formatter.fractionalDigits = 1;
@@ -580,23 +580,24 @@ package com.iblsoft.flexiweather.proj
 					
 				case CoordFormatType.FORMAT_DECIMAL_DEGREE_6_DIGIT:
 					_formatter.fractionalDigits = 6;
-					return _formatter.format(f_laFrac) +"°" + f_laNS;
+					return _formatter.format(y);// +"°" + f_laNS;
 			}
 			
 			f_laFrac -= f_laMin;
 			f_laFrac *= 60;
 			var f_laSec: Number = Math.round(f_laFrac);
+			var s_laSec: String = updateLeadingZeroes(f_laSec, 2);
 			
 			switch (sFormat)
 			{
 				case CoordFormatType.FORMAT_DEGREES_MINUTES_AND_SECONDS:
-					return f_laDeg +"°" + s_laMin + "'" + f_laSec + '"' + f_laNS;
+					return f_laDeg +"°" + s_laMin + "'" + s_laSec + '"' + f_laNS;
 				case CoordFormatType.FORMAT_DEGREES_MINUTES_AND_SECONDS_6_DIGITS:
 						_formatter.fractionalDigits = 6;
 					return f_laDeg +"°" + s_laMin + "'" + _formatter.format(f_laFrac) + '"' + f_laNS;
 			}
 			
-			return f_laDeg + f_laNS + s_laMin + "'" + f_laSec + '"';
+			return f_laDeg + f_laNS + s_laMin + "'" + s_laSec + '"';
 		}
 		
 		private function getEastWestChar(): String
@@ -611,7 +612,11 @@ package com.iblsoft.flexiweather.proj
 		
 		public function formatCoordinate(formatType: String): String
 		{
-			var formattedString: String = getLatitudeString(formatType) + " " + getLongitudeString(formatType);
+			var space: String = " ";
+			if (formatType == CoordFormatType.FORMAT_DEGREES_ROUNDED)
+				space = "";
+			
+			var formattedString: String = getLatitudeString(formatType) + space + getLongitudeString(formatType);
 			return formattedString;
 		}
 
