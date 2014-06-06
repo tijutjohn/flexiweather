@@ -38,10 +38,15 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			super.destroy();
 		}
 
-
-		override public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer
+		override public function createLayerInstance(iw: InteractiveWidget): InteractiveLayer
 		{
 			var l: InteractiveLayerQTTMS = new InteractiveLayerQTTMS(iw, this);
+			return l;			
+		}
+		
+		override public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer
+		{
+			var l: InteractiveLayerQTTMS = createLayerInstance(iw) as InteractiveLayerQTTMS;
 //			l.tilesProvider = new QTTTilesProvider();
 			l.name = label;
 			l.layerName = label;

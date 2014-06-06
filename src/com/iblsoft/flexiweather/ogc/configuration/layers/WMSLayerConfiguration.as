@@ -526,10 +526,15 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			return (s_behaviourId in ma_behaviours) ? ma_behaviours[s_behaviourId] : s_default;
 		}
 
+		override public function createLayerInstance(iw: InteractiveWidget): InteractiveLayer
+		{
+			var l: InteractiveLayerWMS = new InteractiveLayerWMS(iw, this);
+			return l;			
+		}
 		// IInteractiveLayerProvider implementation
 		override public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer
 		{
-			var l: InteractiveLayerWMS = new InteractiveLayerWMS(iw, this);
+			var l: InteractiveLayerWMS = createLayerInstance(iw) as InteractiveLayerWMS;
 			l.layerName = label;
 			return l;
 		}

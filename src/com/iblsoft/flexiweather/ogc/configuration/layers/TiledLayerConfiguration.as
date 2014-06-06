@@ -29,9 +29,14 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		{
 		}
 
-		override public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer
+		override public function createLayerInstance(iw: InteractiveWidget): InteractiveLayer
 		{
 			var l: InteractiveLayerTiled = new InteractiveLayerTiled(iw);
+			return l;			
+		}
+		override public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer
+		{
+			var l: InteractiveLayerTiled = createLayerInstance(iw) as InteractiveLayerTiled;
 			l.name = label;
 			l.layerName = label;
 			return l;
