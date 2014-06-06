@@ -50,6 +50,11 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		{
 		}
 
+		public function createLayerInstance(iw: InteractiveWidget): InteractiveLayer
+		{
+			return null;
+		}
+		
 		public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer
 		{
 			return null;

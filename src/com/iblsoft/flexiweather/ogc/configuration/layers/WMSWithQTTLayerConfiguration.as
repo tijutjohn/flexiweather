@@ -36,9 +36,15 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			_avoidTiling = value;
 		}
 
-		override public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer
+		override public function createLayerInstance(iw: InteractiveWidget): InteractiveLayer
 		{
 			var l: InteractiveLayerWMSWithQTT = new InteractiveLayerWMSWithQTT(iw, this);
+			return l;			
+		}
+		
+		override public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer
+		{
+			var l: InteractiveLayerWMSWithQTT = createLayerInstance(iw) as InteractiveLayerWMSWithQTT;
 			l.layerName = label;
 			return l;
 		}

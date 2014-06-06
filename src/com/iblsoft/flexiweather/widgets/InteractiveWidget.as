@@ -1063,6 +1063,28 @@ package com.iblsoft.flexiweather.widgets
 			return null;
 		}
 		
+		public function shownOnScreen(bbox: BBox): Boolean
+		{
+			var crs: String = getCRS();
+			
+			if (crs == Projection.CRS_GEOGRAPHIC)
+			{
+				var layerBbox:BBox = getViewBBox();
+				
+				var allReflectionParts:Array = mapBBoxToViewReflections(bbox, true);
+				for each (var currentReflectionPart:BBox in allReflectionParts) {
+					var allReflectionVisibleParts:Array = mapBBoxToProjectionExtentParts(currentReflectionPart);
+					for each (var currentReflectionVisiblePart:BBox in allReflectionVisibleParts) {
+						if (layerBbox.intersects(currentReflectionVisiblePart)) {
+							return true; //Layer bounds within viewing bounds
+						}
+					}
+				}
+				return false;
+			}
+			return true;
+		}
+		
 		/**
 		 * Splits coordinates of BBox (in the currently used CRS) into partial sub-BBoxes of the
 		 * IW's View BBox, which are visible.
