@@ -364,10 +364,16 @@ package com.iblsoft.flexiweather.ogc.kml.configuration
 		}
 		*/
 
+		override public function createLayerInstance(iw: InteractiveWidget): InteractiveLayer
+		{
+			var l: InteractiveLayerKML = new InteractiveLayerKML(iw, _kml, new Version(2, 2, 0));
+			return l;			
+		}
+														
 		override public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer
 		{
 			//TODO need to check KML version from loaded KML
-			var l: InteractiveLayerKML = new InteractiveLayerKML(iw, _kml, new Version(2, 2, 0));
+			var l: InteractiveLayerKML = createLayerInstance(iw) as InteractiveLayerKML;
 			if (label)
 			{
 				l.name = label;
