@@ -47,7 +47,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 		public var volcano:Object;
 		
 		//TODO add better depedency on InteractiveWidget
-		public var iw:InteractiveWidget;
+//		public var iw:InteractiveWidget;
 //		public var iw:InteractiveWidget = (FlexGlobals.topLevelApplication as IBrowsingWeather).mainView.iw;
 		
 //		public static const smf_pxToPt: Number = 0.35277777910232544;
@@ -212,7 +212,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 //			addInsertGMLProperty(xmlInsert, null, "baseTime", ISO8601Parser.dateToString(m_baseTime)); 
 //			addInsertGMLProperty(xmlInsert, null, "validity", ISO8601Parser.dateToString(m_validity));
 			
-			var crs: String = iw.getCRS();
+			var crs: String = master.container.getCRS();
 			var gml: Namespace = new Namespace("http://www.opengis.net/gml");
 			addInsertGMLProperty(xmlInsert, null, "baseTime", ISO8601Parser.dateToString(m_baseTime)); 
 			addInsertGMLProperty(xmlInsert, null, "validity", ISO8601Parser.dateToString(m_validity));
@@ -226,7 +226,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 		{
 //			super.toUpdateGML(xmlUpdate);
 			
-			var crs: String = iw.getCRS();
+			var crs: String = master.container.getCRS();
 			var gml: Namespace = new Namespace("http://www.opengis.net/gml");
 			addInsertGMLProperty(xmlUpdate, null, "baseTime", ISO8601Parser.dateToString(m_baseTime)); 
 			addInsertGMLProperty(xmlUpdate, null, "validity", ISO8601Parser.dateToString(m_validity));
@@ -263,8 +263,8 @@ package com.iblsoft.flexiweather.ogc.editable.features
 				var s_srs: String = node.@srsName;
 			}
 			
-			var c: Coord = new Coord(iw.getCRS(), a_bits[0], a_bits[1]);
-			var cooPoint:Point = iw.coordToPoint(c);
+			var c: Coord = new Coord(s_srs, a_bits[0], a_bits[1]);
+			var cooPoint:Point = master.container.coordToPoint(c);
 			
 			volcano = {
 					number: 1,
