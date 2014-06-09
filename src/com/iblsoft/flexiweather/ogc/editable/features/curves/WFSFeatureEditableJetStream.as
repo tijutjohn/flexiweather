@@ -42,11 +42,6 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 	{
 		public var values:Object;
 		
-		//TODO add better depedency on InteractiveWidget
-		public var iw:InteractiveWidget;
-//		public var iw:InteractiveWidget = (FlexGlobals.topLevelApplication as IBrowsingWeather).mainView.iw;
-		
-		
 //		protected var m_windPointsOnCurve: ArrayCollection = new ArrayCollection();
 //		protected var m_windCoordinates: ArrayCollection = new ArrayCollection();
 		
@@ -351,6 +346,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 			
 			i_color = getCurrentColor(i_color);
 
+			var iw: InteractiveWidget = m_master.container;
 			
 			var reflection: WindReflectionData;
 			var totalReflections: uint = ml_movablePoints.totalReflections;
@@ -775,6 +771,9 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 		override public function fromGML(gml: XML): void
 		{
 			super.fromGML(gml);
+			
+			var iw: InteractiveWidget = m_master.container;
+			
 			var ns: Namespace = new Namespace(ms_namespace);
 			var nsGML: Namespace = new Namespace("http://www.opengis.net/gml");
 			

@@ -168,6 +168,7 @@ package com.iblsoft.flexiweather.ogc
 				
 				if (feature)
 				{
+					feature.setMaster(this);
 					feature.fromGML(xml);
 				}
 				return feature;
