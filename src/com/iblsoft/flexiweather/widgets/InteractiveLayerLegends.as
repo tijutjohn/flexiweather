@@ -160,6 +160,11 @@ package com.iblsoft.flexiweather.widgets
 			return null;
 		}
 
+		public function isLayerInside(l: InteractiveLayer): Boolean
+		{
+			var id: int = m_layers.getItemIndex(l);
+			return id > -1;
+		}
 		public function addLayer(l: InteractiveLayer): void
 		{
 			trace("ILLegend addLayer: " + l.name);
