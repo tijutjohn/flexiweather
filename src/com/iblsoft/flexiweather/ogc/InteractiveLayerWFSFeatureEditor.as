@@ -15,7 +15,6 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableStorm;
 	import com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableText;
 	import com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableTropopause;
-	import com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableVolcanicAsh;
 	import com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableVolcano;
 	import com.iblsoft.flexiweather.ogc.editable.features.curves.WFSFeatureEditableFront;
 	import com.iblsoft.flexiweather.ogc.editable.features.curves.WFSFeatureEditableGeometry;
@@ -131,13 +130,9 @@ package com.iblsoft.flexiweather.ogc
 				{
 					feature = new WFSFeatureEditableThunderstormArea("http://www.iblsoft.com/wfs", "ThunderstormArea", xml.@gml::id);
 				}
-				else if (tagName.localName == "VolcanicAsh")
-				{
-					feature = new WFSFeatureEditableVolcanicAsh("http://www.iblsoft.com/wfs", "VolcanicAsh", xml.@gml::id);
-				}
 				else if (tagName.localName == "Volcano")
 				{
-					feature = new WFSFeatureEditableVolcano("http://www.iblsoft.com/wfs", "VolcanicAsh", xml.@gml::id);
+					feature = new WFSFeatureEditableVolcano("http://www.iblsoft.com/wfs", "Volcano", xml.@gml::id);
 				}
 				else if (tagName.localName == "Radiation")
 				{
