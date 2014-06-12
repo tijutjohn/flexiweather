@@ -120,11 +120,18 @@ package com.iblsoft.flexiweather.widgets
 		override public function draw(graphics: Graphics): void
 		{
 			super.draw(graphics);
+			var gr: Graphics = graphics;
+			gr.clear();
+			if (!_primaryLayer)
+				return;
+			
 			var dimensionLabelParser: DimensionLabelParser = new DimensionLabelParser();
 			if (_synchronizator)
 			{
 				var labelText: String = dimensionLabelParser.parseLabel(_synchronizator.labelString, container.interactiveLayerMap);
 				updateLayerLabel(labelText);
+			} else {
+				return;
 			}
 			//we want to display info just from _synchronizedVariableName
 //			if (_synchronizedVariableNames && _synchronizedVariableNames.length > 0 && _primaryLayer)
@@ -152,13 +159,13 @@ package com.iblsoft.flexiweather.widgets
 //			}
 			//draw label
 			var bkgColor: uint = 0x000000;
-			
 			var dataAvailable: Boolean = true;
 			if (_primaryLayer) 
 			{
 				if (_primaryLayer.status == InteractiveDataLayer.STATE_NO_SYNCHRONISATION_DATA_AVAILABLE)	dataAvailable = false;
 				if (!_primaryLayer.container.enabled) dataAvailable = false;
 			}
+			
 			if (labelText == '') dataAvailable = false;
 			
 			if (!dataAvailable)
@@ -187,8 +194,6 @@ package com.iblsoft.flexiweather.widgets
 				_label.width = w;
 				_label.height = h;
 			}
-			var gr: Graphics = graphics;
-			gr.clear();
 			gr.beginFill(0x000000);
 			gr.drawRect(0, height - h, w, h);
 			gr.endFill();
