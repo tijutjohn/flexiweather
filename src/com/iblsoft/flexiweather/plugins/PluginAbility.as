@@ -20,6 +20,7 @@ package com.iblsoft.flexiweather.plugins
 		public static const LAYER_CHANGE_LISTENER: String = "layerChangeListener";
 		public static const LAYER_OPTIONS_PROVIDER: String = "layerOptionsProvider";
 		public static const LAYER_BEHAVIOUR: String = "layerBehaviour";
+		public static const LEGENDS: String = "legends";
 		public static const MENU_ITEM: String = "menuItem";
 		public static const MENU_ITEM_CLICK_LISTENER: String = "menuItemClickListener";
 		public static const SUBMENU_ITEM: String = "submenuItem";
@@ -91,6 +92,12 @@ package com.iblsoft.flexiweather.plugins
 			return new PluginAbility(PluginAbility.PANE_CLIENT, s_id, s_plugin_id, classOrInstance);
 		}
 
+		public static function legends(classOrInstance: Object,
+				s_id: String = null, s_plugin_id: String = null): PluginAbility
+		{
+			return new PluginAbility(PluginAbility.LEGENDS, s_id, s_plugin_id, classOrInstance);
+		}
+		
 		public static function interactiveWidgetClient(classOrInstance: Object,
 				s_id: String = null, s_plugin_id: String = null): PluginAbility
 		{
