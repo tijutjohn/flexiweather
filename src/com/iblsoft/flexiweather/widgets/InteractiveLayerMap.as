@@ -15,6 +15,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.cache.ICache;
 	import com.iblsoft.flexiweather.ogc.configuration.MapTimelineConfiguration;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
+	import com.iblsoft.flexiweather.ogc.data.GlobalVariableValue;
 	import com.iblsoft.flexiweather.ogc.events.ServiceCapabilitiesEvent;
 	import com.iblsoft.flexiweather.ogc.managers.GlobalVariablesManager;
 	import com.iblsoft.flexiweather.ogc.managers.OGCServiceConfigurationManager;
@@ -27,6 +28,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.utils.HTMLUtils;
 	import com.iblsoft.flexiweather.utils.ISO8601Parser;
 	import com.iblsoft.flexiweather.utils.LoggingUtils;
+	import com.iblsoft.flexiweather.utils.Operators;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.utils.XMLStorage;
@@ -151,16 +153,16 @@ package com.iblsoft.flexiweather.widgets
 		[Bindable(event = RUN_VARIABLE_CHANGED)]
 		public function get run(): Date
 		{
-			var runDate: Date = getSynchronizedRunValue();
-//			var runString: String = _globalVariablesManager.run;
+//			var runDate: Date = getSynchronizedRunValue();
+			var runDate: Date = _globalVariablesManager.run;
 			return runDate;
 		}
 		
 		[Bindable(event = LEVEL_VARIABLE_CHANGED)]
 		public function get level(): String
 		{
-			var levelString: String = getSynchronizedLevelValue();
-//			var levelString: String = _globalVariablesManager.level;
+//			var levelString: String = getSynchronizedLevelValue();
+			var levelString: String = _globalVariablesManager.level;
 			return levelString;
 		}
 
@@ -1158,6 +1160,10 @@ package com.iblsoft.flexiweather.widgets
 						bSynchronized = bSynchronized || SynchronisationResponse.wasSynchronised(frameSynchronisationResponse);
 					}
 					if (level) {
+						//if at the startup global level is not set correctly (intersection of all synchronised layers has not such value), it needs to be set for globalvariableManager
+						if (_globalVariablesManager.level != level)
+							_globalVariablesManager.level = level;
+						
 						var levelSynchronisationResponse: String = so.synchroniseWith(GlobalVariable.LEVEL, level);
 						bSynchronized = bSynchronized || SynchronisationResponse.wasSynchronised(levelSynchronisationResponse);
 					}
@@ -1229,21 +1235,90 @@ package com.iblsoft.flexiweather.widgets
 		private function getSynchronizedFrameValue(): Date
 		{
 			if (primaryLayer)
-				return (primaryLayer as ISynchronisedObject).getSynchronisedVariableValue(GlobalVariable.FRAME) as Date;
+				return (primaryLayer as ISynchronisedObject).getSynchronisedVariableValue(GlobalVariable.FRAME, false) as Date;
 			return null;
 		}
 		
 		private function getSynchronizedRunValue(): Date
 		{
 			if (primaryLayer)
-				return (primaryLayer as ISynchronisedObject).getSynchronisedVariableValue(GlobalVariable.RUN) as Date;
+			{
+				var currRun: Date = (primaryLayer as ISynchronisedObject).getSynchronisedVariableValue(GlobalVariable.RUN, false) as Date;
+				
+				var runs: Array = getRuns();
+				if (runs)
+				{
+					var total: int = runs.length;
+					if (runs[0] is GlobalVariableValue)
+					{
+						for each (var cRun: GlobalVariableValue in runs)
+						{
+							if (cRun.value.time == currRun.time)
+								return currRun;
+						}
+						return (runs[0] as GlobalVariableValue).value as Date;
+					} if (runs[0] is Date)
+					{
+						for each (var cRunDate: Date in runs)
+						{
+							if (cRunDate.time == currRun.time)
+								return currRun;
+						}
+						return runs[0] as Date;
+					}
+				} 
+				return currRun;
+			}
 			return null;
 		}
 		
+		private function synchronizePrimaryLayerLevel(level: String): void
+		{
+			if (primaryLayer)
+			{
+				(primaryLayer as ISynchronisedObject).synchroniseWith(GlobalVariable.LEVEL, level);
+				(primaryLayer as ISynchronisedObject).refreshForSynchronisation(false);
+			}
+		}
 		private function getSynchronizedLevelValue(): String
 		{
 			if (primaryLayer)
-				return (primaryLayer as ISynchronisedObject).getSynchronisedVariableValue(GlobalVariable.LEVEL) as String;
+			{
+				var currLevel: String = (primaryLayer as ISynchronisedObject).getSynchronisedVariableValue(GlobalVariable.LEVEL, false) as String;
+				
+				var levels: Array = getLevels();
+				if (levels)
+				{
+					var cLevelStr: String;
+					var total: int = levels.length;
+					if (levels[0] is GlobalVariableValue)
+					{
+						for each (var cLevel: GlobalVariableValue in levels)
+						{
+							if (cLevel.value == currLevel)
+								return currLevel;
+						}
+						cLevelStr = (levels[0] as GlobalVariableValue).value as String;
+						callLater(synchronizePrimaryLayerLevel, [cLevelStr]);
+//						_globalVariablesManager.level = cLevelStr;
+//						invalidateLevel();
+						return cLevelStr;
+					} if (levels[0] is String)
+					{
+						for each (cLevelStr in levels)
+						{
+							if (cLevelStr == currLevel)
+								return currLevel;
+						}
+						cLevelStr = levels[0] as String;
+						callLater(synchronizePrimaryLayerLevel, [cLevelStr]);
+//						_globalVariablesManager.level = cLevelStr;
+//						invalidateLevel();
+						return cLevelStr;
+					}
+				} 
+				return currLevel;
+			}
 			return null;
 		}
 
@@ -1360,14 +1435,14 @@ package com.iblsoft.flexiweather.widgets
 					continue;
 				if (!so.isPrimaryLayer())
 					continue;
-				var l_frames: Array = so.getSynchronisedVariableValuesList(GlobalVariable.FRAME);
+				var l_frames: Array = so.getSynchronisedVariableValuesList(GlobalVariable.FRAME, false);
 				if (l_frames == null || l_frames.length == 0)
 					continue;
 				l_syncLayers.push(so);
 				if (l_timeAxis == null)
 					l_timeAxis = l_frames;
 				else
-					ArrayUtils.unionArrays(l_timeAxis, l_frames);
+					ArrayUtils.unionArrays(l_timeAxis, l_frames, Operators.equalsByDates);
 			}
 			callLater(notifyTimeAxisReenumerated);
 			return l_timeAxis;
@@ -1392,7 +1467,7 @@ package com.iblsoft.flexiweather.widgets
 //				if (!so.isPrimaryLayer())
 				if (!so.synchroniseRun)
 					continue;
-				var l_runs: Array = so.getSynchronisedVariableValuesList(GlobalVariable.RUN);
+				var l_runs: Array = so.getSynchronisedVariableValuesList(GlobalVariable.RUN, false);
 				if (l_runs == null || l_runs.length == 0)
 					continue;
 				l_syncLayers.push(so);
@@ -1400,7 +1475,7 @@ package com.iblsoft.flexiweather.widgets
 					l_allRuns = l_runs;
 				else {
 //					ArrayUtils.unionArrays(l_timeAxis, l_runs);
-					ArrayUtils.intersectedArrays(l_allRuns, l_runs);
+					l_allRuns = ArrayUtils.intersectedArrays(l_allRuns, l_runs, Operators.equalsByDates);
 				}
 			}
 			return l_allRuns;
@@ -1424,7 +1499,7 @@ package com.iblsoft.flexiweather.widgets
 //				if (!so.isPrimaryLayer())
 				if (!so.synchroniseLevel)
 					continue;
-				var l_levels: Array = so.getSynchronisedVariableValuesList(GlobalVariable.LEVEL);
+				var l_levels: Array = so.getSynchronisedVariableValuesList(GlobalVariable.LEVEL, false);
 				if (l_levels == null)
 					continue;
 				l_syncLayers.push(so);
@@ -1432,7 +1507,7 @@ package com.iblsoft.flexiweather.widgets
 					l_allLevels = l_levels;
 				else {
 //					ArrayUtils.unionArrays(l_timeAxis, l_levels);
-					ArrayUtils.intersectedArrays(l_allLevels, l_levels);
+					l_levels = ArrayUtils.intersectedArrays(l_allLevels, l_levels);
 				}
 			}
 			return l_allLevels;
@@ -1911,12 +1986,8 @@ package com.iblsoft.flexiweather.widgets
 		
 		public function setFrame(newFrame: Date, b_nearrest: Boolean = true, bGlobalValueChange: Boolean = true): Boolean
 		{
-//			trace(this + " SET FRAME 1: " + newFrame);
-			
 			if (bGlobalValueChange)
 				_globalVariablesManager.frame = newFrame;
-			
-//			trace(this + "SET FRAME 2: " + newFrame);
 			
 			var layersForRefresh: Array = [];
 			var so: ISynchronisedObject;
@@ -1927,9 +1998,12 @@ package com.iblsoft.flexiweather.widgets
 					continue;
 				if (!so.hasSynchronisedVariable(GlobalVariable.FRAME))
 					continue;
-//				debug(this + " setFrame try to synchronize: [" + newFrame.toTimeString() + "]  for " + l.name, 'Info', 'Layer Map');
+				debug(this + " setFrame try to synchronize: [" + newFrame.toTimeString() + "]  for " + l.name, 'Info', 'Layer Map');
 				
 				var bSynchronized: Boolean = SynchronisationResponse.wasSynchronised(so.synchroniseWith(GlobalVariable.FRAME, newFrame));
+				
+				debug("setFrame [" + newFrame + "] newFrame: " + newFrame + " for: " + l.name + " bSynchronized: " + bSynchronized);
+				
 				if (bSynchronized)
 				{
 					layersForRefresh.push(so);
@@ -2147,7 +2221,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (debugConsole)
 				debugConsole.print(str, type, tag);
-//			trace(tag + "| " + type + "| " + str);
+			trace(tag + "| " + type + "| " + str);
 //			LoggingUtils.dispatchLogEvent(this, " ILM: " + str);
 		}
 		

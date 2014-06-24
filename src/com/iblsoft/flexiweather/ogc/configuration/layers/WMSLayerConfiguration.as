@@ -41,6 +41,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		private var ma_availableImageFormats: Array = [];
 		private var ms_dimensionTimeName: String = null;
 		private var ms_dimensionRunName: String = null;
+		private var ms_timeMethod: String = null;
 		private var ms_dimensionForecastName: String = null;
 		private var ms_dimensionVerticalLevelName: String = null;
 		private var ms_imageFormat: String = null;
@@ -573,6 +574,16 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		public function get legendIsAreaDependant(): Boolean
 		{
 			return mb_legendIsAreaDependant;
+		}
+		
+		public function set timeMethod(s: String): void
+		{
+			ms_timeMethod = s;
+		}
+
+		public function get timeMethod(): String
+		{
+			return ms_timeMethod;
 		}
 		
 		public function set dimensionTimeName(s: String): void

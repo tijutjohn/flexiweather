@@ -542,6 +542,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		override protected function afterWMSDimensionValueIsSet(s_dimName: String, s_value: String): void
 		{
+			super.afterWMSDimensionValueIsSet(s_dimName, s_value);
+			
 			// if "run" changed, then even time axis changes
 			var b_frameChanged: Boolean = false;
 			if (m_cfg.dimensionRunName != null && s_dimName == m_cfg.dimensionRunName)
@@ -558,6 +560,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 				if (m_tiledLayer)
 					m_tiledLayer.setValidityTime(_currentValidityTime);
 			}
+			
 		}
 
 		private function onAllTilesLoaded(event: InteractiveLayerEvent): void

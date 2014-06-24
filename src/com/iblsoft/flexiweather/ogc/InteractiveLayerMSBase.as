@@ -1495,6 +1495,13 @@ package com.iblsoft.flexiweather.ogc
 				return m_currentWMSViewProperties.getWMSDimensionsNames();
 			return null;
 		}
+		
+		public function getWMSDimensionsNamesExceptSynchronisedDimensions(): Array
+		{
+			if (m_currentWMSViewProperties)
+				return m_currentWMSViewProperties.getWMSDimensionsNamesExceptSynchronisedDimensions();
+			return null;
+		}
 
 		// returns null is no such dimension exist
 		public function getWMSDimensionUnitsName(s_dimName: String): String
@@ -1561,34 +1568,47 @@ package com.iblsoft.flexiweather.ogc
 
 		protected function afterWMSDimensionValueIsSet(s_dimName: String, s_value: String): void
 		{
+			var b_frameSynchronised: Boolean = false;
+			
 			// if "run" changed, then even time axis changes
-			if (m_cfg.dimensionRunName != null && s_dimName == m_cfg.dimensionRunName)
+			if ((m_cfg.dimensionRunName != null && s_dimName == m_cfg.dimensionRunName) || s_dimName == GlobalVariable.RUN)
 			{
 				dispatchEvent(new SynchronisedVariableChangeEvent(
-						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, GlobalVariable.RUN));
+					SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.RUN, true));
+				
+//				dispatchEvent(new SynchronisedVariableChangeEvent(
+//						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, GlobalVariable.RUN));
 				dispatchEvent(new SynchronisedVariableChangeEvent(
-						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, GlobalVariable.FRAME));
+						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, GlobalVariable.FRAME, true));
 			}
+			
+			
+			
+			//if global frame was change
+			if (s_dimName == GlobalVariable.FRAME)
+				b_frameSynchronised = true;
+			
 			//if "forecast" changed, we need to update timeline, so we need to dispatch event
 			if (m_cfg.dimensionForecastName != null && s_dimName == m_cfg.dimensionForecastName)
+				b_frameSynchronised = true;
+			
+			//if "time" changed, we need to update timeline, so we need to dispatch event
+			if (m_cfg.dimensionTimeName != null && s_dimName == m_cfg.dimensionTimeName)
+				b_frameSynchronised = true;
+			
+			
+			if (b_frameSynchronised)
 			{
 				dispatchEvent(new SynchronisedVariableChangeEvent(
 						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.FRAME, true));
 			}
-			//if "time" changed, we need to update timeline, so we need to dispatch event
-			if (m_cfg.dimensionTimeName != null && s_dimName == m_cfg.dimensionTimeName)
+			
+			
+			//if "level" changed, we need to update timeline, so we need to dispatch event
+			if ((m_cfg.dimensionVerticalLevelName != null && s_dimName == m_cfg.dimensionVerticalLevelName) || s_dimName == GlobalVariable.LEVEL)
 			{
 				dispatchEvent(new SynchronisedVariableChangeEvent(
-						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.FRAME));
-			}
-			//if "level" changed, we need to update timeline, so we need to dispatch event
-			if (m_cfg.dimensionVerticalLevelName != null && s_dimName == m_cfg.dimensionVerticalLevelName)
-			{
-				if (synchroniseLevel)
-				{
-					dispatchEvent(new SynchronisedVariableChangeEvent(
-						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.LEVEL));
-				}
+					SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.LEVEL, true));
 			}
 		}
 
@@ -1602,6 +1622,10 @@ package com.iblsoft.flexiweather.ogc
 		 */
 		public function setWMSDimensionValue(s_dimName: String, s_value: String): void
 		{
+			if (s_value == null)
+			{
+				trace("check why value is NULL (setWMSDimensionValue)");
+			}
 			if (m_currentWMSViewProperties) {
 				m_currentWMSViewProperties.setWMSDimensionValue(s_dimName, s_value);
 			} else {
@@ -1703,20 +1727,22 @@ package com.iblsoft.flexiweather.ogc
 			return null;
 		}
 
-		public function hasSynchronisedVariable(s_variableId: String): Boolean
+		public function hasSynchronisedVariable(s_variableId: String, b_onlySynchronised: Boolean = true): Boolean
 		{
 			if (m_currentWMSViewProperties)
 			{
 				if (s_variableId == GlobalVariable.LEVEL)
 				{
 					var hasLevel: Boolean = m_currentWMSViewProperties.hasSynchronisedVariable(s_variableId);
-					hasLevel = hasLevel && synchroniseLevel;
+					if (b_onlySynchronised)
+						hasLevel = hasLevel && synchroniseLevel;
 					return hasLevel;
 				}
 				if (s_variableId == GlobalVariable.RUN)
 				{
 					var hasRun: Boolean = m_currentWMSViewProperties.hasSynchronisedVariable(s_variableId);
-					hasRun = hasRun && synchroniseRun;
+					if (b_onlySynchronised)
+						hasRun = hasRun && synchroniseRun;
 					return hasRun;
 				}
 					
@@ -1734,17 +1760,73 @@ package com.iblsoft.flexiweather.ogc
 			return null;
 			
 		}
-		public function getSynchronisedVariableValue(s_variableId: String): Object
+		public function getSynchronisedVariableValue(s_variableId: String, b_checkGlobalSynchronization: Boolean = true): Object
 		{
 			if (status == InteractiveDataLayer.STATE_DATA_LOADED_WITH_ERRORS || status == InteractiveDataLayer.STATE_NO_SYNCHRONISATION_DATA_AVAILABLE)
 				return null;
+			
+			if (b_checkGlobalSynchronization)
+			{
+				switch (s_variableId)
+				{
+					case GlobalVariable.RUN:
+						if (synchroniseRun)
+						{
+							var run: Object = container.interactiveLayerMap.run;
+							if (run)
+								return run;
+						}
+						break;
+					case GlobalVariable.LEVEL:
+						if (synchroniseLevel)
+						{
+							var level: Object = container.interactiveLayerMap.level;
+							if (level)
+								return level;
+						}
+						break;
+					
+				}
+			}
 			if (m_currentWMSViewProperties)
 				return m_currentWMSViewProperties.getSynchronisedVariableValue(s_variableId);
 			return null;
 		}
 
-		public function getSynchronisedVariableValuesList(s_variableId: String): Array
+		// returns null is no such dimension exist
+		public function getSynchronisedVariableUnitsName(s_variableId: String): String
 		{
+			if (m_currentWMSViewProperties)
+				return m_currentWMSViewProperties.getSynchronisedVariableUnitsName(s_variableId);
+			return null;
+		}
+		
+		public function getSynchronisedVariableValuesList(s_variableId: String, b_checkGlobalSynchronization: Boolean = true): Array
+		{
+			if (b_checkGlobalSynchronization)
+			{
+				var values: Array;
+				switch (s_variableId)
+				{
+					case GlobalVariable.RUN:
+						if (synchroniseRun)
+						{
+							values = container.interactiveLayerMap.getRuns();
+							if (values)
+								return values;
+						}
+						break;
+					case GlobalVariable.LEVEL:
+						if (synchroniseLevel)
+						{
+							values = container.interactiveLayerMap.getLevels();
+							if (values)
+								return values;
+						}
+						break;
+						
+				}
+			}
 			if (m_currentWMSViewProperties)
 				return m_currentWMSViewProperties.getSynchronisedVariableValuesList(s_variableId);
 			return null;
@@ -2039,7 +2121,7 @@ package com.iblsoft.flexiweather.ogc
 		protected function debug(str: String): void
 		{
 //			LoggingUtils.dispatchLogEvent(this, "MSBase: " + str);
-//			trace("MSBase: ["+this+"] " + str);
+			trace("MSBase: ["+this+"] " + str);
 		}
 
 		private var _configurationChanged: Boolean;
@@ -2070,7 +2152,24 @@ package com.iblsoft.flexiweather.ogc
 			if (mb_synchroniseRun != value)
 			{
 				mb_synchroniseRun = value;
-				notifySynchronizationChange(GlobalVariable.RUN, getSynchronisedVariableValue(GlobalVariable.RUN), mb_synchroniseRun);
+				var runValue: Object =  getSynchronisedVariableValue(GlobalVariable.RUN);
+				if (runValue)
+				{
+					var runValueString: String;
+					if (runValue is Date)
+						runValueString = ISO8601Parser.dateToString(runValue as Date);
+					if (runValue.value is Date)
+						runValueString = ISO8601Parser.dateToString(runValue.value as Date);
+					
+					notifySynchronizationChange(GlobalVariable.RUN, runValue, mb_synchroniseRun);
+					
+					dispatchEvent(new SynchronisedVariableChangeEvent(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, GlobalVariable.RUN));
+					
+					if (mb_synchroniseRun)
+						afterWMSDimensionValueIsSet(GlobalVariable.RUN, runValueString);
+					else
+						afterWMSDimensionValueIsSet(m_cfg.dimensionRunName, runValueString);
+				}			
 			}
 		}
 		
@@ -2084,7 +2183,22 @@ package com.iblsoft.flexiweather.ogc
 			if (mb_synchroniseLevel != value)
 			{
 				mb_synchroniseLevel = value;
-				notifySynchronizationChange(GlobalVariable.LEVEL, getSynchronisedVariableValue(GlobalVariable.LEVEL), mb_synchroniseLevel);
+				var levelValue: Object =  getSynchronisedVariableValue(GlobalVariable.LEVEL);
+				var levelValueString: String;
+				if (levelValue is String)
+					levelValueString = levelValue as String;
+				if (levelValue.hasOwnProperty('value') && levelValue.value is String)
+					levelValueString = levelValue.value as String;
+						
+				notifySynchronizationChange(GlobalVariable.LEVEL, levelValue, mb_synchroniseLevel);
+				
+				dispatchEvent(new SynchronisedVariableChangeEvent(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, GlobalVariable.LEVEL));
+				
+				if (mb_synchroniseLevel)
+					afterWMSDimensionValueIsSet(GlobalVariable.LEVEL, levelValueString);
+				else
+					afterWMSDimensionValueIsSet(m_cfg.dimensionVerticalLevelName, levelValueString);
+				
 			}
 		}
 
@@ -2095,6 +2209,7 @@ package com.iblsoft.flexiweather.ogc
 				eventType = SynchronisationEvent.START_GLOBAL_VARIABLE_SYNCHRONIZATION;
 			else
 				eventType = SynchronisationEvent.STOP_GLOBAL_VARIABLE_SYNCHRONIZATION;
+			
 			var se: SynchronisationEvent = new SynchronisationEvent(eventType, true);
 			se.globalVariable = globalVariable;
 			se.globalVariableValue = globalVariableValue;
