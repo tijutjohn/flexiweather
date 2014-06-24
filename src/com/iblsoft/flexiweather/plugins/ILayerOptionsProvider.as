@@ -1,7 +1,8 @@
 package com.iblsoft.flexiweather.plugins
 {
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
-	import mx.containers.GridRow;
+
+	import spark.components.HGroup;
 
 	public interface ILayerOptionsProvider extends IAbility
 	{
@@ -12,7 +13,7 @@ package com.iblsoft.flexiweather.plugins
 		 **/
 		function provideLayerOptionsUI(
 		l: InteractiveLayer,
-				parent: GridRow,
+				parent: HGroup,
 				changeCallback: Function): void;
 		function updateLayerOptions(
 		l: InteractiveLayer): Boolean;

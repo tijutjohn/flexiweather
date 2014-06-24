@@ -49,7 +49,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerLegendImage;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	import com.iblsoft.flexiweather.widgets.data.InteractiveLayerPrintQuality;
-	
+
 	import flash.display.AVM1Movie;
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
@@ -66,7 +66,7 @@ package com.iblsoft.flexiweather.ogc
 	import flash.text.engine.CFFHinting;
 	import flash.utils.Dictionary;
 	import flash.utils.Timer;
-	
+
 	import mx.binding.utils.BindingUtils;
 	import mx.collections.ArrayCollection;
 	import mx.controls.Image;
@@ -76,17 +76,17 @@ package com.iblsoft.flexiweather.ogc
 	import mx.events.DynamicEvent;
 	import mx.events.EffectEvent;
 	import mx.logging.Log;
-	
+
 	import spark.components.Group;
 
 	[Event(name = "wmsStyleChanged", type = "com.iblsoft.flexiweather.events.InteractiveLayerWMSEvent")]
 
 	/**
-	 * Dispatched when WMS Dimension (RUN, FORECAST, ELEVATION) is set 
-	 */	
+	 * Dispatched when WMS Dimension (RUN, FORECAST, ELEVATION) is set
+	 */
 	[Event(name = "wmsDimensionValueSet", type = "com.iblsoft.flexiweather.events.WMSViewPropertiesEvent")]
-	
-	
+
+
 	/**
 	 * Common base class for WMS type layers
 	 *
@@ -98,14 +98,14 @@ package com.iblsoft.flexiweather.ogc
 		protected var m_featureInfoLoader: WMSFeatureInfoLoader = new WMSFeatureInfoLoader();
 		protected var mb_updateAfterMakingVisible: Boolean = false;
 		protected var m_cfg: WMSLayerConfiguration;
-//		protected var md_dimensionValues: Dictionary = new Dictionary(); 
+//		protected var md_dimensionValues: Dictionary = new Dictionary();
 		protected var md_customParameters: Dictionary = new Dictionary();
 		protected var ma_subLayerStyleNames: Array = [];
 		protected var mb_synchroniseLevel: Boolean;
 		protected var mb_synchroniseRun: Boolean;
 		protected var m_synchronisationRole: SynchronisationRole;
 		protected var m_cache: ICache;
-		
+
 		protected var _tempParameterStorage: LayerTemporaryParameterStorage = new LayerTemporaryParameterStorage();
 		/**
 		 * Currently displayed wms data
@@ -116,24 +116,24 @@ package com.iblsoft.flexiweather.ogc
 		{
 			return m_currentWMSViewProperties;
 		}
-		
+
 		/**
 		 * Selected style name. It is stored in currentWMSViewProperties, but on save (serialize) it's stored in layer because of loading process should set correctly
-		 * stylename on layer initialization (which is asynchronous (see initializeLayerProperties() method)) 
-		 */		
+		 * stylename on layer initialization (which is asynchronous (see initializeLayerProperties() method))
+		 */
 //		protected var styleNameValue: String;
 		/**
 		 * Selected level value (ELEVATION). It is stored in currentWMSViewProperties, but on save (serialize) it's stored in layer because of loading process should set correctly
-		 * level on layer initialization (which is asynchronous (see initializeLayerProperties() method)) 
-		 */		
+		 * level on layer initialization (which is asynchronous (see initializeLayerProperties() method))
+		 */
 //		protected var level: String;
-		
+
 		/**
 		 * Selected synchronization role value. It is stored in currentWMSViewProperties, but on save (serialize) it's stored in layer because of loading process should set correctly
-		 *  synchronization role on layer initialization (which is asynchronous (see initializeLayerProperties() method)) 
-		 */		
+		 *  synchronization role on layer initialization (which is asynchronous (see initializeLayerProperties() method))
+		 */
 		protected var synchronizationRoleValue: String;
-		
+
 		/**
 		 * wms data which are already preloaded
 		 */
@@ -147,7 +147,7 @@ package com.iblsoft.flexiweather.ogc
 				//if FlexiWeather is not reading GetCapabilities requests, this getter return always TRUE
 				return true;
 			}
-			
+
 			if (m_cfg && m_cfg.service)
 			{
 				return (m_cfg.service as WMSServiceConfiguration).capabilitiesUpdated;
@@ -172,33 +172,33 @@ package com.iblsoft.flexiweather.ogc
 			}
 			return false;
 		}
-		
+
 		private var _vectorParent: UIComponent;
-		
+
 		public function InteractiveLayerMSBase(container: InteractiveWidget, cfg: WMSLayerConfiguration)
 		{
 			super(container);
-			
+
 			synchronizationRoleValue = SynchronisationRole.NONE;
-			
+
 			configuration = cfg;
-			
+
 			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
-			
+
 		}
 
 		override protected function initializeLayerAfterAddToStage(): void
 		{
 			super.initializeLayerAfterAddToStage();
-			
+
 			initializeLayerProperties();
 		}
-		
+
 		override protected function initializeLayer(): void
 		{
 			super.initializeLayer();
 		}
-		
+
 		private function initializeLayerProperties(): void
 		{
 			ma_preloadingBuffer = [];
@@ -219,15 +219,15 @@ package com.iblsoft.flexiweather.ogc
 			setStyle('showEffect', fadeIn);
 //			setStyle('removedEffect', fadeOut);
 			setStyle('hideEffect', fadeOut);
-			
-			
+
+
 			//check if layers was created from serialization
 			// update current wms properties from temporary storage. That means that user set wms style, wms dimension value, custom parameter or configuration
 			// before layer was added to stage
 			// in _tempParameterStorage there are also store properties serialized from current WMSViewProperties
 			_tempParameterStorage.updateCurrentWMSPropertiesFromStorage(m_currentWMSViewProperties);
 		}
-		
+
 		private function initializeConfiguration(): void
 		{
 			if (m_cfg && m_cfg.service)
@@ -235,9 +235,9 @@ package com.iblsoft.flexiweather.ogc
 				//update service from OGCServiceConfigurationManager
 				var serviceManager: OGCServiceConfigurationManager = OGCServiceConfigurationManager.getInstance();
 				var existingService: OGCServiceConfiguration = serviceManager.getServiceByName(m_cfg.service.baseURL);
-				
-				var wmsService: WMSServiceConfiguration = existingService as WMSServiceConfiguration; 
-				
+
+				var wmsService: WMSServiceConfiguration = existingService as WMSServiceConfiguration;
+
 				if (wmsService)
 				{
 					if ( wmsService.capabilitiesUpdated)
@@ -250,16 +250,16 @@ package com.iblsoft.flexiweather.ogc
 				}
 			}
 		}
-		
+
 		private function onWaitForCapabilities(event: ServiceCapabilitiesEvent): void
 		{
 			var wmsService: WMSServiceConfiguration = event.target as WMSServiceConfiguration;
 			wmsService.removeEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onWaitForCapabilities);
 			initializeConfiguration();
-			
+
 		}
-		
-		
+
+
 		private var fadeIn: Fade;
 		private var fadeOut: Fade;
 		[Bindable]
@@ -275,7 +275,7 @@ package com.iblsoft.flexiweather.ogc
 		override protected function commitProperties():void
 		{
 			super.commitProperties();
-			
+
 			if (_configurationChanged)
 			{
 				initializeConfiguration();
@@ -286,13 +286,13 @@ package com.iblsoft.flexiweather.ogc
 		{
 			if (!(viewProperties is WMSViewProperties))
 				return;
-			
+
 			if ((viewProperties as WMSViewProperties).crs != container.crs)
 			{
 				var crsError: Error = new Error("InteractiveLayerMSBase ChangeViewProperties: Layer CRS is different than InteractiveWidget.CRS");
 				throw crsError;
 			}
-			
+
 			m_currentWMSViewProperties.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onCurrentWMSDataSynchronisedVariableChanged);
 			m_currentWMSViewProperties.removeEventListener(WMSViewPropertiesEvent.WMS_DIMENSION_VALUE_SET, onWMSDimensionValueSet);
 			m_currentWMSViewProperties = viewProperties as WMSViewProperties;
@@ -340,30 +340,30 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 
-		
+
 		protected function getWMSViewPropertiesLoader(): IWMSViewPropertiesLoader
 		{
-			var loader: MSBaseLoader = new MSBaseLoader(this); 
-			return loader; 
+			var loader: MSBaseLoader = new MSBaseLoader(this);
+			return loader;
 		}
 
-		
+
 		private var _preloader: MSBaseLoader;
 		/**
-		 * Function will cancel all preloading immediately 
-		 * 
-		 */		
+		 * Function will cancel all preloading immediately
+		 *
+		 */
 		public function cancelPreload(): void
 		{
-			//FIXME cancel currently preloading request 
+			//FIXME cancel currently preloading request
 			if (_preloader)
 				_preloader.cancel();
-			
+
 			setPreloadingStatus(false);
 			ma_preloadedWMSViewProperties = [];
 			ma_preloadingBuffer = [];
 		}
-		
+
 		public function preload(viewProperties: IViewProperties): void
 		{
 			var wmsViewProperties: WMSViewProperties = viewProperties as WMSViewProperties;
@@ -385,7 +385,7 @@ package com.iblsoft.flexiweather.ogc
 				_preloader.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onPreloadingWMSDataLoadingFinished);
 				_preloader.addEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onPreloadingWMSDataLoadingFinished);
 			}
-			
+
 			if (!preloading)
 			{
 				setPreloadingStatus(true);
@@ -429,12 +429,12 @@ package com.iblsoft.flexiweather.ogc
 			var wmsViewProperties: WMSViewProperties = viewProperties as WMSViewProperties;
 			if (!wmsViewProperties)
 				return false;
-			
+
 			var totalDimensions: uint = wmsViewProperties.dimensions.length;
 			if (totalDimensions > 0)
 			{
 				var dimensions: Array = wmsViewProperties.dimensions;
-				
+
 				for each (var currWmsViewProperties: WMSViewProperties in ma_preloadingBuffer)
 				{
 					var correct: int = 0;
@@ -465,7 +465,7 @@ package com.iblsoft.flexiweather.ogc
 				i_height = forcedLayerHeight;
 			var s_currentCRS: String = wmsViewProperties.crs;
 			var currentViewBBox: BBox = wmsViewProperties.getViewBBox();
-			
+
 			if (!currentViewBBox)
 			{
 				return false;
@@ -510,15 +510,15 @@ package com.iblsoft.flexiweather.ogc
 		 */
 		private function isPartCached(wmsViewProperties: WMSViewProperties, currentViewBBox: BBox, i_width: uint, i_height: uint): Boolean
 		{
-			
+
 			var bbox: String;
 			if (Projection.hasCRSAxesFlippedByISO(wmsViewProperties.crs, (configuration as WMSLayerConfiguration).service.version))
 			{
-				bbox = String(currentViewBBox.yMin) + "," + String(currentViewBBox.xMin) + "," + String(currentViewBBox.yMax) + "," + String(currentViewBBox.xMax);	
+				bbox = String(currentViewBBox.yMin) + "," + String(currentViewBBox.xMin) + "," + String(currentViewBBox.yMax) + "," + String(currentViewBBox.xMax);
 			} else {
 				bbox = currentViewBBox.toBBOXString();
 			}
-			
+
 			/**
 			 * this is how you can find properties for cache metadata
 			 *
@@ -582,10 +582,10 @@ package com.iblsoft.flexiweather.ogc
 			//add wmsViewProperties to array of already preloaded wms view properties
 			ma_preloadedWMSViewProperties.push(wmsViewProperties);
 			setPreloadingStatus(false);
-			
+
 			notifyProgress(ma_preloadedWMSViewProperties.length, ma_preloadingBuffer.length + ma_preloadedWMSViewProperties.length, 'frames');
-			
-			
+
+
 			if (ma_preloadingBuffer.length > 0)
 			{
 				//preload next frame
@@ -647,7 +647,7 @@ package com.iblsoft.flexiweather.ogc
 			notifyLoadingFinishedNoSynchronizationData();
 			noSynchronisationDataAvailable(graphics);
 			_currentWMSDataLoadingStarted = false;
-			
+
 		}
 		protected function onCurrentWMSDataLoadingError(event: InteractiveLayerEvent): void
 		{
@@ -688,7 +688,7 @@ package com.iblsoft.flexiweather.ogc
 				if (name)
 					m_currentWMSViewProperties.name = name;
 			}
-			
+
 			if (m_cfg.capabilitiesReceived)
 			{
 				//if capabilities was already received before layer was created, we can call onCapabilitiesUpdated right here
@@ -721,7 +721,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			if (container)
 				return getGetMapFullUrl(int(container.areaWidth), int(container.areaHeight));
-			
+
 			return getGetMapFullUrl(0,0);
 		}
 
@@ -732,18 +732,18 @@ package com.iblsoft.flexiweather.ogc
 //				trace("test getGetMapFullUrl");
 //			}
 			var wmsLayerConfiguration: WMSLayerConfiguration = configuration as WMSLayerConfiguration;
-			
+
 			var bbox: String;
 			var crs: String = container.getCRS();
 			var viewBBox: BBox = container.getViewBBox();
-			
+
 			if (Projection.hasCRSAxesFlippedByISO(crs, wmsLayerConfiguration.service.version))
 			{
-				bbox = String(viewBBox.yMin) + "," + String(viewBBox.xMin) + "," + String(viewBBox.yMax) + "," + String(viewBBox.xMax);	
+				bbox = String(viewBBox.yMin) + "," + String(viewBBox.xMin) + "," + String(viewBBox.yMax) + "," + String(viewBBox.xMax);
 			} else {
 				bbox = viewBBox.toBBOXString();
 			}
-			
+
 			var request: URLRequest = m_cfg.toGetMapRequest(
 					crs, bbox,
 					width, height,
@@ -788,7 +788,7 @@ package com.iblsoft.flexiweather.ogc
 		}
 
 		private var _loader: MSBaseLoader;
-		
+
 		override protected function updateData(b_forceUpdate: Boolean): void
 		{
 //			debug("updateDate["+b_forceUpdate+"] _layerInitialized: " + _layerInitialized + " capabilitiesReady: " + capabilitiesReady + " visible: " + visible);
@@ -811,7 +811,7 @@ package com.iblsoft.flexiweather.ogc
 						return;
 					}
 					updateCurrentWMSViewProperties();
-					
+
 					if (!_loader)
 					{
 						_loader = getWMSViewPropertiesLoader() as MSBaseLoader;
@@ -823,7 +823,7 @@ package com.iblsoft.flexiweather.ogc
 						_loader.addEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
 						_loader.addEventListener(InteractiveLayerEvent.INVALIDATE_DYNAMIC_PART, onCurrentWMSDataInvalidateDynamicPart);
 					}
-					
+
 					//here is problem that m_currentWMSViewProperties has crs ESRI:102021 and viewBBox from CRS:84
 					_loader.updateWMSData(b_forceUpdate, m_currentWMSViewProperties, forcedLayerWidth, forcedLayerHeight, printQuality);
 				}
@@ -850,9 +850,9 @@ package com.iblsoft.flexiweather.ogc
 				ma_preloadedWMSViewProperties = null;
 			}
 			destroyWMSViewPropertiesPreloader();
-			
+
 		}
-		
+
 		override public function destroy(): void
 		{
 			super.destroy();
@@ -947,19 +947,19 @@ package com.iblsoft.flexiweather.ogc
 			}
 			if (image is AVM1Movie)
 			{
-				
+
 				/**
 				 * As we agreed with Jozef, if AVM1Movie was received as data, there can be 2 different modes of rendering
-				 * 
+				 *
 				 * 	1) printQuality == high (it's for vector printing) => will be added as avm1movie and it's not cached
 				 *  2) printQuality == normal && imageFormat == x-shockwave-flash => will be added as bitmap and will be cached
 				 */
-				
+
 				if (printQuality == InteractiveLayerPrintQuality.HIGH_QUALITY)
 				{
 					drawImagePartAsSWF(image as AVM1Movie, s_imageCRS, imageBBox);
 				} else {
-					
+
 					//TODO cache bitmap
 					var bd: BitmapData = new BitmapData(image.width, image.height, true, 0x00ff0000);
 					bd.draw(image);
@@ -970,9 +970,9 @@ package com.iblsoft.flexiweather.ogc
 
 		private function removeBitmapData(): void
 		{
-			
+
 		}
-		
+
 		private function clearVectorData(): void
 		{
 			//remove previous instances
@@ -993,7 +993,7 @@ package com.iblsoft.flexiweather.ogc
 						loader.unload();
 						dispObject = null;
 					}
-					
+
 				}
 			}
 		}
@@ -1003,11 +1003,11 @@ package com.iblsoft.flexiweather.ogc
 			if (_vectorParent && _vectorParent.numChildren > 0)
 			{
 				clearVectorData();
-				
+
 				removeChild(_vectorParent);
 				_vectorParent =  null;
 			}
-			
+
 		}
 		private function drawImagePartAsSWF(image: AVM1Movie, s_imageCRS: String, imageBBox: BBox): void
 		{
@@ -1016,14 +1016,14 @@ package com.iblsoft.flexiweather.ogc
 				_vectorParent = new UIComponent();
 				addChild(_vectorParent);
 			}
-			
+
 			clearVectorData();
-			
+
 			//clear bitmap data
 			clear(graphics);
-			
-			var movieObject: DisplayObject = image.parent; 
-			
+
+			var movieObject: DisplayObject = image.parent;
+
 			if (movieObject)
 				_vectorParent.addChild(movieObject);
 			else
@@ -1032,9 +1032,9 @@ package com.iblsoft.flexiweather.ogc
 
 		private function drawImagePartAsBitmap(graphics: Graphics, image: Bitmap, s_imageCRS: String, imageBBox: BBox): void
 		{
-			
+
 			removeVectorData();
-			
+
 			var ptImageStartPoint: Point =
 					container.coordToPoint(new Coord(s_imageCRS, imageBBox.xMin, imageBBox.yMax));
 			var ptImageEndPoint: Point =
@@ -1044,8 +1044,8 @@ package com.iblsoft.flexiweather.ogc
 			var ptImageSize: Point = ptImageEndPoint.subtract(ptImageStartPoint);
 			ptImageSize.x = int(Math.round(ptImageSize.x));
 			ptImageSize.y = int(Math.round(ptImageSize.y));
-			
-			
+
+
 //			trace(id + " drawImagePartAsBitmap ["+image.bitmapData.width+","+image.bitmapData.height+"]  ptImageSize: "+ ptImageSize);
 			var matrix: Matrix = new Matrix();
 			matrix.scale(ptImageSize.x / image.width, ptImageSize.y / image.height);
@@ -1082,9 +1082,9 @@ package com.iblsoft.flexiweather.ogc
 			setStatus(STATE_EMPTY);
 			debug("refreshForSynchronisation");
 			invalidateData(b_force);
-			
+
 		}
-		
+
 		override public function refresh(b_force: Boolean): void
 		{
 			super.refresh(b_force);
@@ -1100,7 +1100,7 @@ package com.iblsoft.flexiweather.ogc
 		// map legend
 		override public function hasLegend(): Boolean
 		{
-			//check if layer has legend	
+			//check if layer has legend
 			if (!m_currentWMSViewProperties)
 				return false;
 			var styleName: String = m_currentWMSViewProperties.getWMSStyleName(0);
@@ -1141,25 +1141,25 @@ package com.iblsoft.flexiweather.ogc
 			{
 				url.data = new URLVariables();
 			}
-			
+
 			var s_crs: String = container.crs;
 			var viewBBox: BBox = container.getViewBBox();
 			var ogcLayerConfiguration: OGCLayerConfiguration = configuration as OGCLayerConfiguration;
-			
+
 			var s_bbox: String;
 			if (Projection.hasCRSAxesFlippedByISO(s_crs, ogcLayerConfiguration.service.version))
 			{
-				s_bbox = String(viewBBox.yMin) + "," + String(viewBBox.xMin) + "," + String(viewBBox.yMax) + "," + String(viewBBox.xMax);	
+				s_bbox = String(viewBBox.yMin) + "," + String(viewBBox.xMin) + "," + String(viewBBox.yMax) + "," + String(viewBBox.xMax);
 			} else {
 				s_bbox = viewBBox.toBBOXString();
 			}
-			
+
 			if (ogcLayerConfiguration.service.isBefore130Version)
 				url.data.SRS = s_crs;
 			else
 				url.data.CRS = s_crs;
 			url.data.BBOX = s_bbox;
-			url.data.MAP_WIDTH = container.width; 
+			url.data.MAP_WIDTH = container.width;
 			url.data.MAP_HEIGHT = container.height;
 		}
 		private function updateURLWithDimensions(url: URLRequest): void
@@ -1238,7 +1238,7 @@ package com.iblsoft.flexiweather.ogc
 				legendLoader.addEventListener(MSBaseLoaderEvent.LEGEND_LOADED, onLegendLoaded);
 				legendLoader.addEventListener(MSBaseLoaderEvent.LEGEND_NOT_AVAILABLE, onLegendNotAvailable);
 				legendLoader.addEventListener(MSBaseLoaderEvent.LEGEND_LOAD_ERROR, onLegendLoadError);
-				
+
 				debug(" load legend for layer: " + this + " viewProperties: " + currentViewProperties);
 				trace("\nload legend for layer: " + this + " viewProperties: " + currentViewProperties);
 				legendLoader.loadLegend(url, associatedData);
@@ -1257,20 +1257,20 @@ package com.iblsoft.flexiweather.ogc
 			legendLoader.removeEventListener(MSBaseLoaderEvent.LEGEND_LOADED, onLegendLoaded);
 			legendLoader.removeEventListener(MSBaseLoaderEvent.LEGEND_NOT_AVAILABLE, onLegendNotAvailable);
 			legendLoader.removeEventListener(MSBaseLoaderEvent.LEGEND_LOAD_ERROR, onLegendLoadError);
-			
+
 		}
 		private function onLegendNotAvailable(event: MSBaseLoaderEvent): void
 		{
 			trace("MSBAse onLegendNotAvailable");
 			var legendLoader: MSBaseLoader = event.target as MSBaseLoader;
 			removeLegendLoadingListeners(legendLoader);
-			
-			
+
+
 			var associatedData: Object = event.data.associatedData;
-			
+
 			Log.getLogger("Legends").error("Legend Not Available for layer:  " + name);
-			
-			var errorCallback: Function = associatedData.errorCallback; 	
+
+			var errorCallback: Function = associatedData.errorCallback;
 			if (errorCallback != null)
 			{
 				var group: InteractiveLayerLegendGroup = associatedData.group;
@@ -1282,9 +1282,9 @@ package com.iblsoft.flexiweather.ogc
 			trace("MSBAse onLegendLoadError");
 			var legendLoader: MSBaseLoader = event.target as MSBaseLoader;
 			removeLegendLoadingListeners(legendLoader);
-			
+
 			var associatedData: Object = event.data.associatedData;
-			var errorCallback: Function = associatedData.errorCallback; 	
+			var errorCallback: Function = associatedData.errorCallback;
 			if (errorCallback != null)
 			{
 				var group: InteractiveLayerLegendGroup = associatedData.group;
@@ -1299,7 +1299,7 @@ package com.iblsoft.flexiweather.ogc
 			var result: * = event.data.result;
 			var associatedData: Object = event.data.associatedData;
 			(associatedData.wmsViewProperties as WMSViewProperties).legendImage = result;
-			
+
 			if (container)
 				createLegend(result, associatedData.group, associatedData.labelAlign, associatedData.callback, associatedData.legendScaleX, associatedData.legendScaleY, associatedData.width, associatedData.height);
 		}
@@ -1358,19 +1358,19 @@ package com.iblsoft.flexiweather.ogc
 				image.title = layerName;
 				group.addElement(image);
 			}
-			
+
 			image.source = bitmap;
-			
+
 			image.originalWidth = bitmap.bitmapData.width;
 			image.originalHeight = bitmap.bitmapData.height;
 			//FIX for PZAG-637
 			origWidth = bitmap.bitmapData.width;
 			origHeight = bitmap.bitmapData.height;
-			
+
 			//check if legend is not bigger that container, otherwsie scale needs to be adjusted
 			var containerWidth: int = container.areaWidth;
 			var containerHeight: int = container.areaHeight;
-			
+
 			var expectedWidth: Number = origWidth * legendScaleX;
 			var expectedHeight: Number = origHeight * legendScaleY;
 			if (containerWidth < expectedWidth || containerHeight < expectedHeight)
@@ -1378,14 +1378,14 @@ package com.iblsoft.flexiweather.ogc
 				var maxLegendSizeInContainer: Number = 0.8;
 				//choose correct scale
 				var newScale: Number = Math.min(containerWidth * maxLegendSizeInContainer / expectedWidth, containerHeight * maxLegendSizeInContainer / expectedHeight);
-				
+
 				expectedWidth = expectedWidth * newScale;
 				expectedHeight = expectedHeight * newScale;
 			}
-			
+
 			image.width = expectedWidth;
 			image.height = expectedHeight;
-			
+
 			//			image.scaleX = legendScaleX;
 			//			image.scaleY = legendScaleY;
 			image.y = labelHeight + gap;
@@ -1462,7 +1462,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			return status != STATE_NO_SYNCHRONISATION_DATA_AVAILABLE && status != STATE_DATA_LOADED_WITH_ERRORS;
 		}
-		
+
 		override public function hasFeatureInfo(): Boolean
 		{
 			if (hasData())
@@ -1507,7 +1507,7 @@ package com.iblsoft.flexiweather.ogc
 			if (m_cfg.service == null)
 				return null;
 			var bbox: BBox = null;
-			
+
 			var layers: Array = getWMSLayers();
 			var crs: String = container.getCRS();
 			for each (var layer: WMSLayer in layers)
@@ -1549,6 +1549,13 @@ package com.iblsoft.flexiweather.ogc
 		{
 			if (m_currentWMSViewProperties)
 				return m_currentWMSViewProperties.getWMSDimensionsNames();
+			return null;
+		}
+
+		public function getWMSDimensionsNamesExceptSynchronisedDimensions(): Array
+		{
+			if (m_currentWMSViewProperties)
+				return m_currentWMSViewProperties.getWMSDimensionsNamesExceptSynchronisedDimensions();
 			return null;
 		}
 
@@ -1598,11 +1605,11 @@ package com.iblsoft.flexiweather.ogc
 					invalidateLegend();
 				}
 			}
-			
+
 			afterWMSDimensionValueIsSet(event.dimension, event.value);
-			
+
 			dispatchEvent(event);
-			
+
 			if (event.dimension == (configuration as WMSLayerConfiguration).dimensionVerticalLevelName && !synchroniseLevel)
 			{
 				var ile:  InteractiveLayerEvent = new  InteractiveLayerEvent(InteractiveLayerWMSEvent.LEVEL_CHANGED, true);
@@ -1617,34 +1624,47 @@ package com.iblsoft.flexiweather.ogc
 
 		protected function afterWMSDimensionValueIsSet(s_dimName: String, s_value: String): void
 		{
+			var b_frameSynchronised: Boolean = false;
+
 			// if "run" changed, then even time axis changes
-			if (m_cfg.dimensionRunName != null && s_dimName == m_cfg.dimensionRunName)
+			if ((m_cfg.dimensionRunName != null && s_dimName == m_cfg.dimensionRunName) || s_dimName == GlobalVariable.RUN)
 			{
 				dispatchEvent(new SynchronisedVariableChangeEvent(
-						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, GlobalVariable.RUN));
+					SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.RUN, true));
+
+//				dispatchEvent(new SynchronisedVariableChangeEvent(
+//						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, GlobalVariable.RUN));
 				dispatchEvent(new SynchronisedVariableChangeEvent(
-						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, GlobalVariable.FRAME));
+						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, GlobalVariable.FRAME, true));
 			}
+
+
+
+			//if global frame was change
+			if (s_dimName == GlobalVariable.FRAME)
+				b_frameSynchronised = true;
+
 			//if "forecast" changed, we need to update timeline, so we need to dispatch event
 			if (m_cfg.dimensionForecastName != null && s_dimName == m_cfg.dimensionForecastName)
+				b_frameSynchronised = true;
+
+			//if "time" changed, we need to update timeline, so we need to dispatch event
+			if (m_cfg.dimensionTimeName != null && s_dimName == m_cfg.dimensionTimeName)
+				b_frameSynchronised = true;
+
+
+			if (b_frameSynchronised)
 			{
 				dispatchEvent(new SynchronisedVariableChangeEvent(
 						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.FRAME, true));
 			}
-			//if "time" changed, we need to update timeline, so we need to dispatch event
-			if (m_cfg.dimensionTimeName != null && s_dimName == m_cfg.dimensionTimeName)
+
+
+			//if "level" changed, we need to update timeline, so we need to dispatch event
+			if ((m_cfg.dimensionVerticalLevelName != null && s_dimName == m_cfg.dimensionVerticalLevelName) || s_dimName == GlobalVariable.LEVEL)
 			{
 				dispatchEvent(new SynchronisedVariableChangeEvent(
-						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.FRAME));
-			}
-			//if "level" changed, we need to update timeline, so we need to dispatch event
-			if (m_cfg.dimensionVerticalLevelName != null && s_dimName == m_cfg.dimensionVerticalLevelName)
-			{
-				if (synchroniseLevel)
-				{
-					dispatchEvent(new SynchronisedVariableChangeEvent(
-						SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.LEVEL));
-				}
+					SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.LEVEL, true));
 			}
 		}
 
@@ -1658,6 +1678,10 @@ package com.iblsoft.flexiweather.ogc
 		 */
 		public function setWMSDimensionValue(s_dimName: String, s_value: String): void
 		{
+			if (s_value == null)
+			{
+				trace("check why value is NULL (setWMSDimensionValue)");
+			}
 			if (m_currentWMSViewProperties) {
 				m_currentWMSViewProperties.setWMSDimensionValue(s_dimName, s_value);
 			} else {
@@ -1759,23 +1783,25 @@ package com.iblsoft.flexiweather.ogc
 			return null;
 		}
 
-		public function hasSynchronisedVariable(s_variableId: String): Boolean
+		public function hasSynchronisedVariable(s_variableId: String, b_onlySynchronised: Boolean = true): Boolean
 		{
 			if (m_currentWMSViewProperties)
 			{
 				if (s_variableId == GlobalVariable.LEVEL)
 				{
 					var hasLevel: Boolean = m_currentWMSViewProperties.hasSynchronisedVariable(s_variableId);
-					hasLevel = hasLevel && synchroniseLevel;
+					if (b_onlySynchronised)
+						hasLevel = hasLevel && synchroniseLevel;
 					return hasLevel;
 				}
 				if (s_variableId == GlobalVariable.RUN)
 				{
 					var hasRun: Boolean = m_currentWMSViewProperties.hasSynchronisedVariable(s_variableId);
-					hasRun = hasRun && synchroniseRun;
+					if (b_onlySynchronised)
+						hasRun = hasRun && synchroniseRun;
 					return hasRun;
 				}
-					
+
 				return m_currentWMSViewProperties.hasSynchronisedVariable(s_variableId);
 			}
 			return false;
@@ -1788,19 +1814,75 @@ package com.iblsoft.flexiweather.ogc
 			if (m_currentWMSViewProperties)
 				return m_currentWMSViewProperties.getSynchronisedVariableClosetsValue(s_variableId, requiredValue, direction);
 			return null;
-			
+
 		}
-		public function getSynchronisedVariableValue(s_variableId: String): Object
+		public function getSynchronisedVariableValue(s_variableId: String, b_checkGlobalSynchronization: Boolean = true): Object
 		{
 			if (status == InteractiveDataLayer.STATE_DATA_LOADED_WITH_ERRORS)
 				return null;
+
+			if (b_checkGlobalSynchronization)
+			{
+				switch (s_variableId)
+				{
+					case GlobalVariable.RUN:
+						if (synchroniseRun)
+						{
+							var run: Object = container.interactiveLayerMap.run;
+							if (run)
+								return run;
+						}
+						break;
+					case GlobalVariable.LEVEL:
+						if (synchroniseLevel)
+						{
+							var level: Object = container.interactiveLayerMap.level;
+							if (level)
+								return level;
+						}
+						break;
+
+				}
+			}
 			if (m_currentWMSViewProperties)
 				return m_currentWMSViewProperties.getSynchronisedVariableValue(s_variableId);
 			return null;
 		}
 
-		public function getSynchronisedVariableValuesList(s_variableId: String): Array
+		// returns null is no such dimension exist
+		public function getSynchronisedVariableUnitsName(s_variableId: String): String
 		{
+			if (m_currentWMSViewProperties)
+				return m_currentWMSViewProperties.getSynchronisedVariableUnitsName(s_variableId);
+			return null;
+		}
+
+		public function getSynchronisedVariableValuesList(s_variableId: String, b_checkGlobalSynchronization: Boolean = true): Array
+		{
+			if (b_checkGlobalSynchronization)
+			{
+				var values: Array;
+				switch (s_variableId)
+				{
+					case GlobalVariable.RUN:
+						if (synchroniseRun)
+						{
+							values = container.interactiveLayerMap.getRuns();
+							if (values)
+								return values;
+						}
+						break;
+					case GlobalVariable.LEVEL:
+						if (synchroniseLevel)
+						{
+							values = container.interactiveLayerMap.getLevels();
+							if (values)
+								return values;
+						}
+						break;
+
+				}
+			}
 			if (m_currentWMSViewProperties)
 				return m_currentWMSViewProperties.getSynchronisedVariableValuesList(s_variableId);
 			return null;
@@ -1809,7 +1891,7 @@ package com.iblsoft.flexiweather.ogc
 		public function synchroniseWith(s_variableId: String, s_value: Object): String
 		{
 			setStatus(InteractiveDataLayer.STATE_EMPTY);
-			
+
 			var sSynchronizeWithResponse: String;
 			if (isPreloadedWMSDimensionValue(s_variableId, s_value))
 			{
@@ -1858,16 +1940,16 @@ package com.iblsoft.flexiweather.ogc
 		}
 
 		/**
-		 * Update layer status and clear graphics, when layer has no data for current synchronized frame 
+		 * Update layer status and clear graphics, when layer has no data for current synchronized frame
 		 * @param gr
-		 * 
-		 */		
+		 *
+		 */
 		private function noSynchronisationDataAvailable(gr: Graphics): void
 		{
 			setStatus(InteractiveDataLayer.STATE_NO_SYNCHRONISATION_DATA_AVAILABLE);
 			clear(graphics);
 		}
-			
+
 		protected function checkPostponedUpdateDataCall(): void
 		{
 //			debug("checkPostponedUpdateDataCall: _updateDataWaiting: " + _updateDataWaiting + " capabilitiesReady: " + capabilitiesReady);
@@ -1884,7 +1966,7 @@ package com.iblsoft.flexiweather.ogc
 			_capabilitiesReady = true;
 			dispatchEvent(new GetCapabilitiesEvent(
 					GetCapabilitiesEvent.CAPABILITIES_RECEIVED));
-			
+
 			//dispatch also SynchronisedVariableChangeEvent events and do checkPostponedUpdateDataCall()
 			onCapabilitiesUpdated();
 //			checkPostponedUpdateDataCall();
@@ -1894,7 +1976,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 //			debug("MSBAse onCapabilitiesUpdated");
 			_capabilitiesReady = true;
-			
+
 			/*
 			dispatchEvent(new SynchronisedVariableChangeEvent(
 					SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, GlobalVariable.FRAME));
@@ -1935,7 +2017,7 @@ package com.iblsoft.flexiweather.ogc
 			}
 			return false;
 		}
-		
+
 		public function isPrimaryLayer(): Boolean
 		{
 			if (m_synchronisationRole)
@@ -1991,7 +2073,7 @@ package com.iblsoft.flexiweather.ogc
 			fadeIn.removeEventListener(EffectEvent.EFFECT_START, onEffectFadeInStart);
 //			fadeIn = null;
 			callLater(delayedEffectEnd);
-			
+
 //			if (!fadeOut.hasEventListener(EffectEvent.EFFECT_START))
 //			{
 				fadeOut.addEventListener(EffectEvent.EFFECT_START, onEffectFadeOutStart);
@@ -2005,7 +2087,7 @@ package com.iblsoft.flexiweather.ogc
 			fadeOut.removeEventListener(EffectEvent.EFFECT_END, onFadeOutEnd);
 //			fadeOut = null;
 			callLater(delayedEffectEnd);
-			
+
 //			if (!fadeIn.hasEventListener(EffectEvent.EFFECT_START))
 //			{
 				fadeIn.addEventListener(EffectEvent.EFFECT_START, onEffectFadeInStart);
@@ -2048,17 +2130,17 @@ package com.iblsoft.flexiweather.ogc
 			updatePropertyForCloneLayer(newLayer);
 			return newLayer;
 		}
-		
+
 		/**
-		 * You can update all properties, which needs to be updated when clone InteractiveLayer. 
-		 * Please override this function in all layers which extend InteractiveLayer  
+		 * You can update all properties, which needs to be updated when clone InteractiveLayer.
+		 * Please override this function in all layers which extend InteractiveLayer
 		 * @param layer
-		 * 
-		 */		
+		 *
+		 */
 		override protected function updatePropertyForCloneLayer(layer: InteractiveLayer): void
 		{
 			super.updatePropertyForCloneLayer(layer);
-			
+
 //			newLayer.id = id;
 //			newLayer.alpha = alpha;
 //			newLayer.zOrder = zOrder;
@@ -2087,15 +2169,15 @@ package com.iblsoft.flexiweather.ogc
 					var value: String = getWMSDimensionValue(dimName);
 					newLayer.setWMSDimensionValue(dimName, value);
 				}
-				
+
 			}
-			
+
 		}
 
 		protected function debug(str: String): void
 		{
 //			LoggingUtils.dispatchLogEvent(this, "MSBase: " + str);
-//			trace("MSBase: ["+this+"] " + str);
+			trace("MSBase: ["+this+"] " + str);
 		}
 
 		private var _configurationChanged: Boolean;
@@ -2105,7 +2187,7 @@ package com.iblsoft.flexiweather.ogc
 			_configurationChanged = true;
 			invalidateProperties();
 		}
-		
+
 		public function get configuration(): ILayerConfiguration
 		{
 			return m_cfg;
@@ -2126,10 +2208,27 @@ package com.iblsoft.flexiweather.ogc
 			if (mb_synchroniseRun != value)
 			{
 				mb_synchroniseRun = value;
-				notifySynchronizationChange(GlobalVariable.RUN, getSynchronisedVariableValue(GlobalVariable.RUN), mb_synchroniseRun);
+				var runValue: Object =  getSynchronisedVariableValue(GlobalVariable.RUN);
+				if (runValue)
+				{
+					var runValueString: String;
+					if (runValue is Date)
+						runValueString = ISO8601Parser.dateToString(runValue as Date);
+					if (runValue.value is Date)
+						runValueString = ISO8601Parser.dateToString(runValue.value as Date);
+
+					notifySynchronizationChange(GlobalVariable.RUN, runValue, mb_synchroniseRun);
+
+					dispatchEvent(new SynchronisedVariableChangeEvent(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, GlobalVariable.RUN));
+
+					if (mb_synchroniseRun)
+						afterWMSDimensionValueIsSet(GlobalVariable.RUN, runValueString);
+					else
+						afterWMSDimensionValueIsSet(m_cfg.dimensionRunName, runValueString);
+				}
 			}
 		}
-		
+
 		public function get synchroniseLevel(): Boolean
 		{
 			return mb_synchroniseLevel;
@@ -2140,7 +2239,27 @@ package com.iblsoft.flexiweather.ogc
 			if (mb_synchroniseLevel != value)
 			{
 				mb_synchroniseLevel = value;
-				notifySynchronizationChange(GlobalVariable.LEVEL, getSynchronisedVariableValue(GlobalVariable.LEVEL), mb_synchroniseLevel);
+				var levelValue: Object =  getSynchronisedVariableValue(GlobalVariable.LEVEL);
+				if (!levelValue)
+				{
+					trace("Global LEVEL is null");
+					return;
+				}
+				var levelValueString: String;
+				if (levelValue is String)
+					levelValueString = levelValue as String;
+				if (levelValue.hasOwnProperty('value') && levelValue.value is String)
+					levelValueString = levelValue.value as String;
+
+				notifySynchronizationChange(GlobalVariable.LEVEL, levelValue, mb_synchroniseLevel);
+
+				dispatchEvent(new SynchronisedVariableChangeEvent(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, GlobalVariable.LEVEL));
+
+				if (mb_synchroniseLevel)
+					afterWMSDimensionValueIsSet(GlobalVariable.LEVEL, levelValueString);
+				else
+					afterWMSDimensionValueIsSet(m_cfg.dimensionVerticalLevelName, levelValueString);
+
 			}
 		}
 
@@ -2151,6 +2270,7 @@ package com.iblsoft.flexiweather.ogc
 				eventType = SynchronisationEvent.START_GLOBAL_VARIABLE_SYNCHRONIZATION;
 			else
 				eventType = SynchronisationEvent.STOP_GLOBAL_VARIABLE_SYNCHRONIZATION;
+
 			var se: SynchronisationEvent = new SynchronisationEvent(eventType, true);
 			se.globalVariable = globalVariable;
 			se.globalVariableValue = globalVariableValue;
@@ -2161,9 +2281,9 @@ package com.iblsoft.flexiweather.ogc
 		{
 			var key: String = event.item.cacheKey.key;
 			var image: DisplayObject = event.item.image;
-			
+
 			var cache: WMSCache = getCache() as WMSCache;
-			
+
 			//check if this Bitmap is used in this layer
 			if (m_currentWMSViewProperties)
 			{
@@ -2183,7 +2303,7 @@ package com.iblsoft.flexiweather.ogc
 				}
 			}
 		}
-		
+
 		private function onDeleteCacheItemAdded(event: WMSCacheEvent): void
 		{
 			//update imagePart
@@ -2206,7 +2326,7 @@ package com.iblsoft.flexiweather.ogc
 				invalidateDynamicPart();
 			}
 		}
-		
+
 		override public function toString(): String
 		{
 			return "InteractiveLayerMSBase " + name + " / LayerID: " + m_layerID + " IW: " + container.id;
@@ -2216,7 +2336,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			if (m_cache)
 				m_cache.destroyCache();
-			
+
 			m_cache.removeEventListener(WMSCacheEvent.BEFORE_DELETE , onBeforeCacheItemDeleted);
 			m_cache = null;
 		}
@@ -2239,22 +2359,22 @@ import com.iblsoft.flexiweather.ogc.data.viewProperties.WMSViewProperties;
 import flash.utils.Dictionary;
 
 class LayerTemporaryParameterStorage {
-	
+
 	private var _styles: Dictionary = new Dictionary(true);
 	private var _dimension: Dictionary = new Dictionary(true);
 	private var _synchroniseVariablesDictionary: Dictionary = new Dictionary(true);
 	private var _customParameter: Dictionary = new Dictionary(true);
 	private var _configuration: WMSLayerConfiguration;
-	
+
 	public function LayerTemporaryParameterStorage() {
-	
+
 	}
-	
+
 	public function setConfiguration(cfg: WMSLayerConfiguration): void
 	{
 		_configuration = cfg;
 	}
-	
+
 	public function updateCurrentWMSPropertiesFromStorage(currentWMSProperties: WMSViewProperties, bEmptyStorage: Boolean = true): void
 	{
 		if (currentWMSProperties)
@@ -2284,22 +2404,22 @@ class LayerTemporaryParameterStorage {
 			}
 		}
 	}
-		
+
 	public function setWMSStyleName(i_subLayer: uint, s_styleName: String): void
 	{
 		_styles[i_subLayer] = s_styleName;
 	}
-	
+
 	public function setWMSDimensionValue(s_dimName: String, s_value: String): void
 	{
 		_dimension[s_dimName] = s_value;
 	}
-	
+
 	public function setWMSCustomParameter(s_parameter: String, s_value: String): void
 	{
 		_customParameter[s_parameter] = s_value;
 	}
-	
+
 	public function synchroniseWith(s_variableId: String, s_value: Object): void
 	{
 		_synchroniseVariablesDictionary[s_variableId] = s_value;

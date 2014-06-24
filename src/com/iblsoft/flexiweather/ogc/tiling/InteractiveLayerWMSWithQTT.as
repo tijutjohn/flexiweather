@@ -583,7 +583,6 @@ package com.iblsoft.flexiweather.ogc.tiling
 				if (m_tiledLayer)
 					m_tiledLayer.setValidityTime(_currentValidityTime);
 			}
-
 		}
 
 		private function onAllTilesLoaded(event: InteractiveLayerEvent): void

@@ -19,12 +19,14 @@ package com.iblsoft.flexiweather.ogc.configuration.layers.interfaces
 		function get dimensionForecastName(): String;
 		function set dimensionVerticalLevelName(s: String): void;
 		function get dimensionVerticalLevelName(): String;
-		function get styleNames(): Array
-		function set styleNames(value: Array): void
-		function get autoRefreshPeriod(): uint
-		function set autoRefreshPeriod(value: uint): void
-		function get imageFormat(): String
-		function set imageFormat(value: String): void
+		function set timeMethod(s: String): void;
+		function get timeMethod(): String;
+		function get styleNames(): Array;
+		function set styleNames(value: Array): void;
+		function get autoRefreshPeriod(): uint;
+		function set autoRefreshPeriod(value: uint): void;
+		function get imageFormat(): String;
+		function set imageFormat(value: String): void;
 		function dimensionToParameterName(s_dim: String): String;
 	}
 }

@@ -19,11 +19,11 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	import com.iblsoft.flexiweather.widgets.data.InteractiveLayerPrintQuality;
-	
+
 	import flash.events.DataEvent;
 	import flash.events.Event;
 	import flash.net.URLRequest;
-	
+
 	import mx.collections.ArrayCollection;
 
 	[Event(name = CAPABILITIES_UPDATED, type = "flash.events.DataEvent")]
@@ -41,6 +41,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		private var ma_availableImageFormats: Array = [];
 		private var ms_dimensionTimeName: String = null;
 		private var ms_dimensionRunName: String = null;
+		private var ms_timeMethod: String = null;
 		private var ms_dimensionForecastName: String = null;
 		private var ms_dimensionVerticalLevelName: String = null;
 		private var ms_imageFormat: String = null;
@@ -55,18 +56,18 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		{
 			return mb_capabilitiesReceived;
 		}
-		
+
 		public function WMSLayerConfiguration(service: WMSServiceConfiguration = null, a_layerNames: Array = null)
 		{
 			super(service);
-			
+
 			mb_capabilitiesReceived = false;
-			
+
 			if (a_layerNames != null)
 				ma_layerNames = a_layerNames;
-			
+
 			registerService();
-			
+
 //			onCapabilitiesUpdated(null);
 		}
 
@@ -78,33 +79,33 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 				onCapabilitiesUpdated(null);
 			}
 		}
-		
+
 		override protected function unregisterService(): void
 		{
 			if (m_service)
 				m_service.removeEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onCapabilitiesUpdated)
 		}
-		
-		
+
+
 		public function populateLayerCapabilities(layerXML: XML): void
 		{
-			//if FlexiWeather loads GetCapabilitie requests, this functionality is not needed and will not be executed			
+			//if FlexiWeather loads GetCapabilitie requests, this functionality is not needed and will not be executed
 			if (FlexiWeatherConfiguration.FLEXI_WEATHER_LOADS_GET_CAPABILITIES)
 				return;
-			
+
 			if (m_service)
-			{ 
+			{
 				(m_service as WMSServiceConfiguration).populateLayerCapabilities(layerXML);
 				onCapabilitiesUpdated();
 			}
 		}
-		
+
 		override public function destroy(): void
 		{
 			unregisterService();
-			
+
 			ma_layerNames = null;
-			
+
 			if (_layerConfigurations && _layerConfigurations.length > 0)
 			{
 				for each (var wmsLayer: WMSLayerBase in _layerConfigurations)
@@ -121,19 +122,19 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		{
 			return "WMSLayerConfiguration " + id + " ["+m_service+"]";
 		}
-		
+
 		override public function serialize(storage: Storage): void
 		{
 			if (storage.isLoading() && m_service != null)
 				m_service.removeEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onCapabilitiesUpdated)
 			super.serialize(storage);
-			
+
 			if (storage.isLoading())
 			{
 				m_service.addEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
 //				trace(this + " serialized");
 			}
-			
+
 			try
 			{
 				storage.serializeNonpersistentArray("layer-name", ma_layerNames, String);
@@ -212,7 +213,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		public function toGetMapRequest(
 				s_crs: String, s_bbox: String,
 				i_width: int, i_height: int,
-				s_printQuality: String, 
+				s_printQuality: String,
 				s_stylesList: String,
 				s_layersOverride: String = null): URLRequest
 		{
@@ -303,7 +304,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		{
 			if (!m_service)
 				return;
-			
+
 			var layer: WMSLayer
 			var layerConf: WMSLayer
 			var a_layers: ArrayCollection = new ArrayCollection();
@@ -364,9 +365,9 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 				mb_capabilitiesReceived = true;
 			}
 			dispatchEvent(new DataEvent(CAPABILITIES_RECEIVED));
-			
+
 //			trace(this + " onCapabilitiesUpdated ");
-			
+
 		}
 
 		private function updateDimensions(layer: WMSLayer): void
@@ -418,7 +419,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		{
 			if (crs == null)
 				return false;
-			
+
 			if (_layerConfigurations && _layerConfigurations.length > 0)
 			{
 				for each (var layer: WMSLayer in _layerConfigurations)
@@ -467,19 +468,19 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 					}
 				}
 			}
-			
+
 			if (s_url == '' && ms_previewURL && ms_previewURL.length > 0)
 				return ms_previewURL;
-			
+
 			return s_url;
 		}
-		
+
 		protected function getInternalIconPath(s_url: String): String
 		{
 			/*
 			 this is code from generate-preview.py
 			*/
-			
+
 			/*
 			s_serviceURL = x_layer.getAttribute('service-url')
 			if s_serviceURL.find('?') < 0:
@@ -491,7 +492,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 				s_id += "_" + s_layers
 			s_id = s_id.replace('/', '_').replace(',', '+')
 			*/
-			
+
 			s_url = service.fullURL;
 			s_url = s_url.replace(/\$\{BASE_URL\}\//, "").replace(/http:\/\//, "").replace(/https:\/\//, "");
 			var paramPos: int = s_url.indexOf("?");
@@ -502,9 +503,9 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			s_url = s_url.replace(/\//gi, "_");
 			s_url += "_" + ma_layerNames.join("_").replace(" ", "-").toLowerCase();
 			s_url = "assets/layer-previews/" + s_url + ".png";
-			
+
 			return s_url;
-			
+
 		}
 
 		override public function renderPreview(f_width: Number, f_height: Number, iw: InteractiveWidget = null): void
@@ -529,7 +530,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		override public function createLayerInstance(iw: InteractiveWidget): InteractiveLayer
 		{
 			var l: InteractiveLayerWMS = new InteractiveLayerWMS(iw, this);
-			return l;			
+			return l;
 		}
 		// IInteractiveLayerProvider implementation
 		override public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer
@@ -544,7 +545,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			return s_behaviourId in ma_behaviours;
 		}
 
-		// getters & setters				
+		// getters & setters
 		public function get wmsService(): WMSServiceConfiguration
 		{
 			return m_service as WMSServiceConfiguration;
@@ -564,7 +565,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		{
 			return mb_legendIsDimensionDependant;
 		}
-		
+
 		public function set legendIsAreaDependant(b: Boolean): void
 		{
 			mb_legendIsAreaDependant = b;
@@ -574,7 +575,17 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		{
 			return mb_legendIsAreaDependant;
 		}
-		
+
+		public function set timeMethod(s: String): void
+		{
+			ms_timeMethod = s;
+		}
+
+		public function get timeMethod(): String
+		{
+			return ms_timeMethod;
+		}
+
 		public function set dimensionTimeName(s: String): void
 		{
 			ms_dimensionTimeName = s;
