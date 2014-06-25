@@ -494,6 +494,16 @@ package com.iblsoft.flexiweather.proj
 			f_loFrac = f_loFrac - f_loDeg;
 			f_loFrac *= 60;
 			var f_loMin: Number = Math.round(f_loFrac);
+			
+			if (f_loMin == 60)
+			{
+				f_loMin = 0;
+				f_loDeg++;
+			}
+			if (f_loMin >= 60)
+			{
+				trace("check 60 minutes");
+			}
 			var s_loMin: String = updateLeadingZeroes(f_loMin, 2);
 			switch (sFormat)
 			{
@@ -505,6 +515,8 @@ package com.iblsoft.flexiweather.proj
 					return f_loEW +  updateLeadingZeroes(f_loDeg, 3) + s_loMin;
 					
 				case CoordFormatType.FORMAT_DEGREES_AND_MINUTES:
+					if (s_loMin == "60")
+						trace("check problem");
 					return f_loDeg +"°" + s_loMin + "'" + f_loEW;
 					
 				case CoordFormatType.FORMAT_DEGREES_ROUNDED:
@@ -555,6 +567,18 @@ package com.iblsoft.flexiweather.proj
 			f_laFrac *= 60;
 			
 			var f_laMin: Number = Math.round(f_laFrac);
+			
+			if (f_laMin == 60)
+			{
+				f_laMin = 0;
+				f_laDeg++;
+			}
+			if (f_laMin >= 60)
+			{
+				trace("check 60 minutes");
+			}
+			
+			
 			var s_laMin: String = updateLeadingZeroes(f_laMin, 2);
 			
 			switch (sFormat)
