@@ -493,8 +493,7 @@ package com.iblsoft.flexiweather.proj
 			var f_loDeg: Number = Math.floor(f_loFrac);
 			f_loFrac = f_loFrac - f_loDeg;
 			f_loFrac *= 60;
-			var f_loMin: Number = Math.floor(f_loFrac);
-			
+			var f_loMin: Number = Math.round(f_loFrac);
 			var s_loMin: String = updateLeadingZeroes(f_loMin, 2);
 			switch (sFormat)
 			{
@@ -524,6 +523,9 @@ package com.iblsoft.flexiweather.proj
 					return _formatter.format(x);// +"°" + f_loEW;
 			}
 				
+			f_loMin = Math.floor(f_loFrac);
+			s_loMin = updateLeadingZeroes(f_loMin, 2);
+			
 			f_loFrac -= f_loMin;
 			f_loFrac *= 60;
 			
@@ -552,7 +554,7 @@ package com.iblsoft.flexiweather.proj
 			f_laFrac = f_laFrac - f_laDeg;
 			f_laFrac *= 60;
 			
-			var f_laMin: Number = Math.floor(f_laFrac);
+			var f_laMin: Number = Math.round(f_laFrac);
 			var s_laMin: String = updateLeadingZeroes(f_laMin, 2);
 			
 			switch (sFormat)
@@ -582,6 +584,9 @@ package com.iblsoft.flexiweather.proj
 					_formatter.fractionalDigits = 6;
 					return _formatter.format(y);// +"°" + f_laNS;
 			}
+			
+			f_laMin = Math.floor(f_laFrac);
+			s_laMin = updateLeadingZeroes(f_laMin, 2);
 			
 			f_laFrac -= f_laMin;
 			f_laFrac *= 60;
