@@ -213,10 +213,14 @@ package com.iblsoft.flexiweather.ogc.editable.features
 //			addInsertGMLProperty(xmlInsert, null, "validity", ISO8601Parser.dateToString(m_validity));
 			
 			var crs: String = master.container.getCRS();
+			var projection: Projection = master.container.getCRSProjection();
+			var coord: Coord = new Coord("CRS:84", volcano.lo, volcano.la);
+			var volcanoCoord: Coord = coord.convertToProjection(projection);
+			
 			var gml: Namespace = new Namespace("http://www.opengis.net/gml");
 			addInsertGMLProperty(xmlInsert, null, "baseTime", ISO8601Parser.dateToString(m_baseTime)); 
 			addInsertGMLProperty(xmlInsert, null, "validity", ISO8601Parser.dateToString(m_validity));
-			xmlInsert.appendChild(<gml:location xmlns:gml="http://www.opengis.net/gml"><gml:Point><gml:pos srsName={crs}>{volcano.lo} {volcano.la}</gml:pos></gml:Point></gml:location>);
+			xmlInsert.appendChild(<gml:location xmlns:gml="http://www.opengis.net/gml"><gml:Point><gml:pos srsName={crs}>{volcanoCoord.x} {volcanoCoord.y}</gml:pos></gml:Point></gml:location>);
 			addInsertGMLProperty(xmlInsert, null, "phenomenonName", volcano.name);
 			
 //			addInsertGMLProperty(xmlInsert, null, "anotation", values.anotation);
@@ -227,10 +231,14 @@ package com.iblsoft.flexiweather.ogc.editable.features
 //			super.toUpdateGML(xmlUpdate);
 			
 			var crs: String = master.container.getCRS();
+			var projection: Projection = master.container.getCRSProjection();
+			var coord: Coord = new Coord("CRS:84", volcano.lo, volcano.la);
+			var volcanoCoord: Coord = coord.convertToProjection(projection);
+			
 			var gml: Namespace = new Namespace("http://www.opengis.net/gml");
 			addInsertGMLProperty(xmlUpdate, null, "baseTime", ISO8601Parser.dateToString(m_baseTime)); 
 			addInsertGMLProperty(xmlUpdate, null, "validity", ISO8601Parser.dateToString(m_validity));
-			xmlUpdate.appendChild(<gml:location xmlns:gml="http://www.opengis.net/gml"><gml:Point><gml:pos srsName={crs}>{volcano.lo} {volcano.la}</gml:pos></gml:Point></gml:location>);
+			xmlUpdate.appendChild(<gml:location xmlns:gml="http://www.opengis.net/gml"><gml:Point><gml:pos srsName={crs}>{volcanoCoord.x} {volcanoCoord.y}</gml:pos></gml:Point></gml:location>);
 			addInsertGMLProperty(xmlUpdate, null, "phenomenonName", volcano.name);
 		}
 
