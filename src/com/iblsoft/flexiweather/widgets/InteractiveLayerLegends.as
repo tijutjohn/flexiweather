@@ -199,8 +199,13 @@ package com.iblsoft.flexiweather.widgets
 		
 		public function invalidateLayerLegend(l: InteractiveLayer): void
 		{
-			l.removeLegend(getGroupFromDictionary(l));
-			delete m_groupDictionary[l];
+			var group: InteractiveLayerLegendGroup = getGroupFromDictionary(l);
+			if (group && l)
+			{
+				l.removeLegend(group);
+				removeCanvasFromDictionary(l);
+			}
+			
 		
 			_legendsInvalidated = true;
 			invalidateProperties();
@@ -271,9 +276,32 @@ package com.iblsoft.flexiweather.widgets
 			_legends = new Array();
 		}
 
+		private function addLegendGroupListeners(group: InteractiveLayerLegendGroup): void
+		{
+			if (group)
+			{
+				group.addEventListener(MouseEvent.CLICK, onLegendGroupClick);
+				group.addEventListener(MouseEvent.MOUSE_OVER, onLegendGroupRollover);
+				group.addEventListener(MouseEvent.ROLL_OVER, onLegendGroupRollover);
+				group.addEventListener(MouseEvent.MOUSE_OUT, onLegendGroupRollout);
+				group.addEventListener(MouseEvent.ROLL_OUT, onLegendGroupRollout);
+			}
+		}
+		private function removeLegendGroupListeners(group: InteractiveLayerLegendGroup): void
+		{
+			if (group)
+			{
+				group.removeEventListener(MouseEvent.CLICK, onLegendGroupClick);
+				group.removeEventListener(MouseEvent.MOUSE_OVER, onLegendGroupRollover);
+				group.removeEventListener(MouseEvent.ROLL_OVER, onLegendGroupRollover);
+				group.removeEventListener(MouseEvent.MOUSE_OUT, onLegendGroupRollout);
+				group.removeEventListener(MouseEvent.ROLL_OUT, onLegendGroupRollout);
+			}
+		}
 		private function removeCanvasFromDictionary(layer: InteractiveLayer): void
 		{
 			var group: InteractiveLayerLegendGroup = m_groupDictionary[layer];
+			removeLegendGroupListeners(group);
 			delete m_groupDictionary[layer];
 			if (group.parent)
 			{
@@ -286,6 +314,7 @@ package com.iblsoft.flexiweather.widgets
 				debug("addCanvasToDictionary cnv IS NULL ");
 			debug("\t\t InteractiveLayerLegends addCanvasToDictionary [" + layer.name + "/" + layer + "]: " + group);
 			m_groupDictionary[layer] = group;
+			addLegendGroupListeners(group);
 //			_legends[layer] = new Rectangle(cnv.x, cnv.y, cnv.width, cnv.height);
 		}
 		private var _scaleDict: Dictionary = new Dictionary();
@@ -400,7 +429,7 @@ package com.iblsoft.flexiweather.widgets
 						group.visible = false;
 						addCanvasToDictionary(group, l);
 						debug(" layer: " + l + "  loadLegends renderLegend => LOAD");
-						l.renderLegend(group, onLegendRendered, legendScaleX, legendScaleY, getStyle('labelAlign'));
+						l.renderLegend(group, onLegendRendered, onLegendError, legendScaleX, legendScaleY, getStyle('labelAlign'));
 					}
 					else
 					{
@@ -1176,10 +1205,22 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 
+		private function onLegendError(cnv: InteractiveLayerLegendGroup): void
+		{
+			debug("\n\n onLegendError  legendsToBeRendered: " + legendsLoadingCount + " canvas: " + cnv.width + ", " + cnv.height + " Position: " + cnv.x + " , " + cnv.y);
+			cnv.visible = false;
+			legendReceived();
+		}
 		private function onLegendRendered(cnv: InteractiveLayerLegendGroup): void
 		{
+			debug("\n\n onLegendRendered  legendsToBeRendered: " + legendsLoadingCount + " canvas: " + cnv.width + ", " + cnv.height + " Position: " + cnv.x + " , " + cnv.y);
+			cnv.visible = true;
+			legendReceived();
+		}
+		
+		private function legendReceived(): void
+		{
 			legendsLoadingCount--;
-			debug("\n\nonLegendRendered  legendsToBeRendered: " + legendsLoadingCount + " canvas: " + cnv.width + ", " + cnv.height + " Position: " + cnv.x + " , " + cnv.y);
 			if (legendsLoadingCount < 1)
 			{
 				debug("ALL LEGENDS ARE LOADED");
@@ -1234,7 +1275,7 @@ package com.iblsoft.flexiweather.widgets
 		private function debug(str: String): void
 		{
 //			_logger.debug(str);
-//			trace(this + str);
+			trace(this + str);
 		}
 		
 		override public function toString(): String

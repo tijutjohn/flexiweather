@@ -594,6 +594,27 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 		protected function onLegendLoadFailed(event: UniURLLoaderErrorEvent): void
 		{
 			removeLegendListeners(event.target as WMSImageLoader);
+			
+			var e: MSBaseLoaderEvent;
+			
+			if (event.result is XML)
+			{
+				var resultXML: XML = event.result as XML;
+				if (resultXML.localName() == "ServiceExceptionReport")
+				{
+					var serviceException: XML = resultXML.children()[0] as XML;
+					if (serviceException.localName() == "ServiceException" && serviceException.hasOwnProperty("@code") && serviceException.@code == "LegendNotAvailable")
+					{
+						e = new MSBaseLoaderEvent(MSBaseLoaderEvent.LEGEND_NOT_AVAILABLE);
+						e.data = {result: resultXML, associatedData: event.associatedData};
+						dispatchEvent(e);
+						return;
+					}
+				}
+			}
+			e = new MSBaseLoaderEvent(MSBaseLoaderEvent.LEGEND_LOAD_ERROR);
+			e.data = {result: event.result, associatedData: event.associatedData};
+			dispatchEvent(e);
 		}
 	}
 }

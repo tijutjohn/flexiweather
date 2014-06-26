@@ -419,7 +419,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 		}
 
-		public function renderLegend(group: InteractiveLayerLegendGroup, callback: Function, legendScaleX: Number, legendScaleY: Number, labelAlign: String = 'left', useCache: Boolean = false, hintSize: Rectangle = null): Rectangle
+		public function renderLegend(group: InteractiveLayerLegendGroup, callback: Function, errorCallback: Function, legendScaleX: Number, legendScaleY: Number, labelAlign: String = 'left', useCache: Boolean = false, hintSize: Rectangle = null): Rectangle
 		{
 			return new Rectangle();
 		}
