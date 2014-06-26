@@ -1188,7 +1188,7 @@ package com.iblsoft.flexiweather.ogc
 		 * @return
 		 *
 		 */
-		override public function renderLegend(group: InteractiveLayerLegendGroup, callback: Function, legendScaleX: Number, legendScaleY: Number, labelAlign: String = 'left', useCache: Boolean = false, hintSize: Rectangle = null): Rectangle
+		override public function renderLegend(group: InteractiveLayerLegendGroup, callback: Function, errorCallback: Function, legendScaleX: Number, legendScaleY: Number, labelAlign: String = 'left', useCache: Boolean = false, hintSize: Rectangle = null): Rectangle
 		{
 			var styleName: String = getWMSStyleName(0);
 			if (!styleName)
@@ -1232,8 +1232,10 @@ package com.iblsoft.flexiweather.ogc
 				if (isNaN(legendScaleY))
 					legendScaleY = 1;
 				var legendLoader: MSBaseLoader = new MSBaseLoader(this);
-				var associatedData: Object = {wmsViewProperties: currentViewProperties, group: group, labelAlign: labelAlign, callback: callback, useCache: useCache, legendScaleX: legendScaleX, legendScaleY: legendScaleY, width: w, height: h};
+				var associatedData: Object = {wmsViewProperties: currentViewProperties, group: group, labelAlign: labelAlign, callback: callback, errorCallback: errorCallback, useCache: useCache, legendScaleX: legendScaleX, legendScaleY: legendScaleY, width: w, height: h};
 				legendLoader.addEventListener(MSBaseLoaderEvent.LEGEND_LOADED, onLegendLoaded);
+				legendLoader.addEventListener(MSBaseLoaderEvent.LEGEND_NOT_AVAILABLE, onLegendNotAvailable);
+				legendLoader.addEventListener(MSBaseLoaderEvent.LEGEND_LOAD_ERROR, onLegendLoadError);
 				
 				debug(" load legend for layer: " + this + " viewProperties: " + currentViewProperties);
 				legendLoader.loadLegend(url, associatedData);
@@ -1247,10 +1249,47 @@ package com.iblsoft.flexiweather.ogc
 			return new Rectangle(0, 0, w, h + gap + labelHeight);
 		}
 
+		private function removeLegendLoadingListeners(legendLoader: MSBaseLoader): void
+		{
+			legendLoader.removeEventListener(MSBaseLoaderEvent.LEGEND_LOADED, onLegendLoaded);
+			legendLoader.removeEventListener(MSBaseLoaderEvent.LEGEND_NOT_AVAILABLE, onLegendNotAvailable);
+			legendLoader.removeEventListener(MSBaseLoaderEvent.LEGEND_LOAD_ERROR, onLegendLoadError);
+			
+		}
+		private function onLegendNotAvailable(event: MSBaseLoaderEvent): void
+		{
+			var legendLoader: MSBaseLoader = event.target as MSBaseLoader;
+			removeLegendLoadingListeners(legendLoader);
+			
+			
+			var associatedData: Object = event.data.associatedData;
+			
+			Log.getLogger("Legends").error("Legend Not Available for layer:  " + name);
+			
+			var errorCallback: Function = associatedData.errorCallback; 	
+			if (errorCallback != null)
+			{
+				var group: InteractiveLayerLegendGroup = associatedData.group;
+				errorCallback.apply(null, [group]);
+			}
+		}
+		private function onLegendLoadError(event: MSBaseLoaderEvent): void
+		{
+			var legendLoader: MSBaseLoader = event.target as MSBaseLoader;
+			removeLegendLoadingListeners(legendLoader);
+			
+			var associatedData: Object = event.data.associatedData;
+			var errorCallback: Function = associatedData.errorCallback; 	
+			if (errorCallback != null)
+			{
+				var group: InteractiveLayerLegendGroup = associatedData.group;
+				errorCallback.apply(null, [group]);
+			}
+		}
 		private function onLegendLoaded(event: MSBaseLoaderEvent): void
 		{
 			var legendLoader: MSBaseLoader = event.target as MSBaseLoader;
-			legendLoader.removeEventListener(MSBaseLoaderEvent.LEGEND_LOADED, onLegendLoaded);
+			removeLegendLoadingListeners(legendLoader);
 			var result: * = event.data.result;
 			var associatedData: Object = event.data.associatedData;
 			(associatedData.wmsViewProperties as WMSViewProperties).legendImage = result;
