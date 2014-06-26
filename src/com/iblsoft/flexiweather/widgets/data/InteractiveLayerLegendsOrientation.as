@@ -1,6 +1,9 @@
 package com.iblsoft.flexiweather.widgets.data
 {
-	public class InteractiveLayerLegendsOrientation
+	import com.iblsoft.flexiweather.utils.Serializable;
+	import com.iblsoft.flexiweather.utils.Storage;
+
+	public class InteractiveLayerLegendsOrientation implements Serializable
 	{
 		public var label: String;
 		public var horizontalAlign: String;
@@ -13,6 +16,16 @@ package com.iblsoft.flexiweather.widgets.data
 			if (orientationShortcut)
 				updateFromShortcut(orientationShortcut);
 		}
+		
+		public function serialize(storage:Storage):void
+		{
+			label = storage.serializeString('label', label);
+			horizontalAlign = storage.serializeString('horizontal-align', horizontalAlign);
+			horizontalDirection = storage.serializeString('horizontal-direction', horizontalDirection);
+			verticalAlign = storage.serializeString('vertical-align', verticalAlign);
+			verticalDirection = storage.serializeString('vertical-direction', verticalDirection);
+		}
+		
 		
 		public function updateFromShortcut(shortcut: String): void
 		{
