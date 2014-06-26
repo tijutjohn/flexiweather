@@ -4,6 +4,7 @@ package com.iblsoft.flexiweather.ogc.multiview.data
 	import com.iblsoft.flexiweather.ogc.multiview.synchronization.SynchronizatorWrapper;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
+	import com.iblsoft.flexiweather.widgets.data.InteractiveLayerLegendsOrientation;
 	
 	import mx.collections.ArrayCollection;
 
@@ -13,6 +14,8 @@ package com.iblsoft.flexiweather.ogc.multiview.data
 		public var columns: int;
 		
 		public static var wrapperClass: Class;
+		
+		public var legendsOrientation: InteractiveLayerLegendsOrientation;
 		
 		private var _synchronizators: Array;
 		
@@ -84,6 +87,9 @@ package com.iblsoft.flexiweather.ogc.multiview.data
 				if (_viewData)
 					storage.serialize('view-data', _viewData);
 				
+				if (legendsOrientation)
+					storage.serialize('legends-orientation', legendsOrientation);
+				
 				if (_synchronizators)
 				{
 					//create wrapper collection
@@ -102,6 +108,8 @@ package com.iblsoft.flexiweather.ogc.multiview.data
 					_customData = new MultiViewCustomData();
 				if (!_viewData)
 					_viewData = new MultiViewViewData();
+				if (!legendsOrientation)
+					legendsOrientation = new InteractiveLayerLegendsOrientation();
 				if (!_synchronizators)
 					_synchronizators = new Array();
 				
@@ -109,6 +117,11 @@ package com.iblsoft.flexiweather.ogc.multiview.data
 					storage.serialize('custom-data', _customData);
 				} catch (e: Error) {
 					trace("MultiViewConfiguration serialize loading: cannot find custom-data");
+				}
+				try {
+					storage.serialize('legends-orientation', legendsOrientation);
+				} catch (e: Error) {
+					trace("MultiViewConfiguration serialize loading: cannot find legends-orientation");
 				}
 					
 				try {
