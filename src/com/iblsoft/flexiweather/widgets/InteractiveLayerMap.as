@@ -422,6 +422,16 @@ package com.iblsoft.flexiweather.widgets
 					debug("Problem to serialize 'area' mode");
 				}
 					
+				if (!legendsOrientation)
+					legendsOrientation = new InteractiveLayerLegendsOrientation();
+				
+				try {
+					storage.serialize('legends-orientation', legendsOrientation);
+				} catch (e: Error) {
+					trace("MultiViewConfiguration serialize loading: cannot find legends-orientation");
+					legendsOrientation.updateFromShortcut("BLR");
+				}
+				
 				var de: DynamicEvent = new DynamicEvent(LAYERS_SERIALIZED_AND_READY);
 				de['layers'] = newLayers;
 				dispatchEvent(de);
@@ -445,6 +455,10 @@ package com.iblsoft.flexiweather.widgets
 					wrappers.addItem(wrapper);
 				}
 				storage.serializeNonpersistentArrayCollection("layer", wrappers, LayerSerializationWrapper);
+				
+				if (legendsOrientation)
+					storage.serialize('legends-orientation', legendsOrientation);
+				
 				if (globalVariablesManager)
 				{
 //					if (settings.saveFrame)
