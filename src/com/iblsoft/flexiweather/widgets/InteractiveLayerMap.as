@@ -30,6 +30,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.utils.XMLStorage;
+	import com.iblsoft.flexiweather.widgets.data.InteractiveLayerLegendsOrientation;
 	import com.iblsoft.flexiweather.widgets.data.InteractiveLayerMapSaveSettings;
 	
 	import flash.events.DataEvent;
@@ -248,6 +249,8 @@ package com.iblsoft.flexiweather.widgets
 				}
 			}
 		}
+		
+		public var legendsOrientation: InteractiveLayerLegendsOrientation;
 		
 		public function InteractiveLayerMap(container: InteractiveWidget = null)
 		{
@@ -602,6 +605,16 @@ package com.iblsoft.flexiweather.widgets
 					trace("ILM serialize, problem to set global-level: " + globalLevel);
 				}
 				
+				if (!legendsOrientation)
+					legendsOrientation = new InteractiveLayerLegendsOrientation();
+				
+				try {
+					storage.serialize('legends-orientation', legendsOrientation);
+				} catch (e: Error) {
+					trace("MultiViewConfiguration serialize loading: cannot find legends-orientation");
+					legendsOrientation.updateFromShortcut("BLR");
+				}
+				
 				var de: DynamicEvent = new DynamicEvent(LAYERS_SERIALIZED_AND_READY);
 				de['layers'] = newLayers;
 				dispatchEvent(de);
@@ -617,6 +630,10 @@ package com.iblsoft.flexiweather.widgets
 					wrappers.addItem(wrapper);
 				}
 				storage.serializeNonpersistentArrayCollection("layer", wrappers, LayerSerializationWrapper);
+				
+				if (legendsOrientation)
+					storage.serialize('legends-orientation', legendsOrientation);
+				
 				if (globalVariablesManager)
 				{
 //					var frameDateString: String;
