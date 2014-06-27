@@ -171,7 +171,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 						
 						var frames: Array = getFrames(primaryLayer, synchronizedWidgetFrame, synchronizeFromWidgetPosition, total);
 						
-						debug("FramSynchronisator frames: " + frames.length + " selected index: " + preferredSelectedIndex);
+						debug("FrameSynchronisator frames: " + frames.length + " selected index: " + preferredSelectedIndex);
 						for each (var date: Date in frames)
 						{
 							if (date)
@@ -258,6 +258,8 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			{
 				frame = obj.frame as Date;
 				widget = obj.widget as InteractiveWidget;
+				
+				debug("FrameSychronizator delayedSynchronization ["+widget.id+"] to frame: " + frame);
 				
 				widget.interactiveLayerMap.setFrame(frame);
 				dataForWidgetAvailable(widget);
@@ -351,7 +353,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			if (primaryLayer)
 			{
 //				var variables: Array = primaryLayer.getSynchronisedVariables();
-				var frames: Array = primaryLayer.getSynchronisedVariableValuesList(GlobalVariable.FRAME);
+ 				var frames: Array = primaryLayer.getSynchronisedVariableValuesList(GlobalVariable.FRAME);
 				var synchronizeFromWidgetPosition: int = getWidgetPosition(synchronizeFromWidget, widgetsForSynchronisation);
 				var currFrame: Date = primaryLayer.getSynchronisedVariableValue(GlobalVariable.FRAME) as Date;
 				var currFramePosition: int = getFramePosition(currFrame, frames);

@@ -764,6 +764,11 @@ package com.iblsoft.flexiweather.ogc.multiview
 			multiViewInitialized = false;
 			stopWatchingChanges();
 		}
+		public function afterMultiViewChange(): void
+		{
+			multiViewInitialized = true;
+			startWatchingChanges(true, false);
+		}
 		
 		private function loadMapsForAllWidgets(mapXML: XML, synchronizator: ISynchronizator = null): void
 		{
@@ -1520,7 +1525,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 		{
 			if (layer)
 			{
-				layer.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, onSychronisedVariableChanged);
+				layer.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, onSychronisedVariableDomainChanged);
 				layer.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onSychronisedVariableChanged);
 			}
 		}
@@ -1529,11 +1534,16 @@ package com.iblsoft.flexiweather.ogc.multiview
 		{
 			if (layer)
 			{
-				layer.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, onSychronisedVariableChanged);
+				layer.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, onSychronisedVariableDomainChanged);
 				layer.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onSychronisedVariableChanged);
 			}
 		}
 
+		private function onSychronisedVariableDomainChanged(event: SynchronisedVariableChangeEvent): void
+		{
+			debug("onSychronisedVariableDomainChanged " + event.variableId);
+			onSychronisedVariableChanged(event);
+		}
 		private function onSychronisedVariableChanged(event: SynchronisedVariableChangeEvent): void
 		{
 			var layer: InteractiveLayerMSBase = event.target as InteractiveLayerMSBase;
@@ -1542,6 +1552,12 @@ package com.iblsoft.flexiweather.ogc.multiview
 			if (layerWidget && selectedInteractiveWidget)
 			{
 				var synchronizedVariable: String = event.variableId;
+				debug("onSychronisedVariableChanged " + synchronizedVariable);
+				if (synchronizedVariable == GlobalVariable.RUN)
+				{
+					debug("onSychronisedVariableChanged DO NOT SYNCHRONIZE on RUN change, there will be FRAME change afterwards");
+					return;
+				}
 				if (_synchronizator && _synchronizator.hasSynchronisedVariable(synchronizedVariable))
 				{
 					synchronizeWidgets(_synchronizator, layerWidget);
@@ -1989,7 +2005,8 @@ package com.iblsoft.flexiweather.ogc.multiview
 //					trace(this + " do not wait for synchronization end");
 				}
 					
-				synchronizator.synchronizeWidgets(interactiveWidget, _interactiveWidgets.widgets, selectedIndex);
+				callLater(synchronizator.synchronizeWidgets, [interactiveWidget, _interactiveWidgets.widgets, selectedIndex]);
+//				synchronizator.synchronizeWidgets(interactiveWidget, _interactiveWidgets.widgets, selectedIndex);
 			}
 		}
 		
@@ -2047,7 +2064,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 			if (debugConsole)
 				debugConsole.print(str, type, tag);
 			
-//			trace(tag + "| " + type + "| " + str);
+			trace(tag + "| " + type + "| " + str);
 //			LoggingUtils.dispatchLogEvent(this, tag + "| " + type + "| " + str);
 		}
 

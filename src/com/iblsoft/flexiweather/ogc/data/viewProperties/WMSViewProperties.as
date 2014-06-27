@@ -310,9 +310,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		public function getWMSDimensionValue(s_dimName: String,
 				b_returnDefault: Boolean = false): String
 		{
-			var s_value: String =  getWMSDimensionValueInsensitive(s_dimName, b_returnDefault);
-//			trace("getWMSDimensionValue: " + s_dimName + " => " + s_value + " for " + parentLayer.name);
-			return s_value;
+			return getWMSDimensionValueInsensitive(s_dimName, b_returnDefault);
 		}
 
 		public function supportWMSDimension(s_dimName: String): Boolean
@@ -1077,7 +1075,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 
 		public function exactlySynchroniseWith(s_variableId: String, value: Object): String
 		{
-//			trace("WMSViewProperties exactlySynchroniseWith: " + s_variableId + " value: " + value);
+			debug("WMSViewProperties exactlySynchroniseWith ["+parentLayer.container.id+"]: " + s_variableId + " value: " + value);
 			var of: Object;
 			
 			if (s_variableId == GlobalVariable.LEVEL)
@@ -1210,6 +1208,8 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					}
 					if (ofExactForecast != null)
 					{
+						debug("Found exact FRAME for synchronisation ["+parentLayer.container.id+"]: " + value);
+							
 						setWMSDimensionValue(m_cfg.dimensionForecastName, ofExactForecast.value);
 						dispatchSynchronizedVariableChangeEvent(new SynchronisedVariableChangeEvent(
 								SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.FRAME, false));
@@ -1226,6 +1226,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		}
 		protected function debug(str: String): void
 		{
+//			trace("WMSViewProperties: " + str);
 //			LoggingUtils.dispatchLogEvent(this, "WMSViewProperties: " + str);
 		}
 		
@@ -1235,13 +1236,12 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		 */		
 		private function noSynchronisationValueFound(): void
 		{
-//			trace("WMSViewProperties: " + parentLayer.name + " NO SYNCHRONISATION DATA");
+			debug("NO SYNCHRONISATION DATA ["+parentLayer.container.id+"]");
 			dispatchSynchronizedVariableChangeEvent(new SynchronisedVariableChangeEvent(
 				SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.FRAME, false));
 		}
 		public function synchroniseWith(s_variableId: String, value: Object): String
 		{
-			debug("SynchroniseWith ["+s_variableId+"]" + value);
 			var exactSynchronisationResult: String = exactlySynchroniseWith(s_variableId, value);
 			
 			if (s_variableId == GlobalVariable.LEVEL)
@@ -1259,7 +1259,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 				{
 					var a: Array = getSynchronisedVariableValuesList(s_variableId);
 					if (a)
-						debug("synchroniseWith: " + s_variableId + ": " + a.length);
+						debug("synchroniseWith ["+parentLayer.container.id+"]: " + s_variableId + ": " + a.length);
 					else {
 						error({object: this}, "synchroniseWith: " + s_variableId + " does not return any values list for variable: " + s_variableId + " for value: " + value.toString());
 					}
@@ -1335,6 +1335,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 						noSynchronisationValueFound();
 						return SynchronisationResponse.SYNCHRONISATION_VALUE_NOT_FOUND;
 					}
+					debug("synchroniseWith ["+parentLayer.container.id+"] BEST FRAME: " + s_variableId + ": " + bestFrame);
 					return exactlySynchroniseWith(s_variableId, bestFrame);
 				} else {
 					return exactSynchronisationResult;
