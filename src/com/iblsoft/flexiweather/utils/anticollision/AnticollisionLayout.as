@@ -86,11 +86,18 @@ package com.iblsoft.flexiweather.utils.anticollision
 		{
 			if (!m_suspendAnticollisionProcessing)
 			{
-				if (super.visible != value)
+				var previousVisibility: Boolean = super.visible;
+				if (ma_layoutObjects && ma_layoutObjects.length > 0)
+				{
+					previousVisibility = (ma_layoutObjects[0] as AnticollisionLayoutObject).visible;
+				}
+				if (previousVisibility != value)
 				{
 					super.visible = value;
-					trace(this + " visible = " + value);
+					debug(this + " visible = " + value);
 					onVisibilityChanged();
+				} else {
+					debug(this + " same visibility: " + value);
 				}
 			}
 		}
@@ -110,7 +117,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 			{
 				if (!(parent as InteractiveWidget).usedForIcon)
 				{
-					//trace("new AnticollisionLayout is created");
+					debug("new AnticollisionLayout is created");
 				}
 			}
 			_layoutName = layoutName;
@@ -324,7 +331,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 					
 				}
 				ma_layoutObjects.splice(0, ma_layoutObjects.length);
-				//trace("ma_layoutObjects: " + ma_layoutObjects.length);
+				//debug("ma_layoutObjects: " + ma_layoutObjects.length);
 				setDirty();
 				updateLayoutObjectsLength();
 			}
@@ -352,14 +359,14 @@ package com.iblsoft.flexiweather.utils.anticollision
 		{
 			if (!m_suspendAnticollisionProcessing && !_updateLocked)
 			{
-//				trace(this + " UPDATE");
+				debug(this + " UPDATE");
 				var time: int = ProfilerUtils.startProfileTimer();
 				var pass: int = 0;
 				var diffTime: Number = getTimer() - mi_lastUpdate;
 				if (diffTime < 500)
 					return;
-				//if (ma_layoutObjects.length > 0)
-				//	trace("\n ACL update");
+				if (ma_layoutObjects.length > 0)
+					debug("\n ACL update");
 				var currObjects: Array = ma_layoutObjects;
 //				var currObjects: Array = ma_currentLayoutObjects;
 				if (!m_boundaryRect)
@@ -398,7 +405,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 						lo.visible = newVisibility;
 					} else {
 						var objectAbsoluteVisibility: Boolean = getAbsoluteVisibility(lo.object);
-	//						trace("ACL obj: " +  lo.object + " absolute visibility: " + objectAbsoluteVisibility);
+							debug("ACL obj: " +  lo.object + " absolute visibility: " + objectAbsoluteVisibility);
 						if (lo.layer && objectAbsoluteVisibility)
 						{
 							objectAbsoluteVisibility = lo.layer.visible;
@@ -576,7 +583,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 						if (boundsFrom.width < 10 && boundsFrom.height < 10)
 						{
 							//object is too small, do not do anticollision for it
-							//trace("" + this + " object is too small, do not do anticollision for it");
+							//debug("" + this + " object is too small, do not do anticollision for it");
 							continue;
 						}
 						var a_boundingLineSegmentsFrom: Array = getLineSegmentApproximation(lo.object);
@@ -642,7 +649,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 			{
 				//if kml feature is not visible, label have to be invisible as well
 				var kmlFeature: KMLFeature = (object as KMLLabel).kmlFeature;
-//				trace("getAbsoluteVisibility " + object + " kmlFeature: " + kmlFeature + " vis: " + kmlFeature.visible);
+//				debug("getAbsoluteVisibility " + object + " kmlFeature: " + kmlFeature + " vis: " + kmlFeature.visible);
 				if (!kmlFeature.visible)
 					return false;
 			}
@@ -838,7 +845,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 
 		protected function debug(txt: String): void
 		{
-//			trace("AnticollisionLayout: " + txt);
+			trace("AnticollisionLayout: " + txt);
 			if (debugConsole)
 				debugConsole.print("AnticollisionLayout: " + txt, 'Info', 'AnticollisionLayout');
 		}
@@ -866,7 +873,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 		{
 			if (!object || (!object is IAnticollisionLayoutObject))
 			{
-				trace("AnticollisionLayout.getAnticollisionLayoutObjectFor(): PROBLEM");
+				debug("AnticollisionLayout.getAnticollisionLayoutObjectFor(): PROBLEM");
 				return null;
 			}
 			return object.anticollisionLayoutObject;
@@ -876,7 +883,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 		{
 			if (!anchor || (!anchor is IAnticollisionLayoutObject))
 			{
-				trace("AnticollisionLayout.getAnticollisionLayoutObjectForAnchor(): PROBLEM");
+				debug("AnticollisionLayout.getAnticollisionLayoutObjectForAnchor(): PROBLEM");
 				return null;
 			}
 			return anchor.anticollisionLayoutObject;
