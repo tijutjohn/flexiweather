@@ -259,6 +259,12 @@ package com.iblsoft.flexiweather.ogc
 			dispatchEvent(refreshEvent);
 
 		}
+		
+		public function updateFeaturesOnRefresh(newFeatures: ArrayCollection): void
+		{
+			features.removeAll();
+			features.addAll(newFeatures); 
+		}
 
 		protected function onLoadDataLoaded(event: WFSFeatureEditorServiceEvent): void
 		{
@@ -388,6 +394,20 @@ package com.iblsoft.flexiweather.ogc
 				}
 			}
 			var existingFeature: WFSFeatureEditable;
+			
+			var tempExistingSavedFeatures: ArrayCollection;
+			var tempExistingRemovedFeatures: ArrayCollection;
+			
+			if (existingSavedFeatures && existingSavedFeatures.length > 0)
+				tempExistingSavedFeatures = new ArrayCollection(existingSavedFeatures.source);
+			else
+				tempExistingSavedFeatures = new ArrayCollection();
+			if (existingRemovedFeatures && existingRemovedFeatures.length > 0)
+				tempExistingRemovedFeatures = new ArrayCollection(existingRemovedFeatures.source);
+			else
+				tempExistingRemovedFeatures = new ArrayCollection();
+				
+			
 			//all feature arrays are ready
 			while (serverFeatures.length > 0)
 			{
@@ -396,11 +416,11 @@ package com.iblsoft.flexiweather.ogc
 				//find if feature exists
 				if (feature.featureId)
 				{
-					existingFeature = getFeatureFromArrayCollectionByID(feature.featureId, 'featureId', existingSavedFeatures, true);
+					existingFeature = getFeatureFromArrayCollectionByID(feature.featureId, 'featureId', tempExistingSavedFeatures, true);
 					if (!existingFeature)
 					{
 						//try to find feature in removed features
-						existingFeature = getFeatureFromArrayCollectionByID(feature.featureId, 'featureId', existingRemovedFeatures, true);
+						existingFeature = getFeatureFromArrayCollectionByID(feature.featureId, 'featureId', tempExistingRemovedFeatures, true);
 						if (existingFeature)
 							existingFeature.modified = true;
 					}
@@ -435,13 +455,13 @@ package com.iblsoft.flexiweather.ogc
 				else
 					addFeatureAfterLoad(feature, _features);
 			}
-			if (existingSavedFeatures.length > 0)
+			if (tempExistingSavedFeatures.length > 0)
 			{
 				//there are still features, which was removed from server
-				while (existingSavedFeatures.length > 0)
+				while (tempExistingSavedFeatures.length > 0)
 				{
-					existingFeature = existingSavedFeatures.getItemAt(0) as WFSFeatureEditable;
-					existingSavedFeatures.removeItemAt(0);
+					existingFeature = tempExistingSavedFeatures.getItemAt(0) as WFSFeatureEditable;
+					tempExistingSavedFeatures.removeItemAt(0);
 					if (existingFeature.modified)
 					{
 						_modifiedFeaturesCount++;
@@ -464,7 +484,7 @@ package com.iblsoft.flexiweather.ogc
 			returnObject.modifiedFeaturesNew = _modifiedFeaturesNew;
 			returnObject.modifiedFeaturesCount = _modifiedFeaturesCount;
 			returnObject.removedFeatures = _removedFeatures;
-			features = _features;
+//			features = _features;
 			return returnObject;
 		}
 
