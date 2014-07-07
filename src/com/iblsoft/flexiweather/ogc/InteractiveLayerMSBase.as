@@ -1491,11 +1491,12 @@ package com.iblsoft.flexiweather.ogc
 			if (m_cfg.service == null)
 				return null;
 			var bbox: BBox = null;
-			for each (var layer: WMSLayer in getWMSLayers())
+			
+			var layers: Array = getWMSLayers();
+			var crs: String = container.getCRS();
+			for each (var layer: WMSLayer in layers)
 			{
-				var crs: String = container.getCRS()
-//				var b: BBox = layer.getBBoxForCRS(crs);
-				var b: BBox = layer.getTileExtentForCRS(crs);
+				var b: BBox = layer.getBBoxForCRS(crs);
 				if (b == null)
 					continue;
 				if (bbox == null)
