@@ -2033,6 +2033,7 @@ package com.iblsoft.flexiweather.widgets
 		private var _featureTooltipCallsTotalCount: int;
 		private var _featureTooltipCallsCount: int;
 		private var _featureTooltipString: String;
+		private var _featureInfoDictionary: Dictionary = new Dictionary();
 
 		public function getFeatureTooltipForAllLayers(coord: Coord): void
 		{
@@ -2047,6 +2048,7 @@ package com.iblsoft.flexiweather.widgets
 					{
 						_featureTooltipCallsTotalCount++;
 						_featureTooltipCallsCount++;
+						_featureInfoDictionary[layer] = {layer: layer, info: null};
 						layer.getFeatureInfo(coord, onFeatureInfoAvailable);
 					}
 				}
@@ -2078,18 +2080,22 @@ package com.iblsoft.flexiweather.widgets
 				_featureTooltipCallsRunning = false;
 			}
 			var gfie: GetFeatureInfoEvent;
+			var newInfo: String;
 			if (parsingCorrect)
 			{
-				//var info: String = infoXML.text();
-				var info: String = s;
-				_featureTooltipString += '<p><b><font color="#3080c0">' + layer.name + '</font></b>';
-				_featureTooltipString += s + '</p>';
+				newInfo = '<p><b><font color="#3080c0">' + layer.name + '</font></b>' + s + '</p>';
+				_featureInfoDictionary[layer]['info'] = newInfo;
+				
+				_featureTooltipString = createFeatureInfoTooltipText();
+				
 				debug("InteractiveLayerMap onFeatureInfoAvailable _featureTooltipCallsRunning: " + _featureTooltipCallsRunning);
 			}
 			else
 			{
-				_featureTooltipString += '<p><b><font color="#3080c0">' + layer.name + '</font></b>';
-				_featureTooltipString += 'parsing problem</p>'
+				newInfo = '<p><b><font color="#3080c0">' + layer.name + '</font></b>';
+				newInfo += 'parsing problem</p>';
+					
+				_featureTooltipString = createFeatureInfoTooltipText();
 			}
 			gfie = new GetFeatureInfoEvent(GetFeatureInfoEvent.FEATURE_INFO_RECEIVED, true);
 			gfie.text = _featureTooltipString;
@@ -2097,6 +2103,22 @@ package com.iblsoft.flexiweather.widgets
 			gfie.lastFeatureInfo = !_featureTooltipCallsRunning;
 			dispatchEvent(gfie);
 			debug("InteractiveLayerMap onFeatureInfoAvailable event gfie.firstFeatureInfo: " + gfie.firstFeatureInfo + " gfie.lastFeatureInfo: " + gfie.lastFeatureInfo);
+		}
+		
+		private function createFeatureInfoTooltipText(): String
+		{
+			var s: String = '';
+			for each (var layer: InteractiveLayer in layers)
+			{
+				if (layer.hasFeatureInfo() && layer.visible)
+				{
+					if (_featureInfoDictionary[layer])
+					{
+						s += _featureInfoDictionary[layer]['info'];
+					}
+				}
+			}
+			return s;
 		}
 
 		/**
