@@ -1293,7 +1293,9 @@ package com.iblsoft.flexiweather.ogc
 			var result: * = event.data.result;
 			var associatedData: Object = event.data.associatedData;
 			(associatedData.wmsViewProperties as WMSViewProperties).legendImage = result;
-			createLegend(result, associatedData.group, associatedData.labelAlign, associatedData.callback, associatedData.legendScaleX, associatedData.legendScaleY, associatedData.width, associatedData.height);
+			
+			if (container)
+				createLegend(result, associatedData.group, associatedData.labelAlign, associatedData.callback, associatedData.legendScaleX, associatedData.legendScaleY, associatedData.width, associatedData.height);
 		}
 
 		/**
