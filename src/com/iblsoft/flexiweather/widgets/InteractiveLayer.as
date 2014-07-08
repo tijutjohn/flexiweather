@@ -400,6 +400,11 @@ package com.iblsoft.flexiweather.widgets
 		{
 			return false;
 		}
+		
+		public function hasData(): Boolean
+		{
+			return false;
+		}
 
 		public function getFeatureInfo(coord: Coord, callback: Function): void
 		{
