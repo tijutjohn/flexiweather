@@ -117,6 +117,21 @@ package com.iblsoft.flexiweather.widgets
 		private var _suspendTimeAxisNotify: Boolean;
 		
 		
+		private var _legendsOrientation: InteractiveLayerLegendsOrientation;
+		
+		public function get legendsOrientation():InteractiveLayerLegendsOrientation
+		{
+			if (_legendsOrientation != null)
+				return _legendsOrientation;
+			
+			return new InteractiveLayerLegendsOrientation("BLR");
+		}
+
+		public function set legendsOrientation(value:InteractiveLayerLegendsOrientation):void
+		{
+			_legendsOrientation = value;
+		}
+
 		public function get suspendTimeAxisNotify():Boolean
 		{
 			return _suspendTimeAxisNotify;
@@ -250,7 +265,6 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 		
-		public var legendsOrientation: InteractiveLayerLegendsOrientation;
 		
 		public function InteractiveLayerMap(container: InteractiveWidget = null)
 		{
