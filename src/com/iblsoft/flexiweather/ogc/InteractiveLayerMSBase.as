@@ -1293,7 +1293,9 @@ package com.iblsoft.flexiweather.ogc
 			var result: * = event.data.result;
 			var associatedData: Object = event.data.associatedData;
 			(associatedData.wmsViewProperties as WMSViewProperties).legendImage = result;
-			createLegend(result, associatedData.group, associatedData.labelAlign, associatedData.callback, associatedData.legendScaleX, associatedData.legendScaleY, associatedData.width, associatedData.height);
+			
+			if (container)
+				createLegend(result, associatedData.group, associatedData.labelAlign, associatedData.callback, associatedData.legendScaleX, associatedData.legendScaleY, associatedData.width, associatedData.height);
 		}
 
 		/**
@@ -1450,12 +1452,20 @@ package com.iblsoft.flexiweather.ogc
 			return (image != null);
 		}
 
+		override public function hasData(): Boolean
+		{
+			return status != STATE_NO_SYNCHRONISATION_DATA_AVAILABLE && status != STATE_DATA_LOADED_WITH_ERRORS;
+		}
+		
 		override public function hasFeatureInfo(): Boolean
 		{
-			for each (var layer: WMSLayer in getWMSLayers())
+			if (hasData())
 			{
-				if (layer.queryable)
-					return true;
+				for each (var layer: WMSLayer in getWMSLayers())
+				{
+					if (layer.queryable)
+						return true;
+				}
 			}
 			return false;
 		}
