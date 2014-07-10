@@ -78,6 +78,26 @@ package com.iblsoft.flexiweather.widgets
 	{
 		public static const VIEW_BBOX_CHANGED: String = 'viewBBoxChanged';
 		
+		protected function get oldWidgetHeight():Number
+		{
+			return m_oldWidgetHeight;
+		}
+
+		protected function set oldWidgetHeight(value:Number):void
+		{
+			m_oldWidgetHeight = value;
+		}
+
+		protected function get oldWidgetWidth():Number
+		{
+			return m_oldWidgetWidth;
+		}
+
+		protected function set oldWidgetWidth(value:Number):void
+		{
+			m_oldWidgetWidth = value;
+		}
+
 		override public function set id(value:String):void
 		{
 			super.id = value;
@@ -2014,12 +2034,8 @@ package com.iblsoft.flexiweather.widgets
 						viewBBox.offset(-viewBBox.right + m_extentBBox.xMax, 0);
 				}
 				var newBBox: BBox = BBox.fromRectangle(viewBBox);
-				/*
-	//	        if(!m_viewBBox.equals(newBBox)) {
-					m_viewBBox = newBBox;
-					signalAreaChanged(b_finalChange);
-	//	        }
-				*/
+//				debug(this + " setViewBBox inp: " + bbox.toBBOXString() + " finalChange: " + b_finalChange + " , negotiate: " + b_negotiateBBox);
+//				debug(this + " setViewBBox new: " + newBBox.toBBOXString() + " finalChange: " + b_finalChange + " , negotiate: " + b_negotiateBBox);
 				if (b_negotiateBBox)
 					negotiateBBox(newBBox, b_finalChange, b_changeZoom);
 				else
@@ -2028,13 +2044,13 @@ package com.iblsoft.flexiweather.widgets
 			else
 			{
 				//auto layout in widget parent
-				autoLayoutViewBBox(bbox, b_finalChange, true);
+				autoLayoutViewBBox(bbox, b_finalChange, true, b_changeZoom, b_negotiateBBox);
 			}
 		}
-		private var _oldWidgetWidth: Number = 0;
-		private var _oldWidgetHeight: Number = 0;
-
-		private function autoLayoutViewBBox(bbox: BBox, b_finalChange: Boolean, b_setViewBBox: Boolean = false): void
+		private var m_oldWidgetWidth: Number = 0;
+		private var m_oldWidgetHeight: Number = 0;
+		
+		private function autoLayoutViewBBox(bbox: BBox, b_finalChange: Boolean, b_setViewBBox: Boolean = false, b_changeZoom = true, b_negotiateBBox: Boolean = true): void
 		{
 			//auto layout in widget parent
 //			var widgetParent: DataGroup = parent as DataGroup;
@@ -2042,6 +2058,8 @@ package com.iblsoft.flexiweather.widgets
 			if (widgetParent)
 			{
 				var f_bboxApect: Number = bbox.width / bbox.height;
+				var f_bboxCenterX: Number = bbox.xMin + bbox.width / 2.0;
+				var f_bboxCenterY: Number = bbox.yMin + bbox.height / 2.0;
 				var parentWidth: Number = widgetParent.width;
 				var parentHeight: Number = widgetParent.height;
 				var f_parentAspect: Number = parentWidth / parentHeight;
@@ -2061,30 +2079,69 @@ package com.iblsoft.flexiweather.widgets
 					widgetHeight = widgetWidth / f_bboxApect;
 					widgetYPosition = (parentHeight - widgetHeight) / 2;
 				}
+				
 				//check if change in width and height is higher than 1px
-				var widthDiff: Number = Math.abs(_oldWidgetWidth - widgetWidth);
-				var heightDiff: Number = Math.abs(_oldWidgetHeight - widgetHeight);
-				if (widgetWidth > 1 || widgetHeight > 1)
+				var widthDiff: Number = Math.abs(oldWidgetWidth - widgetWidth);
+				var heightDiff: Number = Math.abs(oldWidgetHeight - widgetHeight);
+				if (widthDiff > 1 || heightDiff > 1)
 				{
-//					this.width = widgetWidth;
-//					this.height = widgetHeight;
 					
-					/*
-					setActualSize(widgetWidth, widgetHeight);
-					this.x = widgetXPosition;
-					this.y = widgetYPosition;
-					*/
 					m_widgetBounds.setBounds(widgetXPosition, widgetYPosition, widgetWidth, widgetHeight);
-					trace(this + "autoLayoutViewBBox ["+areaWidth+","+areaHeight+"] ["+widgetWidth+","+widgetHeight+"] previous size ["+width+","+height+"] b_setViewBBox: " + b_setViewBBox);
+//					debug("autoLayout pos: ["+widgetXPosition+","+widgetYPosition+"] size ["+widgetWidth+","+widgetHeight+"] diff: ["+widthDiff+","+heightDiff+"] OLD  ["+oldWidgetWidth+","+oldWidgetHeight+"]"); 
+//					debug("autoLayoutViewBBox ["+areaWidth+","+areaHeight+"] ["+widgetWidth+","+widgetHeight+"] previous size ["+width+","+height+"] b_setViewBBox: " + b_setViewBBox);
+					
+					//move and change size of layers into area
 					updateLayersBounds();
 					
-					_oldWidgetWidth = widgetWidth;
-					_oldWidgetHeight = widgetHeight;
-					if (b_setViewBBox)
-						setViewBBoxAfterNegotiation(bbox, b_finalChange);
+					oldWidgetWidth = widgetWidth;
+					oldWidgetHeight = widgetHeight;
+//					debug("autoLayoutViewBBox OLD SIZE set ["+oldWidgetWidth+","+oldWidgetHeight+"]");
+					
+					
+//					if (b_setViewBBox)
+//					{
+//						if (b_negotiateBBox)
+//							negotiateBBox(bbox, b_finalChange, b_changeZoom);
+//						else
+//							setViewBBoxAfterNegotiation(bbox, b_finalChange);
+//					}
+					
 				}
-				else
-					debug("InteractiveWidget.autoLayoutViewBBox(): View BBox is too small: " + widthDiff + " , " + heightDiff);
+				else {
+					debug("autoLayoutViewBBox(): View BBox is too small: ["+widgetXPosition+","+widgetYPosition+"] size ["+widgetWidth+","+widgetHeight+"] diff: ["+widthDiff+","+heightDiff+"]");
+				}
+				
+				var f_newBBoxWidth: Number = bbox.width;
+				var f_newBBoxHeight: Number = bbox.height;
+				
+				if (f_newBBoxHeight > m_extentBBox.height)
+				{
+					f_newBBoxHeight = m_extentBBox.height;
+					f_newBBoxWidth = f_bboxApect * 1 * f_newBBoxHeight;
+				}
+				if (f_newBBoxWidth > m_extentBBox.width)
+				{
+					f_newBBoxWidth = m_extentBBox.width;
+					f_newBBoxHeight = f_newBBoxWidth / f_bboxApect / 1;
+				}
+				
+				var viewBBox: Rectangle = new Rectangle(f_bboxCenterX - f_newBBoxWidth / 2.0, f_bboxCenterY - f_newBBoxHeight / 2.0, f_newBBoxWidth, f_newBBoxHeight);
+				if (viewBBox.y < m_extentBBox.yMin)
+					viewBBox.offset(0, -viewBBox.y + m_extentBBox.yMin);
+				if (viewBBox.bottom > m_extentBBox.yMax)
+					viewBBox.offset(0, -viewBBox.bottom + m_extentBBox.yMax);
+				if (!isCRSWrappingOverXAxis())
+				{
+					if (viewBBox.x < m_extentBBox.xMin)
+						viewBBox.offset(-viewBBox.x + m_extentBBox.xMin, 0);
+					if (viewBBox.right > m_extentBBox.xMax)
+						viewBBox.offset(-viewBBox.right + m_extentBBox.xMax, 0);
+				}
+				var newBBox: BBox = BBox.fromRectangle(viewBBox);
+				
+//				debug("1 BBOX: "+ bbox.width + ", " + bbox.height + " NEW BBOX: "+ f_newBBoxWidth + ", "+ f_newBBoxHeight);
+//				debug("2 BBOX: "+ bbox.toBBOXString()  + " NEW BBOX: "+ newBBox.toBBOXString());
+				setViewBBoxAfterNegotiation(newBBox, b_finalChange);
 			}
 		}
 

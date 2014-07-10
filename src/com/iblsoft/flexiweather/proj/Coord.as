@@ -490,7 +490,10 @@ package com.iblsoft.flexiweather.proj
 			
 			var f_loEW: String = getEastWestChar();
 			f_loFrac = Math.abs(f_loFrac);
+			
+			var f_loDegOrig: Number = f_loFrac;
 			var f_loDeg: Number = Math.floor(f_loFrac);
+			
 			f_loFrac = f_loFrac - f_loDeg;
 			f_loFrac *= 60;
 			var f_loMin: Number = Math.round(f_loFrac);
@@ -524,11 +527,11 @@ package com.iblsoft.flexiweather.proj
 					
 				case CoordFormatType.FORMAT_DECIMAL_DEGREE_1_DIGIT:
 					_formatter.fractionalDigits = 1;
-					return _formatter.format(f_loFrac) +"°" + f_loEW;
+					return _formatter.format(f_loDegOrig) +"°" + f_loEW;
 					
 				case CoordFormatType.FORMAT_DECIMAL_DEGREE_2_DIGIT:
 					_formatter.fractionalDigits = 2;
-					return _formatter.format(f_loFrac) +"°" + f_loEW;
+					return _formatter.format(f_loDegOrig) +"°" + f_loEW;
 					
 				case CoordFormatType.FORMAT_DECIMAL_DEGREE_6_DIGIT:
 					_formatter.fractionalDigits = 6;
@@ -562,6 +565,7 @@ package com.iblsoft.flexiweather.proj
 			var f_laNS: String = getSouthNorthChar();
 			f_laFrac = Math.abs(f_laFrac);
 			
+			var f_laDegOrig: Number = f_laFrac;
 			var f_laDeg: Number = Math.floor(f_laFrac);
 			f_laFrac = f_laFrac - f_laDeg;
 			f_laFrac *= 60;
@@ -598,11 +602,11 @@ package com.iblsoft.flexiweather.proj
 					
 				case CoordFormatType.FORMAT_DECIMAL_DEGREE_1_DIGIT:
 					_formatter.fractionalDigits = 1;
-					return _formatter.format(f_laFrac) +"°" + f_laNS;
+					return _formatter.format(f_laDegOrig) +"°" + f_laNS;
 					
 				case CoordFormatType.FORMAT_DECIMAL_DEGREE_2_DIGIT:
 					_formatter.fractionalDigits = 2;
-					return _formatter.format(f_laFrac) +"°" + f_laNS;
+					return _formatter.format(f_laDegOrig) +"°" + f_laNS;
 					
 				case CoordFormatType.FORMAT_DECIMAL_DEGREE_6_DIGIT:
 					_formatter.fractionalDigits = 6;
