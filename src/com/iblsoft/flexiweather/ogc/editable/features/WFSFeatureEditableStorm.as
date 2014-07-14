@@ -235,6 +235,7 @@ import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSpriteWithAnnotation;
 import com.iblsoft.flexiweather.utils.AnnotationBox;
 import com.iblsoft.flexiweather.utils.ColorUtils;
 import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayout;
+import com.iblsoft.flexiweather.utils.geometry.LineSegment;
 
 import flash.display.Bitmap;
 import flash.display.BitmapData;
@@ -292,6 +293,21 @@ class StormSprite extends WFSFeatureEditableSpriteWithAnnotation {
 		}
 
 
+	}
+	
+	override public function getLineSegmentApproximationOfBounds(): Array
+	{
+		var a: Array = [];
+		if (m_iconBitmap)
+		{
+			var iconX: int = m_iconBitmap.x + m_iconBitmap.width / 2;
+			var iconY: int = m_iconBitmap.y + m_iconBitmap.height / 2;
+			
+			a.push(new LineSegment(iconX, iconY, iconX+0.5, iconY));
+		} else
+			a.push(new LineSegment(x, y, x+0.5, y+0.5));
+		
+		return a;
 	}
 	
 	override public function update(feature: WFSFeatureEditableWithBaseTimeAndValidityAndAnnotation, annotation: AnnotationBox, blackColor: uint, labelLayout: AnticollisionLayout, pt: Point): void

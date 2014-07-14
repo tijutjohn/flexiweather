@@ -256,12 +256,13 @@ class IcingAreaSubRange
 import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
 import com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation.WFSFeatureEditableIcingArea;
 import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
+import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSpriteWithAnnotation;
 import com.iblsoft.flexiweather.utils.CubicBezier;
 import com.iblsoft.flexiweather.utils.geometry.LineSegment;
 
 import flash.geom.Point;
 
-class IcingAreaSprite extends WFSFeatureEditableSprite
+class IcingAreaSprite extends WFSFeatureEditableSpriteWithAnnotation
 {
 	public function IcingAreaSprite(feature: WFSFeatureEditable)
 	{

@@ -93,6 +93,8 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 			{
 				var cloudAnnotation: CloudAnnotation = annotation as CloudAnnotation;
 				
+				annotation = cloudAnnotation;
+				
 				var showAnnotations: Boolean = m_points && m_points.length > 1 && visible;
 				
 				cloudAnnotation.color = getCurrentColor(0x000000);
@@ -363,12 +365,13 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
 import com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation.WFSFeatureEditableCloud;
 import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
+import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSpriteWithAnnotation;
 import com.iblsoft.flexiweather.utils.CubicBezier;
 import com.iblsoft.flexiweather.utils.geometry.LineSegment;
 
 import flash.geom.Point;
 
-class CloudFeatureSprite extends WFSFeatureEditableSprite
+class CloudFeatureSprite extends WFSFeatureEditableSpriteWithAnnotation
 {
 	override public function set visible(value:Boolean):void
 	{

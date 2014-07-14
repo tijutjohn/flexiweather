@@ -21,6 +21,14 @@ package com.iblsoft.flexiweather.ogc.wfs
 	{
 		private var _annotation: AnnotationBox;
 		
+		override public function get anticollisionLayoutObject():AnticollisionLayoutObject
+		{
+			if (_annotation)
+				return _annotation.anticollisionLayoutObject;
+			
+			return null;
+		}
+		
 		public function WFSFeatureEditableSpriteWithAnnotation(feature: WFSFeatureEditable)
 		{
 			super(feature);
@@ -39,7 +47,7 @@ package com.iblsoft.flexiweather.ogc.wfs
 
 		public function update(feature: WFSFeatureEditableWithBaseTimeAndValidityAndAnnotation, annotation: AnnotationBox, blackColor: uint, labelLayout: AnticollisionLayout, pt: Point): void
 		{
-			
+			_annotation = annotation;
 		}
 	}
 }
