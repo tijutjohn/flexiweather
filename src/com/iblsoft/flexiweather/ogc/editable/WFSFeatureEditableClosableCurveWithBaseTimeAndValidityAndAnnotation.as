@@ -4,14 +4,15 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
 	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
 	import com.iblsoft.flexiweather.ogc.editable.IClosableCurve;
-	import com.iblsoft.flexiweather.ogc.editable.data.MoveablePoint;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableMode;
 	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
+	import com.iblsoft.flexiweather.ogc.editable.data.MoveablePoint;
 	import com.iblsoft.flexiweather.ogc.managers.WFSCursorManager;
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSCurveFeature;
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithAnnotation;
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
+	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSpriteWithAnnotation;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.utils.AnnotationBox;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
@@ -125,6 +126,11 @@ package com.iblsoft.flexiweather.ogc.editable
 							reflection.addAnnotation(annotation);
 						}
 						
+						if (displaySprite is WFSFeatureEditableSpriteWithAnnotation)
+						{
+							(displaySprite as WFSFeatureEditableSpriteWithAnnotation).annotation = annotation;
+						}
+						
 						updateAnnotation(annotation, ptAvg);
 						
 						if (!mb_spritesAddedToLabelLayout && master)
@@ -145,7 +151,6 @@ package com.iblsoft.flexiweather.ogc.editable
 		
 		public function updateAnnotation(annotation: AnnotationBox, annotationPosition: Point, text: String = ""): void
 		{
-			
 		}
 		
 		public function removeFromLabelLayout(annotation: AnnotationBox, displaySprite: WFSFeatureEditableSprite, labelLayout: AnticollisionLayout): void

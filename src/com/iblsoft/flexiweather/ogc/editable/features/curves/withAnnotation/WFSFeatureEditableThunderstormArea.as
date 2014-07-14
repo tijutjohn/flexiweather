@@ -77,6 +77,8 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 			{
 				var thunderstormAreaAnnotation: ThunderstormAreaAnnotation = annotation as ThunderstormAreaAnnotation;
 				
+				annotation = thunderstormAreaAnnotation;
+				
 				var showAnnotations: Boolean = m_points && m_points.length > 1 && visible;
 				var i_color: uint = getCurrentColor(0xfc0019);
 				
@@ -189,12 +191,13 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
 import com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation.WFSFeatureEditableThunderstormArea;
 import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
+import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSpriteWithAnnotation;
 import com.iblsoft.flexiweather.utils.CubicBezier;
 import com.iblsoft.flexiweather.utils.geometry.LineSegment;
 
 import flash.geom.Point;
 
-class ThunderstormAreaSprite extends WFSFeatureEditableSprite
+class ThunderstormAreaSprite extends WFSFeatureEditableSpriteWithAnnotation
 {
 	
 	public function ThunderstormAreaSprite(feature: WFSFeatureEditable)
