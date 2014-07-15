@@ -361,6 +361,7 @@
     <classEntry path="com.iblsoft.flexiweather.plugins.IPluginModule"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.IPopup"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.IPopupManager"/>
+    <classEntry path="com.iblsoft.flexiweather.plugins.ILegends"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.ModuleLoaderCollection"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.PluginAbility"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.PluginEvent"/>
@@ -372,6 +373,7 @@
     <classEntry path="com.iblsoft.flexiweather.plugins.data.ModuleLoaderItem"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.data.PluginCollection"/>
     <classEntry path="com.iblsoft.flexiweather.proj.Coord"/>
+    <classEntry path="com.iblsoft.flexiweather.proj.CoordFormatType"/>
     <classEntry path="com.iblsoft.flexiweather.proj.Projection"/>
     <classEntry path="com.iblsoft.flexiweather.skins.CheckBoxLabelLeftSkin"/>
     <classEntry path="com.iblsoft.flexiweather.symbology.CloudCurveRenderer"/>
@@ -510,6 +512,9 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.InteractiveLayerGoogleMaps"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.skins.TitleWindowCloseButtonSkin"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.skins.TitleWindowSkin"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.data.InteractiveLayerLegendsOrientation"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.curves.IJetStreamEditorGUI"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.Hemisphere"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

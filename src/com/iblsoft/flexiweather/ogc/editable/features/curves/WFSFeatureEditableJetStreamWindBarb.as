@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.ogc.editable.features.curves
 {
 	import com.iblsoft.flexiweather.ogc.editable.data.jetstream.WindBarb;
+	import com.iblsoft.flexiweather.utils.Hemisphere;
 	
 	import flash.display.Bitmap;
 	import flash.display.LineScaleMode;
@@ -19,6 +20,9 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 		protected var m_myPointIndex: uint;
 		protected var m_windBarbDef: WindBarb;
 		
+		//on which hemisphere is windbard (one of Hemisphere constansts)
+		protected var m_hemisphere: String;
+		
 		private var _m_canBeDrawed: Boolean = true;
 		public function get m_canBeDrawed():Boolean
 		{
@@ -35,6 +39,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 		}
 		
 		protected var m_textfield: TextField = new TextField();
+		protected var m_textfieldSprite: Sprite = new Sprite();
 		
 		[Embed(source="/assets/fonts/DroidSans.ttf",
 				fontFamily="labelFont",
@@ -51,13 +56,14 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 		/**
 		 * 
 		 */
-		public function WFSFeatureEditableJetStreamWindBarb(points: Array, myPointIndex: uint, windBarbDef: WindBarb, i_color: uint)
+		public function WFSFeatureEditableJetStreamWindBarb(points: Array, myPointIndex: uint, windBarbDef: WindBarb, i_color: uint, s_hemisphere: String)
 		{
 			super();
 			
 			m_points = points;
 			m_myPointIndex = myPointIndex;
 			m_windBarbDef = windBarbDef;
+			m_hemisphere = s_hemisphere;
 			
 			var nFormat: TextFormat = new TextFormat();
 			nFormat.leading = -1;
@@ -73,7 +79,9 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 			//m_textfield.border = true;
 			//m_textfield.autoSize = TextFieldAutoSize.CENTER;
 			
-			addChild(m_textfield);
+			
+			addChild(m_textfieldSprite);
+			m_textfieldSprite.addChild(m_textfield);
 			
 			update(m_points, m_myPointIndex, m_windBarbDef, i_color);
 		}
@@ -361,11 +369,16 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 					var cPoint: Point = fPoint.add(new Point(mPoint.x / 2, mPoint.y / 2));
 					var degree: Number = Math.atan2(mPoint.y, mPoint.x) * 180 / Math.PI;
 					
+					if (m_hemisphere == Hemisphere.SOUTHERN_HEMISPHERE)
+						m_textfield.y = -1 * m_textfield.textHeight;
+					else
+						m_textfield.y = 0;
+					
 					mPoint.normalize(1);
 					
-					m_textfield.x = cPoint.x - (mPointNormal.x * 4) - (mPoint.x * ((m_textfield.textWidth + 8) / 2));
-					m_textfield.y = cPoint.y - (mPointNormal.y * 4) - (mPoint.y * ((m_textfield.textWidth + 8) / 2));
-					m_textfield.rotation = degree;
+					m_textfieldSprite.x = cPoint.x - (mPointNormal.x * 4) - (mPoint.x * ((m_textfield.textWidth + 8) / 2));
+					m_textfieldSprite.y = cPoint.y - (mPointNormal.y * 4) - (mPoint.y * ((m_textfield.textWidth + 8) / 2));
+					m_textfieldSprite.rotation = degree;
 				}
 			}
 			
@@ -402,7 +415,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 		*/
 		protected function makeNormal(point: Point): Point
 		{
-			if (m_windBarbDef.coordinate.toLaLoCoord().y < 0){
+			if (m_hemisphere == Hemisphere.SOUTHERN_HEMISPHERE) {
 				// southern hemisphere
 				return(new Point(-point.y, point.x));
 			} else {

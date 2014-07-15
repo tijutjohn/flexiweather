@@ -19,12 +19,14 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 	import com.iblsoft.flexiweather.symbology.FrontCurveRenderer;
 	import com.iblsoft.flexiweather.symbology.JetStreamCurveRenderer;
 	import com.iblsoft.flexiweather.utils.CubicBezier;
+	import com.iblsoft.flexiweather.utils.Hemisphere;
 	import com.iblsoft.flexiweather.utils.ICurveRenderer;
 	import com.iblsoft.flexiweather.utils.draw.DrawMode;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
 	import flash.display.Graphics;
 	import flash.display.Sprite;
+	import flash.events.EventDispatcher;
 	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
 	import flash.geom.ColorTransform;
@@ -59,12 +61,17 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 		protected var m_selectedWindPoint: MoveableWindPoint;
 		protected var m_selectedWindPointIndex: int = -1;
 		
+		//on which hemisphere is JetStream (one of Hemisphere constansts). JetStream can not cross equator (physically)
+		protected var m_hemisphere: String;
+		
 		/**
 		 * 
 		 */
 		public function WFSFeatureEditableJetStream(s_namespace: String, s_typeName: String, s_featureId: String)
 		{
 			super(s_namespace, s_typeName, s_featureId);
+			
+			m_hemisphere = Hemisphere.NORTHERN_HEMISPHERE;
 			
 		}
 		
@@ -168,6 +175,8 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 				graphics.lineStyle(1, i_color);
 //				var splinePoints: Array = CubicBezier.calculateHermitSpline(a_points, false);
 				var coords: Array = [];
+				
+				m_hemisphere = Hemisphere.hemisphereForCoord(m_coordinates[0] as Coord);
 				
 				//what is the best way to check in which projection was front created? For now we check CRS of first coordinate
 //				var crs: String = (coordinates[0] as Coord).crs;
@@ -366,7 +375,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 					mp = new MoveableWindPoint(this, i, r, reflection.reflectionDelta);
 					windbarb = WindBarb(reflection.windbarbs[i]);
 					
-					cp = new WFSFeatureEditableJetStreamWindBarb(curvePoints, findNearestCurvePoint(windbarb.point, curvePoints), windbarb, i_color);
+					cp = new WFSFeatureEditableJetStreamWindBarb(curvePoints, findNearestCurvePoint(windbarb.point, curvePoints), windbarb, i_color, m_hemisphere);
 				
 					ret = ret && cp.canBeDrawed;
 				
@@ -918,7 +927,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 					nWindBarb.below = 0;
 					nWindBarb.above = 0;
 					
-					
+					updateJetStreamWindBarbUI(nWindBarb);
 					
 					/**
 					 * we need to save this to local variables and not only to reflections to be able to recreate reflection in updateWindPointsReflections() function
@@ -1011,26 +1020,38 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 			update(FeatureUpdateContext.fullUpdate());
 		}
 		
+		private var _editor: IJetStreamEditorGUI;
+		
 		//TODO better implement JetStream bindable function to remove dependency on FeatureEditorWidget
-		/*
-		public function setBindableFunctions(content: FeatureEditorWidgetBase): void
+		public function setBindableFunctions(content: IJetStreamEditorGUI): void
 		{
+			_editor = content;
 			if (!content.hasEventListener(WindBarbChangeEvent.WIND_BARB_CHANGE)){
 				content.addEventListener(WindBarbChangeEvent.WIND_BARB_CHANGE, onChangeWindBarbContentValues);
 			}
 			
-			addEventListener(WindBarbChangeEvent.WIND_BARB_SELECTION_CHANGE, content.onChangeWindBarbValues);
+			addEventListener(WindBarbChangeEvent.WIND_BARB_SELECTION_CHANGE, updateJetStreamWindBarb);
 		}
 		
-		public function resetBindableFunctions(content: FeatureEditorWidgetBase): void
+		public function resetBindableFunctions(content: IJetStreamEditorGUI): void
 		{
 			if (content.hasEventListener(WindBarbChangeEvent.WIND_BARB_CHANGE)){
 				content.removeEventListener(WindBarbChangeEvent.WIND_BARB_CHANGE, onChangeWindBarbContentValues);
 			}
 			
-			removeEventListener(WindBarbChangeEvent.WIND_BARB_SELECTION_CHANGE, content.onChangeWindBarbValues);
+			removeEventListener(WindBarbChangeEvent.WIND_BARB_SELECTION_CHANGE, updateJetStreamWindBarb);
 		}
-		*/
+		
+		private function updateJetStreamWindBarb(event: WindBarbChangeEvent): void
+		{
+			updateJetStreamWindBarbUI(event.data as WindBarb);
+		}
+		
+		private function updateJetStreamWindBarbUI(windBarb: WindBarb): void
+		{
+			if (_editor)
+				_editor.updateJetStreamWindBard(windBarb);
+		}
 		
 		/**
 		 * 
