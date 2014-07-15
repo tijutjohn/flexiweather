@@ -19,5 +19,12 @@ package com.iblsoft.flexiweather.ogc.editable.events
 			data = _data;
 		}
 		
+		override public function clone():Event
+		{
+			var wbce: WindBarbChangeEvent = new WindBarbChangeEvent(type, data, bubbles, cancelable);
+			return wbce;
+				
+		}
+		
 	}
 }
