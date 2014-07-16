@@ -76,6 +76,9 @@ package com.iblsoft.flexiweather.ogc.editable
 				{
 					m_featureData = new FeatureData(this.toString() + " FeatureData");
 					
+					//DEBUG - check for non smooth (to have less coordinates
+//					smooth = false;
+					
 					//curves will be not drawn, just compute, to be able to draw each reflection separately
 					if (smooth)
 						master.container.drawSmoothPolyLine(getRenderer, a_points, DrawMode.PLAIN, false, true, m_featureData);
@@ -93,55 +96,60 @@ package com.iblsoft.flexiweather.ogc.editable
 			var a_points: Array = getPoints();
 			
 			//create sprites for reflections
-			var totalReflections: uint = ml_movablePoints.totalReflections;
 			
-			var displaySprite: WFSFeatureEditableSprite;
-			
-			var pointsCount: int = a_points.length;
-			var ptAvg: Point;
-			var gr: Graphics;
-			
-			
-			for (var i: int = 0; i < totalReflections; i++)
+			if (m_featureData && m_featureData.reflections)
 			{
-				reflection = ml_movablePoints.getReflection(i) as WFSEditableReflectionData;
-				if (reflection)
+				var totalReflections2: uint = ml_movablePoints.totalReflections;
+				var totalReflections: uint = m_featureData.reflections.length;
+			
+				var displaySprite: WFSFeatureEditableSprite;
+				
+				var pointsCount: int = a_points.length;
+				var ptAvg: Point;
+				var gr: Graphics;
+				
+				
+				for (var i: int = 0; i < totalReflections; i++)
 				{
-					if (m_featureData)
-						ptAvg = m_featureData.getReflectionAt(reflection.reflectionDelta).center;
-					else if (pointsCount == 1) 
-						ptAvg = a_points[0] as Point;
-					
-					if (!reflection.displaySprite)
+					reflection = ml_movablePoints.getReflection(i) as WFSEditableReflectionData;
+					if (reflection)
 					{
-						reflection.displaySprite = getDisplaySpriteForReflection(reflection.reflectionDelta);
-						if (reflection.displaySprite)
-							addChild(reflection.displaySprite);
-					}
-					if (reflection.displaySprite) {
-						displaySprite = reflection.displaySprite as WFSFeatureEditableSprite;
-						gr = reflection.displaySprite.graphics;
-					} else {
-						gr = graphics;
-					}
-					
-					if(pointsCount <= 1)
-					{
-						if (reflection.displaySprite)
-							displaySprite.clear();
-						//						trace("displaySprite.clear: pointsCount: " + pointsCount);
-					} else {
-						var renderer: ICurveRenderer = getRenderer(reflection.reflectionDelta);
 						if (m_featureData)
+							ptAvg = m_featureData.getReflectionAt(reflection.reflectionDelta).center;
+						else if (pointsCount == 1) 
+							ptAvg = a_points[0] as Point;
+						
+						if (!reflection.displaySprite)
 						{
-							gr.clear();
-							//							trace("reflection.displaySprite: " + reflection.displaySprite.parent);
-							var reflectionData: FeatureDataReflection = m_featureData.getReflectionAt(reflection.reflectionDelta);
-							if (reflectionData)
-								drawFeatureReflection(renderer, reflectionData);
+							reflection.displaySprite = getDisplaySpriteForReflection(reflection.reflectionDelta);
+							if (reflection.displaySprite)
+								addChild(reflection.displaySprite);
 						}
-						if (displaySprite)
-							displaySprite.points = reflection.points;
+						if (reflection.displaySprite) {
+							displaySprite = reflection.displaySprite as WFSFeatureEditableSprite;
+							gr = reflection.displaySprite.graphics;
+						} else {
+							gr = graphics;
+						}
+						
+						if(pointsCount <= 1)
+						{
+							if (reflection.displaySprite)
+								displaySprite.clear();
+							//						trace("displaySprite.clear: pointsCount: " + pointsCount);
+						} else {
+							var renderer: ICurveRenderer = getRenderer(reflection.reflectionDelta);
+							if (m_featureData)
+							{
+								gr.clear();
+								//							trace("reflection.displaySprite: " + reflection.displaySprite.parent);
+								var reflectionData: FeatureDataReflection = m_featureData.getReflectionAt(reflection.reflectionDelta);
+								if (reflectionData)
+									drawFeatureReflection(renderer, reflectionData);
+							}
+							if (displaySprite)
+								displaySprite.points = reflection.points;
+						}
 					}
 				}
 			}

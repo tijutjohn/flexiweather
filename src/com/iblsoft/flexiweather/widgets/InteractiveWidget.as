@@ -2342,19 +2342,23 @@ package com.iblsoft.flexiweather.widgets
 			}
 			else if (drawMode == DrawMode.PLAIN) {
 				if (projection.wrapsHorizontally) {
+					
+					//if Projection wraps horizontally, we need to check if coordinates distance is higher then half of extent to check if there is not InternationDateLine
 					if (Math.abs(coordFrom.x - coordTo.x) > extent.width / 2)
 					{
 						coordFrom = coordFrom.toLaLoCoord();
 						coordTo = coordTo.toLaLoCoord();
 						var line1: LineSegment;
-						var line2: LineSegment = new LineSegment(180,-90,180,90);
+						var internationalDateLine: LineSegment = new LineSegment(180,-90,180,90);
+						
+						//create line1 in correct order
 						if (coordFrom.x > coordTo.x)
 							line1 = new LineSegment(coordFrom.x, coordFrom.y, coordTo.x + 360, coordTo.y);
 						else {
 							line1 = new LineSegment(coordTo.x, coordTo.y, coordFrom.x + 360, coordFrom.y);
 						}
 						
-						var intersection: Point = line1.intersectionWithLineSegment(line2);
+						var intersection: Point = line1.intersectionWithLineSegment(internationalDateLine);
 						var intersectionCoordLeft: Coord = new Coord(coordFrom.crs, intersection.x - 0.00001, intersection.y);
 						var intersectionCoordRight: Coord = new Coord(coordFrom.crs, intersection.x + 0.00001, intersection.y);
 						intersectionCoordRight = Coord.convertCoordOnSphere(intersectionCoordRight, projection);
@@ -2363,6 +2367,7 @@ package com.iblsoft.flexiweather.widgets
 						var bisectedCoordsRight: Array;
 						
 						
+						//now there are 2 lines and NULL (dateline) coord, so we split line crossing date line to 2 different lines not crossing dateline
 						if (coordFrom.x > coordTo.x) 
 						{
 							coords = [coordFrom, intersectionCoordLeft, null, intersectionCoordRight, coordTo];
@@ -2370,6 +2375,8 @@ package com.iblsoft.flexiweather.widgets
 							coords = [coordTo, intersectionCoordLeft, null, intersectionCoordRight, coordFrom];
 						}
 						
+						
+						//convert coords back to origin projection
 						var tempCoords: Array = coords;
 						coords = [];
 						for each (c in tempCoords)
@@ -2385,7 +2392,6 @@ package com.iblsoft.flexiweather.widgets
 				}
 			}
 
-			//convert coords back to origin projection
 			
 			// coords can now contain null to mark point of discontinuity if line crosses dateline or projection boundaries
 			
@@ -2401,9 +2407,13 @@ package com.iblsoft.flexiweather.widgets
 				}
 			}
 			
+			//if line crosses dateline there must be at least 2 continuosParts items
+			debug("_drawGeoLine ContinosParts: "+ continousParts.length);
+			
 			var reflections: Array;
 			var projectionExtent: BBox = m_crsProjection.extentBBox;
 			
+			//create lines which are edges of viewBBox
 			var viewBBoxWestLine: LineSegment = new LineSegment(m_viewBBox.xMin, m_viewBBox.yMin, m_viewBBox.xMin, m_viewBBox.yMax);
 			var viewBBoxEastLine: LineSegment = new LineSegment(m_viewBBox.xMax, m_viewBBox.yMin, m_viewBBox.xMax, m_viewBBox.yMax);
 			var viewBBoxNorthLine: LineSegment = new LineSegment(m_viewBBox.xMin, m_viewBBox.yMin, m_viewBBox.xMax, m_viewBBox.yMin);
@@ -2436,8 +2446,10 @@ package com.iblsoft.flexiweather.widgets
 								}
 								
 								line = new LineSegment(o.pointFrom.x, o.pointFrom.y, o.pointTo.x, o.pointTo.y);
+								debug("\t\tdraw lines : "+ line);
 								if (line.isInsideBox(m_viewBBox) || line.isIntersectedBox(viewBBoxWestLine, viewBBoxEastLine, viewBBoxNorthLine, viewBBoxSouthLine))
 								{
+									debug("\t\t\t DRAW IT");
 									var reflection: FeatureDataReflection = featureDataLine.parentFeatureData.getReflectionAt(o.reflection);
 									var currLine: FeatureDataLine = reflection.getLineAt(featureDataLine.id);
 //									trace("_drawGeoLine reflection: " + reflection);
@@ -2458,7 +2470,7 @@ package com.iblsoft.flexiweather.widgets
 	//									d_reflectionToSegmentPoints[s_reflectionId].push(null);
 									}
 //								} else {
-//									trace("There is no intersection with current viewBBox: " + line);
+//									debug("There is no intersection with current viewBBox: " + line);
 								}
 							}
 						}
@@ -2549,6 +2561,7 @@ package com.iblsoft.flexiweather.widgets
 			var total: int = coords.length;
 			var cnt: int = 0;
 			
+			//if coords Array is array of points, convert them to coordinates
 			if (coords[0] is Point)
 			{
 				var newCoords: Array = [];
@@ -2560,12 +2573,14 @@ package com.iblsoft.flexiweather.widgets
 				coords = newCoords;
 			}
 			
+			//if line is closed, add 1st coordinate at the end of coordinates array
 			if (b_closed)
 			{
 				coords.push((coords[0] as Coord).clone());
 			}
 			
 			
+			//draw geoline as many small geolines
 			for each (var c: Coord in coords) 
 			{
 				if(cPrev) {
@@ -2811,7 +2826,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (id != null)
 			{
-//				trace(tag + "| " + type + "| " + str);
+				trace(tag + "| " + type + "| " + str);
 //				LoggingUtils.dispatchLogEvent(this, tag + "| " + type + "| " + str);
 			}
 		}
