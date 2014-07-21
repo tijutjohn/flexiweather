@@ -12,6 +12,7 @@ package com.iblsoft.flexiweather.ogc
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.geom.Point;
+	import flash.utils.Dictionary;
 	
 	import mx.core.UIComponentGlobals;
 	import mx.core.mx_internal;
@@ -25,6 +26,7 @@ package com.iblsoft.flexiweather.ogc
 	
 	public class FeatureBase extends Sprite
 	{
+		private var _reflectionSprites: Dictionary = new Dictionary();
 		private var _next: FeatureBase;
 		private var _previous: FeatureBase;
 
@@ -449,6 +451,14 @@ package com.iblsoft.flexiweather.ogc
 		public function get internalFeatureId(): String
 		{
 			return ms_internalFeatureId;
+		}
+		
+		public function getDisplaySpriteForReflectionAt(reflectionDelta: int): Sprite
+		{
+			if (!_reflectionSprites[reflectionDelta])
+				_reflectionSprites[reflectionDelta] = new Sprite();
+			
+			return _reflectionSprites[reflectionDelta] as Sprite;
 		}
 	}
 }

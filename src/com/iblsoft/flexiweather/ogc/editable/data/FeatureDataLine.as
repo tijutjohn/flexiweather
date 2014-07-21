@@ -4,6 +4,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
+	import flash.utils.Dictionary;
 
 	[Event(name="name", type="flash.events.Event")]
 	public class FeatureDataLine extends EventDispatcher
@@ -14,6 +15,8 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		[ArrayElementType("com.iblsoft.flexiweather.utils.geometry.LineSegment")]
 		public var lineSegments: Array;
 		
+		private var _reflectionEdgePointsDictionary: Dictionary;
+		
 		public var id: int;
 		
 		public  var parentFeatureData: FeatureData;
@@ -23,6 +26,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		{
 			id = position;
 			lineSegments = new Array();
+			_reflectionEdgePointsDictionary = new Dictionary();
 		}
 		
 		private function notify(type: String): void
@@ -30,13 +34,14 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			dispatchEvent(new Event(type));
 		}
 		
-		public function addLineSegment(lineSegment: LineSegment): void
+		public function addLineSegment(lineSegment: LineSegment, firstPointOnEdge: Boolean = false, secondPointOnEdge: Boolean = false): void
 		{
-			addLineSegmentAt(lineSegment, lineSegments.length);
+			addLineSegmentAt(lineSegment, lineSegments.length, firstPointOnEdge, secondPointOnEdge);
 		}
 		
-		public function addLineSegmentAt(lineSegment: LineSegment, position: int): void
+		public function addLineSegmentAt(lineSegment: LineSegment, position: int, firstPointOnEdge: Boolean = false, secondPointOnEdge: Boolean = false): void
 		{
+			_reflectionEdgePointsDictionary[lineSegment] = {line: lineSegment, firstEdge: firstPointOnEdge, secondEdge: secondPointOnEdge};
 			lineSegments[position] = lineSegment;
 			notify(LINE_SEGMENT_ADDED);
 		}
@@ -53,7 +58,11 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		
 		override public function toString(): String
 		{
-			return "FeatureDataLine " + id;
+			var linesStr: String = "";
+			for each (var line: LineSegment in lineSegments)
+				linesStr += " " + line;
+				
+			return "FeatureDataLine " + id + " segments: " + lineSegments.length + "|" + linesStr;
 		}
 	}
 }

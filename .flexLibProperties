@@ -519,6 +519,7 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.data.InteractiveLayerLegendsOrientation"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.curves.IJetStreamEditorGUI"/>
     <classEntry path="com.iblsoft.flexiweather.utils.Hemisphere"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.data.FeatureDataPoint"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

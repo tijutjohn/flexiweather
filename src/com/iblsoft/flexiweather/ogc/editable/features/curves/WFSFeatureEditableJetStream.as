@@ -547,9 +547,9 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 					coordReflected = new Coord(crs, pointReflected.x, pointReflected.y);
 					if (recreateMode)
 					{
-						ml_movablePoints.addReflectedCoordAt(coordReflected, i, j, pointReflectedObject.reflection);
+						ml_movablePoints.addReflectedCoordAt(coordReflected, i, pointReflectedObject.reflection);
 					} else {
-						ml_movablePoints.updateReflectedCoordAt(coordReflected, i, j, pointReflectedObject.reflection);
+						ml_movablePoints.updateReflectedCoordAt(coordReflected, i, pointReflectedObject.reflection);
 					}
 				}
 			}
