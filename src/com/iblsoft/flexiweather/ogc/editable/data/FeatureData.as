@@ -28,6 +28,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			{
 				var refl: FeatureDataReflection = getReflectionAt(i);
 				trace("\t\tLines: " + refl.lines.length);
+				refl.debug(); 
 			}
 		}
 		public function getLineAt(position: int): FeatureDataLine
@@ -43,7 +44,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		
 		public function createReflectionAt(position: int): FeatureDataReflection
 		{
-			var reflection: FeatureDataReflection = new FeatureDataReflection();
+			var reflection: FeatureDataReflection = new FeatureDataReflection(position);
 			reflection.parentFeatureData = this;
 			reflections[position] = reflection;
 			return reflection;

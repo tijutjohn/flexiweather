@@ -207,8 +207,8 @@ package com.iblsoft.flexiweather.ogc.cache
 //			trace("GET TILES: validity: " + validity.toString() + " >> " + a.length);
 			testingTilesValidity(a)
 			
-			if (specialStrings)
-				trace("\t getTiles specialStrings " + specialStrings[0] + " tiles: " + a.length);
+//			if (specialStrings)
+//				trace("\t getTiles specialStrings " + specialStrings[0] + " tiles: " + a.length);
 			return a;
 		}
 		
@@ -308,7 +308,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			mi_cacheLoadingItemsLength--;
 			mi_noDataCacheItemsLength--;
 			
-			trace(this + "cacheItemLoadingCanceled: " + s_key);
+//			trace(this + "cacheItemLoadingCanceled: " + s_key);
 		}
 		
 		override public function addCacheNoDataItem(viewProperties: IViewProperties): void
@@ -350,10 +350,10 @@ package com.iblsoft.flexiweather.ogc.cache
 			var tiledAreas: Array = qttTileViewProperties.tiledAreas;
 			var specialStrings: Array = qttTileViewProperties.specialCacheStrings;
 			
-			if (!validity)
-			{
-				trace("Check why validity == null in  WMSTileCache.addCacheItem");
-			}
+//			if (!validity)
+//			{
+//				trace("Check why validity == null in  WMSTileCache.addCacheItem");
+//			}
 			var url: URLRequest = qttTileViewProperties.url;
 			var tileIndex: TileIndex = qttTileViewProperties.tileIndex;
 			
@@ -361,7 +361,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			var ck: WMSTileCacheKey = new WMSTileCacheKey(s_crs, tileIndex, url, null, validity, null);
 			var s_key: String = decodeURI(ck.toString());
 			
-			trace("WMSTileCache addCacheItem: "+ s_key);
+//			trace("WMSTileCache addCacheItem: "+ s_key);
 			
 			var item: CacheItem = new CacheItem();
 			item.viewProperties = qttTileViewProperties;

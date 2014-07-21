@@ -7,6 +7,9 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
 	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionDictionary;
 	import com.iblsoft.flexiweather.ogc.editable.data.FeatureData;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataPoint;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
+	import com.iblsoft.flexiweather.ogc.editable.data.MoveablePoint;
 	import com.iblsoft.flexiweather.ogc.events.MoveablePointEvent;
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithReflection;
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureBase;
@@ -22,7 +25,6 @@ package com.iblsoft.flexiweather.ogc.editable
 	import flash.geom.Point;
 	import flash.ui.Keyboard;
 	import flash.utils.Dictionary;
-	import com.iblsoft.flexiweather.ogc.editable.data.MoveablePoint;
 
 	public class WFSFeatureEditable extends WFSFeatureBase implements IEditableItem, IHighlightableItem, ISelectableItem, IWFSFeatureWithReflection
 	{
@@ -88,14 +90,14 @@ package com.iblsoft.flexiweather.ogc.editable
 			return null;
 		}
 		
-		private function updateCoordsReflections(): void
+		protected function updateCoordsReflections(): void
 		{
 			if (!master)
 				return;
 //			var reflections: Dictionary = new Dictionary();
 //			ml_movablePoints.cleanup();
 			var total: int = coordinates.length;
-			var iw: InteractiveWidget = master.container;
+ 			var iw: InteractiveWidget = master.container;
 			var crs: String = iw.getCRS();
 			for (var i: int = 0; i < total; i++)
 			{
@@ -108,7 +110,9 @@ package com.iblsoft.flexiweather.ogc.editable
 					var pointReflected: Point = pointReflectedObject.point;
 					var coordReflected: Coord = new Coord(crs, pointReflected.x, pointReflected.y);
 //					trace(this + " updateCoordsReflections coordReflected: " + coordReflected);
-					reflectionDictionary.addReflectedCoordAt(coordReflected, i, j, pointReflectedObject.reflection, iw);
+//					reflectionDictionary.addReflectedCoordAt(coordReflected, i, j, pointReflectedObject.reflection, iw);
+//					reflectionDictionary.addReflectedCoordAt(coordReflected, i, pointReflectedObject.reflection, iw);
+					reflectionDictionary.addReflectedCoord(coordReflected, pointReflectedObject.reflection, iw);
 				}
 			}
 		}
@@ -191,14 +195,81 @@ package com.iblsoft.flexiweather.ogc.editable
 			}
 		}
 		
-		override public function update(changeFlag: FeatureUpdateContext): void
+		/**
+		 * New implementation of update method through FeatureData 
+		 * @param changeFlag
+		 * 
+		 */		
+		private function updateNewImplementation(changeFlag: FeatureUpdateContext): void
 		{
-			super.update(changeFlag);
+			if (m_featureData)
+			{
+				var eim: IEditableItemManager = master as IEditableItemManager;
+				var mp: MoveablePoint;
+				var i: uint;
+				
+				var reflectionsTotal: int = m_featureData.reflections.length;
+				for (var r: int = 0; r < reflectionsTotal; r++)
+				{
+					var reflection: FeatureDataReflection = m_featureData.getReflectionAt(r) as FeatureDataReflection;
+					if (reflection)
+					{
+						var pTotal: int = reflection.points.length;
+						//						var pMoveableTotal: int = reflection.moveablePoints.length;
+						//						trace("FeatureEditable upate: pointsTotal: " + pTotal + "  pMoveableTotal: " + pMoveableTotal);
+						var cnt: int = 0
+						for (i = 0; i < pTotal; ++i)
+						{
+							var pt: FeatureDataPoint = reflection.points[i] as FeatureDataPoint;
+							if (pt)
+							{
+								if (!pt.isReflectionEdgePoint)
+								{
+									if (!pt.movablePoint)
+									{
+										//add new MovablePoint (new point was added, so we need to create Movable point for it
+										mp = new MoveablePoint(this, cnt, r, reflection.reflectionDelta);
+										//										reflection.addMoveablePoint(mp, i);
+										m_editableSprite.addChild(mp);
+										if (eim != null)
+											eim.addEditableItem(mp);
+										addMoveablePointListeners(mp);
+										continue;
+									}
+									mp = pt.movablePoint as MoveablePoint;
+									if (pt == null || mp == null)
+										continue; // TODO: check for CRS
+									var p: Point = mp.getPoint();
+									//						trace("WFSFeatureEditable update: pt: " + pt + " p: " + p + " for reflection r: " + r);
+									if (p && !p.equals(pt))
+									{
+										// reuse MoveablePoint instance, just change it's location 
+										mp.setPoint(pt);
+									}
+								}
+								cnt++;
+							}
+						}
+					}
+				}
+				editableSpriteVisible(mb_selected);
+			}
+		}
+		
+		/**
+		 * New implementation of update method through WFSEditableReflectionData 
+		 * @param changeFlag
+		 * 
+		 */		
+		private function updateOldImplementation(changeFlag: FeatureUpdateContext): void
+		{
+			//m_points is Array of Screen coordinates in pixels
+			updateCoordsReflections();
+			
 			var eim: IEditableItemManager = master as IEditableItemManager;
 			var mp: MoveablePoint;
 			var i: uint;
-			//m_points is Array of Screen coordinates in pixels
-			updateCoordsReflections();
+			
 			var reflectionsTotal: int = reflectionDictionary.totalReflections;
 			for (var r: int = 0; r < reflectionsTotal; r++)
 			{
@@ -206,7 +277,8 @@ package com.iblsoft.flexiweather.ogc.editable
 				if (reflection)
 				{
 					var pTotal: int = reflection.points.length;
-//					trace("FeatureEditable upate: pTotal: " + pTotal); 
+					var pMoveableTotal: int = reflection.moveablePoints.length;
+					trace("FeatureEditable upate: pointsTotal: " + pTotal + "  pMoveableTotal: " + pMoveableTotal); 
 					for (i = 0; i < pTotal; ++i)
 					{
 						var pt: Point = reflection.points[i] as Point;
@@ -225,7 +297,7 @@ package com.iblsoft.flexiweather.ogc.editable
 						if (pt == null || mp == null)
 							continue; // TODO: check for CRS
 						var p: Point = mp.getPoint()
-//						trace("WFSFeatureEditable update: pt: " + pt + " p: " + p + " for reflection r: " + r);
+						//						trace("WFSFeatureEditable update: pt: " + pt + " p: " + p + " for reflection r: " + r);
 						if (p && !p.equals(pt))
 						{
 							// reuse MoveablePoint instance, just change it's location 
@@ -234,7 +306,25 @@ package com.iblsoft.flexiweather.ogc.editable
 					}
 				}
 			}
+			
 			editableSpriteVisible(mb_selected);
+		}
+		
+		override public function update(changeFlag: FeatureUpdateContext): void
+		{
+			super.update(changeFlag);
+			
+			trace("\nWFSFeatureEditable update");
+			
+			
+			//NEW IMPLEMENTATION
+//			updateNewImplementation(changeFlag);
+			
+			//OLD implementation
+			updateOldImplementation(changeFlag);
+			
+			
+		
 		}
 
 		protected function editableSpriteVisible(bool: Boolean): void
@@ -388,7 +478,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				reflectionWidth = master.container.getExtentBBox().width * i_reflectionDelta;
 			var c: Coord = m_master.container.pointToCoord(pt.x, pt.y);
 			
-			trace("WFSFEatureEditable setPoint : from pt: " + pt + " to c: " + c.toLaLoCoord());
+//			trace("WFSFEatureEditable setPoint : from pt: " + pt + " to c: " + c.toLaLoCoord());
 			//need to move coord to 0 reflection
 			
 			var projection: Projection = m_master.container.getCRSProjection();
@@ -400,9 +490,9 @@ package com.iblsoft.flexiweather.ogc.editable
 			m_points[i_pointIndex] = newPt;
 			m_coordinates[i_pointIndex] = c;
 			
-			trace("WFSFEatureEditable setPoint : from c: " + c.toLaLoCoord() + " to pt: " + newPt + " old pt: " + pt);
-			if (newPt.x != pt.x)
-				trace("check this");
+//			trace("WFSFEatureEditable setPoint : from c: " + c.toLaLoCoord() + " to pt: " + newPt + " old pt: " + pt);
+//			if (newPt.x != pt.x)
+//				trace("check this");
 			
 			update(FeatureUpdateContext.fullUpdate());
 			modified = true;

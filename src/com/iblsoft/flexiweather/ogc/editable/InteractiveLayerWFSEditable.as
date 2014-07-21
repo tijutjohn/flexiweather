@@ -313,8 +313,8 @@ package com.iblsoft.flexiweather.ogc.editable
 		override public function onMouseUp(event: MouseEvent): Boolean
 		{
 			var bool: Boolean = onMouseUpCommon(event);
-			if (bool)
-				trace(this + " onMouseUp");
+//			if (bool)
+//				trace(this + " onMouseUp");
 			
 			return bool;
 		}

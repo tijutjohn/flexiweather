@@ -2397,18 +2397,27 @@ package com.iblsoft.flexiweather.widgets
 			
 			var i_part: int = 0;
 			var continousParts: Array = [[]];
+			var isEdge: Boolean = false;
+			
 			for each (c in coords) {
 				if(!c) {
+					
+					//set last point as edge
+					(continousParts[i_part][(continousParts[i_part] as Array).length - 1] as EdgeCoord).edge = true;
+					
 					continousParts.push([]);
 					i_part = continousParts.length - 1;
+					
+					isEdge = true;
 				}
 				else {
-					continousParts[i_part].push(c);
+					continousParts[i_part].push(new EdgeCoord(c, isEdge));
+					isEdge = false;
 				}
 			}
 			
 			//if line crosses dateline there must be at least 2 continuosParts items
-			debug("_drawGeoLine ContinosParts: "+ continousParts.length);
+//			debug("_drawGeoLine ContinosParts: "+ continousParts.length);
 			
 			var reflections: Array;
 			var projectionExtent: BBox = m_crsProjection.extentBBox;
@@ -2422,13 +2431,17 @@ package com.iblsoft.flexiweather.widgets
 			var line: LineSegment;
 			for each(var part: Array in continousParts)
 			{
+				var cObject: EdgeCoord = null;
+				var prevCObject: EdgeCoord = null;
 				var prevC: Coord = null;
-				for each(c in part) 
+				for each(cObject in part) 
 				{
-					if (prevC)
+					if (prevCObject)
 					{
-						if (c)
+						prevC = prevCObject.coord;
+						if (cObject)
 						{
+							c = cObject.coord;
 //							trace("mapLineCoordToViewReflections : " + prevC.toString() + " , " + c.toString());
 							
 							//find reflections of line defined by coords prevC and c in projection extent
@@ -2446,10 +2459,10 @@ package com.iblsoft.flexiweather.widgets
 								}
 								
 								line = new LineSegment(o.pointFrom.x, o.pointFrom.y, o.pointTo.x, o.pointTo.y);
-								debug("\t\tdraw lines : "+ line);
+//								debug("\t\tdraw lines : "+ line);
 								if (line.isInsideBox(m_viewBBox) || line.isIntersectedBox(viewBBoxWestLine, viewBBoxEastLine, viewBBoxNorthLine, viewBBoxSouthLine))
 								{
-									debug("\t\t\t DRAW IT");
+//									debug("\t\t\t DRAW IT");
 									var reflection: FeatureDataReflection = featureDataLine.parentFeatureData.getReflectionAt(o.reflection);
 									var currLine: FeatureDataLine = reflection.getLineAt(featureDataLine.id);
 //									trace("_drawGeoLine reflection: " + reflection);
@@ -2459,7 +2472,7 @@ package com.iblsoft.flexiweather.widgets
 									var p1: Point = coordToPoint(new Coord(ms_crs, o.pointFrom.x, o.pointFrom.y));
 									var p2: Point = coordToPoint(new Coord(ms_crs, o.pointTo.x, o.pointTo.y));
 									
-									currLine.addLineSegment(new LineSegment(p1.x, p1.y, p2.x, p2.y));
+									currLine.addLineSegment(new LineSegment(p1.x, p1.y, p2.x, p2.y), prevCObject.edge, cObject.edge);
 									
 									reflectedSegmentPoints.push(p1);
 									reflectedSegmentPoints.push(p2);
@@ -2475,8 +2488,9 @@ package com.iblsoft.flexiweather.widgets
 							}
 						}
 					}
-					prevC = c;
+					prevCObject = cObject;
 				}
+				
 				for(s_reflectionId in d_reflectionToSegmentPoints) {
 					reflectedSegmentPoints = d_reflectionToSegmentPoints[s_reflectionId];
 					if(reflectedSegmentPoints.length > 0 && reflectedSegmentPoints[reflectedSegmentPoints.length - 1] != null)
@@ -2826,7 +2840,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (id != null)
 			{
-				trace(tag + "| " + type + "| " + str);
+//				trace(tag + "| " + type + "| " + str);
 //				LoggingUtils.dispatchLogEvent(this, tag + "| " + type + "| " + str);
 			}
 		}
@@ -2916,6 +2930,7 @@ package com.iblsoft.flexiweather.widgets
 }
 import com.iblsoft.flexiweather.FlexiWeatherConfiguration;
 import com.iblsoft.flexiweather.ogc.kml.InteractiveLayerKML;
+import com.iblsoft.flexiweather.proj.Coord;
 import com.iblsoft.flexiweather.widgets.InteractiveLayerPan;
 import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 
@@ -3023,5 +3038,17 @@ class KMLSpeedOptimization
 				layer.suspendUpdating = false;
 			}
 		}
+	}
+}
+
+class EdgeCoord
+{
+	public var coord: Coord;
+	public var edge: Boolean;
+	
+	public function EdgeCoord(coord: Coord, edge: Boolean)
+	{
+		this.coord = coord;
+		this.edge = edge;
 	}
 }

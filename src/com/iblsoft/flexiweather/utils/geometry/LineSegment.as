@@ -3,7 +3,6 @@ package com.iblsoft.flexiweather.utils.geometry
 	import com.iblsoft.flexiweather.ogc.BBox;
 	
 	import flash.geom.Point;
-	import flash.sampler.NewObjectSample;
 
 	public class LineSegment
 	{

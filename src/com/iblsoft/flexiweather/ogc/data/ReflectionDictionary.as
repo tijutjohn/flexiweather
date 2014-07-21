@@ -81,9 +81,9 @@ package com.iblsoft.flexiweather.ogc.data
 			}
 			return null;
 		}
-		public function getReflection(reflections: int): ReflectionData
+		public function getReflection(reflectionDelta: int): ReflectionData
 		{
-			return _dictionary[reflections] as ReflectionData;
+			return _dictionary[reflectionDelta] as ReflectionData;
 		}
 
 		protected function notifyCollectionChange(kind: String, reflection: ReflectionData): void
@@ -93,29 +93,29 @@ package com.iblsoft.flexiweather.ogc.data
 			dispatchEvent(re);
 		}
 
-		public function testCreateReflection(reflections: int): ReflectionData
+		public function testCreateReflection(reflectionDelta: int): ReflectionData
 		{
-			return createReflection(reflections);
+			return createReflection(reflectionDelta);
 		}
 		
-		protected function createReflection(reflections: int): ReflectionData
+		protected function createReflection(reflectionDelta: int): ReflectionData
 		{
-			if (!_dictionary[reflections])
+			if (!_dictionary[reflectionDelta])
 			{
 				var refl: ReflectionData = createNewReflectionData();
-				_dictionary[reflections] = refl;
+				_dictionary[reflectionDelta] = refl;
 				_totalReflections++; //= Math.max(_totalReflections, reflections);
 				notifyCollectionChange(ReflectionEvent.ADD_REFLECTION, refl);
 				return refl;
 			}
-			return getReflection(reflections);
+			return getReflection(reflectionDelta);
 		}
 
-		public function updateReflectedCoordAt(coord: Coord, position: int, reflections: int, reflectionDelta: int, iw: InteractiveWidget = null): void
+		public function updateReflectedCoordAt(coord: Coord, position: int, reflectionDelta: int, isEdgePoint: Boolean = false, iw: InteractiveWidget = null): void
 		{
-			var reflection: ReflectionData = createReflection( reflections );
+			var reflection: ReflectionData = createReflection( reflectionDelta );
 			reflection.reflectionDelta = reflectionDelta;
-			reflection.updateCoordAt(coord, position, iw);
+			reflection.updateCoordAt(coord, position, isEdgePoint, iw);
 			
 		}
 		public function removeReflectedCoordAt(position: int): void
@@ -125,20 +125,20 @@ package com.iblsoft.flexiweather.ogc.data
 				reflection.removeItemAt(position);
 			}
 		}
-		public function addReflectedCoordAt(coord: Coord, position: int, reflections: int, reflectionDelta: int, iw: InteractiveWidget = null): void
+		public function addReflectedCoordAt(coord: Coord, position: int, reflectionDelta: int, isEdgePoint: Boolean = false, iw: InteractiveWidget = null): void
 		{
-			var reflection: ReflectionData = createReflection(reflections);
+			var reflection: ReflectionData = createReflection(reflectionDelta);
 			reflection.reflectionDelta = reflectionDelta;
-			reflection.addCoordAt(coord, position, iw);
+			reflection.addCoordAt(coord, position, isEdgePoint, iw);
 		}
 
-		public function addReflectedCoord(coord: Coord, reflections: int, reflectionDelta: int, iw: InteractiveWidget = null): void
+		public function addReflectedCoord(coord: Coord, reflectionDelta: int, isEdgePoint: Boolean = false, iw: InteractiveWidget = null): void
 		{
-			var reflection: ReflectionData = createReflection(reflections);
+			var reflection: ReflectionData = createReflection(reflectionDelta);
 			if (reflection)
 			{
 				var pos: int = reflection.length;
-				addReflectedCoordAt(coord, pos, reflections, reflectionDelta, iw);
+				addReflectedCoordAt(coord, pos, reflectionDelta, isEdgePoint, iw);
 			}
 		}
 	}

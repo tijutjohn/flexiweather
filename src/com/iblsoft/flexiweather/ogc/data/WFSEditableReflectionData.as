@@ -31,6 +31,12 @@ package com.iblsoft.flexiweather.ogc.data
 			_moveablePoints = null;
 			_annotation = null;
 		}
+		
+		override public function cleanup(): void
+		{
+			super.cleanup();
+			_moveablePoints = [];
+		}
 
 		override public function removeItemAt(pointer: int): void
 		{
