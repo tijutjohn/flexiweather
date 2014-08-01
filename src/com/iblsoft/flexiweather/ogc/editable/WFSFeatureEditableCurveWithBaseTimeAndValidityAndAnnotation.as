@@ -1,7 +1,6 @@
 package com.iblsoft.flexiweather.ogc.editable
 {
 	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
-	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
 	import com.iblsoft.flexiweather.ogc.editable.IObjectWithBaseTimeAndValidity;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableCurve;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableMode;
@@ -18,6 +17,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	
 	import flash.display.DisplayObject;
+	import flash.display.Graphics;
 	import flash.geom.Point;
 	
 	import mx.collections.ArrayCollection;
@@ -32,10 +32,10 @@ package com.iblsoft.flexiweather.ogc.editable
 		
 		public function get annotation():AnnotationBox
 		{
-			if (totalReflections > 0)
+			if (m_featureData)
 			{
-				var reflection: WFSEditableReflectionData = getReflection(0);  
-				return reflection.annotation as AnnotationBox;
+				var reflection: FeatureDataReflection = m_featureData.getReflectionAt(0);
+				return getAnnotationForReflectionAt(reflection.reflectionDelta);
 			}
 			return null;
 		}
@@ -64,74 +64,71 @@ package com.iblsoft.flexiweather.ogc.editable
 		public function drawAnnotation(): void
 		{
 			var annotation: AnnotationBox;
-			var reflection: WFSEditableReflectionData;
+			var reflection: FeatureDataReflection;
 			var _addToLabelLayout: Boolean;
 			
 			var a_points: Array = getPoints();
 			
 			//create sprites for reflections
-			var totalReflections: uint = ml_movablePoints.totalReflections;
-			//			var blackColor: uint = getCurrentColor(0x000000);
-			
-			var displaySprite: WFSFeatureEditableSprite;
-			var pointsCount: int = a_points.length;
-			var ptAvg: Point;
-			
-			for (var i: int = 0; i < totalReflections; i++)
+			if (m_featureData && m_featureData.reflections)
 			{
-				reflection = ml_movablePoints.getReflection(i) as WFSEditableReflectionData;
-				if (reflection)
+				var displaySprite: WFSFeatureEditableSprite;
+				var pointsCount: int = a_points.length;
+				var ptAvg: Point;
+				var gr: Graphics;
+				
+				//				m_featureData.debug();
+				
+				graphics.clear();
+				
+				for (var i: int = 0; i < totalReflections; i++)
 				{
-					if (m_featureData)
-						ptAvg = m_featureData.getReflectionAt(reflection.reflectionDelta).center;
-					else if (pointsCount == 1) 
-						ptAvg = a_points[0] as Point;
-					
-					if (!reflection.displaySprite)
+					reflection = m_featureData.getReflectionAt(i);
+					if (reflection)
 					{
-						reflection.displaySprite = getDisplaySpriteForReflection(reflection.reflectionDelta); //new CloudFeatureSprite(this);
-						addChild(reflection.displaySprite);
-					}
-					displaySprite = reflection.displaySprite as WFSFeatureEditableSprite;
-					
-					if(a_points.length <= 1)
-					{
-						displaySprite.clear();
-					} else {
-						var renderer: ICurveRenderer = getRenderer(reflection.reflectionDelta);
+						var reflectionDelta: int = reflection.reflectionDelta;
+						
 						if (m_featureData)
-						{
-							reflection.displaySprite.graphics.clear();
-							var reflectionData: FeatureDataReflection = m_featureData.getReflectionAt(reflection.reflectionDelta);
-							if (reflectionData)
-								drawFeatureReflection(renderer, reflectionData);
-						}
-						displaySprite.points = reflection.points;
+							ptAvg = m_featureData.getReflectionAt(reflection.reflectionDelta).center;
+						else if (pointsCount == 1) 
+							ptAvg = a_points[0] as Point;
 						
-						if (reflection.annotation )
+						displaySprite = getDisplaySpriteForReflectionAt(reflectionDelta);
+						gr = displaySprite.graphics;
+						
+						if(a_points.length <= 1)
 						{
-							annotation = reflection.annotation ;
+							displaySprite.clear();
 						} else {
-							annotation = createAnnotation();
-							reflection.addAnnotation(annotation);
+							var renderer: ICurveRenderer = getRenderer(reflectionDelta);
+							drawFeatureReflection(renderer, reflection);
+							
+							displaySprite.points = reflection.points;
+							
+							annotation = getAnnotationForReflectionAt(reflectionDelta);
+							if (!annotation )
+							{
+								annotation = createAnnotation();
+								addAnnotationForReflectionAt(reflectionDelta, annotation);
+							}
+							
+							updateAnnotation(annotation, ptAvg);
+							
+							if (!mb_spritesAddedToLabelLayout && master)
+							{
+								master.container.labelLayout.addObstacle(displaySprite, master);
+								master.container.labelLayout.addObject(annotation, master, [displaySprite], i);
+								_addToLabelLayout = true;
+							}
+							
+							master.container.labelLayout.updateObjectReferenceLocation(annotation);
 						}
-						
-						updateAnnotation(annotation, ptAvg);
-						
-						if (!mb_spritesAddedToLabelLayout && master)
-						{
-							master.container.labelLayout.addObstacle(displaySprite, master);
-							master.container.labelLayout.addObject(annotation, master, [displaySprite], i);
-							_addToLabelLayout = true;
-						}
-						
-						master.container.labelLayout.updateObjectReferenceLocation(annotation);
 					}
 				}
+				
+				if (!mb_spritesAddedToLabelLayout && _addToLabelLayout)
+					mb_spritesAddedToLabelLayout = true;
 			}
-			
-			if (!mb_spritesAddedToLabelLayout && _addToLabelLayout)
-				mb_spritesAddedToLabelLayout = true;
 		}
 		
 		public function updateAnnotation(annotation: AnnotationBox, annotationPosition: Point, text: String = ""): void
@@ -172,7 +169,10 @@ package com.iblsoft.flexiweather.ogc.editable
 			{
 				if (master)
 				{
-					m_featureData = new FeatureData(this.toString() + " FeatureData");
+					if (!m_featureData)
+						m_featureData = createFeatureData();
+					else
+						m_featureData.clear();
 					if (smooth)
 						master.container.drawSmoothPolyLine(getRenderer, a_points, DrawMode.PLAIN, false, m_featureData);
 					else

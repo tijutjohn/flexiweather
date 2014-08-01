@@ -4,9 +4,9 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWFS;
 	import com.iblsoft.flexiweather.ogc.data.ReflectionData;
-	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableClosableCurveWithBaseTimeAndValidityAndAnnotation;
 	import com.iblsoft.flexiweather.ogc.editable.annotations.IcingAreaAnnotation;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithAnnotation;
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithReflection;
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
@@ -48,13 +48,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 		{
 			var i_color: uint = getCurrentColor(0x884810);
 			var renderer: IcingCurveRenderer;
-			var gr: Graphics = graphics;
-			
-			var reflectionData: WFSEditableReflectionData = ml_movablePoints.getReflection(reflection) as WFSEditableReflectionData;
-			if (reflectionData && reflectionData.displaySprite)
-			{
-				gr = reflectionData.displaySprite.graphics;
-			}
+			var gr: Graphics = getRendererGraphics(reflection);
 			
 			renderer = new IcingCurveRenderer(gr, i_color, i_color, IcingCurveRenderer.MARK_WARM);
 			
@@ -134,14 +128,18 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 				
 				
 				var icingAreaInfo: IcingAreaAnnotation;
-				var reflection: WFSEditableReflectionData;
+				var reflection: FeatureDataReflection;
+				var displaySprite: WFSFeatureEditableSprite;
 				
-				var totalReflections: uint = ml_movablePoints.totalReflections;
 				for (var i: int = 0; i < totalReflections; i++)
 				{
-					reflection = ml_movablePoints.getReflection(i) as WFSEditableReflectionData;
-					icingAreaInfo = reflection.annotation as IcingAreaAnnotation;
-					master.container.labelLayout.removeObject(reflection.displaySprite);
+					reflection = m_featureData.getReflectionAt(i);
+					var reflectionDelta: int = reflection.reflectionDelta;
+					
+					icingAreaInfo = getAnnotationForReflectionAt(reflectionDelta) as IcingAreaAnnotation;
+					displaySprite = getDisplaySpriteForReflectionAt(reflectionDelta);
+					
+					master.container.labelLayout.removeObject(displaySprite);
 					master.container.labelLayout.removeObject(icingAreaInfo);
 				}
 			}

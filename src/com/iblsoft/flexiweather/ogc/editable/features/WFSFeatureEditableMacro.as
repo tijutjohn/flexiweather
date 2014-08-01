@@ -1,12 +1,14 @@
 package com.iblsoft.flexiweather.ogc.editable.features
 {
 	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
-	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableWithBaseTimeAndValidity;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataPoint;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
 	import com.iblsoft.flexiweather.ogc.editable.data.IconFeatureType;
 	import com.iblsoft.flexiweather.ogc.net.loaders.WFSIconLoader;
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithReflection;
+	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.utils.NumberUtils;
 	
@@ -47,29 +49,35 @@ package com.iblsoft.flexiweather.ogc.editable.features
 				
 				
 				var iconSprite: IconSprite;
-				var reflection: WFSEditableReflectionData;
-				
+				var reflection: FeatureDataReflection;
+				var displaySprite: WFSFeatureEditableSprite;
 				//create sprites for reflections
-				var totalReflections: uint = ml_movablePoints.totalReflections;
+				
 				for (var i: int = 0; i < totalReflections; i++)
 				{
-					reflection = ml_movablePoints.getReflection(i) as WFSEditableReflectionData;
-					if (!reflection.displaySprite)
+					reflection = m_featureData.getReflectionAt(i);
+					if (reflection)
 					{
-						iconSprite = new IconSprite(this); 
-						reflection.displaySprite = iconSprite;
-						addChild(reflection.displaySprite);
-					} else {
-						iconSprite = reflection.displaySprite as IconSprite;
+						reflection.validate();
+						var reflectionDelta: int = reflection.reflectionDelta;
+						displaySprite = getDisplaySpriteForReflectionAt(reflectionDelta);
+						iconSprite = displaySprite as IconSprite;
+						
+						var pt: FeatureDataPoint = FeatureDataPoint(reflection.points[0]);
+						if (pt)
+						{
+							iconSprite.update(color, pt);
+						}
 					}
-					
-					var pt: Point = Point(reflection.points[0]);
-					
-					iconSprite.update(color, pt);
 					
 				}
 				
 			}
+		}
+		
+		override public function getDisplaySpriteForReflection(id:int):WFSFeatureEditableSprite
+		{
+			return new IconSprite(this);
 		}
 		
 		private function onIconLoaded(mBitmap: Bitmap): void
@@ -80,26 +88,25 @@ package com.iblsoft.flexiweather.ogc.editable.features
 				//				var pt: Point = getPoint(0);
 				
 				var iconSprite: IconSprite;
-				var reflection: WFSEditableReflectionData;
-				
+				var reflection: FeatureDataReflection;
+				var displaySprite: WFSFeatureEditableSprite;
 				//create sprites for reflections
-				var totalReflections: uint = ml_movablePoints.totalReflections;
+				
 				for (var i: int = 0; i < totalReflections; i++)
 				{
-					reflection = ml_movablePoints.getReflection(i) as WFSEditableReflectionData;
-					if (!reflection.displaySprite)
+					reflection = m_featureData.getReflectionAt(i);
+					if (reflection)
 					{
-						iconSprite = new IconSprite(this); 
-						reflection.displaySprite = iconSprite;
-						addChild(reflection.displaySprite);
-					} else {
-						iconSprite = reflection.displaySprite as IconSprite;
+						reflection.validate();
+						var reflectionDelta: int = reflection.reflectionDelta;
+						displaySprite = getDisplaySpriteForReflectionAt(reflectionDelta);
+						iconSprite = displaySprite as IconSprite;
+						
+						var pt: FeatureDataPoint = FeatureDataPoint(reflection.points[0]);
+						
+						iconSprite.points = [pt];
+						iconSprite.setBitmap(nBitmapData, pt, color);
 					}
-					
-					var pt: Point = Point(reflection.points[0]);
-					
-					iconSprite.points = [pt];
-					iconSprite.setBitmap(nBitmapData, pt, color);
 					
 				}
 				if (pt)
@@ -165,8 +172,10 @@ package com.iblsoft.flexiweather.ogc.editable.features
 			ma_types.push( new IconTypeData( IconFeatureType.RAIN_SHOWERS, IconFeatureType.ICON_NAME_RAIN_SHOWERS ) );
 			ma_types.push( new IconTypeData( IconFeatureType.SNOW_STEADY, IconFeatureType.ICON_NAME_SNOW_STEADY ) );
 			ma_types.push( new IconTypeData( IconFeatureType.SNOW_SHOWERS, IconFeatureType.ICON_NAME_SNOW_SHOWERS ) );
+			ma_types.push( new IconTypeData( IconFeatureType.RASN_STEADY, IconFeatureType.ICON_NAME_RASN_STEADY ) );
+			ma_types.push( new IconTypeData( IconFeatureType.RASN_SHOWERS, IconFeatureType.ICON_NAME_RASN_SHOWERS ) );
 			ma_types.push( new IconTypeData( IconFeatureType.RAIN, IconFeatureType.ICON_NAME_RAIN_STEADY ) );
-			ma_types.push( new IconTypeData( IconFeatureType.DRIZZLE, IconFeatureType.DRIZZLE ) );
+			ma_types.push( new IconTypeData( IconFeatureType.DRIZZLE, IconFeatureType.ICON_NAME_DRIZZLE ) );
 			ma_types.push( new IconTypeData( IconFeatureType.PELLETS, IconFeatureType.ICON_NAME_PELLETS ) );
 			ma_types.push( new IconTypeData( IconFeatureType.FOG, IconFeatureType.ICON_NAME_FOG ) );
 			ma_types.push( new IconTypeData( IconFeatureType.HAZE, IconFeatureType.ICON_NAME_HAZE ) );

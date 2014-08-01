@@ -1,8 +1,11 @@
 package com.iblsoft.flexiweather.ogc.editable
 {
+	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
 	import com.iblsoft.flexiweather.ogc.GMLUtils;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureData;
 	import com.iblsoft.flexiweather.utils.ISO8601Parser;
+	import com.iblsoft.flexiweather.utils.draw.DrawMode;
 
 	public class WFSFeatureEditableWithBaseTimeAndValidity extends WFSFeatureEditable implements IObjectWithBaseTimeAndValidity
 	{
@@ -15,6 +18,27 @@ package com.iblsoft.flexiweather.ogc.editable
 			super(s_namespace, s_typeName, s_featureId);
 		}
 
+		override public function update(changeFlag: FeatureUpdateContext): void
+		{
+			trace("\n WFSFeatureEditableWithBaseTimeAndValidity update");
+			
+			super.update(changeFlag);
+			
+			var a_points: Array = getPoints();
+			if (master)
+			{
+				if (!m_featureData)
+					m_featureData = createFeatureData();
+				else
+					m_featureData.clear();
+				
+				master.container.drawGeoPolyLine(null, a_points, DrawMode.PLAIN, false, true, m_featureData);
+			}
+			
+			//draw editable points (user can drag them)
+			updateEditablePoints(changeFlag);
+		}
+		
 		override public function toInsertGML(xmlInsert: XML): void
 		{
 			addInsertGMLProperty(xmlInsert, null, "baseTime", ISO8601Parser.dateToString(m_baseTime));

@@ -3,18 +3,22 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
 	import com.iblsoft.flexiweather.ogc.data.ReflectionData;
-	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
-	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionDictionary;
 	import com.iblsoft.flexiweather.ogc.editable.IEditableItemManager;
+	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableCurveWithBaseTimeAndValidity;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableMode;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureData;
 	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
+	import com.iblsoft.flexiweather.ogc.editable.data.MoveablePoint;
+	import com.iblsoft.flexiweather.ogc.editable.data.jetstream.JetStreamFeatureData;
+	import com.iblsoft.flexiweather.ogc.editable.data.jetstream.JetStreamFeatureDataReflection;
 	import com.iblsoft.flexiweather.ogc.editable.data.jetstream.MoveableWindPoint;
 	import com.iblsoft.flexiweather.ogc.editable.data.jetstream.WindBarb;
 	import com.iblsoft.flexiweather.ogc.editable.data.jetstream.WindMoveablePointsDictionary;
 	import com.iblsoft.flexiweather.ogc.editable.data.jetstream.WindReflectionData;
 	import com.iblsoft.flexiweather.ogc.editable.events.WindBarbChangeEvent;
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithReflection;
+	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.symbology.FrontCurveRenderer;
 	import com.iblsoft.flexiweather.symbology.JetStreamCurveRenderer;
@@ -32,6 +36,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 	import flash.geom.ColorTransform;
 	import flash.geom.Point;
 	import flash.ui.Keyboard;
+	import flash.utils.Dictionary;
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.Application;
@@ -75,50 +80,54 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 			
 		}
 		
-		override protected function createReflectionDirectory(): void
-		{
-			ml_movablePoints = new WindMoveablePointsDictionary(master.container);
-			
-		}
+//		override protected function createReflectionDirectory(): void
+//		{
+//			ml_movablePoints = new WindMoveablePointsDictionary(master.container);
+//			
+//		}
 		
 		private function debug(): void
 		{
 //			return;
-			var totalWindBarbs: int = m_windPoints.length;
-			var r: uint;
-			var reflection: WindReflectionData;
-			for(var i: uint = 0; i < totalWindBarbs; ++i) 
-			{
-				for (r = 0; r < totalReflections; r++)
-				{
-					reflection = ml_movablePoints.getReflection(r) as WindReflectionData;
-				}
-			}
+//			var totalWindBarbs: int = m_windPoints.length;
+//			var r: uint;
+//			for(var i: uint = 0; i < totalWindBarbs; ++i) 
+//			{
+//				for (r = 0; r < totalReflections; r++)
+//				{
+//					var reflection: JetStreamFeatureDataReflection = m_featureData.getReflectionAt(reflectionID) as JetStreamFeatureDataReflection;
+//				}r
+//			}
 		}
 	
 		override public function getRenderer(reflection: int): ICurveRenderer
 		{
-//			updateFrontProperties();
-//			jetStreamSprite.renderer = new JetStreamCurveRenderer(gr, 4, i_color, 1.0);
 			var i_color: uint = getCurrentColor(0x000000);
-			var gr: Graphics = graphics;
-			
-			var reflectionData: WFSEditableReflectionData = ml_movablePoints.getReflection(reflection) as WFSEditableReflectionData;
-			if (reflectionData && reflectionData.displaySprite)
-			{
-				gr = reflectionData.displaySprite.graphics;
-			}
+			var gr: Graphics = getRendererGraphics(reflection);
 			
 			return new JetStreamCurveRenderer(gr, 4, i_color, 1.0);
 		}
 		
-		override public function update(changeFlag: FeatureUpdateContext): void
+		override protected function createFeatureData():FeatureData
 		{
-			if (!master)
-				return;
+			return new JetStreamFeatureData(this.toString() + " JetStreamFeatureData");
+		}
+		
+		override protected function updateNewImplementation(changeFlag: FeatureUpdateContext): void
+		{
+			//Jet Stream needs its own editable points creation routine
+			super.updateNewImplementation(changeFlag);
+		}
 			
-			graphics.clear();
-			super.update(changeFlag);
+//		override public function update(changeFlag: FeatureUpdateContext): void
+//		{
+//			if (!master)
+//				return;
+//		}
+		
+		override protected function computeCurve():void
+		{
+			super.computeCurve();
 			
 			updateWindPointsReflections();
 			
@@ -130,9 +139,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 			var iw: InteractiveWidget = m_master.container;
 
 			var r: uint;
-			var reflection: WindReflectionData;
-			var totalReflections: uint = ml_movablePoints.totalReflections;
-			
+			var reflection: JetStreamFeatureDataReflection;
 			
 			var totalWindBarbs: int = m_windPoints.length;
 			for(var i: uint = 0; i < totalWindBarbs; ++i) 
@@ -144,7 +151,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 				var pointReflections: Array = master.container.mapCoordToViewReflections(c);
 				for (r = 0; r < totalReflections; r++)
 				{
-					reflection = ml_movablePoints.getReflection(r) as WindReflectionData;
+					reflection = m_featureData.getReflectionAt(r) as JetStreamFeatureDataReflection;
 				
 					if (reflection && reflection.windbarbs && reflection.windbarbs.length > i)
 					{
@@ -162,137 +169,104 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 			}
 			
 			debug();
-			
+		}
+		
+		override protected function drawCurve(): void
+		{
 			graphics.clear();
-			var a_points: Array = getPoints();
-			var i_color: uint = 0x000000;
 			
-			i_color = getCurrentColor(i_color);
+			var r: uint;
+			var reflection: JetStreamFeatureDataReflection;
+			
+//			graphics.clear();
+			
+			var coords: Array = [];
+			var a_points: Array = getPoints();
 			var featureReflections: Array;
 			
-			if(a_points.length > 1) { 
+			var i_color: uint = 0x000000;
+			i_color = getCurrentColor(i_color);
+			
+			
+//			graphics.lineStyle(1, i_color);
+			
+			m_hemisphere = Hemisphere.hemisphereForCoord(m_coordinates[0] as Coord);
+			
+			if (master)
+			{
+			
+				// CREATE WIND BARBS
+				var nColorTransform: ColorTransform;
+				var gr: Graphics;
+				var jetStreamSprite: JetStreamSprite;
+				//					totalReflections = ml_movablePoints.totalReflections;
+				//					totalReflections = 1;
 				
-				graphics.lineStyle(1, i_color);
-//				var splinePoints: Array = CubicBezier.calculateHermitSpline(a_points, false);
-				var coords: Array = [];
-				
-				m_hemisphere = Hemisphere.hemisphereForCoord(m_coordinates[0] as Coord);
-				
-				//what is the best way to check in which projection was front created? For now we check CRS of first coordinate
-//				var crs: String = (coordinates[0] as Coord).crs;
-//				
-//				//convert points to Coords
-//				for each (var p: Point in splinePoints)
-//				{
-//					coords.push(master.container.pointToCoord(p.x, p.y));	
-//				}
-				
-				if (master)
+				for (r = 0; r < totalReflections; r++)
 				{
-//					master.container.drawGeoPolyLine(getFontCurveRenderer, splinePoints, DrawMode.PLAIN);
-					
-//					featureReflections = master.container.getSplineReflections( coords);
-//					createHitMask(featureReflections);
-					
-					
-					// CREATE WIND BARBS
-					var nColorTransform: ColorTransform;
-					var gr: Graphics;
-					var jetStreamSprite: JetStreamSprite;
-					totalReflections = ml_movablePoints.totalReflections;
-//					totalReflections = 1;
-					
-					for (r = 0; r < totalReflections; r++)
+					reflection = m_featureData.getReflectionAt(r) as JetStreamFeatureDataReflection;
+					if (reflection)
 					{
-						reflection = ml_movablePoints.getReflection(r) as WindReflectionData;
+						var reflectionDelta: int = reflection.reflectionDelta;
 						a_points = reflection.points;
+//						a_points = reflection.editablePoints;
 						
-						if (!reflection.displaySprite)
-						{
-							reflection.displaySprite = new JetStreamSprite(this);
-							addChild(reflection.displaySprite);
-						}
-						jetStreamSprite = reflection.displaySprite as JetStreamSprite;
+						jetStreamSprite = getDisplaySpriteForReflectionAt(reflectionDelta) as JetStreamSprite;
+						gr = jetStreamSprite.graphics;
+						
 						jetStreamSprite.points = a_points;
-						
-						
-						gr = reflection.displaySprite.graphics;
 						
 						if (!jetStreamSprite.renderer)
 						{
 							
-							jetStreamSprite.renderer = getRenderer(reflection.reflectionDelta) as JetStreamCurveRenderer;
+							jetStreamSprite.renderer = getRenderer(reflectionDelta) as JetStreamCurveRenderer;
 						}
 						jetStreamSprite.renderer.setColor(i_color);
-//						if (featureReflections)
-//						{
-//							gr.clear();
-//							var curvePoints: Array = featureReflections[r];
 						var curvePoints: Array;
 						
-						if (m_featureData)
+						jetStreamSprite.clear();
+						drawFeatureReflection(jetStreamSprite.renderer, reflection);
+						curvePoints = reflection.points;
+						
+						//we store curvePoints for later usage (find reflected jetstream closest to the point in onMouseDown function)
+						reflection.jetstreamCurvePoints = curvePoints;
+						
+						if(!createWindPoints(curvePoints, r))
 						{
-							jetStreamSprite.clear();
-							var reflectionData: FeatureDataReflection = m_featureData.getReflectionAt(reflection.reflectionDelta);
-							if (reflectionData)
-							{
-								drawFeatureReflection(jetStreamSprite.renderer, reflectionData);
-								curvePoints = reflectionData.points;
-							}
-//							
-//							drawFeature(jetStreamSprite.renderer, curvePoints);
+							// CREATE COLOR TRANSFORM
+							nColorTransform = new ColorTransform(1, 0, 0, 1, 255, 0, 0, 0);
+						} else {
+							nColorTransform = new ColorTransform(1, 1, 1, 1, 0, 0, 0, 0);
 							
-							//we store curvePoints for later usage (find reflected jetstream closest to the point in onMouseDown function)
-							reflection.jetstreamCurvePoints = curvePoints;
-							
-							if(!createWindPoints(curvePoints, r))
-							{
-								// CREATE COLOR TRANSFORM
-								nColorTransform = new ColorTransform(1, 0, 0, 1, 255, 0, 0, 0);
-							} else {
-								nColorTransform = new ColorTransform(1, 1, 1, 1, 0, 0, 0, 0);
-								
-								if (useMonochrome){
-									nColorTransform.color = monochromeColor;
-								}
+							if (useMonochrome){
+								nColorTransform.color = monochromeColor;
 							}
-							if (nColorTransform)
-								reflection.displaySprite.transform.colorTransform = nColorTransform;
 						}
-							
-							
-//						}
-					}
-					
-				}
-			} else {
-				for (r = 0; r < totalReflections; r++)
-				{
-					reflection = ml_movablePoints.getReflection(r) as WindReflectionData;
-					if (reflection.displaySprite)
-					{
-						(reflection.displaySprite as JetStreamSprite).clear();
+						if (nColorTransform)
+							jetStreamSprite.transform.colorTransform = nColorTransform;
+						
+						
 					}
 				}
-				renderFallbackGraphics();
 			}
-		
-			changeVisibility();
 			
+			changeVisibility();
 		}
 		
+		override public function getDisplaySpriteForReflection(id:int):WFSFeatureEditableSprite
+		{
+			return new JetStreamSprite(this);
+		}
 
 		private function changeVisibility(): void
 		{
 			var r: uint;
-			var reflection: WindReflectionData;
-			var totalReflections: uint = ml_movablePoints.totalReflections;
 			
 			for (r = 0; r < totalReflections; r++)
 			{
-				reflection = ml_movablePoints.getReflection(r) as WindReflectionData;
+				var reflection: JetStreamFeatureDataReflection = m_featureData.getReflectionAt(r) as JetStreamFeatureDataReflection;
 				
-				var jetStreamSprite: JetStreamSprite = reflection.displaySprite as JetStreamSprite;
+				var jetStreamSprite: JetStreamSprite = getDisplaySpriteForReflectionAt(reflection.reflectionDelta) as JetStreamSprite;
 				
 				if (jetStreamSprite)
 				{
@@ -344,6 +318,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 		protected function createWindPoints(curvePoints: Array, reflectionID: uint): Boolean
 		{
 			var ret: Boolean = true;
+			
 			var eim: IEditableItemManager = IEditableItemManager(m_master); 
 			
 			var mp: MoveableWindPoint;
@@ -357,13 +332,11 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 
 			var iw: InteractiveWidget = m_master.container;
 			
-			var reflection: WindReflectionData;
-			var totalReflections: uint = ml_movablePoints.totalReflections;
+//			totalReflections = 1;
 			
-			totalReflections = 1;
-			
-			reflection = ml_movablePoints.getReflection(r) as WindReflectionData;
-			var jetStreamSprite: JetStreamSprite = reflection.displaySprite as JetStreamSprite;
+			var reflection: JetStreamFeatureDataReflection = m_featureData.getReflectionAt(r) as JetStreamFeatureDataReflection;
+			var reflectionDelta: int = reflection.reflectionDelta;
+			var jetStreamSprite: JetStreamSprite = getDisplaySpriteForReflectionAt(reflection.reflectionDelta) as JetStreamSprite;
 		
 			var totalWindBarbs: int = reflection.windbarbs.length;
 			var windbarb: WindBarb;
@@ -372,15 +345,16 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 			{
 				if(i >= reflection.totalWindPoints) 
 				{
-					mp = new MoveableWindPoint(this, i, r, reflection.reflectionDelta);
+//					mp = new MoveableWindPoint(this, i, reflection.reflectionDelta);
+					mp = getEditableWindPointForReflectionAt(reflectionDelta, i) as MoveableWindPoint;
 					windbarb = WindBarb(reflection.windbarbs[i]);
 					
-					cp = new WFSFeatureEditableJetStreamWindBarb(curvePoints, findNearestCurvePoint(windbarb.point, curvePoints), windbarb, i_color, m_hemisphere);
+					var windbarPosition: int = findNearestCurvePoint(windbarb.point, curvePoints)
+					cp = getWindbarbGFXAssetForReflectionAt(reflectionDelta, windbarPosition, curvePoints, windbarb, i_color, m_hemisphere);
 				
 					ret = ret && cp.canBeDrawed;
 				
 					reflection.addWindMoveablePoint(mp, i, cp);
-					
 					
 					jetStreamSprite.m_editableSignsSprite.addChild(mp);
 					jetStreamSprite.m_signsSprite.addChild(cp);
@@ -449,17 +423,15 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 		{
 //			var i:int;
 			var j:int;
-			var reflection: WindReflectionData;
-			
 			var eim: IEditableItemManager = IEditableItemManager(m_master); 
 			var mp: MoveableWindPoint;
 			var cp: WFSFeatureEditableJetStreamWindBarb;
 			
-			var totalReflections: uint = ml_movablePoints.totalReflections;
+			
 			for (j = 0; j < totalReflections; j++)
 			{
-				reflection = ml_movablePoints.getReflection(j) as WindReflectionData;
-				var jetStreamSprite: JetStreamSprite = reflection.displaySprite as JetStreamSprite;
+				var reflection: JetStreamFeatureDataReflection = m_featureData.getReflectionAt(j) as JetStreamFeatureDataReflection;
+				var jetStreamSprite: JetStreamSprite = getDisplaySpriteForReflectionAt(reflection.reflectionDelta) as JetStreamSprite;
 				
 //				for(; i < reflection.totalWindPoints; ++i) 
 //				{
@@ -479,17 +451,14 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 		{
 			var i:int;
 			var j:int;
-			var reflection: WindReflectionData;
-			
 			var eim: IEditableItemManager = IEditableItemManager(m_master); 
 			var mp: MoveableWindPoint;
 			var cp: WFSFeatureEditableJetStreamWindBarb;
 			
-			var totalReflections: uint = ml_movablePoints.totalReflections;
 			for (j = 0; j < totalReflections; j++)
 			{
-				reflection = ml_movablePoints.getReflection(j) as WindReflectionData;
-				var jetStreamSprite: JetStreamSprite = reflection.displaySprite as JetStreamSprite;
+				var reflection: JetStreamFeatureDataReflection = m_featureData.getReflectionAt(j) as JetStreamFeatureDataReflection;
+				var jetStreamSprite: JetStreamSprite = getDisplaySpriteForReflectionAt(reflection.reflectionDelta) as JetStreamSprite;
 				
 				for(; i < reflection.totalWindPoints; ++i) 
 				{
@@ -510,6 +479,8 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 		 */		
 		private function updateWindPointsReflections(): void
 		{
+			/*
+			
 			//clean everything only if we are not editing jet stream
 			
 			//FIXME problem is, that this is cleanuped on every update, so we lost all windbarbs and so on
@@ -554,7 +525,20 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 				}
 			}
 			
+			*/
 			
+			var recreateMode: Boolean = false; //editMode != WFSFeatureEditableMode.EDIT_WIND_BARBS_POINTS && editMode != WFSFeatureEditableMode.MOVE_POINTS;
+			
+			var j: uint;
+			var crs: String = master.container.getCRS();
+			var coord: Coord;
+			var pointReflections: Array;
+			var reflectionsCount: int;
+			var pointReflectedObject: Object;
+			var pointReflected: Point;
+			var coordReflected: Coord;
+			
+			var reflection: JetStreamFeatureDataReflection;
 			
 //			recreate windbarbs
 			var totalWindbarbs: int = ml_windBarbs.length;
@@ -577,21 +561,24 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 						coordReflected = new Coord(crs, pointReflected.x, pointReflected.y);
 						
 						var reflectionDelta: int = pointReflectedObject.reflection;
+						reflection = m_featureData.getReflectionAt(reflectionDelta) as JetStreamFeatureDataReflection;
 						
-						var currReflectedWindbarb: WindBarb = windbarb.clone();
-						currReflectedWindbarb.coordinate = coord;
-						
-						if (recreateMode)
+						if (reflection)
 						{
-							(ml_movablePoints as WindMoveablePointsDictionary).addWindbarbAt(currReflectedWindbarb, cnt, j, reflectionDelta);
-						} else {
-							(ml_movablePoints as WindMoveablePointsDictionary).updateWindbarbAt(currReflectedWindbarb, cnt, j, reflectionDelta);
+							var currReflectedWindbarb: WindBarb = windbarb.clone();
+							currReflectedWindbarb.coordinate = coord;
+							
+							if (recreateMode)
+							{
+								reflection.addWindbarbAt(currReflectedWindbarb, cnt);//, j, reflectionDelta);
+							} else {
+								reflection.updateWindbarbAt(currReflectedWindbarb, cnt);//, j, reflectionDelta);
+							}
 						}
 						
 					}
 				}
 			}
-
 		}
 		
 		/**
@@ -618,8 +605,10 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 		 */
 		public function getWindPoint(i_pointIndex: int, reflectionID: int): Point
 		{
-			var reflection: WindReflectionData = ml_movablePoints.getReflection(reflectionID) as WindReflectionData;
-			return(WindBarb(reflection.windbarbs[i_pointIndex]).point);
+			var reflection: JetStreamFeatureDataReflection = m_featureData.getReflectionAt(reflectionID) as JetStreamFeatureDataReflection;
+			if (reflection && reflection.windbarbs && reflection.windbarbs.length > i_pointIndex)
+				return (WindBarb(reflection.windbarbs[i_pointIndex]).point);
+			return null;
 		}
 		
 		/**
@@ -633,26 +622,29 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 			
 			m_selectedWindPointIndex = i_pointIndex;
 			
-			var reflection: WindReflectionData = ml_movablePoints.getReflection(0) as WindReflectionData;
-			if (i_pointIndex > -1) 
+			if (m_featureData)
 			{
-				if (reflection && reflection.windPoints && reflection.windPoints.length > i_pointIndex)
+				var reflection: JetStreamFeatureDataReflection = m_featureData.getReflectionAt(0) as JetStreamFeatureDataReflection;
+				if (i_pointIndex > -1) 
 				{
-					var mp: MoveableWindPoint = MoveableWindPoint(reflection.windPoints[i_pointIndex]);
-					
-					m_selectedWindPoint = mp;
-					m_selectedWindPoint.selected = true;
-					
-					// SEND EVENT ABOUT CHANGE OF SELECTED WIND POINT
-					var nEvent: WindBarbChangeEvent = new WindBarbChangeEvent(WindBarbChangeEvent.WIND_BARB_SELECTION_CHANGE, reflection.windbarbs[m_selectedWindPointIndex]);
+					if (reflection && reflection.windPoints && reflection.windPoints.length > i_pointIndex)
+					{
+						var mp: MoveableWindPoint = MoveableWindPoint(reflection.windPoints[i_pointIndex]);
 						
-					dispatchEvent(nEvent);
+						m_selectedWindPoint = mp;
+						m_selectedWindPoint.selected = true;
+						
+						// SEND EVENT ABOUT CHANGE OF SELECTED WIND POINT
+						var nEvent: WindBarbChangeEvent = new WindBarbChangeEvent(WindBarbChangeEvent.WIND_BARB_SELECTION_CHANGE, reflection.windbarbs[m_selectedWindPointIndex]);
+							
+						dispatchEvent(nEvent);
+					} else {
+						m_selectedWindPoint = null;
+					}
+					
 				} else {
 					m_selectedWindPoint = null;
 				}
-				
-			} else {
-				m_selectedWindPoint = null;
 			}
 		}
 		
@@ -706,10 +698,13 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 				total = points.length;
 			
 			for (var i: uint = 0; i < total; i++){
-				tDist = Point.distance(fPoint, Point(points[i]));
-				if (tDist <= fDist){
-					fDist = tDist;
-					fIndex = i;
+				if (points[i])
+				{
+					tDist = Point.distance(fPoint, Point(points[i]));
+					if (tDist <= fDist){
+						fDist = tDist;
+						fIndex = i;
+					}
 				}
 			} 
 			
@@ -742,7 +737,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 			
 			var profileXML: XML = <profile xmlns="http://www.iblsoft.com/wfs" xmlns:wfs="http://www.opengis.net/wfs" xmlns:gml="http://www.opengis.net/gml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/>;
 			
-			var reflection0: WindReflectionData = ml_movablePoints.getReflection(0) as WindReflectionData;
+			var reflection0: JetStreamFeatureDataReflection = m_featureData.getReflectionAt(0) as JetStreamFeatureDataReflection;
 			// APPEND WIND BARBS
 			var nWindBarb: WindBarb;
 			for (var i: int = 0; i < reflection0.windbarbs.length; i++)
@@ -758,11 +753,10 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 		override public function toUpdateGML(xmlUpdate: XML): void
 		{
 			// TODO: FIXME: No update serialisation of Jet Stream
-			
 			var gml: Namespace = new Namespace("http://www.opengis.net/gml");
 			super.toUpdateGML(xmlUpdate);
 			
-			var reflection0: WindReflectionData = ml_movablePoints.getReflection(0) as WindReflectionData;
+			var reflection0: JetStreamFeatureDataReflection = m_featureData.getReflectionAt(0) as JetStreamFeatureDataReflection;
 			// APPEND WIND BARBS
 			var nWindBarb: WindBarb;
 			var windbarbsXMLList: XMLList = new XMLList();
@@ -841,15 +835,13 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 		
 		private function findClosestReflectionToPoint(pt: Point): int
 		{
-			var reflection: WindReflectionData;
-			var totalReflections: uint = ml_movablePoints.totalReflections;
 			var distanceMax: Number = Number.MAX_VALUE;
 			
 			var closestReflection: int = 0
 			
 			for (var r: int = 0; r < totalReflections; r++)
 			{
-				reflection = ml_movablePoints.getReflection(r) as WindReflectionData;
+				var reflection: JetStreamFeatureDataReflection = m_featureData.getReflectionAt(r) as JetStreamFeatureDataReflection;
 				var dist: int = findNearestCurvePoint(pt, reflection.jetstreamCurvePoints, 'distance');
 				
 				if (dist < distanceMax)
@@ -875,8 +867,8 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 				var gPt: Point = localToGlobal(pt);
 				
 				
-				var reflection: WindReflectionData;
-				var totalReflections: uint = ml_movablePoints.totalReflections;
+				var reflection: JetStreamFeatureDataReflection;
+				
 				
 				var bool: Boolean;
 				
@@ -886,8 +878,8 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 				
 				for (var r: int = 0; r < totalReflections; r++)
 				{
-					reflection = ml_movablePoints.getReflection(r) as WindReflectionData;
-					var jetStreamSprite: JetStreamSprite = reflection.displaySprite as JetStreamSprite;
+					reflection = m_featureData.getReflectionAt(r) as JetStreamFeatureDataReflection;
+					var jetStreamSprite: JetStreamSprite = getDisplaySpriteForReflectionAt(r) as JetStreamSprite;
 						
 					var b1: Boolean = jetStreamSprite.m_editableSignsSprite.hitTestPoint(gPt.x, gPt.y, true);
 					var b2: Boolean = jetStreamSprite.hitTestPoint(gPt.x, gPt.y, true);
@@ -929,9 +921,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 					
 					updateJetStreamWindBarbUI(nWindBarb);
 					
-					/**
-					 * we need to save this to local variables and not only to reflections to be able to recreate reflection in updateWindPointsReflections() function
-					 */
+					 //we need to save this to local variables and not only to reflections to be able to recreate reflection in updateWindPointsReflections() function
 					
 					
 					var coord: Coord = nWindBarb.coordinate;
@@ -964,7 +954,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 					
 					for (r = 0; r < totalReflections; r++)
 					{
-						reflection = ml_movablePoints.getReflection(r) as WindReflectionData;
+						reflection = m_featureData.getReflectionAt(r) as JetStreamFeatureDataReflection;
 						reflection.windbarbs.addItem(nWindBarb.clone());
 					}
 					
@@ -984,6 +974,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 			} else {
 				return(super.onMouseDown(pt,event));
 			}
+			return false;
 		}
 		
 //		override protected function editableSpriteVisible(bool: Boolean): void
@@ -1059,8 +1050,6 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 		public function onChangeWindBarbContentValues(evt: WindBarbChangeEvent): void
 		{
 			if (m_selectedWindPoint != null){
-				var reflection: WindReflectionData;
-				var totalReflections: uint = ml_movablePoints.totalReflections;
 				
 				var wb: WindBarb = ml_windBarbs.getItemAt(m_selectedWindPointIndex) as WindBarb; 
 				
@@ -1072,7 +1061,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 				
 //				for (var r: int = 0; r < totalReflections; r++)
 //				{
-//					reflection = ml_movablePoints.getReflection(r) as WindReflectionData;
+//					var reflection: JetStreamFeatureDataReflection = m_featureData.getReflectionAt(r) as JetStreamFeatureDataReflection;
 //					
 //					var wb: WindBarb = WindBarb(reflection.windbarbs[m_selectedWindPointIndex]); 
 //					
@@ -1117,11 +1106,9 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 					ml_windBarbs.removeItemAt(m_selectedWindPointIndex);
 					m_windPoints.removeItemAt(m_selectedWindPointIndex);
 					
-					var reflection: WindReflectionData;
-					var totalReflections: uint = ml_movablePoints.totalReflections;
 					for (var r: int = 0; r < totalReflections; r++)
 					{
-						reflection = ml_movablePoints.getReflection(r) as WindReflectionData;
+						var reflection: JetStreamFeatureDataReflection = m_featureData.getReflectionAt(r) as JetStreamFeatureDataReflection;
 						// REMOVE SELECTED WIND BARB POINT
 						reflection.removeWindbarbAt(m_selectedWindPointIndex);
 					}					
@@ -1135,17 +1122,116 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 			} else {
 				return super.onKeyDown(evt);
 			}
+			
+			return false;
 		}
 		
-		override public function get reflectionDictionary(): WFSEditableReflectionDictionary
+		
+		/*************************************************************************************************
+		 * 
+		 * 	GFX assets
+		 * 
+		 * 	Specific GFX assets from JetStream. All other GFX assets functionality for editable Features 
+		 *  is in WFSFeatureEditable class
+		 * 
+		 *************************************************************************************************/
+		//new storage dictionaries for GFX (sprites and editable poitns
+		private var _windbarbReflectionGFXAssets: Dictionary = new Dictionary();
+		
+		private function createReflectionGFXAssetIfNeeded(reflectionDelta: int): void
 		{
-			return ml_movablePoints;
+			if (!_windbarbReflectionGFXAssets[reflectionDelta])
+				_windbarbReflectionGFXAssets[reflectionDelta] = new WindBarbReflectionGFXAsset(reflectionDelta);
 		}
+		
+		private function getEditableWindPointForReflectionAt(reflectionDelta: int, pointPosition: int): MoveableWindPoint
+		{
+			var mp: MoveableWindPoint;
+			var gfxAsset: WindBarbReflectionGFXAsset;
+			
+			createReflectionGFXAssetIfNeeded(reflectionDelta);
+			if (!editableWindPointForReflectionExist(reflectionDelta, pointPosition))
+			{
+				gfxAsset = _windbarbReflectionGFXAssets[reflectionDelta] as WindBarbReflectionGFXAsset; 
+				
+				//add new MovablePoint (new point was added, so we need to create Movable point for it
+				mp = new MoveableWindPoint(this, pointPosition, reflectionDelta);
+				//										reflection.addMoveablePoint(mp, i);
+//				m_editableSprite.addChild(mp);
+//				
+//				var eim: IEditableItemManager = master as IEditableItemManager;
+//				if (eim != null)
+//					eim.addEditableItem(mp);
+//				
+//				addMoveablePointListeners(mp);
+				
+				gfxAsset.windPoints[pointPosition] = mp;
+				
+			}
+			
+			gfxAsset = _windbarbReflectionGFXAssets[reflectionDelta] as WindBarbReflectionGFXAsset; 
+			
+			return gfxAsset.windPoints[pointPosition] as MoveableWindPoint;
+		}
+		
+		private function editableWindPointForReflectionExist(reflectionDelta: int, pointPosition: int): Boolean
+		{
+			var gfxAsset: WindBarbReflectionGFXAsset = _windbarbReflectionGFXAssets[reflectionDelta] as WindBarbReflectionGFXAsset; 
+			
+			if (gfxAsset && gfxAsset.windPoints && gfxAsset.windPoints.length > pointPosition)
+				return true;
+			return false;
+		}
+		private function editableWindBarbForReflectionExist(reflectionDelta: int, pointPosition: int): Boolean
+		{
+			var gfxAsset: WindBarbReflectionGFXAsset = _windbarbReflectionGFXAssets[reflectionDelta] as WindBarbReflectionGFXAsset; 
+			
+			if (gfxAsset && gfxAsset.windbarbs && gfxAsset.windbarbs.length > pointPosition)
+				return true;
+			return false;
+		}
+		
+		private function getWindbarbGFXAssetForReflectionAt(reflectionDelta: int, pointPosition: int, points: Array, windBarbDef: WindBarb, i_color: uint, s_hemisphere: String): WFSFeatureEditableJetStreamWindBarb
+		{
+			var windBarbAsset: WFSFeatureEditableJetStreamWindBarb;
+			var gfxAsset: WindBarbReflectionGFXAsset;
+			
+			createReflectionGFXAssetIfNeeded(reflectionDelta);
+			if (!editableWindBarbForReflectionExist(reflectionDelta, pointPosition))
+			{
+				gfxAsset = _windbarbReflectionGFXAssets[reflectionDelta] as WindBarbReflectionGFXAsset; 
+				
+				//add new MovablePoint (new point was added, so we need to create Movable point for it
+				windBarbAsset = new WFSFeatureEditableJetStreamWindBarb(points, pointPosition, windBarbDef, i_color, s_hemisphere);
+				//										reflection.addMoveablePoint(mp, i);
+//				m_editableSprite.addChild(mp);
+//				
+//				var eim: IEditableItemManager = master as IEditableItemManager;
+//				if (eim != null)
+//					eim.addEditableItem(mp);
+//				
+//				addMoveablePointListeners(mp);
+				
+				gfxAsset.windbarbs[pointPosition] = windBarbAsset;
+				
+			}
+			
+			gfxAsset = _windbarbReflectionGFXAssets[reflectionDelta] as WindBarbReflectionGFXAsset; 
+			
+			return gfxAsset.windbarbs[pointPosition] as WFSFeatureEditableJetStreamWindBarb;
+		}
+	
+//		override protected function createEditablePoint(feature: WFSFeatureEditable, i_pointIndex: uint, i_reflectionDelta: int): MoveablePoint
+//		{
+//			return new MoveableWindPoint(feature, i_pointIndex, i_reflectionDelta);
+//		}
+		
 	}
 }
 
 import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
 import com.iblsoft.flexiweather.ogc.editable.features.curves.WFSFeatureEditableJetStream;
+import com.iblsoft.flexiweather.ogc.editable.features.curves.WFSFeatureEditableJetStreamWindBarb;
 import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
 import com.iblsoft.flexiweather.symbology.JetStreamCurveRenderer;
 import com.iblsoft.flexiweather.utils.CubicBezier;
@@ -1208,5 +1294,19 @@ class JetStreamSprite extends WFSFeatureEditableSprite
 		}
 		
 		return a;		
+	}
+}
+
+class WindBarbReflectionGFXAsset
+{
+	public var reflectionDelta: int;
+	public var windbarbs: Array;
+	public var windPoints: Array;
+	
+	public function WindBarbReflectionGFXAsset(reflectionDelta: int)
+	{
+		this.reflectionDelta = reflectionDelta;
+		this.windbarbs = [];
+		this.windPoints = [];
 	}
 }

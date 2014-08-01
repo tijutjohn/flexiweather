@@ -14,9 +14,9 @@ package com.iblsoft.flexiweather.ogc.editable.data.jetstream
 	
 	public class WindReflectionData extends WFSEditableReflectionData
 	{
+		private var _moveableWindPoints: Array;
 		private var _editableJetStreamWindbarbs: Array;
 		private var _windbarbs: ArrayCollection;
-		private var _moveableWindPoints: Array;
 		public var jetstreamCurvePoints: Array;
 		
 		override public function get annotation():AnnotationBox

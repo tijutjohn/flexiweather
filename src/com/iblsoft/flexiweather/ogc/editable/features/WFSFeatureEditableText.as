@@ -2,9 +2,10 @@ package com.iblsoft.flexiweather.ogc.editable.features
 {
 	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
 	import com.iblsoft.flexiweather.ogc.data.ReflectionData;
-	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableWithBaseTimeAndValidity;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithReflection;
+	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
 	import com.iblsoft.flexiweather.symbology.StyledLineCurveRenderer;
 	import com.iblsoft.flexiweather.utils.NumberUtils;
 	
@@ -57,7 +58,6 @@ package com.iblsoft.flexiweather.ogc.editable.features
 		{
 			super.update(changeFlag);
 	
-			var pt: Point = getPoint(0);
 			graphics.clear();
 	
 			var i_color: uint = fontColor;
@@ -85,27 +85,32 @@ package com.iblsoft.flexiweather.ogc.editable.features
 			htmlTextInput = htmlTextInput + '</FONT>';
 			
 			var textSprite: TextSprite;
-			var reflection: WFSEditableReflectionData;
+			var reflection: FeatureDataReflection;
 			
 			//create sprites for reflections
-			var totalReflections: uint = ml_movablePoints.totalReflections;
+			
 			var blackColor: uint = getCurrentColor(0x000000);
 			for (var i: int = 0; i < totalReflections; i++)
 			{
-				reflection = ml_movablePoints.getReflection(i) as WFSEditableReflectionData;
-				if (!reflection.displaySprite)
+				reflection = m_featureData.getReflectionAt(i);
+				if (reflection)
 				{
-					textSprite = new TextSprite(master.container); 
-					reflection.displaySprite = textSprite;
-					addChild(reflection.displaySprite);
-				} else {
-					textSprite = reflection.displaySprite as TextSprite;
+					reflection.validate();
+					var reflectionDelta: int = reflection.reflectionDelta;
+					
+					textSprite = getDisplaySpriteForReflectionAt(reflectionDelta) as TextSprite;
+					var pt: Point = reflection.points[0];
+					if (pt)
+					{
+						textSprite.update(pt, htmlTextInput, textRotation, useRectangle, borderStyle, i_borderColor, borderWidth, fillStyle, i_fillColor);
+					}
 				}
-				
-				textSprite.update(reflection.points[0], htmlTextInput, textRotation, useRectangle, borderStyle, i_borderColor, borderWidth, fillStyle, i_fillColor);
-//				textSprite.x = Point(reflection.points[0]).x;
-//				textSprite.y = Point(reflection.points[0]).y;
 			}
+		}
+		
+		override public function getDisplaySpriteForReflection(id: int): WFSFeatureEditableSprite
+		{
+			return new TextSprite(this); 
 		}
 		
 		
@@ -272,6 +277,8 @@ package com.iblsoft.flexiweather.ogc.editable.features
 		}
 	}
 }
+import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
+import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
 import com.iblsoft.flexiweather.symbology.StyledLineCurveRenderer;
 import com.iblsoft.flexiweather.utils.draw.DrawMode;
 import com.iblsoft.flexiweather.widgets.InteractiveWidget;
@@ -285,7 +292,7 @@ import flash.text.TextFieldAutoSize;
 
 import mx.core.UITextField;
 
-class TextSprite extends Sprite
+class TextSprite extends WFSFeatureEditableSprite
 {
 	protected var ms_rectSprite: Sprite = new Sprite();
 	protected var mtf_text: UITextField = new UITextField();
@@ -299,14 +306,12 @@ class TextSprite extends Sprite
 	private var ms_borderStyle: String;
 	private var ms_fillStyle: String;
 	
-	private var m_container: InteractiveWidget;
-	
-	public function TextSprite(container: InteractiveWidget)
+	public function TextSprite(feature: WFSFeatureEditable)
 	{
+		super(feature);
 		//var nBlur: BlurFilter = new BlurFilter(1.5, 1.5, BitmapFilterQuality.HIGH);
 		//ms_textBitmap.filters = [nBlur];
 	
-		m_container = container;
 		
 		mtf_text.autoSize = TextFieldAutoSize.LEFT;
 		//mtf_text.border = true;

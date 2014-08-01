@@ -3,7 +3,6 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWFS;
-	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
 	import com.iblsoft.flexiweather.ogc.editable.IClosableCurve;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableClosableCurveWithBaseTimeAndValidityAndAnnotation;
@@ -78,13 +77,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 			var i_color: uint = getCurrentColor(mi_lineColor);
 			
 			var renderer: StyledLineCurveRenderer;
-			var gr: Graphics = graphics;
-			
-			var reflectionData: WFSEditableReflectionData = ml_movablePoints.getReflection(reflection) as WFSEditableReflectionData;
-			if (reflectionData && reflectionData.displaySprite)
-			{
-				gr = reflectionData.displaySprite.graphics;
-			}
+			var gr: Graphics = getRendererGraphics(reflection);
 			
 			renderer = new StyledLineCurveRenderer(gr, 3.0, i_color, 1.0, "Solid", "None", i_color);
 			
@@ -100,15 +93,17 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 		{
 			return new AnnotationTextBox();
 		}
-		protected function addLabel(master: InteractiveLayerWFS, reflection: WFSEditableReflectionData, s_text: String, pt: Point, rlX: Number, rlY: Number): void
+		protected function addLabel(master: InteractiveLayerWFS, reflection: FeatureDataReflection, s_text: String, pt: Point, rlX: Number, rlY: Number): void
 		{
 			//just to add sprite to array to let it removed in update() function
-			if (!reflection || !reflection.displaySprite)
+			if (!reflection)
 				return;
 			if (!visible)
 				return;
 			
-			ma_activeLabels.push(reflection.displaySprite);
+			var displaySprite: WFSFeatureEditableSprite = getDisplaySpriteForReflection(reflection.reflectionDelta);
+			
+			ma_activeLabels.push(displaySprite);
 			
 			if(s_text.length > 0) {
 				var i_color: uint = getCurrentColor(0x000000);
@@ -126,13 +121,13 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 				format.color = i_color;
 				label.label.setTextFormat(format);
 				
-				reflection.addAnnotation(label);
+				addAnnotationForReflectionAt(reflection.reflectionDelta, label);
 				
-				var anticollisionLayoutObject: AnticollisionLayoutObject = master.container.labelLayout.addObject(label, master, [reflection.displaySprite]);
+				var anticollisionLayoutObject: AnticollisionLayoutObject = master.container.labelLayout.addObject(label, master, [displaySprite]);
 				
 				//				label.anticollisionLayoutObject = anticollisionLayoutObject;
-				if (reflection.displaySprite is IAnticollisionLayoutObject)
-					IAnticollisionLayoutObject(reflection.displaySprite).anticollisionLayoutObject = anticollisionLayoutObject;
+				if (displaySprite is IAnticollisionLayoutObject)
+					IAnticollisionLayoutObject(displaySprite).anticollisionLayoutObject = anticollisionLayoutObject;
 				//				master.container.labelLayout.addObject(label, [this]);
 				//				master.container.labelLayout.updateObjectReferenceLocationWithCustomPosition(this, rlX, rlY);
 			}
@@ -204,52 +199,44 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 			var pt: Point;
 			var annotationSprite: AnnotationSprite;
 			var renderer: ICurveRenderer;
-			var reflection: WFSEditableReflectionData;
+			var reflection: FeatureDataReflection;
 			
 			var a_points: Array = getPoints();
 			var i_color: uint = getCurrentColor(mi_lineColor);
+			var displaySprite: WFSFeatureEditableSprite;
 			
 			// single point feature
-			/*
-			for each(var pt: Point in a_points) { 
-			graphics.lineStyle(1, i_color);
-			graphics.beginFill(i_color);
-			graphics.drawRoundRect(pt.x - 4, pt.y - 4, 9, 9, 6, 6);
-			graphics.endFill();
-			addLabel(master as InteractiveLayerWFS, ms_text, pt, 0, 0);
-			break;
-			}
-			*/
 			
 			for (i = 0; i < totalReflections; i++)
 			{
-				reflection = ml_movablePoints.getReflection(i) as WFSEditableReflectionData;
-				a_points = reflection.points;
-				
-				if (!reflection.displaySprite)
+				reflection = m_featureData.getReflectionAt(i);
+				if (reflection)
 				{
-					reflection.displaySprite = getDisplaySpriteForReflection(reflection.reflectionDelta);
-					addChild(reflection.displaySprite);
-				}
-				annotationSprite = reflection.displaySprite as AnnotationSprite;
-				annotationSprite.points = a_points;
-				
-				gr = reflection.displaySprite.graphics;
-				if (!annotationSprite.renderer)
-				{
-					renderer = getRenderer(reflection.reflectionDelta);
-					annotationSprite.renderer = renderer as StyledLineCurveRenderer;
-				}
-				
-				gr.clear();
-				
-				for each(pt in a_points) { 
-					graphics.lineStyle(1, i_color);
-					graphics.beginFill(i_color);
-					graphics.drawRoundRect(pt.x - 4, pt.y - 4, 9, 9, 6, 6);
-					graphics.endFill();
-					addLabel(master as InteractiveLayerWFS, reflection, ms_text, pt, 0, 0);
-					break;
+					var reflectionDelta: int = reflection.reflectionDelta;
+					a_points = reflection.points;
+					
+					displaySprite = getDisplaySpriteForReflectionAt(reflectionDelta);
+					gr = displaySprite.graphics;
+					
+					annotationSprite = displaySprite as AnnotationSprite;
+					annotationSprite.points = a_points;
+					
+					if (!annotationSprite.renderer)
+					{
+						renderer = getRenderer(reflection.reflectionDelta);
+						annotationSprite.renderer = renderer as StyledLineCurveRenderer;
+					}
+					
+					gr.clear();
+					
+					for each(pt in a_points) { 
+						graphics.lineStyle(1, i_color);
+						graphics.beginFill(i_color);
+						graphics.drawRoundRect(pt.x - 4, pt.y - 4, 9, 9, 6, 6);
+						graphics.endFill();
+						addLabel(master as InteractiveLayerWFS, reflection, ms_text, pt, 0, 0);
+						break;
+					}
 				}
 			}
 		}
@@ -310,15 +297,15 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 			if (master && master.container && master.container.labelLayout)
 			{
 				var annotation: AnnotationBox;
-				var reflection: WFSEditableReflectionData;
+				var reflection: FeatureDataReflection;
 				
-				var totalReflections: uint = ml_movablePoints.totalReflections;
 				for (var i: int = 0; i < totalReflections; i++)
 				{
-					reflection = ml_movablePoints.getReflection(i) as WFSEditableReflectionData
-					annotation = reflection.annotation as AnnotationBox;
+					reflection = m_featureData.getReflectionAt(i)
+					annotation = getAnnotationForReflectionAt(reflection.reflectionDelta);
+					var displaySprite: WFSFeatureEditableSprite = getDisplaySpriteForReflection(reflection.reflectionDelta);
 					master.container.labelLayout.removeObject(annotation);
-					master.container.labelLayout.removeObject(reflection.displaySprite);
+					master.container.labelLayout.removeObject(displaySprite);
 				}
 			}
 			

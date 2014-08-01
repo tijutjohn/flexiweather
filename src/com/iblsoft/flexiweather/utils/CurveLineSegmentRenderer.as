@@ -17,6 +17,9 @@ package com.iblsoft.flexiweather.utils
 		{
 		}
 
+		public function clear(): void
+		{
+		}
 		public function start(x: Number, y: Number): void
 		{
 		}

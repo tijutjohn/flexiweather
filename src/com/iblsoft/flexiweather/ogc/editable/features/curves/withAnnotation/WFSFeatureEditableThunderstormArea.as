@@ -4,11 +4,11 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWFS;
 	import com.iblsoft.flexiweather.ogc.data.ReflectionData;
-	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableClosableCurveWithBaseTimeAndValidity;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableClosableCurveWithBaseTimeAndValidityAndAnnotation;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableCurveWithBaseTimeAndValidityAndAnnotation;
 	import com.iblsoft.flexiweather.ogc.editable.annotations.ThunderstormAreaAnnotation;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithAnnotation;
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithReflection;
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
@@ -46,13 +46,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 		override public function getRenderer(reflection: int): ICurveRenderer
 		{
 			var i_color: uint = getCurrentColor(0xfc0019);
-			var gr: Graphics = graphics;
-			
-			var reflectionData: WFSEditableReflectionData = ml_movablePoints.getReflection(reflection) as WFSEditableReflectionData;
-			if (reflectionData && reflectionData.displaySprite)
-			{
-				gr = reflectionData.displaySprite.graphics;
-			}
+			var gr: Graphics = getRendererGraphics(reflection);
 			
 			var renderer: StyledLineCurveRenderer = new StyledLineCurveRenderer(gr, 2, i_color, 1, StyledLineCurveRenderer.STYLE_DASHDOT);
 			return renderer;
@@ -97,18 +91,20 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 			
 			if (master && master.container && master.container.labelLayout)
 			{
-				
-				
 				var thunderstormAreaTextInfo: ThunderstormAreaAnnotation;
-				var reflection: WFSEditableReflectionData;
+				var reflection: FeatureDataReflection;
+				var displaySprite: WFSFeatureEditableSprite;
 				
-				var totalReflections: uint = ml_movablePoints.totalReflections;
 				for (var i: int = 0; i < totalReflections; i++)
 				{
-					reflection = ml_movablePoints.getReflection(i) as WFSEditableReflectionData
-					thunderstormAreaTextInfo = reflection.annotation as ThunderstormAreaAnnotation;
+					reflection = m_featureData.getReflectionAt(i);
+					var reflectionDelta: int = reflection.reflectionDelta;
+					
+					thunderstormAreaTextInfo = getAnnotationForReflectionAt(reflectionDelta) as ThunderstormAreaAnnotation;
+					displaySprite = getDisplaySpriteForReflectionAt(reflectionDelta);
+					
 					master.container.labelLayout.removeObject(thunderstormAreaTextInfo);
-					master.container.labelLayout.removeObject(reflection.displaySprite);
+					master.container.labelLayout.removeObject(displaySprite);
 				}
 			}
 			

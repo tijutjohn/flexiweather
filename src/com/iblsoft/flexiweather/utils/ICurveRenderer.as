@@ -8,6 +8,7 @@ package com.iblsoft.flexiweather.utils
 	 **/
 	public interface ICurveRenderer
 	{
+		function clear(): void;
 		function start(x: Number, y: Number): void;
 		function finish(x: Number, y: Number): void;
 		function moveTo(x: Number, y: Number): void;

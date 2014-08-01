@@ -12,6 +12,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 	import com.iblsoft.flexiweather.utils.ICurveRenderer;
 	import com.iblsoft.flexiweather.utils.draw.DrawMode;
 	
+	import flash.display.Graphics;
 	import flash.geom.Point;
 	
 	import mx.collections.ArrayCollection;
@@ -36,13 +37,16 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 		
 		override public function getRenderer(reflection: int): ICurveRenderer
 		{
+			var gr: Graphics = getRendererGraphics(reflection);
+			
 			updateFrontProperties();
-			return new FrontCurveRenderer(graphics, i_color, i_colorSecondary, i_markType);
+			return new FrontCurveRenderer(gr, i_color, i_colorSecondary, i_markType);
 		}
 		
 		override public function getDisplaySpriteForReflection(id: int): WFSFeatureEditableSprite
 		{
-			return null;
+//			return null;
+			return new WFSFeatureEditableSprite(this);
 		}
 		
 		override public function toInsertGML(xmlInsert: XML): void

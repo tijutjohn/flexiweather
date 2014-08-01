@@ -4,10 +4,11 @@ package com.iblsoft.flexiweather.ogc.editable.features
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWFS;
 	import com.iblsoft.flexiweather.ogc.data.ReflectionData;
-	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableWithBaseTimeAndValidity;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableWithBaseTimeAndValidityAndAnnotation;
 	import com.iblsoft.flexiweather.ogc.editable.annotations.RadiationAnnotation;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataPoint;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
 	import com.iblsoft.flexiweather.ogc.net.loaders.WFSIconLoader;
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithAnnotation;
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithReflection;
@@ -34,7 +35,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 //		{
 //			if (totalReflections > 0)
 //			{
-//				var reflection: WFSEditableReflectionData = getReflection(0);
+//				var reflection: FeatureDataReflection = getReflection(0);
 //				if (reflection.annotation)
 //					return reflection.annotation as AnnotationBox;
 //			}
@@ -44,9 +45,9 @@ package com.iblsoft.flexiweather.ogc.editable.features
 		{
 			if (totalReflections > 0)
 			{
-				var reflection: WFSEditableReflectionData = getReflection(0);
-				if (reflection.displaySprite)
-					return reflection.displaySprite as RadiationSprite;
+				var reflection: FeatureDataReflection = m_featureData.getReflectionAt(0);
+				if (reflection)
+					return getDisplaySpriteForReflection(reflection.reflectionDelta) as RadiationSprite;
 			}
 			return null;
 		}
@@ -75,15 +76,16 @@ package com.iblsoft.flexiweather.ogc.editable.features
 				master.container.labelLayout.removeObject(this);
 				
 				var radiationSprite: RadiationSprite;
-				var reflection: WFSEditableReflectionData;
+				var reflection: FeatureDataReflection;
 				
 				//create sprites for reflections
-				var totalReflections: uint = ml_movablePoints.totalReflections;
+				
 				var blackColor: uint = getCurrentColor(0x000000);
 				for (var i: int = 0; i < totalReflections; i++)
 				{
-					reflection = ml_movablePoints.getReflection(i) as WFSEditableReflectionData;
-					radiationSprite = reflection.displaySprite as RadiationSprite;
+					reflection = m_featureData.getReflectionAt(i);
+					var reflectionDelta: int = reflection.reflectionDelta;
+					radiationSprite = getDisplaySpriteForReflectionAt(reflectionDelta) as RadiationSprite;
 					
 					removeFromLabelLayout(radiationSprite.annotation, radiationSprite, master.container.labelLayout);
 				}
@@ -127,27 +129,22 @@ package com.iblsoft.flexiweather.ogc.editable.features
 				//var pt: Point = getPoint(0);
 				
 				var radiationSprite: RadiationSprite;
-				var reflection: WFSEditableReflectionData;
+				var reflection: FeatureDataReflection;
 				
 				//create sprites for reflections
-				var totalReflections: uint = ml_movablePoints.totalReflections;
+				
 				var blackColor: uint = getCurrentColor(0x000000);
 				for (var i: int = 0; i < totalReflections; i++)
 				{
-					reflection = ml_movablePoints.getReflection(i) as WFSEditableReflectionData;
-					if (!reflection.displaySprite)
-					{
-						radiationSprite = new RadiationSprite(this); 
-						reflection.displaySprite = radiationSprite;
-						addChild(reflection.displaySprite);
-					} else {
-						radiationSprite = reflection.displaySprite as RadiationSprite;
-					}
+					reflection = m_featureData.getReflectionAt(i);
+					var reflectionDelta: int = reflection.reflectionDelta;
+					radiationSprite = getDisplaySpriteForReflectionAt(reflectionDelta)  as RadiationSprite;
 					
-					var pt: Point = Point(reflection.points[0]);
-					radiationSprite.setBitmap(nBitmapData, pt);
-//					radiationSprite.x = Point(reflection.points[0]).x;
-//					radiationSprite.y = Point(reflection.points[0]).y;
+					var pt: FeatureDataPoint = FeatureDataPoint(reflection.points[0]);
+					if (pt)
+					{
+						radiationSprite.setBitmap(nBitmapData, pt);
+					}
 				}
 				
 				if (pt)
@@ -210,6 +207,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
 import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableWithBaseTimeAndValidityAndAnnotation;
 import com.iblsoft.flexiweather.ogc.editable.annotations.RadiationAnnotation;
+import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataPoint;
 import com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableRadiation;
 import com.iblsoft.flexiweather.ogc.net.loaders.WMSFeatureInfoLoader;
 import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSpriteWithAnnotation;
@@ -306,7 +304,7 @@ class RadiationSprite extends WFSFeatureEditableSpriteWithAnnotation {
 //		labelLayout.addObject(radiationAnnotation,  layer,  [this], i_reflection);
 //	}
 	
-	override public function update(feature: WFSFeatureEditableWithBaseTimeAndValidityAndAnnotation, annotation: AnnotationBox, blackColor: uint, labelLayout: AnticollisionLayout, pt: Point): void
+	override public function update(feature: WFSFeatureEditableWithBaseTimeAndValidityAndAnnotation, annotation: AnnotationBox, blackColor: uint, labelLayout: AnticollisionLayout, pt: FeatureDataPoint): void
 	{
 		var radiation: WFSFeatureEditableRadiation = feature as WFSFeatureEditableRadiation;
 		

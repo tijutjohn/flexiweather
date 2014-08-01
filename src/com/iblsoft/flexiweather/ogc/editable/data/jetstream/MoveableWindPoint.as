@@ -24,11 +24,11 @@ package com.iblsoft.flexiweather.ogc.editable.data.jetstream
 		/**
 		 * 
 		 */
-		public function MoveableWindPoint(feature: WFSFeatureEditable, i_pointIndex:uint, i_reflection: uint, i_reflectionDelta: int)
+		public function MoveableWindPoint(feature: WFSFeatureEditable, i_pointIndex:uint, i_reflectionDelta: int)
 		{
-			super(feature, i_pointIndex, i_reflection, i_reflectionDelta);
+			super(feature, i_pointIndex, i_reflectionDelta);
 			
-			m_pt = WFSFeatureEditableJetStream(feature).getWindPoint(i_pointIndex, i_reflection);
+			m_pt = WFSFeatureEditableJetStream(feature).getWindPoint(i_pointIndex, i_reflectionDelta);
 	
 //			_debugTF = new TextField();
 //			addChild(_debugTF);

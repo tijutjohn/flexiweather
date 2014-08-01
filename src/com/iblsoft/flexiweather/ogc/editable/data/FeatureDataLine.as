@@ -29,6 +29,14 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			_reflectionEdgePointsDictionary = new Dictionary();
 		}
 		
+		public function clear(): void
+		{
+			_reflectionEdgePointsDictionary = new Dictionary();
+		
+			var total: int = lineSegments.length;
+			lineSegments.splice(0, total);
+		}
+		
 		private function notify(type: String): void
 		{
 			dispatchEvent(new Event(type));

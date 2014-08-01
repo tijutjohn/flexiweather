@@ -2,11 +2,15 @@ package com.iblsoft.flexiweather.ogc.editable.features
 {
 	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
 	import com.iblsoft.flexiweather.ogc.data.ReflectionData;
-	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableWithBaseTimeAndValidity;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataPoint;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithReflection;
+	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
+	
 	import flash.geom.Point;
 	import flash.text.TextFieldAutoSize;
+	
 	import mx.core.UITextField;
 
 	public class WFSFeatureEditablePressureCentre extends WFSFeatureEditableWithBaseTimeAndValidity implements IWFSFeatureWithReflection
@@ -56,35 +60,44 @@ package com.iblsoft.flexiweather.ogc.editable.features
 				s_color = '0' + s_color;
 			}
 			var pressureInfoSprite: PressureInfoSprite;
-			var reflection: WFSEditableReflectionData;
+			var reflection: FeatureDataReflection;
+			var displaySprite: WFSFeatureEditableSprite;
 			//create sprites for reflections
-			var totalReflections: uint = ml_movablePoints.totalReflections;
+			
 			for (var i: int = 0; i < totalReflections; i++)
 			{
-				reflection = ml_movablePoints.getReflection(i) as WFSEditableReflectionData;
-				if (!reflection.displaySprite)
+				reflection = m_featureData.getReflectionAt(i);
+				if (reflection)
 				{
-					pressureInfoSprite = new PressureInfoSprite();
-					reflection.displaySprite = pressureInfoSprite;
-					addChild(reflection.displaySprite);
-				}
-				else
-					pressureInfoSprite = reflection.displaySprite as PressureInfoSprite;
-				var pt: Point = Point(reflection.points[0]);
-				if ((type == PressureCentreType.HIGH) || (type == PressureCentreType.LOW))
-				{
-					pressureInfoSprite.update(s_colorSign, s_color, i_colorCross, type, pressure);
-					pressureInfoSprite.x = Point(reflection.points[0]).x;
-					pressureInfoSprite.y = Point(reflection.points[0]).y;
-				}
-				else
-				{
-					renderFallbackGraphics(i_color);
-					return;
+					reflection.validate();
+					var reflectionDelta: int = reflection.reflectionDelta;
+					displaySprite = getDisplaySpriteForReflectionAt(reflectionDelta);
+					pressureInfoSprite = displaySprite as PressureInfoSprite;
+					
+					if (totalReflectionPoints(0) > 0)
+					{
+						var pt: FeatureDataPoint = reflection.points[0] as FeatureDataPoint;
+						if (pt && (type == PressureCentreType.HIGH) || (type == PressureCentreType.LOW))
+						{
+							pressureInfoSprite.update(s_colorSign, s_color, i_colorCross, type, pressure);
+							pressureInfoSprite.x = pt.x;
+							pressureInfoSprite.y = pt.y;
+						}
+						else
+						{
+							renderFallbackGraphics(i_color);
+							return;
+						}
+					}
 				}
 			}
 		}
 
+		override public function getDisplaySpriteForReflection(id: int): WFSFeatureEditableSprite
+		{
+			return new PressureInfoSprite(this);
+		}
+		
 		override public function toInsertGML(xmlInsert: XML): void
 		{
 			var gml: Namespace = new Namespace("http://www.opengis.net/gml");
@@ -109,17 +122,23 @@ package com.iblsoft.flexiweather.ogc.editable.features
 		}
 	}
 }
+import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
+import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
+
 import flash.display.Sprite;
 import flash.text.TextFieldAutoSize;
+
 import mx.core.UITextField;
 
-class PressureInfoSprite extends Sprite
+class PressureInfoSprite extends WFSFeatureEditableSprite
 {
 	protected var mtf_presureType: UITextField = new UITextField();
 	protected var mtf_presureValue: UITextField = new UITextField();
 
-	public function PressureInfoSprite(): void
+	public function PressureInfoSprite(feature: WFSFeatureEditable)
 	{
+		super(feature);
+		
 		//mtf_presureType.border = true;
 		mtf_presureType.autoSize = TextFieldAutoSize.LEFT;
 		mtf_presureValue.autoSize = TextFieldAutoSize.LEFT;

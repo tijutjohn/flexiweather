@@ -4,9 +4,10 @@ package com.iblsoft.flexiweather.ogc.editable.features
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWFS;
 	import com.iblsoft.flexiweather.ogc.data.ReflectionData;
-	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableWithBaseTimeAndValidityAndAnnotation;
 	import com.iblsoft.flexiweather.ogc.editable.annotations.StormAnnotation;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataPoint;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
 	import com.iblsoft.flexiweather.ogc.net.loaders.WFSIconLoader;
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithAnnotation;
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithReflection;
@@ -25,9 +26,8 @@ package com.iblsoft.flexiweather.ogc.editable.features
 		{
 			if (totalReflections > 0)
 			{
-				var reflection: WFSEditableReflectionData = getReflection(0);
-				if (reflection.displaySprite)
-					return reflection.displaySprite as StormSprite;
+				var reflection: FeatureDataReflection = m_featureData.getReflectionAt(0);
+				return getDisplaySpriteForReflectionAt(reflection.reflectionDelta) as StormSprite;
 			}
 			return null;
 		}
@@ -64,15 +64,17 @@ package com.iblsoft.flexiweather.ogc.editable.features
 				master.container.labelLayout.removeObject(this);
 				
 				var stormAnnotation: StormAnnotation;
-				var reflection: WFSEditableReflectionData;
+				var reflection: FeatureDataReflection;
+				var displaySprite: WFSFeatureEditableSprite;
 				
-				var totalReflections: uint = ml_movablePoints.totalReflections;
 				for (var i: int = 0; i < totalReflections; i++)
 				{
-					reflection = ml_movablePoints.getReflection(i) as WFSEditableReflectionData;
-					stormAnnotation = reflection.annotation as StormAnnotation;
+					reflection = m_featureData.getReflectionAt(i);
+					var reflectionDelta: int = reflection.reflectionDelta;
+					stormAnnotation = getAnnotationForReflectionAt(reflectionDelta) as StormAnnotation;
+					displaySprite = getDisplaySpriteForReflectionAt(reflectionDelta);
 					
-					master.container.labelLayout.removeObject(reflection.displaySprite);
+					master.container.labelLayout.removeObject(displaySprite);
 					master.container.labelLayout.removeObject(stormAnnotation);
 				}
 			}
@@ -118,23 +120,20 @@ package com.iblsoft.flexiweather.ogc.editable.features
 //				var pt: Point = getPoint(0);
 				
 				var stormSprite: StormSprite;
-				var reflection: WFSEditableReflectionData;
+				var reflection: FeatureDataReflection;
+				var displaySprite: WFSFeatureEditableSprite;
 				
 				//create sprites for reflections
-				var totalReflections: uint = ml_movablePoints.totalReflections;
+				
 				for (var i: int = 0; i < totalReflections; i++)
 				{
-					reflection = ml_movablePoints.getReflection(i) as WFSEditableReflectionData;
-					if (!reflection.displaySprite)
-					{
-						stormSprite = new StormSprite(this); 
-						reflection.displaySprite = stormSprite;
-						addChild(reflection.displaySprite);
-					} else {
-						stormSprite = reflection.displaySprite as StormSprite;
-					}
+					reflection = m_featureData.getReflectionAt(i);
+					var reflectionDelta: int = reflection.reflectionDelta;
 					
-					var pt: Point = Point(reflection.points[0]);
+					displaySprite = getDisplaySpriteForReflectionAt(reflectionDelta);
+					stormSprite = displaySprite as StormSprite;
+					
+					var pt: FeatureDataPoint = FeatureDataPoint(reflection.points[0]);
 					
 					stormSprite.points = [pt];
 					stormSprite.setBitmap(nBitmapData, pt);
@@ -229,6 +228,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
 import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableWithBaseTimeAndValidityAndAnnotation;
 import com.iblsoft.flexiweather.ogc.editable.annotations.StormAnnotation;
+import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataPoint;
 import com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableStorm;
 import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
 import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSpriteWithAnnotation;
@@ -310,7 +310,7 @@ class StormSprite extends WFSFeatureEditableSpriteWithAnnotation {
 		return a;
 	}
 	
-	override public function update(feature: WFSFeatureEditableWithBaseTimeAndValidityAndAnnotation, annotation: AnnotationBox, blackColor: uint, labelLayout: AnticollisionLayout, pt: Point): void
+	override public function update(feature: WFSFeatureEditableWithBaseTimeAndValidityAndAnnotation, annotation: AnnotationBox, blackColor: uint, labelLayout: AnticollisionLayout, pt: FeatureDataPoint): void
 	{
 		var storm: WFSFeatureEditableStorm = feature as WFSFeatureEditableStorm;
 		

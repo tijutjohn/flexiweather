@@ -3,6 +3,7 @@ package com.iblsoft.flexiweather.ogc.wfs
 	import com.iblsoft.flexiweather.ogc.editable.IClosableCurve;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableWithBaseTimeAndValidityAndAnnotation;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataPoint;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.utils.AnnotationBox;
 	import com.iblsoft.flexiweather.utils.CubicBezier;
@@ -45,7 +46,7 @@ package com.iblsoft.flexiweather.ogc.wfs
 			_annotation = value;
 		}
 
-		public function update(feature: WFSFeatureEditableWithBaseTimeAndValidityAndAnnotation, annotation: AnnotationBox, blackColor: uint, labelLayout: AnticollisionLayout, pt: Point): void
+		public function update(feature: WFSFeatureEditableWithBaseTimeAndValidityAndAnnotation, annotation: AnnotationBox, blackColor: uint, labelLayout: AnticollisionLayout, pt: FeatureDataPoint): void
 		{
 			_annotation = annotation;
 		}

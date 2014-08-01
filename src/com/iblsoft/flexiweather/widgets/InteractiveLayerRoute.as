@@ -1,8 +1,6 @@
 package com.iblsoft.flexiweather.widgets
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
-	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
-	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionDictionary;
 	import com.iblsoft.flexiweather.ogc.editable.data.FeatureData;
 	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
 	import com.iblsoft.flexiweather.proj.Coord;
@@ -145,13 +143,13 @@ package com.iblsoft.flexiweather.widgets
 		{
 			super.container = value;
 			
-			if (value)
-			{
-				reflectionDictionary = new WFSEditableReflectionDictionary(value);		
-			}
+//			if (value)
+//			{
+//				reflectionDictionary = new WFSEditableReflectionDictionary(value);		
+//			}
 		}
 		
-		private var reflectionDictionary: WFSEditableReflectionDictionary;
+//		private var reflectionDictionary: WFSEditableReflectionDictionary;
 		
 		public function InteractiveLayerRoute(container: InteractiveWidget = null)
 		{

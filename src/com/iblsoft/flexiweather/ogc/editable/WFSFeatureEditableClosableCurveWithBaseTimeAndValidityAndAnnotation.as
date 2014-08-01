@@ -2,7 +2,6 @@ package com.iblsoft.flexiweather.ogc.editable
 {
 	import com.iblsoft.flexiweather.events.WFSCursorManagerTypes;
 	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
-	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
 	import com.iblsoft.flexiweather.ogc.editable.IClosableCurve;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableMode;
@@ -23,6 +22,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	
 	import flash.display.DisplayObject;
+	import flash.display.Graphics;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
 
@@ -30,10 +30,10 @@ package com.iblsoft.flexiweather.ogc.editable
 	{
 		public function get annotation():AnnotationBox
 		{
-			if (totalReflections > 0)
+			if (m_featureData)
 			{
-				var reflection: WFSEditableReflectionData = getReflection(0);  
-				return reflection.annotation as AnnotationBox;
+				var reflection: FeatureDataReflection = m_featureData.getReflectionAt(0);
+				return getAnnotationForReflectionAt(reflection.reflectionDelta);
 			}
 			return null;
 		}
@@ -71,36 +71,37 @@ package com.iblsoft.flexiweather.ogc.editable
 //			clearGraphics();
 			
 			var annotation: AnnotationBox;
-			var reflection: WFSEditableReflectionData;
+			var reflection: FeatureDataReflection;
 			var _addToLabelLayout: Boolean;
 			
 			var a_points: Array = getPoints();
 			
 			//create sprites for reflections
-			var totalReflections: uint = ml_movablePoints.totalReflections;
+			
 //			var blackColor: uint = getCurrentColor(0x000000);
 			
 			var displaySprite: WFSFeatureEditableSprite;
 			
 			var pointsCount: int = a_points.length;
 			var ptAvg: Point;
+			var gr: Graphics;
+			
+			graphics.clear();
 			
 			for (var i: int = 0; i < totalReflections; i++)
 			{
-				reflection = ml_movablePoints.getReflection(i) as WFSEditableReflectionData;
+				reflection = m_featureData.getReflectionAt(i);
 				if (reflection)
 				{
+					var reflectionDelta: int = reflection.reflectionDelta;
+					
 					if (m_featureData)
 						ptAvg = m_featureData.getReflectionAt(reflection.reflectionDelta).center;
 					else if (pointsCount == 1) 
 						ptAvg = a_points[0] as Point;
 					
-					if (!reflection.displaySprite)
-					{
-						reflection.displaySprite = getDisplaySpriteForReflection(reflection.reflectionDelta); //new CloudFeatureSprite(this);
-						addChild(reflection.displaySprite);
-					}
-					displaySprite = reflection.displaySprite as WFSFeatureEditableSprite;
+					displaySprite = getDisplaySpriteForReflectionAt(reflectionDelta);
+					gr = displaySprite.graphics;
 					
 					if(pointsCount <= 1)
 					{
@@ -110,7 +111,6 @@ package com.iblsoft.flexiweather.ogc.editable
 						var renderer: ICurveRenderer = getRenderer(reflection.reflectionDelta);
 						if (m_featureData)
 						{
-							reflection.displaySprite.graphics.clear();
 //							trace("reflection.displaySprite: " + reflection.displaySprite.parent);
 							var reflectionData: FeatureDataReflection = m_featureData.getReflectionAt(reflection.reflectionDelta);
 							if (reflectionData)
@@ -118,12 +118,11 @@ package com.iblsoft.flexiweather.ogc.editable
 						}
 						displaySprite.points = reflection.points;
 						
-						if (reflection.annotation )
+						annotation = getAnnotationForReflectionAt(reflectionDelta);
+						if (!annotation )
 						{
-							annotation = reflection.annotation ;
-						} else {
 							annotation = createAnnotation();
-							reflection.addAnnotation(annotation);
+							addAnnotationForReflectionAt(reflectionDelta, annotation);
 						}
 						
 						if (displaySprite is WFSFeatureEditableSpriteWithAnnotation)
@@ -288,7 +287,7 @@ package com.iblsoft.flexiweather.ogc.editable
 					|| (mi_editMode == WFSFeatureEditableMode.ADD_POINTS_WITH_MOVE_POINTS)
 					&& selected)
 			{
-				var reflection: WFSEditableReflectionData;
+				var reflection: FeatureDataReflection;
 				
 				if (mb_closed)
 				{

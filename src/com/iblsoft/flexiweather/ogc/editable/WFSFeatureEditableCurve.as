@@ -1,14 +1,16 @@
 package com.iblsoft.flexiweather.ogc.editable
 {
 	import com.iblsoft.flexiweather.ogc.GMLUtils;
-	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
+	import com.iblsoft.flexiweather.ogc.editable.data.MoveablePoint;
 	import com.iblsoft.flexiweather.utils.CubicBezier;
 	import com.iblsoft.flexiweather.utils.CurveLineSegment;
 	import com.iblsoft.flexiweather.utils.CurveLineSegmentRenderer;
+	
 	import flash.display.Sprite;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
-	import com.iblsoft.flexiweather.ogc.editable.data.MoveablePoint;
+	import flash.utils.Dictionary;
 
 	public class WFSFeatureEditableCurve extends WFSFeatureEditable implements IMouseEditableItem
 	{
@@ -184,18 +186,13 @@ package com.iblsoft.flexiweather.ogc.editable
 			if ((mi_editMode == WFSFeatureEditableMode.MOVE_POINTS) || (mi_editMode == WFSFeatureEditableMode.ADD_POINTS_WITH_MOVE_POINTS))
 			{
 				// don't do anything if this click is on MoveablePoint belonging to this curve
-				var reflectionID: int = 0;
+				var reflectionDelta: int = 0;
 				
 				var clickedMoveablePoint: MoveablePoint = event.target as MoveablePoint;
 				if (clickedMoveablePoint)
-					reflectionID = clickedMoveablePoint.reflection;
+					reflectionDelta = clickedMoveablePoint.reflectionDelta;
 				
-				//FIXME fix snap for reflection from which point is dragged
-				var reflectionData: WFSEditableReflectionData = (reflectionDictionary.getReflection(reflectionID) as WFSEditableReflectionData);
-				
-				var moveablePoints: Array = [];
-				if (reflectionData)
-					moveablePoints = reflectionData.moveablePoints;
+				var moveablePoints: Array = getEditablePointsForReflection(reflectionDelta);
 				
 				for each (var mpSprite: Sprite in moveablePoints)
 				{
@@ -250,21 +247,15 @@ package com.iblsoft.flexiweather.ogc.editable
 				{
 					insertPointBefore(i_best, pt);
 					var newPoint: IMouseEditableItem;
-//					if (i_best < reflectionDictionary.length)
-//					{
-//						newPoint = MoveablePoint(reflectionDictionary[i_best]);
-//						newPoint.onMouseDown(pt);
-//						if(!b_keepDrag) {
-//							newPoint.onMouseUp(pt);
-//							newPoint.onMouseClick(pt);
-//						}
-//					}
-					if (i_best < reflectionDictionary.totalMoveablePoints)
+					var totalMoveablePoints: int = getEditablePointsForReflection(0).length;
+					
+					//FIXME Test if this is ok
+					if (i_best < totalMoveablePoints)
 					{
 						//FIXME... question is if this needs to be done for 1 reflection or for all reflections
-						var reflection: WFSEditableReflectionData = ml_movablePoints.getReflection(0) as WFSEditableReflectionData;
+						var reflection: FeatureDataReflection = m_featureData.getReflectionAt(0);
 						if (reflection)
-							newPoint = reflection.moveablePoints[i_best] as IMouseEditableItem;
+							newPoint = getEditablePointForReflectionAt(reflection.reflectionDelta, i_best) as IMouseEditableItem;
 						
 						if (newPoint)
 						{

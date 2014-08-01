@@ -3,10 +3,10 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWFS;
-	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableClosableCurveWithBaseTimeAndValidity;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableClosableCurveWithBaseTimeAndValidityAndAnnotation;
 	import com.iblsoft.flexiweather.ogc.editable.annotations.TurbulenceAreaAnnotation;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithAnnotation;
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithReflection;
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
@@ -46,13 +46,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 		{
 			var i_color: uint = getCurrentColor(0x000000);
 			
-			var gr: Graphics = graphics;
-			
-			var reflectionData: WFSEditableReflectionData = ml_movablePoints.getReflection(reflection) as WFSEditableReflectionData;
-			if (reflectionData && reflectionData.displaySprite)
-			{
-				gr = reflectionData.displaySprite.graphics;
-			}
+			var gr: Graphics = getRendererGraphics(reflection);
 			
 			var renderer: TurbulenceCurveRenderer = new TurbulenceCurveRenderer(gr, 2, i_color, 1)
 			return renderer;
@@ -96,15 +90,19 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 			{
 				
 				var turbulenceAreaAnnotation: TurbulenceAreaAnnotation;
-				var reflection: WFSEditableReflectionData;
+				var reflection: FeatureDataReflection;
+				var displaySprite: WFSFeatureEditableSprite;
 				
-				var totalReflections: uint = ml_movablePoints.totalReflections;
 				for (var i: int = 0; i < totalReflections; i++)
 				{
-					reflection = ml_movablePoints.getReflection(i) as WFSEditableReflectionData;
-					turbulenceAreaAnnotation = reflection.annotation as TurbulenceAreaAnnotation;
+					reflection = m_featureData.getReflectionAt(i);
+					var reflectionDelta: int = reflection.reflectionDelta;
+					
+					displaySprite = getDisplaySpriteForReflectionAt(reflectionDelta);
+					
+					turbulenceAreaAnnotation = getAnnotationForReflectionAt(reflectionDelta) as TurbulenceAreaAnnotation;
 					master.container.labelLayout.removeObject(turbulenceAreaAnnotation);
-					master.container.labelLayout.removeObject(reflection.displaySprite);
+					master.container.labelLayout.removeObject(displaySprite);
 				}
 			}
 			
