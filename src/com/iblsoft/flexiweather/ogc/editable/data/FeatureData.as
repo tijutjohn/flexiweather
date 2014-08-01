@@ -2,6 +2,9 @@ package com.iblsoft.flexiweather.ogc.editable.data
 {
 	public class FeatureData
 	{
+		public static var fd_uid: int = 0;
+		public var uid: int;
+		
 		[ArrayElementType("com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection")]
 		public var reflections: Array;
 		
@@ -12,9 +15,13 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		
 		public function FeatureData(name: String)
 		{
+			uid = fd_uid++;
+			
 			this.name = name;
 			lines = [];
 			reflections = [];
+			
+			trace("FeatureData created: " + this);
 		}
 		
 		public function debug(): void
@@ -31,6 +38,21 @@ package com.iblsoft.flexiweather.ogc.editable.data
 				refl.debug(); 
 			}
 		}
+		
+		/**
+		 * Call clear method before reusing FeatureData. E.g. recompute data 
+		 * 
+		 */		
+		public function clear(): void
+		{
+			var total: int = reflections.length;
+			for (var i: int = 0; i < total; i++)
+			{
+				var refl: FeatureDataReflection = getReflectionAt(i);
+				refl.clear();
+			}
+		}
+		
 		public function getLineAt(position: int): FeatureDataLine
 		{
 			var refl: FeatureDataReflection = getReflectionAt(0);
@@ -42,14 +64,25 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			return createReflectionAt(reflections.length);
 		}
 		
+		protected function createFeatureDataReflectionInstance(position: int): FeatureDataReflection
+		{
+			return new FeatureDataReflection(position);
+		}
 		public function createReflectionAt(position: int): FeatureDataReflection
 		{
-			var reflection: FeatureDataReflection = new FeatureDataReflection(position);
+			var reflection: FeatureDataReflection = createFeatureDataReflectionInstance(position);
 			reflection.parentFeatureData = this;
 			reflections[position] = reflection;
 			return reflection;
 		}
 		
+		/**
+		 *Returns reflection data at given position. 
+		 *  
+		 * @param position reflectionDelta parameter from FeatureDataReflection class
+		 * @return FeatureDataReflection 
+		 * 
+		 */		
 		public function getReflectionAt(position: int): FeatureDataReflection
 		{
 			if (reflections.length <= position)
@@ -65,7 +98,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		
 		public function toString(): String
 		{
-			return "FeatureData" + reflections.length + " name: " +  name;
+			return "FeatureData ["+uid+"]" + reflections.length + " name: " +  name;
 		}
 	}
 }

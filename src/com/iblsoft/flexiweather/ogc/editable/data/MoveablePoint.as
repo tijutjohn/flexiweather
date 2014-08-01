@@ -50,12 +50,18 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		{
 			_mi_pointIndex = value;
 		}
-		public function get reflection(): uint
+		
+		public function get reflectionDelta(): uint
 		{
-			return mi_reflection;
+			return mi_reflectionDelta;
 		}
 		
-		protected var mi_reflection: uint;
+//		public function get reflection(): uint
+//		{
+//			return mi_reflection;
+//		}
+		
+//		protected var mi_reflection: uint;
 		protected var mi_reflectionDelta: int;
 		protected var m_pt: Point;
 		protected var mb_highlighted: Boolean = false;
@@ -64,13 +70,13 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		protected var mb_dragging: Boolean = false;
 		public var m_pointCursor: int = WFSCursorManagerTypes.CURSOR_ADD_POINT;
 
-		public function MoveablePoint(feature: WFSFeatureEditable, i_pointIndex: uint, i_reflection: uint, i_reflectionDelta: int)
+		public function MoveablePoint(feature: WFSFeatureEditable, i_pointIndex: uint, i_reflectionDelta: int)
 		{
 			super();
 			doubleClickEnabled = true;
 			m_feature = feature;
 			mi_pointIndex = i_pointIndex;
-			mi_reflection = i_reflection;
+//			mi_reflection = i_reflection;
 			mi_reflectionDelta = i_reflectionDelta;
 			m_pt = feature.getPoint(i_pointIndex);
 			//addEventListener(MouseEvent.MOUSE_OVER, onMouseOver);
@@ -179,9 +185,18 @@ package com.iblsoft.flexiweather.ogc.editable.data
 //			trace("onMouseDown : " + pt);
 			m_editableItemManager.setMouseMoveCapture(this);
 			m_editableItemManager.setMouseClickCapture(this);
-			m_feature.selectMoveablePoint(mi_pointIndex, mi_reflection);
+			m_feature.selectMoveablePoint(mi_pointIndex, mi_reflectionDelta);
 			mb_dragging = true;
+			
+			
 			var mpe: MoveablePointEvent = new MoveablePointEvent(MoveablePointEvent.MOVEABLE_POINT_DOWN, true);
+			mpe.point = this;
+			mpe.feature = m_feature;
+			mpe.x = pt.x;
+			mpe.y = pt.y;
+			dispatchEvent(mpe);
+			
+			mpe = new MoveablePointEvent(MoveablePointEvent.MOVEABLE_POINT_DRAG_START, true);
 			mpe.point = this;
 			mpe.feature = m_feature;
 			mpe.x = pt.x;
@@ -224,6 +239,13 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			var mpe: MoveablePointEvent 
 			
 //			trace("onMouseUp : " + pt);
+			
+			mpe = new MoveablePointEvent(MoveablePointEvent.MOVEABLE_POINT_DRAG_END, true);
+			mpe.point = this;
+			mpe.feature = m_feature;
+			mpe.x = pt.x;
+			mpe.y = pt.y;
+			dispatchEvent(mpe);
 			
 			mpe = new MoveablePointEvent(MoveablePointEvent.MOVEABLE_POINT_UP, true);
 			mpe.point = this;
@@ -290,7 +312,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 
 		override public function toString(): String
 		{
-			return "MoveablePoint: " + m_pt + " index: " + pointIndex + " reflection: " + mi_reflection + " delta: " + mi_reflection;
+			return "MoveablePoint: " + m_pt + " index: " + pointIndex + " delta: " + mi_reflectionDelta;
 		}
 	}
 }

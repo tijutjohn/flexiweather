@@ -9,6 +9,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.ogc.editable.data.FeatureData;
 	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataLine;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataLineSegment;
 	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
 	import com.iblsoft.flexiweather.ogc.kml.InteractiveLayerKML;
 	import com.iblsoft.flexiweather.ogc.multiview.data.SynchronizationChangeType;
@@ -2050,7 +2051,7 @@ package com.iblsoft.flexiweather.widgets
 		private var m_oldWidgetWidth: Number = 0;
 		private var m_oldWidgetHeight: Number = 0;
 		
-		private function autoLayoutViewBBox(bbox: BBox, b_finalChange: Boolean, b_setViewBBox: Boolean = false, b_changeZoom = true, b_negotiateBBox: Boolean = true): void
+		private function autoLayoutViewBBox(bbox: BBox, b_finalChange: Boolean, b_setViewBBox: Boolean = false, b_changeZoom: Boolean = true, b_negotiateBBox: Boolean = true): void
 		{
 			//auto layout in widget parent
 //			var widgetParent: DataGroup = parent as DataGroup;
@@ -2321,75 +2322,95 @@ package com.iblsoft.flexiweather.widgets
 		 */		
 		private function _drawGeoLine(coordFrom: Coord, coordTo: Coord, drawMode: String, d_reflectionToSegmentPoints: Dictionary, featureDataLine: FeatureDataLine = null): void
 		{
-			var coords: Array;
+			if (!coordFrom && !coordTo)
+				return;
+			
+			var tempCoords: Array;
 			var c: Coord;
+			var cEdgeCoord: EdgeCoord;
 			
 			var projection: Projection = getCRSProjection();
 			var extent: BBox = getExtentBBox();
 			
 			var originalCRS: String = coordFrom.crs;
 			
+			var bothCoordsMode: Boolean = false;
 			
-			//move coords into extent
-			coordFrom = Coord.convertCoordOnSphere(coordFrom, projection);
-			coordTo = Coord.convertCoordOnSphere(coordTo, projection);
-			
-			
-			if (drawMode == DrawMode.GREAT_ARC)
+			//both coords are defined
+			if (coordFrom && coordTo)
 			{
-				coords = Coord.interpolateGreatArc(coordFrom, coordTo, distanceValidator);
-//				trace(coords);
-			}
-			else if (drawMode == DrawMode.PLAIN) {
-				if (projection.wrapsHorizontally) {
-					
-					//if Projection wraps horizontally, we need to check if coordinates distance is higher then half of extent to check if there is not InternationDateLine
-					if (Math.abs(coordFrom.x - coordTo.x) > extent.width / 2)
-					{
-						coordFrom = coordFrom.toLaLoCoord();
-						coordTo = coordTo.toLaLoCoord();
-						var line1: LineSegment;
-						var internationalDateLine: LineSegment = new LineSegment(180,-90,180,90);
-						
-						//create line1 in correct order
-						if (coordFrom.x > coordTo.x)
-							line1 = new LineSegment(coordFrom.x, coordFrom.y, coordTo.x + 360, coordTo.y);
-						else {
-							line1 = new LineSegment(coordTo.x, coordTo.y, coordFrom.x + 360, coordFrom.y);
-						}
-						
-						var intersection: Point = line1.intersectionWithLineSegment(internationalDateLine);
-						var intersectionCoordLeft: Coord = new Coord(coordFrom.crs, intersection.x - 0.00001, intersection.y);
-						var intersectionCoordRight: Coord = new Coord(coordFrom.crs, intersection.x + 0.00001, intersection.y);
-						intersectionCoordRight = Coord.convertCoordOnSphere(intersectionCoordRight, projection);
-						
-						var bisectedCoordsLeft: Array;
-						var bisectedCoordsRight: Array;
-						
-						
-						//now there are 2 lines and NULL (dateline) coord, so we split line crossing date line to 2 different lines not crossing dateline
-						if (coordFrom.x > coordTo.x) 
-						{
-							coords = [coordFrom, intersectionCoordLeft, null, intersectionCoordRight, coordTo];
-						} else {
-							coords = [coordTo, intersectionCoordLeft, null, intersectionCoordRight, coordFrom];
-						}
-						
-						
-						//convert coords back to origin projection
-						var tempCoords: Array = coords;
-						coords = [];
-						for each (c in tempCoords)
-						{
-							coords.push(projection.laLoCoordToPrjCoord(c));
-						}
-						
-					} else {
-						coords = [coordFrom, coordTo];
-					}
-				} else {
-					coords = [coordFrom, coordTo];
+				bothCoordsMode = true;
+				
+				//move coords into extent
+				coordFrom = Coord.convertCoordOnSphere(coordFrom, projection);
+				coordTo = Coord.convertCoordOnSphere(coordTo, projection);
+				
+				
+				if (drawMode == DrawMode.GREAT_ARC)
+				{
+					tempCoords = Coord.interpolateGreatArc(coordFrom, coordTo, distanceValidator);
+	//				trace(coords);
 				}
+				else if (drawMode == DrawMode.PLAIN) {
+					if (projection.wrapsHorizontally) {
+						
+						//if Projection wraps horizontally, we need to check if coordinates distance is higher then half of extent to check if there is not InternationDateLine
+						if (Math.abs(coordFrom.x - coordTo.x) > extent.width / 2)
+						{
+							coordFrom = coordFrom.toLaLoCoord();
+							coordTo = coordTo.toLaLoCoord();
+							var line1: FeatureDataLineSegment;
+							var internationalDateLine: LineSegment = new LineSegment(180,-90,180,90);
+							
+							//create line1 in correct order
+							if (coordFrom.x > coordTo.x)
+								line1 = new FeatureDataLineSegment(coordFrom.x, coordFrom.y, coordTo.x + 360, coordTo.y, true, true);
+							else {
+								line1 = new FeatureDataLineSegment(coordTo.x, coordTo.y, coordFrom.x + 360, coordFrom.y, true, true);
+							}
+							
+							var intersection: Point = line1.intersectionWithLineSegment(internationalDateLine);
+							var intersectionCoordLeft: Coord = new Coord(coordFrom.crs, intersection.x - 0.00001, intersection.y);
+							var intersectionCoordRight: Coord = new Coord(coordFrom.crs, intersection.x + 0.00001, intersection.y);
+							intersectionCoordRight = Coord.convertCoordOnSphere(intersectionCoordRight, projection);
+							
+							var bisectedCoordsLeft: Array;
+							var bisectedCoordsRight: Array;
+							
+							
+							//now there are 2 lines and NULL (dateline) coord, so we split line crossing date line to 2 different lines not crossing dateline
+							if (coordFrom.x > coordTo.x) 
+							{
+								tempCoords = [new EdgeCoord(coordFrom, false, true), new EdgeCoord(intersectionCoordLeft, true, false), null, new EdgeCoord(intersectionCoordRight, true, false), new EdgeCoord(coordTo, false, true)];
+							} else {
+								tempCoords = [new EdgeCoord(coordTo, false, true), new EdgeCoord(intersectionCoordLeft, true, false), null, new EdgeCoord(intersectionCoordRight, true, false), new EdgeCoord(coordFrom, false, true)];
+							}
+							
+							
+							//convert coords back to origin projection
+							var tempCoords2: Array = tempCoords;
+							tempCoords = [];
+							for each (cEdgeCoord in tempCoords2)
+							{
+								if (cEdgeCoord)
+									cEdgeCoord.coord = projection.laLoCoordToPrjCoord(cEdgeCoord.coord);
+								
+								tempCoords.push(cEdgeCoord);
+							}
+							
+						} else {
+							tempCoords = [new EdgeCoord(coordFrom, false, true), new EdgeCoord(coordTo, false, true)];
+						}
+					} else {
+						tempCoords = [new EdgeCoord(coordFrom, false, true), new EdgeCoord(coordTo, false, true)];
+					}
+				}
+			} else {
+				//at least one coord is defined
+				if (coordFrom)
+					tempCoords = [new EdgeCoord(coordFrom, false, true)];
+				if (coordTo)
+					tempCoords = [new EdgeCoord(coordTo, false, true)];
 			}
 
 			
@@ -2399,8 +2420,9 @@ package com.iblsoft.flexiweather.widgets
 			var continousParts: Array = [[]];
 			var isEdge: Boolean = false;
 			
-			for each (c in coords) {
-				if(!c) {
+			
+			for each (cEdgeCoord in tempCoords) {
+				if(!cEdgeCoord) {
 					
 					//set last point as edge
 					(continousParts[i_part][(continousParts[i_part] as Array).length - 1] as EdgeCoord).edge = true;
@@ -2411,7 +2433,8 @@ package com.iblsoft.flexiweather.widgets
 					isEdge = true;
 				}
 				else {
-					continousParts[i_part].push(new EdgeCoord(c, isEdge));
+					cEdgeCoord.edge = isEdge;
+					continousParts[i_part].push(cEdgeCoord);
 					isEdge = false;
 				}
 			}
@@ -2421,83 +2444,139 @@ package com.iblsoft.flexiweather.widgets
 			
 			var reflections: Array;
 			var projectionExtent: BBox = m_crsProjection.extentBBox;
+			var part: Array;
+			var cObject: EdgeCoord;
+			var o: Object;
+			var s_reflectionId: String;
+			var reflectedSegmentPoints: Array;
+			var reflection: FeatureDataReflection;
+			var currLine: FeatureDataLine
+			var p1: Point;
+			var p2: Point;
 			
-			//create lines which are edges of viewBBox
-			var viewBBoxWestLine: LineSegment = new LineSegment(m_viewBBox.xMin, m_viewBBox.yMin, m_viewBBox.xMin, m_viewBBox.yMax);
-			var viewBBoxEastLine: LineSegment = new LineSegment(m_viewBBox.xMax, m_viewBBox.yMin, m_viewBBox.xMax, m_viewBBox.yMax);
-			var viewBBoxNorthLine: LineSegment = new LineSegment(m_viewBBox.xMin, m_viewBBox.yMin, m_viewBBox.xMax, m_viewBBox.yMin);
-			var viewBBoxSouthLine: LineSegment = new LineSegment(m_viewBBox.xMin, m_viewBBox.yMax, m_viewBBox.xMax, m_viewBBox.yMax);
-			
-			var line: LineSegment;
-			for each(var part: Array in continousParts)
+			if (bothCoordsMode)
 			{
-				var cObject: EdgeCoord = null;
-				var prevCObject: EdgeCoord = null;
-				var prevC: Coord = null;
-				for each(cObject in part) 
+				//create lines which are edges of viewBBox
+				var viewBBoxWestLine: LineSegment = new LineSegment(m_viewBBox.xMin, m_viewBBox.yMin, m_viewBBox.xMin, m_viewBBox.yMax);
+				var viewBBoxEastLine: LineSegment = new LineSegment(m_viewBBox.xMax, m_viewBBox.yMin, m_viewBBox.xMax, m_viewBBox.yMax);
+				var viewBBoxNorthLine: LineSegment = new LineSegment(m_viewBBox.xMin, m_viewBBox.yMin, m_viewBBox.xMax, m_viewBBox.yMin);
+				var viewBBoxSouthLine: LineSegment = new LineSegment(m_viewBBox.xMin, m_viewBBox.yMax, m_viewBBox.xMax, m_viewBBox.yMax);
+				
+				var line: LineSegment;
+				for each(part in continousParts)
 				{
-					if (prevCObject)
+					cObject = null;
+					var prevCObject: EdgeCoord = null;
+					var prevC: Coord = null;
+					for each(cObject in part) 
 					{
-						prevC = prevCObject.coord;
-						if (cObject)
+						if (prevCObject)
 						{
-							c = cObject.coord;
-//							trace("mapLineCoordToViewReflections : " + prevC.toString() + " , " + c.toString());
-							
-							//find reflections of line defined by coords prevC and c in projection extent
-							reflections = mapLineCoordToViewReflections(prevC, c, projectionExtent);
-							
-							for each(var o: Object in reflections) 
+							prevC = prevCObject.coord;
+							if (cObject)
 							{
-								var s_reflectionId: String = String(o.reflection);
-								var reflectedSegmentPoints: Array = d_reflectionToSegmentPoints[s_reflectionId];
+								c = cObject.coord;
+	//							trace("mapLineCoordToViewReflections : " + prevC.toString() + " , " + c.toString());
 								
-								if(reflectedSegmentPoints == null) 
+								//find reflections of line defined by coords prevC and c in projection extent
+								reflections = mapLineCoordToViewReflections(prevC, c, projectionExtent);
+								
+								for each(o in reflections) 
 								{
-									reflectedSegmentPoints = [];
-									d_reflectionToSegmentPoints[s_reflectionId] = reflectedSegmentPoints;
-								}
-								
-								line = new LineSegment(o.pointFrom.x, o.pointFrom.y, o.pointTo.x, o.pointTo.y);
-//								debug("\t\tdraw lines : "+ line);
-								if (line.isInsideBox(m_viewBBox) || line.isIntersectedBox(viewBBoxWestLine, viewBBoxEastLine, viewBBoxNorthLine, viewBBoxSouthLine))
-								{
-//									debug("\t\t\t DRAW IT");
-									var reflection: FeatureDataReflection = featureDataLine.parentFeatureData.getReflectionAt(o.reflection);
-									var currLine: FeatureDataLine = reflection.getLineAt(featureDataLine.id);
-//									trace("_drawGeoLine reflection: " + reflection);
-//									trace("_drawGeoLine currLine: " + currLine);
+									s_reflectionId = String(o.reflection);
+									reflectedSegmentPoints = d_reflectionToSegmentPoints[s_reflectionId];
 									
-									//check if line is intersect vieBBox
-									var p1: Point = coordToPoint(new Coord(ms_crs, o.pointFrom.x, o.pointFrom.y));
-									var p2: Point = coordToPoint(new Coord(ms_crs, o.pointTo.x, o.pointTo.y));
-									
-									currLine.addLineSegment(new LineSegment(p1.x, p1.y, p2.x, p2.y), prevCObject.edge, cObject.edge);
-									
-									reflectedSegmentPoints.push(p1);
-									reflectedSegmentPoints.push(p2);
-								
-									if (drawMode == DrawMode.PLAIN) 
+									if(reflectedSegmentPoints == null) 
 									{
-										reflectedSegmentPoints.push(null);
-	//									d_reflectionToSegmentPoints[s_reflectionId].push(null);
+										reflectedSegmentPoints = [];
+										d_reflectionToSegmentPoints[s_reflectionId] = reflectedSegmentPoints;
 									}
-//								} else {
-//									debug("There is no intersection with current viewBBox: " + line);
+									
+									line = new FeatureDataLineSegment(o.pointFrom.x, o.pointFrom.y, o.pointTo.x, o.pointTo.y, prevCObject.editable, cObject.editable);
+	//								debug("\t\tdraw lines : "+ line);
+									if (line.isInsideBox(m_viewBBox) || line.isIntersectedBox(viewBBoxWestLine, viewBBoxEastLine, viewBBoxNorthLine, viewBBoxSouthLine))
+									{
+	//									debug("\t\t\t DRAW IT");
+										reflection = featureDataLine.parentFeatureData.getReflectionAt(o.reflection);
+										currLine = reflection.getLineAt(featureDataLine.id);
+	//									trace("_drawGeoLine reflection: " + reflection);
+	//									trace("_drawGeoLine currLine: " + currLine);
+										
+										//check if line is intersect vieBBox
+										p1 = coordToPoint(new Coord(ms_crs, o.pointFrom.x, o.pointFrom.y));
+										p2 = coordToPoint(new Coord(ms_crs, o.pointTo.x, o.pointTo.y));
+										
+										currLine.addLineSegment(new FeatureDataLineSegment(p1.x, p1.y, p2.x, p2.y, prevCObject.editable, cObject.editable), prevCObject.edge, cObject.edge);
+										
+										reflectedSegmentPoints.push(p1);
+										reflectedSegmentPoints.push(p2);
+									
+										if (drawMode == DrawMode.PLAIN) 
+										{
+											reflectedSegmentPoints.push(null);
+		//									d_reflectionToSegmentPoints[s_reflectionId].push(null);
+										}
+	//								} else {
+	//									debug("There is no intersection with current viewBBox: " + line);
+									}
 								}
 							}
 						}
+						prevCObject = cObject;
 					}
-					prevCObject = cObject;
-				}
 				
-				for(s_reflectionId in d_reflectionToSegmentPoints) {
-					reflectedSegmentPoints = d_reflectionToSegmentPoints[s_reflectionId];
-					if(reflectedSegmentPoints.length > 0 && reflectedSegmentPoints[reflectedSegmentPoints.length - 1] != null)
-						reflectedSegmentPoints.push(null);
+				} 
+			} else {
+					
+				//single coord mode
+				for each(part in continousParts)
+				{
+					cObject = null;
+					for each(cObject in part) 
+					{
+						c = cObject.coord;
+						reflections = mapCoordInCRSToViewReflections(new Point(c.x, c.y), projectionExtent);
+						for each(o in reflections) 
+						{
+							s_reflectionId = String(o.reflection);
+							reflectedSegmentPoints = d_reflectionToSegmentPoints[s_reflectionId];
+							
+							if(reflectedSegmentPoints == null) 
+							{
+								reflectedSegmentPoints = [];
+								d_reflectionToSegmentPoints[s_reflectionId] = reflectedSegmentPoints;
+							}
+							
+							line = new FeatureDataLineSegment(o.point.x, o.point.y, Number.NaN, Number.NaN, cObject.editable, false);
+							
+							//it's "line with one points
+							reflection = featureDataLine.parentFeatureData.getReflectionAt(o.reflection);
+							currLine = reflection.getLineAt(featureDataLine.id);
+							//									trace("_drawGeoLine reflection: " + reflection);
+							//									trace("_drawGeoLine currLine: " + currLine);
+							
+							//check if line is intersect vieBBox
+							p1 = coordToPoint(new Coord(ms_crs, o.point.x, o.point.y));
+							
+							currLine.addLineSegment(new FeatureDataLineSegment(p1.x, p1.y, Number.NaN, Number.NaN, cObject.editable, false), cObject.edge, cObject.edge);
+							
+							reflectedSegmentPoints.push(p1);
+							
+							if (drawMode == DrawMode.PLAIN) 
+							{
+								reflectedSegmentPoints.push(null);
+								//									d_reflectionToSegmentPoints[s_reflectionId].push(null);
+							}
+						}
+					}
 				}
 			}
 			
+			for(s_reflectionId in d_reflectionToSegmentPoints) {
+				reflectedSegmentPoints = d_reflectionToSegmentPoints[s_reflectionId];
+				if(reflectedSegmentPoints.length > 0 && reflectedSegmentPoints[reflectedSegmentPoints.length - 1] != null)
+					reflectedSegmentPoints.push(null);
+			}
 			
 		}
 		
@@ -2570,13 +2649,14 @@ package com.iblsoft.flexiweather.widgets
 		 */		
 		public function drawGeoPolyLine(rendererCreator: Function, coords: Array, drawMode: String, b_closed: Boolean = false, b_justCompute: Boolean = false, featureData: FeatureData = null): void
 		{
+			trace("InteractiveWidget drawGeoPolyLine");
 			var d_reflectionToSegmentPoints: Dictionary = new Dictionary();
 			var cPrev: Coord = null;
 			var total: int = coords.length;
 			var cnt: int = 0;
 			
 			//if coords Array is array of points, convert them to coordinates
-			if (coords[0] is Point)
+			if (!(coords[0] is Coord))
 			{
 				var newCoords: Array = [];
 				for (var i: int = 0; i < total; i++)
@@ -2594,19 +2674,29 @@ package com.iblsoft.flexiweather.widgets
 			}
 			
 			
-			//draw geoline as many small geolines
-			for each (var c: Coord in coords) 
+			var featureDataLine: FeatureDataLine;
+			
+			if (coords.length > 1)
 			{
-				if(cPrev) {
-					var featureDataLine: FeatureDataLine;
-					if (featureData)
-					{
-						featureDataLine = featureData.getLineAt(cnt-1);
+				//draw geoline as many small geolines
+				for each (var c: Coord in coords) 
+				{
+					if(cPrev) {
+						if (featureData)
+						{
+							featureDataLine = featureData.getLineAt(cnt-1);
+						}
+						_drawGeoLine(cPrev, c, drawMode, d_reflectionToSegmentPoints, featureDataLine);
 					}
-					_drawGeoLine(cPrev, c, drawMode, d_reflectionToSegmentPoints, featureDataLine);
+					cPrev = c;
+					cnt++;
 				}
-				cPrev = c;
-				cnt++;
+			} else if (coords.length == 1) {
+				if (featureData)
+				{
+					featureDataLine = featureData.getLineAt(0);
+					_drawGeoLine(coords[0] as Coord, null, drawMode, d_reflectionToSegmentPoints, featureDataLine);
+				}
 			}
 			
 			//debug featureData;
@@ -3045,10 +3135,12 @@ class EdgeCoord
 {
 	public var coord: Coord;
 	public var edge: Boolean;
+	public var editable: Boolean;
 	
-	public function EdgeCoord(coord: Coord, edge: Boolean)
+	public function EdgeCoord(coord: Coord, edge: Boolean, editable: Boolean)
 	{
 		this.coord = coord;
 		this.edge = edge;
+		this.editable = editable;
 	}
 }

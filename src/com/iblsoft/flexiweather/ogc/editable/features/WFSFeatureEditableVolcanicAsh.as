@@ -4,10 +4,12 @@ package com.iblsoft.flexiweather.ogc.editable.features
 	import com.iblsoft.flexiweather.ogc.GMLUtils;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWFS;
 	import com.iblsoft.flexiweather.ogc.data.ReflectionData;
-	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableClosableCurveWithBaseTimeAndValidity;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataPoint;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
 	import com.iblsoft.flexiweather.ogc.net.loaders.WFSIconLoader;
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithReflection;
+	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.CubicBezier;
@@ -93,26 +95,24 @@ package com.iblsoft.flexiweather.ogc.editable.features
 				
 				
 				var volcanicAshSprite: VolcanicAshSprite;
-				var reflection: WFSEditableReflectionData;
+				var reflection: FeatureDataReflection;
 				
 				//create sprites for reflections
-				var totalReflections: uint = ml_movablePoints.totalReflections;
+				
 				var blackColor: uint = getCurrentColor(0x000000);
 				for (var i: int = 0; i < totalReflections; i++)
 				{
-					reflection = ml_movablePoints.getReflection(i) as WFSEditableReflectionData;
-					if (!reflection.displaySprite)
-					{
-						volcanicAshSprite = new VolcanicAshSprite(mf_iconsWidth, mf_iconsWidth); 
-						reflection.displaySprite = volcanicAshSprite;
-						addChild(reflection.displaySprite);
-					} else {
-						volcanicAshSprite = reflection.displaySprite as VolcanicAshSprite;
-					}
+					reflection = m_featureData.getReflectionAt(i);
+					var reflectionDelta: int = reflection.reflectionDelta;
+					
+					volcanicAshSprite = getDisplaySpriteForReflectionAt(reflectionDelta) as VolcanicAshSprite;
+					
+					var fdpt: FeatureDataPoint = FeatureDataPoint(reflection.points[0]);
 					
 					volcanicAshSprite.update(blackColor);
-					volcanicAshSprite.x = Point(reflection.points[0]).x;
-					volcanicAshSprite.y = Point(reflection.points[0]).y;
+					
+					volcanicAshSprite.x = fdpt.x;
+					volcanicAshSprite.y = fdpt.y;
 				}
 				
 			} else {
@@ -120,27 +120,27 @@ package com.iblsoft.flexiweather.ogc.editable.features
 			}
 		}
 		
+		override public function getDisplaySpriteForReflection(id: int): WFSFeatureEditableSprite
+		{
+			return new VolcanicAshSprite(this, mf_iconsWidth, mf_iconsWidth);
+		}
+		
 		public function onIconLoaded(mBitmap: Bitmap): void
 		{
 			if (master && mBitmap){
 				
 				var volcanicAshSprite: VolcanicAshSprite;
-				var reflection: WFSEditableReflectionData;
+				var reflection: FeatureDataReflection;
 				
 				//create sprites for reflections
-				var totalReflections: uint = ml_movablePoints.totalReflections;
+				
 				var blackColor: uint = getCurrentColor(0x000000);
 				for (var i: int = 0; i < totalReflections; i++)
 				{
-					reflection = ml_movablePoints.getReflection(i) as WFSEditableReflectionData;
-					if (!reflection.displaySprite)
-					{
-						volcanicAshSprite = new VolcanicAshSprite(mf_iconsWidth, mf_iconsWidth); 
-						reflection.displaySprite = volcanicAshSprite;
-						addChild(reflection.displaySprite);
-					} else {
-						volcanicAshSprite = reflection.displaySprite as VolcanicAshSprite;
-					}
+					reflection = m_featureData.getReflectionAt(i);
+					var reflectionDelta: int = reflection.reflectionDelta;
+					
+					volcanicAshSprite = getDisplaySpriteForReflectionAt(reflectionDelta) as VolcanicAshSprite;
 					
 					volcanicAshSprite.setBitmap(mBitmap.bitmapData);
 				}
@@ -274,6 +274,8 @@ package com.iblsoft.flexiweather.ogc.editable.features
 	}
 }
 
+import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
+import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
 import com.iblsoft.flexiweather.utils.ColorUtils;
 
 import flash.display.Bitmap;
@@ -282,7 +284,7 @@ import flash.display.Graphics;
 import flash.display.Sprite;
 import flash.geom.Point;
 
-class VolcanicAshSprite extends Sprite {
+class VolcanicAshSprite extends WFSFeatureEditableSprite {
 	
 	private var m_iconBitmap: Bitmap = new Bitmap();
 	private var m_iconBitmapOrig: Bitmap = new Bitmap();
@@ -293,8 +295,9 @@ class VolcanicAshSprite extends Sprite {
 	private var graphicsLine:Graphics;
 	private var graphicsIcon:Graphics;
 	
-	public function VolcanicAshSprite(wIcon: Number, hIcon: Number)
+	public function VolcanicAshSprite(feature: WFSFeatureEditable, wIcon: Number, hIcon: Number)
 	{
+		super(feature);
 		sprite1 = new Sprite();
 		sprite2 = new Sprite();
 		

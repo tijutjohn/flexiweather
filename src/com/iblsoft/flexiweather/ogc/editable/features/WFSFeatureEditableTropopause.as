@@ -2,8 +2,10 @@ package com.iblsoft.flexiweather.ogc.editable.features
 {
 	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
 	import com.iblsoft.flexiweather.ogc.data.ReflectionData;
-	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableWithBaseTimeAndValidity;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataPoint;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
+	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
 	
 	import flash.geom.Point;
 	import flash.text.TextFieldAutoSize;
@@ -40,8 +42,6 @@ package com.iblsoft.flexiweather.ogc.editable.features
 		override public function update(changeFlag: FeatureUpdateContext): void
 		{
 			super.update(changeFlag);
-			var pt: Point = getPoint(0);
-
 			var i_color: uint = getCurrentColor(0x000000);
 			var s_color: String = '000000';
 			
@@ -52,30 +52,38 @@ package com.iblsoft.flexiweather.ogc.editable.features
 				lvlString = '0'+level;
 			
 			var tropopauseSprite: TropopauseSprite;
-			var reflection: WFSEditableReflectionData;
+			var reflection: FeatureDataReflection;
 			
 			//create sprites for reflections
-			var totalReflections: uint = ml_movablePoints.totalReflections;
+			
 			var blackColor: uint = getCurrentColor(0x000000);
 			for (var i: int = 0; i < totalReflections; i++)
 			{
-				reflection = ml_movablePoints.getReflection(i) as WFSEditableReflectionData;
-				if (!reflection.displaySprite)
+				reflection = m_featureData.getReflectionAt(i);
+				if (reflection)
 				{
-					tropopauseSprite = new TropopauseSprite(this); 
-					reflection.displaySprite = tropopauseSprite;
-					addChild(reflection.displaySprite);
-				} else {
-					tropopauseSprite = reflection.displaySprite as TropopauseSprite;
+					var reflectionDelta: int = reflection.reflectionDelta;
+					reflection.validate();
+					
+					tropopauseSprite = getDisplaySpriteForReflectionAt(reflectionDelta) as TropopauseSprite;
+					tropopauseSprite.update(type, lvlString, i_color, s_color, blackColor);
+					
+					var fdpt: FeatureDataPoint = FeatureDataPoint(reflection.points[0]);
+					if (fdpt)
+					{
+						tropopauseSprite.x = fdpt.x;
+						tropopauseSprite.y = fdpt.y;
+					}
 				}
-				
-				tropopauseSprite.update(type, lvlString, i_color, s_color, blackColor);
-				tropopauseSprite.x = Point(reflection.points[0]).x;
-				tropopauseSprite.y = Point(reflection.points[0]).y;
 			}
 			
 			
 		}	
+		
+		override public function getDisplaySpriteForReflection(id: int): WFSFeatureEditableSprite
+		{
+			return new TropopauseSprite(this); 
+		}
 		
 		override public function toInsertGML(xmlInsert: XML): void
 		{

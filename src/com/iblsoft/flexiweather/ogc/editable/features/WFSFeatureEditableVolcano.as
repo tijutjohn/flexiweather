@@ -4,8 +4,11 @@ package com.iblsoft.flexiweather.ogc.editable.features
 	import com.iblsoft.flexiweather.ogc.GMLUtils;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWFS;
 	import com.iblsoft.flexiweather.ogc.data.ReflectionData;
-	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableClosableCurveWithBaseTimeAndValidity;
+	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableWithBaseTimeAndValidity;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataPoint;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
+	import com.iblsoft.flexiweather.ogc.editable.data.MoveablePoint;
 	import com.iblsoft.flexiweather.ogc.net.loaders.WFSIconLoader;
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithReflection;
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
@@ -32,7 +35,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 	/**
 	 * For front styles see for example http://en.wikipedia.org/wiki/Weather_front
 	 **/	
-	public class WFSFeatureEditableVolcano extends WFSFeatureEditableClosableCurveWithBaseTimeAndValidity
+	public class WFSFeatureEditableVolcano extends WFSFeatureEditableWithBaseTimeAndValidity
 		implements IWFSFeatureWithReflection
 	{
 //		public var values: Object = {
@@ -60,56 +63,6 @@ package com.iblsoft.flexiweather.ogc.editable.features
 			values = { smooth: false, size: 1.0, style: "Solid", color: 0x000000 };
 		}
 		
-//		[Embed(source="/assets/icons/svg/volcano.svg")]
-//		private const SvgImage:Class;
-	
-		
-		/*
-		override public function update(master: InteractiveLayerWFS): void
-		{
-			super.update(master);
-			var point: Point = getPoint(0);
-			
-			var svgClass:* = new SvgImage();
-			
-			var bd:BitmapData = new BitmapData(svgClass.width, svgClass.height, true, 0x00000000);
-			var svgMatrix:Matrix = new Matrix();
-			svgMatrix.tx = point.x - (bd.width / 2);
-			svgMatrix.ty = point.y - (bd.height / 2); // matrix position
-			
-			var clrTransform: ColorTransform = new ColorTransform();
-			clrTransform.color = getCurrentColor(0x000000);
-			clrTransform.redMultiplier = 1;
-			clrTransform.blueMultiplier = 1;
-			clrTransform.greenMultiplier = 1;
-			
-			bd.draw(svgClass, null, clrTransform);
-			
-			var volcanoSprite: VolcanoSprite;
-			var reflection: WFSEditableReflectionData;
-			
-			//create sprites for reflections
-			var totalReflections: uint = ml_movablePoints.totalReflections;
-			for (var i: int = 0; i < totalReflections; i++)
-			{
-				reflection = ml_movablePoints.getReflection(i) as WFSEditableReflectionData;
-				if (!reflection.displaySprite)
-				{
-					volcanoSprite = new VolcanoSprite(); 
-					reflection.displaySprite = volcanoSprite;
-					addChild(reflection.displaySprite);
-				} else {
-					volcanoSprite = reflection.displaySprite as VolcanoSprite;
-				}
-				
-				volcanoSprite.update(point, bd, svgMatrix);
-				volcanoSprite.x = Point(reflection.points[0]).x;
-				volcanoSprite.y = Point(reflection.points[0]).y;
-			}
-			
-		}
-		*/
-		
 		override public function update(changeFlag: FeatureUpdateContext): void
 		{
 			if(m_coordinates.length != 1
@@ -136,26 +89,27 @@ package com.iblsoft.flexiweather.ogc.editable.features
 				
 				
 				var volcanicAshSprite: VolcanoSprite;
-				var reflection: WFSEditableReflectionData;
+				var reflection: FeatureDataReflection;
 				
 				//create sprites for reflections
-				var totalReflections: uint = ml_movablePoints.totalReflections;
+				
 				var blackColor: uint = getCurrentColor(0x000000);
 				for (var i: int = 0; i < totalReflections; i++)
 				{
-					reflection = ml_movablePoints.getReflection(i) as WFSEditableReflectionData;
-					if (!reflection.displaySprite)
-					{
-						volcanicAshSprite = new VolcanoSprite(this, mf_iconsWidth, mf_iconsWidth); 
-						reflection.displaySprite = volcanicAshSprite;
-						addChild(reflection.displaySprite);
-					} else {
-						volcanicAshSprite = reflection.displaySprite as VolcanoSprite;
-					}
+					reflection = m_featureData.getReflectionAt(i);
+					var reflectionDelta: int = reflection.reflectionDelta;
+					
+					var displaySprite: WFSFeatureEditableSprite = getDisplaySpriteForReflectionAt(reflectionDelta);
+					volcanicAshSprite = displaySprite as VolcanoSprite;
 					
 					volcanicAshSprite.update(blackColor);
-					volcanicAshSprite.x = Point(reflection.points[0]).x;
-					volcanicAshSprite.y = Point(reflection.points[0]).y;
+					
+					var fdpt: FeatureDataPoint = FeatureDataPoint(reflection.points[0]);
+					if (fdpt)
+					{
+						volcanicAshSprite.x = fdpt.x;
+						volcanicAshSprite.y = fdpt.y;
+					}
 				}
 				
 			} else {
@@ -168,22 +122,18 @@ package com.iblsoft.flexiweather.ogc.editable.features
 			if (master && mBitmap){
 				
 				var volcanicAshSprite: VolcanoSprite;
-				var reflection: WFSEditableReflectionData;
+				var reflection: FeatureDataReflection;
 				
 				//create sprites for reflections
-				var totalReflections: uint = ml_movablePoints.totalReflections;
+				
 				var blackColor: uint = getCurrentColor(0x000000);
 				for (var i: int = 0; i < totalReflections; i++)
 				{
-					reflection = ml_movablePoints.getReflection(i) as WFSEditableReflectionData;
-					if (!reflection.displaySprite)
-					{
-						volcanicAshSprite = new VolcanoSprite(this, mf_iconsWidth, mf_iconsWidth); 
-						reflection.displaySprite = volcanicAshSprite;
-						addChild(reflection.displaySprite);
-					} else {
-						volcanicAshSprite = reflection.displaySprite as VolcanoSprite;
-					}
+					reflection = m_featureData.getReflectionAt(i);
+					var reflectionDelta: int = reflection.reflectionDelta;
+					
+					var displaySprite: WFSFeatureEditableSprite = getDisplaySpriteForReflectionAt(reflectionDelta);
+					volcanicAshSprite = displaySprite as VolcanoSprite;
 					
 					volcanicAshSprite.setBitmap(mBitmap.bitmapData);
 				}
@@ -193,6 +143,15 @@ package com.iblsoft.flexiweather.ogc.editable.features
 			} else {
 				setTimeout(onIconLoaded, 1000, mBitmap);
 			}
+		}
+		
+		override protected function addMoveablePointListeners(mp:MoveablePoint):void
+		{
+			//do not do anything, volcano can not be dragged out
+		}
+		override protected function removeMoveablePointListeners(mp:MoveablePoint):void
+		{
+			//do not do anything, volcano can not be dragged out
 		}
 		
 		override public function getDisplaySpriteForReflection(id: int): WFSFeatureEditableSprite

@@ -26,7 +26,6 @@ package com.iblsoft.flexiweather.ogc
 	
 	public class FeatureBase extends Sprite
 	{
-		private var _reflectionSprites: Dictionary = new Dictionary();
 		private var _next: FeatureBase;
 		private var _previous: FeatureBase;
 
@@ -133,6 +132,7 @@ package com.iblsoft.flexiweather.ogc
 		
 		public function insertPointBefore(i_pointIndex: uint, pt: Point): void
 		{
+			trace("FEATUREBASE inserPointBefore");
 //			m_points.addItemAt(pt, i_pointIndex);
 //			m_coordinates.addItemAt(m_master.container.pointToCoord(pt.x, pt.y), i_pointIndex);
 			
@@ -453,12 +453,5 @@ package com.iblsoft.flexiweather.ogc
 			return ms_internalFeatureId;
 		}
 		
-		public function getDisplaySpriteForReflectionAt(reflectionDelta: int): Sprite
-		{
-			if (!_reflectionSprites[reflectionDelta])
-				_reflectionSprites[reflectionDelta] = new Sprite();
-			
-			return _reflectionSprites[reflectionDelta] as Sprite;
-		}
 	}
 }

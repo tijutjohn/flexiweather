@@ -1,7 +1,6 @@
 package com.iblsoft.flexiweather.ogc.editable.features.curves
 {
 	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
-	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableClosableCurveWithBaseTimeAndValidity;
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSCurveFeature;
@@ -51,13 +50,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 			var i_color: uint = getCurrentColor(mi_color);
 			var i_fillColor: uint = getCurrentColor(mi_fillColor);
 			
-			var gr: Graphics = graphics;
-			
-			var reflectionData: WFSEditableReflectionData = ml_movablePoints.getReflection(reflection) as WFSEditableReflectionData;
-			if (reflectionData && reflectionData.displaySprite)
-			{
-				gr = reflectionData.displaySprite.graphics;
-			}
+			var gr: Graphics = getRendererGraphics(reflection);
 			
 			var cr: StyledLineCurveRenderer = new StyledLineCurveRenderer(gr,
 				mf_size, i_color, 5, ms_style, ms_fillStyle, i_fillColor);

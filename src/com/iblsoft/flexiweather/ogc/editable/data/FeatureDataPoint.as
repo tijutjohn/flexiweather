@@ -4,7 +4,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 	
 	public class FeatureDataPoint extends Point
 	{
-		public var movablePoint: MoveablePoint;
+//		public var movablePoint: MoveablePoint;
 		public var isReflectionEdgePoint:Boolean;
 		
 		public function FeatureDataPoint(x:Number=0, y:Number=0)
@@ -20,10 +20,15 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		override public function clone(): Point
 		{
 			var fdp: FeatureDataPoint = new FeatureDataPoint(x,y);
-			fdp.movablePoint = movablePoint;
+//			fdp.movablePoint = movablePoint;
 			fdp.isReflectionEdgePoint = isReflectionEdgePoint;
 			
 			return fdp;
+		}
+		
+		override public function toString(): String
+		{
+			return "FeatureDataPoint ["+x+","+y+"]";
 		}
 	}
 }

@@ -18,6 +18,11 @@ package com.iblsoft.flexiweather.utils
 			m_graphics = graphics;
 		}
 
+		public final function clear(): void
+		{
+			m_graphics.clear();
+		}
+		
 		public final function start(x: Number, y: Number): void
 		{
 			if (mi_recursionDepth == 0)

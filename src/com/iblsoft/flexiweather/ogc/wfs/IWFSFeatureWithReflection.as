@@ -1,7 +1,6 @@
 package com.iblsoft.flexiweather.ogc.wfs
 {
-	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
-	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionDictionary;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
 	
 	import flash.display.DisplayObject;
 
@@ -11,8 +10,8 @@ package com.iblsoft.flexiweather.ogc.wfs
 		function get getAnticollisionObstacle(): DisplayObject;
 		
 		function get totalReflections(): int;
-		function get reflectionDictionary(): WFSEditableReflectionDictionary;
-		function getReflection(id: int): WFSEditableReflectionData;
+//		function get reflectionDictionary(): WFSEditableReflectionDictionary;
+		function getReflection(id: int): FeatureDataReflection;
 		function getDisplaySpriteForReflection(id: int): WFSFeatureEditableSprite;
 	}
 }

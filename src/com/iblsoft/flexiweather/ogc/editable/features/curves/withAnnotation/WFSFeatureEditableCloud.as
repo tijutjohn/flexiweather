@@ -4,11 +4,11 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerFeatureBase;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWFS;
 	import com.iblsoft.flexiweather.ogc.data.ReflectionData;
-	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableClosableCurveWithBaseTimeAndValidity;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableClosableCurveWithBaseTimeAndValidityAndAnnotation;
 	import com.iblsoft.flexiweather.ogc.editable.annotations.CloudAnnotation;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithAnnotation;
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
 	import com.iblsoft.flexiweather.proj.Coord;
@@ -62,13 +62,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 			var i_color: uint = getCurrentColor(0x00ff00);
 			var renderer: CloudCurveRenderer;
 			
-			var gr: Graphics = graphics;
-			
-			var reflectionData: WFSEditableReflectionData = ml_movablePoints.getReflection(reflection) as WFSEditableReflectionData;
-			if (reflectionData && reflectionData.displaySprite)
-			{
-				gr = reflectionData.displaySprite.graphics;
-			}
+			var gr: Graphics = getRendererGraphics(reflection);
 			
 			renderer = new CloudCurveRenderer(gr, 2.0, i_color, 1);
 			return renderer;
@@ -114,16 +108,20 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 //				master.container.labelLayout.removeObject(this);
 				
 				var cloudTextInfo: CloudAnnotation;
-				var reflection: WFSEditableReflectionData;
+				var reflection: FeatureDataReflection;
 				
-				var totalReflections: uint = ml_movablePoints.totalReflections;
+				
 				for (var i: int = 0; i < totalReflections; i++)
 				{
-					reflection = ml_movablePoints.getReflection(i) as WFSEditableReflectionData;
+					reflection = m_featureData.getReflectionAt(i);
 					if (reflection)
 					{
-						cloudTextInfo = reflection.annotation as CloudAnnotation;
-						master.container.labelLayout.removeObject(reflection.displaySprite);
+						var reflectionDelta: int = reflection.reflectionDelta;
+						
+						cloudTextInfo = getAnnotationForReflectionAt(reflectionDelta) as CloudAnnotation;
+						var displaySprite: WFSFeatureEditableSprite = getDisplaySpriteForReflection(reflectionDelta);
+						
+						master.container.labelLayout.removeObject(displaySprite);
 						master.container.labelLayout.removeObject(cloudTextInfo);
 					}
 				}

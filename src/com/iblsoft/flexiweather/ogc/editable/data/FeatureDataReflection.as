@@ -12,11 +12,20 @@ package com.iblsoft.flexiweather.ogc.editable.data
 
 	public class FeatureDataReflection
 	{
-		[ArrayElementType("com.iblsoft.flexiweather.ogc.editable.data.FeatureDataLine")]
+		public static var fdr_uid: int = 0;
+		public var uid: int;
+		
+//		[ArrayElementType("com.iblsoft.flexiweather.ogc.editable.data.FeatureDataLine")]
 		private var _lines: Array;
 		
-		[ArrayElementType("com.iblsoft.flexiweather.ogc.editable.data.FeatureDataPoint")]
+//		[ArrayElementType("com.iblsoft.flexiweather.ogc.editable.data.FeatureDataPoint")]
 		private var _points: Array;
+		
+//		[ArrayElementType("com.iblsoft.flexiweather.ogc.editable.data.FeatureDataPoint")]
+		/**
+		 * Editable points are filtered from _points array in compute() method. So be sure they are computed before you access this array 
+		 */		
+		private var _editablePoints: Array;
 		
 		public var reflectionDelta: int;
 		
@@ -29,6 +38,10 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		{
 			return _points;
 		}
+		public function get editablePoints(): Array
+		{
+			return _editablePoints;
+		}
 		
 		public  var parentFeatureData: FeatureData;
 		
@@ -37,13 +50,23 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		
 		public function FeatureDataReflection(i_reflectionData: int)
 		{
+			uid = fdr_uid++;
+			
 			_lines = new Array();
 			_points = new Array();
+			_editablePoints = new Array();
 			reflectionDelta = i_reflectionData;
 			_stage = (FlexGlobals.topLevelApplication as DisplayObject).stage;
+			
+			trace("FeatureDataReflection created: " + this);
 				
 		}
 		
+		public function setEditablePoints(editablePoints: Array): void
+		{
+			_editablePoints = editablePoints;
+		}
+			
 		public function debug(): void
 		{
 			trace("\t FeatureDataReflection: " + reflectionDelta);
@@ -55,6 +78,19 @@ package com.iblsoft.flexiweather.ogc.editable.data
 				var line: FeatureDataLine = getLineAt(i);
 				trace("\t\t :" + line);
 			}
+		}
+		
+		public function clear(): void
+		{
+			if (_points.length > 0)
+				_points.splice(0, _points.length);
+			
+			var total: int = _lines.length;
+			for (var i: int = 0; i < total; i++)
+			{
+				var line: FeatureDataLine = getLineAt(i);
+				line.clear();
+			}	
 		}
 		
 		public function createLine(): FeatureDataLine
@@ -129,6 +165,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		 */		
 		public function validate(): void
 		{
+			trace("\t" + this + " VALIDATE");
 			compute();
 			stopListenForNextFrame();
 		}
@@ -139,12 +176,15 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		 */		
 		private function compute(): void
 		{
-			_points = [];
+			trace("\t" + this + " COMPUTE");
+			if (_points.length > 0)
+				_points.splice(0, _points.length);
 			var cnt: int = 0;
 			var oldPoint: FeatureDataPoint;
+//			_editablePoints = [];
 			for each (var line: FeatureDataLine in _lines)
 			{
-				for each (var lineSegment: LineSegment in line.lineSegments)
+				for each (var lineSegment: FeatureDataLineSegment in line.lineSegments)
 				{
 					var p1: FeatureDataPoint = new FeatureDataPoint(lineSegment.x1, lineSegment.y1);
 					var p2: FeatureDataPoint = new FeatureDataPoint(lineSegment.x2, lineSegment.y2);
@@ -157,12 +197,18 @@ package com.iblsoft.flexiweather.ogc.editable.data
 						_points.push(p1);
 					}
 						
-					_points.push(p2);
+					//check if line has defined second point
+					if (!isNaN(p2.x) && !isNaN(p2.y))
+					{
+						_points.push(p2);
+						oldPoint = p2.clone() as FeatureDataPoint;
+					} else {
+						oldPoint = p1.clone() as FeatureDataPoint;
+					}
 					
 					if (cnt == 0)
 						_startPoint = p1.clone() as FeatureDataPoint;
 					
-					oldPoint = p2.clone() as FeatureDataPoint;
 					cnt++;
 				}
 			}
@@ -179,6 +225,8 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			}
 			_center.x /= total;
 			_center.y /= total;
+			
+			trace("\t" + this + " COMPUTE END");
 		}
 		
 		public function get startPoint(): FeatureDataPoint
@@ -202,7 +250,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		
 		public function toString(): String
 		{
-			var str: String = "FeatureDataReflection lines: " + _lines.length + " poins: " + _points.length;
+			var str: String = "FeatureDataReflection ["+uid+"] lines: " + _lines.length + " poins: " + _points.length;
 			if (_lines.length > 0)
 			{
 				str += " (";

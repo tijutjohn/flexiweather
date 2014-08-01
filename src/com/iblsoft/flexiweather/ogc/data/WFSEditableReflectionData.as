@@ -6,13 +6,13 @@ package com.iblsoft.flexiweather.ogc.data
 
 	public class WFSEditableReflectionData extends ReflectionData
 	{
-		protected var _moveablePoints: Array;
+//		protected var _moveablePoints: Array;
 		protected var _annotation: AnnotationBox;
 
-		public function get moveablePoints(): Array
-		{
-			return _moveablePoints;
-		}
+//		public function get moveablePoints(): Array
+//		{
+//			return _moveablePoints;
+//		}
 
 		public function get annotation(): AnnotationBox
 		{
@@ -22,20 +22,21 @@ package com.iblsoft.flexiweather.ogc.data
 		public function WFSEditableReflectionData(iw: InteractiveWidget)
 		{
 			super(iw);
-			_moveablePoints = [];
+//			_moveablePoints = [];
 		}
 
 		override public function remove(): void
 		{
 			super.remove();
-			_moveablePoints = null;
+//			_moveablePoints = null;
 			_annotation = null;
 		}
 		
+		/*
 		override public function cleanup(): void
 		{
 			super.cleanup();
-			_moveablePoints = [];
+//			_moveablePoints = [];
 		}
 
 		override public function removeItemAt(pointer: int): void
@@ -69,6 +70,7 @@ package com.iblsoft.flexiweather.ogc.data
 		{
 			_moveablePoints[pointer] = mp;
 		}
+		*/
 
 		public function addAnnotation(annotation: AnnotationBox): void
 		{

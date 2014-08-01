@@ -3,16 +3,20 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.ogc.FeatureBase;
 	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
 	import com.iblsoft.flexiweather.ogc.GMLUtils;
-	import com.iblsoft.flexiweather.ogc.data.WFSEditableReflectionData;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureData;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataPoint;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSpriteWithAnnotation;
 	import com.iblsoft.flexiweather.utils.AnnotationBox;
 	import com.iblsoft.flexiweather.utils.ISO8601Parser;
 	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayout;
+	import com.iblsoft.flexiweather.utils.draw.DrawMode;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	
 	import flash.display.DisplayObject;
+	import flash.display.Graphics;
 	import flash.geom.Point;
 	
 	import mx.collections.ArrayCollection;
@@ -21,10 +25,10 @@ package com.iblsoft.flexiweather.ogc.editable
 	{
 		public function get annotation():AnnotationBox
 		{
-			if (totalReflections > 0)
+			if (m_featureData)
 			{
-				var reflection: WFSEditableReflectionData = getReflection(0);  
-				return reflection.annotation as AnnotationBox;
+				var reflection: FeatureDataReflection = m_featureData.getReflectionAt(0);
+				return getAnnotationForReflectionAt(reflection.reflectionDelta);
 			}
 			return null;
 		}
@@ -57,50 +61,55 @@ package com.iblsoft.flexiweather.ogc.editable
 			var a_points: Array = getPoints();
 			
 			var annotation: AnnotationBox;
-			var reflection: WFSEditableReflectionData;
+			var reflection: FeatureDataReflection;
 			var _addToLabelLayout: Boolean;
 			var displaySpriteWithAnnotation: WFSFeatureEditableSpriteWithAnnotation;
+			var gr: Graphics;
 			
+			graphics.clear();
 			//create sprites for reflections
-			var totalReflections: uint = ml_movablePoints.totalReflections;
+			
 			
 			for (var i: int = 0; i < totalReflections; i++)
 			{
-				reflection = ml_movablePoints.getReflection(i) as WFSEditableReflectionData;
-				if (!reflection.displaySprite)
+				reflection = m_featureData.getReflectionAt(i);
+				if (reflection)
 				{
-					reflection.displaySprite = getDisplaySpriteForReflection(reflection.reflectionDelta);
-					addChild(reflection.displaySprite);
+					reflection.validate();
+					reflection.debug();
+					
+					var reflectionDelta: int = reflection.reflectionDelta;
+					displaySpriteWithAnnotation = getDisplaySpriteForReflectionAt(reflectionDelta) as WFSFeatureEditableSpriteWithAnnotation;
+					gr = displaySpriteWithAnnotation.graphics;
+					
+					if (!displaySpriteWithAnnotation.parent)
+						addChild(displaySpriteWithAnnotation);
+					
+					annotation = getAnnotationForReflectionAt(reflectionDelta);
+					if (!annotation )
+					{
+						annotation = createAnnotation();
+						addAnnotationForReflectionAt(reflectionDelta, annotation);
+					}
+				
+					var pt: FeatureDataPoint = reflection.points[0] as FeatureDataPoint;
+					if (pt)
+					{
+						trace("WFSFeatureEditableWithBaseTimeAndValidityAndAnnotation PT is  " + pt);
+						displaySpriteWithAnnotation.points = [pt];
+						
+						if (!mb_spritesAddedToLabelLayout && master)
+						{
+							addToLabelLayout(annotation, displaySpriteWithAnnotation, master, master.container.labelLayout, i);
+							_addToLabelLayout = true;
+						} else {
+							master.container.anticollisionObjectVisible(displaySpriteWithAnnotation, annotation.visible);
+						}
+						displaySpriteWithAnnotation.update(this, annotation, getCurrentColor(0x000000), master.container.labelLayout, pt);
+					} else {
+						trace("WFSFeatureEditableWithBaseTimeAndValidityAndAnnotation PT is  NULL");
+					}
 				}
-				displaySpriteWithAnnotation = reflection.displaySprite as WFSFeatureEditableSpriteWithAnnotation;
-				
-				if (reflection.annotation )
-				{
-					annotation = reflection.annotation ;
-				} else {
-					annotation = createAnnotation();
-					reflection.addAnnotation(annotation);
-				}
-				
-				var pt: Point = reflection.points[0] as Point;
-				displaySpriteWithAnnotation.points = [pt];
-				
-				if (!mb_spritesAddedToLabelLayout && master)
-				{
-					addToLabelLayout(annotation, displaySpriteWithAnnotation, master, master.container.labelLayout, i);
-					_addToLabelLayout = true;
-				} else {
-					master.container.anticollisionObjectVisible(displaySpriteWithAnnotation, annotation.visible);
-				}
-				
-				
-				//FIXME fix this commented line
-//				displaySpriteWithAnnotation.update(this, blackColor, master.container.labelLayout, pt);
-				displaySpriteWithAnnotation.update(this, annotation, getCurrentColor(0x000000), master.container.labelLayout, pt);
-				
-				
-				//				radiationSprite.x = Point(reflection.points[0]).x;
-				//				radiationSprite.y = Point(reflection.points[0]).y;
 			}
 			
 			if (!mb_spritesAddedToLabelLayout && _addToLabelLayout)

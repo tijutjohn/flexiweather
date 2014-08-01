@@ -59,12 +59,12 @@ package com.iblsoft.flexiweather.ogc.data
 						data = ISO8601Parser.stringToDate(storage.serializeString('data', null));
 						break;
 					case 'number':
-						value = storage.serializeNumber('value', null);
-						data = storage.serializeNumber('data', null);
+						value = storage.serializeNumber('value', Number.NaN);
+						data = storage.serializeNumber('data', Number.NaN);
 						break;
 					case 'int':
-						value = storage.serializeInt('value', null);
-						data = storage.serializeInt('data', null);
+						value = storage.serializeInt('value', 0);
+						data = storage.serializeInt('data', 0);
 						break;
 				}
 			}
