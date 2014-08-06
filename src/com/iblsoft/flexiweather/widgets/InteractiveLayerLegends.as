@@ -167,7 +167,7 @@ package com.iblsoft.flexiweather.widgets
 		}
 		public function addLayer(l: InteractiveLayer): void
 		{
-			trace("ILLegend addLayer: " + l.name);
+//			debug("ILLegend addLayer: " + l.name);
 			m_layers.addItemAt(l, 0);
 			l.addEventListener(InteractiveLayerEvent.VISIBILITY_EFFECT_FINISHED, onLayerVisibilityChanged);
 		}
@@ -184,13 +184,13 @@ package com.iblsoft.flexiweather.widgets
 				var legendGroup: InteractiveLayerLegendGroup = getGroupFromDictionary(l);
 				if (!legendGroup)
 				{
-					trace("Does not find legendGroup in removeLayer for layer: " + l.name);
+					debug("Does not find legendGroup in removeLayer for layer: " + l.name);
 				} else {
 					l.removeLegend(legendGroup);
 					removeCanvasFromDictionary(l);
 				}
 			} else {
-				trace("Problem with remove layer from ILayerLegends");
+				debug("Problem with remove layer from ILayerLegends");
 			}
 				
 		}
