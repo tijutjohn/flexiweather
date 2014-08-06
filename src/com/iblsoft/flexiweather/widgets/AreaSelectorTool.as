@@ -15,6 +15,7 @@ package com.iblsoft.flexiweather.widgets
 	import mx.core.UIComponent;
 	
 	/**
+	 * AreaSelectorTool
 	 * 
 	 * @author Franto
 	 * 
