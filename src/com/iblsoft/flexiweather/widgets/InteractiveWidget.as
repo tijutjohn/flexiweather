@@ -1763,7 +1763,7 @@ package com.iblsoft.flexiweather.widgets
 				h = areaHeight;
 			}
 			
-			trace("IW onResized: ["+w+","+h+"] old ["+Event.oldWidth+","+Event.oldHeight+"]");
+//			trace("IW onResized: ["+w+","+h+"] old ["+Event.oldWidth+","+Event.oldHeight+"]");
 			m_labelLayout.setBoundary(new Rectangle(0, 0, w, h));
 			m_objectLayout.setBoundary(new Rectangle(0, 0, w, h));
 			if (!m_resizeTimer)

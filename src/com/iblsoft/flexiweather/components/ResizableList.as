@@ -23,7 +23,7 @@ package com.iblsoft.flexiweather.components
 			{
 				if (value.length > 0)
 				{
-					trace("ResizableList dataProvider items > 1");
+//					trace("ResizableList dataProvider items > 1");
 					findLongestTypicalItem();
 				}
 				addDataProviderListeners(value);
