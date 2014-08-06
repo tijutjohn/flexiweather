@@ -13,7 +13,12 @@ package com.iblsoft.flexiweather.widgets
 	import flash.geom.Rectangle;
 	
 	import mx.core.UIComponent;
-
+	
+	/**
+	 * 
+	 * @author Franto
+	 * 
+	 */	
 	public class AreaSelectorTool extends InteractiveLayer
 	{
 		public static const AREA_CREATED: String = 'area created';
