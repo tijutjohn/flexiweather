@@ -689,13 +689,18 @@ package com.iblsoft.flexiweather.ogc.tiling
 		private function drawTile(tileIndex: TileIndex, s_crs: String, bitmapData: BitmapData, redrawBorder: Boolean = false, qttViewProperties: TiledViewProperties = null): void
 		{
 			var tileBBox: BBox = getGTileBBox(s_crs, tileIndex);
-			var reflectedTileBBoxes: Array = container.mapBBoxToViewReflections(tileBBox);
-			if (reflectedTileBBoxes.length > 0)
+			if (tileBBox)
 			{
-				for each (var reflectedTileBBox: BBox in reflectedTileBBoxes)
+				var reflectedTileBBoxes: Array = container.mapBBoxToViewReflections(tileBBox);
+				if (reflectedTileBBoxes.length > 0)
 				{
-					drawReflectedTile(tileIndex, reflectedTileBBox, s_crs, bitmapData, redrawBorder, qttViewProperties);
+					for each (var reflectedTileBBox: BBox in reflectedTileBBoxes)
+					{
+						drawReflectedTile(tileIndex, reflectedTileBBox, s_crs, bitmapData, redrawBorder, qttViewProperties);
+					}
 				}
+			} else {
+				trace("InteractiveLayerTiled drawTile can not find tileBBox");
 			}
 		}
 
