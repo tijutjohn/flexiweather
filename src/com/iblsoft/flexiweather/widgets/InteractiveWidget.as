@@ -374,6 +374,18 @@ package com.iblsoft.flexiweather.widgets
 		{
 			super.commitProperties();
 			
+			if (m_suspendDataUpdatingChanged)
+			{
+				debug("commitProperties m_suspendDataUpdatingChanged");
+				var layersCount: int = m_layerContainer.numElements;
+				for (var i : int = 0; i < layersCount; i++)
+				{
+					var l: InteractiveLayer = m_layerContainer.getElementAt(i) as InteractiveLayer;
+					if (l is InteractiveDataLayer)
+						(l as InteractiveDataLayer).suspendDataUpdating = m_suspendDataUpdating;
+				}
+				m_suspendDataUpdatingChanged = false;
+			}
 			if (_forceAnticollisionUpdate)
 			{
 				notifyAnticollisionUpdate();
@@ -684,6 +696,7 @@ package com.iblsoft.flexiweather.widgets
 
 		public function addLayer(l: InteractiveLayer, index: int = -1): void
 		{
+			debug("addLayer: " + l);
 			l.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onLayerLoaded);
 			l.addEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onLayerLoadedFromCache);
 			l.addEventListener(InteractiveDataLayer.LOADING_STARTED, onLayerLoadingStart);
@@ -729,6 +742,7 @@ package com.iblsoft.flexiweather.widgets
 
 		public function removeLayer(l: InteractiveLayer, b_destroy: Boolean = false): void
 		{
+			debug("removeLayer: " + l);
 			if (l is InteractiveLayerMap && m_interactiveLayerMap == l)
 				setInteractiveLayerMap(null);
 			l.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onLayerLoaded);
@@ -746,6 +760,7 @@ package com.iblsoft.flexiweather.widgets
 
 		public function removeAllLayers(): void
 		{
+			debug("removeAllLayers" );
 			while (m_layerContainer.numElements)
 			{
 				var i: int = m_layerContainer.numElements - 1;
@@ -1744,35 +1759,37 @@ package com.iblsoft.flexiweather.widgets
 
 		protected function onResized(Event: ResizeEvent): void
 		{
-		
-			var w: Number;
-			var h: Number;
-			
-			if (!isNaN(explicitWidth))
-				w = explicitWidth;
-			else
-				w = width;
-			if (!isNaN(explicitHeight))
-				h = explicitHeight;
-			else
-				h = height;
-			
-			if (autoLayoutInParent)
+			if (!m_suspendDataUpdating)
 			{
-				w = areaWidth;
-				h = areaHeight;
+				var w: Number;
+				var h: Number;
+				
+				if (!isNaN(explicitWidth))
+					w = explicitWidth;
+				else
+					w = width;
+				if (!isNaN(explicitHeight))
+					h = explicitHeight;
+				else
+					h = height;
+				
+				if (autoLayoutInParent)
+				{
+					w = areaWidth;
+					h = areaHeight;
+				}
+				
+	//			trace("IW onResized: ["+w+","+h+"] old ["+Event.oldWidth+","+Event.oldHeight+"]");
+				m_labelLayout.setBoundary(new Rectangle(0, 0, w, h));
+				m_objectLayout.setBoundary(new Rectangle(0, 0, w, h));
+				if (!m_resizeTimer)
+				{
+					m_resizeTimer = new Timer(500, 1);
+					m_resizeTimer.addEventListener(TimerEvent.TIMER_COMPLETE, callDelayedResize);
+				}
+				m_resizeTimer.stop();
+				m_resizeTimer.start();
 			}
-			
-//			trace("IW onResized: ["+w+","+h+"] old ["+Event.oldWidth+","+Event.oldHeight+"]");
-			m_labelLayout.setBoundary(new Rectangle(0, 0, w, h));
-			m_objectLayout.setBoundary(new Rectangle(0, 0, w, h));
-			if (!m_resizeTimer)
-			{
-				m_resizeTimer = new Timer(500, 1);
-				m_resizeTimer.addEventListener(TimerEvent.TIMER_COMPLETE, callDelayedResize);
-			}
-			m_resizeTimer.stop();
-			m_resizeTimer.start();
 		}
 
 		private function callDelayedResize(event: TimerEvent = null): void
@@ -1781,9 +1798,14 @@ package com.iblsoft.flexiweather.widgets
 		}
 		private function afterDelayedResize(): void
 		{
-//        	setViewBBox(m_viewBBox, true); // set the view bbox to update the aspects
-			setViewBBox(m_viewBBox, false); // set the view bbox to update the aspects
-			updateLayersBounds();
+			debug("afterDelayedResize");
+//			if (!suspendResizeNotifying)
+//			{
+				setViewBBox(m_viewBBox, false); // set the view bbox to update the aspects
+				updateLayersBounds();
+//			} else {
+//				trace("IW resize notifying is suspended");
+//			}
 		} 
 		
 		/**
@@ -2902,6 +2924,54 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 		
+		/**
+		 * do not need suspendResizeNotifying for now, but I'm just leaving it here for futre needs
+		 * 
+		 */
+		/*
+		private var m_suspendResizeNotifying: Boolean = false;
+		
+		public function get suspendResizeNotifying(): Boolean
+		{
+			return m_suspendResizeNotifying;	
+		}
+		public function set suspendResizeNotifying(value: Boolean): void
+		{
+			if (m_suspendResizeNotifying != value)
+			{
+				m_suspendResizeNotifying = value;
+			}
+		}
+		*/
+		
+		private var m_suspendDataUpdating: Boolean;
+		private var m_suspendDataUpdatingChanged: Boolean;
+		
+		public function get suspendDataUpdating(): Boolean
+		{
+			return m_suspendDataUpdating;
+		}
+		
+		/**
+		 * If there are lot of data invalidation and you do not want to update data and load them, set suspendDataUpdating = true. 
+		 * After suspendDataUpdating set to false if layer data was invalidated, layer will update its data
+		 * 
+		 * @param value
+		 * 
+		 */		
+		public function set suspendDataUpdating(value: Boolean): void
+		{
+			if (value != m_suspendDataUpdating)
+			{
+				m_suspendDataUpdating = value;
+				m_suspendDataUpdatingChanged = true;
+				
+				debug("commitProperties suspendDataUpdating = " + m_suspendDataUpdating);
+				
+				invalidateProperties();
+			}
+		}
+		
 		public function get suspendAnticollisionProcessing(): Boolean
 		{
 			return m_suspendAnticollisionProcessing;
@@ -2930,7 +3000,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (id != null)
 			{
-//				trace(tag + "| " + type + "| " + str);
+				trace(tag + "| " + type + "| " + str);
 //				LoggingUtils.dispatchLogEvent(this, tag + "| " + type + "| " + str);
 			}
 		}

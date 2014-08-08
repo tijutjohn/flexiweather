@@ -54,6 +54,20 @@ package com.iblsoft.flexiweather.widgets
 				orderLayers();
 				_layersOrderChanged = false;
 			}
+			
+			if (m_suspendDataUpdatingChanged)
+			{
+				var layersCount: int = m_layers.length;
+				var l: InteractiveLayer;
+				for each (l in m_layers)
+				{
+					if (l is InteractiveDataLayer)
+					{
+						(l as InteractiveDataLayer).suspendDataUpdating = suspendDataUpdating;
+					}
+				}
+				m_suspendDataUpdatingChanged = false;
+			}
 		}
 
 		private function onLayerLoadingFinished(event: InteractiveLayerEvent): void
@@ -137,6 +151,7 @@ package com.iblsoft.flexiweather.widgets
 
 		protected function invalidateAreaForLayer(layer: InteractiveLayer): void
 		{
+			trace("InteractiveLayerComposer: invalidateAreaForLayer " + layer);
 			layer.onAreaChanged(true);
 		}
 		

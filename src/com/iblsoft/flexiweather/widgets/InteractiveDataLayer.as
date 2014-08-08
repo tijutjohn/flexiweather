@@ -220,9 +220,35 @@ package com.iblsoft.flexiweather.widgets
 		 */
 		public function invalidateData(b_forceUpdate: Boolean): void
 		{
+			trace("InvalidateDataLayer ["+this+"]");
 			invalidateDataFlag = true;
 			_invalidateDataForceUpdateFlag = _invalidateDataForceUpdateFlag || b_forceUpdate;
 			invalidateProperties();
+		}
+		
+		private var m_suspendDataUpdating: Boolean;
+		protected var m_suspendDataUpdatingChanged: Boolean;
+		
+		public function get suspendDataUpdating(): Boolean
+		{
+			return m_suspendDataUpdating;
+		}
+		
+		/**
+		 * If there are lot of data invalidation and you do not want to update data and load them, set suspendDataUpdating = true. 
+		 * After suspendDataUpdating set to false if layer data was invalidated, layer will update its data
+		 * 
+		 * @param value
+		 * 
+		 */		
+		public function set suspendDataUpdating(value: Boolean): void
+		{
+			if (value != m_suspendDataUpdating)
+			{
+				m_suspendDataUpdating = value;
+				m_suspendDataUpdatingChanged = true;
+				invalidateProperties();
+			}
 		}
 
 		protected function updateData(b_forceUpdate: Boolean): void
@@ -234,10 +260,15 @@ package com.iblsoft.flexiweather.widgets
 			super.commitProperties();
 			if (_invalidateDataFlag)
 			{
-				updateData(_invalidateDataForceUpdateFlag);
-				invalidateDataFlag = false;
+				if (!m_suspendDataUpdating)
+				{
+					updateData(_invalidateDataForceUpdateFlag);
+					invalidateDataFlag = false;
+					_invalidateDataForceUpdateFlag = false;
+				} else {
+					trace("Would call updateData, but m_suspendDataUpdating = true");
+				}
 			}
-			_invalidateDataForceUpdateFlag = false;
 		}
 
 		/*****************************************************************************************************************
