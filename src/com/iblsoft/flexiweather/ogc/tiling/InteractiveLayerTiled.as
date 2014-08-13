@@ -1443,6 +1443,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 					 * (default pattern is just InteractiveLayerWMSWithQTT.WMS_TILING_URL_PATTERN ('&TILEZOOM=%ZOOM%&TILECOL=%COL%&TILEROW=%ROW%') without any WMS data)
 					 */
 					notifyTilingPatternUpdate();
+					debug("CheckZoom: " + mi_zoom);
 					invalidateData(false);
 				}
 			}
@@ -1768,6 +1769,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 		
 		protected function debug(str: String): void
 		{
+			trace("Tiled: " + str);
 			LoggingUtils.dispatchLogEvent(this, "Tiled: " + str);
 		}
 

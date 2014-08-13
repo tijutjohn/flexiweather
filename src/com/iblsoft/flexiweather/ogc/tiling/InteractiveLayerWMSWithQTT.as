@@ -590,7 +590,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		override public function toString(): String
 		{
-			var retStr: String = "InteractiveLayerWMSWithQTT " + name + " / layerID: " + m_layerID + " isTileable: " + isTileable + " / IW: " + container.id;
+			var retStr: String = "InteractiveLayerWMSWithQTT " + name + " / layerID: " + m_layerID + " isTileable: " + isTileable;
+			if (container)
+				retStr += " / IW: " + container.id;
 			if (m_tiledLayer)
 			{
 				retStr += "\n\t\t" + m_tiledLayer;
