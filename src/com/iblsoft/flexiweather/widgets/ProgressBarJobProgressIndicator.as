@@ -12,6 +12,8 @@ package com.iblsoft.flexiweather.widgets
 	{
 		private var m_progressBar: ProgressBar;
 
+		private var _allowTooltip: Boolean;
+		
 		function ProgressBarJobProgressIndicator(progressBar: ProgressBar): void
 		{
 			m_progressBar = progressBar;
@@ -20,6 +22,13 @@ package com.iblsoft.flexiweather.widgets
 			onParentResize(null);
 		}
 
+		public function allowTooltip(b_allow: Boolean): void
+		{
+			_allowTooltip = b_allow;
+			if (!_allowTooltip && m_progressBar)
+				m_progressBar.toolTip = null;
+		}
+		
 		public function jobProgressUpdate(i_jobsDone: uint, i_jobsCount: uint, s_description: String): void
 		{
 			m_progressBar.label = i_jobsDone + "/" + i_jobsCount + " jobs done";
@@ -36,7 +45,8 @@ package com.iblsoft.flexiweather.widgets
 				m_progressBar.mode = ProgressBarMode.EVENT;
 				m_progressBar.indeterminate = true;
 			}
-			m_progressBar.toolTip = s_description;
+			if (_allowTooltip)
+				m_progressBar.toolTip = s_description;
 			m_progressBar.visible = true;
 		}
 

@@ -1,10 +1,13 @@
 package com.iblsoft.flexiweather.widgets
 {
 	import flash.display.DisplayObject;
+	
 	import mx.core.UIComponent;
 
 	public dynamic class JobPreloader extends UIComponent implements JobProgressIndicator
 	{
+		private var _allowTooltip: Boolean;
+		
 		public function JobPreloader()
 		{
 			super();
@@ -14,11 +17,19 @@ package com.iblsoft.flexiweather.widgets
 		{
 		}
 
+		public function allowTooltip(b_allow: Boolean): void
+		{
+			_allowTooltip = b_allow;
+			if (!_allowTooltip)
+				toolTip = null;
+		}
+		
 		public function jobProgressUpdate(i_jobsDone: uint, i_maxJobs: uint, s_description: String): void
 		{
 			updateUI(i_jobsDone, i_jobsDone);
 			visible = true;
-			toolTip = s_description;
+			if (_allowTooltip)
+				toolTip = s_description;
 		}
 
 		public function jobProgressFinished(): void
