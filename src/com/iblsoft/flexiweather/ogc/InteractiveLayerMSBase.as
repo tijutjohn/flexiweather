@@ -1073,12 +1073,14 @@ package com.iblsoft.flexiweather.ogc
 		override public function onContainerSizeChanged(): void
 		{
 			super.onContainerSizeChanged();
+			debug("onContainerSizeChanged");
 			invalidateData(false);
 		}
 
 		public function refreshForSynchronisation(b_force: Boolean): void
 		{
 			setStatus(STATE_EMPTY);
+			debug("refreshForSynchronisation");
 			invalidateData(b_force);
 			
 		}

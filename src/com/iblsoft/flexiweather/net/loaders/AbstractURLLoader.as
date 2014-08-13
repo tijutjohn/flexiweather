@@ -424,6 +424,10 @@ package com.iblsoft.flexiweather.net.loaders
 		 */
 		public function load(urlRequest: URLRequest, associatedData: Object = null, s_backgroundJobName: String = null, useBasicAuthInRequest: Boolean = false, basicAuthAccount: BasicAuthAccount = null, basicAuthRequestData: UniURLLoaderData = null): void
 		{
+			if (urlRequest && urlRequest.data && urlRequest.data.REQUEST == "GetMap")
+			{
+				trace("\n LOAD: " + urlRequest.data.LAYERS + " height: " + urlRequest.data.HEIGHT);
+			}
 			checkRequestData(urlRequest);
 			checkRequestBaseURL(urlRequest);
 			
