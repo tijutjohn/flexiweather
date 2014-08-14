@@ -297,7 +297,7 @@ package com.iblsoft.flexiweather.ogc
 			{
 				_invalidateCacheAfterImageLoad = true;
 				//				m_cache.invalidate(ms_imageCRS, m_imageBBox);
-				debug("onAreaChanged " + b_finalChange);
+//				debug("onAreaChanged " + b_finalChange);
 				invalidateData(false);
 			}
 			else

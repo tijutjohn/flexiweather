@@ -31,6 +31,7 @@ package com.iblsoft.flexiweather.widgets
 		private var m_delayBeforeLoad: int
 		private var m_delayBeforeLoadChanged: Boolean;
 
+		private var m_lastValidZoomBBox: ZoomBBox;
 
 		public function get minimimMapScale():Number
 		{
@@ -40,6 +41,11 @@ package com.iblsoft.flexiweather.widgets
 		public function set minimimMapScale(value:Number):void
 		{
 			_minimimMapScale = value;
+		}
+		
+		private function set finalChangeOccuredAfterWheelZoom(value:Boolean):void
+		{
+			mb_finalChangeOccuredAfterWheelZoom = value;
 		}
 
 		override public function set enabled(value:Boolean):void
@@ -252,7 +258,7 @@ package com.iblsoft.flexiweather.widgets
 			if (b_finalChange)
 			{
 				// remember final area change
-				mb_finalChangeOccuredAfterWheelZoom = true;
+				finalChangeOccuredAfterWheelZoom = true;
 			}
 			else
 			{
@@ -271,10 +277,11 @@ package com.iblsoft.flexiweather.widgets
 		{
 			//if(!event.ctrlKey && mb_requireCtrlKey)
 			//	return false;
-			return doDeltaZoom(event.delta)
+			trace("ILZoom: wheel " + event.delta); 
+			return doDeltaZoom(event.delta / 9)
 		}
 
-		public function doDeltaZoom(delta: int): Boolean
+		public function doDeltaZoom(delta: Number): Boolean
 		{
 //			trace("doDeltaZoom: " + delta);
 			var bbox: Rectangle = container.getViewBBox().toRectangle();
@@ -284,7 +291,7 @@ package com.iblsoft.flexiweather.widgets
 			var f_height: Number = bbox.height;
 			var b_changed: Boolean = false;
 			
-			var deltaAbs: int = Math.abs(delta);
+			var deltaAbs: Number = Math.abs(delta);
 			if (deltaAbs > 25)
 				deltaAbs = 25;
 			
@@ -293,7 +300,7 @@ package com.iblsoft.flexiweather.widgets
 			
 //			zoomChangeFromDelta = 0.75;
 			if (zoomChangeFromDelta > 1) zoomChangeFromDelta = 1;
-			if (zoomChangeFromDelta < 0.5) zoomChangeFromDelta = 0.5;
+			if (zoomChangeFromDelta < 0.25) zoomChangeFromDelta = 0.25;
 			
 			trace("doDeltaZoom: " + delta + " zoomChangeFromDelta: " + zoomChangeFromDelta);
 			if (delta > 0)
@@ -321,19 +328,32 @@ package com.iblsoft.flexiweather.widgets
 					invalidateDynamicPart();
 					// but start timer to defer final zoom change, but only if final change
 					// doesn't occur in between (initiated by someone else)
-					mb_finalChangeOccuredAfterWheelZoom = false;
+					finalChangeOccuredAfterWheelZoom = false;
 				} 
+			} else {
+				trace("ILZOOM doDeltaZoom b_changed: " + b_changed);
 			}
 			return true;
 		}
 
 		protected function onMouseWheelTimer(event: Event = null): void
 		{
+			trace("\nILZoom onMouseWheelTimer : " + mb_finalChangeOccuredAfterWheelZoom);
 			if (!mb_finalChangeOccuredAfterWheelZoom)
 			{
 				// noone else commited a final area change, so let's do it
 				if (container)
-					setViewBBoxFromRectangle(container.getViewBBox(), true);
+				{
+					if (m_lastValidZoomBBox)
+					{
+						trace("\nILZoom onMouseWheelTimer LastValid: " + m_lastValidZoomBBox);
+						trace("\nILZoom onMouseWheelTimer container: " + container.getViewBBox().toBBOXString());
+						setViewBBoxFromRectangle(m_lastValidZoomBBox.viewBBox, true);
+						m_lastValidZoomBBox = null;
+					} else {
+						setViewBBoxFromRectangle(container.getViewBBox(), true);
+					}
+				}
 			}
 		}
 
@@ -405,10 +425,14 @@ package com.iblsoft.flexiweather.widgets
 		 */
 		private function setViewBBoxFromRectangle(viewBBox: BBox, b_finalChange: Boolean, bZoomOutAction: Boolean = false): Boolean
 		{
+			var zoomBBox: ZoomBBox = new ZoomBBox(viewBBox, b_finalChange, bZoomOutAction);
+			
 			//check max distance of viewBBox
 			var maxDistance: Number = viewBBox.getBBoxMaximumDistance(container.getCRS());
-			var mapScale: Number = container.getMapScale();
+			var mapScale: Number = container.getMapScale(viewBBox);
 			var mapScaleRatio: Number = 1 / mapScale;
+			zoomBBox.scaleRatio = mapScaleRatio;
+			
 			if (mapScaleRatio < minimimMapScale && !bZoomOutAction)
 			{
 				//do not support map scale more than 1:1
@@ -416,7 +440,11 @@ package com.iblsoft.flexiweather.widgets
 				return false;
 //			} else {
 //				trace("current map scale [min: "+minimimMapScale+"]: " + mapScale + " , " + (1/mapScale) + " bZoomOutAction: " + bZoomOutAction);
+			} else {
+				trace("ILZoom setViewBBoxFromRectangle zoom... 1:" +mapScaleRatio);
 			}
+			m_lastValidZoomBBox = zoomBBox;
+			
 			var extentBBox: BBox = container.getExtentBBox();
 			var allowHorizontalWrap: Boolean = allowWrapHorizontally();
 			if (!allowHorizontalWrap)
@@ -476,5 +504,26 @@ package com.iblsoft.flexiweather.widgets
 		{
 			return "InteractiveLayerZoom ";
 		}
+	}
+}
+import com.iblsoft.flexiweather.ogc.BBox;
+
+class ZoomBBox
+{
+	public var viewBBox: BBox;
+	public var finalChange: Boolean;
+	public var zoomOutAction: Boolean;
+	public var scaleRatio: Number;
+	
+	public function ZoomBBox(viewBBox: BBox, b_finalChange: Boolean, bZoomOutAction: Boolean = false)
+	{
+		this.viewBBox = viewBBox;
+		finalChange = b_finalChange;
+		zoomOutAction = bZoomOutAction;
+	}
+	
+	public function toString(): String
+	{
+		return " ZoomBBox [1:"+scaleRatio+"] : " + viewBBox.toBBOXString();
 	}
 }

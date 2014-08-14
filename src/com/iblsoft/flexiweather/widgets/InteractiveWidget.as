@@ -696,7 +696,7 @@ package com.iblsoft.flexiweather.widgets
 
 		public function addLayer(l: InteractiveLayer, index: int = -1): void
 		{
-			debug("addLayer: " + l);
+//			debug("addLayer: " + l);
 			l.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onLayerLoaded);
 			l.addEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onLayerLoadedFromCache);
 			l.addEventListener(InteractiveDataLayer.LOADING_STARTED, onLayerLoadingStart);
@@ -1934,11 +1934,12 @@ package com.iblsoft.flexiweather.widgets
 			
 			return screenDistanceInMeters / w;
 		}
-		public function getMapScale(): Number
+		public function getMapScale(bbox: BBox = null): Number
 		{
 			var w: Number = areaWidth;
 			var h: Number = areaHeight;
-			var bbox: BBox = m_viewBBox;
+			if (!bbox)
+				bbox = m_viewBBox;
 			var prj: Projection = m_crsProjection;
 			var dpi: int = Capabilities.screenDPI;
 			var maxDistanceOnEarthInKm: Number = bbox.getBBoxMaximumDistance(crs);
