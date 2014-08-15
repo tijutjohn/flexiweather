@@ -55,7 +55,9 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 			m_loader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onDataLoaded);
 			m_loader.addEventListener(ProgressEvent.PROGRESS, onDataProgress);
 			m_loader.addEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onDataLoadFailed);
-			
+
+			m_loader.timeoutPeriod = getTimeoutPeriod();
+
 			_delayedRequestArray = [];
 			_delayedCachedRequestArray = [];
 		}
@@ -78,11 +80,11 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 
 		public function cancel(): void
 		{
+			var wmsCache: WMSCache = m_layer.getCache() as WMSCache;
+			wmsCache.cacheItemLoadingCanceled(m_wmsViewProperties);
+
 			if (ma_requests.length > 0)
 			{
-				var wmsCache: WMSCache = m_layer.getCache() as WMSCache;
-				wmsCache.cacheItemLoadingCanceled(m_wmsViewProperties);
-				
 				for each (var request: URLRequest in ma_requests)
 				{
 					m_loader.cancel(request);
@@ -282,15 +284,15 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				while (_delayedRequestArray.length > 0)
 				{
 					var cachedObject: Object = _delayedRequestArray.shift();
-					startLoading(cachedObject.request, cachedObject.wmsViewProperties, cachedObject.wmsCache, cachedObject.imagePart, cachedObject.jobName);
+					startLoading(cachedObject.request, cachedObject.wmsViewProperties, cachedObject.wmsCache, cachedObject.imagePart, cachedObject.jobName, cachedObject);
 				}
 			}
 		}
 
-		private function startLoading(request: URLRequest, wmsViewProperties: WMSViewProperties, wmsCache: WMSCache, imagePart: ImagePart, jobName: String): void
+		private function startLoading(request: URLRequest, wmsViewProperties: WMSViewProperties, wmsCache: WMSCache, imagePart: ImagePart, jobName: String, requestForTimeout: Object = null): void
 		{
 				m_loader.load(request,
-						{requestedImagePart: imagePart, wmsViewProperties: wmsViewProperties},
+						{requestedImagePart: imagePart, wmsViewProperties: wmsViewProperties, timeoutRequest: requestForTimeout},
 						jobName);
 				invalidateDynamicPart();
 				//			wmsCache.startImageLoading(s_currentCRS, currentViewBBox, request, dimensions);
@@ -470,6 +472,17 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 			return false;
 		}
 
+		private function getTimeoutPeriod(): int
+		{
+			var wmsLayerConfiguration: WMSLayerConfiguration = (m_layer.configuration as WMSLayerConfiguration);
+			var timeoutPeriod: uint = wmsLayerConfiguration.service.timeoutPeriod;
+			return timeoutPeriod;
+		}
+		private function isTimeoutEnabled(): Boolean
+		{
+			return getTimeoutPeriod() > 0;
+		}
+
 		private function onDataLoadFailed(event: UniURLLoaderErrorEvent): void
 		{
 			if (!m_layer.layerWasDestroyed)
@@ -517,7 +530,16 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 					
 					if (!errorStateSet)
 						notifyLoadingFinishedWithErrors(event.associatedData);
-					
+
+				} else {
+					if (event.errorID && event.errorString)
+					{
+						//DISPATCH notification after request timeouted (OW-235)
+						if (event.errorString.indexOf("requestTimeouted") >= 0)
+						{
+							notifyLoadingFinishedNoSynchronizationData(event.associatedData);
+						}
+					}
 				}
 				var imagePart: ImagePart = event.associatedData.requestedImagePart;
 				imagePart.image = null;
@@ -525,6 +547,10 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				imagePart.ms_cacheKey = null;
 				invalidateDynamicPart();
 				onFinishedRequest(wmsViewProperties, event.request);
+
+				//cancel request from cache
+				cancel();
+
 			}
 		}
 

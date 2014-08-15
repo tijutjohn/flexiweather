@@ -1788,7 +1788,7 @@ package com.iblsoft.flexiweather.ogc
 		}
 		public function getSynchronisedVariableValue(s_variableId: String): Object
 		{
-			if (status == InteractiveDataLayer.STATE_DATA_LOADED_WITH_ERRORS)
+			if (status == InteractiveDataLayer.STATE_DATA_LOADED_WITH_ERRORS || status == InteractiveDataLayer.STATE_NO_SYNCHRONISATION_DATA_AVAILABLE)
 				return null;
 			if (m_currentWMSViewProperties)
 				return m_currentWMSViewProperties.getSynchronisedVariableValue(s_variableId);

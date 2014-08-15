@@ -3,7 +3,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 	import com.iblsoft.flexiweather.ogc.Version;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
-	
+
 	import flash.events.EventDispatcher;
 	import flash.net.URLRequest;
 	import flash.net.URLVariables;
@@ -12,18 +12,19 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 	{
 		public static var staticIDCounter: int = 0;
 		public var staticID: int;
-		
+
 		Storage.addChangedClass('com.iblsoft.flexiweather.ogc.OGCServiceConfiguration', 'com.iblsoft.flexiweather.ogc.configuration.services.OGCServiceConfiguration', new Version(1, 6, 0));
 		private var ms_id: String;
 		private var ms_fullURL: String;
 		private var ms_service: String;
 		private var m_version: Version;
 		private var mi_updatePeriod: uint; // in ms
+		private var mi_timeoutPeriod: uint; // in ms
 		private var mb_enabled: Boolean = true;
 		// runtime variables
 		private var ms_baseURL: String;
 		private var m_data: URLVariables;
-		
+
 		public var mi_lastUpdateFlashStamp: int = -1000000;
 
 		protected var _xml: XML;
@@ -31,11 +32,11 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		{
 			return _xml;
 		}
-		
+
 		public function OGCServiceConfiguration(s_url: String, s_service: String, version: Version)
 		{
 			staticID = staticIDCounter++;
-			
+
 			ms_fullURL = s_url;
 			parseFullURL(s_url);
 			ms_service = s_service;
@@ -57,6 +58,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 			if (s_version != s_versionCurrent)
 				m_version = Version.fromString(s_version);
 			mi_updatePeriod = storage.serializeUInt("update-period", mi_updatePeriod, 0);
+			mi_timeoutPeriod = storage.serializeUInt("timeout-period", mi_timeoutPeriod, 0);
 			mb_enabled = storage.serializeBool("enabled", mb_enabled, true);
 //			if(storage.isLoading()) {
 //				var s_data: String = storage.serializeString("arguments", null);
@@ -129,7 +131,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		{
 			return m_version.isLessThan(1, 3, 0);
 		}
-		
+
 		public function get version(): Version
 		{
 			return m_version;
@@ -146,13 +148,28 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		}
 
 		/**
-		 * How often will be service updated (load GetCapabilities service) 
+		 * How often will be service updated (load GetCapabilities service)
 		 * @param i_period period in miliseconds
-		 * 
-		 */		
+		 *
+		 */
 		public function set updatePeriod(i_period: uint): void
 		{
 			mi_updatePeriod = i_period;
+		}
+
+		public function get timeoutPeriod(): uint
+		{
+			return mi_timeoutPeriod;
+		}
+
+		/**
+		 * Timeout for failed requested from this Service. It any request has failed, application will wait "timeoutPeriod" and then rerequest it again
+		 * @param i_period period in miliseconds
+		 *
+		 */
+		public function set timeoutPeriod(i_period: uint): void
+		{
+			mi_timeoutPeriod = i_period;
 		}
 
 		public function get enabled(): Boolean
@@ -188,7 +205,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		{
 			return ms_service.toUpperCase();
 		}
-		
+
 		override public function toString(): String
 		{
 			return "OGCServiceConfiguration: " + id + " / " + staticID + " - " + fullURL;

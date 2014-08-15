@@ -32,9 +32,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.ogc.tiling.TileMatrixSetLink;
 	import com.iblsoft.flexiweather.ogc.tiling.TileSize;
 	import com.iblsoft.flexiweather.ogc.tiling.TiledArea;
-	import com.iblsoft.flexiweather.ogc.tiling.TiledLoader;
 	import com.iblsoft.flexiweather.ogc.tiling.TiledTileRequest;
-	import com.iblsoft.flexiweather.ogc.tiling.TiledTilesProvider;
 	import com.iblsoft.flexiweather.ogc.tiling.TiledTilingInfo;
 	import com.iblsoft.flexiweather.ogc.tiling.TilingUtils;
 	import com.iblsoft.flexiweather.plugins.IConsole;
@@ -48,7 +46,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
-	
+
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
@@ -63,10 +61,10 @@ package com.iblsoft.flexiweather.ogc
 	import flash.utils.Dictionary;
 	import flash.utils.Timer;
 	import flash.utils.setTimeout;
-	
+
 	import mx.controls.Alert;
 	import mx.events.DynamicEvent;
-	
+
 	/**
 	 * Generic Quad Tree (like Google Maps) tiling layer
 	 **/
@@ -86,12 +84,12 @@ package com.iblsoft.flexiweather.ogc
 			super(container, cfg);
 		}
 
-		
+
 		public function addCRSWithTilingExtent(s_urlPattern: String, s_tilingCRS: String, crsTilingExtent: BBox, tileSize: uint, minimumZoomLevel: int, maximumZoomLevel: int): void
 		{
 			if (tileSize == 0)
 				tileSize = TileSize.SIZE_256;
-			
+
 			//new functionality need to generate correct tile matrix set
 			var tileMatrixSet: TileMatrixSet = new TileMatrixSet();
 			tileMatrixSet.id = s_tilingCRS;
@@ -101,23 +99,23 @@ package com.iblsoft.flexiweather.ogc
 			{
 				var matrix: TileMatrix = new TileMatrix();
 				matrix.id = s_tilingCRS + ':' + i;
-				
+
 				//TODO how to count scaleDenominator
 				matrix.topLeftCorner = new Point(crsTilingExtent.xMin, crsTilingExtent.yMin);
-				matrix.tileWidth = tileSize; 
+				matrix.tileWidth = tileSize;
 				matrix.tileHeight = tileSize;
 				matrix.matrixWidth = Math.pow(2, i);
 				matrix.matrixHeight = Math.pow(2, i);
 
-				var widthScaleDenominator: Number = crsTilingExtent.width / (matrix.tileWidth * matrix.matrixWidth); 
-				var heightScaleDenominator: Number = crsTilingExtent.height / (matrix.tileHeight * matrix.matrixHeight); 
-					
+				var widthScaleDenominator: Number = crsTilingExtent.width / (matrix.tileWidth * matrix.matrixWidth);
+				var heightScaleDenominator: Number = crsTilingExtent.height / (matrix.tileHeight * matrix.matrixHeight);
+
 				matrix.scaleDenominator = widthScaleDenominator; //denominators[i];
 				tileMatrixSet.addTileMatrix(matrix);
 			}
 			var tileMatrixSetLink: TileMatrixSetLink = new TileMatrixSetLink();
 			tileMatrixSetLink.tileMatrixSet = tileMatrixSet;
-			
+
 			var tileMatrixSetLimitsArray: TileMatrixSetLimits = new TileMatrixSetLimits();
 			for (var l: int = minimumZoomLevel; l <= maximumZoomLevel; l++)
 			{
@@ -129,18 +127,18 @@ package com.iblsoft.flexiweather.ogc
 				limit.maxTileColumn = limit.maxTileRow;
 				tileMatrixSetLimitsArray.addTileMatrixLimits(limit);
 			}
-			
+
 			tileMatrixSetLink.tileMatrixSetLimitsArray = tileMatrixSetLimitsArray;
-			
+
 			addTileMatrixSetLink(tileMatrixSetLink);
-			
-			
+
+
 			var crsWithBBox: CRSWithBBox = new CRSWithBBox(s_tilingCRS, crsTilingExtent);
 			var tilingInfo: TiledTilingInfo = new TiledTilingInfo(s_urlPattern, crsWithBBox);
 			(m_cfg as QTTMSLayerConfiguration).addTiledTilingInfo(tilingInfo);
-			
+
 		}
-		
+
 		public function clearCRSWithTilingExtents(): void
 		{
 			(m_cfg as QTTMSLayerConfiguration).removeAllTilingInfo();
@@ -150,35 +148,35 @@ package com.iblsoft.flexiweather.ogc
 		override protected function initializeLayerAfterAddToStage(): void
 		{
 			super.initializeLayerAfterAddToStage();
-			
+
 			initializeLayerProperties();
 		}
-		
+
 		override protected function initializeLayer(): void
 		{
 			super.initializeLayer();
 		}
-		
+
 		private function initializeLayerProperties(): void
 		{
 			m_currentQTTViewProperties.setConfiguration(m_cfg);
 			updateCurrentWMSViewProperties();
 		}
-		
+
 		override public function clone(): InteractiveLayer
 		{
 			trace(this + " clone() config: " + configuration);
-			
+
 			var newLayer: InteractiveLayerQTTMS;
 			if (!configuration)
 				newLayer = new InteractiveLayerQTTMS(container, m_cfg as QTTMSLayerConfiguration);
 			else
 				newLayer = configuration.createInteractiveLayer(container) as InteractiveLayerQTTMS;
-			
+
 			updatePropertyForCloneLayer(newLayer);
 			return newLayer;
 		}
-		
+
 		override public function toString(): String
 		{
 			return "InteractiveLayerQTTMS " + name + " / " + layerID;
