@@ -19,7 +19,7 @@ package com.iblsoft.flexiweather.net.loaders
 	import com.iblsoft.flexiweather.widgets.basicauth.controls.IBasicAuthCredentialsPopup;
 	import com.iblsoft.flexiweather.widgets.basicauth.data.BasicAuthAccount;
 	import com.iblsoft.flexiweather.widgets.basicauth.events.BasicAuthEvent;
-	
+
 	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
@@ -36,7 +36,9 @@ package com.iblsoft.flexiweather.net.loaders
 	import flash.net.URLVariables;
 	import flash.utils.ByteArray;
 	import flash.utils.Dictionary;
-	
+	import flash.utils.clearTimeout;
+	import flash.utils.setTimeout;
+
 	import mx.controls.Alert;
 	import mx.core.ClassFactory;
 	import mx.core.FlexGlobals;
@@ -48,7 +50,7 @@ package com.iblsoft.flexiweather.net.loaders
 	import mx.utils.Base64Encoder;
 	import mx.utils.ObjectUtil;
 	import mx.utils.URLUtil;
-	
+
 	import spark.components.TitleWindow;
 
 	public class AbstractURLLoader extends EventDispatcher implements IURLLoaderBasicAuth
@@ -63,6 +65,18 @@ package com.iblsoft.flexiweather.net.loaders
 		public static var basicAuthCredentialsPopupClass: IBasicAuthCredentialsPopup;
 		protected var md_urlLoaderToRequestMap: Dictionary = new Dictionary();
 		private static var _baseURL: String = '';
+
+
+		private var m_timeoutPeriod: uint;
+		public function get timeoutPeriod():uint
+		{
+			return m_timeoutPeriod;
+		}
+
+		public function set timeoutPeriod(value:uint):void
+		{
+			m_timeoutPeriod = value;
+		}
 
 		public static function get baseURL(): String
 		{
@@ -84,6 +98,7 @@ package com.iblsoft.flexiweather.net.loaders
 		public static var crossDomainProxyURLPattern: String = null;
 		/** Deprecated - associated data. Use load(request, associatedData) instead. */
 		public var data: Object;
+
 
 		public function AbstractURLLoader(target: IEventDispatcher = null)
 		{
@@ -128,7 +143,7 @@ package com.iblsoft.flexiweather.net.loaders
 		public function destroy(): void
 		{
 			var id: String;
-			var obj: Object;
+			var obj: URLLoaderDictionaryData;
 			if (md_urlLoaderToRequestMap)
 			{
 				for (id in md_urlLoaderToRequestMap)
@@ -136,7 +151,7 @@ package com.iblsoft.flexiweather.net.loaders
 					obj = md_urlLoaderToRequestMap[id];
 				}
 			}
-			
+
 			data = null;
 			if (_baLoader)
 				_baLoader.destroy();
@@ -430,7 +445,7 @@ package com.iblsoft.flexiweather.net.loaders
 //			}
 			checkRequestData(urlRequest);
 			checkRequestBaseURL(urlRequest);
-			
+
 //			trace(this + " load: " + urlRequest.url);
 			// if there is no associatedDat, add empty one
 			if (!associatedData)
@@ -488,16 +503,45 @@ package com.iblsoft.flexiweather.net.loaders
 				_baLoader = classFactory.newInstance() as IURLLoaderBasicAuthListener;
 				_baLoader.addBasicAuthListeners(this, urlLoader, uniURLLoaderData);
 			}
+
 			UniURLLoaderManager.instance.addLoaderRequest(urlRequest);
+
+			var timeout: int = -1;
+			if (timeoutPeriod)
+			{
+				timeout = startTimeout(urlLoader);
+			}
+
 			urlLoader.load(urlRequest);
 			debug("Load URL: " + urlRequest.url);
+
 			var backgroundJob: BackgroundJob = null;
 			if (s_backgroundJobName != null)
 				backgroundJob = BackgroundJobManager.getInstance().startJob(s_backgroundJobName);
-			md_urlLoaderToRequestMap[urlLoader] = {request: urlRequest, loader: urlLoader, backgroundJob: backgroundJob};
+
+
+			md_urlLoaderToRequestMap[urlLoader] = new URLLoaderDictionaryData(urlRequest, urlLoader, backgroundJob, timeout);
 			var e: UniURLLoaderEvent = new UniURLLoaderEvent(UniURLLoaderEvent.LOAD_STARTED, null, urlRequest, associatedData);
 			dispatchEvent(e);
 		}
+
+		private function startTimeout(urlLoader: URLLoaderWithAssociatedData): int
+		{
+			var timeout: int = setTimeout(requestTimeouted, timeoutPeriod, urlLoader);
+			return timeout;
+		}
+
+		private function requestTimeouted(urlLoader: URLLoaderWithAssociatedData): void
+		{
+			debug("requestTimeouted: " + urlLoader);
+			var urlRequest: URLRequest = disconnectURLLoader(urlLoader);
+			if (urlRequest == null)
+				return;
+			Log.getLogger("UniURLLoader").info("requestTimeouted.");
+			dispatchFault('UniURLLoader requestTimeouted.', 500, null, urlRequest, urlLoader.associatedData);
+		}
+
+
 
 		public function setResponseHeaders(headers: Array, responseURL: String, status: int, loader: Object): void
 		{
@@ -532,7 +576,7 @@ package com.iblsoft.flexiweather.net.loaders
 					{
 						var basicAuthManager: UniURLLoaderBasicAuthManager = UniURLLoaderBasicAuthManager.instance;
 						var urlLoader: URLLoaderWithAssociatedData = URLLoaderWithAssociatedData(loader);
-						var urlRequest: URLRequest = md_urlLoaderToRequestMap[urlLoader].request;
+						var urlRequest: URLRequest = (md_urlLoaderToRequestMap[urlLoader] as URLLoaderDictionaryData).request;
 						/**
 						 * check if domain and realm was authenticated before.
 						 * if yes - just load it again with correct basic auth crendentials
@@ -551,9 +595,9 @@ package com.iblsoft.flexiweather.net.loaders
 						{
 							var autorizationResetValue: String;
 							realm = basicAuthAccount.realm;
-							
+
 							//autorizationResetValue instead of null was used, because of failed Fortify tests (see FW-97)
-							
+
 							//401 - authorization problem, reset name and password
 							basicAuthAccount.name = autorizationResetValue;
 							basicAuthAccount.password = autorizationResetValue;
@@ -617,9 +661,9 @@ package com.iblsoft.flexiweather.net.loaders
 		{
 			var urlLoader: URLLoaderWithAssociatedData = URLLoaderWithAssociatedData(event.target);
 			var urlRequest: URLRequest;
-			// Try to use cross-domain if received "Error #2048: Security sandbox violation:" 
+			// Try to use cross-domain if received "Error #2048: Security sandbox violation:"
 			var s_proxyURL: String = fromBaseURL(crossDomainProxyURLPattern, proxyBaseURL);
-			urlRequest = md_urlLoaderToRequestMap[urlLoader].request;
+			urlRequest = (md_urlLoaderToRequestMap[urlLoader] as URLLoaderDictionaryData).request;
 			checkRequestData(urlRequest);
 			var s_url: String = urlRequest.url;
 			Log.getLogger('SecurityError').info('s_url: ' + s_url);
@@ -642,10 +686,13 @@ package com.iblsoft.flexiweather.net.loaders
 		{
 			var basicAuthManager: UniURLLoaderBasicAuthManager = UniURLLoaderBasicAuthManager.instance;
 			var urlLoader: URLLoaderWithAssociatedData = URLLoaderWithAssociatedData(event.target);
+
+			debug("onDataComplete: " + urlLoader);
+
 			var urlRequest: URLRequest = disconnectURLLoader(urlLoader);
 			if (urlRequest == null)
 				return;
-			
+
 			if (urlLoader.associatedData && urlLoader.associatedData.hasOwnProperty("uniURLLoaderBasicAuthInfo") && urlLoader.associatedData.uniURLLoaderBasicAuthInfo == 'first message')
 			{
 				var domain: String = getDomain(urlRequest);
@@ -697,7 +744,7 @@ package com.iblsoft.flexiweather.net.loaders
 			debug("AbstractURLLoader.onSecurityError: " + event.text);
 			var urlLoader: URLLoaderWithAssociatedData = URLLoaderWithAssociatedData(event.target);
 			var urlRequest: URLRequest;
-			// Try to use cross-domain if received "Error #2048: Security sandbox violation:" 
+			// Try to use cross-domain if received "Error #2048: Security sandbox violation:"
 			if (crossDomainProxyURLPattern != null && event.text.match(/#2048/) && !urlLoader.b_crossDomainProxyRequest)
 			{
 				loadCrossDomainProxyURLPattern(urlLoader);
@@ -714,7 +761,7 @@ package com.iblsoft.flexiweather.net.loaders
 		{
 			var urlRequest: URLRequest;
 			var s_proxyURL: String = fromBaseURL(crossDomainProxyURLPattern, proxyBaseURL);
-			urlRequest = md_urlLoaderToRequestMap[urlLoader].request;
+			urlRequest = (md_urlLoaderToRequestMap[urlLoader] as URLLoaderDictionaryData).request;
 			checkRequestData(urlRequest);
 			var s_url: String = urlRequest.url;
 			Log.getLogger('SecurityError').info('s_url: ' + s_url);
@@ -772,15 +819,26 @@ package com.iblsoft.flexiweather.net.loaders
 			urlLoader.removeEventListener(ProgressEvent.PROGRESS, onDataProgress);
 			urlLoader.removeEventListener(IOErrorEvent.IO_ERROR, onDataIOError);
 			urlLoader.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, onSecurityError);
+			debug("disconnectURLLoader");
 			if (!urlLoader in md_urlLoaderToRequestMap)
+			{
+				debug("disconnectURLLoader URLLoader is not register (was removed already)");
 				return null;
+			}
+
+			var data: URLLoaderDictionaryData = (md_urlLoaderToRequestMap[urlLoader] as URLLoaderDictionaryData);
 			// finish background job if it was started
-			var backgroundJob: BackgroundJob = md_urlLoaderToRequestMap[urlLoader].backgroundJob;
+			var backgroundJob: BackgroundJob = data.backgroundJob;
 			if (backgroundJob != null)
 				BackgroundJobManager.getInstance().finishJob(backgroundJob);
-			var urlRequest: URLRequest = md_urlLoaderToRequestMap[urlLoader].request;
+
+			if (data.timeout > -1)
+				clearTimeout(data.timeout);
+
+			var urlRequest: URLRequest = data.request;
 			UniURLLoaderManager.instance.removeLoaderRequest(urlRequest);
 			delete md_urlLoaderToRequestMap[urlLoader];
+			debug("disconnectURLLoader REMOVE URLLoader: " + urlLoader);
 			return urlRequest;
 		}
 
@@ -789,10 +847,11 @@ package com.iblsoft.flexiweather.net.loaders
 			var key: Object;
 			for (key in md_urlLoaderToRequestMap)
 			{
-				if (md_urlLoaderToRequestMap[key].request === urlRequest)
+				var data: URLLoaderDictionaryData = md_urlLoaderToRequestMap[key];
+				if (data.request === urlRequest)
 				{
-					md_urlLoaderToRequestMap[key].loader.close();
-					disconnectURLLoader(URLLoaderWithAssociatedData(md_urlLoaderToRequestMap[key].loader));
+					data.loader.close();
+					disconnectURLLoader(URLLoaderWithAssociatedData(data.loader));
 					delete md_urlLoaderToRequestMap[key];
 					return true;
 				}
@@ -804,13 +863,14 @@ package com.iblsoft.flexiweather.net.loaders
 		{
 			var str: String = ba.readUTFBytes(ba.length);
 			ba.position = 0;
-			
+
 			return str;
 		}
 
 		protected function debug(txt: String): void
 		{
 			return;
+			trace("AbstractUniURLLoader: " + txt);
 			if (debugConsole)
 				debugConsole.print(txt, 'Info', 'UniURLLoader');
 		}
@@ -820,4 +880,27 @@ package com.iblsoft.flexiweather.net.loaders
 			return "AbstractURLLoader";
 		}
 	}
+}
+import com.iblsoft.flexiweather.net.loaders.URLLoaderWithAssociatedData;
+import com.iblsoft.flexiweather.widgets.BackgroundJob;
+
+import flash.net.URLLoader;
+import flash.net.URLRequest;
+
+class URLLoaderDictionaryData
+{
+	public var request: URLRequest;
+	public var loader: URLLoaderWithAssociatedData;
+	public var backgroundJob: BackgroundJob;
+	public var timeout: int;
+
+	public function URLLoaderDictionaryData(request: URLRequest, loaded: URLLoaderWithAssociatedData, backgroundJob: BackgroundJob, timeout: int)
+	{
+		this.request = request;
+		this.loader = loader;
+		this.backgroundJob = backgroundJob;
+		this.timeout = timeout;
+
+	}
+
 }
