@@ -10,7 +10,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import com.iblsoft.flexiweather.ogc.WMSLayer;
 	import com.iblsoft.flexiweather.ogc.cache.ICache;
 	import com.iblsoft.flexiweather.ogc.cache.ICachedLayer;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.OGCLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.QTTMSLayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.TiledLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.WMSWithQTTLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
@@ -24,7 +26,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
-	
+
 	import flash.display.BitmapData;
 	import flash.display.Graphics;
 	import flash.events.DataEvent;
@@ -78,7 +80,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			}
 			return super.status;
 		}
-		
+
 		override public function set visible(b_visible: Boolean): void
 		{
 			super.visible = b_visible;
@@ -90,6 +92,11 @@ package com.iblsoft.flexiweather.ogc.tiling
 			}
 		}
 
+		override public function set configuration(value: ILayerConfiguration): void
+		{
+			super.configuration = value;
+			updateTileLayerTimeoutPeriod();
+		}
 		public function InteractiveLayerWMSWithQTT(
 				container: InteractiveWidget = null,
 				cfg: WMSWithQTTLayerConfiguration = null): void
@@ -100,19 +107,19 @@ package com.iblsoft.flexiweather.ogc.tiling
 		override protected function initializeLayerAfterAddToStage(): void
 		{
 			super.initializeLayerAfterAddToStage();
-			
+
 			initializeLayerProperties();
 		}
-		
+
 		override protected function initializeLayer(): void
 		{
 			super.initializeLayer();
 		}
-		
+
 		private function initializeLayerProperties(): void
 		{
 			m_tiledLayer = createTiledLayer();
-			
+
 			if (m_tiledLayer)
 			{
 				m_tiledLayer.addEventListener(InteractiveLayerEvent.LAYER_INITIALIZED, onTiledLayerInitialized);
@@ -123,14 +130,16 @@ package com.iblsoft.flexiweather.ogc.tiling
 				updateTiledLayerCRSs();
 			}
 		}
-		
+
 		protected function createTiledLayer(): InteractiveLayerQTTMS
 		{
 			var tiledLayerConfig: QTTMSLayerConfiguration = new QTTMSLayerConfiguration();
 			var tiledLayer: InteractiveLayerQTTMS = new InteractiveLayerQTTMS(container, tiledLayerConfig);
 			tiledLayer.onCapabilitiesDependent = true;
 			tiledLayer.capabilitiesReady = capabilitiesReady;
-			
+
+			updateTileLayerTimeoutPeriod();
+
 			return tiledLayer;
 		}
 
@@ -148,16 +157,16 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			if (!m_tiledLayer)
 				return;
-			
+
 			if (isTileable)
 			{
 				draw(graphics);
 			} else {
 				super.updateDisplayList(unscaledWidth, unscaledHeight);
 			}
-			
+
 			m_tiledLayer.name = name + " (tiled)";
-			
+
 			//TODO fix this after InteractiveLayerTiled is implemented
 //			if (isTileable)
 //			{
@@ -175,10 +184,10 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			if (!container)
 				return;
-			
+
 			updateTiledLayerCRSs();
 			updateTiledLayerValidityTime();
-			
+
 			if (m_tiledLayer)
 			{
 				m_tiledLayer.capabilitiesReady = true;
@@ -207,7 +216,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			super.updateDimensionsInURLRequest(url);
 			ma_specialCacheStrings = [];
 			updateWMSViewProperties(currentViewProperties as WMSViewProperties);
-			
+
 			/*
 			var currWMSViewProperties: WMSViewProperties = currentViewProperties as WMSViewProperties;
 			var dimNames: Array = currWMSViewProperties.getWMSDimensionsNames();
@@ -220,11 +229,23 @@ package com.iblsoft.flexiweather.ogc.tiling
 			*/
 		}
 
+		private function updateTileLayerTimeoutPeriod(): void
+		{
+			if (m_tiledLayer)
+			{
+				var wmsLayerConfiguration: WMSLayerConfiguration = (configuration as WMSLayerConfiguration);
+				var timeoutPeriod: uint = wmsLayerConfiguration.service.timeoutPeriod;
+
+				(m_tiledLayer.configuration as TiledLayerConfiguration).timeoutPeriod = timeoutPeriod;
+			}
+
+		}
 		override protected function updateRequestData(request: URLRequest): void
 		{
 			super.updateRequestData(request);
 			if (isTileable)
 			{
+				updateTileLayerTimeoutPeriod();
 				if (request.data.hasOwnProperty('REQUEST'))
 					request.data.REQUEST = 'GetGTile';
 				if (request.data.hasOwnProperty('LAYERS'))
@@ -244,13 +265,15 @@ package com.iblsoft.flexiweather.ogc.tiling
 				}
 			}
 		}
-		
-		
+
+
 		private function updateWMSViewProperties(wmsViewProperties: WMSViewProperties): void
 		{
+			updateTileLayerTimeoutPeriod();
+
 			var validityTime: Date = getValidityTimeForViewProperties(wmsViewProperties);
 			wmsViewProperties.setValidityTime(validityTime);
-			
+
 			//need to check dimension other than "validity" dependent dimension
 			var specialStringArr: Array = [];
 			var dimNames: Array = wmsViewProperties.getWMSDimensionsNames();
@@ -262,21 +285,21 @@ package com.iblsoft.flexiweather.ogc.tiling
 					var value: String = wmsViewProperties.getWMSDimensionValue(s_dimName);
 					if (value)
 					{
-//						var specialParamName: String = "SPECIAL_" + m_cfg.dimensionToParameterName(s_dimName); 
-						var specialParamName: String = m_cfg.dimensionToParameterName(s_dimName); 
+//						var specialParamName: String = "SPECIAL_" + m_cfg.dimensionToParameterName(s_dimName);
+						var specialParamName: String = m_cfg.dimensionToParameterName(s_dimName);
 						var str: String = specialParamName  + "=" + value;
 						addToSpecialCacheString(str);
 					}
 //				}
-				
+
 			}
 		}
-		
+
 		private function addToSpecialCacheString(str: String): void
 		{
 			var arr: Array = str.split('=');
 			var specialParamName: String = arr[0];
-			
+
 			var len: int = ma_specialCacheStrings.length
 			for (var i: int = 0; i < len; i++)
 			{
@@ -287,7 +310,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 					return;
 				}
 			}
-			
+
 			ma_specialCacheStrings.push(str);
 		}
 
@@ -315,7 +338,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 		private function updateTiledLayerValidityTime(): void
 		{
 			var currWMSViewProperties: WMSViewProperties = currentViewProperties as WMSViewProperties;
-			
+
 			var currentValidityTime: Date = getValidityTimeForViewProperties(currWMSViewProperties);
 			if (m_tiledLayer && currentValidityTime)
 				m_tiledLayer.setValidityTime(currentValidityTime);
@@ -323,14 +346,14 @@ package com.iblsoft.flexiweather.ogc.tiling
 		private function updateTiledLayerURLBase(): void
 		{
 			updateTiledLayerValidityTime();
-			
+
 			var fullURL: String = getFullURL();
 			m_tiledLayer.fullURL = fullURL;
-			
+
 			/*
 			var crs: String = container.getCRS();
 			var config: QTTMSLayerConfiguration = m_tiledLayer.configuration as QTTMSLayerConfiguration;
-			
+
 			var tilingInfo: TiledTilingInfo = config.getTiledTilingInfoForCRS(crs);
 			if (!tilingInfo)
 				trace("updateTiledLayerURLBase problem with CRS");
@@ -352,7 +375,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 				var tileSize: uint = 0;
 				if (m_cfg && m_cfg.hasOwnProperty('tileSize'))
 					tileSize = m_cfg['tileSize'] as uint;
-				
+
 				m_tiledLayer.clearCRSWithTilingExtents();
 				for each (var crsWithBBox: CRSWithBBox in l.crsWithBBoxes)
 				{
@@ -365,11 +388,11 @@ package com.iblsoft.flexiweather.ogc.tiling
 							m_tiledLayer.addCRSWithTilingExtent(WMS_TILING_URL_PATTERN, ti.crs, ti.tilingExtent, TileSize.SIZE_256, 1, 18);
 					}
 				}
-				
+
 				updateTiledLayerURLBase();
 			}
 		}
-		
+
 		override public function destroy(): void
 		{
 			if (m_tiledLayer)
@@ -380,7 +403,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 		override protected function destroyWMSViewPropertiesPreloader(): void
 		{
 			//FIXME fix InteractiveLayerWMSWithQTT destroyWMSViewPropertiesPreloader
-			
+
 //			if (loader is TiledLoader)
 //			{
 //				loader.removeEventListener(InteractiveLayerEvent.INVALIDATE_DYNAMIC_PART, onWMSViewPropertiesDataInvalidateDynamicPart);
@@ -395,17 +418,17 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			if (isTileable)
 			{
-				var tiledLoader: TiledLoader = new TiledLoader(m_tiledLayer); 
+				var tiledLoader: TiledLoader = new TiledLoader(m_tiledLayer);
 				tiledLoader.zoom = m_tiledLayer.zoomLevel;
 				return tiledLoader;
-			} 
+			}
 			return super.getWMSViewPropertiesLoader();
 		}
 
 		override protected function updateData(b_forceUpdate: Boolean): void
 		{
 //			debug("updateDate["+b_forceUpdate+"] isTileable: " + isTileable + " _layerInitialized: " + _layerInitialized + " capabilitiesReady: " + capabilitiesReady + " visible: " + visible);
-			
+
 			if (!_layerInitialized)
 				return;
 			//we need to postpone updateData if capabilities was not received, otherwise we do not know, if layes is tileable or not
@@ -419,7 +442,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 				mb_updateAfterMakingVisible = true;
 				return;
 			}
-			
+
 			if (status != STATE_NO_SYNCHRONISATION_DATA_AVAILABLE)
 			{
 				var gr: Graphics = graphics;
@@ -431,16 +454,16 @@ package com.iblsoft.flexiweather.ogc.tiling
 						return;
 					}
 					ma_specialCacheStrings = [];
-					
+
 					updateTiledLayerURLBase();
 					updateWMSViewProperties(currentViewProperties as WMSViewProperties);
-					
-					
+
+
 					if (isTileable && m_tiledLayer)
 					{
 						m_tiledLayer.setSpecialCacheStrings(ma_specialCacheStrings);
 					}
-					
+
 					if (m_tiledLayer.currentQTTViewProperties)
 					{
 						m_tiledLayer.currentQTTViewProperties.crs = container.getCRS();
@@ -468,7 +491,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 				super.renderPreview(graphics, f_width, f_height);
 		}
 
-		
+
 		/**
 		 * Call this function if you want clear layer graphics
 		 * @param graphics
@@ -542,6 +565,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		override protected function afterWMSDimensionValueIsSet(s_dimName: String, s_value: String): void
 		{
+			super.afterWMSDimensionValueIsSet(s_dimName, s_value);
+
 			// if "run" changed, then even time axis changes
 			var b_frameChanged: Boolean = false;
 			if (m_cfg.dimensionRunName != null && s_dimName == m_cfg.dimensionRunName)
@@ -558,6 +583,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 				if (m_tiledLayer)
 					m_tiledLayer.setValidityTime(_currentValidityTime);
 			}
+
 		}
 
 		private function onAllTilesLoaded(event: InteractiveLayerEvent): void
@@ -666,14 +692,14 @@ package com.iblsoft.flexiweather.ogc.tiling
 			var qttViewProperties: TiledViewProperties = _qttViewPropertiesDictionary[wmsViewProperties];
 			qttViewProperties.crs = wmsViewProperties.crs;
 			qttViewProperties.setViewBBox(wmsViewProperties.getViewBBox());
-			
+
 			updateWMSViewProperties(wmsViewProperties);
 			qttViewProperties.setValidityTime(wmsViewProperties.validity);
 			qttViewProperties.setSpecialCacheStrings(ma_specialCacheStrings);
 			return qttViewProperties;
 		}
-		
-		
+
+
 
 		public function getTiledArea(viewBBox: BBox, zoomLevel: String, tileSize: int): TiledArea
 		{
@@ -689,14 +715,14 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 //			return super.changeViewProperties(getViewPropertiesBasedOnIsTileable(viewProperties));
 			super.changeViewProperties(viewProperties);
-			
+
 			var layer: IPreloadableLayer = getPreloadableInteractiveLayerBaseOnIsTileable();
 			if (layer == this)
 			{
 				return;
 //				return super.changeViewProperties(getViewPropertiesBasedOnIsTileable(viewProperties));
 			}
-					
+
 			return layer.changeViewProperties(getViewPropertiesBasedOnIsTileable(viewProperties));
 		}
 
@@ -705,7 +731,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			var layer: IPreloadableLayer = getPreloadableInteractiveLayerBaseOnIsTileable();
 			if (layer == this)
 				return super.cancelPreload();
-			
+
 			return layer.cancelPreload();
 		}
 		override public function preload(viewProperties: IViewProperties): void
@@ -734,10 +760,10 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 //			return layer.isPreloading(getViewPropertiesBasedOnIsTileable(viewProperties));
 		}
-		
+
 		override public function isPreloaded(viewProperties: IViewProperties): Boolean
 		{
- 			var layer: IPreloadableLayer = getPreloadableInteractiveLayerBaseOnIsTileable();
+			var layer: IPreloadableLayer = getPreloadableInteractiveLayerBaseOnIsTileable();
 			if (layer == this)
 				return super.isPreloaded(getViewPropertiesBasedOnIsTileable(viewProperties));
 
@@ -764,12 +790,12 @@ package com.iblsoft.flexiweather.ogc.tiling
 					cache.clearCache();
 			}
 		}
-		
+
 		private function onTiledLayerInitialized(event: InteractiveLayerEvent): void
 		{
 			event.stopImmediatePropagation();
 			event.stopPropagation();
-			
+
 			m_tiledLayer.removeEventListener(InteractiveLayerEvent.LAYER_INITIALIZED, onTiledLayerInitialized);
 			notifyLayerInitializedIfBothLayersAreInitialized();
 		}
@@ -781,10 +807,10 @@ package com.iblsoft.flexiweather.ogc.tiling
 				notifyLayerInitializedIfBothLayersAreInitialized();
 			} else {
 				trace(this + " delayedInitializeLayerAfterAddToStage ALREADY INITIALIZED");
-				
+
 			}
 		}
-		
+
 		private function notifyLayerInitializedIfBothLayersAreInitialized(): void
 		{
 			if (layerInitialized)
@@ -798,13 +824,13 @@ package com.iblsoft.flexiweather.ogc.tiling
 				}
 			}
 		}
-		
+
 		override protected function debug(str: String): void
 		{
 //			trace(this + " WMSWithQTT: " + str);
 //			LoggingUtils.dispatchLogEvent(this, "WMSWithQTT: " + str);
 		}
-		
+
 		override public function clone(): InteractiveLayer
 		{
 			var newLayer: InteractiveLayerWMSWithQTT = new InteractiveLayerWMSWithQTT(container, m_cfg as WMSWithQTTLayerConfiguration);

@@ -85,10 +85,17 @@ package com.iblsoft.flexiweather.ogc.tiling
 			var tiledLayerConfiguration: TiledLayerConfiguration = (m_layer.configuration as TiledLayerConfiguration);
 
 			var timeoutPeriod: uint = 0;
-			if (tiledLayerConfiguration is WMSWithQTTLayerConfiguration)
-				timeoutPeriod = (tiledLayerConfiguration as WMSWithQTTLayerConfiguration).service.timeoutPeriod;
+			if (tiledLayerConfiguration is TiledLayerConfiguration)
+			{
+				timeoutPeriod = (tiledLayerConfiguration as TiledLayerConfiguration).timeoutPeriod;
+				if (timeoutPeriod == 0 && m_layer.parent is InteractiveLayerWMSWithQTT)
+				{
+					timeoutPeriod = ((m_layer.parent as InteractiveLayerWMSWithQTT).configuration as WMSWithQTTLayerConfiguration).service.timeoutPeriod
+				}
+			}
 
-			return 0;
+
+			return timeoutPeriod;
 		}
 
 		private function createLoaders(): void

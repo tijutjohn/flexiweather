@@ -894,7 +894,7 @@ class URLLoaderDictionaryData
 	public var backgroundJob: BackgroundJob;
 	public var timeout: int;
 
-	public function URLLoaderDictionaryData(request: URLRequest, loaded: URLLoaderWithAssociatedData, backgroundJob: BackgroundJob, timeout: int)
+	public function URLLoaderDictionaryData(request: URLRequest, loader: URLLoaderWithAssociatedData, backgroundJob: BackgroundJob, timeout: int)
 	{
 		this.request = request;
 		this.loader = loader;
