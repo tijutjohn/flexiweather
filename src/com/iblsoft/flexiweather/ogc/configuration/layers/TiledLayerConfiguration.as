@@ -19,12 +19,29 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 
 		/** Array of TiledTilingInfo instances */
 		private var _tilingCRSsAndExtents: Array = [];
-		
+
 		public function get tilingCRSsAndExtents(): Array
 		{
 			return _tilingCRSsAndExtents;
 		}
-		
+
+		private var mi_timeoutPeriod: uint; // in ms
+
+		public function get timeoutPeriod(): uint
+		{
+			return mi_timeoutPeriod;
+		}
+
+		/**
+		 * Timeout for failed requested. It any request has failed, application will wait "timeoutPeriod" and then rerequest it again
+		 * @param i_period period in miliseconds
+		 *
+		 */
+		public function set timeoutPeriod(i_period: uint): void
+		{
+			mi_timeoutPeriod = i_period;
+		}
+
 		public function TiledLayerConfiguration()
 		{
 		}
@@ -32,7 +49,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		override public function createLayerInstance(iw: InteractiveWidget): InteractiveLayer
 		{
 			var l: InteractiveLayerTiled = new InteractiveLayerTiled(iw);
-			return l;			
+			return l;
 		}
 		override public function createInteractiveLayer(iw: InteractiveWidget): InteractiveLayer
 		{
@@ -46,7 +63,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		{
 			_tilingCRSsAndExtents = [];
 		}
-		
+
 		/**
 		 * Add TiledTilingInfo into array of supported tilingInfo data for this configuration
 		 * @param tilingInfo
@@ -58,7 +75,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 				_tilingCRSsAndExtents = [];
 			tilingCRSsAndExtents.push(tilingInfo);
 		}
-		
+
 		/**
 		 * Get TiledTilingInfo for given CRS
 		 *
@@ -84,7 +101,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			super.destroy();
 			//TODO implement destroy functionality
 			//destroy tileMatrixSetLink
-			
+
 			if (tilingCRSsAndExtents && tilingCRSsAndExtents.length > 0)
 			{
 				for each (var tiledTilingInfo: TiledTilingInfo in tilingCRSsAndExtents)
@@ -92,7 +109,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 					tiledTilingInfo.destroy();
 				}
 			}
-			
+
 			ma_behaviours = null;
 			super.destroy();
 		}
@@ -121,7 +138,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 		{
 			//TODO implement TiledLayerConfiguration isCompatibleWithCRS
 //			for each(var qtTilingInfo: TiledTilingInfo in tilingCRSsAndExtents) {
-//				var crsWithBBox: CRSWithBBox = qtTilingInfo.crsWithBBox;  
+//				var crsWithBBox: CRSWithBBox = qtTilingInfo.crsWithBBox;
 //				if(crsWithBBox && crsWithBBox.crs == s_crs)
 //					return true;
 //			}
@@ -161,7 +178,7 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 				var tilingInfo: TiledTilingInfo = tilingCRSsAndExtents[0];
 				if (tilingInfo)
 				{
-					return 'TiledLayerConfiguration ['+id+'] urlPattern: ' + tilingInfo.urlPattern + ' CRS: ' + tilingInfo.crsWithBBox.crs + ' bbox: ' + tilingInfo.crsWithBBox.bbox.toBBOXString(); 
+					return 'TiledLayerConfiguration ['+id+'] urlPattern: ' + tilingInfo.urlPattern + ' CRS: ' + tilingInfo.crsWithBBox.crs + ' bbox: ' + tilingInfo.crsWithBBox.bbox.toBBOXString();
 				}
 			}
 			return 'TiledLayerConfiguration ['+id+'] with NO TILING info';
