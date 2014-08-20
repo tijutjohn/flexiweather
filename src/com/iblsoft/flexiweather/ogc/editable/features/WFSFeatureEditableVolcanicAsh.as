@@ -107,7 +107,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 					
 					volcanicAshSprite = getDisplaySpriteForReflectionAt(reflectionDelta) as VolcanicAshSprite;
 					
-					var fdpt: FeatureDataPoint = FeatureDataPoint(reflection.points[0]);
+					var fdpt: FeatureDataPoint = FeatureDataPoint(reflection.editablePoints[0]);
 					
 					volcanicAshSprite.update(blackColor);
 					
@@ -266,7 +266,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 			};
 		}
 		
-		override public function insertPointBefore(i_pointIndex:uint, pt:Point):void
+		override public function insertPointBefore(i_pointIndex:uint, pt:Point, reflectionID: int = 0):void
 		{
 			// volcano is a single point feature
 			update(FeatureUpdateContext.fullUpdate());

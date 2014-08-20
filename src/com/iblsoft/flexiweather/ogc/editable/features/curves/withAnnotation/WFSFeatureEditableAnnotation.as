@@ -213,7 +213,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 				if (reflection)
 				{
 					var reflectionDelta: int = reflection.reflectionDelta;
-					a_points = reflection.points;
+					a_points = reflection.editablePoints;
 					
 					displaySprite = getDisplaySpriteForReflectionAt(reflectionDelta);
 					gr = displaySprite.graphics;
@@ -252,21 +252,22 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 			return b_closed;
 		}
 		
-		override public function getPoints(): Array
+		override public function getPoints(reflectionID: int = 0): Array
 		{
+			var points: Array = m_points.getPointsForReflection(reflectionID);
 			if (ms_type == ANNOTATION_PIN)
 			{
-				if (m_points && m_points.length > 0)
+				if (reflectionID && points.length > 0)
 				{
 					var arr: Array = []
-					var firstItem: Point = m_points[0] as Point;
+					var firstItem: Point = points[0] as Point;
 					arr.push(firstItem);
 					arr.push(firstItem);
 					return arr;
 				}
-				return m_points;
+				return points;
 			} 
-			return m_points;
+			return points;
 		}
 		
 		override public function cleanup(): void

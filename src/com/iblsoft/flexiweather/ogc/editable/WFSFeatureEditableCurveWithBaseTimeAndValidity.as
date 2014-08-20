@@ -339,8 +339,9 @@ package com.iblsoft.flexiweather.ogc.editable
 			if (mi_editMode == WFSFeatureEditableMode.ADD_POINTS_ON_CURVE)
 			{
 				// PREPARE CURVE POINTS
-				ma_points = CubicBezier.calculateHermitSpline(m_points, false);
-					//ma_points = CubicBezier.calculateHermitSpline(m_points,  
+				var points: Array = m_points.getPointsForReflection(0);
+				ma_points = CubicBezier.calculateHermitSpline(points, false);
+				//ma_points = CubicBezier.calculateHermitSpline(m_points,  
 			}
 			if (mi_editMode == WFSFeatureEditableMode.MOVE_POINTS)
 			{

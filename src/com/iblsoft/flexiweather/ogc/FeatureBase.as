@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc
 {
+	import com.iblsoft.flexiweather.ogc.data.FeatureEditablePoints;
 	import com.iblsoft.flexiweather.ogc.editable.IClosableCurve;
 	import com.iblsoft.flexiweather.ogc.events.FeatureEvent;
 	import com.iblsoft.flexiweather.ogc.kml.renderer.IKMLRenderer;
@@ -9,6 +10,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.utils.CurveLineSegmentRenderer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
+	import flash.display.BitmapData;
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.geom.Point;
@@ -65,11 +67,8 @@ package com.iblsoft.flexiweather.ogc
 		protected var ms_featureId: String;
 		protected var ms_internalFeatureId: String;
 		
-//		protected var m_coordinates: ArrayCollection = new ArrayCollection();
-//		protected var m_points: ArrayCollection = new ArrayCollection();
-		
 		protected var m_coordinates: Array;
-		protected var m_points: Array;
+		protected var m_points: FeatureEditablePoints;
 		
 		protected var mb_pointsDirty: Boolean = false;
 		protected var mb_spritesAddedToLabelLayout: Boolean
@@ -86,6 +85,24 @@ package com.iblsoft.flexiweather.ogc
 			mb_presentInViewBBox = value;
 		}
 		
+		protected var mb_isSinglePointFeature: Boolean;
+		
+		public function get isSinglePointFeature(): Boolean
+		{
+			return mb_isSinglePointFeature;
+		}
+		
+		/**
+		 * BitmapData holder for icon features
+		 */
+		protected var m_loadedIconBitmapData: BitmapData;
+		protected var mb_isIconFeature: Boolean;
+		
+		public function get isIconFeature(): Boolean
+		{
+			return mb_isIconFeature;
+		}
+		
 		public function FeatureBase(s_namespace: String, s_typeName: String, s_featureId: String)
 		{
 			super();
@@ -99,44 +116,30 @@ package com.iblsoft.flexiweather.ogc
 			mb_presentInViewBBox = true;
 			
 			m_coordinates = [];
+			m_points = new FeatureEditablePoints();
 		}
 
 		/** Called after the feature is added to master, before first call to update(). */
 		public function setMaster(master: InteractiveLayerFeatureBase): void
 		{
 			m_master = master;
+			m_points.container = master.container;
 		}
 		
-//		private function onPointsChanged(event: CollectionEvent): void
-//		{
-//			var changeEvent: PropertyChangeEvent
-//			if (event.kind == CollectionEventKind.UPDATE)
-//			{
-//				changeEvent = event.items[0] as PropertyChangeEvent;
-//			}
-//			if (event.kind == CollectionEventKind.REPLACE)
-//			{
-//				changeEvent = event.items[0] as PropertyChangeEvent;
-//			}
-//		}
-		
-		public function addPointAt(point: Point, index: uint): void
+		public function addPointAt(point: Point, index: uint, reflectionID: int = 0): void
 		{
-			m_points.splice(index, 0, point);
+			m_points.addPointAt(point, index, reflectionID);
 		}
 		
-		public function addPoint(point: Point): void
+		public function addPoint(point: Point, reflectionID: int = 0): void
 		{
-			m_points.push(point);
+			m_points.addPoint(point, reflectionID);
 		}
 		
-		public function insertPointBefore(i_pointIndex: uint, pt: Point): void
+		public function insertPointBefore(i_pointIndex: uint, pt: Point, reflectionID: int = 0): void
 		{
 			trace("FEATUREBASE inserPointBefore");
-//			m_points.addItemAt(pt, i_pointIndex);
-//			m_coordinates.addItemAt(m_master.container.pointToCoord(pt.x, pt.y), i_pointIndex);
-			
-			m_points.splice(i_pointIndex, 0, pt);
+			m_points.insertPointBefore(i_pointIndex, pt, reflectionID);
 			m_coordinates.splice(i_pointIndex, 0, m_master.container.pointToCoord(pt.x, pt.y));
 				
 			update(FeatureUpdateContext.fullUpdate());
@@ -144,7 +147,7 @@ package com.iblsoft.flexiweather.ogc
 		
 		private function initializePoints(): void
 		{
-			m_points = [];
+			m_points.initializePoints();
 			
 //			if (m_points)
 //				m_points.removeEventListener(CollectionEvent.COLLECTION_CHANGE, onPointsChanged);
@@ -197,7 +200,7 @@ package com.iblsoft.flexiweather.ogc
 						}
 							
 						pt = iw.coordToPoint(c);
-						m_points.push(pt);
+						m_points.addPoint(pt);
 						
 						if (reflectedCoords && reflectedCoords.length == 0)
 						{
@@ -238,12 +241,10 @@ package com.iblsoft.flexiweather.ogc
 		public function cleanup(): void
 		{
 			m_master = null;
-//			m_coordinates.removeAll();
-//			m_points.removeAll();
 			if (m_coordinates)
 				m_coordinates.splice(0, m_coordinates.length);
 			if (m_points)
-				m_points.splice(0, m_points.length);
+				m_points.removeAllPoints();
 		}
 
 		public function get master(): InteractiveLayerFeatureBase
@@ -251,30 +252,19 @@ package com.iblsoft.flexiweather.ogc
 			return m_master;
 		}
 
-		public function getPoints(): Array
+		public function getPoints(reflectionID: int = 0): Array
 		{
-			return m_points;
+			return m_points.getPointsForReflection(reflectionID);
 		}
 
-		public function getAveragePoint():Point
+		public function getAveragePoint(reflectionID: int = 0):Point
 		{
-			var ret:Point = new Point();
-			var len: int = m_points.length;
-			for (var i:int = 0; i < len; i++) {
-				ret.x = ret.x + m_points[i].x;
-				ret.y = ret.y + m_points[i].y;
-			}
-			ret.x = ret.x / len;
-			ret.y = ret.y / len;
-			
-			return ret;
+			return m_points.getAveragePoint(reflectionID);
 		}
 		
-		public function getPoint(i_pointIndex: uint): Point
+		public function getPoint(i_pointIndex: uint, reflectionID: int = 0): Point
 		{
-			if (m_points && m_points.length > i_pointIndex)
-				return m_points[i_pointIndex];
-			return null;
+			return m_points.getPoint(i_pointIndex, reflectionID);
 		}
 
 		public function invalidatePoints(): void

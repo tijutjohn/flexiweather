@@ -59,14 +59,14 @@ package com.iblsoft.flexiweather.ogc.kml.features
 			super.visible = value;
 		}
 
-		override public function getPoints(): Array
+		override public function getPoints(reflectionID: int = 0): Array
 		{
 			if (_geometry is Polygon)
 			{
 				var linearRing: LinearRing = (_geometry as Polygon).outerBoundaryIs.linearRing;
 				return linearRing.coordinatesPoints;
 			}
-			return m_points;
+			return m_points.getPointsForReflection(reflectionID);
 		}
 
 		override public function get coordinates(): Array

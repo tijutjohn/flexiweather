@@ -54,7 +54,8 @@ package com.iblsoft.flexiweather.ogc.editable.features
 		{
 			super(s_namespace, s_typeName, s_featureId);
 			
-			
+			mb_isSinglePointFeature = true;
+			mb_isIconFeature = true;
 		}
 	
 		public override function cleanup(): void
@@ -109,6 +110,9 @@ package com.iblsoft.flexiweather.ogc.editable.features
 			return new StormAnnotation(0);
 		}
 		
+		
+		
+		
 		/**
 		 * 
 		 */
@@ -116,8 +120,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 		{
 			if (mBitmap)
 			{
-				var nBitmapData: BitmapData = mBitmap.bitmapData;
-//				var pt: Point = getPoint(0);
+				m_loadedIconBitmapData = mBitmap.bitmapData;
 				
 				var stormSprite: StormSprite;
 				var reflection: FeatureDataReflection;
@@ -133,10 +136,10 @@ package com.iblsoft.flexiweather.ogc.editable.features
 					displaySprite = getDisplaySpriteForReflectionAt(reflectionDelta);
 					stormSprite = displaySprite as StormSprite;
 					
-					var pt: FeatureDataPoint = FeatureDataPoint(reflection.points[0]);
+					var pt: Point = Point(reflection.editablePoints[0]);
 					
 					stormSprite.points = [pt];
-					stormSprite.setBitmap(nBitmapData, pt);
+					stormSprite.setBitmap(m_loadedIconBitmapData, pt);
 					
 				}
 				if (pt)
@@ -230,6 +233,7 @@ import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableWithBaseTimeAndVa
 import com.iblsoft.flexiweather.ogc.editable.annotations.StormAnnotation;
 import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataPoint;
 import com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableStorm;
+import com.iblsoft.flexiweather.ogc.wfs.IWFSIconSprite;
 import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
 import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSpriteWithAnnotation;
 import com.iblsoft.flexiweather.utils.AnnotationBox;
@@ -242,7 +246,8 @@ import flash.display.BitmapData;
 import flash.display.Sprite;
 import flash.geom.Point;
 
-class StormSprite extends WFSFeatureEditableSpriteWithAnnotation {
+class StormSprite extends WFSFeatureEditableSpriteWithAnnotation implements IWFSIconSprite 
+{
 
 	private var mn_iconsWidth: Number = 24;
 	private var m_iconBitmap: Bitmap = new Bitmap();
@@ -278,7 +283,7 @@ class StormSprite extends WFSFeatureEditableSpriteWithAnnotation {
 
 	}
 	
-	public function setBitmap(nBitmapData: BitmapData, pt: Point): void
+	public function setBitmap(nBitmapData: BitmapData, pt: Point, blackColor: uint = 0): void
 	{
 		
 		var nBitmapData: BitmapData = nBitmapData.clone();
@@ -310,7 +315,7 @@ class StormSprite extends WFSFeatureEditableSpriteWithAnnotation {
 		return a;
 	}
 	
-	override public function update(feature: WFSFeatureEditableWithBaseTimeAndValidityAndAnnotation, annotation: AnnotationBox, blackColor: uint, labelLayout: AnticollisionLayout, pt: FeatureDataPoint): void
+	override public function update(feature: WFSFeatureEditableWithBaseTimeAndValidityAndAnnotation, annotation: AnnotationBox, blackColor: uint, labelLayout: AnticollisionLayout, pt: Point): void
 	{
 		var storm: WFSFeatureEditableStorm = feature as WFSFeatureEditableStorm;
 		
