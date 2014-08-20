@@ -36,6 +36,15 @@ package com.iblsoft.flexiweather.ogc.wfs
 			super.visible = value;
 		}
 		
+		/**
+		 * For feature with icons
+		 */
+		protected var mb_bitmapLoaded: Boolean;
+		public function get bitmapLoaded(): Boolean
+		{
+			return mb_bitmapLoaded;
+		}
+		
 		public function WFSFeatureEditableSprite(feature: WFSFeatureEditable)
 		{
 			_feature = feature;

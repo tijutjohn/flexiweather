@@ -24,6 +24,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 			super(s_namespace, s_typeName, s_featureId);
 			type = PressureCentreType.LOW;
 			pressure = 1000;
+			mb_isSinglePointFeature = true;
 		}
 
 		override public function update(changeFlag: FeatureUpdateContext): void
@@ -74,9 +75,9 @@ package com.iblsoft.flexiweather.ogc.editable.features
 					displaySprite = getDisplaySpriteForReflectionAt(reflectionDelta);
 					pressureInfoSprite = displaySprite as PressureInfoSprite;
 					
-					if (totalReflectionPoints(0) > 0)
+					if (totalReflectionEditablePoints(0) > 0)
 					{
-						var pt: FeatureDataPoint = reflection.points[0] as FeatureDataPoint;
+						var pt: Point = Point(reflection.editablePoints[0]);
 						if (pt && (type == PressureCentreType.HIGH) || (type == PressureCentreType.LOW))
 						{
 							pressureInfoSprite.update(s_colorSign, s_color, i_colorCross, type, pressure);

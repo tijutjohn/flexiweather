@@ -7,6 +7,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.ogc.editable.data.FeatureData;
 	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataPoint;
 	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
+	import com.iblsoft.flexiweather.ogc.wfs.IWFSIconSprite;
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSpriteWithAnnotation;
 	import com.iblsoft.flexiweather.utils.AnnotationBox;
@@ -92,7 +93,14 @@ package com.iblsoft.flexiweather.ogc.editable
 						addAnnotationForReflectionAt(reflectionDelta, annotation);
 					}
 				
-					var pt: FeatureDataPoint = reflection.points[0] as FeatureDataPoint;
+					if (mb_isIconFeature && !displaySpriteWithAnnotation.bitmapLoaded && m_loadedIconBitmapData)
+					{
+						if (displaySpriteWithAnnotation is IWFSIconSprite)
+						{
+							(displaySpriteWithAnnotation as IWFSIconSprite).setBitmap(m_loadedIconBitmapData, pt, 0);
+						}
+					}
+					var pt: Point = Point(reflection.editablePoints[0]);
 					if (pt)
 					{
 						trace("WFSFeatureEditableWithBaseTimeAndValidityAndAnnotation PT is  " + pt);

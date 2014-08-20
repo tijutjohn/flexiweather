@@ -46,7 +46,7 @@ package com.iblsoft.flexiweather.ogc.wfs
 			_annotation = value;
 		}
 
-		public function update(feature: WFSFeatureEditableWithBaseTimeAndValidityAndAnnotation, annotation: AnnotationBox, blackColor: uint, labelLayout: AnticollisionLayout, pt: FeatureDataPoint): void
+		public function update(feature: WFSFeatureEditableWithBaseTimeAndValidityAndAnnotation, annotation: AnnotationBox, blackColor: uint, labelLayout: AnticollisionLayout, pt: Point): void
 		{
 			_annotation = annotation;
 		}

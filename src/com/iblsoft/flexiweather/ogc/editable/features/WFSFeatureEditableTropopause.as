@@ -68,7 +68,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 					tropopauseSprite = getDisplaySpriteForReflectionAt(reflectionDelta) as TropopauseSprite;
 					tropopauseSprite.update(type, lvlString, i_color, s_color, blackColor);
 					
-					var fdpt: FeatureDataPoint = FeatureDataPoint(reflection.points[0]);
+					var fdpt: FeatureDataPoint = FeatureDataPoint(reflection.editablePoints[0]);
 					if (fdpt)
 					{
 						tropopauseSprite.x = fdpt.x;

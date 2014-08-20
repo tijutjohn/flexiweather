@@ -101,6 +101,7 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.configuration.MapConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.configuration.MapTimelineConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.configuration.ProjectionConfiguration"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.configuration.data.TimeCreationMethod"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.configuration.layers.LayerConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.configuration.layers.OGCLayerConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.configuration.layers.QTTMSLayerConfiguration"/>
@@ -114,6 +115,7 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceParsingManager"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.configuration.services.interfaces.IOGCServicesConfiguration"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.data.FeatureEditablePoints"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.data.GlobalVariable"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.data.GlobalVariableValue"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.data.ImagePart"/>
@@ -154,11 +156,15 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.annotations.TurbulenceAreaAnnotation"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.data.FeatureData"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.data.FeatureDataLine"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.data.FeatureDataLineSegment"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.data.FeatureDataPoint"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.data.FeatureType"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.data.IconFeatureType"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.data.MoveablePoint"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.data.front.FrontType"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.data.jetstream.JetStreamFeatureData"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.data.jetstream.JetStreamFeatureDataReflection"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.data.jetstream.MoveableWindPoint"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.data.jetstream.WindBarb"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.data.jetstream.WindMoveablePointsDictionary"/>
@@ -180,6 +186,7 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableTropopause"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableVolcanicAsh"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableVolcano"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.curves.IJetStreamEditorGUI"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.curves.WFSFeatureEditableFront"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.curves.WFSFeatureEditableGeometry"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.curves.WFSFeatureEditableJetStream"/>
@@ -347,6 +354,7 @@
     <classEntry path="com.iblsoft.flexiweather.plugins.ILayerManager"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.ILayerOptionsProvider"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.ILayerSelectionListener"/>
+    <classEntry path="com.iblsoft.flexiweather.plugins.ILegends"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.IMenu"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.IMenuManager"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.IMultiView"/>
@@ -361,7 +369,6 @@
     <classEntry path="com.iblsoft.flexiweather.plugins.IPluginModule"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.IPopup"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.IPopupManager"/>
-    <classEntry path="com.iblsoft.flexiweather.plugins.ILegends"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.ModuleLoaderCollection"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.PluginAbility"/>
     <classEntry path="com.iblsoft.flexiweather.plugins.PluginEvent"/>
@@ -404,6 +411,7 @@
     <classEntry path="com.iblsoft.flexiweather.utils.Duration"/>
     <classEntry path="com.iblsoft.flexiweather.utils.GraphicsCurveRenderer"/>
     <classEntry path="com.iblsoft.flexiweather.utils.HTMLUtils"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.Hemisphere"/>
     <classEntry path="com.iblsoft.flexiweather.utils.ICurveRenderer"/>
     <classEntry path="com.iblsoft.flexiweather.utils.IObjectPoolObject"/>
     <classEntry path="com.iblsoft.flexiweather.utils.ISO8601Parser"/>
@@ -461,6 +469,7 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerPlace"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerPlaces"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerPreloader"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerReflection"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerRoute"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerZoom"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveWidget"/>
@@ -506,6 +515,7 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.controls.tabbar.skins.InteractiveTabBarSkin"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.controls.tabbar.skins.InteractiveVerticalTabBarButtonSkin"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.controls.tabbar.skins.InteractiveVerticalTabBarSkin"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.data.InteractiveLayerLegendsOrientation"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.data.InteractiveLayerMapSaveSettings"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.data.InteractiveLayerPrintQuality"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.errors.ErrorJournal"/>
@@ -516,10 +526,7 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.googlemaps.InteractiveLayerGoogleMaps"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.skins.TitleWindowCloseButtonSkin"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.skins.TitleWindowSkin"/>
-    <classEntry path="com.iblsoft.flexiweather.widgets.data.InteractiveLayerLegendsOrientation"/>
-    <classEntry path="com.iblsoft.flexiweather.ogc.editable.features.curves.IJetStreamEditorGUI"/>
-    <classEntry path="com.iblsoft.flexiweather.utils.Hemisphere"/>
-    <classEntry path="com.iblsoft.flexiweather.ogc.editable.data.FeatureDataPoint"/>
+    <classEntry path="com.iblsoft.flexiweather.ogc.wfs.IWFSIconSprite"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

@@ -99,7 +99,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 					var reflectionDelta: int = reflection.reflectionDelta;
 					
 					textSprite = getDisplaySpriteForReflectionAt(reflectionDelta) as TextSprite;
-					var pt: Point = reflection.points[0];
+					var pt: Point = reflection.editablePoints[0];
 					if (pt)
 					{
 						textSprite.update(pt, htmlTextInput, textRotation, useRectangle, borderStyle, i_borderColor, borderWidth, fillStyle, i_fillColor);
