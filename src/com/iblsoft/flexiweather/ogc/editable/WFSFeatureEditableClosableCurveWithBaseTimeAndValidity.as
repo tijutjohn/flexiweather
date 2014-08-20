@@ -203,7 +203,9 @@ package com.iblsoft.flexiweather.ogc.editable
 			if (mi_editMode == WFSFeatureEditableMode.ADD_POINTS_ON_CURVE)
 			{
 				// PREPARE CURVE POINTS
-				ma_points = CubicBezier.calculateHermitSpline(m_points, mb_closed);
+				//FIXME move this elsewhere else
+				var points: Array = m_points.getPointsForReflection(0);
+				ma_points = CubicBezier.calculateHermitSpline(points, mb_closed);
 					//ma_points = CubicBezier.calculateHermitSpline(m_points,  
 			}
 		}
@@ -326,7 +328,8 @@ package com.iblsoft.flexiweather.ogc.editable
 					// IF USER CLICK NEAR BY FIRST POINT AND CURVE HAS MORE THAN 2 POINTS (IT CAN BE CLOSED)
 					if (m_points && m_points.length > 0)
 					{
-						var f_distanceToFirst: Number = pt.subtract(m_points[0]).length;
+						var points: Array = m_points.getPointsForReflection(0);
+						var f_distanceToFirst: Number = pt.subtract(points[0]).length;
 						if ((f_distanceToFirst < 10) && (m_points.length > 2))
 						{
 							closeCurve();

@@ -31,16 +31,6 @@ package com.iblsoft.flexiweather.ogc.editable.features
 		public var type: String;
 		public var date: Date;
 		
-//		public function get annotation(): AnnotationBox
-//		{
-//			if (totalReflections > 0)
-//			{
-//				var reflection: FeatureDataReflection = getReflection(0);
-//				if (reflection.annotation)
-//					return reflection.annotation as AnnotationBox;
-//			}
-//			return null;
-//		}
 		public function get sprite(): RadiationSprite
 		{
 			if (totalReflections > 0)
@@ -64,7 +54,8 @@ package com.iblsoft.flexiweather.ogc.editable.features
 		public function WFSFeatureEditableRadiation(s_namespace:String, s_typeName:String, s_featureId:String)
 		{
 			super(s_namespace, s_typeName, s_featureId);
-			
+			mb_isSinglePointFeature = true;
+			mb_isIconFeature = true;
 		}
 
 		private var _spritesAddedToLabelLayout: Boolean;
@@ -124,7 +115,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 		public function onIconLoaded(mBitmap: Bitmap): void
 		{
 			if (mBitmap){
-				var nBitmapData: BitmapData = mBitmap.bitmapData.clone();
+				m_loadedIconBitmapData = mBitmap.bitmapData.clone();
 				
 				//var pt: Point = getPoint(0);
 				
@@ -140,10 +131,10 @@ package com.iblsoft.flexiweather.ogc.editable.features
 					var reflectionDelta: int = reflection.reflectionDelta;
 					radiationSprite = getDisplaySpriteForReflectionAt(reflectionDelta)  as RadiationSprite;
 					
-					var pt: FeatureDataPoint = FeatureDataPoint(reflection.points[0]);
+					var pt: Point = Point(reflection.editablePoints[0]);
 					if (pt)
 					{
-						radiationSprite.setBitmap(nBitmapData, pt);
+						radiationSprite.setBitmap(m_loadedIconBitmapData, pt);
 					}
 				}
 				
@@ -156,15 +147,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 				
 			}
 		}
-			
-		/*
-		private function getUTCDate(date: Date): Date
-		{
-			var d: Date = new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes(), 0, 0);
-			return d;
-		}
-		*/
-
+		
 		override public function toInsertGML(xmlInsert: XML): void
 		{
 			date.seconds = 0;
@@ -210,6 +193,7 @@ import com.iblsoft.flexiweather.ogc.editable.annotations.RadiationAnnotation;
 import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataPoint;
 import com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableRadiation;
 import com.iblsoft.flexiweather.ogc.net.loaders.WMSFeatureInfoLoader;
+import com.iblsoft.flexiweather.ogc.wfs.IWFSIconSprite;
 import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSpriteWithAnnotation;
 import com.iblsoft.flexiweather.utils.AnnotationBox;
 import com.iblsoft.flexiweather.utils.ColorUtils;
@@ -225,7 +209,8 @@ import flash.geom.Point;
 
 import mx.utils.ColorUtil;
 
-class RadiationSprite extends WFSFeatureEditableSpriteWithAnnotation {
+class RadiationSprite extends WFSFeatureEditableSpriteWithAnnotation implements IWFSIconSprite
+{
 	
 	private var m_iconBitmap: Bitmap = new Bitmap();
 	private var m_originalSymbolBitmap: Bitmap;
@@ -264,7 +249,7 @@ class RadiationSprite extends WFSFeatureEditableSpriteWithAnnotation {
 		addChild(m_iconBitmap);
 	}
 	
-	public function setBitmap(nBitmapData: BitmapData, pt: Point): void
+	public function setBitmap(nBitmapData: BitmapData, pt: Point, blackColor: uint = 0): void
 	{
 		m_iconBitmap.bitmapData = nBitmapData;
 		m_originalSymbolBitmap = new Bitmap(nBitmapData.clone());
@@ -304,7 +289,7 @@ class RadiationSprite extends WFSFeatureEditableSpriteWithAnnotation {
 //		labelLayout.addObject(radiationAnnotation,  layer,  [this], i_reflection);
 //	}
 	
-	override public function update(feature: WFSFeatureEditableWithBaseTimeAndValidityAndAnnotation, annotation: AnnotationBox, blackColor: uint, labelLayout: AnticollisionLayout, pt: FeatureDataPoint): void
+	override public function update(feature: WFSFeatureEditableWithBaseTimeAndValidityAndAnnotation, annotation: AnnotationBox, blackColor: uint, labelLayout: AnticollisionLayout, pt: Point): void
 	{
 		var radiation: WFSFeatureEditableRadiation = feature as WFSFeatureEditableRadiation;
 		

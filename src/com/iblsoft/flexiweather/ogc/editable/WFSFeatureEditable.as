@@ -135,6 +135,22 @@ package com.iblsoft.flexiweather.ogc.editable
 			return gfxAsset.displaySprite;
 		}
 		
+		/**
+		 * Function used to find out in which reflection (by reflectionDelta) is displaySprite drawn 
+		 * @param displaySprite
+		 * @return 
+		 * 
+		 */		
+		public function getReflectionDeltaFromDisplaySprite(displaySprite: WFSFeatureEditableSprite): int
+		{
+			for each (var gfxAsset: ReflectionGFXAsset in _reflectionGFXAssets)
+			{
+				if (gfxAsset.displaySprite == displaySprite)
+					return gfxAsset.reflectionDelta;
+			}
+			return 0;
+		}
+		
 		public function addAnnotationForReflectionAt(reflectionDelta: int, annotation: AnnotationBox): void
 		{
 			createReflectionGFXAssetIfNeeded(reflectionDelta);
@@ -312,7 +328,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				var reflection: FeatureDataReflection = m_featureData.getReflectionAt(r) as FeatureDataReflection;
 				if (reflection)
 				{
-					var pTotal: int = reflection.points.length;
+					var pTotal: int = reflection.editablePoints.length;
 					//					trace("FeatureEditable upate: pTotal: " + pTotal);
 					if (coordIndex < pTotal)
 					{
@@ -346,7 +362,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				{
 					var reflection: FeatureDataReflection = m_featureData.getReflectionAt(r) as FeatureDataReflection;
 					//FIXME needs to updated correctly between reflections, this is temporary solution
-					reflection.setEditablePoints(m_points);
+					reflection.setEditablePoints(m_points.getPointsForReflection(reflection.reflectionDelta));
 					
 					if (reflection)
 					{
@@ -414,12 +430,12 @@ package com.iblsoft.flexiweather.ogc.editable
 				var reflection: FeatureDataReflection = reflectionDictionary.getReflection(r) as FeatureDataReflection;
 				if (reflection)
 				{
-					var pTotal: int = reflection.points.length;
+					var pTotal: int = reflection.editablePoints.length;
 					var pMoveableTotal: int = reflection.moveablePoints.length;
 					trace("FeatureEditable upate: pointsTotal: " + pTotal + "  pMoveableTotal: " + pMoveableTotal); 
 					for (i = 0; i < pTotal; ++i)
 					{
-						var pt: Point = reflection.points[i] as Point;
+						var pt: Point = reflection.editablePoints[i] as Point;
 						if (i >= reflection.moveablePoints.length)
 						{
 							//add new MovablePoint (new point was added, so we need to create Movable point for it
@@ -617,14 +633,13 @@ package com.iblsoft.flexiweather.ogc.editable
 			
 //			trace("WFSFEatureEditable setPoint : from pt: " + pt + " to c: " + c.toLaLoCoord());
 			//need to move coord to 0 reflection
-			
 			var projection: Projection = m_master.container.getCRSProjection();
 			c = projection.moveCoordToExtent(c);
 //			c.x -= reflectionWidth;
 			
 			//and cound correct point position for 0 reflection
 			var newPt: Point = m_master.container.coordToPoint(c);
-			m_points[i_pointIndex] = newPt;
+			m_points.setPoint(newPt, i_pointIndex, 0)
 			m_coordinates[i_pointIndex] = c;
 			
 //			trace("WFSFEatureEditable setPoint : from c: " + c.toLaLoCoord() + " to pt: " + newPt + " old pt: " + pt);
@@ -704,27 +719,25 @@ package com.iblsoft.flexiweather.ogc.editable
 			}
 		}
 
-		override public function addPointAt(point: Point, index: uint): void
+		override public function addPointAt(point: Point, index: uint, reflectionID: int = 0): void
 		{
-			insertPointBefore(index, point);
+			insertPointBefore(index, point, reflectionID);
 		}
 
-		override public function addPoint(pt: Point): void
+		override public function addPoint(pt: Point, reflectionID: int = 0): void
 		{
-			insertPointBefore(m_points.length, pt);
+			insertPointBefore(m_points.length, pt, reflectionID);
 		}
 
-		override public function insertPointBefore(i_pointIndex: uint, pt: Point): void
+		override public function insertPointBefore(i_pointIndex: uint, pt: Point, reflectionID: int = 0): void
 		{
-			super.insertPointBefore(i_pointIndex, pt);
+			super.insertPointBefore(i_pointIndex, pt, reflectionID);
 			modified = true;
 		}
 
-		public function removePointAt(i_pointIndex: uint): void
+		public function removePointAt(i_pointIndex: uint, reflectionID: int = 0): void
 		{
-//			m_points.removeItemAt(i_pointIndex);
-//			m_coordinates.removeItemAt(i_pointIndex);
-			m_points.splice(i_pointIndex, 1);
+			m_points.removePointAt(i_pointIndex, reflectionID);
 			m_coordinates.splice(i_pointIndex, 1);
 			
 			removeMoveablePointAt(i_pointIndex);
@@ -1047,13 +1060,13 @@ package com.iblsoft.flexiweather.ogc.editable
 				return m_featureData.reflections.length;
 			return 0;
 		}
-		public function totalReflectionPoints(reflectionDelta: int): int
+		public function totalReflectionEditablePoints(reflectionDelta: int): int
 		{
 			if (m_featureData)
 			{
 				var reflection: FeatureDataReflection = getReflection(reflectionDelta);
 				if (reflection)
-					return reflection.points.length;
+					return reflection.editablePoints.length;
 			}
 			return 0;
 		}

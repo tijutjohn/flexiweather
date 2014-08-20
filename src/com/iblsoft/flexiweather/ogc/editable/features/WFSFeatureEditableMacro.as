@@ -29,6 +29,8 @@ package com.iblsoft.flexiweather.ogc.editable.features
 			super(s_namespace, s_typeName, s_featureId);
 			color = 0x000000;
 			
+			mb_isSinglePointFeature = true;
+			mb_isIconFeature = true;
 			ma_types = [];
 			initializeTypes();
 		}
@@ -63,9 +65,12 @@ package com.iblsoft.flexiweather.ogc.editable.features
 						displaySprite = getDisplaySpriteForReflectionAt(reflectionDelta);
 						iconSprite = displaySprite as IconSprite;
 						
-						var pt: FeatureDataPoint = FeatureDataPoint(reflection.points[0]);
+						var pt: Point = Point(reflection.editablePoints[0]);
 						if (pt)
 						{
+							if (!iconSprite.bitmapLoaded)
+								iconSprite.setBitmap(m_loadedIconBitmapData, pt, color);
+							
 							iconSprite.update(color, pt);
 						}
 					}
@@ -84,9 +89,8 @@ package com.iblsoft.flexiweather.ogc.editable.features
 		{
 			if (mBitmap)
 			{
-				var nBitmapData: BitmapData = mBitmap.bitmapData;
-				//				var pt: Point = getPoint(0);
-				
+				m_loadedIconBitmapData = mBitmap.bitmapData;
+
 				var iconSprite: IconSprite;
 				var reflection: FeatureDataReflection;
 				var displaySprite: WFSFeatureEditableSprite;
@@ -102,10 +106,10 @@ package com.iblsoft.flexiweather.ogc.editable.features
 						displaySprite = getDisplaySpriteForReflectionAt(reflectionDelta);
 						iconSprite = displaySprite as IconSprite;
 						
-						var pt: FeatureDataPoint = FeatureDataPoint(reflection.points[0]);
+						var pt: Point = Point(reflection.editablePoints[0]);
 						
 						iconSprite.points = [pt];
-						iconSprite.setBitmap(nBitmapData, pt, color);
+						iconSprite.setBitmap(m_loadedIconBitmapData, pt, color);
 					}
 					
 				}
@@ -254,6 +258,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 
 import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
 import com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableMacro;
+import com.iblsoft.flexiweather.ogc.wfs.IWFSIconSprite;
 import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
 import com.iblsoft.flexiweather.utils.ColorUtils;
 
@@ -273,7 +278,7 @@ class IconTypeData
 	}
 }
 
-class IconSprite extends WFSFeatureEditableSprite 
+class IconSprite extends WFSFeatureEditableSprite implements IWFSIconSprite
 {
 	private var mn_iconsWidth: Number = 24;
 	private var m_iconBitmap: Bitmap = new Bitmap();
@@ -305,9 +310,9 @@ class IconSprite extends WFSFeatureEditableSprite
 		
 	}
 	
-	public function setBitmap(nBitmapData: BitmapData, pt: Point, blackColor: uint): void
+	public function setBitmap(nBitmapData: BitmapData, pt: Point, blackColor: uint = 0): void
 	{
-		
+		mb_bitmapLoaded = true;
 		var nBitmapData: BitmapData = nBitmapData.clone();
 		m_iconBitmapOrig = new Bitmap(nBitmapData.clone());
 		

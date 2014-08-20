@@ -59,6 +59,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 		{
 			super(s_namespace, s_typeName, s_featureId);
 			
+			mb_isSinglePointFeature = true;
 			volcano = { number: 1, name: "blank", la: 0, lo: 0, coordinate: new Coord(Projection.CRS_EPSG_GEOGRAPHIC, 0,0), elev: 0, anotation: "none" };
 			values = { smooth: false, size: 1.0, style: "Solid", color: 0x000000 };
 		}
@@ -104,7 +105,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 					
 					volcanicAshSprite.update(blackColor);
 					
-					var fdpt: FeatureDataPoint = FeatureDataPoint(reflection.points[0]);
+					var fdpt: FeatureDataPoint = FeatureDataPoint(reflection.editablePoints[0]);
 					if (fdpt)
 					{
 						volcanicAshSprite.x = fdpt.x;

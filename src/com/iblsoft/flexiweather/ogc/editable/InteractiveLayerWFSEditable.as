@@ -3,7 +3,9 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.ogc.FeatureBase;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWFS;
 	import com.iblsoft.flexiweather.ogc.Version;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureBase;
+	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
 	import com.iblsoft.flexiweather.utils.ScreenUtils;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 	
@@ -151,6 +153,13 @@ package com.iblsoft.flexiweather.ogc.editable
 			{
 				var oldSItem: ISelectableItem = m_selectedItem;
 				m_selectedItem = sItem;
+				
+				if (m_selectedItem is WFSFeatureEditable && mouseEvent)
+				{
+					var displaySprite: WFSFeatureEditableSprite = mouseEvent.target as WFSFeatureEditableSprite;
+					var refID: int = (m_selectedItem as WFSFeatureEditable).getReflectionDeltaFromDisplaySprite(displaySprite);
+					trace("Reflection delta: " + refID);
+				}
 				if (dispatchChangeEvent)
 				{
 					dispatchEvent(new PropertyChangeEvent(
@@ -205,7 +214,26 @@ package com.iblsoft.flexiweather.ogc.editable
 						continue;
 				}
 				if(item.hitTestPoint(f_stageX, f_stageY, true))
+				{
 					a.push(item);
+					if (item is WFSFeatureEditable)
+					{
+						var wfsEditableItem: WFSFeatureEditable = item as WFSFeatureEditable;
+						var totalReflections: int = wfsEditableItem.totalReflections;
+						for (var r: int = 0; r < totalReflections; r++)
+						{
+							var featureDataReflection: FeatureDataReflection = wfsEditableItem.getReflection(r);
+							var displaySprite: WFSFeatureEditableSprite = wfsEditableItem.getDisplaySpriteForReflection(featureDataReflection.reflectionDelta);
+							if (displaySprite)
+							{
+								if (displaySprite.hitTestPoint(f_stageX, f_stageY, true))
+								{
+									trace("Display Sprite at ["+featureDataReflection.reflectionDelta+"] HITTED");
+								}
+							}
+						}
+					}
+				}
 			}
 			a.sortOn("editPriority");
 			return a;
@@ -281,6 +309,7 @@ package com.iblsoft.flexiweather.ogc.editable
 
 		override public function onMouseDown(event: MouseEvent): Boolean
 		{
+			trace("InteractiveLayerWFSEditable onMouseDown CTRL: " + event.ctrlKey + " SHIFT: " + event.shiftKey);
 			if(event.ctrlKey || event.shiftKey)
 				return false;
 			if(m_mouseClickCapturingItem != null)

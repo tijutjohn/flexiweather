@@ -2502,7 +2502,8 @@ package com.iblsoft.flexiweather.widgets
 	//							trace("mapLineCoordToViewReflections : " + prevC.toString() + " , " + c.toString());
 								
 								//find reflections of line defined by coords prevC and c in projection extent
-								reflections = mapLineCoordToViewReflections(prevC, c, projectionExtent);
+//								reflections = mapLineCoordToViewReflections(prevC, c, projectionExtent);
+								reflections = mapLineCoordToViewReflections(prevC, c, m_viewBBox);
 								
 								for each(o in reflections) 
 								{
@@ -2558,7 +2559,7 @@ package com.iblsoft.flexiweather.widgets
 					for each(cObject in part) 
 					{
 						c = cObject.coord;
-						reflections = mapCoordInCRSToViewReflections(new Point(c.x, c.y), projectionExtent);
+						reflections = mapCoordInCRSToViewReflections(new Point(c.x, c.y), m_viewBBox);
 						for each(o in reflections) 
 						{
 							s_reflectionId = String(o.reflection);
