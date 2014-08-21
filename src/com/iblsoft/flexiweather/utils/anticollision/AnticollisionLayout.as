@@ -91,14 +91,20 @@ package com.iblsoft.flexiweather.utils.anticollision
 				{
 					previousVisibility = (ma_layoutObjects[0] as AnticollisionLayoutObject).visible;
 				}
-				if (previousVisibility != value)
-				{
+//				if (previousVisibility != value)
+//				{
+//					if (!value)
+//					{
+//						debug("HIDE anticollision");
+//					} else {
+//						debug("SHOW anticollision");
+//					}
 					super.visible = value;
-					debug(this + " visible = " + value);
+//					debug(this + " visible = " + value);
 					onVisibilityChanged();
-				} else {
-					debug(this + " same visibility: " + value);
-				}
+//				} else {
+//					debug(this + " same visibility: " + value);
+//				}
 			}
 		}
 		
@@ -405,7 +411,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 						lo.visible = newVisibility;
 					} else {
 						var objectAbsoluteVisibility: Boolean = getAbsoluteVisibility(lo.object);
-							debug("ACL obj: " +  lo.object + " absolute visibility: " + objectAbsoluteVisibility);
+//						debug("ACL obj: " +  lo.object + " absolute visibility: " + objectAbsoluteVisibility);
 						if (lo.layer && objectAbsoluteVisibility)
 						{
 							objectAbsoluteVisibility = lo.layer.visible;
@@ -845,7 +851,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 
 		protected function debug(txt: String): void
 		{
-//			trace("AnticollisionLayout: " + txt);
+			trace("AnticollisionLayout: " + txt);
 			if (debugConsole)
 				debugConsole.print("AnticollisionLayout: " + txt, 'Info', 'AnticollisionLayout');
 		}

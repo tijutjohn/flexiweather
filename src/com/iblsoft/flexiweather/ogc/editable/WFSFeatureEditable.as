@@ -57,6 +57,11 @@ package com.iblsoft.flexiweather.ogc.editable
 				iw.anticollisionObjectVisible(getAnticollisionObject, value);
 				iw.anticollisionObjectVisible(getAnticollisionObstacle, value);
 				iw.anticollisionForcedUpdate();
+				
+				if (!value)
+					editableSpriteVisible(false);
+				else
+					editableSpriteVisible(mb_selected);
 			}
 		}
 		
@@ -352,7 +357,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			if (m_featureData)
 			{
-				trace("WFSFeatureEditable updateNewImplementation");
+//				trace("WFSFeatureEditable updateNewImplementation");
 				
 				var eim: IEditableItemManager = master as IEditableItemManager;
 				var mp: MoveablePoint;
@@ -405,7 +410,8 @@ package com.iblsoft.flexiweather.ogc.editable
 						}
 					}
 				}
-				editableSpriteVisible(mb_selected);
+				if (visible)
+					editableSpriteVisible(mb_selected);
 			}
 		}
 		
@@ -468,7 +474,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		
 		override public function update(changeFlag: FeatureUpdateContext): void
 		{
-			trace("\nWFSFeatureEditable update");
+//			trace("\nWFSFeatureEditable update");
 			
 			super.update(changeFlag);
 		}
