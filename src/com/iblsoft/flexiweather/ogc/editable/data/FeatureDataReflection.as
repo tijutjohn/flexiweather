@@ -165,7 +165,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		 */		
 		public function validate(): void
 		{
-			trace("\t" + this + " VALIDATE");
+//			trace("\t" + this + " VALIDATE");
 			compute();
 			stopListenForNextFrame();
 		}
@@ -176,7 +176,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		 */		
 		private function compute(): void
 		{
-			trace("\t COMPUTE START" + this);
+//			trace("\t COMPUTE START" + this);
 			if (_points.length > 0)
 				_points.splice(0, _points.length);
 			var cnt: int = 0;
@@ -226,7 +226,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			_center.x /= total;
 			_center.y /= total;
 			
-			trace("\t COMPUTE END avg: " + _center + " > " + this);
+//			trace("\t COMPUTE END avg: " + _center + " > " + this);
 		}
 		
 		public function get startPoint(): FeatureDataPoint

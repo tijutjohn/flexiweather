@@ -80,8 +80,11 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 		
 		override public function updateAnnotation(annotation: AnnotationBox, annotationPosition: Point, text: String = ""): void
 		{
-			if (!annotationPosition)
+			if (!annotationPosition || isNaN(annotationPosition.x) || isNaN(annotationPosition.y))
+			{
+				annotation.visible = false;
 				return;
+			}
 			
 			if (annotation is CloudAnnotation)
 			{
@@ -107,7 +110,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 			{
 //				master.container.labelLayout.removeObject(this);
 				
-				var cloudTextInfo: CloudAnnotation;
+				var cloudAnnotation: CloudAnnotation;
 				var reflection: FeatureDataReflection;
 				
 				
@@ -120,13 +123,11 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 					reflection = m_featureData.getReflectionAt(reflectionDelta);
 					if (reflection)
 					{
-						var reflectionDelta: int = reflection.reflectionDelta;
-						
-						cloudTextInfo = getAnnotationForReflectionAt(reflectionDelta) as CloudAnnotation;
+						cloudAnnotation = getAnnotationForReflectionAt(reflectionDelta) as CloudAnnotation;
 						var displaySprite: WFSFeatureEditableSprite = getDisplaySpriteForReflection(reflectionDelta);
 						
 						master.container.labelLayout.removeObject(displaySprite);
-						master.container.labelLayout.removeObject(cloudTextInfo);
+						master.container.labelLayout.removeObject(cloudAnnotation);
 					}
 				}
 			}

@@ -81,9 +81,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				if (reflection)
 				{
 					reflection.validate();
-					reflection.debug();
 					
-					var reflectionDelta: int = reflection.reflectionDelta;
 					displaySpriteWithAnnotation = getDisplaySpriteForReflectionAt(reflectionDelta) as WFSFeatureEditableSpriteWithAnnotation;
 					gr = displaySpriteWithAnnotation.graphics;
 					

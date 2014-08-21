@@ -34,6 +34,8 @@ package com.iblsoft.flexiweather.ogc.wfs
 			value = value && _feature.presentInViewBBox;
 			
 			super.visible = value;
+			if (_feature)
+				_feature.visible = value;
 		}
 		
 		/**

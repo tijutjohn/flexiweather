@@ -2673,7 +2673,7 @@ package com.iblsoft.flexiweather.widgets
 		 */		
 		public function drawGeoPolyLine(rendererCreator: Function, coords: Array, drawMode: String, b_closed: Boolean = false, b_justCompute: Boolean = false, featureData: FeatureData = null): void
 		{
-			trace("InteractiveWidget drawGeoPolyLine");
+//			trace("InteractiveWidget drawGeoPolyLine");
 			var d_reflectionToSegmentPoints: Dictionary = new Dictionary();
 			var cPrev: Coord = null;
 			var total: int = coords.length;
@@ -3177,6 +3177,10 @@ class KMLSpeedOptimization
 		if (FlexiWeatherConfiguration.USE_KML_BITMAP_PANNING)
 		{
 			_layoutVisibilityBeforePanning = m_iw.labelLayout.visible;
+			if (!_layoutVisibilityBeforePanning)
+			{
+				trace("Check _layoutVisibilityBeforePanning == false");
+			}
 			m_iw.labelLayout.visible = false;
 			
 			for each (var layer: InteractiveLayerKML in m_kmlLayers)
