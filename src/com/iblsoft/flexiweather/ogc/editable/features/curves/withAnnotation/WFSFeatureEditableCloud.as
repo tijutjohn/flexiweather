@@ -111,9 +111,13 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 				var reflection: FeatureDataReflection;
 				
 				
+				var reflectionIDs: Array = m_featureData.reflectionsIDs;
+				
 				for (var i: int = 0; i < totalReflections; i++)
 				{
-					reflection = m_featureData.getReflectionAt(i);
+					var reflectionDelta: int = reflectionIDs[i];
+					
+					reflection = m_featureData.getReflectionAt(reflectionDelta);
 					if (reflection)
 					{
 						var reflectionDelta: int = reflection.reflectionDelta;
@@ -383,30 +387,34 @@ class CloudFeatureSprite extends WFSFeatureEditableSpriteWithAnnotation
 	
 	override public function getLineSegmentApproximationOfBounds():Array
 	{
-		var a: Array = [];
-		var ptFirst: Point = null;
-		var ptPrev: Point = null;
-		
-		var cloudFeature: WFSFeatureEditableCloud = _feature as WFSFeatureEditableCloud;
-		var pts: Array = CubicBezier.calculateHermitSpline(points, cloudFeature.isCurveClosed());
-		
-		var useEvery: int = 1;
-		if (pts.length > 100){
-			useEvery = int(pts.length / 20);
-		} else if (pts.length > 50){
-			useEvery = int(pts.length / 10);
-		}
-		
-		var actPUse: int = 0;
-		for each(var pt: Point in pts) {
-			if ((actPUse % useEvery) == 0){
-				if(ptPrev != null)
-					a.push(new LineSegment(ptPrev.x, ptPrev.y, pt.x, pt.y));
-				ptPrev = pt;
+		if (points && points.length > 0)
+		{
+			var a: Array = [];
+			var ptFirst: Point = null;
+			var ptPrev: Point = null;
+			
+			var cloudFeature: WFSFeatureEditableCloud = _feature as WFSFeatureEditableCloud;
+			var pts: Array = CubicBezier.calculateHermitSpline(points, cloudFeature.isCurveClosed());
+			
+			var useEvery: int = 1;
+			if (pts.length > 100){
+				useEvery = int(pts.length / 20);
+			} else if (pts.length > 50){
+				useEvery = int(pts.length / 10);
 			}
-			actPUse++;
-		}
-		
-		return a;		
+			
+			var actPUse: int = 0;
+			for each(var pt: Point in pts) {
+				if ((actPUse % useEvery) == 0){
+					if(ptPrev != null)
+						a.push(new LineSegment(ptPrev.x, ptPrev.y, pt.x, pt.y));
+					ptPrev = pt;
+				}
+				actPUse++;
+			}
+			
+			return a;
+		} 
+		return null;
 	}
 }

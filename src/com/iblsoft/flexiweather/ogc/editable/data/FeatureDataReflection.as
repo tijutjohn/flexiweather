@@ -176,7 +176,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		 */		
 		private function compute(): void
 		{
-			trace("\t" + this + " COMPUTE");
+			trace("\t COMPUTE START" + this);
 			if (_points.length > 0)
 				_points.splice(0, _points.length);
 			var cnt: int = 0;
@@ -226,7 +226,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			_center.x /= total;
 			_center.y /= total;
 			
-			trace("\t" + this + " COMPUTE END");
+			trace("\t COMPUTE END avg: " + _center + " > " + this);
 		}
 		
 		public function get startPoint(): FeatureDataPoint
@@ -250,16 +250,16 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		
 		public function toString(): String
 		{
-			var str: String = "FeatureDataReflection ["+uid+"] lines: " + _lines.length + " poins: " + _points.length;
-			if (_lines.length > 0)
-			{
-				str += " (";
-				for each (var line: FeatureDataLine in _lines)
-				{
-					str += line.id + " ";
-				}
-				str += ")";
-			}
+			var str: String = "FeatureDataReflection ["+uid+"] lines: " + _lines.length + " points: " + _points.length;
+//			if (_lines.length > 0)
+//			{
+//				str += " (";
+//				for each (var line: FeatureDataLine in _lines)
+//				{
+//					str += line.id + " ";
+//				}
+//				str += ")";
+//			}
 			return str;
 		}
 	}

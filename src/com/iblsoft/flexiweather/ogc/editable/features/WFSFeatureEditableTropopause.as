@@ -57,12 +57,15 @@ package com.iblsoft.flexiweather.ogc.editable.features
 			//create sprites for reflections
 			
 			var blackColor: uint = getCurrentColor(0x000000);
+			var reflectionIDs: Array = m_featureData.reflectionsIDs;
+			
 			for (var i: int = 0; i < totalReflections; i++)
 			{
-				reflection = m_featureData.getReflectionAt(i);
+				var reflectionDelta: int = reflectionIDs[i];
+				
+				reflection = m_featureData.getReflectionAt(reflectionDelta);
 				if (reflection)
 				{
-					var reflectionDelta: int = reflection.reflectionDelta;
 					reflection.validate();
 					
 					tropopauseSprite = getDisplaySpriteForReflectionAt(reflectionDelta) as TropopauseSprite;

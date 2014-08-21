@@ -76,13 +76,15 @@ package com.iblsoft.flexiweather.ogc.editable
 				
 				graphics.clear();
 				
+				var reflectionIDs: Array = m_featureData.reflectionsIDs;
+				
 				for (var i: int = 0; i < totalReflections; i++)
 				{
-					reflection = m_featureData.getReflectionAt(i) as FeatureDataReflection;
+					var reflectionDelta: int = reflectionIDs[i];
+					
+					reflection = m_featureData.getReflectionAt(reflectionDelta);
 					if (reflection)
 					{
-						var reflectionDelta: int = reflection.reflectionDelta;
-						
 						if (m_featureData)
 							ptAvg = m_featureData.getReflectionAt(reflectionDelta).center;
 						else if (pointsCount == 1) 
@@ -100,9 +102,7 @@ package com.iblsoft.flexiweather.ogc.editable
 							if (m_featureData)
 							{
 								//							trace("reflection.displaySprite: " + reflection.displaySprite.parent);
-								var reflectionData: FeatureDataReflection = m_featureData.getReflectionAt(reflection.reflectionDelta);
-								if (reflectionData)
-									drawFeatureReflection(renderer, reflectionData);
+								drawFeatureReflection(renderer, reflection);
 							}
 							displaySprite.points = reflection.points;
 							

@@ -494,9 +494,13 @@ package com.iblsoft.flexiweather.ogc.editable
 			var masterEditable: InteractiveLayerWFSEditable = master as InteractiveLayerWFSEditable;
 			if (masterEditable != null)
 				masterEditable.editingComponentsContainer.removeChild(m_editableSprite);
+			var reflectionIDs: Array = m_featureData.reflectionsIDs;
+			
 			for (var i: int = 0; i < totalReflections; i++)
 			{
-				var reflection: FeatureDataReflection = m_featureData.getReflectionAt(i) as FeatureDataReflection;
+				var reflectionDelta: int = reflectionIDs[i];
+				
+				var reflection: FeatureDataReflection = m_featureData.getReflectionAt(reflectionDelta);
 				if (reflection)
 				{
 					var editablePoints: Array = getEditablePointsForReflection(reflection.reflectionDelta);
@@ -802,9 +806,13 @@ package com.iblsoft.flexiweather.ogc.editable
 		public function onRegisteredAsEditableItem(eim: IEditableItemManager): void
 		{
 			m_editableItemManager = eim;
+			var reflectionIDs: Array = m_featureData.reflectionsIDs;
+			
 			for (var i: int = 0; i < totalReflections; i++)
 			{
-				var reflection: FeatureDataReflection = m_featureData.getReflectionAt(i) as FeatureDataReflection;
+				var reflectionDelta: int = reflectionIDs[i];
+				
+				var reflection: FeatureDataReflection = m_featureData.getReflectionAt(reflectionDelta);
 				if (reflection)
 				{
 					var editablePoints: Array = getEditablePointsForReflection(reflection.reflectionDelta);
@@ -818,9 +826,13 @@ package com.iblsoft.flexiweather.ogc.editable
 
 		public function onUnregisteredAsEditableItem(eim: IEditableItemManager): void
 		{
+			var reflectionIDs: Array = m_featureData.reflectionsIDs;
+			
 			for (var i: int = 0; i < totalReflections; i++)
 			{
-				var reflection: FeatureDataReflection = m_featureData.getReflectionAt(i) as FeatureDataReflection;
+				var reflectionDelta: int = reflectionIDs[i];
+				
+				var reflection: FeatureDataReflection = m_featureData.getReflectionAt(reflectionDelta);
 				if (reflection)
 				{
 					var editablePoints: Array = getEditablePointsForReflection(reflection.reflectionDelta);

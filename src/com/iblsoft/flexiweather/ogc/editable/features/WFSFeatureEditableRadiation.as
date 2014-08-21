@@ -72,10 +72,13 @@ package com.iblsoft.flexiweather.ogc.editable.features
 				//create sprites for reflections
 				
 				var blackColor: uint = getCurrentColor(0x000000);
+				var reflectionIDs: Array = m_featureData.reflectionsIDs;
+				
 				for (var i: int = 0; i < totalReflections; i++)
 				{
-					reflection = m_featureData.getReflectionAt(i);
-					var reflectionDelta: int = reflection.reflectionDelta;
+					var reflectionDelta: int = reflectionIDs[i];
+					
+					reflection = m_featureData.getReflectionAt(reflectionDelta);
 					radiationSprite = getDisplaySpriteForReflectionAt(reflectionDelta) as RadiationSprite;
 					
 					removeFromLabelLayout(radiationSprite.annotation, radiationSprite, master.container.labelLayout);
@@ -125,10 +128,13 @@ package com.iblsoft.flexiweather.ogc.editable.features
 				//create sprites for reflections
 				
 				var blackColor: uint = getCurrentColor(0x000000);
+				var reflectionIDs: Array = m_featureData.reflectionsIDs;
+				
 				for (var i: int = 0; i < totalReflections; i++)
 				{
-					reflection = m_featureData.getReflectionAt(i);
-					var reflectionDelta: int = reflection.reflectionDelta;
+					var reflectionDelta: int = reflectionIDs[i];
+					
+					reflection = m_featureData.getReflectionAt(reflectionDelta);
 					radiationSprite = getDisplaySpriteForReflectionAt(reflectionDelta)  as RadiationSprite;
 					
 					var pt: Point = Point(reflection.editablePoints[0]);

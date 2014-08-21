@@ -300,9 +300,13 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 				var annotation: AnnotationBox;
 				var reflection: FeatureDataReflection;
 				
+				var reflectionIDs: Array = m_featureData.reflectionsIDs;
+				
 				for (var i: int = 0; i < totalReflections; i++)
 				{
-					reflection = m_featureData.getReflectionAt(i)
+					var reflectionDelta: int = reflectionIDs[i];
+					
+					reflection = m_featureData.getReflectionAt(reflectionDelta);
 					annotation = getAnnotationForReflectionAt(reflection.reflectionDelta);
 					var displaySprite: WFSFeatureEditableSprite = getDisplaySpriteForReflection(reflection.reflectionDelta);
 					master.container.labelLayout.removeObject(annotation);
