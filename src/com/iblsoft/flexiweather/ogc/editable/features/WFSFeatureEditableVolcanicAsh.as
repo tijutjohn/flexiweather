@@ -100,10 +100,13 @@ package com.iblsoft.flexiweather.ogc.editable.features
 				//create sprites for reflections
 				
 				var blackColor: uint = getCurrentColor(0x000000);
+				var reflectionIDs: Array = m_featureData.reflectionsIDs;
+				
 				for (var i: int = 0; i < totalReflections; i++)
 				{
-					reflection = m_featureData.getReflectionAt(i);
-					var reflectionDelta: int = reflection.reflectionDelta;
+					var reflectionDelta: int = reflectionIDs[i];
+					
+					reflection = m_featureData.getReflectionAt(reflectionDelta);
 					
 					volcanicAshSprite = getDisplaySpriteForReflectionAt(reflectionDelta) as VolcanicAshSprite;
 					
@@ -135,10 +138,13 @@ package com.iblsoft.flexiweather.ogc.editable.features
 				//create sprites for reflections
 				
 				var blackColor: uint = getCurrentColor(0x000000);
+				var reflectionIDs: Array = m_featureData.reflectionsIDs;
+				
 				for (var i: int = 0; i < totalReflections; i++)
 				{
-					reflection = m_featureData.getReflectionAt(i);
-					var reflectionDelta: int = reflection.reflectionDelta;
+					var reflectionDelta: int = reflectionIDs[i];
+					
+					reflection = m_featureData.getReflectionAt(reflectionDelta);
 					
 					volcanicAshSprite = getDisplaySpriteForReflectionAt(reflectionDelta) as VolcanicAshSprite;
 					

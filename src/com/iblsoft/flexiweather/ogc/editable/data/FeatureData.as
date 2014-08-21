@@ -7,6 +7,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		
 		[ArrayElementType("com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection")]
 		public var reflections: Array;
+		public var reflectionsIDs: Array;
 		
 		[ArrayElementType("com.iblsoft.flexiweather.ogc.editable.data.FeatureDataLine")]
 		public var lines: Array;
@@ -20,6 +21,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			this.name = name;
 			lines = [];
 			reflections = [];
+			reflectionsIDs = [];
 			
 			trace("FeatureData created: " + this);
 		}
@@ -51,6 +53,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 				var refl: FeatureDataReflection = getReflectionAt(i);
 				refl.clear();
 			}
+			reflectionsIDs = [];
 		}
 		
 		public function getLineAt(position: int): FeatureDataLine
@@ -73,7 +76,17 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			var reflection: FeatureDataReflection = createFeatureDataReflectionInstance(position);
 			reflection.parentFeatureData = this;
 			reflections[position] = reflection;
+			updateIDs();
 			return reflection;
+		}
+		
+		private function updateIDs(): void
+		{
+			reflectionsIDs = [];
+			for (var id: Object in reflections)
+			{
+				reflectionsIDs.push(id);	
+			}
 		}
 		
 		/**
@@ -93,6 +106,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			if (!(reflections[position] is FeatureDataReflection))
 				return createReflectionAt(position);
 			
+			updateIDs();
 			return reflections[position] as FeatureDataReflection;
 		}
 		

@@ -68,10 +68,13 @@ package com.iblsoft.flexiweather.ogc.editable.features
 				var reflection: FeatureDataReflection;
 				var displaySprite: WFSFeatureEditableSprite;
 				
+				var reflectionIDs: Array = m_featureData.reflectionsIDs;
+				
 				for (var i: int = 0; i < totalReflections; i++)
 				{
-					reflection = m_featureData.getReflectionAt(i);
-					var reflectionDelta: int = reflection.reflectionDelta;
+					var reflectionDelta: int = reflectionIDs[i];
+					
+					reflection = m_featureData.getReflectionAt(reflectionDelta);
 					stormAnnotation = getAnnotationForReflectionAt(reflectionDelta) as StormAnnotation;
 					displaySprite = getDisplaySpriteForReflectionAt(reflectionDelta);
 					
@@ -128,10 +131,13 @@ package com.iblsoft.flexiweather.ogc.editable.features
 				
 				//create sprites for reflections
 				
+				var reflectionIDs: Array = m_featureData.reflectionsIDs;
+				
 				for (var i: int = 0; i < totalReflections; i++)
 				{
-					reflection = m_featureData.getReflectionAt(i);
-					var reflectionDelta: int = reflection.reflectionDelta;
+					var reflectionDelta: int = reflectionIDs[i];
+					
+					reflection = m_featureData.getReflectionAt(reflectionDelta);
 					
 					displaySprite = getDisplaySpriteForReflectionAt(reflectionDelta);
 					stormSprite = displaySprite as StormSprite;

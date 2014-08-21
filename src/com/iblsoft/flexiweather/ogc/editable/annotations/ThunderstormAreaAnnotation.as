@@ -133,6 +133,7 @@ package com.iblsoft.flexiweather.ogc.editable.annotations
 					retIconName = '99';
 					break;
 				case TYPE_RAIN: 
+					//TODoit's SIGWX, not synop
 					retIconName = 'thunderstorm_rain';
 					break;
 			} 
