@@ -88,17 +88,21 @@ package com.iblsoft.flexiweather.ogc.editable
 			
 			graphics.clear();
 			
+			var reflectionIDs: Array = m_featureData.reflectionsIDs;
+			
 			for (var i: int = 0; i < totalReflections; i++)
 			{
-				reflection = m_featureData.getReflectionAt(i);
+				var reflectionDelta: int = reflectionIDs[i];
+				
+				reflection = m_featureData.getReflectionAt(reflectionDelta);
 				if (reflection)
 				{
-					var reflectionDelta: int = reflection.reflectionDelta;
+					reflection.validate();
 					
-					if (m_featureData)
-						ptAvg = m_featureData.getReflectionAt(reflection.reflectionDelta).center;
-					else if (pointsCount == 1) 
-						ptAvg = a_points[0] as Point;
+//					if (m_featureData)
+						ptAvg = reflection.center;
+//					else if (pointsCount == 1) 
+//						ptAvg = a_points[0] as Point;
 					
 					displaySprite = getDisplaySpriteForReflectionAt(reflectionDelta);
 					gr = displaySprite.graphics;
@@ -108,13 +112,19 @@ package com.iblsoft.flexiweather.ogc.editable
 						displaySprite.clear();
 //						trace("displaySprite.clear: pointsCount: " + pointsCount);
 					} else {
-						var renderer: ICurveRenderer = getRenderer(reflection.reflectionDelta);
-						if (m_featureData)
-						{
+						var renderer: ICurveRenderer = getRenderer(reflectionDelta);
+//						if (m_featureData)
+//						{
 //							trace("reflection.displaySprite: " + reflection.displaySprite.parent);
-							var reflectionData: FeatureDataReflection = m_featureData.getReflectionAt(reflection.reflectionDelta);
-							if (reflectionData)
-								drawFeatureReflection(renderer, reflectionData);
+							drawFeatureReflection(renderer, reflection);
+//						}
+						if (reflection.points)
+						{
+							trace("eflection.points: " + reflection.points.length);
+							if (reflection.points.length == 0)
+							{
+								trace("no points for displaysprite");
+							}
 						}
 						displaySprite.points = reflection.points;
 						

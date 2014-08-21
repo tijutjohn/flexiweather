@@ -55,9 +55,13 @@ package com.iblsoft.flexiweather.ogc.editable.features
 				var displaySprite: WFSFeatureEditableSprite;
 				//create sprites for reflections
 				
+				var reflectionIDs: Array = m_featureData.reflectionsIDs;
+				
 				for (var i: int = 0; i < totalReflections; i++)
 				{
-					reflection = m_featureData.getReflectionAt(i);
+					var reflectionDelta: int = reflectionIDs[i];
+					
+					reflection = m_featureData.getReflectionAt(reflectionDelta);
 					if (reflection)
 					{
 						reflection.validate();
@@ -96,9 +100,13 @@ package com.iblsoft.flexiweather.ogc.editable.features
 				var displaySprite: WFSFeatureEditableSprite;
 				//create sprites for reflections
 				
+				var reflectionIDs: Array = m_featureData.reflectionsIDs;
+				
 				for (var i: int = 0; i < totalReflections; i++)
 				{
-					reflection = m_featureData.getReflectionAt(i);
+					var reflectionDelta: int = reflectionIDs[i];
+					
+					reflection = m_featureData.getReflectionAt(reflectionDelta);
 					if (reflection)
 					{
 						reflection.validate();

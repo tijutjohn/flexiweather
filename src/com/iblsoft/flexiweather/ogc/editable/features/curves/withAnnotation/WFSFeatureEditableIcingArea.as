@@ -131,10 +131,13 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 				var reflection: FeatureDataReflection;
 				var displaySprite: WFSFeatureEditableSprite;
 				
+				var reflectionIDs: Array = m_featureData.reflectionsIDs;
+				
 				for (var i: int = 0; i < totalReflections; i++)
 				{
-					reflection = m_featureData.getReflectionAt(i);
-					var reflectionDelta: int = reflection.reflectionDelta;
+					var reflectionDelta: int = reflectionIDs[i];
+					
+					reflection = m_featureData.getReflectionAt(reflectionDelta);
 					
 					icingAreaInfo = getAnnotationForReflectionAt(reflectionDelta) as IcingAreaAnnotation;
 					displaySprite = getDisplaySpriteForReflectionAt(reflectionDelta);

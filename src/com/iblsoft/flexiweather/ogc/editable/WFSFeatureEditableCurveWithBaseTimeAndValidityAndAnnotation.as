@@ -81,13 +81,15 @@ package com.iblsoft.flexiweather.ogc.editable
 				
 				graphics.clear();
 				
+				var reflectionIDs: Array = m_featureData.reflectionsIDs;
+				
 				for (var i: int = 0; i < totalReflections; i++)
 				{
-					reflection = m_featureData.getReflectionAt(i);
+					var reflectionDelta: int = reflectionIDs[i];
+					
+					reflection = m_featureData.getReflectionAt(reflectionDelta);
 					if (reflection)
 					{
-						var reflectionDelta: int = reflection.reflectionDelta;
-						
 						if (m_featureData)
 							ptAvg = m_featureData.getReflectionAt(reflection.reflectionDelta).center;
 						else if (pointsCount == 1) 
