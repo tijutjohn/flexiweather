@@ -266,7 +266,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				
 				g.start(p.x, p.y);
 				g.moveTo(p.x, p.y);
-				trace("\ndrawFeatureReflection moveTO: [" + p.x + " , " + p.y + " ]");
+//				trace("\ndrawFeatureReflection moveTO: [" + p.x + " , " + p.y + " ]");
 				var bNewLine: Boolean = false;
 				for (var i: int = 1; i < pointsCount; i++)
 				{
@@ -288,7 +288,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				}
 				
 				g.finish(p.x, p.y);
-				trace("\n");
+//				trace("\n");
 			}
 			
 		}

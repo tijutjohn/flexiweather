@@ -99,31 +99,31 @@ package com.iblsoft.flexiweather.ogc.editable
 				{
 					reflection.validate();
 					
-//					if (m_featureData)
-						ptAvg = reflection.center;
-//					else if (pointsCount == 1) 
-//						ptAvg = a_points[0] as Point;
+					var featureIsVisible: Boolean = true;
+					
+					ptAvg = reflection.center;
 					
 					displaySprite = getDisplaySpriteForReflectionAt(reflectionDelta);
-					gr = displaySprite.graphics;
+//					gr = displaySprite.graphics;
 					
 					if(pointsCount <= 1)
 					{
 						displaySprite.clear();
 //						trace("displaySprite.clear: pointsCount: " + pointsCount);
 					} else {
-						var renderer: ICurveRenderer = getRenderer(reflectionDelta);
-//						if (m_featureData)
-//						{
-//							trace("reflection.displaySprite: " + reflection.displaySprite.parent);
-							drawFeatureReflection(renderer, reflection);
-//						}
+						
+						
 						if (reflection.points)
 						{
-							trace("eflection.points: " + reflection.points.length);
+							trace("reflection.points: " + reflection.points.length);
 							if (reflection.points.length == 0)
 							{
 								trace("no points for displaysprite");
+								featureIsVisible = false;
+							} else {
+								//draw only in case there are some points
+								var renderer: ICurveRenderer = getRenderer(reflectionDelta);
+								drawFeatureReflection(renderer, reflection);
 							}
 						}
 						displaySprite.points = reflection.points;
@@ -142,11 +142,38 @@ package com.iblsoft.flexiweather.ogc.editable
 						
 						updateAnnotation(annotation, ptAvg);
 						
-						if (!mb_spritesAddedToLabelLayout && master)
+						var isAnnotationInAnticollision: Boolean
+						var isDisplayObjectInAnticollision: Boolean
+						if (master)
 						{
-							master.container.labelLayout.addObstacle(displaySprite, master);
-							master.container.labelLayout.addObject(annotation, master, [displaySprite], i);
-							_addToLabelLayout = true;
+							isDisplayObjectInAnticollision = master.container.labelLayout.isObjectInside(displaySprite);
+							isAnnotationInAnticollision = master.container.labelLayout.isObjectInside(annotation);
+//							if (!mb_spritesAddedToLabelLayout && master)
+							if (featureIsVisible)
+							{
+								if (!isDisplayObjectInAnticollision)
+								{
+									displaySprite.visible = true;
+									master.container.labelLayout.addObstacle(displaySprite, master);
+								} else {
+									trace("DisplaySprite is already in Anticollision");
+								}
+								if (!isAnnotationInAnticollision)
+								{
+									annotation.visible = true;
+									master.container.labelLayout.addObject(annotation, master, [displaySprite], i);
+	//								_addToLabelLayout = true;
+								}
+								else {
+									trace("Annotation is already in Anticollision");
+								}
+							} else {
+								//for non visible features, remove them from anticollision
+								if (isDisplayObjectInAnticollision)
+									master.container.labelLayout.removeObject(displaySprite);
+								if (isAnnotationInAnticollision)
+									master.container.labelLayout.removeObject(annotation);
+							}
 						}
 						
 						master.container.labelLayout.updateObjectReferenceLocation(annotation);
@@ -154,8 +181,8 @@ package com.iblsoft.flexiweather.ogc.editable
 				}
 			}
 			
-			if (!mb_spritesAddedToLabelLayout && _addToLabelLayout)
-				mb_spritesAddedToLabelLayout = true;
+//			if (!mb_spritesAddedToLabelLayout && _addToLabelLayout)
+//				mb_spritesAddedToLabelLayout = true;
 		}
 		
 		public function updateAnnotation(annotation: AnnotationBox, annotationPosition: Point, text: String = ""): void

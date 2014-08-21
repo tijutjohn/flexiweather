@@ -101,7 +101,6 @@
     <classEntry path="com.iblsoft.flexiweather.ogc.configuration.MapConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.configuration.MapTimelineConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.configuration.ProjectionConfiguration"/>
-    <classEntry path="com.iblsoft.flexiweather.ogc.configuration.data.TimeCreationMethod"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.configuration.layers.LayerConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.configuration.layers.OGCLayerConfiguration"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.configuration.layers.QTTMSLayerConfiguration"/>
