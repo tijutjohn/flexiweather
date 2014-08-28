@@ -111,14 +111,31 @@ package com.iblsoft.flexiweather.widgets.controls
 				
 				if (renderer is ToggleButtonBarButton)
 				{
+					ToggleButtonBarButton(renderer).addEventListener(Event.CHANGE, onToggleButtonChanged);
 					ToggleButtonBarButton(renderer).toolTip = data.tooltip;
 					ToggleButtonBarButton(renderer).type = data.type;
 					ToggleButtonBarButton(renderer).enabled = data.enabled;
+					
 				}
 				
 				if (renderer is ButtonBarButton)
 					ButtonBarButton(renderer).allowDeselection = !requireSelection;
 			}
+		}
+		
+		private function onToggleButtonChanged(event: Event): void
+		{
+			var visualElement: IVisualElement = event.target as IVisualElement;
+			if (visualElement is ToggleButtonBarButton)
+			{
+				var btn: ToggleButtonBarButton = visualElement as ToggleButtonBarButton;
+				var data: ToggleButtonBarItemData = getDataForRenderer(btn);
+				
+				btn.toolTip = data.tooltip;
+				btn.type = data.type;
+				btn.enabled = data.enabled;
+			}
+			
 		}
 		
 		/**
