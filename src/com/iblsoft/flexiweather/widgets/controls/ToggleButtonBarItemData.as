@@ -3,20 +3,55 @@ package com.iblsoft.flexiweather.widgets.controls
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 
+	[Event(name="change", type="flash.events.Event")]
 	public class ToggleButtonBarItemData extends EventDispatcher
 	{
 		public static const NORMAL: String = 'normal';
 		public static const TOGGLE: String = 'toggle';
 		public static const EXCLUSIVE: String = 'exclusive';
 		
-		[Bindable]
-		public var ident: String;
-		[Bindable]
-		public var label: String;
-		[Bindable]
-		public var tooltip: String;
+		private var m_ident: String;
+		private var m_label: String;
+		private var m_tooltip: String;
 		
 		private var _enabled: Boolean;
+
+		[Bindable]
+		public function get ident():String
+		{
+			return m_ident;
+		}
+
+		public function set ident(value:String):void
+		{
+			m_ident = value;
+			notifyChange();
+		}
+
+		[Bindable]
+		public function get label():String
+		{
+			return m_label;
+		}
+
+		public function set label(value:String):void
+		{
+			m_label = value;
+			notifyChange();
+		}
+
+		[Bindable]
+		public function get tooltip():String
+		{
+			return m_tooltip;
+		}
+
+		public function set tooltip(value:String):void
+		{
+			m_tooltip = value;
+			notifyChange();
+		}
+
 		[Bindable (event="enabledChanged")]
 		public function get enabled():Boolean
 		{
@@ -27,6 +62,7 @@ package com.iblsoft.flexiweather.widgets.controls
 		{
 			_enabled = value;
 			notify("enabledChanged");
+			notifyChange();
 		}
 		
 		public var type: String;
@@ -48,6 +84,7 @@ package com.iblsoft.flexiweather.widgets.controls
 		{
 			_icon = value;
 			notify("iconChanged");
+			notifyChange();
 		}
 		
 		private var _iconTest: Class;
@@ -62,8 +99,13 @@ package com.iblsoft.flexiweather.widgets.controls
 		{
 			_iconTest = value;
 			notify("iconTestChanged");
+			notifyChange();
 		}
 		
+		private function notifyChange(): void
+		{
+			notify(Event.CHANGE);
+		}
 		private function notify(type:String): void
 		{
 			dispatchEvent(new Event(type));
