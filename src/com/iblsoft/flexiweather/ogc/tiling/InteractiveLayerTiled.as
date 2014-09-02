@@ -1769,7 +1769,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 		
 		protected function debug(str: String): void
 		{
-			trace("Tiled: " + str);
+//			trace("Tiled: " + str);
 			LoggingUtils.dispatchLogEvent(this, "Tiled: " + str);
 		}
 

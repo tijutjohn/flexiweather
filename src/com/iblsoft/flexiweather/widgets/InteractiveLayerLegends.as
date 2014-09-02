@@ -2,6 +2,7 @@ package com.iblsoft.flexiweather.widgets
 {
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWMS;
+	import com.iblsoft.flexiweather.ogc.events.GetCapabilitiesEvent;
 	import com.iblsoft.flexiweather.ogc.kml.features.Point;
 	import com.iblsoft.flexiweather.utils.packing.DynamicArea;
 	import com.iblsoft.flexiweather.utils.packing.PackingLayoutProperties;
@@ -18,6 +19,7 @@ package com.iblsoft.flexiweather.widgets
 	
 	import mx.collections.ArrayCollection;
 	import mx.core.IVisualElement;
+	import mx.events.ResizeEvent;
 	import mx.logging.ILogger;
 	import mx.logging.Log;
 	
@@ -129,7 +131,7 @@ package com.iblsoft.flexiweather.widgets
 		public function set legendsLoadingCount(value: int): void
 		{
 			_legendsLoadingCount = value;
-			debug("_legendsLoading = " + _legendsLoadingCount);
+//			debug("_legendsLoading = " + _legendsLoadingCount);
 		}
 
 		public function get legendsAlreadyLoaded(): int
@@ -140,7 +142,7 @@ package com.iblsoft.flexiweather.widgets
 		public function set legendsAlreadyLoaded(value: int): void
 		{
 			_legendsAlreadyLoaded = value;
-			debug("_legendsAlreadyLoaded = " + _legendsAlreadyLoaded);
+//			debug("_legendsAlreadyLoaded = " + _legendsAlreadyLoaded);
 		}
 		private var legendsBkgRectangle: Rectangle;
 		private var _currentRectangle: Rectangle;
@@ -151,6 +153,7 @@ package com.iblsoft.flexiweather.widgets
 			_logger = Log.getLogger('InteractiveLayerLegends');
 			mouseChildren = true;
 			mouseEnabled = true;
+
 		}
 
 		public function getLayerAt(id: int): InteractiveLayer
@@ -170,6 +173,7 @@ package com.iblsoft.flexiweather.widgets
 //			debug("ILLegend addLayer: " + l.name);
 			m_layers.addItemAt(l, 0);
 			l.addEventListener(InteractiveLayerEvent.VISIBILITY_EFFECT_FINISHED, onLayerVisibilityChanged);
+			l.addEventListener(GetCapabilitiesEvent.CAPABILITIES_RECEIVED, onLayerGetCapabilitiesReceived);
 		}
 
 		public function removeLayer(l: InteractiveLayer): void
@@ -179,6 +183,7 @@ package com.iblsoft.flexiweather.widgets
 			{
 //				unbindSubLayer(l);
 				l.removeEventListener(InteractiveLayerEvent.VISIBILITY_EFFECT_FINISHED, onLayerVisibilityChanged);
+				l.removeEventListener(GetCapabilitiesEvent.CAPABILITIES_RECEIVED, onLayerGetCapabilitiesReceived);
 				m_layers.removeItemAt(i);
 				
 				var legendGroup: InteractiveLayerLegendGroup = getGroupFromDictionary(l);
@@ -240,6 +245,12 @@ package com.iblsoft.flexiweather.widgets
 //			debug("Legends onAreaChanged");
 		}
 
+		private function onLayerGetCapabilitiesReceived(event: GetCapabilitiesEvent): void
+		{
+			var layer: InteractiveLayer = (event.target) as  InteractiveLayer; 
+//			debug("onLayerGetCapabilitiesReceived for layer: " + layer);
+			invalidateLayerLegend(layer);
+		}
 		private function onLayerVisibilityChanged(event: InteractiveLayerEvent): void
 		{
 			renderLegendsStack();
@@ -262,7 +273,7 @@ package com.iblsoft.flexiweather.widgets
 		private function repositionedLegends(): void
 		{
 			renderLegendsStack(true);
-			debug("repositionedLegends: " + legendsBkgRectangle);
+//			debug("repositionedLegends: " + legendsBkgRectangle);
 			var ile: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.LEGENDS_AREA_UPDATED);
 			ile.area = legendsBkgRectangle;
 			dispatchEvent(ile);
@@ -480,13 +491,13 @@ package com.iblsoft.flexiweather.widgets
 			var group: InteractiveLayerLegendGroup;
 			for each (l in m_layers)
 			{
-				debug("LEGENDS checkIfAllLegendsAreLoaded l: " + l.name + " hasLegend: " + l.hasLegend() + " visible: " + l.visible);
+//				debug("LEGENDS checkIfAllLegendsAreLoaded l: " + l.name + " hasLegend: " + l.hasLegend() + " visible: " + l.visible);
 				if (l.hasLegend() && l.visible)
 				{
 					group = getGroupFromDictionary(l);
 					if (!group)
 					{
-						debug("\t LEGENDS checkIfAllLegendsAreLoaded NEEDS LOADING l: " + l.name);
+//						debug("\t LEGENDS checkIfAllLegendsAreLoaded NEEDS LOADING l: " + l.name);
 						//it needs to be loaded
 						needLoading = true;
 					} else {
