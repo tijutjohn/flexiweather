@@ -1240,6 +1240,7 @@ package com.iblsoft.flexiweather.ogc
 				legendLoader.addEventListener(MSBaseLoaderEvent.LEGEND_LOAD_ERROR, onLegendLoadError);
 				
 				debug(" load legend for layer: " + this + " viewProperties: " + currentViewProperties);
+				trace("\nload legend for layer: " + this + " viewProperties: " + currentViewProperties);
 				legendLoader.loadLegend(url, associatedData);
 			}
 			else
@@ -1260,6 +1261,7 @@ package com.iblsoft.flexiweather.ogc
 		}
 		private function onLegendNotAvailable(event: MSBaseLoaderEvent): void
 		{
+			trace("MSBAse onLegendNotAvailable");
 			var legendLoader: MSBaseLoader = event.target as MSBaseLoader;
 			removeLegendLoadingListeners(legendLoader);
 			
@@ -1277,6 +1279,7 @@ package com.iblsoft.flexiweather.ogc
 		}
 		private function onLegendLoadError(event: MSBaseLoaderEvent): void
 		{
+			trace("MSBAse onLegendLoadError");
 			var legendLoader: MSBaseLoader = event.target as MSBaseLoader;
 			removeLegendLoadingListeners(legendLoader);
 			
@@ -1290,6 +1293,7 @@ package com.iblsoft.flexiweather.ogc
 		}
 		private function onLegendLoaded(event: MSBaseLoaderEvent): void
 		{
+			trace("MSBAse onLegendLoaded");
 			var legendLoader: MSBaseLoader = event.target as MSBaseLoader;
 			removeLegendLoadingListeners(legendLoader);
 			var result: * = event.data.result;

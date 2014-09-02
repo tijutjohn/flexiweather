@@ -151,7 +151,6 @@ package com.iblsoft.flexiweather.widgets
 
 		protected function invalidateAreaForLayer(layer: InteractiveLayer): void
 		{
-			trace("InteractiveLayerComposer: invalidateAreaForLayer " + layer);
 			layer.onAreaChanged(true);
 		}
 		
