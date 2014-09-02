@@ -320,7 +320,7 @@ package com.iblsoft.flexiweather.ogc
 		
 		override protected function debug(str: String): void
 		{
-			trace(this + " WMS: " + str);
+//			trace(this + " WMS: " + str);
 //			LoggingUtils.dispatchLogEvent(this, "WMS: " + str);
 		}
 		

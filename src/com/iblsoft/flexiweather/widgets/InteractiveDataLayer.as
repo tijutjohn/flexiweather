@@ -220,7 +220,7 @@ package com.iblsoft.flexiweather.widgets
 		 */
 		public function invalidateData(b_forceUpdate: Boolean): void
 		{
-			trace("InvalidateDataLayer ["+this+"]");
+//			trace("InvalidateDataLayer invalidateData ["+this+"]");
 			invalidateDataFlag = true;
 			_invalidateDataForceUpdateFlag = _invalidateDataForceUpdateFlag || b_forceUpdate;
 			invalidateProperties();
