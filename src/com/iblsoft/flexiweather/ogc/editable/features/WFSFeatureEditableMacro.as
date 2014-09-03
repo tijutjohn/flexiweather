@@ -59,14 +59,11 @@ package com.iblsoft.flexiweather.ogc.editable.features
 				
 				for (var i: int = 0; i < totalReflections; i++)
 				{
-					var reflectionDelta: int = reflectionIDs[i];
-					
-					reflection = m_featureData.getReflectionAt(reflectionDelta);
+					reflection = m_featureData.getReflectionAt(reflectionIDs[i]);
 					if (reflection)
 					{
 						reflection.validate();
-						var reflectionDelta: int = reflection.reflectionDelta;
-						displaySprite = getDisplaySpriteForReflectionAt(reflectionDelta);
+						displaySprite = getDisplaySpriteForReflectionAt(reflection.reflectionDelta);
 						iconSprite = displaySprite as IconSprite;
 						
 						var pt: Point = Point(reflection.editablePoints[0]);
@@ -78,7 +75,6 @@ package com.iblsoft.flexiweather.ogc.editable.features
 							iconSprite.update(color, pt);
 						}
 					}
-					
 				}
 				
 			}
@@ -104,14 +100,11 @@ package com.iblsoft.flexiweather.ogc.editable.features
 				
 				for (var i: int = 0; i < totalReflections; i++)
 				{
-					var reflectionDelta: int = reflectionIDs[i];
-					
-					reflection = m_featureData.getReflectionAt(reflectionDelta);
+					reflection = m_featureData.getReflectionAt(reflectionIDs[i]);
 					if (reflection)
 					{
 						reflection.validate();
-						var reflectionDelta: int = reflection.reflectionDelta;
-						displaySprite = getDisplaySpriteForReflectionAt(reflectionDelta);
+						displaySprite = getDisplaySpriteForReflectionAt(reflection.reflectionDelta);
 						iconSprite = displaySprite as IconSprite;
 						
 						var pt: Point = Point(reflection.editablePoints[0]);
@@ -126,8 +119,6 @@ package com.iblsoft.flexiweather.ogc.editable.features
 					update(FeatureUpdateContext.fullUpdate());
 					master.container.labelLayout.update();
 				}
-				
-				
 			}
 		}
 		
