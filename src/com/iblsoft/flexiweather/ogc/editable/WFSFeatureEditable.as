@@ -16,7 +16,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.AnnotationBox;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
-	
+
 	import flash.display.DisplayObject;
 	import flash.display.Sprite;
 	import flash.events.KeyboardEvent;
@@ -41,35 +41,35 @@ package com.iblsoft.flexiweather.ogc.editable
 		protected var mi_actSelectedMoveablePointIndex: int = -1;
 		protected var mi_actSelectedMoveablePointReflectionIndex: int = -1;
 		protected var m_firstInit: Boolean = true;
-		
+
 		//new storage dictionaries for GFX (sprites and editable poitns
 		private var _reflectionGFXAssets: Dictionary = new Dictionary();
-		
+
 		override public function set visible(value:Boolean):void
 		{
 			value = value && presentInViewBBox;
-			
+
 			if (super.visible != value)
 			{
 				super.visible = value;
-				
+
 				var iw: InteractiveWidget = m_master.container;
 				iw.anticollisionObjectVisible(getAnticollisionObject, value);
 				iw.anticollisionObjectVisible(getAnticollisionObstacle, value);
 				iw.anticollisionForcedUpdate();
-				
+
 				if (!value)
 					editableSpriteVisible(false);
 				else
 					editableSpriteVisible(mb_selected);
 			}
 		}
-		
+
 		public function get selectedMoveablePointIndex(): int
 		{
 			return mi_actSelectedMoveablePointIndex;
 		}
-		
+
 		protected var m_featureData: FeatureData;
 
 		public function WFSFeatureEditable(s_namespace: String, s_typeName: String, s_featureId: String)
@@ -92,23 +92,23 @@ package com.iblsoft.flexiweather.ogc.editable
 				masterEditable.editingComponentsContainer.addChild(m_editableSprite);
 		}
 
-		
+
 		protected function createFeatureData(): FeatureData
 		{
 			return new FeatureData(this.toString() + " FeatureData");
 		}
 		/***************************************************************************************************************
-		 * 
+		 *
 		 * 	Commnon function for retrieving GFX parts needed for displaying features.
-		 * 
+		 *
 		 *  GFX stored in dictionary for each reflection are:
 		 * 		* displaySprite
 		 * 		* annotation (if needed)
 		 * 		* editable points
-		 * 
-		 * 
+		 *
+		 *
 		 ***************************************************************************************************************/
-		
+
 		private function createReflectionGFXAssetIfNeeded(reflectionDelta: int): void
 		{
 			if (!_reflectionGFXAssets[reflectionDelta])
@@ -116,21 +116,21 @@ package com.iblsoft.flexiweather.ogc.editable
 		}
 		/**
 		 * This function returns stored WFSFeatureEditableSprite for each reflection. If WFSFeatureEditableSprite was not yet created, it will be created here.
-		 *  
+		 *
 		 * @param reflectionDelta
 		 * @param bAddAsChild if true WFSFeatureEditableSprite will be added to displayList (if it is not there already)
 		 * @return WFSFeatureEditableSprite for reflection
-		 * 
+		 *
 		 */
 		public function getDisplaySpriteForReflectionAt(reflectionDelta: int, bAddAsChild: Boolean = true): WFSFeatureEditableSprite
 		{
 			createReflectionGFXAssetIfNeeded(reflectionDelta);
-			var gfxAsset: ReflectionGFXAsset = _reflectionGFXAssets[reflectionDelta] as ReflectionGFXAsset; 
-			
+			var gfxAsset: ReflectionGFXAsset = _reflectionGFXAssets[reflectionDelta] as ReflectionGFXAsset;
+
 			if (!gfxAsset.displaySprite)
 			{
 				gfxAsset.displaySprite = getDisplaySpriteForReflection(reflectionDelta);
-						
+
 				if (bAddAsChild)
 				{
 					if (!gfxAsset.displaySprite.parent)
@@ -139,13 +139,13 @@ package com.iblsoft.flexiweather.ogc.editable
 			}
 			return gfxAsset.displaySprite;
 		}
-		
+
 		/**
-		 * Function used to find out in which reflection (by reflectionDelta) is displaySprite drawn 
+		 * Function used to find out in which reflection (by reflectionDelta) is displaySprite drawn
 		 * @param displaySprite
-		 * @return 
-		 * 
-		 */		
+		 * @return
+		 *
+		 */
 		public function getReflectionDeltaFromDisplaySprite(displaySprite: WFSFeatureEditableSprite): int
 		{
 			for each (var gfxAsset: ReflectionGFXAsset in _reflectionGFXAssets)
@@ -155,94 +155,146 @@ package com.iblsoft.flexiweather.ogc.editable
 			}
 			return 0;
 		}
-		
+
 		public function addAnnotationForReflectionAt(reflectionDelta: int, annotation: AnnotationBox): void
 		{
 			createReflectionGFXAssetIfNeeded(reflectionDelta);
-			var gfxAsset: ReflectionGFXAsset = _reflectionGFXAssets[reflectionDelta] as ReflectionGFXAsset; 
+			var gfxAsset: ReflectionGFXAsset = _reflectionGFXAssets[reflectionDelta] as ReflectionGFXAsset;
 			gfxAsset.annotation = annotation;
 		}
-		
+
 		public function getAnnotationForReflectionAt(reflectionDelta: int): AnnotationBox
 		{
 			createReflectionGFXAssetIfNeeded(reflectionDelta);
-			var gfxAsset: ReflectionGFXAsset = _reflectionGFXAssets[reflectionDelta] as ReflectionGFXAsset; 
-					
+			var gfxAsset: ReflectionGFXAsset = _reflectionGFXAssets[reflectionDelta] as ReflectionGFXAsset;
+
 			return gfxAsset.annotation;
 		}
-		
+
 		public function editablePointForReflectionExist(reflectionDelta: int, pointPosition: int): Boolean
 		{
-			var gfxAsset: ReflectionGFXAsset = _reflectionGFXAssets[reflectionDelta] as ReflectionGFXAsset; 
-			
+			var gfxAsset: ReflectionGFXAsset = _reflectionGFXAssets[reflectionDelta] as ReflectionGFXAsset;
+
 			if (gfxAsset && gfxAsset.editablePoints && gfxAsset.editablePoints.length > pointPosition)
 				return true;
 			return false;
 		}
-		
+
 		public function getEditablePointsForReflection(reflectionDelta: int): Array
 		{
 			createReflectionGFXAssetIfNeeded(reflectionDelta);
-			var gfxAsset: ReflectionGFXAsset = _reflectionGFXAssets[reflectionDelta] as ReflectionGFXAsset; 
+			var gfxAsset: ReflectionGFXAsset = _reflectionGFXAssets[reflectionDelta] as ReflectionGFXAsset;
 			return gfxAsset.editablePoints;
 		}
-		
+
+		public function removeAllEditablePointForReflection(reflectionDelta: int): void
+		{
+			var mp: MoveablePoint;
+			var gfxAsset: ReflectionGFXAsset;
+
+			createReflectionGFXAssetIfNeeded(reflectionDelta);
+			{
+				gfxAsset = _reflectionGFXAssets[reflectionDelta] as ReflectionGFXAsset;
+				var editablePoints: Array = gfxAsset.editablePoints;
+				if (editablePoints && editablePoints.length > 0)
+				{
+					while (editablePoints.length > 0)
+					{
+						mp = editablePoints.splice(0, 1);
+						removeMoveablePointListeners(mp);
+
+						m_editableSprite.removeChild(mp);
+
+						var eim: IEditableItemManager = master as IEditableItemManager;
+						if (eim != null)
+							eim.removeEditableItem(mp);
+					}
+				}
+			}
+		}
+		public function removeEditablePointForReflectionAt(reflectionDelta: int,  pointPosition: int): void
+		{
+			var mp: MoveablePoint;
+			var gfxAsset: ReflectionGFXAsset;
+
+			createReflectionGFXAssetIfNeeded(reflectionDelta);
+			if (editablePointForReflectionExist(reflectionDelta, pointPosition))
+			{
+				//TODO remove editable point from reflection
+				gfxAsset = _reflectionGFXAssets[reflectionDelta] as ReflectionGFXAsset;
+				var editablePoints: Array = gfxAsset.editablePoints;
+				if (editablePoints && editablePoints.length > pointPosition)
+				{
+					mp = editablePoints[pointPosition] as MoveablePoint;
+
+					editablePoints.splice(pointPosition, 1);
+					removeMoveablePointListeners(mp);
+
+					m_editableSprite.removeChild(mp);
+
+					var eim: IEditableItemManager = master as IEditableItemManager;
+					if (eim != null)
+						eim.removeEditableItem(mp);
+				}
+
+			}
+		}
 		public function getEditablePointForReflectionAt(reflectionDelta: int, pointPosition: int): MoveablePoint
 		{
 			var mp: MoveablePoint;
 			var gfxAsset: ReflectionGFXAsset;
-			
+
 			createReflectionGFXAssetIfNeeded(reflectionDelta);
 			if (!editablePointForReflectionExist(reflectionDelta, pointPosition))
 			{
-				gfxAsset = _reflectionGFXAssets[reflectionDelta] as ReflectionGFXAsset; 
-				
+				gfxAsset = _reflectionGFXAssets[reflectionDelta] as ReflectionGFXAsset;
+
 				//add new MovablePoint (new point was added, so we need to create Movable point for it
 				mp = createEditablePoint(this, pointPosition, reflectionDelta);
 				//										reflection.addMoveablePoint(mp, i);
 				m_editableSprite.addChild(mp);
-				
+
 				var eim: IEditableItemManager = master as IEditableItemManager;
 				if (eim != null)
 					eim.addEditableItem(mp);
-				
+
 				addMoveablePointListeners(mp);
-				
+
 				gfxAsset.editablePoints[pointPosition] = mp;
-				
+
 			}
-			
-			gfxAsset = _reflectionGFXAssets[reflectionDelta] as ReflectionGFXAsset; 
-			
+
+			gfxAsset = _reflectionGFXAssets[reflectionDelta] as ReflectionGFXAsset;
+
 			return gfxAsset.editablePoints[pointPosition] as MoveablePoint;
 		}
-		
+
 		/**
 		 * create new instance of Editable point, if feature needs different point, which extends MoveablePoint, overrie this protected method
 		 * and return newly created Editable Point instance. See also WFSFeatureEditableJetStream for example
-		 *  
+		 *
 		 * @param feature
 		 * @param i_pointIndex
 		 * @param i_reflectionDelta
-		 * @return 
-		 * 
-		 */		
+		 * @return
+		 *
+		 */
 		protected function createEditablePoint(feature: WFSFeatureEditable, i_pointIndex: uint, i_reflectionDelta: int): MoveablePoint
 		{
 			return new MoveablePoint(feature, i_pointIndex, i_reflectionDelta);
 		}
-		
+
 		/**
 		 * This function should be override and return proper  WFSFeatureEditableSprite for each feature type
 		 * @param id
-		 * @return 
-		 * 
-		 */		
+		 * @return
+		 *
+		 */
 		public function getDisplaySpriteForReflection(id: int): WFSFeatureEditableSprite
 		{
 			return null;
 		}
-		
+
 		/*
 		protected function updateCoordsReflections(): void
 		{
@@ -251,7 +303,7 @@ package com.iblsoft.flexiweather.ogc.editable
 //			var reflections: Dictionary = new Dictionary();
 //			ml_movablePoints.cleanup();
 			var total: int = coordinates.length;
- 			var iw: InteractiveWidget = master.container;
+			var iw: InteractiveWidget = master.container;
 			var crs: String = iw.getCRS();
 			for (var i: int = 0; i < total; i++)
 			{
@@ -269,7 +321,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			}
 		}
 		*/
-		
+
 		protected function addMoveablePointListeners(mp: MoveablePoint): void
 		{
 			if (mp)
@@ -310,24 +362,24 @@ package com.iblsoft.flexiweather.ogc.editable
 		override protected function notifyCoordinateInside(coord: Coord, coordIndex: uint, coordReflection: uint): void
 		{
 			super.notifyCoordinateInside(coord, coordIndex, coordReflection);
-			
+
 			changeMoveablePointVisibility(coord, coordIndex, coordReflection, true);
 		}
-		
+
 		override protected function notifyCoordinateOutside(coord: Coord, coordIndex: uint, coordReflection: uint): void
 		{
 			super.notifyCoordinateOutside(coord, coordIndex, coordReflection);
-		
+
 			changeMoveablePointVisibility(coord, coordIndex, coordReflection, false);
 		}
-		
+
 		private function changeMoveablePointVisibility(coord: Coord, coordIndex: uint, coordReflection: uint, visible: Boolean): void
 		{
 			//hide correct moveable points
-			
+
 			var mp: MoveablePoint;
 			var i: uint;
-			
+
 			for (var r: int = 0; r < totalReflections; r++)
 			{
 				var reflection: FeatureDataReflection = m_featureData.getReflectionAt(r) as FeatureDataReflection;
@@ -347,28 +399,28 @@ package com.iblsoft.flexiweather.ogc.editable
 				}
 			}
 		}
-		
+
 		/**
-		 * New implementation of update method through FeatureData 
+		 * New implementation of update method through FeatureData
 		 * @param changeFlag
-		 * 
-		 */		
+		 *
+		 */
 		protected function updateNewImplementation(changeFlag: FeatureUpdateContext): void
 		{
 			if (m_featureData)
 			{
 //				trace("WFSFeatureEditable updateNewImplementation");
-				
+
 				var eim: IEditableItemManager = master as IEditableItemManager;
 				var mp: MoveablePoint;
 				var i: uint;
-				
+
 				for (var r: int = 0; r < totalReflections; r++)
 				{
 					var reflection: FeatureDataReflection = m_featureData.getReflectionAt(r) as FeatureDataReflection;
 					//FIXME needs to updated correctly between reflections, this is temporary solution
 					reflection.setEditablePoints(m_points.getPointsForReflection(reflection.reflectionDelta));
-					
+
 					if (reflection)
 					{
 						var pTotal: int = reflection.editablePoints.length;
@@ -385,7 +437,7 @@ package com.iblsoft.flexiweather.ogc.editable
 								if (!isReflectionEdgePoint)
 								{
 									mp = getEditablePointForReflectionAt(reflection.reflectionDelta, cnt);
-									
+
 										//add new MovablePoint (new point was added, so we need to create Movable point for it
 //										mp = new MoveablePoint(this, cnt, r, reflection.reflectionDelta);
 //										m_editableSprite.addChild(mp);
@@ -394,14 +446,14 @@ package com.iblsoft.flexiweather.ogc.editable
 //										addMoveablePointListeners(mp);
 //										continue;
 //									mp = pt.movablePoint as MoveablePoint;
-									
+
 									if (pt == null || mp == null)
 										continue; // TODO: check for CRS
 									var p: Point = mp.getPoint();
 									//						trace("WFSFeatureEditable update: pt: " + pt + " p: " + p + " for reflection r: " + r);
 									if (p && !p.equals(pt))
 									{
-										// reuse MoveablePoint instance, just change it's location 
+										// reuse MoveablePoint instance, just change it's location
 										mp.setPoint(pt);
 									}
 								}
@@ -414,22 +466,22 @@ package com.iblsoft.flexiweather.ogc.editable
 					editableSpriteVisible(mb_selected);
 			}
 		}
-		
+
 		/**
-		 * New implementation of update method through FeatureDataReflection 
+		 * New implementation of update method through FeatureDataReflection
 		 * @param changeFlag
-		 * 
-		 */		
+		 *
+		 */
 		/*
 		private function updateOldImplementation(changeFlag: FeatureUpdateContext): void
 		{
 			//m_points is Array of Screen coordinates in pixels
 			updateCoordsReflections();
-			
+
 			var eim: IEditableItemManager = master as IEditableItemManager;
 			var mp: MoveablePoint;
 			var i: uint;
-			
+
 			var reflectionsTotal: int = reflectionDictionary.totalReflections;
 			for (var r: int = 0; r < totalReflections; r++)
 			{
@@ -438,7 +490,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				{
 					var pTotal: int = reflection.editablePoints.length;
 					var pMoveableTotal: int = reflection.moveablePoints.length;
-					trace("FeatureEditable upate: pointsTotal: " + pTotal + "  pMoveableTotal: " + pMoveableTotal); 
+					trace("FeatureEditable upate: pointsTotal: " + pTotal + "  pMoveableTotal: " + pMoveableTotal);
 					for (i = 0; i < pTotal; ++i)
 					{
 						var pt: Point = reflection.editablePoints[i] as Point;
@@ -461,31 +513,31 @@ package com.iblsoft.flexiweather.ogc.editable
 						//						trace("WFSFeatureEditable update: pt: " + pt + " p: " + p + " for reflection r: " + r);
 						if (p && !p.equals(pt))
 						{
-							// reuse MoveablePoint instance, just change it's location 
+							// reuse MoveablePoint instance, just change it's location
 							mp.setPoint(pt);
 						}
 					}
 				}
 			}
-			
+
 			editableSpriteVisible(mb_selected);
 		}
 		*/
-		
+
 		override public function update(changeFlag: FeatureUpdateContext): void
 		{
 //			trace("\nWFSFeatureEditable update");
-			
+
 			super.update(changeFlag);
 		}
-		
+
 		protected function updateEditablePoints(changeFlag: FeatureUpdateContext): void
 		{
 			//NEW IMPLEMENTATION
 			updateNewImplementation(changeFlag);
-			
+
 			//OLD implementation
-			//updateOldImplementation(changeFlag);	
+			//updateOldImplementation(changeFlag);
 		}
 
 		protected function editableSpriteVisible(bool: Boolean): void
@@ -501,25 +553,16 @@ package com.iblsoft.flexiweather.ogc.editable
 			if (masterEditable != null)
 				masterEditable.editingComponentsContainer.removeChild(m_editableSprite);
 			var reflectionIDs: Array = m_featureData.reflectionsIDs;
-			
+
 			for (var i: int = 0; i < totalReflections; i++)
 			{
 				var reflectionDelta: int = reflectionIDs[i];
-				
-				var reflection: FeatureDataReflection = m_featureData.getReflectionAt(reflectionDelta);
-				if (reflection)
-				{
-					var editablePoints: Array = getEditablePointsForReflection(reflection.reflectionDelta);
-					for each (var mp: MoveablePoint in editablePoints)
-					{
-						m_editableSprite.removeChild(mp);
-					}
-				}
+				removeEditablePointForReflectionAt(reflectionDelta, 0);
 			}
 //			reflectionDictionary.cleanup();
 			super.cleanup();
 		}
-		
+
 		public function get getAnticollisionObject(): DisplayObject
 		{
 			return null;
@@ -528,7 +571,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			return editableSprite;
 		}
-		
+
 		public function get editableSprite(): WFSFeatureEditableSprite
 		{
 			if (totalReflections > 0)
@@ -581,14 +624,14 @@ package com.iblsoft.flexiweather.ogc.editable
 
 		/**
 		 * This method will be called when WFS feature will be created as result of split.
-		 * Do whatever is needed after split in this method 
-		 * 
-		 */		
+		 * Do whatever is needed after split in this method
+		 *
+		 */
 		public function afterSplit(): void
 		{
-			
+
 		}
-		
+
 		public function clone(): WFSFeatureEditable
 		{
 			var o: Object = this;
@@ -597,7 +640,7 @@ package com.iblsoft.flexiweather.ogc.editable
 					this.ms_namespace, this.ms_typeName, null);
 			var xml: XML = <Feature/>
 					;
-			//var xml: XML = <Feature xmlns="http://www.iblsoft.com/wfs" xmlns:wfs="http://www.opengis.net/wfs" xmlns:gml="http://www.opengis.net/gml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" />; 
+			//var xml: XML = <Feature xmlns="http://www.iblsoft.com/wfs" xmlns:wfs="http://www.opengis.net/wfs" xmlns:gml="http://www.opengis.net/gml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" />;
 			this.toInsertGML(xml);
 			f.fromGML(xml);
 			return f;
@@ -622,14 +665,14 @@ package com.iblsoft.flexiweather.ogc.editable
 				s_namespace = ms_namespace;
 			var p: XML = <wfs:Property xmlns:wfs="http://www.opengis.net/wfs"/>;
 			p.appendChild(<wfs:Name xmlns:wfs="http://www.opengis.net/wfs" xmlns={s_namespace}>{s_property}</wfs:Name>);
-			
+
 			if (value)
 			{
 				var v: XML = <wfs:Value xmlns:wfs="http://www.opengis.net/wfs"/>;
 				v.appendChild(value);
 				p.appendChild(v);
 			}
-			
+
 			xmlUpdate.appendChild(p);
 		}
 
@@ -640,22 +683,22 @@ package com.iblsoft.flexiweather.ogc.editable
 			if (i_reflectionDelta != 0)
 				reflectionWidth = master.container.getExtentBBox().width * i_reflectionDelta;
 			var c: Coord = m_master.container.pointToCoord(pt.x, pt.y);
-			
+
 //			trace("WFSFEatureEditable setPoint : from pt: " + pt + " to c: " + c.toLaLoCoord());
 			//need to move coord to 0 reflection
 			var projection: Projection = m_master.container.getCRSProjection();
 			c = projection.moveCoordToExtent(c);
 //			c.x -= reflectionWidth;
-			
+
 			//and cound correct point position for 0 reflection
 			var newPt: Point = m_master.container.coordToPoint(c);
 			m_points.setPoint(newPt, i_pointIndex, 0)
 			m_coordinates[i_pointIndex] = c;
-			
+
 //			trace("WFSFEatureEditable setPoint : from c: " + c.toLaLoCoord() + " to pt: " + newPt + " old pt: " + pt);
 //			if (newPt.x != pt.x)
 //				trace("check this");
-			
+
 			update(FeatureUpdateContext.fullUpdate());
 			modified = true;
 		}
@@ -705,7 +748,7 @@ package com.iblsoft.flexiweather.ogc.editable
 						selPoint.selected = true;
 						mi_actSelectedMoveablePointIndex = i_pointIndex;
 						mi_actSelectedMoveablePointReflectionIndex = i_reflection;
-						
+
 						var mpe: MoveablePointEvent = new MoveablePointEvent(MoveablePointEvent.MOVEABLE_POINT_SELECTION_CHANGE, true);
 						mpe.feature = this;
 						mpe.point = selPoint;
@@ -749,16 +792,17 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			m_points.removePointAt(i_pointIndex, reflectionID);
 			m_coordinates.splice(i_pointIndex, 1);
-			
+
 			removeMoveablePointAt(i_pointIndex);
 			if (mi_actSelectedMoveablePointIndex == i_pointIndex)
 			{
 				//point was selected, select other poin
 				selectPreviousMoveablePoint();
 			}
+			invalidatePoints();
 			update(FeatureUpdateContext.fullUpdate());
 		}
-		
+
 		private function removeMoveablePointAt(i: int): void
 		{
 			var eim: IEditableItemManager = master as IEditableItemManager;
@@ -767,20 +811,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				var reflection: FeatureDataReflection = m_featureData.getReflectionAt(r) as FeatureDataReflection;
 				if (reflection)
 				{
-					var mp: MoveablePoint = getEditablePointForReflectionAt(reflection.reflectionDelta, i);
-					if (mp)
-					{
-						removeMoveablePointListeners(mp);
-						if (mp && eim != null)
-						{
-							eim.removeEditableItem(mp);
-							// ADD CHECK ABOUT SELECTED MOVEABLE POINT
-						}
-						m_editableSprite.removeChild(mp);
-					}
-					
-					//TODO correctly remove editable point and annotation 
-//					reflection.removeItemAt(i);
+					removeEditablePointForReflectionAt(reflection.reflectionDelta, i);
 				}
 			}
 		}
@@ -813,11 +844,11 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			m_editableItemManager = eim;
 			var reflectionIDs: Array = m_featureData.reflectionsIDs;
-			
+
 			for (var i: int = 0; i < totalReflections; i++)
 			{
 				var reflectionDelta: int = reflectionIDs[i];
-				
+
 				var reflection: FeatureDataReflection = m_featureData.getReflectionAt(reflectionDelta);
 				if (reflection)
 				{
@@ -833,11 +864,11 @@ package com.iblsoft.flexiweather.ogc.editable
 		public function onUnregisteredAsEditableItem(eim: IEditableItemManager): void
 		{
 			var reflectionIDs: Array = m_featureData.reflectionsIDs;
-			
+
 			for (var i: int = 0; i < totalReflections; i++)
 			{
 				var reflectionDelta: int = reflectionIDs[i];
-				
+
 				var reflection: FeatureDataReflection = m_featureData.getReflectionAt(reflectionDelta);
 				if (reflection)
 				{
@@ -923,7 +954,7 @@ package com.iblsoft.flexiweather.ogc.editable
 					var displaySprite: WFSFeatureEditableSprite = getDisplaySpriteForReflectionAt(r);
 					if (displaySprite)
 						displaySprite.filters = filterArray;
-					
+
 					filters = null;
 				}
 				else
@@ -941,16 +972,16 @@ package com.iblsoft.flexiweather.ogc.editable
 				if (mb_selected && (mi_actSelectedMoveablePointIndex > -1) && (m_points.length > 1) && (mi_actSelectedMoveablePointIndex < m_points.length))
 				{
 //					removeMoveablePointAt(mi_actSelectedMoveablePointIndex);
-//					
+//
 //					ml_movablePoints.removeReflectedCoordAt(mi_actSelectedMoveablePointIndex);
 //					m_points.removeItemAt(mi_actSelectedMoveablePointIndex);
-//					
+//
 //					trace("FeatureEditable m_points: " + m_points.length + " ml_movablePoints: " + ml_movablePoints.totalMoveablePoints);
-//					
+//
 //					update(FeatureUpdateContext.fullUpdate());
-					
+
 					removePointAt(mi_actSelectedMoveablePointIndex);
-					
+
 					if ((mi_actSelectedMoveablePointIndex >= 0) && (mi_actSelectedMoveablePointIndex < m_points.length))
 						selectMoveablePoint(mi_actSelectedMoveablePointIndex, mi_actSelectedMoveablePointReflectionIndex);
 					else if (mi_actSelectedMoveablePointIndex >= m_points.length)
@@ -1106,7 +1137,7 @@ class ReflectionGFXAsset
 	public var displaySprite: WFSFeatureEditableSprite;
 	public var annotation: AnnotationBox;
 	public var editablePoints: Array;
-	
+
 	public function ReflectionGFXAsset(reflectionDelta: int)
 	{
 		this.reflectionDelta = reflectionDelta;
