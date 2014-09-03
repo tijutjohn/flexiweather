@@ -53,7 +53,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		public function removeEditableItem(item: IEditableItem): void
 		{
 			var i: int = ma_items.getItemIndex(item);
-			if (i >= 0)
+	if (i >= 0)
 			{
 				if (m_highlightedItem == item)
 					m_highlightedItem = null;
