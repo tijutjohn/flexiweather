@@ -3,7 +3,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 	import com.iblsoft.flexiweather.events.WFSCursorManagerEvent;
 	import com.iblsoft.flexiweather.events.WFSCursorManagerTypes;
 	import com.iblsoft.flexiweather.ogc.events.MoveablePointEvent;
-	
+
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
@@ -24,7 +24,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		override public function set x(value:Number):void
 		{
 			super.x = value;
-			
+
 //			trace(this + " x = " + value);
 		}
 		override public function set visible(value:Boolean):void
@@ -50,17 +50,17 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		{
 			_mi_pointIndex = value;
 		}
-		
+
 		public function get reflectionDelta(): uint
 		{
 			return mi_reflectionDelta;
 		}
-		
+
 //		public function get reflection(): uint
 //		{
 //			return mi_reflection;
 //		}
-		
+
 //		protected var mi_reflection: uint;
 		protected var mi_reflectionDelta: int;
 		protected var m_pt: Point;
@@ -183,26 +183,31 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		public function onMouseDown(pt: Point, event: MouseEvent): Boolean
 		{
 //			trace("onMouseDown : " + pt);
-			m_editableItemManager.setMouseMoveCapture(this);
 			m_editableItemManager.setMouseClickCapture(this);
 			m_feature.selectMoveablePoint(mi_pointIndex, mi_reflectionDelta);
-			mb_dragging = true;
-			
-			
+
+
 			var mpe: MoveablePointEvent = new MoveablePointEvent(MoveablePointEvent.MOVEABLE_POINT_DOWN, true);
 			mpe.point = this;
 			mpe.feature = m_feature;
 			mpe.x = pt.x;
 			mpe.y = pt.y;
 			dispatchEvent(mpe);
-			
-			mpe = new MoveablePointEvent(MoveablePointEvent.MOVEABLE_POINT_DRAG_START, true);
-			mpe.point = this;
-			mpe.feature = m_feature;
-			mpe.x = pt.x;
-			mpe.y = pt.y;
-			dispatchEvent(mpe);
+
+			if (!m_feature.justSelectable)
+			{
+				mb_dragging = true;
+				m_editableItemManager.setMouseMoveCapture(this);
+				mpe = new MoveablePointEvent(MoveablePointEvent.MOVEABLE_POINT_DRAG_START, true);
+				mpe.point = this;
+				mpe.feature = m_feature;
+				mpe.x = pt.x;
+				mpe.y = pt.y;
+				dispatchEvent(mpe);
+			}
+
 			return true;
+
 		}
 
 		public function onMouseUp(pt: Point, event: MouseEvent): Boolean
@@ -212,7 +217,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			m_editableItemManager.releaseMouseMoveCapture(this);
 			m_editableItemManager.releaseMouseClickCapture(this);
 			mb_dragging = false;
-			
+
 			var featurePointsLength: int = m_feature.getPoints().length;
 			if (mi_pointIndex == 0 || mi_pointIndex == (featurePointsLength - 1))
 			{
@@ -235,32 +240,32 @@ package com.iblsoft.flexiweather.ogc.editable.data
 					}
 				}
 			}
-			
-			var mpe: MoveablePointEvent 
-			
+
+			var mpe: MoveablePointEvent
+
 //			trace("onMouseUp : " + pt);
-			
+
 			mpe = new MoveablePointEvent(MoveablePointEvent.MOVEABLE_POINT_DRAG_END, true);
 			mpe.point = this;
 			mpe.feature = m_feature;
 			mpe.x = pt.x;
 			mpe.y = pt.y;
 			dispatchEvent(mpe);
-			
+
 			mpe = new MoveablePointEvent(MoveablePointEvent.MOVEABLE_POINT_UP, true);
 			mpe.point = this;
 			mpe.feature = m_feature;
 			mpe.x = pt.x;
 			mpe.y = pt.y;
 			dispatchEvent(mpe);
-			
+
 			mpe = new MoveablePointEvent(MoveablePointEvent.MOVEABLE_POINT_CLICK, true);
 			mpe.point = this;
 			mpe.feature = m_feature;
 			mpe.x = pt.x;
 			mpe.y = pt.y;
 			dispatchEvent(mpe);
-			
+
 			return true;
 		}
 
