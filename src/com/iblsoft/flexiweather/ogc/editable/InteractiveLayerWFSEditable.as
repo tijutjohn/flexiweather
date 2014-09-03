@@ -8,12 +8,12 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
 	import com.iblsoft.flexiweather.utils.ScreenUtils;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
-	
+
 	import flash.display.DisplayObject;
 	import flash.display.Sprite;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
-	
+
 	import mx.collections.ArrayCollection;
 	import mx.events.PropertyChangeEvent;
 	import mx.events.PropertyChangeEventKind;
@@ -22,6 +22,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	public class InteractiveLayerWFSEditable extends InteractiveLayerWFS implements IHighlightableItemManager, ISelectableItemManager, IEditableItemManager
 	{
 		public static const SELECTION_CHANGE: String = "wfsEditableSelectionChange";
+
 		protected var ma_items: ArrayCollection = new ArrayCollection();
 		protected var m_highlightedItem: IHighlightableItem = null;
 		protected var m_selectedItem: ISelectableItem = null;
@@ -36,6 +37,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				version: Version = null)
 		{
 			super(container, version);
+
 			mouseChildren = true;
 			// add a layer for any components which are realted to feature editing
 			addChild(m_editingComponentsContainer);
@@ -89,7 +91,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			if (item == m_mouseClickCapturingItem)
 				return;
-			
+
 			if (item == null)
 				throw new Error("Cannot capture mouse clicks for a null object");
 			if (m_mouseClickCapturingItem != null)
@@ -153,7 +155,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			{
 				var oldSItem: ISelectableItem = m_selectedItem;
 				m_selectedItem = sItem;
-				
+
 				if (m_selectedItem is WFSFeatureEditable && mouseEvent)
 				{
 					var displaySprite: WFSFeatureEditableSprite = mouseEvent.target as WFSFeatureEditableSprite;
@@ -187,7 +189,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			var oldSItem: ISelectableItem = item as ISelectableItem;
 			if (item != null)
 				removeEditableItem(item);
-			
+
 			//FW-76: this SELECTION_CHANGE event does not needs to be called, as it will be dispatched when selectedItem = null
 			/*
 			dispatchEvent(new PropertyChangeEvent(
@@ -279,14 +281,14 @@ package com.iblsoft.flexiweather.ogc.editable
 					}
 				}
 			}
-			
+
 			// selecting
 			var l_hitItems: Array = doHitTest(event.stageX, event.stageY, ISelectableItem);
 			for each(var sItem: ISelectableItem in l_hitItems) {
 				selectItem(sItem, event);
 				return true;
 			}
-			
+
 			return false;
 		}
 
@@ -320,7 +322,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				}
 			var l_hitItems: Array = doHitTest(event.stageX, event.stageY, IMouseEditableItem);
 			var _selectedItemHitted: Boolean;
-			
+
 			for each(var mItem: IMouseEditableItem in l_hitItems) {
 				//if(mItem.onMouseDown(new Point(event.localX, event.localY)))
 				if (mItem == m_selectedItem)
@@ -335,7 +337,7 @@ package com.iblsoft.flexiweather.ogc.editable
 
 			if (!_selectedItemHitted)
 				selectItem(null);
-			
+
 			return false;
 		}
 
@@ -344,10 +346,10 @@ package com.iblsoft.flexiweather.ogc.editable
 			var bool: Boolean = onMouseUpCommon(event);
 //			if (bool)
 //				trace(this + " onMouseUp");
-			
+
 			return bool;
 		}
-		
+
 		override public function onMouseUpOutside(event: MouseEvent): Boolean
 		{
 			if(event.ctrlKey || event.shiftKey)
@@ -362,7 +364,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			}
 			return false;
 		}
-		
+
 		private function onMouseUpCommon(event: MouseEvent): Boolean
 		{
 			if(event.ctrlKey || event.shiftKey)
@@ -394,7 +396,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			return m_editingComponentsContainer;
 		}
-		
+
 		override public function toString(): String
 		{
 			return "InteractiveLayerWFSEditable: " + name + ", " + id + " ";
