@@ -88,21 +88,25 @@ package com.iblsoft.flexiweather.widgets.controls
 				
 				var data: ToggleButtonBarItemData = event.data as ToggleButtonBarItemData;
 				
+				if (data.ident.indexOf('time') >= 0)
+				{
+					trace("Check time crosssection data.type:"+data.type);
+				}
 				switch (data.type)
 				{
 					case ToggleButtonBarItemData.NORMAL:
 						renderer.addEventListener(MouseEvent.CLICK, onNormalButtonClick);
-						_buttons[renderer] = new ButtonDictionaryData(renderer, data);
+						_buttons[data.ident] = new ButtonDictionaryData(renderer, data);
 						break;
 					case ToggleButtonBarItemData.TOGGLE:
 						renderer.addEventListener(Event.CHANGE, onToggleButtonChange);
 						renderer.addEventListener(MouseEvent.CLICK, onToggleButtonClick);
-						_buttons[renderer] = new ButtonDictionaryData(renderer, data);
+						_buttons[data.ident] = new ButtonDictionaryData(renderer, data);
 						break;
 					case ToggleButtonBarItemData.EXCLUSIVE:
 						renderer.addEventListener(Event.CHANGE, onExclusiveButtonChange);
 						renderer.addEventListener(MouseEvent.CLICK, onExclusiveButtonClick);
-						_buttons[renderer] = new ButtonDictionaryData(renderer, data);
+						_buttons[data.ident] = new ButtonDictionaryData(renderer, data);
 						break;
 				}	
 //				renderer.addEventListener(MouseEvent.CLICK, item_clickHandler);

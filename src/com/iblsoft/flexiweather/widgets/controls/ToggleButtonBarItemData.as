@@ -60,6 +60,7 @@ package com.iblsoft.flexiweather.widgets.controls
 
 		public function set enabled(value:Boolean):void
 		{
+			trace("ToggleButtonBarItemData enabled: " + value + "  ident: " + ident);
 			_enabled = value;
 			notify("enabledChanged");
 			notifyChange();
@@ -109,6 +110,11 @@ package com.iblsoft.flexiweather.widgets.controls
 		private function notify(type:String): void
 		{
 			dispatchEvent(new Event(type));
+		}
+		
+		public function ToggleButtonBarItemData()
+		{
+			trace("New ToggleButtonBarItemData");
 		}
 
 	}
