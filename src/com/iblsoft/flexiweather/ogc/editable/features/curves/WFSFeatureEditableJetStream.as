@@ -1071,6 +1071,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 //					wb.below = WindBarb(evt.data).below;
 //				}
 				update(FeatureUpdateContext.fullUpdate());
+				modified = true;
 			}
 		}
 
