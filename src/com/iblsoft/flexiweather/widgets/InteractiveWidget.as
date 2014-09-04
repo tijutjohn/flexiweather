@@ -2371,7 +2371,13 @@ package com.iblsoft.flexiweather.widgets
 				
 				if (drawMode == DrawMode.GREAT_ARC)
 				{
-					tempCoords = Coord.interpolateGreatArc(coordFrom, coordTo, distanceValidator);
+					var arcCoords: Array = Coord.interpolateGreatArc(coordFrom, coordTo, distanceValidator);
+					
+					tempCoords = [];
+					for each (c in arcCoords)
+					{
+						tempCoords.push(new EdgeCoord(c, false, true));
+					}
 	//				trace(coords);
 				}
 				else if (drawMode == DrawMode.PLAIN) {
