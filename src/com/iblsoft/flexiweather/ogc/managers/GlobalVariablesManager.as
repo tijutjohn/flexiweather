@@ -394,7 +394,9 @@ package com.iblsoft.flexiweather.ogc.managers
 				}
 				
 				if (!_cachedFrames)
+				{
 					onInteractiveLayerMapFramesEnumerated();
+				}
 				
 //				var framesObjects: Array = _interactiveLayerMap.primaryLayer.getSynchronisedVariableValuesList(GlobalVariable.FRAME);
 //				if (!_cachedFrames)
@@ -440,15 +442,18 @@ package com.iblsoft.flexiweather.ogc.managers
 					if (_frame.time != selectedFrame.time)
 					{
 						//frame is changed
-						framesChanged = true;
+//						framesChanged = true;
 						notifySelectedFrameChanged(selectedFrame);
 					}
 //					else
 //						trace("Global frame is not changed, do not notify");
 				}
 				else {
-					framesChanged = true;
-					notifySelectedFrameChanged(selectedFrame);
+					if (selectedFrame)
+					{
+						framesChanged = true;
+						notifySelectedFrameChanged(selectedFrame);
+					}
 				}
 			}
 			else {
