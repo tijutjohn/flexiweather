@@ -1014,6 +1014,31 @@ package com.iblsoft.flexiweather.widgets
 			var cy: Number = (h - 1 - y) * m_viewBBox.height / (h - 1) + m_viewBBox.yMin;
 			return new Coord(ms_crs, cx , cy);
 		}
+		
+		/**
+		 * Helper function, which finds out if there is dateline between two points 
+		 * @param p1
+		 * @param p2
+		 * @return 
+		 * 
+		 */		
+		private function crossDateline(p1: Point, p2: Point): Boolean
+		{
+			var leftX: Number = m_crsProjection.extentBBox.xMin;
+			var rightX: Number = m_crsProjection.extentBBox.xMax;
+			
+			var p1x: Number = Math.min(p1.x, p2.x);
+			var p2x: Number = Math.max(p1.x, p2.x);
+			
+			if (p1x <= rightX && p2x >= rightX)
+				return true;
+			
+			if (p1x <= leftX && p2x >= leftX)
+				return true;
+			
+			return false;
+		}
+		
 
 		public function coordInside(c: Coord): Boolean
 		{
@@ -1529,16 +1554,40 @@ package com.iblsoft.flexiweather.widgets
 			{
 				var f_crsExtentBBoxWidth: Number = m_crsProjection.extentBBox.width;
 				var reflections: Array = mapCoordInCRSToViewReflections(point, m_crsProjection.extentBBox);
-				var pX0: Number = reflections[0].point.x;
-				var a: Array = [];
-				for each (var i_delta: int in deltas)
+				
+				var pX0: Number;
+				var pointInZeroReflectionFound: Boolean;
+				//TODO: need to checkout deltas in reflections if they are same as requested deltas
+				
+				//get 0 reflection index
+				for each (var reflectedObject: Object in reflections)
 				{
-					var p: Point = new Point(pX0 + f_crsExtentBBoxWidth * i_delta, point.y)
-					a.push({point: p, reflection: i_delta});
+					if (reflectedObject.reflection == 0)
+					{
+						pX0 = reflectedObject.point.x;
+						pointInZeroReflectionFound = true;
+						break;
+					}
 				}
-				return a;
+				
+				if (pointInZeroReflectionFound)
+				{
+					var a: Array = [];
+					for each (var i_delta: int in deltas)
+					{
+	//					var p: Point = new Point(pX0 + f_crsExtentBBoxWidth * i_delta, point.y)
+						var p: Point = new Point(pX0 + f_crsExtentBBoxWidth * i_delta, point.y)
+						a.push({point: p, reflection: i_delta});
+					}
+					return a;
+				}
 			}
 			return [{point: point, reflection: 0}];
+		}
+		
+		private function getReflectedXPositionForDelta(pX0: Number, delta: Number, f_crsExtentBBoxWidth: Number): Number
+		{
+			return pX0 + f_crsExtentBBoxWidth * delta;
 		}
 		
 		private var _enableSynchronization: Boolean;
@@ -2625,7 +2674,7 @@ package com.iblsoft.flexiweather.widgets
 				
 				var g: ICurveRenderer = rendererCreator(l_reflection);
 				
-//				trace("_drawReflectedSegmentPoints: l_reflectionStr: " + l_reflectedSegmentPoints.length + " points");
+				//trace("_drawReflectedSegmentPoints: l_reflectionStr: " + l_reflectedSegmentPoints.length + " points");
 				var str: String = '\nReflection: ' + l_reflection + ': ';
 				for each(var pt: Point in l_reflectedSegmentPoints) {
 					if(!pt) {
@@ -2646,7 +2695,7 @@ package com.iblsoft.flexiweather.widgets
 						ptLast = ptPrev = pt;
 					}
 				}
-//				trace(str);
+				//trace(str);
 				if(ptLast)
 					g.finish(ptLast.x, ptLast.y);
 			}
@@ -2662,8 +2711,59 @@ package com.iblsoft.flexiweather.widgets
 
 		public function drawSmoothPolyLine(rendererCreator: Function, coords: Array, drawMode: String, b_closed: Boolean = false, b_justCompute: Boolean = false,  featureData: FeatureData = null): void
 		{
-			var splinePoints: Array = CubicBezier.calculateHermitSpline(coords, false);
-			drawGeoPolyLine(rendererCreator, splinePoints, drawMode, b_closed, b_justCompute, featureData);
+			//coords must be screen pixels position. If needed, convert coordinates to pixel points
+			coords = coordsToPoints(coords);
+			
+			var splineCoordinates: Array = CubicBezier.calculateHermitSpline(coords, false);
+			
+			//Convert pixel points to coordinates
+			coords = pointsToCoords(splineCoordinates);
+			
+			drawGeoPolyLine(rendererCreator, coords, drawMode, b_closed, b_justCompute, featureData);
+		}
+		
+		/**
+		 * Batch conversion of screen pixel positions to coordinates (if needed, otherwise returns same array) 
+		 * @param points
+		 * @return 
+		 * 
+		 */		
+		public function pointsToCoords(points: Array): Array
+		{
+			var total: int = points.length;
+			if (!(points[0] is Coord))
+			{
+				var newCoords: Array = [];
+				for (var i: int = 0; i < total; i++)
+				{
+					var p: Point = points[i] as Point;
+					newCoords.push(pointToCoord(p.x, p.y));	
+				}	
+				return newCoords;
+			}
+			return points;
+		}
+		
+		/**
+		 * Batch conversion of coordinates to screen pixel positions (if needed, otherwise returns same array) 
+		 * @param coords
+		 * @return 
+		 * 
+		 */		
+		public function coordsToPoints(coords: Array): Array
+		{
+			var total: int = coords.length;
+			if ((coords[0] is Coord))
+			{
+				var newPoints: Array = [];
+				for (var i: int = 0; i < total; i++)
+				{
+					var c: Coord = coords[i] as Coord;
+					newPoints.push(coordToPoint(c));	
+				}	
+				return newPoints;
+			}
+			return coords;
 		}
 		
 		/**
@@ -2686,16 +2786,7 @@ package com.iblsoft.flexiweather.widgets
 			var cnt: int = 0;
 			
 			//if coords Array is array of points, convert them to coordinates
-			if (!(coords[0] is Coord))
-			{
-				var newCoords: Array = [];
-				for (var i: int = 0; i < total; i++)
-				{
-					var p: Point = coords[i] as Point;
-					newCoords.push(pointToCoord(p.x, p.y));	
-				}	
-				coords = newCoords;
-			}
+			coords = pointsToCoords(coords);
 			
 			//if line is closed, add 1st coordinate at the end of coordinates array
 			if (b_closed)

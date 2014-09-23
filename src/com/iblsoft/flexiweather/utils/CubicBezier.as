@@ -531,11 +531,13 @@ package com.iblsoft.flexiweather.utils
 
 		/**
 		 * Calculates all needed parameters for hermit spline (distances, derivations, points)
-		 *
-		 * @return;
-		 * Returns array of MPoints
-		 */
-//		public static function calculateHermitSpline(_points: Array, _closed: Boolean, _step: Number = 0.005): Array
+		 * 
+		 * @param _points - screen pixel positions
+		 * @param _closed
+		 * @param _step
+		 * @return Returns array of MPoints 
+		 * 
+		 */		
 		public static function calculateHermitSpline(_points: Array, _closed: Boolean, _step: Number = 0.05): Array
 		{
 			var retPoints: Array = new Array();
