@@ -165,17 +165,21 @@ package com.iblsoft.flexiweather.ogc.editable
 					//DEBUG - check for non smooth (to have less coordinates
 //					smooth = false;
 					
+					var b_justCompute: Boolean = true;
+					
 					//curves will be not drawn, just compute, to be able to draw each reflection separately
 					if (smooth)
-						master.container.drawSmoothPolyLine(getRenderer, a_points, DrawMode.PLAIN, false, true, m_featureData);
+						master.container.drawSmoothPolyLine(getRenderer, a_points, DrawMode.PLAIN, false, b_justCompute, m_featureData);
 					else
-						master.container.drawGeoPolyLine(getRenderer, a_points, DrawMode.PLAIN, false, true, m_featureData);
+						master.container.drawGeoPolyLine(getRenderer, a_points, DrawMode.PLAIN, false, b_justCompute, m_featureData);
 				}
 //			}
 		}
 		
 	 	protected function drawCurve(): void
 		{
+//			return;
+			
 			trace("WFSFeatureEditableCurveWithBaseTimeAndValidity drawCurve");
 			
 			var reflection: FeatureDataReflection;
