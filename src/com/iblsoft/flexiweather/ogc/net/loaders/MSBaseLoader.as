@@ -20,14 +20,15 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
-
+	
 	import flash.display.Bitmap;
 	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.ProgressEvent;
 	import flash.net.URLRequest;
-
+	import flash.utils.ByteArray;
+	
 	import mx.collections.ArrayCollection;
 	import mx.events.DynamicEvent;
 	import mx.logging.Log;
@@ -505,29 +506,33 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				{
 					var errorStateSet: Boolean;
 
-					var xml: XML = associatedData.errorResult;
-					if (xml.localName() == "ServiceExceptionReport")
+					if ((associatedData.errorResult as ByteArray).length > 0)
 					{
-						var serviceException: XML = xml.children()[0] as XML;
-						if (serviceException.localName() == "ServiceException" && serviceException.hasOwnProperty("@code") && serviceException.@code == "InvalidDimensionValue")
+						
+						var xml: XML = associatedData.errorResult;
+						if (xml.localName() == "ServiceExceptionReport")
 						{
-							var exceptionText: String = serviceException.text();
-							if (exceptionText.indexOf('Failed to apply value') == 0)
+							var serviceException: XML = xml.children()[0] as XML;
+							if (serviceException.localName() == "ServiceException" && serviceException.hasOwnProperty("@code") && serviceException.@code == "InvalidDimensionValue")
 							{
-								var arr: Array = exceptionText.split("'");
-								var timeString: String = arr[1];
-								var dimension: String = arr[3];
-								m_layer.getCache().addCacheNoDataItem(wmsViewProperties);
-
-								ExceptionUtils.logError(Log.getLogger("WMS"), associatedData.errorResult,
-									"Failed to apply value '" + (m_layer.configuration as IWMSLayerConfiguration).layerNames.join(",") + "'");
-
-								notifyLoadingFinishedNoSynchronizationData(event.associatedData);
-								errorStateSet = true;
+								var exceptionText: String = serviceException.text();
+								if (exceptionText.indexOf('Failed to apply value') == 0)
+								{
+									var arr: Array = exceptionText.split("'");
+									var timeString: String = arr[1];
+									var dimension: String = arr[3];
+									m_layer.getCache().addCacheNoDataItem(wmsViewProperties);
+	
+									ExceptionUtils.logError(Log.getLogger("WMS"), associatedData.errorResult,
+										"Failed to apply value '" + (m_layer.configuration as IWMSLayerConfiguration).layerNames.join(",") + "'");
+	
+									notifyLoadingFinishedNoSynchronizationData(event.associatedData);
+									errorStateSet = true;
+								}
 							}
 						}
 					}
-
+					
 					if (!errorStateSet)
 						notifyLoadingFinishedWithErrors(event.associatedData);
 
