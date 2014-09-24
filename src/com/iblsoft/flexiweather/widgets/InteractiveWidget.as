@@ -1016,6 +1016,22 @@ package com.iblsoft.flexiweather.widgets
 		}
 		
 		/**
+		 * 
+		 * @param p1
+		 * @param p2
+		 * @param extent if null it will get actual extent. You can provide extent to optimize performance
+		 * @return 
+		 * 
+		 */		
+		private function coordsFarThanExtentWidth(p1: Coord, p2: Coord, extent: BBox = null): Boolean
+		{
+			if (!extent)
+				extent = getExtentBBox();
+			
+			return (Math.abs(p1.x - p2.x) > extent.width / 2);
+		}
+		
+		/**
 		 * Helper function, which finds out if there is dateline between two points 
 		 * @param p1
 		 * @param p2
@@ -2382,6 +2398,55 @@ package com.iblsoft.flexiweather.widgets
 			return (dist < maxDist);
 		}
 		
+		private function splitCoordsOnDateline(coordFrom: Coord, coordTo: Coord): Array
+		{
+			var projection: Projection = getCRSProjection();
+			
+			coordFrom = coordFrom.toLaLoCoord();
+			coordTo = coordTo.toLaLoCoord();
+			var line1: FeatureDataLineSegment;
+			var internationalDateLine: LineSegment = new LineSegment(180,-90,180,90);
+			
+			//create line1 in correct order
+			if (coordFrom.x > coordTo.x)
+				line1 = new FeatureDataLineSegment(coordFrom.x, coordFrom.y, coordTo.x + 360, coordTo.y, true, true);
+			else {
+				line1 = new FeatureDataLineSegment(coordTo.x, coordTo.y, coordFrom.x + 360, coordFrom.y, true, true);
+			}
+			
+			var intersection: Point = line1.intersectionWithLineSegment(internationalDateLine);
+			var intersectionCoordLeft: Coord = new Coord(coordFrom.crs, intersection.x - 0.00001, intersection.y);
+			var intersectionCoordRight: Coord = new Coord(coordFrom.crs, intersection.x + 0.00001, intersection.y);
+			intersectionCoordRight = Coord.convertCoordOnSphere(intersectionCoordRight, projection);
+			
+			var bisectedCoordsLeft: Array;
+			var bisectedCoordsRight: Array;
+			
+			var tempCoords: Array;
+			var cEdgeCoord: EdgeCoord;
+			
+			//now there are 2 lines and NULL (dateline) coord, so we split line crossing date line to 2 different lines not crossing dateline
+			if (coordFrom.x > coordTo.x) 
+			{
+				tempCoords = [new EdgeCoord(coordFrom, false, true), new EdgeCoord(intersectionCoordLeft, true, false), null, new EdgeCoord(intersectionCoordRight, true, false), new EdgeCoord(coordTo, false, true)];
+			} else {
+				tempCoords = [new EdgeCoord(coordTo, false, true), new EdgeCoord(intersectionCoordLeft, true, false), null, new EdgeCoord(intersectionCoordRight, true, false), new EdgeCoord(coordFrom, false, true)];
+			}
+			
+			
+			//convert coords back to origin projection
+			var tempCoords2: Array = tempCoords;
+			tempCoords = [];
+			for each (cEdgeCoord in tempCoords2)
+			{
+				if (cEdgeCoord)
+					cEdgeCoord.coord = projection.laLoCoordToPrjCoord(cEdgeCoord.coord);
+				
+				tempCoords.push(cEdgeCoord);
+			}
+			
+			return tempCoords;
+		}
 		/**
 		 * 
 		 * @param g
@@ -2420,62 +2485,63 @@ package com.iblsoft.flexiweather.widgets
 				
 				if (drawMode == DrawMode.GREAT_ARC)
 				{
-					var arcCoords: Array = Coord.interpolateGreatArc(coordFrom, coordTo, distanceValidator);
-					
+					var arcCoords: Array;
 					tempCoords = [];
-					for each (c in arcCoords)
-					{
-						tempCoords.push(new EdgeCoord(c, false, true));
+					
+					if (projection.wrapsHorizontally) {
+						if (crossDateline(coordFrom, coordTo) || coordsFarThanExtentWidth(coordFrom, coordTo) )
+						{
+							tempCoords = splitCoordsOnDateline(coordFrom, coordTo);
+							
+							var arcTempCoords: Array = [];
+							
+							var ec1: EdgeCoord;
+							var ec2: EdgeCoord;
+							while(tempCoords.length > 0)
+							{
+								if (tempCoords[0] == null)
+									arcTempCoords.push(tempCoords.shift());
+								
+								if (!ec1 && tempCoords.length > 0)
+									ec1 = tempCoords.shift();
+								if (!ec2 && tempCoords.length > 0)
+									ec2 = tempCoords.shift();
+								
+								if (ec1 && ec2)
+								{
+									arcCoords = Coord.interpolateGreatArc(ec1.coord, ec2.coord, distanceValidator);
+									for each (c in arcCoords)
+									{
+										arcTempCoords.push(new EdgeCoord(c, false, true));
+									}
+									
+									ec1 = null;
+									ec2 = null;
+								}
+							}
+							
+							tempCoords = arcTempCoords;
+							
+						} else {
+//							tempCoords = [new EdgeCoord(coordFrom, false, true), new EdgeCoord(coordTo, false, true)];
+							tempCoords = [];//new EdgeCoord(coordFrom, false, true), new EdgeCoord(coordTo, false, true)];
+							arcCoords = Coord.interpolateGreatArc(coordFrom, coordTo, distanceValidator);
+							for each (c in arcCoords)
+							{
+								tempCoords.push(new EdgeCoord(c, false, true));
+							}
+						}
 					}
+					
 	//				trace(coords);
 				}
 				else if (drawMode == DrawMode.PLAIN) {
 					if (projection.wrapsHorizontally) {
 						
 						//if Projection wraps horizontally, we need to check if coordinates distance is higher then half of extent to check if there is not InternationDateLine
-						if (Math.abs(coordFrom.x - coordTo.x) > extent.width / 2)
+						if (crossDateline(coordFrom, coordTo) || coordsFarThanExtentWidth(coordFrom, coordTo) )
 						{
-							coordFrom = coordFrom.toLaLoCoord();
-							coordTo = coordTo.toLaLoCoord();
-							var line1: FeatureDataLineSegment;
-							var internationalDateLine: LineSegment = new LineSegment(180,-90,180,90);
-							
-							//create line1 in correct order
-							if (coordFrom.x > coordTo.x)
-								line1 = new FeatureDataLineSegment(coordFrom.x, coordFrom.y, coordTo.x + 360, coordTo.y, true, true);
-							else {
-								line1 = new FeatureDataLineSegment(coordTo.x, coordTo.y, coordFrom.x + 360, coordFrom.y, true, true);
-							}
-							
-							var intersection: Point = line1.intersectionWithLineSegment(internationalDateLine);
-							var intersectionCoordLeft: Coord = new Coord(coordFrom.crs, intersection.x - 0.00001, intersection.y);
-							var intersectionCoordRight: Coord = new Coord(coordFrom.crs, intersection.x + 0.00001, intersection.y);
-							intersectionCoordRight = Coord.convertCoordOnSphere(intersectionCoordRight, projection);
-							
-							var bisectedCoordsLeft: Array;
-							var bisectedCoordsRight: Array;
-							
-							
-							//now there are 2 lines and NULL (dateline) coord, so we split line crossing date line to 2 different lines not crossing dateline
-							if (coordFrom.x > coordTo.x) 
-							{
-								tempCoords = [new EdgeCoord(coordFrom, false, true), new EdgeCoord(intersectionCoordLeft, true, false), null, new EdgeCoord(intersectionCoordRight, true, false), new EdgeCoord(coordTo, false, true)];
-							} else {
-								tempCoords = [new EdgeCoord(coordTo, false, true), new EdgeCoord(intersectionCoordLeft, true, false), null, new EdgeCoord(intersectionCoordRight, true, false), new EdgeCoord(coordFrom, false, true)];
-							}
-							
-							
-							//convert coords back to origin projection
-							var tempCoords2: Array = tempCoords;
-							tempCoords = [];
-							for each (cEdgeCoord in tempCoords2)
-							{
-								if (cEdgeCoord)
-									cEdgeCoord.coord = projection.laLoCoordToPrjCoord(cEdgeCoord.coord);
-								
-								tempCoords.push(cEdgeCoord);
-							}
-							
+							tempCoords = splitCoordsOnDateline(coordFrom, coordTo);
 						} else {
 							tempCoords = [new EdgeCoord(coordFrom, false, true), new EdgeCoord(coordTo, false, true)];
 						}
@@ -2711,15 +2777,88 @@ package com.iblsoft.flexiweather.widgets
 
 		public function drawSmoothPolyLine(rendererCreator: Function, coords: Array, drawMode: String, b_closed: Boolean = false, b_justCompute: Boolean = false,  featureData: FeatureData = null): void
 		{
+			var projection: Projection = getCRSProjection();
+			if (projection.wrapsHorizontally) 
+			{
+				//Convert pixel points to coordinates (if needed), because of checking dateline crossing
+				coords = pointsToCoords(coords);
+				
+				var newCoords: Array = [];
+				var tempCoords: Array = [];
+				
+				var coordFrom: Coord = coords.shift();
+				coordFrom = Coord.convertCoordOnSphere(coordFrom, projection);
+				var coordTo: Coord;
+				
+				while (coords.length > 0)
+				{
+					tempCoords = null;
+					coordTo = coords.shift();
+					coordTo = Coord.convertCoordOnSphere(coordTo, projection);
+					if (crossDateline(coordFrom, coordTo) || coordsFarThanExtentWidth(coordFrom, coordTo) )
+					{
+						tempCoords = splitCoordsOnDateline(coordFrom, coordTo);
+						while (tempCoords.length > 1)
+						{
+							newCoords.push(tempCoords.shift());
+						}
+					} else {
+						newCoords.push(new EdgeCoord(coordFrom, false, true));
+					}
+					coordFrom = coordTo;
+				}
+				//add last point
+				if (tempCoords)
+				{
+					newCoords.push(tempCoords.shift());
+				} else {
+					newCoords.push(new EdgeCoord(coordTo, false, true));
+				}
+				
+				coords = newCoords;
+				
+			}
+			
 			//coords must be screen pixels position. If needed, convert coordinates to pixel points
 			coords = coordsToPoints(coords);
 			
-			var splineCoordinates: Array = CubicBezier.calculateHermitSpline(coords, false);
+			//find all parts and create hermit spline for them
+			tempCoords = [];
+			while (coords.length > 0)
+			{
+				var p: Point = coords.shift();
+				if (p)
+				{
+					tempCoords.push(p)
+				} else {
+					//there is null, so previous part finished
+					if (tempCoords.length > 0)
+					{
+						var splinePoints: Array = CubicBezier.calculateHermitSpline(tempCoords, false);
+						
+						//Convert pixel points to coordinates
+						var splineCoords: Array = pointsToCoords(splinePoints);
+						
+						//TODO check b_closed, if it was split
+						drawGeoPolyLine(rendererCreator, splineCoords, drawMode, b_closed, b_justCompute, featureData);
+						
+					}
+					tempCoords = [];
+				}
+			}
+			//check last part
+			if (tempCoords.length > 0)
+			{
+				splinePoints = CubicBezier.calculateHermitSpline(tempCoords, false);
+				
+				//Convert pixel points to coordinates
+				splineCoords = pointsToCoords(splinePoints);
+				
+				//TODO check b_closed, if it was split
+				drawGeoPolyLine(rendererCreator, splineCoords, drawMode, b_closed, b_justCompute, featureData);
+				
+			}
 			
-			//Convert pixel points to coordinates
-			coords = pointsToCoords(splineCoordinates);
-			
-			drawGeoPolyLine(rendererCreator, coords, drawMode, b_closed, b_justCompute, featureData);
 		}
 		
 		/**
@@ -2758,8 +2897,28 @@ package com.iblsoft.flexiweather.widgets
 				var newPoints: Array = [];
 				for (var i: int = 0; i < total; i++)
 				{
-					var c: Coord = coords[i] as Coord;
-					newPoints.push(coordToPoint(c));	
+					if (coords[i])
+					{
+						var c: Coord = coords[i] as Coord;
+						newPoints.push(coordToPoint(c));
+					} else {
+						newPoints.push(null);
+					}
+				}	
+				return newPoints;
+			}
+			if ((coords[0] is EdgeCoord))
+			{
+				newPoints = [];
+				for (i = 0; i < total; i++)
+				{
+					if (coords[i])
+					{
+						c = (coords[i] as EdgeCoord).coord;
+						newPoints.push(coordToPoint(c));
+					} else {
+						newPoints.push(null);
+					} 
 				}	
 				return newPoints;
 			}
