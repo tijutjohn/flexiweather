@@ -2430,7 +2430,8 @@ package com.iblsoft.flexiweather.widgets
 			{
 				tempCoords = [new EdgeCoord(coordFrom, false, true), new EdgeCoord(intersectionCoordLeft, true, false), null, new EdgeCoord(intersectionCoordRight, true, false), new EdgeCoord(coordTo, false, true)];
 			} else {
-				tempCoords = [new EdgeCoord(coordTo, false, true), new EdgeCoord(intersectionCoordLeft, true, false), null, new EdgeCoord(intersectionCoordRight, true, false), new EdgeCoord(coordFrom, false, true)];
+				tempCoords = [new EdgeCoord(coordFrom, false, true), new EdgeCoord(intersectionCoordRight, true, false), null, new EdgeCoord(intersectionCoordLeft, true, false), new EdgeCoord(coordTo, false, true)];
+//				tempCoords = [new EdgeCoord(coordTo, false, true), new EdgeCoord(intersectionCoordLeft, true, false), null, new EdgeCoord(intersectionCoordRight, true, false), new EdgeCoord(coordFrom, false, true)];
 			}
 			
 			
@@ -2777,14 +2778,47 @@ package com.iblsoft.flexiweather.widgets
 
 		public function drawSmoothPolyLine(rendererCreator: Function, coords: Array, drawMode: String, b_closed: Boolean = false, b_justCompute: Boolean = false,  featureData: FeatureData = null): void
 		{
+			//debug coords
+			if (coords[0] is Coord)
+			{
+				trace("DEBUG drawSmoothPolyLine input coords");
+				trace("--------------------");
+				
+				for each (var cc: Coord in coords)
+				{
+					if (cc)
+						trace("Coord: "+ cc.x + ","+ cc.y);
+					else
+						trace("--------------------");
+				}
+				trace("--------------------");
+				trace("END DEBUG drawSmoothPolyLine input coords");
+			}
+			if (coords[0] is Point)
+			{
+				trace("DEBUG drawSmoothPolyLine input points");
+				trace("--------------------");
+				
+				for each (var pp: Point in coords)
+				{
+					if (pp)
+						trace("Coord: "+ pp.x + ","+ pp.y);
+					else
+						trace("--------------------");
+				}
+				trace("--------------------");
+				trace("END DEBUG drawSmoothPolyLine input points");
+			}
+			
 			var projection: Projection = getCRSProjection();
 			if (projection.wrapsHorizontally) 
 			{
 				//Convert pixel points to coordinates (if needed), because of checking dateline crossing
 				coords = pointsToCoords(coords);
 				
+				trace("CONVERTING");
 				var newCoords: Array = [];
-				var tempCoords: Array = [];
+				var tempCoords: Array = null;
 				
 				var coordFrom: Coord = coords.shift();
 				coordFrom = Coord.convertCoordOnSphere(coordFrom, projection);
@@ -2795,32 +2829,59 @@ package com.iblsoft.flexiweather.widgets
 					tempCoords = null;
 					coordTo = coords.shift();
 					coordTo = Coord.convertCoordOnSphere(coordTo, projection);
+					
+					trace("\n from: "+ coordFrom.x + ","+coordFrom.y + " to: " + coordTo.x + " , " + coordTo.y);
+					
 					if (crossDateline(coordFrom, coordTo) || coordsFarThanExtentWidth(coordFrom, coordTo) )
 					{
+						trace("\n\t crossing dateline");
 						tempCoords = splitCoordsOnDateline(coordFrom, coordTo);
+						trace("\t Adding first coord: " + tempCoords[0].coord.x + " , " + tempCoords[0].coord.y);
 						while (tempCoords.length > 1)
 						{
 							newCoords.push(tempCoords.shift());
 						}
 					} else {
+						trace("\n\n NOT crossing dateline");
+						trace("\t Adding COORD FROM coord: " + coordFrom.x + " , " + coordFrom.y);
 						newCoords.push(new EdgeCoord(coordFrom, false, true));
 					}
 					coordFrom = coordTo;
 				}
 				//add last point
-				if (tempCoords)
+				if (tempCoords && tempCoords.length > 0)
 				{
+					trace("\tAdding last temp coord: " + tempCoords[0].coord.x + " , " + tempCoords[0].coord.y);
 					newCoords.push(tempCoords.shift());
 				} else {
-					newCoords.push(new EdgeCoord(coordTo, false, true));
+					if (coordTo)
+					{
+						trace("\t Adding last COORD TO coord: " + coordTo.x + " , " + coordTo.y);
+						newCoords.push(new EdgeCoord(coordTo, false, true));
+					}
 				}
 				
+				trace("END OF CONVERTING");
 				coords = newCoords;
 				
 			}
 			
+			//debug coords
+			trace("DEBUG splitted coords");
+			trace("--------------------");
+			for each (var ec: EdgeCoord in coords)
+			{
+				if (ec)
+					trace("Coord: "+ ec.coord.x + ","+ ec.coord.y);
+				else
+					trace("--------------------");
+			}
+			trace("--------------------");
+			trace("END DEBUG splitted coords");
+			
 			//coords must be screen pixels position. If needed, convert coordinates to pixel points
 			coords = coordsToPoints(coords);
+			
 			
 			//find all parts and create hermit spline for them
 			tempCoords = [];
