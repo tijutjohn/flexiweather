@@ -124,7 +124,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 					if (reflection)
 					{
 						cloudAnnotation = getAnnotationForReflectionAt(reflectionDelta) as CloudAnnotation;
-						var displaySprite: WFSFeatureEditableSprite = getDisplaySpriteForReflection(reflectionDelta);
+						var displaySprite: WFSFeatureEditableSprite = getDisplaySpriteForReflectionAt(reflectionDelta);
 						
 						master.container.labelLayout.removeObject(displaySprite);
 						master.container.labelLayout.removeObject(cloudAnnotation);
