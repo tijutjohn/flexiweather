@@ -34,6 +34,14 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			return _lines;
 		}
 		
+		public function get linesLength(): int
+		{
+			if (lines)
+				return lines.length;
+			
+			return 0;
+		}
+		
 		public function get points(): Array
 		{
 			return _points;
@@ -84,13 +92,15 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		{
 			if (_points.length > 0)
 				_points.splice(0, _points.length);
+			if (_lines.length > 0)
+				_lines.splice(0, _lines.length);
 			
-			var total: int = _lines.length;
-			for (var i: int = 0; i < total; i++)
-			{
-				var line: FeatureDataLine = getLineAt(i);
-				line.clear();
-			}	
+//			var total: int = _lines.length;
+//			for (var i: int = 0; i < total; i++)
+//			{
+//				var line: FeatureDataLine = getLineAt(i);
+//				line.clear();
+//			}	
 		}
 		
 		public function createLine(): FeatureDataLine
@@ -176,7 +186,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		 */		
 		private function compute(): void
 		{
-//			trace("\t COMPUTE START" + this);
+			trace("\t COMPUTE START" + this);
 			if (_points.length > 0)
 				_points.splice(0, _points.length);
 			var cnt: int = 0;
@@ -186,6 +196,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			{
 				for each (var lineSegment: FeatureDataLineSegment in line.lineSegments)
 				{
+					trace("line segment: " + lineSegment);
 					var p1: FeatureDataPoint = new FeatureDataPoint(lineSegment.x1, lineSegment.y1);
 					var p2: FeatureDataPoint = new FeatureDataPoint(lineSegment.x2, lineSegment.y2);
 					
@@ -204,12 +215,15 @@ package com.iblsoft.flexiweather.ogc.editable.data
 						oldPoint = p2.clone() as FeatureDataPoint;
 					} else {
 						oldPoint = p1.clone() as FeatureDataPoint;
+						//if there is no second point, add NULL (split line)
+						_points.push(null);
 					}
 					
 					if (cnt == 0)
 						_startPoint = p1.clone() as FeatureDataPoint;
 					
 					cnt++;
+					trace("\t Old point: " + oldPoint);
 				}
 			}
 			
