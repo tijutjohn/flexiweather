@@ -54,7 +54,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			notify(LINE_SEGMENT_ADDED);
 		}
 		
-		public function getReflectionAt(position: int): LineSegment
+		public function getLineSegmentAt(position: int): LineSegment
 		{
 			if (lineSegments.length >= 0)
 			{

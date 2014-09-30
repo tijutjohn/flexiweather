@@ -76,50 +76,6 @@ package com.iblsoft.flexiweather.ogc.editable
 			afterCurveRendering();
 		}
 		
-/*
-		override protected function updateCoordsReflections(): void
-		{
-			if (!master)
-				return;
-			
-			if (m_featureData)
-			{
-				//			var reflections: Dictionary = new Dictionary();
-//				ml_movablePoints.cleanup();
-				var iw: InteractiveWidget = master.container;
-				var crs: String = iw.getCRS();
-				var total: int = m_featureData.reflections.length;
-				for (var i: int = 0; i < total; i++)
-				{
-//					var coord: Coord = coordinates[i] as Coord;
-//					var pointReflections: Array = iw.mapCoordToViewReflections(coord);
-//					var reflectionsCount: int = pointReflections.length;
-					var reflection: FeatureDataReflection = m_featureData.getReflectionAt(i);
-					var reflectionDelta: int = reflection.reflectionDelta;
-					var reflectionPoints: Array = reflection.points;
-					var pointsTotal: int = reflectionPoints.length;
-					
-					for (var j: int = 0; j < pointsTotal; j++)
-					{
-//						var pointReflectedObject: Object = pointReflections[j];
-//						var pointReflected: Point = pointReflectedObject.point;
-						var pointReflected: Point = reflectionPoints[j] as Point;
-						if (pointReflected)
-						{
-							var isEdgePoint: Boolean = isReflectionEdgePoint(reflectionPoints, j);
-							var coordReflected: Coord = new Coord(crs, pointReflected.x, pointReflected.y);
-							//					trace(this + " updateCoordsReflections coordReflected: " + coordReflected);
-							//					reflectionDictionary.addReflectedCoordAt(coordReflected, i, j, pointReflectedObject.reflection, iw);
-							//					reflectionDictionary.addReflectedCoordAt(coordReflected, i, pointReflectedObject.reflection, iw);
-							reflectionDictionary.addReflectedCoord(coordReflected, reflectionDelta, isEdgePoint, iw);
-						}
-					}
-				}
-			} else {
-				super.updateCoordsReflections();
-			}
-		}
-*/		
 		protected function isReflectionEdgePoint(points: Array, position: int): Boolean
 		{
 			var total: int = points.length;

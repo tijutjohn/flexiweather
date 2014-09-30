@@ -88,16 +88,6 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 
 		private function debug(): void
 		{
-//			return;
-//			var totalWindBarbs: int = m_windPoints.length;
-//			var r: uint;
-//			for(var i: uint = 0; i < totalWindBarbs; ++i)
-//			{
-//				for (r = 0; r < totalReflections; r++)
-//				{
-//					var reflection: JetStreamFeatureDataReflection = m_featureData.getReflectionAt(reflectionID) as JetStreamFeatureDataReflection;
-//				}r
-//			}
 		}
 
 		override public function getRenderer(reflection: int): ICurveRenderer
@@ -876,10 +866,13 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 				var createNewPoint: Boolean;
 				var createdInReflection: int = 0;
 
+				var reflectionIDs: Array = m_featureData.reflectionsIDs;
 				for (var r: int = 0; r < totalReflections; r++)
 				{
-					reflection = m_featureData.getReflectionAt(r) as JetStreamFeatureDataReflection;
-					var jetStreamSprite: JetStreamSprite = getDisplaySpriteForReflectionAt(r) as JetStreamSprite;
+					var reflectionDelta: int = reflectionIDs[r];
+					reflection = m_featureData.getReflectionAt(reflectionDelta) as JetStreamFeatureDataReflection;
+					
+					var jetStreamSprite: JetStreamSprite = getDisplaySpriteForReflectionAt(reflectionDelta) as JetStreamSprite;
 
 					var b1: Boolean = jetStreamSprite.m_editableSignsSprite.hitTestPoint(gPt.x, gPt.y, true);
 					var b2: Boolean = jetStreamSprite.hitTestPoint(gPt.x, gPt.y, true);

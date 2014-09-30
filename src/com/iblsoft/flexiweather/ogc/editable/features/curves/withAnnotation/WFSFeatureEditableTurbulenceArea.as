@@ -98,7 +98,6 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 				for (var i: int = 0; i < totalReflections; i++)
 				{
 					var reflectionDelta: int = reflectionIDs[i];
-					
 					reflection = m_featureData.getReflectionAt(reflectionDelta);
 					
 					displaySprite = getDisplaySpriteForReflectionAt(reflectionDelta);
