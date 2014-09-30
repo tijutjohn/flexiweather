@@ -531,6 +531,8 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 								}
 							}
 						}
+					} else {
+						trace("MSBaseLoader errorResult has 0 bytes");
 					}
 					
 					if (!errorStateSet)

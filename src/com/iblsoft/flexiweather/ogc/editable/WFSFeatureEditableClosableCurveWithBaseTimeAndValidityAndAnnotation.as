@@ -13,6 +13,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSpriteWithAnnotation;
 	import com.iblsoft.flexiweather.proj.Coord;
+	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.AnnotationBox;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.utils.CubicBezier;
@@ -25,6 +26,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	import flash.display.Graphics;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
+	import flash.utils.Dictionary;
 
 	public class WFSFeatureEditableClosableCurveWithBaseTimeAndValidityAndAnnotation extends WFSFeatureEditableClosableCurveWithBaseTimeAndValidity implements IClosableCurve, IWFSCurveFeature, IWFSFeatureWithAnnotation
 	{
@@ -90,6 +92,11 @@ package com.iblsoft.flexiweather.ogc.editable
 			
 			var reflectionIDs: Array = m_featureData.reflectionsIDs;
 			
+			var projectionWidth: Number = master.container.getProjectionWidthInPixels();
+				
+			//annotation visibility for dateline splitted features
+			var annotationPositions: Dictionary = new Dictionary();
+			
 			for (var i: int = 0; i < totalReflections; i++)
 			{
 				var reflectionDelta: int = reflectionIDs[i];
@@ -142,6 +149,8 @@ package com.iblsoft.flexiweather.ogc.editable
 						
 						updateAnnotation(annotation, ptAvg);
 						
+						annotationPositions[reflectionDelta] = new AnnotationPosition(reflectionDelta, ptAvg);
+						
 						var isAnnotationInAnticollision: Boolean
 						var isDisplayObjectInAnticollision: Boolean
 						if (master)
@@ -151,21 +160,38 @@ package com.iblsoft.flexiweather.ogc.editable
 //							if (!mb_spritesAddedToLabelLayout && master)
 							if (featureIsVisible)
 							{
+								
+								var annotationDatelineSplitVisibility: Boolean = checkAnnotationVisibilityForSplittedFeature(annotationPositions, annotationPositions[reflectionDelta] as AnnotationPosition, projectionWidth / 2);
+								
+								trace("Reflection : " + reflectionDelta + " isAnnotationInAnticollision: " + isAnnotationInAnticollision + " annotationDatelineSplitVisibility: " + annotationDatelineSplitVisibility);
+								
 								if (!isDisplayObjectInAnticollision)
 								{
+									//if object is not in anticollision layout and it should be there, we should add it
 									displaySprite.visible = true;
 									master.container.labelLayout.addObstacle(displaySprite, master);
 								} else {
-									trace("DisplaySprite is already in Anticollision");
+									trace("\tDisplaySprite is already in Anticollision");
 								}
 								if (!isAnnotationInAnticollision)
 								{
-									annotation.visible = true;
-									master.container.labelLayout.addObject(annotation, master, [displaySprite], i);
-	//								_addToLabelLayout = true;
+									//if annotation is not in anticollision layout and it should be there, we should add it
+									if (annotationDatelineSplitVisibility)
+									{
+										annotation.visible = true;
+										master.container.labelLayout.addObject(annotation, master, [displaySprite], i);
+		//								_addToLabelLayout = true;
+									}
 								}
 								else {
-									trace("Annotation is already in Anticollision");
+									annotation.visible = false;
+									trace("\tAnnotation is already in Anticollision");
+									
+									if (!annotationDatelineSplitVisibility)
+									{
+										master.container.labelLayout.removeObject(annotation);
+										trace("\t\tAnnotation is already visible for different reflection (Should be splitted on dateline)");
+									}
 								}
 							} else {
 								//for non visible features, remove them from anticollision
@@ -183,6 +209,19 @@ package com.iblsoft.flexiweather.ogc.editable
 			
 //			if (!mb_spritesAddedToLabelLayout && _addToLabelLayout)
 //				mb_spritesAddedToLabelLayout = true;
+		}
+		
+		private function checkAnnotationVisibilityForSplittedFeature(annotationPositions: Dictionary, positionObject: AnnotationPosition, projectionWidthHalf: Number): Boolean
+		{
+			for each (var annotationObject: AnnotationPosition in annotationPositions)
+			{
+				if (positionObject.reflectionDelta != annotationObject.reflectionDelta)
+				{
+					if (Math.abs(annotationObject.position.x - positionObject.position.x) <= projectionWidthHalf)
+						return false;
+				}
+			}
+			return true;
 		}
 		
 		public function updateAnnotation(annotation: AnnotationBox, annotationPosition: Point, text: String = ""): void
@@ -411,5 +450,18 @@ package com.iblsoft.flexiweather.ogc.editable
 				return (super.onMouseDown(pt, event));
 		}
 		*/
+	}
+}
+import flash.geom.Point;
+
+class AnnotationPosition
+{
+	public var reflectionDelta: int;
+	public var position: Point;
+	
+	public function AnnotationPosition(reflectionDelta: int, position: Point)
+	{
+		this.reflectionDelta = reflectionDelta;
+		this.position = position;
 	}
 }

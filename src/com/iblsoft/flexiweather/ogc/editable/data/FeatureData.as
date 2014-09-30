@@ -12,6 +12,14 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		[ArrayElementType("com.iblsoft.flexiweather.ogc.editable.data.FeatureDataLine")]
 		public var lines: Array;
 		
+		public function get linesLength(): int
+		{
+			if (lines)
+				return lines.length;
+			
+			return 0;
+		}
+		
 		public var name: String;
 		
 		public function FeatureData(name: String)
