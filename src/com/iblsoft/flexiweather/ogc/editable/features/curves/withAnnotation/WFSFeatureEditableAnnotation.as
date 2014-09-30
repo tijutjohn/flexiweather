@@ -206,10 +206,12 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 			var displaySprite: WFSFeatureEditableSprite;
 			
 			// single point feature
-			
+			var reflectionIDs: Array = m_featureData.reflectionsIDs;
+				
 			for (i = 0; i < totalReflections; i++)
 			{
-				reflection = m_featureData.getReflectionAt(i);
+				var reflectionDelta: int = reflectionIDs[i];
+				reflection = m_featureData.getReflectionAt(reflectionDelta);
 				if (reflection)
 				{
 					var reflectionDelta: int = reflection.reflectionDelta;

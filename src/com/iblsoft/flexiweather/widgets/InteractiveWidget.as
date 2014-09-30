@@ -3649,7 +3649,7 @@ class SmoothRendererNew
 			
 			var b_originalClosed: Boolean = b_closed;
 			
-			var splittedSplinesCoords: Array = splineSplineCoords(splineCoords);
+			var splittedSplinesCoords: Array = splitSplineCoords(splineCoords);
 			var isDatelineSplit: Boolean = splittedSplinesCoords.length > 1; 
 			
 			if (isDatelineSplit)
@@ -3696,7 +3696,7 @@ class SmoothRendererNew
 		}
 	}	
 	
-	private function splineSplineCoords(coords: Array): Array
+	private function splitSplineCoords(coords: Array): Array
 	{
 		var projection: Projection = _iw.getCRSProjection();
 		var projectionLeft: Number = projection.extentBBox.xMin;

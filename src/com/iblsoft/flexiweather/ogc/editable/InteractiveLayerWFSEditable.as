@@ -222,10 +222,13 @@ package com.iblsoft.flexiweather.ogc.editable
 					{
 						var wfsEditableItem: WFSFeatureEditable = item as WFSFeatureEditable;
 						var totalReflections: int = wfsEditableItem.totalReflections;
+						var reflectionIDs: Array = wfsEditableItem.featureData.reflectionsIDs;
 						for (var r: int = 0; r < totalReflections; r++)
 						{
-							var featureDataReflection: FeatureDataReflection = wfsEditableItem.getReflection(r);
-							var displaySprite: WFSFeatureEditableSprite = wfsEditableItem.getDisplaySpriteForReflection(featureDataReflection.reflectionDelta);
+							var reflectionDelta: int = reflectionIDs[r];
+							
+							var featureDataReflection: FeatureDataReflection = wfsEditableItem.getReflection(reflectionDelta);
+							var displaySprite: WFSFeatureEditableSprite = wfsEditableItem.getDisplaySpriteForReflection(reflectionDelta);
 							if (displaySprite)
 							{
 								if (displaySprite.hitTestPoint(f_stageX, f_stageY, true))

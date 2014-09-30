@@ -1,5 +1,7 @@
 package com.iblsoft.flexiweather.ogc.editable.data
 {
+	import com.iblsoft.flexiweather.ogc.data.ReflectionData;
+
 	public class FeatureData
 	{
 		public static var fd_uid: int = 0;
@@ -12,6 +14,20 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		[ArrayElementType("com.iblsoft.flexiweather.ogc.editable.data.FeatureDataLine")]
 		public var lines: Array;
 		
+		public function get reflectionsLength(): int
+		{
+			if (reflections)
+			{
+				//we need to enumerate via reflections, because length does not work with negative indicies
+				return reflectionsIDs.length;
+//				var cnt: int = 0;
+//				for each (var refl: FeatureDataReflection in reflections)
+//					cnt++
+//						
+//				return cnt;
+			}
+			return 0;
+		}
 		public function get linesLength(): int
 		{
 			if (lines)
@@ -38,12 +54,14 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		{
 			trace("FeatureData: " + name);
 			trace("\tLines: " + lines.length);
-			trace("\tReflections: " + reflections.length);
+			trace("\tReflections: " + reflectionsLength);
 			
-			var total: int = reflections.length;
+			var total: int = reflectionsLength;
+			var reflectionIDs: Array = reflectionsIDs;
+			
 			for (var i: int = 0; i < total; i++)
 			{
-				var refl: FeatureDataReflection = getReflectionAt(i);
+				var refl: FeatureDataReflection = getReflectionAt(reflectionIDs[i]);
 				trace("\t\tLines: " + refl.lines.length);
 				refl.debug(); 
 			}
@@ -55,10 +73,12 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		 */		
 		public function clear(): void
 		{
-			var total: int = reflections.length;
+			var total: int = reflectionsLength;
+			var reflectionIDs: Array = reflectionsIDs;
+			
 			for (var i: int = 0; i < total; i++)
 			{
-				var refl: FeatureDataReflection = getReflectionAt(i);
+				var refl: FeatureDataReflection = getReflectionAt(reflectionIDs[i]);
 				refl.clear();
 			}
 			reflectionsIDs = [];
@@ -72,7 +92,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		}
 		public function createReflection(): FeatureDataReflection
 		{
-			return createReflectionAt(reflections.length);
+			return createReflectionAt(reflectionsLength);
 		}
 		
 		protected function createFeatureDataReflectionInstance(position: int): FeatureDataReflection
@@ -106,7 +126,8 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		 */		
 		public function getReflectionAt(position: int): FeatureDataReflection
 		{
-			if (reflections.length <= position)
+//			if (reflections.length <= position)
+			if (reflections[position] == null)
 			{
 				return createReflectionAt(position);
 			}
@@ -120,7 +141,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		
 		public function toString(): String
 		{
-			return "FeatureData ["+uid+"]" + reflections.length + " name: " +  name;
+			return "FeatureData ["+uid+"]" + reflectionsLength + " name: " +  name;
 		}
 	}
 }
