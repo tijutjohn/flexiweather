@@ -19,7 +19,7 @@ package com.iblsoft.flexiweather.net.loaders
 	import com.iblsoft.flexiweather.widgets.basicauth.controls.IBasicAuthCredentialsPopup;
 	import com.iblsoft.flexiweather.widgets.basicauth.data.BasicAuthAccount;
 	import com.iblsoft.flexiweather.widgets.basicauth.events.BasicAuthEvent;
-
+	
 	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
@@ -34,11 +34,12 @@ package com.iblsoft.flexiweather.net.loaders
 	import flash.net.URLRequestHeader;
 	import flash.net.URLRequestMethod;
 	import flash.net.URLVariables;
+	import flash.system.LoaderContext;
 	import flash.utils.ByteArray;
 	import flash.utils.Dictionary;
 	import flash.utils.clearTimeout;
 	import flash.utils.setTimeout;
-
+	
 	import mx.controls.Alert;
 	import mx.core.ClassFactory;
 	import mx.core.FlexGlobals;
@@ -50,7 +51,7 @@ package com.iblsoft.flexiweather.net.loaders
 	import mx.utils.Base64Encoder;
 	import mx.utils.ObjectUtil;
 	import mx.utils.URLUtil;
-
+	
 	import spark.components.TitleWindow;
 
 	public class AbstractURLLoader extends EventDispatcher implements IURLLoaderBasicAuth
@@ -437,7 +438,7 @@ package com.iblsoft.flexiweather.net.loaders
 		 * @param s_backgroundJobName
 		 *
 		 */
-		public function load(urlRequest: URLRequest, associatedData: Object = null, s_backgroundJobName: String = null, useBasicAuthInRequest: Boolean = false, basicAuthAccount: BasicAuthAccount = null, basicAuthRequestData: UniURLLoaderData = null): void
+		public function load(urlRequest: URLRequest, associatedData: Object = null, s_backgroundJobName: String = null, useBasicAuthInRequest: Boolean = false, basicAuthAccount: BasicAuthAccount = null, basicAuthRequestData: UniURLLoaderData = null, loaderContext: LoaderContext = null): void
 		{
 //			if (urlRequest && urlRequest.data && urlRequest.data.REQUEST == "GetMap")
 //			{
@@ -474,6 +475,12 @@ package com.iblsoft.flexiweather.net.loaders
 			}
 			else
 				uniURLLoaderData = basicAuthManager.createRequest(urlRequest, this, associatedData, s_backgroundJobName);
+			
+			callLoader(urlRequest, associatedData, s_backgroundJobName);
+		}
+		
+		protected function callLoader(urlRequest: URLRequest, associatedData: Object, s_backgroundJobName: String): void
+		{
 			var urlLoader: URLLoaderWithAssociatedData = new URLLoaderWithAssociatedData();
 			urlLoader.associatedData = associatedData;
 			urlLoader.dataFormat = URLLoaderDataFormat.BINARY;
@@ -497,12 +504,12 @@ package com.iblsoft.flexiweather.net.loaders
 			*/
 			//FIXME end of remove section.
 			//implement listening for HTTP_RESPONSE_STATUS available only in AIR
-			if (basicAuthURLLoaderClass)
-			{
-				var classFactory: ClassFactory = new ClassFactory(basicAuthURLLoaderClass);
-				_baLoader = classFactory.newInstance() as IURLLoaderBasicAuthListener;
-				_baLoader.addBasicAuthListeners(this, urlLoader, uniURLLoaderData);
-			}
+//			if (basicAuthURLLoaderClass)
+//			{
+//				var classFactory: ClassFactory = new ClassFactory(basicAuthURLLoaderClass);
+//				_baLoader = classFactory.newInstance() as IURLLoaderBasicAuthListener;
+//				_baLoader.addBasicAuthListeners(this, urlLoader, uniURLLoaderData);
+//			}
 
 			UniURLLoaderManager.instance.addLoaderRequest(urlRequest);
 
@@ -513,6 +520,7 @@ package com.iblsoft.flexiweather.net.loaders
 			}
 
 			urlLoader.load(urlRequest);
+//			urlLoader.load(urlRequest, loaderContext);
 			debug("Load URL: " + urlRequest.url);
 
 			var backgroundJob: BackgroundJob = null;
@@ -523,6 +531,7 @@ package com.iblsoft.flexiweather.net.loaders
 			md_urlLoaderToRequestMap[urlLoader] = new URLLoaderDictionaryData(urlRequest, urlLoader, backgroundJob, timeout);
 			var e: UniURLLoaderEvent = new UniURLLoaderEvent(UniURLLoaderEvent.LOAD_STARTED, null, urlRequest, associatedData);
 			dispatchEvent(e);
+			
 		}
 
 		private function startTimeout(urlLoader: URLLoaderWithAssociatedData): int

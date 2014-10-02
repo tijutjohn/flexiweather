@@ -1,9 +1,17 @@
 package com.iblsoft.flexiweather.net.loaders
 {
+	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.net.loaders.errors.URLLoaderError;
+	import com.iblsoft.flexiweather.net.managers.UniURLLoaderManager;
+	import com.iblsoft.flexiweather.widgets.BackgroundJob;
+	import com.iblsoft.flexiweather.widgets.BackgroundJobManager;
 	
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
+	import flash.events.ProgressEvent;
+	import flash.events.SecurityErrorEvent;
+	import flash.net.URLLoader;
+	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
 	import flash.utils.Dictionary;
@@ -41,6 +49,42 @@ package com.iblsoft.flexiweather.net.loaders
 				}
 			}
 		}
+		
+		override protected function callLoader(urlRequest: URLRequest, associatedData: Object, s_backgroundJobName: String): void
+		{
+			super.callLoader(urlRequest, associatedData, s_backgroundJobName);
+			/*
+			var urlLoader: URLLoaderWithAssociatedData = new URLLoaderWithAssociatedData();
+			urlLoader.associatedData = associatedData;
+			urlLoader.dataFormat = URLLoaderDataFormat.BINARY;
+			urlLoader.addEventListener(Event.COMPLETE, onDataComplete);
+			urlLoader.addEventListener(ProgressEvent.PROGRESS, onDataProgress);
+			urlLoader.addEventListener(IOErrorEvent.IO_ERROR, onDataIOError);
+			urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onSecurityError);
+			
+			UniURLLoaderManager.instance.addLoaderRequest(urlRequest);
+			
+			var timeout: int = -1;
+			if (timeoutPeriod)
+			{
+				timeout = startTimeout(urlLoader);
+			}
+			
+			urlLoader.load(urlRequest);
+			//			urlLoader.load(urlRequest, loaderContext);
+			debug("Load URL: " + urlRequest.url);
+			
+			var backgroundJob: BackgroundJob = null;
+			if (s_backgroundJobName != null)
+				backgroundJob = BackgroundJobManager.getInstance().startJob(s_backgroundJobName);
+			
+			
+			md_urlLoaderToRequestMap[urlLoader] = new URLLoaderDictionaryData(urlRequest, urlLoader, backgroundJob, timeout);
+			var e: UniURLLoaderEvent = new UniURLLoaderEvent(UniURLLoaderEvent.LOAD_STARTED, null, urlRequest, associatedData);
+			dispatchEvent(e);
+			*/
+			
+		} 
 
 		override protected function decodeResult(rawData: ByteArray, urlLoader: URLLoaderWithAssociatedData, urlRequest: URLRequest, resultCallback: Function, errorCallback: Function): void
 		{
