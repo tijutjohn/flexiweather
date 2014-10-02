@@ -10,7 +10,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 	import com.iblsoft.flexiweather.widgets.basicauth.data.BasicAuthAccount;
 	
 	import flash.net.URLRequest;
-	import flash.system.ImageDecodingPolicy;
+//	import flash.system.ImageDecodingPolicy;
 	import flash.system.LoaderContext;
 	import flash.utils.ByteArray;
 	
@@ -26,7 +26,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 		override public function load(urlRequest:URLRequest, associatedData:Object=null, s_backgroundJobName:String=null, useBasicAuthInRequest:Boolean=false, basicAuthAccount:BasicAuthAccount=null, basicAuthRequestData:UniURLLoaderData=null, loaderContext: LoaderContext = null):void
 		{
 			var loaderContext: LoaderContext = new LoaderContext();
-			loaderContext.imageDecodingPolicy = ImageDecodingPolicy.ON_LOAD;
+//			loaderContext.imageDecodingPolicy = ImageDecodingPolicy.ON_LOAD;
 			super.load(urlRequest, associatedData, s_backgroundJobName, useBasicAuthInRequest, basicAuthAccount, basicAuthRequestData, loaderContext);
 		}
 		override protected function decodeResult(rawData: ByteArray, urlLoader: URLLoaderWithAssociatedData, urlRequest: URLRequest, resultCallback: Function, errorCallback: Function): void
