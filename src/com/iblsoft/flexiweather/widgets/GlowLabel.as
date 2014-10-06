@@ -62,7 +62,7 @@ package com.iblsoft.flexiweather.widgets
 		override protected function childrenCreated(): void
 		{
 			super.childrenCreated();
-			filters = [_glow];
+			updateFilters();
 		}
 
 		override protected function commitProperties(): void
@@ -74,7 +74,7 @@ package com.iblsoft.flexiweather.widgets
 				{
 					_glow.color = _glowColor;
 					_glowColorChanged = false
-					filters = [_glow];
+					updateFilters();
 				}
 				else
 					invalidateProperties();
@@ -86,11 +86,16 @@ package com.iblsoft.flexiweather.widgets
 					_glow.blurX = _glowBlur;
 					_glow.blurY = _glowBlur;
 					_glowBlurChanged = false
-					filters = [_glow];
+					updateFilters();
 				}
 				else
 					invalidateProperties();
 			}
+		}
+		
+		private function updateFilters(): void
+		{
+			filters = [_glow];
 		}
 	/*
 	override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number):void

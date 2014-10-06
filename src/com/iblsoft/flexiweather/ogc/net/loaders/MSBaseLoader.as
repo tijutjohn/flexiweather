@@ -506,7 +506,14 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				{
 					var errorStateSet: Boolean;
 
-					if ((associatedData.errorResult as ByteArray).length > 0)
+					var bZeroBytesCheck: Boolean = false;
+					if (associatedData.errorResult && associatedData.errorResult is ByteArray)
+					{
+						if ((associatedData.errorResult as ByteArray).length == 0)
+							bZeroBytesCheck = true;
+					}
+					
+					if (!bZeroBytesCheck)
 					{
 						
 						var xml: XML = associatedData.errorResult;
