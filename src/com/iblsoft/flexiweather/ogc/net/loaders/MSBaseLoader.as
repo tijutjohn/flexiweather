@@ -27,6 +27,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 	import flash.events.EventDispatcher;
 	import flash.events.ProgressEvent;
 	import flash.net.URLRequest;
+	import flash.utils.ByteArray;
 	
 	import mx.collections.ArrayCollection;
 	import mx.events.DynamicEvent;
@@ -504,10 +505,20 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				if (associatedData.errorResult)
 				{
 					var errorStateSet: Boolean;
-					
-					var xml: XML = associatedData.errorResult;
-					if (xml.localName() == "ServiceExceptionReport")
+
+					var bZeroBytesCheck: Boolean = false;
+					if (associatedData.errorResult && associatedData.errorResult is ByteArray)
 					{
+						if ((associatedData.errorResult as ByteArray).length == 0)
+							bZeroBytesCheck = true;
+					}
+					
+					if (!bZeroBytesCheck)
+					{
+						
+						var xml: XML = associatedData.errorResult;
+						if (xml.localName() == "ServiceExceptionReport")
+						{
 						var serviceException: XML = xml.children()[0] as XML;
 						if (serviceException.localName() == "ServiceException" && serviceException.hasOwnProperty("@code") && serviceException.@code == "InvalidDimensionValue")
 						{
@@ -526,6 +537,9 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 								errorStateSet = true;
 							}
 						}
+						}
+					} else {
+						trace("MSBaseLoader errorResult has 0 bytes");
 					}
 					
 					if (!errorStateSet)
