@@ -30,6 +30,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 	import flash.utils.Dictionary;
 	
 	import mx.collections.ArrayCollection;
+	import mx.logging.Log;
 
 	/**
 	 * Dispatched when WMS Dimension (RUN, FORECAST, ELEVATION) is set 
@@ -1222,6 +1223,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 
 		protected function error(errorObject: Object, str: String): void
 		{
+			Log.getLogger('WMSViewProperties').error(str);
 			LoggingUtils.dispatchErrorEvent(this, errorObject, "WMSViewProperties: " + str);
 		}
 		protected function debug(str: String): void
@@ -1237,6 +1239,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		private function noSynchronisationValueFound(): void
 		{
 			debug("NO SYNCHRONISATION DATA ["+parentLayer.container.id+"]");
+			error({object: this}," NO SYNCHRONISATION DATA ["+parentLayer.container.id+"]");
 			dispatchSynchronizedVariableChangeEvent(new SynchronisedVariableChangeEvent(
 				SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.FRAME, false));
 		}
