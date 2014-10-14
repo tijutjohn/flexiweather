@@ -154,11 +154,10 @@ package com.iblsoft.flexiweather.widgets
 		override public function set width(value:Number):void
 		{
 			super.width = value;
-			if (id == "m_iw1")
-			{
-				trace("Widget size[width]: " + this + " ["+width+","+height+"] ["+explicitWidth+","+explicitHeight+"]");
-			}
-//			if (!autoLayoutInParent && m_widgetBounds)
+//			if (id == "m_iw1")
+//			{
+//				trace("Widget size[width]: " + this + " ["+width+","+height+"] ["+explicitWidth+","+explicitHeight+"]");
+//			}
 			if (m_widgetBounds)
 				m_widgetBounds.width = value;
 		}
@@ -168,11 +167,10 @@ package com.iblsoft.flexiweather.widgets
 		override public function set height(value:Number):void
 		{
 			super.height = value;
-			if (id == "m_iw1")
-			{
-				trace("Widget size[height]: " + this + " ["+width+","+height+"] ["+explicitWidth+","+explicitHeight+"]");
-			}
-//			if (!autoLayoutInParent && m_widgetBounds)
+//			if (id == "m_iw1")
+//			{
+//				trace("Widget size[height]: " + this + " ["+width+","+height+"] ["+explicitWidth+","+explicitHeight+"]");
+//			}
 			if (m_widgetBounds)
 				m_widgetBounds.height = value;
 		}
@@ -1031,6 +1029,15 @@ package com.iblsoft.flexiweather.widgets
 			
 			return (Math.abs(p1.x - p2.x) > extent.width / 2);
 		}
+		public function pointsFarThanExtentWidth(p1: Point, p2: Point, extent: BBox = null): Boolean
+		{
+			if (!extent)
+				extent = getExtentBBox();
+			
+			var extentWidthInPixels: Number = getProjectionWidthInPixels(); 
+			
+			return (Math.abs(p1.x - p2.x) > extentWidthInPixels / 2);
+		}
 		
 		/**
 		 * Helper function, which finds out if there is dateline between two points 
@@ -1398,6 +1405,15 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 
+		public function getReflectedViewBBox(reflectionDelta: int): BBox
+		{
+			var f_crsExtentBBoxWidth: Number = m_crsProjection.extentBBox.width;
+			
+			var reflectedBBox: BBox = m_crsProjection.extentBBox.translated(f_crsExtentBBoxWidth * reflectionDelta, 0);
+//			trace("getReflectedViewBBox  ["+reflectionDelta+"]: " + reflectedBBox); 
+			return reflectedBBox;
+		}
+		
 		public function mapLineCoordToViewReflections(coordFrom: Coord, coordTo: Coord, vBBox: BBox = null): Array
 		{
 			if (!coordFrom || !coordTo)
@@ -1862,7 +1878,7 @@ package com.iblsoft.flexiweather.widgets
 		}
 		private function afterDelayedResize(): void
 		{
-			debug("afterDelayedResize");
+//			debug("afterDelayedResize");
 //			if (!suspendResizeNotifying)
 //			{
 				setViewBBox(m_viewBBox, false); // set the view bbox to update the aspects
@@ -2413,9 +2429,9 @@ package com.iblsoft.flexiweather.widgets
 			
 			//create line1 in correct order
 			if (coordFrom.x > coordTo.x)
-				line1 = new FeatureDataLineSegment(coordFrom.x, coordFrom.y, coordTo.x + 360, coordTo.y, true, true);
+				line1 = new FeatureDataLineSegment(coordFrom.x, coordFrom.y, coordTo.x + 360, coordTo.y, true, true, true);
 			else {
-				line1 = new FeatureDataLineSegment(coordTo.x, coordTo.y, coordFrom.x + 360, coordFrom.y, true, true);
+				line1 = new FeatureDataLineSegment(coordTo.x, coordTo.y, coordFrom.x + 360, coordFrom.y, true, true, true);
 			}
 			
 			var intersection: Point = line1.intersectionWithLineSegment(internationalDateLine);
@@ -2462,7 +2478,7 @@ package com.iblsoft.flexiweather.widgets
 		 * @return 
 		 * 
 		 */		
-		private function _drawGeoLine(coordFrom: Coord, coordTo: Coord, drawMode: String, d_reflectionToSegmentPoints: Dictionary, featureDataLine: FeatureDataLine = null): void
+		private function _drawGeoLine(coordFrom: Coord, coordTo: Coord, drawMode: String, d_reflectionToSegmentPoints: Dictionary, featureData: FeatureData = null, featureDataLineID: int = 0): void
 		{
 			if (!coordFrom && !coordTo)
 				return;
@@ -2631,6 +2647,10 @@ package com.iblsoft.flexiweather.widgets
 //								reflections = mapLineCoordToViewReflections(prevC, c, projectionExtent);
 								reflections = mapLineCoordToViewReflections(prevC, c, m_viewBBox);
 								
+								var origLine: FeatureDataLineSegment = new FeatureDataLineSegment(prevC.x, prevC.y,c.x, c.y, true, prevCObject.editable, cObject.editable);
+								//temporary check why line is not drawn when it's partially not visible
+								var bTemporaryIsInReflection: Boolean = false;
+								
 								for each(o in reflections) 
 								{
 									s_reflectionId = String(o.reflection);
@@ -2642,35 +2662,76 @@ package com.iblsoft.flexiweather.widgets
 										d_reflectionToSegmentPoints[s_reflectionId] = reflectedSegmentPoints;
 									}
 									
-									line = new FeatureDataLineSegment(o.pointFrom.x, o.pointFrom.y, o.pointTo.x, o.pointTo.y, prevCObject.editable, cObject.editable);
-									if (o.reflection == 0)
-										debug("\t\tdraw lines : "+ line + " reflection: " + o.reflection);
+									line = new FeatureDataLineSegment(o.pointFrom.x, o.pointFrom.y, o.pointTo.x, o.pointTo.y, true, prevCObject.editable, cObject.editable);
+//									if (o.reflection == 0)
+//										debug("\t\tdraw lines : "+ line + " reflection: " + o.reflection);
 									
-									if (line.isInsideBox(m_viewBBox) || line.isIntersectedBox(viewBBoxWestLine, viewBBoxEastLine, viewBBoxNorthLine, viewBBoxSouthLine))
+									var bLineIsInsideViewBBox: Boolean = line.isInsideBox(m_viewBBox);
+									var bLineIsIntersectedWithViewBBox: Boolean = line.isIntersectedBox(viewBBoxWestLine, viewBBoxEastLine, viewBBoxNorthLine, viewBBoxSouthLine);
+//									if (!bLineIsInsideViewBBox && !bLineIsIntersectedWithViewBBox)
+//									{
+//										if (o.reflection == -1 || o.reflection == 0)
+//											trace("Check line [Reflection: " + o.reflection + ", line ID: " + featureDataLineID+"] if it is in reflection ");
+//									}
+//									var bLineIsInsideReflection: Boolean = line.isInsideBox(getReflectedViewBBox(o.reflection));
+//									if (bLineIsInsideViewBBox || bLineIsIntersectedWithViewBBox)
+									if (bLineIsInsideViewBBox || bLineIsIntersectedWithViewBBox)
 									{
-	//									debug("\t\t\t DRAW IT");
-										reflection = featureDataLine.parentFeatureData.getReflectionAt(o.reflection);
-										currLine = reflection.getLineAt(featureDataLine.id);
-	//									trace("_drawGeoLine reflection: " + reflection);
-	//									trace("_drawGeoLine currLine: " + currLine);
+//											if (o.reflection == -1 || o.reflection == 0)
+												bTemporaryIsInReflection = true;
+		//									debug("\t\t\t DRAW IT");☺
+	//										reflection = featureDataLine.parentFeatureData.getReflectionAt(o.reflection);
+	//										currLine = reflection.getLineAt(featureDataLine.id);
+											reflection = featureData.getReflectionAt(o.reflection);
+//											featureDataLine = featureData.getLineAt(reflection.reflectionDelta, featureDataLineID);
+											currLine = reflection.getLineAt(featureDataLineID);
+		//									trace("_drawGeoLine reflection: " + reflection);
+		//									trace("_drawGeoLine currLine: " + currLine);
+											
+											//check if line is intersect vieBBox
+											p1 = coordToPoint(new Coord(ms_crs, o.pointFrom.x, o.pointFrom.y));
+											p2 = coordToPoint(new Coord(ms_crs, o.pointTo.x, o.pointTo.y));
+											
+//											trace("Add line segment [Reflection: " + reflection.reflectionDelta + ", line ID: " + currLine.id+"] points: " + p1 + " , " + p2);
+											var lineSegment: FeatureDataLineSegment = new FeatureDataLineSegment(p1.x, p1.y, p2.x, p2.y, bLineIsInsideViewBBox, prevCObject.editable, cObject.editable);
+											
+											currLine.addLineSegment(lineSegment, prevCObject.edge, cObject.edge);
+											
+											reflectedSegmentPoints.push(p1);
+											reflectedSegmentPoints.push(p2);
 										
-										//check if line is intersect vieBBox
-										p1 = coordToPoint(new Coord(ms_crs, o.pointFrom.x, o.pointFrom.y));
-										p2 = coordToPoint(new Coord(ms_crs, o.pointTo.x, o.pointTo.y));
+											if (drawMode == DrawMode.PLAIN) 
+											{
+												reflectedSegmentPoints.push(null);
+			//									d_reflectionToSegmentPoints[s_reflectionId].push(null);
+											}
+//									} else {
 										
-										currLine.addLineSegment(new FeatureDataLineSegment(p1.x, p1.y, p2.x, p2.y, prevCObject.editable, cObject.editable), prevCObject.edge, cObject.edge);
-										
-										reflectedSegmentPoints.push(p1);
-										reflectedSegmentPoints.push(p2);
-									
-										if (drawMode == DrawMode.PLAIN) 
-										{
-											reflectedSegmentPoints.push(null);
-		//									d_reflectionToSegmentPoints[s_reflectionId].push(null);
-										}
-	//								} else {
-	//									debug("There is no intersection with current viewBBox: " + line);
+//										check if line is inside reflection ...so it means it's not visible
+//										if (bLineIsIntersectedWithViewBBox)
+//										{
+//											debug("Line is not visible, but is inside reflection: [Reflection: " + o.reflection + ", line ID: " + featureDataLineID+"]");
+//											if (o.reflection == -1 || o.reflection == 0)
+//											{
+//												bTemporaryIsInReflection = true;
+//												reflectedSegmentPoints.push(null);
+//											}
+//										}
+//										if (o.reflection == -1 || o.reflection == 0)
+//											debug("There is no intersection with current viewBBox: [Reflection: " + o.reflection + ", line ID: " + featureDataLineID+"]");
 									}
+								}
+								if (!bTemporaryIsInReflection)
+								{
+									//add non-visible line to reflection 0 (how to find, which reflection is correct
+									reflection = featureData.getReflectionAt(0);
+//									featureDataLine = featureData.getLineAt(0, featureDataLineID);
+									currLine = reflection.getLineAt(featureDataLineID);
+									
+									var lineSegment2: FeatureDataLineSegment = new FeatureDataLineSegment(0,0,0,0, false, false, false);
+									currLine.addLineSegment(lineSegment, prevCObject.edge, cObject.edge);
+									
+//									debug("There is no intersection with current viewBBox: [Reflection: " + o.reflection + ", line ID: " + featureDataLineID+"]");
 								}
 							}
 						}
@@ -2702,8 +2763,10 @@ package com.iblsoft.flexiweather.widgets
 							line = new FeatureDataLineSegment(o.point.x, o.point.y, Number.NaN, Number.NaN, cObject.editable, false);
 							
 							//it's "line with one points
-							reflection = featureDataLine.parentFeatureData.getReflectionAt(o.reflection);
-							currLine = reflection.getLineAt(featureDataLine.id);
+							reflection = featureData.getReflectionAt(o.reflection);
+//							featureDataLine = featureData.getLineAt(reflection.reflectionDelta, featureDataLineID);
+							currLine = reflection.getLineAt(featureDataLineID);
+							
 							//									trace("_drawGeoLine reflection: " + reflection);
 							//									trace("_drawGeoLine currLine: " + currLine);
 							
@@ -2784,6 +2847,7 @@ package com.iblsoft.flexiweather.widgets
 
 		private function debugCoords(coords: Array): void
 		{
+			return;
 			if (coords[0] is Coord)
 			{
 				trace("DEBUG drawSmoothPolyLine input coords");
@@ -2842,6 +2906,8 @@ package com.iblsoft.flexiweather.widgets
 		 */
 		public function drawSmoothPolyLine(rendererCreator: Function, coords: Array, drawMode: String, b_closed: Boolean = false, b_justCompute: Boolean = false,  featureData: FeatureData = null, b_fixDateline: Boolean = false): void
 		{
+//			trace("****************************************************************************");
+//			trace("DRAW SMOOTH POLYLINE \n");
 			//debug coords
 			debugCoords(coords);
 			
@@ -2870,7 +2936,7 @@ package com.iblsoft.flexiweather.widgets
 			
 			renderer.drawSmoothDatelineDividedParts(rendererCreator, coords, drawMode, b_closed, b_justCompute, featureData, b_fixDateline);
 			
-			
+//			trace("****************************************************************************");
 		}
 		
 		
@@ -2966,7 +3032,11 @@ package com.iblsoft.flexiweather.widgets
 			 * needs to start not at 0 position, but after already drawn lines (e.g - 1st refl. 0 -> 5 lines, refl. 1 -> 3 lines, 2nd refl.0 -> need to start at 6th line
 			 */
 			if (featureData)
-				cnt = featureData.getReflectionAt(0).linesLength;
+			{
+//				cnt = featureData.getReflectionAt(0).linesLength;
+				cnt = featureData.linesLength;
+			}
+				
 			
 			//if coords Array is array of points, convert them to coordinates
 			coords = pointsToCoords(coords);
@@ -2985,12 +3055,12 @@ package com.iblsoft.flexiweather.widgets
 				//draw geoline as many small geolines
 				for each (var c: Coord in coords) 
 				{
-					if(cPrev) {
-						if (featureData)
-						{
-							featureDataLine = featureData.getLineAt(cnt-1);
-						}
-						_drawGeoLine(cPrev, c, drawMode, d_reflectionToSegmentPoints, featureDataLine);
+					if(cPrev && c) {
+//						if (featureData)
+//						{
+//							featureDataLine = featureData.getLineAt(cnt-1);
+//						}
+						_drawGeoLine(cPrev, c, drawMode, d_reflectionToSegmentPoints, featureData, cnt);
 					}
 					cPrev = c;
 					cnt++;
@@ -2998,8 +3068,8 @@ package com.iblsoft.flexiweather.widgets
 			} else if (coords.length == 1) {
 				if (featureData)
 				{
-					featureDataLine = featureData.getLineAt(cnt);
-					_drawGeoLine(coords[0] as Coord, null, drawMode, d_reflectionToSegmentPoints, featureDataLine);
+//					featureDataLine = featureData.getLineAt(cnt);
+					_drawGeoLine(coords[0] as Coord, null, drawMode, d_reflectionToSegmentPoints, featureData, cnt);
 				}
 			}
 			
@@ -3578,12 +3648,12 @@ class SmoothRendererNew
 			coordTo = coords.shift();
 			coordTo = Coord.convertCoordOnSphere(coordTo, projection);
 			
-			trace("\n from: "+ coordFrom.x + ","+coordFrom.y + " to: " + coordTo.x + " , " + coordTo.y);
+//			trace("\n from: "+ coordFrom.x + ","+coordFrom.y + " to: " + coordTo.x + " , " + coordTo.y);
 			
 //			if (_iw.crossDateline(coordFrom, coordTo) || _iw.coordsFarThanExtentWidth(coordFrom, coordTo) )
 			if (_iw.coordsFarThanExtentWidth(coordFrom, coordTo) )
 			{
-				trace("\n\t crossing dateline");
+//				trace("\n\t crossing dateline");
 				newCoords.push(new EdgeCoord(coordFrom, false, true));
 				//create line1 in correct order
 				if (coordFrom.x > coordTo.x)
@@ -3593,8 +3663,8 @@ class SmoothRendererNew
 				}
 				
 			} else {
-				trace("\n\n NOT crossing dateline");
-				trace("\t Adding COORD FROM coord: " + coordFrom.x + " , " + coordFrom.y);
+//				trace("\n\n NOT crossing dateline");
+//				trace("\t Adding COORD FROM coord: " + coordFrom.x + " , " + coordFrom.y);
 				newCoords.push(new EdgeCoord(coordFrom, false, true));
 			}
 			coordFrom = coordTo;
@@ -3602,7 +3672,7 @@ class SmoothRendererNew
 		
 		if (coordTo)
 		{
-			trace("\t Adding last COORD TO coord: " + coordTo.x + " , " + coordTo.y);
+//			trace("\t Adding last COORD TO coord: " + coordTo.x + " , " + coordTo.y);
 			newCoords.push(new EdgeCoord(coordTo, false, true));
 		}
 		

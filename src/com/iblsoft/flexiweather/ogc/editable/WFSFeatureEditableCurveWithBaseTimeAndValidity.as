@@ -128,6 +128,8 @@ package com.iblsoft.flexiweather.ogc.editable
 						master.container.drawSmoothPolyLine(getRenderer, a_points, DrawMode.PLAIN, false, b_justCompute, m_featureData);
 					else
 						master.container.drawGeoPolyLine(getRenderer, a_points, DrawMode.PLAIN, false, b_justCompute, m_featureData);
+					
+					m_featureData.joinLinesFromReflections();
 				}
 //			}
 		}
@@ -179,9 +181,15 @@ package com.iblsoft.flexiweather.ogc.editable
 							//						trace("displaySprite.clear: pointsCount: " + pointsCount);
 						} else {
 							gr.clear();
-							var renderer: ICurveRenderer = getRenderer(reflectionDelta);
-							drawFeatureReflection(renderer, reflection);
 							
+							if (m_featureData.reflectionDelta == reflectionDelta)
+							{
+								var renderer: ICurveRenderer = getRenderer(reflectionDelta);
+	//							drawFeatureReflection(renderer, reflection);
+								drawFeatureData(renderer, m_featureData);
+							} else {
+								trace("\t\t Do not draw data for " + reflectionDelta + " Feature is drawn in " + m_featureData.reflectionDelta);
+							}
 							if (displaySprite)
 								displaySprite.points = reflection.points;
 						}
@@ -198,6 +206,70 @@ package com.iblsoft.flexiweather.ogc.editable
 //			return result
 		}
 		
+		protected function drawFeatureData(g: ICurveRenderer, m_featureData: FeatureData): void
+		{
+			if (!g || !m_featureData || !m_featureData.lines)
+			{
+				return;
+			}
+			
+			var p: Point;
+			var points: Array = m_featureData.points;
+			
+			var linesCount: int = m_featureData.lines.length;
+			var pointsCount: int = points.length;
+			
+//			if (pointsCount == 0 && m_featureData.computingScheduled)
+//			{
+//				m_featureData.validate();
+//				points = m_featureData.points;
+//				pointsCount = points.length;
+//			}
+			
+			if (pointsCount > 0)
+			{
+				p = convertCoordToScreen(m_featureData.startPoint);
+				
+				var lastPoint: Point;
+				
+				g.clear();
+				
+				g.start(p.x, p.y);
+				g.moveTo(p.x, p.y);
+				lastPoint = new Point(p.x, p.y);
+				//				trace("\ndrawFeatureReflection moveTO: [" + p.x + " , " + p.y + " ]");
+				var bNewLine: Boolean = false;
+				for (var i: int = 1; i < pointsCount; i++)
+				{
+					p = points[i] as Point;
+					if (p)
+					{
+						p = convertCoordToScreen(p);
+						if (bNewLine) {
+							g.finish(lastPoint.x, lastPoint.y);
+							
+							g.start(p.x, p.y);
+							g.moveTo(p.x, p.y);
+							//							trace("drawFeatureReflection moveTo: [" + p.x + " , " + p.y + " ]");
+						} else {
+							g.lineTo(p.x, p.y);
+							//							trace("drawFeatureReflection lineTO: [" + p.x + " , " + p.y + " ]");
+						}
+						if (!p)
+							trace("check why p is null");
+						lastPoint = new Point(p.x, p.y);
+						bNewLine = false;
+					} else {
+						bNewLine = true;
+					}
+				}
+				if (p)
+					g.finish(p.x, p.y);
+				else
+					g.finish(lastPoint.x, lastPoint.y);
+				//				trace("\n");
+			}
+		}
 		protected function drawFeatureReflection(g: ICurveRenderer, m_featureDataReflection: FeatureDataReflection): void
 		{
 			if (!g || !m_featureDataReflection || !m_featureDataReflection.lines)
@@ -229,7 +301,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				g.start(p.x, p.y);
 				g.moveTo(p.x, p.y);
 				lastPoint = new Point(p.x, p.y);
-				trace("\ndrawFeatureReflection moveTO: [" + p.x + " , " + p.y + " ]");
+//				trace("\ndrawFeatureReflection moveTO: [" + p.x + " , " + p.y + " ]");
 				var bNewLine: Boolean = false;
 				for (var i: int = 1; i < pointsCount; i++)
 				{
@@ -242,10 +314,10 @@ package com.iblsoft.flexiweather.ogc.editable
 							
 							g.start(p.x, p.y);
 							g.moveTo(p.x, p.y);
-							trace("drawFeatureReflection moveTo: [" + p.x + " , " + p.y + " ]");
+//							trace("drawFeatureReflection moveTo: [" + p.x + " , " + p.y + " ]");
 						} else {
 							g.lineTo(p.x, p.y);
-							trace("drawFeatureReflection lineTO: [" + p.x + " , " + p.y + " ]");
+//							trace("drawFeatureReflection lineTO: [" + p.x + " , " + p.y + " ]");
 						}
 						if (!p)
 							trace("check why p is null");
@@ -259,7 +331,7 @@ package com.iblsoft.flexiweather.ogc.editable
 					g.finish(p.x, p.y);
 				else
 					g.finish(lastPoint.x, lastPoint.y);
-				trace("\n");
+//				trace("\n");
 			}
 			
 		}

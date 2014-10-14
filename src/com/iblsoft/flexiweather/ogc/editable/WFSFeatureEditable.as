@@ -373,7 +373,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			changeMoveablePointVisibility(coord, coordIndex, coordReflection, false);
 		}
 
-		private function changeMoveablePointVisibility(coord: Coord, coordIndex: uint, coordReflection: uint, visible: Boolean): void
+		private function changeMoveablePointVisibility(coord: Coord, coordIndex: int, coordReflection: int, visible: Boolean): void
 		{
 			if ( !m_featureData)
 				return;
@@ -923,6 +923,10 @@ package com.iblsoft.flexiweather.ogc.editable
 			return mb_highlighted;
 		}
 
+		public function invalidateGlow(): void
+		{
+			updateGlow();
+		}
 		protected function updateGlow(): void
 		{
 			if (mb_selected != m_editableSprite.visible)

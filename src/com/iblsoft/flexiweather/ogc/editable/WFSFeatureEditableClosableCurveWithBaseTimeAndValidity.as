@@ -53,6 +53,8 @@ package com.iblsoft.flexiweather.ogc.editable
 						master.container.drawGeoPolyLine(getRenderer, a_points, DrawMode.PLAIN, isCurveClosed(), true, m_featureData);
 				}
 				
+				m_featureData.joinLinesFromReflections();
+				
 //			}
 		}
 		override protected function drawCurve(): void
@@ -98,11 +100,13 @@ package com.iblsoft.flexiweather.ogc.editable
 							displaySprite.clear();
 							//						trace("displaySprite.clear: pointsCount: " + pointsCount);
 						} else {
-							var renderer: ICurveRenderer = getRenderer(reflectionDelta);
-							if (m_featureData)
+							gr.clear();
+							if (m_featureData.reflectionDelta == reflectionDelta)
 							{
-								//							trace("reflection.displaySprite: " + reflection.displaySprite.parent);
-								drawFeatureReflection(renderer, reflection);
+								var renderer: ICurveRenderer = getRenderer(reflectionDelta);
+								drawFeatureData(renderer, m_featureData);
+							} else {
+								trace("\t\t Do not draw data for " + reflectionDelta + " Feature is drawn in " + m_featureData.reflectionDelta);
 							}
 							displaySprite.points = reflection.points;
 							
