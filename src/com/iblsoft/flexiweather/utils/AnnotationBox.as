@@ -17,12 +17,12 @@ package com.iblsoft.flexiweather.utils
 		
 		override public function set visible(value:Boolean):void
 		{
-			if (value)
-			{
-				trace("Show Annotation");
-			} else {
-				trace("Hide Annotation");
-			}
+//			if (value)
+//			{
+//				trace("Show Annotation");
+//			} else {
+//				trace("Hide Annotation");
+//			}
 			super.visible = value;
 		}
 		public function AnnotationBox()

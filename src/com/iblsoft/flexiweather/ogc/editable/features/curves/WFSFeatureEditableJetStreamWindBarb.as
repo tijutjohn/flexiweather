@@ -141,8 +141,19 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 			var tBeforeDist: Number = 0;
 			var enoughSpaceBefore: Boolean = false;
 			
-			for (i = m_myPointIndex; i > 0; i--){
-				tDist = Point.distance(m_points[i], m_points[i - 1]);
+			var currPoint: Point;
+			var previousPoint: Point;
+			var nextPoint: Point;
+			
+			for (i = m_myPointIndex; i > 0; i--)
+			{
+				currPoint = m_points[i];
+				previousPoint = m_points[i -1];
+				
+				if (!currPoint || !previousPoint)
+					continue;
+				
+				tDist = Point.distance(currPoint, previousPoint);
 				
 				if ((tBeforeDist + tDist) < (totalLength / 2)){
 					tBeforeDist = tBeforeDist + tDist;
@@ -167,12 +178,18 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 				//for (i = m_myPointIndex; i < (m_points.length - 1); i++){
 				for (i = sPointIndex; i < (m_points.length - 1); i++)
 				{
-					tDist = Point.distance(m_points[i + 1], m_points[i]);
+					currPoint = m_points[i];
+					nextPoint = m_points[i + 1];
+					
+					if (!currPoint || !nextPoint)
+						continue;
+					
+					tDist = Point.distance(nextPoint, currPoint);
 						
 					if ((aDist + tDist) >= 1)
 					{
 						// NEED TO FIND POINT BETWEEN
-						dirVector = Point(m_points[i + 1]).subtract(Point(m_points[i]));
+						dirVector = nextPoint.subtract(currPoint);
 						dirVector.normalize(1);
 							
 						pTangent = makeNormal(dirVector); 
@@ -182,8 +199,8 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 						offsetVector.x = offsetVector.x * addOffset;
 						offsetVector.y = offsetVector.y * addOffset;
 							
-						p1 = Point(m_points[i]).add(offsetVector);
-//						p1 = Point(m_points[i]).add(dirVector);
+						p1 = Point(currPoint).add(offsetVector);
+//						p1 = Point(currPoint).add(dirVector);
 							
 						signPoints.push({pt: p1.clone(), tg: pTangent.clone()});
 						totalDist += addOffset;
@@ -196,8 +213,8 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 							offsetVector.x = offsetVector.x * addOffset;
 							offsetVector.y = offsetVector.y * addOffset;
 								
-//							p1 = Point(m_points[i]).add(dirVector);
-							p1 = Point(m_points[i]).add(offsetVector);
+//							p1 = Point(currPoint).add(dirVector);
+							p1 = Point(currPoint).add(offsetVector);
 								
 							signPoints.push({pt: p1.clone(), tg: pTangent.clone()});
 								
@@ -206,7 +223,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 							tDist = tDist - 1;
 						}
 							
-						aDist = Point.distance(m_points[i + 1], m_points[i]) - addOffset;
+						aDist = Point.distance(nextPoint, currPoint) - addOffset;
 						totalDist += aDist;
 						//i = i - 1
 					} else {

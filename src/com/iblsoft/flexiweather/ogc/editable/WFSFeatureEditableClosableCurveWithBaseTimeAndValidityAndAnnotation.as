@@ -97,7 +97,8 @@ package com.iblsoft.flexiweather.ogc.editable
 			//annotation visibility for dateline splitted features
 			var annotationPositions: Dictionary = new Dictionary();
 			
-			for (var i: int = 0; i < totalReflections; i++)
+			var total: int = totalReflections;
+			for (var i: int = 0; i < total; i++)
 			{
 				var reflectionDelta: int = reflectionIDs[i];
 				
@@ -111,7 +112,7 @@ package com.iblsoft.flexiweather.ogc.editable
 					ptAvg = reflection.center;
 					
 					displaySprite = getDisplaySpriteForReflectionAt(reflectionDelta);
-//					gr = displaySprite.graphics;
+					gr = displaySprite.graphics;
 					
 					if(pointsCount <= 1)
 					{
@@ -122,15 +123,20 @@ package com.iblsoft.flexiweather.ogc.editable
 						
 						if (reflection.points)
 						{
+							gr.clear();
 							trace("reflection.points: " + reflection.points.length);
 							if (reflection.points.length == 0)
 							{
 								trace("no points for displaysprite");
 								featureIsVisible = false;
 							} else {
-								//draw only in case there are some points
-								var renderer: ICurveRenderer = getRenderer(reflectionDelta);
-								drawFeatureReflection(renderer, reflection);
+								if (m_featureData.reflectionDelta == reflectionDelta)
+								{
+									var renderer: ICurveRenderer = getRenderer(reflectionDelta);
+									drawFeatureData(renderer, m_featureData);
+								} else {
+									trace("\t\t Do not draw data for " + reflectionDelta + " Feature is drawn in " + m_featureData.reflectionDelta);
+								}
 							}
 						}
 						displaySprite.points = reflection.points;
@@ -163,7 +169,7 @@ package com.iblsoft.flexiweather.ogc.editable
 								
 								var annotationDatelineSplitVisibility: Boolean = checkAnnotationVisibilityForSplittedFeature(annotationPositions, annotationPositions[reflectionDelta] as AnnotationPosition, projectionWidth / 2);
 								
-								trace("Reflection : " + reflectionDelta + " isAnnotationInAnticollision: " + isAnnotationInAnticollision + " annotationDatelineSplitVisibility: " + annotationDatelineSplitVisibility);
+//								trace("Reflection : " + reflectionDelta + " isAnnotationInAnticollision: " + isAnnotationInAnticollision + " annotationDatelineSplitVisibility: " + annotationDatelineSplitVisibility);
 								
 								if (!isDisplayObjectInAnticollision)
 								{

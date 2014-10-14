@@ -7,6 +7,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 	import flash.display.Stage;
 	import flash.events.Event;
 	import flash.geom.Point;
+	import flash.utils.Dictionary;
 	
 	import mx.core.FlexGlobals;
 
@@ -15,10 +16,10 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		public static var fdr_uid: int = 0;
 		public var uid: int;
 		
-//		[ArrayElementType("com.iblsoft.flexiweather.ogc.editable.data.FeatureDataLine")]
+		[ArrayElementType("com.iblsoft.flexiweather.ogc.editable.data.FeatureDataLine")]
 		private var _lines: Array;
 		
-//		[ArrayElementType("com.iblsoft.flexiweather.ogc.editable.data.FeatureDataPoint")]
+		[ArrayElementType("com.iblsoft.flexiweather.ogc.editable.data.FeatureDataPoint")]
 		private var _points: Array;
 		
 //		[ArrayElementType("com.iblsoft.flexiweather.ogc.editable.data.FeatureDataPoint")]
@@ -36,10 +37,11 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		
 		public function get linesLength(): int
 		{
-			if (lines)
-				return lines.length;
+			var cnt: int = 0;
+			for (var obj: Object in _lines)
+				cnt++;
 			
-			return 0;
+			return cnt;
 		}
 		
 		public function get points(): Array
@@ -78,22 +80,45 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		public function debug(): void
 		{
 			trace("\t FeatureDataReflection: " + reflectionDelta);
-			trace("\t Lines: " + _lines.length);
+			trace("\t Lines: " + linesLength);
 			
-			var total: int = _lines.length;
-			for (var i: int = 0; i < total; i++)
+			var total: int = linesLength;
+			for (var lineID: String in _lines)
 			{
-				var line: FeatureDataLine = getLineAt(i);
+				var line: FeatureDataLine = getLineAt(parseInt(lineID));
 				trace("\t\t :" + line);
 			}
+		}
+		
+		public function get ids(): Array
+		{
+			var _ids: Array = [];
+			for (var lineID: String in _lines)
+				_ids.push(parseInt(lineID));
+			
+			_ids.sort(Array.NUMERIC)
+				
+			return _ids;
 		}
 		
 		public function clear(): void
 		{
 			if (_points.length > 0)
 				_points.splice(0, _points.length);
-			if (_lines.length > 0)
-				_lines.splice(0, _lines.length);
+//			if (_lines.length > 0)
+//				_lines.splice(0, _lines.length);
+			
+			var total: int = linesLength;
+			var _ids: Array = ids;
+			
+			for each (var iLineID: int in _ids)
+			{
+				deleteLineAt(iLineID);
+				
+//				var line: FeatureDataLine = getLineAt(parseInt(lineID));
+//				line.clear();
+//				trace("\t\t :" + line);
+			}
 			
 //			var total: int = _lines.length;
 //			for (var i: int = 0; i < total; i++)
@@ -108,6 +133,18 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			return createLineAt(_lines.length);
 		}
 		
+		public function deleteLineAt(position: int): void
+		{
+			var line: FeatureDataLine = _lines[position] as FeatureDataLine;
+			
+			line.removeEventListener(FeatureDataLine.LINE_SEGMENT_ADDED, onLineSegmentsChanged);
+			line.removeEventListener(FeatureDataLine.LINE_SEGMENT_REMOVED, onLineSegmentsChanged);
+			
+			line.parentFeatureData = null;
+			line.parentFeatureReflection = null
+			delete _lines[position];
+			
+		}
 		public function createLineAt(position: int): FeatureDataLine
 		{
 			var line: FeatureDataLine = new FeatureDataLine(position);
@@ -121,14 +158,18 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			return line;
 		}
 		
+		public function hasLineAt(position: int): Boolean
+		{
+			return (_lines[position] is FeatureDataLine);
+		}
 		public function getLineAt(position: int): FeatureDataLine
 		{
-			if (_lines.length <= position)
-			{
-				return createLineAt(position);
-			}
+//			if (_lines.length <= position)
+//			{
+//				return createLineAt(position);
+//			}
 			
-			if (!(_lines[position] is FeatureDataLine))
+			if (!hasLineAt(position))
 				return createLineAt(position);
 			
 			return _lines[position] as FeatureDataLine;
@@ -186,17 +227,28 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		 */		
 		private function compute(): void
 		{
-			trace("\t COMPUTE START" + this);
+//			trace("\t COMPUTE START" + this);
 			if (_points.length > 0)
 				_points.splice(0, _points.length);
 			var cnt: int = 0;
 			var oldPoint: FeatureDataPoint;
 //			_editablePoints = [];
-			for each (var line: FeatureDataLine in _lines)
+			
+			var _ids: Array = ids;
+			
+			for each (var iLineID: int in _ids)
 			{
-				for each (var lineSegment: FeatureDataLineSegment in line.lineSegments)
+				var line: FeatureDataLine = _lines[iLineID] as FeatureDataLine;
+				var totalLineSegments: int = line.lineSegments.length;
+				for (var s: int = 0 ; s < totalLineSegments; s++)
 				{
-					trace("line segment: " + lineSegment);
+					var lineSegment: FeatureDataLineSegment = line.lineSegments[s] as FeatureDataLineSegment;
+					if (!lineSegment)
+						continue;
+					if (!lineSegment.visible)
+						continue;
+					
+//					trace("line segment:  lineID = " + iLineID + " s: " + s + " Segment: " + lineSegment);
 					var p1: FeatureDataPoint = new FeatureDataPoint(lineSegment.x1, lineSegment.y1);
 					var p2: FeatureDataPoint = new FeatureDataPoint(lineSegment.x2, lineSegment.y2);
 					
@@ -204,6 +256,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 					if (!oldPoint)
 						_points.push(p1);
 					else if (oldPoint.x != p1.x || oldPoint.y != p1.y) {
+//						trace("old and new points are not equal: lineID = " + iLineID + " s: " + s);
 						_points.push(null);
 						_points.push(p1);
 					}
@@ -223,7 +276,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 						_startPoint = p1.clone() as FeatureDataPoint;
 					
 					cnt++;
-					trace("\t Old point: " + oldPoint);
+//					trace("\t Old point: lineID = " + iLineID + " s: " + s + " point: " + oldPoint);
 				}
 			}
 			

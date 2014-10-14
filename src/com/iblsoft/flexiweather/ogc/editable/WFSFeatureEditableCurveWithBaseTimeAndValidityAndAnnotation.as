@@ -103,7 +103,7 @@ package com.iblsoft.flexiweather.ogc.editable
 							displaySprite.clear();
 						} else {
 							var renderer: ICurveRenderer = getRenderer(reflectionDelta);
-							drawFeatureReflection(renderer, reflection);
+							drawFeatureData(renderer, m_featureData);
 							
 							displaySprite.points = reflection.points;
 							
@@ -179,6 +179,8 @@ package com.iblsoft.flexiweather.ogc.editable
 						master.container.drawSmoothPolyLine(getRenderer, a_points, DrawMode.PLAIN, false, m_featureData);
 					else
 						master.container.drawGeoPolyLine(getRenderer, a_points, DrawMode.PLAIN, false, m_featureData);
+		
+					m_featureData.joinLinesFromReflections();
 				}
 			}
 		}

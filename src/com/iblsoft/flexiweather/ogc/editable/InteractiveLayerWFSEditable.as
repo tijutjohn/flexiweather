@@ -4,16 +4,17 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerWFS;
 	import com.iblsoft.flexiweather.ogc.Version;
 	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
+	import com.iblsoft.flexiweather.ogc.editable.data.MoveablePoint;
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureBase;
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
 	import com.iblsoft.flexiweather.utils.ScreenUtils;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
-
+	
 	import flash.display.DisplayObject;
 	import flash.display.Sprite;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
-
+	
 	import mx.collections.ArrayCollection;
 	import mx.events.PropertyChangeEvent;
 	import mx.events.PropertyChangeEventKind;
@@ -48,12 +49,30 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			ma_items.addItem(item);
 			item.onRegisteredAsEditableItem(this);
+			
+			if (item is IHighlightableItem)
+			{
+				var hItem: IHighlightableItem = item as IHighlightableItem;
+				
+				var feature: WFSFeatureEditable;
+				if (hItem is WFSFeatureEditable)
+					feature = hItem as WFSFeatureEditable;
+				else if (hItem is MoveablePoint)
+				{
+					feature = (hItem as MoveablePoint).getFeature();
+				}
+				if (feature && feature.selected)
+				{
+					feature.invalidateGlow();
+//					highlightItem(feature);
+				}
+			}
 		}
 
 		public function removeEditableItem(item: IEditableItem): void
 		{
 			var i: int = ma_items.getItemIndex(item);
-	if (i >= 0)
+			if (i >= 0)
 			{
 				if (m_highlightedItem == item)
 					m_highlightedItem = null;
