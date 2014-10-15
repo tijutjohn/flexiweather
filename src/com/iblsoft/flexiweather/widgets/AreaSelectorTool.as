@@ -81,11 +81,14 @@ package com.iblsoft.flexiweather.widgets
 
 		override public function onMouseDown(event: MouseEvent): Boolean
 		{
+			
 //			if(!event.ctrlKey && mb_requireCtrlKey || event.shiftKey)
 			if (event.ctrlKey || event.shiftKey)
 				return false;
 //			if(!event.buttonDown)
 //				return false;
+			
+			trace("AreaSelector: onMouseDown");
 			
 			systemManager.getSandboxRoot().addEventListener(MouseEvent.MOUSE_UP, onMouseUpOutsideArea);
 			
@@ -117,12 +120,20 @@ package com.iblsoft.flexiweather.widgets
 		}
 		override public function onMouseUp(event: MouseEvent): Boolean
 		{
+			trace("AreaSelector: onMouseUp");
 			systemManager.getSandboxRoot().removeEventListener(MouseEvent.MOUSE_UP, onMouseUpOutsideArea);
 			
 			if (event.ctrlKey || event.shiftKey)
 				return false;
 			if (_r == null || _areaComponent.isResizing)
-				return false;
+			{
+				if (_areaComponent.isResizing)
+				{
+					_areaComponent.stopDragging();
+				} else {
+					return false;
+				}
+			}
 			if (!_toolIsCreated)
 			{
 				//create new rectangle from old one with correct left, top, right, bottom properties (it matters on direction of draggine when zoom rectange is created
@@ -394,16 +405,19 @@ class AreaRectangle extends UIComponent
 
 	private function onSpriteDown(event: MouseEvent): void
 	{
+		trace("AreaRectangle: onSpriteDown");
 		isResizing = true;
 		_currentlyDraggedSprite = event.target as Sprite;
 		mouseEnabled = false;
 		enableSprites(false);
 		stage.addEventListener(MouseEvent.MOUSE_MOVE, onSpriteMove);
 		stage.addEventListener(MouseEvent.MOUSE_UP, onSpriteUp);
+		systemManager.getSandboxRoot().addEventListener(MouseEvent.MOUSE_UP, onMouseUpOutsideArea);
 	}
 
 	private function onSpriteMove(event: MouseEvent): void
 	{
+//		trace("AreaRectangle: onSpriteMove");
 		mouseEnabled = false;
 		enableSprites(false);
 		computeBoundingBox(event);
@@ -457,11 +471,27 @@ class AreaRectangle extends UIComponent
 		draw(null, true);
 	}
 
-	private function onSpriteUp(event: MouseEvent): void
+	private function onMouseUpOutsideArea(event: MouseEvent): void
 	{
+		trace("AreaRectangle: onMouseUpOutsideArea");
+		onSpriteUp(event);
+	}
+	
+	public function stopDragging(): void
+	{
+		trace("AreaRectangle: stopDragging");
+		onSpriteUp();
+	}
+	private function onSpriteUp(event: MouseEvent = null): void
+	{
+		trace("AreaRectangle: onSpriteUp");
 		stage.removeEventListener(MouseEvent.MOUSE_MOVE, onSpriteMove);
 		stage.removeEventListener(MouseEvent.MOUSE_UP, onSpriteUp);
-		computeBoundingBox(event);
+		systemManager.getSandboxRoot().removeEventListener(MouseEvent.MOUSE_UP, onMouseUpOutsideArea);
+		
+		if (event)
+			computeBoundingBox(event);
+		
 		draw(_r, false);
 		isResizing = false;
 		_currentlyDraggedSprite = null;
