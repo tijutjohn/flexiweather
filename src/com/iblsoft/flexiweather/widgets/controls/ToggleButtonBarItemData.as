@@ -9,11 +9,11 @@ package com.iblsoft.flexiweather.widgets.controls
 		public static const NORMAL: String = 'normal';
 		public static const TOGGLE: String = 'toggle';
 		public static const EXCLUSIVE: String = 'exclusive';
-		
+
 		private var m_ident: String;
 		private var m_label: String;
 		private var m_tooltip: String;
-		
+
 		private var _enabled: Boolean;
 
 		[Bindable]
@@ -60,19 +60,18 @@ package com.iblsoft.flexiweather.widgets.controls
 
 		public function set enabled(value:Boolean):void
 		{
-			trace("ToggleButtonBarItemData enabled: " + value + "  ident: " + ident);
 			_enabled = value;
 			notify("enabledChanged");
 			notifyChange();
 		}
-		
+
 		public var type: String;
-		
+
 //		public var toggle: Boolean;
-//		public var exclusive: String;  
+//		public var exclusive: String;
 		public var iconToggle: Class;
 		public var priority: int;
-		
+
 		private var _icon: Class;
 
 		[Bindable (event="iconChanged")]
@@ -87,7 +86,7 @@ package com.iblsoft.flexiweather.widgets.controls
 			notify("iconChanged");
 			notifyChange();
 		}
-		
+
 		private var _iconTest: Class;
 
 		[Bindable (event="iconTestChanged")]
@@ -102,7 +101,7 @@ package com.iblsoft.flexiweather.widgets.controls
 			notify("iconTestChanged");
 			notifyChange();
 		}
-		
+
 		private function notifyChange(): void
 		{
 			notify(Event.CHANGE);
@@ -111,10 +110,9 @@ package com.iblsoft.flexiweather.widgets.controls
 		{
 			dispatchEvent(new Event(type));
 		}
-		
+
 		public function ToggleButtonBarItemData()
 		{
-			trace("New ToggleButtonBarItemData");
 		}
 
 	}
