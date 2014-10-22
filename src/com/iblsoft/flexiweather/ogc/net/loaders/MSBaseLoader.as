@@ -20,7 +20,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
-	
+
 	import flash.display.Bitmap;
 	import flash.display.DisplayObject;
 	import flash.events.Event;
@@ -28,7 +28,8 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 	import flash.events.ProgressEvent;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
-	
+	import flash.utils.getTimer;
+
 	import mx.collections.ArrayCollection;
 	import mx.events.DynamicEvent;
 	import mx.logging.Log;
@@ -42,11 +43,13 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 		private var m_layer: InteractiveLayerMSBase;
 		protected var m_loader: WMSImageLoader;
 		private var m_wmsViewProperties: WMSViewProperties;
+		private var m_previousWmsViewProperties: WMSViewProperties;
+		private var m_previousWmsViewPropertiesTime: Number;
 		private var m_imagePart: ImagePart;
 
 		private var _delayedRequestArray: Array;
 		private var _delayedCachedRequestArray: Array;
-		
+
 		public function MSBaseLoader(layer: InteractiveLayerMSBase)
 		{
 			uid++;
@@ -93,7 +96,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				ma_requests.removeAll();
 			}
 		}
-		
+
 		/**
 		 * Check if WMS data are cached (only if b_forceUpdate is true) and load any data parts which are missing.
 		 *
@@ -104,13 +107,19 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 		public function updateWMSData(b_forceUpdate: Boolean, viewProperties: IViewProperties, forcedLayerWidth: Number, forcedLayerHeight: Number, printQuality: String): void
 		{
 			m_wmsViewProperties = viewProperties as WMSViewProperties;
+
+			if (isSameData())
+			{
+				trace("Same WMS Data request in short time, does not load anything");
+				return;
+			}
 			//check if data are not already cached
 			//			super.updateData(b_forceUpdate);
 			++mi_updateCycleAge;
-			
+
 			//cancel all running requests
 			cancel();
-			
+
 			var i_width: int = int(m_layer.container.width);
 			var i_height: int = int(m_layer.container.height);
 			if (forcedLayerWidth > 0)
@@ -135,6 +144,34 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 						printQuality,
 						b_forceUpdate);
 			}
+
+			savePreviousData();
+		}
+
+		private function isSameData(): Boolean
+		{
+			if (m_previousWmsViewProperties)
+			{
+				var timeNow: Number = getTimer();
+				var timeDiff: Number = timeNow - m_previousWmsViewPropertiesTime;
+				if (timeDiff < 500)
+				{
+					//will check dimensions
+					if (m_previousWmsViewProperties.equals(m_wmsViewProperties))
+					{
+						var bbox1: BBox = m_previousWmsViewProperties.getViewBBox();
+						var bbox2: BBox = m_wmsViewProperties.getViewBBox();
+						if (bbox1.equals(bbox2))
+							return true;
+					}
+				}
+			}
+			return false;
+		}
+		private function savePreviousData(): void
+		{
+			m_previousWmsViewPropertiesTime = getTimer();
+			m_previousWmsViewProperties = m_wmsViewProperties;
 		}
 
 		/**
@@ -152,11 +189,11 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 		private function updateDataPart(wmsViewProperties: WMSViewProperties, currentViewBBox: BBox, i_width: uint, i_height: uint, s_printQuality: String, b_forceUpdate: Boolean): void
 		{
 			var wmsLayerConfiguration: WMSLayerConfiguration = (m_layer.configuration as WMSLayerConfiguration);
-			
+
 			var bbox: String;
 			if (Projection.hasCRSAxesFlippedByISO(wmsViewProperties.crs, wmsLayerConfiguration.service.version))
 			{
-				bbox = String(currentViewBBox.yMin) + "," + String(currentViewBBox.xMin) + "," + String(currentViewBBox.yMax) + "," + String(currentViewBBox.xMax);	
+				bbox = String(currentViewBBox.yMin) + "," + String(currentViewBBox.xMin) + "," + String(currentViewBBox.yMax) + "," + String(currentViewBBox.xMax);
 			} else {
 				bbox = currentViewBBox.toBBOXString();
 			}
@@ -167,16 +204,16 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 					m_layer.getWMSStyleListString());
 			if (!request)
 				return;
-			
+
 			wmsViewProperties.updateDimensionsInURLRequest(request);
 			wmsViewProperties.updateCustomParametersInURLRequest(request);
 			wmsViewProperties.url = request;
-			
+
 			var img: DisplayObject = null;
 			var wmsCache: WMSCache = m_layer.getCache() as WMSCache;
 			var cacheItem: CacheItem;
 			var imagePart: ImagePart = new ImagePart();
-			
+
 			imagePart.mi_updateCycleAge = mi_updateCycleAge;
 			imagePart.ms_imageCRS = wmsViewProperties.crs;
 			imagePart.m_imageBBox = currentViewBBox;
@@ -202,7 +239,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				if (isCached && isNoDataCached && imgTest == null)
 				{
 					//is cached, but no data, do not load anything (it's data which was loaded before, but exception was returned, so we cached this info
-					// invalidate property "displayed" for cached items		
+					// invalidate property "displayed" for cached items
 					wmsCache.removeFromScreen();
 					notifyLoadingFinishedNoSynchronizationData(null);
 					return;
@@ -212,7 +249,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 			}
 			else
 			{
-				// invalidate property "displayed" for cached items		
+				// invalidate property "displayed" for cached items
 				wmsCache.removeFromScreen();
 			}
 			if (img == null)
@@ -222,16 +259,16 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				ma_requests.addItem(request);
 				if (ma_requests.length == 1)
 					notifyLoadingStart(false);
-				
+
 				var forecast: Object = wmsViewProperties.getWMSDimensionValue('FORECAST');
 				var timeString: String = '';
-				
+
 				var jobName: String = "Rendering " + (m_layer.configuration as IWMSLayerConfiguration).layerNames.join("+");
 				if (forecast)
 				{
 					jobName += "["+forecast+"]";
 				}
-				
+
 				if (_delayedRequestArray.length > 0)
 				{
 					trace("there is _delayedRequestObject still, which was not executed yet");
@@ -248,27 +285,27 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 			else
 			{
 				notifyLoadingStart(false);
-				
+
 				//image is cached
 				cacheItem = wmsCache.getCacheItem(wmsViewProperties);
 				var key: String;
 				if (cacheItem && cacheItem.cacheKey)
 					key = cacheItem.cacheKey.key;
-				
+
 				addImagePart(wmsViewProperties, imagePart, img, key);
 				onFinishedRequest(wmsViewProperties, null);
 				invalidateDynamicPart();
-				
+
 				if (_delayedCachedRequestArray.length > 0)
 				{
 					trace("there is _delayedCachedRequestObject still, which was not executed yet");
 				}
 				_delayedCachedRequestArray.push({wmsViewProperties: wmsViewProperties});
 				m_layer.addEventListener(Event.ENTER_FRAME, dispatchLoadingFinishedFromCacheOnNextFrame);
-				
+
 			}
 		}
-		
+
 		private function checkIfRequestIsAlreadyInDelayQueue(wmsViewProperties: WMSViewProperties): Boolean
 		{
 			if (_delayedRequestArray.length > 0)
@@ -294,12 +331,14 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				}
 			}
 		}
-		
+
 		private function startLoadingOnNextFrame(event: Event): void
 		{
+			trace("startLoadingOnNextFrame");
 			m_layer.removeEventListener(Event.ENTER_FRAME, startLoadingOnNextFrame);
 			if (_delayedRequestArray)
 			{
+				trace("startLoadingOnNextFrame: " + _delayedRequestArray.length);
 				while (_delayedRequestArray.length > 0)
 				{
 					var cachedObject: Object = _delayedRequestArray.shift();
@@ -317,23 +356,23 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				//			wmsCache.startImageLoading(s_currentCRS, currentViewBBox, request, dimensions);
 				wmsCache.startImageLoading(wmsViewProperties);
 		}
-		
+
 		private function onCacheItemLoaded(event: WMSCacheEvent): void
 		{
 			var wmsCache: WMSCache = event.target as WMSCache;
 			var item: CacheItem = event.item;
 			var wmsViewProperties: WMSViewProperties = m_wmsViewProperties;
-			
+
 			wmsCache.removeEventListener(WMSCacheEvent.ITEM_ADDED, onCacheItemLoaded);
-			
+
 			var imagePart: ImagePart = m_imagePart;
 			var result: * = item.image;
 			imagePart.mi_updateCycleAge = mi_updateCycleAge;
 			addImagePart(wmsViewProperties, imagePart, result, item.cacheKey.key);
-			
+
 			onFinishedRequest(m_wmsViewProperties, null);
 			invalidateDynamicPart();
-			
+
 			notifyLoadingFinishedFromCache(event.associatedData);
 		}
 
@@ -390,7 +429,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				imagePart.image = img;
 				imagePart.mb_imageOK = true;
 				imagePart.ms_cacheKey = cacheKey;
-				
+
 				var total: int = imageParts.length;
 				if (total > 0)
 				{
@@ -435,25 +474,25 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				var result: * = event.result;
 				event.associatedData.result = result;
 				var bError:  Boolean;
-				
+
 				if (result is DisplayObject)
 				{
 					var cacheItem: CacheItem = wmsCache.getCacheItem(wmsViewProperties);
 					var key: String;
 					if (cacheItem && cacheItem.cacheKey)
 						key = cacheItem.cacheKey.key;
-					
+
 					imagePart.mi_updateCycleAge = mi_updateCycleAge;
 					addImagePart(wmsViewProperties, imagePart, result, key);
 					wmsViewProperties.url = event.request;
 					wmsCache.addCacheItem(imagePart.image, wmsViewProperties, event.associatedData);
 					invalidateDynamicPart();
-					
+
 				}
 				else
 				{
 					notifyLoadingFinishedWithErrors(event.associatedData);
-					
+
 					ExceptionUtils.logError(Log.getLogger("WMS"), result,
 							"Error accessing layer(s) '" + (m_layer.configuration as IWMSLayerConfiguration).layerNames.join(",") + "' - unexpected response type")
 				}
@@ -530,10 +569,10 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 						if ((associatedData.errorResult as ByteArray).length == 0)
 							bZeroBytesCheck = true;
 					}
-					
+
 					if (!bZeroBytesCheck)
 					{
-						
+
 						var xml: XML = associatedData.errorResult;
 						if (xml.localName() == "ServiceExceptionReport")
 						{
@@ -547,10 +586,10 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 								var timeString: String = arr[1];
 								var dimension: String = arr[3];
 								m_layer.getCache().addCacheNoDataItem(wmsViewProperties);
-								
+
 								ExceptionUtils.logError(Log.getLogger("WMS"), associatedData.errorResult,
 									"Failed to apply value '" + (m_layer.configuration as IWMSLayerConfiguration).layerNames.join(",") + "'");
-								
+
 								notifyLoadingFinishedNoSynchronizationData(event.associatedData);
 								errorStateSet = true;
 							}
@@ -560,7 +599,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 						Log.getLogger("MSBaseLoader").error("errorResult has 0 bytes ("+event.request.url+")");
 						trace("MSBaseLoader errorResult has 0 bytes");
 					}
-					
+
 					if (!errorStateSet)
 						notifyLoadingFinishedWithErrors(event.associatedData);
 
@@ -653,9 +692,9 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 		protected function onLegendLoadFailed(event: UniURLLoaderErrorEvent): void
 		{
 			removeLegendListeners(event.target as WMSImageLoader);
-			
+
 			var e: MSBaseLoaderEvent;
-			
+
 			if (event.result is XML)
 			{
 				var resultXML: XML = event.result as XML;
