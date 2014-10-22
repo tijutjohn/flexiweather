@@ -20,7 +20,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
-	
+
 	import flash.display.Bitmap;
 	import flash.display.DisplayObject;
 	import flash.events.Event;
@@ -28,7 +28,8 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 	import flash.events.ProgressEvent;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
-	
+	import flash.utils.getTimer;
+
 	import mx.collections.ArrayCollection;
 	import mx.events.DynamicEvent;
 	import mx.logging.Log;
@@ -42,6 +43,8 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 		private var m_layer: InteractiveLayerMSBase;
 		protected var m_loader: WMSImageLoader;
 		private var m_wmsViewProperties: WMSViewProperties;
+		private var m_previousWmsViewProperties: WMSViewProperties;
+		private var m_previousWmsViewPropertiesTime: Number;
 		private var m_imagePart: ImagePart;
 
 		private var _delayedRequestArray: Array;
@@ -104,6 +107,12 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 		public function updateWMSData(b_forceUpdate: Boolean, viewProperties: IViewProperties, forcedLayerWidth: Number, forcedLayerHeight: Number, printQuality: String): void
 		{
 			m_wmsViewProperties = viewProperties as WMSViewProperties;
+
+			if (isSameData())
+			{
+				trace("Same WMS Data request in short time, does not load anything");
+				return;
+			}
 			//check if data are not already cached
 			//			super.updateData(b_forceUpdate);
 			++mi_updateCycleAge;
@@ -135,6 +144,34 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 						printQuality,
 						b_forceUpdate);
 			}
+
+			savePreviousData();
+		}
+
+		private function isSameData(): Boolean
+		{
+			if (m_previousWmsViewProperties)
+			{
+				var timeNow: Number = getTimer();
+				var timeDiff: Number = timeNow - m_previousWmsViewPropertiesTime;
+				if (timeDiff < 500)
+				{
+					//will check dimensions
+					if (m_previousWmsViewProperties.equals(m_wmsViewProperties))
+					{
+						var bbox1: BBox = m_previousWmsViewProperties.getViewBBox();
+						var bbox2: BBox = m_wmsViewProperties.getViewBBox();
+						if (bbox1.equals(bbox2))
+							return true;
+					}
+				}
+			}
+			return false;
+		}
+		private function savePreviousData(): void
+		{
+			m_previousWmsViewPropertiesTime = getTimer();
+			m_previousWmsViewProperties = m_wmsViewProperties;
 		}
 
 		/**
@@ -268,7 +305,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 
 			}
 		}
-		
+
 		private function checkIfRequestIsAlreadyInDelayQueue(wmsViewProperties: WMSViewProperties): Boolean
 		{
 			if (_delayedRequestArray.length > 0)
@@ -297,9 +334,11 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 
 		private function startLoadingOnNextFrame(event: Event): void
 		{
+			trace("startLoadingOnNextFrame");
 			m_layer.removeEventListener(Event.ENTER_FRAME, startLoadingOnNextFrame);
 			if (_delayedRequestArray)
 			{
+				trace("startLoadingOnNextFrame: " + _delayedRequestArray.length);
 				while (_delayedRequestArray.length > 0)
 				{
 					var cachedObject: Object = _delayedRequestArray.shift();
@@ -530,10 +569,10 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 						if ((associatedData.errorResult as ByteArray).length == 0)
 							bZeroBytesCheck = true;
 					}
-					
+
 					if (!bZeroBytesCheck)
 					{
-						
+
 						var xml: XML = associatedData.errorResult;
 						if (xml.localName() == "ServiceExceptionReport")
 						{
@@ -547,10 +586,10 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 									var timeString: String = arr[1];
 									var dimension: String = arr[3];
 									m_layer.getCache().addCacheNoDataItem(wmsViewProperties);
-	
+
 									ExceptionUtils.logError(Log.getLogger("WMS"), associatedData.errorResult,
 										"Failed to apply value '" + (m_layer.configuration as IWMSLayerConfiguration).layerNames.join(",") + "'");
-	
+
 									notifyLoadingFinishedNoSynchronizationData(event.associatedData);
 									errorStateSet = true;
 								}
@@ -560,7 +599,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 						Log.getLogger("MSBaseLoader").error("errorResult has 0 bytes ("+event.request.url+")");
 						trace("MSBaseLoader errorResult has 0 bytes");
 					}
-					
+
 					if (!errorStateSet)
 						notifyLoadingFinishedWithErrors(event.associatedData);
 
