@@ -236,8 +236,13 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				{
 					trace("there is _delayedRequestObject still, which was not executed yet");
 				}
-				_delayedRequestArray.push({request: request, wmsViewProperties: wmsViewProperties, wmsCache: wmsCache, imagePart: imagePart, jobName: jobName});
-				m_layer.addEventListener(Event.ENTER_FRAME, startLoadingOnNextFrame);
+				if (!checkIfRequestIsAlreadyInDelayQueue(wmsViewProperties))
+				{
+					_delayedRequestArray.push({request: request, wmsViewProperties: wmsViewProperties, wmsCache: wmsCache, imagePart: imagePart, jobName: jobName});
+					m_layer.addEventListener(Event.ENTER_FRAME, startLoadingOnNextFrame);
+				} else {
+					trace("MSBaseLOader: Request already waits to be loaded, do not do nothing");
+				}
 
 			}
 			else
@@ -262,6 +267,19 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				m_layer.addEventListener(Event.ENTER_FRAME, dispatchLoadingFinishedFromCacheOnNextFrame);
 
 			}
+		}
+		
+		private function checkIfRequestIsAlreadyInDelayQueue(wmsViewProperties: WMSViewProperties): Boolean
+		{
+			if (_delayedRequestArray.length > 0)
+			{
+				for each (var obj: Object in _delayedRequestArray)
+				{
+					if (wmsViewProperties.equals(obj.wmsViewProperties))
+						return true;
+				}
+			}
+			return false;
 		}
 
 		private function dispatchLoadingFinishedFromCacheOnNextFrame(event: Event): void
