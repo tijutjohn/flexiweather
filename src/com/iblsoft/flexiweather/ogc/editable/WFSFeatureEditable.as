@@ -557,7 +557,7 @@ package com.iblsoft.flexiweather.ogc.editable
 
 		protected function editableSpriteVisible(bool: Boolean): void
 		{
-			trace("WFSFeatureEditable editableSpriteVisible: " + bool);
+//			trace("WFSFeatureEditable editableSpriteVisible: " + bool);
 			m_editableSprite.visible = bool;
 			if (justSelectable)
 				m_editableSprite.visible = false;
