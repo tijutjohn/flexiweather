@@ -14,7 +14,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.utils.AnnotationBox;
-	
+
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
@@ -31,7 +31,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 			}
 			return null;
 		}
-		
+
 		override public function get getAnticollisionObject(): DisplayObject
 		{
 			return annotation;
@@ -40,126 +40,126 @@ package com.iblsoft.flexiweather.ogc.editable.features
 		{
 			return sprite;
 		}
-		
+
 		public var type: String;
 		public var label: String;
 //		public var intensity: String;
 		public var speed: int;
 		public var pressure: int;
-		
+
 		private var ms_actIconLoaded: String = '';
 		private var m_iconBitmap: Bitmap = new Bitmap();
-		
+
 		public function WFSFeatureEditableStorm(s_namespace:String, s_typeName:String, s_featureId:String)
 		{
 			super(s_namespace, s_typeName, s_featureId);
-			
+
 			mb_isSinglePointFeature = true;
 			mb_isIconFeature = true;
 		}
-	
+
 		public override function cleanup(): void
 		{
 			if (master && master.container && master.container.labelLayout)
 			{
 				master.container.labelLayout.removeObject(this);
-				
+
 				var stormAnnotation: StormAnnotation;
 				var reflection: FeatureDataReflection;
 				var displaySprite: WFSFeatureEditableSprite;
-				
+
 				var reflectionIDs: Array = m_featureData.reflectionsIDs;
-				
+
 				for (var i: int = 0; i < totalReflections; i++)
 				{
 					var reflectionDelta: int = reflectionIDs[i];
-					
+
 					reflection = m_featureData.getReflectionAt(reflectionDelta);
 					stormAnnotation = getAnnotationForReflectionAt(reflectionDelta) as StormAnnotation;
 					displaySprite = getDisplaySpriteForReflectionAt(reflectionDelta);
-					
+
 					master.container.labelLayout.removeObject(displaySprite);
 					master.container.labelLayout.removeObject(stormAnnotation);
 				}
 			}
-			
+
 			super.cleanup();
 		}
-		
+
 		private var _spritesAddedToLabelLayout: Boolean;
-		
+
 		override public function update(changeFlag: FeatureUpdateContext): void
 		{
 			super.update(changeFlag);
 			graphics.clear();
-			
+
 			var nIcon: String = resolveIconName();
-		
+
 			// http://wms.iblsoft.com/ria/helpers/gpaint-macro/render/SIGWX/tropical_storm?width=24&height=24
 			if (nIcon != ms_actIconLoaded){
 				ms_actIconLoaded = nIcon;
 				WFSIconLoader.getInstance().getIcon(nIcon, this, onIconLoaded, 'SIGWX');
 			}
-			
-		}	
-		
+
+		}
+
 		override public function getDisplaySpriteForReflection(id: int): WFSFeatureEditableSprite
 		{
 			return new StormSprite(this);
 		}
-		
+
 		override public function createAnnotation(): AnnotationBox
 		{
 			return new StormAnnotation(0);
 		}
-		
-		
-		
-		
+
+
+
+
 		/**
-		 * 
+		 *
 		 */
 		private function onIconLoaded(mBitmap: Bitmap): void
 		{
 			if (mBitmap)
 			{
 				m_loadedIconBitmapData = mBitmap.bitmapData;
-				
+
 				var stormSprite: StormSprite;
 				var reflection: FeatureDataReflection;
 				var displaySprite: WFSFeatureEditableSprite;
-				
+
 				//create sprites for reflections
-				
+
 				var reflectionIDs: Array = m_featureData.reflectionsIDs;
-				
+
 				for (var i: int = 0; i < totalReflections; i++)
 				{
 					var reflectionDelta: int = reflectionIDs[i];
-					
+
 					reflection = m_featureData.getReflectionAt(reflectionDelta);
-					
+
 					displaySprite = getDisplaySpriteForReflectionAt(reflectionDelta);
 					stormSprite = displaySprite as StormSprite;
-					
+
 					var pt: Point = Point(reflection.editablePoints[0]);
-					
+
 					stormSprite.points = [pt];
 					stormSprite.setBitmap(m_loadedIconBitmapData, pt);
-					
+
 				}
 				if (pt)
 				{
 					update(FeatureUpdateContext.fullUpdate());
 					master.container.labelLayout.update();
 				}
-				
-				
+
+
 			}
 		}
-		
+
 		/**
-		 * 
+		 *
 		 */
 		private function resolveIconName(): String
 		{
@@ -186,25 +186,25 @@ package com.iblsoft.flexiweather.ogc.editable.features
 						retIconName = 'tropical_storm_south_hemisphere';
 					else
 						retIconName = 'tropical_storm';
-				
+
 					break;
-				
+
 				case StormAnnotation.TYPE_TYPHOON:
-					
+
 					if (isSouthHemisphere)
 						retIconName = 'hurricane_typhoon_south_hemisphere';
 					else
 						retIconName = 'hurricane_typhoon';
 					break;
-					
+
 				case StormAnnotation.TYPE_DUST_SAND_STORM:
 					retIconName = 'sandstorm';
 					break;
-			} 
-			
+			}
+
 			return(retIconName);
 		}
-		
+
 		override public function toInsertGML(xmlInsert: XML): void
 		{
 			var gml: Namespace = new Namespace("http://www.opengis.net/gml");
@@ -227,7 +227,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 			type = gml.ns::type[0];
 			label = gml.ns::phenomenonName[0];
 		}
-		
+
 		public function getType(): String
 		{
 			return(type);
@@ -252,19 +252,19 @@ import flash.display.BitmapData;
 import flash.display.Sprite;
 import flash.geom.Point;
 
-class StormSprite extends WFSFeatureEditableSpriteWithAnnotation implements IWFSIconSprite 
+class StormSprite extends WFSFeatureEditableSpriteWithAnnotation implements IWFSIconSprite
 {
 
 	private var mn_iconsWidth: Number = 24;
 	private var m_iconBitmap: Bitmap = new Bitmap();
 	private var m_iconBitmapOrig: Bitmap = new Bitmap();
-	
+
 	override public function set visible(value:Boolean):void
 	{
 		if (super.visible != value)
 		{
 			super.visible = value;
-			
+
 			if (!value)
 			{
 				trace("StormSprite hiding");
@@ -277,26 +277,26 @@ class StormSprite extends WFSFeatureEditableSpriteWithAnnotation implements IWFS
 			}
 		}
 	}
-	
+
 	public function StormSprite(feature: WFSFeatureEditable)
 	{
 		super(feature)
-			
+
 		var baseBitmapData: BitmapData = new BitmapData(mn_iconsWidth, mn_iconsWidth, true, 0xFFFFFF);
 		m_iconBitmap.bitmapData = baseBitmapData;
-		
+
 		addChild(m_iconBitmap);
 
 	}
-	
+
 	public function setBitmap(nBitmapData: BitmapData, pt: Point, blackColor: uint = 0): void
 	{
-		
+
 		var nBitmapData: BitmapData = nBitmapData.clone();
 		m_iconBitmapOrig = new Bitmap(nBitmapData.clone());
-		
+
 		m_iconBitmap.bitmapData = nBitmapData;
-		
+
 		if (pt)
 		{
 			m_iconBitmap.x = pt.x - nBitmapData.width / 2;
@@ -305,7 +305,7 @@ class StormSprite extends WFSFeatureEditableSpriteWithAnnotation implements IWFS
 
 
 	}
-	
+
 	override public function getLineSegmentApproximationOfBounds(): Array
 	{
 		var a: Array = [];
@@ -313,36 +313,36 @@ class StormSprite extends WFSFeatureEditableSpriteWithAnnotation implements IWFS
 		{
 			var iconX: int = m_iconBitmap.x + m_iconBitmap.width / 2;
 			var iconY: int = m_iconBitmap.y + m_iconBitmap.height / 2;
-			
+
 			a.push(new LineSegment(iconX, iconY, iconX+0.5, iconY));
 		} else
 			a.push(new LineSegment(x, y, x+0.5, y+0.5));
-		
+
 		return a;
 	}
-	
+
 	override public function update(feature: WFSFeatureEditableWithBaseTimeAndValidityAndAnnotation, annotation: AnnotationBox, blackColor: uint, labelLayout: AnticollisionLayout, pt: Point): void
 	{
 		var storm: WFSFeatureEditableStorm = feature as WFSFeatureEditableStorm;
-		
+
 		this.annotation = annotation;
-		
+
 		if (m_iconBitmap)
 		{
 			m_iconBitmap.x = pt.x - m_iconBitmap.width / 2;
 			m_iconBitmap.y = pt.y - m_iconBitmap.height / 2;
 			ColorUtils.updateSymbolColor(blackColor, m_iconBitmap, m_iconBitmapOrig);
-		}		
-		
+		}
+
 		annotation.color = blackColor;
 		(annotation as StormAnnotation).stormData = storm;
 		annotation.update();
 //		annotation.visible = true;
 		annotation.x = m_iconBitmap.x + m_iconBitmap.width / 2 - annotation.width / 2.0;
 		annotation.y = m_iconBitmap.y - annotation.height - 3;
-		
-		trace("StormSprite update 1: " + annotation.x + " , " + annotation.y + " visible: " + annotation.visible)
-		trace("StormSprite update 2: " + x + " , " + y)
+
+//		trace("StormSprite update 1: " + annotation.x + " , " + annotation.y + " visible: " + annotation.visible)
+//		trace("StormSprite update 2: " + x + " , " + y)
 		labelLayout.updateObjectReferenceLocation(annotation);
 	}
 }
