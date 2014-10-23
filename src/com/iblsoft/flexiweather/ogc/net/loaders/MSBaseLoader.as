@@ -20,7 +20,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
-
+	
 	import flash.display.Bitmap;
 	import flash.display.DisplayObject;
 	import flash.events.Event;
@@ -29,7 +29,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
 	import flash.utils.getTimer;
-
+	
 	import mx.collections.ArrayCollection;
 	import mx.events.DynamicEvent;
 	import mx.logging.Log;
@@ -108,7 +108,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 		{
 			m_wmsViewProperties = viewProperties as WMSViewProperties;
 
-			if (isSameData())
+			if (isSameData(m_wmsViewProperties, m_previousWmsViewProperties))
 			{
 				trace("Same WMS Data request in short time, does not load anything");
 				return;
@@ -148,19 +148,19 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 			savePreviousData();
 		}
 
-		private function isSameData(): Boolean
+		private function isSameData(wmsViewProperties: WMSViewProperties, previousWmsViewProperties: WMSViewProperties): Boolean
 		{
-			if (m_previousWmsViewProperties)
+			if (previousWmsViewProperties)
 			{
 				var timeNow: Number = getTimer();
 				var timeDiff: Number = timeNow - m_previousWmsViewPropertiesTime;
 				if (timeDiff < 500)
 				{
 					//will check dimensions
-					if (m_previousWmsViewProperties.equals(m_wmsViewProperties))
+					if (previousWmsViewProperties.equals(wmsViewProperties))
 					{
-						var bbox1: BBox = m_previousWmsViewProperties.getViewBBox();
-						var bbox2: BBox = m_wmsViewProperties.getViewBBox();
+						var bbox1: BBox = previousWmsViewProperties.getViewBBox();
+						var bbox2: BBox = wmsViewProperties.getViewBBox();
 						if (bbox1.equals(bbox2))
 							return true;
 					}
@@ -312,7 +312,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 			{
 				for each (var obj: Object in _delayedRequestArray)
 				{
-					if (wmsViewProperties.equals(obj.wmsViewProperties))
+					if (isSameData(obj.wmsViewProperties, wmsViewProperties))
 						return true;
 				}
 			}
