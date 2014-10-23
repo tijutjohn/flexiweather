@@ -82,6 +82,23 @@ package com.iblsoft.flexiweather.ogc.editable.data.jetstream
 			_invalidated = true;
 		}
 
+		/**
+		 * This functionality needs to be down for moving windbarbs through dateline
+		 */
+		private var _needToCaptureMouse: Boolean
+		public function get needToCaptureMouse(): Boolean
+		{
+			return _needToCaptureMouse;
+		}
+		public function captureMouse(): void
+		{
+			_needToCaptureMouse = true;
+		}
+		public function captureMouseDone(): void
+		{
+			_needToCaptureMouse = false;
+		}
+
 		override public function toString(): String
 		{
 			return "WindBard: " + point + " c: " + _coordinate + " invalidated: " + _invalidated; // ["+below+"/"+above+"]";

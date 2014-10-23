@@ -58,6 +58,10 @@ package com.iblsoft.flexiweather.ogc
 		{
 			return (_flag & PARTS_CHANGED) == PARTS_CHANGED;
 		}
+		public function get windbarbsChanged(): Boolean
+		{
+			return (_flag & WINDBARB_CHANGE) == WINDBARB_CHANGE;
+		}
 
 		public function FeatureUpdateContext(statusFlag: uint)
 		{

@@ -57,7 +57,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			if (!master)
 				return;
 
-			trace("\n\n WFSFeatureEditableCurveWithBaseTimeAndValidity update");
+//			trace("\n\n WFSFeatureEditableCurveWithBaseTimeAndValidity update");
 			super.update(changeFlag);
 
 			clearGraphics();
