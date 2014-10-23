@@ -20,10 +20,10 @@ package com.iblsoft.flexiweather.ogc.editable
 
 		override public function update(changeFlag: FeatureUpdateContext): void
 		{
-			trace("\n WFSFeatureEditableWithBaseTimeAndValidity update");
-			
+//			trace("\n WFSFeatureEditableWithBaseTimeAndValidity update");
+
 			super.update(changeFlag);
-			
+
 			var a_points: Array = getPoints();
 			if (master)
 			{
@@ -31,14 +31,14 @@ package com.iblsoft.flexiweather.ogc.editable
 					m_featureData = createFeatureData();
 				else
 					m_featureData.clear();
-				
+
 				master.container.drawGeoPolyLine(null, a_points, DrawMode.PLAIN, false, true, m_featureData);
 			}
-			
+
 			//draw editable points (user can drag them)
 			updateEditablePoints(changeFlag);
 		}
-		
+
 		override public function toInsertGML(xmlInsert: XML): void
 		{
 			addInsertGMLProperty(xmlInsert, null, "baseTime", ISO8601Parser.dateToString(m_baseTime));

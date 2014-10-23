@@ -20,7 +20,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
-	
+
 	import flash.display.Bitmap;
 	import flash.display.DisplayObject;
 	import flash.events.Event;
@@ -29,7 +29,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
 	import flash.utils.getTimer;
-	
+
 	import mx.collections.ArrayCollection;
 	import mx.events.DynamicEvent;
 	import mx.logging.Log;
@@ -334,11 +334,11 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 
 		private function startLoadingOnNextFrame(event: Event): void
 		{
-			trace("startLoadingOnNextFrame");
+//			trace("startLoadingOnNextFrame");
 			m_layer.removeEventListener(Event.ENTER_FRAME, startLoadingOnNextFrame);
 			if (_delayedRequestArray)
 			{
-				trace("startLoadingOnNextFrame: " + _delayedRequestArray.length);
+//				trace("startLoadingOnNextFrame: " + _delayedRequestArray.length);
 				while (_delayedRequestArray.length > 0)
 				{
 					var cachedObject: Object = _delayedRequestArray.shift();

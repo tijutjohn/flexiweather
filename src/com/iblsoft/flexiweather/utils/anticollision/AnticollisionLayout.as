@@ -19,7 +19,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 	import com.iblsoft.flexiweather.utils.geometry.LineSegment;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
-	
+
 	import flash.display.BitmapData;
 	import flash.display.BlendMode;
 	import flash.display.DisplayObject;
@@ -33,7 +33,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 	import flash.geom.Rectangle;
 	import flash.utils.Timer;
 	import flash.utils.getTimer;
-	
+
 	import mx.collections.ArrayCollection;
 	import mx.core.UIComponent;
 	import mx.utils.object_proxy;
@@ -81,7 +81,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 		{
 			return ma_layoutObjects;
 		}
-		
+
 		override public function set visible(value:Boolean):void
 		{
 			if (!m_suspendAnticollisionProcessing)
@@ -100,24 +100,24 @@ package com.iblsoft.flexiweather.utils.anticollision
 //						debug("SHOW anticollision");
 //					}
 					super.visible = value;
-//					debug(this + " visible = " + value);
+					debug(this + " visible = " + value);
 					onVisibilityChanged();
 //				} else {
 //					debug(this + " same visibility: " + value);
 //				}
 			}
 		}
-		
+
 		private var _parentContainer: InteractiveWidget;
-		
+
 		public static var uid: int = 0;
 		public var id: int;
-		
+
 		public function AnticollisionLayout(layoutName: String, parent: DisplayObject)
 		{
 			id = uid++;
 			super();
-		
+
 			_parentContainer = parent as InteractiveWidget;
 			if (parent && parent is InteractiveWidget)
 			{
@@ -144,9 +144,10 @@ package com.iblsoft.flexiweather.utils.anticollision
 				m_placementBitmap = null;
 			}
 		}
-		
+
 		private function onVisibilityChanged(): void
 		{
+			debug("onVisibilityChanged: " + visible);
 			var currObjects: Array = ma_layoutObjects;
 			var lo: AnticollisionLayoutObject;
 			for each (lo in currObjects)
@@ -154,7 +155,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 				lo.visible = visible;
 			}
 		}
-		
+
 		private var _areaChangedScheduled: Boolean;
 		private var _areaChangedScheduledBBox: BBox;
 
@@ -318,7 +319,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 				return null;
 			return lo.referenceLocation;
 		}
-		
+
 		public function moveObjectIntoAnticollisionLayout(layout: AnticollisionLayout): void
 		{
 			if (layout)
@@ -334,7 +335,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 					} else {
 						layout.addObject(lo.object, lo.layer, lo.objectsToAnchor, lo.reflectionID, lo.displacementMode, lo.managedChild);
 					}
-					
+
 				}
 				ma_layoutObjects.splice(0, ma_layoutObjects.length);
 				//debug("ma_layoutObjects: " + ma_layoutObjects.length);
@@ -382,7 +383,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 				mi_lastUpdate = getTimer();
 				var i_roundedWidth: uint = Math.round(m_boundaryRect.width + 0.9999999999);
 				var i_roundedHeight: uint = Math.round(m_boundaryRect.height + 0.9999999999);
-				// ensure we have a white 
+				// ensure we have a white
 				if (m_placementBitmap == null || m_placementBitmap.width != i_roundedWidth || m_placementBitmap.height != i_roundedHeight)
 					m_placementBitmap = new BitmapData(i_roundedWidth, i_roundedHeight, true, 0x00FFFFFF);
 				else
@@ -396,14 +397,14 @@ package com.iblsoft.flexiweather.utils.anticollision
 				for each (lo in currObjects)
 				{
 					pass++;
-					if (lo.manageVisibilityWithAnchors) 
+					if (lo.manageVisibilityWithAnchors)
 					{
 						var newVisibility: Boolean;
 						if (lo.objectsToAnchor.length > 0)
 						{
 							newVisibility = (lo.objectsToAnchor[0] as DisplayObject).visible;
 						}
-						
+
 						if (lo.layer)
 						{
 							newVisibility = newVisibility && lo.layer.visible;
@@ -518,7 +519,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 										f_dx = int(Math.round(Math.cos(f_angle) * i_disp10));
 										f_dy = int(Math.round(Math.sin(f_angle) * i_disp10));
 										var boundsDisplaced: Rectangle = new Rectangle(bounds.x + f_dx, bounds.y + f_dy, bounds.width, bounds.height);
-										// quick check if resulting boundary is within the m_boundaryRect 
+										// quick check if resulting boundary is within the m_boundaryRect
 										if (checkObjectPlacement(lo, boundsDisplaced))
 										{
 											b_foundPlace = true;
@@ -562,7 +563,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 				}
 				currTime = ProfilerUtils.startProfileTimer();
 				// now we can assume that all objects are laid out
-				// draw anchors between 
+				// draw anchors between
 				var g: Graphics = m_anchorsLayer.graphics;
 				g.clear();
 				for each (lo in currObjects)
@@ -650,7 +651,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 		{
 			if (object == null)
 				return false;
-			
+
 			if (object is KMLLabel)
 			{
 				//if kml feature is not visible, label have to be invisible as well
@@ -659,13 +660,13 @@ package com.iblsoft.flexiweather.utils.anticollision
 				if (!kmlFeature.visible)
 					return false;
 			}
-			
+
 			// check if at least part of object is within m_boundaryRect
 			var bounds: Rectangle = object.getBounds(this);
-			
+
 			if (bounds.width == 0 && bounds.height == 0)
 				return true;
-				
+
 			if (bounds.right < m_boundaryRect.left)
 				return false;
 			if (bounds.left > m_boundaryRect.right)
@@ -851,7 +852,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 
 		protected function debug(txt: String): void
 		{
-//			trace("AnticollisionLayout: " + txt);
+			trace("AnticollisionLayout: " + txt);
 			if (debugConsole)
 				debugConsole.print("AnticollisionLayout: " + txt, 'Info', 'AnticollisionLayout');
 		}
