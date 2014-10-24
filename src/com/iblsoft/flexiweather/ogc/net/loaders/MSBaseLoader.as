@@ -18,6 +18,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.WMSViewProperties;
 	import com.iblsoft.flexiweather.ogc.events.MSBaseLoaderEvent;
 	import com.iblsoft.flexiweather.proj.Projection;
+	import com.iblsoft.flexiweather.utils.DebugUtils;
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 
@@ -108,6 +109,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 		{
 			m_wmsViewProperties = viewProperties as WMSViewProperties;
 
+//			trace("\nupdateWMSData: " + m_wmsViewProperties.toString());
 			if (isSameData(m_wmsViewProperties, m_previousWmsViewProperties))
 			{
 				trace("Same WMS Data request in short time, does not load anything");
@@ -148,13 +150,17 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 			savePreviousData();
 		}
 
+		private function isSameImagePart(imagePart: ImagePart, previousImagePart: ImagePart): Boolean
+		{
+			return imagePart.areaEquals(previousImagePart);
+		}
 		private function isSameData(wmsViewProperties: WMSViewProperties, previousWmsViewProperties: WMSViewProperties): Boolean
 		{
 			if (previousWmsViewProperties)
 			{
 				var timeNow: Number = getTimer();
 				var timeDiff: Number = timeNow - m_previousWmsViewPropertiesTime;
-				if (timeDiff < 500)
+				if (timeDiff < 1000)
 				{
 					//will check dimensions
 					if (previousWmsViewProperties.equals(wmsViewProperties))
@@ -171,7 +177,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 		private function savePreviousData(): void
 		{
 			m_previousWmsViewPropertiesTime = getTimer();
-			m_previousWmsViewProperties = m_wmsViewProperties;
+			m_previousWmsViewProperties = m_wmsViewProperties.clone() as WMSViewProperties;
 		}
 
 		/**
@@ -273,13 +279,13 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				{
 					trace("there is _delayedRequestObject still, which was not executed yet");
 				}
-				if (!checkIfRequestIsAlreadyInDelayQueue(wmsViewProperties))
+				if (!checkIfRequestIsAlreadyInDelayQueue(wmsViewProperties, imagePart))
 				{
 					_delayedRequestArray.push({request: request, wmsViewProperties: wmsViewProperties, wmsCache: wmsCache, imagePart: imagePart, jobName: jobName});
-					m_layer.addEventListener(Event.ENTER_FRAME, startLoadingOnNextFrame);
 				} else {
 					trace("MSBaseLOader: Request already waits to be loaded, do not do nothing");
 				}
+				m_layer.addEventListener(Event.ENTER_FRAME, startLoadingOnNextFrame);
 
 			}
 			else
@@ -306,13 +312,13 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 			}
 		}
 
-		private function checkIfRequestIsAlreadyInDelayQueue(wmsViewProperties: WMSViewProperties): Boolean
+		private function checkIfRequestIsAlreadyInDelayQueue(wmsViewProperties: WMSViewProperties, imagePart: ImagePart): Boolean
 		{
 			if (_delayedRequestArray.length > 0)
 			{
 				for each (var obj: Object in _delayedRequestArray)
 				{
-					if (isSameData(obj.wmsViewProperties, wmsViewProperties))
+					if (isSameData(obj.wmsViewProperties, wmsViewProperties) && isSameImagePart(obj.imagePart, imagePart))
 						return true;
 				}
 			}
