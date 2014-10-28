@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="1">
+<flexLibProperties includeAllClasses="false" useMultiPlatformConfig="false" version="1">
   <includeClasses>
     <classEntry path="com.iblsoft.flexiweather.events.BackgroundJobEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.GetFeatureInfoEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.InteractiveLayerEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.events.InteractiveLayerMapEvent"/>
+    <classEntry path="com.iblsoft.flexiweather.events.InteractiveLayerProgressEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.WFSCursorManagerEvent"/>
     <classEntry path="com.iblsoft.flexiweather.events.WFSCursorManagerTypes"/>
     <classEntry path="com.iblsoft.flexiweather.events.WFSEvent"/>
@@ -131,6 +133,7 @@
     <classEntry path="com.iblsoft.flexiweather.utils.CurveLineSegmentRenderer"/>
     <classEntry path="com.iblsoft.flexiweather.utils.DateTimeValidator"/>
     <classEntry path="com.iblsoft.flexiweather.utils.DateUtils"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.DebugUtils"/>
     <classEntry path="com.iblsoft.flexiweather.utils.DistanceMarkingCurveRenderer"/>
     <classEntry path="com.iblsoft.flexiweather.utils.Duration"/>
     <classEntry path="com.iblsoft.flexiweather.utils.GraphicsCurveRenderer"/>
@@ -148,6 +151,7 @@
     <classEntry path="com.iblsoft.flexiweather.utils.StorageException"/>
     <classEntry path="com.iblsoft.flexiweather.utils.TimerWithData"/>
     <classEntry path="com.iblsoft.flexiweather.utils.TreeUtils"/>
+    <classEntry path="com.iblsoft.flexiweather.utils.URLUtils"/>
     <classEntry path="com.iblsoft.flexiweather.utils.UniURLLoader"/>
     <classEntry path="com.iblsoft.flexiweather.utils.UniURLLoaderEvent"/>
     <classEntry path="com.iblsoft.flexiweather.utils.UniURLLoaderManager"/>
@@ -168,6 +172,7 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.GlowLabel"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.IConfigurableLayer"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InputDialog"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveDataLayer"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayer"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerClickAction"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.InteractiveLayerClickActionEvent"/>
