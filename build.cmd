@@ -1,2 +1,2 @@
-call ant -DFLEX_HOME="%FLEX_HOME%" main
+call ant main -propertyfile local.properties
 pause
