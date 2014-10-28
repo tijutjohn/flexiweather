@@ -9,6 +9,8 @@ package com.iblsoft.flexiweather.ogc
 		public static var VIEW_BBOX_SIZE_CHANGED: int = 4;
 		public static var PARTS_CHANGED: int = 8;
 		public static var FEATURE_SCALE_CHANGED: int = 16;
+		public static var WINDBARB_CHANGE: int = 32;
+
 		private var _flag: uint;
 
 		public function get anyChange(): Boolean
@@ -55,6 +57,10 @@ package com.iblsoft.flexiweather.ogc
 		public function get partsChanged(): Boolean
 		{
 			return (_flag & PARTS_CHANGED) == PARTS_CHANGED;
+		}
+		public function get windbarbsChanged(): Boolean
+		{
+			return (_flag & WINDBARB_CHANGE) == WINDBARB_CHANGE;
 		}
 
 		public function FeatureUpdateContext(statusFlag: uint)

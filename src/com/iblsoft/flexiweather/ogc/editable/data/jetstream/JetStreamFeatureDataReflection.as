@@ -2,23 +2,23 @@ package com.iblsoft.flexiweather.ogc.editable.data.jetstream
 {
 	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
 	import com.iblsoft.flexiweather.ogc.editable.features.curves.WFSFeatureEditableJetStreamWindBarb;
-	
+
 	import mx.collections.ArrayCollection;
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
-	
+
 	public class JetStreamFeatureDataReflection extends FeatureDataReflection
 	{
 		private var _moveableWindPoints: Array;
 		private var _editableJetStreamWindbarbs: Array;
 		private var _windbarbs: ArrayCollection;
 		public var jetstreamCurvePoints: Array;
-		
+
 		public function get totalWindPoints(): uint
 		{
 			if (_moveableWindPoints)
 				return _moveableWindPoints.length;
-			
+
 			return 0;
 		}
 		public function get windPoints(): Array
@@ -33,23 +33,23 @@ package com.iblsoft.flexiweather.ogc.editable.data.jetstream
 		{
 			return _windbarbs;
 		}
-		
+
 		public function JetStreamFeatureDataReflection(i_reflectionData:int)
 		{
 			super(i_reflectionData);
-			
+
 			cleanup();
 		}
-		
+
 		public function cleanup(): void
 		{
-			_windbarbs = new ArrayCollection();	
+			_windbarbs = new ArrayCollection();
 			_windbarbs.addEventListener(CollectionEvent.COLLECTION_CHANGE, onWindbarbsChange);
-			
-			_editableJetStreamWindbarbs = [];	
-			_moveableWindPoints = [];	
+
+			_editableJetStreamWindbarbs = [];
+			_moveableWindPoints = [];
 		}
-		
+
 		private function onWindbarbsChange(event: CollectionEvent): void
 		{
 			switch (event.kind)
@@ -59,7 +59,7 @@ package com.iblsoft.flexiweather.ogc.editable.data.jetstream
 					break;
 			}
 		}
-		
+
 		public function removeWindbarbAt(position: int): void
 		{
 			if (windbarbs && windbarbs.length > position)
@@ -69,12 +69,13 @@ package com.iblsoft.flexiweather.ogc.editable.data.jetstream
 			if (_moveableWindPoints && _moveableWindPoints.length > position)
 				_moveableWindPoints.splice(position, 1);
 		}
-		
+
 		public function updateWindbarbAt(windbarb: WindBarb, position: int): void
 		{
-			if (_windbarbs.length == position)
+			if (position >= _windbarbs.length)
 			{
-				addWindbarbAt(windbarb, position);
+//				addWindbarbAt(windbarb, position);
+				addWindbarb(windbarb);
 			} else {
 				_windbarbs.setItemAt(windbarb, position);
 			}
@@ -87,7 +88,7 @@ package com.iblsoft.flexiweather.ogc.editable.data.jetstream
 		{
 			_windbarbs.addItem(windbarb);
 		}
-		
+
 		public function addWindMoveablePoint(mp: MoveableWindPoint, pointer: int, cp: WFSFeatureEditableJetStreamWindBarb): void
 		{
 			_moveableWindPoints[pointer] = mp;

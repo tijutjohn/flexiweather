@@ -15,22 +15,22 @@ package com.iblsoft.flexiweather.ogc.editable.features
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
 	import com.iblsoft.flexiweather.utils.AnnotationBox;
 	import com.iblsoft.flexiweather.utils.ISO8601Parser;
-	
+
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
 	import flash.geom.ColorTransform;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
-	
+
 	public class WFSFeatureEditableRadiation extends WFSFeatureEditableWithBaseTimeAndValidityAndAnnotation implements IWFSFeatureWithAnnotation, IWFSFeatureWithReflection
 	{
 		private var ms_actIconLoaded: String = '';
-		
+
 		public var label: String;
 		public var type: String;
 		public var date: Date;
-		
+
 		public function get sprite(): RadiationSprite
 		{
 			if (totalReflections > 0)
@@ -41,7 +41,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 			}
 			return null;
 		}
-		
+
 		override public function get getAnticollisionObject(): DisplayObject
 		{
 			return annotation;
@@ -50,7 +50,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 		{
 			return sprite;
 		}
-		
+
 		public function WFSFeatureEditableRadiation(s_namespace:String, s_typeName:String, s_featureId:String)
 		{
 			super(s_namespace, s_typeName, s_featureId);
@@ -59,106 +59,106 @@ package com.iblsoft.flexiweather.ogc.editable.features
 		}
 
 		private var _spritesAddedToLabelLayout: Boolean;
-		
+
 		public override function cleanup(): void
 		{
 			if (master && master.container && master.container.labelLayout)
 			{
 				master.container.labelLayout.removeObject(this);
-				
+
 				var radiationSprite: RadiationSprite;
 				var reflection: FeatureDataReflection;
-				
+
 				//create sprites for reflections
-				
+
 				var blackColor: uint = getCurrentColor(0x000000);
 				var reflectionIDs: Array = m_featureData.reflectionsIDs;
-				
+
 				for (var i: int = 0; i < totalReflections; i++)
 				{
 					var reflectionDelta: int = reflectionIDs[i];
-					
+
 					reflection = m_featureData.getReflectionAt(reflectionDelta);
 					radiationSprite = getDisplaySpriteForReflectionAt(reflectionDelta) as RadiationSprite;
-					
+
 					removeFromLabelLayout(radiationSprite.annotation, radiationSprite, master.container.labelLayout);
 				}
 			}
-			
+
 			ms_actIconLoaded = '';
-			
+
 			super.cleanup();
 		}
-		
+
 		override public function update(changeFlag: FeatureUpdateContext): void
 		{
 			super.update(changeFlag);
-			
-			
-			
+
+
+
 			var s_iconName: String = 'radioactive_materials';
-			
+
 			// http://wms.iblsoft.com/ria/helpers/gpaint-macro/render/SIGWX/tropical_storm?width=24&height=24
 			if (s_iconName != ms_actIconLoaded){
 				ms_actIconLoaded = s_iconName;
 				WFSIconLoader.getInstance().getIcon(s_iconName, this, onIconLoaded, 'SIGWX');
 			}
-		}	
-		
+		}
+
 		override public function getDisplaySpriteForReflection(id: int): WFSFeatureEditableSprite
 		{
 			return new RadiationSprite(this);
 		}
-		
+
 		override public function createAnnotation(): AnnotationBox
 		{
 			return new RadiationAnnotation(0);
 		}
-		
+
 		public function onIconLoaded(mBitmap: Bitmap): void
 		{
 			if (mBitmap){
 				m_loadedIconBitmapData = mBitmap.bitmapData.clone();
-				
+
 				//var pt: Point = getPoint(0);
-				
+
 				var radiationSprite: RadiationSprite;
 				var reflection: FeatureDataReflection;
-				
+
 				//create sprites for reflections
-				
+
 				var blackColor: uint = getCurrentColor(0x000000);
 				var reflectionIDs: Array = m_featureData.reflectionsIDs;
-				
+
 				for (var i: int = 0; i < totalReflections; i++)
 				{
 					var reflectionDelta: int = reflectionIDs[i];
-					
+
 					reflection = m_featureData.getReflectionAt(reflectionDelta);
 					radiationSprite = getDisplaySpriteForReflectionAt(reflectionDelta)  as RadiationSprite;
-					
+
 					var pt: Point = Point(reflection.editablePoints[0]);
 					if (pt)
 					{
 						radiationSprite.setBitmap(m_loadedIconBitmapData, pt);
 					}
 				}
-				
+
 				if (pt)
 				{
 					update(FeatureUpdateContext.fullUpdate());
 					master.container.labelLayout.update();
 				}
-				
-				
+
+
 			}
 		}
-		
+
 		override public function toInsertGML(xmlInsert: XML): void
 		{
 			date.seconds = 0;
 			date.milliseconds = 0;
-			
+
 			var gml: Namespace = new Namespace("http://www.opengis.net/gml");
 			super.toInsertGML(xmlInsert);
 			addInsertGMLProperty(xmlInsert, null, "type", type);
@@ -171,7 +171,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 		{
 			date.seconds = 0;
 			date.milliseconds = 0;
-			
+
 			super.toUpdateGML(xmlUpdate);
 			addUpdateGMLProperty(xmlUpdate, null, "type", type);
 			addUpdateGMLProperty(xmlUpdate, null, "phenomenonName", label);
@@ -186,7 +186,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 			label = gml.ns::phenomenonName[0];
 			date = ISO8601Parser.stringToDate(gml.ns::eventTime[0]);
 		}
-		
+
 		public function getType(): String
 		{
 			return type;
@@ -217,10 +217,10 @@ import mx.utils.ColorUtil;
 
 class RadiationSprite extends WFSFeatureEditableSpriteWithAnnotation implements IWFSIconSprite
 {
-	
+
 	private var m_iconBitmap: Bitmap = new Bitmap();
 	private var m_originalSymbolBitmap: Bitmap;
-	
+
 	private var mf_iconsWidth: Number = 24;
 
 	override public function set visible(value:Boolean):void
@@ -248,79 +248,79 @@ class RadiationSprite extends WFSFeatureEditableSpriteWithAnnotation implements 
 	public function RadiationSprite(feature: WFSFeatureEditable)
 	{
 		super(feature);
-		
-		
+
+
 		var baseBitmapData: BitmapData = new BitmapData(mf_iconsWidth, mf_iconsWidth, true, 0xFFFFFF);
 		m_iconBitmap.bitmapData = baseBitmapData;
 		addChild(m_iconBitmap);
 	}
-	
+
 	public function setBitmap(nBitmapData: BitmapData, pt: Point, blackColor: uint = 0): void
 	{
 		m_iconBitmap.bitmapData = nBitmapData;
 		m_originalSymbolBitmap = new Bitmap(nBitmapData.clone());
-		
+
 		if (pt)
 		{
 			m_iconBitmap.x = pt.x - 12;
 			m_iconBitmap.y = pt.y - 12;
 		}
 	}
-	
+
 	override public function getLineSegmentApproximationOfBounds(): Array
 	{
 		var a: Array = [];
-		
+
 		if (m_iconBitmap)
 		{
 			var iconX: int = m_iconBitmap.x + m_iconBitmap.width / 2;
 			var iconY: int = m_iconBitmap.y + m_iconBitmap.height / 2;
-			
+
 			a.push(new LineSegment(iconX, iconY, iconX+0.5, iconY));
 		} else
 			a.push(new LineSegment(x, y, x+0.5, y+0.5));
-		
+
 		return a;
 	}
-	
+
 //	public function removeFromLabelLayout(labelLayout: AnticollisionLayout): void
 //	{
 //		labelLayout.removeObject(this);
 //		labelLayout.removeObject(radiationAnnotation);
 //	}
-//	
+//
 //	public function addToLabelLayout(radiation: WFSFeatureEditableRadiation, layer: InteractiveLayer, labelLayout: AnticollisionLayout, i_reflection: uint): void
 //	{
 //		labelLayout.addObstacle(this, layer);
 //		labelLayout.addObject(radiationAnnotation,  layer,  [this], i_reflection);
 //	}
-	
+
 	override public function update(feature: WFSFeatureEditableWithBaseTimeAndValidityAndAnnotation, annotation: AnnotationBox, blackColor: uint, labelLayout: AnticollisionLayout, pt: Point): void
 	{
 		var radiation: WFSFeatureEditableRadiation = feature as WFSFeatureEditableRadiation;
-		
+
 		this.annotation = annotation;
-		
+
 		graphics.clear();
-		
+
 		if (m_iconBitmap)
 		{
 			m_iconBitmap.x = pt.x - m_iconBitmap.width / 2;
 			m_iconBitmap.y = pt.y - m_iconBitmap.height / 2;
 			ColorUtils.updateSymbolColor(blackColor, m_iconBitmap, m_originalSymbolBitmap);
 		}
-		
+
 		annotation.color = blackColor;
 		(annotation as RadiationAnnotation).radiationData = radiation;
 		annotation.update();
 //		annotation.visible = true;
 		annotation.x = pt.x - annotation.width / 2.0;
 		annotation.y = pt.y - m_iconBitmap.height/2 - annotation.height - 3;
-		
-		trace("RadiationSprite update 1: " + annotation.x + " , " + annotation.y + " visible: " + annotation.visible)
-		trace("RadiationSprite update 2: " + x + " , " + y)
-		
+
+//		trace("RadiationSprite update 1: " + annotation.x + " , " + annotation.y + " visible: " + annotation.visible)
+//		trace("RadiationSprite update 2: " + x + " , " + y)
+
 		labelLayout.updateObjectReferenceLocation(annotation);
-		
+
 	}
 }

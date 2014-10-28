@@ -2,6 +2,11 @@ package com.iblsoft.flexiweather.ogc.editable.data
 {
 	import com.iblsoft.flexiweather.events.WFSCursorManagerEvent;
 	import com.iblsoft.flexiweather.events.WFSCursorManagerTypes;
+	import com.iblsoft.flexiweather.ogc.editable.IClosableCurve;
+	import com.iblsoft.flexiweather.ogc.editable.IEditableItemManager;
+	import com.iblsoft.flexiweather.ogc.editable.IHighlightableItem;
+	import com.iblsoft.flexiweather.ogc.editable.IMouseEditableItem;
+	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
 	import com.iblsoft.flexiweather.ogc.events.MoveablePointEvent;
 
 	import flash.display.Sprite;
@@ -10,11 +15,6 @@ package com.iblsoft.flexiweather.ogc.editable.data
 	import flash.geom.Point;
 	import flash.system.Capabilities;
 	import flash.system.TouchscreenType;
-	import com.iblsoft.flexiweather.ogc.editable.IClosableCurve;
-	import com.iblsoft.flexiweather.ogc.editable.IEditableItemManager;
-	import com.iblsoft.flexiweather.ogc.editable.IHighlightableItem;
-	import com.iblsoft.flexiweather.ogc.editable.IMouseEditableItem;
-	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
 
 	public class MoveablePoint extends Sprite implements IMouseEditableItem, IHighlightableItem
 	{
@@ -68,6 +68,11 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		protected var mb_selected: Boolean = false;
 		protected var m_editableItemManager: IEditableItemManager;
 		protected var mb_dragging: Boolean = false;
+
+		public function get isDragging(): Boolean
+		{
+			return mb_dragging;
+		}
 		public var m_pointCursor: int = WFSCursorManagerTypes.CURSOR_ADD_POINT;
 
 		public function MoveablePoint(feature: WFSFeatureEditable, i_pointIndex: uint, i_reflectionDelta: int)
@@ -146,6 +151,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		// IMouseEditableItem implementation
 		public function onMouseMove(pt: Point, event: MouseEvent): Boolean
 		{
+//			trace("MoveablePoint onMouseMove: " + pt + " dragging: " + mb_dragging + " mi_reflectionDelta: " + mi_reflectionDelta);
 			if (!mb_dragging)
 				return false;
 			m_pt = pt;
