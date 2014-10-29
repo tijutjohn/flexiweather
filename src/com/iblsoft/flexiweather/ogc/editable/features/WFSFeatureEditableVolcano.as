@@ -88,34 +88,36 @@ package com.iblsoft.flexiweather.ogc.editable.features
 				if (s_iconName != ms_actIconLoaded){
 					ms_actIconLoaded = s_iconName;
 					WFSIconLoader.getInstance().getIcon(s_iconName, this, onIconLoaded, 'SIGWX', mf_iconsWidth, mf_iconsWidth);
-				}
+				} else {
+					var volcanicAshSprite: VolcanoSprite;
+					var reflection: FeatureDataReflection;
 
+					//create sprites for reflections
 
-				var volcanicAshSprite: VolcanoSprite;
-				var reflection: FeatureDataReflection;
+					var blackColor: uint = getCurrentColor(0x000000);
+					var reflectionIDs: Array = m_featureData.reflectionsIDs;
 
-				//create sprites for reflections
-
-				var blackColor: uint = getCurrentColor(0x000000);
-				var reflectionIDs: Array = m_featureData.reflectionsIDs;
-
-				for (var i: int = 0; i < totalReflections; i++)
-				{
-					var reflectionDelta: int = reflectionIDs[i];
-
-					reflection = m_featureData.getReflectionAt(reflectionDelta);
-
-					var displaySprite: WFSFeatureEditableSprite = getDisplaySpriteForReflectionAt(reflectionDelta);
-					volcanicAshSprite = displaySprite as VolcanoSprite;
-
-					volcanicAshSprite.update(blackColor);
-
-//					var fdpt: FeatureDataPoint = FeatureDataPoint(reflection.editablePoints[0]);
-					var fdpt: Point = Point(reflection.editablePoints[0]);
-					if (fdpt)
+					for (var i: int = 0; i < totalReflections; i++)
 					{
-						volcanicAshSprite.x = fdpt.x;
-						volcanicAshSprite.y = fdpt.y;
+						var reflectionDelta: int = reflectionIDs[i];
+
+						reflection = m_featureData.getReflectionAt(reflectionDelta);
+
+						var displaySprite: WFSFeatureEditableSprite = getDisplaySpriteForReflectionAt(reflectionDelta);
+						volcanicAshSprite = displaySprite as VolcanoSprite;
+
+						volcanicAshSprite.update(blackColor);
+
+	//					var fdpt: FeatureDataPoint = FeatureDataPoint(reflection.editablePoints[0]);
+						var fdpt: Point = Point(reflection.editablePoints[0]);
+						if (fdpt)
+						{
+							if (!volcanicAshSprite.bitmapLoaded)
+								volcanicAshSprite.setBitmap(m_loadedIconBitmapData, blackColor);
+
+							volcanicAshSprite.x = fdpt.x;
+							volcanicAshSprite.y = fdpt.y;
+						}
 					}
 				}
 
@@ -128,6 +130,8 @@ package com.iblsoft.flexiweather.ogc.editable.features
 		{
 			if (master && mBitmap){
 
+				m_loadedIconBitmapData = mBitmap.bitmapData;
+
 				var volcanicAshSprite: VolcanoSprite;
 				var reflection: FeatureDataReflection;
 
@@ -145,7 +149,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 					var displaySprite: WFSFeatureEditableSprite = getDisplaySpriteForReflectionAt(reflectionDelta);
 					volcanicAshSprite = displaySprite as VolcanoSprite;
 
-					volcanicAshSprite.setBitmap(mBitmap.bitmapData);
+					volcanicAshSprite.setBitmap(mBitmap.bitmapData, blackColor);
 				}
 
 				update(FeatureUpdateContext.fullUpdate());
@@ -298,12 +302,12 @@ class VolcanoSprite extends WFSFeatureEditableSprite {
 
 	}
 
-	public function setBitmap(nBitmapData: BitmapData): void
+	public function setBitmap(nBitmapData: BitmapData, blackColor: uint = 0): void
 	{
-
+		mb_bitmapLoaded = true;
 		m_iconBitmap.bitmapData = nBitmapData.clone();
 		m_iconBitmapOrig = new Bitmap(nBitmapData.clone());
-
+		update(blackColor);
 	}
 
 	public function update(blackColor: uint): void

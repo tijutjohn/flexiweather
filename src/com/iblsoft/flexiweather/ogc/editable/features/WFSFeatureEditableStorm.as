@@ -26,7 +26,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 		{
 			if (totalReflections > 0)
 			{
-				var reflection: FeatureDataReflection = m_featureData.getReflectionAt(0);
+				var reflection: FeatureDataReflection = m_featureData.getReflectionAt(m_featureData.reflectionsIDs[0]);
 				return getDisplaySpriteForReflectionAt(reflection.reflectionDelta) as StormSprite;
 			}
 			return null;
@@ -261,21 +261,26 @@ class StormSprite extends WFSFeatureEditableSpriteWithAnnotation implements IWFS
 
 	override public function set visible(value:Boolean):void
 	{
-		if (super.visible != value)
-		{
+//		if (super.visible != value)
+//		{
 			super.visible = value;
 
 			if (!value)
 			{
-				trace("StormSprite hiding");
+				trace(this + " hiding");
 			} else {
-				trace("StormSprite showing");
+				trace(this + " showing");
 			}
 			if (annotation)
 			{
 				annotation.visible = value;
 			}
-		}
+//		} else {
+//			if (annotation)
+//				trace(this + " visibility not changed: " + super.visible + " annotation["+annotation+"].visible: " + annotation.visible);
+//			else
+//				trace(this + " visibility not changed: " + super.visible);
+//		}
 	}
 
 	public function StormSprite(feature: WFSFeatureEditable)
@@ -344,5 +349,10 @@ class StormSprite extends WFSFeatureEditableSpriteWithAnnotation implements IWFS
 //		trace("StormSprite update 1: " + annotation.x + " , " + annotation.y + " visible: " + annotation.visible)
 //		trace("StormSprite update 2: " + x + " , " + y)
 		labelLayout.updateObjectReferenceLocation(annotation);
+	}
+
+	override public function toString(): String
+	{
+		return "StormSprite["+id+"]";
 	}
 }

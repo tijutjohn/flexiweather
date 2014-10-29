@@ -21,6 +21,18 @@ package com.iblsoft.flexiweather.ogc.editable.data
 
 		private var _points: Array;
 
+		private var m_closed: Boolean;
+
+
+		public function get closed():Boolean
+		{
+			return m_closed;
+		}
+
+		public function set closed(value:Boolean):void
+		{
+			m_closed = value;
+		}
 
 		public function get reflectionsIDs():Array
 		{
@@ -282,8 +294,11 @@ package com.iblsoft.flexiweather.ogc.editable.data
 
 						if (!lineSegmentVisible)
 						{
-							_points.push(null);
-							continue;
+							if (!closed)
+							{
+								_points.push(null);
+								continue;
+							}
 						}
 //						trace("line segment:  lineID = " + line.id + " s: " + s + " Segment: " + lineSegment);
 						var p1: FeatureDataPoint = new FeatureDataPoint(lineSegment.x1, lineSegment.y1);

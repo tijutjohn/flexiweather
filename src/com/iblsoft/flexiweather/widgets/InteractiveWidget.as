@@ -708,6 +708,8 @@ package com.iblsoft.flexiweather.widgets
 
 			if (l is InteractiveLayerPan)
 				kmlSpeedOptimization.setPanLayer(l as InteractiveLayerPan);
+			if (l is InteractiveLayerZoom)
+				kmlSpeedOptimization.setZoomLayer(l as InteractiveLayerZoom);
 
 			if (l is InteractiveLayerKML)
 				kmlSpeedOptimization.addKMLLayer(l as InteractiveLayerKML)
@@ -2631,7 +2633,7 @@ package com.iblsoft.flexiweather.widgets
 				var viewBBoxNorthLine: LineSegment = new LineSegment(m_viewBBox.xMin, m_viewBBox.yMin, m_viewBBox.xMax, m_viewBBox.yMin);
 				var viewBBoxSouthLine: LineSegment = new LineSegment(m_viewBBox.xMin, m_viewBBox.yMax, m_viewBBox.xMax, m_viewBBox.yMax);
 
-				var line: LineSegment;
+				var line: FeatureDataLineSegment;
 				for each(part in continousParts)
 				{
 					cObject = null;
@@ -2727,15 +2729,25 @@ package com.iblsoft.flexiweather.widgets
 								}
 								if (!bTemporaryIsInReflection)
 								{
-									//add non-visible line to reflection 0 (how to find, which reflection is correct
-									reflection = featureData.getReflectionAt(0);
-//									featureDataLine = featureData.getLineAt(0, featureDataLineID);
-									currLine = reflection.getLineAt(featureDataLineID);
+									if (!featureData.closed)
+									{
+										//add non-visible line to reflection 0 (how to find, which reflection is correct
+										reflection = featureData.getReflectionAt(featureData.reflectionsIDs[0]);
+	//									featureDataLine = featureData.getLineAt(0, featureDataLineID);
+										currLine = reflection.getLineAt(featureDataLineID);
 
-									var lineSegment2: FeatureDataLineSegment = new FeatureDataLineSegment(0,0,0,0, false, false, false);
-									currLine.addLineSegment(lineSegment, prevCObject.edge, cObject.edge);
+	//									var lineSegment2: FeatureDataLineSegment = new FeatureDataLineSegment(0,0,0,0, false, false, false);
+										if (!lineSegment)
+										{
+											p1 = coordToPoint(new Coord(ms_crs, line.x1, line.y1));
+											p2 = coordToPoint(new Coord(ms_crs, line.x2, line.y2));
+											lineSegment = new FeatureDataLineSegment(p1.x, p1.y, p2.x, p2.y, false, false);
+										}
 
-//									debug("There is no intersection with current viewBBox: [Reflection: " + o.reflection + ", line ID: " + featureDataLineID+"]");
+										currLine.addLineSegment(lineSegment, prevCObject.edge, cObject.edge);
+
+	//									debug("There is no intersection with current viewBBox: [Reflection: " + o.reflection + ", line ID: " + featureDataLineID+"]");
+									}
 								}
 							}
 						}
@@ -3039,7 +3051,6 @@ package com.iblsoft.flexiweather.widgets
 			 */
 			if (featureData)
 			{
-//				cnt = featureData.getReflectionAt(0).linesLength;
 				cnt = featureData.linesLength;
 			}
 
@@ -3466,6 +3477,7 @@ import com.iblsoft.flexiweather.proj.Coord;
 import com.iblsoft.flexiweather.proj.Projection;
 import com.iblsoft.flexiweather.utils.CubicBezier;
 import com.iblsoft.flexiweather.widgets.InteractiveLayerPan;
+import com.iblsoft.flexiweather.widgets.InteractiveLayerZoom;
 import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 
 import flash.events.Event;
@@ -3509,6 +3521,7 @@ class WidgetSize
 class KMLSpeedOptimization
 {
 	private var m_iw: InteractiveWidget;
+	private var m_zoomLayer: InteractiveLayerZoom;
 	private var m_panLayer: InteractiveLayerPan;
 	private var m_kmlLayers: Array = [];
 
@@ -3520,6 +3533,11 @@ class KMLSpeedOptimization
 	}
 	public function destroy(): void
 	{
+		if (m_zoomLayer)
+		{
+			m_zoomLayer.removeEventListener(InteractiveLayerZoom.START_ZOOMING, onStartZooming);
+			m_zoomLayer.removeEventListener(InteractiveLayerZoom.STOP_ZOOMING, onStopZooming);
+		}
 		if (m_panLayer)
 		{
 			m_panLayer.removeEventListener(InteractiveLayerPan.START_PANNING, onStartPanning);
@@ -3540,12 +3558,31 @@ class KMLSpeedOptimization
 			m_panLayer.addEventListener(InteractiveLayerPan.STOP_PANNING, onStopPanning);
 		}
 	}
+	public function setZoomLayer(layer: InteractiveLayerZoom): void
+	{
+		m_zoomLayer = layer;
+
+		if (FlexiWeatherConfiguration.USE_KML_BITMAP_PANNING)
+		{
+			m_zoomLayer.addEventListener(InteractiveLayerZoom.START_ZOOMING, onStartZooming);
+			m_zoomLayer.addEventListener(InteractiveLayerZoom.STOP_ZOOMING, onStopZooming);
+		}
+	}
 	public function addKMLLayer(layer: InteractiveLayerKML): void
 	{
 		m_kmlLayers.push(layer);
 	}
 
 	private function onStartPanning(event: Event): void
+	{
+		startOptimization();
+	}
+	private function onStartZooming(event: Event): void
+	{
+		startOptimization();
+	}
+
+	private function startOptimization(): void
 	{
 		if (FlexiWeatherConfiguration.USE_KML_BITMAP_PANNING)
 		{
@@ -3565,7 +3602,16 @@ class KMLSpeedOptimization
 		}
 	}
 
+	private function onStopZooming(event: Event): void
+	{
+		stopOptimization();
+	}
 	private function onStopPanning(event: Event): void
+	{
+		stopOptimization();
+	}
+
+	private function stopOptimization(): void
 	{
 		if (FlexiWeatherConfiguration.USE_KML_BITMAP_PANNING)
 		{

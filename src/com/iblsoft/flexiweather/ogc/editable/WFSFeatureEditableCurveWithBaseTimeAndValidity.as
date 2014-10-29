@@ -198,7 +198,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			}
 		}
 
-		private function convertCoordToScreen(p: Point): Point
+		protected function convertCoordToScreen(p: Point): Point
 		{
 			return p;
 
@@ -232,6 +232,7 @@ package com.iblsoft.flexiweather.ogc.editable
 
 				var lastPoint: Point;
 
+				// check NULL points...
 				g.clear();
 
 				g.start(p.x, p.y);

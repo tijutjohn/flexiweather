@@ -3,7 +3,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
-	
+
 	import flash.display.Graphics;
 	import flash.display.Sprite;
 	import flash.events.Event;
@@ -16,10 +16,13 @@ package com.iblsoft.flexiweather.widgets
 	import flash.geom.Rectangle;
 	import flash.ui.Multitouch;
 	import flash.utils.Timer;
-	
+
 	public class InteractiveLayerZoom extends InteractiveLayer
 	{
 		public static const ZOOM: String = 'zoom';
+		public static const START_ZOOMING: String = 'startZooming';
+		public static const STOP_ZOOMING: String = 'stopZooming';
+
 		protected var mb_requireCtrlKey: Boolean = true;
 		protected var m_areaZoomingRectangle: Rectangle;
 		protected var m_wheelZoomTimer: Timer = new Timer(2500, 1);
@@ -42,7 +45,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			_minimimMapScale = value;
 		}
-		
+
 		private function set finalChangeOccuredAfterWheelZoom(value:Boolean):void
 		{
 			mb_finalChangeOccuredAfterWheelZoom = value;
@@ -69,13 +72,13 @@ package com.iblsoft.flexiweather.widgets
 			invalidateProperties();
 		}
 
-        protected function turnOnZoomSprite():void {
-            mb_showSlideZoomingSprite = true;
-        }
+		protected function turnOnZoomSprite():void {
+			mb_showSlideZoomingSprite = true;
+		}
 
-        protected function turnOffZoomSprite():void {
-            mb_showSlideZoomingSprite = false;
-        }
+		protected function turnOffZoomSprite():void {
+			mb_showSlideZoomingSprite = false;
+		}
 
 		public function InteractiveLayerZoom(container: InteractiveWidget = null)
 		{
@@ -150,7 +153,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (!mb_showSlideZoomingSprite && event.ctrlKey)
 			{
-                turnOnZoomSprite();
+				turnOnZoomSprite();
 				invalidateDisplayList();
 			}
 		}
@@ -182,14 +185,15 @@ package com.iblsoft.flexiweather.widgets
 			{
 				var p: Point = getMousePositionInArea(event.localX, event.localY);
 				initializeRectangle(p.x, p.y);
+				startZooming();
 			}
 			return true;
 		}
 
-        protected function initializeRectangle(x:Number, y:Number):void {
-            m_areaZoomingRectangle = new Rectangle(x, y, 0, 0);
-            invalidateDynamicPart();
-        }
+		protected function initializeRectangle(x:Number, y:Number):void {
+			m_areaZoomingRectangle = new Rectangle(x, y, 0, 0);
+			invalidateDynamicPart();
+		}
 
 		override public function onMouseUp(event: MouseEvent): Boolean
 		{
@@ -200,29 +204,40 @@ package com.iblsoft.flexiweather.widgets
 			else
 			{
 				finalizeRectangle();
+				stopZooming();
 			}
 			return true;
 		}
 
-        protected function finalizeRectangle():void {
-            //create new rectangle from old one with correct left, top, right, bottom properties (it matters on direction of draggine when zoom rectange is created
-            m_areaZoomingRectangle = new Rectangle(Math.min(m_areaZoomingRectangle.left, m_areaZoomingRectangle.right), Math.min(m_areaZoomingRectangle.top, m_areaZoomingRectangle.bottom), Math.abs(m_areaZoomingRectangle.left - m_areaZoomingRectangle.right), Math.abs(m_areaZoomingRectangle.top - m_areaZoomingRectangle.bottom));
-            if ((m_areaZoomingRectangle.width) > 5 && (m_areaZoomingRectangle.height) > 5)
-            {
-                var r: Rectangle = container.getViewBBox().toRectangle();
-                var w: Number = container.areaWidth;
-                var h: Number = container.areaHeight;
-                var bW: Number = r.width;
-                var bH: Number = r.height;
-                r.width = bW / w * m_areaZoomingRectangle.width;
-                r.height = bH / h * m_areaZoomingRectangle.height;
-                r.x = r.x + m_areaZoomingRectangle.x / w * bW;
-                r.y = r.y + (h - m_areaZoomingRectangle.bottom) / h * bH;
-                setViewBBoxFromRectangle(BBox.fromRectangle(r), true);
-            }
-            m_areaZoomingRectangle = null;
-            invalidateDynamicPart();
-        }
+		protected function finalizeRectangle():void
+		{
+			//create new rectangle from old one with correct left, top, right, bottom properties (it matters on direction of draggine when zoom rectange is created
+			m_areaZoomingRectangle = new Rectangle(Math.min(m_areaZoomingRectangle.left, m_areaZoomingRectangle.right), Math.min(m_areaZoomingRectangle.top, m_areaZoomingRectangle.bottom), Math.abs(m_areaZoomingRectangle.left - m_areaZoomingRectangle.right), Math.abs(m_areaZoomingRectangle.top - m_areaZoomingRectangle.bottom));
+			if ((m_areaZoomingRectangle.width) > 5 && (m_areaZoomingRectangle.height) > 5)
+			{
+				var r: Rectangle = container.getViewBBox().toRectangle();
+				var w: Number = container.areaWidth;
+				var h: Number = container.areaHeight;
+				var bW: Number = r.width;
+				var bH: Number = r.height;
+				r.width = bW / w * m_areaZoomingRectangle.width;
+				r.height = bH / h * m_areaZoomingRectangle.height;
+				r.x = r.x + m_areaZoomingRectangle.x / w * bW;
+				r.y = r.y + (h - m_areaZoomingRectangle.bottom) / h * bH;
+				setViewBBoxFromRectangle(BBox.fromRectangle(r), true);
+			}
+			m_areaZoomingRectangle = null;
+			invalidateDynamicPart();
+		}
+
+		private function startZooming(): void
+		{
+			dispatchEvent(new Event(InteractiveLayerZoom.START_ZOOMING, true));
+		}
+		private function stopZooming(): void
+		{
+			dispatchEvent(new Event(InteractiveLayerZoom.STOP_ZOOMING, true));
+		}
 
 		override public function onMouseMove(event: MouseEvent): Boolean
 		{
@@ -243,9 +258,9 @@ package com.iblsoft.flexiweather.widgets
 			{
 				if (m_areaZoomingRectangle == null)
 					return false;
-				
+
 				var p: Point = getMousePositionInArea(event.localX, event.localY);
-				
+
 				m_areaZoomingRectangle.width = p.x - m_areaZoomingRectangle.x;
 				m_areaZoomingRectangle.height = p.y - m_areaZoomingRectangle.y;
 				invalidateDynamicPart();
@@ -277,7 +292,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			//if(!event.ctrlKey && mb_requireCtrlKey)
 			//	return false;
-			trace("ILZoom: wheel " + event.delta); 
+			trace("ILZoom: wheel " + event.delta);
 			return doDeltaZoom(event.delta / 9)
 		}
 
@@ -290,18 +305,18 @@ package com.iblsoft.flexiweather.widgets
 			var f_width: Number = bbox.width;
 			var f_height: Number = bbox.height;
 			var b_changed: Boolean = false;
-			
+
 			var deltaAbs: Number = Math.abs(delta);
 			if (deltaAbs > 25)
 				deltaAbs = 25;
-			
+
 			//it can vary from 0.75 to 0.25
 			var zoomChangeFromDelta: Number = 0.75 - 0.5* (deltaAbs / 25);
-			
+
 //			zoomChangeFromDelta = 0.75;
 			if (zoomChangeFromDelta > 1) zoomChangeFromDelta = 1;
 			if (zoomChangeFromDelta < 0.25) zoomChangeFromDelta = 0.25;
-			
+
 			trace("doDeltaZoom: " + delta + " zoomChangeFromDelta: " + zoomChangeFromDelta);
 			if (delta > 0)
 			{
@@ -329,7 +344,7 @@ package com.iblsoft.flexiweather.widgets
 					// but start timer to defer final zoom change, but only if final change
 					// doesn't occur in between (initiated by someone else)
 					finalChangeOccuredAfterWheelZoom = false;
-				} 
+				}
 			} else {
 				trace("ILZOOM doDeltaZoom b_changed: " + b_changed);
 			}
@@ -371,9 +386,9 @@ package com.iblsoft.flexiweather.widgets
 			var f_viewWidth: Number = oldViewBBox.width;
 			var f_viewHeight: Number = oldViewBBox.height;
 			var f_aspectedScale: Number = (event.scaleX + event.scaleY) / 2;
-			
+
 			var p: Point = getMousePositionInArea(event.localX, event.localY);
-			
+
 			var newMidPoint: Coord = container.pointToCoord(p.x, p.y);
 			if (!newMidPoint)
 				return;
@@ -416,7 +431,7 @@ package com.iblsoft.flexiweather.widgets
 		}
 
 		private var _minimimMapScale: Number = 20000;
-		
+
 		/**
 		 * One common function for setting viewBBox from Rectangle with check for projection which allows horizontal wrap to do not allow zoom outside extent.
 		 * @param r
@@ -426,13 +441,13 @@ package com.iblsoft.flexiweather.widgets
 		private function setViewBBoxFromRectangle(viewBBox: BBox, b_finalChange: Boolean, bZoomOutAction: Boolean = false): Boolean
 		{
 			var zoomBBox: ZoomBBox = new ZoomBBox(viewBBox, b_finalChange, bZoomOutAction);
-			
+
 			//check max distance of viewBBox
 			var maxDistance: Number = viewBBox.getBBoxMaximumDistance(container.getCRS());
 			var mapScale: Number = container.getMapScale(viewBBox);
 			var mapScaleRatio: Number = 1 / mapScale;
 			zoomBBox.scaleRatio = mapScaleRatio;
-			
+
 			if (mapScaleRatio < minimimMapScale && !bZoomOutAction)
 			{
 				//do not support map scale more than 1:1
@@ -444,7 +459,7 @@ package com.iblsoft.flexiweather.widgets
 				trace("ILZoom setViewBBoxFromRectangle zoom... 1:" +mapScaleRatio);
 			}
 			m_lastValidZoomBBox = zoomBBox;
-			
+
 			var extentBBox: BBox = container.getExtentBBox();
 			var allowHorizontalWrap: Boolean = allowWrapHorizontally();
 			if (!allowHorizontalWrap)
@@ -462,7 +477,7 @@ package com.iblsoft.flexiweather.widgets
 				}
 			}
 			container.setViewBBox(viewBBox, b_finalChange);
-			
+
 			return true;
 		}
 
@@ -514,14 +529,14 @@ class ZoomBBox
 	public var finalChange: Boolean;
 	public var zoomOutAction: Boolean;
 	public var scaleRatio: Number;
-	
+
 	public function ZoomBBox(viewBBox: BBox, b_finalChange: Boolean, bZoomOutAction: Boolean = false)
 	{
 		this.viewBBox = viewBBox;
 		finalChange = b_finalChange;
 		zoomOutAction = bZoomOutAction;
 	}
-	
+
 	public function toString(): String
 	{
 		return " ZoomBBox [1:"+scaleRatio+"] : " + viewBBox.toBBOXString();

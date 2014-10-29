@@ -100,7 +100,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 //						debug("SHOW anticollision");
 //					}
 					super.visible = value;
-					debug(this + " visible = " + value);
+					debug("\n\n"+this + " visible = " + value);
 					onVisibilityChanged();
 //				} else {
 //					debug(this + " same visibility: " + value);
@@ -147,7 +147,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 
 		private function onVisibilityChanged(): void
 		{
-			debug("onVisibilityChanged: " + visible);
+			debug("\nonVisibilityChanged: " + visible);
 			var currObjects: Array = ma_layoutObjects;
 			var lo: AnticollisionLayoutObject;
 			for each (lo in currObjects)
@@ -409,10 +409,13 @@ package com.iblsoft.flexiweather.utils.anticollision
 						{
 							newVisibility = newVisibility && lo.layer.visible;
 						}
+						debug("ACL manageVisibilityWithAnchors obj: " +  lo.object + " absolute visibility: " + newVisibility);
 						lo.visible = newVisibility;
 					} else {
-						var objectAbsoluteVisibility: Boolean = getAbsoluteVisibility(lo.object);
-//						debug("ACL obj: " +  lo.object + " absolute visibility: " + objectAbsoluteVisibility);
+						var object: DisplayObject = lo.object as DisplayObject;
+						var objectBounds: Rectangle = object.getBounds(this);
+						var objectAbsoluteVisibility: Boolean = getAbsoluteVisibility(object);
+						debug("ACL obj: " +  lo.object + "[bounds: " + objectBounds+"] m_boundaryRect: " + m_boundaryRect + " absolute visibility: " + objectAbsoluteVisibility);
 						if (lo.layer && objectAbsoluteVisibility)
 						{
 							objectAbsoluteVisibility = lo.layer.visible;

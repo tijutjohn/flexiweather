@@ -247,7 +247,7 @@ package com.iblsoft.flexiweather.ogc.editable
 							var reflectionDelta: int = reflectionIDs[r];
 
 							var featureDataReflection: FeatureDataReflection = wfsEditableItem.getReflection(reflectionDelta);
-							var displaySprite: WFSFeatureEditableSprite = wfsEditableItem.getDisplaySpriteForReflection(reflectionDelta);
+							var displaySprite: WFSFeatureEditableSprite = wfsEditableItem.getDisplaySpriteForReflectionAt(reflectionDelta);
 							if (displaySprite)
 							{
 								if (displaySprite.hitTestPoint(f_stageX, f_stageY, true))

@@ -16,12 +16,12 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.utils.CubicBezier;
 	import com.iblsoft.flexiweather.utils.ICurveRenderer;
 	import com.iblsoft.flexiweather.utils.draw.DrawMode;
-	
+
 	import flash.display.Graphics;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	import flash.utils.Dictionary;
-	
+
 	public class WFSFeatureEditableClosableCurveWithBaseTimeAndValidity extends WFSFeatureEditableCurveWithBaseTimeAndValidity implements IClosableCurve, IWFSCurveFeature
 	{
 		protected var mb_closed: Boolean = false;
@@ -30,13 +30,13 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			super(s_namespace, s_typeName, s_featureId);
 		}
-		
-		
+
+
 		override protected function computeCurve(): void
 		{
 			var a_points: Array = getPoints();
-			
-//			if(a_points && a_points.length > 1) 
+
+//			if(a_points && a_points.length > 1)
 //			{
 				if (master)
 				{
@@ -45,56 +45,58 @@ package com.iblsoft.flexiweather.ogc.editable
 						m_featureData = createFeatureData();
 					else
 						m_featureData.clear();
-					
+
+					m_featureData.closed = isCurveClosed();
+
 					// feature is computed via drawSmoothPolyLine() or drawGeoPolyLine() method
 					if (smooth)
 						master.container.drawSmoothPolyLine(getRenderer, a_points, DrawMode.PLAIN, isCurveClosed(), true, m_featureData);
 					else
 						master.container.drawGeoPolyLine(getRenderer, a_points, DrawMode.PLAIN, isCurveClosed(), true, m_featureData);
 				}
-				
+
 				m_featureData.joinLinesFromReflections();
-				
+
 //			}
 		}
 		override protected function drawCurve(): void
 		{
 			var reflection: FeatureDataReflection;
 			var _addToLabelLayout: Boolean;
-			
+
 			var a_points: Array = getPoints();
-			
+
 			if (!a_points)
 				return;
-			
+
 			//create sprites for reflections
 			if (m_featureData && m_featureData.reflections)
 			{
 				var displaySprite: WFSFeatureEditableSprite;
-				
+
 				var pointsCount: int = a_points.length;
 				var ptAvg: Point;
 				var gr: Graphics;
-				
+
 				graphics.clear();
-				
+
 				var reflectionIDs: Array = m_featureData.reflectionsIDs;
-				
+
 				for (var i: int = 0; i < totalReflections; i++)
 				{
 					var reflectionDelta: int = reflectionIDs[i];
-					
+
 					reflection = m_featureData.getReflectionAt(reflectionDelta);
 					if (reflection)
 					{
 						if (m_featureData)
 							ptAvg = m_featureData.getReflectionAt(reflectionDelta).center;
-						else if (pointsCount == 1) 
+						else if (pointsCount == 1)
 							ptAvg = a_points[0] as Point;
-						
+
 						displaySprite = getDisplaySpriteForReflectionAt(reflectionDelta);
 						gr = displaySprite.graphics;
-						
+
 						if(pointsCount <= 1)
 						{
 							displaySprite.clear();
@@ -109,13 +111,86 @@ package com.iblsoft.flexiweather.ogc.editable
 								trace("\t\t Do not draw data for " + reflectionDelta + " Feature is drawn in " + m_featureData.reflectionDelta);
 							}
 							displaySprite.points = reflection.points;
-							
+
 						}
 					}
 				}
 			}
 		}
 
+		override protected function drawFeatureData(g:ICurveRenderer, m_featureData:FeatureData):void
+		{
+			if (!isCurveClosed())
+			{
+				super.drawFeatureData(g, m_featureData);
+				return;
+			}
+
+			//drawing closed feature... there must be special handling of non-visible part of feature polyline
+
+			if (!g || !m_featureData || !m_featureData.lines)
+			{
+				return;
+			}
+
+			var p: Point;
+			var points: Array = m_featureData.points;
+
+			var linesCount: int = m_featureData.lines.length;
+			var pointsCount: int = points.length;
+
+			//			if (pointsCount == 0 && m_featureData.computingScheduled)
+			//			{
+			//				m_featureData.validate();
+			//				points = m_featureData.points;
+			//				pointsCount = points.length;
+			//			}
+
+			if (pointsCount > 0)
+			{
+				p = convertCoordToScreen(m_featureData.startPoint);
+
+				var lastPoint: Point;
+
+				// check NULL points...
+				g.clear();
+
+				g.start(p.x, p.y);
+				g.moveTo(p.x, p.y);
+				lastPoint = new Point(p.x, p.y);
+				//				trace("\ndrawFeatureReflection moveTO: [" + p.x + " , " + p.y + " ]");
+				var bNewLine: Boolean = false;
+				for (var i: int = 1; i < pointsCount; i++)
+				{
+					p = points[i] as Point;
+					if (p)
+					{
+						p = convertCoordToScreen(p);
+//						if (bNewLine) {
+//							g.finish(lastPoint.x, lastPoint.y);
+//
+//							g.start(p.x, p.y);
+//							g.moveTo(p.x, p.y);
+//							//							trace("drawFeatureReflection moveTo: [" + p.x + " , " + p.y + " ]");
+//						} else {
+							g.lineTo(p.x, p.y);
+							//							trace("drawFeatureReflection lineTO: [" + p.x + " , " + p.y + " ]");
+//						}
+						if (!p)
+							trace("check why p is null");
+						lastPoint = new Point(p.x, p.y);
+						bNewLine = false;
+					} else {
+						bNewLine = true;
+					}
+				}
+				if (p)
+					g.finish(p.x, p.y);
+				else
+					g.finish(lastPoint.x, lastPoint.y);
+				//				trace("\n");
+			}
+		}
 		/*
 		override public function toInsertGML(xmlInsert: XML): void
 		{
@@ -210,7 +285,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				//FIXME move this elsewhere else
 				var points: Array = m_points.getPointsForReflection(0);
 				ma_points = CubicBezier.calculateHermitSpline(points, mb_closed);
-					//ma_points = CubicBezier.calculateHermitSpline(m_points,  
+					//ma_points = CubicBezier.calculateHermitSpline(m_points,
 			}
 		}
 
@@ -256,12 +331,12 @@ package com.iblsoft.flexiweather.ogc.editable
 					&& selected)
 			{
 				var reflection: FeatureDataReflection;
-				
+
 				if (mb_closed)
 				{
 					// don't do anything if this click is on MoveablePoint belonging to this curve
 					//FIXME fix this for all reflections
-					reflection = m_featureData.getReflectionAt(0) as FeatureDataReflection;
+					reflection = m_featureData.getReflectionAt(m_featureData.reflectionsIDs[0]) as FeatureDataReflection;
 					var moveablePoints: Array = getEditablePointsForReflection(reflection.reflectionDelta);
 					if (moveablePoints)
 					{
@@ -272,10 +347,10 @@ package com.iblsoft.flexiweather.ogc.editable
 						}
 					}
 					var a: Array = getPoints();
-					
+
 					if (!a)
 						return false;
-					
+
 					var i_best: int = -1;
 					var f_bestDistance: Number = 0;
 					var b_keepDrag: Boolean = true;
@@ -285,7 +360,7 @@ package com.iblsoft.flexiweather.ogc.editable
 						// add point between 2 points
 						//add first point at the end to check possibility to insert point between last and first point
 						a.push((a[0] as Point).clone());
-						
+
 						for (var i: int = 1; i < a.length; ++i)
 						{
 							var ptPrev: Point = Point(a[i - 1]);
@@ -293,14 +368,14 @@ package com.iblsoft.flexiweather.ogc.editable
 							var f_distance: Number = ptPrev.subtract(pt).length + ptCurr.subtract(pt).length;
 							var f_distCurrPrev: Number = ptCurr.subtract(ptPrev).length * 1.3;
 							if (f_distance > ptCurr.subtract(ptPrev).length * 1.3)
-								continue; // skip, clicked to far from point 
+								continue; // skip, clicked to far from point
 							if (i_best == -1 || f_distance < f_bestDistance)
 							{
 								i_best = i;
 								f_bestDistance = f_distance;
 							}
 						}
-						
+
 						//remove last point as we have added it just for this test
 //						a.removeItemAt(a.length - 1);
 						a.splice(a.length - 1, 1);
@@ -309,7 +384,7 @@ package com.iblsoft.flexiweather.ogc.editable
 					{
 						insertPointBefore(i_best, pt);
 //						MoveablePoint(ml_movablePoints[i_best]).onMouseDown(pt);
-						reflection = m_featureData.getReflectionAt(0) as FeatureDataReflection;
+						reflection = m_featureData.getReflectionAt(m_featureData.reflectionsIDs[0]) as FeatureDataReflection;
 						if (reflection)
 							var newPoint: MoveablePoint = getEditablePointForReflectionAt(reflection.reflectionDelta, i_best);
 						if (newPoint)
