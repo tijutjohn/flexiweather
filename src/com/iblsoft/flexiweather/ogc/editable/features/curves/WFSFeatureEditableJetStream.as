@@ -740,7 +740,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 
 			if (m_featureData)
 			{
-				var reflection: JetStreamFeatureDataReflection = m_featureData.getReflectionAt(0) as JetStreamFeatureDataReflection;
+				var reflection: JetStreamFeatureDataReflection = m_featureData.getReflectionAt(m_featureData.reflectionsIDs[0]) as JetStreamFeatureDataReflection;
 				if (i_pointIndex > -1)
 				{
 					if (reflection && reflection.windPoints && reflection.windPoints.length > i_pointIndex)
@@ -854,7 +854,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 
 			var profileXML: XML = <profile xmlns="http://www.iblsoft.com/wfs" xmlns:wfs="http://www.opengis.net/wfs" xmlns:gml="http://www.opengis.net/gml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/>;
 
-			var reflection0: JetStreamFeatureDataReflection = m_featureData.getReflectionAt(0) as JetStreamFeatureDataReflection;
+			var reflection0: JetStreamFeatureDataReflection = m_featureData.getReflectionAt(m_featureData.reflectionsIDs[0]) as JetStreamFeatureDataReflection;
 			// APPEND WIND BARBS
 			var nWindBarb: WindBarb;
 			for (var i: int = 0; i < reflection0.windbarbs.length; i++)
@@ -873,7 +873,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 			var gml: Namespace = new Namespace("http://www.opengis.net/gml");
 			super.toUpdateGML(xmlUpdate);
 
-			var reflection0: JetStreamFeatureDataReflection = m_featureData.getReflectionAt(0) as JetStreamFeatureDataReflection;
+			var reflection0: JetStreamFeatureDataReflection = m_featureData.getReflectionAt(m_featureData.reflectionsIDs[0]) as JetStreamFeatureDataReflection;
 			// APPEND WIND BARBS
 			var nWindBarb: WindBarb;
 			var windbarbsXMLList: XMLList = new XMLList();

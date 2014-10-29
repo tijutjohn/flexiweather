@@ -28,7 +28,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			if (m_featureData)
 			{
-				var reflection: FeatureDataReflection = m_featureData.getReflectionAt(0);
+				var reflection: FeatureDataReflection = m_featureData.getReflectionAt(m_featureData.reflectionsIDs[0]);
 				return getAnnotationForReflectionAt(reflection.reflectionDelta);
 			}
 			return null;

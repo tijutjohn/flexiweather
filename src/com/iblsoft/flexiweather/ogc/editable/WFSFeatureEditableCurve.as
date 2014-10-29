@@ -6,7 +6,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.utils.CubicBezier;
 	import com.iblsoft.flexiweather.utils.CurveLineSegment;
 	import com.iblsoft.flexiweather.utils.CurveLineSegmentRenderer;
-	
+
 	import flash.display.Sprite;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
@@ -24,7 +24,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			mb_smooth = value;
 		}
-		
+
 //		protected var mb_closed: Boolean = true;
 //		public function get closed():Boolean
 //		{
@@ -35,7 +35,7 @@ package com.iblsoft.flexiweather.ogc.editable
 //		{
 //			mb_closed = value;
 //		}
-		
+
 		public function WFSFeatureEditableCurve(s_namespace: String, s_typeName: String, s_featureId: String)
 		{
 			super(s_namespace, s_typeName, s_featureId);
@@ -187,13 +187,13 @@ package com.iblsoft.flexiweather.ogc.editable
 			{
 				// don't do anything if this click is on MoveablePoint belonging to this curve
 				var reflectionDelta: int = 0;
-				
+
 				var clickedMoveablePoint: MoveablePoint = event.target as MoveablePoint;
 				if (clickedMoveablePoint)
 					reflectionDelta = clickedMoveablePoint.reflectionDelta;
-				
+
 				var moveablePoints: Array = getEditablePointsForReflection(reflectionDelta);
-				
+
 				for each (var mpSprite: Sprite in moveablePoints)
 				{
 					if (mpSprite.hitTestPoint(stagePt.x, stagePt.y, true))
@@ -216,7 +216,7 @@ package com.iblsoft.flexiweather.ogc.editable
 						var ptCurr: Point = Point(a[i]);
 						var f_distance: Number = ptPrev.subtract(pt).length + ptCurr.subtract(pt).length;
 						if (f_distance > ptCurr.subtract(ptPrev).length * 1.3)
-							continue; // skip, clicked to far from point 
+							continue; // skip, clicked to far from point
 						if (i_best == -1 || f_distance < f_bestDistance)
 						{
 							i_best = i;
@@ -248,15 +248,15 @@ package com.iblsoft.flexiweather.ogc.editable
 					insertPointBefore(i_best, pt);
 					var newPoint: IMouseEditableItem;
 					var totalMoveablePoints: int = getEditablePointsForReflection(0).length;
-					
+
 					//FIXME Test if this is ok
 					if (i_best < totalMoveablePoints)
 					{
 						//FIXME... question is if this needs to be done for 1 reflection or for all reflections
-						var reflection: FeatureDataReflection = m_featureData.getReflectionAt(0);
+						var reflection: FeatureDataReflection = m_featureData.getReflectionAt(m_featureData.reflectionsIDs[0]);
 						if (reflection)
 							newPoint = getEditablePointForReflectionAt(reflection.reflectionDelta, i_best) as IMouseEditableItem;
-						
+
 						if (newPoint)
 						{
 							newPoint.onMouseDown(pt, event);
@@ -279,7 +279,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			return false;
 		}
 
-		// getters & setters 
+		// getters & setters
 		protected function getEffectiveCoordinates(): Array
 		{
 			return coordinates;

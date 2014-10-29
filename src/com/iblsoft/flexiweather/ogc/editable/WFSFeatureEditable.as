@@ -592,7 +592,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			if (totalReflections > 0)
 			{
-				return getDisplaySpriteForReflection(0);
+				return getDisplaySpriteForReflectionAt(0);
 			}
 			return null;
 		}

@@ -2,19 +2,22 @@ package com.iblsoft.flexiweather.utils
 {
 	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayoutObject;
 	import com.iblsoft.flexiweather.utils.anticollision.IAnticollisionLayoutObject;
-	
+
 	import flash.display.Sprite;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
 
 	public class AnnotationBox extends Sprite implements IAnticollisionLayoutObject
 	{
+		public static var UID: int = 0;
+		public var id: int;
+
 		public var measuredWidth: Number = 0;
 		public var measuredHeight: Number = 0;
 		private var _color: uint;
 
 		private var _anticollisionLayoutObject: AnticollisionLayoutObject;
-		
+
 		override public function set visible(value:Boolean):void
 		{
 //			if (value)
@@ -30,18 +33,19 @@ package com.iblsoft.flexiweather.utils
 			super();
 			mouseEnabled = false;
 			mouseChildren = false;
+			id = UID++;
 		}
 
 		public function set anticollisionLayoutObject(object: AnticollisionLayoutObject): void
 		{
 			_anticollisionLayoutObject = object;
 		}
-		
+
 		public function get anticollisionLayoutObject(): AnticollisionLayoutObject
 		{
 			return _anticollisionLayoutObject;
 		}
-		
+
 		public function get color(): uint
 		{
 			return _color;

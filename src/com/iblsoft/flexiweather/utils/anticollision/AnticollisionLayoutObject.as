@@ -4,7 +4,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 	import com.iblsoft.flexiweather.ogc.kml.events.KMLFeatureEvent;
 	import com.iblsoft.flexiweather.ogc.kml.features.KMLFeature;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
-	
+
 	import flash.display.DisplayObject;
 	import flash.geom.Point;
 
@@ -17,7 +17,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 //		{
 //			return _object;
 //		}
-//		
+//
 //		public function set object(value:DisplayObject):void
 //		{
 //			_object = value;
@@ -38,13 +38,13 @@ package com.iblsoft.flexiweather.utils.anticollision
 		{
 			return m_referenceLocation;
 		}
-		
+
 		public function set referenceLocation(value: Point): void
 		{
 			m_referenceLocation.x = value.x;
 			m_referenceLocation.y = value.y;
 		}
-		
+
 		public function get visible(): Boolean
 		{
 			return _visible;
@@ -52,13 +52,16 @@ package com.iblsoft.flexiweather.utils.anticollision
 
 		public function set visible(value: Boolean): void
 		{
-			if (_visible != value || object.visible != value)
-			{
+//			if (_visible != value || object.visible != value)
+//			{
 				_visible = value;
 				//set object visibility to save value
 				object.visible = value;
+				trace("AnticollisionLayoutObject VISIBLE CHANGED: " + _visible + " object["+object+"].visible: " + object.visible);
 //				trace(this + " VISIBLE CHANGED");
-			}
+//			} else {
+//				trace("AnticollisionLayoutObject visible not changed: " + _visible + " object["+object+"].visible: " + object.visible);
+//			}
 		}
 
 		public function toString(): String
@@ -76,14 +79,14 @@ package com.iblsoft.flexiweather.utils.anticollision
 			this.object = object;
 			m_referenceLocation = new Point(object.x, object.y)
 			manageVisibilityWithAnchors = false;
-			
+
 			if (object is KMLLabel)
 			{
 				var kmlFeature: KMLFeature = (object as KMLLabel).kmlFeature;
 				kmlFeature.addEventListener(KMLFeatureEvent.KML_FEATURE_VISIBILITY_CHANGE, onKMLFeatureVisibilityChange);
 			}
 		}
-			
+
 		private function onKMLFeatureVisibilityChange(event: KMLFeatureEvent): void
 		{
 			var kmlFeature: KMLFeature = event.target as KMLFeature;
@@ -97,8 +100,8 @@ package com.iblsoft.flexiweather.utils.anticollision
 				var kmlFeature: KMLFeature = (object as KMLLabel).kmlFeature;
 				kmlFeature.removeEventListener(KMLFeatureEvent.KML_FEATURE_VISIBILITY_CHANGE, onKMLFeatureVisibilityChange);
 			}
-			
+
 		}
-		
+
 	}
 }

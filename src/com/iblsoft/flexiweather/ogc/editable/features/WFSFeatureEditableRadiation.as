@@ -35,9 +35,9 @@ package com.iblsoft.flexiweather.ogc.editable.features
 		{
 			if (totalReflections > 0)
 			{
-				var reflection: FeatureDataReflection = m_featureData.getReflectionAt(0);
+				var reflection: FeatureDataReflection = m_featureData.getReflectionAt(m_featureData.reflectionsIDs[0]);
 				if (reflection)
-					return getDisplaySpriteForReflection(reflection.reflectionDelta) as RadiationSprite;
+					return getDisplaySpriteForReflectionAt(reflection.reflectionDelta) as RadiationSprite;
 			}
 			return null;
 		}
@@ -225,17 +225,22 @@ class RadiationSprite extends WFSFeatureEditableSpriteWithAnnotation implements 
 
 	override public function set visible(value:Boolean):void
 	{
-		if (super.visible != value)
-		{
+//		if (super.visible != value)
+//		{
 			super.visible = value;
-			trace("RadiationSprite: visible: " + value);
+			trace(this + " : visible: " + value);
 			if (annotation)
 			{
 				annotation.visible = value;
 			} else {
-				trace("HIDE RadiationSprite");
+				trace(this + " HIDE");
 			}
-		}
+//		} else {
+//			if (annotation)
+//				trace(this + " visibility not changed: " + super.visible + "  annotation["+annotation+"].visible: " + annotation.visible);
+//			else
+//				trace(this + " visibility not changed: " + super.visible);
+//		}
 	}
 	override public function set x(value:Number):void
 	{
@@ -322,5 +327,10 @@ class RadiationSprite extends WFSFeatureEditableSpriteWithAnnotation implements 
 
 		labelLayout.updateObjectReferenceLocation(annotation);
 
+	}
+
+	override public function toString(): String
+	{
+		return "RadiationSprite["+id+"]";
 	}
 }
