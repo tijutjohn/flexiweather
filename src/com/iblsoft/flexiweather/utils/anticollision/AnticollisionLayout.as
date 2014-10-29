@@ -54,6 +54,13 @@ package com.iblsoft.flexiweather.utils.anticollision
 	 **/
 	public class AnticollisionLayout extends Sprite
 	{
+
+		/**
+		 * Minimum time period in which 2 following updates are not executed. It's used for optimization for situation line map pan
+		 * when there are too many anticollision layout updates scheduled;
+		 */
+		public static const MINIMUM_UPDATE_WAIT_INTERVAL: int = 0;
+
 		public static const ANTICOLLISTION_UPDATED: String = 'anticollisionUpdated';
 		public static var drawDebugMap: Boolean = false;
 		/**
@@ -223,6 +230,8 @@ package com.iblsoft.flexiweather.utils.anticollision
 			lo.name = "Obstacle";
 			ma_layoutObjects.push(lo);
 			updateLayoutObjectsLength();
+
+			trace("Add Obstacle: "+ lo);
 		}
 
 		/**
@@ -265,7 +274,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 			var lo: AnticollisionLayoutObject = new AnticollisionLayoutObject(object, parentLayer, b_addAsChild, i_displacementMode);
 			lo.name = "Object" + i_reflection;
 			lo.objectsToAnchor = a_anchors;
-			lo.reflectionID = i_reflection;
+			lo.reflectionDelta = i_reflection;
 			lo.manageVisibilityWithAnchors = (a_anchors != null && a_anchors.length > 0);
 			ma_layoutObjects.push(lo);
 			updateLayoutObjectsLength();
@@ -278,6 +287,8 @@ package com.iblsoft.flexiweather.utils.anticollision
 			}
 			if (object is IAnticollisionLayoutObject)
 				(object as IAnticollisionLayoutObject).anticollisionLayoutObject = lo;
+
+			trace("Add Object: "+ lo);
 			return lo;
 		}
 
@@ -333,7 +344,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 					{
 						layout.addObstacle(lo.object, lo.layer);
 					} else {
-						layout.addObject(lo.object, lo.layer, lo.objectsToAnchor, lo.reflectionID, lo.displacementMode, lo.managedChild);
+						layout.addObject(lo.object, lo.layer, lo.objectsToAnchor, lo.reflectionDelta, lo.displacementMode, lo.managedChild);
 					}
 
 				}
@@ -370,8 +381,11 @@ package com.iblsoft.flexiweather.utils.anticollision
 				var time: int = ProfilerUtils.startProfileTimer();
 				var pass: int = 0;
 				var diffTime: Number = getTimer() - mi_lastUpdate;
-				if (diffTime < 500)
+
+				//check time difference from last update cycle and if it is shorter than MINIMUM_UPDATE_WAIT_INTERVAL then do nothing
+				if (diffTime < MINIMUM_UPDATE_WAIT_INTERVAL)
 					return;
+
 				if (ma_layoutObjects.length > 0)
 					debug("\n ACL update");
 				var currObjects: Array = ma_layoutObjects;
@@ -715,7 +729,8 @@ package com.iblsoft.flexiweather.utils.anticollision
 
 		protected function drawAnnotationAnchorFunction(graphics: Graphics, b_drawArrow: Boolean, f_x1: Number, f_y1: Number, f_x2: Number, f_y2: Number, color: uint, alpha: Number): void
 		{
-			if (m_drawAnnotationAnchor)
+			debug("drawAnnotationAnchorFunction: " + b_drawArrow + " m_drawAnnotationAnchor: "+ m_drawAnnotationAnchor);
+			if (m_drawAnnotationAnchor && b_drawArrow)
 			{
 				var f_xc: Number = (f_x1 + f_x2) / 2;
 				var f_yc: Number = (f_y1 + f_y2) / 2;

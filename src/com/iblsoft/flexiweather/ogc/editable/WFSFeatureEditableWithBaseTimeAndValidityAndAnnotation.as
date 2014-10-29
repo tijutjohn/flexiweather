@@ -10,11 +10,13 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSIconSprite;
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSpriteWithAnnotation;
+	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.utils.AnnotationBox;
 	import com.iblsoft.flexiweather.utils.ISO8601Parser;
 	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayout;
 	import com.iblsoft.flexiweather.utils.draw.DrawMode;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
+	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 
 	import flash.display.DisplayObject;
 	import flash.display.Graphics;
@@ -69,8 +71,6 @@ package com.iblsoft.flexiweather.ogc.editable
 
 			graphics.clear();
 			//create sprites for reflections
-
-
 			var reflectionIDs: Array = m_featureData.reflectionsIDs;
 
 			for (var i: int = 0; i < totalReflections; i++)
@@ -98,6 +98,7 @@ package com.iblsoft.flexiweather.ogc.editable
 					var pt: Point = Point(reflection.editablePoints[0]);
 					if (pt)
 					{
+						var featureIsInsideViewBBox: Boolean = isReflectionFeatureInsideViewBBox(pt, reflectionDelta);
 						if (mb_isIconFeature && !displaySpriteWithAnnotation.bitmapLoaded && m_loadedIconBitmapData)
 						{
 							if (displaySpriteWithAnnotation is IWFSIconSprite)
@@ -105,7 +106,6 @@ package com.iblsoft.flexiweather.ogc.editable
 								(displaySpriteWithAnnotation as IWFSIconSprite).setBitmap(m_loadedIconBitmapData, pt, 0);
 							}
 						}
-//						trace("WFSFeatureEditableWithBaseTimeAndValidityAndAnnotation PT is  " + pt);
 						displaySpriteWithAnnotation.points = [pt];
 
 
@@ -115,71 +115,70 @@ package com.iblsoft.flexiweather.ogc.editable
 						{
 							isDisplayObjectInAnticollision = master.container.labelLayout.isObjectInside(displaySpriteWithAnnotation);
 							isAnnotationInAnticollision = master.container.labelLayout.isObjectInside(annotation);
-							//							if (!mb_spritesAddedToLabelLayout && master)
-//							if (featureIsVisible)
-//							{
-//
-//								var annotationDatelineSplitVisibility: Boolean = checkAnnotationVisibilityForSplittedFeature(annotationPositions, annotationPositions[reflectionDelta] as AnnotationPosition, projectionWidth / 2);
 
-								//								trace("Reflection : " + reflectionDelta + " isAnnotationInAnticollision: " + isAnnotationInAnticollision + " annotationDatelineSplitVisibility: " + annotationDatelineSplitVisibility);
-
-								if (!isDisplayObjectInAnticollision)
+							if (!isDisplayObjectInAnticollision)
+							{
+								if (featureIsInsideViewBBox)
 								{
 									//if object is not in anticollision layout and it should be there, we should add it
 									displaySpriteWithAnnotation.visible = true;
 									master.container.labelLayout.addObstacle(displaySpriteWithAnnotation, master);
-								} else {
-									trace("\tDisplaySprite is already in Anticollision");
-								}
-								if (!isAnnotationInAnticollision)
-								{
-									//if annotation is not in anticollision layout and it should be there, we should add it
-//									if (annotationDatelineSplitVisibility)
-//									{
+									if (!isAnnotationInAnticollision)
+									{
 										annotation.visible = true;
 										master.container.labelLayout.addObject(annotation, master, [displaySpriteWithAnnotation], i);
-										//								_addToLabelLayout = true;
-//									}
+									}
+								} else {
+									displaySpriteWithAnnotation.visible = false;
+									annotation.visible = false;
 								}
-//								else {
-//									annotation.visible = false;
-//									trace("\tAnnotation is already in Anticollision");
-//
-//									if (!annotationDatelineSplitVisibility)
-//									{
-//										master.container.labelLayout.removeObject(annotation);
-//										trace("\t\tAnnotation is already visible for different reflection (Should be splitted on dateline)");
-//									}
-//								}
-//							} else {
-								//for non visible features, remove them from anticollision
-//								if (isDisplayObjectInAnticollision)
-//									master.container.labelLayout.removeObject(displaySprite);
-//								if (isAnnotationInAnticollision)
-//									master.container.labelLayout.removeObject(annotation);
-//							}
+							} else {
+								trace("\tDisplaySprite is already in Anticollision");
+								if (!featureIsInsideViewBBox)
+								{
+									//remove it, as feature in current reflection is not inside view boox
+									master.container.labelLayout.removeObject(displaySpriteWithAnnotation);
+									if (isAnnotationInAnticollision)
+									{
+										master.container.labelLayout.removeObject(annotation);
+										annotation.visible = false;
+									}
+									displaySpriteWithAnnotation.visible = false;
+								} else {
+									displaySpriteWithAnnotation.visible = true;
+									annotation.visible = true;
+								}
+							}
+
 						}
 
-//						master.container.labelLayout.updateObjectReferenceLocation(annotation);
-
-
-//						if (!mb_spritesAddedToLabelLayout && master)
-//						{
-//							addToLabelLayout(annotation, displaySpriteWithAnnotation, master, master.container.labelLayout, i);
-//							_addToLabelLayout = true;
-//						} else {
-//							master.container.anticollisionObjectVisible(displaySpriteWithAnnotation, annotation.visible);
-//						}
 						displaySpriteWithAnnotation.update(this, annotation, getCurrentColor(0x000000), master.container.labelLayout, pt);
 					} else {
 						trace("WFSFeatureEditableWithBaseTimeAndValidityAndAnnotation PT is  NULL");
 					}
 				}
 			}
+		}
 
-//			if (!mb_spritesAddedToLabelLayout && _addToLabelLayout)
-//				mb_spritesAddedToLabelLayout = true;
+		/**
+		 * This class is for feature with single point, so it's easy to find out if feature is inside in view BBox. It's enough to check view bbox presence of only editable point for this feature
+		 *
+		 * @param pt
+		 * @return
+		 *
+		 */
+		private function isReflectionFeatureInsideViewBBox(pt: Point, reflectionDelta: int): Boolean
+		{
+			var isInsideViewBBox: Boolean = false;
+			var iw: InteractiveWidget = master.container;
+			if (iw)
+			{
+				var c: Coord = iw.pointToCoord(pt.x, pt.y);
+				isInsideViewBBox = iw.coordInside(c);
+			}
 
+			trace("isReflectionFeatureInsideViewBBox["+reflectionDelta+"] visible: "+ isInsideViewBBox + "{"+this+"}");
+			return isInsideViewBBox;
 		}
 
 		public function updateAnnotation(annotation: AnnotationBox, annotationPosition: Point, text: String = ""): void
