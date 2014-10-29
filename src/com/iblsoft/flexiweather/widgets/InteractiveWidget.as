@@ -1066,6 +1066,12 @@ package com.iblsoft.flexiweather.widgets
 		}
 
 
+		/**
+		 * Find out if coordinate is inside view bbox.
+		 * @param c
+		 * @return
+		 *
+		 */
 		public function coordInside(c: Coord): Boolean
 		{
 			if (!Projection.equalCRSs(c.crs, ms_crs))
