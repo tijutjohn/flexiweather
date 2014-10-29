@@ -21,7 +21,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayout;
 	import com.iblsoft.flexiweather.utils.draw.DrawMode;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
-	
+
 	import flash.display.DisplayObject;
 	import flash.display.Graphics;
 	import flash.events.MouseEvent;
@@ -34,93 +34,93 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 			if (m_featureData)
 			{
-				var reflection: FeatureDataReflection = m_featureData.getReflectionAt(0);
+				var reflection: FeatureDataReflection = m_featureData.getReflectionAt(m_featureData.reflectionsIDs[0]);
 				return getAnnotationForReflectionAt(reflection.reflectionDelta);
 			}
 			return null;
 		}
-		
+
 		override public function get getAnticollisionObject(): DisplayObject
 		{
 			return annotation;
 		}
-		
+
 		public function WFSFeatureEditableClosableCurveWithBaseTimeAndValidityAndAnnotation(s_namespace: String, s_typeName: String, s_featureId: String)
 		{
 			super(s_namespace, s_typeName, s_featureId);
 		}
-		
+
 		override public function clone(): WFSFeatureEditable
 		{
 			var feature: WFSFeatureEditable = super.clone();
 			(feature as WFSFeatureEditableClosableCurveWithBaseTimeAndValidityAndAnnotation).mb_closed = mb_closed;
 			return feature;
 		}
-		
+
 		override protected function drawCurve():void
 		{
 			drawAnnotation();
 		}
-		
-		
+
+
 		public function createAnnotation(): AnnotationBox
 		{
 			return null;
 		}
-		
+
 		public function drawAnnotation(): void
 		{
 //			clearGraphics();
-			
+
 			var annotation: AnnotationBox;
 			var reflection: FeatureDataReflection;
 			var _addToLabelLayout: Boolean;
-			
+
 			var a_points: Array = getPoints();
-			
+
 			//create sprites for reflections
-			
+
 //			var blackColor: uint = getCurrentColor(0x000000);
-			
+
 			var displaySprite: WFSFeatureEditableSprite;
-			
+
 			var pointsCount: int = a_points.length;
 			var ptAvg: Point;
 			var gr: Graphics;
-			
+
 			graphics.clear();
-			
+
 			var reflectionIDs: Array = m_featureData.reflectionsIDs;
-			
+
 			var projectionWidth: Number = master.container.getProjectionWidthInPixels();
-				
+
 			//annotation visibility for dateline splitted features
 			var annotationPositions: Dictionary = new Dictionary();
-			
+
 			var total: int = totalReflections;
 			for (var i: int = 0; i < total; i++)
 			{
 				var reflectionDelta: int = reflectionIDs[i];
-				
+
 				reflection = m_featureData.getReflectionAt(reflectionDelta);
 				if (reflection)
 				{
 					reflection.validate();
-					
+
 					var featureIsVisible: Boolean = true;
-					
+
 					ptAvg = reflection.center;
-					
+
 					displaySprite = getDisplaySpriteForReflectionAt(reflectionDelta);
 					gr = displaySprite.graphics;
-					
+
 					if(pointsCount <= 1)
 					{
 						displaySprite.clear();
 //						trace("displaySprite.clear: pointsCount: " + pointsCount);
 					} else {
-						
-						
+
+
 						if (reflection.points)
 						{
 							gr.clear();
@@ -140,23 +140,23 @@ package com.iblsoft.flexiweather.ogc.editable
 							}
 						}
 						displaySprite.points = reflection.points;
-						
+
 						annotation = getAnnotationForReflectionAt(reflectionDelta);
 						if (!annotation )
 						{
 							annotation = createAnnotation();
 							addAnnotationForReflectionAt(reflectionDelta, annotation);
 						}
-						
+
 						if (displaySprite is WFSFeatureEditableSpriteWithAnnotation)
 						{
 							(displaySprite as WFSFeatureEditableSpriteWithAnnotation).annotation = annotation;
 						}
-						
+
 						updateAnnotation(annotation, ptAvg);
-						
+
 						annotationPositions[reflectionDelta] = new AnnotationPosition(reflectionDelta, ptAvg);
-						
+
 						var isAnnotationInAnticollision: Boolean
 						var isDisplayObjectInAnticollision: Boolean
 						if (master)
@@ -166,11 +166,11 @@ package com.iblsoft.flexiweather.ogc.editable
 //							if (!mb_spritesAddedToLabelLayout && master)
 							if (featureIsVisible)
 							{
-								
+
 								var annotationDatelineSplitVisibility: Boolean = checkAnnotationVisibilityForSplittedFeature(annotationPositions, annotationPositions[reflectionDelta] as AnnotationPosition, projectionWidth / 2);
-								
+
 //								trace("Reflection : " + reflectionDelta + " isAnnotationInAnticollision: " + isAnnotationInAnticollision + " annotationDatelineSplitVisibility: " + annotationDatelineSplitVisibility);
-								
+
 								if (!isDisplayObjectInAnticollision)
 								{
 									//if object is not in anticollision layout and it should be there, we should add it
@@ -190,11 +190,11 @@ package com.iblsoft.flexiweather.ogc.editable
 									}
 								}
 								else {
-									annotation.visible = false;
-									trace("\tAnnotation is already in Anticollision");
-									
+
 									if (!annotationDatelineSplitVisibility)
 									{
+										annotation.visible = false;
+										trace("\tAnnotation is already in Anticollision");
 										master.container.labelLayout.removeObject(annotation);
 										trace("\t\tAnnotation is already visible for different reflection (Should be splitted on dateline)");
 									}
@@ -207,16 +207,16 @@ package com.iblsoft.flexiweather.ogc.editable
 									master.container.labelLayout.removeObject(annotation);
 							}
 						}
-						
+
 						master.container.labelLayout.updateObjectReferenceLocation(annotation);
 					}
 				}
 			}
-			
+
 //			if (!mb_spritesAddedToLabelLayout && _addToLabelLayout)
 //				mb_spritesAddedToLabelLayout = true;
 		}
-		
+
 		private function checkAnnotationVisibilityForSplittedFeature(annotationPositions: Dictionary, positionObject: AnnotationPosition, projectionWidthHalf: Number): Boolean
 		{
 			for each (var annotationObject: AnnotationPosition in annotationPositions)
@@ -229,23 +229,23 @@ package com.iblsoft.flexiweather.ogc.editable
 			}
 			return true;
 		}
-		
+
 		public function updateAnnotation(annotation: AnnotationBox, annotationPosition: Point, text: String = ""): void
 		{
 		}
-		
+
 		public function removeFromLabelLayout(annotation: AnnotationBox, displaySprite: WFSFeatureEditableSprite, labelLayout: AnticollisionLayout): void
 		{
 			labelLayout.removeObject(this);
 			labelLayout.removeObject(annotation);
 		}
-		
+
 		public function addToLabelLayout(annotation: AnnotationBox, displaySprite: WFSFeatureEditableSprite, layer: InteractiveLayer, labelLayout: AnticollisionLayout, i_reflection: uint): void
 		{
 			labelLayout.addObstacle(displaySprite, layer);
 			labelLayout.addObject(annotation,  layer,  [displaySprite], i_reflection);
 		}
-		
+
 		/*
 		override public function toInsertGML(xmlInsert: XML): void
 		{
@@ -330,7 +330,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			{
 				// PREPARE CURVE POINTS
 				ma_points = CubicBezier.calculateHermitSpline(m_points, mb_closed);
-					//ma_points = CubicBezier.calculateHermitSpline(m_points,  
+					//ma_points = CubicBezier.calculateHermitSpline(m_points,
 			}
 		}
 
@@ -370,7 +370,7 @@ package com.iblsoft.flexiweather.ogc.editable
 					&& selected)
 			{
 				var reflection: FeatureDataReflection;
-				
+
 				if (mb_closed)
 				{
 					// don't do anything if this click is on MoveablePoint belonging to this curve
@@ -395,7 +395,7 @@ package com.iblsoft.flexiweather.ogc.editable
 						// add point between 2 points
 						//add first point at the end to check possibility to insert point between last and first point
 						a.addItem((a.getItemAt(0) as Point).clone());
-						
+
 						for (var i: int = 1; i < a.length; ++i)
 						{
 							var ptPrev: Point = Point(a[i - 1]);
@@ -403,14 +403,14 @@ package com.iblsoft.flexiweather.ogc.editable
 							var f_distance: Number = ptPrev.subtract(pt).length + ptCurr.subtract(pt).length;
 							var f_distCurrPrev: Number = ptCurr.subtract(ptPrev).length * 1.3;
 							if (f_distance > ptCurr.subtract(ptPrev).length * 1.3)
-								continue; // skip, clicked to far from point 
+								continue; // skip, clicked to far from point
 							if (i_best == -1 || f_distance < f_bestDistance)
 							{
 								i_best = i;
 								f_bestDistance = f_distance;
 							}
 						}
-						
+
 						//remove last point as we have added it just for this test
 						a.removeItemAt(a.length - 1);
 					}
@@ -464,7 +464,7 @@ class AnnotationPosition
 {
 	public var reflectionDelta: int;
 	public var position: Point;
-	
+
 	public function AnnotationPosition(reflectionDelta: int, position: Point)
 	{
 		this.reflectionDelta = reflectionDelta;

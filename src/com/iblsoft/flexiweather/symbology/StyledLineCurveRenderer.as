@@ -2,7 +2,7 @@ package com.iblsoft.flexiweather.symbology
 {
 	import com.iblsoft.flexiweather.utils.CubicBezier;
 	import com.iblsoft.flexiweather.utils.DistanceMarkingCurveRenderer;
-	
+
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.CapsStyle;
@@ -24,7 +24,7 @@ package com.iblsoft.flexiweather.symbology
 		public static const FILL_STYLE_SOLID: String = 'Solid';
 		public static const FILL_STYLE_HORIZONTAL_LINES: String = 'HorizontalLines';
 		public static const FILL_STYLE_VERTICAL_LINES: String = 'VerticalLines';
-		public static const FILL_STYLE_CROSING_LINES: String = 'CrossingLines';
+		public static const FILL_STYLE_CROSSING_LINES: String = 'CrossingLines';
 		public static const FILL_STYLE_BACKWARD_DIAGONAL_LINES: String = 'BackwardDiagonalLines';
 		public static const FILL_STYLE_FORWARD_DIAGONAL_LINES: String = 'ForwardDiagonalLines';
 		public static const FILL_STYLE_CROSSING_DIAGONAL_LINES: String = 'CrossingDiagonalLines';
@@ -36,8 +36,8 @@ package com.iblsoft.flexiweather.symbology
 		protected var ms_fillStyle: String;
 		protected var mi_fillColor: uint;
 		// runtime variables
-		//protected var mf_currentDistance: Number = 0; 
-		//protected var mf_lastMarkDistance: Number = -1000; 
+		//protected var mf_currentDistance: Number = 0;
+		//protected var mf_lastMarkDistance: Number = -1000;
 		protected var mf_markStep: Number = 6;
 		protected var mf_paternStep: Number = 6;
 		protected var mi_lastPaternStep: int = 0;
@@ -55,28 +55,28 @@ package com.iblsoft.flexiweather.symbology
 		{
 			return mi_color;
 		}
-		
+
 		public function set color(value: uint): void
 		{
-			if (value != mi_color) 
+			if (value != mi_color)
 			{
 				mi_color = value;
 			}
 		}
-		
+
 		public function get fillColor(): uint
 		{
 			return mi_fillColor;
 		}
-		
+
 		public function set fillColor(value: uint): void
 		{
-			if (value != mi_fillColor) 
+			if (value != mi_fillColor)
 			{
 				mi_fillColor = value;
 			}
 		}
-		
+
 		public function set thickness(value: Number): void
 		{
 			mf_thickness = value;
@@ -146,9 +146,9 @@ package com.iblsoft.flexiweather.symbology
 		override public function started(x: Number, y: Number): void
 		{
 			setDefaultLineStyle();
-			
+
 			beginFill(mi_fillColor);
-			
+
 			m_graphics.moveTo(x, y);
 			mp_actMarkPoint = null;
 			mp_lastMarkPoint = null;
@@ -156,7 +156,7 @@ package com.iblsoft.flexiweather.symbology
 			mi_lastPaternStep = 0;
 			mi_counter = -1;
 			mark(x, y);
-			
+
 		}
 
 		override public function finished(x: Number, y: Number): void
@@ -380,7 +380,7 @@ package com.iblsoft.flexiweather.symbology
 			m_lastY = f_y;
 		}
 
-		
+
 		protected function beginFill(i_fillColor: uint): void
 		{
 //			if (isCurveClosed() && (ms_fillStyle != StyledLineCurveRenderer.FILL_STYLE_NONE)){
@@ -389,9 +389,9 @@ package com.iblsoft.flexiweather.symbology
 				m_graphics.beginBitmapFill(createFillBitmap(i_fillColor), null, true, false);
 			}
 		}
-		
+
 		/**
-		 * 
+		 *
 		 */
 		protected function endFill(): void
 		{
@@ -400,20 +400,20 @@ package com.iblsoft.flexiweather.symbology
 				m_graphics.endFill();
 			}
 		}
-		
+
 		/**
-		 * 
+		 *
 		 */
 		protected function createFillBitmap(i_fillColor: uint): BitmapData
 		{
 			var fillBitmapData: BitmapData = new BitmapData(16, 16, true, 0x00FFFFFF);//, 0x00000000);
 			var ix: int;
 			var iy: int;
-			
+
 			var nBitmap: Bitmap = new Bitmap(fillBitmapData);
-			
+
 			i_fillColor = getHexARGB(i_fillColor);
-			
+
 			switch (ms_fillStyle){
 				case StyledLineCurveRenderer.FILL_STYLE_SOLID:
 					fillBitmapData.fillRect(new Rectangle(0, 0, 16, 16), i_fillColor); //mi_fillColor);
@@ -426,7 +426,7 @@ package com.iblsoft.flexiweather.symbology
 						}
 					}
 					break;
-				
+
 				case StyledLineCurveRenderer.FILL_STYLE_VERTICAL_LINES:
 					for (ix = 0; ix < 16; ix = ix + 8){
 						for (iy = 0; iy < 16; iy++){
@@ -434,8 +434,8 @@ package com.iblsoft.flexiweather.symbology
 						}
 					}
 					break;
-				
-				case StyledLineCurveRenderer.FILL_STYLE_CROSING_LINES:
+
+				case StyledLineCurveRenderer.FILL_STYLE_CROSSING_LINES:
 					for (ix = 0; ix < 16; ix++){
 						for (iy = 0; iy < 16; iy = iy + 8){
 							fillBitmapData.setPixel32(ix, iy, i_fillColor);
@@ -490,28 +490,28 @@ package com.iblsoft.flexiweather.symbology
 					}
 					break;
 			}
-			
+
 			return(nBitmap.bitmapData);
 		}
-		
+
 		/**
-		 * 
+		 *
 		 */
 		protected function getHexARGB(color: uint, n_alpha: Number = 255): uint
 		{
 			var r: uint = ((color & 0xFF0000) >> 16);
 			var g: uint = ((color & 0x00FF00) >> 8);
 			var b: uint = ((color & 0x0000FF));
-			
+
 			var ret: uint = n_alpha << 24;
 			ret += (r << 16);
 			ret += (g << 8);
 			ret += (b);
-			
+
 			return(ret);
 		}
-		
-		
+
+
 		/**
 		 *
 		 */
