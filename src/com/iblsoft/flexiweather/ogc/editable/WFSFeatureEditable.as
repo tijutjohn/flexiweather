@@ -53,7 +53,14 @@ package com.iblsoft.flexiweather.ogc.editable
 			{
 				super.visible = value;
 
+				changeVisibilityForAnticollsionObjects(value);
+			}
+		}
+
+		protected function changeVisibilityForAnticollsionObjects(value: Boolean): void
+		{
 				var iw: InteractiveWidget = m_master.container;
+				//all reflection object should
 				iw.anticollisionObjectVisible(getAnticollisionObject, value);
 				iw.anticollisionObjectVisible(getAnticollisionObstacle, value);
 				iw.anticollisionForcedUpdate();
@@ -62,9 +69,8 @@ package com.iblsoft.flexiweather.ogc.editable
 					editableSpriteVisible(false);
 				else
 					editableSpriteVisible(mb_selected);
-			}
-		}
 
+		}
 		public function get selectedMoveablePointIndex(): int
 		{
 			return mi_actSelectedMoveablePointIndex;

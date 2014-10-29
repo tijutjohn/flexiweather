@@ -26,13 +26,23 @@ package com.iblsoft.flexiweather.utils.anticollision
 		public var managedChild: Boolean;
 		public var displacementMode: String;
 		private var m_referenceLocation: Point;
-		public var reflectionID: int;
+		private var m_reflectionDelta: int;
 		public var objectsToAnchor: Array;
 		public var anchorColor: uint = 0;
 		public var anchorAlpha: Number = 1;
 		public var drawAnchorArrow: Boolean = true;
 		public var manageVisibilityWithAnchors: Boolean
 		private var _visible: Boolean;
+
+		public function get reflectionDelta():int
+		{
+			return m_reflectionDelta;
+		}
+
+		public function set reflectionDelta(value:int):void
+		{
+			m_reflectionDelta = value;
+		}
 
 		public function get referenceLocation(): Point
 		{
@@ -57,7 +67,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 				_visible = value;
 				//set object visibility to save value
 				object.visible = value;
-				trace("AnticollisionLayoutObject VISIBLE CHANGED: " + _visible + " object["+object+"].visible: " + object.visible);
+				trace("AnticollisionLayoutObject [refl: "+ reflectionDelta+"] VISIBLE CHANGED: " + _visible + " object["+object+"].visible: " + object.visible);
 //				trace(this + " VISIBLE CHANGED");
 //			} else {
 //				trace("AnticollisionLayoutObject visible not changed: " + _visible + " object["+object+"].visible: " + object.visible);
@@ -66,7 +76,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 
 		public function toString(): String
 		{
-			return "ALO [" + name + "] " + object + " visible: " + visible;
+			return "ALO [" + name + "/"+reflectionDelta+"] " + object + " visible: " + visible;
 		}
 
 		public function AnticollisionLayoutObject(object: DisplayObject, l_layer: InteractiveLayer, b_managedChild: Boolean, i_displacementMode: String)
@@ -74,7 +84,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 			managedChild = b_managedChild;
 			displacementMode = i_displacementMode;
 			layer = l_layer;
-//			_object = object;
+//			_object = object;♣
 //			m_referenceLocation = new Point(_object.x, _object.y)
 			this.object = object;
 			m_referenceLocation = new Point(object.x, object.y)
@@ -85,6 +95,8 @@ package com.iblsoft.flexiweather.utils.anticollision
 				var kmlFeature: KMLFeature = (object as KMLLabel).kmlFeature;
 				kmlFeature.addEventListener(KMLFeatureEvent.KML_FEATURE_VISIBILITY_CHANGE, onKMLFeatureVisibilityChange);
 			}
+
+			trace("\nNEW "+ this);
 		}
 
 		private function onKMLFeatureVisibilityChange(event: KMLFeatureEvent): void

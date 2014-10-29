@@ -27,6 +27,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 	import com.iblsoft.flexiweather.utils.draw.DrawMode;
 	import com.iblsoft.flexiweather.utils.geometry.ILineSegmentApproximableBounds;
 	import com.iblsoft.flexiweather.utils.geometry.LineSegment;
+	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 
 	import flash.display.DisplayObject;
 	import flash.display.Graphics;
@@ -93,6 +94,34 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 		{
 			return new AnnotationTextBox();
 		}
+
+		/*
+		override protected function changeVisibilityForAnticollsionObjects(value: Boolean): void
+		{
+			super.changeVisibilityForAnticollsionObjects(value);
+
+			if (master && master.container && master.container.labelLayout)
+			{
+				var displaySprite: WFSFeatureEditableSprite;
+				var reflection: FeatureDataReflection;
+
+				//create sprites for reflections
+
+				var reflectionIDs: Array = m_featureData.reflectionsIDs;
+
+				for (var i: int = 0; i < totalReflections; i++)
+				{
+					var reflectionDelta: int = reflectionIDs[i];
+
+					reflection = m_featureData.getReflectionAt(reflectionDelta);
+					WFSFeatureEditableSprite = getDisplaySpriteForReflectionAt(reflectionDelta) as WFSFeatureEditableSprite;
+
+					removeFromLabelLayout(radiationSprite.annotation, radiationSprite, master.container.labelLayout);
+				}
+			}
+		}
+		*/
+
 		protected function addLabel(master: InteractiveLayerWFS, reflection: FeatureDataReflection, s_text: String, pt: Point, rlX: Number, rlY: Number): void
 		{
 			//just to add sprite to array to let it removed in update() function
