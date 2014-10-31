@@ -2667,7 +2667,7 @@ package com.iblsoft.flexiweather.widgets
 						if (prevCObject)
 						{
 							prevC = prevCObject.coord;
-							if (cObject)
+							if (cObject && cObject.coord)
 							{
 								c = cObject.coord;
 	//							trace("mapLineCoordToViewReflections : " + prevC.toString() + " , " + c.toString());
@@ -2786,7 +2786,8 @@ package com.iblsoft.flexiweather.widgets
 								}
 							}
 						}
-						prevCObject = cObject;
+						if (cObject.coord)
+							prevCObject = cObject;
 					}
 
 				}
