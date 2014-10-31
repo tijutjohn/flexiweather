@@ -147,7 +147,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 				if (pt)
 				{
 					update(FeatureUpdateContext.fullUpdate());
-					master.container.labelLayout.update();
+					master.container.labelLayout.invalidateLayout();
 				}
 
 
@@ -287,18 +287,6 @@ class RadiationSprite extends WFSFeatureEditableSpriteWithAnnotation implements 
 
 		return a;
 	}
-
-//	public function removeFromLabelLayout(labelLayout: AnticollisionLayout): void
-//	{
-//		labelLayout.removeObject(this);
-//		labelLayout.removeObject(radiationAnnotation);
-//	}
-//
-//	public function addToLabelLayout(radiation: WFSFeatureEditableRadiation, layer: InteractiveLayer, labelLayout: AnticollisionLayout, i_reflection: uint): void
-//	{
-//		labelLayout.addObstacle(this, layer);
-//		labelLayout.addObject(radiationAnnotation,  layer,  [this], i_reflection);
-//	}
 
 	override public function update(feature: WFSFeatureEditableWithBaseTimeAndValidityAndAnnotation, annotation: AnnotationBox, blackColor: uint, labelLayout: AnticollisionLayout, pt: Point): void
 	{

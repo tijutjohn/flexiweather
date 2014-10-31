@@ -18,6 +18,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.CubicBezier;
 	import com.iblsoft.flexiweather.utils.ICurveRenderer;
+	import com.iblsoft.flexiweather.utils.ProfilerUtils;
 	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayout;
 	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayoutObject;
 	import com.iblsoft.flexiweather.utils.draw.DrawMode;
@@ -307,11 +308,21 @@ package com.iblsoft.flexiweather.widgets
 			addEventListener(ResizeEvent.RESIZE, onResized);
 			addEventListener(ElementExistenceEvent.ELEMENT_ADD, onElementAdd);
 			addEventListener(FlexEvent.CREATION_COMPLETE, onWidgetCreationComplete);
+			addEventListener(Event.ENTER_FRAME, onWidgetEnterFrame);
 			m_lastResizeTime = getTimer();
 
 			initializeDefaultProjection();
 		}
 
+		/**
+		 * Debug function to test what is executed between frames. This function just write "NEW FRAME" to console.
+		 * @param event
+		 *
+		 */
+		private function onWidgetEnterFrame(event: Event): void
+		{
+//			trace("NEW TICK");
+		}
 		private function initializeDefaultProjection(): void
 		{
 			ms_crs = Projection.CRS_GEOGRAPHIC;
@@ -388,9 +399,9 @@ package com.iblsoft.flexiweather.widgets
 			if (_forceAnticollisionUpdate)
 			{
 				notifyAnticollisionUpdate();
-				m_labelLayout.update();
+				m_labelLayout.invalidateLayout();
 				notifyAnticollisionUpdate();
-				m_objectLayout.update();
+				m_objectLayout.invalidateLayout();
 
 				_forceAnticollisionUpdate = false;
 			}
@@ -2492,6 +2503,9 @@ package com.iblsoft.flexiweather.widgets
 		 */
 		private function _drawGeoLine(coordFrom: Coord, coordTo: Coord, drawMode: String, d_reflectionToSegmentPoints: Dictionary, featureData: FeatureData = null, featureDataLineID: int = 0): void
 		{
+			var currTime: Number = getTimer();
+			var bDebugTimes: Boolean = false;
+
 			if (!coordFrom && !coordTo)
 				return;
 
@@ -2590,7 +2604,7 @@ package com.iblsoft.flexiweather.widgets
 					tempCoords = [new EdgeCoord(coordTo, false, true)];
 			}
 
-
+			if (bDebugTimes) trace("\t\t _drawGeoPolyLine - 1 - took " + (getTimer() - currTime) + "ms.");
 			// coords can now contain null to mark point of discontinuity if line crosses dateline or projection boundaries
 
 			var i_part: int = 0;
@@ -2616,6 +2630,7 @@ package com.iblsoft.flexiweather.widgets
 				}
 			}
 
+			if (bDebugTimes) trace("\t\t _drawGeoPolyLine - 2 - took " + (getTimer() - currTime) + "ms.");
 			//if line crosses dateline there must be at least 2 continuosParts items
 //			debug("_drawGeoLine ContinosParts: "+ continousParts.length);
 
@@ -2639,6 +2654,8 @@ package com.iblsoft.flexiweather.widgets
 				var viewBBoxNorthLine: LineSegment = new LineSegment(m_viewBBox.xMin, m_viewBBox.yMin, m_viewBBox.xMax, m_viewBBox.yMin);
 				var viewBBoxSouthLine: LineSegment = new LineSegment(m_viewBBox.xMin, m_viewBBox.yMax, m_viewBBox.xMax, m_viewBBox.yMax);
 
+				var helpTime: Number;
+
 				var line: FeatureDataLineSegment;
 				for each(part in continousParts)
 				{
@@ -2655,9 +2672,11 @@ package com.iblsoft.flexiweather.widgets
 								c = cObject.coord;
 	//							trace("mapLineCoordToViewReflections : " + prevC.toString() + " , " + c.toString());
 
+								if (bDebugTimes) helpTime = startProfileTimer();
 								//find reflections of line defined by coords prevC and c in projection extent
 //								reflections = mapLineCoordToViewReflections(prevC, c, projectionExtent);
 								reflections = mapLineCoordToViewReflections(prevC, c, m_viewBBox);
+								if (bDebugTimes) stopProfileTimer(helpTime, '\t\t\t mapLineCoordToViewReflections');
 
 								var origLine: FeatureDataLineSegment = new FeatureDataLineSegment(prevC.x, prevC.y,c.x, c.y, true, prevCObject.editable, cObject.editable);
 								//temporary check why line is not drawn when it's partially not visible
@@ -2665,6 +2684,7 @@ package com.iblsoft.flexiweather.widgets
 
 								for each(o in reflections)
 								{
+									if (bDebugTimes) helpTime = startProfileTimer();
 									s_reflectionId = String(o.reflection);
 									reflectedSegmentPoints = d_reflectionToSegmentPoints[s_reflectionId];
 
@@ -2680,6 +2700,13 @@ package com.iblsoft.flexiweather.widgets
 
 									var bLineIsInsideViewBBox: Boolean = line.isInsideBox(m_viewBBox);
 									var bLineIsIntersectedWithViewBBox: Boolean = line.isIntersectedBox(viewBBoxWestLine, viewBBoxEastLine, viewBBoxNorthLine, viewBBoxSouthLine);
+
+									if (bDebugTimes)
+									{
+										stopProfileTimer(helpTime, '\t\t\t bLineIsInsideViewBBox: ' + bLineIsInsideViewBBox + ', bLineIsIntersectedWithViewBBox: ' + bLineIsIntersectedWithViewBBox);
+										helpTime = startProfileTimer();
+									}
+
 //									if (!bLineIsInsideViewBBox && !bLineIsIntersectedWithViewBBox)
 //									{
 //										if (o.reflection == -1 || o.reflection == 0)
@@ -2732,6 +2759,8 @@ package com.iblsoft.flexiweather.widgets
 //										if (o.reflection == -1 || o.reflection == 0)
 //											debug("There is no intersection with current viewBBox: [Reflection: " + o.reflection + ", line ID: " + featureDataLineID+"]");
 									}
+
+									if (bDebugTimes) stopProfileTimer(helpTime, '\t\t\t add line');
 								}
 								if (!bTemporaryIsInReflection)
 								{
@@ -2809,15 +2838,33 @@ package com.iblsoft.flexiweather.widgets
 				}
 			}
 
+			if (bDebugTimes) trace("\t\t _drawGeoPolyLine - 3 - took " + (getTimer() - currTime) + "ms.");
+
 			for(s_reflectionId in d_reflectionToSegmentPoints) {
 				reflectedSegmentPoints = d_reflectionToSegmentPoints[s_reflectionId];
 				if(reflectedSegmentPoints.length > 0 && reflectedSegmentPoints[reflectedSegmentPoints.length - 1] != null)
 					reflectedSegmentPoints.push(null);
 			}
 
+			if (bDebugTimes) trace("\t_drawGeoPolyLine took " + (getTimer() - currTime) + "ms.");
+
 		}
 
+		protected function startProfileTimer(): Number
+		{
+			return ProfilerUtils.startProfileTimer();
+		}
 
+		/**
+		 * Return time interval in seconds
+		 * @param startTime
+		 * @return
+		 *
+		 */
+		protected function stopProfileTimer(startTime: Number, text: String): void
+		{
+			trace(ProfilerUtils.formatStringProfileTimer(startTime, text));
+		}
 
 		private function _drawReflectedSegmentPoints(rendererCreator: Function, d_reflectionToSegmentPoints: Dictionary): void
 		{
@@ -2929,6 +2976,7 @@ package com.iblsoft.flexiweather.widgets
 		 */
 		public function drawSmoothPolyLine(rendererCreator: Function, coords: Array, drawMode: String, b_closed: Boolean = false, b_justCompute: Boolean = false,  featureData: FeatureData = null, b_fixDateline: Boolean = false): void
 		{
+			var currTime: Number = getTimer();
 //			trace("****************************************************************************");
 //			trace("DRAW SMOOTH POLYLINE \n");
 			//debug coords
@@ -2960,6 +3008,7 @@ package com.iblsoft.flexiweather.widgets
 
 			renderer.drawSmoothDatelineDividedParts(rendererCreator, coords, drawMode, b_closed, b_justCompute, featureData, b_fixDateline);
 
+			trace("drawSmoothPolyLine took " + (getTimer() - currTime) + "ms.");
 //			trace("****************************************************************************");
 		}
 
@@ -3042,6 +3091,7 @@ package com.iblsoft.flexiweather.widgets
 		 */
 		public function drawGeoPolyLine(rendererCreator: Function, coords: Array, drawMode: String, b_closed: Boolean = false, b_justCompute: Boolean = false, featureData: FeatureData = null): void
 		{
+			var currTime: Number = getTimer();
 //			trace("InteractiveWidget drawGeoPolyLine");
 			var d_reflectionToSegmentPoints: Dictionary = new Dictionary();
 			var cPrev: Coord = null;
@@ -3102,6 +3152,8 @@ package com.iblsoft.flexiweather.widgets
 
 			if (!b_justCompute)
 				_drawReflectedSegmentPoints(rendererCreator, d_reflectionToSegmentPoints);
+
+			trace("drawGeoPolyLine took " + (getTimer() - currTime) + "ms.");
 		}
 
 		/**
@@ -3272,12 +3324,12 @@ package com.iblsoft.flexiweather.widgets
 				if (m_labelLayout.needsUpdate())
 				{
 					notifyAnticollisionUpdate();
-					m_labelLayout.update();
+					m_labelLayout.invalidateLayout();
 				}
 				if (m_objectLayout.needsUpdate())
 				{
 					notifyAnticollisionUpdate();
-					m_objectLayout.update();
+					m_objectLayout.invalidateLayout();
 				}
 			}
 		}
@@ -3488,6 +3540,7 @@ import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 
 import flash.events.Event;
 import flash.geom.Point;
+import flash.utils.getTimer;
 
 class WidgetSize
 {
@@ -3690,6 +3743,8 @@ class SmoothRendererNew
 
 	public function smoothDatelineOptimization(coords: Array, b_fixDateline: Boolean = false): Array
 	{
+		var currTime: Number = getTimer();
+
 		var projection: Projection = _iw.getCRSProjection();
 		var projectionWidth: Number = projection.extentBBox.width;
 
@@ -3734,11 +3789,14 @@ class SmoothRendererNew
 			newCoords.push(new EdgeCoord(coordTo, false, true));
 		}
 
+		trace("smoothDatelineOptimization took " + (getTimer() - currTime) + "ms.");
+
 		return newCoords;
 	}
 
 	public function drawSmoothDatelineDividedParts(rendererCreator: Function, coords: Array, drawMode: String, b_closed: Boolean = false, b_justCompute: Boolean = false,  featureData: FeatureData = null, b_fixDateline: Boolean = false): void
 	{
+		var currTime: Number = getTimer();
 		var splinePoints: Array;
 		var splineCoords: Array
 
@@ -3822,6 +3880,7 @@ class SmoothRendererNew
 			}
 
 		}
+		trace("drawSmoothDatelineDividedParts took " + (getTimer() - currTime) + "ms.");
 	}
 
 	private function splitSplineCoords(coords: Array): Array

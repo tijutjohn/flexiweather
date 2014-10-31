@@ -35,7 +35,7 @@ package com.iblsoft.flexiweather.ogc.kml
 	import com.iblsoft.flexiweather.utils.ProfilerUtils;
 	import com.iblsoft.flexiweather.utils.ScreenUtils;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
-	
+
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
@@ -46,7 +46,7 @@ package com.iblsoft.flexiweather.ogc.kml
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
-	
+
 	import mx.controls.Alert;
 	import mx.core.ClassFactory;
 	import mx.core.EventPriority;
@@ -69,7 +69,7 @@ package com.iblsoft.flexiweather.ogc.kml
 		override public function set visible(b_visible:Boolean):void
 		{
 			super.visible = b_visible;
-			
+
 //			if (b_visible)
 //			{
 				_visibilityChanged = true;
@@ -77,7 +77,7 @@ package com.iblsoft.flexiweather.ogc.kml
 				update(FeatureUpdateContext.fullUpdate());
 //			}
 		}
-			
+
 		public var kmzFile: KMZFile;
 		public var itemRenderer: Class;
 		private var _itemRendererInstance: IKMLRenderer;
@@ -133,7 +133,7 @@ package com.iblsoft.flexiweather.ogc.kml
 				_syncManager = new AsyncManager('syncManager');
 			if (!_syncManagerFullUpdate)
 				_syncManagerFullUpdate = new AsyncManager('fullSyncManager');
-			
+
 			bmp = new Bitmap();
 		}
 
@@ -148,7 +148,7 @@ package com.iblsoft.flexiweather.ogc.kml
 			}
 			if (!_syncManagerFullUpdate.parent)
 				addChild(_syncManagerFullUpdate);
-			
+
 			addChild(bmp);
 			bmp.visible = false;
 		}
@@ -172,7 +172,7 @@ package com.iblsoft.flexiweather.ogc.kml
 			while (featuresForUnloading.length > 0)
 			{
 				var currFeature: KMLFeature = featuresForUnloading.shift() as KMLFeature;
-				
+
 				//FIXME we need to have reflectionIDs
 				var reflectionID: uint = 0;
 				var window: IFlexDisplayObject = KMLPopupManager.getInstance().getPopUpForFeature(currFeature, reflectionID);
@@ -268,8 +268,8 @@ package com.iblsoft.flexiweather.ogc.kml
 
 		private function kmlParsingFinished(): void
 		{
-			container.labelLayout.update();
-			container.objectLayout.update();
+			container.labelLayout.invalidateLayout();
+			container.objectLayout.invalidateLayout();
 		}
 
 		public function canContainFeatures(feature: KMLFeature): Boolean
@@ -454,7 +454,7 @@ package com.iblsoft.flexiweather.ogc.kml
 			{
 				if (reflectionID == -1)
 					reflectionID = 0;
-				
+
 				infoWindow = new KMLInfoWindow();
 				infoWindow.feature = feature;
 				infoWindow = kmlPM.addPopUp(infoWindow, FlexGlobals.topLevelApplication as DisplayObject, feature, this.container, reflectionID) as KMLInfoWindow;
@@ -463,11 +463,11 @@ package com.iblsoft.flexiweather.ogc.kml
 				kmlPM.centerPopUpOnFeature(infoWindow);
 			}
 		}
-			
+
 		private function onInfoWindowCreated(event: FlexEvent): void
 		{
 			var kmlPM: KMLPopupManager = KMLPopupManager.getInstance();
-			
+
 			var infoWindow: KMLInfoWindow = event.target as KMLInfoWindow;
 			kmlPM.centerPopUpOnFeature(infoWindow);
 		}
@@ -500,7 +500,7 @@ package com.iblsoft.flexiweather.ogc.kml
 					return;
 				}
 			}
-			
+
 			m_boundaryRect = new Rectangle(0, 0, width, height);
 			var time: int;
 			if (changeFlag.fullUpdateNeeded && _syncManagerFullUpdate)
@@ -509,12 +509,12 @@ package com.iblsoft.flexiweather.ogc.kml
 				_syncManagerFullUpdate.stop();
 				_syncManagerFullUpdate.maxCallsPerTick = 30;
 				time = ProfilerUtils.startProfileTimer();
-				
+
 				updateForFeature(firstFeature as KMLFeature, changeFlag, _syncManagerFullUpdate);
-				
+
 				if (firstFeature)
 					(firstFeature as KMLFeature).debug("ILKML full update add calls: " + ProfilerUtils.stopProfileTimer(time) + " ms");
-				
+
 				if (_syncManagerFullUpdate.notEmpty)
 					_syncManagerFullUpdate.start();
 			}
@@ -544,14 +544,14 @@ package com.iblsoft.flexiweather.ogc.kml
 //			var viewBBox: BBox = container.getViewBBox();
 //			if (viewBBox.pointInside(feature.x, feature.y))
 //			{
-//				
+//
 //			} else {
-//				
+//
 //			}
 			feature.featureScale = kmlFeatureScaleX;
 			feature.update(changeFlag);
 			feature.visible = visible; //  true; //getAbsoluteVisibility(feature);
-			
+
 			if (_visibilityChanged)
 				_visibilityChanged = false;
 //			if (feature is Container)
@@ -613,68 +613,68 @@ package com.iblsoft.flexiweather.ogc.kml
 				}
 			}
 			super.commitProperties();
-			
+
 			if (_suspendUpdating)
 			{
 				drawImagePartAsBitmap(graphics);
 			}
 		}
-		
+
 		private var bmp: Bitmap;
-		
+
 		public function testPan(event: DynamicEvent): void
 		{
 			var diff: Point = event['pixelsDiff'] as Point;
 			bmp.x += diff.x;
 			bmp.y += diff.y;
 		}
-		
+
 		private function drawImagePartAsBitmap(graphics: Graphics): void
 		{
 			if (FlexiWeatherConfiguration.USE_KML_BITMAP_PANNING)
 			{
 //				removeVectorData();
-			
-			
+
+
 				var ptImageStartPoint: Point = container.coordToPoint(imageStartCoord);
 				var ptImageEndPoint: Point = container.coordToPoint(imageEndCoord);
-				
+
 				ptImageEndPoint.x += 1;
 				ptImageEndPoint.y += 1;
-				
+
 				var ptImageSize: Point = ptImageEndPoint.subtract(ptImageStartPoint);
 				ptImageSize.x = int(Math.round(ptImageSize.x));
 				ptImageSize.y = int(Math.round(ptImageSize.y));
-				
+
 				var matrix: Matrix = new Matrix();
 				matrix.scale(ptImageSize.x / bmp.width, ptImageSize.y / bmp.height);
 				matrix.translate(ptImageStartPoint.x, ptImageStartPoint.y);
-				
+
 				graphics.clear();
 				graphics.beginBitmapFill(bmp.bitmapData, matrix, true, true);
 				graphics.drawRect(ptImageStartPoint.x, ptImageStartPoint.y, ptImageSize.x, ptImageSize.y);
 				graphics.endFill();
 			}
-		} 
-		
-		private var imageStartCoord: Coord; 
-		private var imageEndCoord: Coord; 
-		
+		}
+
+		private var imageStartCoord: Coord;
+		private var imageEndCoord: Coord;
+
 		private function createBitmapPreview(): void
 		{
 			if (FlexiWeatherConfiguration.USE_KML_BITMAP_PANNING)
 			{
 				var s_imageCRS: String = container.crs;
 				var imageBBox: BBox = container.getViewBBox();
-				
+
 				imageStartCoord = new Coord(s_imageCRS, imageBBox.xMin, imageBBox.yMax);
 				imageEndCoord = new Coord(s_imageCRS, imageBBox.xMax, imageBBox.yMin);
-				
+
 				hideAllFeatures();
 				bmp.x = 0;
 				bmp.y = 0;
 				bmp.bitmapData = new BitmapData(width, height, true, 0x00000000);
-				bmp.bitmapData.draw(m_featuresContainer); 
+				bmp.bitmapData.draw(m_featuresContainer);
 //				bmp.visible = true;
 			}
 		}
@@ -682,16 +682,16 @@ package com.iblsoft.flexiweather.ogc.kml
 		{
 			if (FlexiWeatherConfiguration.USE_KML_BITMAP_PANNING)
 			{
-				bmp.x = 0; 
+				bmp.x = 0;
 				bmp.y = 0;
 				bmp.bitmapData.dispose();
 				bmp.visible = false;
-				
+
 				showAllFeatures();
 			}
-			
+
 		}
-		
+
 		override public function onAreaChanged(b_finalChange: Boolean): void
 		{
 			if (_suspendUpdating)
@@ -706,7 +706,7 @@ package com.iblsoft.flexiweather.ogc.kml
 				invalidateProperties();
 				return;
 			}
-			
+
 			super.onAreaChanged(b_finalChange);
 			//FIXME this should not be called if panning or zooming is still in progress
 			//invalidateDynamicPart();

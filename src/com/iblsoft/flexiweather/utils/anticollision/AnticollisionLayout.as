@@ -52,7 +52,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 	 * If object does not implement ILineApproximableBounds the it's assumed that the object
 	 * is rectangle.
 	 **/
-	public class AnticollisionLayout extends Sprite
+	public class AnticollisionLayout extends UIComponent
 	{
 
 		/**
@@ -118,11 +118,11 @@ package com.iblsoft.flexiweather.utils.anticollision
 		private var _parentContainer: InteractiveWidget;
 
 		public static var uid: int = 0;
-		public var id: int;
+		public var anticollisionLayoutID: int = 0;
 
 		public function AnticollisionLayout(layoutName: String, parent: DisplayObject)
 		{
-			id = uid++;
+//			anticollisionLayoutID = uid++;
 			super();
 
 			_parentContainer = parent as InteractiveWidget;
@@ -373,7 +373,26 @@ package com.iblsoft.flexiweather.utils.anticollision
 		}
 		private var _updateLocked: Boolean;
 
-		public function update(): void
+		private var _anticollisionLayoutChanged: Boolean;
+
+		public function invalidateLayout(): void
+		{
+			_anticollisionLayoutChanged = true;
+			invalidateProperties();
+		}
+
+		override protected function commitProperties():void
+		{
+			super.commitProperties();
+
+			if (_anticollisionLayoutChanged)
+			{
+				update();
+				_anticollisionLayoutChanged = false;
+			}
+		}
+
+		private function update(): void
 		{
 			if (!m_suspendAnticollisionProcessing && !_updateLocked)
 			{
@@ -423,13 +442,13 @@ package com.iblsoft.flexiweather.utils.anticollision
 						{
 							newVisibility = newVisibility && lo.layer.visible;
 						}
-						debug("ACL manageVisibilityWithAnchors obj: " +  lo.object + " absolute visibility: " + newVisibility);
+						debug("ACL manageVisibilityWithAnchors absolute visibility: " + newVisibility + " OBJECT: " +  lo);
 						lo.visible = newVisibility;
 					} else {
 						var object: DisplayObject = lo.object as DisplayObject;
 						var objectBounds: Rectangle = object.getBounds(this);
 						var objectAbsoluteVisibility: Boolean = getAbsoluteVisibility(object);
-						debug("ACL obj: " +  lo.object + "[bounds: " + objectBounds+"] m_boundaryRect: " + m_boundaryRect + " absolute visibility: " + objectAbsoluteVisibility);
+						debug("ACL [bounds: " + objectBounds+"] m_boundaryRect: " + m_boundaryRect + " absolute visibility: " + objectAbsoluteVisibility + " |  OBJECT: " +  lo);
 						if (lo.layer && objectAbsoluteVisibility)
 						{
 							objectAbsoluteVisibility = lo.layer.visible;
@@ -823,7 +842,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 			if (mb_dirty)
 			{
 				if (getTimer() - mi_lastUpdate > m_updateInterval)
-					update();
+					invalidateLayout();
 			}
 		}
 
@@ -839,7 +858,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 				m_suspendAnticollisionProcessing = value;
 				if (_areaChangedScheduled)
 					areaChanged(_areaChangedScheduledBBox);
-				update();
+				invalidateLayout();
 			}
 		}
 
@@ -877,7 +896,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 
 		override public function toString(): String
 		{
-			return "AnticollistionLayout [" + _layoutName + " / " + id + "] parent: " + _parentContainer.id;
+			return "AnticollistionLayout [" + _layoutName + " / " + anticollisionLayoutID + "] parent: " + _parentContainer.id;
 		}
 
 		public function getAnticollisionLayoutObjectsForLayer(layer: InteractiveLayer): Array

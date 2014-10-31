@@ -3,6 +3,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 	import com.iblsoft.flexiweather.ogc.data.ReflectionData;
 
 	import flash.utils.Dictionary;
+	import flash.utils.getTimer;
 
 	public class FeatureData
 	{
@@ -130,7 +131,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		 */
 		public function joinLinesFromReflections(): void
 		{
-
+			var currTime: Number = getTimer();
 			var total: int = reflectionsLength;
 			if (total == 0)
 				return;
@@ -206,8 +207,13 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			var cnt: int = startingID;
 			var tempRefl: FeatureDataReflection;
 
+			var currTime: Number = getTimer();
 			while(cnt <= lastID)
 			{
+				if ((getTimer() - currTime) > 5000)
+				{
+					trace("	joinLinesFromReflections 1 infinite loop");
+				}
 				if (currentReflection.hasLineAt(cnt))
 				{
 					tempLines.push(currentReflection.getLineAt(cnt));
@@ -218,6 +224,10 @@ package com.iblsoft.flexiweather.ogc.editable.data
 					var ok: Boolean = true;
 					while(ok)
 					{
+						if ((getTimer() - currTime) > 5000)
+						{
+							trace("	joinLinesFromReflections 2 infinite loop");
+						}
 						helper = tempDict[currentReflection] as ReflectionHelper;
 						currentReflection = helper.previousReflection;
 						if (currentReflection)
@@ -250,6 +260,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 							currentReflection = tempRefl;
 							tempRefl = null;
 							ok = false;
+							cnt++;
 						}
 					}
 				}
@@ -257,7 +268,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 
 			lines = tempLines;
 			compute();
-			trace(this + " has computed LINES");
+			trace(this + " has computed LINES - Time:" + (getTimer() - currTime) + "ms.");
 		}
 
 		/**
@@ -266,6 +277,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		 */
 		private function compute(): void
 		{
+			var currTime: Number = getTimer();
 //			trace("********************************************************");
 //			trace("\t COMPUTE START" + this);
 			if (_points.length > 0)
@@ -351,6 +363,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			_center.y /= total;
 
 			//			trace("\t COMPUTE END avg: " + _center + " > " + this);
+			trace("compute took " + (getTimer() - currTime) + "ms.");
 		}
 
 		public function get startPoint(): FeatureDataPoint

@@ -189,7 +189,7 @@ package com.iblsoft.flexiweather.ogc.editable
 							oldSItem, m_selectedItem, this));
 				}
 				// force update of labels layout
-				container.labelLayout.update();
+				container.labelLayout.invalidateLayout();
 			}
 		}
 
@@ -248,13 +248,13 @@ package com.iblsoft.flexiweather.ogc.editable
 
 							var featureDataReflection: FeatureDataReflection = wfsEditableItem.getReflection(reflectionDelta);
 							var displaySprite: WFSFeatureEditableSprite = wfsEditableItem.getDisplaySpriteForReflectionAt(reflectionDelta);
-							if (displaySprite)
-							{
-								if (displaySprite.hitTestPoint(f_stageX, f_stageY, true))
-								{
-									trace("Display Sprite at ["+featureDataReflection.reflectionDelta+"] HITTED");
-								}
-							}
+//							if (displaySprite)
+//							{
+//								if (displaySprite.hitTestPoint(f_stageX, f_stageY, true))
+//								{
+//									trace("Display Sprite at ["+featureDataReflection.reflectionDelta+"] HITTED");
+//								}
+//							}
 						}
 					}
 				}
