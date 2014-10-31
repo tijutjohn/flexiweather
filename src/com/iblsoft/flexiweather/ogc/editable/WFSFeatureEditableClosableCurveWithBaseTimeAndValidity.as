@@ -118,6 +118,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			}
 		}
 
+		/*
 		override protected function drawFeatureData(g:ICurveRenderer, m_featureData:FeatureData):void
 		{
 			if (!isCurveClosed())
@@ -191,6 +192,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				//				trace("\n");
 			}
 		}
+		*/
 		/*
 		override public function toInsertGML(xmlInsert: XML): void
 		{

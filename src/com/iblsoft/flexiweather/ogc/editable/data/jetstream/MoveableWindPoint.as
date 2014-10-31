@@ -21,6 +21,11 @@ package com.iblsoft.flexiweather.ogc.editable.data.jetstream
 
 //		private var _debugTF: TextField;
 
+		public function get position(): Point
+		{
+			return m_pt;
+		}
+
 		/**
 		 *
 		 */
@@ -28,7 +33,7 @@ package com.iblsoft.flexiweather.ogc.editable.data.jetstream
 		{
 			super(feature, i_pointIndex, i_reflectionDelta);
 
-			m_pt = WFSFeatureEditableJetStream(feature).getWindPoint(i_pointIndex, i_reflectionDelta);
+			invalidatePosition();
 
 //			_debugTF = new TextField();
 //			addChild(_debugTF);
@@ -88,6 +93,12 @@ package com.iblsoft.flexiweather.ogc.editable.data.jetstream
 			}
 
 			return true;
+		}
+
+		public function invalidatePosition(): void
+		{
+			m_pt = WFSFeatureEditableJetStream(m_feature).getWindPoint(pointIndex, reflectionDelta);
+			update();
 		}
 
 		override public function onMouseDoubleClick(pt: Point, event: MouseEvent): Boolean

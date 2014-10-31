@@ -116,18 +116,20 @@ package com.iblsoft.flexiweather.ogc.editable
 							isDisplayObjectInAnticollision = master.container.labelLayout.isObjectInside(displaySpriteWithAnnotation);
 							isAnnotationInAnticollision = master.container.labelLayout.isObjectInside(annotation);
 
+							trace("CHECK ANTICOLLISION OBJECTS: featureIsInsideViewBBox: " + featureIsInsideViewBBox + " pt: " + pt);
+							trace("sprite: " + displaySpriteWithAnnotation + " ANNOTATION: " + annotation);
 							if (!isDisplayObjectInAnticollision)
 							{
 								if (featureIsInsideViewBBox)
 								{
 									//if object is not in anticollision layout and it should be there, we should add it
-									displaySpriteWithAnnotation.visible = true;
 									master.container.labelLayout.addObstacle(displaySpriteWithAnnotation, master);
 									if (!isAnnotationInAnticollision)
 									{
-										annotation.visible = true;
 										master.container.labelLayout.addObject(annotation, master, [displaySpriteWithAnnotation], i);
+										annotation.visible = true;
 									}
+									displaySpriteWithAnnotation.visible = true;
 								} else {
 									displaySpriteWithAnnotation.visible = false;
 									annotation.visible = false;

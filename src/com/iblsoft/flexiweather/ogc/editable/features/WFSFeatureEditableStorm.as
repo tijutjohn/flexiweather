@@ -32,6 +32,18 @@ package com.iblsoft.flexiweather.ogc.editable.features
 			return null;
 		}
 
+		override public function set visible(value:Boolean):void
+		{
+			super.visible = value;
+
+			if (!value)
+			{
+				trace(this + " hiding");
+			} else {
+				trace(this + " showing");
+			}
+		}
+
 		override public function get getAnticollisionObject(): DisplayObject
 		{
 			return annotation;
@@ -151,7 +163,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 				if (pt)
 				{
 					update(FeatureUpdateContext.fullUpdate());
-					master.container.labelLayout.update();
+					master.container.labelLayout.invalidateLayout();
 				}
 
 
@@ -231,6 +243,11 @@ package com.iblsoft.flexiweather.ogc.editable.features
 		public function getType(): String
 		{
 			return(type);
+		}
+
+		override public function toString(): String
+		{
+			return "WFSFeatureEditableStorm";
 		}
 	}
 }

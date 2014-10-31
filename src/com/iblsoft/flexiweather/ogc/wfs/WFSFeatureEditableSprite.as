@@ -32,12 +32,10 @@ package com.iblsoft.flexiweather.ogc.wfs
 		override public function set visible(value:Boolean):void
 		{
 			value = value && _feature.presentInViewBBox;
-			
+
 			super.visible = value;
-			if (_feature)
-				_feature.visible = value;
 		}
-		
+
 		/**
 		 * For feature with icons
 		 */
@@ -46,7 +44,7 @@ package com.iblsoft.flexiweather.ogc.wfs
 		{
 			return mb_bitmapLoaded;
 		}
-		
+
 		public function WFSFeatureEditableSprite(feature: WFSFeatureEditable)
 		{
 			_feature = feature;
@@ -56,7 +54,7 @@ package com.iblsoft.flexiweather.ogc.wfs
 		{
 			graphics.clear();
 		}
-		
+
 		public function getLineSegmentApproximationOfBounds(): Array
 		{
 			return [];
@@ -77,7 +75,7 @@ package com.iblsoft.flexiweather.ogc.wfs
 			var cPrev: Point = null;
 			var cFirst: Point = null;
 			// we use here, that Coord is derived from Point, and Coord.crs is not used
-//			var a_coordinates: Array = b_useCoordinates ? coordinates : getPoints(); 
+//			var a_coordinates: Array = b_useCoordinates ? coordinates : getPoints();
 			var a_coordinates: Array = points;
 			for each (var c: Point in a_coordinates)
 			{
@@ -103,7 +101,7 @@ package com.iblsoft.flexiweather.ogc.wfs
 		{
 //			return createStraightLineSegmentApproximation(b_useCoordinates);
 //			var segmentRenderer: CurveLineSegmentRenderer = new CurveLineSegmentRenderer();
-//			
+//
 //			var newSegmentRenderer: CurveLineSegmentRenderer = new CurveLineSegmentRenderer();
 			var b_closed: Boolean = (_feature is IClosableCurve) && IClosableCurve(_feature).isCurveClosed();
 			var splinePoints: Array = CubicBezier.calculateHermitSpline(points, b_closed, 0.005);
