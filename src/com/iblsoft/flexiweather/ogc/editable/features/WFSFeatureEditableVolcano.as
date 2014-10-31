@@ -153,7 +153,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 				}
 
 				update(FeatureUpdateContext.fullUpdate());
-				master.container.labelLayout.update();
+				master.container.labelLayout.invalidateLayout();
 			} else {
 				setTimeout(onIconLoaded, 1000, mBitmap);
 			}

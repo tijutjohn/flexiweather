@@ -76,7 +76,18 @@ package com.iblsoft.flexiweather.utils.anticollision
 
 		public function toString(): String
 		{
-			return "ALO [" + name + "/"+reflectionDelta+"] " + object + " visible: " + visible;
+			var tmp: String = "ALO [" + name + "/"+reflectionDelta+"] " + object;
+			if (objectsToAnchor)
+			{
+				tmp += " objectsToAnchor[";
+				for each (var dispObj: DisplayObject in objectsToAnchor)
+				{
+					tmp += dispObj.toString() + ", ";
+				}
+				tmp += "]";
+			}
+			tmp += " visible: " + visible;
+			return tmp;
 		}
 
 		public function AnticollisionLayoutObject(object: DisplayObject, l_layer: InteractiveLayer, b_managedChild: Boolean, i_displacementMode: String)

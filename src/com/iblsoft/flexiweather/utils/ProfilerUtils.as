@@ -20,5 +20,10 @@ package com.iblsoft.flexiweather.utils
 			var diff: Number = getTimer() - startTime;
 			return diff;
 		}
+		static public function formatStringProfileTimer(startTime: Number, text: String = ''): String
+		{
+			var diff: Number = getTimer() - startTime;
+			return text + " took " + diff + "ms.";
+		}
 	}
 }

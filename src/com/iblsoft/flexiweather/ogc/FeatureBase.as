@@ -9,13 +9,13 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.utils.CurveLineSegment;
 	import com.iblsoft.flexiweather.utils.CurveLineSegmentRenderer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
-	
+
 	import flash.display.BitmapData;
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.geom.Point;
 	import flash.utils.Dictionary;
-	
+
 	import mx.core.UIComponentGlobals;
 	import mx.core.mx_internal;
 	import mx.events.CollectionEvent;
@@ -25,7 +25,7 @@ package com.iblsoft.flexiweather.ogc
 	import mx.managers.ISystemManager;
 
 	use namespace mx_internal;
-	
+
 	public class FeatureBase extends Sprite
 	{
 		private var _next: FeatureBase;
@@ -66,43 +66,48 @@ package com.iblsoft.flexiweather.ogc
 		protected var ms_typeName: String;
 		protected var ms_featureId: String;
 		protected var ms_internalFeatureId: String;
-		
+
 		protected var m_coordinates: Array;
 		protected var m_points: FeatureEditablePoints;
-		
+
 		protected var mb_pointsDirty: Boolean = false;
 		protected var mb_spritesAddedToLabelLayout: Boolean
-		
+
+		/**
+		 * Feature going to be destroyed
+		 */
+		protected var mb_destroying: Boolean = false;
+
 		protected var mb_presentInViewBBox: Boolean
-		
+
 		public function get presentInViewBBox(): Boolean
 		{
 			return mb_presentInViewBBox;
 		}
-		
+
 		public function set presentInViewBBox(value: Boolean): void
 		{
 			mb_presentInViewBBox = value;
 		}
-		
+
 		protected var mb_isSinglePointFeature: Boolean;
-		
+
 		public function get isSinglePointFeature(): Boolean
 		{
 			return mb_isSinglePointFeature;
 		}
-		
+
 		/**
 		 * BitmapData holder for icon features
 		 */
 		protected var m_loadedIconBitmapData: BitmapData;
 		protected var mb_isIconFeature: Boolean;
-		
+
 		public function get isIconFeature(): Boolean
 		{
 			return mb_isIconFeature;
 		}
-		
+
 		public function FeatureBase(s_namespace: String, s_typeName: String, s_featureId: String)
 		{
 			super();
@@ -112,9 +117,9 @@ package com.iblsoft.flexiweather.ogc
 			mouseEnabled = false;
 			mouseChildren = false;
 			doubleClickEnabled = false;
-			
+
 			mb_presentInViewBBox = true;
-			
+
 			m_coordinates = [];
 			m_points = new FeatureEditablePoints();
 		}
@@ -125,30 +130,30 @@ package com.iblsoft.flexiweather.ogc
 			m_master = master;
 			m_points.container = master.container;
 		}
-		
+
 		public function addPointAt(point: Point, index: uint, reflectionID: int = 0): void
 		{
 			m_points.addPointAt(point, index, reflectionID);
 		}
-		
+
 		public function addPoint(point: Point, reflectionID: int = 0): void
 		{
 			m_points.addPoint(point, reflectionID);
 		}
-		
+
 		public function insertPointBefore(i_pointIndex: uint, pt: Point, reflectionID: int = 0): void
 		{
 			trace("FEATUREBASE inserPointBefore");
 			m_points.insertPointBefore(i_pointIndex, pt, reflectionID);
 			m_coordinates.splice(i_pointIndex, 0, m_master.container.pointToCoord(pt.x, pt.y));
-				
+
 			update(FeatureUpdateContext.fullUpdate());
 		}
-		
+
 		private function initializePoints(): void
 		{
 			m_points.initializePoints();
-			
+
 //			if (m_points)
 //				m_points.removeEventListener(CollectionEvent.COLLECTION_CHANGE, onPointsChanged);
 //			m_points = new ArrayCollection();
@@ -162,7 +167,7 @@ package com.iblsoft.flexiweather.ogc
 			{
 				mb_pointsDirty = false;
 				initializePoints();
-				
+
 				/**
 				 * this function needs also check all coordinates reflection, because feature can be displayed in other reflections (and this algorithm without reflection would dispatch that feature is outside of view BBox
 				 */
@@ -170,7 +175,7 @@ package com.iblsoft.flexiweather.ogc
 				{
 					var iw: InteractiveWidget = m_master.container;
 //					var viewBBox: BBox = iw.getViewBBox();
-					
+
 					var total: int = m_coordinates.length;
 					var oldPoint: Point;
 					var oldCoordNotInside: Coord;
@@ -181,15 +186,15 @@ package com.iblsoft.flexiweather.ogc
 					for (var i: uint = 0; i < total; ++i)
 					{
 						var c: Coord = m_coordinates[i];
-						
+
 						var reflectedCoords: Array = iw.mapCoordToViewReflections(c);
 //						trace("FeatureBase update reflectedCoords["+i+"] = " + reflectedCoords.length + " c : " + c + " viewBBox: " + iw.getViewBBox());
-						
+
 						for each (var currCoordObject: Object in reflectedCoords)
 						{
 							var currPoint: Point = (currCoordObject.point as Point)
 							var currCoord: Coord = new Coord(iw.crs, currPoint.x, currPoint.y);
-							
+
 							if (iw.coordInside(currCoord))
 							{
 								featureIsInside = true;
@@ -198,10 +203,10 @@ package com.iblsoft.flexiweather.ogc
 								notifyCoordinateOutside(c, i, currCoordObject.reflection);
 							}
 						}
-							
+
 						pt = iw.coordToPoint(c);
 						m_points.addPoint(pt);
-						
+
 						if (reflectedCoords && reflectedCoords.length == 0)
 						{
 							//coordinates has no reflection, has to be hiden
@@ -229,13 +234,18 @@ package com.iblsoft.flexiweather.ogc
 			event.coordinateReflection = coordReflection;
 			dispatchEvent(event);
 		}
-		
+
 		protected function notifyCoordinateOutside(coord: Coord, coordIndex: uint, coordReflection: uint): void
 		{
 			var event: FeatureEvent = new FeatureEvent(FeatureEvent.COORDINATE_INVISIBLE, true);
 			event.coordinate = coord;
 			event.coordinateIndex = coordIndex;
 			dispatchEvent(event);
+		}
+
+		public function beforeDestroying(): void
+		{
+			mb_destroying = true;
 		}
 		/** Called internally before the feature is removed from the master. */
 		public function cleanup(): void
@@ -261,7 +271,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			return m_points.getAveragePoint(reflectionID);
 		}
-		
+
 		public function getPoint(i_pointIndex: uint, reflectionID: int = 0): Point
 		{
 			return m_points.getPoint(i_pointIndex, reflectionID);
@@ -291,7 +301,7 @@ package com.iblsoft.flexiweather.ogc
 			area /= 2;
 			return area;
 		}
-			
+
 		public function getExtent(): CRSWithBBox
 		{
 			var a_coordinates: Array = coordinates;
@@ -358,7 +368,7 @@ package com.iblsoft.flexiweather.ogc
 			// assume we use smooth curve be default
 			return createSmoothLineSegmentApproximation();
 		}
-		
+
 		public function createStraightLineSegmentApproximation(b_useCoordinates: Boolean = true): Array
 		{
 			var l: Array = [];
@@ -442,6 +452,6 @@ package com.iblsoft.flexiweather.ogc
 		{
 			return ms_internalFeatureId;
 		}
-		
+
 	}
 }

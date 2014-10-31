@@ -166,7 +166,6 @@ package com.iblsoft.flexiweather.ogc.editable
 //							if (!mb_spritesAddedToLabelLayout && master)
 							if (featureIsVisible)
 							{
-
 								var annotationDatelineSplitVisibility: Boolean = checkAnnotationVisibilityForSplittedFeature(annotationPositions, annotationPositions[reflectionDelta] as AnnotationPosition, projectionWidth / 2);
 
 //								trace("Reflection : " + reflectionDelta + " isAnnotationInAnticollision: " + isAnnotationInAnticollision + " annotationDatelineSplitVisibility: " + annotationDatelineSplitVisibility);
@@ -174,8 +173,8 @@ package com.iblsoft.flexiweather.ogc.editable
 								if (!isDisplayObjectInAnticollision)
 								{
 									//if object is not in anticollision layout and it should be there, we should add it
-									displaySprite.visible = true;
 									master.container.labelLayout.addObstacle(displaySprite, master);
+									displaySprite.visible = true;
 								} else {
 									trace("\tDisplaySprite is already in Anticollision");
 								}
@@ -184,9 +183,8 @@ package com.iblsoft.flexiweather.ogc.editable
 									//if annotation is not in anticollision layout and it should be there, we should add it
 									if (annotationDatelineSplitVisibility)
 									{
-										annotation.visible = true;
 										master.container.labelLayout.addObject(annotation, master, [displaySprite], i);
-		//								_addToLabelLayout = true;
+										annotation.visible = true;
 									}
 								}
 								else {

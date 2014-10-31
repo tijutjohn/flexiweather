@@ -3,7 +3,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.plugins.IConsole;
 	import com.iblsoft.flexiweather.proj.Projection;
-	
+
 	import flash.display.Graphics;
 	import flash.events.Event;
 	import flash.events.GesturePhase;
@@ -17,7 +17,7 @@ package com.iblsoft.flexiweather.widgets
 	import flash.utils.getTimer;
 	import flash.utils.setInterval;
 	import flash.utils.setTimeout;
-	
+
 	import mx.effects.Move;
 	import mx.effects.easing.Quadratic;
 	import mx.events.ChildExistenceChangedEvent;
@@ -29,7 +29,7 @@ package com.iblsoft.flexiweather.widgets
 	public class InteractiveLayerPan extends InteractiveLayer
 	{
 		public static const MOUSE_MOVE_DELAY: int = 1500;
-		
+
 		public static const PAN: String = 'pan';
 		public static const START_PANNING: String = 'startPanning';
 		public static const STOP_PANNING: String = 'stopPanning';
@@ -47,15 +47,15 @@ package com.iblsoft.flexiweather.widgets
 		private var _wrapLimiter: WrapLimiter;
 
 		private var _doPanDelayed: DoPanDelay;
-		
+
 		public function InteractiveLayerPan(container: InteractiveWidget = null)
 		{
 			super(container);
-			
+
 			_type = PAN;
-			
+
 			_doPanDelayed = new DoPanDelay(doRealPan, MOUSE_MOVE_DELAY);
-			
+
 			addEventListener(ChildExistenceChangedEvent.CHILD_ADD, onChildAdd);
 			waitForContainer();
 		}
@@ -105,7 +105,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			return startPanning(event);
 		}
-		
+
 		private function startPanning(event: MouseEvent): Boolean
 		{
 			if (!event.shiftKey && mb_requireShiftKey || event.ctrlKey)
@@ -161,12 +161,12 @@ package com.iblsoft.flexiweather.widgets
 		{
 			return finishPanning(event);
 		}
-		
+
 		override public function onMouseUp(event: MouseEvent): Boolean
 		{
 			return finishPanning(event);
 		}
-		
+
 		private function finishPanning(event: MouseEvent): Boolean
 		{
 			if (supportsPanAnimation)
@@ -279,22 +279,22 @@ package com.iblsoft.flexiweather.widgets
 			var withinTreshold: Boolean = Math.abs(100 - extentRatio) < percentageTreshold;
 			return projection.wrapsHorizontally && withinTreshold;
 		}
-		
-		
+
+
 		private var _diff: Point;
-		
-		
+
+
 		/**
-		 * Panning function exposed 
+		 * Panning function exposed
 		 * @param xDiff
 		 * @param yDiff
-		 * 
-		 */		
+		 *
+		 */
 		public function doPan(xDiff: int, yDiff: int): void
 		{
 			_doPanDelayed.doPan(xDiff, yDiff);
 		}
-		
+
 		private function doRealPan(xDiff: Number, yDiff: Number, b_finalChange: Boolean): void
 		{
 			var r: BBox = container.getViewBBox();
@@ -306,13 +306,13 @@ package com.iblsoft.flexiweather.widgets
 				_diff = new Point(xDiff, yDiff);
 			_diff.x = xDiff;
 			_diff.y = yDiff;
-			
+
 //			if (xDiff == 0 && yDiff == 0)
 //			{
 //				trace("InteractiveLayerPan doRealPan: diff 0,0");
 //				return;
 //			}
-			
+
 			invalidateDynamicPart(true);
 			var projection: Projection = container.getCRSProjection();
 			r = r.translated(-xDiff, yDiff);
@@ -355,24 +355,24 @@ package com.iblsoft.flexiweather.widgets
 			}
 			container.setExtentBBox(extentBBox, false);
 			container.setViewBBox(r, b_finalChange);
-			
+
 //			updateContainerArea(extentBBox, r, b_finalChange);
 		}
 
 		private var _updateContainerAreaInterval: uint = 500;
 		private var _lastUpdateTime: Number;
 		private var _delayedUpdatedTimeout: Number;
-		
+
 		private var _extentBBox: BBox;
 		private var _viewBBox: BBox;
 		private var _viewBBoxFinalChange: Boolean;
-		
+
 		public function updateContainerArea(extentBBox: BBox, viewBBox: BBox, viewBBoxFinalChange: Boolean): void
 		{
 			_extentBBox = extentBBox;
 			_viewBBox = viewBBox;
 			_viewBBoxFinalChange = viewBBoxFinalChange;
-			
+
 			var currentTime: Number = getTimer();
 			var timeSinceLastUpdate: Number = currentTime - _lastUpdateTime;
 			if (isNaN(_lastUpdateTime) || timeSinceLastUpdate >= _updateContainerAreaInterval)
@@ -383,15 +383,15 @@ package com.iblsoft.flexiweather.widgets
 				_delayedUpdatedTimeout = setTimeout(delayedUpdateContainerArea, _updateContainerAreaInterval - timeSinceLastUpdate);
 			}
 		}
-		
+
 		private function delayedUpdateContainerArea(): void
-		{			
+		{
 			_lastUpdateTime = getTimer();
 			container.setExtentBBox(_extentBBox, false);
 			container.setViewBBox(_extentBBox, true);
 		}
-		
-		
+
+
 //		private var _txt: TextField;
 		/*
 		override protected function createChildren():void
@@ -523,6 +523,9 @@ class WrapLimiter
 
 	public function moveViewBBoxBack(bbox: BBox): BBox
 	{
+		trace("\n\n");
+		trace("PAN - MOVE VIEW BBOX BACK");
+
 		getProjection();
 		var rightMinimumForOffsetBack: Number = rightWrapLimitForMovingBack();
 		var leftMinimumForOffsetBack: Number = rightWrapLimitForMovingBack();
@@ -533,6 +536,7 @@ class WrapLimiter
 			moveX = getWrapMoveBackSize(bbox);
 			bbox = moveViewBBoxBackBy(bbox, moveX, 0);
 		}
+		trace("\n\n");
 		return bbox;
 	}
 
@@ -552,12 +556,12 @@ class DoPanDelay {
 	private var _delayTime: int;
 	private var _xDiff: Number;
 	private var _yDiff: Number;
-	
+
 	public function DoPanDelay(callback: Function, delayTime: int): void
 	{
 		_callback = callback;
 		_delayTime = delayTime;
-		
+
 		_doPanTimeOut = 0;
 		_doPanTime = 0;
 		_xDiff = 0;
@@ -568,14 +572,14 @@ class DoPanDelay {
 	{
 		_xDiff += xDiff;
 		_yDiff += yDiff;
-		
+
 //		trace("DoPanDealy doPan ["+xDiff + ", " + yDiff + "] total ["+_xDiff + ", " + _yDiff + "]");
-		var timeDifference: Number = getTimer() - _doPanTime; 
+		var timeDifference: Number = getTimer() - _doPanTime;
 		if (timeDifference > _delayTime)
 		{
 			doPanDelayed();
 		} else {
-		
+
 			if (_xDiff != 0 || _yDiff != 0)
 			{
 //				trace("DoPanDealy doPan callback: FALSE");
@@ -583,19 +587,19 @@ class DoPanDelay {
 				_yDiff /= 2;
 				_callback(_xDiff, _yDiff, false);
 			}
-			
+
 			if (_doPanTimeOut > 0)
 				clearTimeout(_doPanTimeOut);
-		
+
 			var timeToNextPan: Number = _delayTime - timeDifference;
 			_doPanTimeOut = setTimeout(doPanDelayed, timeToNextPan);
 		}
 	}
-		
+
 	private function doPanDelayed(): void
 	{
 		_doPanTimeOut = 0;
-		
+
 		if (_xDiff != 0 || _yDiff != 0)
 		{
 //			trace("DoPanDealy doPanDelayed callback: TRUE");
@@ -603,7 +607,7 @@ class DoPanDelay {
 			_xDiff = 0;
 			_yDiff = 0;
 		}
-		
+
 		_doPanTime = getTimer();
 	}
 }

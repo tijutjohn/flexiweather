@@ -27,11 +27,11 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureBase;
 	import com.iblsoft.flexiweather.utils.ISO8601Parser;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
-	
+
 	import flash.display.Graphics;
 	import flash.net.URLRequest;
 	import flash.net.URLRequestMethod;
-	
+
 	import mx.collections.ArrayCollection;
 	import mx.controls.Alert;
 	import mx.rpc.events.FaultEvent;
@@ -42,24 +42,24 @@ package com.iblsoft.flexiweather.ogc
 	{
 		public static const TRANSACTION_SAVE: String = 'save';
 		public static const TRANSACTION_ISSUE: String = 'issue';
-		
+
 		protected var ms_transactionType: String;
 //		protected var m_service: HTTPService = new HTTPService();
-		protected var mi_insertionHandleSeq: uint = 0; 
+		protected var mi_insertionHandleSeq: uint = 0;
 		protected var mm_insertionHandleToFeatureMap: Array = [];
-		
-		private var ml_removedFeatures: Array = [];		
-		
+
+		private var ml_removedFeatures: Array = [];
+
 		override public function set visible(b_visible:Boolean):void
 		{
 			super.visible = b_visible;
 		}
-		
+
 		public function InteractiveLayerWFSFeatureEditor(container: InteractiveWidget = null)
 		{
 			super(container, new Version(1, 1, 0));
 			invalidateDynamicPart();
-			
+
 			wfsService.addEventListener(UniURLLoaderEvent.DATA_LOADED, onTransactionResult);
 			wfsService.addEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onTransactionFailed);
 		}
@@ -87,7 +87,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			super.draw(graphics);
 		}
-		
+
 		public override function parseFeatureMember(
 				xml: XML, wfs: Namespace, gml: Namespace): WFSFeatureBase
 		{
@@ -110,23 +110,23 @@ package com.iblsoft.flexiweather.ogc
 				else if(tagName.localName == "Cloud") {
 					feature = new WFSFeatureEditableCloud("http://www.iblsoft.com/wfs", "Cloud", xml.@gml::id);
 				}
-				else if(tagName.localName == "Geometry") 
+				else if(tagName.localName == "Geometry")
 				{
 					feature = new WFSFeatureEditableGeometry("http://www.iblsoft.com/wfs", "Geometry", xml.@gml::id);
 				}
-				else if(tagName.localName == "JetStream") 
+				else if(tagName.localName == "JetStream")
 				{
 					feature = new WFSFeatureEditableJetStream("http://www.iblsoft.com/wfs", "JetStream", xml.@gml::id);
 				}
-				else if(tagName.localName == "IcingArea") 
+				else if(tagName.localName == "IcingArea")
 				{
 					feature = new WFSFeatureEditableIcingArea("http://www.iblsoft.com/wfs", "IcingArea", xml.@gml::id);
 				}
-				else if(tagName.localName == "TurbulenceArea") 
+				else if(tagName.localName == "TurbulenceArea")
 				{
 					feature = new WFSFeatureEditableTurbulenceArea("http://www.iblsoft.com/wfs", "TurbulenceArea", xml.@gml::id);
 				}
-				else if(tagName.localName == "ThunderstormArea") 
+				else if(tagName.localName == "ThunderstormArea")
 				{
 					feature = new WFSFeatureEditableThunderstormArea("http://www.iblsoft.com/wfs", "ThunderstormArea", xml.@gml::id);
 				}
@@ -160,7 +160,7 @@ package com.iblsoft.flexiweather.ogc
 				}
 				else
 					return null;
-				
+
 				if (feature)
 				{
 					feature.setMaster(this);
@@ -170,19 +170,19 @@ package com.iblsoft.flexiweather.ogc
 			}
 			return null;
 		}
-		
+
 		public function save(): void
 		{
 			var xmlOperation: XML = <wfs:Transaction xmlns:wfs="http://www.opengis.net/wfs" service="WFS" version="1.1.0"/>;
-			
+
 			var l_insertedFeatures: Array = [];
 			var l_insertedXMLs: Array = [];
 			var xml: XML;
 			var editableFeature: WFSFeatureEditable;
 			var xmlInsert: XML;
-			
+
 			var insertID: int = 0;
-			for each(var feature: WFSFeatureBase in features) 
+			for each(var feature: WFSFeatureBase in features)
 			{
 				editableFeature = feature as WFSFeatureEditable;
 				if(editableFeature == null)
@@ -190,14 +190,14 @@ package com.iblsoft.flexiweather.ogc
 				if(editableFeature.isInternal())
 					continue;
 				// FIXME: featureId should not be "" - who creates it?
-				if(editableFeature.featureId == null || editableFeature.featureId == "") 
+				if(editableFeature.featureId == null || editableFeature.featureId == "")
 				{
 					xmlInsert = <wfs:Insert xmlns:wfs="http://www.opengis.net/wfs"/>;
 					var xmlFeature: XML = <root/>;
 					xmlFeature.setName(editableFeature.typeName);
 					xmlFeature.setNamespace(new Namespace(editableFeature.namespaceURI));
 					editableFeature.toInsertGML(xmlFeature);
-					
+
 					xmlInsert.appendChild(xmlFeature);
 					l_insertedFeatures[insertID] = editableFeature;
 					l_insertedXMLs[insertID] = xmlInsert;
@@ -209,10 +209,10 @@ package com.iblsoft.flexiweather.ogc
 					editableFeature.toUpdateGML(xmlUpdate);
 					xmlUpdate.appendChild(
 							<ogc:Filter xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml">
-					            <ogc:PropertyIsEqualTo>
-					                <ogc:PropertyName>@gml:id</ogc:PropertyName>
-					                <ogc:Literal>{feature.featureId}</ogc:Literal>
-					            </ogc:PropertyIsEqualTo>
+								<ogc:PropertyIsEqualTo>
+									<ogc:PropertyName>@gml:id</ogc:PropertyName>
+									<ogc:Literal>{feature.featureId}</ogc:Literal>
+								</ogc:PropertyIsEqualTo>
 							</ogc:Filter>);
 					xmlOperation.appendChild(xmlUpdate);
 				}
@@ -222,10 +222,10 @@ package com.iblsoft.flexiweather.ogc
 				xmlDelete.@typeName = editableFeature.typeName;
 				xmlDelete.appendChild(
 						<ogc:Filter xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml">
-				            <ogc:PropertyIsEqualTo>
-				                <ogc:PropertyName>@gml:id</ogc:PropertyName>
-				                <ogc:Literal>{editableFeature.featureId}</ogc:Literal>
-				            </ogc:PropertyIsEqualTo>
+							<ogc:PropertyIsEqualTo>
+								<ogc:PropertyName>@gml:id</ogc:PropertyName>
+								<ogc:Literal>{editableFeature.featureId}</ogc:Literal>
+							</ogc:PropertyIsEqualTo>
 						</ogc:Filter>);
 				xmlOperation.appendChild(xmlDelete);
 			}
@@ -234,77 +234,77 @@ package com.iblsoft.flexiweather.ogc
 				{
 					xmlInsert = l_insertedXMLs[i] as XML;
 					editableFeature = l_insertedFeatures[i] as WFSFeatureEditable;
-					
+
 					++mi_insertionHandleSeq;
-					
-					var s_iHandle: String = "insertion-" + mi_insertionHandleSeq; 
-					mm_insertionHandleToFeatureMap[s_iHandle] = editableFeature; 
+
+					var s_iHandle: String = "insertion-" + mi_insertionHandleSeq;
+					mm_insertionHandleToFeatureMap[s_iHandle] = editableFeature;
 					xmlInsert.@handle = s_iHandle;
 					xmlOperation.appendChild(xmlInsert);
 				}
-			} 
+			}
 			//Alert.show("Sending WFS transaction request:\n" + xmlOperation.toXMLString());
-			
+
 			ms_transactionType = TRANSACTION_SAVE;
-			
+
 			wfsService.save(xmlOperation);
-			
+
 		}
-		
+
 		public function issue(): void
 		{
-			
+
 			var baseTimeString: String = ISO8601Parser.dateToString(wfsService.product.getBaseTime());
 			var validityString: String = ISO8601Parser.dateToString(wfsService.product.getValidity());
-			
+
 			/*
 			<Transaction xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.0.0/WFS-transaction.xsd http://www.iblsoft.com/wfs http://localhost:8008/test?SERVICE=WFS&REQUEST=DescribeFeatureType&VERSION=1.0.0&TYPENAME=Front%2cPressureCentre" version="1.0.0" service="WFS" xmlns="http://www.opengis.net/wfs" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 			   <LockId>my-lock-id</LockId>
-			    <Native vendorId="com.iblsoft.vw" safeToIgnore="false">
-			      <IssueProduct xmlns="http://www.iblsoft.com/wfs" typeName="JetStream">
-			        <baseTime>2009-06-01T06:00:00</baseTime>
-			        <validity>2009-06-01T12:00:00</validity>
-			      </IssueProduct>
-			    </Native>
+				<Native vendorId="com.iblsoft.vw" safeToIgnore="false">
+				  <IssueProduct xmlns="http://www.iblsoft.com/wfs" typeName="JetStream">
+					<baseTime>2009-06-01T06:00:00</baseTime>
+					<validity>2009-06-01T12:00:00</validity>
+				  </IssueProduct>
+				</Native>
 			</Transaction>
 			*/
-			
+
 			var xmlOperation: XML = <Transaction xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.0.0/WFS-transaction.xsd http://www.iblsoft.com/wfs http://localhost:8008/test?SERVICE=WFS&REQUEST=DescribeFeatureType&VERSION=1.0.0&TYPENAME=Front%2cPressureCentre" version="1.0.0" service="WFS" xmlns="http://www.opengis.net/wfs" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/>
 			var xmlLock: XML = <LockId>my-lock-id</LockId>;
 			var xmlNative: XML = <Native vendorId="com.iblsoft.vw" safeToIgnore="false"/>;
 			var xmlIssueProduct: XML = <IssueProduct xmlns="http://www.iblsoft.com/wfs" typeName="JetStream"/>;
 			var baseTime: XML = <baseTime>{baseTimeString}</baseTime>;
 			var validity: XML = <validity>{validityString}</validity>;
-			
+
 			xmlOperation.appendChild(xmlLock);
 			xmlOperation.appendChild(xmlNative);
 			xmlNative.appendChild(xmlIssueProduct);
 			xmlIssueProduct.appendChild(baseTime);
 			xmlIssueProduct.appendChild(validity);
-			
+
 			ms_transactionType = TRANSACTION_ISSUE;
-			
+
 			wfsService.issue(xmlOperation);
-			
+
 		}
-		
+
 		protected function onTransactionFailed(event: UniURLLoaderErrorEvent): void
 		{
 			var wte: WFSTransactionEvent = new WFSTransactionEvent(WFSTransactionEvent.TRANSACTION_FAILED, ms_transactionType, event.result);
 			dispatchEvent(wte);
-			
+
 			dispatchEvent(event);
 		}
-		
+
 		protected function onTransactionResult(event: UniURLLoaderEvent): void
 		{
 			var xml: XML = XML(event.result); // TransactionResponse xmlns="http://www.opengis.net/wfs"
 			var wfs: Namespace = new Namespace("http://www.opengis.net/wfs");
 			var ogc: Namespace = new Namespace("http://www.opengis.net/ogc");
-			
+
 			if(xml.localName() != "TransactionResponse" && xml.localName() != "WFS_TransactionResponse") {
 				dispatchEvent(event);
-				return; 
+				return;
 			}
 
 //			switch (ms_transactionType)
@@ -317,11 +317,11 @@ package com.iblsoft.flexiweather.ogc
 
 			var i_index: uint = 0;
 			for each(var ir: XML in xml.wfs::InsertResults.wfs::Feature) {
-				
+
 				editableFeature = getEditableFeatureFromInsertedResults(ir, i_index);
 				if(editableFeature)
 				{
-					editableFeature.featureId = ir.ogc::FeatureId.@fid; 
+					editableFeature.featureId = ir.ogc::FeatureId.@fid;
 					++i_index;
 				}
 			}
@@ -332,15 +332,15 @@ package com.iblsoft.flexiweather.ogc
 				editableFeature.modified = false;
 			}
 			emptyRemovedFeatures();
-			
+
 			var wte: WFSTransactionEvent = new WFSTransactionEvent(WFSTransactionEvent.TRANSACTION_COMPLETE, ms_transactionType, event.result);
 			dispatchEvent(wte);
-			
+
 			ms_transactionType = '';
-			
+
 			dispatchEvent(event);
 		}
-		
+
 		public function getEditableFeatureFromInsertedResults(ir: XML, i_index: uint): WFSFeatureEditable
 		{
 			var editableFeature: WFSFeatureEditable;
@@ -349,21 +349,21 @@ package com.iblsoft.flexiweather.ogc
 			if(!(s_handle in mm_insertionHandleToFeatureMap))
 				return null;
 			editableFeature = mm_insertionHandleToFeatureMap[s_handle];
-			
+
 			return editableFeature;
 		}
-		
+
 		override public function removeAllFeatures(): void
 		{
 			super.removeAllFeatures();
 			emptyRemovedFeatures();
 		}
-		
+
 		public function emptyRemovedFeatures(): void
 		{
 			ml_removedFeatures = [];
 		}
-		
+
 		override public function getRemovedFeatureByFeatureId(id: String): WFSFeatureBase
 		{
 			for each (var feature: WFSFeatureEditable in ml_removedFeatures)
@@ -375,12 +375,12 @@ package com.iblsoft.flexiweather.ogc
 			}
 			return null;
 		}
-		
+
 		/**
 		 * Function returns features, which was already saved to feature database (featureID is defined), but was removed from stage, but it's not saved to database yet.
-		 * @return 
-		 * 
-		 */		
+		 * @return
+		 *
+		 */
 		override protected function getRemovedFeatureDatabaseFeatures(): ArrayCollection
 		{
 			var arr: ArrayCollection = new ArrayCollection();
@@ -393,22 +393,24 @@ package com.iblsoft.flexiweather.ogc
 			}
 			return arr;
 		}
-		
+
 		public function onFeatureRemove(): Boolean
 		{
 			var feature: WFSFeatureEditable = selectedItem as WFSFeatureEditable;
 			if(feature == null)
 				return false;
-				
+
+			feature.beforeDestroying();
+
 			if(feature.featureId != null)
 				ml_removedFeatures.push(feature);
-				
+
 			var internalFeature: Boolean = feature.internalFeatureId != null;
-			
+
 			removeFeature(feature);
-			
+
 			return internalFeature;
-			
+
 		}
 	}
 }
