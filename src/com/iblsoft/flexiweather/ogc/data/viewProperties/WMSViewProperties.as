@@ -463,6 +463,13 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 //				
 //				_oldTimeValue = value;
 //			}
+			if (a_dimValues && a_dimValues.length > 0)
+			{
+				if (!(a_dimValues[0] is GlobalVariableValue))
+				{
+					trace("Check via dimension value is not GlobalVariableValue");
+				}
+			}
 			return a_dimValues;
 		}
 		
@@ -1160,7 +1167,13 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					ofExactForecast = null;
 					for each (of in l_times)
 					{
-						if (of && of.data && (of.data as Date).time == frame.time)
+						var time: Date;
+						if (of.data is Date)
+							time = of.data as Date;
+						else if (of.data is String)
+							time = ISO8601Parser.stringToDate(of.data as String);
+						
+						if (of && of.data && time.time == frame.time)
 						{
 							ofExactForecast = of;
 //							trace("WMSViewProperties exact forecast: " + ofExactForecast + " layer: " + parentLayer.name);
