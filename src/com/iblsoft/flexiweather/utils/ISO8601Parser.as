@@ -20,7 +20,15 @@ package com.iblsoft.flexiweather.utils
 			var ss: Array = s.split("T", 2); // separate the date and time components
 			if (ss.length == 0)
 				throw new Error("bad date format: " + s);
-			var date: Date = parseDate(ss[0]);
+			try
+			{
+				var date: Date = parseDate(ss[0]);
+			}
+			catch (error: Error)
+			{
+				trace("parseDateTime can not parse date: " + error.message);
+				return null;
+			}
 			if (ss.length > 1)
 			{
 				var time: Date = parseTime(ss[1]);
@@ -55,6 +63,7 @@ package com.iblsoft.flexiweather.utils
 				}
 				catch (e: Error)
 				{
+					trace("invalid date format: " + str + "\n\t" + e.message);
 					throw new Error("invalid date format: " + str + "\n\t" + e.message);
 				}
 				var date: Date = new Date();
