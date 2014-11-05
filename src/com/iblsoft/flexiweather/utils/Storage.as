@@ -296,6 +296,8 @@ package com.iblsoft.flexiweather.utils
 				catch (error: Error)
 				{
 					trace("Storage __serialize error catched: " + error.message);
+					//throw error further
+					throw error;
 				}
 				finally
 				{
