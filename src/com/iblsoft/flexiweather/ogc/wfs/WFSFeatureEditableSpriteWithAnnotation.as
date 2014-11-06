@@ -20,9 +20,6 @@ package com.iblsoft.flexiweather.ogc.wfs
 
 	public class WFSFeatureEditableSpriteWithAnnotation extends WFSFeatureEditableSprite implements ILineSegmentApproximableBounds, IAnticollisionLayoutObject
 	{
-		public static var UID: int = 0;
-
-		public var id: int;
 		private var _annotation: AnnotationBox;
 
 		override public function get anticollisionLayoutObject():AnticollisionLayoutObject
@@ -36,9 +33,6 @@ package com.iblsoft.flexiweather.ogc.wfs
 		public function WFSFeatureEditableSpriteWithAnnotation(feature: WFSFeatureEditable)
 		{
 			super(feature);
-
-			id = UID++;
-
 			trace(this + " created");
 		}
 
