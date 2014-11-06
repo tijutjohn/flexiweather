@@ -223,7 +223,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 		 * Basically this means that all other objects will be displaced so that they don't
 		 * overlap with this one.
 		 **/
-		public function addObstacle(object: DisplayObject, parentLayer: InteractiveLayer): void
+		public function addObstacle(object: DisplayObject, parentLayer: InteractiveLayer): AnticollisionLayoutObject
 		{
 			setDirty();
 			var lo: AnticollisionLayoutObject = new AnticollisionLayoutObject(object, parentLayer, false, AnticollisionDisplayMode.FIXED);
@@ -232,6 +232,8 @@ package com.iblsoft.flexiweather.utils.anticollision
 			updateLayoutObjectsLength();
 
 			trace("Add Obstacle: "+ lo);
+
+			return lo;
 		}
 
 		/**
@@ -933,7 +935,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 			return anchor.anticollisionLayoutObject;
 		}
 
-		public function updateObjectReferenceLocationWithCustomPosition(object: DisplayObject, rlX: Number, rlY: Number): Boolean
+		public function updateObjectReferenceLocationWithCustomPosition(object: IAnticollisionLayoutObject, rlX: Number, rlY: Number): Boolean
 		{
 			var lo: AnticollisionLayoutObject = getAnticollisionLayoutObjectFor(object as IAnticollisionLayoutObject);
 			if (lo == null)
