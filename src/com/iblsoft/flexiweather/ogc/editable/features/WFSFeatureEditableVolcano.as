@@ -18,6 +18,9 @@ package com.iblsoft.flexiweather.ogc.editable.features
 	import com.iblsoft.flexiweather.utils.GraphicsCurveRenderer;
 	import com.iblsoft.flexiweather.utils.ISO8601Parser;
 	import com.iblsoft.flexiweather.utils.NumberUtils;
+	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayout;
+	import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayoutObject;
+	import com.iblsoft.flexiweather.utils.anticollision.IAnticollisionLayoutObject;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 
 	import flash.display.Bitmap;
@@ -66,6 +69,34 @@ package com.iblsoft.flexiweather.ogc.editable.features
 			values = { smooth: false, size: 1.0, style: "Solid", color: 0x000000 };
 		}
 
+		public override function cleanup(): void
+		{
+			if (master && master.container && master.container.labelLayout)
+			{
+//				master.container.labelLayout.removeObject(this);
+
+				var volcanoSprite: VolcanoSprite;
+				var reflection: FeatureDataReflection;
+				var labelLayout: AnticollisionLayout = master.container.labelLayout;
+
+				//remove sprites for reflections
+				var reflectionIDs: Array = m_featureData.reflectionsIDs;
+				for (var i: int = 0; i < totalReflections; i++)
+				{
+					var reflectionDelta: int = reflectionIDs[i];
+
+					reflection = m_featureData.getReflectionAt(reflectionDelta);
+					volcanoSprite = getDisplaySpriteForReflectionAt(reflectionDelta) as VolcanoSprite;
+
+					labelLayout.removeObject(volcanoSprite);
+				}
+			}
+
+			ms_actIconLoaded = '';
+
+			super.cleanup();
+		}
+
 		override public function update(changeFlag: FeatureUpdateContext): void
 		{
 			if(m_coordinates.length != 1
@@ -103,17 +134,27 @@ package com.iblsoft.flexiweather.ogc.editable.features
 
 						reflection = m_featureData.getReflectionAt(reflectionDelta);
 
-						var displaySprite: WFSFeatureEditableSprite = getDisplaySpriteForReflectionAt(reflectionDelta);
+						var displaySprite: VolcanoSprite = getDisplaySpriteForReflectionAt(reflectionDelta) as VolcanoSprite;
 						volcanicAshSprite = displaySprite as VolcanoSprite;
 
 						volcanicAshSprite.update(blackColor);
 
+						var isDisplayObjectInAnticollision: Boolean = master.container.labelLayout.isObjectInside(displaySprite);
+						var obstacle: AnticollisionLayoutObject = null;
+						if (!isDisplayObjectInAnticollision)
+						{
+							obstacle = master.container.labelLayout.addObstacle(displaySprite, master);
+							volcanicAshSprite.anticollisionLayoutObject = obstacle;
+						}
 	//					var fdpt: FeatureDataPoint = FeatureDataPoint(reflection.editablePoints[0]);
 						var fdpt: Point = Point(reflection.editablePoints[0]);
 						if (fdpt)
 						{
-							if (!volcanicAshSprite.bitmapLoaded)
+							if (!volcanicAshSprite.bitmapLoaded && m_loadedIconBitmapData)
 								volcanicAshSprite.setBitmap(m_loadedIconBitmapData, blackColor);
+
+							//this must be done to set display sprite position in anticollision layout, otherwise it will be moved to 0,0
+							master.container.labelLayout.updateObjectReferenceLocationWithCustomPosition(volcanicAshSprite, fdpt.x, fdpt.y);
 
 							volcanicAshSprite.x = fdpt.x;
 							volcanicAshSprite.y = fdpt.y;
@@ -265,6 +306,8 @@ package com.iblsoft.flexiweather.ogc.editable.features
 import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
 import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
 import com.iblsoft.flexiweather.utils.ColorUtils;
+import com.iblsoft.flexiweather.utils.anticollision.AnticollisionLayoutObject;
+import com.iblsoft.flexiweather.utils.anticollision.IAnticollisionLayoutObject;
 
 import flash.display.Bitmap;
 import flash.display.BitmapData;
@@ -272,7 +315,8 @@ import flash.display.Graphics;
 import flash.display.Sprite;
 import flash.geom.Point;
 
-class VolcanoSprite extends WFSFeatureEditableSprite {
+class VolcanoSprite extends WFSFeatureEditableSprite
+{
 
 	private var m_iconBitmap: Bitmap = new Bitmap();
 	private var m_iconBitmapOrig: Bitmap = new Bitmap();
@@ -282,6 +326,23 @@ class VolcanoSprite extends WFSFeatureEditableSprite {
 
 	private var graphicsLine:Graphics;
 	private var graphicsIcon:Graphics;
+
+	override public function set x(value:Number):void
+	{
+		super.x = value;
+		trace(this + " x = " + value);
+	}
+	override public function set visible(value:Boolean):void
+	{
+		super.visible = value;
+
+		if (!value)
+		{
+			trace(this + " hiding");
+		} else {
+			trace(this + " showing");
+		}
+	}
 
 	public function VolcanoSprite(feature: WFSFeatureEditable, wIcon: Number, hIcon: Number)
 	{
@@ -300,6 +361,8 @@ class VolcanoSprite extends WFSFeatureEditableSprite {
 		m_iconBitmap.bitmapData = baseBitmapData;
 		addChild(m_iconBitmap);
 
+		trace(this + " created");
+
 	}
 
 	public function setBitmap(nBitmapData: BitmapData, blackColor: uint = 0): void
@@ -308,6 +371,7 @@ class VolcanoSprite extends WFSFeatureEditableSprite {
 		m_iconBitmap.bitmapData = nBitmapData.clone();
 		m_iconBitmapOrig = new Bitmap(nBitmapData.clone());
 		update(blackColor);
+		trace(this + " setBitmap");
 	}
 
 	public function update(blackColor: uint): void
@@ -328,6 +392,11 @@ class VolcanoSprite extends WFSFeatureEditableSprite {
 		graphicsIcon.endFill();
 
 
+	}
+
+	override public function toString(): String
+	{
+		return "VolcanoSprite["+id+"] pos:["+x+","+y+"] ";
 	}
 }
 
