@@ -6,6 +6,9 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.ogc.editable.data.FeatureData;
 	import com.iblsoft.flexiweather.utils.ISO8601Parser;
 	import com.iblsoft.flexiweather.utils.draw.DrawMode;
+	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+
+	import flash.geom.Rectangle;
 
 	public class WFSFeatureEditableWithBaseTimeAndValidity extends WFSFeatureEditable implements IObjectWithBaseTimeAndValidity
 	{
@@ -31,6 +34,9 @@ package com.iblsoft.flexiweather.ogc.editable
 					m_featureData = createFeatureData();
 				else
 					m_featureData.clear();
+
+				var iw: InteractiveWidget = master.container;
+				m_featureData.clippingRectangle = new Rectangle(iw.areaX, iw.areaY, iw.areaWidth, iw.areaHeight);
 
 				master.container.drawGeoPolyLine(null, a_points, DrawMode.PLAIN, false, true, m_featureData);
 			}
