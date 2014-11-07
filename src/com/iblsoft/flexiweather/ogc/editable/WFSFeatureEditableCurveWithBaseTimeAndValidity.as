@@ -17,6 +17,7 @@ package com.iblsoft.flexiweather.ogc.editable
 
 	import flash.display.Graphics;
 	import flash.geom.Point;
+	import flash.geom.Rectangle;
 
 	public class WFSFeatureEditableCurveWithBaseTimeAndValidity extends WFSFeatureEditableCurve implements IObjectWithBaseTimeAndValidity, IWFSCurveFeature
 	{
@@ -123,11 +124,14 @@ package com.iblsoft.flexiweather.ogc.editable
 
 					var b_justCompute: Boolean = true;
 
+					var iw: InteractiveWidget = master.container;
+					m_featureData.clippingRectangle = new Rectangle(iw.areaX, iw.areaY, iw.areaWidth, iw.areaHeight);
+
 					//curves will be not drawn, just compute, to be able to draw each reflection separately
 					if (smooth)
-						master.container.drawSmoothPolyLine(getRenderer, a_points, DrawMode.PLAIN, false, b_justCompute, m_featureData);
+						iw.drawSmoothPolyLine(getRenderer, a_points, DrawMode.PLAIN, false, b_justCompute, m_featureData);
 					else
-						master.container.drawGeoPolyLine(getRenderer, a_points, DrawMode.PLAIN, false, b_justCompute, m_featureData);
+						iw.drawGeoPolyLine(getRenderer, a_points, DrawMode.PLAIN, false, b_justCompute, m_featureData);
 
 					m_featureData.joinLinesFromReflections();
 				}
@@ -213,6 +217,8 @@ package com.iblsoft.flexiweather.ogc.editable
 				return;
 			}
 
+			trace("\n\n");
+			trace("drawFeatureData");
 			var p: Point;
 			var points: Array = m_featureData.points;
 
@@ -246,6 +252,12 @@ package com.iblsoft.flexiweather.ogc.editable
 					if (p)
 					{
 						p = convertCoordToScreen(p);
+
+						if (lastPoint)
+						{
+							var dist: Number = Point.distance(p, lastPoint);
+							trace("\tdrawFeatureData P: " + p + "   distance to last point: " + dist);
+						}
 						if (bNewLine) {
 							g.finish(lastPoint.x, lastPoint.y);
 
@@ -270,6 +282,9 @@ package com.iblsoft.flexiweather.ogc.editable
 					g.finish(lastPoint.x, lastPoint.y);
 				//				trace("\n");
 			}
+
+			trace("End of drawFeatureData");
+			trace("\n\n");
 		}
 		protected function drawFeatureReflection(g: ICurveRenderer, m_featureDataReflection: FeatureDataReflection): void
 		{

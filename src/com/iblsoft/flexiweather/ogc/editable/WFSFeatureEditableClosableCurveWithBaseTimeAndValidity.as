@@ -16,10 +16,12 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.utils.CubicBezier;
 	import com.iblsoft.flexiweather.utils.ICurveRenderer;
 	import com.iblsoft.flexiweather.utils.draw.DrawMode;
+	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 
 	import flash.display.Graphics;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
+	import flash.geom.Rectangle;
 	import flash.utils.Dictionary;
 
 	public class WFSFeatureEditableClosableCurveWithBaseTimeAndValidity extends WFSFeatureEditableCurveWithBaseTimeAndValidity implements IClosableCurve, IWFSCurveFeature
@@ -46,13 +48,16 @@ package com.iblsoft.flexiweather.ogc.editable
 					else
 						m_featureData.clear();
 
+					var iw: InteractiveWidget = master.container;
+
+					m_featureData.clippingRectangle = new Rectangle(iw.areaX, iw.areaY, iw.areaWidth, iw.areaHeight);
 					m_featureData.closed = isCurveClosed();
 
 					// feature is computed via drawSmoothPolyLine() or drawGeoPolyLine() method
 					if (smooth)
-						master.container.drawSmoothPolyLine(getRenderer, a_points, DrawMode.PLAIN, isCurveClosed(), true, m_featureData);
+						iw.drawSmoothPolyLine(getRenderer, a_points, DrawMode.PLAIN, isCurveClosed(), true, m_featureData);
 					else
-						master.container.drawGeoPolyLine(getRenderer, a_points, DrawMode.PLAIN, isCurveClosed(), true, m_featureData);
+						iw.drawGeoPolyLine(getRenderer, a_points, DrawMode.PLAIN, isCurveClosed(), true, m_featureData);
 				}
 
 				m_featureData.joinLinesFromReflections();
@@ -118,7 +123,6 @@ package com.iblsoft.flexiweather.ogc.editable
 			}
 		}
 
-		/*
 		override protected function drawFeatureData(g:ICurveRenderer, m_featureData:FeatureData):void
 		{
 			if (!isCurveClosed())
@@ -139,13 +143,6 @@ package com.iblsoft.flexiweather.ogc.editable
 
 			var linesCount: int = m_featureData.lines.length;
 			var pointsCount: int = points.length;
-
-			//			if (pointsCount == 0 && m_featureData.computingScheduled)
-			//			{
-			//				m_featureData.validate();
-			//				points = m_featureData.points;
-			//				pointsCount = points.length;
-			//			}
 
 			if (pointsCount > 0)
 			{
@@ -192,7 +189,8 @@ package com.iblsoft.flexiweather.ogc.editable
 				//				trace("\n");
 			}
 		}
-		*/
+
+
 		/*
 		override public function toInsertGML(xmlInsert: XML): void
 		{
