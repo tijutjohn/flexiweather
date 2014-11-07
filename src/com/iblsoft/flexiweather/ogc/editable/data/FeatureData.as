@@ -2,8 +2,11 @@ package com.iblsoft.flexiweather.ogc.editable.data
 {
 	import com.iblsoft.flexiweather.ogc.data.ReflectionData;
 
+	import flash.geom.Rectangle;
 	import flash.utils.Dictionary;
 	import flash.utils.getTimer;
+
+	import spark.primitives.Rect;
 
 	public class FeatureData
 	{
@@ -20,10 +23,21 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		private var _center: FeatureDataPoint;
 		private var _startPoint: FeatureDataPoint;
 
+		private var _clippingRectangle: Rectangle;
+
 		private var _points: Array;
 
 		private var m_closed: Boolean;
 
+		public function get clippingRectangle():Rectangle
+		{
+			return _clippingRectangle;
+		}
+
+		public function set clippingRectangle(value:Rectangle):void
+		{
+			_clippingRectangle = value;
+		}
 
 		public function get closed():Boolean
 		{
@@ -161,6 +175,8 @@ package com.iblsoft.flexiweather.ogc.editable.data
 
 			var helperMaxLines: int = 0;
 
+			//1st step - Find first and last ID and set reflection list
+
 			var tempDict: Dictionary = new Dictionary();
 			for (var i: int = 0; i < total; i++)
 			{
@@ -197,17 +213,20 @@ package com.iblsoft.flexiweather.ogc.editable.data
 				}
 			}
 
+
 			if (oldReflection && oldReflection != firstRefl)
 			{
 				//update first reflection "previous reflection"
 				(tempDict[firstRefl] as ReflectionHelper).previousReflection = oldReflection;
 			}
 
+			trace("Join lines 1st step - startingID: " + startingID + " lastID: " + lastID);
+
 			//algorithm start
 			var cnt: int = startingID;
 			var tempRefl: FeatureDataReflection;
 
-			var currTime: Number = getTimer();
+			currTime = getTimer();
 			while(cnt <= lastID)
 			{
 				if ((getTimer() - currTime) > 5000)
@@ -219,6 +238,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 					tempLines.push(currentReflection.getLineAt(cnt));
 					cnt++;
 				} else {
+					trace("\t 	joinLinesFromReflections No line in current reflection on position: " + cnt);
 					//find different reflection with correct line ID
 					tempRefl = currentReflection;
 					var ok: Boolean = true;
@@ -271,6 +291,17 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			trace(this + " has computed LINES - Time:" + (getTimer() - currTime) + "ms.");
 		}
 
+		public function get ids(): Array
+		{
+			var _ids: Array = [];
+			for (var lineID: String in lines)
+				_ids.push(parseInt(lineID));
+
+			_ids.sort(Array.NUMERIC)
+
+			return _ids;
+		}
+
 		/**
 		 * When line is added or removed, everything is computed to do not recompute everything when e.g. center point is requested
 		 *
@@ -286,10 +317,36 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			var oldPoint: FeatureDataPoint;
 			//			_editablePoints = [];
 
-//			var _ids: Array = ids;
+			var oldLineID: Number = -1;
+			var bNewLineInserted: Boolean;
 
-			for each (var line: FeatureDataLine in lines)
+			var _ids: Array = ids;
+
+			for each (var iLineID: int in _ids)
 			{
+				var line: FeatureDataLine = lines[iLineID];
+//				trace("\t LINE ID: " + iLineID);
+				if (oldLineID > -1)
+				{
+					var linesOrderDiff: Number = iLineID - oldLineID;
+					if (linesOrderDiff != 1)
+					{
+						if (oldPoint)
+						{
+							_points.push(oldPoint);
+//						trace("\t\t\t insert old point: " + oldPoint + " diff: " + linesOrderDiff + " curr: " + iLineID);
+							oldPoint = null;
+						}
+						if (!bNewLineInserted)
+						{
+//							trace("\t\t\t insert NULL:  curr: " + iLineID);
+							_points.push(null);
+						}
+						bNewLineInserted = true;
+					} else {
+						bNewLineInserted = false;
+					}
+				}
 				if (line)
 				{
 					var totalLineSegments: int = line.lineSegments.length;
@@ -315,7 +372,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 //						trace("line segment:  lineID = " + line.id + " s: " + s + " Segment: " + lineSegment);
 						var p1: FeatureDataPoint = new FeatureDataPoint(lineSegment.x1, lineSegment.y1);
 						var p2: FeatureDataPoint = new FeatureDataPoint(lineSegment.x2, lineSegment.y2);
-
+//						trace("\t\t compute p1: " + p1 + " p2: " + p2);
 
 						if (!oldPoint)
 							_points.push(p1);
@@ -347,23 +404,98 @@ package com.iblsoft.flexiweather.ogc.editable.data
 				} else {
 					_points.push(null);
 				}
+
+				oldLineID = iLineID;
 			}
 
+//			trace("STEP 2");
+			var newPoint: FeatureDataPoint = checkClipping(_points, 0, _points.length - 1);
+			if (newPoint)
+				_points.push(newPoint);
+
+
+//			trace("STEP 3");
+			cnt = 0;
 			_center = new FeatureDataPoint();
 			var total: int = 0;
 			for each (var ptr: FeatureDataPoint in _points)
 			{
 				if (ptr)
 				{
+//					trace("\t\t\t Point["+cnt+"] " + ptr);
 					_center.addPoint(ptr);
 					total++;
+				} else {
+//					trace("\t\t\t Point["+cnt+"] NULL");
+
+					//check, if there needs to added point on edge of the screen
+					newPoint = checkClipping(_points, cnt+1, cnt-1);
+
+					if (newPoint)
+					{
+						//there is NULL on "cnt" position, remove it and insert newPoint there
+						_points.splice(cnt, 1, newPoint);
+						cnt++;
+					}
 				}
+				oldPoint = ptr;
+				cnt++;
 			}
 			_center.x /= total;
 			_center.y /= total;
 
 			//			trace("\t COMPUTE END avg: " + _center + " > " + this);
-			trace("compute took " + (getTimer() - currTime) + "ms.");
+//			trace("compute took " + (getTimer() - currTime) + "ms.");
+		}
+
+		/**
+		 * Check points if there are outside of viewBBox and there needs to be inserted another point to correctly draw feature when it is clipped
+		 * @param _points
+		 * @param firstPointPosition
+		 * @param lastPoinPositiont
+		 * @param newPosition
+		 * @return
+		 *
+		 */
+		private function checkClipping(_points: Array, firstPointPosition: int, lastPoinPositiont: int): FeatureDataPoint
+		{
+			var firstPoint: FeatureDataPoint = _points[firstPointPosition] as FeatureDataPoint;
+			var lastPoint: FeatureDataPoint = _points[lastPoinPositiont] as FeatureDataPoint;
+
+			if (!firstPoint || !lastPoint)
+				return null;
+
+			var newPoint: FeatureDataPoint;
+			var left: Number = clippingRectangle.left;
+			var right: Number = clippingRectangle.right;
+			var top: Number = clippingRectangle.top;
+			var bottom: Number = clippingRectangle.bottom;
+
+			//check - top left corner
+			if (firstPoint.y < top && lastPoint.x < left)
+				newPoint = new FeatureDataPoint(lastPoint.x, firstPoint.y);
+			if (firstPoint.x < left && lastPoint.y < top)
+				newPoint = new FeatureDataPoint(firstPoint.x, lastPoint.y);
+
+			//check - top right corner
+			if (firstPoint.y < top && lastPoint.x > right)
+				newPoint = new FeatureDataPoint(lastPoint.x, firstPoint.y);
+			if (firstPoint.x > right && lastPoint.y < top)
+				newPoint = new FeatureDataPoint(firstPoint.x, lastPoint.y);
+
+			//check - top bottom corner
+			if (firstPoint.y > bottom && lastPoint.x > right)
+				newPoint = new FeatureDataPoint(lastPoint.x, firstPoint.y);
+			if (firstPoint.x > right && lastPoint.y > bottom)
+				newPoint = new FeatureDataPoint(firstPoint.x, lastPoint.y);
+
+			//check - top bottom corner
+			if (firstPoint.y > bottom && lastPoint.x < left)
+				newPoint = new FeatureDataPoint(lastPoint.x, firstPoint.y);
+			if (firstPoint.x < left && lastPoint.y > bottom)
+				newPoint = new FeatureDataPoint(firstPoint.x, lastPoint.y);
+
+			return newPoint;
 		}
 
 		public function get startPoint(): FeatureDataPoint
