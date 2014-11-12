@@ -83,7 +83,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			mi_pointIndex = i_pointIndex;
 //			mi_reflection = i_reflection;
 			mi_reflectionDelta = i_reflectionDelta;
-			m_pt = feature.getPoint(i_pointIndex);
+			m_pt = feature.getPoint(i_pointIndex, mi_reflectionDelta);
 			//addEventListener(MouseEvent.MOUSE_OVER, onMouseOver);
 			//addEventListener(MouseEvent.MOUSE_OUT, onMouseOut);
 			draw();

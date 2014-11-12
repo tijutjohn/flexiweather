@@ -30,14 +30,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			var a_points: Array = getPoints();
 			if (master)
 			{
-				if (!m_featureData)
-					m_featureData = createFeatureData();
-				else
-					m_featureData.clear();
-
-				var iw: InteractiveWidget = master.container;
-				m_featureData.clippingRectangle = new Rectangle(iw.areaX, iw.areaY, iw.areaWidth, iw.areaHeight);
-
+				initialize()
 				master.container.drawGeoPolyLine(null, a_points, DrawMode.PLAIN, false, true, m_featureData);
 			}
 
