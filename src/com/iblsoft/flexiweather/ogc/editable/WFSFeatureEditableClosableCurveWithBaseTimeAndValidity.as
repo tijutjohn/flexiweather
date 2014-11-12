@@ -357,18 +357,25 @@ package com.iblsoft.flexiweather.ogc.editable
 				if (mb_closed)
 				{
 					// don't do anything if this click is on MoveablePoint belonging to this curve
-					//FIXME fix this for all reflections
-					reflection = m_featureData.getReflectionAt(m_featureData.reflectionsIDs[0]) as FeatureDataReflection;
-					var moveablePoints: Array = getEditablePointsForReflection(reflection.reflectionDelta);
-					if (moveablePoints)
+					var ids: Array = m_featureData.reflectionsIDs;
+					for each (var id: int in ids)
 					{
-						for each (var mp: MoveablePoint in moveablePoints)
+						reflection = m_featureData.getReflectionAt(id) as FeatureDataReflection;
+						var moveablePoints: Array = getEditablePointsForReflection(reflection.reflectionDelta);
+						if (moveablePoints)
 						{
-							if (mp.hitTestPoint(stagePt.x, stagePt.y, true))
-								return false;
+							for each (var mp: MoveablePoint in moveablePoints)
+							{
+								if (mp.hitTestPoint(stagePt.x, stagePt.y, true))
+									return false;
+							}
 						}
 					}
-					var a: Array = getPoints();
+
+					//FIXME how to get correct points for feature, which is crossing dateline?
+					iw = master.container;
+					var clickedReflection: int = iw.pointReflection(stagePt.x, stagePt.y);
+					var a: Array = getPoints(clickedReflection);
 
 					if (!a)
 						return false;
@@ -382,6 +389,7 @@ package com.iblsoft.flexiweather.ogc.editable
 						// add point between 2 points
 						//add first point at the end to check possibility to insert point between last and first point
 						a.push((a[0] as Point).clone());
+
 
 						for (var i: int = 1; i < a.length; ++i)
 						{
@@ -430,8 +438,12 @@ package com.iblsoft.flexiweather.ogc.editable
 				{
 					// IF USER CLICK NEAR BY FIRST POINT AND CURVE HAS MORE THAN 2 POINTS (IT CAN BE CLOSED)
 					if (m_points && m_points.length > 0)
-					{	//FIXME...need to check all first points in all reflections
-						var points: Array = m_points.getPointsForReflection(0);
+					{
+						var iw: InteractiveWidget = master.container;
+						var clickedReflection: int = iw.pointReflection(pt.x, pt.y);
+
+						//get points from reflection when user clicks
+						var points: Array = m_points.getPointsForReflection(clickedReflection);
 						var f_distanceToFirst: Number = pt.subtract(points[0]).length;
 						if ((f_distanceToFirst < 10) && (m_points.length > 2))
 						{
