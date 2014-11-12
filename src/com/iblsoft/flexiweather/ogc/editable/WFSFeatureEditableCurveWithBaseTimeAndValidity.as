@@ -106,7 +106,7 @@ package com.iblsoft.flexiweather.ogc.editable
 
 		protected function computeCurve(): void
 		{
-			trace("WFSFeatureEditableCurveWithBaseTimeAndValidity computeCurve");
+//			trace("WFSFeatureEditableCurveWithBaseTimeAndValidity computeCurve");
 
 			var a_points: Array = getPoints();
 
@@ -114,18 +114,13 @@ package com.iblsoft.flexiweather.ogc.editable
 //			{
 				if (master)
 				{
-					if (!m_featureData)
-						m_featureData = createFeatureData();
-					else
-						m_featureData.clear();
 
+					initializeFeatureData();
 					//DEBUG - check for non smooth (to have less coordinates
 //					smooth = false;
 
 					var b_justCompute: Boolean = true;
-
 					var iw: InteractiveWidget = master.container;
-					m_featureData.clippingRectangle = new Rectangle(iw.areaX, iw.areaY, iw.areaWidth, iw.areaHeight);
 
 					//curves will be not drawn, just compute, to be able to draw each reflection separately
 					if (smooth)
@@ -142,7 +137,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 //			return;
 
-			trace("WFSFeatureEditableCurveWithBaseTimeAndValidity drawCurve");
+//			trace("WFSFeatureEditableCurveWithBaseTimeAndValidity drawCurve");
 
 			var reflection: FeatureDataReflection;
 			var _addToLabelLayout: Boolean;
@@ -217,8 +212,8 @@ package com.iblsoft.flexiweather.ogc.editable
 				return;
 			}
 
-			trace("\n\n");
-			trace("drawFeatureData");
+//			trace("\n\n");
+//			trace("drawFeatureData");
 			var p: Point;
 			var points: Array = m_featureData.points;
 
@@ -256,7 +251,7 @@ package com.iblsoft.flexiweather.ogc.editable
 						if (lastPoint)
 						{
 							var dist: Number = Point.distance(p, lastPoint);
-							trace("\tdrawFeatureData P: " + p + "   distance to last point: " + dist);
+//							trace("\tdrawFeatureData P: " + p + "   distance to last point: " + dist);
 						}
 						if (bNewLine) {
 							g.finish(lastPoint.x, lastPoint.y);
@@ -283,8 +278,8 @@ package com.iblsoft.flexiweather.ogc.editable
 				//				trace("\n");
 			}
 
-			trace("End of drawFeatureData");
-			trace("\n\n");
+//			trace("End of drawFeatureData");
+//			trace("\n\n");
 		}
 		protected function drawFeatureReflection(g: ICurveRenderer, m_featureDataReflection: FeatureDataReflection): void
 		{

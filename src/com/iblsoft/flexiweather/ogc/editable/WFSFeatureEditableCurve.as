@@ -6,10 +6,12 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.utils.CubicBezier;
 	import com.iblsoft.flexiweather.utils.CurveLineSegment;
 	import com.iblsoft.flexiweather.utils.CurveLineSegmentRenderer;
+	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 
 	import flash.display.Sprite;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
+	import flash.geom.Rectangle;
 	import flash.utils.Dictionary;
 
 	public class WFSFeatureEditableCurve extends WFSFeatureEditable implements IMouseEditableItem
@@ -42,6 +44,21 @@ package com.iblsoft.flexiweather.ogc.editable
 		}
 
 
+		/**
+		 * Function is called from computeCurve method. You can override method if you need update featureData in any way
+		 *
+		 */
+		protected function initializeFeatureData(): void
+		{
+			if (!m_featureData)
+				m_featureData = createFeatureData();
+			else
+				m_featureData.clear();
+
+			var iw: InteractiveWidget = master.container;
+			m_featureData.clippingRectangle = new Rectangle(iw.areaX, iw.areaY, iw.areaWidth, iw.areaHeight);
+			m_featureData.featureSplitter = iw.featureSplitter;
+		}
 
 		override public function toInsertGML(xmlInsert: XML): void
 		{
@@ -245,28 +262,36 @@ package com.iblsoft.flexiweather.ogc.editable
 				}
 				if (i_best != -1)
 				{
-					insertPointBefore(i_best, pt);
-					var newPoint: IMouseEditableItem;
+					reflectionDelta = master.container.pointReflection(pt.x, pt.y);
+
+//					insertPointBefore(i_best, pt, reflectionDelta);
+					var newPoint: IMouseEditableItem = setPoint(i_best, pt, reflectionDelta);
+
+
 					var totalMoveablePoints: int = getEditablePointsForReflection(0).length;
-
+//
 					//FIXME Test if this is ok
-					if (i_best < totalMoveablePoints)
-					{
+//					if (i_best < totalMoveablePoints)
+//					{
 						//FIXME... question is if this needs to be done for 1 reflection or for all reflections
-						var reflection: FeatureDataReflection = m_featureData.getReflectionAt(m_featureData.reflectionsIDs[0]);
-						if (reflection)
-							newPoint = getEditablePointForReflectionAt(reflection.reflectionDelta, i_best) as IMouseEditableItem;
+//						var ids: Array = m_featureData.reflectionsIDs;
+//						for (var i: int = 0; i < totalReflections; i++)
+//						{
+//							var reflectionDelta: int = ids[i];
+//							var reflection: FeatureDataReflection = m_featureData.getReflectionAt(reflectionDelta);
+//							newPoint = getEditablePointForReflectionAt(reflectionDelta, i_best) as IMouseEditableItem;
 
-						if (newPoint)
-						{
-							newPoint.onMouseDown(pt, event);
-							if (!b_keepDrag)
+							if (newPoint)
 							{
-								newPoint.onMouseUp(pt, event);
-								newPoint.onMouseClick(pt, event);
+								newPoint.onMouseDown(pt, event);
+								if (!b_keepDrag)
+								{
+									newPoint.onMouseUp(pt, event);
+									newPoint.onMouseClick(pt, event);
+								}
 							}
-						}
-					}
+//						}
+//					}
 				}
 				return true;
 			}

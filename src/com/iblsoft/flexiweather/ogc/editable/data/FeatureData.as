@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.ogc.editable.data
 {
 	import com.iblsoft.flexiweather.ogc.data.ReflectionData;
+	import com.iblsoft.flexiweather.utils.wfs.FeatureSplitter;
 
 	import flash.geom.Rectangle;
 	import flash.utils.Dictionary;
@@ -28,6 +29,28 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		private var _points: Array;
 
 		private var m_closed: Boolean;
+
+
+
+		public function get featureSplitter():FeatureSplitter
+		{
+			return _featureSplitter;
+		}
+
+		public function set featureSplitter(value:FeatureSplitter):void
+		{
+			_featureSplitter = value;
+		}
+
+		public function get reflectionDelta():int
+		{
+			return m_reflectionDelta;
+		}
+
+		public function set reflectionDelta(value:int):void
+		{
+			m_reflectionDelta = value;
+		}
 
 		public function get clippingRectangle():Rectangle
 		{
@@ -70,7 +93,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		/**
 		 * Reflection in which is feature drawn. If feature is drawn across dateline, it's counted separately, but afterwards joined and draw as inside reflection.
 		 */
-		public var reflectionDelta: int;
+		private var m_reflectionDelta: int;
 
 		public function get reflectionsLength(): int
 		{
@@ -106,6 +129,9 @@ package com.iblsoft.flexiweather.ogc.editable.data
 
 		public var name: String;
 
+		public var forceViewBBoxClipping: Boolean;
+		private var _featureSplitter: FeatureSplitter;
+
 		public function FeatureData(name: String)
 		{
 			uid = fd_uid++;
@@ -117,14 +143,21 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			reflectionsIDs = [];
 
 			reflectionDelta = 0;
-			trace("FeatureData created: " + this);
+			debug("FeatureData created: " + this);
+
+			forceViewBBoxClipping = true;
 		}
 
-		public function debug(): void
+		private function debug(txt: String): void
 		{
-			trace("FeatureData: " + name);
-			trace("\tLines: " + lines.length);
-			trace("\tReflections: " + reflectionsLength);
+			return;
+			trace(this + ": " + txt);
+		}
+		public function debugData(): void
+		{
+			debug("FeatureData: " + name);
+			debug("\tLines: " + lines.length);
+			debug("\tReflections: " + reflectionsLength);
 
 			var total: int = reflectionsLength;
 			var reflectionIDs: Array = reflectionsIDs;
@@ -132,7 +165,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			for (var i: int = 0; i < total; i++)
 			{
 				var refl: FeatureDataReflection = getReflectionAt(reflectionIDs[i]);
-				trace("\t\tLines: " + refl.lines.length);
+				debug("\t\tLines: " + refl.lines.length);
 				refl.debug();
 			}
 		}
@@ -209,7 +242,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 
 					oldReflection = refl;
 				} else {
-					trace("Reflection: " + refl + " has no points");
+					debug("Reflection: " + refl + " has no points");
 				}
 			}
 
@@ -220,7 +253,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 				(tempDict[firstRefl] as ReflectionHelper).previousReflection = oldReflection;
 			}
 
-			trace("Join lines 1st step - startingID: " + startingID + " lastID: " + lastID);
+			debug("Join lines 1st step - startingID: " + startingID + " lastID: " + lastID);
 
 			//algorithm start
 			var cnt: int = startingID;
@@ -231,14 +264,14 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			{
 				if ((getTimer() - currTime) > 5000)
 				{
-					trace("	joinLinesFromReflections 1 infinite loop");
+					debug("	joinLinesFromReflections 1 infinite loop");
 				}
 				if (currentReflection.hasLineAt(cnt))
 				{
 					tempLines.push(currentReflection.getLineAt(cnt));
 					cnt++;
 				} else {
-					trace("\t 	joinLinesFromReflections No line in current reflection on position: " + cnt);
+					debug("\t 	joinLinesFromReflections No line in current reflection on position: " + cnt);
 					//find different reflection with correct line ID
 					tempRefl = currentReflection;
 					var ok: Boolean = true;
@@ -246,7 +279,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 					{
 						if ((getTimer() - currTime) > 5000)
 						{
-							trace("	joinLinesFromReflections 2 infinite loop");
+							debug("	joinLinesFromReflections 2 infinite loop");
 						}
 						helper = tempDict[currentReflection] as ReflectionHelper;
 						currentReflection = helper.previousReflection;
@@ -263,7 +296,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 								if (bWriteNull)
 									tempLines.push(null);
 								else
-									trace("Do not write null, previous item is null");
+									debug("Do not write null, previous item is null");
 
 								ok = false;
 								cnt++;
@@ -288,7 +321,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 
 			lines = tempLines;
 			compute();
-			trace(this + " has computed LINES - Time:" + (getTimer() - currTime) + "ms.");
+			debug(this + " has computed LINES - Time:" + (getTimer() - currTime) + "ms.");
 		}
 
 		public function get ids(): Array
@@ -309,13 +342,12 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		private function compute(): void
 		{
 			var currTime: Number = getTimer();
-//			trace("********************************************************");
-//			trace("\t COMPUTE START" + this);
+			debug("********************************************************");
+			debug("\t COMPUTE START" + this);
 			if (_points.length > 0)
 				_points.splice(0, _points.length);
 			var cnt: int = 0;
 			var oldPoint: FeatureDataPoint;
-			//			_editablePoints = [];
 
 			var oldLineID: Number = -1;
 			var bNewLineInserted: Boolean;
@@ -325,7 +357,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			for each (var iLineID: int in _ids)
 			{
 				var line: FeatureDataLine = lines[iLineID];
-//				trace("\t LINE ID: " + iLineID);
+//				debug("\t LINE ID: " + iLineID);
 				if (oldLineID > -1)
 				{
 					var linesOrderDiff: Number = iLineID - oldLineID;
@@ -334,12 +366,12 @@ package com.iblsoft.flexiweather.ogc.editable.data
 						if (oldPoint)
 						{
 							_points.push(oldPoint);
-//						trace("\t\t\t insert old point: " + oldPoint + " diff: " + linesOrderDiff + " curr: " + iLineID);
+//						debug("\t\t\t insert old point: " + oldPoint + " diff: " + linesOrderDiff + " curr: " + iLineID);
 							oldPoint = null;
 						}
 						if (!bNewLineInserted)
 						{
-//							trace("\t\t\t insert NULL:  curr: " + iLineID);
+//							debug("\t\t\t insert NULL:  curr: " + iLineID);
 							_points.push(null);
 						}
 						bNewLineInserted = true;
@@ -369,15 +401,15 @@ package com.iblsoft.flexiweather.ogc.editable.data
 								continue;
 							}
 						}
-//						trace("line segment:  lineID = " + line.id + " s: " + s + " Segment: " + lineSegment);
+//						debug("line segment:  lineID = " + line.id + " s: " + s + " Segment: " + lineSegment);
 						var p1: FeatureDataPoint = new FeatureDataPoint(lineSegment.x1, lineSegment.y1);
 						var p2: FeatureDataPoint = new FeatureDataPoint(lineSegment.x2, lineSegment.y2);
-//						trace("\t\t compute p1: " + p1 + " p2: " + p2);
+//						debug("\t\t compute p1: " + p1 + " p2: " + p2);
 
 						if (!oldPoint)
 							_points.push(p1);
 						else if (oldPoint.x != p1.x || oldPoint.y != p1.y) {
-//							trace("old and new points are not equal: lineID = " + line.id + " s: " + s);
+//							debug("old and new points are not equal: lineID = " + line.id + " s: " + s);
 	//						_points.push(null);
 							_points.push(p1);
 						}
@@ -399,7 +431,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 							_startPoint = p1.clone() as FeatureDataPoint;
 
 						cnt++;
-//						trace("\t Old point: lineID = " + line.id + " s: " + s + " point: " + oldPoint);
+//						debug("\t Old point: lineID = " + line.id + " s: " + s + " point: " + oldPoint);
 					}
 				} else {
 					_points.push(null);
@@ -408,13 +440,13 @@ package com.iblsoft.flexiweather.ogc.editable.data
 				oldLineID = iLineID;
 			}
 
-//			trace("STEP 2");
+//			debug("STEP 2");
 			var newPoint: FeatureDataPoint = checkClipping(_points, 0, _points.length - 1);
 			if (newPoint)
 				_points.push(newPoint);
 
 
-//			trace("STEP 3");
+//			debug("STEP 3");
 			cnt = 0;
 			_center = new FeatureDataPoint();
 			var total: int = 0;
@@ -422,11 +454,11 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			{
 				if (ptr)
 				{
-//					trace("\t\t\t Point["+cnt+"] " + ptr);
+					debug("\t\t\t Point["+cnt+"] " + ptr);
 					_center.addPoint(ptr);
 					total++;
 				} else {
-//					trace("\t\t\t Point["+cnt+"] NULL");
+					debug("\t\t\t Point["+cnt+"] NULL");
 
 					//check, if there needs to added point on edge of the screen
 					newPoint = checkClipping(_points, cnt+1, cnt-1);
@@ -444,8 +476,8 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			_center.x /= total;
 			_center.y /= total;
 
-			//			trace("\t COMPUTE END avg: " + _center + " > " + this);
-//			trace("compute took " + (getTimer() - currTime) + "ms.");
+			//			debug("\t COMPUTE END avg: " + _center + " > " + this);
+			debug("compute took " + (getTimer() - currTime) + "ms.");
 		}
 
 		/**
@@ -506,7 +538,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		{
 			if (!_center)
 			{
-				//				trace("Center is not computed");
+				//				debug("Center is not computed");
 				if (lines && lines.length > 0)
 				{
 					compute();
@@ -558,11 +590,27 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			return reflection;
 		}
 
+		public function updateReflectionIDsWith(newIDs: Array): Array
+		{
+			for each (var newID: int in newIDs)
+			{
+				if (_reflectionsIDs.indexOf(newID) == -1)
+				{
+					_reflectionsIDs.push(newID);
+					getReflectionAt(newID);
+				}
+			}
+
+			return _reflectionsIDs;
+		}
 		private function updateIDs(): void
 		{
 			_reflectionsIDs = [];
 			for (var id: Object in reflections)
 			{
+				if (id is String)
+					id = parseInt(id as String);
+
 				_reflectionsIDs.push(id);
 			}
 		}

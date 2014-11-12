@@ -143,7 +143,7 @@ package com.iblsoft.flexiweather.ogc
 
 		public function insertPointBefore(i_pointIndex: uint, pt: Point, reflectionID: int = 0): void
 		{
-			trace("FEATUREBASE inserPointBefore");
+//			trace("FEATUREBASE inserPointBefore");
 			m_points.insertPointBefore(i_pointIndex, pt, reflectionID);
 			m_coordinates.splice(i_pointIndex, 0, m_master.container.pointToCoord(pt.x, pt.y));
 

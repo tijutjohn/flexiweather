@@ -15,6 +15,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.utils.AnnotationBox;
+	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 
 	import flash.display.DisplayObject;
@@ -24,6 +25,8 @@ package com.iblsoft.flexiweather.ogc.editable
 	import flash.geom.Point;
 	import flash.ui.Keyboard;
 	import flash.utils.Dictionary;
+
+	import mx.utils.ObjectUtil;
 
 	public class WFSFeatureEditable extends WFSFeatureBase implements IEditableItem, IHighlightableItem, ISelectableItem, IWFSFeatureWithReflection
 	{
@@ -242,13 +245,16 @@ package com.iblsoft.flexiweather.ogc.editable
 					mp = editablePoints[pointPosition] as MoveablePoint;
 
 					editablePoints.splice(pointPosition, 1);
-					removeMoveablePointListeners(mp);
 
-					m_editableSprite.removeChild(mp);
+					if (mp)
+					{
+						removeMoveablePointListeners(mp);
+						m_editableSprite.removeChild(mp);
 
-					var eim: IEditableItemManager = master as IEditableItemManager;
-					if (eim != null)
-						eim.removeEditableItem(mp);
+						var eim: IEditableItemManager = master as IEditableItemManager;
+						if (eim != null)
+							eim.removeEditableItem(mp);
+					}
 				}
 
 			}
@@ -410,9 +416,12 @@ package com.iblsoft.flexiweather.ogc.editable
 					{
 //						mp = reflection.moveablePoints[coordIndex] as MoveablePoint;
 						mp = getEditablePointForReflectionAt(reflection.reflectionDelta, coordIndex);
-						if (mp.visible != visible)
+						if (mp)
 						{
-							mp.visible = visible;
+							if (mp.visible != visible)
+							{
+								mp.visible = visible;
+							}
 						}
 					}
 				}
@@ -435,6 +444,16 @@ package com.iblsoft.flexiweather.ogc.editable
 				var i: uint;
 
 				var reflectionIDs: Array = m_featureData.reflectionsIDs;
+				var viewBBoxReflections: Array = master.container.viewBBoxReflections();
+
+				var isSame: int = ObjectUtil.compare(reflectionIDs, viewBBoxReflections, 0);
+
+				if (isSame != 0)
+				{
+					reflectionIDs = m_featureData.updateReflectionIDsWith(viewBBoxReflections);
+
+					//TODO check if featureData.reflections are changes
+				}
 
 				for (var r: int = 0; r < totalReflections; r++)
 				{
@@ -459,7 +478,8 @@ package com.iblsoft.flexiweather.ogc.editable
 								var isReflectionEdgePoint: Boolean = false; //pt.isReflectionEdgePoint
 								if (!isReflectionEdgePoint)
 								{
-									mp = getEditablePointForReflectionAt(reflectionDelta, cnt);
+//									mp = getEditablePointForReflectionAt(reflectionDelta, cnt);
+									mp = getEditablePointForReflectionAt(reflectionDelta, i);
 
 										//add new MovablePoint (new point was added, so we need to create Movable point for it
 //										mp = new MoveablePoint(this, cnt, r, reflection.reflectionDelta);
@@ -699,18 +719,20 @@ package com.iblsoft.flexiweather.ogc.editable
 		}
 
 		// point/location manipulation helpers
-		public function setPoint(i_pointIndex: uint, pt: Point, i_reflectionDelta: int): void
+		public function setPoint(i_pointIndex: uint, pt: Point, i_reflectionDelta: int): IMouseEditableItem
 		{
+//			insertPointBefore(i_pointIndex, pt, i_reflectionDelta);
+
+			//STEP 1 - add point to 0 reflection
+
 			var reflectionWidth: Number = 0;
 			if (i_reflectionDelta != 0)
 				reflectionWidth = master.container.getExtentBBox().width * i_reflectionDelta;
 			var c: Coord = m_master.container.pointToCoord(pt.x, pt.y);
 
-//			trace("WFSFEatureEditable setPoint : from pt: " + pt + " to c: " + c.toLaLoCoord());
 			//need to move coord to 0 reflection
 			var projection: Projection = m_master.container.getCRSProjection();
 			c = projection.moveCoordToExtent(c);
-//			c.x -= reflectionWidth;
 
 			//and cound correct point position for 0 reflection
 			var newPt: Point = m_master.container.coordToPoint(c);
@@ -718,11 +740,23 @@ package com.iblsoft.flexiweather.ogc.editable
 			m_coordinates[i_pointIndex] = c;
 
 //			trace("WFSFEatureEditable setPoint : from c: " + c.toLaLoCoord() + " to pt: " + newPt + " old pt: " + pt);
-//			if (newPt.x != pt.x)
-//				trace("check this");
+
+
+
+			var newPoint: IMouseEditableItem;
+			//STEP 2 - add it to reflection, in which was added (if it was not added in 0th reflection)
+//			if (i_reflectionDelta != 0)
+//			{
+//				var totalMoveablePoints: int = getEditablePointsForReflection(0).length;
+//
+//				var reflection: FeatureDataReflection = m_featureData.getReflectionAt(i_reflectionDelta);
+//				newPoint = getEditablePointForReflectionAt(i_reflectionDelta, i_pointIndex) as IMouseEditableItem;
+//			}
 
 			update(FeatureUpdateContext.fullUpdate());
 			modified = true;
+
+			return newPoint;
 		}
 
 		public function selectPreviousMoveablePoint(): void
