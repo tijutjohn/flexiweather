@@ -33,6 +33,11 @@ package com.iblsoft.flexiweather.ogc.editable
 			super(s_namespace, s_typeName, s_featureId);
 		}
 
+		override protected function initializeFeatureData():void
+		{
+			super.initializeFeatureData();
+			m_featureData.closed = isCurveClosed();
+		}
 
 		override protected function computeCurve(): void
 		{
@@ -43,15 +48,9 @@ package com.iblsoft.flexiweather.ogc.editable
 				if (master)
 				{
 					//TODO Optimization: do not create new FeatureData everytime, but reuse old ones
-					if (!m_featureData)
-						m_featureData = createFeatureData();
-					else
-						m_featureData.clear();
+					initializeFeatureData();
 
 					var iw: InteractiveWidget = master.container;
-
-					m_featureData.clippingRectangle = new Rectangle(iw.areaX, iw.areaY, iw.areaWidth, iw.areaHeight);
-					m_featureData.closed = isCurveClosed();
 
 					// feature is computed via drawSmoothPolyLine() or drawGeoPolyLine() method
 					if (smooth)
@@ -382,11 +381,15 @@ package com.iblsoft.flexiweather.ogc.editable
 					}
 					if (i_best != -1)
 					{
-						insertPointBefore(i_best, pt);
+						var newPoint: IMouseEditableItem;
+
+						var reflectionDelta: int = master.container.pointReflection(pt.x, pt.y);
+
+						insertPointBefore(i_best, pt, reflectionDelta);
 //						MoveablePoint(ml_movablePoints[i_best]).onMouseDown(pt);
-						reflection = m_featureData.getReflectionAt(m_featureData.reflectionsIDs[0]) as FeatureDataReflection;
-						if (reflection)
-							var newPoint: MoveablePoint = getEditablePointForReflectionAt(reflection.reflectionDelta, i_best);
+
+						var reflection: FeatureDataReflection = m_featureData.getReflectionAt(reflectionDelta);
+						newPoint = getEditablePointForReflectionAt(reflectionDelta, i_best) as IMouseEditableItem;
 						if (newPoint)
 						{
 							newPoint.onMouseDown(pt, event);
@@ -406,7 +409,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				{
 					// IF USER CLICK NEAR BY FIRST POINT AND CURVE HAS MORE THAN 2 POINTS (IT CAN BE CLOSED)
 					if (m_points && m_points.length > 0)
-					{
+					{	//FIXME...need to check all first points in all reflections
 						var points: Array = m_points.getPointsForReflection(0);
 						var f_distanceToFirst: Number = pt.subtract(points[0]).length;
 						if ((f_distanceToFirst < 10) && (m_points.length > 2))

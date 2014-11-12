@@ -16,6 +16,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.multiview.synchronization.events.SynchronisationEvent;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
+	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.utils.CubicBezier;
 	import com.iblsoft.flexiweather.utils.ICurveRenderer;
 	import com.iblsoft.flexiweather.utils.ProfilerUtils;
@@ -190,6 +191,15 @@ package com.iblsoft.flexiweather.widgets
 		private var m_lastResizeTime: Number;
 		private var m_wmsCacheManager: WMSCacheManager;
 
+		//variable for drawing viewport
+		private var mi_viewportXAxisMarginPixels: int = 30;
+		private var mi_viewportYAxisMarginPixels: int = 30;
+		private var m_viewBBoxWestLine: LineSegment;
+		private var m_viewBBoxEastLine: LineSegment;
+		private var m_viewBBoxNorthLine: LineSegment;
+		private var m_viewBBoxSouthLine: LineSegment;
+
+
 		/**
 		 * anticollision layout for Labels
 		 */
@@ -321,7 +331,13 @@ package com.iblsoft.flexiweather.widgets
 		 */
 		private function onWidgetEnterFrame(event: Event): void
 		{
-//			trace("NEW TICK");
+//			debug("NEW TICK");
+			//we want to force mouse move event to be executed just once per frame
+			if (_mouseMoveExecuted)
+			{
+				_mouseMoveExecuted = false;
+//				debug("Commit properties: _mouseMoveExecuted = " + _mouseMoveExecuted);
+			}
 		}
 		private function initializeDefaultProjection(): void
 		{
@@ -426,6 +442,8 @@ package com.iblsoft.flexiweather.widgets
 				}
 				mb_autoLayoutChanged = false;
 			}
+
+
 
 			if (_layersOrderChanged)
 			{
@@ -1014,6 +1032,49 @@ package com.iblsoft.flexiweather.widgets
 		internal function onLayerVisibilityChanged(layer: InteractiveLayer): void
 		{
 			setAnticollisionLayoutsDirty();
+		}
+
+		/**
+		 * Return reflection delta of point on screen
+		 *
+		 * @param x
+		 * @param y
+		 * @return
+		 *
+		 */
+		public function pointReflection(x: Number, y: Number): int
+		{
+			var c: Coord = pointToCoord(x, y);
+			var reflectedCoords: Array = mapCoordInCRSToViewReflections(new Point(c.x, c.y));
+			if (reflectedCoords.length == 1)
+				return reflectedCoords[0].reflection;
+
+			return 0;
+		}
+
+		public function viewBBoxReflections(): Array
+		{
+			//check left and right edges
+//			var leftCoord: Coord = new Coord(crs, m_viewBBox.xMin, m_viewBBox.yMin);
+//			var rightCoord: Coord = new Coord(crs, m_viewBBox.xMax, m_viewBBox.yMin);
+
+			var reflectedLeftCoords: Array = mapCoordInCRSToViewReflections(new Point(m_viewBBox.xMin, m_viewBBox.yMin));
+			var reflectedRightCoords: Array = mapCoordInCRSToViewReflections(new Point(m_viewBBox.xMax, m_viewBBox.yMin));
+
+			ArrayUtils.unionArrays(reflectedLeftCoords, reflectedRightCoords);
+
+			var reflectionDeltas: Array = [];
+			for each (var reflObject: Object in reflectedLeftCoords)
+			{
+				var currReflectionDelta: int = reflObject.reflection;
+				var existingID: int = reflectionDeltas.indexOf(currReflectionDelta);
+				if (existingID == -1)
+					reflectionDeltas.push(currReflectionDelta);
+			}
+
+			reflectionDeltas.sort();
+
+			return reflectionDeltas;
 		}
 
 		/** Converts screen point (pixels) into Coord with current CRS. */
@@ -1770,10 +1831,14 @@ package com.iblsoft.flexiweather.widgets
 			postUserActionUpdate();
 		}
 
+		private var _mouseMoveExecuted: Boolean;
+
 		protected function onMouseMove(event: MouseEvent): void
 		{
-			if (!_enableMouseMove)
+			if (!_enableMouseMove || _mouseMoveExecuted)
 				return;
+
+			_mouseMoveExecuted = true;
 			for (var i: int = m_layerContainer.numElements - 1; i >= 0; --i)
 			{
 				var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
@@ -1783,6 +1848,8 @@ package com.iblsoft.flexiweather.widgets
 					break;
 			}
 			postUserActionUpdate();
+
+			invalidateProperties();
 		}
 
 		protected function onMouseWheel(event: MouseEvent): void
@@ -1971,8 +2038,9 @@ package com.iblsoft.flexiweather.widgets
 			for (var i: int = 0; i < m_layerContainer.numElements; ++i)
 			{
 				var l: InteractiveLayer = InteractiveLayer(m_layerContainer.getElementAt(i));
-				if (l.isDynamicPartInvalid())
-					l.validateNow();
+//FIXME check if this is needed, it's not good solution to call validateNow more times in one frame
+//				if (l.isDynamicPartInvalid())
+//					l.validateNow();
 			}
 			anticollisionUpdate();
 		}
@@ -2101,7 +2169,7 @@ package com.iblsoft.flexiweather.widgets
 		 */
 		public function setViewBBox(bbox: BBox, b_finalChange: Boolean, b_negotiateBBox: Boolean = true): void
 		{
-
+//			trace("\t\t\t setViewBBox: " + bbox.toBBOXString());
 //			debug(this + " setViewBBox: " + bbox.toBBOXString() + " finalChange: " + b_finalChange + " , negotiate: " + b_negotiateBBox);
 
 			var b_changeZoom: Boolean = true;
@@ -2179,6 +2247,8 @@ package com.iblsoft.flexiweather.widgets
 				autoLayoutViewBBox(bbox, b_finalChange, true, b_changeZoom, b_negotiateBBox);
 			}
 		}
+
+
 		private var m_oldWidgetWidth: Number = 0;
 		private var m_oldWidgetHeight: Number = 0;
 
@@ -2295,13 +2365,74 @@ package com.iblsoft.flexiweather.widgets
 		{
 			//dispath view bbox changed event to notify about change
 			m_viewBBox = newBBox;
+
+			//to optimize drawing, count drawing viewport lines when ViewBBox is changed is done just once
+			createDrawingViewBBoxLines();
+
 			dispatchEvent(new Event(VIEW_BBOX_CHANGED));
 			signalAreaChanged(b_finalChange);
 		}
 
+
+		/**
+		 * Function will prepare viewport edge lines for drawing of features.
+		 *
+		 */
+		private function createDrawingViewBBoxLines(): void
+		{
+			var vbLeft: Number = m_viewBBox.xMin;
+			var vbRight: Number = m_viewBBox.xMax;
+			var vbTop: Number = m_viewBBox.yMax;
+			var vbBottom: Number = m_viewBBox.yMin;
+
+			var ebLeft: Number = m_extentBBox.xMin;
+			var ebRight: Number = m_extentBBox.xMax;
+			var ebTop: Number = m_extentBBox.yMax;
+			var ebBottom: Number = m_extentBBox.yMin;
+
+			mi_viewportXAxisMarginPixels = 30;
+			mi_viewportYAxisMarginPixels = 30;
+
+			var coords: Array = pointsToCoords([new Point(0,0), new Point(mi_viewportXAxisMarginPixels, mi_viewportYAxisMarginPixels)]);
+
+			//cound margins in coordinates space
+			var xMargin: Number = (coords[1] as Coord).x - (coords[0] as Coord).x;
+			var yMargin: Number = (coords[0] as Coord).y - (coords[1] as Coord).y;
+
+			var viewportLeft: Number;
+			var viewportRight: Number;
+			var viewportTop: Number;
+			var viewportBottom: Number;
+			var projection: Projection = getCRSProjection();
+
+			if (projection.wrapsHorizontally)
+			{
+				viewportLeft = vbLeft - xMargin;
+				viewportRight = vbRight + xMargin;
+				viewportTop = vbTop + yMargin;
+				viewportBottom = vbBottom - yMargin;
+			} else {
+				viewportLeft = Math.max(ebLeft, vbLeft - xMargin);
+				viewportRight = Math.min(ebRight, vbRight + xMargin);
+				viewportTop = Math.min(ebTop, vbTop + yMargin);
+				viewportBottom = Math.max(ebBottom, vbBottom - yMargin);
+			}
+			_drawingViewport = new BBox(viewportLeft, viewportBottom, viewportRight, viewportTop);
+
+			m_viewBBoxWestLine = new LineSegment(viewportLeft, viewportTop, viewportLeft, viewportBottom);
+			m_viewBBoxEastLine = new LineSegment(viewportRight, viewportTop, viewportRight, viewportBottom);
+			m_viewBBoxNorthLine = new LineSegment(viewportLeft, viewportTop, viewportRight, viewportTop);
+			m_viewBBoxSouthLine = new LineSegment(viewportLeft, viewportBottom, viewportRight, viewportBottom);
+		}
+
+		private var _drawingViewport: BBox;
+
+
+
 		public function setExtentBBox(bbox: BBox, b_finalChange: Boolean = true): void
 		{
 			m_extentBBox = bbox;
+//			trace("\t\t\t setExtentBBox: " + m_extentBBox.toBBOXString());
 			if (b_finalChange)
 				setViewBBox(m_extentBBox, b_finalChange); // this calls signalAreaChanged()
 		}
@@ -2346,6 +2477,11 @@ package com.iblsoft.flexiweather.widgets
 		// Drawing of splitted features
 		//*****************************************************************************************
 		private var m_featureSplitter: FeatureSplitter;
+
+		public function get featureSplitter(): FeatureSplitter
+		{
+			return m_featureSplitter;
+		}
 
 		public function getSplineReflections(coords: Array, b_closed: Boolean = false): Array
 		{
@@ -2504,7 +2640,7 @@ package com.iblsoft.flexiweather.widgets
 		private function _drawGeoLine(coordFrom: Coord, coordTo: Coord, drawMode: String, d_reflectionToSegmentPoints: Dictionary, featureData: FeatureData = null, featureDataLineID: int = 0): void
 		{
 			var currTime: Number = getTimer();
-			var bDebugTimes: Boolean = false;
+			var bDebugTimes: Boolean = true;
 
 			if (!coordFrom && !coordTo)
 				return;
@@ -2604,7 +2740,7 @@ package com.iblsoft.flexiweather.widgets
 					tempCoords = [new EdgeCoord(coordTo, false, true)];
 			}
 
-			if (bDebugTimes) trace("\t\t _drawGeoPolyLine - 1 - took " + (getTimer() - currTime) + "ms.");
+//			if (bDebugTimes) trace("\t\t _drawGeoPolyLine - 1 - took " + (getTimer() - currTime) + "ms.");
 			// coords can now contain null to mark point of discontinuity if line crosses dateline or projection boundaries
 
 			var i_part: int = 0;
@@ -2630,7 +2766,7 @@ package com.iblsoft.flexiweather.widgets
 				}
 			}
 
-			if (bDebugTimes) trace("\t\t _drawGeoPolyLine - 2 - took " + (getTimer() - currTime) + "ms.");
+//			if (bDebugTimes) trace("\t\t _drawGeoPolyLine - 2 - took " + (getTimer() - currTime) + "ms.");
 			//if line crosses dateline there must be at least 2 continuosParts items
 //			debug("_drawGeoLine ContinosParts: "+ continousParts.length);
 
@@ -2648,11 +2784,9 @@ package com.iblsoft.flexiweather.widgets
 
 			if (bothCoordsMode)
 			{
+				//FIXME add some negative margin to viewBBox to hide clipped feature borders (etc. clouds)
 				//create lines which are edges of viewBBox
-				var viewBBoxWestLine: LineSegment = new LineSegment(m_viewBBox.xMin, m_viewBBox.yMin, m_viewBBox.xMin, m_viewBBox.yMax);
-				var viewBBoxEastLine: LineSegment = new LineSegment(m_viewBBox.xMax, m_viewBBox.yMin, m_viewBBox.xMax, m_viewBBox.yMax);
-				var viewBBoxNorthLine: LineSegment = new LineSegment(m_viewBBox.xMin, m_viewBBox.yMin, m_viewBBox.xMax, m_viewBBox.yMin);
-				var viewBBoxSouthLine: LineSegment = new LineSegment(m_viewBBox.xMin, m_viewBBox.yMax, m_viewBBox.xMax, m_viewBBox.yMax);
+
 
 				var helpTime: Number;
 
@@ -2676,7 +2810,7 @@ package com.iblsoft.flexiweather.widgets
 								//find reflections of line defined by coords prevC and c in projection extent
 //								reflections = mapLineCoordToViewReflections(prevC, c, projectionExtent);
 								reflections = mapLineCoordToViewReflections(prevC, c, m_viewBBox);
-								if (bDebugTimes) stopProfileTimer(helpTime, '\t\t\t mapLineCoordToViewReflections');
+//								if (bDebugTimes) stopProfileTimer(helpTime, '\t\t\t mapLineCoordToViewReflections');
 
 								var origLine: FeatureDataLineSegment = new FeatureDataLineSegment(prevC.x, prevC.y,c.x, c.y, true, prevCObject.editable, cObject.editable);
 								//temporary check why line is not drawn when it's partially not visible
@@ -2698,14 +2832,14 @@ package com.iblsoft.flexiweather.widgets
 //									if (o.reflection == 0)
 //										debug("\t\tdraw lines : "+ line + " reflection: " + o.reflection);
 
-									var bLineIsInsideViewBBox: Boolean = line.isInsideBox(m_viewBBox);
-									var bLineIsIntersectedWithViewBBox: Boolean = line.isIntersectedBox(viewBBoxWestLine, viewBBoxEastLine, viewBBoxNorthLine, viewBBoxSouthLine);
+									var bLineIsInsideViewBBox: Boolean = line.isInsideBox(_drawingViewport);
+									var bLineIsIntersectedWithViewBBox: Boolean = line.isIntersectedBox(m_viewBBoxWestLine, m_viewBBoxEastLine, m_viewBBoxNorthLine, m_viewBBoxSouthLine);
 
-									if (bDebugTimes)
-									{
-										stopProfileTimer(helpTime, '\t\t\t bLineIsInsideViewBBox: ' + bLineIsInsideViewBBox + ', bLineIsIntersectedWithViewBBox: ' + bLineIsIntersectedWithViewBBox);
-										helpTime = startProfileTimer();
-									}
+//									if (bDebugTimes)
+//									{
+//										stopProfileTimer(helpTime, '\t\t\t bLineIsInsideViewBBox: ' + bLineIsInsideViewBBox + ', bLineIsIntersectedWithViewBBox: ' + bLineIsIntersectedWithViewBBox);
+//										helpTime = startProfileTimer();
+//									}
 
 //									if (!bLineIsInsideViewBBox && !bLineIsIntersectedWithViewBBox)
 //									{
@@ -2721,12 +2855,29 @@ package com.iblsoft.flexiweather.widgets
 		//									debug("\t\t\t DRAW IT");☺
 	//										reflection = featureDataLine.parentFeatureData.getReflectionAt(o.reflection);
 	//										currLine = reflection.getLineAt(featureDataLine.id);
+
+//											if (bDebugTimes)
+//											{
+//												stopProfileTimer(helpTime, '\t\t\t\t t1');
+//												helpTime = startProfileTimer();
+//											}
 											reflection = featureData.getReflectionAt(o.reflection);
 //											featureDataLine = featureData.getLineAt(reflection.reflectionDelta, featureDataLineID);
+
+//											if (bDebugTimes)
+//											{
+//												stopProfileTimer(helpTime, '\t\t\t\t t2');
+//												helpTime = startProfileTimer();
+//											}
 											currLine = reflection.getLineAt(featureDataLineID);
 		//									trace("_drawGeoLine reflection: " + reflection);
 		//									trace("_drawGeoLine currLine: " + currLine);
 
+//											if (bDebugTimes)
+//											{
+//												stopProfileTimer(helpTime, '\t\t\t\t t3');
+//												helpTime = startProfileTimer();
+//											}
 											//check if line is intersect vieBBox
 											p1 = coordToPoint(new Coord(ms_crs, o.pointFrom.x, o.pointFrom.y));
 											p2 = coordToPoint(new Coord(ms_crs, o.pointTo.x, o.pointTo.y));
@@ -2734,8 +2885,18 @@ package com.iblsoft.flexiweather.widgets
 //											trace("Add line segment [Reflection: " + reflection.reflectionDelta + ", line ID: " + currLine.id+"] points: " + p1 + " , " + p2);
 											var lineSegment: FeatureDataLineSegment = new FeatureDataLineSegment(p1.x, p1.y, p2.x, p2.y, bLineIsInsideViewBBox, prevCObject.editable, cObject.editable);
 
+//											if (bDebugTimes)
+//											{
+//												stopProfileTimer(helpTime, '\t\t\t\t t4');
+//												helpTime = startProfileTimer();
+//											}
 											currLine.addLineSegment(lineSegment, prevCObject.edge, cObject.edge);
 
+											if (bDebugTimes)
+											{
+												stopProfileTimer(helpTime, '\t\t\t\t t5');
+												helpTime = startProfileTimer();
+											}
 											reflectedSegmentPoints.push(p1);
 											reflectedSegmentPoints.push(p2);
 
@@ -2760,7 +2921,7 @@ package com.iblsoft.flexiweather.widgets
 //											debug("There is no intersection with current viewBBox: [Reflection: " + o.reflection + ", line ID: " + featureDataLineID+"]");
 									}
 
-									if (bDebugTimes) stopProfileTimer(helpTime, '\t\t\t add line');
+//									if (bDebugTimes) stopProfileTimer(helpTime, '\t\t\t add line');
 								}
 								if (!bTemporaryIsInReflection)
 								{
@@ -2839,7 +3000,7 @@ package com.iblsoft.flexiweather.widgets
 				}
 			}
 
-			if (bDebugTimes) trace("\t\t _drawGeoPolyLine - 3 - took " + (getTimer() - currTime) + "ms.");
+//			if (bDebugTimes) trace("\t\t _drawGeoPolyLine - 3 - took " + (getTimer() - currTime) + "ms.");
 
 			for(s_reflectionId in d_reflectionToSegmentPoints) {
 				reflectedSegmentPoints = d_reflectionToSegmentPoints[s_reflectionId];
@@ -2847,7 +3008,7 @@ package com.iblsoft.flexiweather.widgets
 					reflectedSegmentPoints.push(null);
 			}
 
-			if (bDebugTimes) trace("\t_drawGeoPolyLine took " + (getTimer() - currTime) + "ms.");
+//			if (bDebugTimes) trace("\t_drawGeoPolyLine took " + (getTimer() - currTime) + "ms.");
 
 		}
 
@@ -3007,9 +3168,13 @@ package com.iblsoft.flexiweather.widgets
 			//coords must be screen pixels position. If needed, convert coordinates to pixel points
 			coords = coordsToPoints(coords);
 
+			//FIXME need to fix state when all points are counted for 0th reflection, but are not on viewBBox.
+			//How to reproduce this... First point in -1 reflection and then continue to 0 reflection
+
+
 			renderer.drawSmoothDatelineDividedParts(rendererCreator, coords, drawMode, b_closed, b_justCompute, featureData, b_fixDateline);
 
-			trace("drawSmoothPolyLine took " + (getTimer() - currTime) + "ms.");
+//			trace("drawSmoothPolyLine took " + (getTimer() - currTime) + "ms.");
 //			trace("****************************************************************************");
 		}
 
@@ -3441,7 +3606,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (id != null)
 			{
-				trace(tag + "| " + type + "| " + str);
+				trace(this + "| " + type + "| " + str);
 //				LoggingUtils.dispatchLogEvent(this, tag + "| " + type + "| " + str);
 			}
 		}
@@ -3790,7 +3955,7 @@ class SmoothRendererNew
 			newCoords.push(new EdgeCoord(coordTo, false, true));
 		}
 
-		trace("smoothDatelineOptimization took " + (getTimer() - currTime) + "ms.");
+//		trace("smoothDatelineOptimization took " + (getTimer() - currTime) + "ms.");
 
 		return newCoords;
 	}
@@ -3831,13 +3996,32 @@ class SmoothRendererNew
 //			splinePoints = CubicBezier.calculateHermitSpline(tempCoords, false);
 			splinePoints = CubicBezier.calculateHermitSpline(coords, b_closed);
 
+			//clip to InteractiveWidget area
+			/*
+
+			//clipping was moved to FeatureDataReflection to compute method
+
+			if (featureData.forceViewBBoxClipping)
+			{
+				var margin: int = -15;
+				var rightMargin: int = 15;
+				var clipPolygon: Array = [new Point(_iw.areaX + margin, _iw.areaY + margin), new Point(_iw.areaX + _iw.areaWidth + rightMargin, _iw.areaY + margin), new Point(_iw.areaX + _iw.areaWidth + rightMargin, _iw.areaHeight + rightMargin), new Point(_iw.areaX + margin, _iw.areaHeight + rightMargin)];
+
+				//FIXME here is the problem, if points are off screen (0 reflection is off screen), then clipping removes points
+				splinePoints = _iw.featureSplitter.polygonClipppingSutherlandHodgman(splinePoints, clipPolygon);
+			}
+			*/
+
 			//Convert pixel points to coordinates
 			splineCoords = _iw.pointsToCoords(splinePoints);
 
 			var b_originalClosed: Boolean = b_closed;
 
+			if (splineCoords.length == 0)
+				return;
+
 			var splittedSplinesCoords: Array = splitSplineCoords(splineCoords);
-			var isDatelineSplit: Boolean = splittedSplinesCoords.length > 1;
+			var isDatelineSplit: Boolean = splittedSplinesCoords.length > 1;2
 
 			if (isDatelineSplit)
 				b_closed = false;
@@ -3881,7 +4065,7 @@ class SmoothRendererNew
 			}
 
 		}
-		trace("drawSmoothDatelineDividedParts took " + (getTimer() - currTime) + "ms.");
+//		trace("drawSmoothDatelineDividedParts took " + (getTimer() - currTime) + "ms.");
 	}
 
 	private function splitSplineCoords(coords: Array): Array
