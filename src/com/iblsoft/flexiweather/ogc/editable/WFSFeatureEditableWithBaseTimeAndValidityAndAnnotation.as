@@ -116,8 +116,8 @@ package com.iblsoft.flexiweather.ogc.editable
 							isDisplayObjectInAnticollision = master.container.labelLayout.isObjectInside(displaySpriteWithAnnotation);
 							isAnnotationInAnticollision = master.container.labelLayout.isObjectInside(annotation);
 
-							trace("CHECK ANTICOLLISION OBJECTS: featureIsInsideViewBBox: " + featureIsInsideViewBBox + " pt: " + pt);
-							trace("sprite: " + displaySpriteWithAnnotation + " ANNOTATION: " + annotation);
+//							trace("CHECK ANTICOLLISION OBJECTS: featureIsInsideViewBBox: " + featureIsInsideViewBBox + " pt: " + pt);
+//							trace("sprite: " + displaySpriteWithAnnotation + " ANNOTATION: " + annotation);
 							if (!isDisplayObjectInAnticollision)
 							{
 								if (featureIsInsideViewBBox)
@@ -135,7 +135,7 @@ package com.iblsoft.flexiweather.ogc.editable
 									annotation.visible = false;
 								}
 							} else {
-								trace("\tDisplaySprite is already in Anticollision");
+//								trace("\tDisplaySprite is already in Anticollision");
 								if (!featureIsInsideViewBBox)
 								{
 									//remove it, as feature in current reflection is not inside view boox
@@ -179,7 +179,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				isInsideViewBBox = iw.coordInside(c);
 			}
 
-			trace("isReflectionFeatureInsideViewBBox["+reflectionDelta+"] visible: "+ isInsideViewBBox + "{"+this+"}");
+//			trace("isReflectionFeatureInsideViewBBox["+reflectionDelta+"] visible: "+ isInsideViewBBox + "{"+this+"}");
 			return isInsideViewBBox;
 		}
 

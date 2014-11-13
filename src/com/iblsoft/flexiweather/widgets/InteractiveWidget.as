@@ -158,7 +158,7 @@ package com.iblsoft.flexiweather.widgets
 			super.width = value;
 //			if (id == "m_iw1")
 //			{
-//				trace("Widget size[width]: " + this + " ["+width+","+height+"] ["+explicitWidth+","+explicitHeight+"]");
+//				debug("Widget size[width]: " + this + " ["+width+","+height+"] ["+explicitWidth+","+explicitHeight+"]");
 //			}
 			if (m_widgetBounds)
 				m_widgetBounds.width = value;
@@ -171,7 +171,7 @@ package com.iblsoft.flexiweather.widgets
 			super.height = value;
 //			if (id == "m_iw1")
 //			{
-//				trace("Widget size[height]: " + this + " ["+width+","+height+"] ["+explicitWidth+","+explicitHeight+"]");
+//				debug("Widget size[height]: " + this + " ["+width+","+height+"] ["+explicitWidth+","+explicitHeight+"]");
 //			}
 			if (m_widgetBounds)
 				m_widgetBounds.height = value;
@@ -428,7 +428,7 @@ package com.iblsoft.flexiweather.widgets
 				var widgetParent: GroupBase = parent as GroupBase;
 				if (widgetParent)
 				{
-//					trace(this + " mb_autoLayoutChanged: addEventListener(ResizeEvent.RESIZE, onParentResize) ");
+//					debug(this + " mb_autoLayoutChanged: addEventListener(ResizeEvent.RESIZE, onParentResize) ");
 					if (mb_autoLayout)
 					{
 						if (!widgetParent.hasEventListener(ResizeEvent.RESIZE))
@@ -580,7 +580,7 @@ package com.iblsoft.flexiweather.widgets
 //			m_layersLoading++;
 			updateLayersLoadingState();
 
-//			trace(this + "IW onLayerLoadingStart: " + m_layersLoading);
+//			debug(this + "IW onLayerLoadingStart: " + m_layersLoading);
 
 			var ile: InteractiveWidgetEvent = new InteractiveWidgetEvent(InteractiveWidgetEvent.DATA_LAYER_LOADING_STARTED);
 			ile.layersLoading = m_layersLoading;
@@ -605,14 +605,14 @@ package com.iblsoft.flexiweather.widgets
 		{
 //			m_layersLoading--;
 			updateLayersLoadingState();
-//			trace(this + " onLayerLoaded: " + m_layersLoading);
+//			debug(this + " onLayerLoaded: " + m_layersLoading);
 			notifyLayerLoaded();
 		}
 		private function onLayerLoadedFromCache(event: InteractiveLayerEvent): void
 		{
 //			m_layersLoading--;
 			updateLayersLoadingState();
-//			trace(this + " onLayerLoadedFromCache: " + m_layersLoading);
+//			debug(this + " onLayerLoadedFromCache: " + m_layersLoading);
 			notifyLayerLoaded();
 		}
 
@@ -629,7 +629,7 @@ package com.iblsoft.flexiweather.widgets
 
 			if (bAllLayersLoaded)
 			{
-//				trace("\t"+this + " IW onLayerLoaded ALL_DATA_LAYERS_LOADED: " + m_layersLoading);
+//				debug("\t"+this + " IW onLayerLoaded ALL_DATA_LAYERS_LOADED: " + m_layersLoading);
 				ile = new InteractiveWidgetEvent(InteractiveWidgetEvent.ALL_DATA_LAYERS_LOADED);
 				dispatchEvent(ile);
 			}
@@ -819,14 +819,14 @@ package com.iblsoft.flexiweather.widgets
 			var total: int = m_layerContainer.numElements;
 			if (total > 1)
 			{
-				trace("******************************************************");
-				trace("IW debug layers");
+				debug("******************************************************");
+				debug("IW debug layers");
 				var displayObject: DisplayObject;
 				var layerObject: DisplayObject;
 				for (var i: int = 0; i < total; ++i)
 				{
 					displayObject = m_layerContainer.getElementAt(i) as DisplayObject;
-					trace("\tIW["+i+"] " + displayObject);
+					debug("\tIW["+i+"] " + displayObject);
 
 					if (displayObject is InteractiveLayerMap)
 					{
@@ -835,7 +835,7 @@ package com.iblsoft.flexiweather.widgets
 						for (var j: int = 0; j < totalMapLayers; j++)
 						{
 							layerObject = im.getLayerAt(j) as DisplayObject;
-							trace("\tIW["+i+"] " + layerObject + " parent: " + layerObject.parent);
+							debug("\tIW["+i+"] " + layerObject + " parent: " + layerObject.parent);
 						}
 					}
 				}
@@ -862,7 +862,7 @@ package com.iblsoft.flexiweather.widgets
 						if (ilJ.zOrder < ilI.zOrder)
 						{
 							// swap Ith and Jth layer, we know that J > I
-//							trace("\nswap layers " + ilJ.name + " , " + ilI.name);
+//							debug("\nswap layers " + ilJ.name + " , " + ilI.name);
 							m_layerContainer.swapElements(ilJ, ilI);
 						}
 					}
@@ -1490,7 +1490,7 @@ package com.iblsoft.flexiweather.widgets
 			var f_crsExtentBBoxWidth: Number = m_crsProjection.extentBBox.width;
 
 			var reflectedBBox: BBox = m_crsProjection.extentBBox.translated(f_crsExtentBBoxWidth * reflectionDelta, 0);
-//			trace("getReflectedViewBBox  ["+reflectionDelta+"]: " + reflectedBBox);
+//			debug("getReflectedViewBBox  ["+reflectionDelta+"]: " + reflectedBBox);
 			return reflectedBBox;
 		}
 
@@ -1615,7 +1615,7 @@ package com.iblsoft.flexiweather.widgets
 				if (!vBBox)
 					vBBox = m_viewBBox;
 
-//				trace(this.id + " mapCoordInCRSToViewReflections m_viewBBox: " + m_viewBBox);
+//				debug(this.id + " mapCoordInCRSToViewReflections m_viewBBox: " + m_viewBBox);
 
 				var viewBBoxWest: Number = vBBox.xMin;
 				var viewBBoxEast: Number = vBBox.xMax;
@@ -1949,7 +1949,7 @@ package com.iblsoft.flexiweather.widgets
 					h = areaHeight;
 				}
 
-	//			trace("IW onResized: ["+w+","+h+"] old ["+Event.oldWidth+","+Event.oldHeight+"]");
+	//			debug("IW onResized: ["+w+","+h+"] old ["+Event.oldWidth+","+Event.oldHeight+"]");
 				m_labelLayout.setBoundary(new Rectangle(0, 0, w, h));
 				m_objectLayout.setBoundary(new Rectangle(0, 0, w, h));
 				if (!m_resizeTimer)
@@ -1974,7 +1974,7 @@ package com.iblsoft.flexiweather.widgets
 				setViewBBox(m_viewBBox, false); // set the view bbox to update the aspects
 				updateLayersBounds();
 //			} else {
-//				trace("IW resize notifying is suspended");
+//				debug("IW resize notifying is suspended");
 //			}
 		}
 
@@ -2169,7 +2169,7 @@ package com.iblsoft.flexiweather.widgets
 		 */
 		public function setViewBBox(bbox: BBox, b_finalChange: Boolean, b_negotiateBBox: Boolean = true): void
 		{
-//			trace("\t\t\t setViewBBox: " + bbox.toBBOXString());
+//			debug("\t\t\t setViewBBox: " + bbox.toBBOXString());
 //			debug(this + " setViewBBox: " + bbox.toBBOXString() + " finalChange: " + b_finalChange + " , negotiate: " + b_negotiateBBox);
 
 			var b_changeZoom: Boolean = true;
@@ -2432,7 +2432,7 @@ package com.iblsoft.flexiweather.widgets
 		public function setExtentBBox(bbox: BBox, b_finalChange: Boolean = true): void
 		{
 			m_extentBBox = bbox;
-//			trace("\t\t\t setExtentBBox: " + m_extentBBox.toBBOXString());
+//			debug("\t\t\t setExtentBBox: " + m_extentBBox.toBBOXString());
 			if (b_finalChange)
 				setViewBBox(m_extentBBox, b_finalChange); // this calls signalAreaChanged()
 		}
@@ -2573,7 +2573,7 @@ package com.iblsoft.flexiweather.widgets
 			if (maxDist < 100)
 				maxDist = 100;
 
-//			trace("distanceValidator: maxDist: " + maxDist + " _mapScale: " + (1/ _mapScale));
+//			debug("distanceValidator: maxDist: " + maxDist + " _mapScale: " + (1/ _mapScale));
 			return (dist < maxDist);
 		}
 
@@ -2716,7 +2716,7 @@ package com.iblsoft.flexiweather.widgets
 						}
 					}
 
-	//				trace(coords);
+	//				debug(coords);
 				}
 				else if (drawMode == DrawMode.PLAIN) {
 					if (projection.wrapsHorizontally) {
@@ -2740,7 +2740,7 @@ package com.iblsoft.flexiweather.widgets
 					tempCoords = [new EdgeCoord(coordTo, false, true)];
 			}
 
-//			if (bDebugTimes) trace("\t\t _drawGeoPolyLine - 1 - took " + (getTimer() - currTime) + "ms.");
+//			if (bDebugTimes) debug("\t\t _drawGeoPolyLine - 1 - took " + (getTimer() - currTime) + "ms.");
 			// coords can now contain null to mark point of discontinuity if line crosses dateline or projection boundaries
 
 			var i_part: int = 0;
@@ -2766,7 +2766,7 @@ package com.iblsoft.flexiweather.widgets
 				}
 			}
 
-//			if (bDebugTimes) trace("\t\t _drawGeoPolyLine - 2 - took " + (getTimer() - currTime) + "ms.");
+//			if (bDebugTimes) debug("\t\t _drawGeoPolyLine - 2 - took " + (getTimer() - currTime) + "ms.");
 			//if line crosses dateline there must be at least 2 continuosParts items
 //			debug("_drawGeoLine ContinosParts: "+ continousParts.length);
 
@@ -2804,7 +2804,7 @@ package com.iblsoft.flexiweather.widgets
 							if (cObject && cObject.coord)
 							{
 								c = cObject.coord;
-	//							trace("mapLineCoordToViewReflections : " + prevC.toString() + " , " + c.toString());
+	//							debug("mapLineCoordToViewReflections : " + prevC.toString() + " , " + c.toString());
 
 								if (bDebugTimes) helpTime = startProfileTimer();
 								//find reflections of line defined by coords prevC and c in projection extent
@@ -2844,7 +2844,7 @@ package com.iblsoft.flexiweather.widgets
 //									if (!bLineIsInsideViewBBox && !bLineIsIntersectedWithViewBBox)
 //									{
 //										if (o.reflection == -1 || o.reflection == 0)
-//											trace("Check line [Reflection: " + o.reflection + ", line ID: " + featureDataLineID+"] if it is in reflection ");
+//											debug("Check line [Reflection: " + o.reflection + ", line ID: " + featureDataLineID+"] if it is in reflection ");
 //									}
 //									var bLineIsInsideReflection: Boolean = line.isInsideBox(getReflectedViewBBox(o.reflection));
 //									if (bLineIsInsideViewBBox || bLineIsIntersectedWithViewBBox)
@@ -2870,8 +2870,8 @@ package com.iblsoft.flexiweather.widgets
 //												helpTime = startProfileTimer();
 //											}
 											currLine = reflection.getLineAt(featureDataLineID);
-		//									trace("_drawGeoLine reflection: " + reflection);
-		//									trace("_drawGeoLine currLine: " + currLine);
+		//									debug("_drawGeoLine reflection: " + reflection);
+		//									debug("_drawGeoLine currLine: " + currLine);
 
 //											if (bDebugTimes)
 //											{
@@ -2882,7 +2882,7 @@ package com.iblsoft.flexiweather.widgets
 											p1 = coordToPoint(new Coord(ms_crs, o.pointFrom.x, o.pointFrom.y));
 											p2 = coordToPoint(new Coord(ms_crs, o.pointTo.x, o.pointTo.y));
 
-//											trace("Add line segment [Reflection: " + reflection.reflectionDelta + ", line ID: " + currLine.id+"] points: " + p1 + " , " + p2);
+//											debug("Add line segment [Reflection: " + reflection.reflectionDelta + ", line ID: " + currLine.id+"] points: " + p1 + " , " + p2);
 											var lineSegment: FeatureDataLineSegment = new FeatureDataLineSegment(p1.x, p1.y, p2.x, p2.y, bLineIsInsideViewBBox, prevCObject.editable, cObject.editable);
 
 //											if (bDebugTimes)
@@ -2980,8 +2980,8 @@ package com.iblsoft.flexiweather.widgets
 //							featureDataLine = featureData.getLineAt(reflection.reflectionDelta, featureDataLineID);
 							currLine = reflection.getLineAt(featureDataLineID);
 
-							//									trace("_drawGeoLine reflection: " + reflection);
-							//									trace("_drawGeoLine currLine: " + currLine);
+							//									debug("_drawGeoLine reflection: " + reflection);
+							//									debug("_drawGeoLine currLine: " + currLine);
 
 							//check if line is intersect vieBBox
 							p1 = coordToPoint(new Coord(ms_crs, o.point.x, o.point.y));
@@ -3000,7 +3000,7 @@ package com.iblsoft.flexiweather.widgets
 				}
 			}
 
-//			if (bDebugTimes) trace("\t\t _drawGeoPolyLine - 3 - took " + (getTimer() - currTime) + "ms.");
+//			if (bDebugTimes) debug("\t\t _drawGeoPolyLine - 3 - took " + (getTimer() - currTime) + "ms.");
 
 			for(s_reflectionId in d_reflectionToSegmentPoints) {
 				reflectedSegmentPoints = d_reflectionToSegmentPoints[s_reflectionId];
@@ -3008,7 +3008,7 @@ package com.iblsoft.flexiweather.widgets
 					reflectedSegmentPoints.push(null);
 			}
 
-//			if (bDebugTimes) trace("\t_drawGeoPolyLine took " + (getTimer() - currTime) + "ms.");
+//			if (bDebugTimes) debug("\t_drawGeoPolyLine took " + (getTimer() - currTime) + "ms.");
 
 		}
 
@@ -3025,7 +3025,7 @@ package com.iblsoft.flexiweather.widgets
 		 */
 		protected function stopProfileTimer(startTime: Number, text: String): void
 		{
-			trace(ProfilerUtils.formatStringProfileTimer(startTime, text));
+			debug(ProfilerUtils.formatStringProfileTimer(startTime, text));
 		}
 
 		private function _drawReflectedSegmentPoints(rendererCreator: Function, d_reflectionToSegmentPoints: Dictionary): void
@@ -3041,7 +3041,7 @@ package com.iblsoft.flexiweather.widgets
 
 				var g: ICurveRenderer = rendererCreator(l_reflection);
 
-				//trace("_drawReflectedSegmentPoints: l_reflectionStr: " + l_reflectedSegmentPoints.length + " points");
+				//debug("_drawReflectedSegmentPoints: l_reflectionStr: " + l_reflectedSegmentPoints.length + " points");
 				var str: String = '\nReflection: ' + l_reflection + ': ';
 				for each(var pt: Point in l_reflectedSegmentPoints) {
 					if(!pt) {
@@ -3062,7 +3062,7 @@ package com.iblsoft.flexiweather.widgets
 						ptLast = ptPrev = pt;
 					}
 				}
-				//trace(str);
+				//debug(str);
 				if(ptLast)
 					g.finish(ptLast.x, ptLast.y);
 			}
@@ -3081,49 +3081,49 @@ package com.iblsoft.flexiweather.widgets
 			return;
 			if (coords[0] is Coord)
 			{
-				trace("DEBUG drawSmoothPolyLine input coords");
-				trace("--------------------");
+				debug("DEBUG drawSmoothPolyLine input coords");
+				debug("--------------------");
 
 				for each (var cc: Coord in coords)
 				{
 					if (cc)
-						trace("Coord: "+ cc.x + ","+ cc.y);
+						debug("Coord: "+ cc.x + ","+ cc.y);
 					else
-						trace("--------------------");
+						debug("--------------------");
 				}
-				trace("--------------------");
-				trace("END DEBUG drawSmoothPolyLine input coords");
+				debug("--------------------");
+				debug("END DEBUG drawSmoothPolyLine input coords");
 			}
 			if (coords[0] is Point)
 			{
-				trace("DEBUG drawSmoothPolyLine input points");
-				trace("--------------------");
+				debug("DEBUG drawSmoothPolyLine input points");
+				debug("--------------------");
 
 				for each (var pp: Point in coords)
 				{
 					if (pp)
-						trace("Coord: "+ pp.x + ","+ pp.y);
+						debug("Coord: "+ pp.x + ","+ pp.y);
 					else
-						trace("--------------------");
+						debug("--------------------");
 				}
-				trace("--------------------");
-				trace("END DEBUG drawSmoothPolyLine input points");
+				debug("--------------------");
+				debug("END DEBUG drawSmoothPolyLine input points");
 			}
 		}
 		private function debugSplittedCoords(coords: Array): void
 		{
 			return;
-			trace("DEBUG splitted coords");
-			trace("--------------------");
+			debug("DEBUG splitted coords");
+			debug("--------------------");
 			for each (var ec: EdgeCoord in coords)
 			{
 				if (ec)
-					trace("Coord: "+ ec.coord.x + ","+ ec.coord.y);
+					debug("Coord: "+ ec.coord.x + ","+ ec.coord.y);
 				else
-					trace("--------------------");
+					debug("--------------------");
 			}
-			trace("--------------------");
-			trace("END DEBUG splitted coords");
+			debug("--------------------");
+			debug("END DEBUG splitted coords");
 		}
 		/**
 		 *
@@ -3139,8 +3139,8 @@ package com.iblsoft.flexiweather.widgets
 		public function drawSmoothPolyLine(rendererCreator: Function, coords: Array, drawMode: String, b_closed: Boolean = false, b_justCompute: Boolean = false,  featureData: FeatureData = null, b_fixDateline: Boolean = false): void
 		{
 			var currTime: Number = getTimer();
-//			trace("****************************************************************************");
-//			trace("DRAW SMOOTH POLYLINE \n");
+//			debug("****************************************************************************");
+//			debug("DRAW SMOOTH POLYLINE \n");
 			//debug coords
 			var renderer: SmoothRendererNew = new SmoothRendererNew(this);
 
@@ -3174,8 +3174,8 @@ package com.iblsoft.flexiweather.widgets
 
 			renderer.drawSmoothDatelineDividedParts(rendererCreator, coords, drawMode, b_closed, b_justCompute, featureData, b_fixDateline);
 
-//			trace("drawSmoothPolyLine took " + (getTimer() - currTime) + "ms.");
-//			trace("****************************************************************************");
+//			debug("drawSmoothPolyLine took " + (getTimer() - currTime) + "ms.");
+//			debug("****************************************************************************");
 		}
 
 
@@ -3258,7 +3258,7 @@ package com.iblsoft.flexiweather.widgets
 		public function drawGeoPolyLine(rendererCreator: Function, coords: Array, drawMode: String, b_closed: Boolean = false, b_justCompute: Boolean = false, featureData: FeatureData = null): void
 		{
 			var currTime: Number = getTimer();
-//			trace("InteractiveWidget drawGeoPolyLine");
+//			debug("InteractiveWidget drawGeoPolyLine");
 			var d_reflectionToSegmentPoints: Dictionary = new Dictionary();
 			var cPrev: Coord = null;
 			var total: int = coords.length;
@@ -3319,7 +3319,7 @@ package com.iblsoft.flexiweather.widgets
 			if (!b_justCompute)
 				_drawReflectedSegmentPoints(rendererCreator, d_reflectionToSegmentPoints);
 
-			trace("drawGeoPolyLine took " + (getTimer() - currTime) + "ms.");
+			debug("drawGeoPolyLine took " + (getTimer() - currTime) + "ms.");
 		}
 
 		/**
@@ -3361,7 +3361,7 @@ package com.iblsoft.flexiweather.widgets
 		public function drawStyledPolyline(fromCoord: Coord, toCoord: Coord, graphics: Graphics, lineStyle: LineStyle = null, fillStyle: FillStyle = null): Array
 		{
 			var features: Array = m_featureSplitter.splitCoordPolyLineToArrayOfPointPolyLines([fromCoord, toCoord], false, false, false);
-//			trace("drawStyledPolyline features: " + features.length);
+//			debug("drawStyledPolyline features: " + features.length);
 			var p: Point;
 			var oldPoint: Point;
 			for each (var mPoints: Array in features)
@@ -3381,13 +3381,13 @@ package com.iblsoft.flexiweather.widgets
 
 //					g.start(p.x, p.y);
 					graphics.moveTo(int(p.x), int(p.y));
-//					trace("\ndrawStyledPolyline moveTo("+int(p.x)+", "+p.y+")");
+//					debug("\ndrawStyledPolyline moveTo("+int(p.x)+", "+p.y+")");
 					for (var i: int = 1; i < mPoints.length; i++)
 					{
 						p = mPoints[i] as Point;
 //						if (!lineIsOutside(p, oldPoint))
 //						{
-//							trace("drawStyledPolyline lineTo("+p.x+", "+p.y+")");
+//							debug("drawStyledPolyline lineTo("+p.x+", "+p.y+")");
 							graphics.lineTo(int(p.x), int(p.y));
 //						}
 						oldPoint = p;
@@ -3606,7 +3606,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (id != null)
 			{
-				trace(this + "| " + type + "| " + str);
+//				trace(this + "| " + type + "| " + str);
 //				LoggingUtils.dispatchLogEvent(this, tag + "| " + type + "| " + str);
 			}
 		}
@@ -3683,7 +3683,7 @@ package com.iblsoft.flexiweather.widgets
 				mb_autoLayoutChanged = true;
 				invalidateProperties();
 
-				trace(id + " autoLayoutInParent = " + mb_autoLayout);
+				debug(id + " autoLayoutInParent = " + mb_autoLayout);
 			}
 		}
 
@@ -3814,7 +3814,7 @@ class KMLSpeedOptimization
 			_layoutVisibilityBeforePanning = m_iw.labelLayout.visible;
 			if (!_layoutVisibilityBeforePanning)
 			{
-				trace("Check _layoutVisibilityBeforePanning == false");
+				//trace("Check _layoutVisibilityBeforePanning == false");
 			}
 			m_iw.labelLayout.visible = false;
 
@@ -3927,12 +3927,12 @@ class SmoothRendererNew
 			coordTo = coords.shift();
 			coordTo = Coord.convertCoordOnSphere(coordTo, projection);
 
-//			trace("\n from: "+ coordFrom.x + ","+coordFrom.y + " to: " + coordTo.x + " , " + coordTo.y);
+//			debug("\n from: "+ coordFrom.x + ","+coordFrom.y + " to: " + coordTo.x + " , " + coordTo.y);
 
 //			if (_iw.crossDateline(coordFrom, coordTo) || _iw.coordsFarThanExtentWidth(coordFrom, coordTo) )
 			if (_iw.coordsFarThanExtentWidth(coordFrom, coordTo) )
 			{
-//				trace("\n\t crossing dateline");
+//				debug("\n\t crossing dateline");
 				newCoords.push(new EdgeCoord(coordFrom, false, true));
 				//create line1 in correct order
 				if (coordFrom.x > coordTo.x)
@@ -3942,8 +3942,8 @@ class SmoothRendererNew
 				}
 
 			} else {
-//				trace("\n\n NOT crossing dateline");
-//				trace("\t Adding COORD FROM coord: " + coordFrom.x + " , " + coordFrom.y);
+//				debug("\n\n NOT crossing dateline");
+//				debug("\t Adding COORD FROM coord: " + coordFrom.x + " , " + coordFrom.y);
 				newCoords.push(new EdgeCoord(coordFrom, false, true));
 			}
 			coordFrom = coordTo;
@@ -3951,11 +3951,11 @@ class SmoothRendererNew
 
 		if (coordTo)
 		{
-//			trace("\t Adding last COORD TO coord: " + coordTo.x + " , " + coordTo.y);
+//			debug("\t Adding last COORD TO coord: " + coordTo.x + " , " + coordTo.y);
 			newCoords.push(new EdgeCoord(coordTo, false, true));
 		}
 
-//		trace("smoothDatelineOptimization took " + (getTimer() - currTime) + "ms.");
+//		debug("smoothDatelineOptimization took " + (getTimer() - currTime) + "ms.");
 
 		return newCoords;
 	}
@@ -4065,7 +4065,7 @@ class SmoothRendererNew
 			}
 
 		}
-//		trace("drawSmoothDatelineDividedParts took " + (getTimer() - currTime) + "ms.");
+//		debug("drawSmoothDatelineDividedParts took " + (getTimer() - currTime) + "ms.");
 	}
 
 	private function splitSplineCoords(coords: Array): Array
@@ -4138,20 +4138,20 @@ class SmoothRendererOld
 			coordTo = coords.shift();
 			coordTo = Coord.convertCoordOnSphere(coordTo, projection);
 
-			trace("\n from: "+ coordFrom.x + ","+coordFrom.y + " to: " + coordTo.x + " , " + coordTo.y);
+			debug("\n from: "+ coordFrom.x + ","+coordFrom.y + " to: " + coordTo.x + " , " + coordTo.y);
 
 			if (_iw.crossDateline(coordFrom, coordTo) || _iw.coordsFarThanExtentWidth(coordFrom, coordTo) )
 			{
-				trace("\n\t crossing dateline");
+				debug("\n\t crossing dateline");
 				tempCoords = _iw.splitCoordsOnDateline(coordFrom, coordTo);
-				trace("\t Adding first coord: " + tempCoords[0].coord.x + " , " + tempCoords[0].coord.y);
+				debug("\t Adding first coord: " + tempCoords[0].coord.x + " , " + tempCoords[0].coord.y);
 				while (tempCoords.length > 1)
 				{
 					newCoords.push(tempCoords.shift());
 				}
 			} else {
-				trace("\n\n NOT crossing dateline");
-				trace("\t Adding COORD FROM coord: " + coordFrom.x + " , " + coordFrom.y);
+				debug("\n\n NOT crossing dateline");
+				debug("\t Adding COORD FROM coord: " + coordFrom.x + " , " + coordFrom.y);
 				newCoords.push(new EdgeCoord(coordFrom, false, true));
 			}
 			coordFrom = coordTo;
@@ -4161,12 +4161,12 @@ class SmoothRendererOld
 		//add last point
 		if (tempCoords && tempCoords.length > 0)
 		{
-			trace("\tAdding last temp coord: " + tempCoords[0].coord.x + " , " + tempCoords[0].coord.y);
+			debug("\tAdding last temp coord: " + tempCoords[0].coord.x + " , " + tempCoords[0].coord.y);
 			newCoords.push(tempCoords.shift());
 		} else {
 			if (coordTo)
 			{
-				trace("\t Adding last COORD TO coord: " + coordTo.x + " , " + coordTo.y);
+				debug("\t Adding last COORD TO coord: " + coordTo.x + " , " + coordTo.y);
 				newCoords.push(new EdgeCoord(coordTo, false, true));
 			}
 		}

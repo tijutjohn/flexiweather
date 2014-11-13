@@ -124,7 +124,7 @@ package com.iblsoft.flexiweather.ogc.editable
 
 		override protected function drawFeatureData(g:ICurveRenderer, m_featureData:FeatureData):void
 		{
-			if (!isCurveClosed())
+			if (!isCurveFilled())
 			{
 				super.drawFeatureData(g, m_featureData);
 				return;
@@ -143,10 +143,14 @@ package com.iblsoft.flexiweather.ogc.editable
 			var linesCount: int = m_featureData.lines.length;
 			var pointsCount: int = points.length;
 
+			var iw: InteractiveWidget = master.container;
+			var projectionHalf: Number = iw.getProjectionWidthInPixels() / 2;
+
 			if (pointsCount > 0)
 			{
 				p = convertCoordToScreen(m_featureData.startPoint);
 
+				var firstPoint: Point;
 				var lastPoint: Point;
 
 				// check NULL points...
@@ -163,8 +167,21 @@ package com.iblsoft.flexiweather.ogc.editable
 					if (p)
 					{
 						p = convertCoordToScreen(p);
+						if (lastPoint)
+						{
+							var dist: Number = Point.distance(p, lastPoint);
+							//							trace("\tdrawFeatureData P: " + p + "   distance to last point: " + dist);
+							if (dist > projectionHalf)
+							{
+								g.finish(lastPoint.x, lastPoint.y);
+
+								g.start(p.x, p.y);
+								g.moveTo(p.x, p.y);
+							}
+						}
+
 //						if (bNewLine) {
-//							g.finish(lastPoint.x, lastPoint.y);
+//							g.finish(firstPoint.x, firstPoint.y);
 //
 //							g.start(p.x, p.y);
 //							g.moveTo(p.x, p.y);
@@ -175,6 +192,8 @@ package com.iblsoft.flexiweather.ogc.editable
 //						}
 						if (!p)
 							trace("check why p is null");
+						if (!firstPoint)
+							firstPoint = new Point(p.x, p.y);
 						lastPoint = new Point(p.x, p.y);
 						bNewLine = false;
 					} else {
@@ -273,6 +292,10 @@ package com.iblsoft.flexiweather.ogc.editable
 		public function isCurveClosed(): Boolean
 		{
 			return mb_closed;
+		}
+		public function isCurveFilled(): Boolean
+		{
+			return false;
 		}
 
 		override public function set editMode(i_mode: int): void
@@ -376,7 +399,6 @@ package com.iblsoft.flexiweather.ogc.editable
 						}
 
 						//remove last point as we have added it just for this test
-//						a.removeItemAt(a.length - 1);
 						a.splice(a.length - 1, 1);
 					}
 					if (i_best != -1)
@@ -386,9 +408,8 @@ package com.iblsoft.flexiweather.ogc.editable
 						var reflectionDelta: int = master.container.pointReflection(pt.x, pt.y);
 
 						insertPointBefore(i_best, pt, reflectionDelta);
-//						MoveablePoint(ml_movablePoints[i_best]).onMouseDown(pt);
 
-						var reflection: FeatureDataReflection = m_featureData.getReflectionAt(reflectionDelta);
+						reflection = m_featureData.getReflectionAt(reflectionDelta);
 						newPoint = getEditablePointForReflectionAt(reflectionDelta, i_best) as IMouseEditableItem;
 						if (newPoint)
 						{

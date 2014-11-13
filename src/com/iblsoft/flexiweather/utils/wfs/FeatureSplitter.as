@@ -209,7 +209,7 @@ package com.iblsoft.flexiweather.utils.wfs
 				if (bClipping)
 				{
 					//polygon clipping
-					var clippedPolygon: Array = polygonClipppingSutherlandHodgman(polygon, viewPolygon);
+					var clippedPolygon: Array = polygonClipppingSutherlandHodgman(polygon, viewPolygon, null);
 					arr.push(clippedPolygon);
 				} else {
 					arr.push(polygon);
@@ -272,7 +272,7 @@ package com.iblsoft.flexiweather.utils.wfs
 			return arr;
 		}
 
-		private function intersection(s: Point, e: Point, cp1: Point, cp2: Point): Point
+		private function intersection(s: Point, e: Point, cp1: Point, cp2: Point, pointClass: Class): Point
 		{
 //			var dc = [ cp1[0] - cp2[0], cp1[1] - cp2[1] ],
 //				dp = [ s[0] - e[0], s[1] - e[1] ],
@@ -288,7 +288,7 @@ package com.iblsoft.flexiweather.utils.wfs
 			var n2: Number = s.x * e.y - s.y * e.x;
 			var n3: Number = 1 / (dc.x * dp.y - dc.y * dp.x);
 
-			return new Point((n1*dp.x - n2*dc.x) * n3, (n1*dp.y - n2*dc.y) * n3);
+			return new pointClass((n1*dp.x - n2*dc.x) * n3, (n1*dp.y - n2*dc.y) * n3);
 		}
 		private function inside(p: Point, cp1: Point, cp2: Point): Boolean
 		{
@@ -400,8 +400,11 @@ package com.iblsoft.flexiweather.utils.wfs
 			return null;
 		}
 
-		public function polygonClipppingSutherlandHodgman(subjectPolygon: Array, clipPolygon: Array): Array
+		public function polygonClipppingSutherlandHodgman(subjectPolygon: Array, clipPolygon: Array, pointClass: Class): Array
 		{
+			if (!pointClass)
+				pointClass = Point;
+
 			var cp1: Point;
 			var cp2: Point;
 			var s: Point;
@@ -417,26 +420,29 @@ package com.iblsoft.flexiweather.utils.wfs
 
 				outputList = [];
 				s = inputList[inputList.length - 1]; //last on the input list
-				for each (e in inputList)
+				if (s)
 				{
-					if (e)
+					for each (e in inputList)
 					{
-						if (inside(e, cp1, cp2))
+						if (e)
 						{
-							if (!inside(s, cp1, cp2))
+							if (inside(e, cp1, cp2))
 							{
-								outputList.push(intersection(s, e, cp1, cp2));
+								if (!inside(s, cp1, cp2))
+								{
+									outputList.push(intersection(s, e, cp1, cp2, pointClass));
+									clipped = true;
+								}
+								outputList.push(e);
+							}
+							else if (inside(s, cp1, cp2)) {
+								outputList.push(intersection(s, e, cp1, cp2, pointClass));
 								clipped = true;
 							}
+							s = e;
+						} else {
 							outputList.push(e);
 						}
-						else if (inside(s, cp1, cp2)) {
-							outputList.push(intersection(s, e, cp1, cp2));
-							clipped = true;
-						}
-						s = e;
-					} else {
-						outputList.push(e);
 					}
 				}
 				cp1 = cp2;
