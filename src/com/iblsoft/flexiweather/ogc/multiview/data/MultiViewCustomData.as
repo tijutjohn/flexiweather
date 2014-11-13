@@ -2,7 +2,7 @@ package com.iblsoft.flexiweather.ogc.multiview.data
 {
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
-	
+
 	import mx.collections.ArrayCollection;
 
 	public class MultiViewCustomData implements Serializable
@@ -12,14 +12,14 @@ package com.iblsoft.flexiweather.ogc.multiview.data
 		public var timeDifference: int;
 		private var _synchronizeFrame: Boolean = true;
 		private var _synchronizeArea: Boolean = true;
-		
+
 		public function MultiViewCustomData(selectedIndex: int = -1, timeDifference: int = -1)
 		{
 			_dataProvider = new ArrayCollection();
 			this.selectedIndex = selectedIndex;
 			this.timeDifference = timeDifference;
 		}
-		
+
 
 
 		public function get synchronizeFrame():Boolean
@@ -58,7 +58,7 @@ package com.iblsoft.flexiweather.ogc.multiview.data
 			timeDifference = storage.serializeInt("time-difference", timeDifference);
 			synchronizeFrame = storage.serializeBool("synchronize-frame", synchronizeFrame);
 			synchronizeArea = storage.serializeBool("synchronize-area", synchronizeArea);
-			
+
 			var arr: Array = [];
 			if (storage.isStoring())
 			{
@@ -70,8 +70,10 @@ package com.iblsoft.flexiweather.ogc.multiview.data
 							arr.push(item);
 						else {
 							var newItem: MultiViewDataProviderItem = new MultiViewDataProviderItem();
-							newItem.label = item.label;
-							newItem.enabled = item.enabled;
+							if (item.hasOwnProperty('label'))
+								newItem.label = item.label;
+							if (item.hasOwnProperty('enabled'))
+								newItem.enabled = item.enabled;
 							if (item.hasOwnProperty('level'))
 								newItem.level = item.level;
 							if (item.hasOwnProperty('run'))
@@ -83,21 +85,21 @@ package com.iblsoft.flexiweather.ogc.multiview.data
 							arr.push(newItem);
 						}
 					}
-					
+
 					storage.serializeNonpersistentArray('data-provider', arr, MultiViewDataProviderItem);
 				}
 			} else {
 				try {
 					storage.serializeNonpersistentArray('data-provider', arr, MultiViewDataProviderItem);
-					
+
 				} catch (e: Error) {
 					trace("MultiViewCustomData: cannot restore data provider");
 				}
 				_dataProvider = new ArrayCollection(arr);
 			}
-			
+
 		}
-		
-		
+
+
 	}
 }

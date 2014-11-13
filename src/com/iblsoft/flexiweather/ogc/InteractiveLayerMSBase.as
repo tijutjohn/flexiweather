@@ -2240,6 +2240,11 @@ package com.iblsoft.flexiweather.ogc
 			{
 				mb_synchroniseLevel = value;
 				var levelValue: Object =  getSynchronisedVariableValue(GlobalVariable.LEVEL);
+				if (!levelValue)
+				{
+					trace("Global LEVEL is null");
+					return;
+				}
 				var levelValueString: String;
 				if (levelValue is String)
 					levelValueString = levelValue as String;
