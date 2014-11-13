@@ -6,6 +6,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	{
 		function closeCurve(): void;
 		function isCurveClosed(): Boolean;
+		function isCurveFilled(): Boolean;
 		function openCurve(i_afterPointIndex: uint, cSplitPoint: Coord = null): void;
 	}
 }

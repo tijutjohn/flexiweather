@@ -46,10 +46,15 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 
 		}
 
-		override public function isCurveClosed(): Boolean
+		override public function isCurveFilled(): Boolean
 		{
-			return mb_closed || (ms_fillStyle != StyledLineCurveRenderer.FILL_STYLE_NONE);
+			return ms_fillStyle != StyledLineCurveRenderer.FILL_STYLE_NONE;
 		}
+
+//		override public function isCurveClosed(): Boolean
+//		{
+//			return mb_closed || (ms_fillStyle != StyledLineCurveRenderer.FILL_STYLE_NONE);
+//		}
 		override public function getRenderer(reflection: int): ICurveRenderer
 		{
 			var i_color: uint = getCurrentColor(mi_color);
