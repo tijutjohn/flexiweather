@@ -124,7 +124,7 @@ package com.iblsoft.flexiweather.ogc.editable
 						if (reflection.points)
 						{
 							gr.clear();
-							trace("reflection.points: " + reflection.points.length);
+//							trace("reflection.points: " + reflection.points.length);
 							if (reflection.points.length == 0)
 							{
 								trace("no points for displaysprite");
@@ -175,8 +175,8 @@ package com.iblsoft.flexiweather.ogc.editable
 									//if object is not in anticollision layout and it should be there, we should add it
 									master.container.labelLayout.addObstacle(displaySprite, master);
 									displaySprite.visible = true;
-								} else {
-									trace("\tDisplaySprite is already in Anticollision");
+//								} else {
+//									trace("\tDisplaySprite is already in Anticollision");
 								}
 								if (!isAnnotationInAnticollision)
 								{
@@ -192,9 +192,9 @@ package com.iblsoft.flexiweather.ogc.editable
 									if (!annotationDatelineSplitVisibility)
 									{
 										annotation.visible = false;
-										trace("\tAnnotation is already in Anticollision");
+//										trace("\tAnnotation is already in Anticollision");
 										master.container.labelLayout.removeObject(annotation);
-										trace("\t\tAnnotation is already visible for different reflection (Should be splitted on dateline)");
+//										trace("\t\tAnnotation is already visible for different reflection (Should be splitted on dateline)");
 									}
 								}
 							} else {

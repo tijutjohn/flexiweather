@@ -67,7 +67,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 				_visible = value;
 				//set object visibility to save value
 				object.visible = value;
-				trace("AnticollisionLayoutObject [refl: "+ reflectionDelta+"] VISIBLE CHANGED: " + _visible + " object["+object+"].visible: " + object.visible);
+//				trace("AnticollisionLayoutObject [refl: "+ reflectionDelta+"] VISIBLE CHANGED: " + _visible + " object["+object+"].visible: " + object.visible);
 //				trace(this + " VISIBLE CHANGED");
 //			} else {
 //				trace("AnticollisionLayoutObject visible not changed: " + _visible + " object["+object+"].visible: " + object.visible);

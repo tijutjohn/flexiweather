@@ -70,7 +70,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			reflectionDelta = i_reflectionData;
 			_stage = (FlexGlobals.topLevelApplication as DisplayObject).stage;
 
-			trace("FeatureDataReflection created: " + this);
+			//trace("FeatureDataReflection created: " + this);
 
 		}
 
@@ -119,7 +119,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 
 //				var line: FeatureDataLine = getLineAt(parseInt(lineID));
 //				line.clear();
-//				trace("\t\t :" + line);
+//				//trace("\t\t :" + line);
 			}
 
 //			var total: int = _lines.length;
@@ -229,7 +229,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		 */
 		private function compute(): void
 		{
-			trace("\t COMPUTE START" + this);
+			//trace("\t COMPUTE START" + this);
 			var currTime: Number = getTimer();
 
 			if (_points.length > 0)
@@ -284,6 +284,22 @@ package com.iblsoft.flexiweather.ogc.editable.data
 				}
 			}
 
+			//fix last point for null
+			var ok: Boolean = _points.length > 0;
+			cnt = _points.length - 1;
+			while (ok)
+			{
+				oldPoint = _points[cnt] as FeatureDataPoint;
+				if (!oldPoint)
+				{
+					_points.splice(cnt,1);
+					cnt--;
+					if (_points.length == 0)
+						ok = false;
+				} else {
+					ok = false;
+				}
+			}
 			_points = clipData(_points);
 
 			_center = new FeatureDataPoint();
@@ -299,7 +315,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			_center.x /= total;
 			_center.y /= total;
 
-			trace("\t COMPUTE END took: " + (getTimer() - currTime) + "ms. > " + this);
+			//trace("\t COMPUTE END took: " + (getTimer() - currTime) + "ms. > " + this);
 		}
 
 		private function clipData(points: Array): Array
@@ -317,7 +333,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 
 				var clipPolygon: Array = [new Point(left,top), new Point(right,top), new Point(right, bottom), new Point(left, bottom)];
 
-				points = parentFeatureData.featureSplitter.polygonClipppingSutherlandHodgman(points, clipPolygon);
+				points = parentFeatureData.featureSplitter.polygonClipppingSutherlandHodgman(points, clipPolygon, FeatureDataPoint);
 			}
 			return points;
 		}

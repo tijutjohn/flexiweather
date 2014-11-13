@@ -891,7 +891,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 
 		protected function debug(txt: String): void
 		{
-			trace("AnticollisionLayout: " + txt);
+//			debug("AnticollisionLayout: " + txt);
 			if (debugConsole)
 				debugConsole.print("AnticollisionLayout: " + txt, 'Info', 'AnticollisionLayout');
 		}
