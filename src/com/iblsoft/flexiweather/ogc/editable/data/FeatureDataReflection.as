@@ -300,7 +300,8 @@ package com.iblsoft.flexiweather.ogc.editable.data
 					ok = false;
 				}
 			}
-			_points = clipData(_points);
+			if (_points.length > 1)
+				_points = clipData(_points);
 
 			_center = new FeatureDataPoint();
 			var total: int = 0;
