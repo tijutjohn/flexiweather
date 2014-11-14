@@ -527,6 +527,9 @@
     <classEntry path="com.iblsoft.flexiweather.widgets.skins.TitleWindowCloseButtonSkin"/>
     <classEntry path="com.iblsoft.flexiweather.widgets.skins.TitleWindowSkin"/>
     <classEntry path="com.iblsoft.flexiweather.ogc.wfs.IWFSIconSprite"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.menu.ScrollableMenuBar"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.menu.ScrollableArrowMenu"/>
+    <classEntry path="com.iblsoft.flexiweather.widgets.controls.menu.ScrollableMenu"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
