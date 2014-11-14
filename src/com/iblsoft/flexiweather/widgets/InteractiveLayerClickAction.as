@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.widgets
 {
 	import flash.events.MouseEvent;
+
 	import mx.controls.Text;
 
 	public class InteractiveLayerClickAction extends InteractiveLayer
@@ -12,6 +13,8 @@ package com.iblsoft.flexiweather.widgets
 		public static const MOUSE_UP: String = "ilcaMouseUp";
 		public static const MOUSE_CLICKED: String = "ilcaMouseClicked";
 
+		private var mb_layerClicked: Boolean;
+
 		public function InteractiveLayerClickAction(container: InteractiveWidget)
 		{
 			super(container);
@@ -21,8 +24,10 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (event.shiftKey || event.ctrlKey)
 				return false;
+
 			if (hasEventListener(MOUSE_DOWN))
 			{
+				mb_layerClicked = true;
 				dispatchEvent(new InteractiveLayerClickActionEvent(MOUSE_DOWN).setup(container, event));
 				return true;
 			}
@@ -33,6 +38,9 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (event.shiftKey || event.ctrlKey)
 				return false;
+
+			mb_layerClicked = false;
+
 			if (hasEventListener(MOUSE_UP))
 			{
 				dispatchEvent(new InteractiveLayerClickActionEvent(MOUSE_UP).setup(container, event));
@@ -53,8 +61,14 @@ package com.iblsoft.flexiweather.widgets
 			}
 			if (event.buttonDown && hasEventListener(MOUSE_PRESSED_MOVE))
 			{
-				dispatchEvent(new InteractiveLayerClickActionEvent(MOUSE_PRESSED_MOVE).setup(container, event));
-				b_handled = true;
+				//dispatch this, only if MOUSE_DOWN was done in this layer
+				if (mb_layerClicked)
+				{
+					dispatchEvent(new InteractiveLayerClickActionEvent(MOUSE_PRESSED_MOVE).setup(container, event));
+					b_handled = true;
+				} else {
+					trace("InteractiveLayerClickAction: MOUSE_PRESSED_MOVE but mouse down was done in different object");
+				}
 			}
 			return b_handled;
 		}
