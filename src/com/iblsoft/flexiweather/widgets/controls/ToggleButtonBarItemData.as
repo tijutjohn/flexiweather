@@ -8,13 +8,35 @@ package com.iblsoft.flexiweather.widgets.controls
 	{
 		public static const NORMAL: String = 'normal';
 		public static const TOGGLE: String = 'toggle';
+		public static const TOGGLE_GROUP: String = 'toggle group';
 		public static const EXCLUSIVE: String = 'exclusive';
 
 		private var m_ident: String;
 		private var m_label: String;
 		private var m_tooltip: String;
+		private var m_toggleGroup: String;
 
 		private var _enabled: Boolean;
+
+		public function get toggleGroup():String
+		{
+			return m_toggleGroup;
+		}
+
+		public function set toggleGroup(value:String):void
+		{
+			m_toggleGroup = value;
+		}
+
+		public function get type():String
+		{
+			return _type;
+		}
+
+		public function set type(value:String):void
+		{
+			_type = value;
+		}
 
 		[Bindable]
 		public function get ident():String
@@ -65,7 +87,7 @@ package com.iblsoft.flexiweather.widgets.controls
 			notifyChange();
 		}
 
-		public var type: String;
+		private var _type: String;
 
 //		public var toggle: Boolean;
 //		public var exclusive: String;

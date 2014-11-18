@@ -1,7 +1,7 @@
 package com.iblsoft.flexiweather.plugins
 {
 	import flash.utils.Dictionary;
-	
+
 	import mx.controls.Image;
 
 	public class PluginAbility
@@ -25,7 +25,7 @@ package com.iblsoft.flexiweather.plugins
 		public static const MENU_ITEM_CLICK_LISTENER: String = "menuItemClickListener";
 		public static const SUBMENU_ITEM: String = "submenuItem";
 		public static const LOCAL_COMMUNICATION: String = "localCommunication";
-		
+
 		private var ms_abilityType: String;
 		private var m_classOrInstance: Object;
 		private var ms_id: String;
@@ -41,11 +41,12 @@ package com.iblsoft.flexiweather.plugins
 		}
 
 		public static function action(classOrInstance: Object,
-				s_id: String, s_plugin_id: String, s_name: String, s_buttonType: String, icon: Class): PluginAbility
+				s_id: String, s_plugin_id: String, s_name: String, s_buttonType: String, icon: Class, s_buttonGroup: String = null): PluginAbility
 		{
 			return new PluginAbility(PluginAbility.ACTION, s_id, s_plugin_id, classOrInstance)
 					.withMetadata("name", s_name)
 					.withMetadata("buttonType", s_buttonType)
+					.withMetadata("buttonGroup", s_buttonGroup)
 					.withMetadata("icon", icon);
 		}
 
@@ -97,7 +98,7 @@ package com.iblsoft.flexiweather.plugins
 		{
 			return new PluginAbility(PluginAbility.LEGENDS, s_id, s_plugin_id, classOrInstance);
 		}
-		
+
 		public static function interactiveWidgetClient(classOrInstance: Object,
 				s_id: String = null, s_plugin_id: String = null): PluginAbility
 		{
@@ -119,15 +120,15 @@ package com.iblsoft.flexiweather.plugins
 
 		/**
 		 * Plugin ability, which adds main menu item to main BrowsingWeather menu
-		 *  
+		 *
 		 * @param classOrInstance
 		 * @param s_menu_id
 		 * @param s_name
 		 * @param i_priority
 		 * @param s_plugin_id
-		 * @return 
-		 * 
-		 */		
+		 * @return
+		 *
+		 */
 		public static function menuItem(classOrInstance: Object, s_plugin_id: String,
 				s_menu_id: String, s_name: String, i_priority: int): PluginAbility
 		{
@@ -139,7 +140,7 @@ package com.iblsoft.flexiweather.plugins
 
 		/**
 		 * Plugin ability, which adds listener to any main BrowsingWeather menu item click
-		 *   
+		 *
 		 * @param classOrInstance
 		 * @param s_mainMenu_id
 		 * @param s_menu_id
@@ -149,9 +150,9 @@ package com.iblsoft.flexiweather.plugins
 		 * @param f_callback
 		 * @param s_plugin_id
 		 * @param s_menuString
-		 * @return 
-		 * 
-		 */		
+		 * @return
+		 *
+		 */
 		public static function menuClickListener(classOrInstance: Object, s_plugin_id: String,
 				s_mainMenu_id: String,  s_itemIDSubstring: String, f_callback: Function): PluginAbility
 		{
@@ -160,10 +161,10 @@ package com.iblsoft.flexiweather.plugins
 			ability.withMetadata("callback", f_callback);
 			return ability;
 		}
-		
+
 		/**
 		 * Plugin ability, which adds submenu item to main BrowsingWeather menu
-		 *  
+		 *
 		 * @param classOrInstance
 		 * @param s_mainMenu_id
 		 * @param s_menu_id
@@ -173,9 +174,9 @@ package com.iblsoft.flexiweather.plugins
 		 * @param f_callback
 		 * @param s_plugin_id
 		 * @param s_menuString
-		 * @return 
-		 * 
-		 */		
+		 * @return
+		 *
+		 */
 		public static function submenuItem(classOrInstance: Object, s_plugin_id: String,
 				s_mainMenu_id: String, s_menu_id: String, s_name: String, i_priority: int, s_type: String = '', f_callback: Function = null, s_menuString: String = ''): PluginAbility
 		{
@@ -194,9 +195,9 @@ package com.iblsoft.flexiweather.plugins
 		{
 			var ability: PluginAbility = new PluginAbility(PluginAbility.LOCAL_COMMUNICATION, s_id, s_plugin_id, classOrInstance)
 			return ability;
-			
+
 		}
-		
+
 		public static function storage(classOrInstance: Object,
 				s_id: String, s_plugin_id: String = null): PluginAbility
 		{
