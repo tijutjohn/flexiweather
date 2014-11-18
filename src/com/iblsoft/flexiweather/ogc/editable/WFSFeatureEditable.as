@@ -90,10 +90,15 @@ package com.iblsoft.flexiweather.ogc.editable
 		protected function initialize(): void
 		{
 			//initialize at least 1 reflection...this is temporary solution for creating first point of feature (there are no reflections yet)
-			m_featureData = createFeatureData();
-			m_featureData.getReflectionAt(0);
+			if (!m_featureData)
+			{
+				m_featureData = createFeatureData();
+				m_featureData.getReflectionAt(0);
 
-			editableSpriteVisible(false);
+				editableSpriteVisible(false);
+			} else {
+				m_featureData.clear();
+			}
 		}
 //		protected function createReflectionDirectory(): void
 //		{
