@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.utils.anticollision
 {
 	import com.iblsoft.flexiweather.constants.AnticollisionDisplayMode;
+	import com.iblsoft.flexiweather.events.InteractiveWidgetEvent;
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.FeatureBase;
 	import com.iblsoft.flexiweather.ogc.kml.controls.KMLLabel;
@@ -137,6 +138,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 			_updateLocationDictionary = new UpdateLocationDictionary(this);
 			m_drawAnnotationAnchor = true;
 			addEventListener(Event.RENDER, onRender, false, 0, true);
+			_parentContainer.addEventListener(InteractiveWidgetEvent.AREA_CHANGED, onAreaChanged);
 			addChild(m_anchorsLayer);
 			m_areaChangedUpdateTime = getTimer();
 		}
@@ -173,6 +175,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 		 */
 		public function areaChanged(bbox: BBox): void
 		{
+			debug("areaChanged");
 		/*
 		var diffTime: Number = (getTimer() - m_areaChangedUpdateTime);
 		if (diffTime > 3000 && !suspendAnticollisionProcessing)
@@ -839,6 +842,21 @@ package com.iblsoft.flexiweather.utils.anticollision
 			return !b_hit;
 		}
 
+		protected function onAreaChanged(event: InteractiveWidgetEvent): void
+		{
+			debug("onAreaChanged");
+
+			//show all object inside anticollision to reset visibility, otherwise next update will not manage visibility correctly from previous state (getAbsoluteVisibility)
+			for each (var obj: AnticollisionLayoutObject in ma_layoutObjects)
+			{
+				if (!obj.manageVisibilityWithAnchors)
+				{
+					var object: DisplayObject = obj.object;
+					object.visible = true;
+				}
+			}
+		}
+
 		protected function onRender(event: Event): void
 		{
 			if (mb_dirty)
@@ -891,7 +909,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 
 		protected function debug(txt: String): void
 		{
-//			debug("AnticollisionLayout: " + txt);
+//			trace("AnticollisionLayout: " + txt);
 			if (debugConsole)
 				debugConsole.print("AnticollisionLayout: " + txt, 'Info', 'AnticollisionLayout');
 		}

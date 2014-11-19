@@ -198,9 +198,9 @@ package com.iblsoft.flexiweather.ogc
 							if (iw.coordInside(currCoord))
 							{
 								featureIsInside = true;
-								notifyCoordinateInside(c, i, currCoordObject.reflection);
+								notifyCoordinateInsideViewBBox(c, i, currCoordObject.reflection);
 							} else {
-								notifyCoordinateOutside(c, i, currCoordObject.reflection);
+								notifyCoordinateOutsideViewBBox(c, i, currCoordObject.reflection);
 							}
 						}
 
@@ -211,22 +211,36 @@ package com.iblsoft.flexiweather.ogc
 						{
 							//coordinates has no reflection, has to be hiden
 //							trace("coordinates has no reflection, has to be hiden");
-							notifyCoordinateOutside(c, i, 0); //currCoordObject.reflection);
+							notifyCoordinateOutsideViewBBox(c, i, 0); //currCoordObject.reflection);
 						}
 					}
 					if (presentInViewBBox != featureIsInside)
 					{
 //						trace("coordinatesvisibility change: " + featureIsInside);
-						var event: FeatureEvent = new FeatureEvent(FeatureEvent.PRESENCE_IN_VIEW_BBOX_CHANGED, true);
-						event.insideViewBBox = featureIsInside;
-						dispatchEvent(event);
+//						if (featureIsInside)
+//							notifyFeatureInsideViewBBox();
+//						else
+//							notifyFeatureOutsideViewBBox();
 					}
 					presentInViewBBox = featureIsInside;
 				}
 			}
 		}
 
-		protected function notifyCoordinateInside(coord: Coord, coordIndex: uint, coordReflection: uint): void
+		protected function notifyFeatureInsideViewBBox(): void
+		{
+			var event: FeatureEvent = new FeatureEvent(FeatureEvent.PRESENCE_IN_VIEW_BBOX_CHANGED, true);
+			event.insideViewBBox = true;
+			dispatchEvent(event);
+		}
+		protected function notifyFeatureOutsideViewBBox(): void
+		{
+			var event: FeatureEvent = new FeatureEvent(FeatureEvent.PRESENCE_IN_VIEW_BBOX_CHANGED, true);
+			event.insideViewBBox = true;
+			dispatchEvent(event);
+		}
+
+		protected function notifyCoordinateInsideViewBBox(coord: Coord, coordIndex: uint, coordReflection: uint): void
 		{
 			var event: FeatureEvent = new FeatureEvent(FeatureEvent.COORDINATE_VISIBLE, true);
 			event.coordinate = coord;
@@ -235,7 +249,7 @@ package com.iblsoft.flexiweather.ogc
 			dispatchEvent(event);
 		}
 
-		protected function notifyCoordinateOutside(coord: Coord, coordIndex: uint, coordReflection: uint): void
+		protected function notifyCoordinateOutsideViewBBox(coord: Coord, coordIndex: uint, coordReflection: uint): void
 		{
 			var event: FeatureEvent = new FeatureEvent(FeatureEvent.COORDINATE_INVISIBLE, true);
 			event.coordinate = coord;

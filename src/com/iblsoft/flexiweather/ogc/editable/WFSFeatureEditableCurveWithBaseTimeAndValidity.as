@@ -63,10 +63,12 @@ package com.iblsoft.flexiweather.ogc.editable
 
 			clearGraphics();
 
-			beforeCurveRendering();
+			beforeCurveComputing();
 
 			//precompute curve (FeatureData) for drawing
 			computeCurve();
+
+			beforeCurveRendering();
 
 			// draw curve
 			drawCurve();
@@ -95,10 +97,52 @@ package com.iblsoft.flexiweather.ogc.editable
 			return false;
 		}
 
-		protected function beforeCurveRendering(): void
+		/**
+		 * This function is called before computeCurve method. You can update data or properties, which are needed for computeCurve method()
+		 *
+		 */
+		protected function beforeCurveComputing(): void
 		{
 
 		}
+
+		/**
+		 * This method is called after computeCurve and before drawCurve()
+		 *
+		 */
+		protected function beforeCurveRendering(): void
+		{
+			var reflection: FeatureDataReflection;
+			var a_points: Array = getPoints();
+
+			//create sprites for reflections
+			if (m_featureData && m_featureData.reflections)
+			{
+
+				var pointsCount: int = a_points.length;
+				var reflectionIDs: Array = m_featureData.reflectionsIDs;
+
+				if (reflectionIDs.length > 0)
+				{
+					if (!presentInViewBBox)
+					{
+						notifyFeatureInsideViewBBox();
+						return;
+					}
+				} else if (presentInViewBBox) {
+					notifyFeatureOutsideViewBBox();
+				}
+			} else if (presentInViewBBox) {
+				notifyFeatureOutsideViewBBox();
+			}
+
+
+		}
+
+		/**
+		 * This method is called after drawCurve method
+		 *
+		 */
 		protected function afterCurveRendering(): void
 		{
 
