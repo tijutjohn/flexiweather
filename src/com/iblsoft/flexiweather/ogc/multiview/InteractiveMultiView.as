@@ -2070,7 +2070,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 			if (debugConsole)
 				debugConsole.print(str, type, tag);
 
-			trace(tag + "| " + type + "| " + str);
+//			trace(tag + "| " + type + "| " + str);
 //			LoggingUtils.dispatchLogEvent(this, tag + "| " + type + "| " + str);
 		}
 

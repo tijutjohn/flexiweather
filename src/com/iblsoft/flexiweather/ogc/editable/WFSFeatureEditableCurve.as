@@ -27,17 +27,6 @@ package com.iblsoft.flexiweather.ogc.editable
 			mb_smooth = value;
 		}
 
-//		protected var mb_closed: Boolean = true;
-//		public function get closed():Boolean
-//		{
-//			return mb_closed;
-//		}
-//
-//		public function set closed(value:Boolean):void
-//		{
-//			mb_closed = value;
-//		}
-
 		public function WFSFeatureEditableCurve(s_namespace: String, s_typeName: String, s_featureId: String)
 		{
 			super(s_namespace, s_typeName, s_featureId);
