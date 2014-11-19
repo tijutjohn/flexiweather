@@ -13,6 +13,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.SynchronisationRole;
 	import com.iblsoft.flexiweather.ogc.SynchronisedVariableChangeEvent;
 	import com.iblsoft.flexiweather.ogc.cache.ICache;
+	import com.iblsoft.flexiweather.ogc.cache.ICachedLayer;
 	import com.iblsoft.flexiweather.ogc.configuration.MapTimelineConfiguration;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariableValue;
@@ -764,6 +765,24 @@ package com.iblsoft.flexiweather.widgets
 				notifyTimeAxisUpdate();
 		}
 
+		/**
+		 * Clear all layers which has implements iCachedLayer 
+		 * 
+		 */
+		public function clearCache(): void
+		{
+			var total: int = layers.length;
+			
+			for (var i: int = 0; i < total; i++)
+			{
+				var currLayer: InteractiveLayer = layers.getItemAt(i) as InteractiveLayer;
+				if (currLayer is ICachedLayer)
+				{
+					(currLayer as ICachedLayer).clearCache();
+				}
+			}
+		}
+		
 		public function onLayerDeselected(layer: InteractiveLayer): void
 		{
 			selectedLayerIndex = -1;	
