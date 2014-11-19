@@ -119,21 +119,6 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 
 			trace("\n\n WFSFeatureEditableCurveWithBaseTimeAndValidity update");
 			super.update(changeFlag);
-
-//			clearGraphics();
-//
-//			beforeCurveRendering();
-//
-//			//precompute curve (FeatureData) for drawing
-//			computeCurve();
-//
-//			// draw curve
-//			drawCurve();
-//
-//			//draw editable points (user can drag them)
-//			updateEditablePoints(changeFlag);
-//
-//			afterCurveRendering();
 		}
 
 		override protected function updateNewImplementation(changeFlag: FeatureUpdateContext): void

@@ -384,16 +384,16 @@ package com.iblsoft.flexiweather.ogc.editable
 			dispatchEvent(event);
 		}
 
-		override protected function notifyCoordinateInside(coord: Coord, coordIndex: uint, coordReflection: uint): void
+		override protected function notifyCoordinateInsideViewBBox(coord: Coord, coordIndex: uint, coordReflection: uint): void
 		{
-			super.notifyCoordinateInside(coord, coordIndex, coordReflection);
+			super.notifyCoordinateInsideViewBBox(coord, coordIndex, coordReflection);
 
 			changeMoveablePointVisibility(coord, coordIndex, coordReflection, true);
 		}
 
-		override protected function notifyCoordinateOutside(coord: Coord, coordIndex: uint, coordReflection: uint): void
+		override protected function notifyCoordinateOutsideViewBBox(coord: Coord, coordIndex: uint, coordReflection: uint): void
 		{
-			super.notifyCoordinateOutside(coord, coordIndex, coordReflection);
+			super.notifyCoordinateOutsideViewBBox(coord, coordIndex, coordReflection);
 
 			changeMoveablePointVisibility(coord, coordIndex, coordReflection, false);
 		}
