@@ -772,13 +772,15 @@ package com.iblsoft.flexiweather.widgets
 		public function clearCache(): void
 		{
 			var total: int = layers.length;
+			var bDisposeDisplayedImaged: Boolean = true;
 			
 			for (var i: int = 0; i < total; i++)
 			{
 				var currLayer: InteractiveLayer = layers.getItemAt(i) as InteractiveLayer;
 				if (currLayer is ICachedLayer)
 				{
-					(currLayer as ICachedLayer).clearCache();
+					
+					(currLayer as ICachedLayer).clearCache(bDisposeDisplayedImaged);
 				}
 			}
 		}
