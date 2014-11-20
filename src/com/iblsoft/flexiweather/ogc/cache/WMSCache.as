@@ -50,11 +50,11 @@ package com.iblsoft.flexiweather.ogc.cache
 			return mi_cacheLoadingItemsLength;			
 		}
 
-		public function clearCache(): void
+		public function clearCache(b_disposeDisplayed: Boolean): void
 		{
 			for each (var cacheItem: CacheItem in md_cache)
 			{
-				deleteCacheItem(cacheItem, true);
+				deleteCacheItem(cacheItem, b_disposeDisplayed);
 			}
 			for (var s_key: String in md_noDataCache)
 			{
@@ -79,7 +79,7 @@ package com.iblsoft.flexiweather.ogc.cache
 				m_expirationTimer.removeEventListener(TimerEvent.TIMER, onExpiration);
 				m_expirationTimer = null;
 			}
-			clearCache();
+			clearCache(true);
 			var cnt: int = 0;
 			var obj: Object
 			for each (obj in md_cache)
@@ -171,6 +171,15 @@ package com.iblsoft.flexiweather.ogc.cache
 		public function deleteCacheItemByKey(s_key: String, b_disposeDisplayed: Boolean = false): Boolean
 		{
 			var cacheItem: CacheItem = md_cache[s_key] as CacheItem;
+			
+			if (cacheItem)
+			{
+				var isDisplayed: Boolean = cacheItem.displayed;
+				var currIsDisplayed: Boolean = cacheItem.isImageOnDisplayList();
+				if (isDisplayed != currIsDisplayed)
+					trace("Check cached item on display list");
+			}
+			
 			// dispose bitmap data, just for bitmaps which are not currently displayed
 			if (cacheItem && (!cacheItem.displayed || (cacheItem.displayed && b_disposeDisplayed)))
 			{

@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.ogc.cache
 {
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.IViewProperties;
+	
 	import flash.display.Bitmap;
 	import flash.display.DisplayObject;
 
@@ -32,7 +33,17 @@ package com.iblsoft.flexiweather.ogc.cache
 		public function isImageOnDisplayList(): Boolean
 		{
 			if (image)
-				return image.parent != null;
+			{
+				var dispObj: DisplayObject = image;
+				while (dispObj.hasOwnProperty('parent'))
+				{
+					if (dispObj.parent == null)
+						return false;
+					
+					dispObj = dispObj.parent;
+				}
+				return true;
+			}
 			return false;
 		}
 

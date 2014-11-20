@@ -2341,10 +2341,10 @@ package com.iblsoft.flexiweather.ogc
 			m_cache = null;
 		}
 
-		public function clearCache(): void
+		public function clearCache(b_disposeDisplayed: Boolean): void
 		{
 			if (m_cache)
-				m_cache.clearCache();
+				m_cache.clearCache(b_disposeDisplayed);
 		}
 
 		public function getCache(): ICache

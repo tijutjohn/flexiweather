@@ -779,7 +779,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 			return layer.isPreloadedMultiple(convertViewPropertiesArray(viewPropertiesArray));
 		}
 
-		override public function clearCache(): void
+		override public function clearCache(b_disposeDisplayed: Boolean): void
 		{
 			var layer: IPreloadableLayer = getPreloadableInteractiveLayerBaseOnIsTileable();
 			if (layer is ICachedLayer)
@@ -787,7 +787,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 				var cachedLayer: ICachedLayer = layer as ICachedLayer;
 				var cache: ICache = cachedLayer.getCache();
 				if (cache)
-					cache.clearCache();
+					cache.clearCache(b_disposeDisplayed);
 			}
 		}
 
