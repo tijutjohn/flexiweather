@@ -339,9 +339,12 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 		/**
 		 * @private
 		 */
-		private function scrollUp(event:TimerEvent):void {
+		private function scrollUp(event:TimerEvent = null):void {
 			if(this.verticalScrollPosition - scrollJump > 0) {
 				this.verticalScrollPosition -= scrollJump;
+//				this.selectedIndex += scrollJump;
+//				this.selectedIndex = Math.min(listItems.length - this.verticalScrollPosition - 1, this.selectedIndex)
+
 			}
 			else {
 				this.verticalScrollPosition = 0;
@@ -353,9 +356,11 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 		/**
 		 * @private
 		 */
-		private function scrollDown(event:TimerEvent):void {
+		private function scrollDown(event:TimerEvent = null):void {
 			if(this.verticalScrollPosition + scrollJump < this.maxVerticalScrollPosition) {
 				this.verticalScrollPosition += scrollJump;
+//				this.selectedIndex -= scrollJump;
+//				this.selectedIndex = Math.max(-1, this.selectedIndex)
 			}
 			else {
 				this.verticalScrollPosition = this.maxVerticalScrollPosition;
@@ -364,5 +369,23 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 			checkButtons(null);
 		}
 
+		override protected function mouseWheelHandler(event:MouseEvent):void
+		{
+			super.mouseWheelHandler(event);
+
+			if (event.delta < 0)
+				scrollUp();
+			if (event.delta > 0)
+				scrollDown();
+		}
+
+		override protected function showPrevious(): void
+		{
+			scrollUp();
+		}
+		override protected function showNext(): void
+		{
+			scrollDown();
+		}
 	}
 }
