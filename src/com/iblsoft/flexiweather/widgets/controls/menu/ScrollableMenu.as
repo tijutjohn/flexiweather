@@ -12,8 +12,11 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 {
 	import flash.display.DisplayObjectContainer;
 	import flash.events.Event;
+	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
+	import flash.sampler.getInvocationCount;
+	import flash.ui.Keyboard;
 	import flash.utils.clearInterval;
 
 	import mx.collections.ICollectionView;
@@ -24,8 +27,10 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 	import mx.core.EdgeMetrics;
 	import mx.core.ScrollPolicy;
 	import mx.core.mx_internal;
+	import mx.events.MenuEvent;
 	import mx.events.ScrollEvent;
 	import mx.managers.PopUpManager;
+	import mx.states.OverrideBase;
 
 	use namespace mx_internal;
 
@@ -70,6 +75,20 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 		}
 
 
+		override public function set selectedIndex(value:int):void
+		{
+			trace("Scrollable menu: selected: " + selectedIndex + " verticalScrollPosition: " + value);
+			if (value < selectedIndex)
+				trace("Check this");
+
+			super.selectedIndex = value;
+		}
+		override public function set verticalScrollPosition(value:Number):void
+		{
+			trace("Scrollable menu: verticalScrollPosition: " + value + " selected: " + selectedIndex);
+
+			super.verticalScrollPosition = value;
+		}
 		/**
 		 * Override the verticalScrollPolicy so we can re-instate scrolling functionality.
 		 *
@@ -508,10 +527,350 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 
 		override public function set dataProvider(value:Object):void
 		{
+			trace("Scrollable menu dataProvider: value: " + value);
+
 			super.dataProvider = value;
 
 			invalidateSize();
 			invalidateDisplayList();
+		}
+
+		override protected function keyUpHandler(event:KeyboardEvent):void
+		{
+			return;
+		}
+		override protected function keyDownHandler(event:KeyboardEvent):void
+		{
+			return;
+			trace("Scrollable menu selectedIndex: " + selectedIndex + " verticalScrollPosition: " + verticalScrollPosition + " listItems: " + listItems.length);
+//			super.keyDownHandler(event);
+
+			if (selectedIndex == 11)
+			{
+				trace("check jump back");
+			}
+			var position: int = selectedIndex - verticalScrollPosition;
+			var row:IListItemRenderer = selectedIndex == -1 ? null : getListItemAt(position,0);
+			var rowData:Object = row ? row.data : null;
+			var menu:Menu = row ? IMenuItemRenderer(row).menu : null;
+			var menuEvent:MenuEvent;
+
+			// If rtl layout, need to swap LEFT and RIGHT so correct action
+			// is done.
+			var keyCode:uint = mapKeycodeForLayoutDirection(event);
+
+			// Handle Key.UP Navigation
+			if (keyCode == Keyboard.UP)
+			{
+				if (rowData && _dataDescriptor.isBranch(rowData) && menu && menu.visible)
+				{
+					supposedToLoseFocus = true;
+					menu.setFocus();
+
+					// start at end and move up 1
+//					menu.moveSelBy(menu.dataProvider.length, -1);
+					moveSelBy(menu.dataProvider.length, -1);
+				}
+				else
+				{
+					moveSelBy(selectedIndex - verticalScrollPosition, -1);
+				}
+
+				event.stopPropagation();
+			}
+
+				// Handle Key.DOWN Navigation
+			else if (keyCode == Keyboard.DOWN)
+			{
+				if (rowData && _dataDescriptor.isBranch(rowData) && menu && menu.visible)
+				{
+					supposedToLoseFocus = true;
+					menu.setFocus();
+
+					// start at -1 and move down 1
+//					menu.moveSelBy(-1, 1);
+					moveSelBy(-1, 1);
+				}
+				else
+				{
+					moveSelBy(selectedIndex, 1);
+				}
+
+				event.stopPropagation();
+			}
+
+				// Handle Key.RIGHT Navigation
+			else if (keyCode == Keyboard.RIGHT)
+			{
+				if (rowData && _dataDescriptor.isBranch(rowData))
+				{
+					openSubMenu(row);
+					menu = IMenuItemRenderer(row).menu;
+
+					supposedToLoseFocus = true;
+					menu.setFocus();
+
+					// start at -1 and move down 1
+//					menu.moveSelBy(-1, 1);
+					moveSelBy(-1, 1);
+				}
+				else
+				{
+					// jump to next sibling in the menubar
+					if (sourceMenuBar)
+					{
+						supposedToLoseFocus = true;
+						sourceMenuBar.setFocus();
+						// Redispatch the event to the MenuBar
+						// and let its keyDownHandler() handle it.
+						sourceMenuBar.dispatchEvent(event);
+					}
+				}
+				event.stopPropagation();
+			}
+
+				// Handle Key.LEFT Navigation
+			else if (keyCode == Keyboard.LEFT)
+			{
+				if (_parentMenu)
+				{
+					supposedToLoseFocus = true;
+					hide(); // hide this menu
+					_parentMenu.setFocus();
+				}
+				else
+				{
+					// jump to previous sibling in the menubar
+					if (sourceMenuBar)
+					{
+						supposedToLoseFocus = true;
+						sourceMenuBar.setFocus();
+						// Redispatch the event to the MenuBar
+						// and let its keyDownHandler() handle it.
+						sourceMenuBar.dispatchEvent(event);
+					}
+				}
+
+				event.stopPropagation();
+			}
+
+				// Handle Key.ENTER Commands
+			else if (keyCode == Keyboard.ENTER || keyCode == Keyboard.SPACE)
+			{
+				if (rowData && _dataDescriptor.isBranch(rowData))
+				{
+					openSubMenu(row);
+					menu = IMenuItemRenderer(row).menu;
+
+					supposedToLoseFocus = true;
+					menu.setFocus();
+
+					// start at -1 and move down 1
+//					menu.moveSelBy(-1, 1);
+					moveSelBy(-1, 1);
+				}
+				else if (rowData)
+				{
+					// Toggle the item regardless of whether it is a check or radio
+					// Custom item renderers can choose how to display this state
+					setMenuItemToggled(rowData, !_dataDescriptor.isToggled(rowData));
+
+					menuEvent = new MenuEvent(MenuEvent.ITEM_CLICK);
+					menuEvent.menu = this;
+					menuEvent.index = this.selectedIndex;
+					menuEvent.menuBar = sourceMenuBar;
+					menuEvent.label = itemToLabel(rowData);
+					menuEvent.item = rowData;
+					menuEvent.itemRenderer = row;
+					getRootMenu().dispatchEvent(menuEvent);
+
+					menuEvent = new MenuEvent(MenuEvent.CHANGE);
+					menuEvent.menu = this;
+					menuEvent.index = this.selectedIndex;
+					menuEvent.menuBar = sourceMenuBar;
+					menuEvent.label = itemToLabel(rowData);
+					menuEvent.item = rowData;
+					menuEvent.itemRenderer = row;
+					getRootMenu().dispatchEvent(menuEvent);
+
+					hideAllMenus();
+				}
+
+				event.stopPropagation();
+			}
+
+				// Handle Key.ESCAPE commands
+			else if (keyCode == Keyboard.TAB)
+			{
+				menuEvent = new MenuEvent(MenuEvent.MENU_HIDE);
+				menuEvent.menu = getRootMenu();
+				menuEvent.menuBar = sourceMenuBar;
+				getRootMenu().dispatchEvent(menuEvent);
+
+				hideAllMenus();
+
+				event.stopPropagation();
+			}
+
+			else if (keyCode == Keyboard.ESCAPE)
+			{
+				if (_parentMenu)
+				{
+					supposedToLoseFocus = true;
+					hide(); // hide this menu
+					_parentMenu.setFocus();
+				}
+				else
+				{
+					menuEvent = new MenuEvent(MenuEvent.MENU_HIDE);
+					menuEvent.menu = getRootMenu();
+					menuEvent.menuBar = sourceMenuBar;
+					getRootMenu().dispatchEvent(menuEvent);
+
+					hideAllMenus();
+
+					event.stopPropagation();
+				}
+			}
+
+		}
+
+
+		/**
+		 *  @private
+		 */
+		private function moveSelBy(oldIndex:Number, incr:Number):void
+		{
+			if (oldIndex == 0 && incr == -1)
+			{
+				if (selectedIndex > 0)
+				{
+					showPrevious();
+					return;
+				}
+			}
+			trace("\t moveSelBy: " + oldIndex + " incr: " + incr);
+			var curIndex:Number = oldIndex;
+			if (isNaN(curIndex))
+				curIndex = -1;
+
+			var limit:Number = Math.max(0, Math.min(rowCount, collection.length) - 1);
+
+			var newIndex:Number = curIndex;
+
+			var firstIndex: Number = itemRendererToIndex(listItems[0][0]);
+			var diffIndex: Number = curIndex - firstIndex;
+			trace("diff index: " + diffIndex);
+
+			if (diffIndex >= 0)
+				newIndex = diffIndex;
+
+			var item:Object;
+			var curItem:int = 0;
+
+			do
+			{
+				newIndex = newIndex + incr;
+
+				if (curItem > limit)
+					return;
+				else
+					curItem++;
+
+				if (newIndex == limit)
+				{
+					showNext();
+//					moveSelBy(oldIndex, incr);
+					return;
+				}
+				if (newIndex > limit) {
+//					newIndex = 0;
+					return;
+				} else if (newIndex < 0) {
+//					newIndex = limit;
+					return;
+				}
+
+				trace("\t\t moveSelBy get newIndex: " + newIndex);
+				item = getListItemAt(newIndex,0);
+
+			} while (item.data && (_dataDescriptor.getType(item.data) == "separator" || !_dataDescriptor.isEnabled(item.data)));
+
+			var menuEvent:MenuEvent;
+
+			if (selectedIndex != -1)
+			{
+				trace("\t\t moveSelBy get oldItem: " + selectedIndex);
+				var oldItem:Object = getListItemAt(selectedIndex,0);
+
+				menuEvent = new MenuEvent(MenuEvent.ITEM_ROLL_OUT);
+				menuEvent.menu = this;
+				menuEvent.index = this.selectedIndex;
+				menuEvent.menuBar = sourceMenuBar;
+				menuEvent.label = itemToLabel(oldItem.data);
+				menuEvent.item = oldItem.data;
+				menuEvent.itemRenderer = IListItemRenderer(oldItem);
+				getRootMenu().dispatchEvent(menuEvent);
+			}
+
+			if (item.data)
+			{
+//				var newItem: IListItemRenderer = getListItemAt(newIndex - verticalScrollPosition,0);
+				var newItem: IListItemRenderer = getListItemAt(newIndex,0);
+				selectItem(newItem, false, false);
+
+//				trace("\t\t moveSelBy get newItem: " + (newIndex - verticalScrollPosition) + " selectedIndex: " + selectedIndex);
+				trace("\t\t moveSelBy get newItem: " + (newIndex) + " selectedIndex: " + selectedIndex);
+				menuEvent = new MenuEvent(MenuEvent.ITEM_ROLL_OVER);
+				menuEvent.menu = this;
+//				menuEvent.index = (newIndex - verticalScrollPosition);
+				menuEvent.index = this.selectedIndex;
+				menuEvent.menuBar = sourceMenuBar;
+				menuEvent.label = itemToLabel(item.data);
+				menuEvent.item = item.data;
+				menuEvent.itemRenderer = IListItemRenderer(item);
+				getRootMenu().dispatchEvent(menuEvent);
+			}
+		}
+
+		private function getListItemAt(position: int, id: int): IListItemRenderer
+		{
+			debugListItems(position);
+
+			if (position < 0)
+				position = 0;
+
+			if (position >= listItems.length)
+				position = listItems.length - 1;
+
+			if (position >= 0 && position < listItems.length)
+				return listItems[position][id];
+
+			trace("can not get list item at " + position);
+			return null;
+		}
+
+		private function debugListItems(position: int): void
+		{
+			return;
+			trace("MENU ITEMS position: " + position + " selected: " + selectedIndex + " vertical : " + verticalScrollPosition);
+			for (var i: int = 0; i < listItems.length; i++)
+			{
+				if (i == position)
+					trace("> " + listItems[i][0].data.@label.toXMLString());
+				else
+					trace("  " + listItems[i][0].data.@label.toXMLString());
+			}
+		}
+
+		protected function showPrevious(): void
+		{
+
+		}
+
+		protected function showNext(): void
+		{
+
 		}
 	}
 }
