@@ -6,13 +6,18 @@ package com.iblsoft.flexiweather.ogc.managers
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
-	
+
+	import flash.events.Event;
+	import flash.events.EventDispatcher;
 	import flash.utils.Dictionary;
-	
+
 	import mx.collections.ArrayCollection;
 
-	public class ProjectionConfigurationManager implements Serializable
+	[Event(name="projectionsUpdated", type="flash.events.Event")]
+	public class ProjectionConfigurationManager extends EventDispatcher implements Serializable
 	{
+		public static const PROJECTIONS_UPDATED: String = 'projectionsUpdated';
+
 		internal static var sm_instance: ProjectionConfigurationManager;
 		internal var ma_projections: ArrayCollection = new ArrayCollection();
 
@@ -84,7 +89,7 @@ package com.iblsoft.flexiweather.ogc.managers
 			}
 			return null;
 		}
-		
+
 		public function getMaxExtentForCRS(crs: String): BBox
 		{
 			var allProjs: ArrayCollection = getAllProjections;
@@ -115,6 +120,8 @@ package com.iblsoft.flexiweather.ogc.managers
 				addProj4Projection(projection);
 			}
 //			ArrayUtils.unionArrays(ma_areas.source, ma_parsedAreas.source, compareProjections);
+
+			dispatchEvent(new Event(PROJECTIONS_UPDATED));
 		}
 
 		public function addProjection(projection: ProjectionConfiguration): void
