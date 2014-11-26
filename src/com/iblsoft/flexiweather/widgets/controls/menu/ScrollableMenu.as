@@ -527,7 +527,7 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 
 		override public function set dataProvider(value:Object):void
 		{
-			trace("Scrollable menu dataProvider: value: " + value);
+//			trace("Scrollable menu dataProvider: value: " + value);
 
 			super.dataProvider = value;
 
