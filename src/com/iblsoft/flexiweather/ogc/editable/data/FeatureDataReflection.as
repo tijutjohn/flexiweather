@@ -324,17 +324,20 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			if (parentFeatureData.forceViewBBoxClipping)
 			{
 				var clipRect: Rectangle = parentFeatureData.clippingRectangle;
-				var margin: int = -15;
-				var rightMargin: int = 15;
+				if (clipRect)
+				{
+					var margin: int = -15;
+					var rightMargin: int = 15;
 
-				var left: int = clipRect.left + margin;
-				var right: int = clipRect.right + rightMargin;
-				var top: int = clipRect.top + margin;
-				var bottom: int = clipRect.bottom + rightMargin;
+					var left: int = clipRect.left + margin;
+					var right: int = clipRect.right + rightMargin;
+					var top: int = clipRect.top + margin;
+					var bottom: int = clipRect.bottom + rightMargin;
 
-				var clipPolygon: Array = [new Point(left,top), new Point(right,top), new Point(right, bottom), new Point(left, bottom)];
+					var clipPolygon: Array = [new Point(left,top), new Point(right,top), new Point(right, bottom), new Point(left, bottom)];
 
-				points = parentFeatureData.featureSplitter.polygonClipppingSutherlandHodgman(points, clipPolygon, FeatureDataPoint);
+					points = parentFeatureData.featureSplitter.polygonClipppingSutherlandHodgman(points, clipPolygon, FeatureDataPoint);
+				}
 			}
 			return points;
 		}
