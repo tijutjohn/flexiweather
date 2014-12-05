@@ -2368,6 +2368,7 @@ import flash.utils.Dictionary;
 import flash.utils.Timer;
 
 import mx.controls.Alert;
+import mx.logging.Log;
 
 class LayerSerializationWrapper implements Serializable
 {
@@ -2385,6 +2386,7 @@ class LayerSerializationWrapper implements Serializable
 			var config: ILayerConfiguration = LayerConfigurationManager.getInstance().getLayerConfigurationByLabel(s_layerType);
 			if (config == null)
 			{
+				Log.getLogger("Map").info("Can not recreate layer: " + s_layerName);
 				Alert.show("Can not recreate layer: " + s_layerName, "Load Map Error", Alert.OK);
 			} else {
 				m_layer = config.createInteractiveLayer(m_iw);

@@ -6,6 +6,6 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 	{
 		function cancel(): void;
 		function destroy(): void;
-		function updateWMSData(b_forceUpdate: Boolean, viewProperties: IViewProperties, forcedLayerWidth: Number, forcedLayerHeight: Number, printQuality: String): void
+		function updateWMSData(b_forceUpdate: Boolean, viewProperties: IViewProperties, forcedLayerWidth: Number, forcedLayerHeight: Number, printQuality: String, b_animationMode: Boolean = false): void
 	}
 }
