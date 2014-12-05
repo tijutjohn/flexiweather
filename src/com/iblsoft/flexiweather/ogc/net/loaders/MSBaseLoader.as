@@ -21,8 +21,9 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 	import com.iblsoft.flexiweather.utils.DebugUtils;
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
+import com.iblsoft.ria.OnlineWeatherConfiguration;
 
-	import flash.display.Bitmap;
+import flash.display.Bitmap;
 	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
@@ -105,12 +106,14 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 		 * @param b_forceUpdate if TRUE, data is forced to load even if they are cached
 		 *
 		 */
-		public function updateWMSData(b_forceUpdate: Boolean, viewProperties: IViewProperties, forcedLayerWidth: Number, forcedLayerHeight: Number, printQuality: String): void
+		public function updateWMSData(b_forceUpdate: Boolean, viewProperties: IViewProperties, forcedLayerWidth: Number, forcedLayerHeight: Number, printQuality: String, b_animationMode: Boolean = false): void
 		{
 			m_wmsViewProperties = viewProperties as WMSViewProperties;
 
-//			trace("\nupdateWMSData: " + m_wmsViewProperties.toString());
-			if (isSameData(m_wmsViewProperties, m_previousWmsViewProperties))
+			trace("\nupdateWMSData: " + m_wmsViewProperties.toString());
+
+			m_layer.container.interactiveLayerMap
+			if (!b_animationMode && isSameData(m_wmsViewProperties, m_previousWmsViewProperties))
 			{
 				trace("Same WMS Data request in short time, does not load anything");
 				return;
@@ -156,11 +159,16 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 		}
 		private function isSameData(wmsViewProperties: WMSViewProperties, previousWmsViewProperties: WMSViewProperties): Boolean
 		{
+			var sameTimeInterval: int = OnlineWeatherConfiguration.SAME_REQUEST_TIME_INTERVAL;
+
+			if (sameTimeInterval == 0)
+				return false;
+
 			if (previousWmsViewProperties)
 			{
 				var timeNow: Number = getTimer();
 				var timeDiff: Number = timeNow - m_previousWmsViewPropertiesTime;
-				if (timeDiff < 1000)
+				if (timeDiff < sameTimeInterval)
 				{
 					//will check dimensions
 					if (previousWmsViewProperties.equals(wmsViewProperties))

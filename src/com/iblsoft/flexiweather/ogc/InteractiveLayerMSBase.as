@@ -389,7 +389,7 @@ package com.iblsoft.flexiweather.ogc
 			if (!preloading)
 			{
 				setPreloadingStatus(true);
-				_preloader.updateWMSData(true, wmsViewProperties, forcedLayerWidth, forcedLayerHeight, printQuality);
+				_preloader.updateWMSData(true, wmsViewProperties, forcedLayerWidth, forcedLayerHeight, printQuality, mb_animationModeEnabled);
 			} else {
 				ma_preloadingBuffer.push(wmsViewProperties);
 			}
@@ -774,8 +774,11 @@ package com.iblsoft.flexiweather.ogc
 			return toString() + "\n" + m_cache.debugCache();
 		}
 
+		private var mb_animationModeEnabled: Boolean;
 		public function setAnimationModeEnable(value: Boolean): void
 		{
+			mb_animationModeEnabled = value;
+
 			if (m_cache)
 				m_cache.setAnimationModeEnable(value);
 			else
@@ -825,7 +828,7 @@ package com.iblsoft.flexiweather.ogc
 					}
 
 					//here is problem that m_currentWMSViewProperties has crs ESRI:102021 and viewBBox from CRS:84
-					_loader.updateWMSData(b_forceUpdate, m_currentWMSViewProperties, forcedLayerWidth, forcedLayerHeight, printQuality);
+					_loader.updateWMSData(b_forceUpdate, m_currentWMSViewProperties, forcedLayerWidth, forcedLayerHeight, printQuality, mb_animationModeEnabled);
 				}
 			}
 		}
@@ -1890,7 +1893,7 @@ package com.iblsoft.flexiweather.ogc
 
 		public function synchroniseWith(s_variableId: String, s_value: Object): String
 		{
-			setStatus(InteractiveDataLayer.STATE_EMPTY);
+
 
 			var sSynchronizeWithResponse: String;
 			if (isPreloadedWMSDimensionValue(s_variableId, s_value))
@@ -1919,6 +1922,7 @@ package com.iblsoft.flexiweather.ogc
 				}
 				else
 				{
+					setStatus(InteractiveDataLayer.STATE_EMPTY);
 //					setStatus(InteractiveDataLayer.STATE_DATA_LOADED);
 				}
 				debug("synchroniseWith ["+s_variableId+"]/"+s_value + " synchronized: " + sSynchronizeWithResponse);
@@ -2177,7 +2181,7 @@ package com.iblsoft.flexiweather.ogc
 		protected function debug(str: String): void
 		{
 //			LoggingUtils.dispatchLogEvent(this, "MSBase: " + str);
-//			trace("MSBase: ["+this+"] " + str);
+			trace("MSBase: ["+this+"] " + str);
 		}
 
 		private var _configurationChanged: Boolean;

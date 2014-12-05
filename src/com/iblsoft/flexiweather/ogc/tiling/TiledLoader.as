@@ -96,7 +96,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 				_tilesProvider.cancel();
 		}
 
-		public function updateWMSData(b_forceUpdate: Boolean, viewProperties: IViewProperties, forcedLayerWidth: Number, forcedLayerHeight: Number, printQuality: String): void
+		public function updateWMSData(b_forceUpdate: Boolean, viewProperties: IViewProperties, forcedLayerWidth: Number, forcedLayerHeight: Number, printQuality: String, b_animationMode: Boolean = false): void
 		{
 			var tiledViewProperties: TiledViewProperties = viewProperties as TiledViewProperties;
 			//store tiled view properties for later use
