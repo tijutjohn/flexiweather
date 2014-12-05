@@ -26,8 +26,10 @@ package com.iblsoft.flexiweather
 		 */
 		public static var USE_KML_BITMAP_PANNING: Boolean = false;
 
-		public function FlexiWeatherConfiguration()
-		{
-		}
+		/**
+		 * Time interval in miliseconds for checking if 2 requests are same when called in "SAME_REQUEST_TIME_INTERVAL" miliseconds.
+		 */
+		public static var SAME_REQUEST_TIME_INTERVAL: int = 1000;
+
 	}
 }
