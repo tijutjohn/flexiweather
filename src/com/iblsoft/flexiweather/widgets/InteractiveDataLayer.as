@@ -8,10 +8,10 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.ExceptionUtils;
 	import com.iblsoft.flexiweather.ogc.net.loaders.WMSImageLoader;
 	import com.iblsoft.flexiweather.utils.LoggingUtils;
-	
+
 	import flash.events.Event;
 	import flash.events.ProgressEvent;
-	
+
 	import mx.events.DynamicEvent;
 
 	[Event(name = "loadingStarted", type = "com.iblsoft.flexiweather.events.InteractiveLayerEvent")]
@@ -172,21 +172,21 @@ package com.iblsoft.flexiweather.widgets
 		override protected function initializeLayerAfterAddToStage(): void
 		{
 			super.initializeLayerAfterAddToStage();
-			
+
 			initializeLayerProperties();
 		}
-		
+
 		private function initializeLayerProperties(): void
 		{
 			setStatus(STATE_EMPTY);
-			
+
 			m_loader = new WMSImageLoader();
-			
+
 			m_loader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onDataLoaded);
 			m_loader.addEventListener(ProgressEvent.PROGRESS, onDataProgress);
 			m_loader.addEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onDataLoadFailed);
 		}
-		
+
 		override protected function initializeLayer(): void
 		{
 			super.initializeLayer();
@@ -225,22 +225,22 @@ package com.iblsoft.flexiweather.widgets
 			_invalidateDataForceUpdateFlag = _invalidateDataForceUpdateFlag || b_forceUpdate;
 			invalidateProperties();
 		}
-		
+
 		private var m_suspendDataUpdating: Boolean;
 		protected var m_suspendDataUpdatingChanged: Boolean;
-		
+
 		public function get suspendDataUpdating(): Boolean
 		{
 			return m_suspendDataUpdating;
 		}
-		
+
 		/**
-		 * If there are lot of data invalidation and you do not want to update data and load them, set suspendDataUpdating = true. 
+		 * If there are lot of data invalidation and you do not want to update data and load them, set suspendDataUpdating = true.
 		 * After suspendDataUpdating set to false if layer data was invalidated, layer will update its data
-		 * 
+		 *
 		 * @param value
-		 * 
-		 */		
+		 *
+		 */
 		public function set suspendDataUpdating(value: Boolean): void
 		{
 			if (value != m_suspendDataUpdating)
@@ -291,8 +291,8 @@ package com.iblsoft.flexiweather.widgets
 			{
 				a = STATE_DATA_LOADED
 			}
-			
-//			trace("\t\tLayer status = " + newStatus + " for ["+this+"] ");
+
+//			trace("\t\tLayer status = " + newStatus + " for ["+name+"] ");
 			_status = newStatus;
 			dispatchEvent(new Event(STATUS_CHANGED));
 		}
@@ -332,7 +332,7 @@ package com.iblsoft.flexiweather.widgets
 			event.interactiveLayer = this;
 			dispatchEvent(event);
 		}
-		
+
 		/**
 		 * Dispatch <code>InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE</code> event. If you need to dispatch more properties inside event, override this method in your class.
 		 *
@@ -404,7 +404,7 @@ package com.iblsoft.flexiweather.widgets
 
 		private var mb_preloading: Boolean;
 		protected var ma_preloadingBuffer: Array;
-		
+
 		public function get preloading(): Boolean
 		{
 			return mb_preloading;
@@ -413,7 +413,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			mb_preloading = value;
 		}
-		
+
 		public function get dataLoader(): WMSImageLoader
 		{
 			return m_loader;
