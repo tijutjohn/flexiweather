@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.ogc.net.loaders
 {
-	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
+import com.iblsoft.flexiweather.FlexiWeatherConfiguration;
+import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerProgressEvent;
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderErrorEvent;
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
@@ -21,7 +22,6 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 	import com.iblsoft.flexiweather.utils.DebugUtils;
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
-import com.iblsoft.ria.OnlineWeatherConfiguration;
 
 import flash.display.Bitmap;
 	import flash.display.DisplayObject;
@@ -159,7 +159,7 @@ import flash.display.Bitmap;
 		}
 		private function isSameData(wmsViewProperties: WMSViewProperties, previousWmsViewProperties: WMSViewProperties): Boolean
 		{
-			var sameTimeInterval: int = OnlineWeatherConfiguration.SAME_REQUEST_TIME_INTERVAL;
+			var sameTimeInterval: int = FlexiWeatherConfiguration.SAME_REQUEST_TIME_INTERVAL;
 
 			if (sameTimeInterval == 0)
 				return false;
