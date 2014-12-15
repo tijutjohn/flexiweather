@@ -1341,6 +1341,7 @@ package com.iblsoft.flexiweather.ogc
 			label.validateNow();
 			//FIXME FIX for legends text height
 			labelHeight = label.measuredHeight;
+			label.setStyle('color', getStyle('legendColor'));
 			label.setStyle('textAlign', labelAlign);
 			//add legend image
 			var image: InteractiveLayerLegendImage;

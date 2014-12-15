@@ -122,7 +122,10 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 			var item:IMenuBarItemRenderer = menuBarItems[index];
 
 			var mdp:Object = item.data;
-			var menu:ScrollableArrowMenu = menus[index];
+			var menu:ScrollableArrowMenu;
+
+			if (menus.length > index || (menus[index] is ScrollableArrowMenu))
+				menu = menus[index] as ScrollableArrowMenu;
 
 			if (menu == null)
 			{

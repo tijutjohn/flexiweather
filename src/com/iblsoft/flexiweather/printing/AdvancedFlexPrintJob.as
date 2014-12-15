@@ -1,3 +1,13 @@
+/***********************************************************************************************
+ *
+ *	Created:	12.04.2014
+ *	Authors:	Franto Kormanak
+ *
+ *	Copyright (c) 2010-2014, IBL Software Engineering spol. s r. o., <escrow@iblsoft.com>.
+ *	All rights reserved. Unauthorised use, modification or redistribution is prohibited.
+ *
+ ***********************************************************************************************/
+
 package com.iblsoft.flexiweather.printing
 {
 

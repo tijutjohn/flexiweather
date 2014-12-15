@@ -4,18 +4,20 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.kml.data.KMZFile;
 	import com.iblsoft.flexiweather.proj.Coord;
-	
+
 	import flash.display.Graphics;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.geom.Rectangle;
-	
+
 	import mx.core.UIComponent;
 	import mx.effects.Effect;
 	import mx.events.EffectEvent;
 	import mx.events.FlexEvent;
-	
+
 	[Event(name = "layerInitialized", type = "com.iblsoft.flexiweather.events.InteractiveLayerEvent")]
+
+	[Style(name="legendColor", inherit="yes", type="uint")]
 	public class InteractiveLayer extends UIComponent
 	{
 		private static var layerUID: int = 0;
@@ -23,7 +25,7 @@ package com.iblsoft.flexiweather.widgets
 
 
 		private var _container: InteractiveWidget;
-		
+
 		public function get container():InteractiveWidget
 		{
 			return _container;
@@ -38,7 +40,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			return m_layerID;
 		}
-		
+
 		protected var m_layerWasDestroyed: Boolean;
 		protected var _type: String;
 
@@ -50,20 +52,20 @@ package com.iblsoft.flexiweather.widgets
 		{
 			return _type;
 		}
-		
-		
-		
+
+
+
 		private var mb_dynamicPartInvalid: Boolean = false;
 		private var mi_zOrder: int = 0;
 		protected var m_legendCallBack: Function;
 		protected var m_legendGroup: InteractiveLayerLegendGroup;
 		protected var m_legendLabelAlign: String;
-		
+
 		[Bindable]
 		public var layerName: String;
 		private var _forcedLayerWidth: int = 0;
 
-		
+
 		public function get forcedLayerWidth(): int
 		{
 			return _forcedLayerWidth;
@@ -99,7 +101,7 @@ package com.iblsoft.flexiweather.widgets
 				dispatchEvent(new InteractiveLayerEvent(InteractiveLayerEvent.ALPHA_CHANGED, true));
 			}
 		}
-		
+
 		[Bindable (event="visibilityPropertyChanged")]
 		override public function get visible(): Boolean
 		{
@@ -111,42 +113,42 @@ package com.iblsoft.flexiweather.widgets
 			if (super.visible != b_visible)
 			{
 				var effect: Effect;
-				
+
 				if (b_visible) {
 					effect = getStyle('showEffect');
 				} else {
 					effect = getStyle('hideEffect');
 				}
-				
+
 				if (effect)
 				{
 					effect.addEventListener(EffectEvent.EFFECT_END, onVisibleEffectEnd);
 					effect.addEventListener(EffectEvent.EFFECT_START, onVisibleEffectStart);
 				}
 				super.visible = b_visible;
-				
+
 //				var ile: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.VISIBILITY_CHANGED);
 //				dispatchEvent(ile);
 //				if (container)
 //					container.onLayerVisibilityChanged(this);
-				
+
 				if (!effect)
 					callLater(visibilityChanged);
-				
+
 //				dispatchEvent(new Event("visibilityPropertyChanged"));
 			}
 		}
-		
+
 		private function onVisibleEffectStart(event: EffectEvent): void
 		{
-			
+
 		}
-		
+
 		private function onVisibleEffectEnd(event: EffectEvent): void
 		{
 			visibilityChanged();
 		}
-		
+
 		private function visibilityChanged(): void
 		{
 			var ile: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.VISIBILITY_CHANGED);
@@ -154,35 +156,35 @@ package com.iblsoft.flexiweather.widgets
 			if (container)
 				container.onLayerVisibilityChanged(this);
 		}
-		
+
 		protected var _layerInitialized: Boolean;
-		
+
 		public function get layerInitialized(): Boolean
 		{
 			return _layerInitialized;
 		}
 
-		
+
 		/**
-		 * One of InteractiveLayerPrintQuality constants 
-		 */		
+		 * One of InteractiveLayerPrintQuality constants
+		 */
 		private var _printQuality: String;
-		
+
 		public function get printQuality():String
 		{
 			return _printQuality;
 		}
-		
+
 		public function set printQuality(value:String):void
 		{
 			_printQuality = value;
 		}
-		
+
 		/**
-		 * Return true of layer supports vector data (can load them and display them) 
-		 * @return 
-		 * 
-		 */		
+		 * Return true of layer supports vector data (can load them and display them)
+		 * @return
+		 *
+		 */
 		public function get supportsVectorData(): Boolean
 		{
 			return false;
@@ -190,7 +192,7 @@ package com.iblsoft.flexiweather.widgets
 		public function InteractiveLayer(container: InteractiveWidget = null)
 		{
 			m_layerID = layerUID++;
-			
+
 			super();
 			mouseEnabled = false;
 			mouseFocusEnabled = false;
@@ -204,13 +206,13 @@ package com.iblsoft.flexiweather.widgets
 			addEventListener(Event.ADDED_TO_STAGE, onLayerAddedToStage);
 		}
 
-		
+
 		private function onLayerAddedToStage(event: Event): void
 		{
 			removeEventListener(Event.ADDED_TO_STAGE, onLayerAddedToStage);
 			initializeLayerAfterAddToStage();
 		}
-		
+
 		private function onLayerCreationComplete(event: FlexEvent): void
 		{
 			removeEventListener(FlexEvent.CREATION_COMPLETE, onLayerCreationComplete);
@@ -225,7 +227,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			callLater(delayedInitializeLayerAfterAddToStage);
 		}
-		
+
 		protected function delayedInitializeLayerAfterAddToStage(): void
 		{
 			if (!_layerInitialized)
@@ -233,9 +235,9 @@ package com.iblsoft.flexiweather.widgets
 				_layerInitialized = true;
 				notifyLayerInitialized();
 			}
-			
+
 		}
-		
+
 		/**
 		 * Override this function and add functionality, which needs to be done when layer is created
 		 *
@@ -305,7 +307,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			_layerInitialized = false;
 			m_layerWasDestroyed = true;
-			
+
 			addEventListener(Event.ADDED_TO_STAGE, onLayerAddedToStage, false, 0, true);
 		}
 
@@ -354,7 +356,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			return false;
 		}
-		
+
 		public function onMouseUp(event: MouseEvent): Boolean
 		{
 			return false;
@@ -400,7 +402,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			return false;
 		}
-		
+
 		public function hasData(): Boolean
 		{
 			return false;
@@ -485,13 +487,13 @@ package com.iblsoft.flexiweather.widgets
 			updatePropertyForCloneLayer(layer);
 			return layer;
 		}
-		
+
 		/**
-		 * You can update all properties, which needs to be updated when clone InteractiveLayer. 
-		 * Please override this function in all layers which extend InteractiveLayer  
+		 * You can update all properties, which needs to be updated when clone InteractiveLayer.
+		 * Please override this function in all layers which extend InteractiveLayer
 		 * @param layer
-		 * 
-		 */		
+		 *
+		 */
 		protected function updatePropertyForCloneLayer(layer: InteractiveLayer): void
 		{
 			layer.id = id;
