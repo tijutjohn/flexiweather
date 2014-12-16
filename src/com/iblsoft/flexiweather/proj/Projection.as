@@ -3,12 +3,12 @@ package com.iblsoft.flexiweather.proj
 	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.Version;
 	import com.iblsoft.flexiweather.ogc.configuration.ProjectionConfiguration;
-	
+
 	import flash.geom.Point;
 	import flash.utils.Dictionary;
-	
+
 	import mx.logging.Log;
-	
+
 	import org.openscales.proj4as.ProjConstants;
 	import org.openscales.proj4as.ProjPoint;
 	import org.openscales.proj4as.ProjProjection;
@@ -17,24 +17,24 @@ package com.iblsoft.flexiweather.proj
 	{
 		public static const CRS_GEOGRAPHIC: String = "CRS:84";
 		public static const CRS_EPSG_GEOGRAPHIC: String = "EPSG:4326";
-		
+
 		public static var AVOID_HORIZONTAL_WRAPPING: Boolean;
-		
+
 		protected var m_proj: ProjProjection;
 		protected var m_extentBBox: BBox;
 		protected var mb_wrapsHorizontally: Boolean;
 		protected static var m_cache: Dictionary = new Dictionary();
 		protected static var md_crsToDetails: Dictionary = new Dictionary();
-		
+
 		Projection.addCRSByProj4(
 				"CRS:84",
 				"+title=Geographic WGS84 +proj=longlat +ellps=WGS84 +datum=WGS84 +units=degrees",
 				new BBox(-180, -90, 180, 90), true);
 		Projection.addCRSByProj4(
-				"EPSG:4326", 
-				"+title=WGS 84 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +units=degrees", 
+				"EPSG:4326",
+				"+title=WGS 84 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +units=degrees",
 				new BBox(-180, -90, 180, 90), true);
-		
+
 //		Projection.setCRSExtentBBox(
 //				'EPSG:900913',
 //				new BBox(-20037508.34, -20037508.34, 20037508.34, 20037508.34), true);
@@ -69,9 +69,9 @@ package com.iblsoft.flexiweather.proj
 		{
 			if (crs == CRS_EPSG_GEOGRAPHIC && (version.equals(1,3,0) || !version.isLessThan(1,3,0)))
 				return true;
-			
+
 			return false;
-				
+
 		}
 		public static function isValidProjection(projection: Projection): Boolean
 		{
@@ -99,7 +99,7 @@ package com.iblsoft.flexiweather.proj
 		public static function getByCRS(s_crs: String): Projection
 		{
 			s_crs = updateCRS(s_crs);
-			
+
 			var prj: Projection;
 			if (s_crs in m_cache)
 			{
@@ -114,7 +114,7 @@ package com.iblsoft.flexiweather.proj
 				extentBBox = md_crsToDetails[s_crs].extentBBox;
 				b_wrapsHorizontally = md_crsToDetails[s_crs].b_wrapsHorizontally;
 			}
-			
+
 			if (!ProjProjection.defs[s_crs])
 			{
 				//WORKAROUND proj4s - if this crs is not in Proj4s library and it is PROJ4 crs, it will be added automatically
@@ -148,7 +148,7 @@ package com.iblsoft.flexiweather.proj
 			{
 				s_crs = (s_crs as String).replace(" ", "");
 			}
-			
+
 			return s_crs;
 		}
 		/**
@@ -174,7 +174,7 @@ package com.iblsoft.flexiweather.proj
 				s_crs: String, crsExtentBBox: BBox, b_crsWrapsHorizontally: Boolean = false): void
 		{
 			s_crs = updateCRS(s_crs);
-			
+
 			if (!(s_crs in md_crsToDetails))
 				md_crsToDetails[s_crs] = {};
 			md_crsToDetails[s_crs].extentBBox = crsExtentBBox;
@@ -192,28 +192,28 @@ package com.iblsoft.flexiweather.proj
 		{
 			if (!m_extentBBox || !m_extentBBox.isValid)
 				return coord;
-			
+
 			if (coord.x >= m_extentBBox.xMin && coord.x <= m_extentBBox.xMax)
 			{
 				return coord;
 			}
-			
+
 			var cx: Number = coord.x;
-			
+
 			if (cx < m_extentBBox.xMin)
 			{
 				cx += Math.ceil((m_extentBBox.xMin - cx) / m_extentBBox.width) * m_extentBBox.width;
 			}
-				
-				
+
+
 			cx = cx % m_extentBBox.width;
 			if (m_extentBBox.xMin < 0 && cx > m_extentBBox.xMax)
 				cx -= m_extentBBox.width;
-			
-				
+
+
 			if (cx != coord.x)
 				coord = new Coord(coord.crs, cx, coord.y);
-			
+
 			return coord;
 		}
 		/**
@@ -223,13 +223,18 @@ package com.iblsoft.flexiweather.proj
 		{
 			if (m_proj == null)
 				return null;
-			
+
 			var origPoint: ProjPoint = new ProjPoint(f_prjX, f_prjY);
-//			trace(" origPoint: " + origPoint);
 			var ptDest: ProjPoint = m_proj.inverse(origPoint);
-			if (m_proj.projParams.longZero && m_proj.projParams.longZero != 0)
+
+			/**
+			 * 	Attention: Proj4as library fix
+			 *  for ProjStere from Proj4s, which do not count with lon_0 parameter [FW-70]
+			 *
+			 */
+			if (m_proj.projParams.projName == 'stere' && m_proj.projParams.longZero && m_proj.projParams.longZero != 0)
 			{
-				ptDest.x += m_proj.projParams.longZero
+				ptDest.x += m_proj.projParams.longZero;
 				if (ptDest.x > ProjConstants.PI)
 				{
 					ptDest.x -= ProjConstants.PI * 2;
@@ -291,7 +296,11 @@ package com.iblsoft.flexiweather.proj
 				f_latitudeRad *= 180.0 / Math.PI;
 			}
 			try {
-				if (m_proj.projParams.longZero && m_proj.projParams.longZero != 0)
+				/**
+				 * Attention: Proj4as library fix for Stere projection, which does not count with lon_0 parameter
+				 *
+				 */
+				if (m_proj.projParams.projName == 'stere' && m_proj.projParams.longZero && m_proj.projParams.longZero != 0)
 				{
 					f_longitudeRad -= m_proj.projParams.longZero;
 				}
@@ -311,14 +320,14 @@ package com.iblsoft.flexiweather.proj
 		{
 			return laLoToPrjPt(laLoPtRad.x, laLoPtRad.y);
 		}
-		
+
 		/**
 		 * Alternative to laLoToPrjPt() accepting Coord object as the input.
-		 * 
+		 *
 		 * @param laLoCoord - lalo coord input
 		 * @return - Coord in this projection
-		 * 
-		 */		
+		 *
+		 */
 		public function laLoCoordToPrjCoord(laLoCoord: Coord): Coord
 		{
 			if (laLoCoord)
@@ -357,7 +366,7 @@ package com.iblsoft.flexiweather.proj
 		{
 			if (AVOID_HORIZONTAL_WRAPPING)
 				return false;
-			
+
 			return mb_wrapsHorizontally;
 		}
 
