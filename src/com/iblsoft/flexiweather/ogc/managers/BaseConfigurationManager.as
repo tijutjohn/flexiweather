@@ -1,7 +1,7 @@
 package com.iblsoft.flexiweather.ogc.managers
 {
 	import flash.events.EventDispatcher;
-	
+
 	import mx.utils.ObjectUtil;
 
 	public class BaseConfigurationManager extends EventDispatcher
@@ -10,7 +10,7 @@ package com.iblsoft.flexiweather.ogc.managers
 		protected var submenuPos: int = 0;
 
 		private var _latestMenuItemsList: XMLList;
-		
+
 		public function BaseConfigurationManager()
 		{
 		}
@@ -90,7 +90,9 @@ package com.iblsoft.flexiweather.ogc.managers
 			groupsArr = groupName.split('/');
 			var level: int = 0;
 			var position: int;
-			var currJoinedGroupName: String = ''
+			var currJoinedGroupName: String = '';
+			var folderType: String = 'folder';
+
 			for each (var currGroupName: String in groupsArr)
 			{
 				if (level == 0)
@@ -99,7 +101,7 @@ package com.iblsoft.flexiweather.ogc.managers
 					currJoinedGroupName += '/' + currGroupName
 				if (!groups[currJoinedGroupName])
 				{
-					groupParentXML = <menuitem label={currGroupName}/>
+					groupParentXML = <menuitem label={currGroupName} type={folderType}/>
 							;
 					groupObject = new Object();
 					groupObject.parent = groupParentXML;
@@ -135,7 +137,7 @@ package com.iblsoft.flexiweather.ogc.managers
 			}
 			return groupParentXML;
 		}
-		
-		
+
+
 	}
 }
