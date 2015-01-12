@@ -59,7 +59,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			_frameStep = 0;
 			if (data && data.dataProvider)
 			{
-				if (data.dataProvider[0] == null || data.dataProvider[1] == null)
+				if (data.dataProvider[0] == null || data.dataProvider[1] == null || data.dataProvider[0].data == null || data.dataProvider[1].data == null)
 					_frameStep = 0;
 				else
 					_frameStep = data.dataProvider[1].data - data.dataProvider[0].data;
