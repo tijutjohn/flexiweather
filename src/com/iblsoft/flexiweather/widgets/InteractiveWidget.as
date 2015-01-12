@@ -2671,8 +2671,8 @@ package com.iblsoft.flexiweather.widgets
 					var arcCoords: Array;
 					tempCoords = [];
 
-					if (projection.wrapsHorizontally) {
-						if (crossDateline(coordFrom, coordTo) || coordsFarThanExtentWidth(coordFrom, coordTo) )
+					if (true) { // FIXME: missing support for non-wrapped projections
+						if (projection.wrapsHorizontally && (crossDateline(coordFrom, coordTo) || coordsFarThanExtentWidth(coordFrom, coordTo)))
 						{
 							tempCoords = splitCoordsOnDateline(coordFrom, coordTo);
 
