@@ -2009,8 +2009,10 @@ package com.iblsoft.flexiweather.ogc
 
 		protected function onFeatureInfoLoadFailed(event: UniURLLoaderErrorEvent): void
 		{
-			m_featureInfoCallBack.call(null, String(event.result), this);
-			m_featureInfoCallBack = null;
+			if(m_featureInfoCallBack != null) {
+				m_featureInfoCallBack.call(null, String(event.result), this);
+				m_featureInfoCallBack = null;
+			}
 		}
 
 		public function get isReadyForSynchronisation(): Boolean
