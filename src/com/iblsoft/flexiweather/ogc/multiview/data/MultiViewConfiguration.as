@@ -82,13 +82,30 @@ package com.iblsoft.flexiweather.ogc.multiview.data
 			if (storage.isStoring())
 			{
 				if (_customData)
-					storage.serialize('custom-data', _customData);
+				{
+					try {
+						storage.serialize('custom-data', _customData);
+					} catch (e: Error) {
+						trace("ERROR: MultiViewConfiguration serialize saving of custom-data failed");
+					}
+				}
 			
 				if (_viewData)
-					storage.serialize('view-data', _viewData);
+				{
+					try {
+						storage.serialize('view-data', _viewData);
+					} catch (e: Error) {
+						trace("ERROR: MultiViewConfiguration serialize saving of view-data failed");
+					}
+				}
 				
-				if (legendsOrientation)
-					storage.serialize('legends-orientation', legendsOrientation);
+				if (legendsOrientation) {
+					try {					
+						storage.serialize('legends-orientation', legendsOrientation);
+					} catch (e: Error) {
+						trace("ERROR: MultiViewConfiguration serialize saving of legends-orientation failed");
+					}
+				}
 				
 				if (_synchronizators)
 				{
