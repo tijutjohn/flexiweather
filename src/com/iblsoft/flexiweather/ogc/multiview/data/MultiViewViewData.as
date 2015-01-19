@@ -31,21 +31,24 @@ package com.iblsoft.flexiweather.ogc.multiview.data
 				{
 					for each (var item: Object  in _dataProvider)
 					{
-						if (item is MultiViewDataProviderItem)
-							arr.push(item);
-						else {
-							var newItem: MultiViewDataProviderItem = new MultiViewDataProviderItem();
-							newItem.enabled = item.enabled;
-							newItem.label = item.label;
-							if (item.hasOwnProperty('level'))
-								newItem.level = item.level;
-							if (item.hasOwnProperty('run'))
-								newItem.run = item.run;
-							if (item.hasOwnProperty('name'))
-								newItem.name = item.name;
-							if (item.hasOwnProperty('fullPath'))
-								newItem.fullPath = item.fullPath;
-							arr.push(newItem);
+						if (item)
+						{
+							if (item is MultiViewDataProviderItem)
+								arr.push(item);
+							else {
+								var newItem: MultiViewDataProviderItem = new MultiViewDataProviderItem();
+								newItem.enabled = item.enabled;
+								newItem.label = item.label;
+								if (item.hasOwnProperty('level'))
+									newItem.level = item.level;
+								if (item.hasOwnProperty('run'))
+									newItem.run = item.run;
+								if (item.hasOwnProperty('name'))
+									newItem.name = item.name;
+								if (item.hasOwnProperty('fullPath'))
+									newItem.fullPath = item.fullPath;
+								arr.push(newItem);
+							}
 						}
 					}
 					
