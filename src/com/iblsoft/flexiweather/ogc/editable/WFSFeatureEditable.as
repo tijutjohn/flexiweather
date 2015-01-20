@@ -17,7 +17,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.utils.AnnotationBox;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
-
+	
 	import flash.display.DisplayObject;
 	import flash.display.Sprite;
 	import flash.events.KeyboardEvent;
@@ -25,7 +25,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	import flash.geom.Point;
 	import flash.ui.Keyboard;
 	import flash.utils.Dictionary;
-
+	
 	import mx.utils.ObjectUtil;
 
 	public class WFSFeatureEditable extends WFSFeatureBase implements IEditableItem, IHighlightableItem, ISelectableItem, IWFSFeatureWithReflection
@@ -635,7 +635,8 @@ package com.iblsoft.flexiweather.ogc.editable
 			if (m_points.length == 1)
 			{
 				graphics.beginFill(i_preferredColor);
-				graphics.drawRoundRect(m_points[0].x - 4, m_points[0].y - 4, 9, 9, 6, 6);
+				var point: Point = m_points.getPoint(0);
+				graphics.drawRoundRect(point.x - 4, point.y - 4, 9, 9, 6, 6);
 				graphics.endFill();
 			}
 			else
