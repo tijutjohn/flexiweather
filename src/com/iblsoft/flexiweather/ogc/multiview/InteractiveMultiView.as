@@ -1258,12 +1258,22 @@ package com.iblsoft.flexiweather.ogc.multiview
 						_globalFrameSynchronizator.synchronizeWidgets(_selectedInteractiveWidget, _interactiveWidgets.widgets);
 						return;
 					}
+					
+					var needToSynchronizeAnimationSettings: Boolean = changeCause == SynchronizationChangeType.ANIMATOR_SETTINGS_CHANGED;
+					if (needToSynchronizeAnimationSettings)
+					{
+						if (!synchronizator.isSynchronisingChangeType(changeCause))
+						{
+							_mapLayersPropertiesSynchronizator.synchronizeAnimationSettings(_selectedInteractiveWidget, _interactiveWidgets.widgets);
+							return;
+						}
+					}
+					
 					if (changeCause == SynchronizationChangeType.ALPHA_CHANGED ||
 						changeCause == SynchronizationChangeType.VISIBILITY_CHANGED ||
 						changeCause == SynchronizationChangeType.SYNCHRONIZE_LEVEL_CHANGED ||
 						changeCause == SynchronizationChangeType.SYNCHRONIZE_RUN_CHANGED ||
 						changeCause == SynchronizationChangeType.RUN_CHANGED ||
-						changeCause == SynchronizationChangeType.ANIMATOR_SETTINGS_CHANGED ||
 						changeCause == SynchronizationChangeType.LEVEL_CHANGED)
 					{
 						if (!synchronizator.isSynchronisingChangeType(changeCause))
