@@ -368,7 +368,10 @@ package com.iblsoft.flexiweather.ogc.managers
 				//TODO sameCollection takes to long
 				_timelineFramesChanged = !sameCollection(framesAC, _frames); 
 				if (_timelineFramesChanged)
+				{
 					_frames = framesAC;
+					notifyFramesChanged();
+				}
 			}
 			
 //			_cachedFrames = frames;
