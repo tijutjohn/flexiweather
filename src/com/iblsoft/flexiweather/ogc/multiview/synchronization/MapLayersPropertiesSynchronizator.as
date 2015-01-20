@@ -110,5 +110,30 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			
 			checkIfSynchronizationIsDone();
 		}
+		
+		public function synchronizeAnimationSettings(synchronizeFromWidget: InteractiveWidget, widgetsForSynchronisation: ArrayCollection, preferredSelectedIndex: int = -1): void
+		{
+			var widgetsForSynchronizing: Array = [];
+			
+			var ilm: InteractiveLayerMap = synchronizeFromWidget.interactiveLayerMap;
+			var ilmTimelineConfiguration: MapTimelineConfiguration = ilm.timelineConfiguration;
+			
+			var currLayerWmsConfig: WMSLayerConfiguration;
+			
+			for each (var widget: InteractiveWidget in widgetsForSynchronisation)
+			{
+				if (widget.id != synchronizeFromWidget.id)
+				{
+					var currILM: InteractiveLayerMap = widget.interactiveLayerMap;
+					var currILMTimelineConfiguration: MapTimelineConfiguration = currILM.timelineConfiguration;
+					
+					//synchronize animator setting
+					ilmTimelineConfiguration.copyConfiguration(currILMTimelineConfiguration);
+				}
+			}
+			
+			
+			checkIfSynchronizationIsDone();
+		}
 	}
 }
