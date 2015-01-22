@@ -170,7 +170,7 @@ package com.iblsoft.flexiweather.widgets
 		}
 		public function addLayer(l: InteractiveLayer): void
 		{
-//			debug("ILLegend addLayer: " + l.name);
+			debug("\n\tILLegend addLayer: " + l.name + " id: " + l.layerID);
 			m_layers.addItemAt(l, 0);
 			l.addEventListener(InteractiveLayerEvent.VISIBILITY_EFFECT_FINISHED, onLayerVisibilityChanged);
 			l.addEventListener(GetCapabilitiesEvent.CAPABILITIES_RECEIVED, onLayerGetCapabilitiesReceived);
@@ -181,6 +181,7 @@ package com.iblsoft.flexiweather.widgets
 			var i: int = m_layers.getItemIndex(l);
 			if (i >= 0)
 			{
+				debug("\n\tILLegend removeLayer: " + l.name + " id: " + l.layerID);
 //				unbindSubLayer(l);
 				l.removeEventListener(InteractiveLayerEvent.VISIBILITY_EFFECT_FINISHED, onLayerVisibilityChanged);
 				l.removeEventListener(GetCapabilitiesEvent.CAPABILITIES_RECEIVED, onLayerGetCapabilitiesReceived);
@@ -189,7 +190,7 @@ package com.iblsoft.flexiweather.widgets
 				var legendGroup: InteractiveLayerLegendGroup = getGroupFromDictionary(l);
 				if (!legendGroup)
 				{
-					debug("Does not find legendGroup in removeLayer for layer: " + l.name);
+					debug("\tDoes not find legendGroup in removeLayer for layer: " + l.name + " id: " + l.layerID);
 				} else {
 					l.removeLegend(legendGroup);
 					removeCanvasFromDictionary(l);
@@ -265,6 +266,7 @@ package com.iblsoft.flexiweather.widgets
 
 		public function removeAllLayers(): void
 		{
+			debug("\n remove all layers (legends)");
 //			for each(var l: InteractiveLayer in m_layers)
 //				unbindSubLayer(l);
 			m_layers.removeAll();
@@ -278,6 +280,10 @@ package com.iblsoft.flexiweather.widgets
 			ile.area = legendsBkgRectangle;
 			dispatchEvent(ile);
 		}
+		
+		/**
+		 * Dictionary, which holds parent for legends, which are already loding 
+		 */		
 		private var m_groupDictionary: Dictionary = new Dictionary();
 		private var _legends: Array = new Array();
 
@@ -311,6 +317,7 @@ package com.iblsoft.flexiweather.widgets
 		}
 		private function removeCanvasFromDictionary(layer: InteractiveLayer): void
 		{
+			debug("\t\tremoveCanvasFromDictionary: " + layer.name);
 			var group: InteractiveLayerLegendGroup = m_groupDictionary[layer];
 			removeLegendGroupListeners(group);
 			delete m_groupDictionary[layer];
@@ -323,7 +330,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (!group)
 				debug("addCanvasToDictionary cnv IS NULL ");
-			debug("\t\t InteractiveLayerLegends addCanvasToDictionary [" + layer.name + "/" + layer + "]: " + group);
+			debug("\t\taddCanvasToDictionary [" + layer.name+"]: " + group);
 			m_groupDictionary[layer] = group;
 			addLegendGroupListeners(group);
 //			_legends[layer] = new Rectangle(cnv.x, cnv.y, cnv.width, cnv.height);
@@ -388,6 +395,7 @@ package com.iblsoft.flexiweather.widgets
 					group = getGroupFromDictionary(l);
 					if (group)
 					{
+						debug("loadLegends1: Legend for layer: " + l.name + " id: " + l.layerID + " is already loading");	
 						_tmpExistedCanvases++;
 						_tempCanvases.push(group);
 					}
@@ -444,6 +452,7 @@ package com.iblsoft.flexiweather.widgets
 					}
 					else
 					{
+						debug("loadLegends2: Legend for layer: " + l.name + " id: " + l.layerID + " is already loading");
 						//already rendered
 //						_tmpLegendsToBeRendered--;
 					}
@@ -491,17 +500,17 @@ package com.iblsoft.flexiweather.widgets
 			var group: InteractiveLayerLegendGroup;
 			for each (l in m_layers)
 			{
-//				debug("LEGENDS checkIfAllLegendsAreLoaded l: " + l.name + " hasLegend: " + l.hasLegend() + " visible: " + l.visible);
+				debug("LEGENDS checkIfAllLegendsAreLoaded l: " + l.name + " id: " + l.layerID + " hasLegend: " + l.hasLegend() + " visible: " + l.visible);
 				if (l.hasLegend() && l.visible)
 				{
 					group = getGroupFromDictionary(l);
 					if (!group)
 					{
-//						debug("\t LEGENDS checkIfAllLegendsAreLoaded NEEDS LOADING l: " + l.name);
+						debug("\t LEGENDS checkIfAllLegendsAreLoaded NEEDS LOADING l: " + l.name  + " id: " + l.layerID);
 						//it needs to be loaded
 						needLoading = true;
 					} else {
-						debug("LEGENDS checkIfAllLegendsAreLoaded l: " + l.name + " DO NOT HAVE GROUP for layer");
+						debug("LEGENDS checkIfAllLegendsAreLoaded l: " + l.name + " id: " + l.layerID + " HAVE GROUP for layer");
 					}
 				}
 			}
