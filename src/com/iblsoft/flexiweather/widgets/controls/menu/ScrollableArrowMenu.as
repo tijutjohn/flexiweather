@@ -144,6 +144,7 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 		public function ScrollableArrowMenu()
 		{
 			super();
+			this.verticalScrollPosition = 0;
 		}
 
 		/*
