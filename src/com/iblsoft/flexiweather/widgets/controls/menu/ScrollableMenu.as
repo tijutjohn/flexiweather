@@ -17,14 +17,16 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 	import flash.geom.Point;
 	import flash.sampler.getInvocationCount;
 	import flash.ui.Keyboard;
+	import flash.utils.Dictionary;
 	import flash.utils.clearInterval;
-
+	
 	import mx.collections.ICollectionView;
 	import mx.controls.Menu;
 	import mx.controls.listClasses.IListItemRenderer;
 	import mx.controls.menuClasses.IMenuItemRenderer;
 	import mx.core.Application;
 	import mx.core.EdgeMetrics;
+	import mx.core.IFactory;
 	import mx.core.ScrollPolicy;
 	import mx.core.mx_internal;
 	import mx.events.MenuEvent;
@@ -231,6 +233,7 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 			{
 				verticalScrollBar.removeEventListener(ScrollEvent.SCROLL, onScroll);
 			}
+			verticalScrollPosition = 0;
 			super.hide();
 		}
 
@@ -358,6 +361,9 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 			// When a sub menu is opened, the openSubMenu function, from the Menu class, receives
 			// a MenuItemRenderer as input. The item renderer does not have provision for a scrollbar
 			// so, we need to take that into account here if we want the sub-menu to open past the scroll bar.
+			
+			verticalScrollPosition = 0;
+			
 			if (parentMenu != null)
 			{
 				with (parentMenu)
@@ -871,6 +877,60 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 		protected function showNext(): void
 		{
 
+		}
+		
+		override public function createItemRenderer(data:Object):IListItemRenderer
+		{
+			var factory:IFactory;
+			
+			// get the factory for the data
+			factory = getItemRendererFactory(data);
+			if (!factory)
+			{
+				if (data == null)
+					factory = nullItemRenderer;
+				if (!factory)
+					factory = itemRenderer;
+			}
+			
+			var renderer:IListItemRenderer;
+			
+			// if it is the default column factory, see if
+			// the freeItemRenderers table has a free one
+			if (factory == itemRenderer)
+			{
+				if (freeItemRenderers && freeItemRenderers.length)
+				{
+					renderer = freeItemRenderers.pop();
+					if (freeItemRenderersByFactory[factory] && freeItemRenderersByFactory[factory][renderer])
+						delete freeItemRenderersByFactory[factory][renderer];
+				}
+			}
+			else if (freeItemRenderersByFactory)
+			{
+				// other re-usable renderers are in the FactoryMap
+				var d:Dictionary = freeItemRenderersByFactory[factory];
+				if (d)
+				{
+					for (var p:* in d)
+					{
+						renderer = IListItemRenderer(p);
+						if (d[p])
+							delete d[p];
+						break;
+					}
+				}
+			}
+			
+			if (!renderer)
+			{
+				renderer = factory.newInstance();
+				renderer.styleName = this;
+				factoryMap[renderer] = factory;
+			}
+			
+			renderer.owner = this;
+			return renderer;
 		}
 	}
 }
