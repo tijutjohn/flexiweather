@@ -129,8 +129,16 @@ package com.iblsoft.flexiweather.ogc.managers
 			_levels = new ArrayCollection();
 		}
 		
-		public function reinitialize(): void
+		public function resetGlobalVariables(): void
 		{
+			run = null;
+			frame = null;
+			level = null;
+			
+		}
+		public function reinitializeGlobalVariables(): void
+		{
+			debug("reinitializeGlobalVariables");
 			if (_frames)
 				_frames.removeAll();
 			if (_runs)
@@ -185,6 +193,7 @@ package com.iblsoft.flexiweather.ogc.managers
 
 		private function checkGlobalVariableChange(): void
 		{
+			debug("checkGlobalVariableChange");
 			var bFramesExist: Boolean = true;
 			var bRunsExist: Boolean = true;
 			var bLevelsExist: Boolean = true;
@@ -243,9 +252,87 @@ package com.iblsoft.flexiweather.ogc.managers
 			notifySelectedFrameChanged(_interactiveLayerMap.frame);
 			notifySelectedLevelChanged(_interactiveLayerMap.level);
 		}
+		
+		/**
+		 * Check if value of global variable is in current list of values for given global variable.
+		 * This check can be done, when layers in map are changed.
+		 *  
+		 * @param globalVariable
+		 * @param value
+		 * @return 
+		 * 
+		 */		
+		public function isGlobalVariableValid(globalVariable: String, value: Object): Boolean
+		{
+			switch (globalVariable)
+			{
+				case GlobalVariable.LEVEL:
+				{
+					var levelToCheck: String = value as String;
+					if (levels && levels.length > 0)
+					{
+						//check if level is inside levels
+						for each (var currLevel: Object in levels)
+						{
+							if (currLevel is GlobalVariableValue)
+							{
+								if (((currLevel as GlobalVariableValue).value as String) == levelToCheck)
+									return true;
+							} else if (currLevel is String) {
+								if ((currLevel as String) == levelToCheck)
+									return true;
+							}
+						}
+					}
+					break;
+				}
+				case GlobalVariable.RUN:
+				{
+					var runToCheck: Date = value as Date;
+					if (runs && runs.length > 0)
+					{
+						//check if level is inside levels
+						for each (var currRun: Object in runs)
+						{
+							if (currRun is GlobalVariableValue)
+							{
+								if (((currRun as GlobalVariableValue).value as Date) == runToCheck)
+									return true;
+							} else if (currRun is Date) {
+								if ((currRun as Date) == runToCheck)
+									return true;
+							}
+						}
+					}
+					break;
+				}
+				case GlobalVariable.FRAME:
+				{
+					var frameToCheck: Date = value as Date;
+					if (frames && frames.length > 0)
+					{
+						//check if level is inside levels
+						for each (var currFrame: Object in frames)
+						{
+							if (currFrame is GlobalVariableValue)
+							{
+								if (((currFrame as GlobalVariableValue).value as Date) == frameToCheck)
+									return true;
+							} else if (currFrame is Date) {
+								if ((currFrame as Date) == frameToCheck)
+									return true;
+							}
+						}
+					}
+					break;
+				}	
+			}
+			return false;
+		}
 
 		private function onGlobalVariableSynchronisationChanged(event: SynchronisationEvent): void
 		{
+			debug("onGlobalVariableSynchronisationChanged");
 			/** this can be called when these 2 event are dispatched
 			 * SynchronisationEvent.START_GLOBAL_VARIABLE_SYNCHRONIZATION
 			 * SynchronisationEvent.STOP_GLOBAL_VARIABLE_SYNCHRONIZATION
@@ -318,6 +405,7 @@ package com.iblsoft.flexiweather.ogc.managers
 		
 		private function onInteractiveLayerLevelVariableChanged(event: Event = null): void
 		{
+			debug("onInteractiveLayerLevelVariableChanged");
 			if (_interactiveLayerMap)
 			{
 				var _layerLevels: Array = _interactiveLayerMap.getLevels();
@@ -485,6 +573,7 @@ package com.iblsoft.flexiweather.ogc.managers
 		}
 		private function notifyLevelsChanged(): void
 		{
+			debug("notifyLevelsChanged");
 			dispatchEvent(new Event(LEVELS_CHANGED, true));
 		}
 		
@@ -522,6 +611,7 @@ package com.iblsoft.flexiweather.ogc.managers
 		}
 		private function notifySelectedLevelChanged(selectedLevel: String): void
 		{
+			debug("notifySelectedLevelChanged");
 			var bChanged: Boolean = true;
 			//if (_level && selectedLevel && _level == selectedLevel)
 			//	bChanged = false;
@@ -545,6 +635,7 @@ package com.iblsoft.flexiweather.ogc.managers
 		
 		private function getGlobalVariableValue(globalVariable: String, positionDiff: int): Object
 		{
+			debug("getGlobalVariableValue globalVariable:" + globalVariable + " positionDiff: " + positionDiff );
 			var arr: ArrayCollection;
 			var selectedValue: Object;
 			
@@ -611,6 +702,12 @@ package com.iblsoft.flexiweather.ogc.managers
 				return true;
 			}
 			return false;
+		}
+		
+		private function debug(str: String, type: String = "Info", tag: String = "GlobalVariablesManager"): void
+		{
+//			trace(tag + "| " + type + "| " + str);
+			//			LoggingUtils.dispatchLogEvent(this, " ILM: " + str);
 		}
 		
 		override public function toString(): String
