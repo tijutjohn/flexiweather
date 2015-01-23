@@ -1304,6 +1304,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 			_globalFrameSynchronizator.removeEventListener(SynchronisationEvent.SYNCHRONISATION_DONE, onGlobalFrameSynchronizationDone);
 		}
 
+		/*
 		private function rebuildGlobalVariables(changeDescription: String): void
 		{
 			var currWidget: InteractiveWidget
@@ -1347,6 +1348,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 				}
 			}
 		}
+		*/
 		private var _widgetsWaitingForRebuild: int;
 
 		private function rebuildWidgets(): void

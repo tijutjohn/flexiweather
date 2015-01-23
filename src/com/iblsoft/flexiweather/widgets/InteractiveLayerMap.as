@@ -35,13 +35,13 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.utils.XMLStorage;
 	import com.iblsoft.flexiweather.widgets.data.InteractiveLayerLegendsOrientation;
 	import com.iblsoft.flexiweather.widgets.data.InteractiveLayerMapSaveSettings;
-
+	
 	import flash.events.DataEvent;
 	import flash.events.Event;
 	import flash.events.TimerEvent;
 	import flash.utils.Dictionary;
 	import flash.utils.Timer;
-
+	
 	import mx.collections.ArrayCollection;
 	import mx.controls.Alert;
 	import mx.core.IVisualElement;
@@ -49,7 +49,7 @@ package com.iblsoft.flexiweather.widgets
 	import mx.events.CollectionEventKind;
 	import mx.events.DynamicEvent;
 	import mx.events.PropertyChangeEvent;
-
+	
 	import spark.events.ElementExistenceEvent;
 
 	[Event(name = "mapLoadingStarted", type = "com.iblsoft.flexiweather.events.InteractiveLayerMapEvent")]
@@ -817,7 +817,7 @@ package com.iblsoft.flexiweather.widgets
 		private function resynchronizeOnStart(event: SynchronisedVariableChangeEvent): void
 		{
 			var layer: InteractiveLayerMSBase = event.currentTarget as InteractiveLayerMSBase
-			resynchronize();
+			resynchronizeGlobalVariables();
 
 //			if (_firstDataReceived[layer])
 //			{
@@ -1090,7 +1090,7 @@ package com.iblsoft.flexiweather.widgets
 				{
 					_firstDataReceived[l] = {layer: l, firstDataReceived: false};
 				}
-				callLater(resynchronize);
+				callLater(resynchronizeGlobalVariables);
 			}
 			else
 			{
@@ -1155,9 +1155,11 @@ package com.iblsoft.flexiweather.widgets
 
 		private function layerSynchronisationReady(layer: InteractiveLayer): void
 		{
+			debug("layerSynchronisationReady");
 			var synchronisableFrame: Boolean = false;
 			var synchronisableRun: Boolean = false;
 			var synchronisableLevel: Boolean = false;
+			var newPrimaryLayer: Boolean = false;
 			var so: ISynchronisedObject = layer as ISynchronisedObject;
 			var isReadyForSynchronisation: Boolean = true;
 
@@ -1186,6 +1188,7 @@ package com.iblsoft.flexiweather.widgets
 				}
 				//this layer can be primary layer and there is no primary layer set, set this one as primaty layer
 				setPrimaryLayer(layer as InteractiveLayerMSBase);
+				newPrimaryLayer = true;
 			}
 			else
 			{
@@ -1293,10 +1296,14 @@ package com.iblsoft.flexiweather.widgets
 				setPrimaryLayer(null);
 				findNewPrimaryLayer();
 			}
+			
+			callLater(resynchronizeGlobalVariables);
+			
 			var dynamicEvent: DynamicEvent = new DynamicEvent(TIME_AXIS_REMOVED);
 			dynamicEvent['layer'] = l;
 			dispatchEvent(dynamicEvent);
 
+			
 			invalidateEnumTimeAxis();
 
 			notifyMapChanged();
@@ -2065,13 +2072,53 @@ package com.iblsoft.flexiweather.widgets
 		 * This function should be called when InteractiveLayerMap needs to be synchronized again, e.g. new layer is added
 		 *
 		 */
-		public function resynchronize(): void
+		public function resynchronizeGlobalVariables(): void
 		{
+			_globalVariablesManager.reinitializeGlobalVariables();
+			
+			var synchronizedRun: Date = run;
 			var synchronizedFrame: Date = frame;
+			var synchronizedLevel: String = level;
 
+			var bValidRun: Boolean = _globalVariablesManager.isGlobalVariableValid(GlobalVariable.RUN, synchronizedRun);
+			var bValidFrame: Boolean = _globalVariablesManager.isGlobalVariableValid(GlobalVariable.FRAME, synchronizedFrame);
+			var bValidLevel: Boolean = _globalVariablesManager.isGlobalVariableValid(GlobalVariable.LEVEL, synchronizedLevel);
+			
+			if (!bValidRun)
+			{
+				synchronizedRun = getSynchronizedRunValue();
+				if (synchronizedRun)
+				{
+					_globalVariablesManager.run = synchronizedRun;
+					invalidateRun();
+				}
+			}
+			if (!bValidFrame)
+			{
+				synchronizedFrame = getSynchronizedFrameValue();
+				if (synchronizedFrame)
+				{
+					_globalVariablesManager.frame = synchronizedFrame;
+					invalidateFrame();
+				}
+			}
+			if (!bValidLevel)
+			{
+				synchronizedLevel = getSynchronizedLevelValue();
+				if (synchronizedLevel)
+				{
+					_globalVariablesManager.level = synchronizedLevel;
+					invalidateLevel();
+				}
+			}
+			
 //			trace(this + " resynchronize to frame: " + synchronizedFrame);
+//			if (synchronizedRun)
+//				setRun(synchronizedRun);
 			if (synchronizedFrame)
 				setFrame(synchronizedFrame);
+//			if (synchronizedLevel)
+//				setLevel(synchronizedLevel);
 		}
 
 		public function setFrame(newFrame: Date, b_nearrest: Boolean = true, bGlobalValueChange: Boolean = true): Boolean
