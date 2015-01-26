@@ -1333,7 +1333,7 @@ package com.iblsoft.flexiweather.widgets
 				var currRun: Date = (primaryLayer as ISynchronisedObject).getSynchronisedVariableValue(GlobalVariable.RUN, false) as Date;
 
 				var runs: Array = getRuns();
-				if (runs)
+				if (runs && currRun)
 				{
 					var total: int = runs.length;
 					if (runs[0] is GlobalVariableValue)
@@ -1374,7 +1374,7 @@ package com.iblsoft.flexiweather.widgets
 				var currLevel: String = (primaryLayer as ISynchronisedObject).getSynchronisedVariableValue(GlobalVariable.LEVEL, false) as String;
 
 				var levels: Array = getLevels();
-				if (levels)
+				if (levels && currLevel)
 				{
 					var cLevelStr: String;
 					var total: int = levels.length;
