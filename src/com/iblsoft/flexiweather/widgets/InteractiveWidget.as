@@ -685,8 +685,8 @@ package com.iblsoft.flexiweather.widgets
 				ilm.addEventListener(InteractiveLayerWMSEvent.RUN_CHANGED, onLayerChangedInInteractiveLayerMap);
 
 				ilm.addEventListener(InteractiveLayerMap.TIMELINE_CONFIGURATION_CHANGE, onInteractiveLayerMapAnimatorSettingsChanged);
-				ilm.addEventListener(InteractiveLayerMap.TIME_AXIS_ADDED, onLayerInInteractiveLayerMapAdded);
-				ilm.addEventListener(InteractiveLayerMap.TIME_AXIS_REMOVED, onLayerInInteractiveLayerMapRemoved);
+				ilm.addEventListener(InteractiveLayerMap.LAYER_ADDED, onLayerInInteractiveLayerMapAdded);
+				ilm.addEventListener(InteractiveLayerMap.LAYER_REMOVED, onLayerInInteractiveLayerMapRemoved);
 			}
 		}
 
@@ -703,8 +703,8 @@ package com.iblsoft.flexiweather.widgets
 				ilm.removeEventListener(InteractiveLayerWMSEvent.RUN_CHANGED, onLayerChangedInInteractiveLayerMap);
 
 				ilm.addEventListener(InteractiveLayerMap.TIMELINE_CONFIGURATION_CHANGE, onInteractiveLayerMapAnimatorSettingsChanged);
-				ilm.removeEventListener(InteractiveLayerMap.TIME_AXIS_ADDED, onLayerInInteractiveLayerMapAdded);
-				ilm.removeEventListener(InteractiveLayerMap.TIME_AXIS_REMOVED, onLayerInInteractiveLayerMapRemoved);
+				ilm.removeEventListener(InteractiveLayerMap.LAYER_ADDED, onLayerInInteractiveLayerMapAdded);
+				ilm.removeEventListener(InteractiveLayerMap.LAYER_REMOVED, onLayerInInteractiveLayerMapRemoved);
 			}
 		}
 

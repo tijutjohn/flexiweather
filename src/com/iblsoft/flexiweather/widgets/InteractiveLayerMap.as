@@ -35,13 +35,13 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.utils.XMLStorage;
 	import com.iblsoft.flexiweather.widgets.data.InteractiveLayerLegendsOrientation;
 	import com.iblsoft.flexiweather.widgets.data.InteractiveLayerMapSaveSettings;
-	
+
 	import flash.events.DataEvent;
 	import flash.events.Event;
 	import flash.events.TimerEvent;
 	import flash.utils.Dictionary;
 	import flash.utils.Timer;
-	
+
 	import mx.collections.ArrayCollection;
 	import mx.controls.Alert;
 	import mx.core.IVisualElement;
@@ -49,7 +49,7 @@ package com.iblsoft.flexiweather.widgets
 	import mx.events.CollectionEventKind;
 	import mx.events.DynamicEvent;
 	import mx.events.PropertyChangeEvent;
-	
+
 	import spark.events.ElementExistenceEvent;
 
 	[Event(name = "mapLoadingStarted", type = "com.iblsoft.flexiweather.events.InteractiveLayerMapEvent")]
@@ -57,8 +57,9 @@ package com.iblsoft.flexiweather.widgets
 	[Event(name = "frameVariableChanged", type = "flash.events.Event")]
 	[Event(name = PRIMARY_LAYER_CHANGED, type = "flash.events.DataEvent")]
 	[Event(name = LAYERS_SERIALIZED_AND_READY, type = "mx.events.DynamicEvent")]
-	[Event(name = TIME_AXIS_UPDATED, type = "flash.events.DataEvent")]
-	[Event(name = TIME_AXIS_ADDED, type = "mx.events.DynamicEvent")]
+	[Event(name = LAYER_UPDATED, type = "flash.events.DataEvent")]
+	[Event(name = LAYER_ADDED, type = "mx.events.DynamicEvent")]
+	[Event(name = LAYER_REMOVED, type = "mx.events.DynamicEvent")]
 	[Event(name = LEVEL_VARIABLE_CHANGED, type = "mx.events.DynamicEvent")]
 	[Event(name = RUN_VARIABLE_CHANGED, type = "mx.events.DynamicEvent")]
 	[Event(name = TIME_AXIS_REMOVED, type = "mx.events.DynamicEvent")]
@@ -78,11 +79,11 @@ package com.iblsoft.flexiweather.widgets
 
 		public static const LAYERS_SERIALIZED_AND_READY: String = "layersSerializedAndReady";
 
-		public static const TIME_AXIS_UPDATED: String = "timeAxisUpdated";
+		public static const LAYER_UPDATED: String = "layerUpdated";
 
-		public static const TIME_AXIS_ADDED: String = "timeAxisAdded";
+		public static const LAYER_ADDED: String = "layerAdded";
 
-		public static const TIME_AXIS_REMOVED: String = "timeAxisRemoved";
+		public static const LAYER_REMOVED: String = "layerRemoved";
 
 		public static const PRIMARY_LAYER_CHANGED: String = "primaryLayerChanged";
 
@@ -125,13 +126,17 @@ package com.iblsoft.flexiweather.widgets
 		public function get legendsOrientation():InteractiveLayerLegendsOrientation
 		{
 			if (_legendsOrientation != null)
+			{
+				debug("legendsOrientation getter is not null. " + _legendsOrientation);
 				return _legendsOrientation;
+			}
 
 			return new InteractiveLayerLegendsOrientation("BLR");
 		}
 
 		public function set legendsOrientation(value:InteractiveLayerLegendsOrientation):void
 		{
+			debug("legendsOrientation = : " + value);
 			_legendsOrientation = value;
 		}
 
@@ -422,7 +427,7 @@ package com.iblsoft.flexiweather.widgets
 				try {
 					mapName = storage.serializeString('name', null);
 				} catch (error: Error) {
-					debug("Problem to serialize 'animation' mode");
+					debug("Problem to serialize 'mapName' mode");
 				}
 				try {
 					storage.serialize('animation', timelineConfiguration);
@@ -437,13 +442,18 @@ package com.iblsoft.flexiweather.widgets
 					debug("Problem to serialize 'area' mode");
 				}
 
-				if (!legendsOrientation)
-					legendsOrientation = new InteractiveLayerLegendsOrientation();
+				if (!_legendsOrientation)
+				{
+					debug("create empty legendsOrientation");
+					_legendsOrientation = new InteractiveLayerLegendsOrientation();
+				}
 
 				try {
+					debug("serialize legendsOrientation 1");
 					storage.serialize('legends-orientation', legendsOrientation);
+					debug("serialize legendsOrientation 2: " + legendsOrientation);
 				} catch (e: Error) {
-					trace("MultiViewConfiguration serialize loading: cannot find legends-orientation");
+					debug("MultiViewConfiguration serialize loading: cannot find legends-orientation");
 					legendsOrientation.updateFromShortcut("BLR");
 				}
 
@@ -595,7 +605,7 @@ package com.iblsoft.flexiweather.widgets
 			var wrappers: ArrayCollection;
 			var wrapper: LayerSerializationWrapper;
 			var layer: InteractiveLayer;
-//			debug("InteractiveLayerMap [IW: " + container.id + "] serialize loading: " + storage.isLoading());
+			debug("InteractiveLayerMap [IW: " + container.id + "] serialize loading: " + storage.isLoading());
 			LayerSerializationWrapper.m_iw = container;
 			LayerSerializationWrapper.map = this;
 			var globalLevel: String;
@@ -640,7 +650,7 @@ package com.iblsoft.flexiweather.widgets
 					trace("ILM serialize, problem to set global-level: " + globalLevel);
 				}
 
-				if (!legendsOrientation)
+				if (!_legendsOrientation)
 					legendsOrientation = new InteractiveLayerLegendsOrientation();
 
 				try {
@@ -729,7 +739,7 @@ package com.iblsoft.flexiweather.widgets
 			if (!_suspendTimeAxisNotify)
 			{
 //				trace("\n" + this + " notifyTimeAxisFrameUpdate");
-				dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
+				dispatchEvent(new DataEvent(LAYER_UPDATED));
 			}
 
 		}
@@ -738,7 +748,7 @@ package com.iblsoft.flexiweather.widgets
 			if (!_suspendTimeAxisNotify)
 			{
 //				trace("\n" + this + " notifyTimeAxisUpdate");
-				dispatchEvent(new DataEvent(TIME_AXIS_UPDATED));
+				dispatchEvent(new DataEvent(LAYER_UPDATED));
 			}
 		}
 
@@ -1148,7 +1158,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			invalidateEnumTimeAxis();
 
-			var dynamicEvent: DynamicEvent = new DynamicEvent(TIME_AXIS_ADDED);
+			var dynamicEvent: DynamicEvent = new DynamicEvent(LAYER_ADDED);
 			dynamicEvent['layer'] = layer;
 			dispatchEvent(dynamicEvent);
 		}
@@ -1296,14 +1306,14 @@ package com.iblsoft.flexiweather.widgets
 				setPrimaryLayer(null);
 				findNewPrimaryLayer();
 			}
-			
+
 			callLater(resynchronizeGlobalVariables);
-			
-			var dynamicEvent: DynamicEvent = new DynamicEvent(TIME_AXIS_REMOVED);
+
+			var dynamicEvent: DynamicEvent = new DynamicEvent(LAYER_REMOVED);
 			dynamicEvent['layer'] = l;
 			dispatchEvent(dynamicEvent);
 
-			
+
 			invalidateEnumTimeAxis();
 
 			notifyMapChanged();
@@ -2075,7 +2085,7 @@ package com.iblsoft.flexiweather.widgets
 		public function resynchronizeGlobalVariables(): void
 		{
 			_globalVariablesManager.reinitializeGlobalVariables();
-			
+
 			var synchronizedRun: Date = run;
 			var synchronizedFrame: Date = frame;
 			var synchronizedLevel: String = level;
@@ -2083,7 +2093,7 @@ package com.iblsoft.flexiweather.widgets
 			var bValidRun: Boolean = _globalVariablesManager.isGlobalVariableValid(GlobalVariable.RUN, synchronizedRun);
 			var bValidFrame: Boolean = _globalVariablesManager.isGlobalVariableValid(GlobalVariable.FRAME, synchronizedFrame);
 			var bValidLevel: Boolean = _globalVariablesManager.isGlobalVariableValid(GlobalVariable.LEVEL, synchronizedLevel);
-			
+
 			if (!bValidRun)
 			{
 				synchronizedRun = getSynchronizedRunValue();
@@ -2111,7 +2121,7 @@ package com.iblsoft.flexiweather.widgets
 					invalidateLevel();
 				}
 			}
-			
+
 //			trace(this + " resynchronize to frame: " + synchronizedFrame);
 //			if (synchronizedRun)
 //				setRun(synchronizedRun);
@@ -2380,8 +2390,8 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (debugConsole)
 				debugConsole.print(str, type, tag);
-			trace(tag + "| " + type + "| " + str);
-//			LoggingUtils.dispatchLogEvent(this, " ILM: " + str);
+			//trace(tag + "| " + type + "| " + str);
+			//LoggingUtils.dispatchLogEvent(this, " ILM: " + str);
 		}
 
 		private function notifyMapChanged(): void
