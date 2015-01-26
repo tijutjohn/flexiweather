@@ -1,22 +1,25 @@
 package com.iblsoft.flexiweather.widgets.data
 {
+	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 
-	public class InteractiveLayerLegendsOrientation implements Serializable
+	import flash.events.EventDispatcher;
+
+	public class InteractiveLayerLegendsOrientation extends EventDispatcher implements Serializable
 	{
 		public var label: String;
 		public var horizontalAlign: String;
 		public var horizontalDirection: String;
 		public var verticalAlign: String;
 		public var verticalDirection: String;
-		
+
 		public function InteractiveLayerLegendsOrientation(orientationShortcut: String = null)
 		{
 			if (orientationShortcut)
 				updateFromShortcut(orientationShortcut);
 		}
-		
+
 		public function serialize(storage:Storage):void
 		{
 			label = storage.serializeString('label', label);
@@ -25,8 +28,8 @@ package com.iblsoft.flexiweather.widgets.data
 			verticalAlign = storage.serializeString('vertical-align', verticalAlign);
 			verticalDirection = storage.serializeString('vertical-direction', verticalDirection);
 		}
-		
-		
+
+
 		public function updateFromShortcut(shortcut: String): void
 		{
 			switch(shortcut)
@@ -96,6 +99,11 @@ package com.iblsoft.flexiweather.widgets.data
 					verticalDirection = 'down';
 					break;
 			}
+		}
+
+		override public function toString(): String
+		{
+			return "InteractiveLayerLegendsOrientation: " +  label;
 		}
 	}
 }
