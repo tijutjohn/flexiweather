@@ -101,6 +101,11 @@ package com.iblsoft.flexiweather.ogc.multiview
 	[Event(name = "multiViewSelectionChange", type = "com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewChangeEvent")]
 
 	/**
+	 * Dispatch when selection is changed but widgets will not be requilding (e.g Map Synchronisator)
+	 */
+	[Event(name = "multiViewChangedWithoutRebuilding", type = "com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewChangeEvent")]
+
+	/**
 	 * dispatched when multi view should be closed
 	 */
 	[Event(name = "closeMultiView", type = "com.iblsoft.flexiweather.ogc.multiview.events.InteractiveMultiViewEvent")]
@@ -632,6 +637,13 @@ package com.iblsoft.flexiweather.ogc.multiview
 					}
 				}
 			}
+		}
+
+		private function notifySelectionChangeWithoutRebuildingWidgets(newInteractiveWidget: InteractiveWidget): void
+		{
+			var e: InteractiveMultiViewChangeEvent = new InteractiveMultiViewChangeEvent(InteractiveMultiViewChangeEvent.MULTI_VIEW_CHANGED_WITHOUT_REBUILDING);
+			e.newInteractiveWidget = newInteractiveWidget;
+			dispatchEvent(e);
 		}
 
 		private function notifyWidgetsMapsLoadingStarted(): void
@@ -1258,7 +1270,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 						_globalFrameSynchronizator.synchronizeWidgets(_selectedInteractiveWidget, _interactiveWidgets.widgets);
 						return;
 					}
-					
+
 					var needToSynchronizeAnimationSettings: Boolean = changeCause == SynchronizationChangeType.ANIMATOR_SETTINGS_CHANGED;
 					if (needToSynchronizeAnimationSettings)
 					{
@@ -1268,7 +1280,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 							return;
 						}
 					}
-					
+
 					if (changeCause == SynchronizationChangeType.ALPHA_CHANGED ||
 						changeCause == SynchronizationChangeType.VISIBILITY_CHANGED ||
 						changeCause == SynchronizationChangeType.SYNCHRONIZE_LEVEL_CHANGED ||
@@ -1288,6 +1300,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 						rebuildWidgets();
 					} else {
 						trace("onWidgetChanged: There were change : " + changeCause + " but synchronizator: "  + synchronizator.labelString + " already synchronize this");
+						notifySelectionChangeWithoutRebuildingWidgets(_selectedInteractiveWidget);
 					}
 				}
 			}
