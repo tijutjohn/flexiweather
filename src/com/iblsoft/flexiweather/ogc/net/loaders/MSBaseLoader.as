@@ -110,7 +110,7 @@ import flash.display.Bitmap;
 		{
 			m_wmsViewProperties = viewProperties as WMSViewProperties;
 
-			trace("\nupdateWMSData: " + m_wmsViewProperties.toString() + " bbox: " + m_wmsViewProperties.getViewBBox());
+//			trace("\nupdateWMSData: " + m_wmsViewProperties.toString() + " bbox: " + m_wmsViewProperties.getViewBBox());
 
 			m_layer.container.interactiveLayerMap
 			if (!b_animationMode && isSameData(m_wmsViewProperties, m_previousWmsViewProperties))

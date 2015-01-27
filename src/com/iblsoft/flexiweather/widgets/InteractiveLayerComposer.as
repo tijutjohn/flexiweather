@@ -14,10 +14,10 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.widgets.googlemaps.InteractiveLayerGoogleMaps;
-	
+
 	import flash.display.DisplayObject;
 	import flash.events.Event;
-	
+
 	import mx.collections.ArrayCollection;
 	import mx.events.CollectionEvent;
 	import mx.events.CollectionEventKind;
@@ -29,9 +29,9 @@ package com.iblsoft.flexiweather.widgets
 	public class InteractiveLayerComposer extends InteractiveDataLayer implements Serializable
 	{
 		public static const LAYERS_CHANGED: String = 'layersChanged';
-		
+
 		private static var composerID: int = 0;
-		
+
 		protected var m_layers: ArrayCollection = new ArrayCollection();
 		private var mb_orderingLayers: Boolean = false;
 
@@ -39,7 +39,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			super(container);
 			m_layers.addEventListener(CollectionEvent.COLLECTION_CHANGE, onLayerCollectionChanged);
-			
+
 			m_staticLayers = new ArrayCollection();
 			m_dynamicLayers = new ArrayCollection();
 			composerID++;
@@ -54,7 +54,7 @@ package com.iblsoft.flexiweather.widgets
 				orderLayers();
 				_layersOrderChanged = false;
 			}
-			
+
 			if (m_suspendDataUpdatingChanged)
 			{
 				var layersCount: int = m_layers.length;
@@ -103,14 +103,14 @@ package com.iblsoft.flexiweather.widgets
 			{
 				addLayer(l);
 			}
-			
+
 		}
 
 		private function redispatchComposerChange(event: Event): void
 		{
 			dispatchEvent(event);
 		}
-		
+
 		private function addComposerChangeEventListenersForLayer(l: InteractiveLayer): void
 		{
 			l.addEventListener(InteractiveLayerWMSEvent.WMS_STYLE_CHANGED, redispatchComposerChange);
@@ -127,16 +127,16 @@ package com.iblsoft.flexiweather.widgets
 			l.addEventListener(InteractiveLayerEvent.LAYER_INITIALIZED, onLayerInitialized);
 			if (container)
 				l.container = container;
-			
+
 			m_layers.addItemAt(l, 0);
 			//wait for layer is initialized. Function "layerAdded" will be called
 			debugLayers();
 		}
-		
+
 		private function debugLayers(): void
 		{
 			return;
-			
+
 			var total: int = m_layers.length;
 			var i: int;
 			for (i = 0; i < total; i++)
@@ -153,7 +153,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			layer.onAreaChanged(true);
 		}
-		
+
 		private function onLayerInitialized(event: InteractiveLayerEvent): void
 		{
 			var l: InteractiveLayer = event.target as InteractiveLayer;
@@ -166,9 +166,9 @@ package com.iblsoft.flexiweather.widgets
 			bindSubLayer(layer);
 			updateStaticLayers();
 			notifyLayersChanged(layer);
-			
+
 			//TODO we need to check if layer is synchronizable and call this when it will be ready for synchronization
-			
+
 			//when new layer is added to container, call onAreaChange to notify layer, that layer is already added to container, so it can render itself
 //			invalidateAreaForLayer(layer);
 		}
@@ -222,7 +222,7 @@ package com.iblsoft.flexiweather.widgets
 				invalidateProperties();
 			}
 		}
-		
+
 		public function orderLayers(): void
 		{
 			if (mb_orderingLayers)
@@ -267,13 +267,11 @@ package com.iblsoft.flexiweather.widgets
 
 		public function removeAllLayers(): void
 		{
-			for each (var l: InteractiveLayer in m_layers)
+			while (m_layers.length > 0)
 			{
-				removeComposerChangeEventListenersForLayer(l);
-				unbindSubLayer(l);
+				var l: InteractiveLayer = m_layers.getItemAt(0) as InteractiveLayer;
+				removeLayer(l);
 			}
-			m_layers.removeAll();
-			notifyLayersChanged();
 		}
 
 		public function getLayerCount(): uint
@@ -288,14 +286,14 @@ package com.iblsoft.flexiweather.widgets
 				for each (var layer: InteractiveLayer in m_layers)
 				{
 					var layerType: String = '';
-					
+
 					if (layer is InteractiveLayerMSBase)
 					{
 						var config: WMSLayerConfiguration = (layer as InteractiveLayerMSBase).configuration as WMSLayerConfiguration;
 						layerType = config.layerType;
 						var wmsService: WMSServiceConfiguration = config.wmsService;
 						var baseURL: String = wmsService.baseURL;
-						
+
 						if (baseURL.indexOf("${BASE_URL}") >= 0)
 						{
 							var regExp: RegExp = /\$\{BASE_URL\}/ig;
@@ -304,9 +302,9 @@ package com.iblsoft.flexiweather.widgets
 								baseURL = baseURL.replace(regExp, "");
 							}
 						}
-						
+
 						layerType = baseURL + '/'+layerType;
-						
+
 					}
 					if (layerType == layerPath)
 						return layer;
@@ -406,7 +404,7 @@ package com.iblsoft.flexiweather.widgets
 		}
 
 		private var _refreshingLayersCount: int;
-		
+
 		// data refreshing
 		override public function refresh(b_force: Boolean): void
 		{
@@ -415,13 +413,13 @@ package com.iblsoft.flexiweather.widgets
 				//there is not finished refreshing
 				trace("there is not finished refreshing");
 			}
-			
+
 			_refreshingLayersCount = m_layers.length;
-			
+
 			dispatchEvent(new InteractiveLayerMapEvent(InteractiveLayerMapEvent.BEFORE_REFRESH, true));
-				
+
 			super.refresh(b_force);
-			
+
 			for each (var l: InteractiveLayer in m_layers)
 			{
 				l.addEventListener(InteractiveDataLayer.LOADING_FINISHED, onRefreshLayerLoadingFinished);
@@ -429,15 +427,15 @@ package com.iblsoft.flexiweather.widgets
 				l.refresh(b_force);
 			}
 		}
-		
+
 		private function onRefreshLayerLoadingFinished(event: InteractiveLayerEvent): void
 		{
 			var l: InteractiveLayer = event.target as InteractiveLayer;
 			l.removeEventListener(InteractiveDataLayer.LOADING_FINISHED, onRefreshLayerLoadingFinished);
 			l.removeEventListener(InteractiveDataLayer.LOADING_FINISHED_FROM_CACHE, onRefreshLayerLoadingFinished);
-			
+
 			_refreshingLayersCount--;
-			
+
 			if (_refreshingLayersCount == 0)
 			{
 				//refreshing is finished
@@ -445,7 +443,7 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 
-		// helper methods        
+		// helper methods
 		protected function bindSubLayer(l: InteractiveLayer): void
 		{
 			l.addEventListener(FlexEvent.UPDATE_COMPLETE, onSignalSubLayerChange);
@@ -498,7 +496,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (crs == null)
 				return false;
-			
+
 			if (m_layers && m_layers.length > 0)
 			{
 				for each (var layer: InteractiveLayer in m_layers)
@@ -519,10 +517,10 @@ package com.iblsoft.flexiweather.widgets
 		{
 			return m_layers;
 		}
-		
+
 		private var m_staticLayers: ArrayCollection;
 		private var m_dynamicLayers: ArrayCollection;
-		
+
 		[Bindable(event = "layersChanged")]
 		public function get staticLayers(): ArrayCollection
 		{
@@ -533,15 +531,15 @@ package com.iblsoft.flexiweather.widgets
 		{
 			return m_dynamicLayers;
 		}
-		
-		
+
+
 		[Bindable(event = "layersChanged")]
 		public function get layersIDs(): String
 		{
 			var layersIDs: String = '';
 			for each (var layer: InteractiveLayer in m_layers)
 				layersIDs += layer.layerID + ", ";
-				
+
 			return layersIDs;
 		}
 
@@ -568,7 +566,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			var total: int = layers.length;
 			var newLayers: Array = [];
-			
+
 			var newLayer: InteractiveLayer;
 			for (var i: int = 0; i < total; i++)
 			{
@@ -576,18 +574,18 @@ package com.iblsoft.flexiweather.widgets
 				newLayer = l.clone();
 				newLayers.unshift(newLayer);
 			}
-			
+
 			composer.addLayers(newLayers);
-			
+
 			for each (newLayer in newLayers)
 			{
 //				composer.addLayer(newLayer);
 				newLayer.refresh(true);
 			}
-			
+
 			orderLayers();
 		}
-		
+
 		override public function toString(): String
 		{
 			return "InteractiveLayerComposer ["+id+"]: ";
