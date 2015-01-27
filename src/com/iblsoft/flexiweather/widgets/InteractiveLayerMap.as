@@ -127,7 +127,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (_legendsOrientation != null)
 			{
-				debug("legendsOrientation getter is not null. " + _legendsOrientation);
+//				debug("legendsOrientation getter is not null. " + _legendsOrientation);
 				return _legendsOrientation;
 			}
 
@@ -136,7 +136,7 @@ package com.iblsoft.flexiweather.widgets
 
 		public function set legendsOrientation(value:InteractiveLayerLegendsOrientation):void
 		{
-			debug("legendsOrientation = : " + value);
+//			debug("legendsOrientation = : " + value);
 			_legendsOrientation = value;
 		}
 
@@ -1096,6 +1096,7 @@ package com.iblsoft.flexiweather.widgets
 			if (l)
 			{
 				super.addLayer(l);
+				debug("Layer add: " + l.name + " id: " + l.layerID +" map["+mapID+"]");
 				if (!_firstDataReceived[l])
 				{
 					_firstDataReceived[l] = {layer: l, firstDataReceived: false};
@@ -1112,7 +1113,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			super.layerAdded(layer);
 
-			debug(this + " ADD LAYER: " + layer.toString());
+			debug(this + " ADD LAYER: " + layer.name + " id: " + layer.layerID);
 
 			if (layer)
 			{
@@ -1301,6 +1302,7 @@ package com.iblsoft.flexiweather.widgets
 		override public function removeLayer(l: InteractiveLayer): void
 		{
 			super.removeLayer(l);
+			debug("Layer remove: " + l.name + " id: " + l.layerID +" map["+mapID+"]");
 			if ((l is InteractiveLayerMSBase) && (l as InteractiveLayerMSBase).isPrimaryLayer())
 			{
 				setPrimaryLayer(null);
@@ -1984,7 +1986,7 @@ package com.iblsoft.flexiweather.widgets
 
 				bGlobalSynchronization = bGlobalSynchronization || bSynchronized;
 
-				debug("setRun [" + newRun + "] newRun: " + newRun + " for: " + l.name + " bSynchronized: " + bSynchronized + " bGlobalSynchronization: " + bGlobalSynchronization);
+//				debug("setRun [" + newRun + "] newRun: " + newRun + " for: " + l.name + " bSynchronized: " + bSynchronized + " bGlobalSynchronization: " + bGlobalSynchronization);
 				if (bSynchronized)
 				{
 //					l.refresh(false);
@@ -2057,7 +2059,7 @@ package com.iblsoft.flexiweather.widgets
 
 				bGlobalSynchronization = bGlobalSynchronization || bSynchronized;
 
-				debug("setLevel [" + newLevel + "] newLevel: " + newLevel + " for: " + l.name + " bSynchronized: " + bSynchronized + " bGlobalSynchronization: " + bGlobalSynchronization);
+//				debug("setLevel [" + newLevel + "] newLevel: " + newLevel + " for: " + l.name + " bSynchronized: " + bSynchronized + " bGlobalSynchronization: " + bGlobalSynchronization);
 				if (bSynchronized)
 				{
 //					l.refresh(false);
@@ -2145,11 +2147,11 @@ package com.iblsoft.flexiweather.widgets
 					continue;
 				if (!so.hasSynchronisedVariable(GlobalVariable.FRAME))
 					continue;
-				debug(this + " setFrame try to synchronize: [" + newFrame.toTimeString() + "]  for " + l.name, 'Info', 'Layer Map');
+//				debug(this + " setFrame try to synchronize: [" + newFrame.toTimeString() + "]  for " + l.name, 'Info', 'Layer Map');
 
 				var bSynchronized: Boolean = SynchronisationResponse.wasSynchronised(so.synchroniseWith(GlobalVariable.FRAME, newFrame));
 
-				debug("setFrame [" + newFrame + "] newFrame: " + newFrame + " for: " + l.name + " bSynchronized: " + bSynchronized);
+//				debug("setFrame [" + newFrame + "] newFrame: " + newFrame + " for: " + l.name + " bSynchronized: " + bSynchronized);
 
 				if (bSynchronized)
 				{
