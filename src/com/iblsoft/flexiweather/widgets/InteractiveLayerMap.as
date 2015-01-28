@@ -388,12 +388,12 @@ package com.iblsoft.flexiweather.widgets
 			var wrappers: ArrayCollection;
 			var wrapper: LayerSerializationWrapper;
 			var layer: InteractiveLayer;
-			debug("InteractiveLayerMap serializeAnimatedMap [IW: " + container.id + "] serialize loading: " + storage.isLoading());
+//			debug("InteractiveLayerMap serializeAnimatedMap [IW: " + container.id + "] serialize loading: " + storage.isLoading());
 			LayerSerializationWrapper.m_iw = container;
 			LayerSerializationWrapper.map = this;
 			if (storage.isLoading())
 			{
-				debug("serializeAnimatedMap : " + (storage as XMLStorage).xml.toXMLString());
+//				debug("serializeAnimatedMap : " + (storage as XMLStorage).xml.toXMLString());
 				wrappers = new ArrayCollection();
 				storage.serializeNonpersistentArrayCollection("layer", wrappers, LayerSerializationWrapper);
 				m_layers.removeAll();
@@ -402,13 +402,13 @@ package com.iblsoft.flexiweather.widgets
 				for (var i: int = total; i >= 0; i--)
 				{
 					wrapper = wrappers.getItemAt(i) as LayerSerializationWrapper;
-					debug("InteractiveLayerMap serialize wrapper: " + wrapper);
+//					debug("InteractiveLayerMap serialize wrapper: " + wrapper);
 					layer = wrapper.m_layer;
 					if (layer is InteractiveLayer)
 					{
 						layer.addEventListener(InteractiveLayerEvent.LAYER_INITIALIZED, onSerializedLayerInitialized);
 
-						debug("InteractiveLayerMap serialize add layer: " + layer + " name: " + layer.name);
+//						debug("InteractiveLayerMap serialize add layer: " + layer + " name: " + layer.name);
 						newLayers.push(layer);
 					}
 				}
@@ -605,7 +605,7 @@ package com.iblsoft.flexiweather.widgets
 			var wrappers: ArrayCollection;
 			var wrapper: LayerSerializationWrapper;
 			var layer: InteractiveLayer;
-			debug("InteractiveLayerMap [IW: " + container.id + "] serialize loading: " + storage.isLoading());
+//			debug("InteractiveLayerMap [IW: " + container.id + "] serialize loading: " + storage.isLoading());
 			LayerSerializationWrapper.m_iw = container;
 			LayerSerializationWrapper.map = this;
 			var globalLevel: String;
@@ -621,13 +621,13 @@ package com.iblsoft.flexiweather.widgets
 				for (var i: int = total; i >= 0; i--)
 				{
 					wrapper = wrappers.getItemAt(i) as LayerSerializationWrapper;
-					debug("InteractiveLayerMap serialize wrapper: " + wrapper);
+//					debug("InteractiveLayerMap serialize wrapper: " + wrapper);
 					layer = wrapper.m_layer;
 					if (layer is InteractiveLayer)
 					{
 						layer.addEventListener(InteractiveLayerEvent.LAYER_INITIALIZED, onSerializedLayerInitialized);
 
-						debug("InteractiveLayerMap serialize add layer: " + layer + " name: " + layer.name);
+//						debug("InteractiveLayerMap serialize add layer: " + layer + " name: " + layer.name);
 						newLayers.push(layer);
 					}
 				}
@@ -844,6 +844,12 @@ package com.iblsoft.flexiweather.widgets
 			//delete enumTimeAxis cache and retrieve tham again
 			_cachedEnumTimeAxis = null;
 			enumTimeAxis();
+		}
+
+		protected function onSynchronisedVariableNotSynchronised(event: SynchronisedVariableChangeEvent): void
+		{
+			debug("onSynchronisedVariableNotSynchronised layer: " + (event.target as InteractiveLayer).layerID + " [map: "+ mapID+"]");
+			dispatchEvent(event);
 		}
 
 		protected function onSynchronisedVariableChanged(event: SynchronisedVariableChangeEvent): void
@@ -2008,10 +2014,14 @@ package com.iblsoft.flexiweather.widgets
 				}
 			}
 
-			if (bGlobalSynchronization)
+			if (bGlobalSynchronization) {
 				_globalVariablesManager.run = newRun;
-			else {
+				if (primaryLayer)
+					primaryLayer.dispatchEvent( new SynchronisedVariableChangeEvent(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.RUN, false) );
+			} else {
 				debug("!!setRun, bGlobalSynchronization = false, do not set global variables manager run");
+				if (primaryLayer)
+					primaryLayer.dispatchEvent( new SynchronisedVariableChangeEvent(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_NOT_SYNCRONISED, GlobalVariable.RUN, false) );
 			}
 
 
@@ -2034,6 +2044,8 @@ package com.iblsoft.flexiweather.widgets
 		 */
 		public function setLevel(newLevel: String, b_nearrest: Boolean = true, bGlobalValueChange: Boolean = true): Boolean
 		{
+			debug("... setLevel [" + newLevel + "] newLevel: " + newLevel + " [map:"+mapID+"] layers count: " + m_layers.length);
+
 			if (newLevel == null)
 				return false;
 
@@ -2059,7 +2071,7 @@ package com.iblsoft.flexiweather.widgets
 
 				bGlobalSynchronization = bGlobalSynchronization || bSynchronized;
 
-//				debug("setLevel [" + newLevel + "] newLevel: " + newLevel + " for: " + l.name + " bSynchronized: " + bSynchronized + " bGlobalSynchronization: " + bGlobalSynchronization);
+				debug("setLevel [" + newLevel + "] newLevel: " + newLevel + " for: " + l.name + " bSynchronized: " + bSynchronized + " bGlobalSynchronization: " + bGlobalSynchronization + " [map:"+mapID+"]");
 				if (bSynchronized)
 				{
 //					l.refresh(false);
@@ -2067,14 +2079,27 @@ package com.iblsoft.flexiweather.widgets
 				}
 				else
 				{
-					error("InteractiveLayerMap setLevel [" + newLevel + "] NO SYNCHRONIZATION for " + l.name);
+					error("InteractiveLayerMap setLevel [" + newLevel + "] NO SYNCHRONIZATION for " + l.name+ " id: "+ l.layerID + " [map:"+mapID+"]");
 				}
 			}
 
-			if (bGlobalSynchronization)
+			if (bGlobalSynchronization) {
 				_globalVariablesManager.level = newLevel;
-			else {
-				debug("!!setLevel, bGlobalSynchronization = false, do not set global variables manager level");
+				if (primaryLayer)
+					primaryLayer.dispatchEvent( new SynchronisedVariableChangeEvent(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.LEVEL, false) );
+				debug("!!setLevel, bGlobalSynchronization = trye, set global variables manager level to "+ newLevel + " [map:"+mapID+"]");
+			} else {
+				if (!primaryLayer)
+					m_primaryLayer = getPrimaryLayer();
+
+				if (primaryLayer)
+				{
+					debug("!!setLevel, bGlobalSynchronization = false, do not set global variables manager level [map:"+mapID+"] primaryLayer: " + primaryLayer.layerID);
+					primaryLayer.dispatchEvent( new SynchronisedVariableChangeEvent(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_NOT_SYNCRONISED, GlobalVariable.LEVEL, false) );
+				} else {
+					debug("!!setLevel, bGlobalSynchronization = false, do not set global variables manager level [map:"+mapID+"]");
+				}
+
 			}
 
 			return true;
@@ -2174,11 +2199,21 @@ package com.iblsoft.flexiweather.widgets
 								setFrame(closestFrame);
 								notifyFrameVariableChanged();
 							}
+
+							if (primaryLayer)
+								primaryLayer.dispatchEvent( new SynchronisedVariableChangeEvent(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_NOT_SYNCRONISED, GlobalVariable.FRAME, false) );
+
 							return false;
 						}
 					}
-					debug(this + " setFrame [" + newFrame.toTimeString() + "] FRAME NOT FOUND for " + l.name);
+					debug(this + " setFrame [" + newFrame.toTimeString() + "] FRAME NOT FOUND for " + l.name + " id: " + l.layerID);
 				}
+			}
+
+			if (layersForRefresh && layersForRefresh.length > 0)
+			{
+				if (primaryLayer)
+					primaryLayer.dispatchEvent( new SynchronisedVariableChangeEvent(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.FRAME, false) );
 			}
 
 			for each (so in layersForRefresh)
@@ -2206,6 +2241,8 @@ package com.iblsoft.flexiweather.widgets
 						onSynchronisedVariableChanged);
 				l.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED,
 						onSynchronisedVariableDomainChanged);
+				l.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_NOT_SYNCRONISED,
+						onSynchronisedVariableNotSynchronised);
 			}
 		}
 
@@ -2219,6 +2256,8 @@ package com.iblsoft.flexiweather.widgets
 						onSynchronisedVariableChanged);
 				l.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED,
 						onSynchronisedVariableDomainChanged);
+				l.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_NOT_SYNCRONISED,
+					onSynchronisedVariableNotSynchronised);
 			}
 		}
 		private var _featureTooltipCallsRunning: Boolean;
@@ -2392,7 +2431,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (debugConsole)
 				debugConsole.print(str, type, tag);
-			//trace(tag + "| " + type + "| " + str);
+			trace(tag + "| " + type + "| " + str);
 			//LoggingUtils.dispatchLogEvent(this, " ILM: " + str);
 		}
 

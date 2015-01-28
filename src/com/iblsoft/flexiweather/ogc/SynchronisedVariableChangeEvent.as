@@ -6,6 +6,8 @@ package com.iblsoft.flexiweather.ogc
 	{
 		public static const SYNCHRONISED_VARIABLE_CHANGED: String = "synchronisedVariableChanged";
 		public static const SYNCHRONISED_VARIABLE_DOMAIN_CHANGED: String = "synchronisedVariableDomainChanged";
+		public static const SYNCHRONISED_VARIABLE_NOT_SYNCRONISED: String = "synchronisedVariableNotSynchronised";
+
 		//[Event(name = SYNCHRONISED_VARIABLE_CHANGED, type = "com.iblsoft.flexiweather.ogc.SynchronisedVariableChangeEvent")]
 		protected var ms_variableId: String;
 

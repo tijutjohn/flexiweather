@@ -282,7 +282,7 @@ import flash.display.Bitmap;
 				{
 					jobName += "["+forecast+"]";
 				}
-				trace("updateDataPart jobName: " + jobName + " bbox: " + bbox);
+//				trace("updateDataPart jobName: " + jobName + " bbox: " + bbox);
 
 				if (_delayedRequestArray.length > 0)
 				{
