@@ -21,28 +21,28 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
-	
+
 	import flash.display.Bitmap;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.net.URLRequest;
 	import flash.net.URLVariables;
 	import flash.utils.Dictionary;
-	
+
 	import mx.collections.ArrayCollection;
 
 	/**
-	 * Dispatched when WMS Dimension (RUN, FORECAST, ELEVATION) is set 
-	 */	
+	 * Dispatched when WMS Dimension (RUN, FORECAST, ELEVATION) is set
+	 */
 	[Event(name = "wmsDimensionValueSet", type = "com.iblsoft.flexiweather.events.WMSViewPropertiesEvent")]
-	
+
 	public class WMSViewProperties extends EventDispatcher implements IViewProperties, Serializable
 	{
-		
+
 		//left and right time frame for animation synchronization (in minutes)
 		public static const FRAMES_SYNCHRONIZATION_LEFT_TIME_FRAME: int = 150; //2 hours and 30 minutes
 		public static const FRAMES_SYNCHRONIZATION_RIGHT_TIME_FRAME: int = 150; //2 hours and 30 minutes
-		
+
 		/**
 		 * this is just debug variable. Do not use it for implementation purpose, can be removed anytime.
 		 */
@@ -248,8 +248,8 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 				md_dimensionValues[s_dimName] = s_value;
 			else
 				delete md_dimensionValues[s_dimName];
-			
-			
+
+
 			var wvpe: WMSViewPropertiesEvent = new WMSViewPropertiesEvent(WMSViewPropertiesEvent.WMS_DIMENSION_VALUE_SET, true);
 			wvpe.dimension = s_dimName;
 			wvpe.value = s_value;
@@ -287,7 +287,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 			}
 			return null;
 		}
-		
+
 		public function getWMSDimensionClosestValue(s_dimName: String, direction: String = "next"): String
 		{
 			if (isSupportedDimension(s_dimName)) {
@@ -304,9 +304,9 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 				return getWMSDimensionDefaultValue(s_dimName);
 			}
 			return null;
-			
+
 		}
-		
+
 		public function getWMSDimensionValue(s_dimName: String,
 				b_returnDefault: Boolean = false): String
 		{
@@ -434,7 +434,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		public function getWMSDimensionsValues(s_dimName: String, b_intersection: Boolean = true): Array
 		{
 			var a_dimValues: Array;
-			
+
 			var wmsLayers: Array = getWMSLayers();
 			for each (var layer: WMSLayer in wmsLayers)
 			{
@@ -460,7 +460,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 //				var value: String = a_dimValues[a_dimValues.length - 1].toString();
 //				if (value != _oldTimeValue)
 //					trace("\t getWMSDimensionsValues: " + a_dimValues[a_dimValues.length - 1]);
-//				
+//
 //				_oldTimeValue = value;
 //			}
 			if (a_dimValues && a_dimValues.length > 0)
@@ -472,7 +472,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 			}
 			return a_dimValues;
 		}
-		
+
 		private var _oldTimeValue: String;
 
 		/**
@@ -686,11 +686,11 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		{
 			if (direction != "previous" && direction != "next")
 				direction == "next";
-			
-			
+
+
 			var runValue: String;
 			var run: Date;
-			
+
 			if (s_variableId == GlobalVariable.FRAME)
 			{
 				var requiredFrameTime: Number = -1;
@@ -721,18 +721,18 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					} else {
 						return frames[0] as Date;
 					}
-					
+
 					return new Date(bestFrameTime);
 				}
 			}
 			return null;
 		}
-		
+
 		public function getSynchronisedVariableValue(s_variableId: String): Object
 		{
 			var runValue: String;
 			var run: Date;
-			
+
 			if (s_variableId == GlobalVariable.FRAME)
 			{
 				if (m_cfg.dimensionTimeName != null)
@@ -740,7 +740,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					var time: String = getWMSDimensionValue(m_cfg.dimensionTimeName, true);
 					if (!time)
 						time = getWMSDimensionDefaultValue(m_cfg.dimensionTimeName);
-					
+
 					return ISO8601Parser.stringToDate(time);
 				}
 				else if (m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null)
@@ -751,26 +751,26 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 						runValue = getWMSDimensionDefaultValue(m_cfg.dimensionRunName);
 					if (!forecastValue)
 						forecastValue = getWMSDimensionDefaultValue(m_cfg.dimensionForecastName);
-					
+
 					run = ISO8601Parser.stringToDate(runValue);
-					
+
 					var timeMethod: String = m_cfg.timeMethod;
 					if (!timeMethod)
 						timeMethod = TimeCreationMethod.timeMethodAccordingFromDimensions(m_cfg.dimensionRunName, m_cfg.dimensionForecastName);
-					
+
 					if (timeMethod == TimeCreationMethod.REFERENCE_TIME_TIME)
 					{
 						var timeDate: Date = ISO8601Parser.stringToDate(forecastValue) as Date;
 //						if (!run || !timeDate)
 //							return null;
-//						
+//
 //						return new Date(run.time + (timeDate.time - run.time));
-						
+
 						return timeDate;
 					}
-					
+
 					var forecast: Duration = ISO8601Parser.stringToDuration(forecastValue);
-					
+
 					if (run != null && forecast != null)
 					{
 //						trace(this + "  getSynchronisedVariableValue RUN: " + run + " FORECAST: " + forecast.toHoursString() + " ["+parentLayer+"]");
@@ -786,9 +786,9 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					runValue = getWMSDimensionValue(m_cfg.dimensionRunName, true);
 					if (!runValue)
 						runValue = getWMSDimensionDefaultValue(m_cfg.dimensionRunName);
-					
+
 					run = ISO8601Parser.stringToDate(runValue);
-					
+
 					if (run != null)
 						return run;
 					return null;
@@ -816,7 +816,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 			{
 				var framesCount: int = frames.length;
 				var referenceTimesCount: int = referenceTimes.length;
-				if (framesCount > 0 && referenceTimesCount > 0) 
+				if (framesCount > 0 && referenceTimesCount > 0)
 				{
 					var forecast: Number;
 					var frame: Date;
@@ -826,18 +826,18 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					var latestRun: Date = (referenceTimes[referenceTimesCount - 1] as GlobalVariableValue).data as Date;
 					var latestRunTime: Number = latestRun.time;
 //					std::set<iosal::TimeSpan> forecastSet;
-					
+
 					var firstFrameTime: Number = ((frames[0] as GlobalVariableValue).data as Date).time;
 					var latestFrameTime: Number = ((frames[framesCount - 1] as GlobalVariableValue).data as Date).time;
-					
-					for(var i: int = 0; i < framesCount; i++) 
+
+					for(var i: int = 0; i < framesCount; i++)
 					{
 						frame = ((frames[i] as GlobalVariableValue).data as Date);
 						var frameTime: Number = frame.time;
-						
+
 						if(frameTime >= latestRunTime) {
 							forecast = frameTime - latestRunTime;
-							
+
 							// now check 1st and last reference-time and keep only those forecasts for which
 							// reference-time+forecast exists
 							// this is e.g. to remove nonexisting analysis (+0h forecast)
@@ -848,17 +848,17 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 								b_forecastAlwaysAvailable = false;
 							if (latestRunForecast < firstRunTime || latestRunForecast > latestFrameTime)
 								b_forecastAlwaysAvailable = false;
-							
+
 							if(b_forecastAlwaysAvailable)
 								forecastSet.push(forecast);
 						}
 					}
-					
+
 					if (!currentRun)
 						currentRun = ((frames[0] as GlobalVariableValue).data as Date);
-					
+
 					var currentRunTime: Number = currentRun.time;
-					
+
 					var foundFrames: Array = [];
 					// finally keep only currentRun+forecast combinations for
 					// which forecast time exists
@@ -866,14 +866,14 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 						frame = new Date(currentRunTime + forecast);
 						foundFrames.push(frame);
 					}
-					
+
 					return foundFrames;
 				}
 			}
 			return [];
 
 		}
-		
+
 		/**
 
 			case tdReferenceTimeAndTimeOfForecast: {
@@ -949,7 +949,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 				{
 					var runUnits: String = getWMSDimensionUnitsName(m_cfg.dimensionRunName);
 					var forecastUnits: String = getWMSDimensionUnitsName(m_cfg.dimensionForecastName);
-					
+
 					if (runUnits == forecastUnits)
 						return runUnits;
 					else if (runUnits != forecastUnits)
@@ -959,9 +959,9 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 				}
 			}
 			return "no units";
-			
+
 		}
-		
+
 		public function getSynchronisedVariableValuesList(s_variableId: String): Array
 		{
 			if (s_variableId == GlobalVariable.LEVEL)
@@ -990,7 +990,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 							trace("PROBLEM: InteractiveLayerMSBase getSynchronisedVariableValuesList run.data is not Number: " + runObj.data);
 						}
 					}
-					
+
 					//sort l_resultRuns by Date
 					if (l_resultRuns && l_resultRuns.length > 0)
 					{
@@ -1009,7 +1009,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 //				trace("m_cfg.dimensionRunName: " + m_cfg.dimensionRunName);
 //				trace("m_cfg.dimensionForecastName: " + m_cfg.dimensionForecastName);
 //				trace("m_cfg.timeMethod: " + m_cfg.timeMethod);
-				
+
 				var l_resultTimes: Array = [];
 				var l_resultTimes2: Array = [];
 				if (m_cfg.dimensionTimeName != null)
@@ -1027,8 +1027,8 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 							trace("PROBLEM: InteractiveLayerMSBase getSynchronisedVariableValuesList time.data is not Date: " + time.data);
 						}
 					}
-					
-					
+
+
 				}
 				else if (m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null)
 				{
@@ -1036,12 +1036,12 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					var timeMethod: String = m_cfg.timeMethod;
 					if (!timeMethod)
 						timeMethod = TimeCreationMethod.timeMethodAccordingFromDimensions(m_cfg.dimensionRunName, m_cfg.dimensionForecastName);
-					
+
 					if (run == null && timeMethod != TimeCreationMethod.REFERENCE_TIME_TIME)
 						return [];
-					
+
 					var l_forecasts: Array = getWMSDimensionsValues(m_cfg.dimensionForecastName);
-					
+
 					if (timeMethod == TimeCreationMethod.REFERENCE_TIME_TIME)
 					{
 						l_runs = getWMSDimensionsValues(m_cfg.dimensionRunName);
@@ -1062,14 +1062,14 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 				}
 				else
 					return [];
-				
+
 				//sort forecast by Date
 				if (l_resultTimes2 && l_resultTimes2.length > 0)
 				{
 					//sort Duration
 					//						l_resultTimes.sort(sortDates);
 					l_resultTimes2.sort(sortTimes);
-					
+
 					for each (var sortedTime: Number in l_resultTimes2)
 					{
 						l_resultTimes.push(new Date(sortedTime));
@@ -1084,7 +1084,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		{
 			debug("WMSViewProperties exactlySynchroniseWith ["+parentLayer.container.id+"]: " + s_variableId + " value: " + value);
 			var of: Object;
-			
+
 			if (s_variableId == GlobalVariable.LEVEL)
 			{
 				if (m_cfg.dimensionVerticalLevelName != null)
@@ -1095,13 +1095,13 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 //					var currentLevel: String = getWMSDimensionValue(m_cfg.dimensionVerticalLevelName);
 //					if (!currentLevel)
 //						currentLevel = getWMSDimensionDefaultValue(m_cfg.dimensionVerticalLevelName);
-					
+
 					if (level == currentLevel)
 						return SynchronisationResponse.ALREADY_SYNCHRONISED;
-					
+
 					ofExactLevel = null;
 					var l_levels: Array = getWMSDimensionsValues(m_cfg.dimensionVerticalLevelName);
-					
+
 					for each (of in l_levels)
 					{
 						if (of && of.data && (of.data as String) == level)
@@ -1110,7 +1110,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 							break;
 						}
 					}
-					
+
 					if (ofExactLevel != null)
 					{
 						setWMSDimensionValue(m_cfg.dimensionVerticalLevelName, ofExactLevel.data as String);
@@ -1120,18 +1120,18 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					}
 				}
 			}
-			
+
 			if (s_variableId == GlobalVariable.RUN)
 			{
 				var ofExactRun: Object = null;
-					
+
 				if (m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null)
 				{
 					var currentRun: Date = ISO8601Parser.stringToDate(
 						getWMSDimensionValue(m_cfg.dimensionRunName, true));
-					
+
 //					var forecast: Duration = new Duration(((value as Date).time - run.time) / 1000.0);
-					
+
 					var l_runs: Array = getWMSDimensionsValues(m_cfg.dimensionRunName);
 //					var l_forecasts: Array = getWMSDimensionsValues(m_cfg.dimensionForecastName);
 					ofExactRun = null;
@@ -1143,7 +1143,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 							break;
 						}
 					}
-					
+
 					//TODO ask if forecast should be synchronised as well
 					if (ofExactRun != null)
 					{
@@ -1155,7 +1155,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					}
 				}
 			}
-			
+
 			if (s_variableId == GlobalVariable.FRAME)
 			{
 				var ofExactForecast: Object = null;
@@ -1172,7 +1172,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 							time = of.data as Date;
 						else if (of.data is String)
 							time = ISO8601Parser.stringToDate(of.data as String);
-						
+
 						if (of && of.data && time.time == frame.time)
 						{
 							ofExactForecast = of;
@@ -1188,7 +1188,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 						return SynchronisationResponse.SYNCHRONISED_EXACTLY;
 					}
 				}
-				
+
 				else if (m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null)
 				{
 					var runString: String = getWMSDimensionValue(m_cfg.dimensionRunName, true);
@@ -1210,7 +1210,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 									currentDuration = of.data as Duration;
 								if (of.data is Date)
 									currentDuration = new Duration(((of.data as Date).time - run.time) / 1000.0);
-							
+
 								if (currentDuration && currentDuration.secondsTotal == forecast.secondsTotal)
 								{
 									ofExactForecast = of;
@@ -1222,7 +1222,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					if (ofExactForecast != null)
 					{
 						debug("Found exact FRAME for synchronisation ["+parentLayer.container.id+"]: " + value);
-							
+
 						setWMSDimensionValue(m_cfg.dimensionForecastName, ofExactForecast.value);
 						dispatchSynchronizedVariableChangeEvent(new SynchronisedVariableChangeEvent(
 								SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.FRAME, false));
@@ -1242,21 +1242,24 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 //			trace("WMSViewProperties: " + str);
 //			LoggingUtils.dispatchLogEvent(this, "WMSViewProperties: " + str);
 		}
-		
+
 		/**
-		 * Call when there is no value for synchronisation (in synchroniseWith method) 
-		 * 
-		 */		
-		private function noSynchronisationValueFound(): void
+		 * Call when there is no value for synchronisation (in synchroniseWith method)
+		 *
+		 */
+		private function noSynchronisationValueFound(globalVariable: String): void
 		{
 			debug("NO SYNCHRONISATION DATA ["+parentLayer.container.id+"]");
 			dispatchSynchronizedVariableChangeEvent(new SynchronisedVariableChangeEvent(
-				SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.FRAME, false));
+				SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED,globalVariable, false));
+
+			dispatchSynchronizedVariableChangeEvent(new SynchronisedVariableChangeEvent(
+				SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_NOT_SYNCRONISED, globalVariable, false));
 		}
 		public function synchroniseWith(s_variableId: String, value: Object): String
 		{
 			var exactSynchronisationResult: String = exactlySynchroniseWith(s_variableId, value);
-			
+
 			if (s_variableId == GlobalVariable.LEVEL)
 			{
 				var levelStr: String = value as String;
@@ -1264,10 +1267,10 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 //				var currentLevel: String = getWMSDimensionValue(m_cfg.dimensionVerticalLevelName);
 //				if (!currentLevel)
 //					currentLevel = getWMSDimensionDefaultValue(m_cfg.dimensionVerticalLevelName);
-				
+
 				if (levelStr == currentLevel)
 					return SynchronisationResponse.ALREADY_SYNCHRONISED;
-				
+
 				if (!SynchronisationResponse.wasSynchronised( exactSynchronisationResult ))
 				{
 					var a: Array = getSynchronisedVariableValuesList(s_variableId);
@@ -1289,7 +1292,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					}
 					if (!bestLevel)
 					{
-						noSynchronisationValueFound();
+						noSynchronisationValueFound(GlobalVariable.LEVEL);
 						return SynchronisationResponse.SYNCHRONISATION_VALUE_NOT_FOUND;
 					}
 					return exactlySynchroniseWith(s_variableId, bestLevel);
@@ -1297,7 +1300,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					return exactSynchronisationResult;
 				}
 			}
-			
+
 			var leftDist: Number = 1000 * 60 * FRAMES_SYNCHRONIZATION_LEFT_TIME_FRAME;
 			var rightDist: Number = 1000 * 60 * FRAMES_SYNCHRONIZATION_RIGHT_TIME_FRAME;
 			if (s_variableId == GlobalVariable.RUN)
@@ -1318,7 +1321,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					}
 					if (bestRun == null)
 					{
-						noSynchronisationValueFound();
+						noSynchronisationValueFound(GlobalVariable.RUN);
 						return SynchronisationResponse.SYNCHRONISATION_VALUE_NOT_FOUND;
 					}
 					return exactlySynchroniseWith(s_variableId, bestRun);
@@ -1326,7 +1329,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					return exactSynchronisationResult;
 				}
 			}
-			
+
 			if (s_variableId == GlobalVariable.FRAME)
 			{
 //				var frameExactSynchro: String = exactlySynchroniseWith(s_variableId, value);
@@ -1345,7 +1348,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					}
 					if (bestFrame == null)
 					{
-						noSynchronisationValueFound();
+						noSynchronisationValueFound(GlobalVariable.FRAME);
 						return SynchronisationResponse.SYNCHRONISATION_VALUE_NOT_FOUND;
 					}
 					debug("synchroniseWith ["+parentLayer.container.id+"] BEST FRAME: " + s_variableId + ": " + bestFrame);
@@ -1462,11 +1465,11 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		{
 			dispatchEvent(event);
 		}
-		
+
 		override public function toString(): String
 		{
 			var tmp: String = "WMSViewProperties: | ";
-			
+
 			var dimNames: Array = getWMSDimensionsNames();
 			for each (var dimName: String in dimNames)
 			{

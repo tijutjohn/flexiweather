@@ -208,6 +208,7 @@ package com.iblsoft.flexiweather.ogc
 			m_currentWMSViewProperties.crs = container.crs;
 			m_currentWMSViewProperties.setViewBBox(container.getViewBBox());
 			m_currentWMSViewProperties.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onCurrentWMSDataSynchronisedVariableChanged);
+			m_currentWMSViewProperties.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_NOT_SYNCRONISED, onCurrentWMSDataSynchronisedVariableProblem);
 			m_currentWMSViewProperties.addEventListener(WMSViewPropertiesEvent.WMS_DIMENSION_VALUE_SET, onWMSDimensionValueSet);
 			m_featureInfoLoader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onFeatureInfoLoaded);
 			m_featureInfoLoader.addEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onFeatureInfoLoadFailed);
@@ -294,9 +295,11 @@ package com.iblsoft.flexiweather.ogc
 			}
 
 			m_currentWMSViewProperties.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onCurrentWMSDataSynchronisedVariableChanged);
+			m_currentWMSViewProperties.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_NOT_SYNCRONISED, onCurrentWMSDataSynchronisedVariableProblem);
 			m_currentWMSViewProperties.removeEventListener(WMSViewPropertiesEvent.WMS_DIMENSION_VALUE_SET, onWMSDimensionValueSet);
 			m_currentWMSViewProperties = viewProperties as WMSViewProperties;
 			m_currentWMSViewProperties.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onCurrentWMSDataSynchronisedVariableChanged);
+			m_currentWMSViewProperties.addEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_NOT_SYNCRONISED, onCurrentWMSDataSynchronisedVariableProblem);
 			m_currentWMSViewProperties.addEventListener(WMSViewPropertiesEvent.WMS_DIMENSION_VALUE_SET, onWMSDimensionValueSet);
 		}
 
@@ -604,6 +607,11 @@ package com.iblsoft.flexiweather.ogc
 		{
 			dispatchEvent(event);
 		}
+		protected function onCurrentWMSDataSynchronisedVariableProblem(event: SynchronisedVariableChangeEvent): void
+		{
+			debug("onCurrentWMSDataSynchronisedVariableProblem");
+			dispatchEvent(event);
+		}
 
 		protected function onWMSViewPropertiesDataInvalidateDynamicPart(event: DynamicEvent): void
 		{
@@ -871,6 +879,7 @@ package com.iblsoft.flexiweather.ogc
 			if (m_currentWMSViewProperties)
 			{
 				m_currentWMSViewProperties.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, onCurrentWMSDataSynchronisedVariableChanged);
+				m_currentWMSViewProperties.removeEventListener(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_NOT_SYNCRONISED, onCurrentWMSDataSynchronisedVariableProblem);
 				m_currentWMSViewProperties.removeEventListener(WMSViewPropertiesEvent.WMS_DIMENSION_VALUE_SET, onWMSDimensionValueSet);
 				m_currentWMSViewProperties.destroy();
 				m_currentWMSViewProperties = null;
