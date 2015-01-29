@@ -3257,6 +3257,13 @@ package com.iblsoft.flexiweather.widgets
 		 */
 		public function drawGeoPolyLine(rendererCreator: Function, coords: Array, drawMode: String, b_closed: Boolean = false, b_justCompute: Boolean = false, featureData: FeatureData = null): void
 		{
+			if (_drawingViewport == null)
+			{
+				// Check OW-331
+				// when creating MultiView, _drawingViewport is null
+				debug("Check OW-331, when creating MultiView, _drawingViewport is null");
+				return;
+			}
 			var currTime: Number = getTimer();
 //			debug("InteractiveWidget drawGeoPolyLine");
 			var d_reflectionToSegmentPoints: Dictionary = new Dictionary();
