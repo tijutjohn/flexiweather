@@ -1804,7 +1804,7 @@ package com.iblsoft.flexiweather.widgets
 			return nowFrame;
 		}
 
-		public function get canAnimate(): Boolean
+		public function canAnimate(): Boolean
 		{
 			var l_syncLayers: Array = [];
 			var l_timeAxis: Array = enumTimeAxis(l_syncLayers);
@@ -1829,6 +1829,7 @@ package com.iblsoft.flexiweather.widgets
 
 				if (l.visible && status != InteractiveDataLayer.STATE_DATA_LOADED && status != InteractiveDataLayer.STATE_NO_SYNCHRONISATION_DATA_AVAILABLE)
 				{
+					debug("Can not animation layer: " + l.name + " status = " + status);
 					return false;
 				}
 			}
