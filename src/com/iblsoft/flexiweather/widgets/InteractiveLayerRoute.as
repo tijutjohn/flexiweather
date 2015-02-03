@@ -9,7 +9,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.utils.draw.DrawMode;
 	import com.iblsoft.flexiweather.utils.draw.FillStyle;
 	import com.iblsoft.flexiweather.utils.draw.LineStyle;
-	
+
 	import flash.display.Graphics;
 	import flash.display.JointStyle;
 	import flash.display.LineScaleMode;
@@ -17,7 +17,7 @@ package com.iblsoft.flexiweather.widgets
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	import flash.utils.getTimer;
-	
+
 	import mx.events.CollectionEvent;
 	import mx.events.FlexEvent;
 
@@ -129,10 +129,10 @@ package com.iblsoft.flexiweather.widgets
 	public class InteractiveLayerRoute extends InteractiveLayer
 	{
 		public static const ROUTE_CHANGED: String = 'routeChanged';
-		
+
 		private var _ma_coords: Array;
 		private var _ma_points: Array;
-		
+
 		protected var m_highlightedCoord: Coord = null;
 		protected var m_selectedCoord: Coord = null;
 //		protected var m_highlightedLineFrom: Coord = null;
@@ -142,18 +142,18 @@ package com.iblsoft.flexiweather.widgets
 		override public function set container(value:InteractiveWidget):void
 		{
 			super.container = value;
-			
+
 //			if (value)
 //			{
-//				reflectionDictionary = new WFSEditableReflectionDictionary(value);		
+//				reflectionDictionary = new WFSEditableReflectionDictionary(value);
 //			}
 		}
-		
+
 //		private var reflectionDictionary: WFSEditableReflectionDictionary;
-		
+
 		public function InteractiveLayerRoute(container: InteractiveWidget = null)
 		{
-			//this must be null 
+			//this must be null
 			super(container);
 			changeDrawMode(DrawMode.GREAT_ARC);
 			setStyle("routeThickness", 5);
@@ -170,7 +170,7 @@ package com.iblsoft.flexiweather.widgets
 			setStyle("placemarkHighlightFillAlpha", 1.0);
 			setStyle("placemarkBorderThickness", 1);
 			setStyle("placemarkRadius", 5);
-			
+
 			coords = [];
 			_ma_points = [];
 		}
@@ -190,7 +190,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			return _ma_points;
 		}
-		
+
 		[Bindable(event = "coordsChanged")]
 		public function get coords(): Array
 		{
@@ -201,24 +201,24 @@ package com.iblsoft.flexiweather.widgets
 		{
 //			if (_ma_coords)
 //				_ma_coords.removeEventListener(CollectionEvent.COLLECTION_CHANGE, onCoordsCollectionChanged);
-			
-		    _ma_coords = value;
-            _ma_points = getPointsFromCoords();
-			
+
+			_ma_coords = value;
+			_ma_points = getPointsFromCoords();
+
 //			if (_ma_coords)
 //				_ma_coords.addEventListener(CollectionEvent.COLLECTION_CHANGE, onCoordsCollectionChanged);
 		}
 
-        private function getPointsFromCoords(): Array {
-            var points: Array = [];
+		private function getPointsFromCoords(): Array {
+			var points: Array = [];
 			var total: int = _ma_coords.length;
 			for (var i: int = 0; i < total; i++)
 			{
 				var coord: Coord = _ma_coords[i] as Coord;
-                points.push(container.coordToPoint(coord));
-            }
-            return points;
-        }
+				points.push(container.coordToPoint(coord));
+			}
+			return points;
+		}
 
 		private function notifyChange(): void
 		{
@@ -229,7 +229,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			_ma_coords.splice(0, _ma_coords.length);
 			_ma_points.splice(0, _ma_points.length);
-			
+
 //			_ma_coords.removeAll();
 //			_ma_points.removeAll();
 			invalidateDynamicPart();
@@ -244,7 +244,7 @@ package com.iblsoft.flexiweather.widgets
 				var p: Point = container.coordToPoint(coord);
 				_ma_points[i] = p;
 			}
-			
+
 			invalidateDynamicPart();
 		}
 
@@ -255,7 +255,7 @@ package com.iblsoft.flexiweather.widgets
 			var c: Coord = container.pointToCoord(event.localX, event.localY);
 			if (c == null)
 				return false;
-			
+
 			var mousePoint: Point = new Point(event.localX, event.localY);
 			var cHit: Coord = getHitCoord(mousePoint);
 			if (cHit != null)
@@ -289,7 +289,7 @@ package com.iblsoft.flexiweather.widgets
 			var projection: Projection = container.getCRSProjection();
 			return projection.moveCoordToExtent(c);
 		}
-		
+
 		override public function onMouseMove(event: MouseEvent): Boolean
 		{
 			if (event.shiftKey || event.ctrlKey)
@@ -304,13 +304,13 @@ package com.iblsoft.flexiweather.widgets
 			else
 			{
 				c = updateCoordToExtent(container.pointToCoord(event.localX, event.localY));
-				
+
 				var i: int = getCoordIndex(m_selectedCoord);
 				if (i >= 0)
 				{
 					_ma_coords[i] = c;
 					_ma_points[i] = mousePt;
-					
+
 					debugCoords("Update coord at " + i);
 					notifyChange();
 					m_selectedCoord = c;
@@ -318,9 +318,9 @@ package com.iblsoft.flexiweather.widgets
 					invalidateDynamicPart();
 				}
 			}
-			return true;
+			return false;
 		}
-		
+
 		private function getCoordIndex(coord: Coord): int
 		{
 			if (_ma_coords && _ma_coords.length > 0)
@@ -337,14 +337,14 @@ package com.iblsoft.flexiweather.widgets
 					}
 					if (currCoord.equalsCoord(coord))
 					{
-						return i;	
+						return i;
 					}
 				}
 			}
 			return -1;
-			
+
 		}
-		
+
 		private function debugCoords(str: String = ''): void
 		{
 			return;
@@ -383,52 +383,52 @@ package com.iblsoft.flexiweather.widgets
 		override public function draw(graphics: Graphics): void
 		{
 			super.draw(graphics);
-			
+
 			graphics.clear();
 //			trace("\n\n *******************************************************************************************\n\n");
 //			var time:  Number = getTimer();
 			_drawMode = getStyle('drawMode');
 			if (!_drawMode)
 				_drawMode == DrawMode.GREAT_ARC;
-			
-			
+
+
 			if (_ma_coords.length > 1)
 			{
 				var featureData: FeatureData = new FeatureData('layerRoute');
 				container.drawGeoPolyLine(getRouteRenderer, _ma_points, _drawMode, false, false, featureData);
 			}
-			
+
 			//draw points
 			drawDraggablePoints();
-			
+
 			notifyRouteChanged();
 //			trace("Time draw: " + (getTimer() - time) + "ms");
 //			trace("\n\n *******************************************************************************************\n\n");
 		}
-		
+
 		public function getRouteRenderer(reflectionString: String): RouteCurveRenderer
 		{
 			var i_routeBorderThickness: uint = uint(getStyle("routeBorderThickness"));
 			var i_routeThickness: uint = uint(getStyle("routeThickness"));
 			var i_routeColor: uint = uint(getStyle("routeBorderColor"));
 			var f_routeAlpha: uint = Number(getStyle("routeBorderAlpha"));
-			
+
 			var i_routeFillColor: uint = uint(getStyle("routeFillColor"));
 			var f_routeFillAlpha: uint = Number(getStyle("routeFillAlpha"));
-			
+
 			var lineStyle: LineStyle = new LineStyle(i_routeThickness + 2 * i_routeBorderThickness, i_routeColor, f_routeAlpha, false, LineScaleMode.NORMAL, null, JointStyle.MITER);
 			var fillStyle: FillStyle = new FillStyle(i_routeColor, f_routeAlpha);
-			
+
 			var lineStyle2: LineStyle = new LineStyle(i_routeThickness, i_routeFillColor, f_routeFillAlpha, false, LineScaleMode.NORMAL, null, JointStyle.MITER);
 			var fillStyle2: FillStyle = new FillStyle(i_routeFillColor, f_routeFillAlpha);
-			
+
 			var routeLineRenderer: RouteCurveRenderer = new RouteCurveRenderer(graphics, lineStyle, fillStyle, lineStyle2, fillStyle2);
 			return routeLineRenderer;
 		}
 
 		private function drawDraggablePoints(): void
 		{
-			
+
 			var pt: Point;
 			var proj: Projection = container.getCRSProjection();
 			var total: int = _ma_coords.length;
@@ -444,7 +444,7 @@ package com.iblsoft.flexiweather.widgets
 				container.drawGeoSprite(c, drawDraggablePoint);
 			}
 		}
-		
+
 		public function drawDraggablePoint(c: Coord, x: Number, y: Number): void
 		{
 			var i_pointColor: uint = uint(getStyle("placemarkBorderColor"));
@@ -455,22 +455,22 @@ package com.iblsoft.flexiweather.widgets
 			var f_pointHighlightFillAlpha: uint = Number(getStyle("placemarkHighlightFillAlpha"));
 			var f_pointBorder: uint = Number(getStyle("placemarkBorderThickness"));
 			var f_pointRadius: uint = Number(getStyle("placemarkRadius"));
-			
+
 			var bHighlightCoord: Boolean = false;
 			if (m_highlightedCoord && m_highlightedCoord.equalsCoord(c))
 				bHighlightCoord = true;
-			
+
 			graphics.beginFill(bHighlightCoord ? i_pointHighlightFillColor : i_pointFillColor, f_pointFillAlpha);
 			graphics.lineStyle(f_pointBorder, i_pointColor, f_pointAlpha);
 			graphics.drawCircle(x, y, f_pointRadius);
 			graphics.endFill();
-			
+
 		}
 		private function notifyRouteChanged(): void
 		{
 			dispatchEvent(new Event(ROUTE_CHANGED));
 		}
-			
+
 		protected function getHitCoord(ptHit: Point): Coord
 		{
 			var cBest: Coord = null;
@@ -478,11 +478,11 @@ package com.iblsoft.flexiweather.widgets
 			var placemarkRadius: uint = getStyle('placemarkRadius');
 			var placemarkBorder: uint = getStyle('placemarkBorderThickness');
 			var radius: int = placemarkBorder + placemarkRadius + 1;
-			
+
 			var projection: Projection = container.getCRSProjection();
 			var projectionWidth: Number = projection.extentBBox.width;
 			var crs: String = projection.crs;
-			
+
 			var total: int = _ma_coords.length;
 			for (var i: int = 0; i < total; i++)
 			{
@@ -495,9 +495,9 @@ package com.iblsoft.flexiweather.widgets
 				{
 					var deltaWidth: Number = projectionWidth * delta;
 					var pt: Point = container.coordToPoint(new Coord(crs, c.x + deltaWidth, c.y));
-					
+
 					var f_dist: Number = pt.subtract(ptHit).length;
-//					trace("ILR getHitCoord delta: "+ delta + "pt: "+ pt + " dist: "+ f_dist + " for "+ c.toLaLoCoord().toString()); 
+//					trace("ILR getHitCoord delta: "+ delta + "pt: "+ pt + " dist: "+ f_dist + " for "+ c.toLaLoCoord().toString());
 					if ((f_dist <= radius && cBest == null) || f_dist < f_best)
 					{
 						f_best = f_dist;
