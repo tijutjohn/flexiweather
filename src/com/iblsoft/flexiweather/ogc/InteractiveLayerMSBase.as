@@ -918,6 +918,7 @@ package com.iblsoft.flexiweather.ogc
 			{
 				super.clear(graphics);
 				graphics.clear();
+				clearVectorData();
 //				removeVectorData();
 			}
 		}
@@ -991,7 +992,7 @@ package com.iblsoft.flexiweather.ogc
 			if (_vectorParent && _vectorParent.numChildren > 0)
 			{
 				var total: int = _vectorParent.numChildren;
-				trace("removeVectorData movieObject: " + total + " => " + this);
+				debug("removeVectorData movieObject: " + total);
 				for (var i: int = 0; i < total; i++)
 				{
 					var dispObject: DisplayObject = _vectorParent.removeChildAt(0);
@@ -1029,17 +1030,31 @@ package com.iblsoft.flexiweather.ogc
 				addChild(_vectorParent);
 			}
 
-			clearVectorData();
+//			clearVectorData();
+
+			var ptImageStartPoint: Point =
+				container.coordToPoint(new Coord(s_imageCRS, imageBBox.xMin, imageBBox.yMax));
+			var ptImageEndPoint: Point =
+				container.coordToPoint(new Coord(s_imageCRS, imageBBox.xMax, imageBBox.yMin));
+			ptImageEndPoint.x += 1;
+			ptImageEndPoint.y += 1;
 
 			//clear bitmap data
-			clear(graphics);
+//			clear(graphics);
 
 			var movieObject: DisplayObject = image.parent;
 
-			if (movieObject)
+			if (movieObject) {
 				_vectorParent.addChild(movieObject);
-			else
+				movieObject.x = ptImageStartPoint.x;
+				movieObject.y = ptImageStartPoint.y;
+				debug("drawImagePartAsSWF movieObject ["+ptImageStartPoint.x+","+ptImageStartPoint.y+"]");
+			} else {
 				_vectorParent.addChild(image);
+				image.x = ptImageStartPoint.x;
+				image.y = ptImageStartPoint.y;
+				debug("drawImagePartAsSWF image ["+ptImageStartPoint.x+","+ptImageStartPoint.y+"]");
+			}
 		}
 
 		private function drawImagePartAsBitmap(graphics: Graphics, image: Bitmap, s_imageCRS: String, imageBBox: BBox): void
@@ -2192,7 +2207,7 @@ package com.iblsoft.flexiweather.ogc
 		protected function debug(str: String): void
 		{
 //			LoggingUtils.dispatchLogEvent(this, "MSBase: " + str);
-			trace("MSBase: ["+this+"] " + str);
+//			trace("MSBase: ["+name+"/"+layerID+"] " + str);
 		}
 
 		private var _configurationChanged: Boolean;
