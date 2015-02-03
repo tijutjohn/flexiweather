@@ -1098,16 +1098,15 @@ package com.iblsoft.flexiweather.widgets
 		 */
 		public function coordsFarThanExtentWidth(p1: Coord, p2: Coord, extent: BBox = null): Boolean
 		{
-			if (!extent)
-				extent = getExtentBBox();
+//			if (!extent)
+//				extent = getExtentBBox();
 
-			return (Math.abs(p1.x - p2.x) > extent.width / 2);
+			var projExtent: BBox = m_crsProjection.extentBBox;
+
+			return (Math.abs(p1.x - p2.x) > projExtent.width / 2);
 		}
 		public function pointsFarThanExtentWidth(p1: Point, p2: Point, extent: BBox = null): Boolean
 		{
-			if (!extent)
-				extent = getExtentBBox();
-
 			var extentWidthInPixels: Number = getProjectionWidthInPixels();
 
 			return (Math.abs(p1.x - p2.x) > extentWidthInPixels / 2);
@@ -2077,7 +2076,9 @@ package com.iblsoft.flexiweather.widgets
 
 		public function getProjectionWidthInPixels(): Number
 		{
-			var p: Array = coordsToPoints([new Coord(crs, m_extentBBox.xMin, m_extentBBox.yMin), new Coord(crs, m_extentBBox.xMax, m_extentBBox.yMax)]);
+			var projExtent: BBox = m_crsProjection.extentBBox;
+
+			var p: Array = coordsToPoints([new Coord(crs, projExtent.xMin, projExtent.yMin), new Coord(crs, projExtent.xMax, projExtent.yMax)]);
 			return p[1].x - p[0].x;
 		}
 		public function getCRSProjection(): Projection
@@ -3613,7 +3614,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (id != null)
 			{
-//				trace(this + "| " + type + "| " + str);
+				trace(this + "| " + type + "| " + str);
 //				LoggingUtils.dispatchLogEvent(this, tag + "| " + type + "| " + str);
 			}
 		}
