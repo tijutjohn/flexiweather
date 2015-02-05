@@ -12,14 +12,14 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 {
 	import flash.display.DisplayObjectContainer;
 	import flash.events.Event;
+	import flash.events.FocusEvent;
 	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
-	import flash.sampler.getInvocationCount;
 	import flash.ui.Keyboard;
 	import flash.utils.Dictionary;
 	import flash.utils.clearInterval;
-	
+
 	import mx.collections.ICollectionView;
 	import mx.controls.Menu;
 	import mx.controls.listClasses.IListItemRenderer;
@@ -229,6 +229,7 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 		 */
 		override public function hide():void
 		{
+			trace("Scrollable menu: hide");
 			if (verticalScrollBar)
 			{
 				verticalScrollBar.removeEventListener(ScrollEvent.SCROLL, onScroll);
@@ -361,9 +362,9 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 			// When a sub menu is opened, the openSubMenu function, from the Menu class, receives
 			// a MenuItemRenderer as input. The item renderer does not have provision for a scrollbar
 			// so, we need to take that into account here if we want the sub-menu to open past the scroll bar.
-			
+
 			verticalScrollPosition = 0;
-			
+
 			if (parentMenu != null)
 			{
 				with (parentMenu)
@@ -516,10 +517,17 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 
 		override mx_internal function hideAllMenus():void
 		{
+			trace("Scrollable menu: hideAllMenus: bBlockHideEvent:" + bBlockHideEvent);
 			if (bBlockHideEvent == false)
 			{
 				super.hideAllMenus();
 			}
+		}
+
+		override protected function focusOutHandler(event:FocusEvent):void
+		{
+			trace("Scrollable menu: hideAllMenus: supposedToLoseFocus:" + supposedToLoseFocus);
+			super.focusOutHandler(event)
 		}
 
 		/**
@@ -878,11 +886,11 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 		{
 
 		}
-		
+
 		override public function createItemRenderer(data:Object):IListItemRenderer
 		{
 			var factory:IFactory;
-			
+
 			// get the factory for the data
 			factory = getItemRendererFactory(data);
 			if (!factory)
@@ -892,9 +900,9 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 				if (!factory)
 					factory = itemRenderer;
 			}
-			
+
 			var renderer:IListItemRenderer;
-			
+
 			// if it is the default column factory, see if
 			// the freeItemRenderers table has a free one
 			if (factory == itemRenderer)
@@ -921,14 +929,14 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 					}
 				}
 			}
-			
+
 			if (!renderer)
 			{
 				renderer = factory.newInstance();
 				renderer.styleName = this;
 				factoryMap[renderer] = factory;
 			}
-			
+
 			renderer.owner = this;
 			return renderer;
 		}
