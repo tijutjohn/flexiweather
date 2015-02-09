@@ -150,8 +150,8 @@ package com.iblsoft.flexiweather.ogc.editable.data
 
 		private function debug(txt: String): void
 		{
-			return;
-			trace(this + ": " + txt);
+//			return;
+//			trace(this + ": " + txt);
 		}
 		public function debugData(): void
 		{
@@ -177,6 +177,13 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		 *
 		 */
 		public function joinLinesFromReflections(): void
+		{
+			joinLinesFromReflectionsNew();
+			//when you want to use OLD solution, go to compute() method and also uncomment computeOld
+//			joinLinesFromReflectionsOld();
+		}
+
+		public function joinLinesFromReflectionsNew(): void
 		{
 			var currTime: Number = getTimer();
 			var total: int = reflectionsLength;
@@ -257,6 +264,134 @@ package com.iblsoft.flexiweather.ogc.editable.data
 
 			//algorithm start
 			var cnt: int = startingID;
+
+			for each (helper in tempDict)
+			{
+				for each (var splineInfo: SplineInfo in helper.splines)
+				{
+					var fromID: int = splineInfo.startID;
+					var toID: int = splineInfo.endID;
+					currentReflection = helper.reflection;
+					debug("Spline from: " + fromID + " to : " + toID + " reflection: " + currentReflection.reflectionDelta);
+					for (i = fromID; i < toID; i++)
+					{
+						tempLines.push(currentReflection.getLineAt(i));
+					}
+					tempLines.push(null);
+				}
+			}
+
+			lines = tempLines;
+			compute();
+//			debug(this + " has computed LINES - Time:" + (getTimer() - currTime) + "ms.");
+		}
+
+		public function joinLinesFromReflectionsOld(): void
+		{
+			var currTime: Number = getTimer();
+			var total: int = reflectionsLength;
+			if (total == 0)
+				return;
+
+			var tempLines: Array = [];
+
+			var startingID: int = int.MAX_VALUE;
+			var lastID: int = int.MIN_VALUE;
+			var currentReflection: FeatureDataReflection;
+			var oldReflection: FeatureDataReflection;
+			var helper: ReflectionHelper;
+
+			var lineID: int = 0;
+
+			var reflectionIDs: Array = reflectionsIDs;
+			var refl: FeatureDataReflection;
+			var firstRefl: FeatureDataReflection;
+
+			if (total == 1)
+			{
+				reflectionDelta = reflectionIDs[0];
+				refl = getReflectionAt(reflectionDelta);
+				lines = refl.lines;
+				compute();
+				return;
+			}
+
+			var helperMaxLines: int = 0;
+
+			//1st step - Find first and last ID and set reflection list
+
+			var tempDict: Dictionary = new Dictionary();
+			for (var i: int = 0; i < total; i++)
+			{
+				refl = getReflectionAt(reflectionIDs[i]);
+
+				var linesCount: int = refl.linesLength;
+				if (linesCount > 0)
+				{
+					if (linesCount > helperMaxLines)
+					{
+						helperMaxLines = linesCount;
+						reflectionDelta = reflectionIDs[i];
+					}
+					if (!firstRefl)
+						firstRefl = refl;
+
+					helper = new ReflectionHelper(refl);
+					tempDict[refl] = helper;
+					helper.previousReflection = oldReflection;
+
+					if (helper.startID < startingID)
+					{
+						startingID = helper.startID;
+						currentReflection = refl;
+					}
+					if (helper.lastID > lastID)
+					{
+						lastID = helper.lastID;
+					}
+
+					oldReflection = refl;
+				} else {
+					debug("Reflection: " + refl + " has no points");
+				}
+			}
+
+
+			if (oldReflection && oldReflection != firstRefl)
+			{
+				//update first reflection "previous reflection"
+				(tempDict[firstRefl] as ReflectionHelper).previousReflection = oldReflection;
+			}
+
+			debug("Join lines 1st step - startingID: " + startingID + " lastID: " + lastID);
+
+			//algorithm start
+			var cnt: int = startingID;
+
+			//check if there is problematic lines
+			while(cnt <= lastID)
+			{
+				var totalLinesForCnt: int = 0;
+				for each (helper in tempDict)
+				{
+					if (helper.reflection.hasLineAt(cnt))
+					{
+						totalLinesForCnt++;
+					}
+				}
+				if (totalLinesForCnt == 0)
+				{
+					debug("There is no lines at position: " + cnt);
+				}
+				if (totalLinesForCnt > 1)
+				{
+					debug("More than 1 line at position: " + cnt + " lines: " + totalLinesForCnt);
+				}
+				cnt++;
+			}
+
+
+			cnt = startingID;
 			var tempRefl: FeatureDataReflection;
 
 			currTime = getTimer();
@@ -341,9 +476,156 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		 */
 		private function compute(): void
 		{
+			computeNew();
+
+			//when you want to use OLD solution, go to joinLinesFromReflections() method and also uncomment joinLinesFromReflectionsOld
+//			computeOld();
+		}
+
+		private function computeNew(): void
+		{
 			var currTime: Number = getTimer();
-			debug("********************************************************");
-			debug("\t COMPUTE START" + this);
+			//			debug("********************************************************");
+			//			debug("\t COMPUTE START" + this);
+			if (_points.length > 0)
+				_points.splice(0, _points.length);
+			var cnt: int = 0;
+			var oldPoint: FeatureDataPoint;
+
+			var oldLineID: Number = -1;
+			var bNewLineInserted: Boolean;
+
+			var _ids: Array = ids;
+
+			for each (var line: FeatureDataLine in lines)
+			{
+//				if (oldLineID > -1)
+//				{
+//					var linesOrderDiff: Number = iLineID - oldLineID;
+//					if (linesOrderDiff != 1)
+//					{
+//						if (oldPoint)
+//						{
+//							_points.push(oldPoint);
+//							//						debug("\t\t\t insert old point: " + oldPoint + " diff: " + linesOrderDiff + " curr: " + iLineID);
+//							oldPoint = null;
+//						}
+//						if (!bNewLineInserted)
+//						{
+//							//							debug("\t\t\t insert NULL:  curr: " + iLineID);
+//							_points.push(null);
+//						}
+//						bNewLineInserted = true;
+//					} else {
+//						bNewLineInserted = false;
+//					}
+//				}
+				if (line)
+				{
+					var totalLineSegments: int = line.lineSegments.length;
+					for (var s: int = 0 ; s < totalLineSegments; s++)
+					{
+						var lineSegment: FeatureDataLineSegment = line.lineSegments[s] as FeatureDataLineSegment;
+						if (!lineSegment)
+						{
+							_points.push(null);
+							continue;
+						}
+
+						var lineSegmentVisible: Boolean = lineSegment.visible;
+
+						if (!lineSegmentVisible)
+						{
+							if (!closed)
+							{
+								_points.push(null);
+								continue;
+							}
+						}
+						//						debug("line segment:  lineID = " + line.id + " s: " + s + " Segment: " + lineSegment);
+						var p1: FeatureDataPoint = new FeatureDataPoint(lineSegment.x1, lineSegment.y1);
+						var p2: FeatureDataPoint = new FeatureDataPoint(lineSegment.x2, lineSegment.y2);
+						//						debug("\t\t compute p1: " + p1 + " p2: " + p2);
+
+						if (!oldPoint)
+							_points.push(p1);
+						else if (oldPoint.x != p1.x || oldPoint.y != p1.y) {
+							//							debug("old and new points are not equal: lineID = " + line.id + " s: " + s);
+							//						_points.push(null);
+							_points.push(p1);
+						}
+
+						//check if line has defined second point
+						if (!isNaN(p2.x) && !isNaN(p2.y))
+						{
+							_points.push(p2);
+							oldPoint = p2.clone() as FeatureDataPoint;
+						} else {
+							oldPoint = p1.clone() as FeatureDataPoint;
+							//if there is no second point, add NULL (split line)
+							_points.push(null);
+						}
+
+
+
+						if (cnt == 0)
+							_startPoint = p1.clone() as FeatureDataPoint;
+
+						cnt++;
+						//						debug("\t Old point: lineID = " + line.id + " s: " + s + " point: " + oldPoint);
+					}
+				} else {
+					_points.push(null);
+				}
+
+//				oldLineID = iLineID;
+			}
+
+			//			debug("STEP 2");
+			var newPoint: FeatureDataPoint = checkClipping(_points, 0, _points.length - 1);
+			if (newPoint)
+				_points.push(newPoint);
+
+
+			//			debug("STEP 3");
+			cnt = 0;
+			_center = new FeatureDataPoint();
+			var total: int = 0;
+			for each (var ptr: FeatureDataPoint in _points)
+			{
+				if (ptr)
+				{
+					//					debug("\t\t\t Point["+cnt+"] " + ptr);
+					_center.addPoint(ptr);
+					total++;
+				} else {
+					//					debug("\t\t\t Point["+cnt+"] NULL");
+
+					//check, if there needs to added point on edge of the screen
+					newPoint = checkClipping(_points, cnt+1, cnt-1);
+
+					if (newPoint)
+					{
+						//there is NULL on "cnt" position, remove it and insert newPoint there
+						_points.splice(cnt, 1, newPoint);
+						cnt++;
+					}
+				}
+				oldPoint = ptr;
+				cnt++;
+			}
+			_center.x /= total;
+			_center.y /= total;
+
+			//			debug("\t COMPUTE END avg: " + _center + " > " + this);
+			//			debug("compute took " + (getTimer() - currTime) + "ms.");
+		}
+
+		private function computeOld(): void
+		{
+			var currTime: Number = getTimer();
+//			debug("********************************************************");
+//			debug("\t COMPUTE START" + this);
 			if (_points.length > 0)
 				_points.splice(0, _points.length);
 			var cnt: int = 0;
@@ -454,11 +736,11 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			{
 				if (ptr)
 				{
-					debug("\t\t\t Point["+cnt+"] " + ptr);
+//					debug("\t\t\t Point["+cnt+"] " + ptr);
 					_center.addPoint(ptr);
 					total++;
 				} else {
-					debug("\t\t\t Point["+cnt+"] NULL");
+//					debug("\t\t\t Point["+cnt+"] NULL");
 
 					//check, if there needs to added point on edge of the screen
 					newPoint = checkClipping(_points, cnt+1, cnt-1);
@@ -477,7 +759,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			_center.y /= total;
 
 			//			debug("\t COMPUTE END avg: " + _center + " > " + this);
-			debug("compute took " + (getTimer() - currTime) + "ms.");
+//			debug("compute took " + (getTimer() - currTime) + "ms.");
 		}
 
 		/**
@@ -649,19 +931,76 @@ class ReflectionHelper
 {
 	public var reflection: FeatureDataReflection;
 	public var previousReflection: FeatureDataReflection;
-	public var startID: int;
-	public var lastID: int;
+	public function get startID(): int
+	{
+		if (splines.length > 0)
+			return (splines[0] as SplineInfo).startID;
+
+		return -1;
+	}
+	public function get lastID(): int
+	{
+		if (splines.length > 0)
+			return (splines[splines.length - 1] as SplineInfo).endID;
+
+		return -1;
+	}
 	public var ids: Array;
+	public var splines: Array
 
 	public function ReflectionHelper(reflection: FeatureDataReflection)
 	{
 		this.reflection = reflection;
 		this.ids = reflection.ids;
+		splines = [];
+		analyseIDs();
+	}
 
-		if (ids && ids.length > 0)
+	private function analyseIDs(): void
+	{
+//		if (ids && ids.length > 0)
+//		{
+//			startID = ids[0];
+//			lastID = ids[ids.length - 1];
+//		}
+
+		var oldID: int = -1;
+		var currSplineInfo: SplineInfo = new SplineInfo();
+		for each (var id: int in ids)
 		{
-			startID = ids[0];
-			lastID = ids[ids.length - 1];
+			if (currSplineInfo.startID == -1)
+				currSplineInfo.startID = id;
+			else {
+				if ((id - oldID) > 1)
+				{
+					currSplineInfo.endID = oldID;
+					splines.push(currSplineInfo);
+					currSplineInfo = new SplineInfo();
+				}
+			}
+			oldID = id;
 		}
+		if (currSplineInfo.endID == -1)
+			currSplineInfo.endID = id;
+
+		splines.push(currSplineInfo);
+
+	}
+
+	public function addSpline(startID: int, endID: int): void
+	{
+		splines.push(new SplineInfo(startID, endID));
+	}
+}
+
+class SplineInfo
+{
+	public var startID: int;
+	public var endID: int;
+
+	public function SplineInfo(startID: int = -1, endID: int = -1)
+	{
+		this.startID = startID;
+		this.endID = endID;
 	}
 }

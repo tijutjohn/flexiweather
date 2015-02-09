@@ -58,7 +58,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			if (!master)
 				return;
 
-//			trace("\n\n WFSFeatureEditableCurveWithBaseTimeAndValidity update");
+//			debug("\n\n WFSFeatureEditableCurveWithBaseTimeAndValidity update");
 			super.update(changeFlag);
 
 			clearGraphics();
@@ -150,7 +150,7 @@ package com.iblsoft.flexiweather.ogc.editable
 
 		protected function computeCurve(): void
 		{
-//			trace("WFSFeatureEditableCurveWithBaseTimeAndValidity computeCurve");
+//			debug("WFSFeatureEditableCurveWithBaseTimeAndValidity computeCurve");
 
 			var a_points: Array = getPoints();
 
@@ -181,7 +181,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		{
 //			return;
 
-//			trace("WFSFeatureEditableCurveWithBaseTimeAndValidity drawCurve");
+//			debug("WFSFeatureEditableCurveWithBaseTimeAndValidity drawCurve");
 
 			var reflection: FeatureDataReflection;
 			var _addToLabelLayout: Boolean;
@@ -221,7 +221,7 @@ package com.iblsoft.flexiweather.ogc.editable
 						if(pointsCount <= 1)
 						{
 							displaySprite.clear();
-							//						trace("displaySprite.clear: pointsCount: " + pointsCount);
+							//						debug("displaySprite.clear: pointsCount: " + pointsCount);
 						} else {
 							gr.clear();
 
@@ -231,7 +231,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	//							drawFeatureReflection(renderer, reflection);
 								drawFeatureData(renderer, m_featureData);
 							} else {
-								trace("\t\t Do not draw data for " + reflectionDelta + " Feature is drawn in " + m_featureData.reflectionDelta);
+								debug("\t\t Do not draw data for " + reflectionDelta + " Feature is drawn in " + m_featureData.reflectionDelta);
 							}
 							if (displaySprite)
 								displaySprite.points = reflection.points;
@@ -256,8 +256,8 @@ package com.iblsoft.flexiweather.ogc.editable
 				return;
 			}
 
-//			trace("\n\n");
-//			trace("drawFeatureData");
+//			debug("\n\n");
+//			debug("drawFeatureData");
 			var p: Point;
 			var points: Array = m_featureData.points;
 
@@ -283,7 +283,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				g.start(p.x, p.y);
 				g.moveTo(p.x, p.y);
 				lastPoint = new Point(p.x, p.y);
-				//				trace("\ndrawFeatureReflection moveTO: [" + p.x + " , " + p.y + " ]");
+				debugStrangePoints(p,"drawFeatureReflection moveTO: [" + p.x + " , " + p.y + " ]");
 				var bNewLine: Boolean = false;
 				for (var i: int = 1; i < pointsCount; i++)
 				{
@@ -295,35 +295,39 @@ package com.iblsoft.flexiweather.ogc.editable
 						if (lastPoint)
 						{
 							var dist: Number = Point.distance(p, lastPoint);
-//							trace("\tdrawFeatureData P: " + p + "   distance to last point: " + dist);
+							debugStrangePoints(p,"\tdrawFeatureData P: " + p + "   distance to last point: " + dist);
 						}
 						if (bNewLine) {
 							g.finish(lastPoint.x, lastPoint.y);
+							debugStrangePoints(lastPoint,"\t drawFeatureReflection lastPoint loop: [" + lastPoint.x + " , " + lastPoint.y + " ]");
 
 							g.start(p.x, p.y);
 							g.moveTo(p.x, p.y);
-							//							trace("drawFeatureReflection moveTo: [" + p.x + " , " + p.y + " ]");
+							debugStrangePoints(p,"\t drawFeatureReflection moveTo: [" + p.x + " , " + p.y + " ]");
 						} else {
 							g.lineTo(p.x, p.y);
-							//							trace("drawFeatureReflection lineTO: [" + p.x + " , " + p.y + " ]");
+							debugStrangePoints(p,"\t drawFeatureReflection lineTO: [" + p.x + " , " + p.y + " ]");
 						}
 						if (!p)
-							trace("check why p is null");
+							debug("check why p is null");
 						lastPoint = new Point(p.x, p.y);
 						bNewLine = false;
 					} else {
 						bNewLine = true;
 					}
 				}
-				if (p)
+				if (p) {
 					g.finish(p.x, p.y);
-				else
+					debugStrangePoints(p,"drawFeatureReflection finish: [" + p.x + " , " + p.y + " ]");
+				} else {
 					g.finish(lastPoint.x, lastPoint.y);
-				//				trace("\n");
+					debugStrangePoints(lastPoint,"drawFeatureReflection finish: [" + lastPoint.x + " , " + lastPoint.y + " ]");
+					debug("\n");
+				}
 			}
 
-//			trace("End of drawFeatureData");
-//			trace("\n\n");
+//			debug("End of drawFeatureData");
+//			debug("\n\n");
 		}
 		protected function drawFeatureReflection(g: ICurveRenderer, m_featureDataReflection: FeatureDataReflection): void
 		{
@@ -356,7 +360,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				g.start(p.x, p.y);
 				g.moveTo(p.x, p.y);
 				lastPoint = new Point(p.x, p.y);
-//				trace("\ndrawFeatureReflection moveTO: [" + p.x + " , " + p.y + " ]");
+//				debug("\ndrawFeatureReflection moveTO: [" + p.x + " , " + p.y + " ]");
 				var bNewLine: Boolean = false;
 				for (var i: int = 1; i < pointsCount; i++)
 				{
@@ -369,13 +373,13 @@ package com.iblsoft.flexiweather.ogc.editable
 
 							g.start(p.x, p.y);
 							g.moveTo(p.x, p.y);
-//							trace("drawFeatureReflection moveTo: [" + p.x + " , " + p.y + " ]");
+//							debug("drawFeatureReflection moveTo: [" + p.x + " , " + p.y + " ]");
 						} else {
 							g.lineTo(p.x, p.y);
-//							trace("drawFeatureReflection lineTO: [" + p.x + " , " + p.y + " ]");
+//							debug("drawFeatureReflection lineTO: [" + p.x + " , " + p.y + " ]");
 						}
 						if (!p)
-							trace("check why p is null");
+							debug("check why p is null");
 						lastPoint = new Point(p.x, p.y);
 						bNewLine = false;
 					} else {
@@ -386,7 +390,7 @@ package com.iblsoft.flexiweather.ogc.editable
 					g.finish(p.x, p.y);
 				else
 					g.finish(lastPoint.x, lastPoint.y);
-//				trace("\n");
+//				debug("\n");
 			}
 
 		}
@@ -466,6 +470,23 @@ package com.iblsoft.flexiweather.ogc.editable
 						graphics.lineTo(curvePoints[p].x, curvePoints[p].y);
 					}
 				}
+			}
+		}
+
+		private var oldPoint: Point;
+		private function debugStrangePoints(point: Point, str: String, type: String = "Info", tag: String = "CurveWithTime"): void
+		{
+//			if (point.x > 1000)
+				debug(str);
+
+			oldPoint = new Point(point.x, point.y);
+		}
+
+		private function debug(str: String, type: String = "Info", tag: String = "CurveWithTime"): void
+		{
+			if (str != null)
+			{
+//				trace(this + "| " + type + "| " + str);
 			}
 		}
 	}

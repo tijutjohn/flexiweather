@@ -1098,18 +1098,15 @@ package com.iblsoft.flexiweather.widgets
 		 */
 		public function coordsFarThanExtentWidth(p1: Coord, p2: Coord, extent: BBox = null): Boolean
 		{
-//			if (!extent)
-//				extent = getExtentBBox();
-
 			var projExtent: BBox = m_crsProjection.extentBBox;
-
-			return (Math.abs(p1.x - p2.x) > projExtent.width / 2);
+			var bIsFar: Boolean = (Math.abs(p1.x - p2.x) > projExtent.width / 2);
+			return bIsFar;
 		}
 		public function pointsFarThanExtentWidth(p1: Point, p2: Point, extent: BBox = null): Boolean
 		{
 			var extentWidthInPixels: Number = getProjectionWidthInPixels();
-
-			return (Math.abs(p1.x - p2.x) > extentWidthInPixels / 2);
+			var bIsFar: Boolean = (Math.abs(p1.x - p2.x) > extentWidthInPixels / 2);
+			return bIsFar;
 		}
 
 		/**
@@ -2641,7 +2638,7 @@ package com.iblsoft.flexiweather.widgets
 		private function _drawGeoLine(coordFrom: Coord, coordTo: Coord, drawMode: String, d_reflectionToSegmentPoints: Dictionary, featureData: FeatureData = null, featureDataLineID: int = 0): void
 		{
 			var currTime: Number = getTimer();
-			var bDebugTimes: Boolean = true;
+			var bDebugTimes: Boolean = false;
 
 			if (!coordFrom && !coordTo)
 				return;
@@ -2662,9 +2659,11 @@ package com.iblsoft.flexiweather.widgets
 			{
 				bothCoordsMode = true;
 
+//				debug("_drawGeoLine(from: " + coordFrom.toString() + " to: " + coordTo.toString());
 				//move coords into extent
 				coordFrom = Coord.convertCoordOnSphere(coordFrom, projection);
 				coordTo = Coord.convertCoordOnSphere(coordTo, projection);
+//				debug("_drawGeoLine convertCoordOnSphere(from: " + coordFrom.toString() + " to: " + coordTo.toString());
 
 
 				if (drawMode == DrawMode.GREAT_ARC)
@@ -3327,7 +3326,7 @@ package com.iblsoft.flexiweather.widgets
 			if (!b_justCompute)
 				_drawReflectedSegmentPoints(rendererCreator, d_reflectionToSegmentPoints);
 
-			debug("drawGeoPolyLine took " + (getTimer() - currTime) + "ms.");
+//			debug("drawGeoPolyLine took " + (getTimer() - currTime) + "ms.");
 		}
 
 		/**
@@ -3614,7 +3613,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (id != null)
 			{
-				trace(this + "| " + type + "| " + str);
+//				trace(this + "| " + type + "| " + str);
 //				LoggingUtils.dispatchLogEvent(this, tag + "| " + type + "| " + str);
 			}
 		}
@@ -4029,7 +4028,7 @@ class SmoothRendererNew
 				return;
 
 			var splittedSplinesCoords: Array = splitSplineCoords(splineCoords);
-			var isDatelineSplit: Boolean = splittedSplinesCoords.length > 1;2
+			var isDatelineSplit: Boolean = splittedSplinesCoords.length > 1;
 
 			if (isDatelineSplit)
 				b_closed = false;

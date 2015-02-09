@@ -6,6 +6,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableMode;
 	import com.iblsoft.flexiweather.ogc.editable.data.FeatureData;
+	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataPoint;
 	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
 	import com.iblsoft.flexiweather.ogc.editable.data.MoveablePoint;
 	import com.iblsoft.flexiweather.ogc.managers.WFSCursorManager;
@@ -104,7 +105,7 @@ package com.iblsoft.flexiweather.ogc.editable
 						if(pointsCount <= 1)
 						{
 							displaySprite.clear();
-							//						trace("displaySprite.clear: pointsCount: " + pointsCount);
+							//						debug("displaySprite.clear: pointsCount: " + pointsCount);
 						} else {
 							gr.clear();
 							if (m_featureData.reflectionDelta == reflectionDelta)
@@ -112,7 +113,7 @@ package com.iblsoft.flexiweather.ogc.editable
 								var renderer: ICurveRenderer = getRenderer(reflectionDelta);
 								drawFeatureData(renderer, m_featureData);
 							} else {
-								trace("\t\t Do not draw data for " + reflectionDelta + " Feature is drawn in " + m_featureData.reflectionDelta);
+								debug("\t\t Do not draw data for " + reflectionDelta + " Feature is drawn in " + m_featureData.reflectionDelta);
 							}
 							displaySprite.points = reflection.points;
 
@@ -159,7 +160,7 @@ package com.iblsoft.flexiweather.ogc.editable
 				g.start(p.x, p.y);
 				g.moveTo(p.x, p.y);
 				lastPoint = new Point(p.x, p.y);
-				//				trace("\ndrawFeatureReflection moveTO: [" + p.x + " , " + p.y + " ]");
+				debugStrangePoints(p, "\ndrawFeatureReflection start: [" + p.x + " , " + p.y + " ]");
 				var bNewLine: Boolean = false;
 				for (var i: int = 1; i < pointsCount; i++)
 				{
@@ -170,13 +171,15 @@ package com.iblsoft.flexiweather.ogc.editable
 						if (lastPoint)
 						{
 							var dist: Number = Point.distance(p, lastPoint);
-							//							trace("\tdrawFeatureData P: " + p + "   distance to last point: " + dist);
+							//							debug("\tdrawFeatureData P: " + p + "   distance to last point: " + dist);
 							if (dist > projectionHalf)
 							{
+								debugStrangePoints(lastPoint, "drawFeatureReflection finish: [" + lastPoint.x + " , " + lastPoint.y + " ]");
 								g.finish(lastPoint.x, lastPoint.y);
 
 								g.start(p.x, p.y);
 								g.moveTo(p.x, p.y);
+								debugStrangePoints(p, "drawFeatureReflection start: [" + p.x + " , " + p.y + " ]");
 							}
 						}
 
@@ -185,13 +188,13 @@ package com.iblsoft.flexiweather.ogc.editable
 //
 //							g.start(p.x, p.y);
 //							g.moveTo(p.x, p.y);
-//							//							trace("drawFeatureReflection moveTo: [" + p.x + " , " + p.y + " ]");
+//							//							debug("drawFeatureReflection moveTo: [" + p.x + " , " + p.y + " ]");
 //						} else {
 							g.lineTo(p.x, p.y);
-							//							trace("drawFeatureReflection lineTO: [" + p.x + " , " + p.y + " ]");
+							debugStrangePoints(p, "drawFeatureReflection lineTO: [" + p.x + " , " + p.y + " ]");
 //						}
 						if (!p)
-							trace("check why p is null");
+							debug("check why p is null");
 						if (!firstPoint)
 							firstPoint = new Point(p.x, p.y);
 						lastPoint = new Point(p.x, p.y);
@@ -200,11 +203,14 @@ package com.iblsoft.flexiweather.ogc.editable
 						bNewLine = true;
 					}
 				}
-				if (p)
+				if (p) {
+					debugStrangePoints(p, "drawFeatureReflection finish: [" + p.x + " , " + p.y + " ]");
 					g.finish(p.x, p.y);
-				else
+				} else {
 					g.finish(lastPoint.x, lastPoint.y);
-				//				trace("\n");
+					debugStrangePoints(lastPoint, "drawFeatureReflection finish: [" + lastPoint.x + " , " + lastPoint.y + " ]");
+					debug("\n");
+				}
 			}
 		}
 
@@ -457,6 +463,22 @@ package com.iblsoft.flexiweather.ogc.editable
 				return true;
 			else
 				return (super.onMouseDown(pt, event));
+		}
+
+		private var oldPoint: Point;
+		private function debugStrangePoints(point: Point, str: String, type: String = "Info", tag: String = "ClosableCurveWithTime"): void
+		{
+			if (point.x > 1000)
+				debug(str);
+
+			oldPoint = new Point(point.x, point.y);
+		}
+		private function debug(str: String, type: String = "Info", tag: String = "ClosableCurveWithTime"): void
+		{
+//			if (str != null)
+//			{
+//				trace(this + "| " + type + "| " + str);
+//			}
 		}
 	}
 }
