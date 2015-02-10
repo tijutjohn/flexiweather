@@ -25,7 +25,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
-	
+
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.Graphics;
@@ -34,7 +34,7 @@ package com.iblsoft.flexiweather.ogc
 	import flash.geom.Point;
 	import flash.net.URLRequest;
 	import flash.utils.Timer;
-	
+
 	import mx.collections.ArrayCollection;
 	import mx.events.DynamicEvent;
 	import mx.logging.Log;
@@ -52,10 +52,10 @@ package com.iblsoft.flexiweather.ogc
 		override protected function initializeLayerAfterAddToStage(): void
 		{
 			super.initializeLayerAfterAddToStage();
-			
+
 			initializeLayerProperties();
 		}
-		
+
 		/**
 		 * Override this function and add functionality, which needs to be done when layer is created
 		 *
@@ -64,10 +64,10 @@ package com.iblsoft.flexiweather.ogc
 		{
 			super.initializeLayer();
 		}
-		
+
 		private function initializeLayerProperties(): void
 		{
-			m_autoRefreshTimer = new Timer(5000); 
+			m_autoRefreshTimer = new Timer(5000);
 			m_autoRefreshTimer.addEventListener(TimerEvent.TIMER_COMPLETE, autoRefreshTimerCompleted);
 			m_autoRefreshTimer.repeatCount = 1;
 			if (container.wmsCacheManager)
@@ -95,10 +95,10 @@ package com.iblsoft.flexiweather.ogc
 			//super.serialize(storage);
 			var s_dimName: String;
 			var styleName: String;
-			
+
 			var styleNameValue: String;
 			var level: String;
-			
+
 			if (storage.isLoading())
 			{
 				//TODO do we really need to add here 2nd parameter?
@@ -108,15 +108,15 @@ package com.iblsoft.flexiweather.ogc
 				visible = storage.serializeBool("visible", visible, true);
 				synchroniseLevel = storage.serializeBool('synchronise-level', false);
 				synchroniseRun = storage.serializeBool('synchronise-run', false);
-				
-				
+
+
 				styleNameValue = storage.serializeString("style-name", "", null);
 				level = storage.serializeString(GlobalVariable.LEVEL, "", null);
 				if (styleNameValue)
 					_tempParameterStorage.setWMSStyleName(0, styleNameValue);
 				if (level)
 					_tempParameterStorage.setWMSDimensionValue('ELEVATION', level);
-				
+
 				var primaryLayer: Boolean = storage.serializeBool("primary-layer", true);
 				if (primaryLayer)
 					synchronizationRoleValue = SynchronisationRole.PRIMARY;
@@ -127,24 +127,24 @@ package com.iblsoft.flexiweather.ogc
 				styleNameValue = m_currentWMSViewProperties.getWMSStyleName(0);
 				level = m_currentWMSViewProperties.getWMSDimensionValue('ELEVATION');
 				synchronizationRoleValue = m_synchronisationRole.role;
-				
+
 				if (alpha < 1)
 					storage.serializeNumber("transparency", alpha);
 				storage.serializeBool("visible", visible);
 				if (isPrimaryLayer())
 					storage.serializeBool("primary-layer", true);
-				
+
 				if (styleNameValue)
 					storage.serializeString("style-name", styleNameValue, null);
-				
+
 				if (!synchroniseLevel)
 				{
 					if (!level)
 						level = m_currentWMSViewProperties.getWMSDimensionDefaultValue('ELEVATION');
-					
+
 					storage.serializeString(GlobalVariable.LEVEL, level, null);
 				}
-				
+
 				storage.serializeBool('synchronise-level', synchroniseLevel);
 				storage.serializeBool('synchronise-run', synchroniseRun);
 			}
@@ -157,7 +157,7 @@ package com.iblsoft.flexiweather.ogc
 			if (m_autoRefreshTimer)
 			{
 				m_autoRefreshTimer.stop();
-			
+
 				if (m_cfg.autoRefreshPeriod > 0)
 					m_autoRefreshTimer.delay = m_cfg.autoRefreshPeriod * 1000.0;
 			}
@@ -181,7 +181,7 @@ package com.iblsoft.flexiweather.ogc
 		override protected function updateData(b_forceUpdate: Boolean): void
 		{
 //			debug("updateDate["+b_forceUpdate+"] _layerInitialized: " + _layerInitialized + " capabilitiesReady: " + capabilitiesReady + " visible: " + visible);
-			
+
 			if (!_layerInitialized)
 				return;
 			if (status != STATE_NO_SYNCHRONISATION_DATA_AVAILABLE)
@@ -308,22 +308,22 @@ package com.iblsoft.flexiweather.ogc
 		{
 			return super.visible;
 		}
-		
+
 		override public function set visible(b_visible: Boolean): void
 		{
 			if (super.visible != b_visible)
 			{
 				super.visible = b_visible;
-				
+
 			}
 		}
-		
+
 		override protected function debug(str: String): void
 		{
-//			trace(this + " WMS: " + str);
+//			trace("WMS: ["+name+"/"+layerID+"] " + str);
 //			LoggingUtils.dispatchLogEvent(this, "WMS: " + str);
 		}
-		
+
 		override public function clone(): InteractiveLayer
 		{
 			var newLayer: InteractiveLayerWMS = new InteractiveLayerWMS(container, m_cfg);

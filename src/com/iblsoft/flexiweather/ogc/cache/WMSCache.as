@@ -4,7 +4,7 @@ package com.iblsoft.flexiweather.ogc.cache
 	import com.iblsoft.flexiweather.ogc.cache.event.WMSCacheEvent;
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.IViewProperties;
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.WMSViewProperties;
-	
+
 	import flash.display.Bitmap;
 	import flash.display.DisplayObject;
 	import flash.events.EventDispatcher;
@@ -28,26 +28,26 @@ package com.iblsoft.flexiweather.ogc.cache
 		private var mf_expirationTime: int = 0;
 		private var m_expirationTimer: Timer;
 		private var _animationModeEnabled: Boolean;
-		
+
 		protected var md_cache: Dictionary = new Dictionary();
 		protected var md_noDataCache: Dictionary = new Dictionary();
 		protected var md_cacheLoading: Dictionary = new Dictionary();
-		
+
 		protected var mi_cacheItemCount: int = 0;
 		protected var mi_noDataCacheItemsLength: int = 0;
 		protected var mi_cacheLoadingItemsLength: int = 0;
-		
+
 		public function get length(): uint
 		{
-			return mi_cacheItemCount;			
+			return mi_cacheItemCount;
 		}
 		public function get noDataItemsLengths(): int
 		{
-			return mi_noDataCacheItemsLength;			
+			return mi_noDataCacheItemsLength;
 		}
 		public function get loadingItemsLength(): int
 		{
-			return mi_cacheLoadingItemsLength;			
+			return mi_cacheLoadingItemsLength;
 		}
 
 		public function clearCache(b_disposeDisplayed: Boolean): void
@@ -97,7 +97,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			md_cache = null;
 			md_noDataCache = null;
 			md_cacheLoading = null;
-			
+
 			mi_cacheItemCount = 0;
 			mi_cacheLoadingItemsLength = 0;
 			mi_noDataCacheItemsLength = 0;
@@ -171,19 +171,19 @@ package com.iblsoft.flexiweather.ogc.cache
 		public function deleteCacheItemByKey(s_key: String, b_disposeDisplayed: Boolean = false): Boolean
 		{
 			var cacheItem: CacheItem = md_cache[s_key] as CacheItem;
-			
+
 			if (cacheItem)
 			{
 				var isDisplayed: Boolean = cacheItem.displayed;
 				var currIsDisplayed: Boolean = cacheItem.isImageOnDisplayList();
-				if (isDisplayed != currIsDisplayed)
-					trace("Check cached item on display list");
+//				if (isDisplayed != currIsDisplayed)
+//					trace("Check cached item on display list");
 			}
-			
+
 			// dispose bitmap data, just for bitmaps which are not currently displayed
 			if (cacheItem && (!cacheItem.displayed || (cacheItem.displayed && b_disposeDisplayed)))
 			{
-				
+
 				notifyBitmapDelete(cacheItem);
 				if (cacheItem.image is Bitmap)
 				{
@@ -222,10 +222,10 @@ package com.iblsoft.flexiweather.ogc.cache
 			var wmsViewProperties: WMSViewProperties = viewProperties as WMSViewProperties;
 			if (!wmsViewProperties)
 				return null;
-			
+
 			return qetWMSViewCacheKey(wmsViewProperties);
 		}
-		
+
 		private function getKey(s_crs: String, bbox: BBox, url: URLRequest, dimensions: Array, validity: Date = null, wmsViewProperties: WMSViewProperties = null): String
 		{
 			var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url, dimensions, validity, wmsViewProperties.m_cfg.wmsService.baseURL);
@@ -285,11 +285,11 @@ package com.iblsoft.flexiweather.ogc.cache
 				if (md_noDataCache && md_noDataCache[s_key])
 					return true;
 			}
-			
+
 //			var temp: String = debugCache();
 //			trace("isItemCached for " + s_key);
 //			trace(temp);
-			
+
 			return md_cache[s_key] || md_cacheLoading[s_key];
 		}
 
@@ -302,7 +302,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			if (s_key in md_cache)
 			{
 //				trace("WMSCache getCacheItem: "+ s_key);
-				
+
 				var item: CacheItem = md_cache[s_key] as CacheItem;
 				item.lastUsed = new Date();
 				item.displayed = true;
@@ -360,6 +360,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			var wmsViewProperties: WMSViewProperties = viewProperties as WMSViewProperties;
 			if (!wmsViewProperties)
 				return;
+
 			var s_crs: String = wmsViewProperties.crs as String;
 			var bbox: BBox = wmsViewProperties.getViewBBox() as BBox;
 			var url: URLRequest = wmsViewProperties.url;
@@ -367,20 +368,20 @@ package com.iblsoft.flexiweather.ogc.cache
 			var validity: Date = wmsViewProperties.validity;
 			var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url, dimensions, validity, wmsViewProperties.m_cfg.wmsService.baseURL);
 			var s_key: String = qetWMSViewCacheKey(wmsViewProperties);
-			
-//			trace("WMSCache addCacheItem: "+ s_key);
+
+			debug("addCacheItem: "+ s_key);
 			var b_deleted: Boolean = deleteCacheItemByKey(s_key, true);
 			var item: CacheItem = new CacheItem();
 			item.cacheKey = ck;
 			item.displayed = true;
 			item.lastUsed = new Date();
 			item.image = img;
-			
+
 			md_cache[s_key] = item;
 			mi_cacheItemCount++;
-			
+
 			debugCache();
-			
+
 			if (md_cacheLoading[s_key])
 			{
 				delete md_cacheLoading[s_key];
@@ -388,7 +389,7 @@ package com.iblsoft.flexiweather.ogc.cache
 //			} else {
 //				trace("addCacheItem: Can not delete item from 'loading cache' for key: " + s_key);
 			}
-			
+
 			var wce: WMSCacheEvent = new WMSCacheEvent(WMSCacheEvent.ITEM_ADDED, item, true);
 			wce.associatedData = associatedData;
 			dispatchEvent(wce);
@@ -398,13 +399,13 @@ package com.iblsoft.flexiweather.ogc.cache
 		{
 			if (!supportCaching)
 				return;
-			
+
 			var wmsViewProperties: WMSViewProperties = viewProperties as WMSViewProperties;
 			if (!wmsViewProperties)
 				return;
-			
+
 			var s_key: String = qetWMSViewCacheKey(wmsViewProperties);
-			
+
 			if (s_key && md_cacheLoading[s_key])
 			{
 				delete md_cacheLoading[s_key];
@@ -413,7 +414,7 @@ package com.iblsoft.flexiweather.ogc.cache
 //				trace("cacheItemLoadingCanceled: Can not delete item from 'loading cache' for key: " + s_key);
 			}
 		}
-		
+
 		public function debugCache(): String
 		{
 			var str: String = 'WMSCache';
@@ -479,8 +480,9 @@ package com.iblsoft.flexiweather.ogc.cache
 
 		private function debug(str: String): void
 		{
+			trace(this + " > " + str);
 		}
-		
+
 		override public function toString(): String
 		{
 			return "WMSCache: len: " + length + " noData len: " + noDataItemsLengths + " loading len: " + loadingItemsLength;
