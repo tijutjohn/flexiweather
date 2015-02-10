@@ -112,7 +112,6 @@ import flash.display.Bitmap;
 
 //			trace("\nupdateWMSData: " + m_wmsViewProperties.toString() + " bbox: " + m_wmsViewProperties.getViewBBox());
 
-			m_layer.container.interactiveLayerMap
 			if (!b_animationMode && isSameData(m_wmsViewProperties, m_previousWmsViewProperties))
 			{
 				trace("Same WMS Data request in short time, does not load anything");
@@ -282,7 +281,7 @@ import flash.display.Bitmap;
 				{
 					jobName += "["+forecast+"]";
 				}
-//				trace("updateDataPart jobName: " + jobName + " bbox: " + bbox);
+				trace("updateDataPart jobName: " + jobName + " bbox: " + bbox + " Image ["+imagePart.partID+"/"+m_wmsViewProperties.propertiesID+"]");
 
 				if (_delayedRequestArray.length > 0)
 				{
@@ -460,6 +459,8 @@ import flash.display.Bitmap;
 							++i;
 					}
 				}
+
+				trace("addImagePart: " + imagePart.partID + " to propertie: " + wmsViewProperties.propertiesID);
 				wmsViewProperties.addImagePart(imagePart);
 			}
 		}
@@ -498,9 +499,16 @@ import flash.display.Bitmap;
 						key = cacheItem.cacheKey.key;
 
 					imagePart.mi_updateCycleAge = mi_updateCycleAge;
-					addImagePart(wmsViewProperties, imagePart, result, key);
 					wmsViewProperties.url = event.request;
+//					addImagePart(wmsViewProperties, imagePart, result, key);
 					wmsCache.addCacheItem(imagePart.image, wmsViewProperties, event.associatedData);
+
+					//ATTENTION
+					//OW-309 - if addImagePart is executed after rwmsCache.addCacheItem - multiView dateline works perfectly (2 imageParts per view),
+					//but there is problem when use change selection in multiView. And vice versa
+					addImagePart(wmsViewProperties, imagePart, result, key);
+
+
 					invalidateDynamicPart();
 
 				}

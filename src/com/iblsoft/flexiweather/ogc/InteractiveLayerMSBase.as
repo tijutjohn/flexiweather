@@ -609,7 +609,7 @@ package com.iblsoft.flexiweather.ogc
 		}
 		protected function onCurrentWMSDataSynchronisedVariableProblem(event: SynchronisedVariableChangeEvent): void
 		{
-			debug("onCurrentWMSDataSynchronisedVariableProblem");
+			debug("onCurrentWMSDataSynchronisedVariableProblem: " + event.variableId);
 			dispatchEvent(event);
 		}
 
@@ -836,6 +836,7 @@ package com.iblsoft.flexiweather.ogc
 					}
 
 					//here is problem that m_currentWMSViewProperties has crs ESRI:102021 and viewBBox from CRS:84
+					debug("_loader.updateWMSData: bbox: " + m_currentWMSViewProperties.getViewBBox().toBBOXString() + " properties: " + m_currentWMSViewProperties);
 					_loader.updateWMSData(b_forceUpdate, m_currentWMSViewProperties, forcedLayerWidth, forcedLayerHeight, printQuality, mb_animationModeEnabled);
 				}
 			}
@@ -943,9 +944,11 @@ package com.iblsoft.flexiweather.ogc
 					{
 						continue; // otherwise we cannot draw it
 					}
+//					debug("Draw: Image ["+imagePart.partID+"/"+m_currentWMSViewProperties.propertiesID+"] m_imageBBox:" + imagePart.m_imageBBox.toBBOXString());
 					var reflectedBBoxes: Array = container.mapBBoxToViewReflections(imagePart.m_imageBBox);
 					for each (var reflectedBBox: BBox in reflectedBBoxes)
 					{
+//						debug("\tDraw: Image ["+imagePart.partID+"/"+m_currentWMSViewProperties.propertiesID+"] reflectedBBox:" + reflectedBBox.toBBOXString());
 						drawImagePart(graphics, imagePart.image, imagePart.ms_imageCRS, reflectedBBox);
 					}
 				}
@@ -1072,14 +1075,20 @@ package com.iblsoft.flexiweather.ogc
 			ptImageSize.x = int(Math.round(ptImageSize.x));
 			ptImageSize.y = int(Math.round(ptImageSize.y));
 
+//			debug("drawImagePartAsBitmap: " + imageBBox.toBBOXString());
+			try {
 
-//			trace(id + " drawImagePartAsBitmap ["+image.bitmapData.width+","+image.bitmapData.height+"]  ptImageSize: "+ ptImageSize);
-			var matrix: Matrix = new Matrix();
-			matrix.scale(ptImageSize.x / image.width, ptImageSize.y / image.height);
-			matrix.translate(ptImageStartPoint.x, ptImageStartPoint.y);
-			graphics.beginBitmapFill(image.bitmapData, matrix, true, true);
-			graphics.drawRect(ptImageStartPoint.x, ptImageStartPoint.y, ptImageSize.x, ptImageSize.y);
-			graphics.endFill();
+//				debug("\t\t drawImagePartAsBitmap ["+image.bitmapData.width+","+image.bitmapData.height+"]  ptImageSize: "+ ptImageSize + " position: " + ptImageStartPoint);
+				var matrix: Matrix = new Matrix();
+				matrix.scale(ptImageSize.x / image.width, ptImageSize.y / image.height);
+				matrix.translate(ptImageStartPoint.x, ptImageStartPoint.y);
+				graphics.beginBitmapFill(image.bitmapData, matrix, true, true);
+				graphics.drawRect(ptImageStartPoint.x, ptImageStartPoint.y, ptImageSize.x, ptImageSize.y);
+				graphics.endFill();
+
+			} catch (error: Error) {
+				debug("\t\t drawImagePartAsBitmap problem with BitmapData size  ptImageSize: "+ ptImageSize + " position: " + ptImageStartPoint);
+			}
 		}
 
 		private function updateCurrentWMSViewProperties(): void
@@ -2207,7 +2216,7 @@ package com.iblsoft.flexiweather.ogc
 		protected function debug(str: String): void
 		{
 //			LoggingUtils.dispatchLogEvent(this, "MSBase: " + str);
-//			trace("MSBase: ["+name+"/"+layerID+"] " + str);
+			trace("MSBase: ["+name+"/"+layerID+"] " + str);
 		}
 
 		private var _configurationChanged: Boolean;
@@ -2327,12 +2336,18 @@ package com.iblsoft.flexiweather.ogc
 						{
 							//listen when same cache item will be added
 							imagePart.mb_imageOK = false;
+							debug("onBeforeCacheItemDeleted imagePart: " + imagePart.partID + " imageOK = false");
+							cache.removeEventListener(WMSCacheEvent.ITEM_ADDED, onDeleteCacheItemAdded);
 							cache.addEventListener(WMSCacheEvent.ITEM_ADDED, onDeleteCacheItemAdded);
+						} else {
+							debug("onBeforeCacheItemDeleted imagePart: " + imagePart.partID + " imageOK not changed ["+imagePart.mb_imageOK+"]");
+
 						}
 					}
 				}
 			}
 		}
+
 
 		private function onDeleteCacheItemAdded(event: WMSCacheEvent): void
 		{
@@ -2341,15 +2356,32 @@ package com.iblsoft.flexiweather.ogc
 			{
 				var imageParts: ArrayCollection = m_currentWMSViewProperties.imageParts;
 				var cacheKey: String = event.item.cacheKey.key;
+				var requestedImagePart: ImagePart = event.associatedData.requestedImagePart;
+				var requestedImagePartID: int = requestedImagePart.partID;
+				var cache: WMSCache = getCache() as WMSCache;
+
+				debug("onDeleteCacheItemAdded cacheKey: " + cacheKey);
 				for each (var imagePart: ImagePart in imageParts)
 				{
+//					if (imagePart.isBitmap && imagePart.partID == requestedImagePartID)
 					if (imagePart.isBitmap)
 					{
-						if (!imagePart.ms_cacheKey || imagePart.ms_cacheKey == cacheKey)
+						var notCached:Boolean = !imagePart.ms_cacheKey;
+						var sameCacheKey: Boolean = (imagePart.ms_cacheKey && imagePart.ms_cacheKey == cacheKey);
+						var samePartID: Boolean = imagePart.partID == requestedImagePartID;
+
+						debug("onDeleteCacheItemAdded imagePart: " + imagePart.partID + " not cached: " + notCached + " sameCacheKey: " + sameCacheKey + " samePartID: " + samePartID);
+//						if (sameCacheKey || samePartID)
+//						if (sameCacheKey)
+//						if (!imagePart.ms_cacheKey || imagePart.ms_cacheKey == cacheKey)
+						if (notCached || sameCacheKey)
 						{
+//							cache.removeEventListener(WMSCacheEvent.ITEM_ADDED, onDeleteCacheItemAdded);
 							imagePart.image = event.item.image;
 							imagePart.mb_imageOK = true;
 							imagePart.ms_cacheKey = cacheKey;
+						} else {
+							trace("will not set image in onDeleteCacheItemAdded imagePart ["+imagePart.partID+"]");
 						}
 					}
 				}

@@ -39,6 +39,9 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 	public class WMSViewProperties extends EventDispatcher implements IViewProperties, Serializable
 	{
 
+		public static var idCounter: int = 0;
+		public var propertiesID: int;
+
 		//left and right time frame for animation synchronization (in minutes)
 		public static const FRAMES_SYNCHRONIZATION_LEFT_TIME_FRAME: int = 150; //2 hours and 30 minutes
 		public static const FRAMES_SYNCHRONIZATION_RIGHT_TIME_FRAME: int = 150; //2 hours and 30 minutes
@@ -138,6 +141,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 
 		public function WMSViewProperties()
 		{
+			propertiesID = idCounter++;
 		}
 
 		public function destroy(): void
@@ -1468,7 +1472,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 
 		override public function toString(): String
 		{
-			var tmp: String = "WMSViewProperties: | ";
+			var tmp: String = "WMSViewProperties ["+propertiesID+"]: | ";
 
 			var dimNames: Array = getWMSDimensionsNames();
 			for each (var dimName: String in dimNames)

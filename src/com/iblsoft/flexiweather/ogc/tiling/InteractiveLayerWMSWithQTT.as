@@ -827,7 +827,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		override protected function debug(str: String): void
 		{
-//			trace(this + " WMSWithQTT: " + str);
+			trace("WMSWithQTT ["+name+"/"+layerID+"] " + str);
 //			LoggingUtils.dispatchLogEvent(this, "WMSWithQTT: " + str);
 		}
 
