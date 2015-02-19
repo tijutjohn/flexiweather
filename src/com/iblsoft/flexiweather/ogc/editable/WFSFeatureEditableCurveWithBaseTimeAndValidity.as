@@ -256,6 +256,12 @@ package com.iblsoft.flexiweather.ogc.editable
 				return;
 			}
 
+			if (!m_featureData.startPoint)
+			{
+				trace("Problem: Start point is null");
+				return;
+			}
+
 //			debug("\n\n");
 //			debug("drawFeatureData");
 			var p: Point;
@@ -270,6 +276,7 @@ package com.iblsoft.flexiweather.ogc.editable
 //				points = m_featureData.points;
 //				pointsCount = points.length;
 //			}
+
 
 			if (pointsCount > 0)
 			{

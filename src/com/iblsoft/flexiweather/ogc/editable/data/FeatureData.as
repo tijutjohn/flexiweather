@@ -506,14 +506,14 @@ package com.iblsoft.flexiweather.ogc.editable.data
 //					{
 //						if (oldPoint)
 //						{
-//							_points.push(oldPoint);
+//							addPoint(oldPoint);
 //							//						debug("\t\t\t insert old point: " + oldPoint + " diff: " + linesOrderDiff + " curr: " + iLineID);
 //							oldPoint = null;
 //						}
 //						if (!bNewLineInserted)
 //						{
 //							//							debug("\t\t\t insert NULL:  curr: " + iLineID);
-//							_points.push(null);
+//							addPoint(null);
 //						}
 //						bNewLineInserted = true;
 //					} else {
@@ -528,7 +528,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 						var lineSegment: FeatureDataLineSegment = line.lineSegments[s] as FeatureDataLineSegment;
 						if (!lineSegment)
 						{
-							_points.push(null);
+							addPoint(null);
 							continue;
 						}
 
@@ -536,11 +536,12 @@ package com.iblsoft.flexiweather.ogc.editable.data
 
 						if (!lineSegmentVisible)
 						{
-							if (!closed)
-							{
-								_points.push(null);
-								continue;
-							}
+//							if (!closed)
+//							{
+//								addPoint(null);
+//								continue;
+//							}
+							continue;
 						}
 						//						debug("line segment:  lineID = " + line.id + " s: " + s + " Segment: " + lineSegment);
 						var p1: FeatureDataPoint = new FeatureDataPoint(lineSegment.x1, lineSegment.y1);
@@ -548,22 +549,22 @@ package com.iblsoft.flexiweather.ogc.editable.data
 						//						debug("\t\t compute p1: " + p1 + " p2: " + p2);
 
 						if (!oldPoint)
-							_points.push(p1);
+							addPoint(p1);
 						else if (oldPoint.x != p1.x || oldPoint.y != p1.y) {
 							//							debug("old and new points are not equal: lineID = " + line.id + " s: " + s);
-							//						_points.push(null);
-							_points.push(p1);
+							//						addPoint(null);
+							addPoint(p1);
 						}
 
 						//check if line has defined second point
 						if (!isNaN(p2.x) && !isNaN(p2.y))
 						{
-							_points.push(p2);
+							addPoint(p2);
 							oldPoint = p2.clone() as FeatureDataPoint;
 						} else {
 							oldPoint = p1.clone() as FeatureDataPoint;
 							//if there is no second point, add NULL (split line)
-							_points.push(null);
+							addPoint(null);
 						}
 
 
@@ -575,7 +576,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 						//						debug("\t Old point: lineID = " + line.id + " s: " + s + " point: " + oldPoint);
 					}
 				} else {
-					_points.push(null);
+					addPoint(null);
 				}
 
 //				oldLineID = iLineID;
@@ -584,7 +585,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			//			debug("STEP 2");
 			var newPoint: FeatureDataPoint = checkClipping(_points, 0, _points.length - 1);
 			if (newPoint)
-				_points.push(newPoint);
+				addPoint(newPoint);
 
 
 			//			debug("STEP 3");
@@ -621,6 +622,11 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			//			debug("compute took " + (getTimer() - currTime) + "ms.");
 		}
 
+		private function addPoint(point: FeatureDataPoint): void
+		{
+			_points.push(point);
+		}
+
 		private function computeOld(): void
 		{
 			var currTime: Number = getTimer();
@@ -647,14 +653,14 @@ package com.iblsoft.flexiweather.ogc.editable.data
 					{
 						if (oldPoint)
 						{
-							_points.push(oldPoint);
+							addPoint(oldPoint);
 //						debug("\t\t\t insert old point: " + oldPoint + " diff: " + linesOrderDiff + " curr: " + iLineID);
 							oldPoint = null;
 						}
 						if (!bNewLineInserted)
 						{
 //							debug("\t\t\t insert NULL:  curr: " + iLineID);
-							_points.push(null);
+							addPoint(null);
 						}
 						bNewLineInserted = true;
 					} else {
@@ -669,7 +675,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 						var lineSegment: FeatureDataLineSegment = line.lineSegments[s] as FeatureDataLineSegment;
 						if (!lineSegment)
 						{
-							_points.push(null);
+							addPoint(null);
 							continue;
 						}
 
@@ -679,7 +685,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 						{
 							if (!closed)
 							{
-								_points.push(null);
+								addPoint(null);
 								continue;
 							}
 						}
@@ -689,22 +695,22 @@ package com.iblsoft.flexiweather.ogc.editable.data
 //						debug("\t\t compute p1: " + p1 + " p2: " + p2);
 
 						if (!oldPoint)
-							_points.push(p1);
+							addPoint(p1);
 						else if (oldPoint.x != p1.x || oldPoint.y != p1.y) {
 //							debug("old and new points are not equal: lineID = " + line.id + " s: " + s);
-	//						_points.push(null);
-							_points.push(p1);
+	//						addPoint(null);
+							addPoint(p1);
 						}
 
 						//check if line has defined second point
 						if (!isNaN(p2.x) && !isNaN(p2.y))
 						{
-							_points.push(p2);
+							addPoint(p2);
 							oldPoint = p2.clone() as FeatureDataPoint;
 						} else {
 							oldPoint = p1.clone() as FeatureDataPoint;
 							//if there is no second point, add NULL (split line)
-							_points.push(null);
+							addPoint(null);
 						}
 
 
@@ -716,7 +722,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 //						debug("\t Old point: lineID = " + line.id + " s: " + s + " point: " + oldPoint);
 					}
 				} else {
-					_points.push(null);
+					addPoint(null);
 				}
 
 				oldLineID = iLineID;
@@ -725,7 +731,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 //			debug("STEP 2");
 			var newPoint: FeatureDataPoint = checkClipping(_points, 0, _points.length - 1);
 			if (newPoint)
-				_points.push(newPoint);
+				addPoint(newPoint);
 
 
 //			debug("STEP 3");
