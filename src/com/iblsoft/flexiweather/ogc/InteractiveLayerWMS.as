@@ -318,7 +318,7 @@ package com.iblsoft.flexiweather.ogc
 			}
 		}
 
-		override protected function debug(str: String): void
+		private function debug(str: String): void
 		{
 //			trace("WMS: ["+name+"/"+layerID+"] " + str);
 //			LoggingUtils.dispatchLogEvent(this, "WMS: " + str);

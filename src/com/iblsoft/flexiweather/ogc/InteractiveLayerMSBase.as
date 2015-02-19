@@ -833,6 +833,7 @@ package com.iblsoft.flexiweather.ogc
 						_loader.addEventListener(InteractiveDataLayer.LOADING_ERROR, onCurrentWMSDataLoadingError);
 						_loader.addEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
 						_loader.addEventListener(InteractiveLayerEvent.INVALIDATE_DYNAMIC_PART, onCurrentWMSDataInvalidateDynamicPart);
+						_loader.addEventListener(MSBaseLoader.REQUEST_CANCELLED, onLoaderRequestCancelled);
 					}
 
 					//here is problem that m_currentWMSViewProperties has crs ESRI:102021 and viewBBox from CRS:84
@@ -840,6 +841,13 @@ package com.iblsoft.flexiweather.ogc
 					_loader.updateWMSData(b_forceUpdate, m_currentWMSViewProperties, forcedLayerWidth, forcedLayerHeight, printQuality, mb_animationModeEnabled);
 				}
 			}
+		}
+
+		private function onLoaderRequestCancelled(event: Event): void
+		{
+			debug("\n\n onLoaderRequestCancelled _previousStatus: " + _lastValidStatus + " \n\n");
+			if (_lastValidStatus)
+				setStatus(_lastValidStatus);
 		}
 
 		private function destroyPreloading(): void
@@ -2213,7 +2221,7 @@ package com.iblsoft.flexiweather.ogc
 
 		}
 
-		protected function debug(str: String): void
+		private function debug(str: String): void
 		{
 //			LoggingUtils.dispatchLogEvent(this, "MSBase: " + str);
 			trace("MSBase: ["+name+"/"+layerID+"] " + str);
