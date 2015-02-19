@@ -220,7 +220,7 @@ package com.iblsoft.flexiweather.widgets
 		 */
 		public function invalidateData(b_forceUpdate: Boolean): void
 		{
-//			trace("InvalidateDataLayer invalidateData ["+this+"]");
+//			debug("InvalidateDataLayer invalidateData ["+this+"]");
 			invalidateDataFlag = true;
 			_invalidateDataForceUpdateFlag = _invalidateDataForceUpdateFlag || b_forceUpdate;
 			invalidateProperties();
@@ -266,7 +266,7 @@ package com.iblsoft.flexiweather.widgets
 					invalidateDataFlag = false;
 					_invalidateDataForceUpdateFlag = false;
 				} else {
-					trace("Would call updateData, but m_suspendDataUpdating = true");
+					debug("Would call updateData, but m_suspendDataUpdating = true");
 				}
 			}
 		}
@@ -276,6 +276,8 @@ package com.iblsoft.flexiweather.widgets
 		 * 													Status functionality
 		 *
 		 ****************************************************************************************************************/
+		protected var _lastValidStatus: String;
+
 		protected function setStatus(newStatus: String): void
 		{
 			var a: String;
@@ -292,9 +294,22 @@ package com.iblsoft.flexiweather.widgets
 				a = STATE_DATA_LOADED
 			}
 
-//			trace("\t\tLayer status = " + newStatus + " for ["+name+"] ");
+			switch (newStatus)
+			{
+				case STATE_DATA_LOADED:
+				case STATE_DATA_LOADED_WITH_ERRORS:
+				case STATE_NO_SYNCHRONISATION_DATA_AVAILABLE:
+				{
+					_lastValidStatus = newStatus;
+					debug("_previousStatus: " + _lastValidStatus);
+					break;
+				}
+			}
+
+			debug("\t\tLayer status = " + newStatus + " for ["+layerID+"/"+name+"] ");
 			_status = newStatus;
 			dispatchEvent(new Event(STATUS_CHANGED));
+
 		}
 
 		/**
@@ -417,6 +432,11 @@ package com.iblsoft.flexiweather.widgets
 		public function get dataLoader(): WMSImageLoader
 		{
 			return m_loader;
+		}
+
+		private function debug(str: String): void
+		{
+			trace("DataLayer: ["+name+"/"+layerID+"] " + str);
 		}
 	}
 }

@@ -2,42 +2,44 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 {
 import com.iblsoft.flexiweather.FlexiWeatherConfiguration;
 import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
-	import com.iblsoft.flexiweather.events.InteractiveLayerProgressEvent;
-	import com.iblsoft.flexiweather.net.events.UniURLLoaderErrorEvent;
-	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
-	import com.iblsoft.flexiweather.ogc.BBox;
-	import com.iblsoft.flexiweather.ogc.ExceptionUtils;
-	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
-	import com.iblsoft.flexiweather.ogc.cache.CacheItem;
-	import com.iblsoft.flexiweather.ogc.cache.WMSCache;
-	import com.iblsoft.flexiweather.ogc.cache.event.WMSCacheEvent;
-	import com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration;
-	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.IWMSLayerConfiguration;
-	import com.iblsoft.flexiweather.ogc.data.ImagePart;
-	import com.iblsoft.flexiweather.ogc.data.viewProperties.IViewProperties;
-	import com.iblsoft.flexiweather.ogc.data.viewProperties.IWMSViewPropertiesLoader;
-	import com.iblsoft.flexiweather.ogc.data.viewProperties.WMSViewProperties;
-	import com.iblsoft.flexiweather.ogc.events.MSBaseLoaderEvent;
-	import com.iblsoft.flexiweather.proj.Projection;
-	import com.iblsoft.flexiweather.utils.DebugUtils;
-	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
-	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
+import com.iblsoft.flexiweather.events.InteractiveLayerProgressEvent;
+import com.iblsoft.flexiweather.net.events.UniURLLoaderErrorEvent;
+import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
+import com.iblsoft.flexiweather.ogc.BBox;
+import com.iblsoft.flexiweather.ogc.ExceptionUtils;
+import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
+import com.iblsoft.flexiweather.ogc.cache.CacheItem;
+import com.iblsoft.flexiweather.ogc.cache.WMSCache;
+import com.iblsoft.flexiweather.ogc.cache.event.WMSCacheEvent;
+import com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration;
+import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.IWMSLayerConfiguration;
+import com.iblsoft.flexiweather.ogc.data.ImagePart;
+import com.iblsoft.flexiweather.ogc.data.viewProperties.IViewProperties;
+import com.iblsoft.flexiweather.ogc.data.viewProperties.IWMSViewPropertiesLoader;
+import com.iblsoft.flexiweather.ogc.data.viewProperties.WMSViewProperties;
+import com.iblsoft.flexiweather.ogc.events.MSBaseLoaderEvent;
+import com.iblsoft.flexiweather.proj.Projection;
+import com.iblsoft.flexiweather.utils.DebugUtils;
+import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
+import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 
 import flash.display.Bitmap;
-	import flash.display.DisplayObject;
-	import flash.events.Event;
-	import flash.events.EventDispatcher;
-	import flash.events.ProgressEvent;
-	import flash.net.URLRequest;
-	import flash.utils.ByteArray;
-	import flash.utils.getTimer;
+import flash.display.DisplayObject;
+import flash.events.Event;
+import flash.events.EventDispatcher;
+import flash.events.ProgressEvent;
+import flash.net.URLRequest;
+import flash.utils.ByteArray;
+import flash.utils.getTimer;
 
-	import mx.collections.ArrayCollection;
-	import mx.events.DynamicEvent;
-	import mx.logging.Log;
+import mx.collections.ArrayCollection;
+import mx.events.DynamicEvent;
+import mx.logging.Log;
 
 	public class MSBaseLoader extends EventDispatcher implements IWMSViewPropertiesLoader
 	{
+		public static const REQUEST_CANCELLED: String = "requestCancelled";
+
 		private static var uid: int = 0;
 		public var id: int;
 		private var ma_requests: ArrayCollection = new ArrayCollection(); // of URLRequest
@@ -115,6 +117,7 @@ import flash.display.Bitmap;
 			if (!b_animationMode && isSameData(m_wmsViewProperties, m_previousWmsViewProperties))
 			{
 				trace("Same WMS Data request in short time, does not load anything");
+				dispatchEvent(new Event(REQUEST_CANCELLED));
 				return;
 			}
 			//check if data are not already cached
