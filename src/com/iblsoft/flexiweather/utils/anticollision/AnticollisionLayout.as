@@ -111,7 +111,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 					debug("\n\n"+this + " visible = " + value);
 					onVisibilityChanged();
 //				} else {
-//					debug(this + " same visibility: " + value);
+//					debug(" same visibility: " + value);
 //				}
 			}
 		}
@@ -355,6 +355,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 				}
 				ma_layoutObjects.splice(0, ma_layoutObjects.length);
 				//debug("ma_layoutObjects: " + ma_layoutObjects.length);
+				m_anchorsLayer.graphics.clear();
 				setDirty();
 				updateLayoutObjectsLength();
 			}
@@ -401,7 +402,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 		{
 			if (!m_suspendAnticollisionProcessing && !_updateLocked)
 			{
-				debug(this + " UPDATE");
+				debug(" UPDATE");
 				var time: int = ProfilerUtils.startProfileTimer();
 				var pass: int = 0;
 				var diffTime: Number = getTimer() - mi_lastUpdate;
@@ -430,6 +431,11 @@ package com.iblsoft.flexiweather.utils.anticollision
 				var loAnchored: AnticollisionLayoutObject;
 				var objectToAnchor: DisplayObject;
 				var currTime: int;
+
+				var g: Graphics = m_anchorsLayer.graphics;
+				g.clear();
+				debug(" UPDATE clear");
+
 				// first pass - analyse current absolute visibility of objects
 				currTime = ProfilerUtils.startProfileTimer();
 				for each (lo in currObjects)
@@ -605,8 +611,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 				currTime = ProfilerUtils.startProfileTimer();
 				// now we can assume that all objects are laid out
 				// draw anchors between
-				var g: Graphics = m_anchorsLayer.graphics;
-				g.clear();
+
 				for each (lo in currObjects)
 				{
 					pass++;
@@ -909,7 +914,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 
 		protected function debug(txt: String): void
 		{
-//			trace("AnticollisionLayout: " + txt);
+//			trace(this + ": " + txt);
 			if (debugConsole)
 				debugConsole.print("AnticollisionLayout: " + txt, 'Info', 'AnticollisionLayout');
 		}
