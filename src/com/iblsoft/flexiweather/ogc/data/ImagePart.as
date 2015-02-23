@@ -27,7 +27,7 @@ package com.iblsoft.flexiweather.ogc.data
 
 		public function set mb_imageOK(value:Boolean):void
 		{
-			trace("ImagePart ["+partID+"]mb_imageOK = " + value);
+//			trace("ImagePart ["+partID+"]mb_imageOK = " + value);
 			_mb_imageOK = value;
 		}
 
@@ -52,10 +52,10 @@ package com.iblsoft.flexiweather.ogc.data
 			if (value is Bitmap)
 			{
 				var bd: BitmapData = (value as Bitmap).bitmapData;
-				trace("ImagePart ["+partID+"] set bitmap ["+bd.width+","+bd.height+"]");
+//				trace("ImagePart ["+partID+"] set bitmap ["+bd.width+","+bd.height+"]");
 				m_image = new Bitmap((value as Bitmap).bitmapData);
 			} else {
-				trace("ImagePart ["+partID+"] NOT set");
+//				trace("ImagePart ["+partID+"] NOT set");
 				m_image = value;
 			}
 		}

@@ -2225,7 +2225,7 @@ package com.iblsoft.flexiweather.ogc
 		private function debug(str: String): void
 		{
 //			LoggingUtils.dispatchLogEvent(this, "MSBase: " + str);
-			trace("MSBase: ["+name+"/"+layerID+"] " + str);
+//			trace("MSBase: ["+name+"/"+layerID+"] " + str);
 		}
 
 		private var _configurationChanged: Boolean;

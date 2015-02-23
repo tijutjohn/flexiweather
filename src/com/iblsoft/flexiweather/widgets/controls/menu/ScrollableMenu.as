@@ -79,15 +79,15 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 
 		override public function set selectedIndex(value:int):void
 		{
-			trace("Scrollable menu: selected: " + selectedIndex + " verticalScrollPosition: " + value);
+			debug(" selected: " + selectedIndex + " verticalScrollPosition: " + value);
 			if (value < selectedIndex)
-				trace("Check this");
+				debug("Check this");
 
 			super.selectedIndex = value;
 		}
 		override public function set verticalScrollPosition(value:Number):void
 		{
-			trace("Scrollable menu: verticalScrollPosition: " + value + " selected: " + selectedIndex);
+			debug(" verticalScrollPosition: " + value + " selected: " + selectedIndex);
 
 			super.verticalScrollPosition = value;
 		}
@@ -229,7 +229,7 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 		 */
 		override public function hide():void
 		{
-			trace("Scrollable menu: hide");
+			debug(" hide");
 			if (verticalScrollBar)
 			{
 				verticalScrollBar.removeEventListener(ScrollEvent.SCROLL, onScroll);
@@ -392,7 +392,7 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 			try {
 				super.show(xShow, yShow);
 			} catch (e:Error) {
-				trace("Problem showing menu");
+				debug("Problem showing menu");
 			}
 
 
@@ -517,7 +517,7 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 
 		override mx_internal function hideAllMenus():void
 		{
-			trace("Scrollable menu: hideAllMenus: bBlockHideEvent:" + bBlockHideEvent);
+			debug(" hideAllMenus: bBlockHideEvent:" + bBlockHideEvent);
 			if (bBlockHideEvent == false)
 			{
 				super.hideAllMenus();
@@ -526,7 +526,7 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 
 		override protected function focusOutHandler(event:FocusEvent):void
 		{
-			trace("Scrollable menu: hideAllMenus: supposedToLoseFocus:" + supposedToLoseFocus);
+			debug(" hideAllMenus: supposedToLoseFocus:" + supposedToLoseFocus);
 			super.focusOutHandler(event)
 		}
 
@@ -541,7 +541,7 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 
 		override public function set dataProvider(value:Object):void
 		{
-//			trace("Scrollable menu dataProvider: value: " + value);
+//			debug("Scrollable menu dataProvider: value: " + value);
 
 			super.dataProvider = value;
 
@@ -556,12 +556,12 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 		override protected function keyDownHandler(event:KeyboardEvent):void
 		{
 			return;
-			trace("Scrollable menu selectedIndex: " + selectedIndex + " verticalScrollPosition: " + verticalScrollPosition + " listItems: " + listItems.length);
+			debug("Scrollable menu selectedIndex: " + selectedIndex + " verticalScrollPosition: " + verticalScrollPosition + " listItems: " + listItems.length);
 //			super.keyDownHandler(event);
 
 			if (selectedIndex == 11)
 			{
-				trace("check jump back");
+				debug("check jump back");
 			}
 			var position: int = selectedIndex - verticalScrollPosition;
 			var row:IListItemRenderer = selectedIndex == -1 ? null : getListItemAt(position,0);
@@ -763,7 +763,7 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 					return;
 				}
 			}
-			trace("\t moveSelBy: " + oldIndex + " incr: " + incr);
+			debug("\t moveSelBy: " + oldIndex + " incr: " + incr);
 			var curIndex:Number = oldIndex;
 			if (isNaN(curIndex))
 				curIndex = -1;
@@ -774,7 +774,7 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 
 			var firstIndex: Number = itemRendererToIndex(listItems[0][0]);
 			var diffIndex: Number = curIndex - firstIndex;
-			trace("diff index: " + diffIndex);
+			debug("diff index: " + diffIndex);
 
 			if (diffIndex >= 0)
 				newIndex = diffIndex;
@@ -805,7 +805,7 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 					return;
 				}
 
-				trace("\t\t moveSelBy get newIndex: " + newIndex);
+				debug("\t\t moveSelBy get newIndex: " + newIndex);
 				item = getListItemAt(newIndex,0);
 
 			} while (item.data && (_dataDescriptor.getType(item.data) == "separator" || !_dataDescriptor.isEnabled(item.data)));
@@ -814,7 +814,7 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 
 			if (selectedIndex != -1)
 			{
-				trace("\t\t moveSelBy get oldItem: " + selectedIndex);
+				debug("\t\t moveSelBy get oldItem: " + selectedIndex);
 				var oldItem:Object = getListItemAt(selectedIndex,0);
 
 				menuEvent = new MenuEvent(MenuEvent.ITEM_ROLL_OUT);
@@ -833,8 +833,8 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 				var newItem: IListItemRenderer = getListItemAt(newIndex,0);
 				selectItem(newItem, false, false);
 
-//				trace("\t\t moveSelBy get newItem: " + (newIndex - verticalScrollPosition) + " selectedIndex: " + selectedIndex);
-				trace("\t\t moveSelBy get newItem: " + (newIndex) + " selectedIndex: " + selectedIndex);
+//				debug("\t\t moveSelBy get newItem: " + (newIndex - verticalScrollPosition) + " selectedIndex: " + selectedIndex);
+				debug("\t\t moveSelBy get newItem: " + (newIndex) + " selectedIndex: " + selectedIndex);
 				menuEvent = new MenuEvent(MenuEvent.ITEM_ROLL_OVER);
 				menuEvent.menu = this;
 //				menuEvent.index = (newIndex - verticalScrollPosition);
@@ -860,20 +860,20 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 			if (position >= 0 && position < listItems.length)
 				return listItems[position][id];
 
-			trace("can not get list item at " + position);
+			debug("can not get list item at " + position);
 			return null;
 		}
 
 		private function debugListItems(position: int): void
 		{
 			return;
-			trace("MENU ITEMS position: " + position + " selected: " + selectedIndex + " vertical : " + verticalScrollPosition);
+			debug("MENU ITEMS position: " + position + " selected: " + selectedIndex + " vertical : " + verticalScrollPosition);
 			for (var i: int = 0; i < listItems.length; i++)
 			{
 				if (i == position)
-					trace("> " + listItems[i][0].data.@label.toXMLString());
+					debug("> " + listItems[i][0].data.@label.toXMLString());
 				else
-					trace("  " + listItems[i][0].data.@label.toXMLString());
+					debug("  " + listItems[i][0].data.@label.toXMLString());
 			}
 		}
 
@@ -939,6 +939,11 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 
 			renderer.owner = this;
 			return renderer;
+		}
+
+		private function debug(str: String): void
+		{
+			//trace("ScrollableMenu: " + str);
 		}
 	}
 }

@@ -436,7 +436,7 @@ package com.iblsoft.flexiweather.widgets
 
 		private function debug(str: String): void
 		{
-			trace("DataLayer: ["+name+"/"+layerID+"] " + str);
+//			trace("DataLayer: ["+name+"/"+layerID+"] " + str);
 		}
 	}
 }
