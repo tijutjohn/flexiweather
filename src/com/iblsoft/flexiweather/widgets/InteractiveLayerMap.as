@@ -56,6 +56,7 @@ package com.iblsoft.flexiweather.widgets
 	[Event(name = "mapLoadingFinished", type = "com.iblsoft.flexiweather.events.InteractiveLayerMapEvent")]
 	[Event(name = "frameVariableChanged", type = "flash.events.Event")]
 	[Event(name = PRIMARY_LAYER_CHANGED, type = "flash.events.DataEvent")]
+	[Event(name = NO_PRIMARY_LAYER_FOUND, type = "flash.events.Event")]
 	[Event(name = LAYERS_SERIALIZED_AND_READY, type = "mx.events.DynamicEvent")]
 	[Event(name = LAYER_UPDATED, type = "flash.events.DataEvent")]
 	[Event(name = LAYER_ADDED, type = "mx.events.DynamicEvent")]
@@ -86,6 +87,8 @@ package com.iblsoft.flexiweather.widgets
 		public static const LAYER_REMOVED: String = "layerRemoved";
 
 		public static const PRIMARY_LAYER_CHANGED: String = "primaryLayerChanged";
+
+		public static const NO_PRIMARY_LAYER_FOUND: String = "noPrimaryLayerFound";
 
 		public static const FRAME_VARIABLE_CHANGED: String = "frameVariableChanged";
 
@@ -1303,7 +1306,11 @@ package com.iblsoft.flexiweather.widgets
 					return;
 				}
 			}
+
+			primaryLayerNotFound();
 		}
+
+
 
 		override public function removeLayer(l: InteractiveLayer): void
 		{
@@ -1473,6 +1480,17 @@ package com.iblsoft.flexiweather.widgets
 			dispatchEvent(new DataEvent(PRIMARY_LAYER_CHANGED, true));
 
 			notifyMapChanged();
+		}
+
+		private function primaryLayerNotFound(): void
+		{
+			_globalVariablesManager.run = null;
+			_globalVariablesManager.frame = null;
+			_globalVariablesManager.level = null;
+
+			dispatchEvent(new Event(NO_PRIMARY_LAYER_FOUND));
+
+			primaryLayerHasChanged();
 		}
 
 		private var _cachedEnumTimeAxis: Array;
