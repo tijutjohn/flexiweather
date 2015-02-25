@@ -7,7 +7,7 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.utils.packing.DynamicArea;
 	import com.iblsoft.flexiweather.utils.packing.PackingLayoutProperties;
 	import com.iblsoft.flexiweather.utils.packing.Padding;
-	
+
 	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
 	import flash.display.Graphics;
@@ -16,13 +16,13 @@ package com.iblsoft.flexiweather.widgets
 	import flash.geom.Rectangle;
 	import flash.utils.Dictionary;
 	import flash.utils.setTimeout;
-	
+
 	import mx.collections.ArrayCollection;
 	import mx.core.IVisualElement;
 	import mx.events.ResizeEvent;
 	import mx.logging.ILogger;
 	import mx.logging.Log;
-	
+
 	[Style(name = "horizontalGap", type = "Number", format = "Length", inherit = "no")]
 	[Style(name = "verticalGap", type = "Number", format = "Length", inherit = "no")]
 	[Style(name = "labelAlign", type = "String", enumeration = "left,center,right", inherit = "no")]
@@ -67,18 +67,18 @@ package com.iblsoft.flexiweather.widgets
 		public static const LEGENDS_LOADING_FINISHED: String = 'legendsLoadingFinished';
 		public static const LEGENDS_LAYERING_STARTED: String = 'legendsLayeringStarted';
 		public static const LEGENDS_LAYERING_FINISHED: String = 'legendsLayeringFinished';
-		
-		
+
+
 		override public function set mouseEnabled(enabled:Boolean):void
 		{
 			super.mouseEnabled = enabled;
 		}
-		
+
 		override public function set mouseChildren(enable:Boolean):void
 		{
 			super.mouseChildren = enable;
 		}
-		
+
 		private var m_layers: ArrayCollection = new ArrayCollection();
 		public function get layers(): ArrayCollection
 		{
@@ -95,7 +95,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			super.visible = b_visible;
 		}
-		
+
 		public function get maximumArea(): Rectangle
 		{
 			return _maximumArea;
@@ -186,7 +186,7 @@ package com.iblsoft.flexiweather.widgets
 				l.removeEventListener(InteractiveLayerEvent.VISIBILITY_EFFECT_FINISHED, onLayerVisibilityChanged);
 				l.removeEventListener(GetCapabilitiesEvent.CAPABILITIES_RECEIVED, onLayerGetCapabilitiesReceived);
 				m_layers.removeItemAt(i);
-				
+
 				var legendGroup: InteractiveLayerLegendGroup = getGroupFromDictionary(l);
 				if (!legendGroup)
 				{
@@ -198,11 +198,11 @@ package com.iblsoft.flexiweather.widgets
 			} else {
 				debug("Problem with remove layer from ILayerLegends");
 			}
-				
+
 		}
-		
+
 		private var _legendsInvalidated: Boolean;
-		
+
 		public function invalidateLayerLegend(l: InteractiveLayer): void
 		{
 			var group: InteractiveLayerLegendGroup = getGroupFromDictionary(l);
@@ -211,16 +211,16 @@ package com.iblsoft.flexiweather.widgets
 				l.removeLegend(group);
 				removeCanvasFromDictionary(l);
 			}
-			
-		
+
+
 			_legendsInvalidated = true;
 			invalidateProperties();
 		}
-		
+
 		override protected function commitProperties():void
 		{
 			super.commitProperties();
-			
+
 			if (_legendsInvalidated)
 			{
 				repositionedLegends();
@@ -248,7 +248,7 @@ package com.iblsoft.flexiweather.widgets
 
 		private function onLayerGetCapabilitiesReceived(event: GetCapabilitiesEvent): void
 		{
-			var layer: InteractiveLayer = (event.target) as  InteractiveLayer; 
+			var layer: InteractiveLayer = (event.target) as  InteractiveLayer;
 //			debug("onLayerGetCapabilitiesReceived for layer: " + layer);
 			invalidateLayerLegend(layer);
 		}
@@ -280,10 +280,10 @@ package com.iblsoft.flexiweather.widgets
 			ile.area = legendsBkgRectangle;
 			dispatchEvent(ile);
 		}
-		
+
 		/**
-		 * Dictionary, which holds parent for legends, which are already loding 
-		 */		
+		 * Dictionary, which holds parent for legends, which are already loding
+		 */
 		private var m_groupDictionary: Dictionary = new Dictionary();
 		private var _legends: Array = new Array();
 
@@ -344,18 +344,22 @@ package com.iblsoft.flexiweather.widgets
 				var cnv: InteractiveLayerLegendGroup = getGroupFromDictionary(layer);
 				var oldScaleX: Number = 1;
 				var oldScaleY: Number = 1;
-				var oldScaleObj: Object = _scaleDict[cnv];
+				var oldScaleObj: Object = _scaleDict[layer];
 				if (oldScaleObj)
 				{
 					oldScaleX = oldScaleObj.oldScaleX;
 					oldScaleY = oldScaleObj.oldScaleY;
 				}
+				debug("\nBEFORE \ngetRectangleFromLayer rect: " + rect);
+				debug("getRectangleFromLayer cnv size: " + cnv.width + " , " + cnv.height);
+				debug("getRectangleFromLayer cnv scale: " + oldScaleX + " , " + oldScaleY);
+				debug("getRectangleFromLayer _legendScaleX: " + _legendScaleX + " , " + _legendScaleX);
 				var rect: Rectangle = new Rectangle(0, 0, cnv.width / oldScaleX * _legendScaleX, cnv.height / oldScaleY * _legendScaleY);
-//				debug("\ngetRectangleFromLayer rect: " + rect);
-//				debug("getRectangleFromLayer cnv size: " + cnv.width + " , " + cnv.height);
-//				debug("getRectangleFromLayer cnv scale: " + oldScaleX + " , " + oldScaleY);
-//				debug("getRectangleFromLayer _legendScaleX: " + _legendScaleX + " , " + _legendScaleX);
-				_scaleDict[cnv] = {oldScaleX: _legendScaleX, oldScaleY: _legendScaleY};
+				debug("\nAFTER\ngetRectangleFromLayer rect: " + rect);
+				debug("getRectangleFromLayer cnv size: " + cnv.width + " , " + cnv.height);
+				debug("getRectangleFromLayer cnv scale: " + oldScaleX + " , " + oldScaleY);
+				debug("getRectangleFromLayer _legendScaleX: " + _legendScaleX + " , " + _legendScaleX);
+				_scaleDict[layer] = {layer: layer, oldScaleX: _legendScaleX, oldScaleY: _legendScaleY};
 				return rect;
 			}
 			return null;
@@ -395,7 +399,7 @@ package com.iblsoft.flexiweather.widgets
 					group = getGroupFromDictionary(l);
 					if (group)
 					{
-						debug("loadLegends1: Legend for layer: " + l.name + " id: " + l.layerID + " is already loading");	
+						debug("loadLegends1: Legend for layer: " + l.name + " id: " + l.layerID + " is already loading");
 						_tmpExistedCanvases++;
 						_tempCanvases.push(group);
 					}
@@ -492,7 +496,7 @@ package com.iblsoft.flexiweather.widgets
 				dispatchEvent(e);
 			}
 		}
-		
+
 		private function checkIfAllLegendsAreLoaded(): Boolean
 		{
 			var needLoading: Boolean;
@@ -786,7 +790,7 @@ package com.iblsoft.flexiweather.widgets
 			_topArea = _currentArea;
 			var cnv: InteractiveLayerLegendGroup = getGroupFromDictionary(l);
 			var rect: Rectangle = getRectangleFromLayer(l);
-			if (rect)
+			if (rect && rect.width > 0)
 			{
 				padding.updateRectangleSizeWithPadding(rect);
 				properties.firstAreaDirection = getFirstAreaDirection(directionX, directionY);
@@ -874,10 +878,10 @@ package com.iblsoft.flexiweather.widgets
 //			var rowItems: int = properties.rowItems;
 //			var maxWidth: int = properties.maxWidth;
 //			var maxHeight: int = properties.maxHeight;
-//			
+//
 //			var initialX: int = properties.initialX;
 //			var initialY: int = properties.initialY;
-//			
+//
 //			var posX: int = properties.posX;
 //			var posY: int = properties.posY;
 //			var startX: int = properties.startX;
@@ -1237,7 +1241,7 @@ package com.iblsoft.flexiweather.widgets
 			cnv.visible = true;
 			legendReceived();
 		}
-		
+
 		private function legendReceived(): void
 		{
 			legendsLoadingCount--;
@@ -1263,7 +1267,7 @@ package com.iblsoft.flexiweather.widgets
 			for (var i: int = 0; i < elements; i++)
 			{
 				var dObj: IVisualElement = currGroup.getElementAt(i);
-				
+
 				if (dObj is InteractiveLayerLegendImage)
 				{
 					legend = dObj as InteractiveLayerLegendImage;
@@ -1291,13 +1295,13 @@ package com.iblsoft.flexiweather.widgets
 //			}
 			return false;
 		}
-		
+
 		private function debug(str: String): void
 		{
 //			_logger.debug(str);
 //			trace(this + str);
 		}
-		
+
 		override public function toString(): String
 		{
 			return "InteractiveLayerLegends: ";
