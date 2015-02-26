@@ -112,11 +112,11 @@ import mx.logging.Log;
 		{
 			m_wmsViewProperties = viewProperties as WMSViewProperties;
 
-//			trace("\nupdateWMSData: " + m_wmsViewProperties.toString() + " bbox: " + m_wmsViewProperties.getViewBBox());
+			debug("\nupdateWMSData: " + m_wmsViewProperties.toString() + " bbox: " + m_wmsViewProperties.getViewBBox());
 
 			if (!b_animationMode && isSameData(m_wmsViewProperties, m_previousWmsViewProperties))
 			{
-				trace("Same WMS Data request in short time, does not load anything");
+				debug("Same WMS Data request in short time, does not load anything");
 				dispatchEvent(new Event(REQUEST_CANCELLED));
 				return;
 			}
@@ -244,6 +244,9 @@ import mx.logging.Log;
 				var isCached: Boolean = wmsCache.isItemCached(wmsViewProperties, true);
 				var isNoDataCached: Boolean = wmsCache.isNoDataItemCached(wmsViewProperties);
 				var imgTest: DisplayObject = wmsCache.getCacheItemBitmap(wmsViewProperties);
+
+				debug("updateDataPart loading: " + isItemLoading + " cached: " + isCached + " no data cached: " + isNoDataCached + " img: " + (imgTest != null));
+
 				if (isItemLoading && !isNoDataCached)
 				{
 					m_wmsViewProperties = wmsViewProperties;
@@ -284,17 +287,17 @@ import mx.logging.Log;
 				{
 					jobName += "["+forecast+"]";
 				}
-				trace("updateDataPart jobName: " + jobName + " bbox: " + bbox + " Image ["+imagePart.partID+"/"+m_wmsViewProperties.propertiesID+"]");
+				debug("updateDataPart jobName: " + jobName + " bbox: " + bbox + " Image ["+imagePart.partID+"/"+m_wmsViewProperties.propertiesID+"]");
 
 				if (_delayedRequestArray.length > 0)
 				{
-					trace("there is _delayedRequestObject still, which was not executed yet");
+					debug("there is _delayedRequestObject still, which was not executed yet");
 				}
 				if (!checkIfRequestIsAlreadyInDelayQueue(wmsViewProperties, imagePart))
 				{
 					_delayedRequestArray.push({request: request, wmsViewProperties: wmsViewProperties, wmsCache: wmsCache, imagePart: imagePart, jobName: jobName});
 				} else {
-					trace("MSBaseLOader: Request already waits to be loaded, do not do nothing");
+					debug("MSBaseLOader: Request already waits to be loaded, do not do nothing");
 				}
 				m_layer.addEventListener(Event.ENTER_FRAME, startLoadingOnNextFrame);
 
@@ -315,7 +318,7 @@ import mx.logging.Log;
 
 				if (_delayedCachedRequestArray.length > 0)
 				{
-					trace("there is _delayedCachedRequestObject still, which was not executed yet");
+					debug("there is _delayedCachedRequestObject still, which was not executed yet");
 				}
 				_delayedCachedRequestArray.push({wmsViewProperties: wmsViewProperties});
 				m_layer.addEventListener(Event.ENTER_FRAME, dispatchLoadingFinishedFromCacheOnNextFrame);
@@ -351,14 +354,19 @@ import mx.logging.Log;
 
 		private function startLoadingOnNextFrame(event: Event): void
 		{
-//			trace("startLoadingOnNextFrame");
+			debug("startLoadingOnNextFrame");
 			m_layer.removeEventListener(Event.ENTER_FRAME, startLoadingOnNextFrame);
 			if (_delayedRequestArray)
 			{
-//				trace("startLoadingOnNextFrame: " + _delayedRequestArray.length);
+				debug("startLoadingOnNextFrame: " + _delayedRequestArray.length);
 				while (_delayedRequestArray.length > 0)
 				{
 					var cachedObject: Object = _delayedRequestArray.shift();
+
+					cachedObject.wmsViewProperties.updateDimensionsInURLRequest(cachedObject.request);
+					cachedObject.wmsViewProperties.updateCustomParametersInURLRequest(cachedObject.request);
+					cachedObject.wmsViewProperties.url = cachedObject.request;
+
 					startLoading(cachedObject.request, cachedObject.wmsViewProperties, cachedObject.wmsCache, cachedObject.imagePart, cachedObject.jobName, cachedObject);
 				}
 			}
@@ -366,6 +374,7 @@ import mx.logging.Log;
 
 		private function startLoading(request: URLRequest, wmsViewProperties: WMSViewProperties, wmsCache: WMSCache, imagePart: ImagePart, jobName: String, requestForTimeout: Object = null): void
 		{
+				debug("startLoading: " + _delayedRequestArray.length + " = > " + wmsViewProperties.toString() + " bbox: " + wmsViewProperties.getViewBBox());
 				m_loader.load(request,
 						{requestedImagePart: imagePart, wmsViewProperties: wmsViewProperties, timeoutRequest: requestForTimeout},
 						jobName);
@@ -463,7 +472,7 @@ import mx.logging.Log;
 					}
 				}
 
-				trace("addImagePart: " + imagePart.partID + " to propertie: " + wmsViewProperties.propertiesID);
+				debug("addImagePart: " + imagePart.partID + " to propertie: " + wmsViewProperties.propertiesID);
 				wmsViewProperties.addImagePart(imagePart);
 			}
 		}
@@ -504,7 +513,9 @@ import mx.logging.Log;
 					imagePart.mi_updateCycleAge = mi_updateCycleAge;
 					wmsViewProperties.url = event.request;
 //					addImagePart(wmsViewProperties, imagePart, result, key);
-					wmsCache.addCacheItem(imagePart.image, wmsViewProperties, event.associatedData);
+//					wmsCache.addCacheItem(imagePart.image, wmsViewProperties, event.associatedData);
+					wmsCache.addCacheItem(result, wmsViewProperties, event.associatedData);
+
 
 					//ATTENTION
 					//OW-309 - if addImagePart is executed after rwmsCache.addCacheItem - multiView dateline works perfectly (2 imageParts per view),
@@ -623,7 +634,7 @@ import mx.logging.Log;
 						}
 					} else {
 						Log.getLogger("MSBaseLoader").error("errorResult has 0 bytes ("+event.request.url+")");
-						trace("MSBaseLoader errorResult has 0 bytes");
+						debug("MSBaseLoader errorResult has 0 bytes");
 					}
 
 					if (!errorStateSet)
@@ -739,6 +750,11 @@ import mx.logging.Log;
 			e = new MSBaseLoaderEvent(MSBaseLoaderEvent.LEGEND_LOAD_ERROR);
 			e.data = {result: event.result, associatedData: event.associatedData};
 			dispatchEvent(e);
+		}
+
+		protected function debug(str: String): void
+		{
+			trace("MSBaseLoader["+m_layer.layerID+"/"+m_layer.name+"]: " + str);
 		}
 	}
 }
