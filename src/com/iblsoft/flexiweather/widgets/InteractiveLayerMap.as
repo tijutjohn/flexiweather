@@ -1286,7 +1286,7 @@ package com.iblsoft.flexiweather.widgets
 		 * Function find first suitable layer, which can primary layer (can have frames)
 		 *
 		 */
-		private function findNewPrimaryLayer(): void
+		private function findNewPrimaryLayer(bDispatchPrimaryLayerNotFound: Boolean = true): void
 		{
 			for each (var l: InteractiveLayer in m_layers)
 			{
@@ -1307,19 +1307,20 @@ package com.iblsoft.flexiweather.widgets
 				}
 			}
 
-			primaryLayerNotFound();
+			if (bDispatchPrimaryLayerNotFound)
+				primaryLayerNotFound();
 		}
 
 
 
-		override public function removeLayer(l: InteractiveLayer): void
+		override public function removeLayer(l: InteractiveLayer, bDispatchPrimaryLayerNotFound: Boolean = true): void
 		{
 			super.removeLayer(l);
 			debug("Layer remove: " + l.name + " id: " + l.layerID +" map["+mapID+"]");
 			if ((l is InteractiveLayerMSBase) && (l as InteractiveLayerMSBase).isPrimaryLayer())
 			{
 				setPrimaryLayer(null);
-				findNewPrimaryLayer();
+				findNewPrimaryLayer(bDispatchPrimaryLayerNotFound);
 			}
 
 			callLater(resynchronizeGlobalVariables);

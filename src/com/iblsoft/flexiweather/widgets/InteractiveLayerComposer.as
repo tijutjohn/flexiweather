@@ -253,7 +253,7 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 
-		public function removeLayer(l: InteractiveLayer): void
+		public function removeLayer(l: InteractiveLayer, bDispatchPrimaryLayerNotFound: Boolean = true): void
 		{
 			var i: int = m_layers.getItemIndex(l);
 			if (i >= 0)
@@ -270,7 +270,7 @@ package com.iblsoft.flexiweather.widgets
 			while (m_layers.length > 0)
 			{
 				var l: InteractiveLayer = m_layers.getItemAt(0) as InteractiveLayer;
-				removeLayer(l);
+				removeLayer(l, false);
 			}
 		}
 
