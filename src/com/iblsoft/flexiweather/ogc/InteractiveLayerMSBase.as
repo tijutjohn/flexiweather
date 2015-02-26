@@ -925,6 +925,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			if (!layerWasDestroyed)
 			{
+				debug("CLEAR");
 				super.clear(graphics);
 				graphics.clear();
 				clearVectorData();
@@ -950,13 +951,14 @@ package com.iblsoft.flexiweather.ogc
 					// Check if CRS of the image part == current CRS of the container
 					if (s_currentCRS != imagePart.ms_imageCRS)
 					{
+						debug("Draw: cannot draw s_currentCRS: " + s_currentCRS + " imagePart.ms_imageCRS: " + imagePart.ms_imageCRS);
 						continue; // otherwise we cannot draw it
 					}
-//					debug("Draw: Image ["+imagePart.partID+"/"+m_currentWMSViewProperties.propertiesID+"] m_imageBBox:" + imagePart.m_imageBBox.toBBOXString());
+					debug("Draw: Image ["+imagePart.partID+"/"+m_currentWMSViewProperties.propertiesID+"] m_imageBBox:" + imagePart.m_imageBBox.toBBOXString());
 					var reflectedBBoxes: Array = container.mapBBoxToViewReflections(imagePart.m_imageBBox);
 					for each (var reflectedBBox: BBox in reflectedBBoxes)
 					{
-//						debug("\tDraw: Image ["+imagePart.partID+"/"+m_currentWMSViewProperties.propertiesID+"] reflectedBBox:" + reflectedBBox.toBBOXString());
+						debug("\tDraw: Image ["+imagePart.partID+"/"+m_currentWMSViewProperties.propertiesID+"] reflectedBBox:" + reflectedBBox.toBBOXString());
 						drawImagePart(graphics, imagePart.image, imagePart.ms_imageCRS, reflectedBBox);
 					}
 				}
@@ -1083,10 +1085,10 @@ package com.iblsoft.flexiweather.ogc
 			ptImageSize.x = int(Math.round(ptImageSize.x));
 			ptImageSize.y = int(Math.round(ptImageSize.y));
 
-//			debug("drawImagePartAsBitmap: " + imageBBox.toBBOXString());
+			debug("drawImagePartAsBitmap: " + imageBBox.toBBOXString());
 			try {
 
-//				debug("\t\t drawImagePartAsBitmap ["+image.bitmapData.width+","+image.bitmapData.height+"]  ptImageSize: "+ ptImageSize + " position: " + ptImageStartPoint);
+				debug("\t\t drawImagePartAsBitmap ["+image.bitmapData.width+","+image.bitmapData.height+"]  ptImageSize: "+ ptImageSize + " position: " + ptImageStartPoint);
 				var matrix: Matrix = new Matrix();
 				matrix.scale(ptImageSize.x / image.width, ptImageSize.y / image.height);
 				matrix.translate(ptImageStartPoint.x, ptImageStartPoint.y);
@@ -1284,7 +1286,6 @@ package com.iblsoft.flexiweather.ogc
 				legendLoader.addEventListener(MSBaseLoaderEvent.LEGEND_LOAD_ERROR, onLegendLoadError);
 
 				debug(" load legend for layer: " + this + " viewProperties: " + currentViewProperties);
-				trace("\nload legend for layer: " + this + " viewProperties: " + currentViewProperties);
 				legendLoader.loadLegend(url, associatedData);
 			}
 			else
@@ -1337,7 +1338,7 @@ package com.iblsoft.flexiweather.ogc
 		}
 		private function onLegendLoaded(event: MSBaseLoaderEvent): void
 		{
-			trace("MSBAse onLegendLoaded");
+//			debug("onLegendLoaded");
 			var legendLoader: MSBaseLoader = event.target as MSBaseLoader;
 			removeLegendLoadingListeners(legendLoader);
 			var result: * = event.data.result;
