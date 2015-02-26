@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.ogc.cache
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
+	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.cache.event.WMSCacheEvent;
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.IViewProperties;
 	import com.iblsoft.flexiweather.ogc.data.viewProperties.WMSViewProperties;
@@ -187,7 +188,7 @@ package com.iblsoft.flexiweather.ogc.cache
 				notifyBitmapDelete(cacheItem);
 				if (cacheItem.image is Bitmap)
 				{
-//					debug("\t deleteCacheItem " + cacheItem);
+					debug("\t deleteCacheItem " + cacheItem);
 					var bmp: Bitmap = cacheItem.image as Bitmap;
 					bmp.bitmapData.dispose();
 				}
@@ -369,8 +370,9 @@ package com.iblsoft.flexiweather.ogc.cache
 			var ck: WMSCacheKey = new WMSCacheKey(s_crs, bbox, url, dimensions, validity, wmsViewProperties.m_cfg.wmsService.baseURL);
 			var s_key: String = qetWMSViewCacheKey(wmsViewProperties);
 
-			debug("addCacheItem: "+ s_key);
-			var b_deleted: Boolean = deleteCacheItemByKey(s_key, true);
+			var parentLayer: InteractiveLayerMSBase = wmsViewProperties.parentLayer;
+			debug("addCacheItem layer["+parentLayer.name+"/"+parentLayer.layerID+"]: going to  deleteCacheItemByKey "+ s_key);
+//			var b_deleted: Boolean = deleteCacheItemByKey(s_key, true);
 			var item: CacheItem = new CacheItem();
 			item.cacheKey = ck;
 			item.displayed = true;
@@ -480,7 +482,7 @@ package com.iblsoft.flexiweather.ogc.cache
 
 		private function debug(str: String): void
 		{
-			trace(this + " > " + str);
+//			trace(this + " > " + str);
 		}
 
 		override public function toString(): String
