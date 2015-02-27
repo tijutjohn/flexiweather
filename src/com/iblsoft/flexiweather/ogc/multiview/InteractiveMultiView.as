@@ -1246,9 +1246,12 @@ package com.iblsoft.flexiweather.ogc.multiview
 					var changeCause: String = event.changeDescription;
 
 					//check global variable synchronizator
-					var globalFrameSynchronizationAllowed: Boolean = true;
-					var globalRunSynchronizationAllowed: Boolean = true;
-					var globalLevelSynchronizationAllowed: Boolean = true;
+					//OW-350 - agreed with  Jozef Matula, that Map Synchronizator does not synchronize global variables (except FRAME if user wants it)
+					var viewHasOwnGlobalVariables: Boolean = synchronizator.viewHasOwnGlobalVariable;
+
+					var globalFrameSynchronizationAllowed: Boolean = !viewHasOwnGlobalVariables;
+					var globalRunSynchronizationAllowed: Boolean = !viewHasOwnGlobalVariables;
+					var globalLevelSynchronizationAllowed: Boolean = !viewHasOwnGlobalVariables;
 					if (_configuration && _configuration.customData && _configuration.customData.synchronizeFrame)
 					{
 						globalFrameSynchronizationAllowed = _configuration.customData.synchronizeFrame
@@ -1268,6 +1271,13 @@ package com.iblsoft.flexiweather.ogc.multiview
 
 						_globalFrameSynchronizator.addEventListener(SynchronisationEvent.SYNCHRONISATION_DONE, onGlobalFrameSynchronizationDone);
 						_globalFrameSynchronizator.synchronizeWidgets(_selectedInteractiveWidget, _interactiveWidgets.widgets);
+						return;
+					}
+
+					if (viewHasOwnGlobalVariables && (changeCause == SynchronizationChangeType.GLOBAL_LEVEL_CHANGED || changeCause == SynchronizationChangeType.GLOBAL_RUN_CHANGED))
+					{
+						//OW-350
+						debug("if synchronizator viewHasOwnGlobalVariables == true and there is global level or run change, synchronizator will not do anything");
 						return;
 					}
 

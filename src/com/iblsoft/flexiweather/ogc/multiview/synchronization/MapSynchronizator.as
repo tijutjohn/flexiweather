@@ -7,29 +7,34 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 	import com.iblsoft.flexiweather.ogc.multiview.data.SynchronizationChangeType;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
-	
+
 	import flash.events.EventDispatcher;
 	import flash.utils.Dictionary;
-	
+
 	import mx.collections.ArrayCollection;
 	import mx.utils.ArrayUtil;
-	
+
 	public class MapSynchronizator extends SynchronizatorBase implements ISynchronizator
 	{
 		protected var _widgetsMapDictionary: Dictionary = new Dictionary();
-		
+
 		private var _synchronizeFrame: Boolean;
-		
+
 
 		public function get synchronizeFrame():Boolean
 		{
 			return _synchronizeFrame;
 		}
 
+		override public function get viewHasOwnGlobalVariable(): Boolean
+		{
+			return true;
+		}
+
 		override public function set customData(data: MultiViewCustomData):void
 		{
 			super.customData = data;
-			
+
 			synchronizeFrame = data.synchronizeFrame;
 		}
 		public function set synchronizeFrame(value:Boolean):void
@@ -50,9 +55,9 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		public function MapSynchronizator()
 		{
 			super();
-			
+
 			type = "map-synchronizator";
-			
+
 			registerChangeType(SynchronizationChangeType.MAP_LAYER_ADDED);
 			registerChangeType(SynchronizationChangeType.MAP_LAYER_REMOVED);
 			registerChangeType(SynchronizationChangeType.MAP_CHANGED);
@@ -63,14 +68,14 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			registerChangeType(SynchronizationChangeType.SYNCHRONIZE_LEVEL_CHANGED);
 			registerChangeType(SynchronizationChangeType.ANIMATOR_SETTINGS_CHANGED);
 		}
-		
+
 		override public function serialize(storage:Storage):void
 		{
 			storage.serializeBool('synchronizeFrame', synchronizeFrame);
 			storage.serialize('custom-data', customData);
 //			storage.serialize('view-data', viewData);
 		}
-		
+
 		override public function updateMapAction(iw: InteractiveWidget, position: int, configuration: MultiViewConfiguration): void
 		{
 			if (configuration && configuration.synchronizators && configuration.synchronizators.length > 0)
@@ -92,7 +97,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 									fullPath = obj.fullPath;
 								else if (obj.hasOwnProperty('path'))
 									fullPath = obj.path;
-									
+
 								_widgetsMapDictionary[iw] = {action: 'loadMap', path: fullPath};
 								return;
 							}
@@ -102,11 +107,11 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			}
 			_widgetsMapDictionary[iw] = {action: 'copyMap'};
 		}
-			
+
 		override public function synchronizeWidgets(synchronizeFromWidget:InteractiveWidget, widgetsForSynchronisation:ArrayCollection, preferredSelectedIndex: int = -1):void
 		{
 			//there is no synchronizing needed for this syncrhonizator, all is done by AreaSynchronizator and GlobalFrameSynchronizator
-			
+
 			var cnt: int = 0;
 			var total: int = widgetsForSynchronisation.length;
 			for (var i: int = 0; i < total; i++)
@@ -120,7 +125,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 					dataForWidgetAvailable(widget);
 				}
 			}
-			
+
 		}
 
 		private function getFrame(position: int, frames: Array): Date
@@ -149,12 +154,12 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			}
 			return -1;
 		}
-		
+
 		override public function getSynchronisedVariables():Array
 		{
 			return [GlobalVariable.FRAME];
 		}
-		
+
 		override public function hasSynchronisedVariable(s_variableId: String): Boolean
 		{
 			return false;

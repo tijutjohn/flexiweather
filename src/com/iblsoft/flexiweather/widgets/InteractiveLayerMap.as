@@ -2448,7 +2448,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			if (debugConsole)
 				debugConsole.print(str, type, tag);
-			trace(tag + "| " + type + "| " + str);
+			trace(tag + "["+mapID+"] | " + type + "| " + str);
 			//LoggingUtils.dispatchLogEvent(this, " ILM: " + str);
 		}
 
