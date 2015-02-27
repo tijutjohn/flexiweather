@@ -375,9 +375,9 @@ package com.iblsoft.flexiweather.widgets.controls.menu
 			super.mouseWheelHandler(event);
 
 			if (event.delta < 0)
-				scrollUp();
-			if (event.delta > 0)
 				scrollDown();
+			if (event.delta > 0)
+				scrollUp();
 		}
 
 		override protected function showPrevious(): void
