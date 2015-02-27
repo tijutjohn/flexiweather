@@ -27,6 +27,11 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 
 		public var type: String;
 
+		public function get viewHasOwnGlobalVariable(): Boolean
+		{
+			return false;
+		}
+
 		public function SynchronizatorBase()
 		{
 			mb_synchronizatorInvalid = true;
