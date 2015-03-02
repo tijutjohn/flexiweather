@@ -159,9 +159,12 @@ package com.iblsoft.flexiweather.widgets
 			else
 			{
 				_areaComponent.stopDrag();
-				_r.x += _areaComponent.x;
-				_r.y += _areaComponent.y;
-				_areaComponent.draw(_r, true);
+				if (_r)
+				{
+					_r.x += _areaComponent.x;
+					_r.y += _areaComponent.y;
+					_areaComponent.draw(_r, true);
+				}
 				_areaComponent.x = _areaComponent.y = 0;
 				findAreaCoordinates();
 			}
