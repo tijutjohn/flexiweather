@@ -31,5 +31,10 @@ package com.iblsoft.flexiweather
 		 */
 		public static var SAME_REQUEST_TIME_INTERVAL: int = 1000;
 
+		/**
+		 * Boolean constant whether to use optimization technique "suspend anticollision". Use it if you need it, it is not used by default
+		 */
+		public static var USE_SUSPEND_ANTICOLLISION: Boolean = false;
+
 	}
 }
