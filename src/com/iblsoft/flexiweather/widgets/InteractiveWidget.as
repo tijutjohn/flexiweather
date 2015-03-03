@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.widgets
 {
+	import com.iblsoft.flexiweather.FlexiWeatherConfiguration;
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerWMSEvent;
 	import com.iblsoft.flexiweather.events.InteractiveWidgetEvent;
@@ -3592,9 +3593,14 @@ package com.iblsoft.flexiweather.widgets
 
 		public function set suspendAnticollisionProcessing(value: Boolean): void
 		{
+			if (!FlexiWeatherConfiguration.USE_SUSPEND_ANTICOLLISION)
+				return;
+
 			if (m_suspendAnticollisionProcessing != value)
 			{
 				m_suspendAnticollisionProcessing = value;
+
+				debug("suspendAnticollisionProcessing = " + value);
 				if (m_objectLayout)
 				{
 					// set suspendAnticollisionProcessing to AnticollisionLayout as well (there is timer for auto update, which needs to be suspended)

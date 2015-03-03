@@ -118,12 +118,12 @@ package com.iblsoft.flexiweather.utils.anticollision
 
 		private var _parentContainer: InteractiveWidget;
 
-		public static var uid: int = 0;
+		public static var alUID: int = 0;
 		public var anticollisionLayoutID: int = 0;
 
 		public function AnticollisionLayout(layoutName: String, parent: DisplayObject)
 		{
-//			anticollisionLayoutID = uid++;
+			anticollisionLayoutID = alUID++;
 			super();
 
 			_parentContainer = parent as InteractiveWidget;
@@ -881,6 +881,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 			if (m_suspendAnticollisionProcessing != value)
 			{
 				m_suspendAnticollisionProcessing = value;
+				debug("suspendAnticollisionProcessing = " + value);
 				if (_areaChangedScheduled)
 					areaChanged(_areaChangedScheduledBBox);
 				invalidateLayout();
@@ -921,7 +922,7 @@ package com.iblsoft.flexiweather.utils.anticollision
 
 		override public function toString(): String
 		{
-			return "AnticollistionLayout [" + _layoutName + " / " + anticollisionLayoutID + "] parent: " + _parentContainer.id;
+			return "AnticollisionLayout [" + _layoutName + " / " + anticollisionLayoutID + "] parent: " + _parentContainer.id;
 		}
 
 		public function getAnticollisionLayoutObjectsForLayer(layer: InteractiveLayer): Array
