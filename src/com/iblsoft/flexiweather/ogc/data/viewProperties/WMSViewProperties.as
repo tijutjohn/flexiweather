@@ -19,6 +19,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 	import com.iblsoft.flexiweather.utils.Duration;
 	import com.iblsoft.flexiweather.utils.ISO8601Parser;
 	import com.iblsoft.flexiweather.utils.LoggingUtils;
+	import com.iblsoft.flexiweather.utils.Operators;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 
@@ -435,7 +436,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		}
 
 		// returns null is no such dimension exist
-		public function getWMSDimensionsValues(s_dimName: String, b_intersection: Boolean = true): Array
+		public function getWMSDimensionsValues(s_dimName: String, b_intersection: Boolean, operatorFunction: Function): Array
 		{
 			var a_dimValues: Array;
 
@@ -451,9 +452,9 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					else
 					{
 						if (b_intersection)
-							a_dimValues = ArrayUtils.intersectedArrays(a_dimValues, dim.values);
+							a_dimValues = ArrayUtils.intersectedArrays(a_dimValues, dim.values, operatorFunction);
 						else
-							ArrayUtils.unionArrays(a_dimValues, dim.values);
+							ArrayUtils.unionArrays(a_dimValues, dim.values, operatorFunction);
 					}
 				}
 			}
@@ -972,7 +973,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 			{
 				if (m_cfg.dimensionVerticalLevelName != null)
 				{
-					var l_levels: Array = getWMSDimensionsValues(m_cfg.dimensionVerticalLevelName);
+					var l_levels: Array = getWMSDimensionsValues(m_cfg.dimensionVerticalLevelName, true, Operators.equalsByData);
 					return l_levels;
 				}
 			}
@@ -981,7 +982,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 				if (m_cfg.dimensionRunName != null)
 				{
 					//TODO check if getSynchronisedVariableValuesList RUN return everything correctly
-					var l_runs: Array = getWMSDimensionsValues(m_cfg.dimensionRunName);
+					var l_runs: Array = getWMSDimensionsValues(m_cfg.dimensionRunName, true, Operators.equalsByDates);
 					var l_resultRuns: Array = [];
 					for each (var runObj: Object in l_runs)
 					{
@@ -1018,7 +1019,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 				var l_resultTimes2: Array = [];
 				if (m_cfg.dimensionTimeName != null)
 				{
-					var l_times: Array = getWMSDimensionsValues(m_cfg.dimensionTimeName);
+					var l_times: Array = getWMSDimensionsValues(m_cfg.dimensionTimeName, true, Operators.equalsByDates);
 					for each (var time: Object in l_times)
 					{
 						if (time.data is Date)
@@ -1044,11 +1045,11 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					if (run == null && timeMethod != TimeCreationMethod.REFERENCE_TIME_TIME)
 						return [];
 
-					var l_forecasts: Array = getWMSDimensionsValues(m_cfg.dimensionForecastName);
+					var l_forecasts: Array = getWMSDimensionsValues(m_cfg.dimensionForecastName, true, Operators.equalsByData);
 
 					if (timeMethod == TimeCreationMethod.REFERENCE_TIME_TIME)
 					{
-						l_runs = getWMSDimensionsValues(m_cfg.dimensionRunName);
+						l_runs = getWMSDimensionsValues(m_cfg.dimensionRunName, true, Operators.equalsByDates);
 						l_resultTimes2 = findForecastFromReferenceTimeAndTimeValue(run, l_runs, l_forecasts);
 					} else {
 						for each (var forecast: Object in l_forecasts)
@@ -1104,7 +1105,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 						return SynchronisationResponse.ALREADY_SYNCHRONISED;
 
 					ofExactLevel = null;
-					var l_levels: Array = getWMSDimensionsValues(m_cfg.dimensionVerticalLevelName);
+					var l_levels: Array = getWMSDimensionsValues(m_cfg.dimensionVerticalLevelName, true, Operators.equalsByData);
 
 					for each (of in l_levels)
 					{
@@ -1136,7 +1137,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 
 //					var forecast: Duration = new Duration(((value as Date).time - run.time) / 1000.0);
 
-					var l_runs: Array = getWMSDimensionsValues(m_cfg.dimensionRunName);
+					var l_runs: Array = getWMSDimensionsValues(m_cfg.dimensionRunName, true, Operators.equalsByDates);
 //					var l_forecasts: Array = getWMSDimensionsValues(m_cfg.dimensionForecastName);
 					ofExactRun = null;
 					for each (of in l_runs)
@@ -1167,7 +1168,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 				{
 					var frame: Date = value as Date;
 					// TODO: interpolation vs. find nearest value?
-					var l_times: Array = getWMSDimensionsValues(m_cfg.dimensionTimeName);
+					var l_times: Array = getWMSDimensionsValues(m_cfg.dimensionTimeName, true, Operators.equalsByDates);
 					ofExactForecast = null;
 					for each (of in l_times)
 					{
@@ -1203,7 +1204,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					if (run)
 					{
 						var forecast: Duration = new Duration(((value as Date).time - run.time) / 1000.0);
-						var l_forecasts: Array = getWMSDimensionsValues(m_cfg.dimensionForecastName);
+						var l_forecasts: Array = getWMSDimensionsValues(m_cfg.dimensionForecastName, true, Operators.equalsByData);
 						ofExactForecast = null;
 						for each (of in l_forecasts)
 						{

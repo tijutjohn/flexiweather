@@ -40,6 +40,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.utils.Duration;
 	import com.iblsoft.flexiweather.utils.ISO8601Parser;
 	import com.iblsoft.flexiweather.utils.LoggingUtils;
+	import com.iblsoft.flexiweather.utils.Operators;
 	import com.iblsoft.flexiweather.widgets.BackgroundJob;
 	import com.iblsoft.flexiweather.widgets.GlowLabel;
 	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
@@ -1622,10 +1623,10 @@ package com.iblsoft.flexiweather.ogc
 		}
 
 		// returns null is no such dimension exist
-		public function getWMSDimensionsValues(s_dimName: String, b_intersection: Boolean = true): Array
+		public function getWMSDimensionsValues(s_dimName: String, b_intersection: Boolean): Array
 		{
 			if (m_currentWMSViewProperties)
-				return m_currentWMSViewProperties.getWMSDimensionsValues(s_dimName, b_intersection);
+				return m_currentWMSViewProperties.getWMSDimensionsValues(s_dimName, b_intersection, Operators.getOperatorForDimension(s_dimName));
 			return null;
 		}
 
