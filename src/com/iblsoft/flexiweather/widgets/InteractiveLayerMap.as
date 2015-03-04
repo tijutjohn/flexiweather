@@ -1621,7 +1621,7 @@ package com.iblsoft.flexiweather.widgets
 					l_allLevels = l_levels;
 				else {
 //					ArrayUtils.unionArrays(l_timeAxis, l_levels);
-					l_levels = ArrayUtils.intersectedArrays(l_allLevels, l_levels);
+					l_allLevels = ArrayUtils.intersectedArrays(l_allLevels, l_levels, Operators.equalsByData);
 				}
 			}
 			return l_allLevels;
@@ -1648,8 +1648,10 @@ package com.iblsoft.flexiweather.widgets
 		 * @return
 		 *
 		 */
-		public function getDimensions(b_intersection: Boolean = true): Array
+		public function getDimensions(b_intersection: Boolean): Array
 		{
+			var operatorFunction: Function = Operators.equalsStrictly;
+
 			var l_syncLayers: Array = [];
 			var l_timeAxis: Array = enumTimeAxis(l_syncLayers);
 			if (l_timeAxis == null) // no time axis
@@ -1666,9 +1668,9 @@ package com.iblsoft.flexiweather.widgets
 				else
 				{
 					if (b_intersection)
-						a_dimensions = ArrayUtils.intersectedArrays(a_dimensions, values);
+						a_dimensions = ArrayUtils.intersectedArrays(a_dimensions, values, operatorFunction);
 					else
-						ArrayUtils.unionArrays(a_dimensions, values);
+						ArrayUtils.unionArrays(a_dimensions, values, operatorFunction);
 				}
 			}
 			return a_dimensions;
@@ -1707,8 +1709,10 @@ package com.iblsoft.flexiweather.widgets
 		 * @return
 		 *
 		 */
-		public function getDimensionValues(dimName: String, b_intersection: Boolean = true): Array
+		public function getDimensionValues(dimName: String, b_intersection: Boolean): Array
 		{
+			var operatorFunction: Function = Operators.getOperatorForDimension(dimName);
+
 			var l_syncLayers: Array = [];
 			var l_timeAxis: Array = enumTimeAxis(l_syncLayers);
 			if (l_timeAxis == null) // no time axis
@@ -1725,9 +1729,9 @@ package com.iblsoft.flexiweather.widgets
 				else
 				{
 					if (b_intersection)
-						a_dimValues = ArrayUtils.intersectedArrays(a_dimValues, values);
+						a_dimValues = ArrayUtils.intersectedArrays(a_dimValues, values, operatorFunction);
 					else
-						ArrayUtils.unionArrays(a_dimValues, values);
+						ArrayUtils.unionArrays(a_dimValues, values, operatorFunction);
 				}
 			}
 			return a_dimValues;
