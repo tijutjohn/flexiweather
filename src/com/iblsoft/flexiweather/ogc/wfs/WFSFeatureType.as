@@ -173,5 +173,10 @@ return(null);
 				retFeature.values = new ArrayCollection(m_definition.getScalarValues(resultXml));
 			return (retFeature);
 		}
+
+		override public function toString(): String
+		{
+			return "FeatureType: "+ name;
+		}
 	}
 }

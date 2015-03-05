@@ -1,9 +1,11 @@
 package com.iblsoft.flexiweather.utils
 {
 	import com.iblsoft.flexiweather.ogc.Version;
+
 	import flash.utils.Dictionary;
 	import flash.utils.getDefinitionByName;
 	import flash.utils.getQualifiedClassName;
+
 	import mx.collections.ArrayCollection;
 
 	public class Storage
@@ -360,7 +362,12 @@ package com.iblsoft.flexiweather.utils
 			else
 			{
 				o = new c;
-				if (o is Serializable)
+				if (o is SerializableSelector) {
+					__serialize(s_key, i_index, o as SerializableSelector);
+					//find final class for serialization
+					o = new ((o as SerializableSelector).geSerializableClass() as Class);
+					__serialize(s_key, i_index, o as Serializable);
+				} else if (o is Serializable)
 					__serialize(s_key, i_index, o as Serializable);
 				else
 					throw Error("Unsupported serialization type '" + c + "'");
