@@ -5,21 +5,21 @@ package com.iblsoft.flexiweather.widgets
 	import com.iblsoft.flexiweather.ogc.configuration.ProjectionConfiguration;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
-	
+
 	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
-	
+
 	import mx.core.UIComponent;
-	
+
 	/**
 	 * AreaSelectorTool
-	 * 
+	 *
 	 * @author Franto
-	 * 
-	 */	
+	 *
+	 */
 	public class AreaSelectorTool extends InteractiveLayer
 	{
 		public static const AREA_CREATED: String = 'area created';
@@ -81,17 +81,17 @@ package com.iblsoft.flexiweather.widgets
 
 		override public function onMouseDown(event: MouseEvent): Boolean
 		{
-			
+
 //			if(!event.ctrlKey && mb_requireCtrlKey || event.shiftKey)
 			if (event.ctrlKey || event.shiftKey)
 				return false;
 //			if(!event.buttonDown)
 //				return false;
-			
+
 			trace("AreaSelector: onMouseDown");
-			
+
 			systemManager.getSandboxRoot().addEventListener(MouseEvent.MOUSE_UP, onMouseUpOutsideArea);
-			
+
 			if (_areaComponent.isResizing)
 			{
 				_areaComponent.mouseEnabled = false;
@@ -122,7 +122,7 @@ package com.iblsoft.flexiweather.widgets
 		{
 			trace("AreaSelector: onMouseUp");
 			systemManager.getSandboxRoot().removeEventListener(MouseEvent.MOUSE_UP, onMouseUpOutsideArea);
-			
+
 			if (event.ctrlKey || event.shiftKey)
 				return false;
 			if (_r == null || _areaComponent.isResizing)
@@ -134,7 +134,7 @@ package com.iblsoft.flexiweather.widgets
 					return false;
 				}
 			}
-			if (!_toolIsCreated)
+			if (!_toolIsCreated && _r)
 			{
 				//create new rectangle from old one with correct left, top, right, bottom properties (it matters on direction of draggine when zoom rectange is created
 				_r = new CustomRectangle(Math.min(_r.left, _r.right), Math.min(_r.top, _r.bottom), Math.abs(_r.left - _r.right), Math.abs(_r.top - _r.bottom));
@@ -479,7 +479,7 @@ class AreaRectangle extends UIComponent
 		trace("AreaRectangle: onMouseUpOutsideArea");
 		onSpriteUp(event);
 	}
-	
+
 	public function stopDragging(): void
 	{
 		trace("AreaRectangle: stopDragging");
@@ -491,10 +491,10 @@ class AreaRectangle extends UIComponent
 		stage.removeEventListener(MouseEvent.MOUSE_MOVE, onSpriteMove);
 		stage.removeEventListener(MouseEvent.MOUSE_UP, onSpriteUp);
 		systemManager.getSandboxRoot().removeEventListener(MouseEvent.MOUSE_UP, onMouseUpOutsideArea);
-		
+
 		if (event)
 			computeBoundingBox(event);
-		
+
 		draw(_r, false);
 		isResizing = false;
 		_currentlyDraggedSprite = null;
@@ -503,7 +503,7 @@ class AreaRectangle extends UIComponent
 		//fix negative position
 //		if (leftX < 0 || topY < 0)
 //		{
-//			
+//
 //		}
 	}
 }
