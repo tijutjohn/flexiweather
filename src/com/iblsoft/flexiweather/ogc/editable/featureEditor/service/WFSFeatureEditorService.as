@@ -10,35 +10,35 @@ package com.iblsoft.flexiweather.ogc.editable.featureEditor.service
 	import com.iblsoft.flexiweather.ogc.editable.featureEditor.data.FeatureEditorProduct;
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeature;
 	import com.iblsoft.flexiweather.utils.ISO8601Parser;
-	
+
 	import flash.events.EventDispatcher;
 	import flash.net.URLRequest;
 	import flash.net.URLRequestMethod;
 	import flash.net.URLVariables;
-	
+
 	import mx.collections.ArrayCollection;
 
 	public class WFSFeatureEditorService extends EventDispatcher
 	{
 		private var m_product: FeatureEditorProduct;
-		
+
 		public function get product(): FeatureEditorProduct
 		{
 			return m_product;
 		}
-		
+
 		protected var m_wfsLoader: WFSLoader;
-		
+
 		public function WFSFeatureEditorService()
 		{
 			m_wfsLoader = new WFSLoader();
 		}
-		
+
 		public function setProduct(product: FeatureEditorProduct): void
 		{
 			m_product = product;
 		}
-		
+
 		public function issue(xml: XML): void
 		{
 			var urlRequest: URLRequest = new URLRequest();
@@ -46,12 +46,12 @@ package com.iblsoft.flexiweather.ogc.editable.featureEditor.service
 			urlRequest.url = m_product.serviceURL;
 			urlRequest.method = URLRequestMethod.POST;
 			urlRequest.data = xml;
-			
+
 			listenToTransaction();
-			
+
 			m_wfsLoader.load(urlRequest);
 		}
-		
+
 		public function save(xml: XML): void
 		{
 			var urlRequest: URLRequest = new URLRequest();
@@ -59,12 +59,12 @@ package com.iblsoft.flexiweather.ogc.editable.featureEditor.service
 			urlRequest.url = m_product.serviceURL;
 			urlRequest.method = URLRequestMethod.POST;
 			urlRequest.data = xml;
-			
+
 			listenToTransaction();
-			
+
 			m_wfsLoader.load(urlRequest);
 		}
-		
+
 		private function stopListenToTransaction(): void
 		{
 			m_wfsLoader.removeEventListener(UniURLLoaderEvent.DATA_LOADED, onTransactionResult);
@@ -75,13 +75,13 @@ package com.iblsoft.flexiweather.ogc.editable.featureEditor.service
 			m_wfsLoader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onTransactionResult);
 			m_wfsLoader.addEventListener(UniURLLoaderErrorEvent.DATA_LOAD_FAILED, onTransactionFailed);
 		}
-		
+
 		protected function onTransactionFailed(event: UniURLLoaderErrorEvent): void
 		{
 			stopListenToTransaction();
 			dispatchEvent(event);
 		}
-		
+
 		protected function onTransactionResult(event: UniURLLoaderEvent): void
 		{
 			stopListenToTransaction();
@@ -95,12 +95,13 @@ package com.iblsoft.flexiweather.ogc.editable.featureEditor.service
 		 * @param validity
 		 *
 		 */
-		public function importData(run: String, validity: String, versionString: String, typeName: String, srsName: String = null): void
+		public function importData(serviceURL: String, run: String, validity: String, versionString: String, typeName: String, srsName: String = null): void
 		{
-			var url: URLRequest = new URLRequest(m_product.serviceURL);
-			
+//			var url: URLRequest = new URLRequest(m_product.serviceURL);
+			var url: URLRequest = new URLRequest(serviceURL);
+
 			m_wfsLoader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onImportLoaded);
-			
+
 			if(url.data == null)
 				url.data = new URLVariables();
 			url.data['SERVICE'] = 'WFS';
@@ -113,69 +114,69 @@ package com.iblsoft.flexiweather.ogc.editable.featureEditor.service
 			url.data['TYPENAME'] = typeName;
 			m_wfsLoader.load(url, null, "Importing features");
 		}
-		
+
 		private function onImportLoaded(event: UniURLLoaderEvent): void
 		{
 			m_wfsLoader.removeEventListener(UniURLLoaderEvent.DATA_LOADED, onImportLoaded);
-			
+
 			var xml: XML = event.result as XML;
 			if (xml == null)
 				return; // TODO: do some error handling
-			
+
 			var e: WFSFeatureEditorServiceEvent = new WFSFeatureEditorServiceEvent(WFSFeatureEditorServiceEvent.IMPORT_DATA_RECEIVED);
 			e.xml = xml;
 			dispatchEvent(e);
 		}
-		
-		
-		
-		
+
+
+
+
 		public function loadData(data: Array, typeName: String, versionString: String, srsName: String = null): void
 		{
 			updateParametersFromProduct(data);
-			
+
 			m_wfsLoader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onLoadDataLoaded);
 			updateWFSData('load', "Load features", data, versionString, typeName, srsName);
-			
+
 		}
-		
+
 		private function onLoadDataLoaded(event: UniURLLoaderEvent): void
 		{
 			m_wfsLoader.removeEventListener(UniURLLoaderEvent.DATA_LOADED, onLoadDataLoaded);
-			
+
 			var xml: XML = event.result as XML;
 			if (xml == null)
 				return; // TODO: do some error handling
-			
+
 			var e: WFSFeatureEditorServiceEvent = new WFSFeatureEditorServiceEvent(WFSFeatureEditorServiceEvent.LOAD_DATA_RECEIVED);
 			e.xml = xml;
 			dispatchEvent(e);
 		}
-		
-		
-		
+
+
+
 		public function refreshData(data: Array, typeName: String, versionString: String, srsName: String = null): void
 		{
 			updateParametersFromProduct(data);
-			
+
 			m_wfsLoader.addEventListener(UniURLLoaderEvent.DATA_LOADED, onRefreshDataLoaded);
 			updateWFSData('refresh', "Refresh features", data, versionString, typeName, srsName);
-			
+
 		}
-		
+
 		private function onRefreshDataLoaded(event: UniURLLoaderEvent): void
 		{
 			m_wfsLoader.removeEventListener(UniURLLoaderEvent.DATA_LOADED, onRefreshDataLoaded);
-			
+
 			var xml: XML = event.result as XML;
 			if (xml == null)
 				return; // TODO: do some error handling
-			
+
 			var e: WFSFeatureEditorServiceEvent = new WFSFeatureEditorServiceEvent(WFSFeatureEditorServiceEvent.REFRESH_DATA_RECEIVED);
 			e.xml = xml;
 			dispatchEvent(e);
 		}
-		
+
 		/**
 		 * update WFS layer data (load them or refresh).
 		 * @param type - type of updating. Possible values are: load, refresh.
@@ -185,7 +186,7 @@ package com.iblsoft.flexiweather.ogc.editable.featureEditor.service
 		{
 			if (m_product.serviceURL == null)
 				return;
-			
+
 			var url: URLRequest = new URLRequest(m_product.serviceURL);
 			if (url.data == null)
 				url.data = new URLVariables();
@@ -202,57 +203,57 @@ package com.iblsoft.flexiweather.ogc.editable.featureEditor.service
 			url.data['TYPENAME'] = typeName;
 			m_wfsLoader.load(url, null, description);
 		}
-		
+
 		private function updateParametersFromProduct(data: Array): void
 		{
 			if (m_product)
 			{
 				var run: String = ISO8601Parser.dateToString(getBaseTime(m_product));
 				data["RUN"] = run;
-				
+
 				var validity: String = ISO8601Parser.dateToString(getValidity(m_product));
-				data["VALIDITY"] = validity;	
+				data["VALIDITY"] = validity;
 			}
 		}
-		
+
 		public function updateFeatureBaseTimeAndValidity(feature: WFSFeatureEditable): void
 		{
-			if(feature is IObjectWithBaseTimeAndValidity) 
+			if(feature is IObjectWithBaseTimeAndValidity)
 			{
 				if (m_product)
 				{
 					IObjectWithBaseTimeAndValidity(feature).baseTime = getBaseTime(m_product);
 					IObjectWithBaseTimeAndValidity(feature).validity = getValidity(m_product);
 				}
-				
+
 			}
 		}
-		
-		
+
+
 		public function getBaseTime(product: FeatureEditorProduct): Date
 		{
 			var dateLocal: Date = product.date
 			var timeOffset: int = product.timeOffset;
-			
+
 			if(dateLocal == null)
-				return new Date(uint(new Date().time) / 3600 * 3600) 
-			
+				return new Date(uint(new Date().time) / 3600 * 3600)
+
 			return getBaseTimeFunction(dateLocal, timeOffset);
 		}
-		
+
 		public function getBaseTimeFunction(dateLocal: Date, timeOffset: int): Date
 		{
 			var date: Date = new Date(Date.UTC(dateLocal.fullYear, dateLocal.month, dateLocal.date));
 			date.time += Number(timeOffset) * 1000.0;
 			return date;
 		}
-		
+
 		public function getValidity(product: FeatureEditorProduct): Date
 		{
 			var forecastTime: int = product.forecast;
 			return getValidityFunction(forecastTime, getBaseTime(product));
 		}
-		
+
 		public function getValidityFunction(forecastTime: int, runDate: Date): Date
 		{
 			return new Date(runDate.time + Number(forecastTime) * 1000.0);

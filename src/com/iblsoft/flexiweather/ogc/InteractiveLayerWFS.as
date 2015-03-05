@@ -13,12 +13,12 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
-	
+
 	import flash.display.Graphics;
 	import flash.display.Sprite;
 	import flash.net.URLRequest;
 	import flash.net.URLVariables;
-	
+
 	import mx.collections.ArrayCollection;
 
 	public class InteractiveLayerWFS extends InteractiveLayerFeatureBase
@@ -28,15 +28,15 @@ package com.iblsoft.flexiweather.ogc
 
 //		protected var m_wfsLoader: WFSLoader;
 		protected var m_wfsService: WFSFeatureEditorService;
-		
+
 		protected var m_product: FeatureEditorProduct;
-		
+
 		public function InteractiveLayerWFS(
 				container: InteractiveWidget = null,
 				version: Version = null)
 		{
 			super(container, version);
-			
+
 //			m_wfsLoader = new WFSLoader();
 			m_wfsService = new WFSFeatureEditorService();
 		}
@@ -51,7 +51,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			m_wfsService = value;
 		}
-		
+
 		public function setProduct(product: FeatureEditorProduct): void
 		{
 			m_product = product;
@@ -69,34 +69,34 @@ package com.iblsoft.flexiweather.ogc
 		public function importData(serviceURL: String, run: String, validity: String): void
 		{
 			var url: URLRequest = new URLRequest(serviceURL);
-			
+
 			var srsName: String;
 			if (!version.isLessThan(1, 1, 0))
 				srsName = container.getCRS();
-			
+
 			m_wfsService.addEventListener(WFSFeatureEditorServiceEvent.IMPORT_DATA_RECEIVED, onImportLoaded);
-			m_wfsService.importData(run, validity, version.toString(), ma_queryFeatures.join(","), srsName);
+			m_wfsService.importData(serviceURL, run, validity, version.toString(), ma_queryFeatures.join(","), srsName);
 		}
-	
+
 		public function loadData(): void
 		{
 			var srsName: String;
 			if (!version.isLessThan(1, 1, 0))
 				srsName = container.getCRS();
-			
+
 			m_wfsService.addEventListener(WFSFeatureEditorServiceEvent.LOAD_DATA_RECEIVED, onLoadDataLoaded);
 			m_wfsService.loadData(md_queryParametersGET, ma_queryFeatures.join(","), version.toString(), srsName);
-			
+
 		}
 		public function refreshData(): void
 		{
 			var srsName: String;
 			if (!version.isLessThan(1, 1, 0))
 				srsName = container.getCRS();
-			
+
 			m_wfsService.addEventListener(WFSFeatureEditorServiceEvent.REFRESH_DATA_RECEIVED, onRefreshDataLoaded);
 			m_wfsService.refreshData(md_queryParametersGET, ma_queryFeatures.join(","), version.toString(), srsName);
-			
+
 		}
 
 		private function addFeatureAfterLoad(feature: WFSFeatureBase, a_features: ArrayCollection = null): void
@@ -230,11 +230,11 @@ package com.iblsoft.flexiweather.ogc
 		public function onImportLoaded(event: WFSFeatureEditorServiceEvent): void
 		{
 			m_wfsService.removeEventListener(WFSFeatureEditorServiceEvent.IMPORT_DATA_RECEIVED, onImportLoaded);
-			
+
 			var xml: XML = event.xml;
 			if (xml == null)
 				return; // TODO: do some error handling
-			
+
 			var lenBefore: int = features.length
 			var newFeatures: ArrayCollection = importFeaturesFromXML(xml);
 			var importEvent: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.FEATURES_IMPORTED);
@@ -247,23 +247,23 @@ package com.iblsoft.flexiweather.ogc
 		protected function onRefreshDataLoaded(event: WFSFeatureEditorServiceEvent): void
 		{
 			m_wfsService.removeEventListener(WFSFeatureEditorServiceEvent.REFRESH_DATA_RECEIVED, onRefreshDataLoaded);
-			
-			var xml: XML = event.xml;			
+
+			var xml: XML = event.xml;
 			if (xml == null)
 				return; // TODO: do some error handling
-			
+
 			var object: Object = createRefreshedFeaturesFromXML( xml );
-			
+
 			var refreshEvent: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.FEATURES_LOADED);
 			refreshEvent.refreshFeaturesObject = object;
 			dispatchEvent(refreshEvent);
 
 		}
-		
+
 		public function updateFeaturesOnRefresh(newFeatures: ArrayCollection): void
 		{
 			features.removeAll();
-			features.addAll(newFeatures); 
+			features.addAll(newFeatures);
 		}
 
 		protected function onLoadDataLoaded(event: WFSFeatureEditorServiceEvent): void
@@ -273,7 +273,7 @@ package com.iblsoft.flexiweather.ogc
 			var xml: XML = event.xml;
 			if (xml == null)
 				return; // TODO: do some error handling
-			
+
 			createFeaturesFromXML(xml);
 			var importEvent: InteractiveLayerEvent = new InteractiveLayerEvent(InteractiveLayerEvent.FEATURES_LOADED);
 			dispatchEvent(importEvent);
@@ -394,10 +394,10 @@ package com.iblsoft.flexiweather.ogc
 				}
 			}
 			var existingFeature: WFSFeatureEditable;
-			
+
 			var tempExistingSavedFeatures: ArrayCollection;
 			var tempExistingRemovedFeatures: ArrayCollection;
-			
+
 			if (existingSavedFeatures && existingSavedFeatures.length > 0)
 				tempExistingSavedFeatures = new ArrayCollection(existingSavedFeatures.source);
 			else
@@ -406,8 +406,8 @@ package com.iblsoft.flexiweather.ogc
 				tempExistingRemovedFeatures = new ArrayCollection(existingRemovedFeatures.source);
 			else
 				tempExistingRemovedFeatures = new ArrayCollection();
-				
-			
+
+
 			//all feature arrays are ready
 			while (serverFeatures.length > 0)
 			{
@@ -547,7 +547,7 @@ package com.iblsoft.flexiweather.ogc
 		{
 			md_queryParametersGET = new Array();
 		}
-		
+
 		override public function toString(): String
 		{
 			return "InteractiveLayerWFS ["+id+"]: ";

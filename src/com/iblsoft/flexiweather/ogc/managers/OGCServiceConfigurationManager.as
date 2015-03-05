@@ -3,43 +3,44 @@ package com.iblsoft.flexiweather.ogc.managers
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderErrorEvent;
 	import com.iblsoft.flexiweather.ogc.Version;
 	import com.iblsoft.flexiweather.ogc.configuration.services.OGCServiceConfiguration;
+	import com.iblsoft.flexiweather.ogc.configuration.services.ServiceSerializableSelector;
 	import com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceConfiguration;
 	import com.iblsoft.flexiweather.ogc.events.ServiceCapabilitiesEvent;
 	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
-	
+
 	import flash.events.DataEvent;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.TimerEvent;
 	import flash.utils.Timer;
 	import flash.utils.getTimer;
-	
+
 	import mx.collections.ArrayCollection;
 
 	[Event (name="serviceCapabilitiesUpdated", type="flash.events.Event")]
-	
+
 	[Event (name="allServicesCapabilitiesUpdated", type="flash.events.Event")]
-	
+
 	public class OGCServiceConfigurationManager extends EventDispatcher implements Serializable
 	{
 		private static var sm_instance: OGCServiceConfigurationManager;
 		private var ma_services: ArrayCollection = new ArrayCollection();
-		
+
 		private var m_timer: Timer;
 
 		private var m_servicesUpdating: int;
-		
+
 		public function OGCServiceConfigurationManager(timeInterval: int = 60000)
 		{
 			if (sm_instance != null)
 				throw new Error("OGCServiceManager can only be accessed through OGCServiceManager.getIntstance()");
-			
+
 			m_timer = new Timer(timeInterval);
 			m_timer.stop();
 			m_timer.addEventListener(TimerEvent.TIMER, onTimer);
-			
+
 		}
 
 		public function get servicesUpdating():int
@@ -61,7 +62,7 @@ package com.iblsoft.flexiweather.ogc.managers
 
 		public function serialize(storage: Storage): void
 		{
-			storage.serializeNonpersistentArrayCollection("service", ma_services, WMSServiceConfiguration);
+			storage.serializeNonpersistentArrayCollection("service", ma_services, ServiceSerializableSelector);
 			if (storage.isLoading())
 			{
 				if (ma_services.length > 0 && !m_timer.running)
@@ -125,7 +126,7 @@ package com.iblsoft.flexiweather.ogc.managers
 			trace("OGCServiceManager addService: " + osc.toString());
 			if (osc.name.indexOf('obser') >= 0)
 				trace("check observations");
-			
+
 			ma_services.addItem(osc);
 			if (ma_services.length == 1)
 				m_timer.start();
@@ -144,18 +145,18 @@ package com.iblsoft.flexiweather.ogc.managers
 
 		/**
 		 * Returns OGCServiceConfiguration defined by name, which is baseURL of OGCServiceConfiguration. If you want just look for string inside baseURL, set bExactName to "false"
-		 *  
+		 *
 		 * @param serviceName - name of service (currently is baseURL used)
 		 * @param bExactName - if true, name must match exactly, if false it will returns first service with serviceName substring in baseURL
-		 * @return 
-		 * 
-		 */		
+		 * @return
+		 *
+		 */
 		public function getServiceByName(serviceName: String, bExactName: Boolean = true): OGCServiceConfiguration
 		{
 			for each (var osc: OGCServiceConfiguration in ma_services)
 			{
 //				if (osc.id == serviceName)
-				
+
 				if (bExactName)
 				{
 					if (osc.baseURL == serviceName)
@@ -185,7 +186,7 @@ package com.iblsoft.flexiweather.ogc.managers
 		{
 			update(getAllServicesNames());
 		}
-		
+
 		/**
 		 * Update just services, which is in services argument, not all services stored in manager
 		 * @param services
@@ -196,10 +197,10 @@ package com.iblsoft.flexiweather.ogc.managers
 		{
 			_currentServices = currServices;
 			stopAllRunningServices();
-			
+
 			servicesUpdating = 0;
 			var i_currentFlashStamp: int = getTimer();
-//			for each(var osc: OGCServiceConfiguration in ma_services) 
+//			for each(var osc: OGCServiceConfiguration in ma_services)
 			for each (var oscName: String in currServices)
 			{
 				var osc: OGCServiceConfiguration = getServiceByName(oscName);
@@ -232,25 +233,25 @@ package com.iblsoft.flexiweather.ogc.managers
 		{
 			dispatchEvent(event);
 		}
-		
+
 		private function onCapabilitiesUpdateFailed(event: ServiceCapabilitiesEvent): void
 		{
 			dispatchEvent(event);
 			capabilitiesUpdated();
-			
+
 		}
-		
+
 		private function onCapabilitiesUpdated(event: ServiceCapabilitiesEvent): void
 		{
 			dispatchEvent(event);
 			capabilitiesUpdated();
 		}
-		
+
 		private function capabilitiesUpdated(): void
 		{
 //			var wmsServiceConfiguration: WMSServiceConfiguration = event.target as WMSServiceConfiguration;
 //			wmsServiceConfiguration.capabilitiesUpdated = true;
-			
+
 //			dispatchEvent(new Event(WMSServiceConfiguration.CAPABILITIES_UPDATED, true));
 			servicesUpdating--;
 			if (servicesUpdating == 0)
@@ -258,7 +259,7 @@ package com.iblsoft.flexiweather.ogc.managers
 				allCapabilitiesAreUpdated();
 			}
 		}
-		
+
 		private function allCapabilitiesAreUpdated(): void
 		{
 			dispatchEvent(new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.ALL_CAPABILITIES_UPDATED, true));
