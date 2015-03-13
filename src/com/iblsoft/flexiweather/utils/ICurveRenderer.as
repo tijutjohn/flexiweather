@@ -11,6 +11,8 @@ package com.iblsoft.flexiweather.utils
 		function clear(): void;
 		function start(x: Number, y: Number): void;
 		function finish(x: Number, y: Number): void;
+		function firstPoint(x: Number, y: Number): void;
+		function lastPoint(x: Number, y: Number): void;
 		function moveTo(x: Number, y: Number): void;
 		function lineTo(x: Number, y: Number): void;
 		function curveTo(controlX: Number, controlY: Number, anchorX: Number, anchorY: Number): void;

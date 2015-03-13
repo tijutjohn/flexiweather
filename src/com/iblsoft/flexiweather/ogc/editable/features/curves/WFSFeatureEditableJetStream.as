@@ -1373,6 +1373,7 @@ import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
 import com.iblsoft.flexiweather.symbology.JetStreamCurveRenderer;
 import com.iblsoft.flexiweather.utils.CubicBezier;
 import com.iblsoft.flexiweather.utils.geometry.LineSegment;
+import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 
 import flash.display.Sprite;
 import flash.geom.Point;
@@ -1404,33 +1405,16 @@ class JetStreamSprite extends WFSFeatureEditableSprite
 			m_editableSignsSprite.graphics.clear();
 		}
 	}
-	override public function getLineSegmentApproximationOfBounds():Array
+
+	override public function getPointsForLineSegmentApproximationOfBounds(): Array
 	{
-		var a: Array = [];
-		var ptFirst: Point = null;
-		var ptPrev: Point = null;
-
 		var jetStreamFeature: WFSFeatureEditableJetStream = _feature as WFSFeatureEditableJetStream;
-		var pts: Array = CubicBezier.calculateHermitSpline(points, false);
+		var iw: InteractiveWidget = jetStreamFeature.master.container;
 
-		var useEvery: int = 1;
-		if (pts.length > 100){
-			useEvery = int(pts.length / 20);
-		} else if (pts.length > 50){
-			useEvery = int(pts.length / 10);
-		}
+		//distanceValidator, pixelDistanceValidator, datelineBetweenPixelPositions
+		var pts: Array = CubicBezier.calculateHermitSpline(points, false, iw.pixelDistanceValidator, iw.datelineBetweenPixelPositions);
 
-		var actPUse: int = 0;
-		for each(var pt: Point in pts) {
-			if ((actPUse % useEvery) == 0){
-				if(ptPrev != null)
-					a.push(new LineSegment(ptPrev.x, ptPrev.y, pt.x, pt.y));
-				ptPrev = pt;
-			}
-			actPUse++;
-		}
-
-		return a;
+		return pts;
 	}
 }
 

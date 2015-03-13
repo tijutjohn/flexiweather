@@ -273,7 +273,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 					var toID: int = splineInfo.endID;
 					currentReflection = helper.reflection;
 					debug("Spline from: " + fromID + " to : " + toID + " reflection: " + currentReflection.reflectionDelta);
-					for (i = fromID; i < toID; i++)
+					for (i = fromID; i <= toID; i++)
 					{
 						tempLines.push(currentReflection.getLineAt(i));
 					}
@@ -982,6 +982,7 @@ class ReflectionHelper
 					currSplineInfo.endID = oldID;
 					splines.push(currSplineInfo);
 					currSplineInfo = new SplineInfo();
+					currSplineInfo.startID = id;
 				}
 			}
 			oldID = id;

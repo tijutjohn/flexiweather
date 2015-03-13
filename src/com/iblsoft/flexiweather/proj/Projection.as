@@ -304,7 +304,8 @@ package com.iblsoft.flexiweather.proj
 				{
 					f_longitudeRad -= m_proj.projParams.longZero;
 				}
-				var ptDest: ProjPoint = m_proj.forward(new ProjPoint(f_longitudeRad, f_latitudeRad));
+				var ptSource:ProjPoint = new ProjPoint(f_longitudeRad, f_latitudeRad);
+				var ptDest: ProjPoint = m_proj.forward(ptSource);
 			} catch (error: Error) {
 				return null;
 			}
@@ -333,7 +334,8 @@ package com.iblsoft.flexiweather.proj
 			if (laLoCoord)
 			{
 				var toRadiansConst: Number = Math.PI / 180;
-				var p: Point = laLoToPrjPt(laLoCoord.x * toRadiansConst, laLoCoord.y * toRadiansConst);
+				var pY: Number = laLoCoord.y * toRadiansConst;
+				var p: Point = laLoToPrjPt(laLoCoord.x * toRadiansConst, pY);
 				return new Coord(crs, p.x, p.y);
 			}
 			return null;

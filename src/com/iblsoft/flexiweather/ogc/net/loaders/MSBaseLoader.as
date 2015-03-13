@@ -754,7 +754,7 @@ import mx.logging.Log;
 
 		protected function debug(str: String): void
 		{
-			trace("MSBaseLoader["+m_layer.layerID+"/"+m_layer.name+"]: " + str);
+//			trace("MSBaseLoader["+m_layer.layerID+"/"+m_layer.name+"]: " + str);
 		}
 	}
 }

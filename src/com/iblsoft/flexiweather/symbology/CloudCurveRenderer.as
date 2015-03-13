@@ -57,6 +57,23 @@ package com.iblsoft.flexiweather.symbology
 			m_graphics.lineTo(x, y);
 		}
 
+		override public function firstPoint(x: Number, y: Number): void
+		{
+			//just as test
+//			m_graphics.lineStyle(mf_thickness, mi_color, mf_alpha);
+//			m_graphics.beginFill(mi_color, mf_alpha);
+//			m_graphics.drawCircle(x, y, 10);
+//			m_graphics.endFill();
+		}
+
+		override public function lastPoint(x: Number, y: Number): void
+		{
+//			m_graphics.lineStyle(mf_thickness, mi_color, mf_alpha);
+//			m_graphics.beginFill(mi_color, mf_alpha);
+//			m_graphics.drawCircle(x, y, 20);
+//			m_graphics.endFill();
+		}
+
 		override protected function mark(f_x: Number, f_y: Number): void
 		{
 			var pt: Point = new Point(f_x, f_y);

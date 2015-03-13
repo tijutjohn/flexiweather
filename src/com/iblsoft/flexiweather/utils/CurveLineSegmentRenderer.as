@@ -29,6 +29,14 @@ package com.iblsoft.flexiweather.utils
 //			++mi_originatingSegmentIndex;
 		}
 
+		public function firstPoint(x: Number, y: Number): void
+		{
+		}
+
+		public function lastPoint(x: Number, y: Number): void
+		{
+		}
+
 		public function moveTo(x: Number, y: Number): void
 		{
 			m_lastX = x;
@@ -37,7 +45,7 @@ package com.iblsoft.flexiweather.utils
 
 		public function lineTo(x: Number, y: Number): void
 		{
-			
+
 			ml_segments.push(new CurveLineSegment(mi_originatingSegmentIndex, m_lastX, m_lastY, x, y));
 			m_lastX = x;
 			m_lastY = y;
