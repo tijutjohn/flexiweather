@@ -2027,8 +2027,11 @@ package com.iblsoft.flexiweather.widgets
 					error("InteractiveLayerMap setRun [" + newRun + "] NO SYNCHRONIZATION for " + l.name);
 					if (bIfRunDoesNotExistSetToCurrentRun)
 					{
+						if (_globalVariablesManager.runs && _globalVariablesManager.runs.length > 0)
+						{
 						var latestRun: Date = _globalVariablesManager.runs.getItemAt(_globalVariablesManager.runs.length - 1) as Date;
 						setRun(latestRun, true, bGlobalValueChange, false);
+						}
 						return false;
 					}
 
