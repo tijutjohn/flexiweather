@@ -1,7 +1,7 @@
 package com.iblsoft.flexiweather.utils.geometry
 {
 	import com.iblsoft.flexiweather.ogc.BBox;
-	
+
 	import flash.geom.Point;
 
 	public class LineSegment
@@ -30,7 +30,7 @@ package com.iblsoft.flexiweather.utils.geometry
 		 */
 		public function intersectionWithLineSegment(other: LineSegment): Point
 		{
-			var adx: Number = this.x2 - this.x1; // this direction vector 
+			var adx: Number = this.x2 - this.x1; // this direction vector
 			var ady: Number = this.y2 - this.y1;
 			var bdx: Number = other.x2 - other.x1; // other direction vector
 			var bdy: Number = other.y2 - other.y1;
@@ -50,19 +50,62 @@ package com.iblsoft.flexiweather.utils.geometry
 			return new Point(this.x1 + adx * r, this.y1 + ady * r);
 		}
 
+		public function intersectionWithInfiniteLineSegment(other: LineSegment): Point
+		{
+			// if the lines intersect, the result contains the x and y of the intersection (treating the lines as infinite) and booleans for whether line segment 1 or line segment 2 contain the point
+			var denominator: Number;
+			var a: Number;
+			var b: Number;
+			var numerator1: Number;
+			var numerator2:  Number;
+			var result: Point = new Point();
+
+			this.x1, this.y1, this.x2, this.y2, other.x1, other.y1, other.x2, other.y2
+
+			denominator = ((other.y2 - other.y1) * (this.x2 - this.x1)) - ((other.x2 - other.x1) * (this.y2 - this.y1));
+			if (denominator == 0) {
+				return result;
+			}
+			a = this.y1 - other.y1;
+			b = this.x1 - other.x1;
+			numerator1 = ((other.x2 - other.x1) * a) - ((other.y2 - other.y1) * b);
+			numerator2 = ((this.x2 - this.x1) * a) - ((this.y2 - this.y1) * b);
+			a = numerator1 / denominator;
+			b = numerator2 / denominator;
+
+			// if we cast these lines infinitely in both directions, they intersect here:
+			result.x = this.x1 + (a * (this.x2 - this.x1));
+			result.y = this.y1 + (a * (this.y2 - this.y1));
+			/*
+			// it is worth noting that this should be the same as:
+			x = other.x1 + (b * (other.x2 - other.x1));
+			y = other.x1 + (b * (other.y2 - other.y1));
+			*/
+			// if line1 is a segment and line2 is infinite, they intersect if:
+//			if (a > 0 && a < 1) {
+//				result.onLine1 = true;
+//			}
+//			// if line2 is a segment and line1 is infinite, they intersect if:
+//			if (b > 0 && b < 1) {
+//				result.onLine2 = true;
+//			}
+			// if line1 and line2 are segments, they intersect if both of the above are true
+			return result;
+		};
+
 		public function isInsideBox(bbox: BBox): Boolean
 		{
 			var left: Number = Math.min(x1, x2);
 			var right: Number = Math.max(x1, x2);
 			var top: Number = Math.min(y1, y2);
 			var bottom: Number = Math.max(y1, y2);
-			
+
 			if (left >= bbox.xMin && right <= bbox.xMax && top >= bbox.yMin && bottom <= bbox.yMax)
 				return true;
 
 			return false;
 		}
-		
+
 		public function isIntersectedBox(verticalLine1: LineSegment, verticalLine2: LineSegment, horizontalLine1: LineSegment, horizontalLine2: LineSegment): Boolean
 		{
 			if (_intersectedWithVerticalLine(verticalLine1))
@@ -73,11 +116,11 @@ package com.iblsoft.flexiweather.utils.geometry
 				return true;
 			if (_intersectedWithHorizontalLine(horizontalLine2))
 				return true;
-			
+
 			return false;
 		}
-		
-		
+
+
 		public function _intersectedWithVerticalLine(verticalLine: LineSegment): Boolean
 		{
 			if (verticalLine.x1 != verticalLine.x2)
@@ -85,7 +128,7 @@ package com.iblsoft.flexiweather.utils.geometry
 				trace("There is no vertical line");
 				return false;
 			}
-			
+
 			var xCorrect: Boolean = false;
 			if (x1 <= verticalLine.x1 && x2 >= verticalLine.x1)
 			{
@@ -93,18 +136,18 @@ package com.iblsoft.flexiweather.utils.geometry
 			} else if (x2 <= verticalLine.x1 && x1 >= verticalLine.x1) {
 				xCorrect = true;
 			}
-			
+
 			if (xCorrect)
 			{
 				var verticalTop: Number = Math.min(verticalLine.y1, verticalLine.y2);
 				var verticalBottom: Number = Math.max(verticalLine.y1, verticalLine.y2);
-				
+
 				if (y1 >= verticalTop && y1 <= verticalBottom)
 					return true;
 				if (y2 >= verticalTop && y2 <= verticalBottom)
 					return true;
 			}
-			
+
 			return false;
 		}
 		public function _intersectedWithHorizontalLine(horizontalLine: LineSegment): Boolean
@@ -114,7 +157,7 @@ package com.iblsoft.flexiweather.utils.geometry
 				trace("There is no horizontal line");
 				return false;
 			}
-			
+
 			var yCorrect: Boolean = false;
 			if (y1 <= horizontalLine.y1 && y2 >= horizontalLine.y1)
 			{
@@ -122,21 +165,21 @@ package com.iblsoft.flexiweather.utils.geometry
 			} else if (y2 <= horizontalLine.y1 && y1 >= horizontalLine.y1) {
 				yCorrect = true;
 			}
-			
+
 			if (yCorrect)
 			{
 				var verticalLeft: Number = Math.min(horizontalLine.x1, horizontalLine.x2);
 				var verticalRight: Number = Math.max(horizontalLine.x1, horizontalLine.x2);
-				
+
 				if (x1 >= verticalLeft && x1 <= verticalRight)
 					return true;
 				if (x2 >= verticalLeft && x2 <= verticalRight)
 					return true;
 			}
-			
+
 			return false;
 		}
-		
+
 		/**
 		 * Returns coordinates of closest point on the line segment.
 		 **/
@@ -222,7 +265,7 @@ package com.iblsoft.flexiweather.utils.geometry
 		{
 			return new Vector2D(x2 - x1, y2 - y1);
 		}
-		
+
 		public function toString(): String
 		{
 			return "LineString: [" + x1 + ", " + y1+"] [" + x2 + ", " + y2+"]";

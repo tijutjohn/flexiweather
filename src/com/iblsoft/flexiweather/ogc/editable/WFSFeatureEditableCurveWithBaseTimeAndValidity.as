@@ -262,21 +262,21 @@ package com.iblsoft.flexiweather.ogc.editable
 				return;
 			}
 
+			//get last point added by user
+			var editablePoints: Array = getPoints(0);
+			var firstEditablePoint: Point = editablePoints[0] as Point;
+			var lastEditablePoint: Point = editablePoints[editablePoints.length - 1] as Point;
+
+
 //			debug("\n\n");
 //			debug("drawFeatureData");
 			var p: Point;
 			var points: Array = m_featureData.points;
-
 			var linesCount: int = m_featureData.lines.length;
 			var pointsCount: int = points.length;
 
-//			if (pointsCount == 0 && m_featureData.computingScheduled)
-//			{
-//				m_featureData.validate();
-//				points = m_featureData.points;
-//				pointsCount = points.length;
-//			}
-
+			var iw: InteractiveWidget = master.container;
+			var projectionHalf: Number = iw.getProjectionWidthInPixels() / 2;
 
 			if (pointsCount > 0)
 			{
@@ -288,9 +288,13 @@ package com.iblsoft.flexiweather.ogc.editable
 				g.clear();
 
 				g.start(p.x, p.y);
+				if (isSameAsEditablePoint(p, firstEditablePoint))
+				{
+					g.firstPoint(p.x, p.y);
+				}
 				g.moveTo(p.x, p.y);
 				lastPoint = new Point(p.x, p.y);
-				debugStrangePoints(p,"drawFeatureReflection moveTO: [" + p.x + " , " + p.y + " ]");
+				debugStrangePoints(p,"drawFeatureReflection moveTO 1: [" + p.x + " , " + p.y + " ]");
 				var bNewLine: Boolean = false;
 				for (var i: int = 1; i < pointsCount; i++)
 				{
@@ -301,19 +305,36 @@ package com.iblsoft.flexiweather.ogc.editable
 
 						if (lastPoint)
 						{
+//							var dist: Number = Point.distance(p, lastPoint);
+//							debugStrangePoints(p,"\tdrawFeatureData P: " + p + "   distance to last point: " + dist);
 							var dist: Number = Point.distance(p, lastPoint);
-							debugStrangePoints(p,"\tdrawFeatureData P: " + p + "   distance to last point: " + dist);
+							if (dist > projectionHalf)
+							{
+								bNewLine = true;
+							}
 						}
 						if (bNewLine) {
-							g.finish(lastPoint.x, lastPoint.y);
-							debugStrangePoints(lastPoint,"\t drawFeatureReflection lastPoint loop: [" + lastPoint.x + " , " + lastPoint.y + " ]");
 
+							debugStrangePoints(lastPoint,"\t drawFeatureReflection finish 1 lastPoint loop: [" + lastPoint.x + " , " + lastPoint.y + " ]");
+							g.finish(lastPoint.x, lastPoint.y);
+							//check if this is real last point (last added point by user) and in that case, use g.finish()
+							if (isSameAsEditablePoint(lastPoint, lastEditablePoint))
+							{
+								//it is real last point
+								g.lastPoint(lastPoint.x, lastPoint.y);
+								debugStrangePoints(lastPoint,"\t drawFeatureReflection lastPoint 1 lastPoint loop: [" + lastPoint.x + " , " + lastPoint.y + " ]");
+								//this is just last point of curve, but not real last point added by user
+							}
 							g.start(p.x, p.y);
+							if (isSameAsEditablePoint(p, firstEditablePoint))
+							{
+								g.firstPoint(p.x, p.y);
+							}
 							g.moveTo(p.x, p.y);
-							debugStrangePoints(p,"\t drawFeatureReflection moveTo: [" + p.x + " , " + p.y + " ]");
+							debugStrangePoints(p,"\t drawFeatureReflection moveTo 2: [" + p.x + " , " + p.y + " ]");
 						} else {
 							g.lineTo(p.x, p.y);
-							debugStrangePoints(p,"\t drawFeatureReflection lineTO: [" + p.x + " , " + p.y + " ]");
+							debugStrangePoints(p,"\t drawFeatureReflection lineTO 1: [" + p.x + " , " + p.y + " ]");
 						}
 						if (!p)
 							debug("check why p is null");
@@ -323,18 +344,44 @@ package com.iblsoft.flexiweather.ogc.editable
 						bNewLine = true;
 					}
 				}
+
 				if (p) {
 					g.finish(p.x, p.y);
-					debugStrangePoints(p,"drawFeatureReflection finish: [" + p.x + " , " + p.y + " ]");
+					debugStrangePoints(p,"drawFeatureReflection finish 2: [" + p.x + " , " + p.y + " ]");
+					if (isSameAsEditablePoint(p, lastEditablePoint))
+					{
+						g.lastPoint(p.x, p.y);
+						debugStrangePoints(p,"drawFeatureReflection lastPoint 2: [" + p.x + " , " + p.y + " ]");
+					}
 				} else {
 					g.finish(lastPoint.x, lastPoint.y);
-					debugStrangePoints(lastPoint,"drawFeatureReflection finish: [" + lastPoint.x + " , " + lastPoint.y + " ]");
+					debugStrangePoints(lastPoint,"drawFeatureReflection finish 3: [" + lastPoint.x + " , " + lastPoint.y + " ]");
+					if (isSameAsEditablePoint(lastPoint, lastEditablePoint))
+					{
+						g.lastPoint(lastPoint.x, lastPoint.y);
+						debugStrangePoints(lastPoint,"drawFeatureReflection lastPoint 3: [" + lastPoint.x + " , " + lastPoint.y + " ]");
+					}
 					debug("\n");
 				}
 			}
 
 //			debug("End of drawFeatureData");
 //			debug("\n\n");
+		}
+
+		protected function isSameAsEditablePoint(currentPoint: Point, editablePoint: Point): Boolean
+		{
+			var iw: InteractiveWidget = master.container;
+			var pointReflection: int = iw.pointReflection(currentPoint.x, currentPoint.y);
+			if (pointReflection != 0)
+				currentPoint = new Point(currentPoint.x  - pointReflection * iw.getProjectionWidthInPixels(), currentPoint.y);
+
+			var distance: Number = Point.distance(currentPoint, editablePoint);
+
+			trace("isLastEditablePoint [currentPoint: " + currentPoint + "] lastEditablePoint: " + editablePoint + " DISTANCE: " + distance);
+
+			var isLast: Boolean = distance < 5;
+			return isLast;
 		}
 		protected function drawFeatureReflection(g: ICurveRenderer, m_featureDataReflection: FeatureDataReflection): void
 		{
@@ -451,8 +498,8 @@ package com.iblsoft.flexiweather.ogc.editable
 			{
 				// PREPARE CURVE POINTS
 				var points: Array = m_points.getPointsForReflection(0);
-				ma_points = CubicBezier.calculateHermitSpline(points, false);
-				//ma_points = CubicBezier.calculateHermitSpline(m_points,
+				var iw: InteractiveWidget = master.container;
+				ma_points = CubicBezier.calculateHermitSpline(points, false,  iw.pixelDistanceValidator, iw.datelineBetweenPixelPositions);
 			}
 			if (mi_editMode == WFSFeatureEditableMode.MOVE_POINTS)
 			{

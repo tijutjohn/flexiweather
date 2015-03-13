@@ -2,6 +2,7 @@ package com.iblsoft.flexiweather.utils
 {
 	import com.iblsoft.flexiweather.utils.wfs.FeatureSplitter;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+
 	import flash.geom.Point;
 
 	public class CubicBezier
@@ -507,10 +508,12 @@ package com.iblsoft.flexiweather.utils
 				_points: Array,
 				_closed: Boolean = false,
 				_drawHiddenHitMask: Boolean = false, // PREPARED PARAMETER FOR DRAWING HIT MASK AREA
+				_distanceValidator: Function = null,
+				_discontinuityValidator: Function = null,
 				_step: Number = 0.01,
 				_useSegmentation: Boolean = false): Array
 		{
-			var mPoints: Array = CubicBezier.calculateHermitSpline(_points, _closed, _step);
+			var mPoints: Array = CubicBezier.calculateHermitSpline(_points, _closed, _distanceValidator, _discontinuityValidator);
 			var actSegment: int = 0;
 			g.start(mPoints[0].x, mPoints[0].y);
 			g.moveTo(mPoints[0].x, mPoints[0].y);
@@ -531,14 +534,14 @@ package com.iblsoft.flexiweather.utils
 
 		/**
 		 * Calculates all needed parameters for hermit spline (distances, derivations, points)
-		 * 
+		 *
 		 * @param _points - screen pixel positions
 		 * @param _closed
 		 * @param _step
-		 * @return Returns array of MPoints 
-		 * 
-		 */		
-		public static function calculateHermitSpline(_points: Array, _closed: Boolean, _step: Number = 0.05): Array
+		 * @return Returns array of MPoints
+		 *
+		 */
+		public static function calculateHermitSpline(_points: Array, _closed: Boolean, distanceValidator: Function, discontinuityValidator: Function): Array
 		{
 			var retPoints: Array = new Array();
 			var usePoints: Array = new Array();
@@ -587,12 +590,12 @@ package com.iblsoft.flexiweather.utils
 					MPoint(usePoints[i]).dist = new Point(MPoint(usePoints[nextIndex]).x - MPoint(usePoints[i]).x, MPoint(usePoints[nextIndex]).y - MPoint(usePoints[i]).y).length;
 				}
 			}
-			
+
 			//there are no visible points, return empty array
 			if (usePoints.length == 0)
 				return [];
-			
-			
+
+
 			// CALCULATE DERIVATES
 			for (i = 0; i < usePoints.length; i++)
 			{
@@ -605,7 +608,6 @@ package com.iblsoft.flexiweather.utils
 			var x0: Number;
 			var y0: Number;
 			var tmpRetPoint: SPoint = new SPoint(MPoint(usePoints[0]).x, MPoint(usePoints[0]).y);
-			//retPoints.push(MPoint(usePoints[0]).point.clone());
 			retPoints.push(tmpRetPoint.clone());
 			for (i = 0; i < usePoints.length; i++)
 			{
@@ -623,35 +625,319 @@ package com.iblsoft.flexiweather.utils
 				x0 = point0.x;
 				y0 = point0.y;
 				var tDist: Number = 0;
-				for (var t: Number = 0; t <= 1.0; t = t + _step)
+
+				calculateHermitSplineBisect(retPoints, "START", 0, 1, i, x0, y0, point0, point1, 0, distanceValidator, discontinuityValidator);
+
+				trace("calculateHermitSplineBisect total: " + retPoints.length);
+
+			}
+//			tmpRetPoint = new SPoint(MPoint(usePoints[usePoints.length - 1]).x, MPoint(usePoints[usePoints.length - 1]).y);
+//			retPoints.push(tmpRetPoint.clone());
+
+
+			var str2: String = "";
+			var leftX:  Number = 0;
+			var rightX:  Number = 360;
+			for each (var tmpRetPoint in retPoints)
+			{
+				if (tmpRetPoint)
 				{
-					//for (var t: Number = 0; t <= 1.0; t = t + (1 / 20)) {
-					//drawPoint = polynom(point0, point1, t);
-					//drawPoint = hermiteCurveEvaluate(t, point0, point1);
-					drawPoint = hermiteCurveEvaluate(point0, point1, t);
-					//drawPoint = polynom(point0, point1, t);
-					tDist += new Point(drawPoint.x - x0, drawPoint.y - y0).length;
-					//if ((tDist >= 1.0) || (t >= (1.0 - _step))){
-					if (tDist >= 1.0)
-					{
-						x0 = drawPoint.x;
-						y0 = drawPoint.y;
-						tmpRetPoint = new SPoint(drawPoint.x, drawPoint.y);
-						tmpRetPoint.segmentIndex = i;
-						//retPoints.push(drawPoint.clone());
-						retPoints.push(tmpRetPoint);
-						tDist = 0;
-					}
+					str2 += tmpRetPoint.x + ", ";
+				} else {
+					str2 += "null, ";
+
 				}
-				if (tDist > 0)
+			}
+			trace("Before: "+ str2);
+
+			//filter points, which are inserted twice
+			var bFilterDoublePoints: Boolean = true;
+
+			if (bFilterDoublePoints)
+			{
+				i = 1;
+				tmpRetPoint = retPoints[0] as SPoint;
+				while (i < retPoints.length)
 				{
-					tmpRetPoint = new SPoint(drawPoint.x, drawPoint.y);
-					tmpRetPoint.segmentIndex = i;
-					//retPoints.push(drawPoint.clone());
-					retPoints.push(tmpRetPoint);
+					var sp: SPoint = retPoints[i] as SPoint;
+					if (sp && tmpRetPoint && sp.equals(tmpRetPoint))
+					{
+						retPoints.splice(i,1);
+					} else {
+						i++;
+						tmpRetPoint = sp;
+					}
 				}
 			}
 			return (retPoints);
+		}
+
+
+		public static function calculateHermitSplineBisect(points: Array, type: String, fromT: Number, toT: Number, segmentIndex: int, x0: Number, y0: Number, point0: MPoint, point1: MPoint, level: uint, distanceValidator: Function = null, discontinuityValidator: Function = null): void
+		{
+			var bTraceResults: Boolean = false;
+
+			var drawPoint: Point;
+			var drawPointMiddle: Point;
+			var tmpRetPoint: SPoint;
+
+			var testDist: Number = Point.distance(point0, point1);
+			if (testDist > 1500)
+			{
+				trace("Check reflection problem");
+				return;
+			}
+
+			if (level < 10)
+			{
+
+				var tHalf: Number = fromT + (toT - fromT)/2;
+
+				//------------------------------------------------------------------------------------------------------------------
+				//left part
+
+				drawPointMiddle = hermiteCurveEvaluate(point0, point1, tHalf);
+
+				var calculateParts: Boolean = true;
+				var calculateLeftPart: Boolean = true;
+				var calculateRightPart: Boolean = true;
+				var leftPartDiscontinuation: Boolean = false;
+				var rightPartDiscontinuation: Boolean = false;
+
+				if (distanceValidator != null || discontinuityValidator != null)
+				{
+					var drawPoint0: Point = hermiteCurveEvaluate(point0, point1, fromT);
+					var drawPointLast: Point = hermiteCurveEvaluate(point0, point1, toT);
+					if (distanceValidator != null)
+					{
+						calculateLeftPart = !distanceValidator(drawPoint0, drawPointMiddle);
+						calculateRightPart = !distanceValidator(drawPointMiddle, drawPointLast);
+					}
+					if (discontinuityValidator != null)
+					{
+						leftPartDiscontinuation = discontinuityValidator(drawPoint0, drawPointMiddle);
+						rightPartDiscontinuation = discontinuityValidator(drawPointMiddle, drawPointLast);
+					}
+				}
+
+				if (bTraceResults) trace("calculateHermitSplineBisect: [" + fromT + ", " + toT+"] level: " + level + " type: " + type);
+				if (bTraceResults) trace("calculate left: " + calculateLeftPart + ", right: " + calculateRightPart+"] discontinuity LEFT: " + leftPartDiscontinuation + " RIGHT: " + rightPartDiscontinuation);
+
+				var points2: Array;
+
+				if (leftPartDiscontinuation)
+				{
+					if (bTraceResults) trace("LEFT discontinuation");
+					points2 = calculateHermitSplineBisect2(drawPoint0, drawPointMiddle, fromT, tHalf, point0, point1, 0, discontinuityValidator);
+					if (points2 && points2.length == 2)
+					{
+						var drawPointLeftDiscontinuationLeft: PPoint = points2[0] as PPoint;
+						var drawPointLeftDiscontinuationRight: PPoint = points2[1] as PPoint;
+
+						if (!distanceValidator(drawPoint0, drawPointLeftDiscontinuationLeft)) {
+
+							var posLPDLeft0: Number = fromT;
+							var posLPDLeft1: Number = drawPointLeftDiscontinuationLeft.position;
+
+							if (bTraceResults) trace("\t\t after calculateHermitSplineBisect2 there needs to be more bisect drawPoint0, drawPointLeftDiscontinuationLeft ["+posLPDLeft0+","+posLPDLeft1+"]("+drawPoint0.x + " , " + drawPointLeftDiscontinuationLeft.x+")");
+
+							calculateHermitSplineBisect(points, type, posLPDLeft0, posLPDLeft1, segmentIndex, x0, y0, point0, point1, level+1, distanceValidator, discontinuityValidator);
+						} else {
+//							if (bTraceResults) trace("\t\t after calculateHermitSplineBisect2 distance is OK - PUSH drawPointLeftDiscontinuationLeft (" + drawPointLeftDiscontinuationLeft.x+") into result array");
+							if (bTraceResults) trace("after calculateHermitSplineBisect2 distance is OK: ["+fromT+","+drawPointLeftDiscontinuationLeft.position+"]  type: " + type + " => " + drawPointLeftDiscontinuationLeft);
+
+						}
+
+						if (bTraceResults) trace("\t\t after calculateHermitSplineBisect2 distance is OK - PUSH POINT drawPointLeftDiscontinuationLeft ["+drawPointLeftDiscontinuationLeft.position+"] (" + drawPointLeftDiscontinuationLeft.x+") into result array");
+						if (bTraceResults) trace("\t\t after calculateHermitSplineBisect2 distance is OK - PUSH POINT null into result array");
+						if (bTraceResults) trace("\t\t after calculateHermitSplineBisect2 distance is OK - PUSH POINT drawPointLeftDiscontinuationRight ["+drawPointLeftDiscontinuationRight.position+"] (" + drawPointLeftDiscontinuationRight.x+") into result array");
+						points.push(drawPointLeftDiscontinuationLeft.toSPoint(segmentIndex));
+						points.push(null);
+						points.push(drawPointLeftDiscontinuationRight.toSPoint(segmentIndex));
+
+						if (!distanceValidator(drawPointLeftDiscontinuationRight, drawPointMiddle)) {
+
+							var posLPDRight0: Number = drawPointLeftDiscontinuationRight.position;
+							var posLPDRight1: Number = tHalf;
+							if (bTraceResults) trace("\t\t after Bisect2 there needs to be more bisect drawPointLeftDiscontinuationRight, drawPointMiddle ("+drawPointLeftDiscontinuationRight.x + " , " + drawPointMiddle.x+")");
+
+							calculateHermitSplineBisect(points, type, posLPDRight0, posLPDRight1, segmentIndex, x0, y0, point0, point1, level+1, distanceValidator, discontinuityValidator);
+
+						} else {
+							if (bTraceResults) trace("\t\t after Bisect2 distance is OK - PUSH drawPointMiddle (" + drawPointMiddle.x+") into result array");
+
+							tmpRetPoint = new SPoint(drawPointMiddle.x, drawPointMiddle.y);
+							tmpRetPoint.segmentIndex = segmentIndex;
+							points.push(tmpRetPoint);
+							if (bTraceResults) trace("after Bisect2 distance [drawPointLeftDiscontinuationRight, drawPointMiddle] is OK: [" + drawPointLeftDiscontinuationRight.position + ", " + tHalf+"] type: " + type + " => PUSH POINT " +drawPointMiddle);
+						}
+					} else {
+						if (bTraceResults) trace("\t\t calculateHermitSplineBisect2 return wrong value (or null)");
+					}
+
+				} else if (calculateLeftPart)
+				{
+					calculateHermitSplineBisect(points, "LEFT", fromT, tHalf, segmentIndex, x0, y0, point0, point1, level + 1, distanceValidator, discontinuityValidator);
+				} else {
+					tmpRetPoint = new SPoint(drawPoint0.x, drawPoint0.y);
+					tmpRetPoint.segmentIndex = segmentIndex;
+					points.push(tmpRetPoint);
+					if (bTraceResults) trace("calculateHermitSplineBisect: [" + fromT + ", " + toT+"] LEFT pos:  " + fromT + " type: " + type + " PUSH POINT " + drawPoint0);
+					//just debug
+//					debugSPoints(points);
+				}
+
+				//------------------------------------------------------------------------------------------------------------------
+				//right part
+//				drawPointMiddle = hermiteCurveEvaluate(point0, point1, toT);
+
+				if (rightPartDiscontinuation)
+				{
+					if (bTraceResults) trace("RIGHT discontinuation");
+					points2 = calculateHermitSplineBisect2(drawPointMiddle, drawPointLast, tHalf, toT, point0, point1, 0, discontinuityValidator);
+					if (points2 && points2.length == 2)
+					{
+						var drawPointRightDiscontinuationLeft: PPoint = points2[0] as PPoint;
+						var drawPointRightDiscontinuationRight: PPoint = points2[1] as PPoint;
+
+						if (!distanceValidator(drawPointMiddle, drawPointRightDiscontinuationLeft)) {
+
+							if (bTraceResults) trace("\t\t after calculateHermitSplineBisect2 there needs to be more bisect [drawPointMiddle, drawPointRightDiscontinuationLeft] ("+drawPointMiddle.x + " , " + drawPointRightDiscontinuationLeft.x+")");
+
+							var posRPDLeft0: Number = tHalf;
+							var posRPDLeft1: Number = drawPointRightDiscontinuationLeft.position;
+							calculateHermitSplineBisect(points, type, posRPDLeft0, posRPDLeft1, segmentIndex, x0, y0, point0, point1, level+1, distanceValidator, discontinuityValidator);
+
+						} else {
+							if (bTraceResults) trace("after calculateHermitSplineBisect2 distance [drawPointMiddle, drawPointRightDiscontinuationLeft] is OK: [" + tHalf + ", " +  drawPointRightDiscontinuationLeft.position+"]  type: " + type + " => " + drawPointRightDiscontinuationLeft.toString());
+						}
+
+						if (bTraceResults) trace("\t\t after calculateHermitSplineBisect2 distance is OK - PUSH POINT drawPointRightDiscontinuationLeft ["+drawPointRightDiscontinuationLeft.position+"] (" + drawPointRightDiscontinuationLeft.x+") into result array");
+						if (bTraceResults) trace("\t\t after calculateHermitSplineBisect2 distance is OK - PUSH POINT null into result array");
+						if (bTraceResults) trace("\t\t after calculateHermitSplineBisect2 distance is OK - PUSH POINT drawPointRightDiscontinuationRight ["+drawPointRightDiscontinuationRight.position+"] (" + drawPointRightDiscontinuationRight.x+") into result array");
+						points.push(drawPointRightDiscontinuationLeft.toSPoint(segmentIndex));
+						points.push(null);
+						points.push(drawPointRightDiscontinuationRight.toSPoint(segmentIndex));
+
+						if (!distanceValidator(drawPointRightDiscontinuationRight, drawPointLast)) {
+
+							if (bTraceResults) trace("\t\t after Bisect2 there needs to be more bisect [drawPointRightDiscontinuationRight, drawPointLast] ("+drawPointRightDiscontinuationRight.x + " , " + drawPointLast.x+")");
+							var posRPDRight0: Number = drawPointRightDiscontinuationRight.position;
+							var posRPDRight1: Number = toT;
+							calculateHermitSplineBisect(points, type, posRPDRight0, posRPDRight1, segmentIndex, x0, y0, point0, point1, level+1, distanceValidator, discontinuityValidator);
+
+						} else {
+							if (bTraceResults) trace("\t\t after Bisect2 distance is OK - PUSH drawPointLast (" + drawPointLast.x+") into result array");
+
+							tmpRetPoint = new SPoint(drawPointLast.x, drawPointLast.y);
+							tmpRetPoint.segmentIndex = segmentIndex;
+							points.push(tmpRetPoint);
+							if (bTraceResults) trace("after Bisect2 distance [drawPointRightDiscontinuationRight, drawPointLast] is OK: [" +  drawPointRightDiscontinuationRight.position + ", " + toT+"]  type: " + type + " PUSH POINT " + drawPointLast);
+						}
+
+					} else {
+						if (bTraceResults) trace("\t\t calculateHermitSplineBisect2 return wrong value (or null)");
+					}
+
+				} else if (calculateRightPart)
+				{
+					calculateHermitSplineBisect(points, "RIGHT", tHalf, toT, segmentIndex, x0, y0, point0, point1, level + 1, distanceValidator, discontinuityValidator);
+				} else {
+					tmpRetPoint = new SPoint(drawPointLast.x, drawPointLast.y);
+					tmpRetPoint.segmentIndex = segmentIndex;
+					points.push(tmpRetPoint);
+					if (bTraceResults) trace("calculateHermitSplineBisect: [" + fromT + ", " + toT+"] RIGHT pos:  " + toT + " type: " + type + " PUSH POINT " +drawPointLast);
+				}
+			} else {
+				if (bTraceResults) trace("calculateHermitSplineBisect it's too deep: level: " + level);
+			}
+
+		}
+
+		/**
+		 *
+		 * @param p1
+		 * @param p2
+		 * @param fromT
+		 * @param toT
+		 * @param point0
+		 * @param point1
+		 * @param level
+		 * @param previousDistance
+		 * @param discontinuityValidator
+		 * @return
+		 *
+		 */
+		public static function calculateHermitSplineBisect2(p1: Point, p2: Point, fromT: Number, toT: Number, point0: MPoint, point1: MPoint, previousDistance: Number = 0, discontinuityValidator: Function = null): Array
+		{
+			var debug: Function = function(str: String): void
+			{
+//				trace("Coord calculateHermitSplineBisect2: " + str);
+			}
+
+			var max: Number = 3;
+			var isDiscontinuation: Boolean = discontinuityValidator(p1, p2);
+			var currentDistance: Number = Point.distance(p1, p2);
+
+			debug("\n calculateHermitSplineBisect2 currentDistance: " + currentDistance + " p1: " + p1 + " p2: " + p2);
+			if (previousDistance != 0 && currentDistance > previousDistance)
+			{
+			}
+
+			if (currentDistance < max && isDiscontinuation)
+			{
+				debug("\t\t bisect2GreatArc currentDistance < max and there were no sings change (" +p1 + ",  " + p2+") into result array");
+				return [new PPoint(p1.x, p1.y, fromT), new PPoint(p2.x, p2.y, toT)];
+			}
+			if (!isDiscontinuation)
+			{
+				debug("\t\t bisect2GreatArc there were sings change return NULL into result array");
+				return null;
+			}
+
+
+			var tHalf: Number = fromT + (toT - fromT)/2;
+			var middlePoint: Point = hermiteCurveEvaluate(point0, point1, tHalf);
+
+			if (middlePoint)
+			{
+				var points: Array;
+				//LEFT SIDE
+				debug("\t\t calculateHermitSplineBisect2 call calculateHermitSplineBisect2 for sp1, c (" + p1 + " , " + middlePoint+")");
+
+				points = calculateHermitSplineBisect2(p1, middlePoint, fromT, tHalf, point0, point1, currentDistance, discontinuityValidator);
+				if (points)
+				{
+					debug("\t\t calculateHermitSplineBisect2 after calculateHermitSplineBisect2 for sp1, c add " + points.length + " ito result array");
+					return points;
+				}
+
+				//RIGHT SIDE
+				debug("\t\t calculateHermitSplineBisect2 call calculateHermitSplineBisect2 for c, sp2 (" + middlePoint + " , " + p2+")");
+				points = calculateHermitSplineBisect2(middlePoint, p2, tHalf, toT, point0, point1, currentDistance, discontinuityValidator);
+				if (points)
+				{
+					debug("\t\t calculateHermitSplineBisect2 after calculateHermitSplineBisect2 for c, sp2 add " + points.length + " ito result array");
+					return points;
+				}
+			}
+
+			return null;
+		}
+
+		public static function debugSPoints(points: Array): void
+		{
+			var formatNumber: Function = function(nr: Number): String
+			{
+				return (int(nr * 10)/10).toString();
+			}
+
+			var str: String = "";
+			for (var t: int = 0; t < points.length; t++)
+			{
+				str += formatNumber((points[t] as SPoint).x) + ", ";
+			}
+			trace(str);
 		}
 
 		/**
@@ -679,7 +965,7 @@ package com.iblsoft.flexiweather.utils
 					MPoint(_mpoints[i_prev]).dist,
 					MPoint(_mpoints[pointIndex]).dist,
 					MPoint(_mpoints[i_next]).dist));
-			//return(countSegmentDerivation(MPoint(mPoints[pointIndex - 1]).point, MPoint(mPoints[pointIndex + 1]).point, 0.2));	
+			//return(countSegmentDerivation(MPoint(mPoints[pointIndex - 1]).point, MPoint(mPoints[pointIndex + 1]).point, 0.2));
 		}
 
 		/**
@@ -857,6 +1143,34 @@ class SPoint extends Point
 	{
 		var ret: SPoint = new SPoint(this.x, this.y);
 		ret.segmentIndex = this.segmentIndex;
+		return (ret);
+	}
+}
+
+
+class PPoint extends Point
+{
+	public var position: Number;
+
+	public function PPoint(x: Number = 0, y: Number = 0, position: Number = 0)
+	{
+		super(x, y);
+		this.position = position;
+	}
+
+	public function toSPoint(segmentIndex: int): SPoint
+	{
+		var sPoint: SPoint = new SPoint(x, y);
+		sPoint.segmentIndex = segmentIndex;
+		return sPoint;
+	}
+
+	/**
+	 *
+	 */
+	override public function clone(): Point
+	{
+		var ret: PPoint = new PPoint(this.x, this.y, this.position);
 		return (ret);
 	}
 }

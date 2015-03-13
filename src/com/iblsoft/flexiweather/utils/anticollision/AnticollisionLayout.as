@@ -422,6 +422,9 @@ package com.iblsoft.flexiweather.utils.anticollision
 				mi_lastUpdate = getTimer();
 				var i_roundedWidth: uint = Math.round(m_boundaryRect.width + 0.9999999999);
 				var i_roundedHeight: uint = Math.round(m_boundaryRect.height + 0.9999999999);
+				if (m_boundaryRect.width == 10000)
+					return;
+
 				// ensure we have a white
 				if (m_placementBitmap == null || m_placementBitmap.width != i_roundedWidth || m_placementBitmap.height != i_roundedHeight)
 					m_placementBitmap = new BitmapData(i_roundedWidth, i_roundedHeight, true, 0x00FFFFFF);

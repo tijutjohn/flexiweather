@@ -22,7 +22,7 @@ package com.iblsoft.flexiweather.utils
 		{
 			m_graphics.clear();
 		}
-		
+
 		public final function start(x: Number, y: Number): void
 		{
 			if (mi_recursionDepth == 0)
@@ -35,6 +35,14 @@ package com.iblsoft.flexiweather.utils
 			--mi_recursionDepth;
 			if (mi_recursionDepth == 0)
 				finished(x, y);
+		}
+
+		public function firstPoint(x: Number, y: Number): void
+		{
+		}
+
+		public function lastPoint(x: Number, y: Number): void
+		{
 		}
 
 		public function moveTo(x: Number, y: Number): void

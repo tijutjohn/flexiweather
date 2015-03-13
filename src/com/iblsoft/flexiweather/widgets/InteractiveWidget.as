@@ -2552,6 +2552,37 @@ package com.iblsoft.flexiweather.widgets
 			}
 		}
 
+		public function datelineBetweenPixelPositions(p1: Point, p2: Point): Boolean
+		{
+			var c1: Coord = pointToCoord(p1.x, p1.y);
+			var c2: Coord = pointToCoord(p2.x, p2.y);
+			return crossDateline(new Point(c1.x, c1.y), new Point(c2.x, c2.y));
+		}
+
+		/**
+		 * Distance validator used for bisection to find out if 2 pixel positions are too close to go deeper with bisection
+		 * @param p1
+		 * @param p2
+		 * @return Returns "true" if coordinates are too close, returns false if coordinates are not close enough
+		 *
+		 */
+		public function pixelDistanceValidator(p1: Point, p2: Point): Boolean
+		{
+			var dist: Number = Point.distance(p1, p2);
+//			trace("pixelDistanceValidator p1: " + p1 + ", p2: " + p2 + " => dist: " + dist);
+			var maxDist: Number = FlexiWeatherConfiguration.BEZIER_POINTS_MAXIMUM_DISTANCE;
+			var bDistance: Boolean = (dist < maxDist);
+			return bDistance;
+		}
+
+		/**
+		 * Distance validator used for bisection to find out if 2 coordinates are too close to go deeper with bisection
+		 *
+		 * @param c1
+		 * @param c2
+		 * @return Returns "true" if coordinates are too close, returns false if coordinates are not close enough
+		 *
+		 */
 		public function distanceValidator(c1: Coord, c2: Coord): Boolean
 		{
 			var _mapScale: Number = getMapScale();
@@ -2595,6 +2626,7 @@ package com.iblsoft.flexiweather.widgets
 			var intersection: Point = line1.intersectionWithLineSegment(internationalDateLine);
 			var intersectionCoordLeft: Coord = new Coord(coordFrom.crs, intersection.x - 0.00001, intersection.y);
 			var intersectionCoordRight: Coord = new Coord(coordFrom.crs, intersection.x + 0.00001, intersection.y);
+			//FIXME proble when converting coord from EPSG 900913
 			intersectionCoordRight = Coord.convertCoordOnSphere(intersectionCoordRight, projection);
 
 			var bisectedCoordsLeft: Array;
@@ -2609,7 +2641,7 @@ package com.iblsoft.flexiweather.widgets
 				tempCoords = [new EdgeCoord(coordFrom, false, true), new EdgeCoord(intersectionCoordLeft, true, false), null, new EdgeCoord(intersectionCoordRight, true, false), new EdgeCoord(coordTo, false, true)];
 			} else {
 				tempCoords = [new EdgeCoord(coordFrom, false, true), new EdgeCoord(intersectionCoordRight, true, false), null, new EdgeCoord(intersectionCoordLeft, true, false), new EdgeCoord(coordTo, false, true)];
-//				tempCoords = [new EdgeCoord(coordTo, false, true), new EdgeCoord(intersectionCoordLeft, true, false), null, new EdgeCoord(intersectionCoordRight, true, false), new EdgeCoord(coordFrom, false, true)];
+				//				tempCoords = [new EdgeCoord(coordTo, false, true), new EdgeCoord(intersectionCoordLeft, true, false), null, new EdgeCoord(intersectionCoordRight, true, false), new EdgeCoord(coordFrom, false, true)];
 			}
 
 
@@ -2619,13 +2651,17 @@ package com.iblsoft.flexiweather.widgets
 			for each (cEdgeCoord in tempCoords2)
 			{
 				if (cEdgeCoord)
-					cEdgeCoord.coord = projection.laLoCoordToPrjCoord(cEdgeCoord.coord);
+					if (cEdgeCoord.coord.crs != projection.crs)
+						cEdgeCoord.coord = projection.laLoCoordToPrjCoord(cEdgeCoord.coord);
+					else
+						trace("splitCoordsOnDateline: cEdgeCoord was already in correct projection");
 
 				tempCoords.push(cEdgeCoord);
 			}
 
 			return tempCoords;
 		}
+
 		/**
 		 *
 		 * @param g
@@ -3143,7 +3179,7 @@ package com.iblsoft.flexiweather.widgets
 //			debug("****************************************************************************");
 //			debug("DRAW SMOOTH POLYLINE \n");
 			//debug coords
-			var renderer: SmoothRendererNew = new SmoothRendererNew(this);
+			var renderer: SmoothRendererNew = new SmoothRendererNew(this, distanceValidator, pixelDistanceValidator, datelineBetweenPixelPositions);
 
 			debugCoords(coords);
 
@@ -3161,13 +3197,22 @@ package com.iblsoft.flexiweather.widgets
 //				{
 //					b_closed = false;
 //				}
+//			} else {
+//				coords = [coords];
 			}
 
 			//debug coords
 			debugSplittedCoords(coords);
 
 			//coords must be screen pixels position. If needed, convert coordinates to pixel points
+//			var points: Array = [];
+//			for each (var currCoords: Array in coords)
+//			{
+//				points.push(coordsToPoints(currCoords));
+//			}
+//			coords = points;
 			coords = coordsToPoints(coords);
+
 
 			//FIXME need to fix state when all points are counted for 0th reflection, but are not on viewBBox.
 			//How to reproduce this... First point in -1 reflection and then continue to 0 reflection
@@ -3190,13 +3235,20 @@ package com.iblsoft.flexiweather.widgets
 		public function pointsToCoords(points: Array): Array
 		{
 			var total: int = points.length;
-			if (!(points[0] is Coord))
+			if (points[0] && !(points[0] is Coord))
 			{
 				var newCoords: Array = [];
 				for (var i: int = 0; i < total; i++)
 				{
 					var p: Point = points[i] as Point;
-					newCoords.push(pointToCoord(p.x, p.y));
+
+					if (p && p.x > 2000)
+						trace("debug wrong positions x > 2000");
+
+					if (p)
+						newCoords.push(pointToCoord(p.x, p.y));
+					else
+						newCoords.push(null);
 				}
 				return newCoords;
 			}
@@ -3708,11 +3760,14 @@ package com.iblsoft.flexiweather.widgets
 	}
 }
 import com.iblsoft.flexiweather.FlexiWeatherConfiguration;
+import com.iblsoft.flexiweather.ogc.BBox;
 import com.iblsoft.flexiweather.ogc.editable.data.FeatureData;
+import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataLineSegment;
 import com.iblsoft.flexiweather.ogc.kml.InteractiveLayerKML;
 import com.iblsoft.flexiweather.proj.Coord;
 import com.iblsoft.flexiweather.proj.Projection;
 import com.iblsoft.flexiweather.utils.CubicBezier;
+import com.iblsoft.flexiweather.utils.geometry.LineSegment;
 import com.iblsoft.flexiweather.widgets.InteractiveLayerPan;
 import com.iblsoft.flexiweather.widgets.InteractiveLayerZoom;
 import com.iblsoft.flexiweather.widgets.InteractiveWidget;
@@ -3887,10 +3942,16 @@ class EdgeCoord
 class SmoothRendererNew
 {
 	private var _iw: InteractiveWidget;
+	public var distanceValidator: Function;
+	public var pixelDistanceValidator: Function;
+	public var discontinuityValidator: Function;
 
-	public function SmoothRendererNew(iw: InteractiveWidget)
+	public function SmoothRendererNew(iw: InteractiveWidget, distanceValidator: Function, pixelDistanceValidator: Function, discontinuityValidator: Function)
 	{
 		_iw = iw;
+		this.distanceValidator = distanceValidator;
+		this.pixelDistanceValidator = pixelDistanceValidator;
+		this.discontinuityValidator = discontinuityValidator;
 	}
 	public function crossDateline(coords: Array): Boolean
 	{
@@ -3920,6 +3981,13 @@ class SmoothRendererNew
 		return false;
 	}
 
+	/**
+	 *
+	 * @param coords
+	 * @param b_fixDateline
+	 * @return
+	 *
+	 */
 	public function smoothDatelineOptimization(coords: Array, b_fixDateline: Boolean = false): Array
 	{
 		var currTime: Number = getTimer();
@@ -3934,6 +4002,8 @@ class SmoothRendererNew
 		coordFrom = Coord.convertCoordOnSphere(coordFrom, projection);
 		var coordTo: Coord;
 
+		var finalArray: Array = [];
+
 		while (coords.length > 0)
 		{
 			tempCoords = null;
@@ -3946,7 +4016,6 @@ class SmoothRendererNew
 			if (_iw.coordsFarThanExtentWidth(coordFrom, coordTo) )
 			{
 //				debug("\n\t crossing dateline");
-				newCoords.push(new EdgeCoord(coordFrom, false, true));
 				//create line1 in correct order
 				if (coordFrom.x > coordTo.x)
 					coordTo.x += projectionWidth;
@@ -3954,6 +4023,92 @@ class SmoothRendererNew
 					coordTo.x -= projectionWidth;
 				}
 
+				if (coordFrom.x > 180 && coordTo.x > 180)
+				{
+					trace("Test why both coords are outside zero reflection");
+				}
+				if (_iw.crossDateline(coordFrom, coordTo))
+				{
+					var useDatelineSplit: Boolean = false;
+
+					if (useDatelineSplit)
+					{
+
+						var dateline: LineSegment = getDatelineForCoords(coordFrom, coordTo);
+
+						var cFx: Number = coordFrom.x;
+						var cFy: Number = coordFrom.y;
+						var cTx: Number = coordTo.x;
+						var cTy: Number = coordTo.y;
+
+						var line1: FeatureDataLineSegment = new FeatureDataLineSegment(cFx, cFy, cTx, cTy, true, true, true);
+						var intersection: Point = line1.intersectionWithInfiniteLineSegment(dateline);
+						var direction: int = 1;
+						if (cFx > cTx)
+							direction = -1;
+						var intersectionCoordLeft: Coord = new Coord(coordFrom.crs, dateline.x1 - direction * 0.00001, intersection.y);
+						var intersectionCoordRight: Coord = new Coord(coordFrom.crs, dateline.x1 + direction * 0.00001, intersection.y);
+	//					intersectionCoordRight = Coord.convertCoordOnSphere(intersectionCoordRight, projection);
+
+						trace("smoothDatelineOptimization dateline: from: " + coordFrom.toString() + " to: " + coordTo.toString());
+						tempCoords = [];
+						tempCoords.push(new EdgeCoord(coordFrom, false, true));
+						tempCoords.push(new EdgeCoord(intersectionCoordLeft, true, true));
+						tempCoords.push(null);
+						tempCoords.push(new EdgeCoord(intersectionCoordRight, true, true));
+						tempCoords.push(new EdgeCoord(coordTo, true, true));
+
+
+						var arcTempCoords: Array = [];
+
+						var ec1: EdgeCoord;
+						var ec2: EdgeCoord;
+						while(tempCoords.length > 0)
+						{
+							if (tempCoords[0] == null)
+								arcTempCoords.push(tempCoords.shift());
+
+							if (!ec1 && tempCoords.length > 0)
+								ec1 = tempCoords.shift();
+							if (!ec2 && tempCoords.length > 0)
+								ec2 = tempCoords.shift();
+
+							if (ec1 && ec2)
+							{
+								var arcCoords: Array = Coord.interpolateGreatArc(ec1.coord, ec2.coord, distanceValidator);
+								for each (var c: Coord in arcCoords)
+								{
+									arcTempCoords.push(new EdgeCoord(c, false, true));
+								}
+
+								ec1 = null;
+								ec2 = null;
+							}
+						}
+
+						tempCoords = arcTempCoords;
+
+	//					tempCoords = _iw.splitCoordsOnDateline(coordFrom, coordTo);
+						var len: int = tempCoords.length;
+						for (var i: int = 0; i < len - 1; i++)
+						{
+							var ec: EdgeCoord = tempCoords[i] as EdgeCoord;
+							if (ec)
+								newCoords.push(ec);
+							else {
+								finalArray.push(newCoords);
+								newCoords = [];
+							}
+						}
+	//
+						coordTo = (tempCoords[len - 1] as EdgeCoord).coord;
+					} else {
+						newCoords.push(new EdgeCoord(coordFrom, false, true));
+					}
+
+				} else {
+					newCoords.push(new EdgeCoord(coordFrom, false, true));
+				}
 			} else {
 //				debug("\n\n NOT crossing dateline");
 //				debug("\t Adding COORD FROM coord: " + coordFrom.x + " , " + coordFrom.y);
@@ -3961,6 +4116,7 @@ class SmoothRendererNew
 			}
 			coordFrom = coordTo;
 		}
+		finalArray.push(newCoords);
 
 		if (coordTo)
 		{
@@ -3970,10 +4126,39 @@ class SmoothRendererNew
 
 //		debug("smoothDatelineOptimization took " + (getTimer() - currTime) + "ms.");
 
+//		return finalArray;
 		return newCoords;
 	}
 
-	public function drawSmoothDatelineDividedParts(rendererCreator: Function, coords: Array, drawMode: String, b_closed: Boolean = false, b_justCompute: Boolean = false,  featureData: FeatureData = null, b_fixDateline: Boolean = false): void
+	private function getDatelineForCoords(coordFrom: Coord, coordTo: Coord): LineSegment
+	{
+		var cF: Coord = coordFrom;
+		var cT: Coord = coordTo;
+
+		if (coordFrom.x > coordTo.x)
+		{
+			cF = coordTo;
+			cT = coordFrom;
+		}
+
+		var datelineX: int = 180;
+		if (cF.x <= datelineX && cT.x >= datelineX)
+		{
+			return new LineSegment(180,-90,180,90);
+		}
+
+		var direction: int;
+		(cT.x < datelineX) ? direction = -1 : direction = 1;
+		while (!(cF.x <= datelineX && cT.x >= datelineX))
+		{
+			datelineX += (direction * 360);
+		}
+
+		return new LineSegment(datelineX,-90,datelineX,90);
+
+	}
+
+	public function drawSmoothDatelineDividedParts(rendererCreator: Function, splittedReflectionCoords: Array, drawMode: String, b_closed: Boolean = false, b_justCompute: Boolean = false,  featureData: FeatureData = null, b_fixDateline: Boolean = false): void
 	{
 		var currTime: Number = getTimer();
 		var splinePoints: Array;
@@ -4004,78 +4189,116 @@ class SmoothRendererNew
 //			}
 //		}
 		//check last part
-		if (coords.length > 0)
+		if (splittedReflectionCoords.length > 0)
 		{
 //			splinePoints = CubicBezier.calculateHermitSpline(tempCoords, false);
-			splinePoints = CubicBezier.calculateHermitSpline(coords, b_closed);
 
-			//clip to InteractiveWidget area
-			/*
-
-			//clipping was moved to FeatureDataReflection to compute method
-
-			if (featureData.forceViewBBoxClipping)
-			{
-				var margin: int = -15;
-				var rightMargin: int = 15;
-				var clipPolygon: Array = [new Point(_iw.areaX + margin, _iw.areaY + margin), new Point(_iw.areaX + _iw.areaWidth + rightMargin, _iw.areaY + margin), new Point(_iw.areaX + _iw.areaWidth + rightMargin, _iw.areaHeight + rightMargin), new Point(_iw.areaX + margin, _iw.areaHeight + rightMargin)];
-
-				//FIXME here is the problem, if points are off screen (0 reflection is off screen), then clipping removes points
-				splinePoints = _iw.featureSplitter.polygonClipppingSutherlandHodgman(splinePoints, clipPolygon);
-			}
-			*/
-
-			//Convert pixel points to coordinates
-			splineCoords = _iw.pointsToCoords(splinePoints);
-
-			var b_originalClosed: Boolean = b_closed;
-
-			if (splineCoords.length == 0)
-				return;
-
-			var splittedSplinesCoords: Array = splitSplineCoords(splineCoords);
-			var isDatelineSplit: Boolean = splittedSplinesCoords.length > 1;
-
-			if (isDatelineSplit)
-				b_closed = false;
-
-			var splitPartID: int = 0;
-			var firstCoord: Coord;
-
-			for each (var currSplineCoords: Array in splittedSplinesCoords)
-			{
-				var addDatelineCrossing: Boolean = true;
-
-				if (b_originalClosed)
+			//if there is dateline (null), we need to split coords before hermit splin
+//			for each (var coords: Array in splittedReflectionCoords)
+//			{
+				var coords: Array = splittedReflectionCoords;
+				for each (var q: * in coords)
 				{
-					if (splitPartID == 0)
-						firstCoord = currSplineCoords[0] as Coord;
+					trace("Q coord: "+ q.toString());
+				}
 
-					//close last part with first coord of first part
-					if (splitPartID == (splittedSplinesCoords.length - 1))
+				splinePoints = CubicBezier.calculateHermitSpline(coords, b_closed, pixelDistanceValidator, discontinuityValidator);
+
+				//clip to InteractiveWidget area
+				/*
+
+				//clipping was moved to FeatureDataReflection to compute method
+
+				if (featureData.forceViewBBoxClipping)
+				{
+					var margin: int = -15;
+					var rightMargin: int = 15;
+					var clipPolygon: Array = [new Point(_iw.areaX + margin, _iw.areaY + margin), new Point(_iw.areaX + _iw.areaWidth + rightMargin, _iw.areaY + margin), new Point(_iw.areaX + _iw.areaWidth + rightMargin, _iw.areaHeight + rightMargin), new Point(_iw.areaX + margin, _iw.areaHeight + rightMargin)];
+
+					//FIXME here is the problem, if points are off screen (0 reflection is off screen), then clipping removes points
+					splinePoints = _iw.featureSplitter.polygonClipppingSutherlandHodgman(splinePoints, clipPolygon);
+				}
+				*/
+
+				//Convert pixel points to coordinates
+				//debug spliceCoontds
+
+				splineCoords = _iw.pointsToCoords(splinePoints);
+
+				var str: String = "";
+				var str2: String = "";
+				var leftX:  Number = 0;
+				var rightX:  Number = 360;
+				for each (var c: Coord in splineCoords)
+				{
+					if (c)
 					{
-						currSplineCoords.push(firstCoord);
-						addDatelineCrossing = false;
+						var p: Point = _iw.coordToPoint(c);
+						if (c.x > leftX && c.x < 180)
+							leftX = c.x;
+						if (c.x < rightX && c.x > 180)
+							rightX = c.x;
+						str += c.x + ", ";
+						str2 += p.x + ", ";
+					} else {
+						str += "null, ";
+						str2 += "null, ";
+
 					}
 				}
+				trace("leftX: " + leftX + " rightX: " + rightX);
+				trace(str);
+				trace(str2);
 
-				if (addDatelineCrossing)
+				var b_originalClosed: Boolean = b_closed;
+
+				if (splineCoords.length == 0)
+					return;
+
+				var splittedSplinesCoords: Array = splitSplineCoords(splineCoords);
+				var isDatelineSplit: Boolean = splittedSplinesCoords.length > 1;
+
+				if (isDatelineSplit)
+					b_closed = false;
+
+				var splitPartID: int = 0;
+				var firstCoord: Coord;
+
+				for each (var currSplineCoords: Array in splittedSplinesCoords)
 				{
-					currSplineCoords.push(null);
+					var addDatelineCrossing: Boolean = true;
+
+					if (b_originalClosed)
+					{
+						if (splitPartID == 0)
+							firstCoord = currSplineCoords[0] as Coord;
+
+						//close last part with first coord of first part
+						if (splitPartID == (splittedSplinesCoords.length - 1))
+						{
+							currSplineCoords.push(firstCoord);
+							addDatelineCrossing = false;
+						}
+					}
+
+//					if (addDatelineCrossing)
+//					{
+//						currSplineCoords.push(null);
+//					}
+					//TODO check b_closed, if it was split
+	//				switch (splitPartID)
+	//				{
+	//					case 0:
+	//					case 1:
+	//					case 2:
+							_iw.drawGeoPolyLine(rendererCreator, currSplineCoords, drawMode, b_closed, b_justCompute, featureData);
+	//						break;
+	//				}
+
+					splitPartID++;
+
 				}
-				//TODO check b_closed, if it was split
-//				switch (splitPartID)
-//				{
-//					case 0:
-//					case 1:
-//					case 2:
-						_iw.drawGeoPolyLine(rendererCreator, currSplineCoords, drawMode, b_closed, b_justCompute, featureData);
-//						break;
-//				}
-
-				splitPartID++;
-
-			}
+//			}
 
 		}
 //		debug("drawSmoothDatelineDividedParts took " + (getTimer() - currTime) + "ms.");
@@ -4096,197 +4319,44 @@ class SmoothRendererNew
 		currentSpline.push(coord);
 
 		var total: int = coords.length;
+		var bNextCoordToLastReflection: Boolean;
+		var previousCoord: Coord;
+
 		for (var i: int = 1; i < total; i++)
 		{
 			coord = coords[i] as Coord;
-			var currReflection: int = getReflectionForCoord(coord, projectionLeft, projectionWidth);
-
-			if (currReflection != initReflection)
+			if (coord)
 			{
-				splines.push(currentSpline);
-				currentSpline = [];
+				var currReflection: int = getReflectionForCoord(coord, projectionLeft, projectionWidth);
 
-				initReflection = currReflection;
+				if (currReflection != initReflection)
+				{
+					//insert first from next reflection
+	//				currentSpline.push(coord);
+					splines.push(currentSpline);
+
+	//				splines.push(lastSpline);
+
+					//first coord is from previous reflection
+					currentSpline = [];
+					initReflection = currReflection;
+	//			} else {
+	//				lastSpline = null;
+				}
+
+				currentSpline.push(coord);
+
+				previousCoord = coord;
 			}
-
-			currentSpline.push(coord);
 		}
 		splines.push(currentSpline);
 
 		return splines;
 	}
 
+
 	private function getReflectionForCoord(c: Coord, projectionLeft: Number, projectionWidth: Number): int
 	{
 		return int((c.x - projectionLeft) / projectionWidth)
 	}
 }
-
-/*
-class SmoothRendererOld
-{
-	private var _iw: InteractiveWidget;
-
-	public function SmoothRendererOld(iw: InteractiveWidget)
-	{
-		_iw = iw;
-	}
-	public function smoothDatelineOptimization(coords: Array, b_fixDateline: Boolean = false): Array
-	{
-		var projection: Projection = _iw.getCRSProjection();
-
-		var newCoords: Array = [];
-		var tempCoords: Array = null;
-
-		var partPosition: int = 0;
-		var coordFromPosition: int = 0;
-
-		var coordFrom: Coord = coords.shift();
-		coordFrom = Coord.convertCoordOnSphere(coordFrom, projection);
-		var coordTo: Coord;
-
-		while (coords.length > 0)
-		{
-			tempCoords = null;
-			coordTo = coords.shift();
-			coordTo = Coord.convertCoordOnSphere(coordTo, projection);
-
-			debug("\n from: "+ coordFrom.x + ","+coordFrom.y + " to: " + coordTo.x + " , " + coordTo.y);
-
-			if (_iw.crossDateline(coordFrom, coordTo) || _iw.coordsFarThanExtentWidth(coordFrom, coordTo) )
-			{
-				debug("\n\t crossing dateline");
-				tempCoords = _iw.splitCoordsOnDateline(coordFrom, coordTo);
-				debug("\t Adding first coord: " + tempCoords[0].coord.x + " , " + tempCoords[0].coord.y);
-				while (tempCoords.length > 1)
-				{
-					newCoords.push(tempCoords.shift());
-				}
-			} else {
-				debug("\n\n NOT crossing dateline");
-				debug("\t Adding COORD FROM coord: " + coordFrom.x + " , " + coordFrom.y);
-				newCoords.push(new EdgeCoord(coordFrom, false, true));
-			}
-			coordFrom = coordTo;
-			coordFromPosition++;
-		}
-
-		//add last point
-		if (tempCoords && tempCoords.length > 0)
-		{
-			debug("\tAdding last temp coord: " + tempCoords[0].coord.x + " , " + tempCoords[0].coord.y);
-			newCoords.push(tempCoords.shift());
-		} else {
-			if (coordTo)
-			{
-				debug("\t Adding last COORD TO coord: " + coordTo.x + " , " + coordTo.y);
-				newCoords.push(new EdgeCoord(coordTo, false, true));
-			}
-		}
-
-		if (b_fixDateline)
-			fixDatelineCrossingCoords(newCoords);
-
-		return newCoords;
-	}
-
-	/**
-	 * Fix coordinates on datelines (add previous or folloving coordinates to different section, because of Hermit spline need more coordinates to be correctly connected)
-	 *
-	 * @param newCoords - coordinates array
-	 * @param neighborCoordinatesCount - how many coordinates needs to be copied from previous or next sectionh
-	 *
-	 /
-	private function fixDatelineCrossingCoords(newCoords: Array, neighborCoordinatesCount: int = 1): void
-	{
-		if (neighborCoordinatesCount < 1)
-			return;
-
-		var total: int = newCoords.length;
-		var partPosition: int = 0;
-		var tempEC: EdgeCoord;
-		var c: Coord;
-		var pos: int;
-		for (var i: int = 0; i < total; i++)
-		{
-			var ec: EdgeCoord = newCoords[i] as EdgeCoord;
-
-			if (!ec)
-			{
-				//this is dateline (coord == null)
-				partPosition++;
-				//					newCoords.splice(i - 1, 1);
-				//					i--;
-				//					newCoords.splice(i+
-				//add coordinates from previous part
-				for (var t: int = 0; t < neighborCoordinatesCount; t++)
-				{
-					pos = i + 1 + t * 2;
-					if (newCoords.length > pos)
-					{
-						tempEC = (newCoords[pos] as EdgeCoord).clone();
-						c = tempEC.coord;
-						tempEC.coord = new Coord(c.crs, c.x + 360 , c.y);
-						newCoords.splice(i, 0, tempEC);
-						i++;
-					}
-
-					pos = i - 2 - t * 2;
-					if (newCoords.length > pos)
-					{
-						//get last coord of previous part
-						tempEC = (newCoords[pos] as EdgeCoord).clone();
-						c = tempEC.coord;
-						tempEC.coord = new Coord(c.crs, c.x - 360 , c.y);
-						newCoords.splice(i + 1, 0, tempEC);
-					}
-
-					total = newCoords.length;
-				}
-
-
-			}
-		}
-	}
-
-	public function drawSmoothDatelineDividedParts(rendererCreator: Function, coords: Array, drawMode: String, b_closed: Boolean = false, b_justCompute: Boolean = false,  featureData: FeatureData = null, b_fixDateline: Boolean = false): void
-	{
-		//find all parts and create hermit spline for them
-		var tempCoords: Array = [];
-		while (coords.length > 0)
-		{
-			var p: Point = coords.shift();
-			if (p)
-			{
-				tempCoords.push(p)
-			} else {
-				//there is null, so previous part finished
-				if (tempCoords.length > 0)
-				{
-					var splinePoints: Array = CubicBezier.calculateHermitSpline(tempCoords, false);
-
-					//Convert pixel points to coordinates
-					var splineCoords: Array = _iw.pointsToCoords(splinePoints);
-
-					//TODO check b_closed, if it was split
-					_iw.drawGeoPolyLine(rendererCreator, splineCoords, drawMode, b_closed, b_justCompute, featureData);
-
-				}
-				tempCoords = [];
-			}
-		}
-		//check last part
-		if (tempCoords.length > 0)
-		{
-			splinePoints = CubicBezier.calculateHermitSpline(tempCoords, false);
-
-			//Convert pixel points to coordinates
-			splineCoords = _iw.pointsToCoords(splinePoints);
-
-			//TODO check b_closed, if it was split
-			_iw.drawGeoPolyLine(rendererCreator, splineCoords, drawMode, b_closed, b_justCompute, featureData);
-
-		}
-	}
-}
-*/

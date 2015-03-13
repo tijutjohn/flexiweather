@@ -163,10 +163,12 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 }
 
 import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
+import com.iblsoft.flexiweather.ogc.editable.features.curves.WFSFeatureEditableGeometry;
 import com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation.WFSFeatureEditableCloud;
 import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
 import com.iblsoft.flexiweather.utils.CubicBezier;
 import com.iblsoft.flexiweather.utils.geometry.LineSegment;
+import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 
 import flash.geom.Point;
 
@@ -182,40 +184,14 @@ class GeometryFeatureSprite extends WFSFeatureEditableSprite
 		super(feature);
 	}
 
-//	public override function getLineSegmentApproximation(): Array
-//	{
-//		if(smooth)
-//			return createSmoothLineSegmentApproximation();
-//		else
-//			return createStraightLineSegmentApproximation();
-//	}
-
-	override public function getLineSegmentApproximationOfBounds():Array
+	override public function getPointsForLineSegmentApproximationOfBounds(): Array
 	{
-		var a: Array = [];
-		var ptFirst: Point = null;
-		var ptPrev: Point = null;
+		var geometryFeature: WFSFeatureEditableGeometry = _feature as WFSFeatureEditableGeometry;
+		var iw: InteractiveWidget = geometryFeature.master.container;
 
-		var cloudFeature: WFSFeatureEditableCloud = _feature as WFSFeatureEditableCloud;
-		var pts: Array = CubicBezier.calculateHermitSpline(points, cloudFeature.isCurveClosed());
+		//distanceValidator, pixelDistanceValidator, datelineBetweenPixelPositions
+		var pts: Array = CubicBezier.calculateHermitSpline(points, geometryFeature.isCurveClosed(), iw.pixelDistanceValidator, iw.datelineBetweenPixelPositions);
 
-		var useEvery: int = 1;
-		if (pts.length > 100){
-			useEvery = int(pts.length / 20);
-		} else if (pts.length > 50){
-			useEvery = int(pts.length / 10);
-		}
-
-		var actPUse: int = 0;
-		for each(var pt: Point in pts) {
-			if ((actPUse % useEvery) == 0){
-				if(ptPrev != null)
-					a.push(new LineSegment(ptPrev.x, ptPrev.y, pt.x, pt.y));
-				ptPrev = pt;
-			}
-			actPUse++;
-		}
-
-		return a;
+		return pts;
 	}
 }

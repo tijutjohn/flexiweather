@@ -36,5 +36,11 @@ package com.iblsoft.flexiweather
 		 */
 		public static var USE_SUSPEND_ANTICOLLISION: Boolean = false;
 
+		/**
+		 * Constant, which defined maximum distance betwenn points on Cubic Bezier (Hermit Spline), when counting spline.
+		 * If there is need for smoother bezier curve, set smaller value. Higher value are for faster but not so precise curves.
+		 */
+		public static var BEZIER_POINTS_MAXIMUM_DISTANCE: int = 15;
+
 	}
 }
