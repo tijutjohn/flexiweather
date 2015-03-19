@@ -378,7 +378,7 @@ package com.iblsoft.flexiweather.ogc.editable
 
 			var distance: Number = Point.distance(currentPoint, editablePoint);
 
-			trace("isLastEditablePoint [currentPoint: " + currentPoint + "] lastEditablePoint: " + editablePoint + " DISTANCE: " + distance);
+//			trace("isLastEditablePoint [currentPoint: " + currentPoint + "] lastEditablePoint: " + editablePoint + " DISTANCE: " + distance);
 
 			var isLast: Boolean = distance < 5;
 			return isLast;

@@ -16,6 +16,7 @@ package com.iblsoft.flexiweather.widgets
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
+	import flash.geom.Rectangle;
 	import flash.utils.getTimer;
 
 	import mx.events.CollectionEvent;
@@ -142,14 +143,7 @@ package com.iblsoft.flexiweather.widgets
 		override public function set container(value:InteractiveWidget):void
 		{
 			super.container = value;
-
-//			if (value)
-//			{
-//				reflectionDictionary = new WFSEditableReflectionDictionary(value);
-//			}
 		}
-
-//		private var reflectionDictionary: WFSEditableReflectionDictionary;
 
 		public function InteractiveLayerRoute(container: InteractiveWidget = null)
 		{
@@ -348,12 +342,12 @@ package com.iblsoft.flexiweather.widgets
 		private function debugCoords(str: String = ''): void
 		{
 			return;
-			trace("debugCoords: " + str);
+			debug("debugCoords: " + str);
 			var total: int = _ma_coords.length;
 			for  (var i: int = 0; i < total; i++)
 			{
 				var coord: Coord = _ma_coords[i] as Coord;
-				trace("\tILR coord["+i+"]: " + coord);
+				debug("\tILR coord["+i+"]: " + coord);
 			}
 		}
 
@@ -385,7 +379,7 @@ package com.iblsoft.flexiweather.widgets
 			super.draw(graphics);
 
 			graphics.clear();
-//			trace("\n\n *******************************************************************************************\n\n");
+//			debug("\n\n *******************************************************************************************\n\n");
 //			var time:  Number = getTimer();
 			_drawMode = getStyle('drawMode');
 			if (!_drawMode)
@@ -395,15 +389,228 @@ package com.iblsoft.flexiweather.widgets
 			if (_ma_coords.length > 1)
 			{
 				var featureData: FeatureData = new FeatureData('layerRoute');
-				container.drawGeoPolyLine(getRouteRenderer, _ma_points, _drawMode, false, false, featureData);
+				var iw: InteractiveWidget = container;
+				featureData.clippingRectangle = new Rectangle(iw.areaX, iw.areaY, iw.areaWidth, iw.areaHeight);
+				featureData.featureSplitter = iw.featureSplitter;
+
+				container.drawGeoPolyLine(getRouteRenderer, _ma_points, _drawMode, false, true, featureData);
+				featureData.joinLinesFromReflections();
+//				drawFeatureData(getRouteRenderer("0"), featureData);
+				drawCurve(featureData);
 			}
 
 			//draw points
 			drawDraggablePoints();
 
 			notifyRouteChanged();
-//			trace("Time draw: " + (getTimer() - time) + "ms");
-//			trace("\n\n *******************************************************************************************\n\n");
+//			debug("Time draw: " + (getTimer() - time) + "ms");
+//			debug("\n\n *******************************************************************************************\n\n");
+		}
+
+		protected function convertCoordToScreen(p: Point): Point
+		{
+			return p;
+
+			//			var result: Point = master.container.coordToPoint(new Coord(master.container.crs, p.x, p.y));
+			//			return result
+		}
+		protected function isSameAsEditablePoint(currentPoint: Point, editablePoint: Point): Boolean
+		{
+			var iw: InteractiveWidget = container;
+			var projWidth: Number = iw.getProjectionWidthInPixels();
+
+			var pointReflection: int = iw.pointReflection(currentPoint.x, currentPoint.y);
+			if (pointReflection != 0)
+				currentPoint = new Point(currentPoint.x  - pointReflection * projWidth, currentPoint.y);
+
+			pointReflection = iw.pointReflection(editablePoint.x, editablePoint.y);
+			if (pointReflection != 0)
+				editablePoint = new Point(editablePoint.x  - pointReflection * projWidth, editablePoint.y);
+
+			var distance: Number = Point.distance(currentPoint, editablePoint);
+
+//			debug("ILR isLastEditablePoint [currentPoint: " + currentPoint + "] lastEditablePoint: " + editablePoint + " DISTANCE: " + distance);
+
+			var isLast: Boolean = distance < 5;
+			return isLast;
+		}
+
+		protected function drawCurve(m_featureData: FeatureData): void
+		{
+			//			return;
+
+			//			debug("WFSFeatureEditableCurveWithBaseTimeAndValidity drawCurve");
+
+			var reflection: FeatureDataReflection;
+			var _addToLabelLayout: Boolean;
+
+			var a_points: Array = _ma_points; //getPoints();
+
+			//create sprites for reflections
+			if (m_featureData && m_featureData.reflections)
+			{
+//				var displaySprite: WFSFeatureEditableSprite;
+
+				var pointsCount: int = a_points.length;
+				var ptAvg: Point;
+				var gr: Graphics;
+
+				//				m_featureData.debug();
+				var totalReflections: int = m_featureData.reflectionsLength;
+
+//				graphics.clear();
+
+				var reflectionIDs: Array = m_featureData.reflectionsIDs;
+
+				for (var i: int = 0; i < totalReflections; i++)
+				{
+					var reflectionDelta: int = reflectionIDs[i];
+
+					reflection = m_featureData.getReflectionAt(reflectionDelta);
+					if (reflection)
+					{
+						if (m_featureData)
+							ptAvg = m_featureData.getReflectionAt(reflectionDelta).center;
+						else if (pointsCount == 1)
+							ptAvg = a_points[0] as Point;
+
+//						displaySprite = getDisplaySpriteForReflectionAt(reflectionDelta);
+//						gr = displaySprite.graphics;
+						gr = graphics;
+
+						if(pointsCount <= 1)
+						{
+//							displaySprite.clear();
+//							gr.clear();
+							//						debug("displaySprite.clear: pointsCount: " + pointsCount);
+						} else {
+//							gr.clear();
+
+							if (m_featureData.reflectionDelta == reflectionDelta)
+							{
+								var renderer: ICurveRenderer = getRouteRenderer(reflectionDelta.toString());
+								//							drawFeatureReflection(renderer, reflection);
+								drawFeatureData(renderer, m_featureData);
+							} else {
+								debug("\t\t Do not draw data for " + reflectionDelta + " Feature is drawn in " + m_featureData.reflectionDelta);
+							}
+//							if (displaySprite)
+//								displaySprite.points = reflection.points;
+						}
+					}
+				}
+			}
+		}
+
+		private function drawFeatureData(g:ICurveRenderer, m_featureData:FeatureData):void
+		{
+			//drawing closed feature... there must be special handling of non-visible part of feature polyline
+
+			if (!g || !m_featureData || !m_featureData.lines)
+			{
+				return;
+			}
+
+			//get last point added by user
+			var editablePoints: Array = _ma_points;
+			var firstEditablePoint: Point = editablePoints[0] as Point;
+			var lastEditablePoint: Point = editablePoints[editablePoints.length - 1] as Point;
+
+			var p: Point;
+			var points: Array = m_featureData.points;
+
+			var linesCount: int = m_featureData.lines.length;
+			var pointsCount: int = points.length;
+
+			var iw: InteractiveWidget = container;
+			var projectionHalf: Number = iw.getProjectionWidthInPixels() / 2;
+
+			if (pointsCount > 0)
+			{
+				p = convertCoordToScreen(m_featureData.startPoint);
+
+				var lastPoint: Point;
+
+				// check NULL points...
+//				g.clear();
+
+				g.start(p.x, p.y);
+				if (isSameAsEditablePoint(p, firstEditablePoint))
+				{
+					g.firstPoint(p.x, p.y);
+				}
+				g.moveTo(p.x, p.y);
+				lastPoint = new Point(p.x, p.y);
+//				debug(p,"ILR drawFeatureData moveTO 1: [" + p.x + " , " + p.y + " ]");
+				var bNewLine: Boolean = false;
+				for (var i: int = 1; i < pointsCount; i++)
+				{
+					p = points[i] as Point;
+					if (p)
+					{
+						p = convertCoordToScreen(p);
+
+						if (lastPoint)
+						{
+							//							var dist: Number = Point.distance(p, lastPoint);
+							//							debug(p,"\tdrawFeatureData P: " + p + "   distance to last point: " + dist);
+							var dist: Number = Point.distance(p, lastPoint);
+							if (dist > projectionHalf)
+							{
+								bNewLine = true;
+							}
+						}
+						if (bNewLine) {
+
+//							debug("\t ILR drawFeatureData finish 1 lastPoint loop: [" + lastPoint.x + " , " + lastPoint.y + " ]");
+							if (isSameAsEditablePoint(lastPoint, lastEditablePoint))
+							{
+								//it is real last point
+								g.lastPoint(lastPoint.x, lastPoint.y);
+//								debug("\t ILR drawFeatureData lastPoint 1 lastPoint loop: [" + lastPoint.x + " , " + lastPoint.y + " ]");
+							}
+							//this is just last point of curve, but not real last point added by user
+							g.finish(lastPoint.x, lastPoint.y);
+							//check if this is real last point (last added point by user) and in that case, use g.finish()
+							g.start(p.x, p.y);
+							if (isSameAsEditablePoint(p, firstEditablePoint))
+							{
+								g.firstPoint(p.x, p.y);
+							}
+							g.moveTo(p.x, p.y);
+//							debug(p,"\t ILR drawFeatureData moveTo 2: [" + p.x + " , " + p.y + " ]");
+						} else {
+							g.lineTo(p.x, p.y);
+//							debug(p,"\t ILR drawFeatureData lineTO 1: [" + p.x + " , " + p.y + " ]");
+						}
+						if (!p)
+							debug("check why p is null");
+						lastPoint = new Point(p.x, p.y);
+						bNewLine = false;
+					} else {
+						bNewLine = true;
+					}
+				}
+
+				if (p) {
+					if (isSameAsEditablePoint(p, lastEditablePoint))
+					{
+						g.lastPoint(p.x, p.y);
+//						debug(p,"ILR drawFeatureData lastPoint 2: [" + p.x + " , " + p.y + " ]");
+					}
+					g.finish(p.x, p.y);
+//					debug(p,"ILR drawFeatureData finish 2: [" + p.x + " , " + p.y + " ]");
+				} else {
+					if (isSameAsEditablePoint(lastPoint, lastEditablePoint))
+					{
+						g.lastPoint(lastPoint.x, lastPoint.y);
+						trace("ILR drawFeatureData lastPoint 3: [" + lastPoint.x + " , " + lastPoint.y + " ]");
+					}
+					g.finish(lastPoint.x, lastPoint.y);
+//					debug("ILR drawFeatureData finish 3: [" + lastPoint.x + " , " + lastPoint.y + " ]");
+					debug("\n");
+				}
+			}
 		}
 
 		public function getRouteRenderer(reflectionString: String): RouteCurveRenderer
@@ -423,6 +630,7 @@ package com.iblsoft.flexiweather.widgets
 			var fillStyle2: FillStyle = new FillStyle(i_routeFillColor, f_routeFillAlpha);
 
 			var routeLineRenderer: RouteCurveRenderer = new RouteCurveRenderer(graphics, lineStyle, fillStyle, lineStyle2, fillStyle2);
+			routeLineRenderer.reflectionID = reflectionString;
 			return routeLineRenderer;
 		}
 
@@ -435,7 +643,7 @@ package com.iblsoft.flexiweather.widgets
 			for (var i: int = 0; i < total; i++)
 			{
 				var c: Coord = _ma_coords[i] as Coord;
-//				trace("Route drawDraggablePoints: " + c + " ["+i+"] " + (_ma_points[i] as Point));
+//				debug("Route drawDraggablePoints: " + c + " ["+i+"] " + (_ma_points[i] as Point));
 				if (c.crs != container.crs)
 				{
 					c = c.convertToProjection(proj);
@@ -497,7 +705,7 @@ package com.iblsoft.flexiweather.widgets
 					var pt: Point = container.coordToPoint(new Coord(crs, c.x + deltaWidth, c.y));
 
 					var f_dist: Number = pt.subtract(ptHit).length;
-//					trace("ILR getHitCoord delta: "+ delta + "pt: "+ pt + " dist: "+ f_dist + " for "+ c.toLaLoCoord().toString());
+//					debug("ILR getHitCoord delta: "+ delta + "pt: "+ pt + " dist: "+ f_dist + " for "+ c.toLaLoCoord().toString());
 					if ((f_dist <= radius && cBest == null) || f_dist < f_best)
 					{
 						f_best = f_dist;
@@ -515,6 +723,11 @@ package com.iblsoft.flexiweather.widgets
 				m_highlightedCoord = c;
 				invalidateDynamicPart();
 			}
+		}
+
+		private function debug(txt: String): void
+		{
+			trace("InteractiveLayerRoute: " + txt);
 		}
 	}
 }
