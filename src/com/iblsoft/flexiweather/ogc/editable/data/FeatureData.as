@@ -150,7 +150,6 @@ package com.iblsoft.flexiweather.ogc.editable.data
 
 		private function debug(txt: String): void
 		{
-//			return;
 //			trace(this + ": " + txt);
 		}
 		public function debugData(): void

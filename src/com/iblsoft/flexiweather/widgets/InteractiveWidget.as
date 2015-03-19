@@ -1121,9 +1121,11 @@ package com.iblsoft.flexiweather.widgets
 		{
 			var leftX: Number = m_crsProjection.extentBBox.xMin;
 			var rightX: Number = m_crsProjection.extentBBox.xMax;
+			var projWidthHalf: Number = m_crsProjection.extentBBox.width / 2;
 
 			var p1x: Number = Math.min(p1.x, p2.x);
 			var p2x: Number = Math.max(p1.x, p2.x);
+
 
 			if (p1x <= rightX && p2x >= rightX)
 				return true;
@@ -1131,7 +1133,22 @@ package com.iblsoft.flexiweather.widgets
 			if (p1x <= leftX && p2x >= leftX)
 				return true;
 
+			if (Point.distance(p1, p2) > projWidthHalf)
+				return true;
+
 			return false;
+		}
+
+		public function crossDatelineCoords(c1: Coord, c2: Coord): Boolean
+		{
+
+			if (c1.crs != crs)
+				c1 = c1.convertToProjection(m_crsProjection);
+			if (c2.crs != crs)
+				c2 = c2.convertToProjection(m_crsProjection);
+
+			//must be in same projection as widget projection
+			return crossDateline(new Point(c1.x, c1.y), new Point(c2.x, c2.y));
 		}
 
 
@@ -2674,6 +2691,9 @@ package com.iblsoft.flexiweather.widgets
 		 */
 		private function _drawGeoLine(coordFrom: Coord, coordTo: Coord, drawMode: String, d_reflectionToSegmentPoints: Dictionary, featureData: FeatureData = null, featureDataLineID: int = 0): void
 		{
+			var fdlID: int = featureDataLineID;
+			var bGreatArcHack: Boolean = false;
+
 			var currTime: Number = getTimer();
 			var bDebugTimes: Boolean = false;
 
@@ -2696,7 +2716,7 @@ package com.iblsoft.flexiweather.widgets
 			{
 				bothCoordsMode = true;
 
-//				debug("_drawGeoLine(from: " + coordFrom.toString() + " to: " + coordTo.toString());
+//				trace("_drawGeoLine(from: " + coordFrom.toString() + " to: " + coordTo.toString() + " featureDataLineID: "+ featureDataLineID);
 				//move coords into extent
 				coordFrom = Coord.convertCoordOnSphere(coordFrom, projection);
 				coordTo = Coord.convertCoordOnSphere(coordTo, projection);
@@ -2711,44 +2731,69 @@ package com.iblsoft.flexiweather.widgets
 					if (true) { // FIXME: missing support for non-wrapped projections
 						if (projection.wrapsHorizontally && (crossDateline(coordFrom, coordTo) || coordsFarThanExtentWidth(coordFrom, coordTo)))
 						{
-							tempCoords = splitCoordsOnDateline(coordFrom, coordTo);
+							var bUseDatelineSplit: Boolean = false;
 
-							var arcTempCoords: Array = [];
-
-							var ec1: EdgeCoord;
-							var ec2: EdgeCoord;
-							while(tempCoords.length > 0)
+							if (bUseDatelineSplit)
 							{
-								if (tempCoords[0] == null)
-									arcTempCoords.push(tempCoords.shift());
+								tempCoords = splitCoordsOnDateline(coordFrom, coordTo);
 
-								if (!ec1 && tempCoords.length > 0)
-									ec1 = tempCoords.shift();
-								if (!ec2 && tempCoords.length > 0)
-									ec2 = tempCoords.shift();
+								var arcTempCoords: Array = [];
 
-								if (ec1 && ec2)
+								var ec1: EdgeCoord;
+								var ec2: EdgeCoord;
+								while(tempCoords.length > 0)
 								{
-									arcCoords = Coord.interpolateGreatArc(ec1.coord, ec2.coord, distanceValidator);
-									for each (c in arcCoords)
-									{
-										arcTempCoords.push(new EdgeCoord(c, false, true));
-									}
+									if (tempCoords[0] == null)
+										arcTempCoords.push(tempCoords.shift());
 
-									ec1 = null;
-									ec2 = null;
+									if (!ec1 && tempCoords.length > 0)
+										ec1 = tempCoords.shift();
+									if (!ec2 && tempCoords.length > 0)
+										ec2 = tempCoords.shift();
+
+									if (ec1 && ec2)
+									{
+										arcCoords = Coord.interpolateGreatArc(ec1.coord, ec2.coord, distanceValidator, crossDatelineCoords);
+										for each (c in arcCoords)
+										{
+											if (c)
+												arcTempCoords.push(new EdgeCoord(c, false, true));
+											else
+												arcTempCoords.push(null);
+//											arcTempCoords.push(new EdgeCoord(c, false, true));
+										}
+
+										ec1 = null;
+										ec2 = null;
+									}
 								}
+
+								tempCoords = arcTempCoords;
+							} else {
+
+
+								tempCoords = [];
+								arcCoords = Coord.interpolateGreatArc(coordFrom, coordTo, distanceValidator, crossDatelineCoords);
+								for each (c in arcCoords)
+								{
+									if (c)
+										tempCoords.push(new EdgeCoord(c, false, true));
+									else
+										tempCoords.push(null);
+								}
+
+
 							}
 
-							tempCoords = arcTempCoords;
-
 						} else {
-//							tempCoords = [new EdgeCoord(coordFrom, false, true), new EdgeCoord(coordTo, false, true)];
-							tempCoords = [];//new EdgeCoord(coordFrom, false, true), new EdgeCoord(coordTo, false, true)];
-							arcCoords = Coord.interpolateGreatArc(coordFrom, coordTo, distanceValidator);
+							tempCoords = [];
+							arcCoords = Coord.interpolateGreatArc(coordFrom, coordTo, distanceValidator, crossDatelineCoords);
 							for each (c in arcCoords)
 							{
-								tempCoords.push(new EdgeCoord(c, false, true));
+								if (c)
+									tempCoords.push(new EdgeCoord(c, false, true));
+								else
+									tempCoords.push(c);
 							}
 						}
 					}
@@ -2828,11 +2873,32 @@ package com.iblsoft.flexiweather.widgets
 				var helpTime: Number;
 
 				var line: FeatureDataLineSegment;
+				var usedReflections: Dictionary;
 				for each(part in continousParts)
 				{
+
+					/*
+					* if "usedReflections" exists (it was already created in previous "part"), add null for discontinuation
+					* - it is at the start of loop, to do not add null segments when there is just one part, or after the last part
+					*/
+					if (usedReflections)
+					{
+						for (var usedReflection: String in usedReflections)
+						{
+							var reflID: int = parseInt(usedReflection);
+
+							reflection = featureData.getReflectionAt(reflID);
+							currLine = reflection.getLineAt(fdlID);
+							currLine.addLineSegment(null);
+						}
+					}
+
+
 					cObject = null;
 					var prevCObject: EdgeCoord = null;
 					var prevC: Coord = null;
+
+					usedReflections = new Dictionary(true);
 					for each(cObject in part)
 					{
 						if (prevCObject)
@@ -2857,6 +2923,9 @@ package com.iblsoft.flexiweather.widgets
 								{
 									if (bDebugTimes) helpTime = startProfileTimer();
 									s_reflectionId = String(o.reflection);
+
+									usedReflections[s_reflectionId] = true;
+
 									reflectedSegmentPoints = d_reflectionToSegmentPoints[s_reflectionId];
 
 									if(reflectedSegmentPoints == null)
@@ -2906,7 +2975,11 @@ package com.iblsoft.flexiweather.widgets
 //												stopProfileTimer(helpTime, '\t\t\t\t t2');
 //												helpTime = startProfileTimer();
 //											}
-											currLine = reflection.getLineAt(featureDataLineID);
+
+											if (bGreatArcHack && drawMode == DrawMode.GREAT_ARC)
+												fdlID++;
+
+											currLine = reflection.getLineAt(fdlID);
 		//									debug("_drawGeoLine reflection: " + reflection);
 		//									debug("_drawGeoLine currLine: " + currLine);
 
@@ -2966,10 +3039,11 @@ package com.iblsoft.flexiweather.widgets
 									{
 										//add non-visible line to reflection 0 (how to find, which reflection is correct
 										reflection = featureData.getReflectionAt(featureData.reflectionsIDs[0]);
-	//									featureDataLine = featureData.getLineAt(0, featureDataLineID);
-										currLine = reflection.getLineAt(featureDataLineID);
+										if (bGreatArcHack && drawMode == DrawMode.GREAT_ARC)
+											fdlID++;
 
-	//									var lineSegment2: FeatureDataLineSegment = new FeatureDataLineSegment(0,0,0,0, false, false, false);
+										currLine = reflection.getLineAt(fdlID);
+
 										if (!lineSegment)
 										{
 											p1 = coordToPoint(new Coord(ms_crs, line.x1, line.y1));
@@ -2987,7 +3061,6 @@ package com.iblsoft.flexiweather.widgets
 						if (cObject.coord)
 							prevCObject = cObject;
 					}
-
 				}
 			} else {
 
@@ -3014,11 +3087,13 @@ package com.iblsoft.flexiweather.widgets
 
 							//it's "line with one points
 							reflection = featureData.getReflectionAt(o.reflection);
-//							featureDataLine = featureData.getLineAt(reflection.reflectionDelta, featureDataLineID);
-							currLine = reflection.getLineAt(featureDataLineID);
 
-							//									debug("_drawGeoLine reflection: " + reflection);
-							//									debug("_drawGeoLine currLine: " + currLine);
+							if (bGreatArcHack && drawMode == DrawMode.GREAT_ARC)
+								fdlID++;
+							currLine = reflection.getLineAt(fdlID);
+
+//							debug("_drawGeoLine reflection: " + reflection);
+//							debug("_drawGeoLine currLine: " + currLine);
 
 							//check if line is intersect vieBBox
 							p1 = coordToPoint(new Coord(ms_crs, o.point.x, o.point.y));
@@ -3067,6 +3142,8 @@ package com.iblsoft.flexiweather.widgets
 
 		private function _drawReflectedSegmentPoints(rendererCreator: Function, d_reflectionToSegmentPoints: Dictionary): void
 		{
+			var projectionHalf: Number = getProjectionWidthInPixels() / 2;
+
 			for (var s_reflectionStr: String in d_reflectionToSegmentPoints) {
 				var b_first: Boolean = true;
 				var ptPrev: Point = null;
@@ -4075,10 +4152,14 @@ class SmoothRendererNew
 
 							if (ec1 && ec2)
 							{
-								var arcCoords: Array = Coord.interpolateGreatArc(ec1.coord, ec2.coord, distanceValidator);
+								var arcCoords: Array = Coord.interpolateGreatArc(ec1.coord, ec2.coord, distanceValidator, discontinuityValidator);
 								for each (var c: Coord in arcCoords)
 								{
-									arcTempCoords.push(new EdgeCoord(c, false, true));
+									if (c)
+										arcTempCoords.push(new EdgeCoord(c, false, true));
+									else
+										arcTempCoords.push(null);
+//									arcTempCoords.push(new EdgeCoord(c, false, true));
 								}
 
 								ec1 = null;
@@ -4197,10 +4278,10 @@ class SmoothRendererNew
 //			for each (var coords: Array in splittedReflectionCoords)
 //			{
 				var coords: Array = splittedReflectionCoords;
-				for each (var q: * in coords)
-				{
-					trace("Q coord: "+ q.toString());
-				}
+//				for each (var q: * in coords)
+//				{
+//					trace("Q coord: "+ q.toString());
+//				}
 
 				splinePoints = CubicBezier.calculateHermitSpline(coords, b_closed, pixelDistanceValidator, discontinuityValidator);
 
@@ -4225,7 +4306,7 @@ class SmoothRendererNew
 
 				splineCoords = _iw.pointsToCoords(splinePoints);
 
-				var str: String = "";
+				/*var str: String = "";
 				var str2: String = "";
 				var leftX:  Number = 0;
 				var rightX:  Number = 360;
@@ -4248,7 +4329,7 @@ class SmoothRendererNew
 				}
 				trace("leftX: " + leftX + " rightX: " + rightX);
 				trace(str);
-				trace(str2);
+				trace(str2);*/
 
 				var b_originalClosed: Boolean = b_closed;
 

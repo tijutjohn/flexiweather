@@ -70,7 +70,7 @@ package com.iblsoft.flexiweather.proj
 			return Math.sqrt(dx * dx + dy * dy);
 		}
 
-		public static function interpolateGreatArc(c1: Coord, c2: Coord, distanceValidator: Function, bIncludeDiscontinuation: Boolean = false): Array
+		public static function interpolateGreatArc(c1: Coord, c2: Coord, distanceValidator: Function, discontinuityValidator: Function): Array
 		{
 			var origC1: Coord = c1.cloneCoord();
 			var origC2: Coord = c2.cloneCoord();
@@ -89,7 +89,7 @@ package com.iblsoft.flexiweather.proj
 //			debug("*******************************************************************************");
 //			debug("interpolateGreatArc orig " + c1.toString() + " , " + c2.toString());
 //			debug("interpolateGreatArc converted " + t1.toString() + " , " + t2.toString());
-			bisectGreatArc(lp1, t1, lp2, t2, a, projection, distanceValidator, bIncludeDiscontinuation);
+			bisectGreatArc(lp1, t1, lp2, t2, a, projection, distanceValidator, discontinuityValidator);
 
 //			var total: int = a.length;
 //			debug("\n\ninterpolateGreatArc");
@@ -104,14 +104,51 @@ package com.iblsoft.flexiweather.proj
 ////				debug("interpolateGreatArc ["+interpolatedCoord.toString()+"] fixed: ["+fixedCoord.toString()+"]");
 //			}
 //			debug("*******************************************************************************");
+
+
+
+			var str2: String = "";
+			var leftX:  Number = 0;
+			var rightX:  Number = 360;
+			for each (var tmpRetCoord: Coord in a)
+			{
+				if (tmpRetCoord)
+				{
+					str2 += tmpRetCoord.x + ", ";
+				} else {
+					str2 += "null, ";
+
+				}
+			}
+//			trace("Before: "+ str2);
+
+			//filter points, which are inserted twice
+			var bFilterDoublePoints: Boolean = true;
+
+			if (bFilterDoublePoints)
+			{
+				var i: int = 1;
+				tmpRetCoord = a[0] as Coord;
+				while (i < a.length)
+				{
+					var sp: Coord = a[i] as Coord;
+					if (sp && tmpRetCoord && sp.equals(tmpRetCoord))
+					{
+						a.splice(i,1);
+					} else {
+						i++;
+						tmpRetCoord = sp;
+					}
+				}
+			}
 			return a;
 		}
 
-		private static function bisectGreatArc(lp1: Coord, c1: Coord, lp2: Coord, c2: Coord, a: Array, projection: Projection, distanceValidator: Function, bIncludeDiscontinuation: Boolean): void
+		private static function bisectGreatArc(lp1: Coord, c1: Coord, lp2: Coord, c2: Coord, a: Array, projection: Projection, distanceValidator: Function, discontinuityValidator: Function): void
 		{
 			var debug: Function = function(str: String): void
 			{
-				trace("Coord bisectGreatArc: " + str);
+//				trace("Coord bisectGreatArc: " + str);
 			}
 
 			var toRadians: Function = function(degree: Number): Number
@@ -148,7 +185,7 @@ package com.iblsoft.flexiweather.proj
 			var points: Array;
 
 			debug("bisectGreatArc c1: " + c1.toString() + " cM: " + cM.toString() + " c2: " + c2.toString());
-			if (!areSameSigns(c1, cM))
+			if (discontinuityValidator(c1, cM))
 			{
 				debug("\t bisectGreatArc SIGNS for c1, cM are different ("+c1.x + " , " + cM.x+")");
 //				var sp1: SpherePointWithLalo = new SpherePointWithLalo(x1, y1, z1, c1.x, c1.y);
@@ -157,7 +194,7 @@ package com.iblsoft.flexiweather.proj
 				var spM1: SpherePointWithLalo = new SpherePointWithLalo(xTotal, yTotal, zTotal, lpM.x, lpM.y);
 
 				//do bisect2 - find coordinates near "sign change" (dateline or primemeridian)
-				points = bisect2GreatArc(sp1, spM1, a, projection);
+				points = bisect2GreatArc(sp1, spM1, a, projection, discontinuityValidator);
 				if (points && points.length == 2)
 				{
 					debug("\t\t bisect2GreatArc return 2 points");
@@ -175,11 +212,11 @@ package com.iblsoft.flexiweather.proj
 
 						var lLeft1: Coord = cLeft1.toLaLoCoord();
 						debug("\t\t after Bisect2 there needs to be more bisect c1, cLeft1 ("+c1.x + " , " + cLeft1.x+")");
-						bisectGreatArc(lp1, c1, lLeft1, cLeft1, a, projection, distanceValidator, bIncludeDiscontinuation);
+						bisectGreatArc(lp1, c1, lLeft1, cLeft1, a, projection, distanceValidator, discontinuityValidator);
 
 					} else {
 						debug("\t\t after Bisect2 distance is OK - PUSH cLeft1 (" + cLeft1.x+") into result array");
-						a.push(cLeft1);
+//						a.push(cLeft1);
 					}
 
 					debug("\t\t after Bisect2 distance is OK - PUSH cLeft1 (" + cLeft1.x+") into result array");
@@ -193,7 +230,7 @@ package com.iblsoft.flexiweather.proj
 
 						var lRight1: Coord = cRight1.toLaLoCoord();
 						debug("\t\t after Bisect2 there needs to be more bisect cRight1, cM ("+cRight1.x + " , " + cM.x+")");
-						bisectGreatArc(lRight1, cRight1, lpM, cM, a, projection, distanceValidator, bIncludeDiscontinuation);
+						bisectGreatArc(lRight1, cRight1, lpM, cM, a, projection, distanceValidator, discontinuityValidator);
 
 					} else {
 						debug("\t\t after Bisect2 distance is OK - PUSH cM (" + cM.x+") into result array");
@@ -205,14 +242,14 @@ package com.iblsoft.flexiweather.proj
 
 			} else if (!distanceValidator(c1, cM)) {
 				debug("\t bisectGreatArc SIGNS ARE SAME c1, cM ("+c1.x + " , " + cM.x+")");
-				bisectGreatArc(lp1, c1, lpM, cM, a, projection, distanceValidator, bIncludeDiscontinuation);
+				bisectGreatArc(lp1, c1, lpM, cM, a, projection, distanceValidator, discontinuityValidator);
 
 			} else {
 				debug("\t\t distance is OK - PUSH cM (" + cM.x+") into result array");
 				a.push(cM);
 			}
 
-			if (!areSameSigns(c2, cM))
+			if (discontinuityValidator(c2, cM))
 			{
 				debug("\t bisectGreatArc SIGNS for c2, cM are different ("+c2.x + " , " + cM.x+")");
 //				var sp2: SpherePointWithLalo = new SpherePointWithLalo(x2, y2, z2, c2.x, c2.y);
@@ -221,7 +258,7 @@ package com.iblsoft.flexiweather.proj
 				var spM2: SpherePointWithLalo = new SpherePointWithLalo(xTotal, yTotal, zTotal, lpM.x, lpM.y);
 
 				//do bisect2
-				points = bisect2GreatArc(spM2, sp2, a, projection);
+				points = bisect2GreatArc(spM2, sp2, a, projection, discontinuityValidator);
 				if (points && points.length == 2)
 				{
 					debug("\t\t bisect2GreatArc return 2 points");
@@ -239,11 +276,11 @@ package com.iblsoft.flexiweather.proj
 
 						var lLeft2: Coord = cLeft2.toLaLoCoord();
 						debug("\t\t after Bisect2 there needs to be more bisect cM, cLeft2 ("+cM.x + " , " + cLeft2.x+")");
-						bisectGreatArc(lpM, cM, lLeft2, cLeft2, a, projection, distanceValidator, bIncludeDiscontinuation);
+						bisectGreatArc(lpM, cM, lLeft2, cLeft2, a, projection, distanceValidator, discontinuityValidator);
 
 					} else {
 						debug("\t\t after Bisect2 distance is OK - PUSH cLeft2 (" + cLeft2.x+") into result array");
-						a.push(cLeft2);
+//						a.push(cLeft2);
 					}
 
 					debug("\t\t after Bisect2 distance is OK - PUSH cLeft2 (" + cLeft2.x+") into result array");
@@ -258,7 +295,7 @@ package com.iblsoft.flexiweather.proj
 
 						var lRight2: Coord = cRight2.toLaLoCoord();
 						debug("\t\t after Bisect2 there needs to be more bisect cRight2, c2 ("+cRight2.x + " , " + c2.x+")");
-						bisectGreatArc(lRight2, cRight2, lp2, c2, a, projection, distanceValidator, bIncludeDiscontinuation);
+						bisectGreatArc(lRight2, cRight2, lp2, c2, a, projection, distanceValidator, discontinuityValidator);
 
 					} else {
 //						debug("\t\t distance is OK - PUSH c2 (" + c2.x+") into result array");
@@ -270,7 +307,7 @@ package com.iblsoft.flexiweather.proj
 			} else if (!distanceValidator(c2, cM))
 			{
 				debug("\t bisectGreatArc SIGNS ARE SAME c2, cM ("+c2.x + " , " + cM.x+")");
-				bisectGreatArc(lpM, cM, lp2, c2, a, projection, distanceValidator, bIncludeDiscontinuation);
+				bisectGreatArc(lpM, cM, lp2, c2, a, projection, distanceValidator, discontinuityValidator);
 			}
 			else {
 				debug("\t\t distance is OK - PUSH c2 (" + c2.x+") into result array");
@@ -289,11 +326,11 @@ package com.iblsoft.flexiweather.proj
 		 * @return
 		 *
 		 */
-		private static function bisect2GreatArc(sp1: SpherePointWithLalo, sp2: SpherePointWithLalo, a: Array, projection: Projection, previousDistance: Number = 0): Array
+		private static function bisect2GreatArc(sp1: SpherePointWithLalo, sp2: SpherePointWithLalo, a: Array, projection: Projection, discontinuityValidator: Function, previousDistance: Number = 0): Array
 		{
 			var debug: Function = function(str: String): void
 			{
-				trace("Coord bisectGreatArc2: " + str);
+//				trace("Coord bisectGreatArc2: " + str);
 			}
 
 			var distance: Function = function(sp1: SpherePointWithLalo, sp2: SpherePointWithLalo): Number
@@ -314,7 +351,9 @@ package com.iblsoft.flexiweather.proj
 			}
 
 			var max: Number = 0.000001;
-			var signsAreDifferent: Boolean = sp1.signsAreDifferent(sp2);
+//			var signsAreDifferent: Boolean = sp1.signsAreDifferent(sp2);
+			var isDiscontinuation: Boolean = discontinuityValidator(new Coord("CRS:84", sp1.longitude, sp1.latitude), new Coord("CRS:84", sp2.longitude, sp2.latitude));
+
 			var currentDistance: Number = distance(sp1, sp2);
 
 			debug("\n bisect2GreatArc currentDistance: " + currentDistance + " sp1: " + sp1.longitude + " sp2: " + sp2.longitude);
@@ -325,13 +364,13 @@ package com.iblsoft.flexiweather.proj
 //				return null;
 			}
 
-			if (currentDistance < max && !signsAreDifferent)
+			if (currentDistance < max && isDiscontinuation)
 			{
 				debug("\t\t bisect2GreatArc currentDistance < max and there were no sings change (" + sp1.longitude + " , " + sp2.longitude+") into result array");
 				return [sp1, sp2];
 			}
 //			if (currentDistance < max && signsAreSame)
-			if (signsAreDifferent)
+			if (!isDiscontinuation)
 			{
 				debug("\t\t bisect2GreatArc there were sings change return NULL into result array");
 				return null;
@@ -372,7 +411,7 @@ package com.iblsoft.flexiweather.proj
 
 				debug("\t\t bisect2GreatArc call bisect2GreatArc for sp1, c (" + sp1.longitude + " , " + c.longitude+")");
 
-				points = bisect2GreatArc(sp1, c, a, projection, currentDistance);
+				points = bisect2GreatArc(sp1, c, a, projection, discontinuityValidator, currentDistance);
 				if (points)
 				{
 					debug("\t\t bisect2GreatArc after bisect2GreatArc for sp1, c add " + points.length + " ito result array");
@@ -380,7 +419,7 @@ package com.iblsoft.flexiweather.proj
 				}
 
 				debug("\t\t bisect2GreatArc call bisect2GreatArc for c, sp2 (" + c.longitude + " , " + sp2.longitude+")");
-				points = bisect2GreatArc(c, sp2, a, projection, currentDistance);
+				points = bisect2GreatArc(c, sp2, a, projection, discontinuityValidator, currentDistance);
 				if (points)
 				{
 					debug("\t\t bisect2GreatArc after bisect2GreatArc for c, sp2 add " + points.length + " ito result array");
