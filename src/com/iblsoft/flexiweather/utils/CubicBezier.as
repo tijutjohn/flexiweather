@@ -628,7 +628,7 @@ package com.iblsoft.flexiweather.utils
 
 				calculateHermitSplineBisect(retPoints, "START", 0, 1, i, x0, y0, point0, point1, 0, distanceValidator, discontinuityValidator);
 
-				trace("calculateHermitSplineBisect total: " + retPoints.length);
+//				trace("calculateHermitSplineBisect total: " + retPoints.length);
 
 			}
 //			tmpRetPoint = new SPoint(MPoint(usePoints[usePoints.length - 1]).x, MPoint(usePoints[usePoints.length - 1]).y);
@@ -648,7 +648,7 @@ package com.iblsoft.flexiweather.utils
 
 				}
 			}
-			trace("Before: "+ str2);
+//			trace("Before: "+ str2);
 
 			//filter points, which are inserted twice
 			var bFilterDoublePoints: Boolean = true;
@@ -779,7 +779,8 @@ package com.iblsoft.flexiweather.utils
 				{
 					calculateHermitSplineBisect(points, "LEFT", fromT, tHalf, segmentIndex, x0, y0, point0, point1, level + 1, distanceValidator, discontinuityValidator);
 				} else {
-					tmpRetPoint = new SPoint(drawPoint0.x, drawPoint0.y);
+//					tmpRetPoint = new SPoint(drawPoint0.x, drawPoint0.y);
+					tmpRetPoint = new SPoint(drawPointMiddle.x, drawPointMiddle.y);
 					tmpRetPoint.segmentIndex = segmentIndex;
 					points.push(tmpRetPoint);
 					if (bTraceResults) trace("calculateHermitSplineBisect: [" + fromT + ", " + toT+"] LEFT pos:  " + fromT + " type: " + type + " PUSH POINT " + drawPoint0);
