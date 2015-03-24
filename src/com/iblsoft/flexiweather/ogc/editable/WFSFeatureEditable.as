@@ -17,7 +17,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.utils.AnnotationBox;
 	import com.iblsoft.flexiweather.utils.ArrayUtils;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
-	
+
 	import flash.display.DisplayObject;
 	import flash.display.Sprite;
 	import flash.events.KeyboardEvent;
@@ -25,7 +25,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	import flash.geom.Point;
 	import flash.ui.Keyboard;
 	import flash.utils.Dictionary;
-	
+
 	import mx.utils.ObjectUtil;
 
 	public class WFSFeatureEditable extends WFSFeatureBase implements IEditableItem, IHighlightableItem, ISelectableItem, IWFSFeatureWithReflection
@@ -714,7 +714,7 @@ package com.iblsoft.flexiweather.ogc.editable
 			var p: XML = <wfs:Property xmlns:wfs="http://www.opengis.net/wfs"/>;
 			p.appendChild(<wfs:Name xmlns:wfs="http://www.opengis.net/wfs" xmlns={s_namespace}>{s_property}</wfs:Name>);
 
-			if (value)
+			if (value != null)
 			{
 				var v: XML = <wfs:Value xmlns:wfs="http://www.opengis.net/wfs"/>;
 				v.appendChild(value);
