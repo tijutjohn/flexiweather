@@ -17,7 +17,8 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		public static const RADIATION: String = 'Radiation';
 		public static const ANNOTATION: String = 'Annotation';
 		public static const TEXT: String = 'Text';
-		
+		public static const MOVEMENT: String = 'Movement';
+
 		public static const LABEL_FRONT: String = 'Front';
 		public static const LABEL_PRESSURE_CENTRE: String = 'Pressure Centre';
 		public static const LABEL_THUNDERSTORM_AREA: String = 'Thunderstorm Area';
@@ -33,6 +34,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 		public static const LABEL_RADIATION: String = 'Radiation';
 		public static const LABEL_ANNOTATION: String = 'Annotation';
 		public static const LABEL_TEXT: String = 'Text';
-		
+		public static const LABEL_MOVEMENT: String = 'Movement';
+
 	}
 }

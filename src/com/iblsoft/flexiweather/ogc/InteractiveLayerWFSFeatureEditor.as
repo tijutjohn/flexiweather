@@ -10,6 +10,7 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableMode;
 	import com.iblsoft.flexiweather.ogc.editable.featureEditor.events.WFSTransactionEvent;
 	import com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableMacro;
+	import com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableMovement;
 	import com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditablePressureCentre;
 	import com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableRadiation;
 	import com.iblsoft.flexiweather.ogc.editable.features.WFSFeatureEditableStorm;
@@ -106,6 +107,9 @@ package com.iblsoft.flexiweather.ogc
 				}
 				else if(tagName.localName == "PressureCentre") {
 					feature = new WFSFeatureEditablePressureCentre("http://www.iblsoft.com/wfs", "PressureCentre", xml.@gml::id);
+				}
+				else if(tagName.localName == "Movement") {
+					feature = new WFSFeatureEditableMovement("http://www.iblsoft.com/wfs", "Movement", xml.@gml::id);
 				}
 				else if(tagName.localName == "Cloud") {
 					feature = new WFSFeatureEditableCloud("http://www.iblsoft.com/wfs", "Cloud", xml.@gml::id);
