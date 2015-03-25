@@ -144,7 +144,7 @@ package com.iblsoft.flexiweather.proj
 			return a;
 		}
 
-		private static function bisectGreatArc(lp1: Coord, c1: Coord, lp2: Coord, c2: Coord, a: Array, projection: Projection, distanceValidator: Function, discontinuityValidator: Function): void
+		private static function bisectGreatArc(lp1: Coord, c1: Coord, lp2: Coord, c2: Coord, a: Array, projection: Projection, distanceValidator: Function, discontinuityValidator: Function, level: int = 0): void
 		{
 			var debug: Function = function(str: String): void
 			{
@@ -162,156 +162,161 @@ package com.iblsoft.flexiweather.proj
 				return radians * toDegConst;
 			}
 
-			var lp1X: Number = toRadians(lp1.x);
-			var lp1Y: Number = toRadians(lp1.y);
-			var lp2X: Number = toRadians(lp2.x);
-			var lp2Y: Number = toRadians(lp2.y);
-			var x1: Number = Math.cos(lp1Y) * Math.cos(lp1X);
-			var y1: Number = Math.cos(lp1Y) * Math.sin(lp1X);
-			var z1: Number = Math.sin(lp1Y);
-			var x2: Number = Math.cos(lp2Y) * Math.cos(lp2X);
-			var y2: Number = Math.cos(lp2Y) * Math.sin(lp2X);
-			var z2: Number = Math.sin(lp2Y);
-			var xTotal: Number = x1 + x2;
-			var yTotal: Number = y1 + y2;
-			var zTotal: Number = z1 + z2;
-			var l: Number = Math.sqrt(xTotal * xTotal + yTotal * yTotal + zTotal * zTotal);
-			xTotal /= l;
-			yTotal /= l;
-			zTotal /= l;
-			var lpM: Coord = new Coord(Projection.CRS_GEOGRAPHIC, toDegrees(Math.atan2(yTotal, xTotal)), toDegrees(Math.atan2(zTotal, Math.sqrt(xTotal * xTotal + yTotal * yTotal))));
-			var cM: Coord = lpM.convertToProjection(projection);
-
-			var points: Array;
-
-			debug("bisectGreatArc c1: " + c1.toString() + " cM: " + cM.toString() + " c2: " + c2.toString());
-			if (discontinuityValidator(c1, cM))
+			if (level < 10)
 			{
-				debug("\t bisectGreatArc SIGNS for c1, cM are different ("+c1.x + " , " + cM.x+")");
-//				var sp1: SpherePointWithLalo = new SpherePointWithLalo(x1, y1, z1, c1.x, c1.y);
-//				var spM1: SpherePointWithLalo = new SpherePointWithLalo(xTotal, yTotal, zTotal, cM.x, cM.y);
-				var sp1: SpherePointWithLalo = new SpherePointWithLalo(x1, y1, z1, lp1.x, lp1.y);
-				var spM1: SpherePointWithLalo = new SpherePointWithLalo(xTotal, yTotal, zTotal, lpM.x, lpM.y);
+				var lp1X: Number = toRadians(lp1.x);
+				var lp1Y: Number = toRadians(lp1.y);
+				var lp2X: Number = toRadians(lp2.x);
+				var lp2Y: Number = toRadians(lp2.y);
+				var x1: Number = Math.cos(lp1Y) * Math.cos(lp1X);
+				var y1: Number = Math.cos(lp1Y) * Math.sin(lp1X);
+				var z1: Number = Math.sin(lp1Y);
+				var x2: Number = Math.cos(lp2Y) * Math.cos(lp2X);
+				var y2: Number = Math.cos(lp2Y) * Math.sin(lp2X);
+				var z2: Number = Math.sin(lp2Y);
+				var xTotal: Number = x1 + x2;
+				var yTotal: Number = y1 + y2;
+				var zTotal: Number = z1 + z2;
+				var l: Number = Math.sqrt(xTotal * xTotal + yTotal * yTotal + zTotal * zTotal);
+				xTotal /= l;
+				yTotal /= l;
+				zTotal /= l;
+				var lpM: Coord = new Coord(Projection.CRS_GEOGRAPHIC, toDegrees(Math.atan2(yTotal, xTotal)), toDegrees(Math.atan2(zTotal, Math.sqrt(xTotal * xTotal + yTotal * yTotal))));
+				var cM: Coord = lpM.convertToProjection(projection);
 
-				//do bisect2 - find coordinates near "sign change" (dateline or primemeridian)
-				points = bisect2GreatArc(sp1, spM1, a, projection, discontinuityValidator);
-				if (points && points.length == 2)
+				var points: Array;
+
+				debug("bisectGreatArc c1: " + c1.toString() + " cM: " + cM.toString() + " c2: " + c2.toString());
+				if (discontinuityValidator(c1, cM))
 				{
-					debug("\t\t bisect2GreatArc return 2 points");
-					var spLeft1: SpherePointWithLalo = points[0] as SpherePointWithLalo;
-					var spRight1: SpherePointWithLalo = points[1] as SpherePointWithLalo;
-//					var cLeft1: Coord = new Coord(c1.crs, spLeft1.longitude, spLeft1.latitude);
-//					var cRight1: Coord = new Coord(c2.crs, spRight1.longitude, spRight1.latitude);
-					var cLeft1: Coord = new Coord(lp1.crs, spLeft1.longitude, spLeft1.latitude);
-					var cRight1: Coord = new Coord(lp1.crs, spRight1.longitude, spRight1.latitude);
+					debug("\t bisectGreatArc SIGNS for c1, cM are different ("+c1.x + " , " + cM.x+")");
+	//				var sp1: SpherePointWithLalo = new SpherePointWithLalo(x1, y1, z1, c1.x, c1.y);
+	//				var spM1: SpherePointWithLalo = new SpherePointWithLalo(xTotal, yTotal, zTotal, cM.x, cM.y);
+					var sp1: SpherePointWithLalo = new SpherePointWithLalo(x1, y1, z1, lp1.x, lp1.y);
+					var spM1: SpherePointWithLalo = new SpherePointWithLalo(xTotal, yTotal, zTotal, lpM.x, lpM.y);
 
-					cLeft1 = cLeft1.convertToProjection(projection);
-					cRight1 = cRight1.convertToProjection(projection);
+					//do bisect2 - find coordinates near "sign change" (dateline or primemeridian)
+					points = bisect2GreatArc(sp1, spM1, a, projection, discontinuityValidator);
+					if (points && points.length == 2)
+					{
+						debug("\t\t bisect2GreatArc return 2 points");
+						var spLeft1: SpherePointWithLalo = points[0] as SpherePointWithLalo;
+						var spRight1: SpherePointWithLalo = points[1] as SpherePointWithLalo;
+	//					var cLeft1: Coord = new Coord(c1.crs, spLeft1.longitude, spLeft1.latitude);
+	//					var cRight1: Coord = new Coord(c2.crs, spRight1.longitude, spRight1.latitude);
+						var cLeft1: Coord = new Coord(lp1.crs, spLeft1.longitude, spLeft1.latitude);
+						var cRight1: Coord = new Coord(lp1.crs, spRight1.longitude, spRight1.latitude);
 
-					if (!distanceValidator(c1, cLeft1)) {
+						cLeft1 = cLeft1.convertToProjection(projection);
+						cRight1 = cRight1.convertToProjection(projection);
 
-						var lLeft1: Coord = cLeft1.toLaLoCoord();
-						debug("\t\t after Bisect2 there needs to be more bisect c1, cLeft1 ("+c1.x + " , " + cLeft1.x+")");
-						bisectGreatArc(lp1, c1, lLeft1, cLeft1, a, projection, distanceValidator, discontinuityValidator);
+						if (!distanceValidator(c1, cLeft1)) {
 
-					} else {
+							var lLeft1: Coord = cLeft1.toLaLoCoord();
+							debug("\t\t after Bisect2 there needs to be more bisect c1, cLeft1 ("+c1.x + " , " + cLeft1.x+")");
+							bisectGreatArc(lp1, c1, lLeft1, cLeft1, a, projection, distanceValidator, discontinuityValidator, level + 1);
+
+						} else {
+							debug("\t\t after Bisect2 distance is OK - PUSH cLeft1 (" + cLeft1.x+") into result array");
+	//						a.push(cLeft1);
+						}
+
 						debug("\t\t after Bisect2 distance is OK - PUSH cLeft1 (" + cLeft1.x+") into result array");
-//						a.push(cLeft1);
-					}
+						debug("\t\t after Bisect2 distance is OK - PUSH null into result array");
+						debug("\t\t after Bisect2 distance is OK - PUSH cRight1 (" + cRight1.x+") into result array");
+						a.push(cLeft1);
+						a.push(null);
+						a.push(cRight1);
 
-					debug("\t\t after Bisect2 distance is OK - PUSH cLeft1 (" + cLeft1.x+") into result array");
-					debug("\t\t after Bisect2 distance is OK - PUSH null into result array");
-					debug("\t\t after Bisect2 distance is OK - PUSH cRight1 (" + cRight1.x+") into result array");
-					a.push(cLeft1);
-					a.push(null);
-					a.push(cRight1);
+						if (!distanceValidator(cRight1, cM)) {
 
-					if (!distanceValidator(cRight1, cM)) {
+							var lRight1: Coord = cRight1.toLaLoCoord();
+							debug("\t\t after Bisect2 there needs to be more bisect cRight1, cM ("+cRight1.x + " , " + cM.x+")");
+							bisectGreatArc(lRight1, cRight1, lpM, cM, a, projection, distanceValidator, discontinuityValidator, level +  1);
 
-						var lRight1: Coord = cRight1.toLaLoCoord();
-						debug("\t\t after Bisect2 there needs to be more bisect cRight1, cM ("+cRight1.x + " , " + cM.x+")");
-						bisectGreatArc(lRight1, cRight1, lpM, cM, a, projection, distanceValidator, discontinuityValidator);
-
+						} else {
+							debug("\t\t after Bisect2 distance is OK - PUSH cM (" + cM.x+") into result array");
+							a.push(cM);
+						}
 					} else {
-						debug("\t\t after Bisect2 distance is OK - PUSH cM (" + cM.x+") into result array");
-						a.push(cM);
+						debug("\t\t bisect2GreatArc return wrong value (or null)");
 					}
+
+				} else if (!distanceValidator(c1, cM)) {
+					debug("\t bisectGreatArc SIGNS ARE SAME c1, cM ("+c1.x + " , " + cM.x+")");
+					bisectGreatArc(lp1, c1, lpM, cM, a, projection, distanceValidator, discontinuityValidator, level + 1);
+
 				} else {
-					debug("\t\t bisect2GreatArc return wrong value (or null)");
+					debug("\t\t distance is OK - PUSH cM (" + cM.x+") into result array");
+					a.push(cM);
 				}
 
-			} else if (!distanceValidator(c1, cM)) {
-				debug("\t bisectGreatArc SIGNS ARE SAME c1, cM ("+c1.x + " , " + cM.x+")");
-				bisectGreatArc(lp1, c1, lpM, cM, a, projection, distanceValidator, discontinuityValidator);
-
-			} else {
-				debug("\t\t distance is OK - PUSH cM (" + cM.x+") into result array");
-				a.push(cM);
-			}
-
-			if (discontinuityValidator(c2, cM))
-			{
-				debug("\t bisectGreatArc SIGNS for c2, cM are different ("+c2.x + " , " + cM.x+")");
-//				var sp2: SpherePointWithLalo = new SpherePointWithLalo(x2, y2, z2, c2.x, c2.y);
-//				var spM2: SpherePointWithLalo = new SpherePointWithLalo(xTotal, yTotal, zTotal, cM.x, cM.y);
-				var sp2: SpherePointWithLalo = new SpherePointWithLalo(x2, y2, z2, lp2.x, lp2.y);
-				var spM2: SpherePointWithLalo = new SpherePointWithLalo(xTotal, yTotal, zTotal, lpM.x, lpM.y);
-
-				//do bisect2
-				points = bisect2GreatArc(spM2, sp2, a, projection, discontinuityValidator);
-				if (points && points.length == 2)
+				if (discontinuityValidator(c2, cM))
 				{
-					debug("\t\t bisect2GreatArc return 2 points");
-					var spLeft2: SpherePointWithLalo = points[0] as SpherePointWithLalo;
-					var spRight2: SpherePointWithLalo = points[1] as SpherePointWithLalo;
-//					var cLeft2: Coord = new Coord(c1.crs, spLeft2.longitude, spLeft2.latitude);
-//					var cRight2: Coord = new Coord(c2.crs, spRight2.longitude, spRight2.latitude);
-					var cLeft2: Coord = new Coord(lp2.crs, spLeft2.longitude, spLeft2.latitude);
-					var cRight2: Coord = new Coord(lp2.crs, spRight2.longitude, spRight2.latitude);
+					debug("\t bisectGreatArc SIGNS for c2, cM are different ("+c2.x + " , " + cM.x+")");
+	//				var sp2: SpherePointWithLalo = new SpherePointWithLalo(x2, y2, z2, c2.x, c2.y);
+	//				var spM2: SpherePointWithLalo = new SpherePointWithLalo(xTotal, yTotal, zTotal, cM.x, cM.y);
+					var sp2: SpherePointWithLalo = new SpherePointWithLalo(x2, y2, z2, lp2.x, lp2.y);
+					var spM2: SpherePointWithLalo = new SpherePointWithLalo(xTotal, yTotal, zTotal, lpM.x, lpM.y);
 
-					cLeft2 = cLeft2.convertToProjection(projection);
-					cRight2 = cRight2.convertToProjection(projection);
+					//do bisect2
+					points = bisect2GreatArc(spM2, sp2, a, projection, discontinuityValidator);
+					if (points && points.length == 2)
+					{
+						debug("\t\t bisect2GreatArc return 2 points");
+						var spLeft2: SpherePointWithLalo = points[0] as SpherePointWithLalo;
+						var spRight2: SpherePointWithLalo = points[1] as SpherePointWithLalo;
+	//					var cLeft2: Coord = new Coord(c1.crs, spLeft2.longitude, spLeft2.latitude);
+	//					var cRight2: Coord = new Coord(c2.crs, spRight2.longitude, spRight2.latitude);
+						var cLeft2: Coord = new Coord(lp2.crs, spLeft2.longitude, spLeft2.latitude);
+						var cRight2: Coord = new Coord(lp2.crs, spRight2.longitude, spRight2.latitude);
 
-					if (!distanceValidator(cM, cLeft2)) {
+						cLeft2 = cLeft2.convertToProjection(projection);
+						cRight2 = cRight2.convertToProjection(projection);
 
-						var lLeft2: Coord = cLeft2.toLaLoCoord();
-						debug("\t\t after Bisect2 there needs to be more bisect cM, cLeft2 ("+cM.x + " , " + cLeft2.x+")");
-						bisectGreatArc(lpM, cM, lLeft2, cLeft2, a, projection, distanceValidator, discontinuityValidator);
+						if (!distanceValidator(cM, cLeft2)) {
 
-					} else {
+							var lLeft2: Coord = cLeft2.toLaLoCoord();
+							debug("\t\t after Bisect2 there needs to be more bisect cM, cLeft2 ("+cM.x + " , " + cLeft2.x+")");
+							bisectGreatArc(lpM, cM, lLeft2, cLeft2, a, projection, distanceValidator, discontinuityValidator, level + 1);
+
+						} else {
+							debug("\t\t after Bisect2 distance is OK - PUSH cLeft2 (" + cLeft2.x+") into result array");
+	//						a.push(cLeft2);
+						}
+
 						debug("\t\t after Bisect2 distance is OK - PUSH cLeft2 (" + cLeft2.x+") into result array");
-//						a.push(cLeft2);
+						debug("\t\t after Bisect2 distance is OK - PUSH null into result array");
+						debug("\t\t after Bisect2 distance is OK - PUSH cRight2 (" + cRight2.x+") into result array");
+						a.push(cLeft2);
+						a.push(null);
+						a.push(cRight2);
+
+
+						if (!distanceValidator(cRight2, c2)) {
+
+							var lRight2: Coord = cRight2.toLaLoCoord();
+							debug("\t\t after Bisect2 there needs to be more bisect cRight2, c2 ("+cRight2.x + " , " + c2.x+")");
+							bisectGreatArc(lRight2, cRight2, lp2, c2, a, projection, distanceValidator, discontinuityValidator, level + 1);
+
+						} else {
+	//						debug("\t\t distance is OK - PUSH c2 (" + c2.x+") into result array");
+							a.push(c2);
+						}
+
 					}
 
-					debug("\t\t after Bisect2 distance is OK - PUSH cLeft2 (" + cLeft2.x+") into result array");
-					debug("\t\t after Bisect2 distance is OK - PUSH null into result array");
-					debug("\t\t after Bisect2 distance is OK - PUSH cRight2 (" + cRight2.x+") into result array");
-					a.push(cLeft2);
-					a.push(null);
-					a.push(cRight2);
-
-
-					if (!distanceValidator(cRight2, c2)) {
-
-						var lRight2: Coord = cRight2.toLaLoCoord();
-						debug("\t\t after Bisect2 there needs to be more bisect cRight2, c2 ("+cRight2.x + " , " + c2.x+")");
-						bisectGreatArc(lRight2, cRight2, lp2, c2, a, projection, distanceValidator, discontinuityValidator);
-
-					} else {
-//						debug("\t\t distance is OK - PUSH c2 (" + c2.x+") into result array");
-						a.push(c2);
-					}
-
+				} else if (!distanceValidator(c2, cM))
+				{
+					debug("\t bisectGreatArc SIGNS ARE SAME c2, cM ("+c2.x + " , " + cM.x+")");
+					bisectGreatArc(lpM, cM, lp2, c2, a, projection, distanceValidator, discontinuityValidator, level + 1);
 				}
-
-			} else if (!distanceValidator(c2, cM))
-			{
-				debug("\t bisectGreatArc SIGNS ARE SAME c2, cM ("+c2.x + " , " + cM.x+")");
-				bisectGreatArc(lpM, cM, lp2, c2, a, projection, distanceValidator, discontinuityValidator);
-			}
-			else {
-				debug("\t\t distance is OK - PUSH c2 (" + c2.x+") into result array");
-				a.push(c2);
+				else {
+					debug("\t\t distance is OK - PUSH c2 (" + c2.x+") into result array");
+					a.push(c2);
+				}
+			} else {
+				debug(" bisectGreatArc it's too deep: level: " + level);
 			}
 		}
 
