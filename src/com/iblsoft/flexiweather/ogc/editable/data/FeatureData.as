@@ -496,38 +496,22 @@ package com.iblsoft.flexiweather.ogc.editable.data
 
 			var _ids: Array = ids;
 
+			var visibleLines: int = 0;
+			var totalLinePoints: int = 0;
 			for each (var line: FeatureDataLine in lines)
 			{
-//				if (oldLineID > -1)
-//				{
-//					var linesOrderDiff: Number = iLineID - oldLineID;
-//					if (linesOrderDiff != 1)
-//					{
-//						if (oldPoint)
-//						{
-//							addPoint(oldPoint);
-//							//						debug("\t\t\t insert old point: " + oldPoint + " diff: " + linesOrderDiff + " curr: " + iLineID);
-//							oldPoint = null;
-//						}
-//						if (!bNewLineInserted)
-//						{
-//							//							debug("\t\t\t insert NULL:  curr: " + iLineID);
-//							addPoint(null);
-//						}
-//						bNewLineInserted = true;
-//					} else {
-//						bNewLineInserted = false;
-//					}
-//				}
 				if (line)
 				{
 					var totalLineSegments: int = line.lineSegments.length;
+					var visiblePoints: int = 0;
 					for (var s: int = 0 ; s < totalLineSegments; s++)
 					{
 						var lineSegment: FeatureDataLineSegment = line.lineSegments[s] as FeatureDataLineSegment;
 						if (!lineSegment)
 						{
-							addPoint(null);
+							if (visiblePoints > 0)
+								addPoint(null);
+							visiblePoints = 0;
 							continue;
 						}
 
@@ -535,11 +519,6 @@ package com.iblsoft.flexiweather.ogc.editable.data
 
 						if (!lineSegmentVisible)
 						{
-//							if (!closed)
-//							{
-//								addPoint(null);
-//								continue;
-//							}
 							continue;
 						}
 						//						debug("line segment:  lineID = " + line.id + " s: " + s + " Segment: " + lineSegment);
@@ -547,26 +526,33 @@ package com.iblsoft.flexiweather.ogc.editable.data
 						var p2: FeatureDataPoint = new FeatureDataPoint(lineSegment.x2, lineSegment.y2);
 						//						debug("\t\t compute p1: " + p1 + " p2: " + p2);
 
-						if (!oldPoint)
+						if (!oldPoint) {
 							addPoint(p1);
-						else if (oldPoint.x != p1.x || oldPoint.y != p1.y) {
-							//							debug("old and new points are not equal: lineID = " + line.id + " s: " + s);
-							//						addPoint(null);
+							visiblePoints++;
+							totalLinePoints++;
+						} else if (oldPoint.x != p1.x || oldPoint.y != p1.y) {
+//							debug("old and new points are not equal: lineID = " + line.id + " s: " + s);
 							addPoint(p1);
+							visiblePoints++;
+							totalLinePoints++;
 						}
 
 						//check if line has defined second point
 						if (!isNaN(p2.x) && !isNaN(p2.y))
 						{
 							addPoint(p2);
+							visiblePoints++;
+							totalLinePoints++;
 							oldPoint = p2.clone() as FeatureDataPoint;
 						} else {
 							oldPoint = p1.clone() as FeatureDataPoint;
 							//if there is no second point, add NULL (split line)
-							addPoint(null);
+							if (visiblePoints > 0)
+							{
+								addPoint(null);
+							}
+							visiblePoints = 0;
 						}
-
-
 
 						if (cnt == 0)
 							_startPoint = p1.clone() as FeatureDataPoint;
@@ -574,8 +560,13 @@ package com.iblsoft.flexiweather.ogc.editable.data
 						cnt++;
 						//						debug("\t Old point: lineID = " + line.id + " s: " + s + " point: " + oldPoint);
 					}
+
+					if (totalLinePoints > 0)
+						visibleLines++;
 				} else {
-					addPoint(null);
+					if (visibleLines > 0)
+						addPoint(null);
+					visibleLines = 0;
 				}
 
 //				oldLineID = iLineID;
