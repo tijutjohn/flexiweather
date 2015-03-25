@@ -2611,16 +2611,16 @@ package com.iblsoft.flexiweather.widgets
 
 			maxDist = 100;
 
-			var maxDistConst: int = 200000;
+			var maxDistConst: int = 120000;
 //			var maxDistConst: int = 70000;
 
 			maxDist = (1/ _mapScale) / maxDistConst;
 			if (maxDist > 1000)
 				maxDist = 1000;
-			if (maxDist < 100)
-				maxDist = 100;
+			if (maxDist < 300)
+				maxDist = 300;
 
-//			debug("distanceValidator: maxDist: " + maxDist + " _mapScale: " + (1/ _mapScale));
+			trace("distanceValidator: dist: " + dist + "  maxDist: " + maxDist + " IS VALID: " +  (dist < maxDist) + " _mapScale: " + (1/ _mapScale));
 			return (dist < maxDist);
 		}
 
