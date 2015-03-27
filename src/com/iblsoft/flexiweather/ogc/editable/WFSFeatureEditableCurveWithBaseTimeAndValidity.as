@@ -269,12 +269,12 @@ package com.iblsoft.flexiweather.ogc.editable
 
 
 //			debug("\n\n");
-//			debug("drawFeatureData");
 			var p: Point;
 			var points: Array = m_featureData.points;
 			var linesCount: int = m_featureData.lines.length;
 			var pointsCount: int = points.length;
 
+//			debug("drawFeatureData pointsCount: " + pointsCount + " linesCount: " + linesCount);
 			var iw: InteractiveWidget = master.container;
 			var projectionHalf: Number = iw.getProjectionWidthInPixels() / 2;
 
@@ -512,14 +512,16 @@ package com.iblsoft.flexiweather.ogc.editable
 
 		protected function createHitMask(curvesPoints: Array): void
 		{
-			for each (var curvePoints: Array in curvesPoints)
+			var curP: int = curvesPoints.length;
+			for (var i: int = 0; i < curP; i++)
 			{
+				var curvePoints: Array = curvesPoints[i] as Array;
 				if (curvePoints.length > 1)
 				{
 					// CREATE CURVE MASK
 					graphics.lineStyle(10, 0xFF0000, 0.0);
 					graphics.moveTo(curvePoints[0].x, curvePoints[0].y);
-					for (var p: int = 1; p < curvePoints.length; p++)
+					for (var p: int = 1; p < curP; p++)
 					{
 						graphics.lineTo(curvePoints[p].x, curvePoints[p].y);
 					}
