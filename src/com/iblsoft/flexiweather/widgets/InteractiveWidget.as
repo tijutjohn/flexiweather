@@ -2620,7 +2620,7 @@ package com.iblsoft.flexiweather.widgets
 			if (maxDist < 300)
 				maxDist = 300;
 
-			trace("distanceValidator: dist: " + dist + "  maxDist: " + maxDist + " IS VALID: " +  (dist < maxDist) + " _mapScale: " + (1/ _mapScale));
+			debug("distanceValidator: dist: " + dist + "  maxDist: " + maxDist + " IS VALID: " +  (dist < maxDist) + " _mapScale: " + (1/ _mapScale));
 			return (dist < maxDist);
 		}
 

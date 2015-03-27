@@ -101,19 +101,11 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			{
 				//we need to enumerate via reflections, because length does not work with negative indicies
 				return reflectionsIDs.length;
-//				var cnt: int = 0;
-//				for each (var refl: FeatureDataReflection in reflections)
-//					cnt++
-//
-//				return cnt;
 			}
 			return 0;
 		}
 		public function get linesLength(): int
 		{
-//			if (lines)
-//				return lines.length;
-
 			var total: int = reflectionsLength;
 			var reflectionIDs: Array = reflectionsIDs;
 
@@ -481,6 +473,29 @@ package com.iblsoft.flexiweather.ogc.editable.data
 //			computeOld();
 		}
 
+		private function debugLinesForOrderProblem(): void
+		{
+			var totalLines: int = lines.length;
+			var str: String = "for loop: ";
+			for (var i: int = 0; i < totalLines; i++)
+			{
+				var line: FeatureDataLine = lines[i] as FeatureDataLine;
+				if (line)
+					str +=	line.id + ", ";
+				else
+					str +=	"null, ";
+			}
+			trace(str);
+			var str: String = "for each: ";
+			for each (line in lines)
+			{
+				if (line)
+					str +=	line.id + ", ";
+				else
+					str +=	"null, ";
+			}
+			trace(str);
+		}
 		private function computeNew(): void
 		{
 			var currTime: Number = getTimer();
@@ -496,22 +511,38 @@ package com.iblsoft.flexiweather.ogc.editable.data
 
 			var _ids: Array = ids;
 
+			var totalLines: int = lines.length;
 			var visibleLines: int = 0;
+			var visiblePoints: int = 0;
 			var totalLinePoints: int = 0;
-			for each (var line: FeatureDataLine in lines)
+			var totalNulls: int = 0;
+
+			var previousNotValidPoint: Boolean;
+
+			//just for debugging, to test that for each loop has wrong order of lines
+//			debugLinesForOrderProblem();
+
+			for (var i: int = 0; i < totalLines; i++)
 			{
+				var line: FeatureDataLine = lines[i] as FeatureDataLine;
 				if (line)
 				{
 					var totalLineSegments: int = line.lineSegments.length;
-					var visiblePoints: int = 0;
 					for (var s: int = 0 ; s < totalLineSegments; s++)
 					{
 						var lineSegment: FeatureDataLineSegment = line.lineSegments[s] as FeatureDataLineSegment;
 						if (!lineSegment)
 						{
 							if (visiblePoints > 0)
-								addPoint(null);
+							{
+								if (totalNulls == 0)
+								{
+									addPoint(null);
+									totalNulls++;
+								}
+							}
 							visiblePoints = 0;
+							previousNotValidPoint = true;
 							continue;
 						}
 
@@ -519,6 +550,16 @@ package com.iblsoft.flexiweather.ogc.editable.data
 
 						if (!lineSegmentVisible)
 						{
+							if (visiblePoints > 0)
+							{
+								if (totalNulls == 0)
+								{
+									addPoint(null);
+									totalNulls++;
+								}
+							}
+							visiblePoints = 0;
+							previousNotValidPoint = true;
 							continue;
 						}
 						//						debug("line segment:  lineID = " + line.id + " s: " + s + " Segment: " + lineSegment);
@@ -529,11 +570,25 @@ package com.iblsoft.flexiweather.ogc.editable.data
 						if (!oldPoint) {
 							addPoint(p1);
 							visiblePoints++;
+							totalNulls = 0;
 							totalLinePoints++;
 						} else if (oldPoint.x != p1.x || oldPoint.y != p1.y) {
 //							debug("old and new points are not equal: lineID = " + line.id + " s: " + s);
+							if (previousNotValidPoint)
+							{
+								if (visiblePoints > 0)
+								{
+									if (totalNulls == 0)
+									{
+										addPoint(null);
+										totalNulls++;
+									}
+								}
+								visiblePoints = 0;
+							}
 							addPoint(p1);
 							visiblePoints++;
+							totalNulls = 0;
 							totalLinePoints++;
 						}
 
@@ -542,6 +597,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 						{
 							addPoint(p2);
 							visiblePoints++;
+							totalNulls = 0;
 							totalLinePoints++;
 							oldPoint = p2.clone() as FeatureDataPoint;
 						} else {
@@ -549,7 +605,11 @@ package com.iblsoft.flexiweather.ogc.editable.data
 							//if there is no second point, add NULL (split line)
 							if (visiblePoints > 0)
 							{
-								addPoint(null);
+								if (totalNulls == 0)
+								{
+									addPoint(null);
+									totalNulls++;
+								}
 							}
 							visiblePoints = 0;
 						}
@@ -563,8 +623,10 @@ package com.iblsoft.flexiweather.ogc.editable.data
 
 					if (totalLinePoints > 0)
 						visibleLines++;
+
+					previousNotValidPoint = false;
 				} else {
-					if (visibleLines > 0)
+					if (visibleLines > 0 && totalNulls == 0)
 						addPoint(null);
 					visibleLines = 0;
 				}
@@ -582,8 +644,11 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			cnt = 0;
 			_center = new FeatureDataPoint();
 			var total: int = 0;
-			for each (var ptr: FeatureDataPoint in _points)
+//			for each (var ptr: FeatureDataPoint in _points)
+			var pointsLen: int = _points.length;
+			for (i = 0; i < pointsLen; i++)
 			{
+				var ptr: FeatureDataPoint = _points[i] as FeatureDataPoint;
 				if (ptr)
 				{
 					//					debug("\t\t\t Point["+cnt+"] " + ptr);
@@ -617,146 +682,6 @@ package com.iblsoft.flexiweather.ogc.editable.data
 			_points.push(point);
 		}
 
-		private function computeOld(): void
-		{
-			var currTime: Number = getTimer();
-//			debug("********************************************************");
-//			debug("\t COMPUTE START" + this);
-			if (_points.length > 0)
-				_points.splice(0, _points.length);
-			var cnt: int = 0;
-			var oldPoint: FeatureDataPoint;
-
-			var oldLineID: Number = -1;
-			var bNewLineInserted: Boolean;
-
-			var _ids: Array = ids;
-
-			for each (var iLineID: int in _ids)
-			{
-				var line: FeatureDataLine = lines[iLineID];
-//				debug("\t LINE ID: " + iLineID);
-				if (oldLineID > -1)
-				{
-					var linesOrderDiff: Number = iLineID - oldLineID;
-					if (linesOrderDiff != 1)
-					{
-						if (oldPoint)
-						{
-							addPoint(oldPoint);
-//						debug("\t\t\t insert old point: " + oldPoint + " diff: " + linesOrderDiff + " curr: " + iLineID);
-							oldPoint = null;
-						}
-						if (!bNewLineInserted)
-						{
-//							debug("\t\t\t insert NULL:  curr: " + iLineID);
-							addPoint(null);
-						}
-						bNewLineInserted = true;
-					} else {
-						bNewLineInserted = false;
-					}
-				}
-				if (line)
-				{
-					var totalLineSegments: int = line.lineSegments.length;
-					for (var s: int = 0 ; s < totalLineSegments; s++)
-					{
-						var lineSegment: FeatureDataLineSegment = line.lineSegments[s] as FeatureDataLineSegment;
-						if (!lineSegment)
-						{
-							addPoint(null);
-							continue;
-						}
-
-						var lineSegmentVisible: Boolean = lineSegment.visible;
-
-						if (!lineSegmentVisible)
-						{
-							if (!closed)
-							{
-								addPoint(null);
-								continue;
-							}
-						}
-//						debug("line segment:  lineID = " + line.id + " s: " + s + " Segment: " + lineSegment);
-						var p1: FeatureDataPoint = new FeatureDataPoint(lineSegment.x1, lineSegment.y1);
-						var p2: FeatureDataPoint = new FeatureDataPoint(lineSegment.x2, lineSegment.y2);
-//						debug("\t\t compute p1: " + p1 + " p2: " + p2);
-
-						if (!oldPoint)
-							addPoint(p1);
-						else if (oldPoint.x != p1.x || oldPoint.y != p1.y) {
-//							debug("old and new points are not equal: lineID = " + line.id + " s: " + s);
-	//						addPoint(null);
-							addPoint(p1);
-						}
-
-						//check if line has defined second point
-						if (!isNaN(p2.x) && !isNaN(p2.y))
-						{
-							addPoint(p2);
-							oldPoint = p2.clone() as FeatureDataPoint;
-						} else {
-							oldPoint = p1.clone() as FeatureDataPoint;
-							//if there is no second point, add NULL (split line)
-							addPoint(null);
-						}
-
-
-
-						if (cnt == 0)
-							_startPoint = p1.clone() as FeatureDataPoint;
-
-						cnt++;
-//						debug("\t Old point: lineID = " + line.id + " s: " + s + " point: " + oldPoint);
-					}
-				} else {
-					addPoint(null);
-				}
-
-				oldLineID = iLineID;
-			}
-
-//			debug("STEP 2");
-			var newPoint: FeatureDataPoint = checkClipping(_points, 0, _points.length - 1);
-			if (newPoint)
-				addPoint(newPoint);
-
-
-//			debug("STEP 3");
-			cnt = 0;
-			_center = new FeatureDataPoint();
-			var total: int = 0;
-			for each (var ptr: FeatureDataPoint in _points)
-			{
-				if (ptr)
-				{
-//					debug("\t\t\t Point["+cnt+"] " + ptr);
-					_center.addPoint(ptr);
-					total++;
-				} else {
-//					debug("\t\t\t Point["+cnt+"] NULL");
-
-					//check, if there needs to added point on edge of the screen
-					newPoint = checkClipping(_points, cnt+1, cnt-1);
-
-					if (newPoint)
-					{
-						//there is NULL on "cnt" position, remove it and insert newPoint there
-						_points.splice(cnt, 1, newPoint);
-						cnt++;
-					}
-				}
-				oldPoint = ptr;
-				cnt++;
-			}
-			_center.x /= total;
-			_center.y /= total;
-
-			//			debug("\t COMPUTE END avg: " + _center + " > " + this);
-//			debug("compute took " + (getTimer() - currTime) + "ms.");
-		}
 
 		/**
 		 * Check points if there are outside of viewBBox and there needs to be inserted another point to correctly draw feature when it is clipped
