@@ -178,7 +178,7 @@ package com.iblsoft.flexiweather.ogc.cache
 				var isDisplayed: Boolean = cacheItem.displayed;
 				var currIsDisplayed: Boolean = cacheItem.isImageOnDisplayList();
 //				if (isDisplayed != currIsDisplayed)
-//					trace("Check cached item on display list");
+//					debug("Check cached item on display list");
 			}
 
 			// dispose bitmap data, just for bitmaps which are not currently displayed
@@ -288,8 +288,8 @@ package com.iblsoft.flexiweather.ogc.cache
 			}
 
 //			var temp: String = debugCache();
-//			trace("isItemCached for " + s_key);
-//			trace(temp);
+//			debug("isItemCached for " + s_key);
+//			debug(temp);
 
 			return md_cache[s_key] || md_cacheLoading[s_key];
 		}
@@ -302,7 +302,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			var s_key: String = qetWMSViewCacheKey(wmsViewProperties);
 			if (s_key in md_cache)
 			{
-//				trace("WMSCache getCacheItem: "+ s_key);
+//				debug("WMSCache getCacheItem: "+ s_key);
 
 				var item: CacheItem = md_cache[s_key] as CacheItem;
 				item.lastUsed = new Date();
@@ -338,6 +338,7 @@ package com.iblsoft.flexiweather.ogc.cache
 			if (!wmsViewProperties)
 				return;
 			var s_key: String = qetWMSViewCacheKey(wmsViewProperties);
+			debug("WMSCache startImageLoading " + wmsViewProperties + " KEY: " + s_key);
 			md_cacheLoading[s_key] = true;
 			mi_cacheLoadingItemsLength++;
 		}
@@ -386,10 +387,11 @@ package com.iblsoft.flexiweather.ogc.cache
 
 			if (md_cacheLoading[s_key])
 			{
+				debug("addCacheItem delete item loading: " + s_key);
 				delete md_cacheLoading[s_key];
 				mi_cacheLoadingItemsLength--;
-//			} else {
-//				trace("addCacheItem: Can not delete item from 'loading cache' for key: " + s_key);
+			} else {
+				debug("addCacheItem: Can not delete item from 'loading cache' for key: " + s_key);
 			}
 
 			var wce: WMSCacheEvent = new WMSCacheEvent(WMSCacheEvent.ITEM_ADDED, item, true);
@@ -408,12 +410,14 @@ package com.iblsoft.flexiweather.ogc.cache
 
 			var s_key: String = qetWMSViewCacheKey(wmsViewProperties);
 
+			debug("cacheItemLoadingCanceled " + wmsViewProperties + " KEY: " + s_key);
+
 			if (s_key && md_cacheLoading[s_key])
 			{
 				delete md_cacheLoading[s_key];
 				mi_cacheLoadingItemsLength--;
 //			} else {
-//				trace("cacheItemLoadingCanceled: Can not delete item from 'loading cache' for key: " + s_key);
+//				debug("cacheItemLoadingCanceled: Can not delete item from 'loading cache' for key: " + s_key);
 			}
 		}
 

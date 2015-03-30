@@ -88,13 +88,16 @@ import mx.logging.Log;
 
 		public function cancel(): void
 		{
+			debug("cancel: " + ma_requests.length);
 			var wmsCache: WMSCache = m_layer.getCache() as WMSCache;
-			wmsCache.cacheItemLoadingCanceled(m_wmsViewProperties);
 
 			if (ma_requests.length > 0)
 			{
 				for each (var request: URLRequest in ma_requests)
 				{
+					m_wmsViewProperties.url = request;
+					wmsCache.cacheItemLoadingCanceled(m_wmsViewProperties);
+
 					m_loader.cancel(request);
 				}
 				ma_requests.removeAll();
@@ -114,7 +117,9 @@ import mx.logging.Log;
 
 			debug("\nupdateWMSData: " + m_wmsViewProperties.toString() + " bbox: " + m_wmsViewProperties.getViewBBox());
 
-			if (!b_animationMode && isSameData(m_wmsViewProperties, m_previousWmsViewProperties))
+			var bSupportNotLoadingSameRequestInSameTime: Boolean = false;
+
+			if (bSupportNotLoadingSameRequestInSameTime && !b_animationMode && isSameData(m_wmsViewProperties, m_previousWmsViewProperties))
 			{
 				debug("Same WMS Data request in short time, does not load anything");
 				dispatchEvent(new Event(REQUEST_CANCELLED));
@@ -245,14 +250,18 @@ import mx.logging.Log;
 				var isNoDataCached: Boolean = wmsCache.isNoDataItemCached(wmsViewProperties);
 				var imgTest: DisplayObject = wmsCache.getCacheItemBitmap(wmsViewProperties);
 
-				debug("updateDataPart loading: " + isItemLoading + " cached: " + isCached + " no data cached: " + isNoDataCached + " img: " + (imgTest != null));
+				debug("\nupdateDataPart loading: " + isItemLoading + " cached: " + isCached + " no data cached: " + isNoDataCached + " img: " + (imgTest != null) + " part: " + imagePart);
 
 				if (isItemLoading && !isNoDataCached)
 				{
+					debug(" \n isItemLoading && !isNoDataCached) \n ");
 					m_wmsViewProperties = wmsViewProperties;
 					m_imagePart = imagePart;
 					cacheItem = wmsCache.getCacheItem(wmsViewProperties);
-					wmsCache.addEventListener(WMSCacheEvent.ITEM_ADDED, onCacheItemLoaded);
+					if (!wmsCache.hasEventListener(WMSCacheEvent.ITEM_ADDED))
+						wmsCache.addEventListener(WMSCacheEvent.ITEM_ADDED, onCacheItemLoaded);
+					else
+						trace("WMS cache alreay listen for WMSCacheEvent.ITEM_ADDED");
 					return;
 				}
 				if (isCached && isNoDataCached && imgTest == null)
@@ -299,6 +308,7 @@ import mx.logging.Log;
 				} else {
 					debug("MSBaseLOader: Request already waits to be loaded, do not do nothing");
 				}
+				debug("listen for (Event.ENTER_FRAME, startLoadingOnNextFrame);");
 				m_layer.addEventListener(Event.ENTER_FRAME, startLoadingOnNextFrame);
 
 			}
@@ -321,6 +331,7 @@ import mx.logging.Log;
 					debug("there is _delayedCachedRequestObject still, which was not executed yet");
 				}
 				_delayedCachedRequestArray.push({wmsViewProperties: wmsViewProperties});
+				debug("listen for (Event.ENTER_FRAME, dispatchLoadingFinishedFromCacheOnNextFrame);");
 				m_layer.addEventListener(Event.ENTER_FRAME, dispatchLoadingFinishedFromCacheOnNextFrame);
 
 			}
@@ -341,6 +352,7 @@ import mx.logging.Log;
 
 		private function dispatchLoadingFinishedFromCacheOnNextFrame(event: Event): void
 		{
+			debug("dispatchLoadingFinishedFromCacheOnNextFrame");
 			m_layer.removeEventListener(Event.ENTER_FRAME, dispatchLoadingFinishedFromCacheOnNextFrame);
 			if (_delayedCachedRequestArray)
 			{
@@ -374,7 +386,7 @@ import mx.logging.Log;
 
 		private function startLoading(request: URLRequest, wmsViewProperties: WMSViewProperties, wmsCache: WMSCache, imagePart: ImagePart, jobName: String, requestForTimeout: Object = null): void
 		{
-				debug("startLoading: " + _delayedRequestArray.length + " = > " + wmsViewProperties.toString() + " bbox: " + wmsViewProperties.getViewBBox());
+				debug("startLoading: " + _delayedRequestArray.length + " PART: " + imagePart);
 				m_loader.load(request,
 						{requestedImagePart: imagePart, wmsViewProperties: wmsViewProperties, timeoutRequest: requestForTimeout},
 						jobName);
@@ -386,17 +398,21 @@ import mx.logging.Log;
 		private function onCacheItemLoaded(event: WMSCacheEvent): void
 		{
 			var wmsCache: WMSCache = event.target as WMSCache;
+//			wmsCache.removeEventListener(WMSCacheEvent.ITEM_ADDED, onCacheItemLoaded);
+
 			var item: CacheItem = event.item;
-			var wmsViewProperties: WMSViewProperties = m_wmsViewProperties;
 
-			wmsCache.removeEventListener(WMSCacheEvent.ITEM_ADDED, onCacheItemLoaded);
+			var wmsViewProperties: WMSViewProperties = event.associatedData.wmsViewProperties;//   m_wmsViewProperties;
+			var imagePart: ImagePart = event.associatedData.requestedImagePart as ImagePart; //m_imagePart;
 
-			var imagePart: ImagePart = m_imagePart;
-			var result: * = item.image;
+			var result: DisplayObject = item.image;
+
+			debug("onCacheItemLoaded " + imagePart + " ["+result.width+", " + result.height + "]");
+
 			imagePart.mi_updateCycleAge = mi_updateCycleAge;
 			addImagePart(wmsViewProperties, imagePart, result, item.cacheKey.key);
 
-			onFinishedRequest(m_wmsViewProperties, null);
+			onFinishedRequest(wmsViewProperties, null);
 			invalidateDynamicPart();
 
 			notifyLoadingFinishedFromCache(event.associatedData);
@@ -447,6 +463,11 @@ import mx.logging.Log;
 
 		private function addImagePart(wmsViewProperties: WMSViewProperties, imagePart: ImagePart, img: DisplayObject, cacheKey: String): void
 		{
+			debug("\n\naddImagePart " + imagePart + " img: [" + img.width + ", " + img.height + "]");
+			if (!cacheKey) {
+				debug("Attention: cacheKey is null");
+			} else
+				debug("addImagePart part: " + imagePart + " cache key: " + cacheKey);
 			//image is cached
 			var imageParts: ArrayCollection = wmsViewProperties.imageParts;
 			if (imageParts)
@@ -462,8 +483,11 @@ import mx.logging.Log;
 					for (var i: int = 0; i < total; )
 					{
 						var currImagePart: ImagePart = imageParts.getItemAt(i) as ImagePart;
-						if (imagePart.intersectsOrHasDifferentCRS(currImagePart))
+						var bIntersectParts: Boolean = imagePart.intersectsOrHasDifferentCRS(currImagePart);
+						var bSameAreaParts: Boolean = imagePart.areaEquals(currImagePart);
+						if (bIntersectParts)
 						{
+							debug("addImagePart: removingPart " + currImagePart + " bSameAreaParts: " + bSameAreaParts);
 							imageParts.removeItemAt(i);
 							total--;
 						}
@@ -472,7 +496,7 @@ import mx.logging.Log;
 					}
 				}
 
-				debug("addImagePart: " + imagePart.partID + " to propertie: " + wmsViewProperties.propertiesID);
+				debug("addImagePart: " + imagePart);
 				wmsViewProperties.addImagePart(imagePart);
 			}
 		}
@@ -492,6 +516,9 @@ import mx.logging.Log;
 				var wmsViewProperties: WMSViewProperties = event.associatedData.wmsViewProperties as WMSViewProperties;
 				var imagePart: ImagePart = event.associatedData.requestedImagePart;
 				var wmsCache: WMSCache = m_layer.getCache() as WMSCache;
+
+				debug("onDataLoaded imagePart: " + imagePart);
+
 				/* FIXME:
 				if (_invalidateCacheAfterImageLoad)
 				{
@@ -505,17 +532,19 @@ import mx.logging.Log;
 
 				if (result is DisplayObject)
 				{
-					var cacheItem: CacheItem = wmsCache.getCacheItem(wmsViewProperties);
-					var key: String;
-					if (cacheItem && cacheItem.cacheKey)
-						key = cacheItem.cacheKey.key;
 
 					imagePart.mi_updateCycleAge = mi_updateCycleAge;
 					wmsViewProperties.url = event.request;
 //					addImagePart(wmsViewProperties, imagePart, result, key);
 //					wmsCache.addCacheItem(imagePart.image, wmsViewProperties, event.associatedData);
+
 					wmsCache.addCacheItem(result, wmsViewProperties, event.associatedData);
 
+					var cacheItem: CacheItem = wmsCache.getCacheItem(wmsViewProperties);
+					var key: String;
+					if (cacheItem && cacheItem.cacheKey)
+						key = cacheItem.cacheKey.key;
+					debug("addCacheItem [key: " + key + "]: " + wmsViewProperties);
 
 					//ATTENTION
 					//OW-309 - if addImagePart is executed after rwmsCache.addCacheItem - multiView dateline works perfectly (2 imageParts per view),
@@ -585,6 +614,7 @@ import mx.logging.Log;
 				// event is null if this method was called internally by this class
 				//		super.onDataLoadFailed(event);
 				var wmsViewProperties: WMSViewProperties = event.associatedData.wmsViewProperties;
+				debug("onDataLoadFailed");
 				//FIXME check if this is ServiceException "InvalidDimensionValue" and add information to cachec "somehow" to do not load it when looping animation
 				/**
 				 *
