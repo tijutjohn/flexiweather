@@ -170,6 +170,18 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		public function addImagePart(imagePart: ImagePart): void
 		{
 			ma_imageParts.addItem(imagePart);
+//			debugImageParts();
+		}
+
+		private function debugImageParts(): void
+		{
+			var str: String = "";
+			for (var i: int = 0; i < ma_imageParts.length; i++)
+			{
+				var part: ImagePart = ma_imageParts[i] as ImagePart;
+				str += part + " |\n";
+			}
+			trace("WMSViewProperties ["+propertiesID+"] debugImageParts: " + str);
 		}
 
 		public function setConfiguration(cfg: ILayerConfiguration): void
@@ -1481,6 +1493,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 				var value: String = getWMSDimensionValue(dimName);
 				tmp += dimName + ": " + value + " | ";
 			}
+			tmp += "bbox: " + _viewBBox;
 			return tmp;
 		}
 	}

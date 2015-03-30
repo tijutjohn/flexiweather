@@ -111,7 +111,15 @@ package com.iblsoft.flexiweather.ogc.data
 
 		public function toString(): String
 		{
-			return "ImagePart ["+partID+"]";
+			var str: String = "ImagePart ["+partID+"] bbox: " + m_imageBBox;
+			if (!m_image)
+				str += " NO BITMAP";
+			else if (m_image is Bitmap)
+				str += "Bitmap Size: [" + (m_image as Bitmap).width + ", " + (m_image as Bitmap).height + "]";
+			else
+				str += "DispObj Size: [" + (m_image as DisplayObject).width + ", " + (m_image as DisplayObject).height + "]";
+
+			return str;
 		}
 	}
 }
