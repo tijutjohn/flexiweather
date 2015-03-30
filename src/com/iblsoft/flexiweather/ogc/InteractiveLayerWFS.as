@@ -528,6 +528,11 @@ package com.iblsoft.flexiweather.ogc
 			trace(this + " onDataLoadFailed");
 		}
 
+		public function removeAllQueryFeatures(): void
+		{
+			ma_queryFeatures = [];
+
+		}
 		public function addQueryFeature(s_featureId: String): void
 		{
 			ma_queryFeatures.push(s_featureId);
