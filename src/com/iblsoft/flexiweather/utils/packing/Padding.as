@@ -15,6 +15,10 @@ package com.iblsoft.flexiweather.utils.packing
 
 		public function updateRectangleSizeWithPadding(rect: Rectangle): void
 		{
+//			rect.x = left;
+//			rect.y = top;
+//			rect.width -= left + right;
+//			rect.height -= top + bottom;
 			rect.width += left + right;
 			rect.height += top + bottom;
 		}
