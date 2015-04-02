@@ -615,26 +615,16 @@ package com.iblsoft.flexiweather.widgets
 					loadLegends();
 				return;
 			}
-			/*
-			if (!justReposition)
-			{
-				loadLegends();
-				var needsLoaded: int = loadLegends();
-				if (needsLoaded > 0)
-				{
-					debug("\nrenderLegendsStack needsLoaded: " + needsLoaded + " DO NOT CONTINUE");
-					return;
-				}
-			}*/
 			notify(LEGENDS_LAYERING_STARTED);
 			var l: InteractiveLayerWMS;
 			var posX: int = 0;
 			var posY: int = 0;
-			var maxWidth: int = Math.max(width, 600);
-			var maxHeight: int = Math.max(height, 200);
+//			var maxWidth: int = Math.max(width, 600);
+//			var maxHeight: int = Math.max(height, 200);
+			var maxWidth: int = Math.max(width, 100);
+			var maxHeight: int = Math.max(height, 100);
 			if (maxWidth == 0 || maxHeight == 0)
 			{
-//				callLater(renderLegendsStack);
 				return;
 			}
 			if (maxWidth < 100 || maxHeight < 100)
@@ -776,21 +766,11 @@ package com.iblsoft.flexiweather.widgets
 			properties.endY2 = endY2;
 			properties.initialReposition = initialReposition;
 			var debugPos: Boolean = true;
-			//				for each (l in _legends)
-			//				{
-			//					properties = placeRectangle(l, properties);
-			//				}
 			debug("\n\n NEW ROUND");
-//			areas = new Array();
-//			var lRect: InteractiveLayerWMS = getLayerAt(0) as InteractiveLayerWMS;
 			l = _legends[0] as InteractiveLayerWMS;
-//			var lRect: Rectangle = _legends[0] as Rectangle;
 			var _currentArea: DynamicArea = new DynamicArea(null);
 
-
-//			_currentArea.area = new Rectangle(0, 0, maxWidth, maxHeight);
 			_currentArea.area = new Rectangle(paddingLeft, paddingTop, maxWidth - paddingLeft - paddingRight, maxHeight - paddingBottom - paddingTop);
-
 
 			_topArea = _currentArea;
 			var cnv: InteractiveLayerLegendGroup = getGroupFromDictionary(l);
@@ -804,12 +784,10 @@ package com.iblsoft.flexiweather.widgets
 				rect = _currentArea.itemArea;
 				cnv.x = rect.x;
 				cnv.y = rect.y;
-//				_topArea.draw(workspace.graphics);
-//							drawLegendsBackground(new Rectangle(canvas.x, canvas.y, canvas.width, canvas.height));
+				debug("renderLegendsStack pos: ["+cnv.x + "," + cnv.y+"] size: ["+cnv.width+","+cnv.height+"] rect: " + rect);
 				updateLegendScale(l);
 				drawLegendsBackground(rect);
 				step = 1;
-//				if (chbAutomate.selected)
 				nextStep();
 			}
 		}
@@ -871,80 +849,39 @@ package com.iblsoft.flexiweather.widgets
 		{
 			var debugPos: Boolean = true;
 			var horizontalAlign: String = properties.horizontalAlign;
-//			var verticalAlign: String = properties.verticalAlign;
-//			var horizontalDirection: String = properties.horizontalDirection;
-//			var verticalDirection: String = properties.verticalDirection;
 			var padding: Padding = properties.padding;
-//			var paddingBottom: int = properties.padding.bottom;
-//			var paddingTop: int = properties.padding.top;
-//			var paddingLeft: int = properties.padding.left;
-//			var paddingRight: int = properties.padding.right;
-//			var colItems: int = properties.colItems;
-//			var rowItems: int = properties.rowItems;
-//			var maxWidth: int = properties.maxWidth;
-//			var maxHeight: int = properties.maxHeight;
-//
-//			var initialX: int = properties.initialX;
-//			var initialY: int = properties.initialY;
-//
-//			var posX: int = properties.posX;
-//			var posY: int = properties.posY;
-//			var startX: int = properties.startX;
-//			var startY: int = properties.startY;
-//			var endX: int = properties.endX;
-//			var endY: int = properties.endY2;
-//			var startX2: int = properties.startX2;
-//			var startY2: int = properties.startY2;
-//			var endX2: int = properties.endX2;
-//			var endY2: int = properties.endY2;
-//			var gapX: int = properties.gapX;
-//			var gapY: int = properties.gapY;
-//			var directionX: int = properties.directionX;
-//			var directionY: int = properties.directionY;
-//			var initialReposition: Boolean = properties.initialReposition;
-//			if (true)
+
 			if (l.hasLegend())
 			{
 				var canvas: InteractiveLayerLegendGroup = getGroupFromDictionary(l);
 				if (canvas)
 				{
 					canvas.visible = l.visible;
-//					if (debugPos)
-//						debug("LEGENDS layer visible: " + l.visible);
-//					var canvas: Rectangle = l.clone();
 					if (l.visible)
 					{
 						var rect: Rectangle = getRectangleFromLayer(l);
 						if (rect.width == 0 || rect.height == 0)
 						{
-							debug("Wron rect, skip");
+							debug("Wrong rect, skip");
 							return null;
 						}
-						//rect = new Rectangle(0,0, canvas.width, canvas.height);
 						padding.updateRectangleSizeWithPadding(rect);
 						var areas: Array = [];
 						_topArea.findSuitableArea(rect, 'both', areas);
 						if (areas.length > 0)
 						{
 							debug("Areas found: " + areas.length);
-//							if (chbDensity.selected)
-//								areas.sort(sortAreas);
 							var bestArea: DynamicArea = areas[0].area;
 							var bestDenstiy: Number = areas[0].density;
 							if (bestArea.area.width == 0 || bestArea.area.height == 0)
 								debug("stop area is 0");
-							//								var currRect: Rectangle = bestArea.area.clone();
 							bestArea.createFromItem(rect, properties.firstAreaDirection, properties.secondAreaDirection);
-							//								rect.x = bestArea.area.x;
-							//								rect.y = bestArea.area.y;
 							rect = bestArea.itemArea;
 							canvas.x = rect.x;
 							canvas.y = rect.y;
-//							_topArea.draw(workspace.graphics);
-//							drawLegendsBackground(new Rectangle(canvas.x, canvas.y, canvas.width, canvas.height));
+							debug("placeRectangle pos: ["+canvas.x + "," + canvas.y+"] size: ["+canvas.width+","+canvas.height+"] rect: " + rect);
 							updateLegendScale(l);
 							drawLegendsBackground(rect);
-								//							} else {
 						}
 						else
 							debug("Areas: did not found suitable area : topArea: " + _topArea.area);
