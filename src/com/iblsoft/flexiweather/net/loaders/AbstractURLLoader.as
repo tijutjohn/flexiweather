@@ -19,7 +19,7 @@ package com.iblsoft.flexiweather.net.loaders
 	import com.iblsoft.flexiweather.widgets.basicauth.controls.IBasicAuthCredentialsPopup;
 	import com.iblsoft.flexiweather.widgets.basicauth.data.BasicAuthAccount;
 	import com.iblsoft.flexiweather.widgets.basicauth.events.BasicAuthEvent;
-	
+
 	import flash.display.DisplayObject;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
@@ -39,7 +39,7 @@ package com.iblsoft.flexiweather.net.loaders
 	import flash.utils.Dictionary;
 	import flash.utils.clearTimeout;
 	import flash.utils.setTimeout;
-	
+
 	import mx.controls.Alert;
 	import mx.core.ClassFactory;
 	import mx.core.FlexGlobals;
@@ -51,7 +51,7 @@ package com.iblsoft.flexiweather.net.loaders
 	import mx.utils.Base64Encoder;
 	import mx.utils.ObjectUtil;
 	import mx.utils.URLUtil;
-	
+
 	import spark.components.TitleWindow;
 
 	public class AbstractURLLoader extends EventDispatcher implements IURLLoaderBasicAuth
@@ -143,6 +143,7 @@ package com.iblsoft.flexiweather.net.loaders
 
 		public function destroy(): void
 		{
+			debug("destroy");
 			var id: String;
 			var obj: URLLoaderDictionaryData;
 			if (md_urlLoaderToRequestMap)
@@ -442,12 +443,12 @@ package com.iblsoft.flexiweather.net.loaders
 		{
 //			if (urlRequest && urlRequest.data && urlRequest.data.REQUEST == "GetMap")
 //			{
-//				trace("\n LOAD: " + urlRequest.data.LAYERS + " height: " + urlRequest.data.HEIGHT);
+//				debug("\n LOAD: " + urlRequest.data.LAYERS + " height: " + urlRequest.data.HEIGHT);
 //			}
 			checkRequestData(urlRequest);
 			checkRequestBaseURL(urlRequest);
 
-//			trace(this + " load: " + urlRequest.url);
+//			debug(this + " load: " + urlRequest.url);
 			// if there is no associatedDat, add empty one
 			if (!associatedData)
 			{
@@ -475,10 +476,10 @@ package com.iblsoft.flexiweather.net.loaders
 			}
 			else
 				uniURLLoaderData = basicAuthManager.createRequest(urlRequest, this, associatedData, s_backgroundJobName);
-			
+
 			callLoader(urlRequest, associatedData, s_backgroundJobName);
 		}
-		
+
 		protected function callLoader(urlRequest: URLRequest, associatedData: Object, s_backgroundJobName: String): void
 		{
 			var urlLoader: URLLoaderWithAssociatedData = new URLLoaderWithAssociatedData();
@@ -521,7 +522,7 @@ package com.iblsoft.flexiweather.net.loaders
 
 			urlLoader.load(urlRequest);
 //			urlLoader.load(urlRequest, loaderContext);
-			debug("Load URL: " + urlRequest.url);
+			debug("Load URL: [loader: " + urlLoader + "] " + urlRequest.url);
 
 			var backgroundJob: BackgroundJob = null;
 			if (s_backgroundJobName != null)
@@ -529,9 +530,10 @@ package com.iblsoft.flexiweather.net.loaders
 
 
 			md_urlLoaderToRequestMap[urlLoader] = new URLLoaderDictionaryData(urlRequest, urlLoader, backgroundJob, timeout);
+			debug("Load md_urlLoaderToRequestMap["+urlLoader+"] new URLLoaderDictionaryData(");
 			var e: UniURLLoaderEvent = new UniURLLoaderEvent(UniURLLoaderEvent.LOAD_STARTED, null, urlRequest, associatedData);
 			dispatchEvent(e);
-			
+
 		}
 
 		private function startTimeout(urlLoader: URLLoaderWithAssociatedData): int
@@ -828,7 +830,7 @@ package com.iblsoft.flexiweather.net.loaders
 			urlLoader.removeEventListener(ProgressEvent.PROGRESS, onDataProgress);
 			urlLoader.removeEventListener(IOErrorEvent.IO_ERROR, onDataIOError);
 			urlLoader.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, onSecurityError);
-			debug("disconnectURLLoader");
+			debug("disconnectURLLoader " + urlLoader);
 			if (!urlLoader in md_urlLoaderToRequestMap)
 			{
 				debug("disconnectURLLoader URLLoader is not register (was removed already)");
@@ -847,20 +849,25 @@ package com.iblsoft.flexiweather.net.loaders
 			var urlRequest: URLRequest = data.request;
 			UniURLLoaderManager.instance.removeLoaderRequest(urlRequest);
 			delete md_urlLoaderToRequestMap[urlLoader];
-			debug("disconnectURLLoader REMOVE URLLoader: " + urlLoader);
+			debug("disconnectURLLoader REMOVE URLLoader: delete md_urlLoaderToRequestMap[" + urlLoader + "]");
 			return urlRequest;
 		}
 
 		public function cancel(urlRequest: URLRequest): Boolean
 		{
+			debug("AbstractURLLoader cancel : " + urlRequest.data);
+//			return false;
+
 			var key: Object;
 			for (key in md_urlLoaderToRequestMap)
 			{
 				var data: URLLoaderDictionaryData = md_urlLoaderToRequestMap[key];
 				if (data.request === urlRequest)
 				{
+					debug("AbstractURLLoader cancel data.loader close(): " + data.loader);
 					data.loader.close();
 					disconnectURLLoader(URLLoaderWithAssociatedData(data.loader));
+					debug("cancel: delete md_urlLoaderToRequestMap[" + key + "]");
 					delete md_urlLoaderToRequestMap[key];
 					return true;
 				}

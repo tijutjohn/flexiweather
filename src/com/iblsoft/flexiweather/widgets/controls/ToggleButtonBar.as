@@ -88,10 +88,10 @@ package com.iblsoft.flexiweather.widgets.controls
 
 				var data: ToggleButtonBarItemData = event.data as ToggleButtonBarItemData;
 
-				if (data.ident.indexOf('time') >= 0)
-				{
-					trace("Check time crosssection data.type:"+data.type);
-				}
+//				if (data.ident.indexOf('time') >= 0)
+//				{
+//					trace("Check time crosssection data.type:"+data.type);
+//				}
 				switch (data.type)
 				{
 					case ToggleButtonBarItemData.NORMAL:

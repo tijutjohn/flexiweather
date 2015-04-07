@@ -359,6 +359,9 @@ package com.iblsoft.flexiweather.ogc
 		 */
 		public function cancelPreload(): void
 		{
+			if (!FlexiWeatherConfiguration.CAN_CANCELL_REQUESTS)
+				return;
+
 			//FIXME cancel currently preloading request
 			if (_preloader)
 				_preloader.cancel();
@@ -626,12 +629,18 @@ package com.iblsoft.flexiweather.ogc
 
 		protected function onCurrentWMSDataLoadingStarted(event: InteractiveLayerEvent): void
 		{
+			var loader: MSBaseLoader = event.target as MSBaseLoader;
+			debug("onCurrentWMSDataLoadingStarted loader: " + loader);
+
 			_currentWMSDataLoadingStarted = true;
 			notifyLoadingStart(true);
 		}
 
 		protected function onCurrentWMSDataProgress(event: InteractiveLayerProgressEvent): void
 		{
+			var loader: MSBaseLoader = event.target as MSBaseLoader;
+			debug("onCurrentWMSDataProgress loader: " + loader);
+
 			notifyProgress(event.loaded, event.total, event.units);
 		}
 
@@ -646,12 +655,16 @@ package com.iblsoft.flexiweather.ogc
 				_loader.removeEventListener(InteractiveDataLayer.LOADING_ERROR, onCurrentWMSDataLoadingError);
 				_loader.removeEventListener(InteractiveDataLayer.PROGRESS, onCurrentWMSDataProgress);
 				_loader.removeEventListener(InteractiveLayerEvent.INVALIDATE_DYNAMIC_PART, onCurrentWMSDataInvalidateDynamicPart);
+				_loader.removeEventListener(MSBaseLoader.REQUEST_CANCELLED, onLoaderRequestCancelled);
 				_loader.destroy();
 			}
 		}
 		protected function onCurrentWMSDataLoadingFinishedNoSynchronizationData(event: InteractiveLayerEvent): void
 		{
 			var loader: MSBaseLoader = event.target as MSBaseLoader;
+
+			debug("onCurrentWMSDataLoadingFinishedNoSynchronizationData loader: " + loader);
+
 //			removeLoaderListeners(loader);
 			notifyLoadingFinishedNoSynchronizationData();
 			noSynchronisationDataAvailable(graphics);
@@ -661,6 +674,9 @@ package com.iblsoft.flexiweather.ogc
 		protected function onCurrentWMSDataLoadingError(event: InteractiveLayerEvent): void
 		{
 			var loader: MSBaseLoader = event.target as MSBaseLoader;
+
+			debug("onCurrentWMSDataLoadingError loader: " + loader);
+
 //			removeLoaderListeners(loader);
 			notifyLoadingError();
 			_currentWMSDataLoadingStarted = false;
@@ -668,6 +684,7 @@ package com.iblsoft.flexiweather.ogc
 		protected function onCurrentWMSDataLoadingFinished(event: InteractiveLayerEvent): void
 		{
 			var loader: MSBaseLoader = event.target as MSBaseLoader;
+			debug("onCurrentWMSDataLoadingFinished loader: " + loader);
 //			removeLoaderListeners(loader);
 			notifyLoadingFinished();
 			_currentWMSDataLoadingStarted = false;
@@ -675,6 +692,9 @@ package com.iblsoft.flexiweather.ogc
 		protected function onCurrentWMSDataLoadingFinishedFromCache(event: InteractiveLayerEvent): void
 		{
 			var loader: MSBaseLoader = event.target as MSBaseLoader;
+
+			debug("onCurrentWMSDataLoadingFinishedFromCache loader: " + loader);
+
 //			removeLoaderListeners(loader);
 			notifyLoadingFinishedFromCache();
 			_currentWMSDataLoadingStarted = false;
@@ -846,6 +866,9 @@ package com.iblsoft.flexiweather.ogc
 
 		private function onLoaderRequestCancelled(event: Event): void
 		{
+
+			var loader: MSBaseLoader = event.target as MSBaseLoader;
+			debug("onLoaderRequestCancelled loader: " + loader);
 			debug("\n\n onLoaderRequestCancelled _previousStatus: " + _lastValidStatus + " \n\n");
 			if (_lastValidStatus)
 				setStatus(_lastValidStatus);

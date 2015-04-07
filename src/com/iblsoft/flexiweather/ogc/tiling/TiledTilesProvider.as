@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc.tiling
 {
+	import com.iblsoft.flexiweather.FlexiWeatherConfiguration;
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderErrorEvent;
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.net.loaders.UniURLLoader;
@@ -144,37 +145,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 //		private var _cancelledRequests: Array = [];
 		private function cancelPreviousRequests(tilesRequests: Array): void
 		{
-
-/*
-			_tilesToBeLoaded -= ma_tilesBuffer.length;
-			_tilesTotal -= ma_tilesBuffer.length;
-
-			ma_tilesBuffer = [];
-
-			for each (var tileLoader: TileLoader in md_loadersRequests)
-			{
-				if (tileLoader.isLoading)
-				{
-					var request: URLRequest = tileLoader.request;
-					var loader: WMSImageLoader = tileLoader.loader;
-
-					var loadingRequest: TiledTileRequest = tileLoader.data;
-					trace("Cancel request: " + loadingRequest);
-//					if (loadingRequest)
-//					{
-//						_cancelledRequests.push(loadingRequest);
-//					}
-
-					tileLoader.cancelled = true;
-
-					m_tiledCached.cacheItemLoadingCanceled(loadingRequest.qttTileViewProperties);
-					loader.cancel(request);
-
-					releaseLoader(loader);
-				}
-			}
-*/
-
+			if (!FlexiWeatherConfiguration.CAN_CANCELL_REQUESTS)
+				return;
 
 			for each (var data: TiledTileRequest in tilesRequests)
 			{

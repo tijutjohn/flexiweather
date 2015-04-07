@@ -1,5 +1,6 @@
 package com.iblsoft.flexiweather.ogc.tiling
 {
+	import com.iblsoft.flexiweather.FlexiWeatherConfiguration;
 	import com.iblsoft.flexiweather.events.InteractiveLayerEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerProgressEvent;
 	import com.iblsoft.flexiweather.events.InteractiveLayerQTTEvent;
@@ -92,6 +93,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 
 		public function cancel(): void
 		{
+			if (!FlexiWeatherConfiguration.CAN_CANCELL_REQUESTS)
+				return;
+
 			if (_tilesProvider)
 				_tilesProvider.cancel();
 		}
