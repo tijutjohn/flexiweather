@@ -27,7 +27,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 		}
 	}
 }
+import com.iblsoft.flexiweather.FlexiWeatherConfiguration;
 import com.iblsoft.flexiweather.ogc.net.loaders.WMSImageLoader;
+
 import flash.net.URLRequest;
 
 class TileJob
@@ -57,6 +59,9 @@ class TileJob
 
 	public function cancelRequests(): void
 	{
+		if (!FlexiWeatherConfiguration.CAN_CANCELL_REQUESTS)
+			return;
+
 		m_urlLoader.cancel(m_urlRequest);
 	}
 }

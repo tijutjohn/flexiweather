@@ -8,12 +8,12 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 	import com.iblsoft.flexiweather.net.loaders.XMLLoader;
 	import com.iblsoft.flexiweather.net.loaders.errors.URLLoaderError;
 	import com.iblsoft.flexiweather.widgets.basicauth.data.BasicAuthAccount;
-	
+
 	import flash.net.URLRequest;
 //	import flash.system.ImageDecodingPolicy;
 	import flash.system.LoaderContext;
 	import flash.utils.ByteArray;
-	
+
 	import mx.events.DynamicEvent;
 
 	public class WMSImageLoader extends ImageLoader
@@ -45,6 +45,7 @@ package com.iblsoft.flexiweather.ogc.net.loaders
 				errorCallback("WMS Image Loader error: XML is received", URLLoaderError.UNSPECIFIED_ERROR, new XML(cloneByteArrayToString(rawData)), urlRequest, urlLoader.associatedData);
 				return;
 			}
+			trace("WMS Image Loader error: Expected Image or XML => loader: " + urlLoader.loaderID);
 			errorCallback("WMS Image Loader error: Expected Image or XML", URLLoaderError.UNSPECIFIED_ERROR, rawData, urlRequest, urlLoader.associatedData);
 		}
 

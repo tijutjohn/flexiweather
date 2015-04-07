@@ -1,11 +1,12 @@
 package com.iblsoft.flexiweather.net.loaders
 {
+	import com.iblsoft.flexiweather.FlexiWeatherConfiguration;
 	import com.iblsoft.flexiweather.net.events.UniURLLoaderEvent;
 	import com.iblsoft.flexiweather.net.loaders.errors.URLLoaderError;
 	import com.iblsoft.flexiweather.net.managers.UniURLLoaderManager;
 	import com.iblsoft.flexiweather.widgets.BackgroundJob;
 	import com.iblsoft.flexiweather.widgets.BackgroundJobManager;
-	
+
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
 	import flash.events.ProgressEvent;
@@ -15,7 +16,7 @@ package com.iblsoft.flexiweather.net.loaders
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
 	import flash.utils.Dictionary;
-	
+
 	import mx.utils.ObjectUtil;
 
 	public class ImageLoader extends AbstractURLLoader
@@ -49,7 +50,7 @@ package com.iblsoft.flexiweather.net.loaders
 				}
 			}
 		}
-		
+
 		override protected function callLoader(urlRequest: URLRequest, associatedData: Object, s_backgroundJobName: String): void
 		{
 			super.callLoader(urlRequest, associatedData, s_backgroundJobName);
@@ -61,30 +62,30 @@ package com.iblsoft.flexiweather.net.loaders
 			urlLoader.addEventListener(ProgressEvent.PROGRESS, onDataProgress);
 			urlLoader.addEventListener(IOErrorEvent.IO_ERROR, onDataIOError);
 			urlLoader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, onSecurityError);
-			
+
 			UniURLLoaderManager.instance.addLoaderRequest(urlRequest);
-			
+
 			var timeout: int = -1;
 			if (timeoutPeriod)
 			{
 				timeout = startTimeout(urlLoader);
 			}
-			
+
 			urlLoader.load(urlRequest);
 			//			urlLoader.load(urlRequest, loaderContext);
 			debug("Load URL: " + urlRequest.url);
-			
+
 			var backgroundJob: BackgroundJob = null;
 			if (s_backgroundJobName != null)
 				backgroundJob = BackgroundJobManager.getInstance().startJob(s_backgroundJobName);
-			
-			
+
+
 			md_urlLoaderToRequestMap[urlLoader] = new URLLoaderDictionaryData(urlRequest, urlLoader, backgroundJob, timeout);
 			var e: UniURLLoaderEvent = new UniURLLoaderEvent(UniURLLoaderEvent.LOAD_STARTED, null, urlRequest, associatedData);
 			dispatchEvent(e);
 			*/
-			
-		} 
+
+		}
 
 		override protected function decodeResult(rawData: ByteArray, urlLoader: URLLoaderWithAssociatedData, urlRequest: URLRequest, resultCallback: Function, errorCallback: Function): void
 		{
@@ -139,6 +140,10 @@ package com.iblsoft.flexiweather.net.loaders
 
 		override public function cancel(urlRequest: URLRequest): Boolean
 		{
+			if (!FlexiWeatherConfiguration.CAN_CANCELL_REQUESTS)
+				return false;
+
+			trace("ImageLoader cancel");
 			var cancelBool: Boolean = super.cancel(urlRequest);
 			if (!cancelBool)
 			{
@@ -180,14 +185,14 @@ package com.iblsoft.flexiweather.net.loaders
 			{
 				//we need to clone BYteArray, otherwise readded bytes will be removed from ByteArray
 				var ba: ByteArray = data as ByteArray;
-				
+
 				var b0: int = ba.length > 0 ? ba.readUnsignedByte() : -1;
 				var b1: int = ba.length > 1 ? ba.readUnsignedByte() : -1;
 				var b2: int = ba.length > 2 ? ba.readUnsignedByte() : -1;
 				var b3: int = ba.length > 3 ? ba.readUnsignedByte() : -1;
-				
+
 				ba.position = 0;
-				
+
 				var isPNG: Boolean = b0 == 0x89 && b1 == 0x50 && b2 == 0x4E && b3 == 0x47;
 				var isGIF: Boolean = b0 == 0x47 && b1 == 0x49 && b2 == 0x46;
 				var isJPG: Boolean = b0 == 0xff && b1 == 0xd8 && b2 == 0xff && b3 == 0xe0;

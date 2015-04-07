@@ -18,6 +18,7 @@ import com.iblsoft.flexiweather.ogc.data.viewProperties.IViewProperties;
 import com.iblsoft.flexiweather.ogc.data.viewProperties.IWMSViewPropertiesLoader;
 import com.iblsoft.flexiweather.ogc.data.viewProperties.WMSViewProperties;
 import com.iblsoft.flexiweather.ogc.events.MSBaseLoaderEvent;
+import com.iblsoft.flexiweather.plugins.IConsole;
 import com.iblsoft.flexiweather.proj.Projection;
 import com.iblsoft.flexiweather.utils.DebugUtils;
 import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
@@ -39,6 +40,8 @@ import mx.logging.Log;
 	public class MSBaseLoader extends EventDispatcher implements IWMSViewPropertiesLoader
 	{
 		public static const REQUEST_CANCELLED: String = "requestCancelled";
+
+		public static var debugConsole: IConsole;
 
 		private static var uid: int = 0;
 		public var id: int;
@@ -72,7 +75,7 @@ import mx.logging.Log;
 
 		override public function toString(): String
 		{
-			return "MSBaseLoader [" + id + "]";
+			return "MSBaseLoader [" + id + "/loader: " + m_loader+"]";
 		}
 
 		public function destroy(): void
@@ -88,6 +91,9 @@ import mx.logging.Log;
 
 		public function cancel(): void
 		{
+			if (!FlexiWeatherConfiguration.CAN_CANCELL_REQUESTS)
+				return;
+
 			debug("cancel: " + ma_requests.length);
 			var wmsCache: WMSCache = m_layer.getCache() as WMSCache;
 
@@ -96,6 +102,7 @@ import mx.logging.Log;
 				for each (var request: URLRequest in ma_requests)
 				{
 					m_wmsViewProperties.url = request;
+					debug("cancel: " + request + " m_wmsViewProperties: " + m_wmsViewProperties);
 					wmsCache.cacheItemLoadingCanceled(m_wmsViewProperties);
 
 					m_loader.cancel(request);
@@ -784,6 +791,8 @@ import mx.logging.Log;
 
 		protected function debug(str: String): void
 		{
+			if (debugConsole)
+				debugConsole.print(str, 'Info', 'MSBaseLoader');
 //			trace("MSBaseLoader["+m_layer.layerID+"/"+m_layer.name+"]: " + str);
 		}
 	}

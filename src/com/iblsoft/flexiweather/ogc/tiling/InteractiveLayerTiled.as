@@ -990,6 +990,9 @@ package com.iblsoft.flexiweather.ogc.tiling
 		 */
 		public function cancelPreload(): void
 		{
+			if (!FlexiWeatherConfiguration.CAN_CANCELL_REQUESTS)
+				return;
+
 			//FIXME cancel currently preloading request
 			if (_preloader)
 				_preloader.cancel();
