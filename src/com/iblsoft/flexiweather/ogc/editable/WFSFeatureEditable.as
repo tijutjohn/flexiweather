@@ -41,12 +41,23 @@ package com.iblsoft.flexiweather.ogc.editable
 		protected var mi_monochromeColor: uint = 0x333333;
 		protected var ma_points: Array;
 		protected var m_editableItemManager: IEditableItemManager;
-		protected var mi_actSelectedMoveablePointIndex: int = -1;
+		private var _mi_actSelectedMoveablePointIndex: int = -1;
 		protected var mi_actSelectedMoveablePointReflectionIndex: int = -1;
 		protected var m_firstInit: Boolean = true;
 
 		//new storage dictionaries for GFX (sprites and editable poitns
 		private var _reflectionGFXAssets: Dictionary = new Dictionary();
+
+
+		public function get mi_actSelectedMoveablePointIndex():int
+		{
+			return _mi_actSelectedMoveablePointIndex;
+		}
+
+		public function set mi_actSelectedMoveablePointIndex(value:int):void
+		{
+			_mi_actSelectedMoveablePointIndex = value;
+		}
 
 		override public function set visible(value:Boolean):void
 		{
@@ -415,11 +426,9 @@ package com.iblsoft.flexiweather.ogc.editable
 				var reflection: FeatureDataReflection = m_featureData.getReflectionAt(reflectionDelta);
 				if (reflection)
 				{
-					var pTotal: int = reflection.editablePoints.length;
-					//					trace("FeatureEditable upate: pTotal: " + pTotal);
+					var pTotal: int = totalReflectionEditablePoints(reflectionDelta);
 					if (coordIndex < pTotal)
 					{
-//						mp = reflection.moveablePoints[coordIndex] as MoveablePoint;
 						mp = getEditablePointForReflectionAt(reflection.reflectionDelta, coordIndex);
 						if (mp)
 						{
@@ -470,35 +479,26 @@ package com.iblsoft.flexiweather.ogc.editable
 
 					if (reflection)
 					{
-						var pTotal: int = reflection.editablePoints.length;
-						//						var pMoveableTotal: int = reflection.moveablePoints.length;
-						//						trace("FeatureEditable upate: pointsTotal: " + pTotal + "  pMoveableTotal: " + pMoveableTotal);
+						var pTotal: int = totalReflectionEditablePoints(reflectionDelta);
+
+						//some features (e.g. Annotations) can have defined more editable points, but do not want to use all, so other needs to be hided
+						hideUnusedEditablePoints(reflectionDelta);
+
 						var cnt: int = 0
 						for (i = 0; i < pTotal; ++i)
 						{
-//							var pt: FeatureDataPoint = reflection.editablePoints[i] as FeatureDataPoint;
 							var pt: Point = reflection.editablePoints[i] as Point;
 							if (pt)
 							{
 								var isReflectionEdgePoint: Boolean = false; //pt.isReflectionEdgePoint
 								if (!isReflectionEdgePoint)
 								{
-//									mp = getEditablePointForReflectionAt(reflectionDelta, cnt);
 									mp = getEditablePointForReflectionAt(reflectionDelta, i);
-
-										//add new MovablePoint (new point was added, so we need to create Movable point for it
-//										mp = new MoveablePoint(this, cnt, r, reflection.reflectionDelta);
-//										m_editableSprite.addChild(mp);
-//									if (eim != null)
-//										eim.addEditableItem(mp);
-//										addMoveablePointListeners(mp);
-//										continue;
-//									mp = pt.movablePoint as MoveablePoint;
 
 									if (pt == null || mp == null)
 										continue; // TODO: check for CRS
 									var p: Point = mp.getPoint();
-									//						trace("WFSFeatureEditable update: pt: " + pt + " p: " + p + " for reflection r: " + r);
+									mp.visible = true;
 									if (p && !p.equals(pt))
 									{
 										// reuse MoveablePoint instance, just change it's location
@@ -516,61 +516,15 @@ package com.iblsoft.flexiweather.ogc.editable
 		}
 
 		/**
-		 * New implementation of update method through FeatureDataReflection
-		 * @param changeFlag
+		 * Some features (e.g. Annotations) can have defined more editable points, but do not want to use all.
+		 * So other needs to be hided.
 		 *
+		 * Override this method, if you need to hide some editable points
 		 */
-		/*
-		private function updateOldImplementation(changeFlag: FeatureUpdateContext): void
+		protected function hideUnusedEditablePoints(reflectionDelta: int): void
 		{
-			//m_points is Array of Screen coordinates in pixels
-			updateCoordsReflections();
 
-			var eim: IEditableItemManager = master as IEditableItemManager;
-			var mp: MoveablePoint;
-			var i: uint;
-
-			var reflectionsTotal: int = reflectionDictionary.totalReflections;
-			for (var r: int = 0; r < totalReflections; r++)
-			{
-				var reflection: FeatureDataReflection = reflectionDictionary.getReflection(r) as FeatureDataReflection;
-				if (reflection)
-				{
-					var pTotal: int = reflection.editablePoints.length;
-					var pMoveableTotal: int = reflection.moveablePoints.length;
-					trace("FeatureEditable upate: pointsTotal: " + pTotal + "  pMoveableTotal: " + pMoveableTotal);
-					for (i = 0; i < pTotal; ++i)
-					{
-						var pt: Point = reflection.editablePoints[i] as Point;
-						if (i >= reflection.moveablePoints.length)
-						{
-							//add new MovablePoint (new point was added, so we need to create Movable point for it
-//							mp = new MoveablePoint(this, i, r, reflection.reflectionDelta);
-							mp = new MoveablePoint(this, i, reflection.reflectionDelta);
-							reflection.addMoveablePoint(mp, i);
-							m_editableSprite.addChild(mp);
-							if (eim != null)
-								eim.addEditableItem(mp);
-							addMoveablePointListeners(mp);
-							continue;
-						}
-						mp = reflection.moveablePoints[i] as MoveablePoint;
-						if (pt == null || mp == null)
-							continue; // TODO: check for CRS
-						var p: Point = mp.getPoint()
-						//						trace("WFSFeatureEditable update: pt: " + pt + " p: " + p + " for reflection r: " + r);
-						if (p && !p.equals(pt))
-						{
-							// reuse MoveablePoint instance, just change it's location
-							mp.setPoint(pt);
-						}
-					}
-				}
-			}
-
-			editableSpriteVisible(mb_selected);
 		}
-		*/
 
 		override public function update(changeFlag: FeatureUpdateContext): void
 		{
