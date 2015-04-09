@@ -8,8 +8,10 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableClosableCurveWithBaseTimeAndValidityAndAnnotation;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableCurveWithBaseTimeAndValidity;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableCurveWithBaseTimeAndValidityAndAnnotation;
+	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableMode;
 	import com.iblsoft.flexiweather.ogc.editable.data.FeatureData;
 	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
+	import com.iblsoft.flexiweather.ogc.editable.data.MoveablePoint;
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithAnnotation;
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithReflection;
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
@@ -90,6 +92,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 			return new AnnotationSprite(this);
 		}
 
+
 		override public function createAnnotation(): AnnotationBox
 		{
 			return new AnnotationTextBox();
@@ -162,16 +165,67 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 			}
 		}
 
-
-		override protected function drawFeatureReflection(g: ICurveRenderer, m_featureDataReflection: FeatureDataReflection): void
+		override public function totalReflectionEditablePoints(reflectionDelta: int): int
 		{
-			if (!g || !m_featureDataReflection || !m_featureDataReflection.lines)
+			if (ms_type != ANNOTATION_PIN)
+			{
+				return super.totalReflectionEditablePoints(reflectionDelta)
+			} else {
+				if (m_featureData)
+				{
+					var reflection: FeatureDataReflection = getReflection(reflectionDelta);
+					if (reflection && reflection.editablePoints.length > 1)
+					{
+						//for PIN type return just 1 editable point
+						return 1;
+					}
+				}
+			}
+			return 0;
+		}
+
+		/**
+		* Some features (e.g. Annotations) can have defined more editable points, but do not want to use all.
+		* So other needs to be hided.
+		*
+		* Override this method, if you need to hide some editable points
+		*/
+		override protected function hideUnusedEditablePoints(reflectionDelta: int): void
+		{
+			if (ms_type == ANNOTATION_PIN)
+			{
+				var reflection: FeatureDataReflection = getReflection(reflectionDelta);
+				var visibleEditablePoints: int = totalReflectionEditablePoints(reflectionDelta);
+				var totalEditablePoints: int = reflection.editablePoints.length;
+				if (visibleEditablePoints > 0 && totalEditablePoints > visibleEditablePoints)
+				{
+					var i: int;
+					var mp: MoveablePoint;
+					for (i = 0; i < visibleEditablePoints; i++)
+					{
+						mp = getEditablePointForReflectionAt(reflectionDelta, i);
+						if (mp)
+							mp.visible = true;
+					}
+					for (i = visibleEditablePoints; i < totalEditablePoints; i++)
+					{
+						mp = getEditablePointForReflectionAt(reflectionDelta, i);
+						if (mp)
+							mp.visible = false;
+					}
+				}
+			}
+		}
+
+		override protected function drawFeatureData(g: ICurveRenderer, m_featureData: FeatureData): void
+		{
+			if (!g || !m_featureData || !m_featureData.lines)
 			{
 				return;
 			}
 
 			if (ms_type != ANNOTATION_PIN)
-				super.drawFeatureReflection(g, m_featureDataReflection);
+				super.drawFeatureData(g, m_featureData);
 			else {
 				//TODO finish drawing of PIN
 
@@ -193,6 +247,42 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 			}
 		}
 
+		/**
+		 *
+		 *
+		 */
+		public function beforeDeselect(): void
+		{
+			//if annotation is not pin and has just 1 point, it's automatically changed to pin
+			if (ms_type != WFSFeatureEditableAnnotation.ANNOTATION_PIN)
+			{
+				if (getPoints().length < 2)
+				{
+					ms_type = WFSFeatureEditableAnnotation.ANNOTATION_PIN;
+					update(FeatureUpdateContext.fullUpdate());
+				}
+			}
+		}
+		public function updateEditMode(): void
+		{
+			if (ms_type == WFSFeatureEditableAnnotation.ANNOTATION_PIN)
+			{
+				if (getPoints().length > 0){
+					editMode = WFSFeatureEditableMode.MOVE_POINTS;
+					//FIXME ... must be correct reflection
+					selectMoveablePoint(0, 0);
+				} else {
+					editMode = WFSFeatureEditableMode.ADD_POINTS_WITH_MOVE_POINTS;
+				}
+			} else {
+				if (getPoints().length == 1){
+					editMode = WFSFeatureEditableMode.ADD_POINTS_WITH_MOVE_POINTS;
+				} else {
+					editMode = WFSFeatureEditableMode.MOVE_POINTS;
+				}
+			}
+		}
+
 		override public function updateAnnotation(annotation: AnnotationBox, annotationPosition: Point, text: String = ""): void
 		{
 			if (!annotationPosition)
@@ -209,14 +299,23 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 
 				txtAnnotation.label.text = text;
 				txtAnnotation.color = i_color;
-				txtAnnotation.update();
-				txtAnnotation.width = txtAnnotation.measuredWidth;
-				txtAnnotation.height = txtAnnotation.measuredHeight;
-				txtAnnotation.x = annotationPosition.x - txtAnnotation.width / 2.0;
-				txtAnnotation.y = annotationPosition.y - txtAnnotation.height - 5// / 2.0;
 				var format: TextFormat = txtAnnotation.label.getTextFormat();
 				format.color = i_color;
 				txtAnnotation.label.setTextFormat(format);
+
+				trace("updateAnnotation text: " + text);
+				trace("txtAnnotation size: [" + txtAnnotation.width + ", " + txtAnnotation.height + "]");
+				trace("txtAnnotation measured size: [" + txtAnnotation.measuredWidth + ", " + txtAnnotation.measuredHeight + "]");
+				trace("txtAnnotation label size: [" + txtAnnotation.label.width + ", " + txtAnnotation.label.height + "]");
+				trace("txtAnnotation label text size: [" + txtAnnotation.label.textWidth + ", " + txtAnnotation.label.textHeight + "]");
+//				if (txtAnnotation.measuredWidth > 0)
+//				{
+//					txtAnnotation.width = txtAnnotation.measuredWidth;
+//					txtAnnotation.height = txtAnnotation.measuredHeight;
+//				}
+				txtAnnotation.update();
+				txtAnnotation.x = annotationPosition.x - txtAnnotation.width / 2.0;
+				txtAnnotation.y = annotationPosition.y - txtAnnotation.height - 5// / 2.0;
 
 			}
 		}
@@ -282,12 +381,21 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 			return b_closed;
 		}
 
+		override protected function computeCurve():void
+		{
+			super.computeCurve();
+		}
+		override protected function drawCurve():void
+		{
+			super.drawCurve();
+		}
+
 		override public function getPoints(reflectionID: int = 0): Array
 		{
 			var points: Array = m_points.getPointsForReflection(reflectionID);
 			if (ms_type == ANNOTATION_PIN)
 			{
-				if (reflectionID && points.length > 0)
+				if (points.length > 0)
 				{
 					var arr: Array = []
 					var firstItem: Point = points[0] as Point;
@@ -432,7 +540,7 @@ class AnnotationSprite extends WFSFeatureEditableSprite
 
 	public function update(type: String, master: InteractiveLayerWFS, a_points: Array, i_color: uint): void
 	{
-
+		trace("Update AnnotationSprite");
 	}
 
 	public function getLineSegmentApproximation(): Array
