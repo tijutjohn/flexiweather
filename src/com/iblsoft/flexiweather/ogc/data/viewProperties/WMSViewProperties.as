@@ -655,7 +655,18 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		{
 			var a: Array = [];
 			if (m_cfg.dimensionTimeName != null)
+			{
 				a.push(m_cfg.dimensionTimeName);
+
+				var timeMethod: String = m_cfg.timeMethod;
+				if (!timeMethod)
+					timeMethod = TimeCreationMethod.timeMethodAccordingFromDimensions(m_cfg.dimensionRunName, m_cfg.dimensionTimeName);
+
+				if (timeMethod == TimeCreationMethod.REFERENCE_TIME_TIME)
+				{
+					a.push(m_cfg.dimensionRunName);
+				}
+			}
 			if (m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null) {
 				a.push(m_cfg.dimensionRunName);
 				a.push(m_cfg.dimensionForecastName);
@@ -752,11 +763,22 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 
 			if (s_variableId == GlobalVariable.FRAME)
 			{
+				trace("getSynchronisedVariableValue m_cfg.dimensionTimeName: " + m_cfg.dimensionTimeName + " m_cfg.dimensionRunName: " + m_cfg.dimensionRunName + " m_cfg.dimensionForecastName: " + m_cfg.dimensionForecastName);
 				if (m_cfg.dimensionTimeName != null)
 				{
 					var time: String = getWMSDimensionValue(m_cfg.dimensionTimeName, true);
 					if (!time)
 						time = getWMSDimensionDefaultValue(m_cfg.dimensionTimeName);
+
+					var timeMethod: String = m_cfg.timeMethod;
+					if (!timeMethod)
+						timeMethod = TimeCreationMethod.timeMethodAccordingFromDimensions(m_cfg.dimensionRunName, m_cfg.dimensionTimeName);
+
+					if (timeMethod == TimeCreationMethod.REFERENCE_TIME_TIME)
+					{
+						var timeDate: Date = ISO8601Parser.stringToDate(time) as Date;
+						return timeDate;
+					}
 
 					return ISO8601Parser.stringToDate(time);
 				}
@@ -771,6 +793,10 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 
 					run = ISO8601Parser.stringToDate(runValue);
 
+					/**
+					 * Was added as part of OW-194
+					 */
+
 					var timeMethod: String = m_cfg.timeMethod;
 					if (!timeMethod)
 						timeMethod = TimeCreationMethod.timeMethodAccordingFromDimensions(m_cfg.dimensionRunName, m_cfg.dimensionForecastName);
@@ -778,11 +804,6 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					if (timeMethod == TimeCreationMethod.REFERENCE_TIME_TIME)
 					{
 						var timeDate: Date = ISO8601Parser.stringToDate(forecastValue) as Date;
-//						if (!run || !timeDate)
-//							return null;
-//
-//						return new Date(run.time + (timeDate.time - run.time));
-
 						return timeDate;
 					}
 
@@ -1031,25 +1052,40 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 				var l_resultTimes2: Array = [];
 				if (m_cfg.dimensionTimeName != null)
 				{
+					var timeMethod: String = m_cfg.timeMethod;
+					if (!timeMethod)
+						timeMethod = TimeCreationMethod.timeMethodAccordingFromDimensions(m_cfg.dimensionRunName, m_cfg.dimensionTimeName);
+
+//					if (run == null && timeMethod != TimeCreationMethod.REFERENCE_TIME_TIME)
+//						return [];
+
 					var l_times: Array = getWMSDimensionsValues(m_cfg.dimensionTimeName, true, Operators.equalsByDates);
-					for each (var time: Object in l_times)
+
+					if (timeMethod == TimeCreationMethod.REFERENCE_TIME_TIME)
 					{
-						if (time.data is Date)
+						l_runs = getWMSDimensionsValues(m_cfg.dimensionRunName, true, Operators.equalsByDates);
+						l_resultTimes2 = findForecastFromReferenceTimeAndTimeValue(run, l_runs, l_times);
+					} else {
+						for each (var time: Object in l_times)
 						{
-//							l_resultTimes.push(time.data);
-							l_resultTimes2.push((time.data as Date).time);
-						}
-						else
-						{
-							trace("PROBLEM: InteractiveLayerMSBase getSynchronisedVariableValuesList time.data is not Date: " + time.data);
+							if (time.data is Date)
+							{
+								l_resultTimes2.push((time.data as Date).time);
+							}
+							else
+							{
+								trace("PROBLEM: InteractiveLayerMSBase getSynchronisedVariableValuesList time.data is not Date: " + time.data);
+							}
 						}
 					}
-
-
 				}
 				else if (m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null)
 				{
 					var run: Date = ISO8601Parser.stringToDate(getWMSDimensionValue(m_cfg.dimensionRunName, true));
+					var l_forecasts: Array = getWMSDimensionsValues(m_cfg.dimensionForecastName, true, Operators.equalsByData);
+					/**
+					 * Was added as part of OW-194
+					 **/
 					var timeMethod: String = m_cfg.timeMethod;
 					if (!timeMethod)
 						timeMethod = TimeCreationMethod.timeMethodAccordingFromDimensions(m_cfg.dimensionRunName, m_cfg.dimensionForecastName);
@@ -1142,15 +1178,13 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 			{
 				var ofExactRun: Object = null;
 
-				if (m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null)
+				//OW-412 need to check also posibility when Run and Time is set (REFERENCE_TIME_TIME)
+				if (m_cfg.dimensionRunName != null && (m_cfg.dimensionForecastName != null || m_cfg.dimensionTimeName != null))
 				{
 					var currentRun: Date = ISO8601Parser.stringToDate(
 						getWMSDimensionValue(m_cfg.dimensionRunName, true));
 
-//					var forecast: Duration = new Duration(((value as Date).time - run.time) / 1000.0);
-
 					var l_runs: Array = getWMSDimensionsValues(m_cfg.dimensionRunName, true, Operators.equalsByDates);
-//					var l_forecasts: Array = getWMSDimensionsValues(m_cfg.dimensionForecastName);
 					ofExactRun = null;
 					for each (of in l_runs)
 					{
@@ -1164,7 +1198,6 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 					//TODO ask if forecast should be synchronised as well
 					if (ofExactRun != null)
 					{
-//						setWMSDimensionValue(m_cfg.dimensionForecastName, ofExactForecast.value);
 						setWMSDimensionValue(m_cfg.dimensionRunName, ofExactRun.value);
 						dispatchSynchronizedVariableChangeEvent(new SynchronisedVariableChangeEvent(
 							SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_CHANGED, GlobalVariable.RUN, false));
