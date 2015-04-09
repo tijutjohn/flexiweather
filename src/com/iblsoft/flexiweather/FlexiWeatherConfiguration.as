@@ -45,7 +45,7 @@ package com.iblsoft.flexiweather
 		/**
 		 * Constant, which defines whether loader can cancell previous requests, which were not finished, when new load request is required
 		 */
-		public static var CAN_CANCELL_REQUESTS: Boolean = false;
+		public static var CAN_CANCELL_REQUESTS: Boolean = true;
 
 	}
 }
