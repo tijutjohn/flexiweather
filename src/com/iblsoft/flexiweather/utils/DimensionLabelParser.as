@@ -148,7 +148,7 @@ package com.iblsoft.flexiweather.utils
 				var value: String = interactiveLayer.getWMSDimensionValue(dimensionName, true);
 				if (value)
 				{
-					var valueObject: Object = WMSDimension.stringValueToObject(value, interactiveLayer.getWMSDimensionUnitsName(dimensionName));
+					var valueObject: Object = WMSDimension.stringValueToObject(value, interactiveLayer.getWMSDimensionUnitsName(dimensionName), interactiveLayer.getWMSDimensionUnitSymbolsName(dimensionName));
 					return valueObject;
 				}
 			}

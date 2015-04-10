@@ -4,15 +4,16 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariableValue;
 	import com.iblsoft.flexiweather.utils.Duration;
 	import com.iblsoft.flexiweather.utils.ISO8601Parser;
-	
+
 	import flash.utils.getTimer;
 
 	public class WMSDimension extends GetCapabilitiesXMLItem
 	{
 		private var ma_values: Array;
 		private var ms_units: String;
+		private var ms_unitSymbol: String;
 		private var ms_default: String;
-		
+
 		/**
 		 * String representing values of dimensions as found in the GetCapabilities document.
 		 * It will be parsed if the values getter is invoked.
@@ -24,26 +25,30 @@ package com.iblsoft.flexiweather.ogc
 		public function WMSDimension(xml: XML, wms: Namespace, version: Version)
 		{
 			super(xml, wms, version);
-			
+
 			// in WMS 1.3.0 dimension values are inside of <Dimension> element
-			ms_units = xml.@units;
 			ms_name = xml.@name;
+			ms_units = xml.@units;
+			if (xml.hasOwnProperty("@unitSymbol"))
+			{
+				ms_unitSymbol = xml.@unitSymbol;
+			}
 		}
-		
+
 //		override public function initialize(): void
 //		{
 //			super.initialize();
-//		}			
-		
+//		}
+
 		override public function parse(parsingManager: WMSServiceParsingManager = null): void
 		{
 			super.parse();
-			
+
 			// in WMS < 1.3.0, dimension values are inside of <Extent> element
 			// having the same @name as the <Dimension> element
 			if (!m_version.isLessThan(1, 3, 0))
 			{
-				
+
 				// in WMS < 1.3.0, dimension values are inside of <Extent> element
 				// having the same @name as the <Dimension> element
 				//			if (m_version.isLessThan(1, 3, 0))
@@ -60,8 +65,8 @@ package com.iblsoft.flexiweather.ogc
 				//parse WMS1.3.0 dimension
 				loadExtent(m_itemXML, wms, m_version);
 			}
-			
-			
+
+
 		}
 
 		public function destroy(): void
@@ -104,16 +109,16 @@ package com.iblsoft.flexiweather.ogc
 		{
 			if (!mb_isParsed)
 				parse();
-			
+
 			var arr: Array = ms_values == null ? [] : ms_values.split(",");
 			ma_values = [];
 			for each (var s_value: String in arr)
 			{
 				// Strip white spaces to workaround " , " separation used in
-				// http://openmetoc.met.no/metoc/metocwms?request=GetCapabilities&VERSION=1.1.1 
+				// http://openmetoc.met.no/metoc/metocwms?request=GetCapabilities&VERSION=1.1.1
 				s_value = s_value.replace(/\s+\Z/, '').replace(/\A\s+/, '');
 				if (s_value.length > 0)
-					stringValueToObjects(ma_values, s_value, ms_units);
+					stringValueToObjects(ma_values, s_value, ms_units, ms_unitSymbol);
 				else
 					trace("WMSDimension: There is problem with value: " + s_value);
 			}
@@ -122,14 +127,14 @@ package com.iblsoft.flexiweather.ogc
 
 		protected static function stringValueToObjects(
 				a_values: Array,
-				s_value: String, s_units: String): void
+				s_value: String, s_units: String, s_unitSymbol: String): void
 		{
 			var gvv: GlobalVariableValue;
 			var s_label: String = s_value;
 			var data: Object = s_value;
 			if (s_units != null)
 				s_units = s_units.toUpperCase();
-			// Unit date_time is used at http://openmetoc.met.no/metoc/metocwms?request=GetCapabilities&VERSION=1.1.1 
+			// Unit date_time is used at http://openmetoc.met.no/metoc/metocwms?request=GetCapabilities&VERSION=1.1.1
 			if (s_units == "ISO8601" || s_units == "DATE_TIME")
 			{
 				if (sm_dateTimeParser.looksLikeDuration(s_value))
@@ -181,7 +186,7 @@ package com.iblsoft.flexiweather.ogc
 								}
 								return;
 							}
-								// else - TODO: range?						
+								// else - TODO: range?
 						}
 						else
 						{
@@ -219,7 +224,7 @@ package com.iblsoft.flexiweather.ogc
 								f_numTo = f_numSwap;
 							}
 							if (f_numStep == 0)
-								f_numStep = 1; // HACK:  
+								f_numStep = 1; // HACK:
 							while ((f_numTo - f_numFrom) / f_numStep > 1000)
 							{
 								f_numStep *= 10.0;
@@ -248,16 +253,23 @@ package com.iblsoft.flexiweather.ogc
 			}
 			// default operation
 			gvv = new GlobalVariableValue();
-			gvv.label = s_label;
-			gvv.value = s_value;
+			if (s_unitSymbol) {
+				gvv.label = s_label +  s_unitSymbol;
+				gvv.unitSymbol = s_unitSymbol;
+//				gvv.data = data +  s_unitSymbol;
+			} else {
+				gvv.label = s_label;
+//				gvv.data = data;
+			}
 			gvv.data = data;
+			gvv.value = s_value;
 			a_values.push(gvv);
 		}
 
-		public static function stringValueToObject(s_value: String, s_units: String): Object
+		public static function stringValueToObject(s_value: String, s_units: String, s_unitSymbol: String): Object
 		{
 			var a: Array = [];
-			stringValueToObjects(a, s_value, s_units);
+			stringValueToObjects(a, s_value, s_units, s_unitSymbol);
 			if (a.length > 0)
 				return a[0];
 			return null;
@@ -273,6 +285,11 @@ package com.iblsoft.flexiweather.ogc
 		public function get units(): String
 		{
 			return ms_units;
+		}
+
+		public function get unitSymbol(): String
+		{
+			return ms_unitSymbol;
 		}
 
 		public function get defaultValue(): String

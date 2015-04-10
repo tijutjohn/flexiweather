@@ -255,7 +255,6 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 
 		public function setWMSDimensionValue(s_dimName: String, s_value: String): void
 		{
-//			trace("setWMSDimensionValue: " + s_dimName + " => " + s_value + " for " + parentLayer.name);
 			//FIXME clearing legend cache must be moved to layer
 //			if (m_cfg.mb_legendIsDimensionDependant)
 //			{
@@ -416,6 +415,33 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 			if (b_anyDimensionFound && s_units == null)
 				return "no units";
 			return s_units;
+		}
+
+		public function getWMSDimensionUnitSymbolsName(s_dimName: String): String
+		{
+			var s_unitSymbol: String = null;
+			var b_anyDimensionFound: Boolean = false;
+			for each (var layer: WMSLayer in getWMSLayers())
+			{
+				for each (var dim: WMSDimension in layer.dimensions)
+				{
+					if (dim.name.toLowerCase() != s_dimName.toLowerCase())
+						continue;
+					if (dim.unitSymbol == null)
+						continue;
+					b_anyDimensionFound = true;
+					if (s_unitSymbol == null)
+						s_unitSymbol = dim.unitSymbol;
+					else
+					{
+						if (dim.unitSymbol != s_unitSymbol)
+							return "mixed unitSymbols";
+					}
+				}
+			}
+			if (b_anyDimensionFound && s_unitSymbol == null)
+				return "no unitSymbol";
+			return s_unitSymbol;
 		}
 
 		// returns null is no such dimension exist
@@ -763,7 +789,6 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 
 			if (s_variableId == GlobalVariable.FRAME)
 			{
-				trace("getSynchronisedVariableValue m_cfg.dimensionTimeName: " + m_cfg.dimensionTimeName + " m_cfg.dimensionRunName: " + m_cfg.dimensionRunName + " m_cfg.dimensionForecastName: " + m_cfg.dimensionForecastName);
 				if (m_cfg.dimensionTimeName != null)
 				{
 					var time: String = getWMSDimensionValue(m_cfg.dimensionTimeName, true);
@@ -1153,11 +1178,18 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 						return SynchronisationResponse.ALREADY_SYNCHRONISED;
 
 					ofExactLevel = null;
-					var l_levels: Array = getWMSDimensionsValues(m_cfg.dimensionVerticalLevelName, true, Operators.equalsByData);
+//					var l_levels: Array = getWMSDimensionsValues(m_cfg.dimensionVerticalLevelName, true, Operators.equalsByData);
+					var l_levels: Array = getWMSDimensionsValues(m_cfg.dimensionVerticalLevelName, true, Operators.equalsByLabels);
 
 					for each (of in l_levels)
 					{
+//						if (of && of.data && (of.data as String) == level)
 						if (of && of.data && (of.data as String) == level)
+						{
+							ofExactLevel = of;
+							break;
+						}
+						if (of && of.dataWithUnitSymbol && (of.dataWithUnitSymbol as String) == level)
 						{
 							ofExactLevel = of;
 							break;
@@ -1289,7 +1321,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		}
 		protected function debug(str: String): void
 		{
-//			trace("WMSViewProperties: " + str);
+			trace("WMSViewProperties: " + str);
 //			LoggingUtils.dispatchLogEvent(this, "WMSViewProperties: " + str);
 		}
 
