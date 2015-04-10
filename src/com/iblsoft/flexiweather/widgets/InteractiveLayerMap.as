@@ -1620,8 +1620,7 @@ package com.iblsoft.flexiweather.widgets
 				if (l_allLevels == null || l_allLevels.length == 0)
 					l_allLevels = l_levels;
 				else {
-//					ArrayUtils.unionArrays(l_timeAxis, l_levels);
-					l_allLevels = ArrayUtils.intersectedArrays(l_allLevels, l_levels, Operators.equalsByData);
+					l_allLevels = ArrayUtils.intersectedArrays(l_allLevels, l_levels, Operators.equalsByLabels);
 				}
 			}
 			return l_allLevels;

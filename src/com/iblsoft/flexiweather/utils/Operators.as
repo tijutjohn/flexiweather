@@ -16,7 +16,7 @@ package com.iblsoft.flexiweather.utils
 					break;
 				case 'elevation':
 				case 'level':
-					fnc = Operators.equalsByData;
+					fnc = Operators.equalsByLabels;
 					break;
 			}
 			return fnc;

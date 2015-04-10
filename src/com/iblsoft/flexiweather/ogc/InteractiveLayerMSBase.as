@@ -639,7 +639,7 @@ package com.iblsoft.flexiweather.ogc
 		protected function onCurrentWMSDataProgress(event: InteractiveLayerProgressEvent): void
 		{
 			var loader: MSBaseLoader = event.target as MSBaseLoader;
-			debug("onCurrentWMSDataProgress loader: " + loader);
+//			debug("onCurrentWMSDataProgress loader: " + loader);
 
 			notifyProgress(event.loaded, event.total, event.units);
 		}
@@ -1633,6 +1633,14 @@ package com.iblsoft.flexiweather.ogc
 		{
 			if (m_currentWMSViewProperties)
 				return m_currentWMSViewProperties.getWMSDimensionUnitsName(s_dimName);
+			return null;
+		}
+
+		// returns null is no such dimension exist
+		public function getWMSDimensionUnitSymbolsName(s_dimName: String): String
+		{
+			if (m_currentWMSViewProperties)
+				return m_currentWMSViewProperties.getWMSDimensionUnitSymbolsName(s_dimName);
 			return null;
 		}
 
