@@ -173,7 +173,7 @@ package com.iblsoft.flexiweather.ogc.editable.data
 
 		public function onMouseDoubleClick(pt: Point, event: MouseEvent): Boolean
 		{
-			m_feature.deselect();
+			m_feature.closeFeature();
 			if (m_feature is IClosableCurve && m_feature.coordinates.length > 2)
 			{
 				if (mi_pointIndex == 0)
