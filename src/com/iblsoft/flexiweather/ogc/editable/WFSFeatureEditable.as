@@ -8,6 +8,7 @@ package com.iblsoft.flexiweather.ogc.editable
 	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataPoint;
 	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
 	import com.iblsoft.flexiweather.ogc.editable.data.MoveablePoint;
+	import com.iblsoft.flexiweather.ogc.editable.events.WFSFeatureEditableEvent;
 	import com.iblsoft.flexiweather.ogc.events.MoveablePointEvent;
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithReflection;
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureBase;
@@ -28,6 +29,7 @@ package com.iblsoft.flexiweather.ogc.editable
 
 	import mx.utils.ObjectUtil;
 
+	[Event(name=WFSFeatureEditableEvent.FEATURE_CLOSED, type="com.iblsoft.flexiweather.ogc.editable.events.WFSFeatureEditableEvent")]
 	public class WFSFeatureEditable extends WFSFeatureBase implements IEditableItem, IHighlightableItem, ISelectableItem, IWFSFeatureWithReflection
 	{
 		protected var mb_selected: Boolean;
@@ -838,6 +840,14 @@ package com.iblsoft.flexiweather.ogc.editable
 					removeEditablePointForReflectionAt(reflection.reflectionDelta, i);
 				}
 			}
+		}
+
+		public function closeFeature(): void
+		{
+			var wfee: WFSFeatureEditableEvent = new WFSFeatureEditableEvent(WFSFeatureEditableEvent.FEATURE_CLOSED, this, true);
+			dispatchEvent(wfee);
+
+			deselect();
 		}
 
 		public function deselect(): void
