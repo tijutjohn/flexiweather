@@ -25,6 +25,7 @@ package com.iblsoft.flexiweather.plugins
 		public static const MENU_ITEM_CLICK_LISTENER: String = "menuItemClickListener";
 		public static const SUBMENU_ITEM: String = "submenuItem";
 		public static const LOCAL_COMMUNICATION: String = "localCommunication";
+		public static const THEME: String = "theme";
 
 		private var ms_abilityType: String;
 		private var m_classOrInstance: Object;
@@ -97,6 +98,12 @@ package com.iblsoft.flexiweather.plugins
 				s_id: String = null, s_plugin_id: String = null): PluginAbility
 		{
 			return new PluginAbility(PluginAbility.LEGENDS, s_id, s_plugin_id, classOrInstance);
+		}
+
+		public static function theme(classOrInstance: Object,
+				s_id: String = null, s_plugin_id: String = null): PluginAbility
+		{
+			return new PluginAbility(PluginAbility.THEME, s_id, s_plugin_id, classOrInstance);
 		}
 
 		public static function interactiveWidgetClient(classOrInstance: Object,
