@@ -291,11 +291,11 @@ package com.iblsoft.flexiweather.ogc.editable.features
 							movementSprite.x = pt.x;
 							movementSprite.y = pt.y;
 						}
-						else
-						{
-							renderFallbackGraphics(i_color);
-							return;
-						}
+//						else
+//						{
+//							renderFallbackGraphics(i_color);
+//							return;
+//						}
 					}
 				}
 			}
@@ -441,25 +441,21 @@ class MovementSprite extends WFSFeatureEditableSprite
 		graphics.clear();
 
 		graphics.lineStyle(2,i_colorCross, 1 );
-//		graphics.beginFill(i_colorCross,1);
-
-//		graphics.moveTo(x - ptDiff2X, y - ptDiff2Y);
 		graphics.moveTo(prevX, prevY);
 		graphics.lineTo(x - ptDiff2X, y - ptDiff2Y);
 		graphics.lineTo(x + ptPerpX - ptDiffX, y + ptPerpY - ptDiffY);
 		graphics.moveTo(x - ptDiff2X, y - ptDiff2Y);
 		graphics.lineTo(x - ptPerpX - ptDiffX, y - ptPerpY - ptDiffY);
 
-//		trace("\nMovement draw");
-//		trace("graphics.moveTo("+prevX +", "+prevY +");");
-//		trace("graphics.lineTo("+(x - ptDiff2X) +", "+(y - ptDiff2Y) +");");
-//		trace("graphics.lineTo("+(x + ptPerpX - ptDiffX) +", "+(y + ptPerpY - ptDiffY) +");");
-//		trace("graphics.moveTo("+(x - ptDiff2X) +", "+(y - ptDiff2Y) +");");
-//		trace("graphics.lineTo("+(x - ptPerpX - ptDiffX) +", "+(y - ptPerpY - ptDiffY) +");");
+		/*
+		trace("\nMovement draw");
+		trace("graphics.moveTo("+prevX +", "+prevY +");");
+		trace("graphics.lineTo("+(x - ptDiff2X) +", "+(y - ptDiff2Y) +");");
+		trace("graphics.lineTo("+(x + ptPerpX - ptDiffX) +", "+(y + ptPerpY - ptDiffY) +");");
 
-//		graphics.lineTo(x - ptDiff2X, y - ptDiff2Y);
-
-//		graphics.endFill();
+		trace("graphics.moveTo("+(x - ptDiff2X) +", "+(y - ptDiff2Y) +");");
+		trace("graphics.lineTo("+(x - ptPerpX - ptDiffX) +", "+(y - ptPerpY - ptDiffY) +");");
+		*/
 
 	}
 
