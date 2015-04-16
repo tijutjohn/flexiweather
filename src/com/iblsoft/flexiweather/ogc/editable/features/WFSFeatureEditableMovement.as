@@ -33,7 +33,6 @@ package com.iblsoft.flexiweather.ogc.editable.features
 	{
 		public var type: String;
 
-
 		public function get directionValue():Object
 		{
 			return _directionValue;
@@ -48,25 +47,24 @@ package com.iblsoft.flexiweather.ogc.editable.features
 		[Bindable (event="directionChanged")]
 		public function get direction(): int
 		{
-			var test: int = getDirectionFromValue();
+			var test: int = getDirectionFromValue(directionValue, type);
 			return test;
 		}
 		private var _directionValue: Object;
 		public var speed: int;
-		private var _angles: Dictionary;
+		public static var angles: Dictionary;
 
 		public function WFSFeatureEditableMovement(s_namespace: String, s_typeName: String, s_featureId: String)
 		{
 			super(s_namespace, s_typeName, s_featureId);
+
 			type = MovementMode.COMPASS_POINTS_8;
 			speed = 80;
 			directionValue = {value: "N"};
 			mb_isSinglePointFeature = true;
-			_angles = new Dictionary();
-			initAngles();
 		}
 
-		public function getDataProvideForMovementMode(mode: String): ArrayCollection
+		public static function getDataProvideForMovementMode(mode: String): ArrayCollection
 		{
 			var arr: Array;
 			switch (mode)
@@ -81,25 +79,32 @@ package com.iblsoft.flexiweather.ogc.editable.features
 			return new ArrayCollection(arr);
 		}
 
-		private function initAngles(): void
+		public static function initAngles(): void
 		{
-			var directions: Array = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE","SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
-			var angle: Number = 0;
-			for each (var direction: String in directions)
+			if (!angles)
 			{
-				_angles[direction] = {direction: direction, angle: angle};
-				angle += 360/16;
+				angles = new Dictionary();
+				var directions: Array = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE","SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
+				var angle: Number = 0;
+				for each (var direction: String in directions)
+				{
+					angles[direction] = {direction: direction, angle: angle};
+					angle += 360/16;
+				}
 			}
 		}
 
-		public function getAngleForDirection(direction: Object): Number
+		public static function getAngleForDirection(direction: Object): Number
 		{
 			if (direction is Object && direction.hasOwnProperty("value"))
-				return _angles[direction.value as String].angle as Number;
+			{
+				initAngles();
+				return angles[direction.value as String].angle as Number;
+			}
 
 			return (direction as Number);
 		}
-		public function getItemWithSimilarDirection(ac: ArrayCollection): Object
+		public static function getItemWithSimilarDirection(ac: ArrayCollection, directionValue: Object): Object
 		{
 			if (directionValue)
 			{
@@ -107,9 +112,12 @@ package com.iblsoft.flexiweather.ogc.editable.features
 				var direction: String;
 				var item: Object;
 				var currDirectionString: String;
-				if (directionValue is Object && directionValue.hasOwnProperty("value")) {
+				if (directionValue is Object && directionValue.hasOwnProperty("value"))
+				{
+					initAngles();
+
 					direction = directionValue.value;
-					currAngle = _angles[direction].angle;
+					currAngle = angles[direction].angle;
 					for each (item in ac)
 					{
 						currDirectionString = item.value as String;
@@ -128,7 +136,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 					for each (item in ac)
 					{
 						currDirectionString = item.value as String;
-						var angle: Number = _angles[currDirectionString].angle;
+						var angle: Number = angles[currDirectionString].angle;
 
 						var dist: Number = Math.abs(currAngle - angle);
 						if (dist < minDistance)
@@ -148,15 +156,16 @@ package com.iblsoft.flexiweather.ogc.editable.features
 			return null;
 		}
 
-		private function getDirectionFromValue(): int
+		public static function getDirectionFromValue(directionValue: Object, movementType: String): int
 		{
-			if (type == MovementMode.DEGREES)
+			if (movementType == MovementMode.DEGREES)
 			{
 				return Math.round(directionValue as Number);
 			}
 
+			initAngles();
 			var directionName: String = directionValue.value as String;
-			return Math.round((_angles[directionName] as Object).angle);
+			return Math.round((angles[directionName] as Object).angle);
 		}
 		override public function update(changeFlag: FeatureUpdateContext): void
 		{
