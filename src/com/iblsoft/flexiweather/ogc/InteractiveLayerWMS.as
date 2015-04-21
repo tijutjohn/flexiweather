@@ -19,11 +19,13 @@ package com.iblsoft.flexiweather.ogc
 	import com.iblsoft.flexiweather.utils.LoggingUtils;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
+	import com.iblsoft.flexiweather.utils.XMLStorage;
 	import com.iblsoft.flexiweather.widgets.BackgroundJob;
 	import com.iblsoft.flexiweather.widgets.BackgroundJobManager;
 	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
+	import com.iblsoft.flexiweather.widgets.InteractiveLayerCreationMethod;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 
 	import flash.display.Bitmap;
@@ -39,7 +41,7 @@ package com.iblsoft.flexiweather.ogc
 	import mx.events.DynamicEvent;
 	import mx.logging.Log;
 
-	[Event(name = "wmsStyleChanged", type = "fcom.iblsoft.flexiweather.events.InteractiveLayerWMSEvent")]
+	[Event (name = "wmsStyleChanged", type = "fcom.iblsoft.flexiweather.events.InteractiveLayerWMSEvent")]
 	public class InteractiveLayerWMS extends InteractiveLayerMSBase implements ISynchronisedObject, Serializable, IConfigurableLayer, ICachedLayer
 	{
 		protected var m_autoRefreshTimer: Timer;
@@ -97,7 +99,24 @@ package com.iblsoft.flexiweather.ogc
 			var styleName: String;
 
 			var styleNameValue: String;
-			var level: String;
+			var config: WMSLayerConfiguration = configuration as WMSLayerConfiguration;
+			var supportVerticalLevelDimension: Boolean = config.dimensionVerticalLevelName != null;
+			var supportRunDimension: Boolean = config.dimensionRunName != null;
+			var supportSynchronisableLevel: Boolean = hasSynchronisedVariable(GlobalVariable.LEVEL);
+			var supportSynchronisableRun: Boolean = hasSynchronisedVariable(GlobalVariable.RUN);
+
+			if (supportVerticalLevelDimension)
+			{
+				var level: String;
+				var dimensionVerticalLevelName: String;// = "ELEVATION";
+				dimensionVerticalLevelName = config.dimensionVerticalLevelName;
+			}
+			if (supportRunDimension)
+			{
+				var run: String;
+				var dimensionRunName: String;// = "RUN";
+				dimensionRunName = config.dimensionRunName;
+			}
 
 			if (storage.isLoading())
 			{
@@ -106,26 +125,31 @@ package com.iblsoft.flexiweather.ogc
 				if (newAlpha < 1)
 					alpha = newAlpha;
 				visible = storage.serializeBool("visible", visible, true);
+
 				synchroniseLevel = storage.serializeBool('synchronise-level', false);
+				if (supportVerticalLevelDimension && !synchroniseLevel)
+				{
+					level = storage.serializeString(GlobalVariable.LEVEL, "", null);
+					if (level)
+						_tempParameterStorage.setWMSDimensionValue(dimensionVerticalLevelName, level);
+				}
 				synchroniseRun = storage.serializeBool('synchronise-run', false);
 
-
 				styleNameValue = storage.serializeString("style-name", "", null);
-				level = storage.serializeString(GlobalVariable.LEVEL, "", null);
 				if (styleNameValue)
 					_tempParameterStorage.setWMSStyleName(0, styleNameValue);
-				if (level)
-					_tempParameterStorage.setWMSDimensionValue('ELEVATION', level);
 
 				var primaryLayer: Boolean = storage.serializeBool("primary-layer", true);
 				if (primaryLayer)
 					synchronizationRoleValue = SynchronisationRole.PRIMARY;
+
+				creationMethod = InteractiveLayerCreationMethod.SERIALIZED;
 			}
 			else
 			{
 				//get values from currentWMSViewProperties and store them in layer properties
 				styleNameValue = m_currentWMSViewProperties.getWMSStyleName(0);
-				level = m_currentWMSViewProperties.getWMSDimensionValue('ELEVATION');
+
 				synchronizationRoleValue = m_synchronisationRole.role;
 
 				if (alpha < 1)
@@ -137,16 +161,33 @@ package com.iblsoft.flexiweather.ogc
 				if (styleNameValue)
 					storage.serializeString("style-name", styleNameValue, null);
 
-				if (!synchroniseLevel)
+
+				if (supportSynchronisableLevel || supportVerticalLevelDimension) storage.serializeBool('synchronise-level', synchroniseLevel);
+				if (supportSynchronisableRun || supportRunDimension) storage.serializeBool('synchronise-run', synchroniseRun);
+
+				if (supportVerticalLevelDimension)
 				{
-					if (!level)
-						level = m_currentWMSViewProperties.getWMSDimensionDefaultValue('ELEVATION');
+					level = m_currentWMSViewProperties.getWMSDimensionValue(dimensionVerticalLevelName);
+					if (!synchroniseLevel)
+					{
+						if (!level)
+							level = m_currentWMSViewProperties.getWMSDimensionDefaultValue(dimensionVerticalLevelName);
 
-					storage.serializeString(GlobalVariable.LEVEL, level, null);
+						storage.serializeString(GlobalVariable.LEVEL, level, null);
+					}
 				}
-
-				storage.serializeBool('synchronise-level', synchroniseLevel);
-				storage.serializeBool('synchronise-run', synchroniseRun);
+//				if (supportRunDimension)
+//				{
+//					run = m_currentWMSViewProperties.getWMSDimensionValue(dimensionRunName);
+//					if (!synchroniseRun)
+//					{
+//						if (!run)
+//							run = m_currentWMSViewProperties.getWMSDimensionDefaultValue(dimensionRunName);
+//
+//						storage.serializeString(GlobalVariable.RUN, run, null);
+//					}
+//				}
+				trace("WMS layer serialize " + (storage as XMLStorage).xml.toXMLString());
 			}
 		}
 

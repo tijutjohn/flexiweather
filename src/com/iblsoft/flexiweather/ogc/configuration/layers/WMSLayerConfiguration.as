@@ -406,9 +406,10 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			var dimensions: Array = layer.parsedDimensions;
 			for each (var dimension: WMSDimension in dimensions)
 			{
-				switch (dimension.name)
+				switch (dimension.name.toUpperCase())
 				{
 					case "RUN":
+					case "REFERENCE_TIME":
 					{
 						dimensionRunName = dimension.name;
 						break;
@@ -427,6 +428,10 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 					{
 						dimensionVerticalLevelName = dimension.name;
 						break;
+					}
+					default:
+					{
+//						trace("WMSLayerConfiguration updateDimensions wrong dimension: " + dimension.name);
 					}
 				}
 			}

@@ -253,6 +253,9 @@ package com.iblsoft.flexiweather.ogc
 			}
 			// default operation
 			gvv = new GlobalVariableValue();
+			if (s_units) {
+				gvv.unit = s_units;
+			}
 			if (s_unitSymbol) {
 				gvv.label = s_label +  s_unitSymbol;
 				gvv.unitSymbol = s_unitSymbol;

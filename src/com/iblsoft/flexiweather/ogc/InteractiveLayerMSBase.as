@@ -119,17 +119,6 @@ package com.iblsoft.flexiweather.ogc
 		}
 
 		/**
-		 * Selected style name. It is stored in currentWMSViewProperties, but on save (serialize) it's stored in layer because of loading process should set correctly
-		 * stylename on layer initialization (which is asynchronous (see initializeLayerProperties() method))
-		 */
-//		protected var styleNameValue: String;
-		/**
-		 * Selected level value (ELEVATION). It is stored in currentWMSViewProperties, but on save (serialize) it's stored in layer because of loading process should set correctly
-		 * level on layer initialization (which is asynchronous (see initializeLayerProperties() method))
-		 */
-//		protected var level: String;
-
-		/**
 		 * Selected synchronization role value. It is stored in currentWMSViewProperties, but on save (serialize) it's stored in layer because of loading process should set correctly
 		 *  synchronization role on layer initialization (which is asynchronous (see initializeLayerProperties() method))
 		 */
@@ -1934,6 +1923,13 @@ package com.iblsoft.flexiweather.ogc
 			return null;
 		}
 
+		public function getSynchronisedVariableUnitSymbolsName(s_variableId: String): String
+		{
+			if (m_currentWMSViewProperties)
+				return m_currentWMSViewProperties.getSynchronisedVariableUnitSymbolsName(s_variableId);
+			return null;
+		}
+
 		public function getSynchronisedVariableValuesList(s_variableId: String, b_checkGlobalSynchronization: Boolean = true): Array
 		{
 			if (b_checkGlobalSynchronization)
@@ -2221,11 +2217,6 @@ package com.iblsoft.flexiweather.ogc
 		{
 			super.updatePropertyForCloneLayer(layer);
 
-//			newLayer.id = id;
-//			newLayer.alpha = alpha;
-//			newLayer.zOrder = zOrder;
-//			newLayer.visible = visible;
-//			newLayer.layerName = layerName;
 			if (layer is InteractiveLayerMSBase)
 			{
 				var newLayer: InteractiveLayerMSBase = layer as InteractiveLayerMSBase;
@@ -2331,7 +2322,16 @@ package com.iblsoft.flexiweather.ogc
 				if (levelValue.hasOwnProperty('value') && levelValue.value is String)
 					levelValueString = levelValue.value as String;
 
-				notifySynchronizationChange(GlobalVariable.LEVEL, levelValue, mb_synchroniseLevel);
+				var values: Array = getSynchronisedVariableValuesList(GlobalVariable.LEVEL);
+				for each (var gvv: GlobalVariableValue in values)
+				{
+					if (gvv.value == levelValueString)
+					{
+						levelValueString = gvv.dataWithUnit;
+						break;
+					}
+				}
+				notifySynchronizationChange(GlobalVariable.LEVEL, levelValueString, mb_synchroniseLevel);
 
 				dispatchEvent(new SynchronisedVariableChangeEvent(SynchronisedVariableChangeEvent.SYNCHRONISED_VARIABLE_DOMAIN_CHANGED, GlobalVariable.LEVEL));
 

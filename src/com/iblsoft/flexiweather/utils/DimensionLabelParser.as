@@ -3,8 +3,10 @@ package com.iblsoft.flexiweather.utils
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.WMSDimension;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
+	import com.iblsoft.flexiweather.ogc.data.GlobalVariableValue;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerComposer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
+
 	import flash.utils.Dictionary;
 
 	public class DimensionLabelParser
@@ -96,10 +98,16 @@ package com.iblsoft.flexiweather.utils
 						}
 						else if (tagName.toLowerCase() == GlobalVariable.LEVEL)
 						{
-							var elevation: Object = getWMSDimensionValue(layerMap, layerID, 'ELEVATION');
+//							var elevation: Object = getWMSDimensionValue(layerMap, layerID, 'ELEVATION');
+							var elevation: Object = getSynchronisedVariableValue(layerMap, layerID, GlobalVariable.LEVEL);
 							if (elevation)
 							{
-								var level: String = elevation.data as String;
+								var level: String;
+								level = elevation as String;
+//								if (elevation.hasOwnProperty("dataWithUnitSymbol"))
+//									level = elevation.dataWithUnitSymbol as String;
+//								else if (elevation.hasOwnProperty("data"))
+//									level = elevation.data as String;
 								replacedString = formatWMSDimensionValue(level, format, useUTC);
 							}
 						}
@@ -151,6 +159,65 @@ package com.iblsoft.flexiweather.utils
 					var valueObject: Object = WMSDimension.stringValueToObject(value, interactiveLayer.getWMSDimensionUnitsName(dimensionName), interactiveLayer.getWMSDimensionUnitSymbolsName(dimensionName));
 					return valueObject;
 				}
+			}
+			return '';
+		}
+		private function getSynchronisedVariableValue(layerComposer: InteractiveLayerMap, interactiveLayerType: String, variableName: String): Object
+		{
+			var interactiveLayer: InteractiveLayerMSBase;
+			if (interactiveLayerType)
+				interactiveLayer = layerComposer.getLayerByID(interactiveLayerType) as InteractiveLayerMSBase;
+			else {
+				for each (interactiveLayer in layerComposer.layers)
+				{
+					if (interactiveLayer.hasSynchronisedVariable(variableName))
+					{
+						break;
+					}
+				}
+			}
+			if (interactiveLayer)
+			{
+				var value: Object
+				switch (variableName)
+				{
+					case GlobalVariable.FRAME:
+						value = layerComposer.frame;
+						break;
+					case GlobalVariable.RUN:
+						value = layerComposer.run;
+						break;
+					case GlobalVariable.LEVEL:
+						value = layerComposer.level;
+						var synchronisedLevels: Array = interactiveLayer.getSynchronisedVariableValuesList(GlobalVariable.LEVEL);
+						var synchronisedLevel: String = layerComposer.level
+						var synchronisedLevelUnitSymbols: String = interactiveLayer.getSynchronisedVariableUnitSymbolsName(GlobalVariable.LEVEL);
+
+						var synchronisedLevelReplaced: Boolean;
+						if (synchronisedLevels && synchronisedLevels.length > 0)
+						{
+							for (var l: int = 0; l < synchronisedLevels.length; l++)
+							{
+								var levelGvv: GlobalVariableValue = synchronisedLevels[l] as GlobalVariableValue;
+								if (levelGvv.dataWithUnit == synchronisedLevel)
+								{
+									synchronisedLevel = levelGvv.dataWithUnitSymbol;
+									synchronisedLevelReplaced = true;
+									break;
+								}
+							}
+						}
+						if (!synchronisedLevelReplaced && synchronisedLevelUnitSymbols && synchronisedLevel.indexOf(synchronisedLevelUnitSymbols) == -1)
+							synchronisedLevel += synchronisedLevelUnitSymbols;
+						value = synchronisedLevel;
+						break;
+				}
+				return value;
+//				if (value)
+//				{
+//					var valueObject: Object = WMSDimension.stringValueToObject(value, interactiveLayer.getSynchronisedVariableUnitsName(variableName), interactiveLayer.getSynchronisedVariableUnitSymbolsName(variableName));
+//					return valueObject;
+//				}
 			}
 			return '';
 		}

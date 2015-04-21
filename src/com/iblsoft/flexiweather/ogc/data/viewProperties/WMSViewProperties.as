@@ -9,6 +9,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 	import com.iblsoft.flexiweather.ogc.WMSDimension;
 	import com.iblsoft.flexiweather.ogc.WMSLayer;
 	import com.iblsoft.flexiweather.ogc.configuration.data.TimeCreationMethod;
+	import com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.IWMSLayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
@@ -195,16 +196,20 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 			//super.serialize(storage);
 			var s_dimName: String;
 			var styleName: String;
+			var config: WMSLayerConfiguration = parentLayer.configuration as WMSLayerConfiguration;
 			if (storage.isLoading())
 			{
 				styleName = storage.serializeString("style-name", name);
 				if (styleName)
 					setWMSStyleName(0, styleName);
+
 				for each (s_dimName in getWMSDimensionsNames())
 				{
 					var level: String = storage.serializeString(s_dimName, null, null);
 					if (level)
-						setWMSDimensionValue('ELEVATION', level);
+					{
+						setWMSDimensionValue(config.dimensionVerticalLevelName, level);
+					}
 				}
 			}
 			else
@@ -274,9 +279,11 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 
 		private function isSupportedDimension(s_dimName: String): Boolean
 		{
+//			trace("isSupportedDimension s_dimName: " + s_dimName);
 			s_dimName = s_dimName.toLowerCase();
 			for (var currDimName: String in md_dimensionValues)
 			{
+//				trace("isSupportedDimension currDimName: " + currDimName);
 				var currDimNameLowerCase: String = currDimName.toLowerCase();
 				if (currDimNameLowerCase == s_dimName)
 					return true;
@@ -286,10 +293,12 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		private function getWMSDimensionValueInsensitive(s_dimName: String,
 				 b_returnDefault: Boolean = false): String
 		{
+//			trace("getWMSDimensionValueInsensitive s_dimName: " + s_dimName);
 			if (isSupportedDimension(s_dimName)) {
 				var s_dimNameLowerCase: String = s_dimName.toLowerCase();
 				for (var currDimName: String in md_dimensionValues)
 				{
+//					trace("getWMSDimensionValueInsensitive currDimName: " + currDimName);
 					var currDimNameLowerCase: String = currDimName.toLowerCase();
 					if (currDimNameLowerCase == s_dimNameLowerCase)
 						return md_dimensionValues[currDimName];
@@ -987,6 +996,42 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 
  */
 
+		public function getSynchronisedVariableUnitSymbolsName(s_variableId: String): String
+		{
+			if (s_variableId == GlobalVariable.LEVEL)
+			{
+				if (m_cfg.dimensionVerticalLevelName != null)
+				{
+					return getWMSDimensionUnitSymbolsName(m_cfg.dimensionVerticalLevelName);
+				}
+			}
+			else if (s_variableId == GlobalVariable.RUN)
+			{
+				if (m_cfg.dimensionRunName != null)
+				{
+					return getWMSDimensionUnitSymbolsName(m_cfg.dimensionRunName);
+				}
+			}
+			else if (s_variableId == GlobalVariable.FRAME)
+			{
+				if (m_cfg.dimensionTimeName != null)
+				{
+					return getWMSDimensionUnitSymbolsName(m_cfg.dimensionTimeName);
+				} else if (m_cfg.dimensionRunName != null && m_cfg.dimensionForecastName != null)
+				{
+					var runUnits: String = getWMSDimensionUnitSymbolsName(m_cfg.dimensionRunName);
+					var forecastUnits: String = getWMSDimensionUnitSymbolsName(m_cfg.dimensionForecastName);
+
+					if (runUnits == forecastUnits)
+						return runUnits;
+					else if (runUnits != forecastUnits)
+						return "mixed unit symbols";
+					if (runUnits == null && forecastUnits == null)
+						return "no unit symbols";
+				}
+			}
+			return "no unit symbols";
+		}
 		public function getSynchronisedVariableUnitsName(s_variableId: String): String
 		{
 			if (s_variableId == GlobalVariable.LEVEL)
@@ -1169,7 +1214,8 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 				{
 					var ofExactLevel: Object = null;
 					var level: String = value as String;
-					var currentLevel: String = getSynchronisedVariableValue(m_cfg.dimensionVerticalLevelName) as String;
+					var currentLevel: String = getSynchronisedVariableValue(GlobalVariable.LEVEL) as String;
+//					var currentLevel: String = getSynchronisedVariableValue(m_cfg.dimensionVerticalLevelName) as String;
 //					var currentLevel: String = getWMSDimensionValue(m_cfg.dimensionVerticalLevelName);
 //					if (!currentLevel)
 //						currentLevel = getWMSDimensionDefaultValue(m_cfg.dimensionVerticalLevelName);
@@ -1179,7 +1225,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 
 					ofExactLevel = null;
 //					var l_levels: Array = getWMSDimensionsValues(m_cfg.dimensionVerticalLevelName, true, Operators.equalsByData);
-					var l_levels: Array = getWMSDimensionsValues(m_cfg.dimensionVerticalLevelName, true, Operators.equalsByLabels);
+					var l_levels: Array = getWMSDimensionsValues(m_cfg.dimensionVerticalLevelName, true, Operators.equalsByDataWithUnit);
 
 					for each (of in l_levels)
 					{
@@ -1189,7 +1235,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 							ofExactLevel = of;
 							break;
 						}
-						if (of && of.dataWithUnitSymbol && (of.dataWithUnitSymbol as String) == level)
+						if (of && of.dataWithUnit && (of.dataWithUnit as String) == level)
 						{
 							ofExactLevel = of;
 							break;
