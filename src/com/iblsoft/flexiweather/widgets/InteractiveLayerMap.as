@@ -186,7 +186,6 @@ package com.iblsoft.flexiweather.widgets
 		[Bindable(event = LEVEL_VARIABLE_CHANGED)]
 		public function get level(): String
 		{
-//			var levelString: String = getSynchronizedLevelValue();
 			var levelString: String = _globalVariablesManager.level;
 			return levelString;
 		}
@@ -497,7 +496,7 @@ package com.iblsoft.flexiweather.widgets
 //						storage.serializeString('global-frame', frameDateString);
 //						storage.serializeString('run', frameDateString);
 //					}
-					storage.serializeString('global-level', globalVariablesManager.level);
+					storage.serializeString('global-level', level);
 				}
 
 				if (selectedLayerIndex > -1)
@@ -692,7 +691,7 @@ package com.iblsoft.flexiweather.widgets
 					var synchronizableLevel: String = level;
 					globalLevel = globalVariablesManager.level;
 
-					storage.serializeString('global-level', globalVariablesManager.level);
+					storage.serializeString('global-level', level);
 					var runString: String = null;
 					var synchronizableRun: Date = globalVariablesManager.run;
 					if (synchronizableRun)
@@ -1183,8 +1182,6 @@ package com.iblsoft.flexiweather.widgets
 			var so: ISynchronisedObject = layer as ISynchronisedObject;
 			var isReadyForSynchronisation: Boolean = true;
 
-			addLayerToTimeAxis(layer);
-
 			//need to wait when synchronizaed variables will be update (set FRAME and LEVEL)
 			if (so)
 			{
@@ -1280,6 +1277,8 @@ package com.iblsoft.flexiweather.widgets
 			{
 				invalidateAreaForLayer(layer);
 			}
+
+			addLayerToTimeAxis(layer);
 		}
 
 		/**
@@ -1388,6 +1387,27 @@ package com.iblsoft.flexiweather.widgets
 			if (primaryLayer)
 			{
 				var currLevel: String = (primaryLayer as ISynchronisedObject).getSynchronisedVariableValue(GlobalVariable.LEVEL, false) as String;
+				var currLevel2: * = (primaryLayer as ISynchronisedObject).getSynchronisedVariableValue(GlobalVariable.LEVEL, false);
+				var currLevelList: Array = (primaryLayer as ISynchronisedObject).getSynchronisedVariableValuesList(GlobalVariable.LEVEL);
+				var currLevelUnit: String = (primaryLayer as ISynchronisedObject).getSynchronisedVariableUnitsName(GlobalVariable.LEVEL) as String;
+				var currLevelUnitSymbol: String = (primaryLayer as ISynchronisedObject).getSynchronisedVariableUnitSymbolsName(GlobalVariable.LEVEL) as String;
+
+				var synchronisedValueReplaced: Boolean;
+				if (currLevelList && currLevelList.length > 0)
+				{
+					for (var vi: int = 0; vi < currLevelList.length; vi++)
+					{
+						var levelGvv: GlobalVariableValue  = currLevelList[vi] as GlobalVariableValue;
+						if (levelGvv && (levelGvv.dataWithUnit == currLevel || levelGvv.value == currLevel))
+						{
+							currLevel = levelGvv.dataWithUnit;
+							synchronisedValueReplaced = true;
+							break;
+						}
+					}
+				}
+				if (!synchronisedValueReplaced && currLevelUnitSymbol && currLevel && currLevel.indexOf(currLevelUnitSymbol) == -1)
+					currLevel += currLevelUnitSymbol;
 
 				var levels: Array = getLevels();
 				if (levels && currLevel)
@@ -1398,10 +1418,10 @@ package com.iblsoft.flexiweather.widgets
 					{
 						for each (var cLevel: GlobalVariableValue in levels)
 						{
-							if (cLevel.value == currLevel)
+							if (cLevel.dataWithUnit == currLevel)
 								return currLevel;
 						}
-						cLevelStr = (levels[0] as GlobalVariableValue).value as String;
+						cLevelStr = (levels[0] as GlobalVariableValue).dataWithUnit as String;
 						callLater(synchronizePrimaryLayerLevel, [cLevelStr]);
 //						_globalVariablesManager.level = cLevelStr;
 //						invalidateLevel();
@@ -1620,7 +1640,7 @@ package com.iblsoft.flexiweather.widgets
 				if (l_allLevels == null || l_allLevels.length == 0)
 					l_allLevels = l_levels;
 				else {
-					l_allLevels = ArrayUtils.intersectedArrays(l_allLevels, l_levels, Operators.equalsByLabels);
+					l_allLevels = ArrayUtils.intersectedArrays(l_allLevels, l_levels, Operators.equalsByDataWithUnit);
 				}
 			}
 			return l_allLevels;

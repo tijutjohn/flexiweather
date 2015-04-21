@@ -29,6 +29,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 	import com.iblsoft.flexiweather.widgets.IConfigurableLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveDataLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
+	import com.iblsoft.flexiweather.widgets.InteractiveLayerCreationMethod;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 
 	import flash.display.Bitmap;
@@ -1681,6 +1682,7 @@ package com.iblsoft.flexiweather.ogc.tiling
 				{
 					alpha = newAlpha;
 				}
+				creationMethod = InteractiveLayerCreationMethod.SERIALIZED;
 			}
 			else
 			{

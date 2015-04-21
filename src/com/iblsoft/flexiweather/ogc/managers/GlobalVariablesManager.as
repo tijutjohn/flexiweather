@@ -412,7 +412,8 @@ package com.iblsoft.flexiweather.ogc.managers
 				var tempArr: Array = [];
 				for each (var globalLevelVariable: GlobalVariableValue in _layerLevels)
 				{
-					tempArr.push({data: globalLevelVariable.data as String, label: globalLevelVariable.label as String});
+//					tempArr.push({data: globalLevelVariable.data as String, label: globalLevelVariable.label as String});
+					tempArr.push(globalLevelVariable);
 				}
 				_levels = new ArrayCollection(tempArr);
 				_levels.refresh();

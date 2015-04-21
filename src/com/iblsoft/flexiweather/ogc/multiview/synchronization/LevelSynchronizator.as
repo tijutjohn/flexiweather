@@ -12,46 +12,46 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
-	
+
 	import flash.events.EventDispatcher;
 	import flash.utils.Dictionary;
-	
+
 	import mx.collections.ArrayCollection;
 	import mx.utils.ArrayUtil;
-	
+
 	public class LevelSynchronizator extends SynchronizatorBase implements ISynchronizator
 	{
 		override public function get labelString(): String
 		{
 			return '<level/>';
 		}
-		
+
 		private var _levelValues: MultiViewViewData;
 		private var _widgetDictionary: Dictionary;
-		
-		
+
+
 		override public function get willSynchronisePrimaryLayer(): Boolean
 		{
 			return true;
 		}
-		
+
 		override public function set viewData(data: MultiViewViewData): void
 		{
 			_levelValues = data;
 		}
-		
-		
+
+
 		public function LevelSynchronizator()
 		{
 			super();
-			
+
 			type = "level-synchronizator";
-			
+
 			_widgetDictionary = new Dictionary(true);
-			
+
 			registerChangeType(SynchronizationChangeType.GLOBAL_LEVEL_CHANGED);
 		}
-		
+
 		override public function serialize(storage:Storage):void
 		{
 			if (storage.isStoring())
@@ -61,12 +61,12 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 				viewData = _levelValues;
 			}
 		}
-		
+
 		private function getLevelValue(position: int): void
 		{
-			
+
 		}
-		
+
 		override public function updateMapAction(widget: InteractiveWidget, position: int, configuration: MultiViewConfiguration): void
 		{
 			var infoObject: Object = _widgetDictionary[widget];
@@ -75,70 +75,70 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 //				var position: int = infoObject.position;
 				//update level at this position
 				var oldObj: Object = _levelValues.dataProvider[position];
-				
-				_levelValues.dataProvider[position] = configuration.viewData.dataProvider[position]; 
+
+				_levelValues.dataProvider[position] = configuration.viewData.dataProvider[position];
 			}
-			
+
 		}
-		
+
 		override public function synchronizeWidgets(synchronizeFromWidget:InteractiveWidget, widgetsForSynchronisation:ArrayCollection, preferredSelectedIndex: int = -1):void
 		{
 			if (_levelValues)
 			{
 				var levels: Array = _levelValues.dataProvider;
-				
+
 				if (preferredSelectedIndex > -1)
 				{
 					synchronizeFromWidget = widgetsForSynchronisation.getItemAt(preferredSelectedIndex) as InteractiveWidget;
 				}
-			
+
 				var synchronizeFromWidgetPosition: int = getWidgetPosition(synchronizeFromWidget, widgetsForSynchronisation);
-				
+
 				var bGlobalLevelChange: Boolean = true;
-				
+
 				_widgetDictionary = new Dictionary(true);
-				
+
 				if (synchronizeFromWidgetPosition > -1)
 				{
 					var cnt: int = 0;
 					var total: int = widgetsForSynchronisation.length;
-					
+
 					var widgetsForSynchronizing: Array = [];
-					
+
 					var level: String;
-					
+
 					for (var i: int = 0; i < total; i++)
 					{
 						var widget: InteractiveWidget = widgetsForSynchronisation.getItemAt(i) as InteractiveWidget;
 						var hasSynchronizableLevel: Boolean = hasLevelSynchronizable(widget);
 //						if (widget.id != synchronizeFromWidget.id)
 //						{
-						
+
 						widget.addEventListener(InteractiveWidgetEvent.WIDGET_CHANGED, onWidgetChanged, false, 0, true);
-						
-						
+
+
 						if (hasSynchronizableLevel)
 						{
 							if (levels.length > cnt && levels[cnt])
 							{
 								var levelObject: Object = levels[cnt] as Object;
-								
+
 								_widgetDictionary[widget] = {widget: widget, position: i, levelObject: levelObject};
-								
+
 								if (levelObject && levelObject.hasOwnProperty('level') && levelObject.level is GlobalVariableValue)
 								{
-									level = (levelObject.level as GlobalVariableValue).label;
+									level = (levelObject.level as GlobalVariableValue).dataWithUnit;
 									if (level)
 									{
 										if (widget.interactiveLayerMap.level != level)
 										{
 											listenToWidgetSynchronization(widget);
-											widgetsForSynchronizing.push( {level: level, widget: widget } );
+											widgetsForSynchronizing.push( {level: level, widget: widget, levelVariable: levelObject.level as GlobalVariableValue} );
 										} else {
 											trace("LevelSychronizator synchroniseWidWidgets level fro widget ["+cnt+"] is already set to " + level + " Do not do anything!");
 											dataForWidgetAvailable(widget);
 										}
-										
+
 									}
 								}
 							}
@@ -147,17 +147,17 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 						}
 						cnt++;
 					}
-					
+
 					//2nd pass, change frames
 					for each (var obj: Object in widgetsForSynchronizing)
 					{
 						level = obj.level as String;
 						widget = obj.widget as InteractiveWidget;
-						
+
 //						widget.interactiveLayerMap.globalVariablesManager.level = level;
 						widget.interactiveLayerMap.setLevel(level, true);
 						dataForWidgetAvailable(widget);
-						
+
 					}
 					checkIfSynchronizationIsDone();
 				}
@@ -165,7 +165,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 				checkIfSynchronizationIsDone();
 			}
 		}
-		
+
 		private function onWidgetChanged(event: InteractiveWidgetEvent): void
 		{
 			switch (event.changeDescription)
@@ -178,9 +178,9 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 				{
 					var widget: InteractiveWidget = event.target as InteractiveWidget;
 					var layers: ArrayCollection = widget.interactiveLayerMap.layers;
-					
+
 					var synchronizeLevel: Boolean = false;
-					
+
 					for each (var layer: InteractiveLayerMSBase in layers)
 					{
 						if (layer && layer.synchroniseLevel)
@@ -189,7 +189,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 							break;
 						}
 					}
-					
+
 					if (synchronizeLevel)
 						dataForWidgetAvailable(widget);
 					else
@@ -197,7 +197,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 				}
 			}
 		}
-		
+
 		private function hasLevelSynchronizable(widget: InteractiveWidget): Boolean
 		{
 			var layers: ArrayCollection = widget.interactiveLayerMap.layers;
@@ -224,7 +224,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			}
 			return false;
 		}
-		
+
 		private function getLevel(position: int, levels: Array):  String
 		{
 			var cnt: int = 0;
@@ -264,12 +264,12 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			}
 			return -1;
 		}
-		
+
 		override public function getSynchronisedVariables():Array
 		{
 			return [GlobalVariable.LEVEL];
 		}
-		
+
 		override public function hasSynchronisedVariable(s_variableId: String): Boolean
 		{
 			return s_variableId == GlobalVariable.LEVEL;

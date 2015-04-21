@@ -26,6 +26,17 @@ package com.iblsoft.flexiweather.widgets
 
 		private var _container: InteractiveWidget;
 
+
+		public function get creationMethod():String
+		{
+			return _creationMethod;
+		}
+
+		public function set creationMethod(value:String):void
+		{
+			_creationMethod = value;
+		}
+
 		public function get container():InteractiveWidget
 		{
 			return _container;
@@ -53,7 +64,10 @@ package com.iblsoft.flexiweather.widgets
 			return _type;
 		}
 
-
+		/**
+		 * One of constant string from InteractiveLayerCreationMethod.
+		 */
+		private var _creationMethod: String;
 
 		private var mb_dynamicPartInvalid: Boolean = false;
 		private var mi_zOrder: int = 0;
@@ -202,6 +216,9 @@ package com.iblsoft.flexiweather.widgets
 			InteractiveLayer.ID++;
 			uid = 'interactiveLayer' + InteractiveLayer.ID;
 			this.container = container;
+
+			creationMethod = InteractiveLayerCreationMethod.NEW_INSTANCE;
+
 			addEventListener(FlexEvent.CREATION_COMPLETE, onLayerCreationComplete);
 			addEventListener(Event.ADDED_TO_STAGE, onLayerAddedToStage);
 		}
@@ -501,6 +518,7 @@ package com.iblsoft.flexiweather.widgets
 			layer.zOrder = zOrder;
 			layer.visible = visible;
 			layer.layerName = layerName;
+			layer.creationMethod = creationMethod;
 		}
 
 		override public function toString(): String

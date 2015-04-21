@@ -32,6 +32,12 @@ package com.iblsoft.flexiweather.utils
 			return o1 == o2;
 		}
 
+		public static function equalsByDataWithUnit(o1: Object, o2: Object): Boolean
+		{
+			if (!o1.hasOwnProperty('dataWithUnit') || !o2.hasOwnProperty('dataWithUnit'))
+				return false;
+			return o1.dataWithUnit == o2.dataWithUnit;
+		}
 		public static function equalsByLabels(o1: Object, o2: Object): Boolean
 		{
 			if (!o1.hasOwnProperty('label') || !o2.hasOwnProperty('label'))
