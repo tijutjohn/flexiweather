@@ -16,5 +16,6 @@ package com.iblsoft.flexiweather.utils
 		function moveTo(x: Number, y: Number): void;
 		function lineTo(x: Number, y: Number): void;
 		function curveTo(controlX: Number, controlY: Number, anchorX: Number, anchorY: Number): void;
+		function drawRoundRect(x: Number, y: Number, w: Number, h: Number, ellipseWidth: Number, ellipseHeight: Number): void;
 	}
 }
