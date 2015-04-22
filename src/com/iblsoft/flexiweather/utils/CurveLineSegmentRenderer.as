@@ -37,6 +37,10 @@ package com.iblsoft.flexiweather.utils
 		{
 		}
 
+		public function drawRoundRect(x: Number, y: Number, w: Number, h: Number, ellipseWidth: Number, ellipseHeight: Number): void
+		{
+		}
+
 		public function moveTo(x: Number, y: Number): void
 		{
 			m_lastX = x;

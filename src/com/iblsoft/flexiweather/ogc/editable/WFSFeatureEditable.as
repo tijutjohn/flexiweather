@@ -451,7 +451,7 @@ package com.iblsoft.flexiweather.ogc.editable
 		 */
 		protected function updateNewImplementation(changeFlag: FeatureUpdateContext): void
 		{
-			if (m_featureData)
+			if (m_featureData && master && master.container)
 			{
 //				trace("WFSFeatureEditable updateNewImplementation");
 

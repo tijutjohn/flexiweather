@@ -82,7 +82,11 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 			var renderer: StyledLineCurveRenderer;
 			var gr: Graphics = getRendererGraphics(reflection);
 
-			renderer = new StyledLineCurveRenderer(gr, 3.0, i_color, 1.0, "Solid", "None", i_color);
+			var fillType: String = "None";
+			if (ms_type == ANNOTATION_PIN)
+				fillType = "Solid";
+
+			renderer = new StyledLineCurveRenderer(gr, 3.0, i_color, 1.0, "Solid", fillType, i_color);
 
 			return renderer;
 		}
@@ -227,21 +231,15 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 			if (ms_type != ANNOTATION_PIN)
 				super.drawFeatureData(g, m_featureData);
 			else {
-				//TODO finish drawing of PIN
-
-				var gr: Graphics = graphics;
-				gr.clear();
+				g.clear();
 
 				var a_points: Array = getPoints();
 				var pt: Point;
 				var lineRenderer: StyledLineCurveRenderer = g as StyledLineCurveRenderer;
-
 				for each(pt in a_points) {
-					gr.lineStyle(lineRenderer.thickness, lineRenderer.color);
-					gr.beginFill(lineRenderer.fillColor);
-					gr.drawRoundRect(pt.x - 4, pt.y - 4, 9, 9, 6, 6);
-					gr.endFill();
-//					addLabel(master as InteractiveLayerWFS, reflection, ms_text, pt, 0, 0);
+					g.start(pt.x, pt.x);
+					g.drawRoundRect(pt.x - 4, pt.y - 4, 9, 9, 6, 6);
+					g.finish(pt.x, pt.y);
 					break;
 				}
 			}
