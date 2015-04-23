@@ -113,25 +113,25 @@ package com.iblsoft.flexiweather.ogc.managers
 //
 //			Alert.show("latestMenuItemsList: " + latestMenuItemsList);
 //			return latestMenuItemsList;
-/*
+
 			if (ma_layersConfigurations && ma_layersConfigurations.length > 0)
 			{
 				groups = [];
 				submenuPos = 0;
 				var layersXMLList: XML;
-				if (oldXMLList)
-				{
-					while (oldXMLList.children().length() > 0)
-					{
-						delete oldXMLList.children()[0];
-					}
-					layersXMLList = oldXMLList;
-				}
-				else
-				{
+//				if (oldXMLList)
+//				{
+//					while (oldXMLList.children().length() > 0)
+//					{
+//						delete oldXMLList.children()[0];
+//					}
+//					layersXMLList = oldXMLList;
+//				}
+//				else
+//				{
 					layersXMLList = <menuitem label='Layers' data='layer' type='folder'/>
 							;
-				}
+//				}
 				var groupParentXML: XML;
 				var iw: InteractiveWidget = new InteractiveWidget(true);
 				iw.width = 150;
@@ -147,11 +147,15 @@ package com.iblsoft.flexiweather.ogc.managers
 				ma_layersConfigurations.sort = sort;
 				ma_layersConfigurations.refresh();
 
-				Alert.show("ma_layersConfigurations: " + ma_layersConfigurations.length);
-				for each (var layerConfig: LayerConfiguration in ma_layersConfigurations)
+//				Alert.show("ma_layersConfigurations: " + ma_layersConfigurations.length);
+//				for each (var layerConfig: LayerConfiguration in ma_layersConfigurations)
+				var maxLayers: int = Math.min(7, ma_layersConfigurations.length);
+				for (var i: int = 0; i < maxLayers; i++)
 				{
+					var layerConfig: LayerConfiguration = ma_layersConfigurations[i] as LayerConfiguration;
+
 					var lbl: String = layerConfig.label;
-//					Alert.show("lbl: " + lbl);
+					Alert.show("lbl: " + lbl + " total: " + ma_layersConfigurations.length);
 					var folderName: String = '';
 					compatibleWithCRS = layerConfig.isCompatibleWithCRS(currentCRS);
 					if (lbl && lbl.indexOf('/') > 0)
@@ -189,8 +193,8 @@ package com.iblsoft.flexiweather.ogc.managers
 			}
 			latestMenuItemsList = null;
 
-			Alert.show("latestMenuItemsList: NULL");
-			*/
+//			Alert.show("latestMenuItemsList: NULL");
+
 			return latestMenuItemsList;
 		}
 
