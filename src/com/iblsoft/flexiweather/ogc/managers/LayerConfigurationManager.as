@@ -113,7 +113,7 @@ package com.iblsoft.flexiweather.ogc.managers
 //
 //			Alert.show("latestMenuItemsList: " + latestMenuItemsList);
 //			return latestMenuItemsList;
-
+/*
 			if (ma_layersConfigurations && ma_layersConfigurations.length > 0)
 			{
 				groups = [];
@@ -190,6 +190,7 @@ package com.iblsoft.flexiweather.ogc.managers
 			latestMenuItemsList = null;
 
 			Alert.show("latestMenuItemsList: NULL");
+			*/
 			return latestMenuItemsList;
 		}
 
