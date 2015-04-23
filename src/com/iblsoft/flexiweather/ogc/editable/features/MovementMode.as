@@ -14,6 +14,6 @@ package com.iblsoft.flexiweather.ogc.editable.features
 	{
 		public static const COMPASS_POINTS_8: String = "8CompassPoints";
 		public static const COMPASS_POINTS_16: String = "16CompassPoints";
-		public static const DEGREES: String = "Degres";
+		public static const DEGREES: String = "Degrees";
 	}
 }

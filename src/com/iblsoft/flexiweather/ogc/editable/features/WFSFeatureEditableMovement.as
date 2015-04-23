@@ -64,7 +64,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 			mb_isSinglePointFeature = true;
 		}
 
-		public static function getDataProvideForMovementMode(mode: String): ArrayCollection
+		public static function getDataProviderForMovementMode(mode: String): ArrayCollection
 		{
 			var arr: Array;
 			switch (mode)
