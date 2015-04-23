@@ -156,6 +156,7 @@ package com.iblsoft.flexiweather.ogc.managers
 
 					var lbl: String = layerConfig.label;
 					Alert.show("lbl: " + lbl + " total: " + ma_layersConfigurations.length);
+					/*
 					var folderName: String = '';
 					compatibleWithCRS = layerConfig.isCompatibleWithCRS(currentCRS);
 					if (lbl && lbl.indexOf('/') > 0)
@@ -182,6 +183,7 @@ package com.iblsoft.flexiweather.ogc.managers
 					}
 					else
 						layersXMLList.appendChild(layerXML);
+					*/
 				}
 				var layerCustom: XML = <menuitem label="Add custom layer..." data="map.add-layer-custom" type="action"/>
 				layersXMLList.appendChild(layerCustom);
