@@ -105,6 +105,15 @@ package com.iblsoft.flexiweather.ogc.managers
 		public function getMenuLayersXMLList(currentCRS: String = null, oldXMLList: XML = null): XMLList
 		{
 			Alert.show("getMenuLayersXMLList currentCRS: " + currentCRS + " oldXMLList: " + oldXMLList);
+			layersXMLList = <menuitem label='Layers' data='layer' type='folder'/>
+			var layerCustom: XML = <menuitem label="Add custom layer..." data="map.add-layer-custom" type="action"/>
+			layersXMLList.appendChild(layerCustom);
+
+			latestMenuItemsList = layersXMLList.children();
+
+			Alert.show("latestMenuItemsList: " + latestMenuItemsList);
+			return latestMenuItemsList;
+
 			if (ma_layersConfigurations && ma_layersConfigurations.length > 0)
 			{
 				groups = [];
