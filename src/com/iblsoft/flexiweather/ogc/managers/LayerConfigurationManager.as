@@ -104,15 +104,15 @@ package com.iblsoft.flexiweather.ogc.managers
 
 		public function getMenuLayersXMLList(currentCRS: String = null, oldXMLList: XML = null): XMLList
 		{
-			Alert.show("getMenuLayersXMLList currentCRS: " + currentCRS + " oldXMLList: " + oldXMLList);
-			layersXMLList = <menuitem label='Layers' data='layer' type='folder'/>
-			var layerCustom: XML = <menuitem label="Add custom layer..." data="map.add-layer-custom" type="action"/>
-			layersXMLList.appendChild(layerCustom);
-
-			latestMenuItemsList = layersXMLList.children();
-
-			Alert.show("latestMenuItemsList: " + latestMenuItemsList);
-			return latestMenuItemsList;
+//			Alert.show("getMenuLayersXMLList currentCRS: " + currentCRS + " oldXMLList: " + oldXMLList);
+//			layersXMLList = <menuitem label='Layers' data='layer' type='folder'/>
+//			var layerCustom: XML = <menuitem label="Add custom layer..." data="map.add-layer-custom" type="action"/>
+//			layersXMLList.appendChild(layerCustom);
+//
+//			latestMenuItemsList = layersXMLList.children();
+//
+//			Alert.show("latestMenuItemsList: " + latestMenuItemsList);
+//			return latestMenuItemsList;
 
 			if (ma_layersConfigurations && ma_layersConfigurations.length > 0)
 			{
@@ -151,16 +151,9 @@ package com.iblsoft.flexiweather.ogc.managers
 				for each (var layerConfig: LayerConfiguration in ma_layersConfigurations)
 				{
 					var lbl: String = layerConfig.label;
-					Alert.show("lbl: " + lbl);
+//					Alert.show("lbl: " + lbl);
 					var folderName: String = '';
 					compatibleWithCRS = layerConfig.isCompatibleWithCRS(currentCRS);
-//					if (currentCRS)
-//					{
-//						if (!compatibleWithCRS)
-//						{
-//							trace("Layer : " + lbl + " is not compatible with " + currentCRS);
-//						}
-//					}
 					if (lbl && lbl.indexOf('/') > 0)
 					{
 						var lastPos: int = lbl.lastIndexOf('/');
@@ -179,8 +172,9 @@ package com.iblsoft.flexiweather.ogc.managers
 					var layerXML: XML = <menuitem label={lbl} data={layerData} icon={icon} compatibleWithCRS={compatibleWithCRS} type={layerType}/>
 					if (folderName && folderName.length > 0)
 					{
-						groupParentXML = createGroupSubfoldersAndGetParent(folderName, layersXMLList);
-						groupParentXML.appendChild(layerXML);
+//						Alert.show("folderName: " + folderName);
+//						groupParentXML = createGroupSubfoldersAndGetParent(folderName, layersXMLList);
+//						groupParentXML.appendChild(layerXML);
 					}
 					else
 						layersXMLList.appendChild(layerXML);
@@ -190,7 +184,7 @@ package com.iblsoft.flexiweather.ogc.managers
 
 				latestMenuItemsList = layersXMLList.children();
 
-				Alert.show("latestMenuItemsList: " + latestMenuItemsList);
+//				Alert.show("latestMenuItemsList: " + latestMenuItemsList);
 				return latestMenuItemsList;
 			}
 			latestMenuItemsList = null;
