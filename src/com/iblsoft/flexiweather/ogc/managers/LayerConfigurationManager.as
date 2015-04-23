@@ -10,9 +10,13 @@ package com.iblsoft.flexiweather.ogc.managers
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+
 	import flash.events.Event;
+
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
+	import mx.controls.Alert;
+
 	import spark.collections.SortField;
 
 	public class LayerConfigurationManager extends BaseConfigurationManager implements Serializable
@@ -100,6 +104,7 @@ package com.iblsoft.flexiweather.ogc.managers
 
 		public function getMenuLayersXMLList(currentCRS: String = null, oldXMLList: XML = null): XMLList
 		{
+			Alert.show("getMenuLayersXMLList currentCRS: " + currentCRS + " oldXMLList: " + oldXMLList);
 			if (ma_layersConfigurations && ma_layersConfigurations.length > 0)
 			{
 				groups = [];
@@ -132,9 +137,12 @@ package com.iblsoft.flexiweather.ogc.managers
 				sort.compareFunction = sortArray;
 				ma_layersConfigurations.sort = sort;
 				ma_layersConfigurations.refresh();
+
+				Alert.show("ma_layersConfigurations: " + ma_layersConfigurations.length);
 				for each (var layerConfig: LayerConfiguration in ma_layersConfigurations)
 				{
 					var lbl: String = layerConfig.label;
+					Alert.show("lbl: " + lbl);
 					var folderName: String = '';
 					compatibleWithCRS = layerConfig.isCompatibleWithCRS(currentCRS);
 //					if (currentCRS)
@@ -170,11 +178,15 @@ package com.iblsoft.flexiweather.ogc.managers
 				}
 				var layerCustom: XML = <menuitem label="Add custom layer..." data="map.add-layer-custom" type="action"/>
 				layersXMLList.appendChild(layerCustom);
-				
+
 				latestMenuItemsList = layersXMLList.children();
+
+				Alert.show("latestMenuItemsList: " + latestMenuItemsList);
 				return latestMenuItemsList;
 			}
 			latestMenuItemsList = null;
+
+			Alert.show("latestMenuItemsList: NULL");
 			return latestMenuItemsList;
 		}
 
