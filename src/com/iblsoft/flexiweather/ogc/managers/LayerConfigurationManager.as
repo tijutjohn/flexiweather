@@ -166,7 +166,12 @@ package com.iblsoft.flexiweather.ogc.managers
 						lbl = lbl.substring(lastPos + 1, lbl.length);
 					}
 
-					var icon: String = layerConfig.getPreviewURL();
+					try {
+						var icon: String = layerConfig.getPreviewURL();
+					} catch (e:Error)
+					{
+						trace("problem with getting icon for layerConfig: " + layerConfig + " lbl: " + lbl);
+					}
 //					if (!icon)
 //					{
 //						//just to test problem with icon is null -> remove next line when fixed
