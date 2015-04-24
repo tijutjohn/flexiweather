@@ -166,23 +166,27 @@ package com.iblsoft.flexiweather.ogc.managers
 						lbl = lbl.substring(lastPos + 1, lbl.length);
 					}
 
+					var layerData: String = "layer." + layerConfig.label;
+					var layerXML: XML;
 					try {
 						var icon: String = layerConfig.getPreviewURL();
+						if (!icon)
+						{
+							//just to test problem with icon is null -> remove next line when fixed
+							layerConfig.getPreviewURL();
+						}
+						if (icon)
+						{
+							icon = AbstractURLLoader.fromBaseURL(icon);
+							layerXML = <menuitem label={lbl} data={layerData} icon={icon} compatibleWithCRS={compatibleWithCRS} type={layerType}/>
+						}
 					} catch (e:Error)
 					{
 						trace("problem with getting icon for layerConfig: " + layerConfig + " lbl: " + lbl);
 					}
-//					if (!icon)
-//					{
-//						//just to test problem with icon is null -> remove next line when fixed
-//						layerConfig.getPreviewURL();
-//					}
-//					if (icon)
-//						icon = AbstractURLLoader.fromBaseURL(icon);
+					if (!icon)
+						layerXML = <menuitem label={lbl} data={layerData} compatibleWithCRS={compatibleWithCRS} type={layerType}/>
 
-					var layerData: String = "layer." + layerConfig.label;
-//					var layerXML: XML = <menuitem label={lbl} data={layerData} icon={icon} compatibleWithCRS={compatibleWithCRS} type={layerType}/>
-					var layerXML: XML = <menuitem label={lbl} data={layerData} compatibleWithCRS={compatibleWithCRS} type={layerType}/>
 					if (folderName && folderName.length > 0)
 					{
 						groupParentXML = createGroupSubfoldersAndGetParent(folderName, layersXMLList);
