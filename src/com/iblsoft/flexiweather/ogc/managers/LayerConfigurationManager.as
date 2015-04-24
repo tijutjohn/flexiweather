@@ -155,8 +155,7 @@ package com.iblsoft.flexiweather.ogc.managers
 					var layerConfig: LayerConfiguration = ma_layersConfigurations[i] as LayerConfiguration;
 
 					var lbl: String = layerConfig.label;
-					Alert.show("lbl: " + lbl + " total: " + ma_layersConfigurations.length);
-					/*
+//					Alert.show("lbl: " + lbl + " total: " + ma_layersConfigurations.length);
 					var folderName: String = '';
 					compatibleWithCRS = layerConfig.isCompatibleWithCRS(currentCRS);
 					if (lbl && lbl.indexOf('/') > 0)
@@ -165,6 +164,7 @@ package com.iblsoft.flexiweather.ogc.managers
 						folderName = lbl.substring(0, lastPos);
 						lbl = lbl.substring(lastPos + 1, lbl.length);
 					}
+					/*
 					var icon: String = layerConfig.getPreviewURL();
 					if (!icon)
 					{
@@ -173,8 +173,10 @@ package com.iblsoft.flexiweather.ogc.managers
 					}
 					if (icon)
 						icon = AbstractURLLoader.fromBaseURL(icon);
+					*/
 					var layerData: String = "layer." + layerConfig.label;
-					var layerXML: XML = <menuitem label={lbl} data={layerData} icon={icon} compatibleWithCRS={compatibleWithCRS} type={layerType}/>
+//					var layerXML: XML = <menuitem label={lbl} data={layerData} icon={icon} compatibleWithCRS={compatibleWithCRS} type={layerType}/>
+					var layerXML: XML = <menuitem label={lbl} data={layerData} compatibleWithCRS={compatibleWithCRS} type={layerType}/>
 					if (folderName && folderName.length > 0)
 					{
 //						Alert.show("folderName: " + folderName);
@@ -183,7 +185,6 @@ package com.iblsoft.flexiweather.ogc.managers
 					}
 					else
 						layersXMLList.appendChild(layerXML);
-					*/
 				}
 				var layerCustom: XML = <menuitem label="Add custom layer..." data="map.add-layer-custom" type="action"/>
 				layersXMLList.appendChild(layerCustom);
