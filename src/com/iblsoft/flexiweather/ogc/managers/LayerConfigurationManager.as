@@ -153,8 +153,9 @@ package com.iblsoft.flexiweather.ogc.managers
 
 					var layerData: String = "layer." + layerConfig.label;
 					var layerXML: XML;
+					var icon: String = null;
 					try {
-						var icon: String = layerConfig.getPreviewURL();
+						icon = layerConfig.getPreviewURL();
 						if (!icon)
 						{
 							//just to test problem with icon is null -> remove next line when fixed
