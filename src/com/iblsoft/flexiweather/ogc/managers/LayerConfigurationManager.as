@@ -165,14 +165,14 @@ package com.iblsoft.flexiweather.ogc.managers
 						lbl = lbl.substring(lastPos + 1, lbl.length);
 					}
 
-					var icon: String = layerConfig.getPreviewURL();
-					if (!icon)
-					{
-						//just to test problem with icon is null -> remove next line when fixed
-						layerConfig.getPreviewURL();
-					}
-					if (icon)
-						icon = AbstractURLLoader.fromBaseURL(icon);
+//					var icon: String = layerConfig.getPreviewURL();
+//					if (!icon)
+//					{
+//						//just to test problem with icon is null -> remove next line when fixed
+//						layerConfig.getPreviewURL();
+//					}
+//					if (icon)
+//						icon = AbstractURLLoader.fromBaseURL(icon);
 
 					var layerData: String = "layer." + layerConfig.label;
 //					var layerXML: XML = <menuitem label={lbl} data={layerData} icon={icon} compatibleWithCRS={compatibleWithCRS} type={layerType}/>
