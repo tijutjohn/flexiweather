@@ -149,7 +149,8 @@ package com.iblsoft.flexiweather.ogc.managers
 
 //				Alert.show("ma_layersConfigurations: " + ma_layersConfigurations.length);
 //				for each (var layerConfig: LayerConfiguration in ma_layersConfigurations)
-				var maxLayers: int = Math.min(7, ma_layersConfigurations.length);
+//				var maxLayers: int = Math.min(7, ma_layersConfigurations.length);
+				var maxLayers: int = ma_layersConfigurations.length;
 				for (var i: int = 0; i < maxLayers; i++)
 				{
 					var layerConfig: LayerConfiguration = ma_layersConfigurations[i] as LayerConfiguration;
@@ -177,15 +178,15 @@ package com.iblsoft.flexiweather.ogc.managers
 					var layerData: String = "layer." + layerConfig.label;
 //					var layerXML: XML = <menuitem label={lbl} data={layerData} icon={icon} compatibleWithCRS={compatibleWithCRS} type={layerType}/>
 					var layerXML: XML = <menuitem label={lbl} data={layerData} compatibleWithCRS={compatibleWithCRS} type={layerType}/>
-//					if (folderName && folderName.length > 0)
-//					{
-//						Alert.show("folderName: " + folderName);
-//						groupParentXML = createGroupSubfoldersAndGetParent(folderName, layersXMLList);
-//						groupParentXML.appendChild(layerXML);
-//					}
-//					else
-//						layersXMLList.appendChild(layerXML);
+					if (folderName && folderName.length > 0)
+					{
+						Alert.show("folderName: " + folderName);
+						groupParentXML = createGroupSubfoldersAndGetParent(folderName, layersXMLList);
+						groupParentXML.appendChild(layerXML);
+					}
+					else
 						layersXMLList.appendChild(layerXML);
+//						layersXMLList.appendChild(layerXML);
 				}
 				var layerCustom: XML = <menuitem label="Add custom layer..." data="map.add-layer-custom" type="action"/>
 				layersXMLList.appendChild(layerCustom);
