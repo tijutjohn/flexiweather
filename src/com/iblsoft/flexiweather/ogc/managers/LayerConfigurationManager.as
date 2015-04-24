@@ -180,7 +180,6 @@ package com.iblsoft.flexiweather.ogc.managers
 					var layerXML: XML = <menuitem label={lbl} data={layerData} compatibleWithCRS={compatibleWithCRS} type={layerType}/>
 					if (folderName && folderName.length > 0)
 					{
-						Alert.show("folderName: " + folderName);
 						groupParentXML = createGroupSubfoldersAndGetParent(folderName, layersXMLList);
 						groupParentXML.appendChild(layerXML);
 					}
