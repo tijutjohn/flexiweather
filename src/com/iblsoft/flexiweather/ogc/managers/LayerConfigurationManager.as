@@ -141,6 +141,7 @@ package com.iblsoft.flexiweather.ogc.managers
 
 				var maxLayers: int = ma_layersConfigurations.length;
 				debug ("\n getMenuLayersXMLList	CRS: " + currentCRS + " maxLayers: " + maxLayers);
+//				maxLayers = Math.min(50, maxLayers);
 				for (var i: int = 0; i < maxLayers; i++)
 				{
 					var layerConfig: LayerConfiguration = ma_layersConfigurations[i] as LayerConfiguration;
@@ -155,30 +156,49 @@ package com.iblsoft.flexiweather.ogc.managers
 						lbl = lbl.substring(lastPos + 1, lbl.length);
 					}
 
-					debug ("\nlayerConfiguration: " + lbl + " previewURL: " + layerConfig.previewURL);
+//					debug ("\nlayerConfiguration: " + lbl + " previewURL: " + layerConfig.previewURL);
 					var layerData: String = "layer." + layerConfig.label;
 					var layerXML: XML;
 					var icon: String = null;
 					try {
 						icon = layerConfig.getPreviewURL();
-						debug ("layerConfiguration ["+layerConfig+"]: " + lbl + " icon 1: " + icon);
+//						debug ("layerConfiguration ["+layerConfig+"]: " + lbl + " icon 1: " + icon);
 //						if (!icon)
 //						{
 //							//just to test problem with icon is null -> remove next line when fixed
 //							layerConfig.getPreviewURL();
 //							debug ("layerConfiguration: " + lbl + " icon 2: " + icon);
 //						}
+						/*
 						if (icon)
 						{
-							debug ("layerConfiguration: " + lbl + " icon 3: " + icon);
+//							debug ("layerConfiguration: " + lbl + " icon 3: " + icon);
 							icon = AbstractURLLoader.fromBaseURL(icon);
-							debug ("layerConfiguration: " + lbl + " icon full: " + icon);
+//							debug ("layerConfiguration: " + lbl + " icon full: " + icon);
+							layerXML = <menuitem label={lbl} data={layerData} icon={icon} compatibleWithCRS={compatibleWithCRS} type={layerType}/>
+						}
+						*/
+					} catch (e:Error)
+					{
+						debug("problem with getting icon for layerConfig: " + layerConfig + " lbl: " + lbl + " previewURL: " + layerConfig.previewURL);
+						throw new Error("problem with getting icon for layerConfig: " + layerConfig + " lbl: " + lbl + " previewURL: " + layerConfig.previewURL);
+					}
+
+					try {
+						if (icon)
+						{
+							//							debug ("layerConfiguration: " + lbl + " icon 3: " + icon);
+							icon = AbstractURLLoader.fromBaseURL(icon);
+							//							debug ("layerConfiguration: " + lbl + " icon full: " + icon);
 							layerXML = <menuitem label={lbl} data={layerData} icon={icon} compatibleWithCRS={compatibleWithCRS} type={layerType}/>
 						}
 					} catch (e:Error)
 					{
-						debug("problem with getting icon for layerConfig: " + layerConfig + " lbl: " + lbl);
+						debug("problem 2 with getting icon ["+icon+"] for layerConfig: " + layerConfig + " lbl: " + lbl + " previewURL: " + layerConfig.previewURL);
+						throw new Error("problem 2 with getting icon ["+icon+"] for layerConfig: " + layerConfig + " lbl: " + lbl + " previewURL: " + layerConfig.previewURL);
 					}
+
+
 					if (!icon)
 						layerXML = <menuitem label={lbl} data={layerData} compatibleWithCRS={compatibleWithCRS} type={layerType}/>
 
