@@ -155,19 +155,19 @@ package com.iblsoft.flexiweather.ogc.managers
 						lbl = lbl.substring(lastPos + 1, lbl.length);
 					}
 
-					debug ("\nlayerConfiguration: " + lbl);
+					debug ("\nlayerConfiguration: " + lbl + " previewURL: " + layerConfig.previewURL);
 					var layerData: String = "layer." + layerConfig.label;
 					var layerXML: XML;
 					var icon: String = null;
 					try {
 						icon = layerConfig.getPreviewURL();
 						debug ("layerConfiguration ["+layerConfig+"]: " + lbl + " icon 1: " + icon);
-						if (!icon)
-						{
-							//just to test problem with icon is null -> remove next line when fixed
-							layerConfig.getPreviewURL();
-							debug ("layerConfiguration: " + lbl + " icon 2: " + icon);
-						}
+//						if (!icon)
+//						{
+//							//just to test problem with icon is null -> remove next line when fixed
+//							layerConfig.getPreviewURL();
+//							debug ("layerConfiguration: " + lbl + " icon 2: " + icon);
+//						}
 						if (icon)
 						{
 							debug ("layerConfiguration: " + lbl + " icon 3: " + icon);
@@ -212,7 +212,7 @@ package com.iblsoft.flexiweather.ogc.managers
 		{
 			if (debugConsole)
 				debugConsole.print(str, 'Info', 'LayerConfigurationManager');
-//			trace("LayerConfigurationManager["+m_layer.layerID+"/"+m_layer.name+"]: " + str);
+			trace("LayerConfigurationManager: " + str);
 		}
 	}
 }
