@@ -140,6 +140,7 @@ package com.iblsoft.flexiweather.ogc.managers
 				ma_layersConfigurations.refresh();
 
 				var maxLayers: int = ma_layersConfigurations.length;
+				debug ("\n getMenuLayersXMLList	CRS: " + currentCRS + " maxLayers: " + maxLayers);
 				for (var i: int = 0; i < maxLayers; i++)
 				{
 					var layerConfig: LayerConfiguration = ma_layersConfigurations[i] as LayerConfiguration;
