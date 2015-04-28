@@ -181,7 +181,7 @@ package com.iblsoft.flexiweather.ogc.managers
 					} catch (e:Error)
 					{
 						debug("problem with getting icon for layerConfig: " + layerConfig + " lbl: " + lbl + " previewURL: " + layerConfig.previewURL);
-						throw new Error("problem with getting icon for layerConfig: " + layerConfig + " lbl: " + lbl + " previewURL: " + layerConfig.previewURL);
+//						throw new Error("problem with getting icon for layerConfig: " + layerConfig + " lbl: " + lbl + " previewURL: " + layerConfig.previewURL);
 					}
 
 					try {
@@ -195,7 +195,7 @@ package com.iblsoft.flexiweather.ogc.managers
 					} catch (e:Error)
 					{
 						debug("problem 2 with getting icon ["+icon+"] for layerConfig: " + layerConfig + " lbl: " + lbl + " previewURL: " + layerConfig.previewURL);
-						throw new Error("problem 2 with getting icon ["+icon+"] for layerConfig: " + layerConfig + " lbl: " + lbl + " previewURL: " + layerConfig.previewURL);
+//						throw new Error("problem 2 with getting icon ["+icon+"] for layerConfig: " + layerConfig + " lbl: " + lbl + " previewURL: " + layerConfig.previewURL);
 					}
 
 
