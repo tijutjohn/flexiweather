@@ -215,7 +215,8 @@ package com.iblsoft.flexiweather.ogc.tiling
 		{
 			super.updateDimensionsInURLRequest(url);
 			ma_specialCacheStrings = [];
-			updateWMSViewProperties(currentViewProperties as WMSViewProperties);
+			if (currentViewProperties)
+				updateWMSViewProperties(currentViewProperties as WMSViewProperties);
 
 			/*
 			var currWMSViewProperties: WMSViewProperties = currentViewProperties as WMSViewProperties;

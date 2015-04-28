@@ -737,10 +737,10 @@ package com.iblsoft.flexiweather.ogc
 		 */
 		override public function getFullURL(): String
 		{
-			if (container)
+			if (container && int(container.areaWidth) > 0 && int(container.areaHeight) > 0)
 				return getGetMapFullUrl(int(container.areaWidth), int(container.areaHeight));
 
-			return getGetMapFullUrl(0,0);
+			return getGetMapFullUrl(64, 64);
 		}
 
 		private function getGetMapFullUrl(width: int, height: int): String
@@ -754,6 +754,11 @@ package com.iblsoft.flexiweather.ogc
 			var bbox: String;
 			var crs: String = container.getCRS();
 			var viewBBox: BBox = container.getViewBBox();
+
+			if (!crs || crs == "")
+				crs = Projection.CRS_GEOGRAPHIC;
+			if (!viewBBox || (viewBBox.width == 0 && viewBBox.height == 0))
+				viewBBox = new BBox(-180, -90, 180, 90);
 
 			if (Projection.hasCRSAxesFlippedByISO(crs, wmsLayerConfiguration.service.version))
 			{

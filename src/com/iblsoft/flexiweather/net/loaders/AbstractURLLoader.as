@@ -888,7 +888,7 @@ package com.iblsoft.flexiweather.net.loaders
 
 		protected function debug(txt: String): void
 		{
-//			return;
+			return;
 			trace("AbstractUniURLLoader: " + txt);
 			if (debugConsole)
 				debugConsole.print(txt, 'Info', 'UniURLLoader');
