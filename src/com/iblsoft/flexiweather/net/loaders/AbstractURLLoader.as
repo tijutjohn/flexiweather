@@ -87,6 +87,9 @@ package com.iblsoft.flexiweather.net.loaders
 		public static function set baseURL(value: String): void
 		{
 			_baseURL = value;
+
+			if (debugConsole)
+				debugConsole.print("Set BASE URL: " + _baseURL, 'Info', 'UniURLLoader');
 		}
 		public static var proxyBaseURL: String = '';
 		/**
@@ -129,7 +132,7 @@ package com.iblsoft.flexiweather.net.loaders
 			var s_baseUrl: String = baseURL;
 			if (s_customBaseUrl && s_customBaseUrl.length > 0)
 				s_baseUrl = s_customBaseUrl;
-			if (s_url.indexOf("${BASE_URL}") >= 0)
+			if (s_url && s_baseUrl && s_baseUrl.length > 0 && s_url.indexOf("${BASE_URL}") >= 0)
 			{
 				var regExp: RegExp = /\$\{BASE_URL\}/ig;
 				while (regExp.exec(s_url) != null)
@@ -885,7 +888,7 @@ package com.iblsoft.flexiweather.net.loaders
 
 		protected function debug(txt: String): void
 		{
-			return;
+//			return;
 			trace("AbstractUniURLLoader: " + txt);
 			if (debugConsole)
 				debugConsole.print(txt, 'Info', 'UniURLLoader');
