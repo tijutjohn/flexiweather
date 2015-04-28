@@ -1367,7 +1367,7 @@ package com.iblsoft.flexiweather.ogc.data.viewProperties
 		}
 		protected function debug(str: String): void
 		{
-			trace("WMSViewProperties: " + str);
+//			trace("WMSViewProperties: " + str);
 //			LoggingUtils.dispatchLogEvent(this, "WMSViewProperties: " + str);
 		}
 

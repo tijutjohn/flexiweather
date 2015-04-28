@@ -7,16 +7,23 @@ package com.iblsoft.flexiweather.ogc.managers
 	import com.iblsoft.flexiweather.ogc.WMSLayer;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.LayerConfiguration;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.interfaces.ILayerConfiguration;
+	import com.iblsoft.flexiweather.plugins.IConsole;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
+
 	import flash.events.Event;
+
 	import mx.collections.ArrayCollection;
 	import mx.collections.Sort;
+	import mx.controls.Alert;
+
 	import spark.collections.SortField;
 
 	public class LayerConfigurationManager extends BaseConfigurationManager implements Serializable
 	{
+		public static var debugConsole: IConsole;
+
 		public static const LAYERS_CONFIGURATIONS_CHANGED: String = 'layersConfigurationChanged';
 		public static var sm_instance: LayerConfigurationManager;
 		private var ma_layersConfigurations: ArrayCollection = new ArrayCollection();
@@ -116,7 +123,6 @@ package com.iblsoft.flexiweather.ogc.managers
 				else
 				{
 					layersXMLList = <menuitem label='Layers' data='layer' type='folder'/>
-							;
 				}
 				var groupParentXML: XML;
 				var iw: InteractiveWidget = new InteractiveWidget(true);
@@ -132,34 +138,44 @@ package com.iblsoft.flexiweather.ogc.managers
 				sort.compareFunction = sortArray;
 				ma_layersConfigurations.sort = sort;
 				ma_layersConfigurations.refresh();
-				for each (var layerConfig: LayerConfiguration in ma_layersConfigurations)
+
+				var maxLayers: int = ma_layersConfigurations.length;
+				debug ("\n getMenuLayersXMLList	CRS: " + currentCRS + " maxLayers: " + maxLayers);
+//				maxLayers = Math.min(50, maxLayers);
+				for (var i: int = 0; i < maxLayers; i++)
 				{
+					var layerConfig: LayerConfiguration = ma_layersConfigurations[i] as LayerConfiguration;
+
 					var lbl: String = layerConfig.label;
 					var folderName: String = '';
 					compatibleWithCRS = layerConfig.isCompatibleWithCRS(currentCRS);
-//					if (currentCRS)
-//					{
-//						if (!compatibleWithCRS)
-//						{
-//							trace("Layer : " + lbl + " is not compatible with " + currentCRS);
-//						}
-//					}
 					if (lbl && lbl.indexOf('/') > 0)
 					{
 						var lastPos: int = lbl.lastIndexOf('/');
 						folderName = lbl.substring(0, lastPos);
 						lbl = lbl.substring(lastPos + 1, lbl.length);
 					}
-					var icon: String = layerConfig.getPreviewURL();
-					if (!icon)
-					{
-						//just to test problem with icon is null -> remove next line when fixed
-						layerConfig.getPreviewURL();
-					}
-					if (icon)
-						icon = AbstractURLLoader.fromBaseURL(icon);
+
+//					debug ("\nlayerConfiguration: " + lbl + " previewURL: " + layerConfig.previewURL);
 					var layerData: String = "layer." + layerConfig.label;
-					var layerXML: XML = <menuitem label={lbl} data={layerData} icon={icon} compatibleWithCRS={compatibleWithCRS} type={layerType}/>
+					var layerXML: XML;
+					var icon: String = null;
+					try {
+						icon = layerConfig.getPreviewURL();
+						if (icon)
+						{
+							icon = AbstractURLLoader.fromBaseURL(icon);
+							layerXML = <menuitem label={lbl} data={layerData} icon={icon} compatibleWithCRS={compatibleWithCRS} type={layerType}/>
+						}
+					} catch (e:Error)
+					{
+						debug("problem with getting icon for layerConfig: " + layerConfig + " lbl: " + lbl + " previewURL: " + layerConfig.previewURL);
+//						throw new Error("problem with getting icon for layerConfig: " + layerConfig + " lbl: " + lbl + " previewURL: " + layerConfig.previewURL);
+					}
+
+					if (!icon)
+						layerXML = <menuitem label={lbl} data={layerData} compatibleWithCRS={compatibleWithCRS} type={layerType}/>
+
 					if (folderName && folderName.length > 0)
 					{
 						groupParentXML = createGroupSubfoldersAndGetParent(folderName, layersXMLList);
@@ -170,11 +186,13 @@ package com.iblsoft.flexiweather.ogc.managers
 				}
 				var layerCustom: XML = <menuitem label="Add custom layer..." data="map.add-layer-custom" type="action"/>
 				layersXMLList.appendChild(layerCustom);
-				
+
 				latestMenuItemsList = layersXMLList.children();
+
 				return latestMenuItemsList;
 			}
 			latestMenuItemsList = null;
+
 			return latestMenuItemsList;
 		}
 
@@ -182,6 +200,13 @@ package com.iblsoft.flexiweather.ogc.managers
 		public function get layersConfigurations(): ArrayCollection
 		{
 			return ma_layersConfigurations;
+		}
+
+		protected function debug(str: String): void
+		{
+			if (debugConsole)
+				debugConsole.print(str, 'Info', 'LayerConfigurationManager');
+			trace("LayerConfigurationManager: " + str);
 		}
 	}
 }

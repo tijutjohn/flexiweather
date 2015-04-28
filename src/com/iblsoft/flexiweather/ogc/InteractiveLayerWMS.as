@@ -187,7 +187,7 @@ package com.iblsoft.flexiweather.ogc
 //						storage.serializeString(GlobalVariable.RUN, run, null);
 //					}
 //				}
-				trace("WMS layer serialize " + (storage as XMLStorage).xml.toXMLString());
+//				trace("WMS layer serialize " + (storage as XMLStorage).xml.toXMLString());
 			}
 		}
 

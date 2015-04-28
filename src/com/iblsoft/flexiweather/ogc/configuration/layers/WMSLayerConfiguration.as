@@ -530,14 +530,17 @@ package com.iblsoft.flexiweather.ogc.configuration.layers
 			*/
 
 			s_url = service.fullURL;
-			s_url = s_url.replace(/\$\{BASE_URL\}\//, "").replace(/http:\/\//, "").replace(/https:\/\//, "");
-			var paramPos: int = s_url.indexOf("?");
-			if (paramPos > 0)
+			if (s_url)
 			{
-				s_url = s_url.substr(0, paramPos);
+				s_url = s_url.replace(/\$\{BASE_URL\}\//, "").replace(/http:\/\//, "").replace(/https:\/\//, "");
+				var paramPos: int = s_url.indexOf("?");
+				if (paramPos > 0)
+				{
+					s_url = s_url.substr(0, paramPos);
+				}
+				s_url = s_url.replace(/\//gi, "_");
 			}
-			s_url = s_url.replace(/\//gi, "_");
-			s_url += "_" + ma_layerNames.join("_").replace(" ", "-").toLowerCase();
+			if (ma_layerNames) s_url += "_" + ma_layerNames.join("_").replace(" ", "-").toLowerCase();
 			s_url = "assets/layer-previews/" + s_url + ".png";
 
 			return s_url;

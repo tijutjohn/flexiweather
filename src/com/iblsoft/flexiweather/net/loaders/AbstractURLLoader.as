@@ -129,7 +129,7 @@ package com.iblsoft.flexiweather.net.loaders
 			var s_baseUrl: String = baseURL;
 			if (s_customBaseUrl && s_customBaseUrl.length > 0)
 				s_baseUrl = s_customBaseUrl;
-			if (s_url.indexOf("${BASE_URL}") >= 0)
+			if (s_url && s_baseUrl && s_baseUrl.length > 0 && s_url.indexOf("${BASE_URL}") >= 0)
 			{
 				var regExp: RegExp = /\$\{BASE_URL\}/ig;
 				while (regExp.exec(s_url) != null)
