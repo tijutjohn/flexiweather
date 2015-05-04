@@ -207,7 +207,7 @@ package com.iblsoft.flexiweather.utils
 								}
 							}
 						}
-						if (!synchronisedLevelReplaced && synchronisedLevelUnitSymbols && synchronisedLevel.indexOf(synchronisedLevelUnitSymbols) == -1)
+						if (!synchronisedLevelReplaced && synchronisedLevelUnitSymbols && synchronisedLevel && synchronisedLevel.indexOf(synchronisedLevelUnitSymbols) == -1)
 							synchronisedLevel += synchronisedLevelUnitSymbols;
 						value = synchronisedLevel;
 						break;
