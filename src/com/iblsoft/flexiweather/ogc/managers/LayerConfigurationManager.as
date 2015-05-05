@@ -204,9 +204,9 @@ package com.iblsoft.flexiweather.ogc.managers
 
 		protected function debug(str: String): void
 		{
-			if (debugConsole)
-				debugConsole.print(str, 'Info', 'LayerConfigurationManager');
-			trace("LayerConfigurationManager: " + str);
+//			if (debugConsole)
+//				debugConsole.print(str, 'Info', 'LayerConfigurationManager');
+//			trace("LayerConfigurationManager: " + str);
 		}
 	}
 }
