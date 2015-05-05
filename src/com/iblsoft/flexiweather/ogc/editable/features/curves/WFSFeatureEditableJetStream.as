@@ -89,7 +89,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 
 		private function debug(txt: String): void
 		{
-			trace("JetStream: " + txt);
+//			trace("JetStream: " + txt);
 		}
 
 		override public function getRenderer(reflection: int): ICurveRenderer
@@ -117,7 +117,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 
 			_currentFeatureUpdateContext = changeFlag;
 
-			trace("\n\n WFSFeatureEditableCurveWithBaseTimeAndValidity update");
+			debug("\n\n WFSFeatureEditableCurveWithBaseTimeAndValidity update");
 			super.update(changeFlag);
 		}
 
@@ -158,6 +158,8 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 			var totalWindBarbs: int = m_windPoints.length;
 
 			var crsProjection: Projection = iw.getCRSProjection();
+			var currentWindbarbPosition: int = 0;
+
 			for(var i: uint = 0; i < totalWindBarbs; ++i)
 			{
 				var pt: Point = m_windPoints.getItemAt(i) as Point;
@@ -169,55 +171,58 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 				var coordReflections: Array = master.container.mapCoordToViewReflections(c);
 				debug("windbarb: ["+i+"]: " + windbarb);
 
-				var mp: MoveableWindPoint = null;
-				var reflectedMP: MoveableWindPoint = null;
-				var reflectedWindbarb: WindBarb = null;
-				var cancelDraggingMP: MoveableWindPoint = null;
-				for (r = 0; r < totalReflections; r++)
+				if (coordReflections && coordReflections.length > 0)
 				{
-					var reflectionDelta: int = reflectionIDs[r];
-					reflection = m_featureData.getReflectionAt(reflectionDelta) as JetStreamFeatureDataReflection;
-
-					if (reflection && reflection.windbarbs && reflection.windbarbs.length > i)
+					var mp: MoveableWindPoint = null;
+					var reflectedMP: MoveableWindPoint = null;
+					var reflectedWindbarb: WindBarb = null;
+					var cancelDraggingMP: MoveableWindPoint = null;
+					for (r = 0; r < totalReflections; r++)
 					{
-						var currWindbarb: WindBarb = WindBarb(reflection.windbarbs[i]);
+						var reflectionDelta: int = reflectionIDs[r];
+						reflection = m_featureData.getReflectionAt(reflectionDelta) as JetStreamFeatureDataReflection;
 
-						for each (var coordReflectionsObject: Object in coordReflections)
+						if (reflection && reflection.windbarbs && reflection.windbarbs.length > currentWindbarbPosition)
 						{
-							if (coordReflectionsObject.reflection == reflectionDelta)
+							var currWindbarb: WindBarb = WindBarb(reflection.windbarbs[currentWindbarbPosition]);
+
+							for each (var coordReflectionsObject: Object in coordReflections)
 							{
-								reflectedMP = getEditableWindPointForReflectionAt(reflectionDelta, i) as MoveableWindPoint;
-								reflectedWindbarb = WindBarb(reflection.windbarbs[i]);
-								var cReflected: Coord = new Coord(c.crs, coordReflectionsObject.point.x, coordReflectionsObject.point.y);
-								reflectedWindbarb.coordinate = cReflected;
-								reflectedWindbarb.point = iw.coordToPoint(cReflected);
-								if (cancelDraggingMP)
+								if (coordReflectionsObject.reflection == reflectionDelta)
 								{
-									reflectedMP.captureMouse();
-									reflectedWindbarb.captureMouse();
-								}
-							} else {
-								mp = getEditableWindPointForReflectionAt(reflectionDelta, i) as MoveableWindPoint;
-								if (mp && mp.isDragging)
-								{
-									// wind point, which was dragged lost it's
-									cancelDraggingMP = mp;
-									cancelDraggingMP.releaseMouse();
-									if (reflectedMP)
+									reflectedMP = getEditableWindPointForReflectionAt(reflectionDelta, currentWindbarbPosition) as MoveableWindPoint;
+									reflectedWindbarb = currWindbarb;
+									var cReflected: Coord = new Coord(c.crs, coordReflectionsObject.point.x, coordReflectionsObject.point.y);
+									reflectedWindbarb.coordinate = cReflected;
+									reflectedWindbarb.point = iw.coordToPoint(cReflected);
+									if (cancelDraggingMP)
 									{
 										reflectedMP.captureMouse();
 										reflectedWindbarb.captureMouse();
 									}
-								}
+								} else {
+									mp = getEditableWindPointForReflectionAt(reflectionDelta, currentWindbarbPosition) as MoveableWindPoint;
+									if (mp && mp.isDragging)
+									{
+										// wind point, which was dragged lost it's
+										cancelDraggingMP = mp;
+										cancelDraggingMP.releaseMouse();
+										if (reflectedMP)
+										{
+											reflectedMP.captureMouse();
+											reflectedWindbarb.captureMouse();
+										}
+									}
 
+								}
 							}
+							currentWindbarbPosition++;
 						}
 					}
 				}
-
-				//remove windbarbs which was not updated...
 			}
 
+			//remove windbarbs which was not updated...
 			hideInvalidateWindbarbs();
 
 		}
@@ -284,6 +289,8 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 							} else {
 								trace("\t\t Do not draw data for " + reflectionDelta + " Feature is drawn in " + m_featureData.reflectionDelta);
 							}
+						} else {
+							trace("_currentFeatureUpdateContext.windbarbsChanged reflectionDelta: " + reflectionDelta)
 						}
 						curvePoints = reflection.points;
 
@@ -422,31 +429,37 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 				{
 //					mp = new MoveableWindPoint(this, i, reflection.reflectionDelta);
 					mp = getEditableWindPointForReflectionAt(reflectionDelta, i) as MoveableWindPoint;
-					windbarb = WindBarb(reflection.windbarbs[i]);
-
-					if (windbarb.point)
+					if (mp)
 					{
-						var windbarPosition: int = findNearestCurvePoint(windbarb.point, curvePoints)
-						cp = getWindbarbGFXAssetForReflectionAt(reflectionDelta, windbarPosition, curvePoints, windbarb, i_color, m_hemisphere);
+						windbarb = WindBarb(reflection.windbarbs[i]);
 
-						windbardCanBeDrawn = cp.canBeDrawed;
-
-						ret = ret && windbardCanBeDrawn;
-
-						reflection.addWindMoveablePoint(mp, i, cp);
-
-						jetStreamSprite.m_editableSignsSprite.addChild(mp);
-						jetStreamSprite.m_signsSprite.addChild(cp);
-						eim.addEditableItem(mp);
-						if (windbarb.needToCaptureMouse)
+						if (windbarb.point)
 						{
-							mp.captureMouse();
-							windbarb.captureMouseDone();
+							var windbarPosition: int = findNearestCurvePoint(windbarb.point, curvePoints)
+							cp = getWindbarbGFXAssetForReflectionAt(reflectionDelta, windbarPosition, curvePoints, windbarb, i_color, m_hemisphere);
+
+							windbardCanBeDrawn = cp.canBeDrawed;
+
+							ret = ret && windbardCanBeDrawn;
+
+							reflection.addWindMoveablePoint(mp, i, cp);
+
+							jetStreamSprite.m_editableSignsSprite.addChild(mp);
+							eim.addEditableItem(mp);
+
+							jetStreamSprite.m_signsSprite.addChild(cp);
+							if (windbarb.needToCaptureMouse)
+							{
+								mp.captureMouse();
+								windbarb.captureMouseDone();
+							}
+						} else {
+							trace("Need to fix windbarb.point == null, i: " + i + " totalWindBarbs: " + totalWindBarbs);
 						}
+						continue;
 					} else {
-						trace("Need to fix windbarb.point == null, i: " + i + " totalWindBarbs: " + totalWindBarbs);
+						trace("JetStream: mp == null");
 					}
-					continue;
 				}
 
 				mp = reflection.windPoints[i] as MoveableWindPoint;
@@ -458,16 +471,15 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 				mp.setPoint(pt);
 
 				//TODO  curvePoints are currently pixels position, but "pt" is reflected "pt" => need to recount "pt" point to current screen pixel position
-				if (ml_windBarbs.length > i)
-				{
-					var c1: Coord = (ml_windBarbs[i] as WindBarb).coordinate;
+//				if (ml_windBarbs.length > i)
+//				{
+					var c1: Coord = windbarb.coordinate;
 
 //					var wbCoordPoint: Point = new Point(c1.x, c1.y);
 					//and we need "r"th reflection of it
 					var reflectedPoints: Array = iw.mapCoordToViewReflections(c1);
 
 					var wbPoint: Point = null;
-//					var cnt: uint = 0;
 					for each (var refObj: Object in reflectedPoints)
 					{
 						if (refObj.reflection == reflectionDelta)
@@ -475,7 +487,6 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 							wbPoint = refObj.point as Point;
 							break;
 						}
-//						cnt++;
 					}
 
 					if (wbPoint)
@@ -488,11 +499,12 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 						ret = ret && cp.canBeDrawed;
 					} else {
 						//windbarb is not visible
+						trace("How to find position for invisible (wbPoint == null) position");
 						cp.update(curvePoints, close, windbarb, i_color);
 
 					}
 				}
-			}
+//			}
 
 			for(; i < reflection.totalWindPoints; ++i)
 			{
@@ -658,10 +670,13 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 					var windbarb: WindBarb = windbarbs.getItemAt(i) as WindBarb;
 					if (!windbarb.isValid())
 					{
+						debug("Hide windbarb at position: " + i + " is invalid. Total windbarbs: " + windbarbs.length);
 						removeWindbarbFromReflectionAt(reflectionDelta, i);
 						reflection.removeWindbarbAt(i);
-					} else
+					} else {
+						debug("show windbarb at position: " + i + " is valid. Total windbarbs: " + windbarbs.length);
 						i++;
+					}
 				}
 			}
 		}
