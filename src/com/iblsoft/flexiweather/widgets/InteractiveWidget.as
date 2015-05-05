@@ -2947,13 +2947,21 @@ package com.iblsoft.flexiweather.widgets
 //										helpTime = startProfileTimer();
 //									}
 
+//									if (!bLineIsInsideViewBBox && bLineIsIntersectedWithViewBBox)
+//									{
+//										if (o.reflection == 0)
+//											debug("Partiably visible line [Reflection: " + o.reflection + ", line ID: " + featureDataLineID+"] " + line);
+//									}
 //									if (!bLineIsInsideViewBBox && !bLineIsIntersectedWithViewBBox)
 //									{
-//										if (o.reflection == -1 || o.reflection == 0)
-//											debug("Check line [Reflection: " + o.reflection + ", line ID: " + featureDataLineID+"] if it is in reflection ");
+//										if (o.reflection == 0)
+//											debug("Invisible line [Reflection: " + o.reflection + ", line ID: " + featureDataLineID+"] " + line);
+//									} else {
+//										if (o.reflection == 0)
+//											debug("line is visible [Reflection: " + o.reflection + ", line ID: " + featureDataLineID+"] " + line);
+//
 //									}
 //									var bLineIsInsideReflection: Boolean = line.isInsideBox(getReflectedViewBBox(o.reflection));
-//									if (bLineIsInsideViewBBox || bLineIsIntersectedWithViewBBox)
 									if (bLineIsInsideViewBBox || bLineIsIntersectedWithViewBBox)
 									{
 //											if (o.reflection == -1 || o.reflection == 0)
@@ -2993,7 +3001,8 @@ package com.iblsoft.flexiweather.widgets
 											p2 = coordToPoint(new Coord(ms_crs, o.pointTo.x, o.pointTo.y));
 
 //											debug("Add line segment [Reflection: " + reflection.reflectionDelta + ", line ID: " + currLine.id+"] points: " + p1 + " , " + p2);
-											var lineSegment: FeatureDataLineSegment = new FeatureDataLineSegment(p1.x, p1.y, p2.x, p2.y, bLineIsInsideViewBBox, prevCObject.editable, cObject.editable);
+//											var lineSegment: FeatureDataLineSegment = new FeatureDataLineSegment(p1.x, p1.y, p2.x, p2.y, bLineIsInsideViewBBox, prevCObject.editable, cObject.editable);
+											var lineSegment: FeatureDataLineSegment = new FeatureDataLineSegment(p1.x, p1.y, p2.x, p2.y, bLineIsInsideViewBBox || bLineIsIntersectedWithViewBBox, prevCObject.editable, cObject.editable);
 
 //											if (bDebugTimes)
 //											{
