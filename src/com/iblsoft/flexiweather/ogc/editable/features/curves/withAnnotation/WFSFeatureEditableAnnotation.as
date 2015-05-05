@@ -173,7 +173,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 		{
 			if (ms_type != ANNOTATION_PIN)
 			{
-				return super.totalReflectionEditablePoints(reflectionDelta)
+				return super.totalReflectionEditablePoints(reflectionDelta);
 			} else {
 				if (m_featureData)
 				{
@@ -183,6 +183,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 						//for PIN type return just 1 editable point
 						return 1;
 					}
+					return super.totalReflectionEditablePoints(reflectionDelta);
 				}
 			}
 			return 0;
@@ -301,16 +302,11 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves.withAnnotation
 				format.color = i_color;
 				txtAnnotation.label.setTextFormat(format);
 
-				trace("updateAnnotation text: " + text);
-				trace("txtAnnotation size: [" + txtAnnotation.width + ", " + txtAnnotation.height + "]");
-				trace("txtAnnotation measured size: [" + txtAnnotation.measuredWidth + ", " + txtAnnotation.measuredHeight + "]");
-				trace("txtAnnotation label size: [" + txtAnnotation.label.width + ", " + txtAnnotation.label.height + "]");
-				trace("txtAnnotation label text size: [" + txtAnnotation.label.textWidth + ", " + txtAnnotation.label.textHeight + "]");
-//				if (txtAnnotation.measuredWidth > 0)
-//				{
-//					txtAnnotation.width = txtAnnotation.measuredWidth;
-//					txtAnnotation.height = txtAnnotation.measuredHeight;
-//				}
+//				trace("updateAnnotation text: " + text);
+//				trace("txtAnnotation size: [" + txtAnnotation.width + ", " + txtAnnotation.height + "]");
+//				trace("txtAnnotation measured size: [" + txtAnnotation.measuredWidth + ", " + txtAnnotation.measuredHeight + "]");
+//				trace("txtAnnotation label size: [" + txtAnnotation.label.width + ", " + txtAnnotation.label.height + "]");
+//				trace("txtAnnotation label text size: [" + txtAnnotation.label.textWidth + ", " + txtAnnotation.label.textHeight + "]");
 				txtAnnotation.update();
 				txtAnnotation.x = annotationPosition.x - txtAnnotation.width / 2.0;
 				txtAnnotation.y = annotationPosition.y - txtAnnotation.height - 5// / 2.0;
