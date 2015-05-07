@@ -2283,7 +2283,11 @@ package com.iblsoft.flexiweather.ogc
 		{
 			if (mb_synchroniseRun != value)
 			{
+				if (status == STATE_NO_SYNCHRONISATION_DATA_AVAILABLE)
+					setStatus(STATE_EMPTY);
+
 				mb_synchroniseRun = value;
+
 				var runValue: Object =  getSynchronisedVariableValue(GlobalVariable.RUN);
 				if (runValue)
 				{
@@ -2321,6 +2325,10 @@ package com.iblsoft.flexiweather.ogc
 					trace("Global LEVEL is null");
 					return;
 				}
+
+				if (status == STATE_NO_SYNCHRONISATION_DATA_AVAILABLE)
+					setStatus(STATE_EMPTY);
+
 				var levelValueString: String;
 				if (levelValue is String)
 					levelValueString = levelValue as String;

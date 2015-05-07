@@ -909,7 +909,10 @@ package com.iblsoft.flexiweather.widgets
 				notifyFrameVariableChanged();
 			}
 			if (event.variableId == GlobalVariable.LEVEL)
+			{
+				resynchronizeOnStart(event);
 				notifyLevelVariableChanged();
+			}
 
 			if (event.variableId == GlobalVariable.RUN)
 			{
@@ -1343,9 +1346,11 @@ package com.iblsoft.flexiweather.widgets
 
 		private function getSynchronizedRunValue(): Date
 		{
-			if (primaryLayer)
+			var runSynchronisedLayers: Array = getSynchronisedLayersForGlobalVariable(GlobalVariable.RUN)
+			if (runSynchronisedLayers && runSynchronisedLayers.length)
 			{
-				var currRun: Date = (primaryLayer as ISynchronisedObject).getSynchronisedVariableValue(GlobalVariable.RUN, false) as Date;
+				var synchronisedLayer: ISynchronisedObject = runSynchronisedLayers[0] as ISynchronisedObject;
+				var currRun: Date = synchronisedLayer.getSynchronisedVariableValue(GlobalVariable.RUN, false) as Date;
 
 				var runs: Array = getRuns();
 				if (runs && currRun)
@@ -1374,23 +1379,60 @@ package com.iblsoft.flexiweather.widgets
 			return null;
 		}
 
-		private function synchronizePrimaryLayerLevel(level: String): void
+		private function synchronizeLayerLevel(level: String): void
 		{
-			if (primaryLayer)
+			//TODO find when this method is used
+			var levelSynchronisedLayers: Array = getSynchronisedLayersForGlobalVariable(GlobalVariable.LEVEL)
+			if (levelSynchronisedLayers && levelSynchronisedLayers.length)
 			{
-				(primaryLayer as ISynchronisedObject).synchroniseWith(GlobalVariable.LEVEL, level);
-				(primaryLayer as ISynchronisedObject).refreshForSynchronisation(false);
+				var synchronisedLayer: ISynchronisedObject = levelSynchronisedLayers[0] as ISynchronisedObject;
+				synchronisedLayer.synchroniseWith(GlobalVariable.LEVEL, level);
+				synchronisedLayer.refreshForSynchronisation(false);
 			}
 		}
+
+		private function getSynchronisedLayersForGlobalVariable(variable: String): Array
+		{
+			if (variable)
+			{
+				var synchronisedLayers: Array = [];
+
+				for each (var layer: ISynchronisedObject in layers)
+				{
+					if (layer.hasSynchronisedVariable(variable))
+					{
+						switch(variable)
+						{
+							case GlobalVariable.FRAME:
+								synchronisedLayers.push(layer);
+								break;
+							case GlobalVariable.RUN:
+								if (layer.synchroniseRun)
+									synchronisedLayers.push(layer);
+								break;
+							case GlobalVariable.LEVEL:
+								if (layer.synchroniseLevel)
+									synchronisedLayers.push(layer);
+								break;
+						}
+					}
+				}
+				return synchronisedLayers;
+			}
+			return null;
+		}
+
 		private function getSynchronizedLevelValue(): String
 		{
-			if (primaryLayer)
+			var levelSynchronisedLayers: Array = getSynchronisedLayersForGlobalVariable(GlobalVariable.LEVEL)
+			if (levelSynchronisedLayers && levelSynchronisedLayers.length)
 			{
-				var currLevel: String = (primaryLayer as ISynchronisedObject).getSynchronisedVariableValue(GlobalVariable.LEVEL, false) as String;
-				var currLevel2: * = (primaryLayer as ISynchronisedObject).getSynchronisedVariableValue(GlobalVariable.LEVEL, false);
-				var currLevelList: Array = (primaryLayer as ISynchronisedObject).getSynchronisedVariableValuesList(GlobalVariable.LEVEL);
-				var currLevelUnit: String = (primaryLayer as ISynchronisedObject).getSynchronisedVariableUnitsName(GlobalVariable.LEVEL) as String;
-				var currLevelUnitSymbol: String = (primaryLayer as ISynchronisedObject).getSynchronisedVariableUnitSymbolsName(GlobalVariable.LEVEL) as String;
+				var synchronisedLayer: ISynchronisedObject = levelSynchronisedLayers[0] as ISynchronisedObject;
+				var currLevel: String = synchronisedLayer.getSynchronisedVariableValue(GlobalVariable.LEVEL, false) as String;
+				var currLevel2: * = synchronisedLayer.getSynchronisedVariableValue(GlobalVariable.LEVEL, false);
+				var currLevelList: Array = synchronisedLayer.getSynchronisedVariableValuesList(GlobalVariable.LEVEL);
+				var currLevelUnit: String = synchronisedLayer.getSynchronisedVariableUnitsName(GlobalVariable.LEVEL) as String;
+				var currLevelUnitSymbol: String = synchronisedLayer.getSynchronisedVariableUnitSymbolsName(GlobalVariable.LEVEL) as String;
 
 				var synchronisedValueReplaced: Boolean;
 				if (currLevelList && currLevelList.length > 0)
@@ -1422,7 +1464,7 @@ package com.iblsoft.flexiweather.widgets
 								return currLevel;
 						}
 						cLevelStr = (levels[0] as GlobalVariableValue).dataWithUnit as String;
-						callLater(synchronizePrimaryLayerLevel, [cLevelStr]);
+						callLater(synchronizeLayerLevel, [cLevelStr]);
 //						_globalVariablesManager.level = cLevelStr;
 //						invalidateLevel();
 						return cLevelStr;
@@ -1434,7 +1476,7 @@ package com.iblsoft.flexiweather.widgets
 								return currLevel;
 						}
 						cLevelStr = levels[0] as String;
-						callLater(synchronizePrimaryLayerLevel, [cLevelStr]);
+						callLater(synchronizeLayerLevel, [cLevelStr]);
 //						_globalVariablesManager.level = cLevelStr;
 //						invalidateLevel();
 						return cLevelStr;
