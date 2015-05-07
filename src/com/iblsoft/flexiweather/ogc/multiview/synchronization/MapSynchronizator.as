@@ -108,7 +108,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			_widgetsMapDictionary[iw] = {action: 'copyMap'};
 		}
 
-		override public function synchronizeWidgets(synchronizeFromWidget:InteractiveWidget, widgetsForSynchronisation:ArrayCollection, preferredSelectedIndex: int = -1):void
+		override public function synchronizeWidgets(synchronizeFromWidget:InteractiveWidget, widgetsForSynchronisation:ArrayCollection, preferredSelectedIndex: int = -1, mainSynchronizator: ISynchronizator = null):void
 		{
 			//there is no synchronizing needed for this syncrhonizator, all is done by AreaSynchronizator and GlobalFrameSynchronizator
 

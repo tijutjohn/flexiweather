@@ -26,7 +26,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 
 		function updateMapAction(iw: InteractiveWidget, position: int, configuration: MultiViewConfiguration): void;
 
-		function synchronizeWidgets(synchronizeFromWidget: InteractiveWidget, widgetsForSynchronisation: ArrayCollection, preferredSelectedIndex: int = -1): void;
+		function synchronizeWidgets(synchronizeFromWidget: InteractiveWidget, widgetsForSynchronisation: ArrayCollection, preferredSelectedIndex: int = -1, mainSynchronizator: ISynchronizator = null):void
 		function notifySynchronizationDone(): void;
 		function get labelString():String;
 		function set viewData(data: MultiViewViewData): void;
