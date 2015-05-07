@@ -12,7 +12,7 @@ package com.iblsoft.flexiweather.utils
 
 		public var startDate: Date;
 		private var dateFormatter: DateFormatter;
-		
+
 		public function ArrayLogTarget()
 		{
 			super();
@@ -29,14 +29,33 @@ package com.iblsoft.flexiweather.utils
 //			var newDate = new Date(interval);
 			var intervalString: String = convertToHHMMSS(interval/1000);
 //			var intervalString2: String = dateFormatter.format(interval/1000);
-			
-			ma_logs.addItemAt({
-						date: ISO8601Parser.dateToString(new Date()),
-						timeInterval: intervalString,
-						level: LogEvent.getLevelString(event.level),
-						message: event.message,
-						category: ILogger(event.target).category
-					},0);
+
+			var level: String = LogEvent.getLevelString(event.level);
+			var message: String = event.message;
+			if (!isSame(level, message))
+			{
+				ma_logs.addItemAt({
+							date: ISO8601Parser.dateToString(new Date()),
+							timeInterval: intervalString,
+							level: level,
+							message: message,
+							count: 1,
+							category: ILogger(event.target).category
+						},0);
+			} else {
+				var item: Object = ma_logs.getItemAt(0);
+				item.count++;
+			}
+		}
+
+		private function isSame(level: String, message: String): Boolean
+		{
+			if (ma_logs.length > 0)
+			{
+				var item: Object = ma_logs.getItemAt(0);
+				return item.level == level && item.message == message;
+			}
+			return false;
 		}
 
 		private function convertToHHMMSS(seconds:Number):String
@@ -44,23 +63,23 @@ package com.iblsoft.flexiweather.utils
 			var s:Number = seconds % 60;
 			var m:Number = Math.floor((seconds % 3600 ) / 60);
 			var h:Number = Math.floor(seconds / (60 * 60));
-			
+
 			var hourStr:String = (h == 0) ? "" : doubleDigitFormat(h) + "h";
 			var minuteStr:String = (m == 0) ? "" : doubleDigitFormat(m) + "m ";
 			var secondsStr:String = doubleDigitFormat(s) + "s ";
-			
+
 			return hourStr + minuteStr + secondsStr;
 		}
-		
+
 		private function doubleDigitFormat(num:uint):String
 		{
-			if (num < 10) 
+			if (num < 10)
 			{
 				return ("0" + num);
 			}
 			return String(num);
 		}
-		
+
 		protected function internalLog(s_message: String): void
 		{
 		}

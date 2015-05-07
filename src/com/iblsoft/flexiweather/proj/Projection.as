@@ -35,6 +35,8 @@ package com.iblsoft.flexiweather.proj
 				"+title=WGS 84 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +units=degrees",
 				new BBox(-180, -90, 180, 90), true);
 
+		Projection.addCRSByProj4("ESRI:54004", "+title=World Mercator +proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs");
+
 //		Projection.setCRSExtentBBox(
 //				'EPSG:900913',
 //				new BBox(-20037508.34, -20037508.34, 20037508.34, 20037508.34), true);
