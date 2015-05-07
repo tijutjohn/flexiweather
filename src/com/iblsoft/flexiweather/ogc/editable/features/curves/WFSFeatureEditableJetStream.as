@@ -303,7 +303,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 							if(!windPointsCanBeCreated)
 							{
 								// CREATE COLOR TRANSFORM
-								nColorTransform = new ColorTransform(1, 0, 0, 1, 255, 0, 0, 0);
+								nColorTransform = new ColorTransform(1, 0, 0, 1, 160, 0, 0, 0);
 							} else {
 								bWindbarbsDrawn = true;
 								nColorTransform = new ColorTransform(1, 1, 1, 1, 0, 0, 0, 0);

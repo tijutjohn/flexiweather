@@ -31,10 +31,10 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 
 		public function set m_canBeDrawed(value:Boolean):void
 		{
-//			if (!value)
-//			{
-//				trace("windbard can not be drawed");
-//			}
+			if (!value)
+			{
+				debug("windbard can not be drawed");
+			}
 			_m_canBeDrawed = value;
 		}
 
@@ -175,6 +175,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 			//TODO problem s tym, ze sa windbarby stracaju, ze prejde len 1 prechod vo FOR i loope (pri mensich, prejde 3 prechody atd)...
 			if (!enoughSpaceBefore){
 				m_canBeDrawed = false;
+				m_textfield.visible = m_textfieldSprite.visible = false;
 			} else {
 				//for (i = m_myPointIndex; i < (m_points.length - 1); i++){
 				for (i = sPointIndex; i < (m_points.length - 1); i++)
@@ -251,6 +252,7 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 					// NOT ENOUGH POINTS TO SHOW WIND SIGN
 
 					m_canBeDrawed = false;
+					m_textfield.visible = m_textfieldSprite.visible = false;
 				} else {
 					m_canBeDrawed = true;
 
@@ -397,6 +399,8 @@ package com.iblsoft.flexiweather.ogc.editable.features.curves
 					m_textfieldSprite.x = cPoint.x - (mPointNormal.x * 4) - (mPoint.x * ((m_textfield.textWidth + 8) / 2));
 					m_textfieldSprite.y = cPoint.y - (mPointNormal.y * 4) - (mPoint.y * ((m_textfield.textWidth + 8) / 2));
 					m_textfieldSprite.rotation = degree;
+
+					m_textfield.visible = m_textfieldSprite.visible = true;
 				}
 			}
 
