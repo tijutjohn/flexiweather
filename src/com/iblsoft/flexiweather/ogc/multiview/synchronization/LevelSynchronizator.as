@@ -81,7 +81,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 
 		}
 
-		override public function synchronizeWidgets(synchronizeFromWidget:InteractiveWidget, widgetsForSynchronisation:ArrayCollection, preferredSelectedIndex: int = -1):void
+		override public function synchronizeWidgets(synchronizeFromWidget:InteractiveWidget, widgetsForSynchronisation:ArrayCollection, preferredSelectedIndex: int = -1, mainSynchronizator: ISynchronizator = null):void
 		{
 			if (_levelValues)
 			{

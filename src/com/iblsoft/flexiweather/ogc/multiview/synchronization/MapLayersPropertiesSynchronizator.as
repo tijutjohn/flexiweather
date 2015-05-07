@@ -3,10 +3,11 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 	import com.iblsoft.flexiweather.ogc.InteractiveLayerMSBase;
 	import com.iblsoft.flexiweather.ogc.configuration.MapTimelineConfiguration;
 	import com.iblsoft.flexiweather.ogc.configuration.layers.WMSLayerConfiguration;
+	import com.iblsoft.flexiweather.ogc.data.GlobalVariable;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayer;
 	import com.iblsoft.flexiweather.widgets.InteractiveLayerMap;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
-	
+
 	import mx.collections.ArrayCollection;
 
 	public class MapLayersPropertiesSynchronizator extends SynchronizatorBase
@@ -15,124 +16,140 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 		{
 			super();
 		}
-		
-		override public function synchronizeWidgets(synchronizeFromWidget: InteractiveWidget, widgetsForSynchronisation: ArrayCollection, preferredSelectedIndex: int = -1): void
+
+		override public function synchronizeWidgets(synchronizeFromWidget: InteractiveWidget, widgetsForSynchronisation: ArrayCollection, preferredSelectedIndex: int = -1, mainSynchronizator: ISynchronizator = null):void
 		{
 			var widgetsForSynchronizing: Array = [];
-			
+
 			var ilm: InteractiveLayerMap = synchronizeFromWidget.interactiveLayerMap;
 			var ilmTimelineConfiguration: MapTimelineConfiguration = ilm.timelineConfiguration;
-			
+
 			var currLayerWmsConfig: WMSLayerConfiguration;
 			var synchLayerWmsConfig: WMSLayerConfiguration;
-			
+
 			for each (var widget: InteractiveWidget in widgetsForSynchronisation)
 			{
 				if (widget.id != synchronizeFromWidget.id)
 				{
 					var currILM: InteractiveLayerMap = widget.interactiveLayerMap;
 					var currILMTimelineConfiguration: MapTimelineConfiguration = currILM.timelineConfiguration;
-					
+
 					//synchronize animator setting
 					ilmTimelineConfiguration.copyConfiguration(currILMTimelineConfiguration);
-							
+
+					var mainSynchronizatorSynchronizeRun: Boolean = false;
+					var mainSynchronizatorSynchronizeLevel: Boolean = false;
+
+					if (mainSynchronizator)
+					{
+						mainSynchronizatorSynchronizeRun = mainSynchronizator.hasSynchronisedVariable(GlobalVariable.RUN);
+						mainSynchronizatorSynchronizeLevel = mainSynchronizator.hasSynchronisedVariable(GlobalVariable.LEVEL);
+					}
+
 					var totalLayers: int = widget.interactiveLayerMap.layers.length;
 					for (var i: int = 0; i < totalLayers; i++)
 					{
 						var currLayer: InteractiveLayer = currILM.getLayerAt(i);
 						var synchLayer: InteractiveLayer = ilm.getLayerAt(i);
-						
+
 						if (synchLayer.alpha != currLayer.alpha)
 							currLayer.alpha = synchLayer.alpha;
-						
+
 						if (synchLayer.visible != currLayer.visible)
 							currLayer.visible = synchLayer.visible;
-						
+
 						if (synchLayer is InteractiveLayerMSBase)
 						{
 							var synchLayerMSBase: InteractiveLayerMSBase = synchLayer as InteractiveLayerMSBase;
 							var currLayerMSBase: InteractiveLayerMSBase = currLayer as InteractiveLayerMSBase;
-							
+
 							// check synchronization of global RUN
-							if (synchLayerMSBase.synchroniseRun != currLayerMSBase.synchroniseRun)
-								currLayerMSBase.synchroniseRun = synchLayerMSBase.synchroniseRun;
-							
-							
-//							if (!currLayerMSBase.synchroniseRun)
-							if (currLayerMSBase.synchroniseRun)
+							if (!mainSynchronizatorSynchronizeRun)
 							{
-								//check run
-								currLayerWmsConfig = currLayerMSBase.configuration as WMSLayerConfiguration;
-								synchLayerWmsConfig = synchLayerMSBase.configuration as WMSLayerConfiguration;
-								
-								if (currLayerWmsConfig.dimensionRunName && synchLayerWmsConfig.dimensionRunName)
+								if (synchLayerMSBase.synchroniseRun != currLayerMSBase.synchroniseRun)
+									currLayerMSBase.synchroniseRun = synchLayerMSBase.synchroniseRun;
+
+								if (currLayerMSBase.synchroniseRun)
 								{
-									var currRun: String = currLayerMSBase.getWMSDimensionValue(currLayerWmsConfig.dimensionRunName);
-									var synchRun: String = synchLayerMSBase.getWMSDimensionValue(synchLayerWmsConfig.dimensionRunName);
-									
-									if (currRun != synchRun)
+									//check run
+									currLayerWmsConfig = currLayerMSBase.configuration as WMSLayerConfiguration;
+									synchLayerWmsConfig = synchLayerMSBase.configuration as WMSLayerConfiguration;
+
+									if (currLayerWmsConfig.dimensionRunName && synchLayerWmsConfig.dimensionRunName)
 									{
-										currLayerMSBase.setWMSDimensionValue(currLayerWmsConfig.dimensionRunName, synchRun);
-										currLayerMSBase.refresh(false);
+										var currRun: String = currLayerMSBase.getWMSDimensionValue(currLayerWmsConfig.dimensionRunName);
+										var synchRun: String = synchLayerMSBase.getWMSDimensionValue(synchLayerWmsConfig.dimensionRunName);
+
+										if (currRun != synchRun)
+										{
+											currLayerMSBase.setWMSDimensionValue(currLayerWmsConfig.dimensionRunName, synchRun);
+											currLayerMSBase.refresh(false);
+										}
 									}
 								}
+							} else {
+								trace("MapLayersPropertiesSynchronizator will not synchronize RUN, because main synchronizator synchronizes it");
 							}
-							
+
 							// check synchronization of global LEVEL
-							if (synchLayerMSBase.synchroniseLevel != currLayerMSBase.synchroniseLevel)
-								currLayerMSBase.synchroniseLevel = synchLayerMSBase.synchroniseLevel;
-							
-//							if (!currLayerMSBase.synchroniseLevel)
-							if (currLayerMSBase.synchroniseLevel)
+							if (!mainSynchronizatorSynchronizeLevel)
 							{
-								//check level
-								currLayerWmsConfig = currLayerMSBase.configuration as WMSLayerConfiguration;
-								synchLayerWmsConfig = synchLayerMSBase.configuration as WMSLayerConfiguration;
-								
-								if (currLayerWmsConfig.dimensionVerticalLevelName && synchLayerWmsConfig.dimensionVerticalLevelName)
+								if (synchLayerMSBase.synchroniseLevel != currLayerMSBase.synchroniseLevel)
+									currLayerMSBase.synchroniseLevel = synchLayerMSBase.synchroniseLevel;
+
+								if (currLayerMSBase.synchroniseLevel)
 								{
-									var currLevel: String = currLayerMSBase.getWMSDimensionValue(currLayerWmsConfig.dimensionVerticalLevelName);
-									var synchLevel: String = synchLayerMSBase.getWMSDimensionValue(synchLayerWmsConfig.dimensionVerticalLevelName);
-										
-									if (currLevel != synchLevel)
+									//check level
+									currLayerWmsConfig = currLayerMSBase.configuration as WMSLayerConfiguration;
+									synchLayerWmsConfig = synchLayerMSBase.configuration as WMSLayerConfiguration;
+
+									if (currLayerWmsConfig.dimensionVerticalLevelName && synchLayerWmsConfig.dimensionVerticalLevelName)
 									{
-										currLayerMSBase.setWMSDimensionValue(currLayerWmsConfig.dimensionVerticalLevelName, synchLevel);
-										currLayerMSBase.refresh(false);
+										var currLevel: String = currLayerMSBase.getWMSDimensionValue(currLayerWmsConfig.dimensionVerticalLevelName);
+										var synchLevel: String = synchLayerMSBase.getWMSDimensionValue(synchLayerWmsConfig.dimensionVerticalLevelName);
+
+										if (currLevel != synchLevel)
+										{
+											currLayerMSBase.setWMSDimensionValue(currLayerWmsConfig.dimensionVerticalLevelName, synchLevel);
+											currLayerMSBase.refresh(false);
+										}
 									}
 								}
+							} else {
+								trace("MapLayersPropertiesSynchronizator will not synchronize LEVEL, because main synchronizator synchronizes it");
 							}
-							
+
 						}
 					}
 				}
 			}
-			
-			
+
+
 			checkIfSynchronizationIsDone();
 		}
-		
+
 		public function synchronizeAnimationSettings(synchronizeFromWidget: InteractiveWidget, widgetsForSynchronisation: ArrayCollection, preferredSelectedIndex: int = -1): void
 		{
 			var widgetsForSynchronizing: Array = [];
-			
+
 			var ilm: InteractiveLayerMap = synchronizeFromWidget.interactiveLayerMap;
 			var ilmTimelineConfiguration: MapTimelineConfiguration = ilm.timelineConfiguration;
-			
+
 			var currLayerWmsConfig: WMSLayerConfiguration;
-			
+
 			for each (var widget: InteractiveWidget in widgetsForSynchronisation)
 			{
 				if (widget.id != synchronizeFromWidget.id)
 				{
 					var currILM: InteractiveLayerMap = widget.interactiveLayerMap;
 					var currILMTimelineConfiguration: MapTimelineConfiguration = currILM.timelineConfiguration;
-					
+
 					//synchronize animator setting
 					ilmTimelineConfiguration.copyConfiguration(currILMTimelineConfiguration);
 				}
 			}
-			
-			
+
+
 			checkIfSynchronizationIsDone();
 		}
 	}

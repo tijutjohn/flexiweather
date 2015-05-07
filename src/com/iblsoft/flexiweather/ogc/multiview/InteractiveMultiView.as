@@ -1300,7 +1300,7 @@ package com.iblsoft.flexiweather.ogc.multiview
 					{
 						if (!synchronizator.isSynchronisingChangeType(changeCause))
 						{
-							_mapLayersPropertiesSynchronizator.synchronizeWidgets(_selectedInteractiveWidget, _interactiveWidgets.widgets);
+							_mapLayersPropertiesSynchronizator.synchronizeWidgets(_selectedInteractiveWidget, _interactiveWidgets.widgets, -1, synchronizator);
 							return;
 						}
 					}
