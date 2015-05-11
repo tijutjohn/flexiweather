@@ -25,12 +25,39 @@ package com.iblsoft.flexiweather.ogc.managers
 
 	public class OGCServiceConfigurationManager extends EventDispatcher implements Serializable
 	{
+		/**
+		 * Interval in miliseconds, which will manager wait after completing service update and calling update method of next service waiting in queue
+		 * Implement for OW-428
+		 */
+		public static var INTERVAL_BEFORE_UPDATE_NEXT_SERVICE: int = 300;
+		public static var PARALLEL_LOADING: Boolean = true;
+
 		private static var sm_instance: OGCServiceConfigurationManager;
 		private var ma_services: ArrayCollection = new ArrayCollection();
 
+		private var _currentServices: Array = [];
+
 		private var m_timer: Timer;
 
-		private var m_servicesUpdating: int;
+		private var m_capabilitiesLoader: GetCapabilitiesLoader;
+
+		[Bindable (event="servicesUpdatingChanged")]
+		public function get servicesUpdating():int
+		{
+			if (m_capabilitiesLoader)
+				return m_capabilitiesLoader.servicesUpdating;
+
+			return 0;
+		}
+
+		[Bindable (event="currentServicesChanged")]
+		public function get totalServices():int
+		{
+			if (_currentServices)
+				return _currentServices.length;
+
+			return 0;
+		}
 
 		public function OGCServiceConfigurationManager(timeInterval: int = 60000)
 		{
@@ -41,17 +68,15 @@ package com.iblsoft.flexiweather.ogc.managers
 			m_timer.stop();
 			m_timer.addEventListener(TimerEvent.TIMER, onTimer);
 
+			m_capabilitiesLoader = new GetCapabilitiesLoader(this);
+			m_capabilitiesLoader.addEventListener(ServiceCapabilitiesEvent.CAPABILITIES_LOADED, onCapabilitiesLoaded);
+			m_capabilitiesLoader.addEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
+			m_capabilitiesLoader.addEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATE_FAILED, onCapabilitiesUpdateFailed);
+			m_capabilitiesLoader.addEventListener(ServiceCapabilitiesEvent.ALL_CAPABILITIES_UPDATED, allCapabilitiesAreUpdated);
+
 		}
 
-		public function get servicesUpdating():int
-		{
-			return m_servicesUpdating;
-		}
 
-		public function set servicesUpdating(value:int):void
-		{
-			m_servicesUpdating = value;
-		}
 
 		public static function getInstance(): OGCServiceConfigurationManager
 		{
@@ -78,8 +103,15 @@ package com.iblsoft.flexiweather.ogc.managers
 				m_timer.removeEventListener(TimerEvent.TIMER, onTimer);
 				m_timer = null;
 			}
-			_runningServices = null;
+
 			_currentServices = null;
+
+			m_capabilitiesLoader.removeEventListener(ServiceCapabilitiesEvent.CAPABILITIES_LOADED, onCapabilitiesLoaded);
+			m_capabilitiesLoader.removeEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
+			m_capabilitiesLoader.removeEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATE_FAILED, onCapabilitiesUpdateFailed);
+			m_capabilitiesLoader.removeEventListener(ServiceCapabilitiesEvent.ALL_CAPABILITIES_UPDATED, allCapabilitiesAreUpdated);
+			m_capabilitiesLoader.destroy();
+
 			for each (var osc: OGCServiceConfiguration in ma_services)
 			{
 				osc.destroy();
@@ -140,8 +172,7 @@ package com.iblsoft.flexiweather.ogc.managers
 			if (ma_services.length == 0)
 				m_timer.stop();
 		}
-		private var _currentServices: Array = [];
-		private var _runningServices: Array = [];
+
 
 		/**
 		 * Returns OGCServiceConfiguration defined by name, which is baseURL of OGCServiceConfiguration. If you want just look for string inside baseURL, set bExactName to "false"
@@ -171,17 +202,6 @@ package com.iblsoft.flexiweather.ogc.managers
 			return null;
 		}
 
-		private function stopAllRunningServices(): void
-		{
-			for each (var wmsServiceConfiguration: WMSServiceConfiguration in _runningServices)
-			{
-				wmsServiceConfiguration.removeEventListener(ServiceCapabilitiesEvent.CAPABILITIES_LOADED, onCapabilitiesLoaded);
-				wmsServiceConfiguration.removeEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
-				wmsServiceConfiguration.removeEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATE_FAILED, onCapabilitiesUpdateFailed);
-			}
-			_runningServices = [];
-		}
-
 		public function updateAllServices(): void
 		{
 			update(getAllServicesNames());
@@ -196,9 +216,8 @@ package com.iblsoft.flexiweather.ogc.managers
 		public function update(currServices: Array, b_force: Boolean = true): void
 		{
 			_currentServices = currServices;
-			stopAllRunningServices();
+			m_capabilitiesLoader.stopAllRunningServices();
 
-			servicesUpdating = 0;
 			var i_currentFlashStamp: int = getTimer();
 //			for each(var osc: OGCServiceConfiguration in ma_services)
 			for each (var oscName: String in currServices)
@@ -213,18 +232,12 @@ package com.iblsoft.flexiweather.ogc.managers
 						if (osc.mi_lastUpdateFlashStamp + osc.updatePeriod >= i_currentFlashStamp)
 							continue;
 					}
-					if (osc is WMSServiceConfiguration)
-					{
-						var wmsServiceConfiguration: WMSServiceConfiguration = osc as WMSServiceConfiguration;
-						_runningServices.push(wmsServiceConfiguration);
-						servicesUpdating++;
-						wmsServiceConfiguration.addEventListener(ServiceCapabilitiesEvent.CAPABILITIES_LOADED, onCapabilitiesLoaded);
-						wmsServiceConfiguration.addEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
-						wmsServiceConfiguration.addEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATE_FAILED, onCapabilitiesUpdateFailed);
-					}
+//					if (osc is WMSServiceConfiguration)
+//					{
+//						var wmsServiceConfiguration: WMSServiceConfiguration = osc as WMSServiceConfiguration;
+//					}
 //					trace("OGCServiceManager udpate: " + osc.toString());
-					osc.update();
-					osc.mi_lastUpdateFlashStamp = i_currentFlashStamp;
+					m_capabilitiesLoader.addToQueue(osc);
 				}
 			}
 		}
@@ -237,14 +250,14 @@ package com.iblsoft.flexiweather.ogc.managers
 		private function onCapabilitiesUpdateFailed(event: ServiceCapabilitiesEvent): void
 		{
 			dispatchEvent(event);
-			capabilitiesUpdated();
+//			capabilitiesUpdated();
 
 		}
 
 		private function onCapabilitiesUpdated(event: ServiceCapabilitiesEvent): void
 		{
 			dispatchEvent(event);
-			capabilitiesUpdated();
+//			capabilitiesUpdated();
 		}
 
 		private function capabilitiesUpdated(): void
@@ -253,16 +266,17 @@ package com.iblsoft.flexiweather.ogc.managers
 //			wmsServiceConfiguration.capabilitiesUpdated = true;
 
 //			dispatchEvent(new Event(WMSServiceConfiguration.CAPABILITIES_UPDATED, true));
-			servicesUpdating--;
-			if (servicesUpdating == 0)
-			{
-				allCapabilitiesAreUpdated();
-			}
+//			servicesUpdating--;
+//			if (servicesUpdating == 0)
+//			{
+//				allCapabilitiesAreUpdated();
+//			}
 		}
 
-		private function allCapabilitiesAreUpdated(): void
+		private function allCapabilitiesAreUpdated(event: ServiceCapabilitiesEvent): void
 		{
-			dispatchEvent(new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.ALL_CAPABILITIES_UPDATED, true));
+			dispatchEvent(event);
+//			dispatchEvent(new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.ALL_CAPABILITIES_UPDATED, true));
 		}
 
 		protected function onTimer(event: TimerEvent): void
@@ -274,5 +288,185 @@ package com.iblsoft.flexiweather.ogc.managers
 		{
 			return ma_services;
 		}
+	}
+}
+import com.iblsoft.flexiweather.ogc.configuration.services.OGCServiceConfiguration;
+import com.iblsoft.flexiweather.ogc.configuration.services.WMSServiceConfiguration;
+import com.iblsoft.flexiweather.ogc.events.ServiceCapabilitiesEvent;
+import com.iblsoft.flexiweather.ogc.managers.OGCServiceConfigurationManager;
+
+import flash.events.EventDispatcher;
+import flash.utils.getTimer;
+import flash.utils.setTimeout;
+
+class GetCapabilitiesLoader extends EventDispatcher
+{
+	private var _runningServices: Array = [];
+	private var _queuedServices: Array = [];
+	private var _manager: OGCServiceConfigurationManager;
+
+	private var mb_allServicesUpdated: Boolean;
+
+	private var m_timeOfLastUpdate: Number;
+	private var m_currentService: OGCServiceConfiguration;
+
+	private var m_servicesUpdating: int;
+
+	public function get servicesUpdating():int
+	{
+		return m_servicesUpdating;
+	}
+
+	public function set servicesUpdating(value:int):void
+	{
+		m_servicesUpdating = value;
+	}
+
+	public function GetCapabilitiesLoader(manager: OGCServiceConfigurationManager)
+	{
+		_manager = manager;
+		m_timeOfLastUpdate = getTimer();
+	}
+
+	public function addToQueue(osc: OGCServiceConfiguration): void
+	{
+		debug("addToQueue: " + osc);
+		if (osc is WMSServiceConfiguration)
+		{
+			mb_allServicesUpdated = false;
+
+			var wmsServiceConfiguration: WMSServiceConfiguration = osc as WMSServiceConfiguration;
+			_queuedServices.push(wmsServiceConfiguration);
+			servicesUpdating++;
+
+			scheduleUpdateNextService();
+
+		}
+	}
+
+	private function scheduleUpdateNextService(): void
+	{
+		var currTime: Number = getTimer();
+		var diffTime: Number = currTime - m_timeOfLastUpdate;
+
+		debug("scheduleUpdateNextService: " + diffTime + "ms, m_currentService: " + m_currentService);
+
+		if (OGCServiceConfigurationManager.PARALLEL_LOADING)
+		{
+			updateNextService();
+		} else {
+			if (diffTime >= OGCServiceConfigurationManager.INTERVAL_BEFORE_UPDATE_NEXT_SERVICE)
+			{
+				if (!m_currentService)
+				{
+					updateNextService();
+				}
+			} else {
+				//need wait
+				var waitTime: Number = OGCServiceConfigurationManager.INTERVAL_BEFORE_UPDATE_NEXT_SERVICE - diffTime;
+				setTimeout(scheduleUpdateNextService, waitTime);
+			}
+		}
+	}
+
+	private function updateNextService(): void
+	{
+		if (_queuedServices.length > 0)
+		{
+			var osc: OGCServiceConfiguration = _queuedServices.shift();
+			if (osc)
+				updateServiceGetCapabilities(osc);
+			else
+				trace("why there is null");
+		} else {
+			if (servicesUpdating > 0)
+				setTimeout(checkQueueAfterUpdate, 300);
+		}
+	}
+
+	private function updateServiceGetCapabilities(osc: OGCServiceConfiguration): void
+	{
+		debug("updateServiceGetCapabilities: " + osc);
+
+		if (osc is WMSServiceConfiguration)
+		{
+			var wmsServiceConfiguration: WMSServiceConfiguration = osc as WMSServiceConfiguration;
+			_runningServices.push(wmsServiceConfiguration);
+			wmsServiceConfiguration.addEventListener(ServiceCapabilitiesEvent.CAPABILITIES_LOADED, onCapabilitiesLoaded);
+			wmsServiceConfiguration.addEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
+			wmsServiceConfiguration.addEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATE_FAILED, onCapabilitiesUpdateFailed);
+		}
+
+		m_currentService = osc;
+		osc.update();
+		osc.mi_lastUpdateFlashStamp = getTimer();
+	}
+
+	private function onCapabilitiesLoaded(event: ServiceCapabilitiesEvent): void
+	{
+		debug("onCapabilitiesLoaded: " + event.service);
+
+		dispatchEvent(event);
+	}
+
+	private function onCapabilitiesUpdateFailed(event: ServiceCapabilitiesEvent): void
+	{
+		debug("onCapabilitiesUpdateFailed: " + event.service);
+		dispatchEvent(event);
+		capabilitiesUpdated();
+
+	}
+
+	private function onCapabilitiesUpdated(event: ServiceCapabilitiesEvent): void
+	{
+		debug("onCapabilitiesUpdated: " + event.service);
+		dispatchEvent(event);
+		capabilitiesUpdated();
+	}
+
+	private function capabilitiesUpdated(): void
+	{
+		servicesUpdating--;
+		debug("capabilitiesUpdated servicesUpdating: " + servicesUpdating);
+		checkQueueAfterUpdate();
+	}
+
+	private function checkQueueAfterUpdate(): void
+	{
+		debug("checkQueueAfterUpdate: servicesUpdating: " + servicesUpdating + " _queuedServices.length: " + _queuedServices.length);
+		if (servicesUpdating == 0 && _queuedServices.length == 0 && !mb_allServicesUpdated)
+		{
+			mb_allServicesUpdated = true
+			dispatchEvent(new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.ALL_CAPABILITIES_UPDATED, true));
+		} else {
+			m_timeOfLastUpdate = getTimer();
+			m_currentService = null;
+			scheduleUpdateNextService();
+		}
+	}
+
+	public function stopAllRunningServices(): void
+	{
+		debug("stopAllRunningServices: servicesUpdating: " + servicesUpdating);
+		for each (var wmsServiceConfiguration: WMSServiceConfiguration in _runningServices)
+		{
+			wmsServiceConfiguration.removeEventListener(ServiceCapabilitiesEvent.CAPABILITIES_LOADED, onCapabilitiesLoaded);
+			wmsServiceConfiguration.removeEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
+			wmsServiceConfiguration.removeEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATE_FAILED, onCapabilitiesUpdateFailed);
+		}
+		_runningServices = [];
+		_queuedServices = [];
+
+		servicesUpdating = 0;
+	}
+
+	public function destroy(): void
+	{
+		_runningServices = null;
+	}
+
+	private function debug(str: String, type: String = "Info", tag: String = " GetCapabilitiesLoader"): void
+	{
+		trace(this + "| " + type + "| " + str);
 	}
 }
