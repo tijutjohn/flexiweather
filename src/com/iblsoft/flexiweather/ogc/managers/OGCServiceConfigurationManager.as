@@ -97,6 +97,7 @@ package com.iblsoft.flexiweather.ogc.managers
 
 		public function destroy(): void
 		{
+			trace("OGCServiceConfigurationManager destroy");
 			if (m_timer)
 			{
 				m_timer.stop();
@@ -434,13 +435,13 @@ class GetCapabilitiesLoader extends EventDispatcher
 	private function checkQueueAfterUpdate(): void
 	{
 		debug("checkQueueAfterUpdate: servicesUpdating: " + servicesUpdating + " _queuedServices.length: " + _queuedServices.length);
+		m_currentService = null;
 		if (servicesUpdating == 0 && _queuedServices.length == 0 && !mb_allServicesUpdated)
 		{
 			mb_allServicesUpdated = true
 			dispatchEvent(new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.ALL_CAPABILITIES_UPDATED, true));
 		} else {
 			m_timeOfLastUpdate = getTimer();
-			m_currentService = null;
 			scheduleUpdateNextService();
 		}
 	}
@@ -448,12 +449,12 @@ class GetCapabilitiesLoader extends EventDispatcher
 	public function stopAllRunningServices(): void
 	{
 		debug("stopAllRunningServices: servicesUpdating: " + servicesUpdating);
-		for each (var wmsServiceConfiguration: WMSServiceConfiguration in _runningServices)
-		{
-			wmsServiceConfiguration.removeEventListener(ServiceCapabilitiesEvent.CAPABILITIES_LOADED, onCapabilitiesLoaded);
-			wmsServiceConfiguration.removeEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
-			wmsServiceConfiguration.removeEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATE_FAILED, onCapabilitiesUpdateFailed);
-		}
+//		for each (var wmsServiceConfiguration: WMSServiceConfiguration in _runningServices)
+//		{
+//			wmsServiceConfiguration.removeEventListener(ServiceCapabilitiesEvent.CAPABILITIES_LOADED, onCapabilitiesLoaded);
+//			wmsServiceConfiguration.removeEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, onCapabilitiesUpdated);
+//			wmsServiceConfiguration.removeEventListener(ServiceCapabilitiesEvent.CAPABILITIES_UPDATE_FAILED, onCapabilitiesUpdateFailed);
+//		}
 		_runningServices = [];
 		_queuedServices = [];
 
@@ -462,6 +463,7 @@ class GetCapabilitiesLoader extends EventDispatcher
 
 	public function destroy(): void
 	{
+		debug("destroy");
 		_runningServices = null;
 	}
 
