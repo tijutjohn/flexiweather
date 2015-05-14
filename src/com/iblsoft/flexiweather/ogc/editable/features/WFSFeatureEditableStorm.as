@@ -160,7 +160,7 @@ package com.iblsoft.flexiweather.ogc.editable.features
 					stormSprite.setBitmap(m_loadedIconBitmapData, pt);
 
 				}
-				if (pt)
+				if (pt && master)
 				{
 					update(FeatureUpdateContext.fullUpdate());
 					master.container.labelLayout.invalidateLayout();

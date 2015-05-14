@@ -127,6 +127,7 @@ package com.iblsoft.flexiweather.ogc
 		/** Called after the feature is added to master, before first call to update(). */
 		public function setMaster(master: InteractiveLayerFeatureBase): void
 		{
+			debug("setMaster ["+master+"]");
 			m_master = master;
 			m_points.container = master.container;
 		}
@@ -265,6 +266,8 @@ package com.iblsoft.flexiweather.ogc
 		public function cleanup(): void
 		{
 			m_master = null;
+
+			debug("cleanup");
 			if (m_coordinates)
 				m_coordinates.splice(0, m_coordinates.length);
 			if (m_points)
@@ -465,6 +468,15 @@ package com.iblsoft.flexiweather.ogc
 		public function get internalFeatureId(): String
 		{
 			return ms_internalFeatureId;
+		}
+
+		private function debug(str: String): void
+		{
+			trace("FeatureBase["+this+"]: " + str);
+		}
+		override public function toString(): String
+		{
+			return typeName + "["+ms_internalFeatureId+"]";
 		}
 
 	}

@@ -172,11 +172,14 @@ package com.iblsoft.flexiweather.ogc.editable
 		private function isReflectionFeatureInsideViewBBox(pt: Point, reflectionDelta: int): Boolean
 		{
 			var isInsideViewBBox: Boolean = false;
-			var iw: InteractiveWidget = master.container;
-			if (iw)
+			if (master)
 			{
-				var c: Coord = iw.pointToCoord(pt.x, pt.y);
-				isInsideViewBBox = iw.coordInside(c);
+				var iw: InteractiveWidget = master.container;
+				if (iw)
+				{
+					var c: Coord = iw.pointToCoord(pt.x, pt.y);
+					isInsideViewBBox = iw.coordInside(c);
+				}
 			}
 
 //			trace("isReflectionFeatureInsideViewBBox["+reflectionDelta+"] visible: "+ isInsideViewBBox + "{"+this+"}");

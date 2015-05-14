@@ -36,7 +36,7 @@ package com.iblsoft.flexiweather.ogc.editable.featureEditor.service
 
 		public function setProduct(product: FeatureEditorProduct): void
 		{
-			m_product = product;
+			m_product = product.clone();
 		}
 
 		public function issue(xml: XML): void
