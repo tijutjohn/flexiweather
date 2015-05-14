@@ -1,6 +1,7 @@
 package com.iblsoft.flexiweather.ogc.configuration.services
 {
 	import com.iblsoft.flexiweather.ogc.Version;
+	import com.iblsoft.flexiweather.ogc.events.ServiceCapabilitiesEvent;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
 
@@ -145,6 +146,28 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 		public function get updatePeriod(): uint
 		{
 			return mi_updatePeriod;
+		}
+
+		protected function notifyCapabilitiesUpdated(): void
+		{
+			var se: ServiceCapabilitiesEvent  = new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, true);
+			se.service = this;
+			dispatchEvent(se);
+		}
+
+		protected function notifyCapabilitiesLoaded(xml: XML): void
+		{
+			var sce: ServiceCapabilitiesEvent = new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.CAPABILITIES_LOADED, true);
+			sce.service = this;
+			sce.xml = _xml;
+			dispatchEvent(sce);
+		}
+
+		protected function notifyCapabilitiesLoadFailed(errorString: String): void
+		{
+			var e: ServiceCapabilitiesEvent = new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.CAPABILITIES_UPDATE_FAILED, true);
+			e.errorString = errorString;
+			dispatchEvent(e);
 		}
 
 		/**

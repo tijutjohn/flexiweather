@@ -200,10 +200,11 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 			if (event.result is XML)
 			{
 				_xml = event.result as XML;
-				var sce: ServiceCapabilitiesEvent = new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.CAPABILITIES_LOADED, true);
-				sce.service = this;
-				sce.xml = _xml;
-				dispatchEvent(sce);
+//				var sce: ServiceCapabilitiesEvent = new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.CAPABILITIES_LOADED, true);
+//				sce.service = this;
+//				sce.xml = _xml;
+//				dispatchEvent(sce);
+				notifyCapabilitiesLoaded(_xml);
 				parseGetCapabilities(_xml);
 			}
 		}
@@ -215,9 +216,7 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 			m_capabilitiesLoadJob = null;
 			// keep old m_capabilities
 
-			var e: ServiceCapabilitiesEvent = new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.CAPABILITIES_UPDATE_FAILED, true);
-			e.errorString = 'Can not load "'+event.request.url+'" service';
-			dispatchEvent(e);
+			notifyCapabilitiesLoadFailed('Can not load "'+event.request.url+'" service');
 		}
 
 		override public function update(): void
@@ -436,13 +435,6 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 				parsingManager.xml = null;
 				parsingManager = null;
 			}
-		}
-
-		private function notifyCapabilitiesUpdated(): void
-		{
-			var se: ServiceCapabilitiesEvent  = new ServiceCapabilitiesEvent(ServiceCapabilitiesEvent.CAPABILITIES_UPDATED, true);
-			se.service = this;
-			dispatchEvent(se);
 		}
 
 		private function addSupportedProjections(): void
