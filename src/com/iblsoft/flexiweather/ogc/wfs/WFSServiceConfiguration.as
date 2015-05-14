@@ -76,7 +76,7 @@ package com.iblsoft.flexiweather.ogc.wfs
 		public function toGetCapabilitiesRequest(): URLRequest
 		{
 			var r: URLRequest = toRequest("GetCapabilities");
-			//r.data.FORMAT = "image/png"; 
+			//r.data.FORMAT = "image/png";
 			return r;
 		}
 
@@ -142,10 +142,12 @@ package com.iblsoft.flexiweather.ogc.wfs
 			if (event.result is XML)
 			{
 				var xml: XML = event.result as XML;
+				notifyCapabilitiesLoaded(xml);
+
 				var s_version: String = xml.@version;
 				var version: Version = Version.fromString(s_version);
 				//var wfs: Namespace = version.isLessThan(1, 3, 0)
-				//		? new Namespace() : new Namespace("http://www.opengis.net/wfs"); 
+				//		? new Namespace() : new Namespace("http://www.opengis.net/wfs");
 				var wfs: Namespace = new Namespace("http://www.opengis.net/wfs");
 				//var wfs: Namespace = new Namespace("http://www.iblsoft.com/wfs");
 				var capability: XMLList = xml.wfs::FeatureTypeList;
@@ -169,6 +171,8 @@ package com.iblsoft.flexiweather.ogc.wfs
 					// LOAD ALL FEATURE TYPES AS ONE REQUEST
 					queryDescribeFeatureType(featureTypeListVars);
 				}
+
+				notifyCapabilitiesUpdated();
 			}
 		}
 
@@ -177,6 +181,8 @@ package com.iblsoft.flexiweather.ogc.wfs
 			m_capabilitiesLoadJob.finish();
 			m_capabilitiesLoadJob = null;
 			// keep old m_capabilities
+
+			notifyCapabilitiesLoadFailed('Can not load "'+event.request.url+'" service');
 		}
 
 		/**
@@ -199,7 +205,7 @@ package com.iblsoft.flexiweather.ogc.wfs
 				// GO THRUE ALL FEATURE TYPES
 				for each (var tFeatureType: WFSFeatureType in m_featureTypes)
 				{
-					// FIND 
+					// FIND
 					tFeatureType.setDefinition(m_schemaParser.getElementByName(tFeatureType.title));
 				}
 				dispatchEvent(new Event('featureTypesChanged'));
