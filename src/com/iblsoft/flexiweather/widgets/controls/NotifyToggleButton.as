@@ -42,7 +42,6 @@ package com.iblsoft.flexiweather.widgets.controls
 		public function NotifyToggleButton()
 		{
 			super();
-			setStyle("skinClass", NotifyToggleButtonSkin);
 		}
 
 		override protected function commitProperties(): void

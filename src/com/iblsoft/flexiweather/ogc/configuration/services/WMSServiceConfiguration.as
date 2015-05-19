@@ -509,8 +509,8 @@ package com.iblsoft.flexiweather.ogc.configuration.services
 
 		override public function toString(): String
 		{
-			if (id == null)
-				trace("Why ID is null in WMSServiceConfiguration");
+//			if (id == null)
+//				trace("Why ID is null in WMSServiceConfiguration");
 			return "WMSServiceConfiguration " + id + " / " + staticID + " - " + fullURL + " capabilitiesUpdated: " + capabilitiesUpdated;
 		}
 	}

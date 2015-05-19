@@ -444,6 +444,6 @@ class GetCapabilitiesLoader extends EventDispatcher
 
 	private function debug(str: String, type: String = "Info", tag: String = " GetCapabilitiesLoader"): void
 	{
-		trace(this + "| " + type + "| " + str);
+//		trace(this + "| " + type + "| " + str);
 	}
 }

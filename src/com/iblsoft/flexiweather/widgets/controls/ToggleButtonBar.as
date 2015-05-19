@@ -47,8 +47,6 @@ package com.iblsoft.flexiweather.widgets.controls
 			super();
 
 			_buttons = new Dictionary();
-
-//			setStyle('skinClass', ToggleButtonBarSkin);
 		}
 
 		public function getRendererForData(data: ToggleButtonBarItemData): IVisualElement
