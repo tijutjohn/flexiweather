@@ -7,6 +7,11 @@ package com.iblsoft.flexiweather.utils
 		internal var m_sharedObject: SharedObject;
 		internal var m_current: Object;
 
+		public function get sharedObject(): SharedObject
+		{
+			return m_sharedObject;
+		}
+
 		public function SharedObjectStorage(b_mode: Boolean, sharedObject: SharedObject)
 		{
 			super(b_mode);
