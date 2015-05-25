@@ -57,6 +57,7 @@ package com.iblsoft.flexiweather.ogc.multiview.synchronization
 			if (storage.isStoring())
 				storage.serialize('view-data', _levelValues);
 			else {
+				_levelValues = new MultiViewViewData();
 				storage.serialize('view-data', _levelValues);
 				viewData = _levelValues;
 			}
