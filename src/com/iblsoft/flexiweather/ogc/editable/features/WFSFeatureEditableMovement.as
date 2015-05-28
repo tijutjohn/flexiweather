@@ -10,6 +10,7 @@
 
 package com.iblsoft.flexiweather.ogc.editable.features
 {
+	import com.iblsoft.flexiweather.ogc.BBox;
 	import com.iblsoft.flexiweather.ogc.FeatureUpdateContext;
 	import com.iblsoft.flexiweather.ogc.data.ReflectionData;
 	import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditableWithBaseTimeAndValidity;
@@ -17,10 +18,12 @@ package com.iblsoft.flexiweather.ogc.editable.features
 	import com.iblsoft.flexiweather.ogc.editable.data.FeatureDataReflection;
 	import com.iblsoft.flexiweather.ogc.wfs.IWFSFeatureWithReflection;
 	import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
+	import com.iblsoft.flexiweather.plugins.IConsole;
 	import com.iblsoft.flexiweather.proj.Coord;
 	import com.iblsoft.flexiweather.proj.Projection;
 	import com.iblsoft.flexiweather.widgets.InteractiveWidget;
 
+	import flash.display.Graphics;
 	import flash.events.Event;
 	import flash.geom.Point;
 	import flash.text.TextFieldAutoSize;
@@ -32,6 +35,8 @@ package com.iblsoft.flexiweather.ogc.editable.features
 	public class WFSFeatureEditableMovement extends WFSFeatureEditableWithBaseTimeAndValidity implements IWFSFeatureWithReflection
 	{
 		public var type: String;
+
+		public static var debugConsole: IConsole;
 
 		public function get directionValue():Object
 		{
@@ -167,6 +172,58 @@ package com.iblsoft.flexiweather.ogc.editable.features
 			var directionName: String = directionValue.value as String;
 			return Math.round((angles[directionName] as Object).angle);
 		}
+
+		private function groundVectorToScreen(projection: Projection, lalo: Coord, angle: Number): Point
+		{
+			var piConst: Number = Math.PI / 180;
+			var p: Point = new Point(Math.sin(angle * piConst), Math.cos(angle * piConst));
+
+			var arr: Array = derivativeLaloToXY(projection, lalo);
+			var dl: Coord = arr[0] as Coord;
+			var dp: Coord = arr[1] as Coord;
+
+			var px: Number = dl.x * p.x + dp.x * p.y;
+			var py: Number = dl.y * p.x + dp.y * p.y;
+
+			var p2: Point = new Point(px,py);
+			p2.normalize(1);
+
+			return p2;
+		}
+
+		/**
+		 * Derivate LaLo coordinate
+		 * @param projection
+		 * @param lalo
+		 * @return
+		 *
+		 */
+		private function derivativeLaloToXY(projection: Projection, lalo: Coord): Array
+		{
+			var piConst: Number = Math.PI / 180;
+			var diff_h: Number = 0.001;
+			var cor: Number = Math.cos(lalo.y * piConst);
+			if (cor < 1e-5) cor = 1e-5;
+
+			var laloDiff1: Coord = new Coord(lalo.crs, lalo.x + diff_h, lalo.y);
+			var laloDiff2: Coord = new Coord(lalo.crs, lalo.x - diff_h, lalo.y);
+
+			var xy1: Coord = projection.laLoCoordToPrjCoord(laloDiff1);
+			var xy2: Coord = projection.laLoCoordToPrjCoord(laloDiff2);
+
+			var dl: Coord =  new Coord(projection.crs, (xy1.x - xy2.x) *(0.5/diff_h) / cor, (xy1.y - xy2.y) *(0.5/diff_h) / cor);
+
+			var laloDiff3: Coord = new Coord(lalo.crs, lalo.x, lalo.y + diff_h);
+			var laloDiff4: Coord = new Coord(lalo.crs, lalo.x, lalo.y - diff_h);
+
+			var xy3: Coord = projection.laLoCoordToPrjCoord(laloDiff3);
+			var xy4: Coord = projection.laLoCoordToPrjCoord(laloDiff4);
+
+			var dp: Coord =  new Coord(projection.crs, (xy3.x - xy4.x) *(0.5/diff_h), (xy3.y - xy4.y) *(0.5/diff_h));
+
+			return [dl, dp];
+		}
+
 		override public function update(changeFlag: FeatureUpdateContext): void
 		{
 			super.update(changeFlag);
@@ -174,10 +231,6 @@ package com.iblsoft.flexiweather.ogc.editable.features
 			var i_color: uint = 0;
 			var i_colorSign: uint = 0;
 			var i_colorCross: uint = 0;
-//			if (type == PressureCentreType.HIGH)
-//				i_colorSign = 0xC00000;
-//			else if (type == PressureCentreType.LOW)
-//				i_colorSign = 0x0000C0;
 			if (useMonochrome)
 			{
 				i_color = monochromeColor;
@@ -208,55 +261,22 @@ package com.iblsoft.flexiweather.ogc.editable.features
 			var reflectionIDs: Array = m_featureData.reflectionsIDs;
 			var iw: InteractiveWidget = master.container;
 			var projection: Projection = iw.getCRSProjection();
-			var pixelDistance: Number = iw.getPixelDistance();
 
-			var laloCoord: Coord = (coordinates[0] as Coord).toLaLoCoord();
-//			var laloCoord: Coord = (coordinates[0] as Coord)
+			//new solution
+			var c0: Coord = coordinates[0] as Coord;
+			//coordinates is always in same projections as they were created, so we need to convert it to current project
+			c0 = c0.convertToProjection(projection);
 
-			var c0: Coord = laloCoord
-			var c1: Coord = new Coord(laloCoord.crs, laloCoord.x + 1, laloCoord.y + 1);
+			var laloCoord: Coord = c0.toLaLoCoord();
+			var arrowDirection: Point = groundVectorToScreen(projection, laloCoord, direction);
 
-			var p0: Point = iw.coordToPoint(c0);
-			var p1: Point = iw.coordToPoint(c1);
-			var projectWidthInPixels: Number = iw.getProjectionWidthInPixels();
-			if (Math.abs(p0.x - p1.x) > projectWidthInPixels / 2)
-			{
-				var addDirection: int;
-				(p1.x < p0.x) ? addDirection = 1 : addDirection = -1
-				p1.x += addDirection * projectWidthInPixels;
-			}
+			var bbox: BBox = iw.getViewBBox();
+			var pixDistanceX: Number = bbox.width / iw.areaWidth;
 
-			var pixelsForDegree: Number = p1.x - p0.x;
-			var pixelsForDegree2: Number = p1.y - p0.y;
-			var pixelsForDegree3: Number = Point.distance(p0, p1);
-
-			//radius in projection units
-			var radius: Number = 50 / pixelsForDegree3;
-			var radius2: Number = 30 / pixelsForDegree3;
-			var radiusLabel: Number = 65 / pixelsForDegree3;
-
-//			var radius: Number = 1
-//			var radius2: Number = 1
-//			var radiusLabel: Number =2;
-			var piConst: Number = Math.PI / 180;
-
-//			var dir: Number = direction;// - 90;
-			var dir: Number = (90 + (360 - direction)) % 360;// - 90;
-			var dir2: Number = (dir + 180) % 360;
-
-//			laloCoord = (coordinates[0] as Coord).toLaLoCoord();
-			var wantedCRS: String = laloCoord.crs;
-//			var arrowCoord: Coord = new Coord(wantedCRS, laloCoord.x + radius * Math.cos(dir * piConst), laloCoord.y + radius * Math.sin(dir * piConst)).convertToProjection(projection);
-//			var arrowCoord2: Coord = new Coord(wantedCRS, laloCoord.x + radius2 * Math.cos(dir2 * piConst), laloCoord.y + radius2 * Math.sin(dir2 * piConst)).convertToProjection(projection);
-//			var labelCoord: Coord = new Coord(wantedCRS, laloCoord.x + radiusLabel * Math.cos(dir * piConst), laloCoord.y + radiusLabel * Math.sin(dir * piConst)).convertToProjection(projection);
-			var arrowCoord: Coord = new Coord(wantedCRS, laloCoord.x + radius * Math.cos(dir * piConst), laloCoord.y + radius * Math.sin(dir * piConst));
-			var arrowCoord2: Coord = new Coord(wantedCRS, laloCoord.x + radius2 * Math.cos(dir2 * piConst), laloCoord.y + radius2 * Math.sin(dir2 * piConst));
-			var labelCoord: Coord = new Coord(wantedCRS, laloCoord.x + radiusLabel * Math.cos(dir * piConst), laloCoord.y + radiusLabel * Math.sin(dir * piConst));
-
-			arrowCoord = arrowCoord.convertToProjection(projection);
-			arrowCoord2 = arrowCoord2.convertToProjection(projection);
-			labelCoord = labelCoord.convertToProjection(projection);
-			laloCoord = coordinates[0] as Coord
+			var movementLineLengthPx: int = 45;
+			var labelDistancePx: int = 60;
+			var pResult: Coord = new Coord(iw.crs, c0.x + arrowDirection.x * pixDistanceX * movementLineLengthPx,
+				c0.y + arrowDirection.y * pixDistanceX * movementLineLengthPx);
 
 			for (var i: int = 0; i < totalReflections; i++)
 			{
@@ -274,20 +294,20 @@ package com.iblsoft.flexiweather.ogc.editable.features
 						var pt: Point = Point(reflection.editablePoints[0]);
 						if (pt)
 						{
-							var arrowCoordInReflections: Array = iw.mapCoordInCRSToViewReflectionsForDeltas(arrowCoord, [reflectionDelta, reflectionDelta-1, reflectionDelta+1]);
-							var arrowCoordInReflection: Point = getClosestPoint(arrowCoordInReflections, reflection.editablePoints[0], projection ); // new Coord(projection.crs, arrowCoordInReflections[0].point.x, arrowCoordInReflections[0].point.y);
+							movementSprite.pixDistanceX = pixDistanceX;
+							movementSprite.updateText(s_color, speed);
+//							var pLabel: Coord = new Coord(iw.crs, c0.x + arrowDirection.x * pixDistanceX * labelDistancePx,
+//								c0.y + arrowDirection.y * pixDistanceX * labelDistancePx);
+
+							var arrowCoordInReflections: Array = iw.mapCoordInCRSToViewReflectionsForDeltas(c0, [reflectionDelta, reflectionDelta-1, reflectionDelta+1]);
+							var arrowCoordInReflection: Point = getClosestPoint(arrowCoordInReflections, reflection.editablePoints[0], projection );
 							var arrowPoint: Point = arrowCoordInReflection.subtract(pt);
 
-							var arrowCoordInReflections2: Array = iw.mapCoordInCRSToViewReflectionsForDeltas(arrowCoord2, [reflectionDelta, reflectionDelta-1, reflectionDelta+1]);
-							var arrowCoordInReflection2: Point = getClosestPoint(arrowCoordInReflections2, reflection.editablePoints[0], projection ); //new Coord(projection.crs, arrowCoordInReflections2[0].point.x, arrowCoordInReflections2[0].point.y);
+							var arrowCoordInReflections2: Array = iw.mapCoordInCRSToViewReflectionsForDeltas(pResult, [reflectionDelta, reflectionDelta-1, reflectionDelta+1]);
+							var arrowCoordInReflection2: Point = getClosestPoint(arrowCoordInReflections2, reflection.editablePoints[0], projection );
 							var arrowPoint2: Point = arrowCoordInReflection2.subtract(pt);
 
-							var labelCoordInReflections: Array = iw.mapCoordInCRSToViewReflectionsForDeltas(labelCoord, [reflectionDelta, reflectionDelta-1, reflectionDelta+1]);
-							var labelCoordInReflection: Point = getClosestPoint(labelCoordInReflections, reflection.editablePoints[0], projection ); //new Coord(projection.crs, labelCoordInReflections[0].point.x, labelCoordInReflections[0].point.y);
-							var labelPoint: Point = labelCoordInReflection.subtract(pt);
-
-
-							movementSprite.update(s_colorSign, s_color, i_colorCross, type, arrowPoint, arrowPoint2, labelPoint, speed);
+							movementSprite.update(s_colorSign, s_color, i_colorCross, type, arrowPoint2, arrowPoint, speed);
 							movementSprite.x = pt.x;
 							movementSprite.y = pt.y;
 						}
@@ -374,8 +394,16 @@ package com.iblsoft.flexiweather.ogc.editable.features
 			directionValue = radToAngles(directionGML);
 			speed = meterPerSecondsToKnots(speedGML);
 		}
+
+		protected function debug(str: String): void
+		{
+			if (debugConsole)
+				debugConsole.print(str, 'Info', 'WFSFeatureEditableMovement');
+			trace("WFSFeatureEditableMovement: " + str);
+		}
 	}
 }
+import com.iblsoft.flexiweather.ogc.BBox;
 import com.iblsoft.flexiweather.ogc.editable.WFSFeatureEditable;
 import com.iblsoft.flexiweather.ogc.editable.formatters.WindSpeedFormatter;
 import com.iblsoft.flexiweather.ogc.wfs.WFSFeatureEditableSprite;
@@ -390,11 +418,25 @@ import mx.core.UITextField;
 
 class MovementSprite extends WFSFeatureEditableSprite
 {
+	public var pixDistanceX: Number;
+
 	protected var mtf_presureType: UITextField = new UITextField();
 	protected var mtf_presureValue: UITextField = new UITextField();
 
 	private var m_windFormatter: WindSpeedFormatter;
 
+	public function get textWidth(): Number
+	{
+		if (mtf_presureValue)
+			return mtf_presureValue.textWidth;
+		return 0;
+	}
+	public function get textHeight(): Number
+	{
+		if (mtf_presureValue)
+			return mtf_presureValue.textHeight;
+		return 0;
+	}
 	public function MovementSprite(feature: WFSFeatureEditable)
 	{
 		super(feature);
@@ -459,16 +501,42 @@ class MovementSprite extends WFSFeatureEditableSprite
 
 	}
 
-	public function update(s_colorSign: String, s_color: String, i_colorCross: uint, type: String, toPoint: Point, toPoint2: Point, labelPoint: Point,speed: int): void
+	public function updateText( s_color: String, speed: int): void
 	{
-		trace("Movement toPoint: " + toPoint + " toPoint2: " + toPoint2);
-//		direction -= 90
-		drawArrow(toPoint.x, toPoint.y, toPoint2.x, toPoint2.y, i_colorCross);
-//		mtf_presureType.htmlText = '<FONT face="Verdana" size="20" color="#' + s_colorSign + '">' + type.charAt(0).toUpperCase() + '</FONT>';
-//		mtf_presureType.x = -(int(mtf_presureType.width / 2));
-//		mtf_presureType.y = -(int(mtf_presureType.height)) - 3;
 		mtf_presureValue.htmlText = '<FONT face="Verdana" size="12" color="#' + s_color + '">' + m_windFormatter.format(speed) + '</FONT>';
-		mtf_presureValue.x = labelPoint.x -(int(mtf_presureValue.width / 2));
-		mtf_presureValue.y = labelPoint.y -(int(mtf_presureValue.height / 2));;
+	}
+
+	private function countLabelPosition(toPoint: Point, toPoint2: Point): Point
+	{
+		//find angle between points
+		var deltaX: Number = toPoint.x - toPoint2.x;
+		var deltaY: Number = toPoint.y - toPoint2.y;
+		var angle: Number = Math.atan2(deltaY, deltaX);
+//		var angleInDegrees: Number = angle * 180 / Math.PI;
+
+		var movementLineLengthPx: int = 45;
+		var labelDistancePx: int = 60;
+
+		var cos: Number = Math.cos(angle);
+		var sin: Number = Math.sin(angle);
+
+		var lx: Number = toPoint2.x + movementLineLengthPx * cos + (cos - 1)/2*(textWidth + 3);
+		var ly: Number = toPoint2.y + movementLineLengthPx * sin + (sin - 1)/2 *(textHeight + 3);
+		var labelPoint2: Point = new Point(lx, ly);
+		return labelPoint2;
+	}
+
+	public function update(s_colorSign: String, s_color: String, i_colorCross: uint, type: String, toPoint: Point, toPoint2: Point,speed: int): void
+	{
+//		if (toPoint2.x != 0 || toPoint2.y != 0)
+//		{
+//			trace("Check wrong position");
+//		}
+		updateText(s_color, speed);
+		var labelPoint: Point = countLabelPosition(toPoint, toPoint2);
+
+		drawArrow(toPoint.x, toPoint.y, toPoint2.x, toPoint2.y, i_colorCross);
+		mtf_presureValue.x = labelPoint.x;
+		mtf_presureValue.y = labelPoint.y;
 	}
 }
