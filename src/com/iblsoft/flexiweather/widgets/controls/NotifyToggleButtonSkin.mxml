@@ -260,7 +260,7 @@
              left="10" right="10" top="2" bottom="2">
     </s:Label>
 
-	<s:Group width="30" right="5" top="1" bottom="2">
+	<s:Group width="30" right="5" top="1" bottom="2" visible="{(hostComponent as NotifyToggleButton).notificationVisible}" includeInLayout="{(hostComponent as NotifyToggleButton).notificationVisible}">
 		<s:Ellipse height="16" width="16" right="0" horizontalCenter="0" verticalCenter="0" >
 			<s:fill>
 				<s:SolidColor color="0xff0000"/>

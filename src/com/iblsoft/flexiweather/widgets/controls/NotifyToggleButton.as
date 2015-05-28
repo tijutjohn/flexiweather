@@ -14,14 +14,36 @@ package com.iblsoft.flexiweather.widgets.controls
 	import spark.components.HGroup;
 	import spark.components.Label;
 	import spark.components.ToggleButton;
+	import flash.events.Event;
 
+	[Event(name="notificationVisibleChange",type="flash.events.Event")]
 	public class NotifyToggleButton extends ToggleButton
 	{
+		public static const NOTIFICATIONVISIBLE_CHANGE_EVENT:String = "notificationVisibleChange";
+
+		private var _notificationVisible: Boolean;
+
 		[SkinPart (required="true")]
 		public var newItemslabelDisplay: Label;
 
 		private var _newItemsCount: int;
 		private var _newItemsCountChanged: Boolean;
+
+
+		[Bindable(event="notificationVisibleChange")]
+		public function get notificationVisible():Boolean
+		{
+			return _notificationVisible;
+		}
+
+		public function set notificationVisible(value:Boolean):void
+		{
+			if (_notificationVisible != value)
+			{
+				_notificationVisible = value;
+				dispatchEvent(new Event(NOTIFICATIONVISIBLE_CHANGE_EVENT));
+			}
+		}
 
 		[Bindable]
 		public function get newItemsCount():int
@@ -51,6 +73,7 @@ package com.iblsoft.flexiweather.widgets.controls
 			if (_newItemsCountChanged)
 			{
 				newItemslabelDisplay.text = newItemsCount.toString();
+				notificationVisible = _newItemsCount > 0;
 				notify();
 				_newItemsCountChanged = false;
 			}

@@ -126,13 +126,13 @@
     <s:Rect id="fill" left="1" right="1" top="1" bottom="1" radiusX="2">
         <s:fill>
 			<s:LinearGradient rotation="90">
-				<s:GradientEntry color="0x4f4e49" 
+				<s:GradientEntry color="0x5f5e59" 
 								 color.selectedUpStates="0x3f3e39"
 								 color.overStates="0x3f3e39" 
 								 color.downStates="0x2f2e29" 
 								 alpha="0.85" 
 								 alpha.overAndSelected="1" />
-				<s:GradientEntry color="0x3f3e39" 
+				<s:GradientEntry color="0x4f4e49" 
 								 color.selectedUpStates="0x1bbbe9"
 								 color.over="0x2f2e29" 
 								 color.disabled="0x2f2e29" 
@@ -202,8 +202,8 @@
 	<s:Rect id="highlightStroke" left="1" right="1" top="1" bottom="1" radiusX="2" excludeFrom="downStates">
 		<s:stroke>
 			<s:LinearGradientStroke rotation="90" weight="1">
-				<s:GradientEntry color="0xaaaaaa" alpha.overStates="0.12" alpha.selectedUpStates="0.33" />
-				<s:GradientEntry color="0x888888" alpha.overStates="0.12" alpha.selectedUpStates="0.33" />
+				<s:GradientEntry color="0xaaaaaa" alpha="0.4" alpha.overStates="0.12" alpha.selectedUpStates="0.33" />
+				<s:GradientEntry color="0x888888" alpha="0.4" alpha.overStates="0.12" alpha.selectedUpStates="0.33" />
 			</s:LinearGradientStroke>
 		</s:stroke>
 	</s:Rect>
@@ -268,7 +268,7 @@
 			 left="10" right="10" top="2" bottom="2">
 	</s:Label>
 
-	<s:Group width="30" right="5" top="1" bottom="2">
+	<s:Group width="30" right="5" top="1" bottom="2" visible="{(hostComponent as NotifyToggleButton).notificationVisible}" includeInLayout="{(hostComponent as NotifyToggleButton).notificationVisible}">
 		<s:Ellipse height="16" width="16" right="0" horizontalCenter="0" verticalCenter="0" >
 			<s:fill>
 				<s:SolidColor color="0xff0000"/>

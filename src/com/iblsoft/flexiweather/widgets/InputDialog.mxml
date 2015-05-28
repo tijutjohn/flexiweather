@@ -6,7 +6,6 @@
 <s:TitleWindow xmlns:mx="library://ns.adobe.com/flex/mx"
 		xmlns:s="library://ns.adobe.com/flex/spark" xmlns:fx="http://ns.adobe.com/mxml/2009"
 		xmlns:controls="com.iblsoft.ria.widgets.controls"
-		skinClass="com.iblsoft.flexiweather.widgets.skins.TitleWindowSkin"
 		close="onCancel()"
 		maxWidth="800" minWidth="400">
 	<fx:Script>

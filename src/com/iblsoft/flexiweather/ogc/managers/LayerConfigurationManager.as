@@ -189,10 +189,12 @@ package com.iblsoft.flexiweather.ogc.managers
 
 				latestMenuItemsList = layersXMLList.children();
 
+				debug("latestMenuItemsList: " + latestMenuItemsList.toXMLString());
 				return latestMenuItemsList;
 			}
 			latestMenuItemsList = null;
 
+			debug("latestMenuItemsList: " + latestMenuItemsList.toXMLString());
 			return latestMenuItemsList;
 		}
 
@@ -202,7 +204,7 @@ package com.iblsoft.flexiweather.ogc.managers
 			return ma_layersConfigurations;
 		}
 
-		protected function debug(str: String): void
+		override protected function debug(str: String): void
 		{
 //			if (debugConsole)
 //				debugConsole.print(str, 'Info', 'LayerConfigurationManager');

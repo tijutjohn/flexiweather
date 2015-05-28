@@ -1,11 +1,15 @@
 package com.iblsoft.flexiweather.ogc.managers
 {
+	import com.iblsoft.flexiweather.plugins.IConsole;
+
 	import flash.events.EventDispatcher;
 
 	import mx.utils.ObjectUtil;
 
 	public class BaseConfigurationManager extends EventDispatcher
 	{
+		public static var debugConsole: IConsole;
+
 		protected var groups: Array = [];
 		protected var submenuPos: int = 0;
 
@@ -24,7 +28,7 @@ package com.iblsoft.flexiweather.ogc.managers
 		public function set latestMenuItemsList(value:XMLList):void
 		{
 			_latestMenuItemsList = value;
-//			trace(this + " latestMenuItemsList: " + _latestMenuItemsList.toXMLString);
+			debug(this + " latestMenuItemsList: " + _latestMenuItemsList.toXMLString);
 		}
 
 		protected function sortArray(item1: Object, item2: Object, array: Array = null): int
@@ -138,6 +142,11 @@ package com.iblsoft.flexiweather.ogc.managers
 			return groupParentXML;
 		}
 
-
+		protected function debug(str: String): void
+		{
+			if (debugConsole)
+				debugConsole.print("submenuPos: " + submenuPos + " > " + str, 'Info', 'BaseConfigurationManager');
+			//			trace("LayerConfigurationManager: " + str);
+		}
 	}
 }

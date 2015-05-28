@@ -1,16 +1,21 @@
 package com.iblsoft.flexiweather.ogc.managers
 {
+	import com.iblsoft.flexiweather.ogc.configuration.MapConfiguration;
+	import com.iblsoft.flexiweather.plugins.IConsole;
 	import com.iblsoft.flexiweather.utils.Serializable;
 	import com.iblsoft.flexiweather.utils.Storage;
+
 	import flash.events.Event;
+
 	import mx.collections.ArrayCollection;
-	import com.iblsoft.flexiweather.ogc.configuration.MapConfiguration;
 
 	public class MapConfigurationManager extends BaseConfigurationManager implements Serializable
 	{
 		public static const MAPS_CHANGED: String = 'maps changed';
 		internal static var sm_instance: MapConfigurationManager;
 		internal var ma_maps: ArrayCollection = new ArrayCollection();
+
+		public static var debugConsole: IConsole;
 
 		// getters & setters
 		public function get maps(): ArrayCollection
@@ -106,12 +111,20 @@ package com.iblsoft.flexiweather.ogc.managers
 				}
 //				var areaCustom: XML = <menuitem label='Custom...' data='custom.area' type='action'/>;
 //				mapsXMLList.appendChild(areaCustom);
-				
+
 				latestMenuItemsList = mapsXMLList.children()
+				debug("getMapsXMLList latestMenuItemsList: " + latestMenuItemsList.toXMLString());
 				return latestMenuItemsList;
 			}
 			latestMenuItemsList = null;
 			return null;
+		}
+
+		override protected function debug(str: String): void
+		{
+			if (debugConsole)
+				debugConsole.print(str, 'Info', 'MapConfigurationManager');
+			//			trace("LayerConfigurationManager: " + str);
 		}
 	}
 }
